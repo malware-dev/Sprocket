@@ -29,6 +29,24 @@ namespace Reactor.Ui
 
         public int BackCommand { get; set; }
 
+        /// <summary>
+        /// The obvious next move, if this screen has one - "Next", "Done".
+        /// </summary>
+        /// <remarks>
+        /// Deliberately separate from going back, which always means exactly what it
+        /// says: return to the screen you came from. Overloading back with "finished"
+        /// breaks the one navigation idea everybody already has, and leaves someone
+        /// who genuinely wants to retreat with nowhere to press.
+        ///
+        /// Empty when there is nothing to move on to - which on a picker also means
+        /// "you have not chosen anything yet".
+        /// </remarks>
+        public string PrimaryText { get; set; }
+
+        public int PrimaryCommand { get; set; }
+
+        public bool HasPrimary { get { return !string.IsNullOrEmpty(PrimaryText); } }
+
         /// <summary>What to show, in order.</summary>
         public List<EditorComponent> Components { get; private set; }
 

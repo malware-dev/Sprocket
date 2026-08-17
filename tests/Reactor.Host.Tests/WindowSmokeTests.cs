@@ -43,32 +43,28 @@ public class WindowSmokeTests
         var seen = new HashSet<string>();
         Record(seen, editor);
 
-        // The empty root offers the starters straight away.
+        // The empty root offers the starters straight away, and answering one lands
+        // directly on the block picker.
         editor.PressChoice("When something happens");
         window.Beat();
         Layout(window);
         Record(seen, editor);
 
-        // Sequence → block picker
-        editor.PressTriggerSlot(0);
-        window.Beat();
-        Layout(window);
-        Record(seen, editor);
-
         editor.PressBlock("Approach Sensor");
-        editor.Back();
-
-        // Sequence → choice picker
-        editor.PressTriggerSlot(1);
+        editor.PressPrimary();
         window.Beat();
         Layout(window);
         Record(seen, editor);
+
         editor.PressChoice("detects something");
+        window.Beat();
+        Layout(window);
+        Record(seen, editor);
 
         editor.PressAdd("do something");
         editor.PressStepSlot(0, 1);
         editor.PressBlock("Landing Lights");
-        editor.Back();
+        editor.PressPrimary();
 
         // The ship browser, still there for looking things up.
         editor.PressAction("Ship");

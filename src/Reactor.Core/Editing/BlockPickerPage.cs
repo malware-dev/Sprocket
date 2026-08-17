@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Reactor.Ui;
 using Reactor.World;
@@ -26,27 +27,61 @@ namespace Reactor.Editing
         readonly List<IDevice> _filtered = new List<IDevice>();
         readonly List<DeviceKind> _kinds = new List<DeviceKind>();
 
+        readonly string _primaryText;
+        readonly Action _primary;
+
         string _search = "";
         string _kind = "";
         BlockListComponent _list;
 
-        public BlockPickerPage(ReactorEditor editor, string title, IList<long> selection, bool forEvents)
+        public BlockPickerPage(ReactorEditor editor, string title, IList<long> selection, bool forEvents,
+            string primaryText = null, Action primary = null)
             : base(editor)
         {
             _title = title;
             _selection = selection;
             _forEvents = forEvents;
+            _primaryText = string.IsNullOrEmpty(primaryText) ? "Done" : primaryText;
+            _primary = primary;
         }
 
         public override string Title { get { return _title; } }
+
+        /// <summary>
+        /// Appears once something is chosen, and not before - which doubles as the
+        /// nudge that you are expected to choose something.
+        /// </summary>
+        /// <remarks>
+        /// Nothing is being committed here; choices took effect as they were made.
+        /// This exists because the user still needs to be told they have finished,
+        /// and going back cannot be the thing that tells them - going back has to
+        /// keep meaning "return to where I came from".
+        /// </remarks>
+        public override string PrimaryText
+        {
+            get { return _selection.Count > 0 ? _primaryText : ""; }
+        }
+
+        public override void Primary()
+        {
+            if (_primary != null)
+                _primary();
+            else
+                Editor.Pop();
+        }
 
         public override string Subtitle
         {
             get
             {
+                // Says outright that it takes more than one. Picking several is the
+                // ordinary case - it is what keeps looping out of the language - so
+                // it should not have to be discovered.
                 if (_selection.Count == 0)
-                    return "Nothing picked yet";
-                return _selection.Count == 1 ? "1 picked" : _selection.Count + " picked";
+                    return "Pick one or more";
+                return _selection.Count == 1
+                    ? "1 picked — pick more if you want"
+                    : _selection.Count + " picked";
             }
         }
 

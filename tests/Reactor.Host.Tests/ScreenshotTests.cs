@@ -29,7 +29,7 @@ public class ScreenshotTests
         Beat(window, 1);
         Shoot(window, "start");
 
-        BuildAirlock(editor);
+        BuildAirlock(window);
 
         // Let the sequence take a baseline sample before anything happens: a signal
         // already true when a sequence appears is not an edge.
@@ -57,7 +57,6 @@ public class ScreenshotTests
         // rates that cost the server dearly.
         editor.PressAction("Start something new");
         editor.PressChoice("Every so often");
-        editor.PressTriggerSlot(0);
         Beat(window, 1);
         Shoot(window, "rates");
     }
@@ -67,17 +66,22 @@ public class ScreenshotTests
     /// the air, then release the side you are going to. Nothing states when each step
     /// happens, because the list already does.
     /// </summary>
-    static void BuildAirlock(ReactorEditor editor)
+    static void BuildAirlock(MainWindow window)
     {
+        var editor = window.Editor;
+
         // Straight down the sentence: the verb, then what it listens to, then what
-        // happens. Nothing sends the user off to find a block first.
+        // happens. Answering the verb lands directly on the block picker, with no
+        // stop at a half-empty sentence in between.
         editor.PressChoice("When something happens");
+        Beat(window, 1);
+        Shoot(window, "listen");
 
-        editor.PressTriggerSlot(0);
         editor.PressBlock("Airlock Button");
-        editor.Back();
+        Beat(window, 1);
+        Shoot(window, "picked");
 
-        editor.PressTriggerSlot(1);
+        editor.PressPrimary();
         editor.PressChoice("is pressed");
 
         Step(editor, 0, "Airlock Inner Door", "close");
@@ -93,7 +97,7 @@ public class ScreenshotTests
 
         editor.PressStepSlot(index, 1);
         editor.PressBlock(block);
-        editor.Back();
+        editor.PressPrimary();
 
         editor.PressStepSlot(index, 0);
         editor.PressChoice(action);

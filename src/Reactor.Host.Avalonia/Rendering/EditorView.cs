@@ -25,6 +25,16 @@ sealed class EditorView : UserControl
     readonly TextBlock _beat;
     readonly Button _back;
 
+    readonly Button _primary = new()
+    {
+        Background = Palette.Accent,
+        Foreground = Brushes.White,
+        BorderThickness = new Thickness(0),
+        Padding = new Thickness(16, 5),
+        CornerRadius = new CornerRadius(4),
+        IsVisible = false
+    };
+
     int _renderedVersion = -1;
 
     public EditorView(ReactorEditor editor)
@@ -60,6 +70,9 @@ sealed class EditorView : UserControl
         _back.IsVisible = screen.CanGoBack;
         _beat.Text = $"beat {_editor.Beat}";
 
+        _primary.IsVisible = screen.HasPrimary;
+        _primary.Content = screen.PrimaryText;
+
         foreach (var renderer in _renderers)
             renderer.Update();
     }
@@ -87,9 +100,17 @@ sealed class EditorView : UserControl
             BorderThickness = new Thickness(0, 0, 0, 1)
         };
 
+        // Moving on sits apart from the navigation, on the side the eye ends up.
+        _primary.Click += (_, _) => _editor.Invoke(_editor.Screen.PrimaryCommand);
+        Grid.SetColumn(_primary, 1);
+
+        var footerGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
+        footerGrid.Children.Add(_actions);
+        footerGrid.Children.Add(_primary);
+
         var footer = new Border
         {
-            Child = _actions,
+            Child = footerGrid,
             Background = Palette.Chrome,
             Padding = new Thickness(10, 7),
             BorderBrush = Palette.Line,

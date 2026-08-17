@@ -197,24 +197,9 @@ namespace Reactor.Editing
             if (every == null)
                 return;
 
-            var page = new ChoicePage(Editor, "How often?");
-            var cadences = Cadences.All;
-            for (var i = 0; i < cadences.Count; i++)
-            {
-                var ticks = cadences[i].Beats;
-                var label = ticks == 1 ? "every beat" : cadences[i].Name + " — every " + ticks + " beats";
-
-                // Labelled and shown. The words say what it is; the indicator beside
-                // them blinks at the actual rate, so nobody has to imagine a speed
-                // or work out what a beat is worth.
-                page.Add(label, ticks == every.IntervalBeats, ticks, delegate
-                {
-                    every.IntervalBeats = ticks;
-                    Editor.Pop();
-                });
-                page.WarnOnLast(cadences[i].Warning);
-            }
-            Editor.Push(page);
+            // Same page the wizard uses, so the rates read identically wherever they
+            // are met. Choosing one here simply returns.
+            Editor.Push(Editor.RatePage(every, Editor.Pop));
         }
 
         void EditAction(Step step)

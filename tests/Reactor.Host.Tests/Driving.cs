@@ -53,4 +53,12 @@ static class Driving
         editor.Invoke(editor.Screen.Actions.First(a => a.Text == text).Command);
 
     public static void Back(this ReactorEditor editor) => editor.Invoke(editor.Screen.BackCommand);
+
+    /// <summary>Presses the screen's move-on action — "Next" or "Done".</summary>
+    public static void PressPrimary(this ReactorEditor editor)
+    {
+        if (!editor.Screen.HasPrimary)
+            throw new InvalidOperationException($"'{editor.Screen.Title}' has nothing to move on to.");
+        editor.Invoke(editor.Screen.PrimaryCommand);
+    }
 }

@@ -62,8 +62,16 @@ reliably conflate "when the door opens" with "while the door is open", and the
 resulting bug is invisible because the sentence still reads correctly.
 
 **Authoring starts with the verb.** The front door is what the machine does, not a list
-of blocks — you pick `When`, then fill in the sentence in reading order. The ship
-browser is for looking things up.
+of blocks. An empty Reactor asks *"what should set something off?"* and offers `When
+something happens` / `Every so often`; answering leads straight into the next question
+rather than parking you on a half-empty form. The ship browser is still there, as a
+way to look things up rather than as the only way in.
+
+**Going back always means going back.** A run of questions has two directions and they
+are kept separate: `Back` retreats one question, all the way out to where you started,
+and a distinct `Next` / `Done` moves you on. Overloading back with "finished" breaks
+the one navigation idea everybody already has. A new sequence is not created until the
+questions are answered, so backing out leaves nothing behind.
 
 ### Beats
 
@@ -143,7 +151,6 @@ Watch for where they stall. The open question is whether people can build someth
 that works and tell what it is doing — and the thing most likely to be missing is an
 answer to *"why didn't it happen?"*, which is deliberately not built yet.
 
-## Not built yet
+## Where to pick it up
 
-Naming a sequence from the editor, running a named one by hand, and authoring
-`only if` / `once` — all supported by the model, none reachable from the UI.
+See [HANDOVER.md](HANDOVER.md) for what is built, what is not, and the open questions.

@@ -202,6 +202,8 @@ namespace Reactor.Editing
             _screen.Title = page.Title;
             _screen.CanGoBack = _stack.Count > 1;
             _screen.BackCommand = _screen.CanGoBack ? Register(Pop) : 0;
+            _screen.PrimaryText = page.PrimaryText;
+            _screen.PrimaryCommand = _screen.HasPrimary ? Register(page.Primary) : 0;
 
             page.Build(_screen);
             page.Refresh();
@@ -264,11 +266,92 @@ namespace Reactor.Editing
             Push(page);
         }
 
-        /// <summary>Creates a sequence and opens it, leaving no chooser behind.</summary>
+        /// <summary>
+        /// Asks the questions a new sequence needs, one screen at a time.
+        /// </summary>
+        /// <remarks>
+        /// Answering "when something happens" and then being handed a half-empty
+        /// sentence to poke at is a stall, so the next question is asked straight
+        /// away: what should it listen to, then what should it do.
+        ///
+        /// Going back retreats one question, all the way out to where the user
+        /// started. It is never repurposed as "finished" - moving on is its own
+        /// action, so somebody who genuinely wants to retreat still has somewhere to
+        /// press.
+        /// </remarks>
         internal void StartSequence(Trigger trigger)
         {
-            if (Current is ChoicePage)
-                Pop();
+            // Where to unwind to once the questions are answered. A starter chooser
+            // sitting on top stays put for now, because going back has to reach it -
+            // but it is dropped once the sequence exists.
+            var origin = Current is ChoicePage ? _stack.Count - 1 : _stack.Count;
+
+            var when = trigger as WhenTrigger;
+            if (when != null)
+            {
+                Push(new BlockPickerPage(this, "What should this listen to?", when.Sources, true,
+                    "Next", delegate { AskWhatHappens(when, origin); }));
+                return;
+            }
+
+            var every = trigger as EveryTrigger;
+            if (every != null)
+                Push(RatePage(every, delegate { FinishSequence(every, origin); }));
+        }
+
+        void AskWhatHappens(WhenTrigger when, int origin)
+        {
+            var page = new ChoicePage(this, "What should it do?");
+            var events = Vocabulary.EventsFor(_world, when.Sources);
+
+            for (var i = 0; i < events.Count; i++)
+            {
+                var id = events[i].Id;
+                page.Add(events[i].Text, id == when.EventId, delegate
+                {
+                    when.EventId = id;
+                    FinishSequence(when, origin);
+                });
+            }
+
+            page.EmptyText = "None of those blocks have anything in common that can happen to them.";
+            Push(page);
+        }
+
+        /// <summary>The repeat rates, shared by the wizard and by editing a sequence.</summary>
+        internal ChoicePage RatePage(EveryTrigger every, Action chosen)
+        {
+            var page = new ChoicePage(this, "How often?");
+            var cadences = Cadences.All;
+
+            for (var i = 0; i < cadences.Count; i++)
+            {
+                var beats = cadences[i].Beats;
+                var label = beats == 1 ? "every beat" : cadences[i].Name + " — every " + beats + " beats";
+
+                page.Add(label, beats == every.IntervalBeats, beats, delegate
+                {
+                    every.IntervalBeats = beats;
+                    chosen();
+                });
+                page.WarnOnLast(cadences[i].Warning);
+            }
+
+            return page;
+        }
+
+        /// <summary>
+        /// Adds the sequence and opens it, dropping the questions behind it.
+        /// </summary>
+        /// <remarks>
+        /// The sequence does not exist until here, so backing out of the questions
+        /// leaves nothing behind. Creating it up front and tidying up afterwards
+        /// would mean an abandoned run littered the list with an empty sequence.
+        /// </remarks>
+        void FinishSequence(Trigger trigger, int origin)
+        {
+            while (_stack.Count > origin)
+                _stack.RemoveAt(_stack.Count - 1);
 
             Push(new SequencePage(this, _program.AddSequence(trigger)));
         }
