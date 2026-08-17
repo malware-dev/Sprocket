@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Reactor.Core/Reactor.Core.csproj" />
+    <Project Path="src/Reactor.Host.Avalonia/Reactor.Host.Avalonia.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Reactor.Core.Tests/Reactor.Core.Tests.csproj" />
+    <Project Path="tests/Reactor.Host.Tests/Reactor.Host.Tests.csproj" />
+  </Folder>
+</Solution>

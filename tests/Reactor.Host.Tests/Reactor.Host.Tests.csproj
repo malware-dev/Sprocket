@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <!-- xunit v3 test projects are executables. -->
+        <OutputType>Exe</OutputType>
+        <RootNamespace>Reactor.Host.Tests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+        <PackageReference Include="xunit.v3" Version="3.2.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0" />
+        <!-- Loads the real window without putting one on screen. -->
+        <PackageReference Include="Avalonia.Headless.XUnit" Version="12.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Reactor.Host.Avalonia\Reactor.Host.Avalonia.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,29 @@
+T:System.Reflection.Assembly;Reflection is not whitelisted by Space Engineers. Use a hand-written composition root.
+T:System.Reflection.MethodInfo;Reflection is not whitelisted by Space Engineers.
+T:System.Reflection.PropertyInfo;Reflection is not whitelisted by Space Engineers.
+T:System.Reflection.FieldInfo;Reflection is not whitelisted by Space Engineers.
+T:System.Reflection.MemberInfo;Reflection is not whitelisted by Space Engineers.
+T:System.Reflection.BindingFlags;Reflection is not whitelisted by Space Engineers.
+T:System.Activator;Reflection-based construction is not whitelisted.
+T:System.Type;Runtime type inspection is not whitelisted.
+T:System.AppDomain;Not whitelisted.
+T:System.Environment;Not whitelisted.
+T:System.IO.File;File access is not whitelisted. The host supplies and stores bytes.
+T:System.IO.Directory;File access is not whitelisted.
+T:System.IO.Path;File access is not whitelisted.
+T:System.IO.FileStream;File access is not whitelisted.
+T:System.IO.StreamReader;File access is not whitelisted.
+T:System.IO.StreamWriter;File access is not whitelisted.
+T:System.Threading.Thread;Threading is not whitelisted. Core runs on the game's update loop.
+T:System.Threading.Monitor;Threading is not whitelisted.
+T:System.Threading.ThreadPool;Threading is not whitelisted.
+T:System.Threading.Timer;Threading is not whitelisted. The host owns the clock.
+T:System.Threading.Tasks.Task;Asynchrony is not available. Core is tick-driven.
+T:System.Linq.Enumerable;Allocates on every call inside the update loop. Write the loop out instead.
+T:System.Linq.Queryable;Not whitelisted, and not appropriate in a 60Hz loop.
+T:System.Text.RegularExpressions.Regex;Not whitelisted, and far too slow for a 60Hz loop.
+T:System.Net.WebClient;Networking is not whitelisted.
+T:System.Net.Http.HttpClient;Networking is not whitelisted.
+T:System.DateTime;Wall-clock time drifts from simulation time. Count beats instead.
+T:System.Diagnostics.Debug;Core does not log on its own. The host decides what surfaces.
+T:System.Diagnostics.Stopwatch;Wall-clock timing drifts from simulation time.

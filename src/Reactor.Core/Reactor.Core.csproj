@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\build\Reactor.SharedSources.props" />
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <AssemblyName>Reactor.Core</AssemblyName>
+        <RootNamespace>Reactor</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Reactor.Core.Tests" />
+    </ItemGroup>
+
+
+    <!-- The Space Engineers whitelist, enforced at build time. Drift here is
+         otherwise silent until the mod fails to load in-game. -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <AdditionalFiles Include="..\..\build\BannedSymbols.txt" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <!-- A banned call is a broken build, not a suggestion. -->
+        <WarningsAsErrors>$(WarningsAsErrors);RS0030;RS0031</WarningsAsErrors>
+    </PropertyGroup>
+</Project>
