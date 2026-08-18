@@ -22,7 +22,6 @@ sealed class EditorView : UserControl
     readonly StackPanel _actions = Widgets.Stack(Orientation.Horizontal);
     readonly TextBlock _title;
     readonly TextBlock _subtitle;
-    readonly TextBlock _beat;
     readonly Button _back;
 
     readonly Button _primary = new()
@@ -43,8 +42,6 @@ sealed class EditorView : UserControl
 
         _title = Widgets.Label("", Palette.Ink, 16, true);
         _subtitle = Widgets.Label("", Palette.Faint, 11);
-        _beat = Widgets.Label("", Palette.Faint, 11);
-        _beat.FontFamily = new FontFamily("monospace");
 
         _back = Widgets.Ghost("‹ Back");
         _back.Margin = new Thickness(0, 0, 10, 0);
@@ -68,7 +65,6 @@ sealed class EditorView : UserControl
         _title.Text = screen.Title;
         _subtitle.Text = screen.Subtitle;
         _back.IsVisible = screen.CanGoBack;
-        _beat.Text = $"beat {_editor.Beat}";
 
         _primary.IsVisible = screen.HasPrimary;
         _primary.Content = screen.PrimaryText;
@@ -84,12 +80,10 @@ sealed class EditorView : UserControl
         titles.Children.Add(_title);
         titles.Children.Add(_subtitle);
 
-        var headerGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto") };
+        var headerGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*") };
         headerGrid.Children.Add(_back);
         Grid.SetColumn(titles, 1);
         headerGrid.Children.Add(titles);
-        Grid.SetColumn(_beat, 2);
-        headerGrid.Children.Add(_beat);
 
         var header = new Border
         {

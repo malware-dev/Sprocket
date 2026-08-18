@@ -57,11 +57,6 @@ namespace Reactor.Ui
         /// event-versus-state distinction the user has to end up understanding.
         /// </remarks>
         public bool IsLiveNow { get; set; }
-
-        /// <summary>Offers the other kind of trigger, e.g. "use a repeat instead".</summary>
-        public string SwitchLabel { get; set; }
-
-        public int SwitchCommand { get; set; }
     }
 
     /// <summary>

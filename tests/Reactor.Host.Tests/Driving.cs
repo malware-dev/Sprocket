@@ -43,9 +43,6 @@ static class Driving
         editor.Invoke(sentence.Steps[step].Slots[slot].Command);
     }
 
-    public static void PressTriggerSwitch(this ReactorEditor editor) =>
-        editor.Invoke(editor.Component<SequenceComponent>().Trigger.SwitchCommand);
-
     public static void PressTriggerSlot(this ReactorEditor editor, int slot) =>
         editor.Invoke(editor.Component<SequenceComponent>().Trigger.Slots[slot].Command);
 

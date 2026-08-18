@@ -255,15 +255,6 @@ sealed class SequenceRenderer : ComponentRenderer
         };
         wrap.Children.Add(_liveBadge);
 
-        if (!string.IsNullOrEmpty(_model.Trigger.SwitchLabel))
-        {
-            var switchCommand = _model.Trigger.SwitchCommand;
-            var swap = Widgets.Ghost(_model.Trigger.SwitchLabel!);
-            swap.FontSize = 11;
-            swap.Margin = new Thickness(0, 0, 0, 4);
-            swap.Click += (_, _) => Editor.Invoke(switchCommand);
-            wrap.Children.Add(swap);
-        }
 
         return wrap;
     }

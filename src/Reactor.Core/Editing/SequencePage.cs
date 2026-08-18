@@ -111,8 +111,6 @@ namespace Reactor.Editing
                 events.Count == 0 || !HasEvent(events, when.EventId),
                 Editor.Register(EditEvent)));
 
-            trigger.SwitchLabel = "use a repeat instead";
-            trigger.SwitchCommand = Editor.Register(UseEvery);
             return trigger;
         }
 
@@ -124,8 +122,6 @@ namespace Reactor.Editing
                 false,
                 Editor.Register(EditCadence)));
 
-            trigger.SwitchLabel = "use an event instead";
-            trigger.SwitchCommand = Editor.Register(UseWhen);
             return trigger;
         }
 
@@ -221,18 +217,6 @@ namespace Reactor.Editing
         void EditTargets(Step step)
         {
             Editor.Push(new BlockPickerPage(Editor, "What should this affect?", step.Targets, false));
-        }
-
-        void UseEvery()
-        {
-            _sequence.Trigger = new EveryTrigger(Cadences.Default);
-            Editor.Invalidate();
-        }
-
-        void UseWhen()
-        {
-            _sequence.Trigger = new WhenTrigger("");
-            Editor.Invalidate();
         }
 
         void AddAction()
