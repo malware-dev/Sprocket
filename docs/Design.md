@@ -1,0 +1,369 @@
+# Reactor
+
+Automation that someone with no programming knowledge can build, read, and fix.
+The target is a Space Engineers mod; the editor is abstract, and this host is one
+implementation of it.
+
+This document is the model, and it is internal. Where something is undecided it says
+so, and those are the questions to settle rather than gaps to quietly fill in.
+
+The wants it answers to are in [UserStories.md](UserStories.md), which is public, with
+our own notes on them in [StoryNotes.md](StoryNotes.md). Nothing here belongs in the
+first of those.
+
+## Who it is for, and what that forbids
+
+The audience is a player who wants a door to open. They are not stupid and they are
+not children; they simply have never been taught the ideas programmers take as
+furniture, and every one of those ideas we import is a tax charged to every user
+forever.
+
+That gives a test which has already killed several features: **if a concept only earns
+its keep by being general, it does not earn its keep.** Reactor is for building
+automation, not a set of shipped automations - but the difference between the two is
+expressiveness, not abstraction.
+
+One thing that is *not* a reason to leave something out: **just because it can be done
+in vanilla automation does not mean Reactor should not be able to do it as well.** The
+easy cases are not beneath the system - they are what keeps a ship's automation in one
+place, and Reactor can only explain behaviour it can see. Every case somebody sets up
+in the game's own terminal instead is a hole in every answer we later try to give them.
+
+That is not a licence to import every vanilla feature as a want. It says vanilla
+capability never disqualifies a story; there still has to be a story.
+
+**Where the boundary actually falls: setting a block up is not automation.** A sensor's
+friend-or-foe filter, its range, a door's speed - these are configured on the block
+once, the player already knows where they live, and Reactor has no business
+reimplementing the terminal. What Reactor owns is what happens *between* blocks, and
+over time: this happened, so do that.
+
+The line is not that block settings are out of bounds, because changing one is a
+perfectly good action - a step that turns the lights red is setting a block's colour.
+It is that *configuring a block once and leaving it* belongs to the game, while
+*changing it because something happened* belongs here.
+
+The quick test, when a want sounds like this one: would serving it mean rebuilding a
+block's terminal screen inside Reactor? Fifty-odd block types, every setting on each of
+them, duplicated, and re-checked against the game every update. The answer is no, and
+it is not close.
+
+Three consequences worth stating outright, because they are what make the rest cohere:
+
+- **Nothing nests.** Steps are a flat numbered list. Nesting is what defeats novices,
+  and every feature that would have needed it has so far had a flat form that reads
+  better.
+- **Nothing iterates.** A trigger or a step takes several blocks at once, so the
+  collection is the ordinary case and the loop never appears. There is no counter, no
+  termination condition and no iteration variable.
+- **The program is live.** There is no build, no run, no save. A change takes effect
+  as it is made, which is why nothing needs committing and why "Done" only ever means
+  "I have finished", never "apply this".
+
+## The model
+
+### Ship and blocks
+
+Given, not ours. A block has a kind, a name, some signals, and some things that can be
+done to it. Reactor reads and writes; it does not model the world.
+
+Two things about the target constrain the design more than they look. A mod can add
+subtypes but not block types, so the vocabulary is bounded by what the game already
+has - on the order of fifty or sixty terminal types, not hundreds. And a mod's code is
+compiled in-game under a whitelist, which bounds the primitives available but not the
+abstractions built from them.
+
+### Where the program lives
+
+Not in a block. Vanilla automation keeps the behaviour inside the event controller or
+timer that runs it, so a cannon round through that one block takes the automation with
+it and the player starts again from nothing. Reactor's program belongs to the
+construct, and losing any single block may cost the reference to that block and
+nothing else.
+
+This is a constraint on storage rather than on the language, and it is the reason P is
+answerable at all rather than being the same defeat in a nicer editor.
+
+### System
+
+A named set of sequences and states that belong together: an airlock, a hangar, a
+defence system. The unit of grouping, of naming, of export and of configuration.
+
+The word is the player's own - people already say "my docking system" - and it is
+worth being strict about using it only in that sense from here on.
+
+It exists for three separate reasons, each with a story behind it, and any two of them
+would have justified it:
+
+- it is the scope that makes a named state unambiguous, so two airlocks can both have
+  a "vacuum mode" without the player inventing naming discipline (I);
+- it is what keeps the sequence list navigable once a ship has forty of them (J);
+- it is the unit of sharing - what is exported, and what is pointed at your own blocks
+  on import (K).
+
+A fourth was struck out: that a system is the scope a call resolves in, so a sequence
+can be called "cycle out" rather than "front airlock cycle out". Nobody has ever wished
+for a namespace. It is a consequence of the three above, and was doing illegitimate
+work as a justification for them.
+
+Every sequence belongs to exactly one system. Creating one must never stand between
+somebody and their first sequence: one is provided, and named after the fact.
+
+### Sequence
+
+A trigger and an ordered list of steps. Optionally named; the name is what makes it
+callable, and what makes a diagnosis readable.
+
+### Trigger
+
+What starts a sequence. Always a moment, never a situation.
+
+- **When** - a block event. Several blocks means *any* of them by default, with *all*
+  available where the sentence genuinely differs: "when tank A **and** tank B are
+  empty" fires as the last one empties, not the first.
+- **Every** - a recurring interval. This is what replaces the loop.
+- **Called** - started by name from elsewhere, which is what lets two buttons run the
+  same sequence.
+
+Intervals come from the game's frame counter and are never counted by Reactor. Space
+Engineers offers update rates of 1, 10 and 100 only, and the slower two do not land on
+exact multiples, so anything self-counted drifts with server load.
+
+### Step
+
+One numbered line: a verb and the blocks it acts on.
+
+**A step waits for its own action to take effect.** "Close the inner door" holds until
+the door is actually shut. This is the single most important decision in the language:
+a numbered list already means "and then" to anyone who has followed a recipe, and a
+duration is a programmer's substitute for a completion signal that produces airlocks
+which vent the ship the day a door sticks.
+
+It has a consequence worth naming, because it removes a whole category of thing:
+**"make sure X" and "do X" become the same sentence.** An already-shut door completes
+instantly, so ordinary procedures need no conditionals at all.
+
+### Gate
+
+An optional condition on a step, for the cases blocking alone does not cover.
+
+- **once** - hold here until a situation is true. Needed only for something this
+  sequence did not itself cause: "once the tank is full".
+- **only if** - a guard. If it does not hold, the step is passed over and the sequence
+  carries on, which is a different sentence from "hold until it is safe". Being passed
+  over is recorded, because a step that quietly does nothing is indistinguishable from
+  one that worked.
+- **after** - a duration. Still needed for things with no completion signal, such as
+  flashing a beacon. Offered second, never first.
+
+### Events and states
+
+Structurally separate, and this is deliberate. An **event** is an edge and can only
+start a sequence. A **state** is a level and can only gate or guard one. Both are read
+off the same signals, but keeping them apart in the model makes the "when it opens"
+versus "while it is open" confusion impossible to express rather than merely
+discouraged.
+
+Several blocks in a trigger means *any*; several in a condition means *all*. That
+asymmetry is not an inconsistency, it is how the two sentences read aloud.
+
+## Deliberately not in it
+
+- **An interlock primitive.** "Both doors must never be open" is two ordinary
+  sequences, and that version is stronger: locking is a real action, so it also stops
+  a player opening the door by hand. The same test kills "docking mode", "power
+  management" and every other packaged behaviour.
+- **Named block groups.** Blocks are picked inline and belong to the sequence that
+  picked them. Nothing to maintain, and nothing to fall out of date.
+- **Loops, counters, nesting, and variables as a general facility.** Covered above.
+
+## Open decisions
+
+These are what designing proper now means. They are ordered by how much else waits on
+them, and each names the stories that want it. A question with no story behind it does
+not belong on this list.
+
+### 1. A condition on the trigger
+
+*Wanted by: A, L.*
+
+Gates live on steps and are evaluated when their step runs, so a guard meaning "we are
+deploying" is asking about a world that step 1 has already changed. The language cannot
+currently decide, once and up front, which of two procedures this is.
+
+A condition on the trigger settles it: *when the button is pressed, while the arm is
+stowed*. Two sequences, opposite guards, decided before anything moves.
+
+Two things the stories settled rather than argument. The wording is *when* for the edge
+and *while* for the level, which keeps it distinct from a step's *only if* and teaches
+the event/state split in the one place a player needs it. And it has to be reachable
+both while authoring and afterwards, because A and L are the same construct approached
+from opposite ends: if the retrofit route is second class, half the people who want it
+never find it.
+
+Still open: what happens in the resting state where neither guard holds. Not academic -
+the arm is halfway out for most of the time it is moving.
+
+### 2. Quantities
+
+*Wanted by: B, F, G, and the middle rung of O.*
+
+Every state today is a boolean signal; a vent's "62%" is display text the language
+cannot reach.
+
+The stories split this cleanly in two, and the split is the decision:
+
+- **against a chosen number** - below a fifth, above half. Satisfies F and G, and a
+  progress bar.
+- **against another reading** - match the far side. Only B wants this, and B cannot be
+  satisfied without it, because neither operand is ever a constant: not the outside,
+  which is whatever the planet is, and not the inside, which is whatever damage has
+  left it.
+
+The first is much the cheaper and does most of the work. Building only the first is a
+defensible answer, so long as it is a decision rather than an accident.
+
+B also needs the far side to have something that can report it - a vent in the next
+room - which grows the block list of an airlock by one. What happens when nobody put
+one there is unresolved.
+
+### 3. Values on actions, and putting them back
+
+*Wanted by: D.*
+
+A step is a verb plus its targets, with nowhere to put a colour, a percentage or a
+name. That is the small half.
+
+The large half is that D wants them *restored*, and what gets restored is how a block
+is rather than one property of it - a light that was off is normal when it is off
+again. Two dozen hand-tuned lights is exactly the scale at which the player cannot be
+asked to write the values down, so the language has to hold them: a step that remembers
+how a set of blocks looks, and a step that puts them back.
+
+The most likely candidate on this list to be judged not worth it.
+
+### 4. Calling a sequence
+
+*Wanted by: E. Needed by 6.*
+
+Half-built: a sequence can be started by name, but no step can call one. Resolving
+within the system keeps names short.
+
+**Template, not duplicate.** This was being treated as an open fork; E's done-when
+decides it, because "changing the shared procedure changes all three" is not something
+duplication can satisfy. That brings the hardest idea in the language with it - changing
+this changes that - and the cost belongs to E rather than to our preference.
+
+### 5. Named state
+
+*Wanted by: I, C, D.*
+
+Two different features that must not share a name in the UI:
+
+- **derived** - "vacuum mode" *means* the outer door is unlocked and the vent is
+  depressurised, recomputed whenever asked. Cannot fall out of step with the world.
+- **remembered** - a fact stored because nothing in the world records it. Can fall out
+  of step with the world, and "it thinks it is in vacuum mode but it is not" is exactly
+  the failure this audience cannot diagnose.
+
+D changes the shape of the second. Remembering two dozen lights is remembered state at
+a scale nobody would ever author by hand, so it cannot be only a thing players create
+and name. Some of it has to be something the language holds on their behalf.
+
+### 6. Stopping a sequence from outside
+
+*Wanted by: C. Worth nothing before 4.*
+
+Nothing can stop a sequence but the sequence.
+
+C shows this is two wants rather than one - halting, and settling somewhere safe - and
+that the way back is its own procedure, not the forward steps reversed. But the second
+half needs no new concept: a button that stops the preparation and then calls "put the
+hangar back" is an ordinary sequence. So the only primitive here is *stop*, and building
+it before calling exists would deliver the useless half.
+
+### 7. Telling a person something
+
+*Wanted by: G, O.*
+
+Reactor can operate blocks and nothing else. It has never been able to tell anybody
+anything, so "warn me" can only be built today as "switch on a lamp somebody has to be
+looking at".
+
+One capability with two faces: G interrupts, O displays. Building one without the other
+will read as arbitrary. O then ladders - a heading and live text, then a progress bar
+which waits on 2, then a graph which needs **history**, samples kept over time, and
+would be the first thing Reactor stores that is not a fact about right now.
+
+O also raises a structural question rather than a feature one. A screen is a standing
+arrangement that is always true, not a series of steps, and driving it from steps is the
+programmer's shape of the problem. It may want to be a second kind of thing alongside
+sequences.
+
+### 8. References that survive a repair
+
+*Wanted by: P, K.*
+
+A device is referenced by id. A rebuilt block is a new entity with a new id and usually
+a default name, so every reference to the destroyed one is dead and each has to be
+repaired separately. A door used by six steps across two sequences is six repairs.
+
+Two things are wanted here and they are not the same thing.
+
+**Repair in one place.** A block reference becomes a named role on the system - "the
+inner door" - which every sequence that needs it points at, so re-pointing happens
+once. This is exactly the mechanism K needs for sharing, arrived at from a completely
+unrelated direction, and two independent stories asking for one structure is the
+strongest signal the set has produced. It also promotes roles out of "part of export,
+defer them together with it" and into their own right.
+
+**References that cannot be bound at all when written.** T asks for a station sequence
+that acts on whichever ship is docked, which is not the same problem wearing a hat: the
+blocks do not exist yet, and are different ones each time. That forces a reference
+resolved when the sequence runs, by role and kind, against whatever is currently
+attached. It subsumes the other two - a role that can be filled at run time can
+certainly be re-pointed by hand - so if this is built, it is built first and the rest
+falls out.
+
+**Re-binding without being asked** is the speculative half: remember the name alongside
+the id, and when the id is gone and a block of the right kind carrying that exact name
+appears, adopt it. It covers the common case, because somebody who rebuilds a door
+usually renames it back to what it was. It has to stay conservative - silently adopting
+the wrong block is worse than asking - and it is worth nothing without the first half.
+
+### 9. Failure
+
+*Wanted by: M. Load-bearing on H.*
+
+A step that will never complete, a sequence stuck forever, and the question people
+actually ask - which is not "what went wrong" but "why didn't it happen". Last on
+purpose: failure cannot be designed until the language can say what was supposed to
+happen.
+
+A system is the natural unit for the answer. "Front Airlock is stuck on step 3" is a
+sentence about a thing the player built and named.
+
+**This is one window, not four features.** M asks why nothing happened, Q asks whether
+it is already running, V asks which step it is on, and R asks which of two sequences is
+winning. They are the same view of a running sequence seen from four sides, and
+building any one of them on its own would be building a quarter of it badly.
+
+R also deserves noting as a bill we chose to run up. Dropping the interlock primitive
+was right, and it guarantees that several sequences will act on one block by design, so
+conflict is a designed-in condition rather than a fault. The honest answer is probably
+to show the disagreement rather than resolve it quietly.
+
+H is the constraint nobody would guess. Reactor can only explain what it can see, so
+every case somebody sets up in the game's own terminal instead is a hole in the
+explanation. Losing the easy cases is how the hard ones become unanswerable.
+
+## Where the prototype stands
+
+The editor works, and the abstraction has held up: core hands a target a small set of
+domain-shaped components - a block list, a search, a column path, a sequence - and
+decides nothing about layout. A second target reimplements one file.
+
+Of the nine questions above, none contradicts what is built. Two reach past the
+language into the world model rather than adding to it - quantities, and reading a
+block's properties well enough to put them back - so those are the ones to design most
+carefully before writing any of them.

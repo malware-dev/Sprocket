@@ -71,7 +71,7 @@ namespace Reactor.Editing
         static readonly Cadence[] _all =
         {
             new Cadence("every tick", 1, true,
-                "Runs sixty times a second. Hard on the server — only worth it if nothing slower will do."),
+                "Runs sixty times a second. Hard on the server - only worth it if nothing slower will do."),
             new Cadence("fast", 10, true,
                 "Six times a second. Still costly; try something slower first."),
             new Cadence("steady", 100, true),

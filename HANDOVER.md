@@ -21,7 +21,7 @@ its `Rendering/` folder.
   `only if` guards, `once` / `after` gates, named sequences, live status.
 - **The airlock, both ways.** `tests/Reactor.Core.Tests/AirlockTests.cs` builds it as
   a cycle sequence and as a mutual exclusion, and asserts on every tick of an 80-tick
-  run that both doors are never open at once — with no safety feature in the language.
+  run that both doors are never open at once - with no safety feature in the language.
 - **The editor**, entirely in Core: navigation stack, ship browser with search and
   kind filters, block pickers that only offer combinations that could run, choice
   pickers, the sentence view with live state.
@@ -53,11 +53,11 @@ Ordered roughly by how much they hurt.
 ## Known problems
 
 - **Picking a block can empty the list.** After choosing a Button, the picker narrows
-  to blocks sharing an event with it — which is nothing — so everything vanishes and
+  to blocks sharing an event with it - which is nothing - so everything vanishes and
   it reads like a bug. Correct behavior, wrong presentation: incompatible blocks
   probably want to be shown greyed with a reason rather than disappearing.
-- **A jammed device stalls a sequence silently.** Deliberate — proceeding is how a
-  stuck door vents a ship — but there is no visible "stuck" state yet, and no way to
+- **A jammed device stalls a sequence silently.** Deliberate - proceeding is how a
+  stuck door vents a ship - but there is no visible "stuck" state yet, and no way to
   react to one. Design sketched, not agreed: stuck becomes a state after a while, and
   a trigger so recovery is ordinary automation.
 - **Momentary signals can be missed.** If the mod runs on SE's `Update10` or
@@ -73,7 +73,7 @@ Ordered roughly by how much they hurt.
 - Should the block picker chain onward automatically after `Next`, or stop and let
   the user look at the sentence? Currently the new-sequence wizard chains
   (blocks → event → sequence); editing an existing slot does not.
-- How long is "too long" before a stuck sequence says so — one forgiving global
+- How long is "too long" before a stuck sequence says so - one forgiving global
   default, or per-step? Strong lean toward global; per-step is a number to guess.
 - Does SE expose enough "I can't do this" state on vents and doors to detect stuck
   precisely, or does a timer carry all the weight?
@@ -94,7 +94,7 @@ dotnet run --project src/Reactor.Host.Avalonia    # the prototype
 
 - **Core is pinned to C# 6 and netstandard2.0**, with `build/BannedSymbols.txt`
   failing the build on reflection, LINQ, IO, threading and wall-clock time. That is
-  not incidental — it is what keeps Core compilable by SE in-game. Host code is
+  not incidental - it is what keeps Core compilable by SE in-game. Host code is
   exempt and uses modern C# freely.
 - **The running prototype locks `Reactor.Core.dll`**, so close it before rebuilding.
 - **Screenshots** come from `dotnet test --filter Screenshot`, writing to

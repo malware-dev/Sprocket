@@ -53,7 +53,7 @@ public class ScreenshotTests
         Tick(window, 1);
         Shoot(window, "sequences");
 
-        // How often — labelled, blinking at the real rate, and warning about the
+        // How often - labelled, blinking at the real rate, and warning about the
         // rates that cost the server dearly.
         editor.PressAction("Start something new");
         editor.PressChoice("Every so often");

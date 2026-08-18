@@ -368,7 +368,7 @@ namespace Reactor.Editing
             for (var i = 0; i < cadences.Count; i++)
             {
                 var ticks = cadences[i].Ticks;
-                var label = ticks == 1 ? "every tick" : cadences[i].Name + " — every " + ticks + " ticks";
+                var label = ticks == 1 ? "every tick" : cadences[i].Name + " - every " + ticks + " ticks";
 
                 page.Add(label, ticks == every.IntervalTicks, ticks, delegate
                 {

@@ -99,7 +99,7 @@ namespace Reactor.Editing
                 return "waiting to happen";
 
             if (state.IsRunning)
-                return state.IsWaiting ? "running — waiting for this step" : "running";
+                return state.IsWaiting ? "running - waiting for this step" : "running";
 
             return state.LastFiredTick < 0 ? "waiting to happen" : "waiting";
         }

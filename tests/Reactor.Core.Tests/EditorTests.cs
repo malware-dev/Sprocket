@@ -223,7 +223,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.PressChoice("Every so often");
-        editor.PressChoice("steady — every 100 ticks");
+        editor.PressChoice("steady - every 100 ticks");
 
         // The component instances must survive, or a target rebuilds its controls
         // and the field loses focus and the caret mid-word.
@@ -281,7 +281,7 @@ public class EditorTests
         editor.PressAdd("wait");
         Assert.Equal("How long should it wait?", editor.Screen.Title);
 
-        editor.PressChoice("5 seconds — 300 ticks");
+        editor.PressChoice("5 seconds - 300 ticks");
 
         var step = Assert.Single(editor.Sentence().Steps);
         Assert.Equal("wait", step.Lead);

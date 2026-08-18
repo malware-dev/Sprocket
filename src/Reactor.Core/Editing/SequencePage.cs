@@ -261,7 +261,7 @@ namespace Reactor.Editing
             for (var i = 0; i < WaitPresets.Length; i++)
             {
                 var ticks = WaitPresets[i];
-                var label = SequenceText.DescribeDuration(ticks) + " — " + ticks + " ticks";
+                var label = SequenceText.DescribeDuration(ticks) + " - " + ticks + " ticks";
                 page.Add(label, false, delegate { chosen(ticks); });
             }
             return page;

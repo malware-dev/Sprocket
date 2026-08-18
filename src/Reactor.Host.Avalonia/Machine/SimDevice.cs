@@ -147,7 +147,7 @@ sealed class SimTank(long id, string name) : SimDevice(id, name, Kinds.Tank)
 
     public bool Draining { get; set; }
 
-    public override string Status => $"{(int)(_level * 100)}%" + (GetSignal("low") ? " — low" : "");
+    public override string Status => $"{(int)(_level * 100)}%" + (GetSignal("low") ? " - low" : "");
 
     public override bool IsActive => GetSignal("low");
 

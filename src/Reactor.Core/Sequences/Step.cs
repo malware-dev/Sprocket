@@ -10,7 +10,7 @@ namespace Reactor.Sequences
     }
 
     /// <summary>
-    /// "once the inner door is shut — …"
+    /// "once the inner door is shut - …"
     /// </summary>
     /// <remarks>
     /// The default kind of gate, and the important one. A duration is a programmer's
@@ -30,7 +30,7 @@ namespace Reactor.Sequences
     }
 
     /// <summary>
-    /// "only if the inner door is shut — …"
+    /// "only if the inner door is shut - …"
     /// </summary>
     /// <remarks>
     /// A guard, not a wait. If the situation does not hold the step is passed over
@@ -51,7 +51,7 @@ namespace Reactor.Sequences
     }
 
     /// <summary>
-    /// "after 30 ticks — …"
+    /// "after 30 ticks - …"
     /// </summary>
     /// <remarks>
     /// Still needed for things that genuinely have no completion signal, such as

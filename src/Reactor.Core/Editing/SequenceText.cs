@@ -121,7 +121,7 @@ namespace Reactor.Editing
         public static string DescribeStep(IWorld world, Step step)
         {
             // A step with a duration and nothing to do is simply a wait, and reads
-            // better as one than as "after 5 seconds — nothing".
+            // better as one than as "after 5 seconds - nothing".
             if (!step.HasAction)
             {
                 var pause = step.Gate as AfterGate;
@@ -131,7 +131,7 @@ namespace Reactor.Editing
 
             var body = DescribeAction(world, step);
             var gate = DescribeGate(world, step.Gate);
-            return gate.Length == 0 ? body : gate + " — " + body;
+            return gate.Length == 0 ? body : gate + " - " + body;
         }
 
         /// <summary>The "once …" or "only if …" prefix, or empty for the usual case.</summary>

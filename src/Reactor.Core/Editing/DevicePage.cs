@@ -41,7 +41,7 @@ namespace Reactor.Editing
                 var device = Editor.World.FindDevice(_deviceId);
                 if (device == null)
                     return "No longer on the ship";
-                return device.Kind.DisplayName + " — " + device.Status;
+                return device.Kind.DisplayName + " - " + device.Status;
             }
         }
 
