@@ -1,116 +1,123 @@
 # Handover
 
-Where Reactor stands, what to do next, and what is still undecided. Read
-[README.md](README.md) first for the language and the reasoning behind it; this
-document is the state of play.
+Where Reactor stands and what to pick up. Read [README.md](README.md) for the language;
+this is the state of play.
 
 ## In one paragraph
 
-Reactor is an automation system for people who have never programmed, aimed at
-becoming a Space Engineers mod. The language is settled and proven by tests: sequences
-of steps that each wait for their own action to finish, started by `When` or `Every`.
-`Reactor.Core` holds the model, the runtime **and the whole editor**, and compiles
-under C# 6 / netstandard2.0 behind a banned-API gate, so it is already legal for SE to
-compile in-game. The Avalonia app is a prototype host that renders the editor and
-simulates a ship; it is throwaway in principle, and the SE target reimplements only
-its `Rendering/` folder.
+Reactor is automation for people who have never programmed, aimed at becoming a Space
+Engineers mod. A working prototype exists - `Reactor.Core` holds the model, the runtime
+and the whole editor, compiles under C# 6 / netstandard2.0 behind a banned-API gate, and
+an Avalonia host renders it and simulates a ship. **The project is currently in a design
+phase rather than a building one.** The prototype proved the shape works; the documents
+now being written are the attempt to find out what it actually has to do before more of
+it gets built.
 
-## What works
+30 tests, all green.
 
-- **The model and runtime.** Sequences, ordered steps, blocking on completion,
-  `only if` guards, `once` / `after` gates, named sequences, live status.
-- **The airlock, both ways.** `tests/Reactor.Core.Tests/AirlockTests.cs` builds it as
-  a cycle sequence and as a mutual exclusion, and asserts on every tick of an 80-tick
-  run that both doors are never open at once - with no safety feature in the language.
-- **The editor**, entirely in Core: navigation stack, ship browser with search and
-  kind filters, block pickers that only offer combinations that could run, choice
-  pickers, the sentence view with live state.
-- **The prototype host.** Simulated ship where doors travel and vents cycle, a poke
-  strip standing in for the world, and one renderer per component.
-- **Naming and running by hand.** A sequence can be named - optional, and it looks
-  optional - and the name then stands in for the sentence wherever it is listed.
-  `Run now` starts one as if its trigger had fired, so an airlock can be tested
-  without walking to the button.
-- **Headless screenshots.** `ScreenshotTests` writes PNGs to `%TEMP%\reactor-*.png`
-  without opening a window. Useful for reviewing the design without launching.
+## The documents, and which is which
 
-21 tests, all green.
+| | |
+|---|---|
+| `docs/UserStories.md` | **Public.** Twenty-three wants in players' own words. No mechanism, no status, no cost - it exists so somebody outside can say whether we understood them. |
+| `docs/StoryNotes.md` | Internal. Our judgement on each story: where it stands, what it implies, what was rejected, what the set settled on its own. |
+| `docs/Requirements.md` | Internal. What Reactor must do, derived one story at a time. |
+| `docs/Design.md` | Internal. The model, what is deliberately excluded, and the open decisions. |
+| `docs/ApiUnknowns.md` | Internal. Twelve questions about Space Engineers that block requirements, none answerable without the game. |
+
+Nothing from the internal four belongs in the public one.
+
+## How work is supposed to flow
+
+**story → requirement → (decision) → ticket**
+
+- A **story** is a want, in a player's words. An idea that cannot be written as one is not
+  a feature. Being on the list is a request, not a promise.
+- A **requirement** is a thing Reactor needs together with how it works - "we need a stop
+  statement, and this is what stopping does". Something a person could be handed. It is
+  *not* an opinion, *not* a permission, and *not* a story's done-when restated. All three
+  have been mistaken for requirements and retired.
+- **Decisions** are made in conversation and recorded in Design.md. A decision is not a
+  ticket; it is what has to have happened before work can be described.
+- **Tickets** come from requirements, one requirement usually giving several, labelled
+  with the story that sourced it. **None have been filed yet.**
+
+Requirements are numbered permanently from the early re-cut onward. R18 and R19 are
+retired and not reused.
+
+## Where the pass has got to
+
+Working through the stories in order, deriving requirements from each. **Done: A through
+Q. Next: R - two things fighting over my door**, then S, T, U, V, W.
+
+So far: 40 live user requirements, three technical (T1-T3, all provisional predictions
+about a game nobody has run this in yet), three retired.
+
+The biggest things the pass has produced:
+
+- **Roles are wanted by four unrelated stories** - E for reuse, K for sharing, P for
+  repair, T for blocks that are not there yet - which makes the system-as-template work
+  the centre of gravity of the whole project.
+- **The diagnosis window is one feature, not four.** M, Q, R and V each want a piece of
+  the same view of a running sequence.
+- **M is large and essential.** It is the only story that helps somebody whose automation
+  is already broken, and this audience has no fallback.
+- **O is a project in itself**, deliberately under-specified, wanted as a stretch goal.
 
 ## What is not built
 
-Ordered roughly by how much they hurt.
+Ordered by how much they hurt.
 
-1. **Calling one sequence from another.** Naming exists, but nothing consumes a name
-   yet - there is no step that runs a named sequence, so `CalledTrigger` is reachable
-   only through `Run now`. This is what makes a shared "Let me out" worth having.
-2. **Authoring `only if` and `once`.** The model handles them and the editor renders
-   them if present, but nothing creates one.
-3. **"Why didn't it happen?"** The runtime records skipped steps structurally
-   (`SequenceRunner.LastSkippedStep`); nothing surfaces it yet.
-4. **The Space Engineers host.** Not started. It implements `Rendering/` against the
-   same `Reactor.Ui` components and supplies an `IWorld` over the real grid.
+1. **Calling one sequence from another.** `CalledTrigger` exists and nothing consumes a
+   name, so it is reachable only through *run now*. Wanted by E, and R5's stop is worth
+   nothing without it.
+2. **Authoring `only if` and `once`.** The model handles them and the editor renders them;
+   nothing creates one.
+3. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
+   them.
+4. **The Space Engineers host.** Not started. It implements `Rendering/` against the same
+   `Reactor.Ui` components and supplies an `IWorld` over the real grid.
 
 ## Known problems
 
-- **Picking a block can empty the list.** After choosing a Button, the picker narrows
-  to blocks sharing an event with it - which is nothing - so everything vanishes and
-  it reads like a bug. Correct behavior, wrong presentation: incompatible blocks
-  probably want to be shown greyed with a reason rather than disappearing.
-- **A jammed device stalls a sequence silently.** Deliberate - proceeding is how a
-  stuck door vents a ship - but there is no visible "stuck" state yet, and no way to
-  react to one. Design sketched, not agreed: stuck becomes a state after a while, and
-  a trigger so recovery is ordinary automation.
-- **Momentary signals can be missed.** If the mod runs on SE's `Update10` or
-  `Update100`, a one-frame button press between updates never gets sampled. Level-held
-  states survive being sampled late; momentary ones do not. Either the host latches
-  them, or anything listening for one forces `Update1`. Undecided.
-- **Locking is disabling**, so a sequence that stops mid-way can leave a player sealed
-  in an airlock behind a disabled door. No answer yet, and it may simply be survivable
-  in a game where you can grind a door.
-
-## Open questions
-
-- Should the block picker chain onward automatically after `Next`, or stop and let
-  the user look at the sentence? Currently the new-sequence wizard chains
-  (blocks → event → sequence); editing an existing slot does not.
-- How long is "too long" before a stuck sequence says so - one forgiving global
-  default, or per-step? Strong lean toward global; per-step is a number to guess.
-- Does SE expose enough "I can't do this" state on vents and doors to detect stuck
-  precisely, or does a timer carry all the weight?
-
-## The next thing I would do
-
-Either calling a named sequence from a step - which is what naming was for, and is
-the last part of the language that is modelled but unreachable - or start the Space
-Engineers host. The sooner a second target exists, the sooner the component contract
-gets tested by something that is not Avalonia.
+- **Picking a block can empty the list.** After choosing a Button the picker narrows to
+  blocks sharing an event with it, which is nothing, so everything vanishes and it reads
+  like a bug. Correct behaviour, wrong presentation.
+- **A jammed device stalls a sequence silently.** Deliberate - proceeding is how a stuck
+  door vents a ship - but nothing shows it. Now specified as R30.
+- **Momentary signals can be missed.** A one-frame press between updates on `Update10` or
+  `Update100` is never sampled. See ApiUnknowns 10; it may decide the whole runtime shape.
+- **Locking is disabling**, so a sequence stopped mid-way can leave somebody sealed in an
+  airlock behind a disabled door.
 
 ## Working notes
 
 ```
-dotnet test Reactor.slnx                          # 21 tests
+dotnet test                                       # 30 tests
 dotnet run --project src/Reactor.Host.Avalonia    # the prototype
+dotnet test --filter Screenshot                   # PNGs to %TEMP%\reactor-*.png
 ```
 
-- **Core is pinned to C# 6 and netstandard2.0**, with `build/BannedSymbols.txt`
-  failing the build on reflection, LINQ, IO, threading and wall-clock time. That is
-  not incidental - it is what keeps Core compilable by SE in-game. Host code is
-  exempt and uses modern C# freely.
+- **Core is pinned to C# 6 and netstandard2.0**, with `build/BannedSymbols.txt` failing
+  the build on reflection, LINQ, IO, threading and wall-clock time. That gate was silently
+  inert for a while and is now verified to fire. Host code is exempt.
 - **The running prototype locks `Reactor.Core.dll`**, so close it before rebuilding.
-- **Screenshots** come from `dotnet test --filter Screenshot`, writing to
-  `%TEMP%\reactor-*.png`. Cheaper than launching, and it does not steal focus.
-- **Git identity is repo-local** (`Malware` / the `malware-dev` noreply address), so
-  commits are correctly attributed regardless of the global config. Pushing uses Git
-  Credential Manager and does not care which `gh` account is active; only `gh` API
-  commands do.
+- **Git identity is repo-local** (`Malware` / the `malware-dev` noreply address). Pushing
+  uses Git Credential Manager. `gh` defaults to a different account - use
+  `GH_TOKEN=$(gh auth token -u malware-dev)` for API calls rather than switching the
+  active account.
+- **No em dashes anywhere.** Ordinary hyphens.
 
 ## Things not to quietly undo
 
-These were argued out rather than guessed, and the reasoning is in the README:
+Argued out rather than guessed. The reasoning is in Design.md.
 
-- Steps block by default. Duration waits are a substitute for a completion signal.
-- No interlock, no "airlock mode", no primitive for anything expressible as a trigger
-  plus steps. Reactor is an automation system, not a set of finished automations.
+- Steps block by default, and a step whose action changes nothing completes at once.
+- Nothing a sequence did is undone by time, by the sequence ending, or by a stop.
+- No interlock, no "airlock mode", no primitive for anything expressible as trigger plus
+  steps.
 - Events and states stay structurally separate.
 - Ticks come from the game's frame counter and are never counted locally.
-- Back means back. Moving on is its own action.
+- A word programmers already know is not given a different meaning, and the game's own
+  words are used for the game's own things. A merge block is not a docking block.
+- Creating a system never stands between somebody and their first sequence.

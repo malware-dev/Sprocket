@@ -43,10 +43,33 @@ perfectly good action - a step that turns the lights red is setting a block's co
 It is that *configuring a block once and leaving it* belongs to the game, while
 *changing it because something happened* belongs here.
 
+**And a second principle, about motion.** Reactor never moves anything the player did not
+ask it to move. That is what rules out reversal: inferring "back" means moving things
+nobody asked to have moved.
+
+It does not settle the harder question, which is what a player may ask for. Restoring a
+piston or a rotor is travel through a world that is not the world it was captured in, and
+a bulk restore has no order in it, so it moves everything at once with no idea which
+order mattered - a piston returning to where it was crushes what has since parked there.
+That is a reason for care rather than a prohibition: somebody who explicitly asks for a
+piston's position to be remembered has asked. Whether the answer is a safe default with
+an opt-in, an ordering the player controls, or something else, depends on how it is
+built. Unresolved, and low priority.
+
 The quick test, when a want sounds like this one: would serving it mean rebuilding a
 block's terminal screen inside Reactor? Fifty-odd block types, every setting on each of
 them, duplicated, and re-checked against the game every update. The answer is no, and
 it is not close.
+
+**The game's own words are used for the game's own things.** A merge block welds two
+constructs into one and is indistinguishable from a repair; it is not a docking block,
+however many people use it as one, and Reactor must not describe it as one. Borrowing a
+convenient word for a thing that does not work that way teaches the player something false
+and then relies on them not finding out.
+
+**A word that programmers already know must not be given a different meaning.** They are
+part of the audience, and a false friend costs an experienced reader real confusion while
+buying a beginner nothing. This is what ruled out *while* for a trigger condition.
 
 Three consequences worth stating outright, because they are what make the rest cohere:
 
@@ -194,9 +217,11 @@ currently decide, once and up front, which of two procedures this is.
 A condition on the trigger settles it: *when the button is pressed, while the arm is
 stowed*. Two sequences, opposite guards, decided before anything moves.
 
-Two things the stories settled rather than argument. The wording is *when* for the edge
-and *while* for the level, which keeps it distinct from a step's *only if* and teaches
-the event/state split in the one place a player needs it. And it has to be reachable
+Two things the stories settled rather than argument. The sentence simply continues with
+*and* - "when the button is pressed and the arm is stowed" - and no new word is
+introduced. *While* was proposed for the level half and rejected: programmers are not the
+primary audience but they are in it, and *while* means a loop to all of them. And it has
+to be reachable
 both while authoring and afterwards, because A and L are the same construct approached
 from opposite ends: if the retrofit route is second class, half the people who want it
 never find it.
@@ -227,6 +252,17 @@ B also needs the far side to have something that can report it - a vent in the n
 room - which grows the block list of an airlock by one. What happens when nobody put
 one there is unresolved.
 
+**Open inside this: how often a condition is evaluated.** Space Engineers offers update
+rates of 1, 10 and 100, and the choice is a real trade. Checking rarely is cheap and
+lets a level overshoot before anybody notices; checking every tick is accurate and is
+multiplied by every waiting sequence on the server. It is not obvious that one answer
+fits an airlock door and a hydrogen tank equally, and it is not obvious that the player
+should be asked either, since "how often should this be checked" is exactly the sort of
+question this language exists to remove.
+
+Unresolved. It was briefly written up as a requirement saying the player is never asked;
+that was an opinion, not a specification, and it was withdrawn.
+
 ### 3. Values on actions, and putting them back
 
 *Wanted by: D.*
@@ -253,6 +289,14 @@ within the system keeps names short.
 decides it, because "changing the shared procedure changes all three" is not something
 duplication can satisfy. That brings the hardest idea in the language with it - changing
 this changes that - and the cost belongs to E rather than to our preference.
+
+**And E is larger than calling.** A system used more than once is a template with
+instances, its roles are what an instance fills in, and roles are wanted by four stories
+independently. Two questions inside it are not settled: where a template lives when it
+came from somebody else and is used on several constructs, and whether an instance's
+roles are filled once when it is placed or supplied by whoever calls into it. The first
+is closer to how blueprints already work and is probably right; the second is closer to
+passing arguments and is probably too programmer-shaped, but neither is decided.
 
 ### 5. Named state
 

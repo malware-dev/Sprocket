@@ -327,3 +327,17 @@ Automation that has to be trusted before it can be tested does not get trusted.
 
 **Done when** a sequence can be set off deliberately, watched as it goes, and stopped,
 without waiting for the thing that normally triggers it.
+
+## W. Drive the crane from the seat
+
+**Context** A crane on a rotor and a pair of pistons, with a cockpit at its base.
+
+> "I want to sit in it and drive it. Lean the stick and the arm swings, pull back and it
+> lifts. Not click buttons in a terminal while squinting at the thing through a window."
+
+**So that** operating the crane is a thing you get good at, the way flying is. Moving a
+load by feel is most of why anybody builds a crane, and clicking a rotor on and off in a
+terminal is not that.
+
+**Done when** sitting in the cockpit moves the crane directly - further over means faster
+- and the crane still behaves itself when nobody is sitting in it.

@@ -51,8 +51,9 @@ idea being proposed again in six months as if it were new.
 | T | When my miner docks | no |
 | U | I renamed everything | yes |
 | V | Let me watch it work first | half |
+| W | Drive the crane from the seat | no |
 
-Two of twenty-two work. Nothing is scheduled.
+Two of twenty-three work. Nothing is scheduled.
 
 ## Per story
 
@@ -121,6 +122,11 @@ pleasant.
 It matters that it does. Every easy case set up outside Reactor is automation Reactor
 cannot see, cannot show on a screen, and cannot account for when the player asks why
 nothing happened. H is load-bearing for M.
+
+**To measure, before H can produce a requirement.** Count the interactions to build H in
+Reactor, and count them for the same thing through the game's terminal. Two numbers, one
+of which needs somebody in the game. Until both exist, H's done-when is an aspiration
+rather than a bar, and two attempts at writing it as a requirement have been withdrawn.
 
 Status is "yes" for the language and untested for the story. It cannot be settled by
 argument - somebody has to be watched doing it.
@@ -230,6 +236,46 @@ by hand button, so a sequence can be set off deliberately. What is missing is wa
 it - seeing which step it is on - and stopping it, which is C's primitive again. Worth
 noting how much this overlaps M: the thing that answers "why didn't it happen" is
 mostly the same thing that answers "what is it doing right now".
+
+**W - drive the crane.** One plausible reading, held loosely: it may need no new kind of
+thing. If a cockpit's controls are readable, then *when the cockpit's stick is forward* is
+an ordinary trigger with an ordinary condition, and setting a rotor's velocity is R7. It
+would be sequences all the way down.
+
+That reading dissolves two objections raised against W. It would not be a second kind of
+thing alongside sequences, and watching a control is polling exactly as watching a tank
+is, so T2 is not violated in any new way.
+
+**Held loosely on purpose.** It is one implementation, arrived at before we know what the
+game exposes, and committing to it now would be deciding the shape of the feature from a
+guess.
+
+**And the shape of the input is the problem.** A crane's swing is the rotational axis,
+and rotation in a cockpit is driven by the mouse - which gives movement since the last
+frame, not a position. There is no "how far over" to read for the one control the story
+most wants. Forward and back, and roll, are held keys rather than axes; whether anything
+reports a magnitude at all is unknown.
+
+So "when the stick is past a half" may not describe anything that exists. It might be
+"while forward is held", which is a different sentence and gives on-and-off control, or it
+might be a stream of deltas, which is a different thing again and fits nothing in the
+language.
+
+**Proportional control** is what suffers either way. W's done-when says further over means
+faster. Held keys give stepped control at best - a few speeds, chosen by how many
+thresholds somebody authors. Real proportionality needs a magnitude to exist and then to
+flow from the reading into the action, *set the rotor's speed from the stick*, which is a
+step past R7's fixed value and is wanted by nothing else in the set.
+
+Whether stepped control is good enough is a question for somebody who has actually
+operated a crane, not for us. It may be that three speeds and a stop is exactly what
+people build by hand today and nobody minds.
+
+**Also survives: whether the axes are readable at all.** ApiUnknowns 11.
+
+*A note on an earlier claim.* This was briefly written up as the second story wanting
+something that is not a sequence, alongside O's screen. That was wrong, and O stands
+alone.
 
 ## Rejected framings
 
