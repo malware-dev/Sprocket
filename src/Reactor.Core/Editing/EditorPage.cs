@@ -7,7 +7,7 @@ namespace Reactor.Editing
     /// </summary>
     /// <remarks>
     /// A page builds its components once, when the shape of the screen changes, and
-    /// then updates their values in place every beat. Rebuilding on every beat would
+    /// then updates their values in place every tick. Rebuilding on every tick would
     /// force targets to recreate native controls sixty times a second, which is
     /// exactly what they cannot afford.
     /// </remarks>

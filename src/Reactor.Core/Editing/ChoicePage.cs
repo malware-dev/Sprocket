@@ -41,9 +41,9 @@ namespace Reactor.Editing
         /// Adds an option whose indicator blinks at the given rate, for choices about
         /// speed that a label alone cannot convey.
         /// </summary>
-        public void Add(string text, bool isCurrent, int blinkBeats, Action choose)
+        public void Add(string text, bool isCurrent, int blinkTicks, Action choose)
         {
-            _options.Add(new Option(text, isCurrent, blinkBeats, choose));
+            _options.Add(new Option(text, isCurrent, blinkTicks, choose));
         }
 
         /// <summary>Sets the caution shown beside the option added last.</summary>
@@ -63,7 +63,7 @@ namespace Reactor.Editing
                 var option = _options[i];
                 var entry = new ChoiceEntry(option.Text, option.IsCurrent,
                     Editor.Register(option.Choose));
-                entry.BlinkBeats = option.BlinkBeats;
+                entry.BlinkTicks = option.BlinkTicks;
                 entry.Warning = option.Warning;
                 list.Entries.Add(entry);
             }
@@ -73,18 +73,18 @@ namespace Reactor.Editing
 
         sealed class Option
         {
-            public Option(string text, bool isCurrent, int blinkBeats, Action choose)
+            public Option(string text, bool isCurrent, int blinkTicks, Action choose)
             {
                 Text = text;
                 IsCurrent = isCurrent;
-                BlinkBeats = blinkBeats;
+                BlinkTicks = blinkTicks;
                 Choose = choose;
                 Warning = "";
             }
 
             public string Text { get; private set; }
             public bool IsCurrent { get; private set; }
-            public int BlinkBeats { get; private set; }
+            public int BlinkTicks { get; private set; }
             public Action Choose { get; private set; }
             public string Warning { get; set; }
         }

@@ -45,12 +45,12 @@ namespace Reactor.Sequences
     /// </remarks>
     public sealed class EveryTrigger : Trigger
     {
-        public EveryTrigger(int intervalBeats)
+        public EveryTrigger(int intervalTicks)
         {
-            IntervalBeats = intervalBeats;
+            IntervalTicks = intervalTicks;
         }
 
-        public int IntervalBeats { get; set; }
+        public int IntervalTicks { get; set; }
     }
 
     /// <summary>

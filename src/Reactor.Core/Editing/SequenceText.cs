@@ -75,7 +75,7 @@ namespace Reactor.Editing
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                return "Every " + DescribeBeats(every.IntervalBeats);
+                return "Every " + DescribeTicks(every.IntervalTicks);
 
             return EmptySlotText;
         }
@@ -109,7 +109,7 @@ namespace Reactor.Editing
 
             var after = gate as AfterGate;
             if (after != null)
-                return "after " + DescribeBeats(after.Beats);
+                return "after " + DescribeTicks(after.Ticks);
 
             return "";
         }
@@ -158,9 +158,9 @@ namespace Reactor.Editing
             return text + " " + DescribeDevices(world, step.Targets);
         }
 
-        static string DescribeBeats(int ticks)
+        static string DescribeTicks(int ticks)
         {
-            return ticks == 1 ? "beat" : ticks + " beats";
+            return ticks == 1 ? "tick" : ticks + " ticks";
         }
     }
 }

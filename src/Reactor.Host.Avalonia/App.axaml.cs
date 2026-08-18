@@ -9,7 +9,7 @@ namespace Reactor.Host;
 public partial class App : Application
 {
     /// <summary>
-    /// One beat per frame, roughly matching the game's 60 simulation steps a second.
+    /// One tick per frame, roughly matching the game's 60 simulation steps a second.
     /// </summary>
     static readonly TimeSpan BeatInterval = TimeSpan.FromMilliseconds(16);
 
@@ -25,7 +25,7 @@ public partial class App : Application
             desktop.MainWindow = window;
 
             _clock = new DispatcherTimer { Interval = BeatInterval };
-            _clock.Tick += (_, _) => window.Beat();
+            _clock.Tick += (_, _) => window.Tick();
             _clock.Start();
         }
 

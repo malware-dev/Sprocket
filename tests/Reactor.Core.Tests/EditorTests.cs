@@ -20,9 +20,9 @@ public class EditorTests
 
         int _frame;
 
-        public void Beat(int beats = 1)
+        public void Tick(int ticks = 1)
         {
-            for (var i = 0; i < beats; i++)
+            for (var i = 0; i < ticks; i++)
             {
                 World.Tick();
                 Editor.Tick(++_frame);
@@ -119,16 +119,16 @@ public class EditorTests
         editor.PressPrimary();
         editor.PressChoice("is pressed");
 
-        ship.Beat();
+        ship.Tick();
         Assert.StartsWith("When Airlock Button is pressed", editor.Screen.Title);
 
         editor.Name("Let me out");
-        ship.Beat();
+        ship.Tick();
         Assert.Equal("Let me out", editor.Screen.Title);
 
         // And in the list, which is the reason naming exists at all.
         editor.PressAction("Sequences");
-        ship.Beat();
+        ship.Tick();
         Assert.Equal("Let me out", editor.Component<SequenceListComponent>().Entries[0].Summary);
     }
 
@@ -140,12 +140,46 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.PressChoice("Every so often");
-        editor.PressChoice("steady — every 100 beats");
+        editor.PressChoice("steady — every 100 ticks");
 
         var version = editor.Screen.StructureVersion;
         editor.Name("Housekeeping");
 
         Assert.Equal(version, editor.Screen.StructureVersion);
+    }
+
+    [Fact]
+    public void LastRunIsWordedForPeople_AndNotRebuiltEveryTick()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        editor.PressChoice("When something happens");
+        editor.PressBlock("Airlock Button");
+        editor.PressPrimary();
+        editor.PressChoice("is pressed");
+
+        ship.Tick();
+        Assert.Equal("", editor.Sentence().LastRun);
+
+        editor.RunNow();
+        ship.Tick();
+        Assert.Equal("just now", editor.Sentence().LastRun);
+
+        ship.Tick(180);
+        var words = editor.Sentence().LastRun;
+        Assert.Equal("3 seconds ago", words);
+
+        // Half a second later it still says the same thing, and says it with the very
+        // same string - the words are not rebuilt sixty times a second.
+        ship.Tick(30);
+        Assert.Same(words, editor.Sentence().LastRun);
+
+        ship.Tick(60);
+        Assert.Equal("4 seconds ago", editor.Sentence().LastRun);
+
+        ship.Tick(60 * 60);
+        Assert.Equal("a minute ago", editor.Sentence().LastRun);
     }
 
     [Fact]
@@ -166,11 +200,11 @@ public class EditorTests
         editor.PressStepSlot(0, 0);
         editor.PressChoice("turn on");
 
-        ship.Beat(3);
+        ship.Tick(3);
         Assert.Empty(ship.World.Log);
 
         editor.RunNow();
-        ship.Beat();
+        ship.Tick();
 
         Assert.Contains("Airlock Light:on", ship.World.Log);
     }

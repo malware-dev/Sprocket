@@ -116,7 +116,7 @@ namespace Reactor.Editing
             if (_sequences == null)
                 return;
 
-            SequenceSummary.Fill(_sequences.Entries, _referencing, Editor.World, Editor.Runner, Editor.Beat);
+            SequenceSummary.Fill(_sequences.Entries, _referencing, Editor.World, Editor.Runner, Editor.CurrentTick);
         }
 
         void CollectSequences()

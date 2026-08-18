@@ -51,7 +51,7 @@ namespace Reactor.Sequences
     }
 
     /// <summary>
-    /// "after 30 beats — …"
+    /// "after 30 ticks — …"
     /// </summary>
     /// <remarks>
     /// Still needed for things that genuinely have no completion signal, such as
@@ -59,12 +59,12 @@ namespace Reactor.Sequences
     /// </remarks>
     public sealed class AfterGate : StepGate
     {
-        public AfterGate(int beats)
+        public AfterGate(int ticks)
         {
-            Beats = beats;
+            Ticks = ticks;
         }
 
-        public int Beats { get; set; }
+        public int Ticks { get; set; }
     }
 
     /// <summary>

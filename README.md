@@ -73,16 +73,16 @@ and a distinct `Next` / `Done` moves you on. Overloading back with "finished" br
 the one navigation idea everybody already has. A new sequence is not created until the
 questions are answered, so backing out leaves nothing behind.
 
-### Beats
+### Ticks
 
-Time is measured in **beats** — one step of the game's simulation. It is the only
+Time is measured in **ticks** — one step of the game's simulation. It is the only
 honest unit: simulation speed sags under load, so anything promising seconds would
 drift exactly when the user's machine matters most.
 
 The word is never explained in the UI. A repeating sequence shows an indicator
-pulsing at its true rate, so you learn what a beat is by watching one.
+pulsing at its true rate, so you learn what a tick is by watching one.
 
-Reactor never counts beats for itself — it is told the frame number. Space Engineers
+Reactor never counts ticks for itself — it is told the frame number. Space Engineers
 only wakes a mod every 1, 10 or 100 frames, and the slower two do not land on exact
 multiples, so a self-counted clock would drift with server load.
 

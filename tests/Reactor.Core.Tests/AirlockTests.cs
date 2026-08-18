@@ -33,9 +33,9 @@ public class AirlockTests
 
         int _frame;
 
-        public void Beat(int beats = 1)
+        public void Tick(int ticks = 1)
         {
-            for (var i = 0; i < beats; i++)
+            for (var i = 0; i < ticks; i++)
             {
                 World.Tick();
                 Runner.Tick(++_frame);
@@ -88,28 +88,28 @@ public class AirlockTests
     {
         var a = Build();
         a.Inner.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
         a.World.Log.Clear();
 
         a.Inside.Press();
-        a.Beat();
+        a.Tick();
         Assert.Equal(["Inner Door:close"], a.World.Log);
 
         // The door takes time, and nothing else may happen while it travels. Nobody
         // wrote "once it is shut" - the list being a list is what says that.
-        a.Beat(5);
+        a.Tick(5);
         Assert.Equal(["Inner Door:close"], a.World.Log);
         Assert.True(a.State.IsWaiting);
         Assert.Equal(0, a.State.CurrentStep);
 
-        a.Beat(10);
+        a.Tick(10);
         Assert.Contains("Airlock Vent:pump-out", a.World.Log);
         Assert.DoesNotContain("Outer Door:open", a.World.Log);
 
-        a.Beat(15);
+        a.Tick(15);
         Assert.Equal(["Inner Door:close", "Airlock Vent:pump-out", "Outer Door:open"], a.World.Log);
 
-        a.Beat(15);
+        a.Tick(15);
         Assert.False(a.State.IsRunning);
     }
 
@@ -121,16 +121,16 @@ public class AirlockTests
         // a door sticks.
         var a = Build();
         a.Inner.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
         a.World.Log.Clear();
 
         a.Inside.Press();
-        a.Beat();
+        a.Tick();
 
         for (var i = 0; i < 60; i++)
         {
             a.Inner.ForceOpen();
-            a.Beat();
+            a.Tick();
         }
 
         Assert.True(a.State.IsWaiting);
@@ -150,7 +150,7 @@ public class AirlockTests
         sequence.Steps.Add(Do("on", beacon.Id));
         sequence.Steps.Add(Do("close", a.Inner.Id));
 
-        a.Beat();
+        a.Tick();
         Assert.Equal(["Beacon:on", "Inner Door:close"], a.World.Log);
     }
 
@@ -160,7 +160,7 @@ public class AirlockTests
         var a = Build();
         a.Inner.ForceOpen();
         a.Outer.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
         a.World.Log.Clear();
 
         var sequence = a.Automation.AddSequence(new EveryTrigger(1000));
@@ -169,7 +169,7 @@ public class AirlockTests
         sequence.Steps.Add(first);
         sequence.Steps.Add(Do("close", a.Outer.Id));
 
-        a.Beat();                       // lets the runner pick the new sequence up
+        a.Tick();                       // lets the runner pick the new sequence up
         a.World.Log.Clear();
 
         a.Runner.Call(sequence);
@@ -183,12 +183,12 @@ public class AirlockTests
     {
         var a = Build();
         a.Inner.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
 
         a.Inside.Press();
-        a.Beat(2);
+        a.Tick(2);
         a.Inside.Press();
-        a.Beat(2);
+        a.Tick(2);
 
         Assert.Equal(1, a.State.FiredCount);
         Assert.Equal(1, a.State.SkippedCount);
@@ -206,14 +206,14 @@ public class AirlockTests
         a.LetMeOut.Steps[2].Gate = new OnlyIfGate(Is("is-shut", a.Inner.Id));
 
         a.Inner.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
         a.World.Log.Clear();
 
         a.Inside.Press();
         for (var i = 0; i < 30; i++)
         {
             a.Inner.ForceOpen();
-            a.Beat();
+            a.Tick();
         }
 
         Assert.DoesNotContain("Outer Door:open", a.World.Log);
@@ -255,14 +255,14 @@ public class AirlockTests
 
         // Someone has just walked in from inside, so the inner door is open.
         a.Inner.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
         a.Runner.Call(letMeOut);
 
         for (var i = 0; i < 80; i++)
         {
-            a.Beat();
+            a.Tick();
             Assert.False(a.Inner.Status == "open" && a.Outer.Status == "open",
-                $"both doors open at beat {i}");
+                $"both doors open at tick {i}");
         }
 
         Assert.Equal("open", a.Outer.Status);
@@ -277,7 +277,7 @@ public class AirlockTests
         var a = Build();
         var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "pump-out");
 
-        a.Beat(3);
+        a.Tick(3);
         a.World.Log.Clear();
         a.Runner.Call(letMeOut);
 
@@ -295,9 +295,9 @@ public class AirlockTests
         letMeOut.Steps[0].WaitsForCompletion = false;
 
         a.Inner.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
         a.Runner.Call(letMeOut);
-        a.Beat(80);
+        a.Tick(80);
 
         Assert.Equal("open", a.Inner.Status);
         Assert.Equal("open", a.Outer.Status);
@@ -338,16 +338,16 @@ public class AirlockTests
         Mutex(a, a.Inner, a.Outer);
         Mutex(a, a.Outer, a.Inner);
 
-        a.Beat(3);
+        a.Tick(3);
 
         // The player opens the inner door themselves - Reactor never touches it.
         a.Inner.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
 
         // Anything trying to open the outer door now gets nowhere.
         var careless = a.Automation.AddSequence(new EveryTrigger(1));
         careless.Steps.Add(Do("open", a.Outer.Id));
-        a.Beat(30);
+        a.Tick(30);
 
         Assert.NotEqual("open", a.Outer.Status);
     }
@@ -359,16 +359,16 @@ public class AirlockTests
         Mutex(a, a.Inner, a.Outer);
         Mutex(a, a.Outer, a.Inner);
 
-        a.Beat(3);
+        a.Tick(3);
         a.Inner.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
 
         a.World.Invoke(a.Inner, "close");
-        a.Beat(15);
+        a.Tick(15);
 
         var opener = a.Automation.AddSequence(new EveryTrigger(1));
         opener.Steps.Add(Do("open", a.Outer.Id));
-        a.Beat(30);
+        a.Tick(30);
 
         Assert.Equal("open", a.Outer.Status);
     }
@@ -380,9 +380,9 @@ public class AirlockTests
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pump-in");
 
         a.Outer.ForceOpen();
-        a.Beat(3);
+        a.Tick(3);
         a.Runner.Call(letMeIn);
-        a.Beat(80);
+        a.Tick(80);
 
         Assert.Equal("open", a.Inner.Status);
         Assert.Equal("shut", a.Outer.Status);

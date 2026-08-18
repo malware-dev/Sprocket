@@ -62,7 +62,7 @@ namespace Reactor.Sequences
         /// How many sequences touch the given device, without allocating.
         /// </summary>
         /// <remarks>
-        /// Asked once per listed block on every beat, so it must not produce garbage
+        /// Asked once per listed block on every tick, so it must not produce garbage
         /// - core runs inside the game's update loop.
         /// </remarks>
         public int CountReferencing(long deviceId)

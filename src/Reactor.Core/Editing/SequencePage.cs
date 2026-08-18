@@ -13,6 +13,7 @@ namespace Reactor.Editing
         readonly Sequence _sequence;
 
         SequenceComponent _sentence;
+        int _lastRunKey = int.MinValue;
 
         public SequencePage(ReactorEditor editor, Sequence sequence) : base(editor)
         {
@@ -68,9 +69,19 @@ namespace Reactor.Editing
             _sentence.Name = _sequence.Name;
             _sentence.Status = SequenceSummary.Status(_sequence, state);
             _sentence.Problem = SequenceSummary.Problem(Editor.World, _sequence, state);
-            _sentence.Pulse = state != null && state.LastFiredBeat >= 0
-                && Editor.Beat - state.LastFiredBeat < 10;
+            _sentence.Pulse = state != null && state.LastFiredTick >= 0
+                && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
+
+            // Only reworded when the words would change - about once a second at
+            // first, then once a minute, then never.
+            var ticksAgo = SequenceSummary.TicksSinceRun(state, Editor.CurrentTick);
+            var key = Elapsed.Bucket(ticksAgo);
+            if (_lastRunKey != key)
+            {
+                _lastRunKey = key;
+                _sentence.LastRun = Elapsed.Ago(ticksAgo);
+            }
             _sentence.Trigger.IsLiveNow = state != null && state.TriggerSignalIsTrue;
 
             for (var i = 0; i < _sentence.Steps.Count; i++)
@@ -118,7 +129,7 @@ namespace Reactor.Editing
         {
             var trigger = new SentenceTrigger("Every");
             trigger.Slots.Add(new SentenceSlot(
-                every.IntervalBeats == 1 ? "beat" : every.IntervalBeats + " beats",
+                every.IntervalTicks == 1 ? "tick" : every.IntervalTicks + " ticks",
                 false,
                 Editor.Register(EditCadence)));
 

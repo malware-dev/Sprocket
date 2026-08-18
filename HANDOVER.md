@@ -20,7 +20,7 @@ its `Rendering/` folder.
 - **The model and runtime.** Sequences, ordered steps, blocking on completion,
   `only if` guards, `once` / `after` gates, named sequences, live status.
 - **The airlock, both ways.** `tests/Reactor.Core.Tests/AirlockTests.cs` builds it as
-  a cycle sequence and as a mutual exclusion, and asserts on every beat of an 80-beat
+  a cycle sequence and as a mutual exclusion, and asserts on every tick of an 80-tick
   run that both doors are never open at once — with no safety feature in the language.
 - **The editor**, entirely in Core: navigation stack, ship browser with search and
   kind filters, block pickers that only offer combinations that could run, choice
@@ -112,5 +112,5 @@ These were argued out rather than guessed, and the reasoning is in the README:
 - No interlock, no "airlock mode", no primitive for anything expressible as a trigger
   plus steps. Reactor is an automation system, not a set of finished automations.
 - Events and states stay structurally separate.
-- Beats come from the game's frame counter and are never counted locally.
+- Ticks come from the game's frame counter and are never counted locally.
 - Back means back. Moving on is its own action.

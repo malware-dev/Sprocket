@@ -36,7 +36,7 @@ public class WindowSmokeTests
     {
         var window = new MainWindow();
         window.Show();
-        window.Beat();
+        window.Tick();
         Layout(window);
 
         var editor = window.Editor;
@@ -46,18 +46,18 @@ public class WindowSmokeTests
         // The empty root offers the starters straight away, and answering one lands
         // directly on the block picker.
         editor.PressChoice("When something happens");
-        window.Beat();
+        window.Tick();
         Layout(window);
         Record(seen, editor);
 
         editor.PressBlock("Approach Sensor");
         editor.PressPrimary();
-        window.Beat();
+        window.Tick();
         Layout(window);
         Record(seen, editor);
 
         editor.PressChoice("detects something");
-        window.Beat();
+        window.Tick();
         Layout(window);
         Record(seen, editor);
 
@@ -68,18 +68,18 @@ public class WindowSmokeTests
 
         // The ship browser, still there for looking things up.
         editor.PressAction("Ship");
-        window.Beat();
+        window.Tick();
         Layout(window);
         Record(seen, editor);
 
         editor.PressBlock("Landing Lights");
-        window.Beat();
+        window.Tick();
         Layout(window);
         Record(seen, editor);
 
         // The all-sequences list
         editor.PressAction("Sequences");
-        window.Beat();
+        window.Tick();
         Layout(window);
         Record(seen, editor);
 

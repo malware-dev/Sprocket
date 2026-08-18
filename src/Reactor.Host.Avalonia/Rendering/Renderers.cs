@@ -282,7 +282,7 @@ sealed class ChoiceListRenderer : ComponentRenderer
     sealed class Row
     {
         public Ellipse? Blink;
-        public int Beats;
+        public int Ticks;
     }
 
     ChoiceListComponent _model;
@@ -308,8 +308,8 @@ sealed class ChoiceListRenderer : ComponentRenderer
     }
 
     /// <summary>
-    /// Drives the rate indicators. An interval of one beat is lit the whole time,
-    /// which is exactly what "every beat" means.
+    /// Drives the rate indicators. An interval of one tick is lit the whole time,
+    /// which is exactly what "every tick" means.
     /// </summary>
     public override void Update()
     {
@@ -318,11 +318,11 @@ sealed class ChoiceListRenderer : ComponentRenderer
             if (row.Blink == null)
                 continue;
 
-            // A short flash rather than half the cycle. At 50% duty a 600-beat rate
+            // A short flash rather than half the cycle. At 50% duty a 600-tick rate
             // would sit lit for ten seconds and read as "on" rather than as "rarely";
-            // a brief blip reads as rare at every speed, and one beat reads as solid.
-            var flash = Math.Min(6, Math.Max(1, row.Beats / 2));
-            var on = row.Beats <= 1 || Editor.Beat % row.Beats < flash;
+            // a brief blip reads as rare at every speed, and one tick reads as solid.
+            var flash = Math.Min(6, Math.Max(1, row.Ticks / 2));
+            var on = row.Ticks <= 1 || Editor.CurrentTick % row.Ticks < flash;
             row.Blink.Fill = on ? Palette.Live : Palette.Dim;
         }
     }
@@ -342,10 +342,10 @@ sealed class ChoiceListRenderer : ComponentRenderer
 
         foreach (var entry in _model.Entries)
         {
-            var row = new Row { Beats = entry.BlinkBeats };
+            var row = new Row { Ticks = entry.BlinkTicks };
             var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto") };
 
-            if (entry.BlinkBeats > 0)
+            if (entry.BlinkTicks > 0)
             {
                 row.Blink = new Ellipse
                 {
@@ -394,6 +394,7 @@ sealed class SequenceListRenderer : ComponentRenderer
         public Ellipse Lit = null!;
         public TextBlock Summary = null!;
         public TextBlock Status = null!;
+        public TextBlock LastRun = null!;
         public TextBlock Problem = null!;
     }
 
@@ -428,6 +429,7 @@ sealed class SequenceListRenderer : ComponentRenderer
 
             row.Summary.Text = entry.Summary;
             row.Status.Text = entry.Status;
+            row.LastRun.Text = entry.LastRun;
             row.Lit.IsVisible = entry.Pulse;
             row.Problem.Text = entry.Problem;
             row.Problem.IsVisible = !string.IsNullOrEmpty(entry.Problem);
@@ -458,12 +460,18 @@ sealed class SequenceListRenderer : ComponentRenderer
 
             row.Summary = Widgets.Label("", Palette.Ink);
             row.Status = Widgets.Label("", Palette.Faint, 11);
+            row.LastRun = Widgets.Label("", Palette.Faint, 11);
+            row.LastRun.Margin = new Thickness(8, 0, 0, 0);
             row.Problem = Widgets.Label("", Palette.Problem, 11);
             row.Problem.IsVisible = false;
 
+            var line = Widgets.Stack(Orientation.Horizontal);
+            line.Children.Add(row.Status);
+            line.Children.Add(row.LastRun);
+
             var text = Widgets.Stack();
             text.Children.Add(row.Summary);
-            text.Children.Add(row.Status);
+            text.Children.Add(line);
             text.Children.Add(row.Problem);
             Grid.SetColumn(text, 1);
             grid.Children.Add(text);

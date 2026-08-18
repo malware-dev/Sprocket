@@ -195,16 +195,16 @@ namespace Reactor.Ui
         public int Command { get; set; }
 
         /// <summary>
-        /// How often, in beats, this option's indicator should blink - or 0 for no
+        /// How often, in ticks, this option's indicator should blink - or 0 for no
         /// indicator at all.
         /// </summary>
         /// <remarks>
         /// Used by the repeat rates, where the label alone asks the reader to imagine
         /// a speed. A dot blinking at the actual rate is the thing itself, and an
-        /// interval of one beat simply reads as constantly lit - which is exactly
+        /// interval of one tick simply reads as constantly lit - which is exactly
         /// what it means. The words stay; the blink is what makes them concrete.
         /// </remarks>
-        public int BlinkBeats { get; set; }
+        public int BlinkTicks { get; set; }
 
         /// <summary>
         /// What picking this will cost, in plain words, or empty.
@@ -243,6 +243,10 @@ namespace Reactor.Ui
             SequenceId = sequenceId;
             Summary = summary;
             Command = command;
+
+            // Not zero: zero is a real key ("just now"), so a fresh entry has to start
+            // at a value no computed key can equal, or the first update is skipped.
+            LastRunKey = int.MinValue;
         }
 
         public int SequenceId { get; set; }
@@ -255,6 +259,15 @@ namespace Reactor.Ui
 
         /// <summary>Lit briefly each time it fires - the visible heartbeat.</summary>
         public bool Pulse { get; set; }
+
+        /// <summary>When it last ran, in words: "just now", "3 minutes ago", or empty.</summary>
+        public string LastRun { get; set; }
+
+        /// <summary>
+        /// Bookkeeping, not for display: the key <see cref="LastRun"/> was built from,
+        /// so the words are only rebuilt when they would actually differ.
+        /// </summary>
+        public int LastRunKey { get; set; }
 
         public string Problem { get; set; }
 

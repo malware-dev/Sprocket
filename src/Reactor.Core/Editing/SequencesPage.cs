@@ -90,7 +90,7 @@ namespace Reactor.Editing
             }
 
             if (_list != null)
-                SequenceSummary.Fill(_list.Entries, _sequences, Editor.World, Editor.Runner, Editor.Beat);
+                SequenceSummary.Fill(_list.Entries, _sequences, Editor.World, Editor.Runner, Editor.CurrentTick);
         }
 
         void Collect()

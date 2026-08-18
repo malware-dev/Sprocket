@@ -4,12 +4,6 @@ using Reactor.World;
 
 namespace Reactor.Runtime
 {
-    /// <summary>Why an action did not happen.</summary>
-    /// <remarks>
-    /// Kept structurally rather than as a sentence, so the editor can word it. This
-    /// is the raw material for "why didn't my door open?" - the one question a
-    /// non-programmer actually asks, and the one almost no environment answers.
-    /// </remarks>
     /// <summary>A step that was passed over because its "only if" was not true.</summary>
     /// <remarks>
     /// Recorded structurally rather than as a sentence, so the editor can word it.
@@ -18,15 +12,15 @@ namespace Reactor.Runtime
     /// </remarks>
     public sealed class SkippedStep
     {
-        public SkippedStep(int stepIndex, int beat)
+        public SkippedStep(int stepIndex, int tick)
         {
             StepIndex = stepIndex;
-            Beat = beat;
+            Tick = tick;
         }
 
         public int StepIndex { get; private set; }
 
-        public int Beat { get; private set; }
+        public int Tick { get; private set; }
     }
 
     /// <summary>
@@ -39,15 +33,15 @@ namespace Reactor.Runtime
         readonly Sequence _sequence;
 
         int _stepIndex = -1;
-        int _gateBeats;
+        int _gateTicks;
         int _everyCounter;
         bool _awaitingCompletion;
 
         public SequenceRunner(Sequence sequence)
         {
             _sequence = sequence;
-            LastFiredBeat = -1;
-            LastSkippedBeat = -1;
+            LastFiredTick = -1;
+            LastSkippedTick = -1;
         }
 
         public Sequence Sequence { get { return _sequence; } }
@@ -60,7 +54,7 @@ namespace Reactor.Runtime
         /// <summary>True while the current step's gate has not opened.</summary>
         public bool IsWaiting { get; private set; }
 
-        public int LastFiredBeat { get; private set; }
+        public int LastFiredTick { get; private set; }
 
         public int FiredCount { get; private set; }
 
@@ -76,7 +70,7 @@ namespace Reactor.Runtime
         /// </remarks>
         public int SkippedCount { get; private set; }
 
-        public int LastSkippedBeat { get; private set; }
+        public int LastSkippedTick { get; private set; }
 
         /// <summary>Whether the watched signal is true right now.</summary>
         public bool TriggerSignalIsTrue { get; private set; }
@@ -87,9 +81,9 @@ namespace Reactor.Runtime
         /// <summary>The most recent step passed over by its guard, or null.</summary>
         public SkippedStep LastSkippedStep { get; private set; }
 
-        public void Tick(IWorld world, int beat)
+        public void Tick(IWorld world, int tick)
         {
-            // Sample every beat, even while running or switched off. Edge detection
+            // Sample every tick, even while running or switched off. Edge detection
             // is stateful, so a skipped sample makes the next one wrong.
             var triggered = SampleTrigger(world);
 
@@ -104,18 +98,18 @@ namespace Reactor.Runtime
                 if (triggered)
                 {
                     SkippedCount++;
-                    LastSkippedBeat = beat;
+                    LastSkippedTick = tick;
                 }
-                Advance(world, beat);
+                Advance(world, tick);
                 return;
             }
 
             if (triggered)
-                Start(world, beat);
+                Start(world, tick);
         }
 
         /// <summary>Starts the sequence by name, from another sequence or a trigger.</summary>
-        public void Call(IWorld world, int beat)
+        public void Call(IWorld world, int tick)
         {
             if (!_sequence.Enabled)
                 return;
@@ -123,11 +117,11 @@ namespace Reactor.Runtime
             if (IsRunning)
             {
                 SkippedCount++;
-                LastSkippedBeat = beat;
+                LastSkippedTick = tick;
                 return;
             }
 
-            Start(world, beat);
+            Start(world, tick);
         }
 
         public void Stop()
@@ -135,7 +129,7 @@ namespace Reactor.Runtime
             IsRunning = false;
             IsWaiting = false;
             _stepIndex = -1;
-            _gateBeats = 0;
+            _gateTicks = 0;
             _awaitingCompletion = false;
         }
 
@@ -179,30 +173,30 @@ namespace Reactor.Runtime
             return true;
         }
 
-        void Start(IWorld world, int beat)
+        void Start(IWorld world, int tick)
         {
-            LastFiredBeat = beat;
+            LastFiredTick = tick;
             FiredCount++;
             IsRunning = true;
             _stepIndex = 0;
             EnterStep();
-            Advance(world, beat);
+            Advance(world, tick);
         }
 
         void EnterStep()
         {
-            _gateBeats = 0;
+            _gateTicks = 0;
             if (_stepIndex < 0 || _stepIndex >= _sequence.Steps.Count)
                 return;
 
             var after = _sequence.Steps[_stepIndex].Gate as AfterGate;
             if (after != null)
-                _gateBeats = after.Beats;
+                _gateTicks = after.Ticks;
         }
 
-        void Advance(IWorld world, int beat)
+        void Advance(IWorld world, int tick)
         {
-            // Ungated steps all run in the same beat, so "close the door" followed by
+            // Ungated steps all run in the same tick, so "close the door" followed by
             // "once it is shut, pump the air out" behaves the way it reads.
             while (_stepIndex >= 0 && _stepIndex < _sequence.Steps.Count)
             {
@@ -230,7 +224,7 @@ namespace Reactor.Runtime
                 {
                     // Passed over rather than waited on, and recorded so the user can
                     // be told which situation was not true.
-                    LastSkippedStep = new SkippedStep(_stepIndex, beat);
+                    LastSkippedStep = new SkippedStep(_stepIndex, tick);
                     IsWaiting = false;
                     _stepIndex++;
                     EnterStep();
@@ -268,10 +262,10 @@ namespace Reactor.Runtime
             var after = step.Gate as AfterGate;
             if (after != null)
             {
-                if (_gateBeats <= 0)
+                if (_gateTicks <= 0)
                     return true;
-                _gateBeats--;
-                return _gateBeats <= 0;
+                _gateTicks--;
+                return _gateTicks <= 0;
             }
 
             var once = step.Gate as OnceGate;
@@ -340,7 +334,7 @@ namespace Reactor.Runtime
                 if (_lastSignal.TryGetValue(sourceId, out previous))
                 {
                     // No previous sample means the sequence has only just come into
-                    // existence, and an edge needs two. Firing on the first beat
+                    // existence, and an edge needs two. Firing on the first tick
                     // would set every sequence off the moment it was created.
                     if (definition.Edge == SignalEdge.Rising && !previous && now)
                         fired = true;
@@ -358,7 +352,7 @@ namespace Reactor.Runtime
 
         bool SampleEvery(EveryTrigger every)
         {
-            var interval = every.IntervalBeats < 1 ? 1 : every.IntervalBeats;
+            var interval = every.IntervalTicks < 1 ? 1 : every.IntervalTicks;
             _everyCounter++;
             if (_everyCounter < interval)
                 return false;

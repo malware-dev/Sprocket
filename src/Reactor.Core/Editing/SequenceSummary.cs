@@ -16,8 +16,8 @@ namespace Reactor.Editing
     /// </remarks>
     static class SequenceSummary
     {
-        /// <summary>Lit for this many beats after a sequence fires.</summary>
-        const int PulseBeats = 10;
+        /// <summary>Lit for this many ticks after a sequence fires.</summary>
+        const int PulseTicks = 10;
 
         public static bool References(Sequence sequence, long deviceId)
         {
@@ -26,7 +26,7 @@ namespace Reactor.Editing
 
         /// <summary>Updates one entry per sequence, in place.</summary>
         public static void Fill(List<SequenceEntry> entries, List<Sequence> sequences, IWorld world,
-            AutomationRunner runner, int beat)
+            AutomationRunner runner, int tick)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
             for (var i = 0; i < count; i++)
@@ -37,9 +37,16 @@ namespace Reactor.Editing
 
                 entry.Summary = Describe(world, sequence);
                 entry.Status = Status(sequence, state);
-                entry.Pulse = state != null && state.LastFiredBeat >= 0
-                    && beat - state.LastFiredBeat < PulseBeats;
+                entry.Pulse = state != null && state.LastFiredTick >= 0
+                    && tick - state.LastFiredTick < PulseTicks;
                 entry.Problem = Problem(world, sequence, state);
+
+                var key = Elapsed.Bucket(TicksSinceRun(state, tick));
+                if (entry.LastRunKey != key)
+                {
+                    entry.LastRunKey = key;
+                    entry.LastRun = Elapsed.Ago(TicksSinceRun(state, tick));
+                }
             }
         }
 
@@ -72,14 +79,22 @@ namespace Reactor.Editing
         /// What this sequence is doing, in a handful of words.
         /// </summary>
         /// <remarks>
-        /// Every answer is a constant, deliberately. This is read on every beat for
+        /// Every answer is a constant, deliberately. This is read on every tick for
         /// whatever is on screen, so anything built from a number would allocate
         /// sixty times a second inside the game's update loop.
         ///
         /// Nothing is lost by it. The step it is on is already shown by that step
-        /// being lit, and a count of beats since it last ran is a number nobody
+        /// being lit, and a count of ticks since it last ran is a number nobody
         /// reads - the indicator flashing when it fires is the part that carries.
         /// </remarks>
+        /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
+        public static int TicksSinceRun(SequenceRunner state, int tick)
+        {
+            if (state == null || state.LastFiredTick < 0)
+                return -1;
+            return tick - state.LastFiredTick;
+        }
+
         public static string Status(Sequence sequence, SequenceRunner state)
         {
             if (!sequence.Enabled)
@@ -91,7 +106,7 @@ namespace Reactor.Editing
             if (state.IsRunning)
                 return state.IsWaiting ? "running — waiting for this step" : "running";
 
-            return state.LastFiredBeat < 0 ? "waiting to happen" : "waiting";
+            return state.LastFiredTick < 0 ? "waiting to happen" : "waiting";
         }
 
         /// <summary>

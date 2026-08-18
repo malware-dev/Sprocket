@@ -26,38 +26,38 @@ public class ScreenshotTests
         var editor = window.Editor;
 
         // What a brand new Reactor opens on.
-        Beat(window, 1);
+        Tick(window, 1);
         Shoot(window, "start");
 
         BuildAirlock(window);
 
         // Let the sequence take a baseline sample before anything happens: a signal
         // already true when a sequence appears is not an edge.
-        Beat(window, 3);
+        Tick(window, 3);
 
         var button = window.Simulation.World.SimDevices.OfType<SimButton>().First();
         button.Press();
-        Beat(window, 8);
+        Tick(window, 8);
 
         Shoot(window, "sequence");
 
         editor.PressAction("Ship");
-        Beat(window, 1);
+        Tick(window, 1);
         Shoot(window, "ship");
 
         editor.PressBlock("Airlock Outer Door");
-        Beat(window, 1);
+        Tick(window, 1);
         Shoot(window, "block");
 
         editor.PressAction("Sequences");
-        Beat(window, 1);
+        Tick(window, 1);
         Shoot(window, "sequences");
 
         // How often — labelled, blinking at the real rate, and warning about the
         // rates that cost the server dearly.
         editor.PressAction("Start something new");
         editor.PressChoice("Every so often");
-        Beat(window, 1);
+        Tick(window, 1);
         Shoot(window, "rates");
     }
 
@@ -74,11 +74,11 @@ public class ScreenshotTests
         // happens. Answering the verb lands directly on the block picker, with no
         // stop at a half-empty sentence in between.
         editor.PressChoice("When something happens");
-        Beat(window, 1);
+        Tick(window, 1);
         Shoot(window, "listen");
 
         editor.PressBlock("Airlock Button");
-        Beat(window, 1);
+        Tick(window, 1);
         Shoot(window, "picked");
 
         editor.PressPrimary();
@@ -105,10 +105,10 @@ public class ScreenshotTests
         editor.PressChoice(action);
     }
 
-    static void Beat(MainWindow window, int beats)
+    static void Tick(MainWindow window, int ticks)
     {
-        for (var i = 0; i < beats; i++)
-            window.Beat();
+        for (var i = 0; i < ticks; i++)
+            window.Tick();
     }
 
     static void Shoot(MainWindow window, string name)

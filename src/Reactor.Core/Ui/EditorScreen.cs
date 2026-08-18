@@ -60,7 +60,7 @@ namespace Reactor.Ui
         /// Bumped whenever the shape of the screen changes.
         /// </summary>
         /// <remarks>
-        /// Creating native controls every beat is exactly what a target cannot
+        /// Creating native controls every tick is exactly what a target cannot
         /// afford, so this is the signal to rebuild them. While it holds steady the
         /// component objects stay identical and only their values change, and a
         /// target can simply re-read them into the controls it already made.

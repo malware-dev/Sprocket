@@ -31,6 +31,7 @@ sealed class SequenceRenderer : ComponentRenderer
 
     Ellipse _pulse = null!;
     TextBlock _status = null!;
+    TextBlock _lastRun = null!;
     TextBlock _skipped = null!;
     Border _skippedBadge = null!;
     TextBlock _problem = null!;
@@ -61,6 +62,7 @@ sealed class SequenceRenderer : ComponentRenderer
     public override void Update()
     {
         _status.Text = _model.Status;
+        _lastRun.Text = _model.LastRun;
         _pulse.IsVisible = _model.Pulse;
 
         _skippedBadge.IsVisible = _model.SkippedCount > 0;
@@ -140,8 +142,14 @@ sealed class SequenceRenderer : ComponentRenderer
         };
 
         _status = Widgets.Label("", Palette.Muted, 12);
-        Grid.SetColumn(_status, 0);
-        grid.Children.Add(_status);
+        _lastRun = Widgets.Label("", Palette.Faint, 12);
+        _lastRun.Margin = new Thickness(8, 0, 0, 0);
+
+        var state = Widgets.Stack(Orientation.Horizontal);
+        state.Children.Add(_status);
+        state.Children.Add(_lastRun);
+        Grid.SetColumn(state, 0);
+        grid.Children.Add(state);
 
         _skipped = Widgets.Label("", Palette.Notice, 11);
         _skippedBadge = new Border

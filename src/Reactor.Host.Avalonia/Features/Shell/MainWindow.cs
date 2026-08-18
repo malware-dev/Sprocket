@@ -44,10 +44,10 @@ public class MainWindow : Window
     /// <summary>The simulated ship, so tests can make things happen to it.</summary>
     internal Simulation Simulation => _simulation;
 
-    /// <summary>Advances the whole prototype by one beat.</summary>
-    public void Beat()
+    /// <summary>Advances the whole prototype by one tick.</summary>
+    public void Tick()
     {
-        _simulation.Beat();
+        _simulation.Tick();
         _view.Sync();
     }
 

@@ -51,7 +51,7 @@ sealed class EditorView : UserControl
         Sync();
     }
 
-    /// <summary>Brings the visuals in line with the editor. Called every beat.</summary>
+    /// <summary>Brings the visuals in line with the editor. Called every tick.</summary>
     public void Sync()
     {
         var screen = _editor.Screen;

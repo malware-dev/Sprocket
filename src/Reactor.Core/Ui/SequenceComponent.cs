@@ -153,6 +153,9 @@ namespace Reactor.Ui
         /// <summary>Lit briefly each time it fires.</summary>
         public bool Pulse { get; set; }
 
+        /// <summary>When it last ran, in words: "just now", "3 minutes ago", or empty.</summary>
+        public string LastRun { get; set; }
+
         /// <summary>
         /// How often the trigger fired while the sequence was already running and was
         /// therefore ignored. Surfaced rather than hidden, because a sequence that

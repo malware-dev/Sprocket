@@ -5,11 +5,11 @@ using Reactor.World;
 namespace Reactor.Runtime
 {
     /// <summary>
-    /// Runs everything, one beat at a time.
+    /// Runs everything, one tick at a time.
     /// </summary>
     /// <remarks>
     /// There is no build, no run and no stop. The machine is always live, and edits
-    /// take effect on the next beat - a sequence added while the ship is working
+    /// take effect on the next tick - a sequence added while the ship is working
     /// simply begins working too. Removing the gap between writing something and
     /// seeing it happen is what turns "what will this do?" into something the user
     /// can answer by looking.
@@ -41,12 +41,12 @@ namespace Reactor.Runtime
         /// drift with server load. Taking the frame number means elapsed is
         /// <c>now - then</c> and stays exact however irregularly we are called.
         /// </remarks>
-        public int Beat { get; private set; }
+        public int CurrentTick { get; private set; }
 
         /// <summary>Advances everything to the given frame.</summary>
-        public void Tick(int beat)
+        public void Tick(int tick)
         {
-            Beat = beat;
+            CurrentTick = tick;
             Reconcile();
 
             var sequences = _automation.Sequences;
@@ -54,7 +54,7 @@ namespace Reactor.Runtime
             {
                 SequenceRunner runner;
                 if (_runners.TryGetValue(sequences[i].Id, out runner))
-                    runner.Tick(_world, Beat);
+                    runner.Tick(_world, CurrentTick);
             }
         }
 
@@ -70,7 +70,7 @@ namespace Reactor.Runtime
         {
             var runner = Get(sequence);
             if (runner != null)
-                runner.Call(_world, Beat);
+                runner.Call(_world, CurrentTick);
         }
 
         void Reconcile()

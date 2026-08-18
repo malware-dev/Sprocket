@@ -36,15 +36,15 @@ sealed class Simulation
     public ReactorEditor Editor { get; }
 
     /// <summary>
-    /// One beat. The ship moves first so the sequences always sample signals that are
-    /// current for this beat rather than the last one.
+    /// One tick. The ship moves first so the sequences always sample signals that are
+    /// current for this tick rather than the last one.
     /// </summary>
-    public void Beat()
+    public void Tick()
     {
         // Standing in for the game's frame counter. This host is woken every frame so
         // its own count happens to be exact; the mod must read Space Engineers' own
         // counter instead, because its slower update rates do not land on exact
-        // multiples and a self-counted beat would drift with server load.
+        // multiples and a self-counted tick would drift with server load.
         _frame++;
 
         World.Tick();

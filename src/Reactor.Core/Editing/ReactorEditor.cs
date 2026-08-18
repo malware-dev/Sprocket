@@ -47,8 +47,8 @@ namespace Reactor.Editing
         /// <summary>What to show right now.</summary>
         public EditorScreen Screen { get { return _screen; } }
 
-        /// <summary>Beats elapsed. The only honest unit of time available.</summary>
-        public int Beat { get { return _runner.Beat; } }
+        /// <summary>Ticks elapsed. The only honest unit of time available.</summary>
+        public int CurrentTick { get { return _runner.CurrentTick; } }
 
         /// <summary>
         /// Advances everything to the given frame and brings the screen up to date.
@@ -58,9 +58,9 @@ namespace Reactor.Editing
         /// Engineers passes its own counter, a desktop host passes one it keeps, a
         /// test passes whatever it likes. Nothing in core counts time for itself.
         /// </remarks>
-        public void Tick(int beat)
+        public void Tick(int tick)
         {
-            _runner.Tick(beat);
+            _runner.Tick(tick);
 
             if (_structureDirty)
             {
@@ -70,7 +70,7 @@ namespace Reactor.Editing
 
             Current.Refresh();
 
-            // Both are read every beat rather than only when the screen is
+            // Both are read every tick rather than only when the screen is
             // rebuilt, so typing a name shows up in the heading as it is typed.
             _screen.Title = Current.Title;
             _screen.Subtitle = Current.Subtitle;
@@ -330,12 +330,12 @@ namespace Reactor.Editing
 
             for (var i = 0; i < cadences.Count; i++)
             {
-                var beats = cadences[i].Beats;
-                var label = beats == 1 ? "every beat" : cadences[i].Name + " — every " + beats + " beats";
+                var ticks = cadences[i].Ticks;
+                var label = ticks == 1 ? "every tick" : cadences[i].Name + " — every " + ticks + " ticks";
 
-                page.Add(label, beats == every.IntervalBeats, beats, delegate
+                page.Add(label, ticks == every.IntervalTicks, ticks, delegate
                 {
-                    every.IntervalBeats = beats;
+                    every.IntervalTicks = ticks;
                     chosen();
                 });
                 page.WarnOnLast(cadences[i].Warning);

@@ -31,7 +31,7 @@ abstract class ComponentRenderer
     /// </summary>
     public abstract bool TryBind(EditorComponent component);
 
-    /// <summary>Re-reads live values. Called every beat.</summary>
+    /// <summary>Re-reads live values. Called every tick.</summary>
     public abstract void Update();
 
     public static ComponentRenderer Create(EditorComponent component, ReactorEditor editor)
