@@ -33,7 +33,7 @@ namespace Reactor.Editing
 
         public override string Subtitle
         {
-            get { return SequenceSummary.Status(_sequence, Editor.Runner.Get(_sequence), Editor.Beat); }
+            get { return SequenceSummary.Status(_sequence, Editor.Runner.Get(_sequence)); }
         }
 
         public override void Build(EditorScreen screen)
@@ -66,7 +66,7 @@ namespace Reactor.Editing
 
             _sentence.Enabled = _sequence.Enabled;
             _sentence.Name = _sequence.Name;
-            _sentence.Status = SequenceSummary.Status(_sequence, state, Editor.Beat);
+            _sentence.Status = SequenceSummary.Status(_sequence, state);
             _sentence.Problem = SequenceSummary.Problem(Editor.World, _sequence, state);
             _sentence.Pulse = state != null && state.LastFiredBeat >= 0
                 && Editor.Beat - state.LastFiredBeat < 10;

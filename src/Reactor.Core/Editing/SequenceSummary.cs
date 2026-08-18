@@ -36,7 +36,7 @@ namespace Reactor.Editing
                 var state = runner.Get(sequence);
 
                 entry.Summary = Describe(world, sequence);
-                entry.Status = Status(sequence, state, beat);
+                entry.Status = Status(sequence, state);
                 entry.Pulse = state != null && state.LastFiredBeat >= 0
                     && beat - state.LastFiredBeat < PulseBeats;
                 entry.Problem = Problem(world, sequence, state);
@@ -68,7 +68,19 @@ namespace Reactor.Editing
             return trigger + " → " + first + " (+" + (sequence.Steps.Count - 1) + " more)";
         }
 
-        public static string Status(Sequence sequence, SequenceRunner state, int beat)
+        /// <summary>
+        /// What this sequence is doing, in a handful of words.
+        /// </summary>
+        /// <remarks>
+        /// Every answer is a constant, deliberately. This is read on every beat for
+        /// whatever is on screen, so anything built from a number would allocate
+        /// sixty times a second inside the game's update loop.
+        ///
+        /// Nothing is lost by it. The step it is on is already shown by that step
+        /// being lit, and a count of beats since it last ran is a number nobody
+        /// reads - the indicator flashing when it fires is the part that carries.
+        /// </remarks>
+        public static string Status(Sequence sequence, SequenceRunner state)
         {
             if (!sequence.Enabled)
                 return "switched off";
@@ -77,17 +89,9 @@ namespace Reactor.Editing
                 return "waiting to happen";
 
             if (state.IsRunning)
-            {
-                var step = state.CurrentStep + 1;
-                return state.IsWaiting
-                    ? "running — waiting on step " + step
-                    : "running — step " + step;
-            }
+                return state.IsWaiting ? "running — waiting for this step" : "running";
 
-            if (state.LastFiredBeat < 0)
-                return "waiting to happen";
-
-            return "waiting — last ran " + (beat - state.LastFiredBeat) + " beats ago";
+            return state.LastFiredBeat < 0 ? "waiting to happen" : "waiting";
         }
 
         /// <summary>
