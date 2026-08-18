@@ -43,6 +43,14 @@ public class EditorTests
         return ship;
     }
 
+    static void StartOnTheButton(ReactorEditor editor)
+    {
+        editor.PressChoice("When something happens");
+        editor.PressBlock("Airlock Button");
+        editor.PressChoice("is pressed");
+        editor.PressPrimary();
+    }
+
     [Fact]
     public void ItOpensOnTheQuestion_NotOnAListOfBlocks()
     {
@@ -60,18 +68,94 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.PressChoice("When something happens");
-        Assert.Equal("What should this listen to?", editor.Screen.Title);
 
-        // Nothing to move on to until something is chosen, which is also the nudge.
+        // One pane to begin with; the second appears once it has something to be about.
+        Assert.Single(editor.Component<PathComponent>().Panes);
         Assert.False(editor.Screen.HasPrimary);
+
         editor.PressBlock("Airlock Button");
+        Assert.Equal(2, editor.Component<PathComponent>().Panes.Count);
+
+        // Still nothing to move on to - the path is not finished.
+        Assert.False(editor.Screen.HasPrimary);
+
+        editor.PressChoice("is pressed");
         Assert.True(editor.Screen.HasPrimary);
 
         editor.PressPrimary();
-        Assert.Equal("What should it do?", editor.Screen.Title);
-
-        editor.PressChoice("is pressed");
         Assert.NotNull(editor.Sentence());
+    }
+
+    [Fact]
+    public void SeveralBlocksReadAsEitherOnATrigger_AndBothOnAStep()
+    {
+        // A trigger fires on whichever happens first, a step acts on all of them.
+        // Saying "and" in both places would state the wrong thing in one of them.
+        var ship = Build();
+        var editor = ship.Editor;
+
+        editor.PressChoice("When something happens");
+        editor.PressBlock("Inner Door");
+        editor.PressBlock("Outer Door");
+        editor.PressChoice("finishes opening");
+        editor.PressPrimary();
+        Assert.Equal("Inner Door or Outer Door", editor.Sentence().Trigger.Slots[0].Text);
+
+        editor.PressAdd("do something");
+        editor.PressBlock("Inner Door");
+        editor.PressBlock("Outer Door");
+        editor.PressChoice("close");
+        editor.PressPrimary();
+
+        Assert.Equal("Inner Door and Outer Door", editor.Sentence().Steps[0].Slots[1].Text);
+    }
+
+    static TestDoor Door(Ship ship, string name) =>
+        ship.World.Devices.OfType<TestDoor>().First(d => d.Name == name);
+
+    [Fact]
+    public void AllOfThemTogether_ReadsAsAndAndFiresWhenTheLastArrives()
+    {
+        // "When tank A and tank B are empty" is a different sentence from "either of
+        // them", and fires at a different moment - when the last one gets there.
+        var ship = Build();
+        var editor = ship.Editor;
+
+        editor.PressChoice("When something happens");
+        editor.PressBlock("Inner Door");
+        editor.PressBlock("Outer Door");
+        editor.PressChoice("all of them, together");
+        editor.PressChoice("finishes opening");
+        editor.PressPrimary();
+        Assert.Equal("Inner Door and Outer Door", editor.Sentence().Trigger.Slots[0].Text);
+
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("turn on");
+        editor.PressPrimary();
+
+        ship.Tick(3);
+        Door(ship, "Inner Door").ForceOpen();
+        ship.Tick(3);
+        Assert.Empty(ship.World.Log);
+
+        Door(ship, "Outer Door").ForceOpen();
+        ship.Tick(3);
+        Assert.Contains("Airlock Light:on", ship.World.Log);
+    }
+
+    [Fact]
+    public void TheAnyOrAllChoiceOnlyAppearsOnceItMatters()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        editor.PressChoice("When something happens");
+        editor.PressBlock("Inner Door");
+        Assert.False(editor.HasChoice("all of them, together"));
+
+        editor.PressBlock("Outer Door");
+        Assert.True(editor.HasChoice("all of them, together"));
     }
 
     [Fact]
@@ -97,13 +181,12 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.PressChoice("When something happens");
+        Assert.Equal("When something happens", editor.Screen.Title);
+
         editor.PressBlock("Airlock Button");
-        editor.PressPrimary();
-        Assert.Equal("What should it do?", editor.Screen.Title);
+        editor.PressChoice("is pressed");
 
-        editor.Back();
-        Assert.Equal("What should this listen to?", editor.Screen.Title);
-
+        // Both stages are one screen now, so one step back is all the way out.
         editor.Back();
         Assert.Equal("Your automation", editor.Screen.Title);
     }
@@ -116,8 +199,8 @@ public class EditorTests
 
         editor.PressChoice("When something happens");
         editor.PressBlock("Airlock Button");
-        editor.PressPrimary();
         editor.PressChoice("is pressed");
+        editor.PressPrimary();
 
         ship.Tick();
         Assert.StartsWith("When Airlock Button is pressed", editor.Screen.Title);
@@ -142,10 +225,67 @@ public class EditorTests
         editor.PressChoice("Every so often");
         editor.PressChoice("steady — every 100 ticks");
 
-        var version = editor.Screen.StructureVersion;
+        // The component instances must survive, or a target rebuilds its controls
+        // and the field loses focus and the caret mid-word.
+        var before = editor.Sentence();
         editor.Name("Housekeeping");
 
-        Assert.Equal(version, editor.Screen.StructureVersion);
+        Assert.Same(before, editor.Sentence());
+    }
+
+    [Fact]
+    public void AddingAStep_AsksWhatThenAsksHow()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+        StartOnTheButton(editor);
+
+        editor.PressAdd("do something");
+        Assert.Equal("Do something", editor.Screen.Title);
+        Assert.Single(editor.Component<PathComponent>().Panes);
+
+        editor.PressBlock("Inner Door");
+        Assert.Equal(2, editor.Component<PathComponent>().Panes.Count);
+
+        editor.PressChoice("close");
+        editor.PressPrimary();
+
+        Assert.Single(editor.Sentence().Steps);
+        Assert.Equal("close", editor.Sentence().Steps[0].Slots[0].Text);
+        Assert.Equal("Inner Door", editor.Sentence().Steps[0].Slots[1].Text);
+    }
+
+    [Fact]
+    public void BackingOutOfAddingAStep_LeavesNoHalfWrittenLine()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+        StartOnTheButton(editor);
+
+        editor.PressAdd("do something");
+        editor.PressBlock("Inner Door");
+        editor.Back();
+
+        Assert.Empty(editor.Sentence().Steps);
+    }
+
+    [Fact]
+    public void WaitingIsItsOwnKindOfStep_NotAnActionOnABlock()
+    {
+        // A timed wait has no block to act on, so forcing it through the same
+        // question would mean answering one that does not apply.
+        var ship = Build();
+        var editor = ship.Editor;
+        StartOnTheButton(editor);
+
+        editor.PressAdd("wait");
+        Assert.Equal("How long should it wait?", editor.Screen.Title);
+
+        editor.PressChoice("5 seconds — 300 ticks");
+
+        var step = Assert.Single(editor.Sentence().Steps);
+        Assert.Equal("wait", step.Lead);
+        Assert.Equal("5 seconds", step.Slots[0].Text);
     }
 
     [Fact]
@@ -156,8 +296,8 @@ public class EditorTests
 
         editor.PressChoice("When something happens");
         editor.PressBlock("Airlock Button");
-        editor.PressPrimary();
         editor.PressChoice("is pressed");
+        editor.PressPrimary();
 
         ship.Tick();
         Assert.Equal("", editor.Sentence().LastRun);
@@ -190,15 +330,13 @@ public class EditorTests
 
         editor.PressChoice("When something happens");
         editor.PressBlock("Airlock Button");
-        editor.PressPrimary();
         editor.PressChoice("is pressed");
+        editor.PressPrimary();
 
         editor.PressAdd("do something");
-        editor.PressStepSlot(0, 1);
         editor.PressBlock("Airlock Light");
-        editor.PressPrimary();
-        editor.PressStepSlot(0, 0);
         editor.PressChoice("turn on");
+        editor.PressPrimary();
 
         ship.Tick(3);
         Assert.Empty(ship.World.Log);

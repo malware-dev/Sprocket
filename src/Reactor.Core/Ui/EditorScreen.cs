@@ -16,8 +16,8 @@ namespace Reactor.Ui
     {
         public EditorScreen()
         {
-            Components = new List<EditorComponent>();
-            Actions = new List<ChoiceEntry>();
+            Components = new ObservableList<EditorComponent>();
+            Actions = new ObservableList<ChoiceEntry>();
         }
 
         public string Title { get; set; }
@@ -48,23 +48,13 @@ namespace Reactor.Ui
         public bool HasPrimary { get { return !string.IsNullOrEmpty(PrimaryText); } }
 
         /// <summary>What to show, in order.</summary>
-        public List<EditorComponent> Components { get; private set; }
+        public ObservableList<EditorComponent> Components { get; private set; }
 
         /// <summary>
         /// Screen-level actions: the roots to switch between, and starting a sequence
         /// from scratch. A target renders these wherever it puts navigation.
         /// </summary>
-        public List<ChoiceEntry> Actions { get; private set; }
+        public ObservableList<ChoiceEntry> Actions { get; private set; }
 
-        /// <summary>
-        /// Bumped whenever the shape of the screen changes.
-        /// </summary>
-        /// <remarks>
-        /// Creating native controls every tick is exactly what a target cannot
-        /// afford, so this is the signal to rebuild them. While it holds steady the
-        /// component objects stay identical and only their values change, and a
-        /// target can simply re-read them into the controls it already made.
-        /// </remarks>
-        public int StructureVersion { get; set; }
     }
 }

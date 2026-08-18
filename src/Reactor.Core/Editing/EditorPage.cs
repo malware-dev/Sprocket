@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Reactor.Ui;
 
 namespace Reactor.Editing
@@ -36,8 +37,16 @@ namespace Reactor.Editing
 
         public virtual void Primary() { }
 
-        /// <summary>Creates the components and registers their commands.</summary>
-        public abstract void Build(EditorScreen screen);
+        /// <summary>
+        /// Adds this page's components, in order, and registers their commands.
+        /// </summary>
+        /// <remarks>
+        /// Called again whenever the page changes shape. Hand back the same component
+        /// instances wherever possible and change their contents instead of making
+        /// new ones - that is what lets a target keep its controls, and with them the
+        /// focus and caret somebody may be typing into.
+        /// </remarks>
+        public abstract void Build(List<EditorComponent> components);
 
         /// <summary>Updates live values on components that already exist.</summary>
         public virtual void Refresh() { }

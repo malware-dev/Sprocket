@@ -22,14 +22,6 @@ sealed class HeadingRenderer : ComponentRenderer
 
     public override Control Control => _text;
 
-    public override bool TryBind(EditorComponent component)
-    {
-        if (component is not HeadingComponent heading)
-            return false;
-        _model = heading;
-        return true;
-    }
-
     public override void Update() => _text.Text = _model.Text;
 }
 
@@ -50,14 +42,6 @@ sealed class NoticeRenderer : ComponentRenderer
 
     public override Control Control => _border;
 
-    public override bool TryBind(EditorComponent component)
-    {
-        if (component is not NoticeComponent notice)
-            return false;
-        _model = notice;
-        return true;
-    }
-
     public override void Update()
     {
         _text.Text = _model.Text;
@@ -77,11 +61,12 @@ sealed class NoticeRenderer : ComponentRenderer
 /// </remarks>
 sealed class BlockSearchRenderer : ComponentRenderer
 {
+    int _seenFilters = -1;
+
     BlockSearchComponent _model;
     readonly TextBox _box;
     readonly WrapPanel _filters;
     readonly DockPanel _root;
-    bool _echo;
 
     public BlockSearchRenderer(ReactorEditor editor, BlockSearchComponent model) : base(editor)
     {
@@ -99,9 +84,15 @@ sealed class BlockSearchRenderer : ComponentRenderer
         };
         _box.TextChanged += (_, _) =>
         {
-            if (_echo)
+        // Compared against what core holds rather than guarded by a flag around the
+        // assignment: Avalonia raises this after the assignment has returned, by which
+        // time any such flag is down again, so our own echo arrives looking exactly
+        // like a keystroke.
+            var text = _box.Text ?? "";
+            if (text == (_model.Text ?? ""))
                 return;
-            Editor.SetText(_model.Command, _box.Text ?? "");
+
+            Editor.SetText(_model.Command, text);
         };
 
         _filters = new WrapPanel();
@@ -116,25 +107,14 @@ sealed class BlockSearchRenderer : ComponentRenderer
 
     public override Control Control => _root;
 
-    public override bool TryBind(EditorComponent component)
+    public override void Update()
     {
-        if (component is not BlockSearchComponent search)
-            return false;
+        if (_seenFilters == _model.Filters.Revision)
+            return;
 
-        _model = search;
-
-        if (_box.Text != search.Text)
-        {
-            _echo = true;
-            _box.Text = search.Text;
-            _echo = false;
-        }
-
+        _seenFilters = _model.Filters.Revision;
         BuildFilters();
-        return true;
     }
-
-    public override void Update() { }
 
     void BuildFilters()
     {
@@ -151,6 +131,8 @@ sealed class BlockSearchRenderer : ComponentRenderer
 
 sealed class BlockListRenderer : ComponentRenderer
 {
+    int _seenRevision = -1;
+
     sealed class Row
     {
         public Ellipse Lit = null!;
@@ -170,23 +152,22 @@ sealed class BlockListRenderer : ComponentRenderer
         _model = model;
         _empty = Widgets.Label("", Palette.Muted, 12);
         _empty.Margin = new Thickness(4, 8, 0, 0);
+
         Build();
     }
 
     public override Control Control => _panel;
 
-    public override bool TryBind(EditorComponent component)
-    {
-        if (component is not BlockListComponent list || list.Entries.Count != _model.Entries.Count)
-            return false;
-
-        _model = list;
-        Build();
-        return true;
-    }
-
     public override void Update()
     {
+        // Rebuilt here rather than from the list's own event, which fires while
+        // core is still mid-update and would read half-written rows.
+        if (_seenRevision != _model.Entries.Revision)
+        {
+            _seenRevision = _model.Entries.Revision;
+            Build();
+        }
+
         for (var i = 0; i < _rows.Count && i < _model.Entries.Count; i++)
         {
             var entry = _model.Entries[i];
@@ -279,6 +260,8 @@ sealed class BlockListRenderer : ComponentRenderer
 
 sealed class ChoiceListRenderer : ComponentRenderer
 {
+    int _seenRevision = -1;
+
     sealed class Row
     {
         public Ellipse? Blink;
@@ -297,22 +280,20 @@ sealed class ChoiceListRenderer : ComponentRenderer
 
     public override Control Control => _panel;
 
-    public override bool TryBind(EditorComponent component)
-    {
-        if (component is not ChoiceListComponent list || list.Entries.Count != _model.Entries.Count)
-            return false;
-
-        _model = list;
-        Build();
-        return true;
-    }
-
     /// <summary>
     /// Drives the rate indicators. An interval of one tick is lit the whole time,
     /// which is exactly what "every tick" means.
     /// </summary>
     public override void Update()
     {
+        // Rebuilt here rather than from the list's own event, which fires while
+        // core is still mid-update and would read half-written rows.
+        if (_seenRevision != _model.Entries.Revision)
+        {
+            _seenRevision = _model.Entries.Revision;
+            Build();
+        }
+
         foreach (var row in _rows)
         {
             if (row.Blink == null)
@@ -389,6 +370,8 @@ sealed class ChoiceListRenderer : ComponentRenderer
 
 sealed class SequenceListRenderer : ComponentRenderer
 {
+    int _seenRevision = -1;
+
     sealed class Row
     {
         public Ellipse Lit = null!;
@@ -405,23 +388,22 @@ sealed class SequenceListRenderer : ComponentRenderer
     public SequenceListRenderer(ReactorEditor editor, SequenceListComponent model) : base(editor)
     {
         _model = model;
+        _model.Entries.Changed += Build;
         Build();
     }
 
     public override Control Control => _panel;
 
-    public override bool TryBind(EditorComponent component)
-    {
-        if (component is not SequenceListComponent list || list.Entries.Count != _model.Entries.Count)
-            return false;
-
-        _model = list;
-        Build();
-        return true;
-    }
-
     public override void Update()
     {
+        // Rebuilt here rather than from the list's own event, which fires while
+        // core is still mid-update and would read half-written rows.
+        if (_seenRevision != _model.Entries.Revision)
+        {
+            _seenRevision = _model.Entries.Revision;
+            Build();
+        }
+
         for (var i = 0; i < _rows.Count && i < _model.Entries.Count; i++)
         {
             var entry = _model.Entries[i];

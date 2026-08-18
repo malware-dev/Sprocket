@@ -25,7 +25,7 @@ namespace Reactor.Editing
         }
 
         /// <summary>Updates one entry per sequence, in place.</summary>
-        public static void Fill(List<SequenceEntry> entries, List<Sequence> sequences, IWorld world,
+        public static void Fill(ObservableList<SequenceEntry> entries, List<Sequence> sequences, IWorld world,
             AutomationRunner runner, int tick)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
@@ -41,12 +41,7 @@ namespace Reactor.Editing
                     && tick - state.LastFiredTick < PulseTicks;
                 entry.Problem = Problem(world, sequence, state);
 
-                var key = Elapsed.Bucket(TicksSinceRun(state, tick));
-                if (entry.LastRunKey != key)
-                {
-                    entry.LastRunKey = key;
-                    entry.LastRun = Elapsed.Ago(TicksSinceRun(state, tick));
-                }
+                entry.LastRun = Elapsed.Ago(TicksSinceRun(state, tick));
             }
         }
 

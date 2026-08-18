@@ -30,9 +30,10 @@ namespace Reactor.Editing
         readonly Dictionary<int, Action<string>> _textActions = new Dictionary<int, Action<string>>();
         readonly Dictionary<int, Action<bool>> _toggleActions = new Dictionary<int, Action<bool>>();
         readonly EditorScreen _screen = new EditorScreen();
+        readonly List<EditorComponent> _gathered = new List<EditorComponent>();
+        readonly List<ChoiceEntry> _actionBar = new List<ChoiceEntry>();
 
         int _nextCommand;
-        int _structureVersion;
         bool _structureDirty;
 
         public ReactorEditor(IWorld world, Automation program, AutomationRunner runner)
@@ -117,6 +118,21 @@ namespace Reactor.Editing
 
         internal EditorPage Current { get { return _stack[_stack.Count - 1]; } }
 
+        /// <summary>How deep the stack is, for a run of questions to return to.</summary>
+        internal int Depth { get { return _stack.Count; } }
+
+        /// <summary>
+        /// Drops every page above the given depth, so answering the last question
+        /// lands back where the run started rather than walking out through it.
+        /// </summary>
+        internal void UnwindTo(int depth)
+        {
+            while (_stack.Count > depth && _stack.Count > 1)
+                _stack.RemoveAt(_stack.Count - 1);
+
+            _structureDirty = true;
+        }
+
         internal int Register(Action action)
         {
             var id = ++_nextCommand;
@@ -192,15 +208,24 @@ namespace Reactor.Editing
                 Rebuild();
         }
 
+        /// <summary>
+        /// Rebuilds the screen from the page on top of the stack.
+        /// </summary>
+        /// <remarks>
+        /// The component list is gathered first and published in one go. Clearing and
+        /// re-adding would announce a half-built screen to anything watching, and a
+        /// target would draw it.
+        ///
+        /// Pages hand back the same component instances wherever they can, so a
+        /// target that keys its controls on identity keeps them - along with focus,
+        /// carets and scroll positions - even though this ran.
+        /// </remarks>
         void Rebuild()
         {
             _actions.Clear();
             _textActions.Clear();
             _toggleActions.Clear();
             _nextCommand = 0;
-
-            _screen.Components.Clear();
-            _screen.Actions.Clear();
 
             var page = Current;
             _screen.Title = page.Title;
@@ -209,26 +234,53 @@ namespace Reactor.Editing
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryCommand = _screen.HasPrimary ? Register(page.Primary) : 0;
 
-            page.Build(_screen);
+            _gathered.Clear();
+            page.Build(_gathered);
             page.Refresh();
+
+            if (!SameComponents(_gathered))
+                _screen.Components.Reset(_gathered);
 
             _screen.Subtitle = page.Subtitle;
             BuildActions();
 
-            _structureVersion++;
-            _screen.StructureVersion = _structureVersion;
             _structureDirty = false;
         }
 
+        bool SameComponents(List<EditorComponent> gathered)
+        {
+            if (gathered.Count != _screen.Components.Count)
+                return false;
+
+            for (var i = 0; i < gathered.Count; i++)
+            {
+                if (!ReferenceEquals(gathered[i], _screen.Components[i]))
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Rebuilds the screen-level actions, replacing the previous set outright.
+        /// </summary>
+        /// <remarks>
+        /// Replaced rather than appended, because their command ids are re-issued on
+        /// every rebuild. A leftover entry would still look right and point at an id
+        /// that no longer exists, so pressing it would silently do nothing.
+        /// </remarks>
         void BuildActions()
         {
+            _actionBar.Clear();
+
             // What the machine does comes first; the ship is for looking things up.
-            _screen.Actions.Add(new ChoiceEntry("Sequences", IsRootPage<SequencesPage>(),
+            _actionBar.Add(new ChoiceEntry("Sequences", IsRootPage<SequencesPage>(),
                 Register(GoToSequences)));
-            _screen.Actions.Add(new ChoiceEntry("Ship", IsRootPage<ShipPage>(),
+            _actionBar.Add(new ChoiceEntry("Ship", IsRootPage<ShipPage>(),
                 Register(GoToShip)));
-            _screen.Actions.Add(new ChoiceEntry("Start something new", false,
+            _actionBar.Add(new ChoiceEntry("Start something new", false,
                 Register(OfferStarters)));
+
+            _screen.Actions.Reset(_actionBar);
         }
 
         void GoToShip()
@@ -293,33 +345,18 @@ namespace Reactor.Editing
             var when = trigger as WhenTrigger;
             if (when != null)
             {
-                Push(new BlockPickerPage(this, "What should this listen to?", when.Sources, true,
-                    "Next", delegate { AskWhatHappens(when, origin); }));
+                Push(new PickPathPage(this, "When something happens", when.Sources, true,
+                    delegate { return when.EventId; },
+                    delegate(string id) { when.EventId = id; },
+                    delegate { FinishSequence(when, origin); },
+                    delegate { return when.RequiresAll; },
+                    delegate(bool all) { when.RequiresAll = all; }));
                 return;
             }
 
             var every = trigger as EveryTrigger;
             if (every != null)
                 Push(RatePage(every, delegate { FinishSequence(every, origin); }));
-        }
-
-        void AskWhatHappens(WhenTrigger when, int origin)
-        {
-            var page = new ChoicePage(this, "What should it do?");
-            var events = Vocabulary.EventsFor(_world, when.Sources);
-
-            for (var i = 0; i < events.Count; i++)
-            {
-                var id = events[i].Id;
-                page.Add(events[i].Text, id == when.EventId, delegate
-                {
-                    when.EventId = id;
-                    FinishSequence(when, origin);
-                });
-            }
-
-            page.EmptyText = "None of those blocks have anything in common that can happen to them.";
-            Push(page);
         }
 
         /// <summary>The repeat rates, shared by the wizard and by editing a sequence.</summary>
@@ -354,9 +391,7 @@ namespace Reactor.Editing
         /// </remarks>
         void FinishSequence(Trigger trigger, int origin)
         {
-            while (_stack.Count > origin)
-                _stack.RemoveAt(_stack.Count - 1);
-
+            UnwindTo(origin);
             Push(new SequencePage(this, _program.AddSequence(trigger)));
         }
     }

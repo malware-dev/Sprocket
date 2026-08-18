@@ -17,32 +17,17 @@ namespace Reactor.Editing
     {
         const int TicksPerSecond = 60;
 
+        static readonly string[] _seconds = BuildSeconds();
+        static readonly string[] _minutes = BuildMinutes();
+
         /// <summary>
-        /// A key that changes exactly when <see cref="Ago"/> would produce different
-        /// words.
+        /// How long ago, in words.
         /// </summary>
         /// <remarks>
-        /// The point of this is to avoid building a string on every tick. Comparing
-        /// the key costs nothing; the words are rebuilt roughly once a second at
-        /// first, then once a minute, then not at all.
+        /// Every answer comes from a table built once, so this can be called on every
+        /// tick for every visible sequence without allocating. That is why nothing
+        /// caches the result any more - there is nothing left to cache.
         /// </remarks>
-        public static int Bucket(int ticksAgo)
-        {
-            if (ticksAgo < 0)
-                return -1;
-
-            var seconds = ticksAgo / TicksPerSecond;
-            if (seconds < 2)
-                return 0;
-            if (seconds < 60)
-                return seconds;
-            if (seconds < 120)
-                return 100;
-            if (seconds < 3600)
-                return 200 + seconds / 60;
-            return 999;
-        }
-
         public static string Ago(int ticksAgo)
         {
             if (ticksAgo < 0)
@@ -52,12 +37,31 @@ namespace Reactor.Editing
             if (seconds < 2)
                 return "just now";
             if (seconds < 60)
-                return seconds + " seconds ago";
+                return _seconds[seconds];
             if (seconds < 120)
                 return "a minute ago";
-            if (seconds < 3600)
-                return seconds / 60 + " minutes ago";
+
+            var minutes = seconds / 60;
+            if (minutes < 60)
+                return _minutes[minutes];
+
             return "over an hour ago";
+        }
+
+        static string[] BuildSeconds()
+        {
+            var words = new string[60];
+            for (var i = 2; i < 60; i++)
+                words[i] = i + " seconds ago";
+            return words;
+        }
+
+        static string[] BuildMinutes()
+        {
+            var words = new string[60];
+            for (var i = 2; i < 60; i++)
+                words[i] = i + " minutes ago";
+            return words;
         }
     }
 }

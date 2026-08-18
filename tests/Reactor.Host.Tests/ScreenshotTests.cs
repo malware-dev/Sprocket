@@ -81,28 +81,27 @@ public class ScreenshotTests
         Tick(window, 1);
         Shoot(window, "picked");
 
-        editor.PressPrimary();
         editor.PressChoice("is pressed");
+        Tick(window, 1);
+        Shoot(window, "path");
 
-        Step(editor, 0, "Airlock Inner Door", "close");
-        Step(editor, 1, "Airlock Inner Door", "lock");
-        Step(editor, 2, "Airlock Vent", "pump the air out");
-        Step(editor, 3, "Airlock Outer Door", "unlock");
-        Step(editor, 4, "Airlock Outer Door", "open");
+        editor.PressPrimary();
+
+        Step(editor, "Airlock Inner Door", "close");
+        Step(editor, "Airlock Inner Door", "lock");
+        Step(editor, "Airlock Vent", "pump the air out");
+        Step(editor, "Airlock Outer Door", "unlock");
+        Step(editor, "Airlock Outer Door", "open");
 
         editor.Name("Let me out");
     }
 
-    static void Step(ReactorEditor editor, int index, string block, string action)
+    static void Step(ReactorEditor editor, string block, string action)
     {
         editor.PressAdd("do something");
-
-        editor.PressStepSlot(index, 1);
         editor.PressBlock(block);
-        editor.PressPrimary();
-
-        editor.PressStepSlot(index, 0);
         editor.PressChoice(action);
+        editor.PressPrimary();
     }
 
     static void Tick(MainWindow window, int ticks)

@@ -44,26 +44,26 @@ public class WindowSmokeTests
         Record(seen, editor);
 
         // The empty root offers the starters straight away, and answering one lands
-        // directly on the block picker.
+        // directly on the path: blocks, then what happens to them.
         editor.PressChoice("When something happens");
         window.Tick();
         Layout(window);
         Record(seen, editor);
 
         editor.PressBlock("Approach Sensor");
-        editor.PressPrimary();
         window.Tick();
         Layout(window);
         Record(seen, editor);
 
         editor.PressChoice("detects something");
+        editor.PressPrimary();
         window.Tick();
         Layout(window);
         Record(seen, editor);
 
         editor.PressAdd("do something");
-        editor.PressStepSlot(0, 1);
         editor.PressBlock("Landing Lights");
+        editor.PressChoice("turn on");
         editor.PressPrimary();
 
         // The ship browser, still there for looking things up.
@@ -83,6 +83,7 @@ public class WindowSmokeTests
         Layout(window);
         Record(seen, editor);
 
+        Assert.Contains(nameof(PathComponent), seen);
         Assert.Contains(nameof(BlockSearchComponent), seen);
         Assert.Contains(nameof(BlockListComponent), seen);
         Assert.Contains(nameof(ChoiceListComponent), seen);

@@ -35,6 +35,7 @@ namespace Reactor.Runtime
         int _stepIndex = -1;
         int _gateTicks;
         int _everyCounter;
+        int _allState = -1;
         bool _awaitingCompletion;
 
         public SequenceRunner(Sequence sequence)
@@ -308,6 +309,9 @@ namespace Reactor.Runtime
 
         bool SampleWhen(IWorld world, WhenTrigger when)
         {
+            if (when.RequiresAll)
+                return SampleWhenAll(world, when);
+
             var fired = false;
             var anySignalTrue = false;
             var anyMissing = false;
@@ -347,6 +351,54 @@ namespace Reactor.Runtime
 
             TriggerSignalIsTrue = anySignalTrue;
             HasMissingSources = anyMissing;
+            return fired;
+        }
+
+        /// <summary>
+        /// Fires when the last of the sources reaches the state, and not again until
+        /// one of them has left it.
+        /// </summary>
+        /// <remarks>
+        /// Watching for several separate edges on the same tick would almost never
+        /// fire, because the sources reach their state at different moments. What the
+        /// sentence means is "the moment they are all there", so that is what is
+        /// watched: one edge, on the whole condition.
+        /// </remarks>
+        bool SampleWhenAll(IWorld world, WhenTrigger when)
+        {
+            var all = when.Sources.Count > 0;
+            var anyMissing = false;
+
+            for (var i = 0; i < when.Sources.Count; i++)
+            {
+                var device = world.FindDevice(when.Sources[i]);
+                if (device == null)
+                {
+                    anyMissing = true;
+                    all = false;
+                    continue;
+                }
+
+                var definition = device.Kind.FindEvent(when.EventId);
+                if (definition == null)
+                {
+                    all = false;
+                    continue;
+                }
+
+                var wanted = definition.Edge == SignalEdge.Rising;
+                if (device.GetSignal(definition.SignalId) != wanted)
+                    all = false;
+            }
+
+            TriggerSignalIsTrue = all;
+            HasMissingSources = anyMissing;
+
+            // Unknown until the second sample, so a condition that is already true
+            // when the sequence appears does not set it off.
+            var now = all ? 1 : 0;
+            var fired = _allState == 0 && now == 1;
+            _allState = now;
             return fired;
         }
 

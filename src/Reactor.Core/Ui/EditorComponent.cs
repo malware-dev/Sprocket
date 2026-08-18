@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Reactor.Ui
 {
     /// <summary>
@@ -11,28 +9,51 @@ namespace Reactor.Ui
     /// blocks out of primitives, and would drag layout into core - which is the one
     /// place it must never live.
     ///
-    /// Instead a target implements a renderer per component and owns everything
-    /// about how it looks, measures and arranges. Space Engineers can hand a
-    /// <see cref="BlockListComponent"/> straight to its own list control; a desktop
-    /// host can use a virtualizing list; a text-mode host can print it. None of them
-    /// have to agree on anything but the data.
+    /// Components are long-lived. A page creates them once and thereafter changes
+    /// their values and their lists, which is what lets a target build its controls
+    /// once and keep them - along with focus, carets and scroll positions.
     ///
     /// The set is kept small deliberately. Every component added is work multiplied
     /// by the number of targets, so a new one has to earn its place.
     /// </remarks>
-    public abstract class EditorComponent
+    public abstract class EditorComponent : Observable
     {
+        bool _fills;
+
+        /// <summary>
+        /// Whether this component should take whatever space is left and scroll
+        /// inside itself, rather than the screen scrolling as a whole.
+        /// </summary>
+        /// <remarks>
+        /// Set on the one long list a screen is really about. Without it a target
+        /// scrolls the entire screen, which drags the search box and the filters off
+        /// the top along with the rows they are filtering.
+        ///
+        /// At most one component per screen should set this. A screen with none - a
+        /// form, a page of sections - simply scrolls as a whole, which is right for it.
+        /// </remarks>
+        public bool Fills
+        {
+            get { return _fills; }
+            set { Set(ref _fills, value, "Fills"); }
+        }
     }
 
     /// <summary>A label introducing the section under it.</summary>
     public sealed class HeadingComponent : EditorComponent
     {
+        string _text;
+
         public HeadingComponent(string text)
         {
-            Text = text;
+            _text = text;
         }
 
-        public string Text { get; set; }
+        public string Text
+        {
+            get { return _text; }
+            set { Set(ref _text, value, "Text"); }
+        }
     }
 
     public enum NoticeLevel
@@ -49,20 +70,31 @@ namespace Reactor.Ui
     /// </summary>
     /// <remarks>
     /// Used above all for broken references. A sequence quietly doing nothing is
-    /// indistinguishable from a sequence that works, which is the exact shape of failure
-    /// a non-programmer cannot diagnose - so it is never silent.
+    /// indistinguishable from one that works, which is the exact shape of failure a
+    /// non-programmer cannot diagnose - so it is never silent.
     /// </remarks>
     public sealed class NoticeComponent : EditorComponent
     {
+        string _text;
+        NoticeLevel _level;
+
         public NoticeComponent(string text, NoticeLevel level)
         {
-            Text = text;
-            Level = level;
+            _text = text;
+            _level = level;
         }
 
-        public string Text { get; set; }
+        public string Text
+        {
+            get { return _text; }
+            set { Set(ref _text, value, "Text"); }
+        }
 
-        public NoticeLevel Level { get; set; }
+        public NoticeLevel Level
+        {
+            get { return _level; }
+            set { Set(ref _level, value, "Level"); }
+        }
     }
 
     /// <summary>One kind filter offered beside a search box.</summary>
@@ -75,11 +107,11 @@ namespace Reactor.Ui
             Command = command;
         }
 
-        public string Label { get; set; }
+        public string Label { get; private set; }
 
-        public bool IsCurrent { get; set; }
+        public bool IsCurrent { get; private set; }
 
-        public int Command { get; set; }
+        public int Command { get; private set; }
     }
 
     /// <summary>
@@ -92,20 +124,31 @@ namespace Reactor.Ui
     /// </remarks>
     public sealed class BlockSearchComponent : EditorComponent
     {
+        string _text;
+        int _command;
+
         public BlockSearchComponent(string text, int command)
         {
-            Text = text;
-            Command = command;
-            Filters = new List<BlockFilter>();
+            _text = text;
+            _command = command;
+            Filters = new ObservableList<BlockFilter>();
         }
 
         /// <summary>Current search text.</summary>
-        public string Text { get; set; }
+        public string Text
+        {
+            get { return _text; }
+            set { Set(ref _text, value, "Text"); }
+        }
 
         /// <summary>Send the new text here when the user types.</summary>
-        public int Command { get; set; }
+        public int Command
+        {
+            get { return _command; }
+            set { Set(ref _command, value, "Command"); }
+        }
 
-        public List<BlockFilter> Filters { get; private set; }
+        public ObservableList<BlockFilter> Filters { get; private set; }
     }
 
     /// <summary>How a block list behaves when a row is acted on.</summary>
@@ -119,8 +162,12 @@ namespace Reactor.Ui
     }
 
     /// <summary>One block in a list.</summary>
-    public sealed class BlockEntry
+    public sealed class BlockEntry : Observable
     {
+        string _status;
+        bool _isActive;
+        int _sequenceCount;
+
         public BlockEntry(long deviceId, string name, string kind, int command)
         {
             DeviceId = deviceId;
@@ -129,28 +176,40 @@ namespace Reactor.Ui
             Command = command;
         }
 
-        public long DeviceId { get; set; }
+        public long DeviceId { get; private set; }
 
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
-        public string Kind { get; set; }
+        public string Kind { get; private set; }
+
+        public int Command { get; private set; }
+
+        /// <summary>Picked, in <see cref="BlockListMode.Choose"/>.</summary>
+        public bool IsChosen { get; set; }
 
         /// <summary>Live state, in the user's words: "closed", "opening…", "62%".</summary>
-        public string Status { get; set; }
+        public string Status
+        {
+            get { return _status; }
+            set { Set(ref _status, value, "Status"); }
+        }
 
         /// <summary>Whether it is doing something right now.</summary>
-        public bool IsActive { get; set; }
+        public bool IsActive
+        {
+            get { return _isActive; }
+            set { Set(ref _isActive, value, "IsActive"); }
+        }
 
         /// <summary>
         /// How many sequences touch this block, so "what is affecting this?" is
         /// answerable by looking rather than by reading every sequence.
         /// </summary>
-        public int SequenceCount { get; set; }
-
-        /// <summary>Picked, in <see cref="BlockListMode.Choose"/>.</summary>
-        public bool IsChosen { get; set; }
-
-        public int Command { get; set; }
+        public int SequenceCount
+        {
+            get { return _sequenceCount; }
+            set { Set(ref _sequenceCount, value, "SequenceCount"); }
+        }
     }
 
     /// <summary>
@@ -158,24 +217,30 @@ namespace Reactor.Ui
     /// </summary>
     /// <remarks>
     /// In <see cref="BlockListMode.Choose"/> only blocks that would leave the sequence
-    /// sayable appear at all, so an impossible combination is unreachable rather
-    /// than rejected. Picking several is the ordinary case, which is what keeps
-    /// iteration out of the language entirely.
+    /// sayable appear at all, so an impossible combination is unreachable rather than
+    /// rejected. Picking several is the ordinary case, which is what keeps iteration
+    /// out of the language entirely.
     /// </remarks>
     public sealed class BlockListComponent : EditorComponent
     {
+        string _emptyText;
+
         public BlockListComponent(BlockListMode mode)
         {
             Mode = mode;
-            Entries = new List<BlockEntry>();
+            Entries = new ObservableList<BlockEntry>();
         }
 
-        public BlockListMode Mode { get; set; }
+        public BlockListMode Mode { get; private set; }
 
-        public List<BlockEntry> Entries { get; private set; }
+        public ObservableList<BlockEntry> Entries { get; private set; }
 
         /// <summary>Shown instead of the list when nothing matches.</summary>
-        public string EmptyText { get; set; }
+        public string EmptyText
+        {
+            get { return _emptyText; }
+            set { Set(ref _emptyText, value, "EmptyText"); }
+        }
     }
 
     /// <summary>One option in a choice list.</summary>
@@ -188,21 +253,20 @@ namespace Reactor.Ui
             Command = command;
         }
 
-        public string Text { get; set; }
+        public string Text { get; private set; }
 
-        public bool IsCurrent { get; set; }
+        public bool IsCurrent { get; private set; }
 
-        public int Command { get; set; }
+        public int Command { get; private set; }
 
         /// <summary>
-        /// How often, in ticks, this option's indicator should blink - or 0 for no
-        /// indicator at all.
+        /// How often, in ticks, this option's indicator should blink - or 0 for none.
         /// </summary>
         /// <remarks>
-        /// Used by the repeat rates, where the label alone asks the reader to imagine
-        /// a speed. A dot blinking at the actual rate is the thing itself, and an
-        /// interval of one tick simply reads as constantly lit - which is exactly
-        /// what it means. The words stay; the blink is what makes them concrete.
+        /// Used by the repeat rates, where the label alone asks the reader to imagine a
+        /// speed. A dot blinking at the actual rate is the thing itself, and an
+        /// interval of one tick simply reads as constantly lit - which is exactly what
+        /// it means. The words stay; the blink makes them concrete.
         /// </remarks>
         public int BlinkTicks { get; set; }
 
@@ -220,70 +284,98 @@ namespace Reactor.Ui
     /// A short list of named options - what can happen, what to do, how often.
     /// </summary>
     /// <remarks>
-    /// Short by construction: it only ever contains what the blocks in the sequence can
-    /// actually do, so there is never an invalid option to offer or explain.
+    /// Short by construction: it only ever contains what the blocks in the sequence
+    /// can actually do, so there is never an invalid option to offer or explain.
     /// </remarks>
     public sealed class ChoiceListComponent : EditorComponent
     {
+        string _emptyText;
+
         public ChoiceListComponent()
         {
-            Entries = new List<ChoiceEntry>();
+            Entries = new ObservableList<ChoiceEntry>();
         }
 
-        public List<ChoiceEntry> Entries { get; private set; }
+        public ObservableList<ChoiceEntry> Entries { get; private set; }
 
-        public string EmptyText { get; set; }
+        public string EmptyText
+        {
+            get { return _emptyText; }
+            set { Set(ref _emptyText, value, "EmptyText"); }
+        }
     }
 
     /// <summary>One sequence, summarised to a line.</summary>
-    public sealed class SequenceEntry
+    public sealed class SequenceEntry : Observable
     {
+        string _summary;
+        string _status;
+        string _lastRun;
+        string _problem;
+        bool _pulse;
+
         public SequenceEntry(int sequenceId, string summary, int command)
         {
             SequenceId = sequenceId;
-            Summary = summary;
+            _summary = summary;
             Command = command;
-
-            // Not zero: zero is a real key ("just now"), so a fresh entry has to start
-            // at a value no computed key can equal, or the first update is skipped.
-            LastRunKey = int.MinValue;
         }
 
-        public int SequenceId { get; set; }
+        public int SequenceId { get; private set; }
 
-        /// <summary>The sequence read as one sentence.</summary>
-        public string Summary { get; set; }
+        public int Command { get; private set; }
 
-        /// <summary>Live: waiting, running, last fired.</summary>
-        public string Status { get; set; }
+        /// <summary>The sequence read as one line - its name, or its whole sentence.</summary>
+        public string Summary
+        {
+            get { return _summary; }
+            set { Set(ref _summary, value, "Summary"); }
+        }
+
+        /// <summary>Live: waiting, running, switched off.</summary>
+        public string Status
+        {
+            get { return _status; }
+            set { Set(ref _status, value, "Status"); }
+        }
+
+        /// <summary>When it last ran, in words. Empty if it never has.</summary>
+        public string LastRun
+        {
+            get { return _lastRun; }
+            set { Set(ref _lastRun, value, "LastRun"); }
+        }
 
         /// <summary>Lit briefly each time it fires - the visible heartbeat.</summary>
-        public bool Pulse { get; set; }
+        public bool Pulse
+        {
+            get { return _pulse; }
+            set { Set(ref _pulse, value, "Pulse"); }
+        }
 
-        /// <summary>When it last ran, in words: "just now", "3 minutes ago", or empty.</summary>
-        public string LastRun { get; set; }
-
-        /// <summary>
-        /// Bookkeeping, not for display: the key <see cref="LastRun"/> was built from,
-        /// so the words are only rebuilt when they would actually differ.
-        /// </summary>
-        public int LastRunKey { get; set; }
-
-        public string Problem { get; set; }
-
-        public int Command { get; set; }
+        public string Problem
+        {
+            get { return _problem; }
+            set { Set(ref _problem, value, "Problem"); }
+        }
     }
 
     /// <summary>Sequences, one line each.</summary>
     public sealed class SequenceListComponent : EditorComponent
     {
+        string _emptyText;
+
         public SequenceListComponent()
         {
-            Entries = new List<SequenceEntry>();
+            Entries = new ObservableList<SequenceEntry>();
         }
 
-        public List<SequenceEntry> Entries { get; private set; }
+        public ObservableList<SequenceEntry> Entries { get; private set; }
 
-        public string EmptyText { get; set; }
+        public string EmptyText
+        {
+            get { return _emptyText; }
+            set { Set(ref _emptyText, value, "EmptyText"); }
+        }
     }
 }

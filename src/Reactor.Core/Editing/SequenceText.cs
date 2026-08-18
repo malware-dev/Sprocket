@@ -32,6 +32,25 @@ namespace Reactor.Editing
         /// </remarks>
         public static string DescribeDevices(IWorld world, IList<long> deviceIds)
         {
+            return Join(world, deviceIds, " and ");
+        }
+
+        /// <summary>
+        /// Names a selection where any one of them counts, joined with "or".
+        /// </summary>
+        /// <remarks>
+        /// Trigger sources fire on whichever of them happens first, so "and" would
+        /// state the opposite of what the sequence does. It also fixes the grammar:
+        /// "when the port door or the starboard door finishes opening" agrees, where
+        /// "and" would need "finish".
+        /// </remarks>
+        public static string DescribeDevicesAny(IWorld world, IList<long> deviceIds)
+        {
+            return Join(world, deviceIds, " or ");
+        }
+
+        static string Join(IWorld world, IList<long> deviceIds, string joiner)
+        {
             if (deviceIds.Count == 0)
                 return EmptySlotText;
 
@@ -45,13 +64,23 @@ namespace Reactor.Editing
             if (names.Count == 1)
                 return names[0];
             if (names.Count == 2)
-                return names[0] + " and " + names[1];
+                return names[0] + joiner + names[1];
 
             var builder = new StringBuilder();
             builder.Append(names[0]).Append(", ").Append(names[1]);
-            builder.Append(" and ").Append(names.Count - 2);
+            builder.Append(joiner).Append(names.Count - 2);
             builder.Append(" more");
             return builder.ToString();
+        }
+
+        /// <summary>
+        /// Names a trigger's sources with the joiner that says what it actually does.
+        /// </summary>
+        public static string DescribeSources(IWorld world, WhenTrigger when)
+        {
+            return when.RequiresAll
+                ? DescribeDevices(world, when.Sources)
+                : DescribeDevicesAny(world, when.Sources);
         }
 
         /// <summary>The whole first line: "When the hangar door finishes opening".</summary>
@@ -70,7 +99,7 @@ namespace Reactor.Editing
                         break;
                     }
                 }
-                return "When " + DescribeDevices(world, when.Sources) + " " + text;
+                return "When " + DescribeSources(world, when) + " " + text;
             }
 
             var every = trigger as EveryTrigger;
@@ -91,6 +120,15 @@ namespace Reactor.Editing
         /// </remarks>
         public static string DescribeStep(IWorld world, Step step)
         {
+            // A step with a duration and nothing to do is simply a wait, and reads
+            // better as one than as "after 5 seconds — nothing".
+            if (!step.HasAction)
+            {
+                var pause = step.Gate as AfterGate;
+                if (pause != null)
+                    return "wait " + DescribeDuration(pause.Ticks);
+            }
+
             var body = DescribeAction(world, step);
             var gate = DescribeGate(world, step.Gate);
             return gate.Length == 0 ? body : gate + " — " + body;
@@ -156,6 +194,27 @@ namespace Reactor.Editing
             }
 
             return text + " " + DescribeDevices(world, step.Targets);
+        }
+
+        /// <summary>
+        /// A duration in the units a person would say it in.
+        /// </summary>
+        /// <remarks>
+        /// Seconds here rather than ticks, because nobody thinks "wait three hundred
+        /// ticks". The tick count is still shown alongside when the duration is being
+        /// chosen, which is where the two vocabularies need to meet.
+        /// </remarks>
+        public static string DescribeDuration(int ticks)
+        {
+            if (ticks < 60)
+                return ticks == 1 ? "1 tick" : ticks + " ticks";
+
+            var seconds = ticks / 60;
+            if (seconds < 60)
+                return seconds == 1 ? "1 second" : seconds + " seconds";
+
+            var minutes = seconds / 60;
+            return minutes == 1 ? "a minute" : minutes + " minutes";
         }
 
         static string DescribeTicks(int ticks)

@@ -39,7 +39,6 @@ sealed class SequenceRenderer : ComponentRenderer
     Border _liveBadge = null!;
     Button _enable = null!;
     TextBox _name = null!;
-    bool _echoName;
 
     public SequenceRenderer(ReactorEditor editor, SequenceComponent model) : base(editor)
     {
@@ -48,16 +47,6 @@ sealed class SequenceRenderer : ComponentRenderer
     }
 
     public override Control Control => _root;
-
-    public override bool TryBind(EditorComponent component)
-    {
-        if (component is not SequenceComponent sentence || !SameShape(sentence))
-            return false;
-
-        _model = sentence;
-        Update();
-        return true;
-    }
 
     public override void Update()
     {
@@ -77,9 +66,7 @@ sealed class SequenceRenderer : ComponentRenderer
         {
             // Same guard as the search box: only push down when it genuinely differs,
             // or typing fights with the refresh.
-            _echoName = true;
             _name.Text = name;
-            _echoName = false;
         }
 
         _liveBadge.IsVisible = _model.Trigger.IsLiveNow;
@@ -209,9 +196,15 @@ sealed class SequenceRenderer : ComponentRenderer
 
         _name.TextChanged += (_, _) =>
         {
-            if (_echoName)
+        // Compared against what core holds rather than guarded by a flag around the
+        // assignment: Avalonia raises this after the assignment has returned, by which
+        // time any such flag is down again, so our own echo arrives looking exactly
+        // like a keystroke.
+            var text = _name.Text ?? "";
+            if (text == (_model.Name ?? ""))
                 return;
-            Editor.SetText(_model.NameCommand, _name.Text ?? "");
+
+            Editor.SetText(_model.NameCommand, text);
         };
 
         return _name;

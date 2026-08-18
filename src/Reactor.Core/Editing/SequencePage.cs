@@ -10,10 +10,11 @@ namespace Reactor.Editing
     /// </summary>
     sealed class SequencePage : EditorPage
     {
+        static readonly int[] WaitPresets = { 60, 120, 300, 600, 1800, 3600 };
+
         readonly Sequence _sequence;
 
         SequenceComponent _sentence;
-        int _lastRunKey = int.MinValue;
 
         public SequencePage(ReactorEditor editor, Sequence sequence) : base(editor)
         {
@@ -37,7 +38,7 @@ namespace Reactor.Editing
             get { return SequenceSummary.Status(_sequence, Editor.Runner.Get(_sequence)); }
         }
 
-        public override void Build(EditorScreen screen)
+        public override void Build(List<EditorComponent> components)
         {
             _sentence = new SequenceComponent(_sequence.Id, BuildTrigger());
             _sentence.Enabled = _sequence.Enabled;
@@ -50,12 +51,15 @@ namespace Reactor.Editing
             for (var i = 0; i < _sequence.Steps.Count; i++)
                 _sentence.Steps.Add(BuildStep(i, _sequence.Steps[i]));
 
-            // Only one way to extend a sequence. There is no "wait" to add, because
-            // waiting is what a step already does.
+            // Two kinds of step, so two ways to add one. Waiting a set time is not an
+            // action on a block and pretending otherwise is what makes the flow
+            // awkward - it gets its own door instead.
             _sentence.AddOptions.Add(new ChoiceEntry("do something", false,
                 Editor.Register(AddAction)));
+            _sentence.AddOptions.Add(new ChoiceEntry("wait", false,
+                Editor.Register(AddWait)));
 
-            screen.Components.Add(_sentence);
+            components.Add(_sentence);
         }
 
         public override void Refresh()
@@ -73,15 +77,7 @@ namespace Reactor.Editing
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
 
-            // Only reworded when the words would change - about once a second at
-            // first, then once a minute, then never.
-            var ticksAgo = SequenceSummary.TicksSinceRun(state, Editor.CurrentTick);
-            var key = Elapsed.Bucket(ticksAgo);
-            if (_lastRunKey != key)
-            {
-                _lastRunKey = key;
-                _sentence.LastRun = Elapsed.Ago(ticksAgo);
-            }
+            _sentence.LastRun = Elapsed.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
             _sentence.Trigger.IsLiveNow = state != null && state.TriggerSignalIsTrue;
 
             for (var i = 0; i < _sentence.Steps.Count; i++)
@@ -113,14 +109,14 @@ namespace Reactor.Editing
 
             var trigger = new SentenceTrigger("When");
             trigger.Slots.Add(new SentenceSlot(
-                SequenceText.DescribeDevices(Editor.World, when.Sources),
+                SequenceText.DescribeSources(Editor.World, when),
                 when.Sources.Count == 0,
-                Editor.Register(EditSources)));
+                Editor.Register(EditTrigger)));
 
             trigger.Slots.Add(new SentenceSlot(
                 EventText(events, when.EventId),
                 events.Count == 0 || !HasEvent(events, when.EventId),
-                Editor.Register(EditEvent)));
+                Editor.Register(EditTrigger)));
 
             return trigger;
         }
@@ -144,6 +140,17 @@ namespace Reactor.Editing
             built.MoveDownCommand = Editor.Register(delegate { Move(position, position + 1); });
             built.DeleteCommand = Editor.Register(delegate { RemoveStep(step); });
 
+            // A pure wait has no blocks and no verb, just a duration.
+            var pause = step.Gate as AfterGate;
+            if (step.Targets.Count == 0 && pause != null)
+            {
+                built.Lead = "wait";
+                built.Slots.Add(new SentenceSlot(
+                    SequenceText.DescribeDuration(pause.Ticks), false,
+                    Editor.Register(delegate { EditWait(step); })));
+                return built;
+            }
+
             // Ordinarily a step is just "close the inner door" - the ordering is
             // carried by the list, so nothing here says when it happens. A gate reads
             // as a lead-in, and only appears when one was deliberately added.
@@ -156,45 +163,35 @@ namespace Reactor.Editing
             built.Slots.Add(new SentenceSlot(
                 ActionText(actions, step.ActionId),
                 actions.Count == 0 || !HasAction(actions, step.ActionId),
-                Editor.Register(delegate { EditAction(step); })));
+                Editor.Register(delegate { EditStep(step); })));
 
             built.Slots.Add(new SentenceSlot(
                 SequenceText.DescribeDevices(Editor.World, step.Targets),
                 step.Targets.Count == 0,
-                Editor.Register(delegate { EditTargets(step); })));
+                Editor.Register(delegate { EditStep(step); })));
 
             return built;
         }
 
-        void EditSources()
+        /// <summary>
+        /// Opens the whole trigger - blocks and what happens - as one path.
+        /// </summary>
+        /// <remarks>
+        /// Both slots lead here rather than each opening half of it. Which half you
+        /// pressed is not really a different intent: you are looking at the trigger.
+        /// </remarks>
+        void EditTrigger()
         {
             var when = _sequence.Trigger as WhenTrigger;
             if (when == null)
                 return;
 
-            Editor.Push(new BlockPickerPage(Editor, "What should this listen to?",
-                when.Sources, true));
-        }
-
-        void EditEvent()
-        {
-            var when = _sequence.Trigger as WhenTrigger;
-            if (when == null)
-                return;
-
-            var page = new ChoicePage(Editor, "What should it do?");
-            var events = Vocabulary.EventsFor(Editor.World, when.Sources);
-            for (var i = 0; i < events.Count; i++)
-            {
-                var id = events[i].Id;
-                page.Add(events[i].Text, id == when.EventId, delegate
-                {
-                    when.EventId = id;
-                    Editor.Pop();
-                });
-            }
-            page.EmptyText = "Pick what this listens to first — then there will be something to choose here.";
-            Editor.Push(page);
+            Editor.Push(new PickPathPage(Editor, "When something happens", when.Sources, true,
+                delegate { return when.EventId; },
+                delegate(string id) { when.EventId = id; },
+                Editor.Pop,
+                delegate { return when.RequiresAll; },
+                delegate(bool all) { when.RequiresAll = all; }));
         }
 
         void EditCadence()
@@ -208,32 +205,76 @@ namespace Reactor.Editing
             Editor.Push(Editor.RatePage(every, Editor.Pop));
         }
 
-        void EditAction(Step step)
+        void EditStep(Step step)
         {
-            var page = new ChoicePage(Editor, "What should happen to them?");
-            var actions = Vocabulary.ActionsFor(Editor.World, step.Targets);
-            for (var i = 0; i < actions.Count; i++)
-            {
-                var id = actions[i].Id;
-                page.Add(actions[i].Text, id == step.ActionId, delegate
-                {
-                    step.ActionId = id;
-                    Editor.Pop();
-                });
-            }
-            page.EmptyText = "Pick what this affects first — then there will be something to choose here.";
-            Editor.Push(page);
+            Editor.Push(new PickPathPage(Editor, "Do something", step.Targets, false,
+                delegate { return step.ActionId; },
+                delegate(string id) { step.ActionId = id; },
+                Editor.Pop));
         }
 
-        void EditTargets(Step step)
-        {
-            Editor.Push(new BlockPickerPage(Editor, "What should this affect?", step.Targets, false));
-        }
-
+        /// <summary>
+        /// Asks what to affect, then what to do to it.
+        /// </summary>
+        /// <remarks>
+        /// Blocks first, because the user knows which block they mean but may not know
+        /// what verbs exist - pointing at a door and being told what a door can do is
+        /// discovery, whereas every verb on the ship in one list is a wall.
+        ///
+        /// The step is not added until both are answered, so backing out leaves no
+        /// half-written line behind.
+        /// </remarks>
         void AddAction()
         {
-            _sequence.Steps.Add(new Step(""));
-            Editor.Invalidate();
+            var origin = Editor.Depth;
+            var step = new Step("");
+
+            Editor.Push(new PickPathPage(Editor, "Do something", step.Targets, false,
+                delegate { return step.ActionId; },
+                delegate(string id) { step.ActionId = id; },
+                delegate
+                {
+                    _sequence.Steps.Add(step);
+                    Editor.UnwindTo(origin);
+                }));
+        }
+
+        /// <summary>
+        /// A timed wait, for the things that have no completion signal to wait on -
+        /// flashing a beacon, mostly. Rare, and deliberately the second option.
+        /// </summary>
+        void AddWait()
+        {
+            var origin = Editor.Depth;
+            Editor.Push(WaitPage(delegate(int ticks)
+            {
+                var step = new Step("");
+                step.Gate = new AfterGate(ticks);
+                _sequence.Steps.Add(step);
+                Editor.UnwindTo(origin);
+            }));
+        }
+
+        ChoicePage WaitPage(System.Action<int> chosen)
+        {
+            var page = new ChoicePage(Editor, "How long should it wait?");
+            for (var i = 0; i < WaitPresets.Length; i++)
+            {
+                var ticks = WaitPresets[i];
+                var label = SequenceText.DescribeDuration(ticks) + " — " + ticks + " ticks";
+                page.Add(label, false, delegate { chosen(ticks); });
+            }
+            return page;
+        }
+
+        void EditWait(Step step)
+        {
+            var origin = Editor.Depth;
+            Editor.Push(WaitPage(delegate(int ticks)
+            {
+                step.Gate = new AfterGate(ticks);
+                Editor.UnwindTo(origin);
+            }));
         }
 
         void RemoveStep(Step step)

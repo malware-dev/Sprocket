@@ -11,9 +11,20 @@ static class Driving
     public static T Component<T>(this ReactorEditor editor) where T : EditorComponent =>
         editor.Screen.Components.OfType<T>().First();
 
+    static IEnumerable<PathPane> Panes(this ReactorEditor editor) =>
+        editor.Screen.Components.OfType<PathComponent>().SelectMany(p => p.Panes);
+
     public static void PressBlock(this ReactorEditor editor, string name)
     {
-        var entry = editor.Component<BlockListComponent>().Entries.First(e => e.Name == name);
+        var block = editor.Screen.Components.OfType<BlockListComponent>()
+            .SelectMany(l => l.Entries).FirstOrDefault(e => e.Name == name);
+        if (block != null)
+        {
+            editor.Invoke(block.Command);
+            return;
+        }
+
+        var entry = editor.Panes().SelectMany(p => p.Entries).First(e => e.Text == name);
         editor.Invoke(entry.Command);
     }
 
@@ -25,6 +36,17 @@ static class Driving
             if (entry == null)
                 continue;
             editor.Invoke(entry.Command);
+            return;
+        }
+
+        foreach (var pane in editor.Panes())
+        {
+            var option = pane.Options.FirstOrDefault(e => e.Text == text)
+                         ?? pane.Entries.Select(e => new ChoiceEntry(e.Text, e.IsChosen, e.Command))
+                             .FirstOrDefault(e => e.Text == text);
+            if (option == null)
+                continue;
+            editor.Invoke(option.Command);
             return;
         }
 

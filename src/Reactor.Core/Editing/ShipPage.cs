@@ -18,8 +18,12 @@ namespace Reactor.Editing
         readonly List<IDevice> _filtered = new List<IDevice>();
         readonly List<DeviceKind> _kinds = new List<DeviceKind>();
 
-        string _search = "";
+        string _searchText = "";
         string _kind = "";
+
+        readonly List<BlockFilter> _filters = new List<BlockFilter>();
+        readonly List<BlockEntry> _rows = new List<BlockEntry>();
+        BlockSearchComponent _search;
         BlockListComponent _list;
 
         public ShipPage(ReactorEditor editor) : base(editor)
@@ -38,30 +42,52 @@ namespace Reactor.Editing
             }
         }
 
-        public override void Build(EditorScreen screen)
+        /// <summary>
+        /// Hands back the same two components every time, with new contents.
+        /// </summary>
+        /// <remarks>
+        /// Typing in the search box changes which blocks are listed, which runs this
+        /// again. Making a new search component each time would mean a target
+        /// rebuilding the very text field being typed into.
+        /// </remarks>
+        public override void Build(List<EditorComponent> components)
         {
             Collect();
 
-            var search = new BlockSearchComponent(_search, Editor.RegisterText(OnSearch));
-            search.Filters.Add(new BlockFilter("All", _kind.Length == 0, Editor.Register(ClearKind)));
+            if (_search == null)
+                _search = new BlockSearchComponent(_searchText, 0);
+
+            _search.Text = _searchText;
+            _search.Command = Editor.RegisterText(OnSearch);
+
+            _filters.Clear();
+            _filters.Add(new BlockFilter("All", _kind.Length == 0, Editor.Register(ClearKind)));
             for (var i = 0; i < _kinds.Count; i++)
             {
                 var id = _kinds[i].Id;
-                search.Filters.Add(new BlockFilter(_kinds[i].DisplayName, _kind == id,
+                _filters.Add(new BlockFilter(_kinds[i].DisplayName, _kind == id,
                     Editor.Register(delegate { SetKind(id); })));
             }
-            screen.Components.Add(search);
+            _search.Filters.Reset(_filters);
+            components.Add(_search);
 
-            _list = new BlockListComponent(BlockListMode.Navigate);
-            _list.EmptyText = "Nothing on the ship matches that.";
+            if (_list == null)
+            {
+                _list = new BlockListComponent(BlockListMode.Navigate);
+                _list.Fills = true;
+                _list.EmptyText = "Nothing on the ship matches that.";
+            }
+
+            _rows.Clear();
             for (var i = 0; i < _filtered.Count; i++)
             {
                 var device = _filtered[i];
                 var id = device.Id;
-                _list.Entries.Add(new BlockEntry(id, device.Name, device.Kind.DisplayName,
+                _rows.Add(new BlockEntry(id, device.Name, device.Kind.DisplayName,
                     Editor.Register(delegate { Open(id); })));
             }
-            screen.Components.Add(_list);
+            _list.Entries.Reset(_rows);
+            components.Add(_list);
         }
 
         public override void Refresh()
@@ -76,7 +102,6 @@ namespace Reactor.Editing
                 if (device == null)
                     continue;
 
-                entry.Name = device.Name;
                 entry.Status = device.Status;
                 entry.IsActive = device.IsActive;
                 entry.SequenceCount = Editor.Program.CountReferencing(entry.DeviceId);
@@ -94,12 +119,17 @@ namespace Reactor.Editing
             DeviceQuery.KindsPresent(_all, _kinds);
 
             _filtered.Clear();
-            DeviceQuery.Filter(_all, _search, _kind, _filtered);
+            DeviceQuery.Filter(_all, _searchText, _kind, _filtered);
         }
 
+        /// <summary>Takes new search text, and ignores text that is not new.</summary>
         void OnSearch(string value)
         {
-            _search = value;
+            value = value ?? "";
+            if (value == _searchText)
+                return;
+
+            _searchText = value;
             Editor.Invalidate();
         }
 

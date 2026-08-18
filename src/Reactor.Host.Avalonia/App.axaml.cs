@@ -11,7 +11,7 @@ public partial class App : Application
     /// <summary>
     /// One tick per frame, roughly matching the game's 60 simulation steps a second.
     /// </summary>
-    static readonly TimeSpan BeatInterval = TimeSpan.FromMilliseconds(16);
+    static readonly TimeSpan TickInterval = TimeSpan.FromMilliseconds(16);
 
     DispatcherTimer? _clock;
 
@@ -24,7 +24,7 @@ public partial class App : Application
             var window = new MainWindow();
             desktop.MainWindow = window;
 
-            _clock = new DispatcherTimer { Interval = BeatInterval };
+            _clock = new DispatcherTimer { Interval = TickInterval };
             _clock.Tick += (_, _) => window.Tick();
             _clock.Start();
         }

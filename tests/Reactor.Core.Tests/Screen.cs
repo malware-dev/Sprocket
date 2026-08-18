@@ -29,12 +29,22 @@ static class Screen
     public static SequenceComponent Sentence(this ReactorEditor editor) =>
         editor.Component<SequenceComponent>();
 
+    static IEnumerable<PathEntry> PathEntries(this ReactorEditor editor) =>
+        editor.Screen.Components.OfType<PathComponent>().SelectMany(p => p.Panes).SelectMany(p => p.Entries);
+
     public static void PressBlock(this ReactorEditor editor, string name)
     {
-        var list = editor.Component<BlockListComponent>();
-        var entry = list.Entries.FirstOrDefault(e => e.Name == name)
+        var list = editor.Screen.Components.OfType<BlockListComponent>().FirstOrDefault();
+        var block = list?.Entries.FirstOrDefault(e => e.Name == name);
+        if (block != null)
+        {
+            editor.Invoke(block.Command);
+            return;
+        }
+
+        var entry = editor.PathEntries().FirstOrDefault(e => e.Text == name)
                     ?? throw new InvalidOperationException(
-                        $"No block '{name}'. Present: {string.Join(", ", list.Entries.Select(e => e.Name))}");
+                        $"No block '{name}' on '{editor.Screen.Title}'.");
         editor.Invoke(entry.Command);
     }
 
@@ -49,8 +59,30 @@ static class Screen
             return;
         }
 
+        foreach (var pane in editor.Screen.Components.OfType<PathComponent>().SelectMany(p => p.Panes))
+        {
+            var option = pane.Options.FirstOrDefault(e => e.Text == text);
+            if (option != null)
+            {
+                editor.Invoke(option.Command);
+                return;
+            }
+
+            var entry = pane.Entries.FirstOrDefault(e => e.Text == text);
+            if (entry != null)
+            {
+                editor.Invoke(entry.Command);
+                return;
+            }
+        }
+
         throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title}'.");
     }
+
+    public static bool HasChoice(this ReactorEditor editor, string text) =>
+        editor.Screen.Components.OfType<ChoiceListComponent>().Any(l => l.Entries.Any(e => e.Text == text))
+        || editor.Screen.Components.OfType<PathComponent>().SelectMany(p => p.Panes)
+            .Any(p => p.Options.Any(e => e.Text == text) || p.Entries.Any(e => e.Text == text));
 
     public static void PressAdd(this ReactorEditor editor, string text) =>
         editor.Invoke(editor.Sentence().AddOptions.First(o => o.Text == text).Command);

@@ -53,9 +53,10 @@ namespace Reactor.Editing
                 _options[_options.Count - 1].Warning = warning;
         }
 
-        public override void Build(EditorScreen screen)
+        public override void Build(List<EditorComponent> components)
         {
             var list = new ChoiceListComponent();
+            list.Fills = true;
             list.EmptyText = EmptyText;
 
             for (var i = 0; i < _options.Count; i++)
@@ -68,7 +69,7 @@ namespace Reactor.Editing
                 list.Entries.Add(entry);
             }
 
-            screen.Components.Add(list);
+            components.Add(list);
         }
 
         sealed class Option

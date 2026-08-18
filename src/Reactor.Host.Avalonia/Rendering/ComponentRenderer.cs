@@ -29,7 +29,15 @@ abstract class ComponentRenderer
     /// Points this renderer at a component of the same kind after a structural
     /// rebuild, so controls the user is interacting with survive.
     /// </summary>
-    public abstract bool TryBind(EditorComponent component);
+    /// <summary>
+    /// Whether this renderer manages its own scrolling and should not be wrapped.
+    /// </summary>
+    /// <remarks>
+    /// True for anything that scrolls sideways or scrolls several regions
+    /// independently; wrapping one of those in a vertical scroller gives two
+    /// scrollbars fighting over the same gesture.
+    /// </remarks>
+    public virtual bool ScrollsItself => false;
 
     /// <summary>Re-reads live values. Called every tick.</summary>
     public abstract void Update();
@@ -48,6 +56,8 @@ abstract class ComponentRenderer
             return new ChoiceListRenderer(editor, choices);
         if (component is SequenceListComponent sequences)
             return new SequenceListRenderer(editor, sequences);
+        if (component is PathComponent path)
+            return new PathRenderer(editor, path);
         if (component is SequenceComponent sentence)
             return new SequenceRenderer(editor, sentence);
 

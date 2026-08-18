@@ -38,7 +38,7 @@ namespace Reactor.Editing
             }
         }
 
-        public override void Build(EditorScreen screen)
+        public override void Build(List<EditorComponent> components)
         {
             Collect();
 
@@ -48,13 +48,14 @@ namespace Reactor.Editing
             if (_sequences.Count == 0)
             {
                 _list = null;
-                screen.Components.Add(new HeadingComponent(
+                components.Add(new HeadingComponent(
                     "Nothing here yet. What should set something off?"));
-                screen.Components.Add(Starters());
+                components.Add(Starters());
                 return;
             }
 
             _list = new SequenceListComponent();
+            _list.Fills = true;
 
             for (var i = 0; i < _sequences.Count; i++)
             {
@@ -63,7 +64,7 @@ namespace Reactor.Editing
                     Editor.Register(delegate { Editor.Push(new SequencePage(Editor, sequence)); })));
             }
 
-            screen.Components.Add(_list);
+            components.Add(_list);
         }
 
         ChoiceListComponent Starters()

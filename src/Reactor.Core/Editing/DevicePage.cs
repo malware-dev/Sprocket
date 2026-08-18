@@ -45,12 +45,12 @@ namespace Reactor.Editing
             }
         }
 
-        public override void Build(EditorScreen screen)
+        public override void Build(List<EditorComponent> components)
         {
             var device = Editor.World.FindDevice(_deviceId);
             if (device == null)
             {
-                screen.Components.Add(new NoticeComponent(
+                components.Add(new NoticeComponent(
                     "This isn't part of your ship any more.", NoticeLevel.Problem));
                 return;
             }
@@ -61,7 +61,7 @@ namespace Reactor.Editing
             var actions = Vocabulary.ActionsFor(Editor.World, ids);
             if (actions.Count > 0)
             {
-                screen.Components.Add(new HeadingComponent("What should make this happen?"));
+                components.Add(new HeadingComponent("What should make this happen?"));
                 var list = new ChoiceListComponent();
                 for (var i = 0; i < actions.Count; i++)
                 {
@@ -69,13 +69,13 @@ namespace Reactor.Editing
                     list.Entries.Add(new ChoiceEntry(actions[i].Text, false,
                         Editor.Register(delegate { CreateAffecting(actionId); })));
                 }
-                screen.Components.Add(list);
+                components.Add(list);
             }
 
             var events = Vocabulary.EventsFor(Editor.World, ids);
             if (events.Count > 0)
             {
-                screen.Components.Add(new HeadingComponent("When this happens…"));
+                components.Add(new HeadingComponent("When this happens…"));
                 var list = new ChoiceListComponent();
                 for (var i = 0; i < events.Count; i++)
                 {
@@ -83,14 +83,14 @@ namespace Reactor.Editing
                     list.Entries.Add(new ChoiceEntry(events[i].Text, false,
                         Editor.Register(delegate { CreateTriggeredBy(eventId); })));
                 }
-                screen.Components.Add(list);
+                components.Add(list);
             }
 
             CollectSequences();
             if (_referencing.Count == 0)
                 return;
 
-            screen.Components.Add(new HeadingComponent("Already using this"));
+            components.Add(new HeadingComponent("Already using this"));
             _sequences = new SequenceListComponent();
             for (var i = 0; i < _referencing.Count; i++)
             {
@@ -98,7 +98,7 @@ namespace Reactor.Editing
                 _sequences.Entries.Add(new SequenceEntry(sequence.Id, "",
                     Editor.Register(delegate { Open(sequence); })));
             }
-            screen.Components.Add(_sequences);
+            components.Add(_sequences);
         }
 
         public override void Refresh()

@@ -30,6 +30,12 @@ namespace Reactor.Editing
             }
         }
 
+        /// <summary>Whether a plain label matches a search, just as forgivingly.</summary>
+        public static bool MatchesText(string text, string search)
+        {
+            return string.IsNullOrEmpty(search) || ContainsIgnoreCase(text, search);
+        }
+
         public static bool Matches(IDevice device, string search, string kindId)
         {
             if (device == null)
