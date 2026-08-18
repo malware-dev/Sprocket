@@ -69,6 +69,10 @@ namespace Reactor.Editing
             }
 
             Current.Refresh();
+
+            // Both are read every beat rather than only when the screen is
+            // rebuilt, so typing a name shows up in the heading as it is typed.
+            _screen.Title = Current.Title;
             _screen.Subtitle = Current.Subtitle;
         }
 

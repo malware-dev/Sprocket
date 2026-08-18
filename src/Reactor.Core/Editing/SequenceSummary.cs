@@ -43,9 +43,20 @@ namespace Reactor.Editing
             }
         }
 
-        /// <summary>The whole sequence as one sentence, for lists and headings.</summary>
+        /// <summary>
+        /// What to call this sequence: its name if it has one, otherwise the whole
+        /// thing read as a sentence.
+        /// </summary>
+        /// <remarks>
+        /// The name wins everywhere it exists, which is the entire point of allowing
+        /// one - a list of twenty sentences is unreadable, a list of twenty names is
+        /// not. Everything unnamed still reads perfectly well on its own.
+        /// </remarks>
         public static string Describe(IWorld world, Sequence sequence)
         {
+            if (sequence.HasName)
+                return sequence.Name;
+
             var trigger = SequenceText.DescribeTrigger(world, sequence.Trigger);
             if (sequence.Steps.Count == 0)
                 return trigger + " → nothing yet";

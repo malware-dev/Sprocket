@@ -89,6 +89,8 @@ public class ScreenshotTests
         Step(editor, 2, "Airlock Vent", "pump the air out");
         Step(editor, 3, "Airlock Outer Door", "unlock");
         Step(editor, 4, "Airlock Outer Door", "open");
+
+        editor.Name("Let me out");
     }
 
     static void Step(ReactorEditor editor, int index, string block, string action)

@@ -52,6 +52,9 @@ static class Driving
     public static void PressAction(this ReactorEditor editor, string text) =>
         editor.Invoke(editor.Screen.Actions.First(a => a.Text == text).Command);
 
+    public static void Name(this ReactorEditor editor, string name) =>
+        editor.SetText(editor.Component<SequenceComponent>().NameCommand, name);
+
     public static void Back(this ReactorEditor editor) => editor.Invoke(editor.Screen.BackCommand);
 
     /// <summary>Presses the screen's move-on action — "Next" or "Done".</summary>

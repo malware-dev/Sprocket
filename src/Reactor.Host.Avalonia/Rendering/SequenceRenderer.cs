@@ -37,6 +37,8 @@ sealed class SequenceRenderer : ComponentRenderer
     Border _problemBanner = null!;
     Border _liveBadge = null!;
     Button _enable = null!;
+    TextBox _name = null!;
+    bool _echoName;
 
     public SequenceRenderer(ReactorEditor editor, SequenceComponent model) : base(editor)
     {
@@ -67,6 +69,16 @@ sealed class SequenceRenderer : ComponentRenderer
         var hasProblem = !string.IsNullOrEmpty(_model.Problem);
         _problemBanner.IsVisible = hasProblem;
         _problem.Text = _model.Problem;
+
+        var name = _model.Name ?? "";
+        if (_name.Text != name)
+        {
+            // Same guard as the search box: only push down when it genuinely differs,
+            // or typing fights with the refresh.
+            _echoName = true;
+            _name.Text = name;
+            _echoName = false;
+        }
 
         _liveBadge.IsVisible = _model.Trigger.IsLiveNow;
         _enable.Content = _model.Enabled ? "on" : "off";
@@ -106,6 +118,7 @@ sealed class SequenceRenderer : ComponentRenderer
         _steps.Clear();
         _triggerSlots.Clear();
 
+        _root.Children.Add(BuildName());
         _root.Children.Add(BuildHeader());
         _root.Children.Add(BuildProblem());
         _root.Children.Add(BuildTrigger());
@@ -122,7 +135,7 @@ sealed class SequenceRenderer : ComponentRenderer
     {
         var grid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto,Auto,Auto"),
             Margin = new Thickness(0, 0, 0, 10)
         };
 
@@ -145,17 +158,55 @@ sealed class SequenceRenderer : ComponentRenderer
         Grid.SetColumn(_skippedBadge, 1);
         grid.Children.Add(_skippedBadge);
 
+        // Standing in for whatever would normally set this off, so an airlock can be
+        // tried without walking to the button.
+        var run = Widgets.Ghost("Run now");
+        run.Click += (_, _) => Editor.Invoke(_model.RunCommand);
+        Grid.SetColumn(run, 2);
+        grid.Children.Add(run);
+
         _enable = Widgets.Ghost("on");
         _enable.Click += (_, _) => Editor.SetToggle(_model.ToggleCommand, !_model.Enabled);
-        Grid.SetColumn(_enable, 2);
+        Grid.SetColumn(_enable, 3);
         grid.Children.Add(_enable);
 
         var delete = Widgets.Ghost("Delete");
         delete.Click += (_, _) => Editor.Invoke(_model.DeleteCommand);
-        Grid.SetColumn(delete, 3);
+        Grid.SetColumn(delete, 4);
         grid.Children.Add(delete);
 
         return grid;
+    }
+
+    /// <summary>
+    /// Optional, and it looks it: no label, just a faint line and a hint. Requiring a
+    /// name would put a naming task in front of somebody who only wants a door to open.
+    /// </summary>
+    Control BuildName()
+    {
+        _name = new TextBox
+        {
+            Text = _model.Name ?? "",
+            Watermark = "Name this sequence (optional)",
+            Background = Brushes.Transparent,
+            BorderBrush = Palette.Line,
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            // Quieter than the heading above it, which already shows the name. This
+            // is where the name is *changed*, not where it is announced.
+            Foreground = Palette.Muted,
+            FontSize = 12,
+            Padding = new Thickness(0, 3),
+            Margin = new Thickness(0, 0, 0, 10)
+        };
+
+        _name.TextChanged += (_, _) =>
+        {
+            if (_echoName)
+                return;
+            Editor.SetText(_model.NameCommand, _name.Text ?? "");
+        };
+
+        return _name;
     }
 
     Control BuildProblem()

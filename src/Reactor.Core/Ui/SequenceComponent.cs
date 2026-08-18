@@ -120,6 +120,31 @@ namespace Reactor.Ui
 
         public int SequenceId { get; set; }
 
+        /// <summary>
+        /// What the user calls this, or empty.
+        /// </summary>
+        /// <remarks>
+        /// Optional, and it has to look optional. A name buys two things - a list of
+        /// twenty sequences becomes legible, and more than one trigger can start the
+        /// same one - but requiring it would put a naming task in front of somebody
+        /// who just wants a door to open. An unnamed sequence reads as its own
+        /// sentence and is no worse off.
+        /// </remarks>
+        public string Name { get; set; }
+
+        /// <summary>Send the new name here when the user types.</summary>
+        public int NameCommand { get; set; }
+
+        /// <summary>
+        /// Starts the sequence by hand, as if its trigger had fired.
+        /// </summary>
+        /// <remarks>
+        /// Not a "run" button in the sense of a program being run - everything is
+        /// always running. It is a stand-in for the thing that would normally set it
+        /// off, so an airlock can be tested without walking to the button.
+        /// </remarks>
+        public int RunCommand { get; set; }
+
         public SentenceTrigger Trigger { get; set; }
 
         public List<SentenceStep> Steps { get; private set; }

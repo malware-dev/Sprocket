@@ -27,25 +27,27 @@ its `Rendering/` folder.
   pickers, the sentence view with live state.
 - **The prototype host.** Simulated ship where doors travel and vents cycle, a poke
   strip standing in for the world, and one renderer per component.
+- **Naming and running by hand.** A sequence can be named - optional, and it looks
+  optional - and the name then stands in for the sentence wherever it is listed.
+  `Run now` starts one as if its trigger had fired, so an airlock can be tested
+  without walking to the button.
 - **Headless screenshots.** `ScreenshotTests` writes PNGs to `%TEMP%\reactor-*.png`
   without opening a window. Useful for reviewing the design without launching.
 
-14 tests, all green.
+21 tests, all green.
 
 ## What is not built
 
 Ordered roughly by how much they hurt.
 
-1. **Naming a sequence.** The model supports it and the title falls back to the whole
-   sentence, so the airlock reads as "When Airlock Button is pressed → close Airlock
-   Inner Door (+4 more)" instead of "Let me out". Most visible gap.
-2. **Run this now.** A sequence with a `CalledTrigger` has nothing to start it, and
-   testing an airlock means walking to the button.
-3. **Authoring `only if` and `once`.** The model handles them and the editor renders
+1. **Calling one sequence from another.** Naming exists, but nothing consumes a name
+   yet - there is no step that runs a named sequence, so `CalledTrigger` is reachable
+   only through `Run now`. This is what makes a shared "Let me out" worth having.
+2. **Authoring `only if` and `once`.** The model handles them and the editor renders
    them if present, but nothing creates one.
-4. **"Why didn't it happen?"** The runtime records skipped steps structurally
+3. **"Why didn't it happen?"** The runtime records skipped steps structurally
    (`SequenceRunner.LastSkippedStep`); nothing surfaces it yet.
-5. **The Space Engineers host.** Not started. It implements `Rendering/` against the
+4. **The Space Engineers host.** Not started. It implements `Rendering/` against the
    same `Reactor.Ui` components and supplies an `IWorld` over the real grid.
 
 ## Known problems
@@ -78,15 +80,15 @@ Ordered roughly by how much they hurt.
 
 ## The next thing I would do
 
-Naming a sequence, then run-this-now. Both are small, both are needed before anyone
-can test an airlock without a tour of the ship, and together they make the sequence
-list readable. After that, the SE host — the sooner a second target exists, the sooner
-the component contract gets tested for real.
+Either calling a named sequence from a step - which is what naming was for, and is
+the last part of the language that is modelled but unreachable - or start the Space
+Engineers host. The sooner a second target exists, the sooner the component contract
+gets tested by something that is not Avalonia.
 
 ## Working notes
 
 ```
-dotnet test Reactor.slnx                          # 14 tests
+dotnet test Reactor.slnx                          # 21 tests
 dotnet run --project src/Reactor.Host.Avalonia    # the prototype
 ```
 

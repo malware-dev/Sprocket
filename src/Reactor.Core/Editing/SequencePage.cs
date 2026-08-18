@@ -28,12 +28,7 @@ namespace Reactor.Editing
         /// </summary>
         public override string Title
         {
-            get
-            {
-                return _sequence.HasName
-                    ? _sequence.Name
-                    : SequenceSummary.Describe(Editor.World, _sequence);
-            }
+            get { return SequenceSummary.Describe(Editor.World, _sequence); }
         }
 
         public override string Subtitle
@@ -47,6 +42,9 @@ namespace Reactor.Editing
             _sentence.Enabled = _sequence.Enabled;
             _sentence.ToggleCommand = Editor.RegisterToggle(SetEnabled);
             _sentence.DeleteCommand = Editor.Register(Delete);
+            _sentence.Name = _sequence.Name;
+            _sentence.NameCommand = Editor.RegisterText(SetName);
+            _sentence.RunCommand = Editor.Register(Run);
 
             for (var i = 0; i < _sequence.Steps.Count; i++)
                 _sentence.Steps.Add(BuildStep(i, _sequence.Steps[i]));
@@ -67,6 +65,7 @@ namespace Reactor.Editing
             var state = Editor.Runner.Get(_sequence);
 
             _sentence.Enabled = _sequence.Enabled;
+            _sentence.Name = _sequence.Name;
             _sentence.Status = SequenceSummary.Status(_sequence, state, Editor.Beat);
             _sentence.Problem = SequenceSummary.Problem(Editor.World, _sequence, state);
             _sentence.Pulse = state != null && state.LastFiredBeat >= 0
@@ -257,6 +256,22 @@ namespace Reactor.Editing
             _sequence.Steps.RemoveAt(from);
             _sequence.Steps.Insert(to, step);
             Editor.Invalidate();
+        }
+
+        /// <summary>
+        /// Renaming deliberately does not rebuild the screen. The shape has not
+        /// changed, and rebuilding would recreate the field mid-word and throw away
+        /// the caret.
+        /// </summary>
+        void SetName(string value)
+        {
+            _sequence.Name = value;
+        }
+
+        /// <summary>Starts it by hand, standing in for whatever would normally set it off.</summary>
+        void Run()
+        {
+            Editor.Runner.Call(_sequence);
         }
 
         void SetEnabled(bool on)
