@@ -188,6 +188,38 @@ Nothing is decided. It is written down because "we could add behaviour to the ga
 option that would otherwise not occur to somebody reasoning only about automation, and
 because the packaging question is easier to answer now than after the code exists.
 
+### What the game actually gives us
+
+Answered rather than assumed. Most of these were hedged in requirements until they were
+asked out loud.
+
+- **Events vary by event.** Some things the game will tell us about; others must be sampled
+  and the change worked out. This is per event, not a single answer, so the runtime has to
+  do both and the vocabulary has to know which is which.
+- **Levels are readable directly** - vent oxygen, tank fill, battery charge, as values.
+- **A block's appearance is readable**, to varying degree but mostly. Reading back a colour
+  and an on-or-off is available.
+- **A person can be told**, in several ways: chat, notifications, LCDs. See the endemic
+  preference below.
+- **An LCD will take almost anything.** The limit on screens is design and cost, not
+  capability.
+- **Docking is observable.**
+- **Storage is the save file**, or a separate data file. The save for everything except
+  exports and imports, which is what a separate file is for.
+- **A block's position is available**, and a block being placed can be noticed. A destroyed
+  block is destroyed, which needs no explaining.
+- **Being attacked** is probably an event, and failing that there are damage values to
+  sample.
+- **Constructs merging and splitting is entirely our problem.** The game does nothing for
+  us. We detect it, and we decide what it means.
+
+**And a preference that shapes several of these.** Where Reactor tells somebody something,
+prefer doing it *in the world* - a light, a sound, a screen on a wall - over the game's own
+interface. Endemic where possible. A warning that arrives as a chat line is a message from a
+mod; a warning that arrives as a red light in the corridor is the base telling you something,
+and the second is the game people came to play. Chat and notifications remain available and
+are sometimes right, particularly for somebody who is nowhere near the base at all.
+
 ### System
 
 A named set of sequences and states that belong together: an airlock, a hangar, a

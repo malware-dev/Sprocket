@@ -117,8 +117,8 @@ Waiting on such a condition needs no new kind of step. *Once* is already "hold h
 this is true", and already a sibling of *after so many ticks* - B only widens what the
 situation it waits on may be about.
 
-*Waits on Design.md decision 2, and on ApiUnknowns 2 - whether the game exposes a level
-as a value at all.*
+*Waits on Design.md decision 2. The game exposes levels as values directly, so nothing here
+is blocked by the game.*
 
 ## From story C - call it off, and put it back
 
@@ -204,8 +204,9 @@ something else, depends entirely on how this ends up being built.
 *Priority: low.* Likely a nice-to-have until something proves otherwise. Nothing else in
 the set depends on it.
 
-*Waits on ApiUnknowns 3. If a block's appearance cannot be read back, D cannot be served
-at any price.*
+*A block's appearance is readable, to varying degree but mostly, so D is servable. What is
+not readable for a given kind of block simply cannot be captured for it, and saying so is
+better than pretending otherwise.*
 
 ## From story E - three doors, one procedure
 
@@ -400,11 +401,14 @@ rather than argument.
 
 *Open, and worse: whether a crossing can be missed entirely.* On a coarse update tier a
 level may drop below and recover between two of our updates, and the event never
-happened as far as Reactor is concerned. See ApiUnknowns 10 and T3. This is the first
+happened as far as Reactor is concerned - but only where the event is one we have to watch
+for rather than one the game tells us about, and only where it changes and changes back
+inside a single update. See ApiUnknowns 1 and T3. This is the first
 requirement where being told rather than looking would change what can honestly be
 promised.
 
-*Waits on Design.md decision 2 and ApiUnknowns 2.*
+*Waits on Design.md decision 2. Levels are readable, so the question is how the event is
+detected rather than whether the value exists.*
 
 ### R17 - telling a person
 
@@ -419,13 +423,27 @@ It must reach somebody who is not in the room with the tank. That is the whole o
 whose warning this is - whoever owns the construct, whoever is aboard, whoever set the
 sequence up, or everyone. No story answers this and it cannot be guessed.
 
-**Open: what the game allows.** ApiUnknowns 4. A notice on screen, a sound that carries,
-something else, or nothing.
+**In the world before the interface.** Several ways exist - chat, notifications, screens -
+and the preference is to tell somebody through the world where that will reach them: a light
+in the corridor, a sound, a panel by the door. A warning arriving as a chat line is a message
+from a mod; a red light in the corridor is the base telling you something, and the second is
+the game people came to play. The game's own interface stays available and is sometimes
+right, particularly for somebody nowhere near the base.
+
+**Chat is for debugging, and only when asked for.** A running commentary in chat is genuinely
+useful while somebody is working out why a sequence misbehaves - it is the cheapest possible
+form of watching. It must never be on by default. Chat is shared, so a default that talks
+would put one person's diagnosis in front of everybody on the server, and the thing that gets
+switched off is not the noise but Reactor.
+
+So it is a choice somebody makes deliberately, about a particular thing they are debugging,
+and it stops when they stop. It also should not reach further than the person who asked for
+it, where the game allows that.
 
 This is the interrupting half of one capability. The ambient half is a screen that always
 shows how things are, which is story O and is not this requirement.
 
-*Waits on ApiUnknowns 4.*
+*Nothing about this is blocked by the game.*
 
 ## From story I - two airlocks that don't confuse each other
 
@@ -695,7 +713,7 @@ never surprises somebody by tidying up after them.
 *Already true, and never written down. Serves N, and quietly underpins A, C and D.*
 
 *N's remaining question is not ours: whether the game reports being attacked as something
-a block can trigger on. ApiUnknowns 9.*
+a block can trigger on. Probably an event; failing that, damage values can be sampled.*
 
 ## From story O - a screen that tells me how things are
 
@@ -713,7 +731,8 @@ schedule and a cost budget of its own - all three of which the sequence runtime 
 has. That is a second system doing the first system's job, built because screens felt
 special. They are not special; they are output.
 
-*Serves O. Waits on ApiUnknowns 5.*
+*Serves O. An LCD will take almost anything, so what a screen can be is limited by design
+and cost rather than by the game.*
 
 ### R34 - building a screen is its own authoring surface
 
@@ -839,10 +858,22 @@ It must not behave as though the step worked.
 **Only that sequence is affected.** Everything else on the construct keeps running. Losing
 a door should cost the airlock, not the lights, the hangar and the drills.
 
-**And it must not be confused with a role left deliberately empty.** R24 says an unfilled
-optional role is silently skipped and never reported; this says a lost block is reported
-and never silently skipped. From underneath both are "no block here", and only one is a
-problem. Telling them apart is a thing the system has to be able to do, not a thing we can
+**There are three different meanings of "there is no block here", and only one is a
+problem.**
+
+- **Deliberately empty.** An optional role nobody filled. Silently skipped, never reported -
+  R24.
+- **Gone.** A block that existed and was destroyed. Reported loudly - this requirement.
+- **Not yet built.** A construct being welded up from a projection arrives block by block,
+  so a system can be running before the blocks it needs exist. That is not damage and
+  nobody chose it; it is a thing that is about to be true.
+
+The third only became visible once projector building was considered, and it is not an edge
+case - it is how a great many constructs come into existence. Reporting it as damage would
+mean a newly projected ship screaming about missing blocks throughout its construction,
+which is both wrong and the fastest way to teach somebody to ignore the warnings.
+
+Telling the three apart is something the system has to be able to do, not something we can
 leave to context.
 
 *Already true for the reporting half - a missing device reads as gone and flags the
@@ -868,20 +899,25 @@ That signal is far stronger than matching by name, and it does not misfire on th
 from story U who has just spent an evening renaming everything - position and kind are not
 things you change by tidying up.
 
-**It also covers being copied.** A pasted blueprint, or a projection welded into
-existence, is entirely new blocks with new identities - but every one of them is the same
-kind in the same place, so the same healing that repairs a shot-out door repoints a whole
-copied ship. That only works if the automation travelled with the blueprint, which is not
-ours to decide.
+**It also covers being copied, and being built in the first place.** A pasted blueprint, or
+a projection welded into existence, is entirely new blocks with new identities - but every
+one of them is the same kind in the same place, so the same healing that repairs a shot-out
+door repoints a whole copied ship.
+
+**Projector building makes this ordinary rather than exceptional.** A projected construct is
+welded up block by block, so a system may be live while half its blocks do not exist yet,
+each one arriving in the place the system already expects it. Healing is therefore not only
+a repair feature - it is how a system built from a blueprint comes into service at all,
+filling in as the ship is welded. That is a considerably better reason to build it than
+cannonfire.
 
 It does not cover everything, and the requirement does not pretend to. A door rebuilt
 somewhere else, a section cut off and re-welded elsewhere, a block replaced with a
 different kind that does the same job: none of those heal, and all of them fall back to
 being pointed at by hand, which is what the rest of this requirement is for.
 
-*Waits on ApiUnknowns 8 - whether the game gives a mod a block's position on the construct
-in a form that survives the construct moving, and whether it can notice a block being
-placed.*
+*A block's position is available and a block being placed can be noticed, so healing is
+buildable. A destroyed block is destroyed, which needs no explaining.*
 
 *Serves P. Waits on R10 and R23.*
 
@@ -914,14 +950,20 @@ apart, and the program is attached to something that does not hold still.
   something else entirely. That is P's situation arriving wholesale, and the healing in R40
   does not apply because the blocks were not replaced - they left.
 - **Being copied.** A blueprint pasted, or a projection welded up, is a second construct
-  that looks identical. Whether it should carry the automation with it is a design
-  question with a good answer either way, and whether it *can* is ApiUnknowns 7.
+  that looks identical. Whether it should carry the automation with it is a design question
+  with a good answer either way, and what actually happens to our data on a copy is
+  ApiUnknowns 2.
+
+**The game does none of this for us.** Detecting a merge or a split is entirely our
+responsibility - nothing tells us, and nothing moves anything on our behalf. That makes it
+work rather than policy, and it is the reason this is written down while it is still cheap.
 
 None of this is specified. It is recorded because "the program belongs to the construct"
 sounds settled and is not, and because merge blocks are common enough that discovering it
 late would be expensive.
 
-*Waits on ApiUnknowns 7 and 11.*
+*Storage itself is settled: the save file, with a separate data file for exports and
+imports. What remains is ApiUnknowns 2.*
 
 ## From story Q - I pressed it twice
 
@@ -1012,9 +1054,8 @@ A connector connecting and disconnecting must be available as events, on both si
 That is the moment everything in T hangs off, and neither side of a dock can react to
 anything if the moment itself is not sayable.
 
-*Almost certainly a vocabulary matter rather than a language one - connector state is
-something the game reports. Recorded because T is unbuildable without it and nothing else
-in the set needs it.*
+*Docking is observable, so this is a vocabulary matter rather than a language one. Recorded
+because T is unbuildable without it and nothing else in the set needs it.*
 
 ### R46 - filling a tank is a wait, not a switch
 
@@ -1239,7 +1280,7 @@ the player flies away.
 
 *Consequence worth stating separately.* On a coarse tier, a change that happens and
 reverses between two updates was never visible at all. Whether that can happen, and what
-is owed to the player when it does, is not settled - see ApiUnknowns 1 and 10.
+is owed to the player when it does, is not settled - see ApiUnknowns 1.
 
 *Withdrawn premise.* This requirement previously said "never wake what the game left
 asleep", which assumed grids can be left alone. They cannot.

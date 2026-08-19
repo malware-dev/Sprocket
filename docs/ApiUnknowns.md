@@ -1,114 +1,61 @@
 # What we do not know about the game yet
 
-Internal. A register of questions about the Space Engineers API that block requirements
-from being settled. They are gathered here because the same ones keep surfacing while
-reasoning about stories, and because guessing at them is how a design acquires
-assumptions nobody remembers making.
+Internal. Questions about Space Engineers that block requirements from being settled.
+Gathered here because the same ones kept surfacing while reasoning about stories, and
+because guessing at them is how a design acquires assumptions nobody remembers making.
 
-None of these can be answered on the machine this is being written on. Each needs
-either the game, its API documentation, or an existing mod that already does the thing.
+**Most of the original register has been answered**, and the answers are in
+[Design.md](Design.md) under *What the game actually gives us*. Levels are readable,
+appearance is readable, docking is observable, storage is the save file, position is
+available, a person can be told in several ways, and an LCD will take almost anything.
 
-An answer belongs in Design.md once it is known. This file only holds the question.
+What follows is what genuinely remains.
 
 ---
 
-### 1. How a block event reaches us
+### 1. Which events are events, and which have to be watched
 
-What does Reactor actually get told when a button is pressed or a door finishes
-opening? Are these events we can subscribe to, or must the world be polled and edges
-worked out by comparing samples?
+Some things the game will tell us about; others must be sampled and the change worked out.
+That is per event rather than one answer, so this is not a question but a catalogue - and
+the catalogue has to be built by going through the block kinds we intend to support.
 
-*Gates* the whole trigger model, and R4 specifically: whether Reactor can know that a
-button was pressed when nothing was listening for it.
+Not blocking, but shaping. Every event that has to be sampled costs against T1 and T2, and
+sampled events are the only ones that can be missed entirely. It is worth knowing early
+which of the common ones - a button pressed, a door finishing, a sensor tripping, a
+connector locking - are told to us.
 
-### 2. Whether a level is readable as a number
+**What can be missed is bounded, and the bound is comfortable.** A level that is held
+survives being sampled late; the state simply differs from the last sample and the change is
+derived. What is lost is only a sampled thing that changes and changes back inside one
+update - a door that opens and shuts again between two looks. That is a narrow enough hole
+to live with, and to say out loud rather than paper over.
 
-A vent's oxygen level, a tank's fill, a battery's charge. Is any of that available as a
-value, or only as the text the terminal displays?
+*Affects* T2, T3, R3, R16, and how large the runtime has to be.
 
-*Gates* R5 and R6, and with them stories B, F and G, and the progress bar in O.
+### 2. What survives being copied
 
-### 3. Whether a block's appearance can be read, not only set
+A construct pasted from a blueprint, or welded up from a projection, is new blocks with new
+identities. The game does nothing for us here - detecting merges and splits is entirely our
+responsibility - and it is not settled what happens to a copy: whether our data comes with
+it, arrives fresh alongside the new grid, or has to be reconstructed.
 
-Setting a light's colour is presumably straightforward. Reading back what colour it is
-now, and whether it is on, is the half D needs and the half nobody normally asks for.
+**Projector building is the sharper case, and it is not an edge case at all.** A projected
+construct is welded up block by block, so a system can be running before the blocks it needs
+exist. That is not damage, and it is not a role deliberately left empty. It is a third
+thing, and it makes R40's healing part of ordinary construction rather than only of repair.
 
-*Gates* D entirely. If this cannot be read, D cannot be served at any price.
+*Affects* R39, R40, R41 and R24, which between them now carry three different meanings for
+"there is no block here".
 
-### 4. Whether a person can be told something
+---
 
-Can a mod put a notice on a player's screen, or make a sound that carries beyond the
-room? "Warn me" needs to reach somebody who is not looking at the tank.
+## Answered, and where the answers went
 
-*Gates* G, and the interrupting half of decision 7.
+Kept listed so nobody re-opens them: how events reach us, whether levels are readable,
+whether appearance is readable, whether a person can be told, what an LCD accepts, whether
+docking is observable, where a program can live, whether a block's position is available,
+whether being attacked is reported, and whether a change can be missed.
 
-### 5. What can be drawn on an LCD
-
-Text is presumably fine. Headings, bars and graphs need to know what a mod may draw and
-how often it may update without cost.
-
-*Gates* O.
-
-### 6. Whether docking is observable, and what it brings with it
-
-When a ship connects, does Reactor learn about it, and can it reach the blocks on the
-other grid? Does it learn when the ship leaves?
-
-*Gates* T entirely, and with it the run-time half of decision 8.
-
-### 7. Where the program can live
-
-It must survive losing any single block, or Reactor loses to vanilla on the one thing it
-should win: a cannon through the timer block should not cost the automation. Where can a
-mod store data such that it belongs to the construct rather than to a block?
-
-*Gates* the storage constraint in Design.md, and therefore P.
-
-### 8. Whether a replacement block can be recognised
-
-A rebuilt block is a new entity with a new identity. The signal we would use is where it
-sits and what kind it is: same kind, same place on the construct, therefore the
-replacement.
-
-So the question is narrower than it was. Does the game give a mod a block's position on
-the construct, in a form that survives the construct moving, being welded onto, or being
-cut in half? And can a mod notice a block being placed at all, or must it look?
-
-*Gates* the healing half of R40. Without it, re-pointing by hand is the whole answer,
-which is a worse day for the player but not a broken one.
-
-### 9. Whether being attacked is reported
-
-Story N assumes the game can tell a block that the base is under attack. It may be that
-players do this with sensors, turret state, or block damage, and that "under attack" is
-not a thing at all.
-
-*Gates* N, which otherwise needs nothing new.
-
-### 10. Whether a change can happen without us ever seeing it
-
-Blocks run on update tiers, and the tier is not ours to choose. If a door opens and shuts
-again between two of our updates, did anything tell us it happened, or is that event
-simply gone?
-
-This decides whether Reactor is watching a world or being told about one, and the two
-produce quite different runtimes. It also decides whether "nothing happened" can ever
-have the answer "it did happen, we were not looking".
-
-*Gates* T2 and T3, the check-rate question inside decision 2, and part of M.
-
-### 11. What happens to a mod's data when constructs merge, split or are copied
-
-Constructs are welded into one with merge blocks and cut apart again, get pasted from
-blueprints, and get welded up from projections. (Merging is not docking - a merge block
-joins two constructs structurally and is indistinguishable from a repair. Docking is
-connectors, which is a different question entirely.) Each of those makes or unmakes a construct, and Reactor's
-program is attached to one.
-
-Does a mod get told when a grid merges or splits, and can it tell which of the two the
-data should follow? Does anything a mod stored survive being copied to a blueprint and
-pasted back? Is a projection-welded ship a copy in that sense, or a new thing with nothing
-attached?
-
-*Gates* R41, and the healing half of R40 for the copied case. Merge blocks in particular
-are common enough that guessing wrong here would be found late and cost a lot.
+All of them are in Design.md. Two more were struck out earlier for never having been unknown
+at all: a mod sees the entire world, so the one-construct limit is a choice rather than a
+wall, and a cockpit's controls are readable as vectors.
