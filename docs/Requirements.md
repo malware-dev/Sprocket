@@ -419,9 +419,10 @@ a hope rather than a warning.
 It must reach somebody who is not in the room with the tank. That is the whole of G's
 *done when* and the part no arrangement of blocks can satisfy.
 
-**Open: who is told.** On a shared server there are several people, and it is not obvious
-whose warning this is - whoever owns the construct, whoever is aboard, whoever set the
-sequence up, or everyone. No story answers this and it cannot be guessed.
+**Open: who is told.** A message can be aimed at one person, everyone, or anyone nearby, so
+this is a choice rather than a limit. It is still not obvious whose warning it is - whoever
+owns the construct, whoever is aboard, whoever set the sequence up - and no story answers it.
+Being able to pick makes the question sharper rather than easier.
 
 **In the world before the interface.** Several ways exist - chat, notifications, screens -
 and the preference is to tell somebody through the world where that will reach them: a light
@@ -431,14 +432,13 @@ the game people came to play. The game's own interface stays available and is so
 right, particularly for somebody nowhere near the base.
 
 **Chat is for debugging, and only when asked for.** A running commentary in chat is genuinely
-useful while somebody is working out why a sequence misbehaves - it is the cheapest possible
-form of watching. It must never be on by default. Chat is shared, so a default that talks
-would put one person's diagnosis in front of everybody on the server, and the thing that gets
-switched off is not the noise but Reactor.
+useful while somebody works out why a sequence misbehaves - the cheapest possible form of
+watching. It is never on by default: a commentary nobody asked for is noise, and noise is
+what gets Reactor switched off rather than the commentary.
 
-So it is a choice somebody makes deliberately, about a particular thing they are debugging,
-and it stops when they stop. It also should not reach further than the person who asked for
-it, where the game allows that.
+A chat message can be shown to one client alone, so it goes to the person who asked and to
+nobody else. That is a capability rather than a courtesy, and it means the debugging channel
+costs bystanders nothing.
 
 This is the interrupting half of one capability. The ambient half is a screen that always
 shows how things are, which is story O and is not this requirement.
