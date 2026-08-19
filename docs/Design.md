@@ -107,6 +107,87 @@ nothing else.
 This is a constraint on storage rather than on the language, and it is the reason P is
 answerable at all rather than being the same defeat in a nicer editor.
 
+### One construct, by choice
+
+A mod can see the entire world. Nothing stops Reactor watching every grid on the server and
+operating any of it. The limit to one construct is ours, chosen for reasons that are worth
+writing down because the constraint will otherwise look like ignorance of what is possible.
+
+- **Operating other people's property.** If automation reaches past its own construct, then
+  tying up at a stranger's station hands them your thrusters, your reactors and your cargo.
+  Ownership might police that; needing policing is the tell.
+- **Cost.** T1 says the total price is what is happening, not what exists. World scope means
+  every construct is potentially watching every other, and the arithmetic stops being
+  bounded by anything the player can see.
+- **Where the program lives.** It belongs to the construct, which is what makes it
+  survivable and shareable. Automation with no home is neither.
+- **Being able to answer for itself.** M rests on Reactor knowing what is going on. Its
+  chance of explaining anything drops sharply once the answer might be on a different ship.
+
+Story T is the first thing to push back on this, and it does not push hard enough to move
+it - the useful actions in a docking turn out to sit on the side that owns them, and the
+two sides coordinate through the world they already share. If something later pushes harder,
+this is the argument it has to beat, not a technical wall.
+
+### Behaviour of our own, where the game makes something impossible
+
+Open, and worth keeping open. A mod can attach behaviour to blocks that already exist, and
+can add subtypes of its own, so Reactor is not limited to automating what the game already
+provides - it can make an automatable thing possible at all.
+
+**The cheap form is a setting on a stock block**, alongside the ones already there. No
+model, no icon, no build-menu entry, no balance argument, and it applies to every such block
+everybody already owns. Both candidates below look like settings rather than blocks, which
+makes this a far smaller proposition than "we ship blocks".
+
+Two candidates have already surfaced, both from story T, and both fix flaws that will
+otherwise be blamed on us:
+
+- **Stockpile that fills what you meant.** A tank on stockpile pulls from everything it can
+  reach, including other people's ships parked across the same station. A targeted version
+  asks only from a **directly connected construct** - one hop rather than the whole conveyor
+  graph - so a docked miner fills from the station and cannot reach the ship on the far side
+  of it. Small rule, comprehensible, and it reads as obviously right once said.
+
+  A setting on the tank, mutually exclusive with ordinary stockpile: a tank is doing one or
+  the other, never both, so there is no combination to explain or to get wrong.
+- **A connector that pushes onward instead of filling up.** Sorters fill the connector
+  before anything reaches the docked ship, so pushing cargo across a dock barely works. The
+  fix is a setting on the ordinary connector - alongside drain all and the rest - that makes
+  it push its contents onward rather than hold them: storage on its own construct first, and
+  across to the counterpart only when its own side has nowhere to take them.
+
+  That leaves the control with the builder and with blocks that already exist. A one-way
+  sorter on the near side closes off the return path, and the connector then has nowhere to
+  push but across. Nothing needs to guess what the player meant.
+
+  *Name undecided.* "Rejecting" describes what it does not do, which is a poor label for a
+  toggle somebody has to find and understand.
+
+**Sharing does not suffer.** Anyone running a shared system has Reactor, so a Reactor block
+is always available where a third-party dependency would not be.
+
+**What would have to be true before doing it.** A setting on an existing block is cheap; a
+block of our own is content rather than code - model, icon, definitions, balance, and an
+argument with everybody who thinks it is overpowered. Either way the bar is that a story is
+*blocked* by a game mechanic rather than merely inconvenienced by one, that it does one
+thing the game's own version cannot, and that it is not a way of avoiding a design problem
+we should be solving in the language.
+
+**And they may not belong to Reactor at all.** Both are fixes to the game rather than
+automation, and they are useful to people who have no interest in Reactor whatsoever. Making
+them one or two small mods in their own right, which Reactor depends on, costs little and
+buys several things: they stand or fall on their own merit rather than as riders on
+something larger, somebody who only wants a connector that pushes onward can have exactly
+that, and Reactor's own scope stays what it says on the tin.
+
+It costs nothing to sharing either. Anyone running Reactor has the dependency, so a system
+that relies on one of these behaviours works for whoever receives it.
+
+Nothing is decided. It is written down because "we could add behaviour to the game" is an
+option that would otherwise not occur to somebody reasoning only about automation, and
+because the packaging question is easier to answer now than after the code exists.
+
 ### System
 
 A named set of sequences and states that belong together: an airlock, a hangar, a
@@ -196,6 +277,11 @@ asymmetry is not an inconsistency, it is how the two sentences read aloud.
   sequences, and that version is stronger: locking is a real action, so it also stops
   a player opening the door by hand. The same test kills "docking mode", "power
   management" and every other packaged behaviour.
+- **Precedence between sequences.** "Which one wins" is a hidden global rule that changes
+  what a sequence does without appearing anywhere in it, and which one should win nearly
+  always depends on the situation rather than on a fixed ranking - which is a guard, and
+  guards already exist. Conflicts are detected and shown (R43); resolving them is authored.
+  Same reasoning as the interlock.
 - **Named block groups.** Blocks are picked inline and belong to the sequence that
   picked them. Nothing to maintain, and nothing to fall out of date.
 - **Loops, counters, nesting, and variables as a general facility.** Covered above.
@@ -374,6 +460,16 @@ the id, and when the id is gone and a block of the right kind carrying that exac
 appears, adopt it. It covers the common case, because somebody who rebuilds a door
 usually renames it back to what it was. It has to stay conservative - silently adopting
 the wrong block is worse than asking - and it is worth nothing without the first half.
+
+**Open inside this: what watching actually looks like.** R27 and R28 say what must be
+knowable; they say nothing about where somebody stands while knowing it. The useful version
+is probably not a step list read in isolation - it is watching the doors themselves with
+something beside you saying what Reactor thinks is going on, because the failure being
+diagnosed is usually a disagreement between those two. That implies the editor is legible
+while a person is looking at the machine, which is a different demand from being legible
+while they are sat in a terminal.
+
+Undecided, and a question about the shape of the editor rather than about the language.
 
 ### 9. Failure
 

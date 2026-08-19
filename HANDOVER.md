@@ -23,7 +23,7 @@ it gets built.
 | `docs/StoryNotes.md` | Internal. Our judgement on each story: where it stands, what it implies, what was rejected, what the set settled on its own. |
 | `docs/Requirements.md` | Internal. What Reactor must do, derived one story at a time. |
 | `docs/Design.md` | Internal. The model, what is deliberately excluded, and the open decisions. |
-| `docs/ApiUnknowns.md` | Internal. Twelve questions about Space Engineers that block requirements, none answerable without the game. |
+| `docs/ApiUnknowns.md` | Internal. Eleven questions about Space Engineers that block requirements. Two have already been struck out as things we knew after all. |
 
 Nothing from the internal four belongs in the public one.
 
@@ -47,11 +47,17 @@ retired and not reused.
 
 ## Where the pass has got to
 
-Working through the stories in order, deriving requirements from each. **Done: A through
-Q. Next: R - two things fighting over my door**, then S, T, U, V, W.
+**The pass is complete.** Every story from A to W has been worked through and the
+requirements derived from each.
 
-So far: 40 live user requirements, three technical (T1-T3, all provisional predictions
-about a game nobody has run this in yet), three retired.
+48 live user requirements, three technical (T1-T3, all provisional predictions about a game
+nobody has run this in yet), two retired.
+
+**Next: the decisions.** Requirements are written; several wait on design questions that are
+still open, and tickets cannot be described until those are made. Design.md holds nine of
+them, ApiUnknowns holds eleven questions about the game - and several of those turned out on
+inspection to be things Morten simply knows, so the register is worth reading down together
+before treating anything in it as blocking.
 
 The biggest things the pass has produced:
 

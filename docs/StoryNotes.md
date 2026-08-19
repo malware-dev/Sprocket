@@ -212,6 +212,24 @@ a system, and wants it obvious at a glance - neither of which exists. Cheap once
 systems do, and it is the sort of thing that gets missed because it is unglamorous and
 then gets rebuilt badly by every user with a spare button.
 
+**T - game mechanics that shape it, recorded so they are not rediscovered.**
+
+- **Gas does not flow freely.** It moves through a connected network only as it is
+  produced, and ice-fed refuelling is very slow. "Top off the tanks on docking" is a long
+  wait on a level, not a switch.
+- **Stockpile pulls from everywhere it can reach, including across connectors.** Two ships
+  docked at one station, one stockpiling and one not, and the first drains the second.
+  Automation that switches stockpile on can cost a bystander their fuel, which makes it
+  something to be careful with rather than a convenience.
+- **A refinery is not an unloader.** It pulls ore from the network at its own rate and only
+  while it has room, so a large miner stays full for a long time. Draining is a sorter, and
+  sorters are one-way and either take everything or take a named list.
+- **Programmable sorters solve most of it** - filters changed on docking pull ore in one
+  situation, components in another, everything after that - but not all of it: **a sorter
+  fills the connector before anything reaches the docked ship.** That is a flaw in the game
+  and will look like ours. It is also the strongest candidate for a block of our own - a
+  connector that does not want content for itself - see Design.md.
+
 **T - when my miner docks.** Nothing, and it is the largest new idea in the set. Every
 other story references blocks the player picked while authoring. This one cannot: the
 ship is not there yet, and it is a different ship each time. That means a reference
@@ -250,28 +268,16 @@ is, so T2 is not violated in any new way.
 game exposes, and committing to it now would be deciding the shape of the feature from a
 guess.
 
-**And the shape of the input is the problem.** A crane's swing is the rotational axis,
-and rotation in a cockpit is driven by the mouse - which gives movement since the last
-frame, not a position. There is no "how far over" to read for the one control the story
-most wants. Forward and back, and roll, are held keys rather than axes; whether anything
-reports a magnitude at all is unknown.
+**The shape of the input is known.** Controls are readable as vectors, positional and
+rotational, so magnitude exists and proportional control is on the table. The vocabulary
+presents them as named readings on the cockpit - forward, right, up, turn, roll - because
+nobody using Reactor should ever meet a vector.
 
-So "when the stick is past a half" may not describe anything that exists. It might be
-"while forward is held", which is a different sentence and gives on-and-off control, or it
-might be a stream of deltas, which is a different thing again and fits nothing in the
-language.
-
-**Proportional control** is what suffers either way. W's done-when says further over means
-faster. Held keys give stepped control at best - a few speeds, chosen by how many
-thresholds somebody authors. Real proportionality needs a magnitude to exist and then to
-flow from the reading into the action, *set the rotor's speed from the stick*, which is a
-step past R7's fixed value and is wanted by nothing else in the set.
-
-Whether stepped control is good enough is a question for somebody who has actually
-operated a crane, not for us. It may be that three speeds and a stop is exactly what
-people build by hand today and nobody minds.
-
-**Also survives: whether the axes are readable at all.** ApiUnknowns 11.
+What is left is narrower than it was. A keyboard's positional controls are held or not held
+and carry no magnitude; a stick's do. Rotational input is a rate rather than a position,
+which suits a crane well but means "how far over" is not always a question with an answer.
+So W's done-when is satisfiable with a stick and approximable with a keyboard, and that is a
+property of the input device rather than of anything we build.
 
 *A note on an earlier claim.* This was briefly written up as the second story wanting
 something that is not a sequence, alongside O's screen. That was wrong, and O stands

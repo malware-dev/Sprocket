@@ -167,6 +167,14 @@ today is a verb and its targets, with nowhere to put a colour, a level or a name
 The value belongs to the step and not to each block: one step, one value, however many
 blocks it acts on. D's two dozen lights are told once, not listed one at a time.
 
+**A value is not always a number or a colour.** T needs a sorter's filter list set - pull
+ore now, components later, everything after that - which is a list of item kinds. Whatever
+a block's settings actually are, the ones worth changing because something happened are the
+ones this has to carry.
+
+That is inside the boundary Design.md draws rather than a widening of it: configuring a
+sorter once is the game's business, changing its filter because a ship docked is ours.
+
 *Waits on Design.md decision 3.*
 
 ### R8 - capture and restore
@@ -913,7 +921,7 @@ None of this is specified. It is recorded because "the program belongs to the co
 sounds settled and is not, and because merge blocks are common enough that discovering it
 late would be expensive.
 
-*Waits on ApiUnknowns 7 and 12.*
+*Waits on ApiUnknowns 7 and 11.*
 
 ## From story Q - I pressed it twice
 
@@ -938,6 +946,204 @@ Both are defensible in the abstract; nobody has asked for either.
 
 *The rule is already true in the runtime, and already counts. What is missing is anybody
 being able to see it, which is R27 and R29.*
+
+## From story R - two things fighting over my door
+
+### R43 - conflicts are looked for, and never declared absent
+
+Where two sequences drive the same block toward opposite states, Reactor should notice and
+say so. An action already records the state it is trying to bring about, so one sequence
+driving a door toward shut while another drives it toward open is a comparison of things
+already modelled rather than a guess.
+
+**Best effort, and honest about it.** Plenty of conflicts are not visible this way: one
+sequence that starts another which then fights the first, two that only collide in a
+situation neither describes, a fight that depends entirely on timing. Reactor may say *these
+two disagree about this block*. It must never say *there are no conflicts*, because it
+cannot know that, and a clean bill of health that is wrong is worse than no bill at all.
+
+**Resolution is authored, not arbitrated.** Reactor does not decide which sequence wins. The
+player already has the tools: a guard so the airlock cycle does not run while the base is
+sealed, or the sealing sequence stopping the cycle outright, which is what R5 exists for.
+
+*Not taken: precedence.* R's *done when* says the player can say which one wins, and a
+ranking between sequences is the obvious reading. It was not taken because it is a hidden
+global rule that changes behaviour without appearing in either sequence, and because which
+one *should* win almost always depends on the situation rather than on a fixed order - which
+is a guard, which we already have. It is also the same argument that killed the interlock
+primitive.
+
+*Scope it modestly.* This is easy to specify and much harder to do well, and a half-built
+version that cries wolf would get switched off and never trusted again. Better a narrow
+detector that is always right about what it does report.
+
+*Serves R, M. Waits on nothing in the language; it is analysis over what is already there.*
+
+## From story S - leave me alone, I'm building
+
+### R44 - things can be switched off, and it shows
+
+A sequence can be switched off, and so can a whole system. Off means nothing happens: no
+trigger starts it, no step runs, and nothing about it is lost. Switching it back on returns
+it exactly as it was.
+
+**Off must look off.** A sequence that is switched off and a sequence that simply has not
+been triggered are both doing nothing, and from outside they are the same. That is M's
+failure again in the cheapest possible place, and it is the difference between "I turned
+this off while I weld" and "why is this not working".
+
+The system-wide switch is what S actually asks for. Somebody repairing a hangar wants that
+hangar left alone, not to hunt down its four sequences individually and remember to put
+them all back.
+
+*Open: what happens to a sequence that is running when it is switched off.* Stopping it
+where it stands is R5's behaviour and is probably right, but it means switching off can
+leave a door half shut, which is a surprising amount of consequence for what feels like a
+toggle. Not decided.
+
+*Half true today: `Sequence.Enabled` exists and the runner honours it. Systems do not exist
+yet, and nothing makes "off" visible.*
+
+## From story T - when my miner docks
+
+### R45 - docking and undocking are things that happen
+
+A connector connecting and disconnecting must be available as events, on both sides of it.
+That is the moment everything in T hangs off, and neither side of a dock can react to
+anything if the moment itself is not sayable.
+
+*Almost certainly a vocabulary matter rather than a language one - connector state is
+something the game reports. Recorded because T is unbuildable without it and nothing else
+in the set needs it.*
+
+### R46 - filling a tank is a wait, not a switch
+
+Where a sequence brings a level somewhere - filling a docked ship's hydrogen from ice, for
+instance - it waits for the level rather than assuming a duration. Ice-fed refuelling is
+slow enough that any guessed wait is wrong, and the tank itself says when it is done.
+
+This needs nothing new. It is R13's *once* holding until a situation is true, with R4
+letting that situation be about a level. It is written down because it is the first
+genuinely practical use of waiting on a quantity in the set, and because "wait thirty
+seconds and hope" is what people write when the alternative is not offered clearly.
+
+*Waits on R4.*
+
+## T is not finished
+
+The question T actually raises is not settled and is not ready to be:
+
+**Does automation on one construct ever act on another?** A docked ship is a separate
+construct throughout - connectors link, they do not merge. So either each side runs its own
+automation and they coordinate through the world they share, or a station's automation
+reaches into whatever ties up to it.
+
+Two things push towards each side running its own, and one thing is simply unknown.
+
+- **Reaching into somebody else's ship is a griefing vector.** If station automation can
+  operate whatever docks, then tying up at a stranger's station hands them your thrusters,
+  your reactors and your cargo. Ownership might mitigate that; needing mitigation is the
+  tell.
+- **The useful actions turn out to be one-sided anyway.** Draining a miner is a sorter on
+  the station. Shutting a ship down is that ship's own blocks. Gas moves itself.
+- **But a ship carrying no automation gets nothing**, and the station cannot help it. That
+  is a real loss, and it is the same loss as "we do not operate other people's property".
+
+*It is entirely ours to decide.* A mod sees the whole world; the one-construct limit is a
+choice, not a wall. The reasons for keeping it are in Design.md, and T does not push hard
+enough to move it - but it is the first story that pushed at all.
+
+## From story U - I renamed everything
+
+### R47 - a reference is to a block, not to what it is called
+
+A reference is to the block itself. Renaming a block changes nothing about what any sequence
+does, and every place that block is named in the editor shows the name it has now - read
+when it is read, so a renamed block comes back correct everywhere it is mentioned without
+anything being updated or migrated.
+
+**The reason to write down something already true.** It is true by accident of an early
+decision rather than by intent, and there is one specific thing likely to erode it. R40's
+healing could be tempted into matching on names - "remember what it was called, and adopt a
+block carrying that name" - which would quietly make renaming meaningful again, and would
+misfire on precisely the person in this story, who has just changed every name on the ship
+in one evening.
+
+Healing matches on kind and position for that reason. This requirement is why.
+
+*Already true, and untested.*
+
+## From story V - let me watch it work first
+
+Nearly all of V was served before it was reached, and by other stories: R28 walks a sequence
+a step at a time, R27 shows which step it is on and what it is waiting for, R5 stops it.
+That is V's *done when*, assembled from M and C. One thing was missing.
+
+### R48 - a sequence can be set off deliberately, and does the real thing
+
+Any sequence can be started without waiting for its trigger, and doing so must produce
+exactly what the trigger would have produced. Not a rehearsal, not a test mode, not a
+version with the dangerous steps left out - the same sequence, doing the same things to the
+same blocks.
+
+**A trial run that behaves differently from the real one is worse than no trial run**,
+because its whole purpose is to earn trust it has not tested. Somebody who watches it work
+and then stands in the airlock is relying on having seen the thing that is about to happen.
+
+*Half true today: `Runner.Call` exists and the sequence page has a run-by-hand button, and
+nothing has ever specified what it promises.*
+
+## From story W - drive the crane from the seat
+
+### R49 - what somebody is doing at the controls is readable
+
+A cockpit's controls are available as values: how far forward, how far to the side, how much
+turn, how much roll. Reactor reads them the way it reads any other level, and a condition
+about them is an ordinary condition.
+
+**Named directions, not vectors.** The game reports these as vectors, positional and
+rotational. Nobody using Reactor should ever meet a vector. The vocabulary presents them as
+named readings on the cockpit - *forward*, *right*, *up*, *turn*, *roll* - each a value in
+its own right, which is exactly the shape R4 already handles.
+
+*Serves W. Waits on R4.*
+
+### R50 - an action's value can come from a reading
+
+A step that sets something can take its value from a reading rather than from a number
+chosen when the sequence was written: *set the rotor's speed from how far the stick is
+over*.
+
+This is what "further over means faster" needs, and it is the difference between driving a
+crane and switching it between three fixed speeds.
+
+**Priority: stretch, and W does not depend on it.** W is served without this, by triggers on
+thresholds - a few speeds and a stop, which is close to what people build by hand today.
+Proportional control is the better version of the same story rather than the price of
+serving it at all, and treating it as required would put the most speculative thing in the
+set in front of the rest of W.
+
+**And most of it would not arrive anyway.** Nearly everybody plays with a keyboard and
+mouse. Keyboard movement is held or not held and has no magnitude to be proportional to, so
+for the positional axes there is nothing to read for most players. Only the mouse carries a
+magnitude, and that is a rate rather than a position. The expensive feature would therefore
+serve a minority on the axes where it works at all, which is the clearest case in the set
+for building the cheap version first and seeing whether anybody misses the rest.
+
+**It is a smaller addition than it looks.** B already requires a value read from one block
+to be compared against a value read from another, so a reading travelling somewhere other
+than its own block is a thing the language will already do. This is the same movement, from
+a reading into an action rather than into a comparison.
+
+*Open, and the reason not to promise proportionality yet: what the reading actually means.*
+Positional controls from a keyboard are held or not held, and give no magnitude at all;
+from a stick they are proportional. Rotational input is a rate rather than a position -
+faster mouse movement, faster swing - which suits a crane rather well, but means "how far
+over" is not always a question with an answer. What arrives at a rotor is therefore not
+uniformly a proportion, and W's *done when* may be satisfiable with a stick and only
+approximable with a keyboard.
+
+*Serves W. Waits on R4 and R7.*
 
 ## Dropped
 

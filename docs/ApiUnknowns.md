@@ -97,27 +97,7 @@ have the answer "it did happen, we were not looking".
 
 *Gates* T2 and T3, the check-rate question inside decision 2, and part of M.
 
-### 11. What a cockpit's controls actually look like from a mod
-
-Can a mod see what somebody sitting in a cockpit is doing, and in what shape? The three
-kinds of input are not alike:
-
-- **movement** - forward, back, up, down. Held keys, so probably on or off with no
-  magnitude at all.
-- **rotation** - the mouse, which reports movement since the last frame rather than a
-  position. A crane's swing is this one, which is unfortunate, because a delta stream fits
-  nothing in the language.
-- **roll** - held keys again.
-
-Also: can it be read without taking the controls away from the ship the cockpit would
-otherwise be flying?
-
-*Gates* W entirely, and decides how much of it can be served. If controls are readable as
-held-or-not, W is ordinary triggers and conditions and needs almost nothing new, but gives
-stepped control rather than the proportional control the story asks for. If nothing is
-readable, W cannot be served at all.
-
-### 12. What happens to a mod's data when constructs merge, split or are copied
+### 11. What happens to a mod's data when constructs merge, split or are copied
 
 Constructs are welded into one with merge blocks and cut apart again, get pasted from
 blueprints, and get welded up from projections. (Merging is not docking - a merge block
@@ -132,4 +112,3 @@ attached?
 
 *Gates* R41, and the healing half of R40 for the copied case. Merge blocks in particular
 are common enough that guessing wrong here would be found late and cost a lot.
-
