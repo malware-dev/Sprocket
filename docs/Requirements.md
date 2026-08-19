@@ -266,6 +266,11 @@ The author may then improve on that: name a role in their own words, put the que
 an order that makes sense, add an explanation where one helps, note the thing that always
 catches people out. That is an option and never a prerequisite.
 
+**A system also carries its own name and a short description.** What this thing is, in the
+author's words. To the person who built it that is a label; to everybody who receives it
+later it is the only explanation there will ever be of what they have just loaded, and it
+travels with the system (R22).
+
 **The derived version has to be good enough to use, not a placeholder.** Most systems
 will never be polished by anybody, so the unauthored path is the one most people meet.
 If it only works when somebody has been diligent, R11 does not hold.

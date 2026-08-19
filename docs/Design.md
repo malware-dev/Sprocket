@@ -18,6 +18,24 @@ not children; they simply have never been taught the ideas programmers take as
 furniture, and every one of those ideas we import is a tax charged to every user
 forever.
 
+**Be precise about what they lack.** Space Engineers is played overwhelmingly by adults who
+run conveyor networks, balance power budgets, work out thrust to weight, and drive
+projectors and blueprints without help. What they have not been taught is *programmer
+vocabulary and structure* - classes, instances, loops, variables, scope. That is a specific
+gap, not a general one.
+
+So there is a line, and it is easy to cross while trying to be kind:
+
+- **Removing a programmer concept is the job.** No loops, no nesting, no instantiation step,
+  no words that mean one thing here and another thing everywhere else.
+- **Removing information is condescension.** Hiding what something is, refusing to name a
+  thing they can plainly see, or protecting them from a choice they are entitled to make,
+  treats a capable adult as a liability.
+
+When a simplification is proposed, that is the question to ask of it: is this taking away
+jargon, or taking away the truth? The first earns its keep. The second is how a tool
+acquires the tone that makes people put it down.
+
 That gives a test which has already killed several features: **if a concept only earns
 its keep by being general, it does not earn its keep.** Reactor is for building
 automation, not a set of shipped automations - but the difference between the two is
