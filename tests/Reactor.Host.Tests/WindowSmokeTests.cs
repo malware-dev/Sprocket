@@ -45,7 +45,12 @@ public class WindowSmokeTests
 
         // The empty root offers the starters straight away, and answering one lands
         // directly on the path: blocks, then what happens to them.
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        window.Tick();
+        Layout(window);
+        Record(seen, editor);
+
+        editor.PressStart("When...");
         window.Tick();
         Layout(window);
         Record(seen, editor);
@@ -66,31 +71,29 @@ public class WindowSmokeTests
         editor.PressChoice("turn on");
         editor.PressPrimary();
 
-        // The ship browser, still there for looking things up.
-        editor.PressAction("Ship");
+        // The front door: the machines on this ship
+        editor.GoToRoot();
         window.Tick();
         Layout(window);
         Record(seen, editor);
 
-        editor.PressBlock("Landing Lights");
+        // A question with a fixed set of answers. The starters used to be one of these and are
+        // not any more, so the walk reaches for the loader instead.
+        editor.PressStart("Load system");
         window.Tick();
         Layout(window);
         Record(seen, editor);
 
-        // The all-sequences list
-        editor.PressAction("Sequences");
-        window.Tick();
-        Layout(window);
-        Record(seen, editor);
-
-        Assert.Contains(nameof(PathComponent), seen);
-        Assert.Contains(nameof(BlockSearchComponent), seen);
-        Assert.Contains(nameof(BlockListComponent), seen);
+        Assert.Contains(nameof(PickComponent), seen);
         Assert.Contains(nameof(ChoiceListComponent), seen);
+        Assert.Contains(nameof(StartComponent), seen);
         Assert.Contains(nameof(SequenceComponent), seen);
-        Assert.Contains(nameof(SequenceListComponent), seen);
-        Assert.Contains(nameof(HeadingComponent), seen);
+        Assert.Contains(nameof(StatusListComponent), seen);
         Assert.True(window.IsVisible);
+
+        // Heading and Notice are not asserted: nothing produces one at the moment. They are
+        // kept because R39's reported problems and M's diagnosis both want them, unlike the
+        // block list, which the column path replaced outright and which is gone.
     }
 
     static void Record(HashSet<string> seen, Reactor.Editing.ReactorEditor editor)

@@ -21,21 +21,92 @@ namespace Reactor.Sequences
     public sealed class Automation
     {
         readonly List<Sequence> _sequences = new List<Sequence>();
+        readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
 
         int _nextSequenceId = 1;
+        int _nextSystemId = 1;
 
+        /// <summary>
+        /// Every sequence, flat, in the order they were made.
+        /// </summary>
+        /// <remarks>
+        /// What the runtime iterates. Sequences also belong to a system, and the two views
+        /// are kept in step here rather than by flattening on demand - the runtime asks for
+        /// this on every tick and must not be given a freshly built list each time.
+        /// </remarks>
         public IReadOnlyList<Sequence> Sequences { get { return _sequences; } }
 
+        /// <summary>The machines, which is what the editor opens onto.</summary>
+        public IReadOnlyList<AutomationSystem> Systems { get { return _systems; } }
+
+        /// <summary>
+        /// A new machine, with one of it already on the ship.
+        /// </summary>
+        /// <remarks>
+        /// Making a system and then being asked to place one would be two steps for one
+        /// thought. Somebody who builds a thing has one of that thing.
+        /// </remarks>
+        public AutomationSystem AddSystem()
+        {
+            var system = new AutomationSystem(_nextSystemId++);
+            system.AddInstance();
+            _systems.Add(system);
+            return system;
+        }
+
+        public AutomationSystem FindSystem(int id)
+        {
+            for (var i = 0; i < _systems.Count; i++)
+            {
+                if (_systems[i].Id == id)
+                    return _systems[i];
+            }
+            return null;
+        }
+
+        /// <summary>The system a sequence belongs to, or null if it somehow belongs to none.</summary>
+        public AutomationSystem SystemOf(Sequence sequence)
+        {
+            for (var i = 0; i < _systems.Count; i++)
+            {
+                var sequences = _systems[i].Sequences;
+                for (var s = 0; s < sequences.Count; s++)
+                {
+                    if (ReferenceEquals(sequences[s], sequence))
+                        return _systems[i];
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Adds a sequence to a system, making one if none was given.
+        /// </summary>
+        /// <remarks>
+        /// Nothing is declared before it is used, so somebody who starts building gets a
+        /// system without having asked for one and without being made to name it first.
+        /// </remarks>
         public Sequence AddSequence(Trigger trigger)
         {
+            return AddSequence(null, trigger);
+        }
+
+        public Sequence AddSequence(AutomationSystem system, Trigger trigger)
+        {
+            if (system == null)
+                system = _systems.Count > 0 ? _systems[_systems.Count - 1] : AddSystem();
+
             var sequence = new Sequence(_nextSequenceId++, trigger);
             _sequences.Add(sequence);
+            system.Add(sequence);
             return sequence;
         }
 
         public void RemoveSequence(Sequence sequence)
         {
             _sequences.Remove(sequence);
+            for (var i = 0; i < _systems.Count; i++)
+                _systems[i].Remove(sequence);
         }
 
         public Sequence FindSequence(int id)

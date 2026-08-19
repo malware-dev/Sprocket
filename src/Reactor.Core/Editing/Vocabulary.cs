@@ -56,28 +56,33 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// Devices that could be added to a selection without emptying its
-        /// vocabulary.
+        /// Devices that have anything to offer at all: something that can happen to
+        /// them, or something that can be done to them.
         /// </summary>
         /// <remarks>
-        /// This is what stops a user from building a selection of a door and a light
-        /// and then discovering there is nothing they can do with it. Combinations
-        /// that would leave nothing to say are never offered in the first place.
+        /// Deliberately blind to what is already picked. Picking blocks decides what
+        /// can be said about them, never the other way round: a list that loses rows
+        /// as you tick them reads as the ship shrinking, and a block somebody knows
+        /// they have going missing is the one thing a picker must never do.
+        ///
+        /// So an impossible pair is allowed to be made, and answered where the answer
+        /// belongs - the next stage has nothing in it and says so. That is a sentence
+        /// the user can read, which is worth more than a row that silently was not
+        /// there.
+        ///
+        /// A block with no events at all still never appears in an event picker. That
+        /// is not the selection talking, it is the question: there is nothing to ask
+        /// about a block that nothing can happen to.
         /// </remarks>
-        public static List<IDevice> CompatibleWith(IWorld world, IList<long> deviceIds, bool forEvents)
+        public static List<IDevice> Capable(IWorld world, bool forEvents)
         {
             var result = new List<IDevice>();
             var devices = world.Devices;
             for (var i = 0; i < devices.Count; i++)
             {
                 var device = devices[i];
-                if (Contains(deviceIds, device.Id))
-                    continue;
-
-                var probe = new List<long>(deviceIds);
-                probe.Add(device.Id);
-
-                var count = forEvents ? EventsFor(world, probe).Count : ActionsFor(world, probe).Count;
+                var kind = device.Kind;
+                var count = forEvents ? kind.Events.Count : kind.Actions.Count;
                 if (count > 0)
                     result.Add(device);
             }

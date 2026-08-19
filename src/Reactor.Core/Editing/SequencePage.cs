@@ -28,14 +28,36 @@ namespace Reactor.Editing
         /// sentence. Either way "Sequence" as a heading would say nothing the user
         /// cannot already see.
         /// </summary>
+        /// <remarks>
+        /// No subtitle. What the sequence is doing right now used to be repeated up here, and
+        /// it reads as two different things saying the same words. Its state belongs on the
+        /// sentence itself, beside the switch and the run button that change it, where it is
+        /// next to the thing it is about.
+        /// </remarks>
         public override string Title
         {
             get { return SequenceSummary.Describe(Editor.World, _sequence); }
         }
 
-        public override string Subtitle
+        /// <summary>
+        /// Naming happens on the heading, because the heading is what the name is for.
+        /// </summary>
+        /// <remarks>
+        /// Optional, and it has to stay optional. A name buys two things - a list of twenty
+        /// sequences becomes legible, and more than one trigger can start the same one - but
+        /// requiring it puts a naming task in front of somebody who only wants a door to open.
+        /// An unnamed sequence reads as its own sentence and is no worse off, which is why
+        /// clearing the name is as ordinary an act as giving one.
+        /// </remarks>
+        public override string CustomName { get { return _sequence.Name ?? ""; } }
+
+        public override bool CanRename { get { return true; } }
+
+        public override string RenamePrompt { get { return "What do you call this?"; } }
+
+        public override void Rename(string name)
         {
-            get { return SequenceSummary.Status(_sequence, Editor.Runner.Get(_sequence)); }
+            SetName(name);
         }
 
         public override void Build(List<EditorComponent> components)
@@ -44,8 +66,6 @@ namespace Reactor.Editing
             _sentence.Enabled = _sequence.Enabled;
             _sentence.ToggleCommand = Editor.RegisterToggle(SetEnabled);
             _sentence.DeleteCommand = Editor.Register(Delete);
-            _sentence.Name = _sequence.Name;
-            _sentence.NameCommand = Editor.RegisterText(SetName);
             _sentence.RunCommand = Editor.Register(Run);
 
             for (var i = 0; i < _sequence.Steps.Count; i++)
@@ -70,10 +90,9 @@ namespace Reactor.Editing
             var state = Editor.Runner.Get(_sequence);
 
             _sentence.Enabled = _sequence.Enabled;
-            _sentence.Name = _sequence.Name;
             _sentence.Status = SequenceSummary.Status(_sequence, state);
             _sentence.Problem = SequenceSummary.Problem(Editor.World, _sequence, state);
-            _sentence.Pulse = state != null && state.LastFiredTick >= 0
+            _sentence.JustRan = state != null && state.LastFiredTick >= 0
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
 
@@ -186,7 +205,7 @@ namespace Reactor.Editing
             if (when == null)
                 return;
 
-            Editor.Push(new PickPathPage(Editor, "When something happens", when.Sources, true,
+            Editor.Push(new PickPage(Editor, "When something happens", when.Sources, true,
                 delegate { return when.EventId; },
                 delegate(string id) { when.EventId = id; },
                 Editor.Pop,
@@ -207,7 +226,7 @@ namespace Reactor.Editing
 
         void EditStep(Step step)
         {
-            Editor.Push(new PickPathPage(Editor, "Do something", step.Targets, false,
+            Editor.Push(new PickPage(Editor, "Do something", step.Targets, false,
                 delegate { return step.ActionId; },
                 delegate(string id) { step.ActionId = id; },
                 Editor.Pop));
@@ -229,7 +248,7 @@ namespace Reactor.Editing
             var origin = Editor.Depth;
             var step = new Step("");
 
-            Editor.Push(new PickPathPage(Editor, "Do something", step.Targets, false,
+            Editor.Push(new PickPage(Editor, "Do something", step.Targets, false,
                 delegate { return step.ActionId; },
                 delegate(string id) { step.ActionId = id; },
                 delegate

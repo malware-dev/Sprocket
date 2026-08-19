@@ -28,6 +28,11 @@ sealed class EditorView : UserControl
     readonly TextBlock _title;
     readonly TextBlock _subtitle;
     readonly Button _back;
+    readonly Button _heading;
+    readonly TextBlock _renameIcon;
+    readonly TextBox _renameBox;
+
+    bool _renaming;
 
     readonly Button _primary = new()
     {
@@ -53,6 +58,66 @@ sealed class EditorView : UserControl
         _back.Margin = new Thickness(0, 0, 10, 0);
         _back.Click += (_, _) => _editor.Invoke(_editor.Screen.BackCommand);
 
+        // Editing happens where the name already is. A popup would put a second copy of the
+        // heading over the top of the first and ask which one is real; the heading is right
+        // there and already says the name, so it turns into the box rather than summoning one.
+        // Same footprint either way - the header must not change height when it does.
+        _renameBox = new TextBox
+        {
+            Background = Brushes.Transparent,
+            BorderBrush = Palette.Accent,
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            CornerRadius = new CornerRadius(0),
+            Padding = new Thickness(6, 2),
+            FontSize = 16,
+            FontWeight = FontWeight.Bold,
+            Foreground = Palette.Ink,
+            MinWidth = 240,
+            // The theme gives a text box a comfortable minimum that a heading does not have.
+            // Left alone it stands six pixels taller than the title it replaces and the whole
+            // header steps down as you click it.
+            MinHeight = 0,
+            IsVisible = false,
+            // Empty is a real answer, not a missing one: it hands the heading back to whatever
+            // the thing says about itself. So the box says what empty means rather than
+            // nagging for something to be typed.
+            Watermark = "no name"
+        };
+
+        // The pencil says the heading can be renamed; the heading itself is what you press.
+        // An icon is a small target and a title is a large one, and somebody who has worked
+        // out that the name is editable should not then have to aim.
+        _heading = new Button
+        {
+            Background = Brushes.Transparent,
+            // An invisible line exactly where the box will draw a real one, so swapping them
+            // moves nothing.
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            Padding = new Thickness(6, 2),
+            CornerRadius = new CornerRadius(4),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            HorizontalContentAlignment = HorizontalAlignment.Left
+        };
+
+        _renameIcon = Widgets.Label("✎", Palette.Faint, 13);
+        _renameIcon.Margin = new Thickness(10, 0, 0, 0);
+        _renameIcon.VerticalAlignment = VerticalAlignment.Center;
+
+        _heading.Click += (_, _) => StartRenaming();
+
+        // Enter and clicking away both mean the same thing - the name is what the box says -
+        // because there is no separate confirm to press any more. Escape is the way out that
+        // changes nothing.
+        _renameBox.KeyDown += (_, e) =>
+        {
+            if (e.Key == Avalonia.Input.Key.Enter)
+                StopRenaming(true);
+            else if (e.Key == Avalonia.Input.Key.Escape)
+                StopRenaming(false);
+        };
+        _renameBox.LostFocus += (_, _) => StopRenaming(true);
+
         Content = BuildLayout();
         Sync();
     }
@@ -69,6 +134,16 @@ sealed class EditorView : UserControl
         _subtitle.Text = screen.Subtitle;
         _back.IsVisible = screen.CanGoBack;
 
+        // Inert rather than disabled on a screen that cannot be renamed: disabling would grey
+        // out the title, and the title is the heading, not a control that happens to be off.
+        _renameIcon.IsVisible = screen.CanRename;
+        _heading.IsHitTestVisible = screen.CanRename;
+
+        // Whatever is being typed is the truth while it is being typed. Writing the screen's
+        // name back into the box on every tick would fight the caret for it.
+        if (_renaming && !screen.CanRename)
+            StopRenaming(false);
+
         _primary.IsVisible = screen.HasPrimary;
         _primary.Content = screen.PrimaryText;
 
@@ -76,11 +151,64 @@ sealed class EditorView : UserControl
             renderer.Update();
     }
 
+    /// <summary>Turns the heading into the box, holding its place exactly.</summary>
+    void StartRenaming()
+    {
+        if (_renaming || !_editor.Screen.CanRename)
+            return;
+
+        _renaming = true;
+        _renameBox.Text = _editor.Screen.CustomName ?? "";
+        _heading.IsVisible = false;
+        _renameBox.IsVisible = true;
+        _renameBox.SelectAll();
+        _renameBox.Focus();
+    }
+
+    /// <summary>
+    /// Puts the heading back, and sends the name on only if that is what was meant.
+    /// </summary>
+    /// <remarks>
+    /// The guard is not paranoia: hiding a focused box raises its own lost-focus, which lands
+    /// straight back in here and would send the name a second time - and after Escape, would
+    /// send the very edit that was just abandoned.
+    /// </remarks>
+    void StopRenaming(bool keep)
+    {
+        if (!_renaming)
+            return;
+
+        _renaming = false;
+        var text = (_renameBox.Text ?? "").Trim();
+
+        _renameBox.IsVisible = false;
+        _heading.IsVisible = true;
+
+        // Read at the moment of use. Command ids are re-issued on every rebuild, so one
+        // captured when the box opened is already stale by the time typing has finished.
+        var command = _editor.Screen.RenameCommand;
+        if (keep && command != 0)
+            _editor.SetText(command, text);
+    }
+
     Control BuildLayout()
     {
         var titles = Widgets.Stack();
         titles.VerticalAlignment = VerticalAlignment.Center;
-        titles.Children.Add(_title);
+
+        var headingGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,Auto") };
+        headingGrid.Children.Add(_title);
+        Grid.SetColumn(_renameIcon, 1);
+        headingGrid.Children.Add(_renameIcon);
+        _heading.Content = headingGrid;
+
+        // The two share a cell so the one that is showing decides the height and neither can
+        // shift the other's position when they swap.
+        var swap = new Grid();
+        swap.Children.Add(_heading);
+        swap.Children.Add(_renameBox);
+
+        titles.Children.Add(swap);
         titles.Children.Add(_subtitle);
 
         var headerGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*") };

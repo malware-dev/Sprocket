@@ -41,22 +41,15 @@ public class ScreenshotTests
 
         Shoot(window, "sequence");
 
-        editor.PressAction("Ship");
+        // The front door: the machines on this ship, and the ones of each that are fitted.
+        editor.GoToRoot();
         Tick(window, 1);
         Shoot(window, "ship");
 
-        editor.PressBlock("Airlock Outer Door");
-        Tick(window, 1);
-        Shoot(window, "block");
-
-        editor.PressAction("Sequences");
-        Tick(window, 1);
-        Shoot(window, "sequences");
-
         // How often - labelled, blinking at the real rate, and warning about the
         // rates that cost the server dearly.
-        editor.PressAction("Start something new");
-        editor.PressChoice("Every so often");
+        editor.NewSystem("Airlock");
+        editor.PressStart("Every...");
         Tick(window, 1);
         Shoot(window, "rates");
     }
@@ -73,7 +66,8 @@ public class ScreenshotTests
         // Straight down the sentence: the verb, then what it listens to, then what
         // happens. Answering the verb lands directly on the block picker, with no
         // stop at a half-empty sentence in between.
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         Tick(window, 1);
         Shoot(window, "listen");
 

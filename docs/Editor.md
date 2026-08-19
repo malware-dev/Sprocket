@@ -15,16 +15,16 @@ they came looking for.
 A system is what a machine *is*. The ones on the ship are what they *have*.
 
 ```
+   + New system
+   + Load system
+   ---------------------------------------------
 Airlock                        on this ship: 2
    Airlock 1                   cycling - waiting for the inner door
    Port Airlock                idle
-   + another
+   + add
 
 Drill Rig                      stowed
-   + another
-
-   + Build something new
-   ↓ Use one somebody made
+   + add
 ```
 
 **A system with one of them on the ship shows as one row.** *Drill Rig > Drill Rig 1* is a
@@ -46,16 +46,28 @@ notes say "a use of the system", which never has to reach a screen.
 
 Both root actions are equally prominent. Most people will never author anything, and for
 them Reactor is the thing where you load somebody's airlock and tell it which doors are
-yours - so **Use one somebody made** is not a secondary path.
+yours - so **Load system** is not a secondary path.
 
-**Build something new is named after the outcome and behaves verb-first.** It does not open
-an empty container asking to be named. It goes straight to *what should set it off?*, builds
-the sequence, and asks what the machine is called once there is a machine to call something.
-The label describes where you end up; the flow never asks anybody to declare a thing before
-they have done anything.
+**New system asks what the machine is, and then puts you on it.** It does not open an empty
+container and it does not stop on a question of its own. The name is the one thing that
+cannot be worked out - it is what M says when something is stuck and what K sends to a friend
+- so it is asked, and after that you are standing on the machine with the ways to start a
+sequence in front of you.
+
+*There used to be a screen in between, asking "what should start it?" the moment a machine
+was made. It bought nothing: two answers, no context, standing between somebody and the thing
+they came to build, and it kept the machine's own screen off the way back, so leaving the
+first sequence dropped you out to the ship. The answers now live on the machine, which is
+where they were always going to end up.*
 
 That is a sequencing decision, not a vocabulary one. *System* is an ordinary word and the
 audience can read it.
+
+**Labels are plain nouns, not sentences.** *New system*, not *build something new*. *Load
+system*, not *use one somebody made*. The softer forms were proposed and rejected: this
+audience has never been taught programmer vocabulary, which is not the same as having been
+robbed of nouns, and a label rewritten into a friendly sentence buys nothing and reads as
+being handled.
 
 ## The configurator
 
@@ -127,3 +139,119 @@ never matches.
   anything stuck - and whether that lives here or somewhere of its own.
 - Where the **ship browser** sits now that the root is machines rather than sequences.
 - Whether timers, if they are a thing distinct from *every so often*, live here too.
+
+## Nothing appears or disappears with the data
+
+A rule for every target, learned the hard way three times in one afternoon: whether something
+is on screen must not depend on how much data happens to be there.
+
+A search box that shows up past eight rows vanishes when you filter down to five - taking
+away the control you just used, so you cannot undo it. A count that appears when you narrow
+shoves everything below it up and down while somebody reads. Each was defensible on its own
+and each made the screen move under the person using it.
+
+A screen may be different because it *is* a different screen. It may not rearrange itself
+because a list got shorter.
+
+## The picker
+
+Core says: **picking several things in an order, where each one narrows what the next can
+be.** Blocks, and then what can happen to them - the second exists only because of the first
+and cannot be asked before it. That dependency is the whole of what core states.
+
+Each stage says what is being asked, what the answers are, which are chosen, whether picking
+one adds to the others or replaces them, and that it *can* be narrowed by typing. Whether a
+way to narrow is worth showing, and at what point a list is long enough to want one, is the
+target looking at its own screen.
+
+This host draws the stages as columns, side by side, because a wide screen makes the earlier
+answers worth keeping in view and changing one should be a glance to the left. A narrower
+target might ask one stage at a time and be right to. The renderer is called
+`ColumnPickRenderer` so that choice is visible in its name.
+
+*This was previously `PathComponent` with `Pane`s, and core counted rows to decide when a
+search box appeared. Both were core deciding presentation.*
+
+### The dependency runs one way
+
+Narrowing runs left to right and never back. Picking blocks decides what can be said about
+them; it does not decide which blocks exist.
+
+The picker used to enforce the rule in both directions: once you had ticked a block, only
+blocks that could still be grouped with it were offered. On a ship where nothing else shares
+the button's event, ticking the button emptied the list down to itself. The intent was that an
+impossible pair could never be made. What it actually produced was a player watching their own
+blocks disappear, which is the one thing a block picker must never do, and no explanation of
+why.
+
+So an impossible pair is now allowed to be made, and answered where the answer belongs: the
+next stage has nothing in it and says so. A sentence the player can read beats a row that
+silently was not there.
+
+A block with no events at all is still absent from an event picker, and that is not the same
+rule. That is the question talking, not the selection: there is nothing to ask about a block
+that nothing can happen to. It holds from the moment the screen opens and never changes under
+the player's hands.
+
+A block that is already ticked is never hidden by narrowing either. A tick you cannot find is
+a tick you cannot clear.
+
+## Every screen that holds a list
+
+The ship and a machine are the same screen twice: **the ways to add something on top, a rule
+under them, then what is already there.**
+
+```
+   + When...          + New system
+   + Every...                  + Load system
+   -----------------------------     -----------------------------
+When Airlock Button is pressed     Airlock          on this ship: 2
+Every 30 seconds                      Airlock 1     cycling
+                                      + add
+```
+
+Learning the top half once is learning it everywhere, which matters more than either screen
+being individually optimal. It also means a third way to start a sequence is one line in one
+place rather than a new screen.
+
+**Everything that adds something carries a plus.** Core does not spell it into the labels -
+it says these are the ways to start something, and that a row is an action, which is already
+the whole of the claim. Drawing that as a plus is the host being consistent with itself, and
+a target with no room for it can leave it off and lose nothing.
+
+## Naming happens on the heading
+
+A sequence's heading is its name if it has one, and the sentence it makes if it does not:
+*Let me out*, or *When Airlock Button is pressed*. Underneath that there used to be a second
+control, a faint box reading "Name this sequence (optional)". Two places for one thing, one
+announcing it and one setting it, and neither of them obviously the other's other half.
+
+They are one thing now. The heading carries the name, and core says three things about it:
+this screen can be renamed, here is what to ask, and here is the name somebody actually gave
+- which is **not** the same as the heading. The heading always has something to read; the
+custom name is only ever what a person typed. A target that confuses the two opens a box
+prefilled with a sentence nobody wrote and calls it their name.
+
+This host turns the heading into the box. A pencil sits beside it to say that it can be,
+and pressing anywhere across the heading starts editing - an icon is a small target and a
+title is a large one, and somebody who has worked out that the name is editable should not
+then have to aim. Enter and clicking away both commit; Escape leaves it alone.
+
+*It was a popup first, copied from **New system**, where a popup is right because there is
+nothing on screen yet to edit. Renaming is the opposite case: the thing is right there and
+the heading already shows the name, so a popup puts a second copy of it over the first and
+asks which one is real.* The swap has one thing it must get right - the header cannot change
+height when it happens - and that is what the host test measures.
+
+**An empty name is an answer, not a missing one.** It hands the heading back to the sentence,
+so clearing a name is as ordinary an act as giving one - which is what keeps naming genuinely
+optional rather than a step you are quietly expected to complete. The box says "no name"
+where a form would nag.
+
+*This also means any screen can be renameable now, not just a sequence. Machines are the
+obvious next one.*
+
+**A sequence's heading has no subtitle.** What it is doing right now - *waiting to happen*,
+*running* - used to be repeated there as well as on the sentence, and two lines saying the
+same words read as two different claims. State belongs on the sentence, beside the switch and
+the run button that change it.

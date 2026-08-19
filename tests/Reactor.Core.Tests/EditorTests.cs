@@ -45,20 +45,132 @@ public class EditorTests
 
     static void StartOnTheButton(ReactorEditor editor)
     {
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
     }
 
+    /// <summary>
+    /// Naming lives on the heading, and clearing it hands the heading back.
+    /// </summary>
+    /// <remarks>
+    /// There used to be a naming box inside the sequence, underneath a heading that already
+    /// showed the name: two places for one thing, one announcing it and one setting it. The
+    /// name belongs on the heading because the heading is what a name is for.
+    /// </remarks>
     [Fact]
-    public void ItOpensOnTheQuestion_NotOnAListOfBlocks()
+    public void TheHeadingIsWhereNamingHappens()
+    {
+        var ship = Build();
+        StartOnTheButton(ship.Editor);
+        ship.Tick();
+
+        // Unnamed: the heading says what the thing does, and there is no name behind it for a
+        // target to prefill a box with.
+        Assert.True(ship.Editor.Screen.CanRename);
+        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title);
+        Assert.Equal("", ship.Editor.Screen.CustomName);
+
+        ship.Editor.Name("Let me out");
+        ship.Tick();
+        Assert.Equal("Let me out", ship.Editor.Screen.Title);
+        Assert.Equal("Let me out", ship.Editor.Screen.CustomName);
+
+        // Clearing is as ordinary an act as naming, and the sentence comes back.
+        ship.Editor.Name("");
+        ship.Tick();
+        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title);
+        Assert.Equal("", ship.Editor.Screen.CustomName);
+    }
+
+    /// <summary>
+    /// Backing out of a new machine's first sequence lands on the machine.
+    /// </summary>
+    /// <remarks>
+    /// Making a machine goes straight into its first sequence, because there is nothing on an
+    /// empty machine's screen worth stopping for. That shortcut used to leave the machine's
+    /// own screen off the stack entirely, so the only way back out of that first sequence was
+    /// all the way to the ship - past the very thing you had just made.
+    /// </remarks>
+    [Fact]
+    public void BackingOutOfTheFirstSequenceLandsOnTheMachine()
+    {
+        var ship = Build();
+        StartOnTheButton(ship.Editor);
+
+        ship.Editor.Back();
+
+        Assert.Equal("Airlock", ship.Editor.Screen.Title);
+        Assert.True(ship.Editor.Screen.CanGoBack);
+
+        ship.Editor.Back();
+        Assert.Equal("Your ship", ship.Editor.Screen.Title);
+    }
+
+    /// <summary>
+    /// Ticking a block must not take the rest of the ship off the screen.
+    /// </summary>
+    /// <remarks>
+    /// The picker used to offer only blocks that could still be grouped with the ones already
+    /// ticked, so picking a button - the one thing on this ship with an event nothing else
+    /// shares - emptied the list down to itself. Reading that as "my blocks are gone" is the
+    /// only reasonable reading. The stages run left to right: what is picked decides what can
+    /// be said about it, never which blocks exist.
+    /// </remarks>
+    [Fact]
+    public void PickingABlockLeavesEveryOtherBlockOnOffer()
+    {
+        var ship = Build();
+        ship.Editor.NewSystem("Airlock");
+        ship.Editor.PressStart("When...");
+
+        var before = Listed(ship.Editor);
+        ship.Editor.PressBlock("Airlock Button");
+
+        Assert.Equal(before, Listed(ship.Editor));
+
+        // The lamp is absent throughout, and that is the question talking rather than the
+        // selection: nothing can happen to it, so there is nothing to ask about it here.
+        Assert.Equal("Inner Door, Outer Door, Airlock Button", before);
+    }
+
+    /// <summary>
+    /// An impossible pair is allowed, and answered where the answer belongs.
+    /// </summary>
+    [Fact]
+    public void BlocksWithNothingInCommonSaySo_RatherThanBeingUnpickable()
+    {
+        var ship = Build();
+        ship.Editor.NewSystem("Airlock");
+        ship.Editor.PressStart("When...");
+        ship.Editor.PressBlock("Airlock Button");
+        ship.Editor.PressBlock("Inner Door");
+
+        var what = ship.Editor.Component<PickComponent>().Stages[1];
+        Assert.Empty(what.Entries);
+        Assert.NotEqual("", what.EmptyText);
+    }
+
+    static string Listed(ReactorEditor editor) =>
+        string.Join(", ", editor.Component<PickComponent>().Stages[0].Entries.Select(e => e.Text));
+
+    [Fact]
+    public void ItOpensOnTheMachines_NotOnAListOfBlocks()
     {
         var ship = Build();
 
-        Assert.Equal("Your automation", ship.Editor.Screen.Title);
-        Assert.Contains(ship.Editor.Component<ChoiceListComponent>().Entries,
-            e => e.Text == "When something happens");
+        // The same screen an established ship gets, with nothing in the list yet - not a
+        // different screen that rearranges itself the moment anything is built.
+        Assert.Equal("Your ship", ship.Editor.Screen.Title);
+        Assert.Empty(ship.Editor.Component<StatusListComponent>().Entries);
+
+        // Both ways in are offered. How a target asks for the name is its own business, so
+        // there is nothing here about panels or dialogs.
+        var start = ship.Editor.Component<StartComponent>();
+        Assert.Equal("New system, Load system", string.Join(", ", start.Options.Select(o => o.Label)));
+        Assert.Equal("What is it?", start.Options[0].Question);
     }
 
     [Fact]
@@ -67,14 +179,15 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
 
         // One pane to begin with; the second appears once it has something to be about.
-        Assert.Single(editor.Component<PathComponent>().Panes);
+        Assert.Single(editor.Component<PickComponent>().Stages);
         Assert.False(editor.Screen.HasPrimary);
 
         editor.PressBlock("Airlock Button");
-        Assert.Equal(2, editor.Component<PathComponent>().Panes.Count);
+        Assert.Equal(2, editor.Component<PickComponent>().Stages.Count);
 
         // Still nothing to move on to - the path is not finished.
         Assert.False(editor.Screen.HasPrimary);
@@ -94,7 +207,8 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         editor.PressBlock("Inner Door");
         editor.PressBlock("Outer Door");
         editor.PressChoice("finishes opening");
@@ -121,7 +235,8 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         editor.PressBlock("Inner Door");
         editor.PressBlock("Outer Door");
         editor.PressChoice("all of them, together");
@@ -150,7 +265,8 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         editor.PressBlock("Inner Door");
         Assert.False(editor.HasChoice("all of them, together"));
 
@@ -166,12 +282,16 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         editor.PressBlock("Airlock Button");
         editor.Back();
 
         Assert.Empty(ship.Automation.Sequences);
-        Assert.Equal("Your automation", editor.Screen.Title);
+
+        // And one more back off the machine itself.
+        editor.Back();
+        Assert.Equal("Your ship", editor.Screen.Title);
     }
 
     [Fact]
@@ -180,15 +300,20 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         Assert.Equal("When something happens", editor.Screen.Title);
 
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
 
-        // Both stages are one screen now, so one step back is all the way out.
+        // Both stages are one screen now, and the starters are no longer a screen at all, so
+        // one step back reaches the machine and a second reaches the ship.
         editor.Back();
-        Assert.Equal("Your automation", editor.Screen.Title);
+        Assert.Equal("Airlock", editor.Screen.Title);
+
+        editor.Back();
+        Assert.Equal("Your ship", editor.Screen.Title);
     }
 
     [Fact]
@@ -197,7 +322,8 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
@@ -209,10 +335,13 @@ public class EditorTests
         ship.Tick();
         Assert.Equal("Let me out", editor.Screen.Title);
 
-        // And in the list, which is the reason naming exists at all.
-        editor.PressAction("Sequences");
+        // And in the list, which is the reason naming exists at all. Backing out of the
+        // sequence lands on the machine it belongs to, which is where its sequences are listed.
+        editor.Back();
         ship.Tick();
-        Assert.Equal("Let me out", editor.Component<SequenceListComponent>().Entries[0].Summary);
+
+        Assert.Equal("Airlock", editor.Screen.Title);
+        Assert.Equal("Let me out", editor.Component<StatusListComponent>().Entries[0].Summary);
     }
 
     [Fact]
@@ -222,7 +351,8 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("Every so often");
+        editor.NewSystem("Airlock");
+        editor.PressStart("Every...");
         editor.PressChoice("steady - every 100 ticks");
 
         // The component instances must survive, or a target rebuilds its controls
@@ -242,10 +372,10 @@ public class EditorTests
 
         editor.PressAdd("do something");
         Assert.Equal("Do something", editor.Screen.Title);
-        Assert.Single(editor.Component<PathComponent>().Panes);
+        Assert.Single(editor.Component<PickComponent>().Stages);
 
         editor.PressBlock("Inner Door");
-        Assert.Equal(2, editor.Component<PathComponent>().Panes.Count);
+        Assert.Equal(2, editor.Component<PickComponent>().Stages.Count);
 
         editor.PressChoice("close");
         editor.PressPrimary();
@@ -294,7 +424,8 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
@@ -328,7 +459,8 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();

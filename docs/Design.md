@@ -89,6 +89,44 @@ and then relies on them not finding out.
 part of the audience, and a false friend costs an experienced reader real confusion while
 buying a beginner nothing. This is what ruled out *while* for a trigger condition.
 
+**What core says, and what it does not.** Core states what has to be possible and what must
+come back from it: there must be a way to choose one of these, and it must tell me which. It
+does not say what that looks like, where it sits, or how somebody works it. A list, a wheel,
+a row of buttons, a voice prompt - all of them satisfy the same statement, and a target that
+knows its own medium will pick better than we can from here.
+
+**Core does have leanings, and needs them.** The order components are given in is an order.
+*Fills* says which one should take whatever room is left rather than letting the whole screen
+scroll and drag a search box off the top. A screen has a way onward and a way back, and which
+is which matters. All of that is shape, and core is right to say it.
+
+What core does not say is the detail: sizes, positions, what a thing is made of, how it opens,
+what gesture works it. "Ask for a name" is core's; "a panel two hundred wide, anchored under
+the button, dismissed by clicking away" is the target's, and had no business in core when I
+put it there.
+
+The line runs the other way too. A target may decide that double-clicking a choice takes it
+and moves on, because that is how somebody reaches for two things at once. It may not decide
+what taking a choice means.
+
+**Rebuild only when it is unavoidable. Otherwise update.** This holds everywhere - in core,
+in every target, at every level.
+
+Anything torn down and made again loses what somebody was doing with it: the caret in the box
+they were typing into, the row under their pointer, the second half of a double-click, the
+place they had scrolled to. Those are not cosmetic losses; they are the difference between a
+tool that can be used and one that fights back. And a screen that rebuilds cannot be watched,
+because everything on it moves at once.
+
+So the question is never "is it cheaper to rebuild" - it is "did the shape actually change".
+A different number of things is a change. Different words in the same number of things is an
+update. Choosing one of the things on offer is an update. Somebody typing is an update.
+
+A corollary, learned by getting it wrong: **never remember a command id.** Core re-issues them
+on every rebuild, so an id captured when a control was made is dead the moment anything
+changes - and the failure is silent, because pressing a dead id does nothing at all. Read it
+at the moment of use.
+
 Three consequences worth stating outright, because they are what make the rest cohere:
 
 - **Nothing nests.** Steps are a flat numbered list. Nesting is what defeats novices,

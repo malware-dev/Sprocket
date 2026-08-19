@@ -13,7 +13,11 @@ phase rather than a building one.** The prototype proved the shape works; the do
 now being written are the attempt to find out what it actually has to do before more of
 it gets built.
 
-30 tests, all green.
+The one exception is the editor's own interface, which has just had a working-over: the
+prototype is a template for the in-game screens, so its shape is a design artifact rather
+than throwaway scaffolding. `docs/Editor.md` is where that lives.
+
+36 tests, all green - 30 in core, 6 driving the host.
 
 ## The documents, and which is which
 
@@ -23,6 +27,7 @@ it gets built.
 | `docs/StoryNotes.md` | Internal. Our judgement on each story: where it stands, what it implies, what was rejected, what the set settled on its own. |
 | `docs/Requirements.md` | Internal. What Reactor must do, derived one story at a time. |
 | `docs/Design.md` | Internal. The model, what is deliberately excluded, and the open decisions. |
+| `docs/Editor.md` | Internal. The interface: what each screen is, what core states about it, and what is left to whoever draws it. |
 | `docs/ApiUnknowns.md` | Internal. Eleven questions about Space Engineers that block requirements. Two have already been struck out as things we knew after all. |
 
 Nothing from the internal four belongs in the public one.
@@ -70,25 +75,45 @@ The biggest things the pass has produced:
   is already broken, and this audience has no fallback.
 - **O is a project in itself**, deliberately under-specified, wanted as a stretch goal.
 
+## The editor, as of today
+
+The screens were reworked around systems, and the shape settled. `docs/Editor.md` is the
+long form; in brief:
+
+- **The root is the machines on this ship**, not a list of sequences. A system is what a
+  machine *is*; the ones on the ship are what somebody *has*, named *Airlock 1* the way the
+  game names a block *Interior Light 4*. The word "instance" never reaches a screen.
+- **A machine's screen has the same shape as the root** - ways to add on top, a rule, then
+  what is already there. The starter chooser that used to stand between making a machine and
+  building its first sequence is gone; `+ When...` and `+ Every...` live on the machine.
+- **`PathComponent` is `PickComponent`**, drawn by `ColumnPickRenderer`. Core states the
+  stages and what each needs back; columns, the search box, the kind list and the double-tap
+  are all the host's choices.
+- **Naming is on the heading**, using the game's word `CustomName`, edited in place.
+
 ## What is not built
 
 Ordered by how much they hurt.
 
-1. **Calling one sequence from another.** `CalledTrigger` exists and nothing consumes a
+1. **The configurator.** `+ add` on a machine and `Load system` both open a stub that says
+   so. Neither can exist until roles do, and roles are the centre of gravity above.
+2. **Calling one sequence from another.** `CalledTrigger` exists and nothing consumes a
    name, so it is reachable only through *run now*. Wanted by E, and R5's stop is worth
    nothing without it.
-2. **Authoring `only if` and `once`.** The model handles them and the editor renders them;
+3. **Authoring `only if` and `once`.** The model handles them and the editor renders them;
    nothing creates one.
-3. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
+4. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
    them.
-4. **The Space Engineers host.** Not started. It implements `Rendering/` against the same
+5. **The Space Engineers host.** Not started. It implements `Rendering/` against the same
    `Reactor.Ui` components and supplies an `IWorld` over the real grid.
 
 ## Known problems
 
-- **Picking a block can empty the list.** After choosing a Button the picker narrows to
-  blocks sharing an event with it, which is nothing, so everything vanishes and it reads
-  like a bug. Correct behaviour, wrong presentation.
+- **The heading sits above centre on a screen with no subtitle.** The subtitle's line is
+  still measured when its text is empty, so the title is pushed up by about eight pixels
+  and no longer lines up with *Back*. Visible on a sequence, which stopped having a
+  subtitle when its duplicated status was removed. Measured, not guessed: title top at
+  y=11, Back at y=22. `EditorView.BuildLayout` is where the two are stacked.
 - **A jammed device stalls a sequence silently.** Deliberate - proceeding is how a stuck
   door vents a ship - but nothing shows it. Now specified as R30.
 - **Momentary signals can be missed.** A one-frame press between updates on `Update10` or
@@ -99,7 +124,7 @@ Ordered by how much they hurt.
 ## Working notes
 
 ```
-dotnet test                                       # 30 tests
+dotnet test                                       # 36 tests
 dotnet run --project src/Reactor.Host.Avalonia    # the prototype
 dotnet test --filter Screenshot                   # PNGs to %TEMP%\reactor-*.png
 ```
@@ -127,3 +152,18 @@ Argued out rather than guessed. The reasoning is in Design.md.
 - A word programmers already know is not given a different meaning, and the game's own
   words are used for the game's own things. A merge block is not a docking block.
 - Creating a system never stands between somebody and their first sequence.
+- **Narrowing runs left to right and never back.** Picking blocks decides what can be said
+  about them; it never decides which blocks exist. An impossible pair is allowed to be made
+  and answered by an empty next stage, because a player watching their own blocks disappear
+  is worse than a sentence saying why.
+- **Rebuild only when necessary, update otherwise, and say nothing when nothing differs.**
+  Core compares before it writes and bumps a revision only on a real change; a target
+  compares that one integer and stops. Hundreds of sequences will run on a server.
+- **Command ids are re-issued on every rebuild and must never be remembered.** Read one at
+  the moment of use. Captured ids are the cause of every dead search box we have had.
+- **Nothing on screen appears or disappears with how much data there is.** A search box that
+  arrives at eight rows, a count that comes and goes: the screen has no shape to learn.
+- **Every screen holding a list has the same top** - the ways to add something, a rule, then
+  what is already there - and everything that adds something carries a plus.
+- **Naming happens on the heading**, and an empty name is an answer rather than a missing
+  one. It hands the heading back to the sentence.

@@ -11,21 +11,33 @@ static class Driving
     public static T Component<T>(this ReactorEditor editor) where T : EditorComponent =>
         editor.Screen.Components.OfType<T>().First();
 
-    static IEnumerable<PathPane> Panes(this ReactorEditor editor) =>
-        editor.Screen.Components.OfType<PathComponent>().SelectMany(p => p.Panes);
+    static IEnumerable<PickStage> Stages(this ReactorEditor editor) =>
+        editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages);
 
     public static void PressBlock(this ReactorEditor editor, string name)
     {
-        var block = editor.Screen.Components.OfType<BlockListComponent>()
-            .SelectMany(l => l.Entries).FirstOrDefault(e => e.Name == name);
-        if (block != null)
-        {
-            editor.Invoke(block.Command);
-            return;
-        }
-
-        var entry = editor.Panes().SelectMany(p => p.Entries).First(e => e.Text == name);
+        var entry = editor.Stages().SelectMany(p => p.Entries).First(e => e.Text == name);
         editor.Invoke(entry.Command);
+    }
+
+    /// <summary>
+    /// Makes a system with the custom name.
+    /// </summary>
+    /// <remarks>
+    /// How a target asks for the name is its own business, so a test says what the answer was
+    /// and nothing about the asking.
+    /// </remarks>
+    public static void NewSystem(this ReactorEditor editor, string name)
+    {
+        var start = editor.Screen.Components.OfType<StartComponent>().First();
+        editor.SetText(start.Options.First(o => o.Asks).Command, name);
+    }
+
+    /// <summary>Presses one of the ways to start something on this screen.</summary>
+    public static void PressStart(this ReactorEditor editor, string label)
+    {
+        var start = editor.Screen.Components.OfType<StartComponent>().First();
+        editor.Invoke(start.Options.First(o => o.Label == label).Command);
     }
 
     public static void PressChoice(this ReactorEditor editor, string text)
@@ -39,7 +51,7 @@ static class Driving
             return;
         }
 
-        foreach (var pane in editor.Panes())
+        foreach (var pane in editor.Stages())
         {
             var option = pane.Options.FirstOrDefault(e => e.Text == text)
                          ?? pane.Entries.Select(e => new ChoiceEntry(e.Text, e.IsChosen, e.Command))
@@ -68,11 +80,19 @@ static class Driving
     public static void PressTriggerSlot(this ReactorEditor editor, int slot) =>
         editor.Invoke(editor.Component<SequenceComponent>().Trigger.Slots[slot].Command);
 
+    /// <summary>Back out to the front door, however deep we are.</summary>
+    public static void GoToRoot(this ReactorEditor editor)
+    {
+        var guard = 0;
+        while (editor.Screen.CanGoBack && guard++ < 20)
+            editor.Back();
+    }
+
     public static void PressAction(this ReactorEditor editor, string text) =>
         editor.Invoke(editor.Screen.Actions.First(a => a.Text == text).Command);
 
     public static void Name(this ReactorEditor editor, string name) =>
-        editor.SetText(editor.Component<SequenceComponent>().NameCommand, name);
+        editor.SetText(editor.Screen.RenameCommand, name);
 
     public static void Back(this ReactorEditor editor) => editor.Invoke(editor.Screen.BackCommand);
 

@@ -41,7 +41,7 @@ namespace Reactor.Editing
             _world = world;
             _program = program;
             _runner = runner;
-            _stack.Add(new SequencesPage(this));
+            _stack.Add(new SystemsPage(this));
             Rebuild();
         }
 
@@ -71,10 +71,11 @@ namespace Reactor.Editing
 
             Current.Refresh();
 
-            // Both are read every tick rather than only when the screen is
-            // rebuilt, so typing a name shows up in the heading as it is typed.
+            // All three are read every tick rather than only when the screen is
+            // rebuilt, so naming something shows up in the heading straight away.
             _screen.Title = Current.Title;
             _screen.Subtitle = Current.Subtitle;
+            _screen.CustomName = Current.CustomName;
         }
 
         /// <summary>Acts on a button, a row, or anything else that was pressed.</summary>
@@ -231,6 +232,8 @@ namespace Reactor.Editing
             _screen.Title = page.Title;
             _screen.CanGoBack = _stack.Count > 1;
             _screen.BackCommand = _screen.CanGoBack ? Register(Pop) : 0;
+            _screen.RenameCommand = page.CanRename ? RegisterText(page.Rename) : 0;
+            _screen.RenamePrompt = page.RenamePrompt;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryCommand = _screen.HasPrimary ? Register(page.Primary) : 0;
 
@@ -242,6 +245,7 @@ namespace Reactor.Editing
                 _screen.Components.Reset(_gathered);
 
             _screen.Subtitle = page.Subtitle;
+            _screen.CustomName = page.CustomName;
             BuildActions();
 
             _structureDirty = false;
@@ -272,25 +276,15 @@ namespace Reactor.Editing
         {
             _actionBar.Clear();
 
-            // What the machine does comes first; the ship is for looking things up.
-            _actionBar.Add(new ChoiceEntry("Sequences", IsRootPage<SequencesPage>(),
-                Register(GoToSequences)));
-            _actionBar.Add(new ChoiceEntry("Ship", IsRootPage<ShipPage>(),
-                Register(GoToShip)));
-            _actionBar.Add(new ChoiceEntry("Start something new", false,
-                Register(OfferStarters)));
-
+            // Deliberately empty. A permanent strip of tabs along the bottom is a thing to
+            // learn before you have done anything, and two of the three were only ever
+            // navigation - which the screens themselves can offer, where they mean something.
             _screen.Actions.Reset(_actionBar);
         }
 
-        void GoToShip()
+        void GoToSystems()
         {
-            Reset(new ShipPage(this));
-        }
-
-        void GoToSequences()
-        {
-            Reset(new SequencesPage(this));
+            Reset(new SystemsPage(this));
         }
 
         /// <summary>
@@ -305,21 +299,64 @@ namespace Reactor.Editing
         /// Browsing the ship is still there, but as a way to look things up rather
         /// than as the only door in.
         /// </remarks>
-        internal void OfferStarters()
+        /// <summary>
+        /// Loading a system somebody else made. Not built yet, and says so.
+        /// </summary>
+        /// <remarks>
+        /// Present rather than hidden because it is half of what the front door offers, and
+        /// a screen that grows an option later teaches itself twice. What it needs is the
+        /// configurator, which needs roles.
+        /// </remarks>
+        /// <summary>
+        /// Another one of a machine already on the ship. Not built yet, and says so.
+        /// </summary>
+        /// <remarks>
+        /// It opens the same configurator loading does, because they are the same act: point a
+        /// machine at the blocks it should use here. Neither exists until roles do.
+        /// </remarks>
+        internal void OfferAnother(AutomationSystem system)
         {
-            var page = new ChoicePage(this, "What should start it?");
-
-            page.Add("When something happens", false, delegate
-            {
-                StartSequence(new WhenTrigger(""));
-            });
-
-            page.Add("Every so often", false, delegate
-            {
-                StartSequence(new EveryTrigger(Cadences.Default));
-            });
-
+            var page = new ChoicePage(this, "Add another");
+            page.EmptyText = "Not built yet. This would ask which of your blocks this one uses, "
+                + "and everything it does would stay the same as the others.";
             Push(page);
+        }
+
+        internal void OfferLoading()
+        {
+            var page = new ChoicePage(this, "Load system");
+            page.EmptyText = "Not built yet. A system somebody sent you would be set up here, "
+                + "asking which of your blocks fill each part of it.";
+            Push(page);
+        }
+
+        /// <summary>
+        /// The ways a sequence can begin, offered on the machine's own screen.
+        /// </summary>
+        /// <remarks>
+        /// These used to be a screen of their own, asked the moment a machine was made. It
+        /// bought nothing: a question with two answers and no context, standing between
+        /// somebody and the thing they came to build, and it left the machine's own screen off
+        /// the way back. They belong at the top of the machine, in the same place and the same
+        /// shape as the ship's own "new machine" - it is the same question either way, which is
+        /// what would you like to add here.
+        ///
+        /// The catalogue lives here rather than on the page so a third way to start something
+        /// is one line in one place.
+        ///
+        /// Each label is the first word of the sentence it makes: "When..." becomes "When the
+        /// airlock button is pressed", "Every..." becomes "Every 30 seconds". The ellipsis is
+        /// the promise that the rest gets filled in. They read as answers to a question -
+        /// "when something happens", "every so often" - only because they were once exactly
+        /// that, on a screen headed "What should start it?" that no longer exists.
+        /// </remarks>
+        internal void AddStarters(StartComponent start, AutomationSystem system)
+        {
+            start.Add("When...",
+                Register(delegate { StartSequence(system, new WhenTrigger("")); }));
+
+            start.Add("Every...",
+                Register(delegate { StartSequence(system, new EveryTrigger(Cadences.Default)); }));
         }
 
         /// <summary>
@@ -337,15 +374,25 @@ namespace Reactor.Editing
         /// </remarks>
         internal void StartSequence(Trigger trigger)
         {
-            // Where to unwind to once the questions are answered. A starter chooser
-            // sitting on top stays put for now, because going back has to reach it -
-            // but it is dropped once the sequence exists.
-            var origin = Current is ChoicePage ? _stack.Count - 1 : _stack.Count;
+            StartSequence(null, trigger);
+        }
+
+        /// <summary>
+        /// The same, for a sequence that belongs to a machine somebody is already looking at.
+        /// </summary>
+        internal void StartSequence(AutomationSystem system, Trigger trigger)
+        {
+            _pendingSystem = system;
+
+            // Where to unwind to once the questions are answered. The machine's screen is
+            // already underneath - the starters live on it now - so everything the questions
+            // pushed is dropped and the finished sequence lands directly on it.
+            var origin = _stack.Count;
 
             var when = trigger as WhenTrigger;
             if (when != null)
             {
-                Push(new PickPathPage(this, "When something happens", when.Sources, true,
+                Push(new PickPage(this, "When something happens", when.Sources, true,
                     delegate { return when.EventId; },
                     delegate(string id) { when.EventId = id; },
                     delegate { FinishSequence(when, origin); },
@@ -391,8 +438,21 @@ namespace Reactor.Editing
         /// </remarks>
         void FinishSequence(Trigger trigger, int origin)
         {
+            var system = _pendingSystem;
+            _pendingSystem = null;
+
             UnwindTo(origin);
-            Push(new SequencePage(this, _program.AddSequence(trigger)));
+            Push(new SequencePage(this, _program.AddSequence(system, trigger)));
         }
+
+        /// <summary>
+        /// The machine a sequence being built belongs to, or null to make a new one.
+        /// </summary>
+        /// <remarks>
+        /// Held across the run of questions rather than passed through them, because every
+        /// question in between is about the sequence and none of them cares which machine it
+        /// is for. Cleared when the sequence is made, so an abandoned run leaves nothing.
+        /// </remarks>
+        AutomationSystem _pendingSystem;
     }
 }

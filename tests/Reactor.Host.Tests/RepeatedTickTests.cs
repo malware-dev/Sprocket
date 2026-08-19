@@ -27,7 +27,8 @@ public class RepeatedTickTests
 
         Run(window, 60);
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         Run(window, 60);
 
         editor.PressBlock("Airlock Button");
@@ -45,10 +46,10 @@ public class RepeatedTickTests
         editor.Back();
         Run(window, 60);
 
-        editor.PressAction("Ship");
+        editor.GoToRoot();
         Run(window, 60);
 
-        editor.PressAction("Sequences");
+        editor.GoToRoot();
         Run(window, 60);
 
         Assert.True(window.IsVisible);
@@ -77,7 +78,8 @@ public class RepeatedTickTests
 
         AssertStill(window, "the sequence list");
 
-        editor.PressChoice("When something happens");
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
         AssertStill(window, "picking what happens");
 
         editor.PressBlock("Airlock Button");
@@ -91,7 +93,7 @@ public class RepeatedTickTests
         AssertStill(window, "picking what to do");
 
         editor.Back();
-        editor.PressAction("Ship");
+        editor.GoToRoot();
         AssertStill(window, "the ship");
     }
 

@@ -100,150 +100,36 @@ namespace Reactor.Ui
     /// <summary>One kind filter offered beside a search box.</summary>
     public sealed class BlockFilter
     {
-        public BlockFilter(string label, bool isCurrent, int command)
+        public BlockFilter(string label, int count, bool isCurrent, int command)
         {
             Label = label;
+            Count = count;
             IsCurrent = isCurrent;
             Command = command;
         }
 
-        public string Label { get; private set; }
-
-        public bool IsCurrent { get; private set; }
-
-        public int Command { get; private set; }
-    }
-
-    /// <summary>
-    /// Narrows the list beneath it, by text and by kind.
-    /// </summary>
-    /// <remarks>
-    /// Not optional polish. A real construct has hundreds of blocks, and a correct
-    /// list nobody can navigate is no better than a wrong one. The kind filters are
-    /// built from what is actually present rather than from a fixed catalogue.
-    /// </remarks>
-    public sealed class BlockSearchComponent : EditorComponent
-    {
-        string _text;
-        int _command;
-
-        public BlockSearchComponent(string text, int command)
-        {
-            _text = text;
-            _command = command;
-            Filters = new ObservableList<BlockFilter>();
-        }
-
-        /// <summary>Current search text.</summary>
-        public string Text
-        {
-            get { return _text; }
-            set { Set(ref _text, value, "Text"); }
-        }
-
-        /// <summary>Send the new text here when the user types.</summary>
-        public int Command
-        {
-            get { return _command; }
-            set { Set(ref _command, value, "Command"); }
-        }
-
-        public ObservableList<BlockFilter> Filters { get; private set; }
-    }
-
-    /// <summary>How a block list behaves when a row is acted on.</summary>
-    public enum BlockListMode
-    {
-        /// <summary>Acting on a row drills into it.</summary>
-        Navigate,
-
-        /// <summary>Rows are picked and unpicked, several at a time.</summary>
-        Choose
-    }
-
-    /// <summary>One block in a list.</summary>
-    public sealed class BlockEntry : Observable
-    {
-        string _status;
-        bool _isActive;
-        int _sequenceCount;
-
-        public BlockEntry(long deviceId, string name, string kind, int command)
-        {
-            DeviceId = deviceId;
-            Name = name;
-            Kind = kind;
-            Command = command;
-        }
-
-        public long DeviceId { get; private set; }
-
-        public string Name { get; private set; }
-
-        public string Kind { get; private set; }
-
-        public int Command { get; private set; }
-
-        /// <summary>Picked, in <see cref="BlockListMode.Choose"/>.</summary>
-        public bool IsChosen { get; set; }
-
-        /// <summary>Live state, in the user's words: "closed", "opening…", "62%".</summary>
-        public string Status
-        {
-            get { return _status; }
-            set { Set(ref _status, value, "Status"); }
-        }
-
-        /// <summary>Whether it is doing something right now.</summary>
-        public bool IsActive
-        {
-            get { return _isActive; }
-            set { Set(ref _isActive, value, "IsActive"); }
-        }
+        public string Label { get; set; }
 
         /// <summary>
-        /// How many sequences touch this block, so "what is affecting this?" is
-        /// answerable by looking rather than by reading every sequence.
+        /// How many there are of this kind.
         /// </summary>
-        public int SequenceCount
-        {
-            get { return _sequenceCount; }
-            set { Set(ref _sequenceCount, value, "SequenceCount"); }
-        }
-    }
+        /// <remarks>
+        /// A fact rather than a decoration. Which kinds are worth reaching for depends on how
+        /// much is behind each one - fourteen doors is a useful narrowing, one antenna is not -
+        /// and a target that has room to say so should be able to.
+        /// </remarks>
+        public int Count { get; set; }
 
-    /// <summary>
-    /// Blocks on the construct, or the subset that can fill a slot.
-    /// </summary>
-    /// <remarks>
-    /// In <see cref="BlockListMode.Choose"/> only blocks that would leave the sequence
-    /// sayable appear at all, so an impossible combination is unreachable rather than
-    /// rejected. Picking several is the ordinary case, which is what keeps iteration
-    /// out of the language entirely.
-    /// </remarks>
-    public sealed class BlockListComponent : EditorComponent
-    {
-        string _emptyText;
+        public bool IsCurrent { get; set; }
 
-        public BlockListComponent(BlockListMode mode)
-        {
-            Mode = mode;
-            Entries = new ObservableList<BlockEntry>();
-        }
-
-        public BlockListMode Mode { get; private set; }
-
-        public ObservableList<BlockEntry> Entries { get; private set; }
-
-        /// <summary>Shown instead of the list when nothing matches.</summary>
-        public string EmptyText
-        {
-            get { return _emptyText; }
-            set { Set(ref _emptyText, value, "EmptyText"); }
-        }
+        public int Command { get; set; }
     }
 
     /// <summary>One option in a choice list.</summary>
+    /// <remarks>
+    /// Settable throughout, so a page that already has one can change what it says rather than
+    /// making another. Rebuilding is what loses whatever somebody was doing with the thing.
+    /// </remarks>
     public sealed class ChoiceEntry
     {
         public ChoiceEntry(string text, bool isCurrent, int command)
@@ -253,22 +139,23 @@ namespace Reactor.Ui
             Command = command;
         }
 
-        public string Text { get; private set; }
+        public string Text { get; set; }
 
-        public bool IsCurrent { get; private set; }
+        public bool IsCurrent { get; set; }
 
-        public int Command { get; private set; }
+        public int Command { get; set; }
 
         /// <summary>
-        /// How often, in ticks, this option's indicator should blink - or 0 for none.
+        /// The interval this option stands for, in ticks, or 0 if it stands for no interval.
         /// </summary>
         /// <remarks>
-        /// Used by the repeat rates, where the label alone asks the reader to imagine a
-        /// speed. A dot blinking at the actual rate is the thing itself, and an
-        /// interval of one tick simply reads as constantly lit - which is exactly what
-        /// it means. The words stay; the blink makes them concrete.
+        /// Used by the repeat rates, where the label alone asks the reader to imagine a speed.
+        /// Knowing the actual number lets a target show it rather than describe it - this host
+        /// blinks a dot at exactly that rate, so "every ten ticks" is a thing you can see
+        /// instead of a thing you have to picture. Whether to do that, and how, is its own
+        /// decision; core supplies the number.
         /// </remarks>
-        public int BlinkTicks { get; set; }
+        public int IntervalTicks { get; set; }
 
         /// <summary>
         /// What picking this will cost, in plain words, or empty.
@@ -305,27 +192,45 @@ namespace Reactor.Ui
         }
     }
 
-    /// <summary>One sequence, summarised to a line.</summary>
-    public sealed class SequenceEntry : Observable
+    /// <summary>One thing that is doing something, summarised to a line.</summary>
+    public sealed class StatusEntry : Observable
     {
         string _summary;
         string _status;
         string _lastRun;
         string _problem;
-        bool _pulse;
+        bool _ranLight;
 
-        public SequenceEntry(int sequenceId, string summary, int command)
+        public StatusEntry(string summary, int command)
         {
-            SequenceId = sequenceId;
             _summary = summary;
             Command = command;
         }
 
-        public int SequenceId { get; private set; }
+        /// <summary>
+        /// How far in this row sits: 0 for a thing, 1 for one of that thing.
+        /// </summary>
+        /// <remarks>
+        /// One level, and there will never be more. A machine and the ones of it fitted to a
+        /// ship is the whole of the nesting this language has, so a target can indent by a
+        /// fixed amount rather than reinventing a tree.
+        /// </remarks>
+        public int Depth { get; set; }
+
+        /// <summary>
+        /// Whether this row does something rather than being something.
+        /// </summary>
+        /// <remarks>
+        /// "Another one of these" belongs in the list, under the machine it would add to,
+        /// rather than somewhere else on the screen where it would have to explain which
+        /// machine it meant. It is not a thing with a state, so a target should draw it
+        /// quieter than its neighbours.
+        /// </remarks>
+        public bool IsAction { get; set; }
 
         public int Command { get; private set; }
 
-        /// <summary>The sequence read as one line - its name, or its whole sentence.</summary>
+        /// <summary>Read as one line - a name, or a whole sentence.</summary>
         public string Summary
         {
             get { return _summary; }
@@ -346,11 +251,17 @@ namespace Reactor.Ui
             set { Set(ref _lastRun, value, "LastRun"); }
         }
 
-        /// <summary>Lit briefly each time it fires - the visible heartbeat.</summary>
-        public bool Pulse
+        /// <summary>
+        /// Whether it ran a moment ago.
+        /// </summary>
+        /// <remarks>
+        /// The fact, not the flash. A target that wants a heartbeat has one; a target that
+        /// would rather say so in words is not being told to blink.
+        /// </remarks>
+        public bool JustRan
         {
-            get { return _pulse; }
-            set { Set(ref _pulse, value, "Pulse"); }
+            get { return _ranLight; }
+            set { Set(ref _ranLight, value, "JustRan"); }
         }
 
         public string Problem
@@ -360,17 +271,28 @@ namespace Reactor.Ui
         }
     }
 
-    /// <summary>Sequences, one line each.</summary>
-    public sealed class SequenceListComponent : EditorComponent
+    /// <summary>
+    /// Named things that are doing something, one line each.
+    /// </summary>
+    /// <remarks>
+    /// Serves the machines on a ship and the sequences inside one, because they are the same
+    /// thing to look at: a name, what it is doing now, when it last did anything, and whether
+    /// something is wrong with it.
+    ///
+    /// That is not a slide towards generic widgets. It is still shaped by this domain - live
+    /// automation with a heartbeat and a problem - rather than being a list control that
+    /// would leave every target reassembling one out of primitives.
+    /// </remarks>
+    public sealed class StatusListComponent : EditorComponent
     {
         string _emptyText;
 
-        public SequenceListComponent()
+        public StatusListComponent()
         {
-            Entries = new ObservableList<SequenceEntry>();
+            Entries = new ObservableList<StatusEntry>();
         }
 
-        public ObservableList<SequenceEntry> Entries { get; private set; }
+        public ObservableList<StatusEntry> Entries { get; private set; }
 
         public string EmptyText
         {

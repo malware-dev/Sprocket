@@ -16,8 +16,8 @@ namespace Reactor.Editing
     /// </remarks>
     static class SequenceSummary
     {
-        /// <summary>Lit for this many ticks after a sequence fires.</summary>
-        const int PulseTicks = 10;
+        /// <summary>How long after firing a sequence still counts as having just run.</summary>
+        const int JustRanTicks = 10;
 
         public static bool References(Sequence sequence, long deviceId)
         {
@@ -25,7 +25,7 @@ namespace Reactor.Editing
         }
 
         /// <summary>Updates one entry per sequence, in place.</summary>
-        public static void Fill(ObservableList<SequenceEntry> entries, List<Sequence> sequences, IWorld world,
+        public static void Fill(ObservableList<StatusEntry> entries, List<Sequence> sequences, IWorld world,
             AutomationRunner runner, int tick)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
@@ -37,8 +37,8 @@ namespace Reactor.Editing
 
                 entry.Summary = Describe(world, sequence);
                 entry.Status = Status(sequence, state);
-                entry.Pulse = state != null && state.LastFiredTick >= 0
-                    && tick - state.LastFiredTick < PulseTicks;
+                entry.JustRan = state != null && state.LastFiredTick >= 0
+                    && tick - state.LastFiredTick < JustRanTicks;
                 entry.Problem = Problem(world, sequence, state);
 
                 entry.LastRun = Elapsed.Ago(TicksSinceRun(state, tick));

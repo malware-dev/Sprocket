@@ -116,21 +116,6 @@ namespace Reactor.Ui
         public int SequenceId { get; set; }
 
         /// <summary>
-        /// What the user calls this, or empty.
-        /// </summary>
-        /// <remarks>
-        /// Optional, and it has to look optional. A name buys two things - a list of
-        /// twenty sequences becomes legible, and more than one trigger can start the
-        /// same one - but requiring it would put a naming task in front of somebody
-        /// who just wants a door to open. An unnamed sequence reads as its own
-        /// sentence and is no worse off.
-        /// </remarks>
-        public string Name { get; set; }
-
-        /// <summary>Send the new name here when the user types.</summary>
-        public int NameCommand { get; set; }
-
-        /// <summary>
         /// Starts the sequence by hand, as if its trigger had fired.
         /// </summary>
         /// <remarks>
@@ -151,7 +136,7 @@ namespace Reactor.Ui
         public string Status { get; set; }
 
         /// <summary>Lit briefly each time it fires.</summary>
-        public bool Pulse { get; set; }
+        public bool JustRan { get; set; }
 
         /// <summary>When it last ran, in words: "just now", "3 minutes ago", or empty.</summary>
         public string LastRun { get; set; }

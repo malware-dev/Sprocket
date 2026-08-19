@@ -33,6 +33,25 @@ namespace Reactor.Editing
         /// questions moves the user on; going back retreats one question. Both have
         /// to exist, or one of them ends up lying.
         /// </remarks>
+        /// <summary>
+        /// The name somebody gave this page's subject, or empty when the heading is worked
+        /// out from what the thing is.
+        /// </summary>
+        /// <remarks>
+        /// Pages that can be renamed override this and <see cref="Rename"/> together. Neither
+        /// is any use alone: a target has to know what the current name is before it can offer
+        /// to change it, or it opens a box holding a sentence nobody typed.
+        /// </remarks>
+        public virtual string CustomName { get { return ""; } }
+
+        public virtual bool CanRename { get { return false; } }
+
+        /// <summary>What to ask when offering the rename.</summary>
+        public virtual string RenamePrompt { get { return ""; } }
+
+        /// <summary>Takes a new name, or empty to go back to the worked-out heading.</summary>
+        public virtual void Rename(string name) { }
+
         public virtual string PrimaryText { get { return ""; } }
 
         public virtual void Primary() { }

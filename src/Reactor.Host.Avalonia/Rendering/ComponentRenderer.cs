@@ -48,16 +48,14 @@ abstract class ComponentRenderer
             return new HeadingRenderer(editor, heading);
         if (component is NoticeComponent notice)
             return new NoticeRenderer(editor, notice);
-        if (component is BlockSearchComponent search)
-            return new BlockSearchRenderer(editor, search);
-        if (component is BlockListComponent blocks)
-            return new BlockListRenderer(editor, blocks);
+        if (component is StartComponent start)
+            return new StartRenderer(editor, start);
         if (component is ChoiceListComponent choices)
             return new ChoiceListRenderer(editor, choices);
-        if (component is SequenceListComponent sequences)
-            return new SequenceListRenderer(editor, sequences);
-        if (component is PathComponent path)
-            return new PathRenderer(editor, path);
+        if (component is StatusListComponent sequences)
+            return new StatusListRenderer(editor, sequences);
+        if (component is PickComponent path)
+            return new ColumnPickRenderer(editor, path);
         if (component is SequenceComponent sentence)
             return new SequenceRenderer(editor, sentence);
 

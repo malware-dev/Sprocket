@@ -52,209 +52,136 @@ sealed class NoticeRenderer : ComponentRenderer
 }
 
 /// <summary>
-/// Search box plus kind filters.
+/// The ways a machine comes into being, and how this host asks for what they need.
 /// </summary>
 /// <remarks>
-/// The text box deliberately survives structural rebuilds. Typing changes what the
-/// list contains, which is a structural change - recreating the box on every
-/// keystroke would throw away focus and the caret.
+/// Core said a name is needed and gave somewhere to send it. Everything below - that it opens
+/// under the button, that Escape abandons it, that Continue is dead until there is something
+/// to continue with - is this host deciding what that should feel like. Another target may
+/// use a modal, a terminal prompt, or a line at the top of the screen, and core will not know.
 /// </remarks>
-sealed class BlockSearchRenderer : ComponentRenderer
+sealed class StartRenderer : ComponentRenderer
 {
-    int _seenFilters = -1;
+    /// <summary>
+    /// Everything in here adds something, so everything in here gets a plus.
+    /// </summary>
+    /// <remarks>
+    /// Core does not spell the plus into the labels. It says these are the ways to start
+    /// something, which is already the whole of the claim - drawing that as a plus, here and
+    /// on the "add" rows of a list, is this host being consistent with itself. A target with
+    /// no room for it can leave it off and lose nothing.
+    /// </remarks>
+    public const string Plus = "+ ";
 
-    BlockSearchComponent _model;
-    readonly TextBox _box;
-    readonly WrapPanel _filters;
-    readonly DockPanel _root;
+    readonly StartComponent _model;
+    readonly StackPanel _root = Widgets.Stack();
 
-    public BlockSearchRenderer(ReactorEditor editor, BlockSearchComponent model) : base(editor)
+    public StartRenderer(ReactorEditor editor, StartComponent model) : base(editor)
     {
         _model = model;
 
-        _box = new TextBox
+        // A line under the whole block, because what follows it is a different kind of thing:
+        // above is what you can add, below is what is already there.
+        _root.Children.Add(new Border
         {
-            Text = model.Text,
-            Watermark = "Search…",
-            Background = Palette.Panel,
+            Height = 1,
+            Background = Palette.Line,
+            Margin = new Thickness(0, 8, 0, 8)
+        });
+
+        foreach (var option in model.Options)
+            _root.Children.Insert(_root.Children.Count - 1, BuildOption(option));
+    }
+
+    Control BuildOption(StartOption option)
+    {
+        var button = Widgets.Row(Widgets.Label(Plus + option.Label, Palette.Ink));
+
+        if (!option.Asks)
+        {
+            button.Click += (_, _) => Editor.Invoke(option.Command);
+            return button;
+        }
+
+        // No example. The question sits directly above the box, and any example specific
+        // enough to be useful reads as a requirement - somebody would wonder whether it has
+        // to be an airlock.
+        var box = new TextBox
+        {
+            Background = Palette.Page,
             BorderBrush = Palette.Line,
-            CornerRadius = new CornerRadius(6),
-            Padding = new Thickness(10, 7),
-            Margin = new Thickness(0, 0, 0, 8)
+            CornerRadius = new CornerRadius(4),
+            Padding = new Thickness(8, 5),
+            FontSize = 13,
+            MinWidth = 220
         };
-        _box.TextChanged += (_, _) =>
+
+        var confirm = new Button
         {
-        // Compared against what core holds rather than guarded by a flag around the
-        // assignment: Avalonia raises this after the assignment has returned, by which
-        // time any such flag is down again, so our own echo arrives looking exactly
-        // like a keystroke.
-            var text = _box.Text ?? "";
-            if (text == (_model.Text ?? ""))
+            Content = "Continue",
+            Background = Palette.Accent,
+            Foreground = Brushes.White,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(14, 5),
+            CornerRadius = new CornerRadius(4),
+            Margin = new Thickness(8, 0, 0, 0),
+            IsEnabled = false
+        };
+
+        var row = new DockPanel();
+        DockPanel.SetDock(confirm, Dock.Right);
+        row.Children.Add(confirm);
+        row.Children.Add(box);
+
+        var inside = Widgets.Stack();
+        inside.Children.Add(Widgets.Label(option.Question, Palette.Muted, 11));
+        inside.Children.Add(row);
+
+        // A flyout rather than a panel in the stack: it hangs over the screen instead of
+        // shoving it down, it is anchored to the thing that opened it, and clicking away
+        // dismisses it. None of which core knows or should.
+        var flyout = new Flyout
+        {
+            Content = inside,
+            Placement = PlacementMode.BottomEdgeAlignedLeft,
+            ShowMode = FlyoutShowMode.Transient
+        };
+
+        Action confirmed = () =>
+        {
+            var answer = (box.Text ?? "").Trim();
+            if (answer.Length == 0)
                 return;
 
-            Editor.SetText(_model.Command, text);
+            flyout.Hide();
+            Editor.SetText(option.Command, answer);
         };
 
-        _filters = new WrapPanel();
-        _root = new DockPanel();
-        DockPanel.SetDock(_box, Dock.Top);
-        DockPanel.SetDock(_filters, Dock.Top);
-        _root.Children.Add(_box);
-        _root.Children.Add(_filters);
+        box.TextChanged += (_, _) => confirm.IsEnabled = !string.IsNullOrWhiteSpace(box.Text);
+        box.KeyDown += (_, e) =>
+        {
+            if (e.Key == Avalonia.Input.Key.Enter)
+                confirmed();
+            else if (e.Key == Avalonia.Input.Key.Escape)
+                flyout.Hide();
+        };
+        confirm.Click += (_, _) => confirmed();
 
-        BuildFilters();
+        flyout.Opened += (_, _) =>
+        {
+            box.Text = "";
+            confirm.IsEnabled = false;
+            box.Focus();
+        };
+
+        button.Flyout = flyout;
+        return button;
     }
 
     public override Control Control => _root;
 
     public override void Update()
     {
-        if (_seenFilters == _model.Filters.Revision)
-            return;
-
-        _seenFilters = _model.Filters.Revision;
-        BuildFilters();
-    }
-
-    void BuildFilters()
-    {
-        _filters.Children.Clear();
-        foreach (var filter in _model.Filters)
-        {
-            var command = filter.Command;
-            var chip = Widgets.Chip(filter.Label, filter.IsCurrent);
-            chip.Click += (_, _) => Editor.Invoke(command);
-            _filters.Children.Add(chip);
-        }
-    }
-}
-
-sealed class BlockListRenderer : ComponentRenderer
-{
-    int _seenRevision = -1;
-
-    sealed class Row
-    {
-        public Ellipse Lit = null!;
-        public TextBlock Name = null!;
-        public TextBlock Detail = null!;
-        public TextBlock Count = null!;
-        public Border Badge = null!;
-    }
-
-    BlockListComponent _model;
-    readonly StackPanel _panel = Widgets.Stack();
-    readonly List<Row> _rows = [];
-    readonly TextBlock _empty;
-
-    public BlockListRenderer(ReactorEditor editor, BlockListComponent model) : base(editor)
-    {
-        _model = model;
-        _empty = Widgets.Label("", Palette.Muted, 12);
-        _empty.Margin = new Thickness(4, 8, 0, 0);
-
-        Build();
-    }
-
-    public override Control Control => _panel;
-
-    public override void Update()
-    {
-        // Rebuilt here rather than from the list's own event, which fires while
-        // core is still mid-update and would read half-written rows.
-        if (_seenRevision != _model.Entries.Revision)
-        {
-            _seenRevision = _model.Entries.Revision;
-            Build();
-        }
-
-        for (var i = 0; i < _rows.Count && i < _model.Entries.Count; i++)
-        {
-            var entry = _model.Entries[i];
-            var row = _rows[i];
-
-            row.Name.Text = entry.Name;
-            row.Detail.Text = string.IsNullOrEmpty(entry.Status)
-                ? entry.Kind
-                : $"{entry.Kind}   {entry.Status}";
-            row.Lit.IsVisible = entry.IsActive;
-            row.Badge.IsVisible = entry.SequenceCount > 0;
-            row.Count.Text = entry.SequenceCount.ToString();
-        }
-    }
-
-    void Build()
-    {
-        _panel.Children.Clear();
-        _rows.Clear();
-
-        if (_model.Entries.Count == 0)
-        {
-            _empty.Text = _model.EmptyText ?? "";
-            _panel.Children.Add(_empty);
-            return;
-        }
-
-        var choosing = _model.Mode == BlockListMode.Choose;
-
-        foreach (var entry in _model.Entries)
-        {
-            var row = new Row();
-            var grid = new Grid
-            {
-                ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto")
-            };
-
-            if (choosing)
-            {
-                // A glyph rather than a checkbox: the command already toggles, and
-                // one press path is easier to reason about than two.
-                var mark = Widgets.Label(entry.IsChosen ? "✓" : "○",
-                    entry.IsChosen ? Palette.Live : Palette.Faint, 14, true);
-                mark.Margin = new Thickness(0, 0, 10, 0);
-                Grid.SetColumn(mark, 0);
-                grid.Children.Add(mark);
-                row.Lit = new Ellipse { IsVisible = false };
-            }
-            else
-            {
-                var dot = Widgets.Dot(out var lit);
-                row.Lit = lit;
-                Grid.SetColumn(dot, 0);
-                grid.Children.Add(dot);
-            }
-
-            row.Name = Widgets.Label(entry.Name, Palette.Ink);
-            row.Detail = Widgets.Label(entry.Kind, Palette.Faint, 11);
-
-            var text = Widgets.Stack();
-            text.Children.Add(row.Name);
-            text.Children.Add(row.Detail);
-            Grid.SetColumn(text, 1);
-            grid.Children.Add(text);
-
-            row.Count = Widgets.Label("", Palette.Muted, 11);
-            row.Badge = new Border
-            {
-                Child = row.Count,
-                Background = Palette.SlotFill,
-                CornerRadius = new CornerRadius(8),
-                Padding = new Thickness(7, 1),
-                VerticalAlignment = VerticalAlignment.Center,
-                IsVisible = false
-            };
-            Grid.SetColumn(row.Badge, 2);
-            grid.Children.Add(row.Badge);
-
-            var command = entry.Command;
-            var button = Widgets.Row(grid);
-            button.Click += (_, _) => Editor.Invoke(command);
-
-            _panel.Children.Add(button);
-            _rows.Add(row);
-        }
-
-        Update();
     }
 }
 
@@ -323,10 +250,10 @@ sealed class ChoiceListRenderer : ComponentRenderer
 
         foreach (var entry in _model.Entries)
         {
-            var row = new Row { Ticks = entry.BlinkTicks };
+            var row = new Row { Ticks = entry.IntervalTicks };
             var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto") };
 
-            if (entry.BlinkTicks > 0)
+            if (entry.IntervalTicks > 0)
             {
                 row.Blink = new Ellipse
                 {
@@ -368,7 +295,7 @@ sealed class ChoiceListRenderer : ComponentRenderer
     }
 }
 
-sealed class SequenceListRenderer : ComponentRenderer
+sealed class StatusListRenderer : ComponentRenderer
 {
     int _seenRevision = -1;
 
@@ -381,11 +308,11 @@ sealed class SequenceListRenderer : ComponentRenderer
         public TextBlock Problem = null!;
     }
 
-    SequenceListComponent _model;
+    StatusListComponent _model;
     readonly StackPanel _panel = Widgets.Stack();
     readonly List<Row> _rows = [];
 
-    public SequenceListRenderer(ReactorEditor editor, SequenceListComponent model) : base(editor)
+    public StatusListRenderer(ReactorEditor editor, StatusListComponent model) : base(editor)
     {
         _model = model;
         _model.Entries.Changed += Build;
@@ -409,10 +336,12 @@ sealed class SequenceListRenderer : ComponentRenderer
             var entry = _model.Entries[i];
             var row = _rows[i];
 
-            row.Summary.Text = entry.Summary;
+            // The same plus the start block uses, for the same reason: this row adds
+            // something. Core marks it as an action and leaves the drawing to us.
+            row.Summary.Text = entry.IsAction ? StartRenderer.Plus + entry.Summary : entry.Summary;
             row.Status.Text = entry.Status;
             row.LastRun.Text = entry.LastRun;
-            row.Lit.IsVisible = entry.Pulse;
+            row.Lit.IsVisible = entry.JustRan;
             row.Problem.Text = entry.Problem;
             row.Problem.IsVisible = !string.IsNullOrEmpty(entry.Problem);
         }
@@ -438,9 +367,12 @@ sealed class SequenceListRenderer : ComponentRenderer
 
             var dot = Widgets.Dot(out var lit);
             row.Lit = lit;
+            // A row that does something has no state to show, so it gets no light - only the
+            // space where one would be, which keeps its text aligned with its neighbours.
+            dot.IsVisible = !entry.IsAction;
             grid.Children.Add(dot);
 
-            row.Summary = Widgets.Label("", Palette.Ink);
+            row.Summary = Widgets.Label("", entry.IsAction ? Palette.Muted : Palette.Ink);
             row.Status = Widgets.Label("", Palette.Faint, 11);
             row.LastRun = Widgets.Label("", Palette.Faint, 11);
             row.LastRun.Margin = new Thickness(8, 0, 0, 0);
@@ -459,7 +391,28 @@ sealed class SequenceListRenderer : ComponentRenderer
             grid.Children.Add(text);
 
             var command = entry.Command;
+
+            // No command means there is nothing to press, so it is not drawn as something that
+            // can be. A machine's own row is a heading over the ones of it, and a heading that
+            // lights up under the pointer is a promise it cannot keep.
+            if (command == 0)
+            {
+                _panel.Children.Add(new Border
+                {
+                    Child = grid,
+                    Padding = new Thickness(12, 9),
+                    Margin = new Thickness(entry.Depth > 0 ? 22 : 0, 0, 0, 4)
+                });
+                _rows.Add(row);
+                continue;
+            }
+
             var button = Widgets.Row(grid);
+
+            // One level of nesting, ever: a machine, and the ones of it on this ship.
+            if (entry.Depth > 0)
+                button.Margin = new Thickness(22, 0, 0, 4);
+
             button.Click += (_, _) => Editor.Invoke(command);
 
             _panel.Children.Add(button);

@@ -25,6 +25,43 @@ namespace Reactor.Ui
         /// <summary>Context the title cannot carry - a count, a live status.</summary>
         public string Subtitle { get; set; }
 
+        /// <summary>
+        /// The name somebody typed for this screen's subject, or empty when the heading is
+        /// worked out instead.
+        /// </summary>
+        /// <remarks>
+        /// Named for the game's own term. Space Engineers calls a player-supplied name a block's
+        /// CustomName throughout its API, and a mod that invents a different word for the same
+        /// idea makes its author translate every time they read it.
+        /// </remarks>
+        /// <remarks>
+        /// Separate from <see cref="Title"/> because they are not the same thing. The title is
+        /// always something to read - a name if there is one, a description of the thing
+        /// otherwise - while this is only ever what a person typed. A target offering to
+        /// change the name needs to know which it is looking at, or it prefills its box with a
+        /// sentence nobody wrote and calls it their name.
+        /// </remarks>
+        public string CustomName { get; set; }
+
+        public bool CanRename { get { return RenameCommand != 0; } }
+
+        /// <summary>
+        /// Send a new name here, or empty to go back to the worked-out heading.
+        /// </summary>
+        /// <remarks>
+        /// Zero when this screen's heading is not somebody's to change.
+        ///
+        /// This replaced a naming box that sat inside the sequence, under a heading that
+        /// already showed the name - two places for one thing, one of them announcing it and
+        /// one of them setting it. Naming belongs on the heading because the heading is what
+        /// the name is for. Whether that is a pencil beside it, a long press, or typing
+        /// straight over it is the target's business.
+        /// </remarks>
+        public int RenameCommand { get; set; }
+
+        /// <summary>What to ask when offering the rename.</summary>
+        public string RenamePrompt { get; set; }
+
         public bool CanGoBack { get; set; }
 
         public int BackCommand { get; set; }

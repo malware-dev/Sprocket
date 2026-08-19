@@ -54,7 +54,7 @@ public class MainWindow : Window
     Control BuildSimulateStrip()
     {
         var row = Widgets.Stack(Orientation.Horizontal);
-        row.Children.Add(Widgets.Label("Simulate:", Palette.Faint, 11));
+        row.Children.Add(Widgets.Label("Prototype - stands in for the game:", Palette.Faint, 11));
 
         foreach (var device in _simulation.Pokeable())
         {
@@ -94,13 +94,17 @@ public class MainWindow : Window
             }
         }
 
+        // Deliberately unlike the editor above it. With the editor's own action bar gone
+        // this strip is the only thing along the bottom, and anything sitting there in the
+        // same clothes reads as part of the product - which this emphatically is not.
         return new Border
         {
             Child = row,
-            Background = Palette.Chrome,
+            Background = Palette.Page,
             Padding = new Thickness(12, 6),
             BorderBrush = Palette.Line,
-            BorderThickness = new Thickness(0, 1, 0, 0)
+            BorderThickness = new Thickness(0, 1, 0, 0),
+            Opacity = 0.75
         };
     }
 }

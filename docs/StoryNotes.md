@@ -138,6 +138,20 @@ Both are wanted; they must not share a name in the UI.
 **J - forty sequences.** One flat list. With I and K, this is what actually justifies
 the "system" concept.
 
+**K - how sharing might actually happen.** A datapad is an appealing route: an item you
+carry, hand over, and leave in a container - endemic in a way a menu never is. It has a hard
+limit of a thousand characters, so a system cannot simply be written onto one.
+
+That splits sharing in two rather than killing it. Within a world, the datapad can carry a
+short reference and the mod holds the system itself, which covers handing something to
+somebody on your own server - the common case, and the one the item makes charming. Across
+worlds it cannot, because the far side has nothing to look the reference up in, so that needs
+a file or the workshop.
+
+Squeezing a whole system into a thousand characters is the tempting third option and is worth
+resisting: simple systems would fit and complicated ones would not, with no rule anybody could
+predict, which is the worst kind of limit to explain.
+
 **K - give it to a friend.** Nothing is exportable, and a role is not yet something a
 sequence has. The auto-derived resource set idea lives or dies here.
 

@@ -29,7 +29,7 @@ sealed class SequenceRenderer : ComponentRenderer
     readonly List<StepVisual> _steps = [];
     readonly List<Button> _triggerSlots = [];
 
-    Ellipse _pulse = null!;
+    Ellipse _ranLight = null!;
     TextBlock _status = null!;
     TextBlock _lastRun = null!;
     TextBlock _skipped = null!;
@@ -38,7 +38,6 @@ sealed class SequenceRenderer : ComponentRenderer
     Border _problemBanner = null!;
     Border _liveBadge = null!;
     Button _enable = null!;
-    TextBox _name = null!;
 
     public SequenceRenderer(ReactorEditor editor, SequenceComponent model) : base(editor)
     {
@@ -52,7 +51,7 @@ sealed class SequenceRenderer : ComponentRenderer
     {
         _status.Text = _model.Status;
         _lastRun.Text = _model.LastRun;
-        _pulse.IsVisible = _model.Pulse;
+        _ranLight.IsVisible = _model.JustRan;
 
         _skippedBadge.IsVisible = _model.SkippedCount > 0;
         _skipped.Text = $"skipped {_model.SkippedCount}× while busy";
@@ -60,14 +59,6 @@ sealed class SequenceRenderer : ComponentRenderer
         var hasProblem = !string.IsNullOrEmpty(_model.Problem);
         _problemBanner.IsVisible = hasProblem;
         _problem.Text = _model.Problem;
-
-        var name = _model.Name ?? "";
-        if (_name.Text != name)
-        {
-            // Same guard as the search box: only push down when it genuinely differs,
-            // or typing fights with the refresh.
-            _name.Text = name;
-        }
 
         _liveBadge.IsVisible = _model.Trigger.IsLiveNow;
         _enable.Content = _model.Enabled ? "on" : "off";
@@ -107,7 +98,6 @@ sealed class SequenceRenderer : ComponentRenderer
         _steps.Clear();
         _triggerSlots.Clear();
 
-        _root.Children.Add(BuildName());
         _root.Children.Add(BuildHeader());
         _root.Children.Add(BuildProblem());
         _root.Children.Add(BuildTrigger());
@@ -173,43 +163,6 @@ sealed class SequenceRenderer : ComponentRenderer
         return grid;
     }
 
-    /// <summary>
-    /// Optional, and it looks it: no label, just a faint line and a hint. Requiring a
-    /// name would put a naming task in front of somebody who only wants a door to open.
-    /// </summary>
-    Control BuildName()
-    {
-        _name = new TextBox
-        {
-            Text = _model.Name ?? "",
-            Watermark = "Name this sequence (optional)",
-            Background = Brushes.Transparent,
-            BorderBrush = Palette.Line,
-            BorderThickness = new Thickness(0, 0, 0, 1),
-            // Quieter than the heading above it, which already shows the name. This
-            // is where the name is *changed*, not where it is announced.
-            Foreground = Palette.Muted,
-            FontSize = 12,
-            Padding = new Thickness(0, 3),
-            Margin = new Thickness(0, 0, 0, 10)
-        };
-
-        _name.TextChanged += (_, _) =>
-        {
-        // Compared against what core holds rather than guarded by a flag around the
-        // assignment: Avalonia raises this after the assignment has returned, by which
-        // time any such flag is down again, so our own echo arrives looking exactly
-        // like a keystroke.
-            var text = _name.Text ?? "";
-            if (text == (_model.Name ?? ""))
-                return;
-
-            Editor.SetText(_model.NameCommand, text);
-        };
-
-        return _name;
-    }
-
     Control BuildProblem()
     {
         _problem = Widgets.Label("", Palette.Problem, 12);
@@ -223,7 +176,7 @@ sealed class SequenceRenderer : ComponentRenderer
     {
         var wrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
 
-        var dot = Widgets.Dot(out _pulse);
+        var dot = Widgets.Dot(out _ranLight);
         dot.Margin = new Thickness(0, 0, 10, 4);
         wrap.Children.Add(dot);
 
