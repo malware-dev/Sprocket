@@ -203,7 +203,7 @@ namespace Reactor.Editing
                 changed = true;
             }
 
-            var narrow = Editor.RegisterText(OnBlockSearch);
+            var narrow = Editor.RegisterText(Cmd.NarrowEntities, OnBlockSearch);
             if (_blocks.NarrowCommand != narrow)
             {
                 _blocks.NarrowCommand = narrow;
@@ -233,7 +233,8 @@ namespace Reactor.Editing
 
                 changed |= Apply(_blocks.Entries[i], entity.Name, entity.Kind.DisplayName,
                     entity.Status, entity.IsActive, Contains(_selection, id),
-                    Editor.Register(delegate { Toggle(id); }), entity.Kind.Icon);
+                    Editor.Register(Cmd.PickEntity, (int)id, delegate { Toggle(id); }),
+                    entity.Kind.Icon);
             }
 
             return changed;
@@ -244,13 +245,13 @@ namespace Reactor.Editing
             var changed = Resize(_blocks.Filters, _kinds.Count + 1);
 
             changed |= Apply(_blocks.Filters[0], "Anything", _candidates.Count, _kind.Length == 0,
-                Editor.Register(ClearKind));
+                Editor.Register(Cmd.AnyKind, ClearKind));
 
             for (var i = 0; i < _kinds.Count; i++)
             {
                 var id = _kinds[i].Id;
                 changed |= Apply(_blocks.Filters[i + 1], _kinds[i].DisplayName, CountOfKind(id),
-                    _kind == id, Editor.Register(delegate { SetKind(id); }));
+                    _kind == id, Editor.Register(Cmd.OneKind, i, delegate { SetKind(id); }));
             }
 
             return changed;
@@ -269,9 +270,9 @@ namespace Reactor.Editing
 
             var all = _all;
             changed |= Apply(_blocks.Options[0], "any one of them is enough", !all,
-                Editor.Register(delegate { SetAll(false); }));
+                Editor.Register(Cmd.RequireAny, delegate { SetAll(false); }));
             changed |= Apply(_blocks.Options[1], "all of them, together", all,
-                Editor.Register(delegate { SetAll(true); }));
+                Editor.Register(Cmd.RequireAll, delegate { SetAll(true); }));
 
             return changed;
         }
@@ -316,7 +317,7 @@ namespace Reactor.Editing
                 changed = true;
             }
 
-            var narrow = Editor.RegisterText(OnWhatSearch);
+            var narrow = Editor.RegisterText(Cmd.NarrowChoices, OnWhatSearch);
             if (_what.NarrowCommand != narrow)
             {
                 _what.NarrowCommand = narrow;
@@ -336,7 +337,7 @@ namespace Reactor.Editing
                 var at = _matched[i];
                 var id = _ids[at];
                 changed |= Apply(_what.Entries[i], _names[at], "", "", false, id == chosen,
-                    Editor.Register(delegate { Choose(id); }));
+                    Editor.Register(Cmd.PickChoice, at, delegate { Choose(id); }));
             }
 
             return changed;

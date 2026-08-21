@@ -17,7 +17,7 @@ The one exception is the editor's own interface, which has just had a working-ov
 prototype is a template for the in-game screens, so its shape is a design artifact rather
 than throwaway scaffolding. `docs/Editor.md` is where that lives.
 
-62 tests, all green - 55 in core, 7 driving the host.
+78 tests, all green - 60 in core, 18 driving the host.
 
 ## The documents, and which is which
 
@@ -98,8 +98,10 @@ long form; in brief:
 - **A running sequence is drawn as a thing being watched**, not as an editor with its hands
   tied: the arrows, crosses and add buttons are absent rather than greyed, and the sentence
   reads as prose. It is a first slice of the diagnosis view R28 will finish.
-- **Every change is a reversible operation** with an undo beside Pause and Delete that names
-  what it would undo. Undo cannot touch the switch, so no press of it can arm a machine.
+- **Every change is a reversible operation**, with undo and redo beside Pause and Delete as
+  fixed-width arrows that never come and go, the description in a tooltip. A new edit ends the redo branch. Neither can touch
+  the switch, so no press of either can arm a machine, and both wait for it like any other
+  edit.
 
 ## The model, as of today
 
@@ -120,14 +122,19 @@ Ordered by how much they hurt.
 
 1. **The configurator.** `+ add` on a machine and `Load system` both open a stub that says
    so. Neither can exist until roles do, and roles are the centre of gravity above.
-2. **Calling one sequence from another.** `CalledTrigger` exists and nothing consumes a
+2. **The undo history does not survive a restart.** `ProgramText` saves the program; the
+   history lives in `ReactorEditor._history` and `_redo`, keyed by sequence id, in memory only.
+   It was asked for when undo was designed and did not get built. The edits are small records
+   and were shaped to be sendable, so writing them out is the same job as putting them on a
+   wire - do both together rather than twice.
+3. **Calling one sequence from another.** `CalledTrigger` exists and nothing consumes a
    name, so it is reachable only through *run now*. Wanted by E, and R5's stop is worth
    nothing without it.
-3. **Authoring `only if` and `once`.** The model handles them and the editor renders them;
+4. **Authoring `only if` and `once`.** The model handles them and the editor renders them;
    nothing creates one.
-4. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
+5. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
    them.
-5. **The Space Engineers host.** Not started. It implements `Rendering/` against the same
+6. **The Space Engineers host.** Not started. It implements `Rendering/` against the same
    `Reactor.Ui` components and supplies an `IWorld` over the real grid. Read "the small window
    is an opportunity" in `docs/Editor.md` before sketching it: keeping the window small enough
    to sit beside a usable world, and letting somebody pick a block by pointing at it, are both
@@ -145,7 +152,7 @@ Ordered by how much they hurt.
 ## Working notes
 
 ```
-dotnet test                                       # 62 tests
+dotnet test                                       # 78 tests
 dotnet run --project src/Reactor.Host.Avalonia    # the prototype
 dotnet test --filter Screenshot                   # PNGs to %TEMP%\reactor-*.png
 ```
@@ -185,8 +192,13 @@ Argued out rather than guessed. The reasoning is in Design.md.
 - **Rebuild only when necessary, update otherwise, and say nothing when nothing differs.**
   Core compares before it writes and bumps a revision only on a real change; a target
   compares that one integer and stops. Hundreds of sequences will run on a server.
-- **Command ids are re-issued on every rebuild and must never be remembered.** Read one at
-  the moment of use. Captured ids are the cause of every dead search box we have had.
+- **A target must answer every point in `Reactor.Ui.Conformance`**, and each host has a test
+  that fails until it does. Core cannot enforce that an affordance exists; this enforces that
+  nobody forgot it existed. Nothing reads the list at runtime.
+- **A command id says what it is** - a `Cmd` purpose plus up to two numbers, packed - so the
+  same control keeps the same id across rebuilds and a target may hold one. Registering an
+  identity twice throws. This replaced a counter reset per rebuild, which made an id a
+  position and killed anything holding one, silently.
 - **Nothing on screen appears or disappears with how much data there is.** A search box that
   arrives at eight rows, a count that comes and goes: the screen has no shape to learn.
 - **Every screen holding a list has the same top** - the ways to add something, a rule, then

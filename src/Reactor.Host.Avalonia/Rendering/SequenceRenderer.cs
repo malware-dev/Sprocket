@@ -1,8 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
 using Avalonia.Controls.Shapes;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Transformation;
 using Reactor.Editing;
 using Reactor.Ui;
 
@@ -22,12 +26,22 @@ sealed class SequenceRenderer : ComponentRenderer
     {
         public Border Frame = null!;
         public List<Button> Slots = [];
+        public TextBlock Grip = null!;
+        public int Position;
     }
 
     SequenceComponent _model;
     readonly StackPanel _root = Widgets.Stack();
     readonly List<StepVisual> _steps = [];
     readonly List<Button> _triggerSlots = [];
+
+    /// <summary>The margin under each step, which the drag arithmetic has to agree with.</summary>
+    const double RowGap = 3;
+
+    /// <summary>Which step is being dragged, or -1.</summary>
+    int _dragging = -1;
+    double _grabbedAt;
+
 
     Ellipse _ranLight = null!;
     TextBlock _status = null!;
@@ -41,6 +55,7 @@ sealed class SequenceRenderer : ComponentRenderer
     TextBlock _enableText = null!;
     Border _lockedBanner = null!;
     Button _undo = null!;
+    Button _redo = null!;
     TextBlock _locked = null!;
 
     public SequenceRenderer(ReactorEditor editor, SequenceComponent model) : base(editor)
@@ -73,8 +88,15 @@ sealed class SequenceRenderer : ComponentRenderer
         _lockedBanner.IsVisible = !_model.Editable;
         _locked.Text = _model.LockedText;
 
-        _undo.IsVisible = _model.UndoCommand != 0;
-        _undo.Content = "↶ Undo " + _model.UndoText;
+        // Both hold their place for the whole time the sentence is editable, and go quiet when
+        // there is nothing to walk back. Hiding them would move Pause and Delete sideways every
+        // time somebody made or undid a change, under the pointer they were about to use.
+        //
+        // Greying is right here and was wrong for the sentence: these are controls that will
+        // become available, so "not just now" is exactly what grey means. The sentence is not
+        // a control at all.
+        Waiting(_undo, _model.UndoCommand, "Undo " + _model.UndoText, "Nothing to undo");
+        Waiting(_redo, _model.RedoCommand, "Redo " + _model.RedoText, "Nothing to redo");
 
         for (var i = 0; i < _triggerSlots.Count && i < _model.Trigger.Slots.Count; i++)
             _triggerSlots[i].Content = _model.Trigger.Slots[i].Text;
@@ -82,7 +104,13 @@ sealed class SequenceRenderer : ComponentRenderer
         for (var i = 0; i < _steps.Count && i < _model.Steps.Count; i++)
         {
             var step = _model.Steps[i];
-            _steps[i].Frame.Background = step.IsCurrent ? Palette.LiveWash : Brushes.Transparent;
+
+            // Left alone while somebody is dragging. This runs every tick, and it used to
+            // repaint the row being dragged sixty times a second in the colour it is not - the
+            // drag set one background, the tick set the other, and the result was a flicker
+            // that looked like a rendering fault rather than two writers.
+            if (_dragging < 0)
+                _steps[i].Frame.Background = step.IsCurrent ? Palette.LiveWash : Brushes.Transparent;
 
             for (var s = 0; s < _steps[i].Slots.Count && s < step.Slots.Count; s++)
                 _steps[i].Slots[s].Content = step.Slots[s].Text;
@@ -128,7 +156,7 @@ sealed class SequenceRenderer : ComponentRenderer
     {
         var grid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto,Auto,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto,Auto,Auto,Auto"),
             Margin = new Thickness(0, 0, 0, 10)
         };
 
@@ -160,10 +188,21 @@ sealed class SequenceRenderer : ComponentRenderer
         // The switch this whole design hangs on, so it is the loudest thing in the row rather
         // than a word in the corner. Off is not a disabled state here - it is the state you
         // work in, and it has to look like somewhere you would willingly be.
-        _undo = Widgets.Ghost("");
+        // Glyphs, not sentences. Naming what would be undone is worth having and it is not
+        // worth the width of two labels that change length every time somebody edits - the row
+        // would breathe in and out as they worked. It moves to the tooltip, which costs nothing
+        // and is still there for anybody who wants to be sure before pressing.
+        _undo = Arrow("↶");
         _undo.Click += (_, _) => Editor.Invoke(_model.UndoCommand);
+        _undo.IsVisible = _model.Editable;
         Grid.SetColumn(_undo, 2);
         grid.Children.Add(_undo);
+
+        _redo = Arrow("↷");
+        _redo.Click += (_, _) => Editor.Invoke(_model.RedoCommand);
+        _redo.IsVisible = _model.Editable;
+        Grid.SetColumn(_redo, 3);
+        grid.Children.Add(_redo);
 
         _enableText = Widgets.Label("", Brushes.White, 12, true);
         _enable = new Button
@@ -175,14 +214,14 @@ sealed class SequenceRenderer : ComponentRenderer
             Margin = new Thickness(8, 0, 0, 0)
         };
         _enable.Click += (_, _) => Editor.SetToggle(_model.ToggleCommand, !_model.Enabled);
-        Grid.SetColumn(_enable, 3);
+        Grid.SetColumn(_enable, 4);
         grid.Children.Add(_enable);
 
         if (_model.Editable)
         {
             var delete = Widgets.Ghost("Delete");
             delete.Click += (_, _) => Editor.Invoke(_model.DeleteCommand);
-            Grid.SetColumn(delete, 4);
+            Grid.SetColumn(delete, 5);
             grid.Children.Add(delete);
         }
 
@@ -265,9 +304,30 @@ sealed class SequenceRenderer : ComponentRenderer
         var visual = new StepVisual();
         var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto") };
 
+        visual.Position = step.Position;
+
+        // A grip, rather than the whole line being draggable. The line is full of buttons, so
+        // "press anywhere that is not a chip" is a rule nobody can see and half a rule anyway -
+        // it makes an accidental drag easy for somebody aiming just past a word. A handle says
+        // where to grab, and says that grabbing is a thing you can do at all.
+        var handle = Widgets.Stack(Orientation.Horizontal);
+
+        visual.Grip = Widgets.Label("⋮⋮", Palette.Faint, 13);
+        visual.Grip.Width = 18;
+        visual.Grip.VerticalAlignment = VerticalAlignment.Center;
+        visual.Grip.IsVisible = _model.Editable;
+
+        // A transparent background, which is not decoration: without one a TextBlock is only
+        // hit-testable where the glyph actually paints, so the grip answered on the dots and
+        // nowhere else. Padding then makes it a target somebody can hit without aiming.
+        visual.Grip.Background = Brushes.Transparent;
+        visual.Grip.Padding = new Thickness(2, 6);
+        handle.Children.Add(visual.Grip);
+
         var number = Widgets.Label(step.Number.ToString(), Palette.Faint);
         number.Width = 20;
-        grid.Children.Add(number);
+        handle.Children.Add(number);
+        grid.Children.Add(handle);
 
         var wrap = new WrapPanel();
         if (!string.IsNullOrEmpty(step.Lead))
@@ -298,8 +358,6 @@ sealed class SequenceRenderer : ComponentRenderer
         if (_model.Editable)
         {
             var tools = Widgets.Stack(Orientation.Horizontal);
-            tools.Children.Add(Tool("↑", step.MoveUpCommand));
-            tools.Children.Add(Tool("↓", step.MoveDownCommand));
             tools.Children.Add(Tool("✕", step.DeleteCommand));
             Grid.SetColumn(tools, 2);
             grid.Children.Add(tools);
@@ -310,11 +368,243 @@ sealed class SequenceRenderer : ComponentRenderer
             Child = grid,
             CornerRadius = new CornerRadius(4),
             Padding = new Thickness(6, 5),
-            Margin = new Thickness(0, 0, 0, 3)
+            Margin = new Thickness(0, 0, 0, RowGap)
         };
+
+        if (_model.Editable)
+        {
+            visual.Frame.Transitions = Sliding();
+            Draggable(visual, step);
+        }
 
         _steps.Add(visual);
         return visual.Frame;
+    }
+
+    /// <summary>One of the pair, a fixed width so neither can shift the row.</summary>
+    static Button Arrow(string glyph)
+    {
+        var button = Widgets.Ghost(glyph);
+        button.FontSize = 15;
+        button.Padding = new Thickness(6, 2);
+        button.Width = 32;
+        return button;
+    }
+
+    static void Waiting(Button button, int command, string available, string empty)
+    {
+        var ready = command != 0;
+        button.IsEnabled = ready;
+        button.Opacity = ready ? 1.0 : 0.35;
+        ToolTip.SetTip(button, ready ? available : empty);
+    }
+
+    /// <summary>
+    /// Lets a line be picked up and dropped where it belongs.
+    /// </summary>
+    /// <remarks>
+    /// A sequence is a numbered list somebody reads as a procedure, and a procedure written in
+    /// the wrong order is the ordinary case. Reaching for the arrows four times to move one
+    /// line four places is the sort of thing that makes somebody give up and retype it.
+    ///
+    /// Core says only that a step's position is settable. Where the line is dropped is worked
+    /// out here from where the rows actually are, and sent as one move - not as a run of
+    /// single steps, which would fill the undo history with four entries for one act.
+    ///
+    /// The chips inside the row are buttons and handle their own presses, so a press that
+    /// lands on one never starts a drag. Anywhere else in the row does.
+    /// </remarks>
+    void Draggable(StepVisual visual, SentenceStep step)
+    {
+        var grip = visual.Grip;
+        var frame = visual.Frame;
+        grip.Cursor = new Cursor(StandardCursorType.SizeAll);
+
+        grip.PointerPressed += (_, e) =>
+        {
+            _dragging = visual.Position;
+            _grabbedAt = e.GetPosition(_root).Y;
+
+            // The line being carried tracks the pointer exactly, so it is the one row with no
+            // easing on it. Everything else slides.
+            frame.Transitions = null;
+            frame.ZIndex = 1;
+            frame.Background = Palette.SlotFill;
+
+            e.Pointer.Capture(grip);
+        };
+
+        grip.PointerMoved += (_, e) =>
+        {
+            if (_dragging != visual.Position)
+                return;
+
+            var moved = e.GetPosition(_root).Y - _grabbedAt;
+            Carry(frame, moved);
+            MakeRoom(visual.Position,
+                LandingFor(visual.Position, CarriedMiddle(visual.Position, moved)));
+        };
+
+        grip.PointerReleased += (_, e) =>
+        {
+            if (_dragging != visual.Position)
+                return;
+
+            var moved = e.GetPosition(_root).Y - _grabbedAt;
+            var to = LandingFor(visual.Position, CarriedMiddle(visual.Position, moved));
+            _dragging = -1;
+            e.Pointer.Capture(null);
+
+            if (to == visual.Position)
+            {
+                // Nothing to do, so the rows slide back to where they were.
+                Settle();
+                return;
+            }
+
+            // Everything stays exactly where the drag put it, and the carried line drops into
+            // the gap that was being held for it. What is on screen is now the new order, so
+            // the rebuild that follows changes nothing anybody can see.
+            //
+            // Putting it all back first was the obvious thing and it flashed: for one frame the
+            // list rendered in its old order, because the model does not change until the
+            // command is sent and the screen is not rebuilt until the next tick.
+            Carry(frame, Landing(visual.Position, to) - _steps[visual.Position].Frame.Bounds.Top);
+            Editor.SetNumber(step.MoveToCommand, to);
+        };
+    }
+
+    static void Carry(Border frame, double y)
+    {
+        var builder = TransformOperations.CreateBuilder(1);
+        builder.AppendTranslate(0, y);
+        frame.RenderTransform = builder.Build();
+    }
+
+    /// <summary>
+    /// Opens a gap where the line would land.
+    /// </summary>
+    /// <remarks>
+    /// The rows between where it came from and where it is going step aside by exactly its
+    /// height, so the space it would occupy is visibly empty rather than having to be imagined
+    /// from a pointer position. Every one of them has a transition on it, so they slide out of
+    /// the way and back as the pointer crosses them - a row that popped between two places
+    /// would read as the list glitching rather than as the list responding.
+    /// </remarks>
+    void MakeRoom(int from, int to)
+    {
+        var height = _steps[from].Frame.Bounds.Height + RowGap;
+
+        for (var i = 0; i < _steps.Count; i++)
+        {
+            if (i == from)
+                continue;
+
+            var shift = 0.0;
+            if (from < to && i > from && i <= to)
+                shift = -height;
+            else if (from > to && i >= to && i < from)
+                shift = height;
+
+            Carry(_steps[i].Frame, shift);
+        }
+    }
+
+    /// <summary>Puts everything back where the layout says it goes.</summary>
+    void Settle()
+    {
+        for (var i = 0; i < _steps.Count; i++)
+        {
+            var frame = _steps[i].Frame;
+            frame.RenderTransform = null;
+            frame.ZIndex = 0;
+            frame.Background = null;
+            frame.Transitions = Sliding();
+        }
+    }
+
+    /// <summary>
+    /// Short and eased, because this is feedback rather than decoration.
+    /// </summary>
+    /// <remarks>
+    /// A fresh list per control: Avalonia mutates a control's transition collection, so sharing
+    /// one between rows makes them fight over it.
+    /// </remarks>
+    static Transitions Sliding()
+    {
+        return new Transitions
+        {
+            new TransformOperationsTransition
+            {
+                Property = Visual.RenderTransformProperty,
+                Duration = TimeSpan.FromMilliseconds(120),
+                Easing = new CubicEaseOut()
+            }
+        };
+    }
+
+    /// <summary>
+    /// Where the line being carried would land, judged by where the line is.
+    /// </summary>
+    /// <remarks>
+    /// By the line, not by the pointer. Somebody grabs a row wherever the grip happens to be
+    /// under their finger and then aims with the *row* - it is the thing they can see moving.
+    /// Judging by the pointer put the gap a grab-offset away from the row hovering over it, so
+    /// the line landed somewhere other than where the space had been made for it. The two were
+    /// never in disagreement in the arithmetic; they disagreed on screen, which is the only
+    /// place it matters.
+    ///
+    /// Counting how many *other* rows the carried row has passed also gives the answer
+    /// directly, with no correcting for the row being lifted out: the rows it has passed are
+    /// exactly the ones that end up above it.
+    ///
+    /// Measured against where the rows were laid out rather than where they have slid to. The
+    /// sliding is a picture of this answer, and reading it back off the picture would chase
+    /// its own tail.
+    /// </remarks>
+    int LandingFor(int from, double carried)
+    {
+        var index = 0;
+        for (var i = 0; i < _steps.Count; i++)
+        {
+            if (i == from)
+                continue;
+
+            var bounds = _steps[i].Frame.Bounds;
+            if (carried > bounds.Top + bounds.Height / 2)
+                index++;
+        }
+        return index;
+    }
+
+    /// <summary>
+    /// Where the top of the carried row belongs once it has landed.
+    /// </summary>
+    /// <remarks>
+    /// Added up from the rows that will be above it rather than worked out from an offset,
+    /// because the rows are not all the same height - a wait is a shorter line than an action.
+    /// </remarks>
+    double Landing(int from, int to)
+    {
+        var top = _steps[0].Frame.Bounds.Top;
+        var placed = 0;
+
+        for (var i = 0; i < _steps.Count && placed < to; i++)
+        {
+            if (i == from)
+                continue;
+
+            top += _steps[i].Frame.Bounds.Height + RowGap;
+            placed++;
+        }
+        return top;
+    }
+
+    /// <summary>The middle of the carried row, where the drag has put it.</summary>
+    double CarriedMiddle(int from, double moved)
+    {
+        var bounds = _steps[from].Frame.Bounds;
+        return bounds.Top + bounds.Height / 2 + moved;
     }
 
     Button Tool(string glyph, int command)

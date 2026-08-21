@@ -16,6 +16,9 @@ namespace Reactor.Editing
 
         SequenceComponent _sentence;
 
+        int _undoCommand;
+        int _redoCommand;
+
         public SequencePage(ReactorEditor editor, Sequence sequence) : base(editor)
         {
             _sequence = sequence;
@@ -64,7 +67,7 @@ namespace Reactor.Editing
         {
             _sentence = new SequenceComponent(_sequence.Id, BuildTrigger());
             _sentence.Enabled = _sequence.Enabled;
-            _sentence.ToggleCommand = Editor.RegisterToggle(SetEnabled);
+            _sentence.ToggleCommand = Editor.RegisterToggle(Cmd.Enable, SetEnabled);
 
             // Everything that changes what the machine does waits until it is switched off.
             // The commands are simply not issued, so there is nothing for a target to invoke
@@ -73,13 +76,15 @@ namespace Reactor.Editing
             _sentence.Editable = !_sequence.CanRun;
             _sentence.LockedText = "Running. Stop it to make changes - whatever it has already "
                 + "done stays done.";
-            _sentence.DeleteCommand = Change(Delete);
+            _sentence.DeleteCommand = Change(Cmd.DeleteSequence, Delete);
 
-            // Undo is an edit like any other, so it waits for the switch too.
-            _sentence.UndoCommand = Editor.CanUndo(_sequence)
-                ? Change(delegate { Editor.Undo(_sequence); })
-                : 0;
-            _sentence.UndoText = Editor.UndoLabel(_sequence);
+            // Both are edits, so both wait for the switch. Registered here whether or not
+            // there is anything to walk back, because issuing a command needs the numbering
+            // only a rebuild does - and whether there is anything to walk back changes without
+            // one, since renaming deliberately does not rebuild. So Build decides whether the
+            // command may exist at all, and Refresh decides whether it is offered.
+            _undoCommand = Change(Cmd.Undo, delegate { Editor.Undo(_sequence); });
+            _redoCommand = Change(Cmd.Redo, delegate { Editor.Redo(_sequence); });
 
             for (var i = 0; i < _sequence.Steps.Count; i++)
                 _sentence.Steps.Add(BuildStep(i, _sequence.Steps[i]));
@@ -88,9 +93,9 @@ namespace Reactor.Editing
             // action on a block and pretending otherwise is what makes the flow
             // awkward - it gets its own door instead.
             _sentence.AddOptions.Add(new ChoiceEntry("do something", false,
-                Change(AddAction)));
+                Change(Cmd.AddAction, AddAction)));
             _sentence.AddOptions.Add(new ChoiceEntry("wait", false,
-                Change(AddWait)));
+                Change(Cmd.AddWait, AddWait)));
 
             components.Add(_sentence);
         }
@@ -114,6 +119,16 @@ namespace Reactor.Editing
 
             for (var i = 0; i < _sentence.Steps.Count; i++)
                 _sentence.Steps[i].IsCurrent = state != null && state.IsRunning && state.CurrentStep == i;
+
+            // Read every tick rather than only when the screen is rebuilt, because renaming
+            // changes what there is to walk back without changing the screen's shape.
+            var canUndo = Editor.CanUndo(_sequence);
+            _sentence.UndoCommand = canUndo ? _undoCommand : 0;
+            _sentence.UndoText = canUndo ? Editor.UndoLabel(_sequence) : "";
+
+            var canRedo = Editor.CanRedo(_sequence);
+            _sentence.RedoCommand = canRedo ? _redoCommand : 0;
+            _sentence.RedoText = canRedo ? Editor.RedoLabel(_sequence) : "";
         }
 
         SentenceTrigger BuildTrigger()
@@ -139,16 +154,18 @@ namespace Reactor.Editing
             if (events.Count > 0 && !HasEvent(events, when.EventId))
                 when.EventId = events[0].Id;
 
+            // Both slots open the same trip - which blocks and what happens to them are one
+            // question - but they are two controls and must be two identities.
             var trigger = new SentenceTrigger("When");
             trigger.Slots.Add(new SentenceSlot(
                 SequenceText.DescribeSources(Editor.World, when),
                 when.Sources.Count == 0,
-                Change(EditTrigger)));
+                Change(Cmd.TriggerSlot, 0, EditTrigger)));
 
             trigger.Slots.Add(new SentenceSlot(
                 EventText(events, when.EventId),
                 events.Count == 0 || !HasEvent(events, when.EventId),
-                Change(EditTrigger)));
+                Change(Cmd.TriggerSlot, 1, EditTrigger)));
 
             return trigger;
         }
@@ -159,7 +176,7 @@ namespace Reactor.Editing
             trigger.Slots.Add(new SentenceSlot(
                 every.IntervalTicks == 1 ? "tick" : every.IntervalTicks + " ticks",
                 false,
-                Change(EditCadence)));
+                Change(Cmd.EditCadence, EditCadence)));
 
             return trigger;
         }
@@ -174,18 +191,30 @@ namespace Reactor.Editing
         /// still there, they simply do nothing until the switch is off, which is why
         /// <see cref="SequenceComponent.LockedText"/> exists to say so.
         /// </remarks>
-        int Change(System.Action action)
+        int Change(Cmd kind, System.Action action)
         {
-            return _sequence.CanRun ? 0 : Editor.Register(action);
+            return Change(kind, 0, 0, action);
+        }
+
+        int Change(Cmd kind, int which, System.Action action)
+        {
+            return Change(kind, which, 0, action);
+        }
+
+        int Change(Cmd kind, int which, int part, System.Action action)
+        {
+            return _sequence.CanRun ? 0 : Editor.Register(kind, which, part, action);
         }
 
         SentenceStep BuildStep(int index, Step step)
         {
             var position = index;
             var built = new SentenceStep(index + 1);
-            built.MoveUpCommand = Change(delegate { Move(position, position - 1); });
-            built.MoveDownCommand = Change(delegate { Move(position, position + 1); });
-            built.DeleteCommand = Change(delegate { RemoveStep(step); });
+            built.Position = position;
+            built.MoveToCommand = _sequence.CanRun
+                ? 0
+                : Editor.RegisterNumber(Cmd.MoveStep, position, delegate(int to) { Move(position, to); });
+            built.DeleteCommand = Change(Cmd.DeleteStep, position, delegate { RemoveStep(step); });
 
             // A pure wait has no blocks and no verb, just a duration.
             var pause = step.Gate as AfterGate;
@@ -194,7 +223,7 @@ namespace Reactor.Editing
                 built.Lead = "wait";
                 built.Slots.Add(new SentenceSlot(
                     SequenceText.DescribeDuration(pause.Ticks), false,
-                    Change(delegate { EditWait(step); })));
+                    Change(Cmd.StepSlot, position, 0, delegate { EditWait(step); })));
                 return built;
             }
 
@@ -210,12 +239,12 @@ namespace Reactor.Editing
             built.Slots.Add(new SentenceSlot(
                 ActionText(actions, step.ActionId),
                 actions.Count == 0 || !HasAction(actions, step.ActionId),
-                Change(delegate { EditStep(step); })));
+                Change(Cmd.StepSlot, position, 0, delegate { EditStep(step); })));
 
             built.Slots.Add(new SentenceSlot(
                 SequenceText.DescribeEntities(Editor.World, step.Targets),
                 step.Targets.Count == 0,
-                Change(delegate { EditStep(step); })));
+                Change(Cmd.StepSlot, position, 1, delegate { EditStep(step); })));
 
             return built;
         }

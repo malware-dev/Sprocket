@@ -132,6 +132,186 @@ public class EditorTests
     }
 
     /// <summary>
+    /// Undo and redo walk the same list in both directions, and a new edit ends the branch.
+    /// </summary>
+    /// <remarks>
+    /// Redo replays the edit's own <c>Apply</c> rather than a third code path, so anything
+    /// that survives the round-trip tests survives this too.
+    /// </remarks>
+    [Fact]
+    public void UndoAndRedoWalkTheSameList()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("turn on");
+        editor.PressPrimary();
+        ship.Tick();
+
+        var sequence = ship.Automation.Sequences[0];
+        Assert.Single(sequence.Steps);
+
+        // Nothing has been walked back, so there is nothing to put back.
+        Assert.NotEqual(0, editor.Sentence().UndoCommand);
+        Assert.Equal(0, editor.Sentence().RedoCommand);
+        Assert.Equal("adding a step", editor.Sentence().UndoText);
+
+        editor.Invoke(editor.Sentence().UndoCommand);
+        ship.Tick();
+        Assert.Empty(sequence.Steps);
+        Assert.Equal("adding a step", editor.Sentence().RedoText);
+
+        editor.Invoke(editor.Sentence().RedoCommand);
+        ship.Tick();
+        Assert.Single(sequence.Steps);
+        Assert.Equal("Airlock Light", ship.World.FindEntity(sequence.Steps[0].Targets[0])!.Name);
+
+        // Walk back, then do something different: the road not taken is gone, because putting
+        // a step back at an index that now means something else is worse than not offering.
+        editor.Invoke(editor.Sentence().UndoCommand);
+        ship.Tick();
+        editor.Name("Let me out");
+        ship.Tick();
+
+        Assert.Equal(0, editor.Sentence().RedoCommand);
+        Assert.Equal("renaming", editor.Sentence().UndoText);
+    }
+
+    /// <summary>
+    /// Both are edits, so both wait for the switch.
+    /// </summary>
+    [Fact]
+    public void NeitherUndoNorRedoIsOfferedWhileItRuns()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("turn on");
+        editor.PressPrimary();
+        editor.Invoke(editor.Sentence().UndoCommand);
+        ship.Tick();
+
+        Assert.NotEqual(0, editor.Sentence().RedoCommand);
+
+        editor.SwitchOn();
+        ship.Tick();
+
+        Assert.Equal(0, editor.Sentence().UndoCommand);
+        Assert.Equal(0, editor.Sentence().RedoCommand);
+    }
+
+    /// <summary>
+    /// A command id says what it is, so the same control keeps it across a rebuild.
+    /// </summary>
+    /// <remarks>
+    /// It used to be a counter reset on every rebuild - id 7 meant "the seventh thing this page
+    /// registered this time round". Stable only while nothing about the page's shape changed,
+    /// with nothing enforcing that and nothing noticing when it stopped being true. Anything
+    /// holding an id went quietly dead, because Invoke ignores what it does not recognise.
+    ///
+    /// The case that matters is the one that used to break it: the shape changing underneath.
+    /// </remarks>
+    [Fact]
+    public void ACommandKeepsItsIdentityAcrossARebuild()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Inner Door");
+        editor.PressChoice("close");
+        editor.PressPrimary();
+        ship.Tick();
+
+        var before = editor.Sentence();
+        var toggle = before.ToggleCommand;
+        var firstStepMove = before.Steps[0].MoveToCommand;
+        var firstStepSlot = before.Steps[0].Slots[0].Command;
+
+        editor.PressAdd("do something");
+        editor.PressBlock("Outer Door");
+        editor.PressChoice("open");
+        editor.PressPrimary();
+        ship.Tick();
+
+        var after = editor.Sentence();
+        Assert.Equal(2, after.Steps.Count);
+        Assert.Equal(toggle, after.ToggleCommand);
+        Assert.Equal(firstStepMove, after.Steps[0].MoveToCommand);
+        Assert.Equal(firstStepSlot, after.Steps[0].Slots[0].Command);
+
+        // And an id held from before the rebuild still does what it did.
+        Assert.True(ship.Automation.Sequences[0].Enabled == false);
+        editor.SetToggle(toggle, true);
+        ship.Tick();
+        Assert.True(ship.Automation.Sequences[0].Enabled);
+    }
+
+    /// <summary>
+    /// Narrowing a list does not renumber the commands after it.
+    /// </summary>
+    /// <remarks>
+    /// This is the case that actually used to break, and the reason the search box went dead
+    /// weeks ago. Under a counter, an id was a position in this rebuild's registration order,
+    /// so filtering the entity list to fewer rows shifted every command registered after it -
+    /// including everything in the next stage. A target holding one was then pressing
+    /// somebody else's button, or nothing at all.
+    /// </remarks>
+    [Fact]
+    public void NarrowingAListDoesNotRenumberWhatComesAfterIt()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
+        editor.PressBlock("Inner Door");
+        ship.Tick();
+
+        var stages = editor.Component<PickComponent>().Stages;
+        var narrow = stages[0].NarrowCommand;
+        var kinds = stages[0].Filters[0].Command;
+        var firstChoice = stages[1].Entries[0].Command;
+        var rows = stages[0].Entries.Count;
+
+        // Type something that leaves fewer rows in the first stage.
+        editor.SetText(narrow, "inner");
+        ship.Tick();
+
+        stages = editor.Component<PickComponent>().Stages;
+        Assert.True(stages[0].Entries.Count < rows, "the search did not narrow anything");
+
+        Assert.Equal(narrow, stages[0].NarrowCommand);
+        Assert.Equal(kinds, stages[0].Filters[0].Command);
+        Assert.Equal(firstChoice, stages[1].Entries[0].Command);
+    }
+
+    /// <summary>
+    /// Two controls may not share one identity, and saying so is the point.
+    /// </summary>
+    /// <remarks>
+    /// Under the old counter this mistake could not be detected at all - two controls that
+    /// ought to be distinguishable simply were not, and the symptom was a button doing another
+    /// button's job.
+    /// </remarks>
+    [Fact]
+    public void TwoCommandsCannotClaimTheSameIdentity()
+    {
+        var ship = Build();
+        ship.Editor.Register(Cmd.Undo, delegate { });
+
+        Assert.Throws<InvalidOperationException>(
+            () => ship.Editor.Register(Cmd.Undo, delegate { }));
+    }
+
+    /// <summary>
     /// The one irreversible act in the editor asks before it happens.
     /// </summary>
     /// <remarks>

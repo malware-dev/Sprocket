@@ -78,7 +78,8 @@ namespace Reactor.Editing
             {
                 var sequence = _sequences[i];
                 _list.Entries.Add(new StatusEntry("",
-                    Editor.Register(delegate { Editor.Push(new SequencePage(Editor, sequence)); })));
+                    Editor.Register(Cmd.OpenSequence, sequence.Id,
+                        delegate { Editor.Push(new SequencePage(Editor, sequence)); })));
             }
 
             components.Add(_list);

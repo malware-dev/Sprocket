@@ -29,11 +29,11 @@ namespace Reactor.Editing
         readonly Dictionary<int, Action> _actions = new Dictionary<int, Action>();
         readonly Dictionary<int, Action<string>> _textActions = new Dictionary<int, Action<string>>();
         readonly Dictionary<int, Action<bool>> _toggleActions = new Dictionary<int, Action<bool>>();
+        readonly Dictionary<int, Action<int>> _numberActions = new Dictionary<int, Action<int>>();
         readonly EditorScreen _screen = new EditorScreen();
         readonly List<EditorComponent> _gathered = new List<EditorComponent>();
         readonly List<ChoiceEntry> _actionBar = new List<ChoiceEntry>();
 
-        int _nextCommand;
         bool _structureDirty;
 
         public ReactorEditor(IWorld world, Automation program, AutomationRunner runner)
@@ -101,6 +101,28 @@ namespace Reactor.Editing
             Settle();
         }
 
+        /// <summary>
+        /// Reports a number somebody chose - a position to move something to, most of all.
+        /// </summary>
+        /// <remarks>
+        /// The third shape of answer, beside text and a toggle. Without it core could only
+        /// offer a step "up" and "down", which is a widget rather than a capability: a target
+        /// that wanted dragging had to synthesise a run of single moves and one with a number
+        /// field could not express itself at all.
+        ///
+        /// Out of range is ignored rather than refused. A drop past the end of a list is an
+        /// ordinary thing for a pointer to do.
+        /// </remarks>
+        public void SetNumber(int command, int value)
+        {
+            Action<int> action;
+            if (!_numberActions.TryGetValue(command, out action))
+                return;
+
+            action(value);
+            Settle();
+        }
+
         /// <summary>Reports a toggle being flipped.</summary>
         public void SetToggle(int command, bool on)
         {
@@ -135,25 +157,88 @@ namespace Reactor.Editing
             _structureDirty = true;
         }
 
-        internal int Register(Action action)
+        /// <summary>
+        /// Gives a command an id that says what it is.
+        /// </summary>
+        /// <remarks>
+        /// The same control gets the same id on every rebuild, by construction. That is the
+        /// whole point: an id used to be a position in this rebuild's registration order, so
+        /// anything holding one went stale the moment a page changed shape, silently, because
+        /// <see cref="Invoke"/> ignores what it does not recognise.
+        ///
+        /// Registering the same identity twice is a mistake and says so. Under the old counter
+        /// the equivalent - two controls that ought to be distinguishable ending up
+        /// indistinguishable - could not be detected at all.
+        /// </remarks>
+        internal int Register(Cmd kind, Action action)
         {
-            var id = ++_nextCommand;
+            return Register(kind, 0, 0, action);
+        }
+
+        internal int Register(Cmd kind, int which, Action action)
+        {
+            return Register(kind, which, 0, action);
+        }
+
+        internal int Register(Cmd kind, int which, int part, Action action)
+        {
+            var id = CommandId.Of(kind, which, part);
+            Claim(id, kind);
             _actions.Add(id, action);
             return id;
         }
 
-        internal int RegisterText(Action<string> action)
+        internal int RegisterText(Cmd kind, Action<string> action)
         {
-            var id = ++_nextCommand;
+            return RegisterText(kind, 0, action);
+        }
+
+        internal int RegisterText(Cmd kind, int which, Action<string> action)
+        {
+            var id = CommandId.Of(kind, which);
+            Claim(id, kind);
             _textActions.Add(id, action);
             return id;
         }
 
-        internal int RegisterToggle(Action<bool> action)
+        internal int RegisterNumber(Cmd kind, int which, Action<int> action)
         {
-            var id = ++_nextCommand;
+            var id = CommandId.Of(kind, which);
+            Claim(id, kind);
+            _numberActions.Add(id, action);
+            return id;
+        }
+
+        internal int RegisterToggle(Cmd kind, Action<bool> action)
+        {
+            return RegisterToggle(kind, 0, action);
+        }
+
+        internal int RegisterToggle(Cmd kind, int which, Action<bool> action)
+        {
+            var id = CommandId.Of(kind, which);
+            Claim(id, kind);
             _toggleActions.Add(id, action);
             return id;
+        }
+
+        /// <summary>
+        /// Refuses to let two commands share one identity.
+        /// </summary>
+        /// <remarks>
+        /// Loud, and on purpose. A page that hands the same id to two controls has one of them
+        /// doing the other's job, and the symptom - a button that does the wrong thing - would
+        /// be blamed on anything but the numbering.
+        /// </remarks>
+        void Claim(int id, Cmd kind)
+        {
+            if (_actions.ContainsKey(id) || _textActions.ContainsKey(id)
+                || _toggleActions.ContainsKey(id) || _numberActions.ContainsKey(id))
+            {
+                throw new InvalidOperationException(
+                    "Two commands were registered as " + kind + " with the same number. "
+                    + "A command's identity has to be unique on its screen.");
+            }
         }
 
         internal void Push(EditorPage page)
@@ -203,6 +288,18 @@ namespace Reactor.Editing
             new Dictionary<int, List<SequenceEdit>>();
 
         /// <summary>
+        /// What has been taken back and could be put back again.
+        /// </summary>
+        /// <remarks>
+        /// Emptied by the next edit, which is the standard behaviour and the right one: once
+        /// somebody has walked back three steps and then done something different, the three
+        /// they walked back are a road not taken. Offering to redo into a sequence that has
+        /// moved on since would put back a step at an index that means something else now.
+        /// </remarks>
+        readonly Dictionary<int, List<SequenceEdit>> _redo =
+            new Dictionary<int, List<SequenceEdit>>();
+
+        /// <summary>
         /// How far back one sequence can be walked.
         /// </summary>
         /// <remarks>
@@ -237,6 +334,9 @@ namespace Reactor.Editing
                 return;
 
             edit.Apply(sequence);
+
+            // A new edit is a new branch, so whatever was walked back is gone.
+            _redo.Remove(sequence.Id);
 
             var stack = HistoryFor(sequence);
             if (!coalesce || stack.Count == 0 || stack[stack.Count - 1].Label != edit.Label)
@@ -274,10 +374,64 @@ namespace Reactor.Editing
                 return;
 
             var last = stack.Count - 1;
-            stack[last].Undo(sequence);
+            var edit = stack[last];
             stack.RemoveAt(last);
 
+            edit.Undo(sequence);
+            Waiting(sequence).Add(edit);
+
             Invalidate();
+        }
+
+        internal bool CanRedo(Sequence sequence)
+        {
+            List<SequenceEdit> stack;
+            return _redo.TryGetValue(sequence.Id, out stack) && stack.Count > 0;
+        }
+
+        /// <summary>What redoing would put back, in the words it happened in.</summary>
+        internal string RedoLabel(Sequence sequence)
+        {
+            List<SequenceEdit> stack;
+            if (!_redo.TryGetValue(sequence.Id, out stack) || stack.Count == 0)
+                return "";
+
+            return stack[stack.Count - 1].Label;
+        }
+
+        /// <summary>
+        /// Puts back the last thing undone.
+        /// </summary>
+        /// <remarks>
+        /// The same <c>Apply</c> the original edit ran, not a third code path. An edit that
+        /// could be applied, reversed, and then not applied again the same way would be a
+        /// stranger bug than either half alone.
+        /// </remarks>
+        internal void Redo(Sequence sequence)
+        {
+            List<SequenceEdit> stack;
+            if (!_redo.TryGetValue(sequence.Id, out stack) || stack.Count == 0)
+                return;
+
+            var last = stack.Count - 1;
+            var edit = stack[last];
+            stack.RemoveAt(last);
+
+            edit.Apply(sequence);
+            HistoryFor(sequence).Add(edit);
+
+            Invalidate();
+        }
+
+        List<SequenceEdit> Waiting(Sequence sequence)
+        {
+            List<SequenceEdit> stack;
+            if (!_redo.TryGetValue(sequence.Id, out stack))
+            {
+                stack = new List<SequenceEdit>();
+                _redo[sequence.Id] = stack;
+            }
+            return stack;
         }
 
         List<SequenceEdit> HistoryFor(Sequence sequence)
@@ -294,6 +448,7 @@ namespace Reactor.Editing
         void ForgetHistory(int sequenceId)
         {
             _history.Remove(sequenceId);
+            _redo.Remove(sequenceId);
         }
 
         internal void ForgetSequence(int sequenceId)
@@ -337,17 +492,17 @@ namespace Reactor.Editing
             _actions.Clear();
             _textActions.Clear();
             _toggleActions.Clear();
-            _nextCommand = 0;
+            _numberActions.Clear();
 
             var page = Current;
             _screen.Title = page.Title;
             _screen.CanGoBack = _stack.Count > 1;
-            _screen.BackCommand = _screen.CanGoBack ? Register(Pop) : 0;
-            _screen.RenameCommand = page.CanRename ? RegisterText(page.Rename) : 0;
+            _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Pop) : 0;
+            _screen.RenameCommand = page.CanRename ? RegisterText(Cmd.Rename, page.Rename) : 0;
             _screen.RenamePrompt = page.RenamePrompt;
-            _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(page.Switch) : 0;
+            _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(Cmd.Switch, page.Switch) : 0;
             _screen.PrimaryText = page.PrimaryText;
-            _screen.PrimaryCommand = _screen.HasPrimary ? Register(page.Primary) : 0;
+            _screen.PrimaryCommand = _screen.HasPrimary ? Register(Cmd.Primary, page.Primary) : 0;
 
             _gathered.Clear();
             page.Build(_gathered);
@@ -467,10 +622,10 @@ namespace Reactor.Editing
         internal void AddStarters(StartComponent start, AutomationSystem system)
         {
             start.Add("When...",
-                Register(delegate { StartSequence(system, new WhenTrigger("")); }));
+                Register(Cmd.StartWhen, delegate { StartSequence(system, new WhenTrigger("")); }));
 
-            start.Add("Every...",
-                Register(delegate { StartSequence(system, new EveryTrigger(Cadences.Default)); }));
+            start.Add("Every...", Register(Cmd.StartEvery,
+                delegate { StartSequence(system, new EveryTrigger(Cadences.Default)); }));
         }
 
         /// <summary>

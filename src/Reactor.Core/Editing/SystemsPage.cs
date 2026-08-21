@@ -36,8 +36,8 @@ namespace Reactor.Editing
             Collect();
 
             var start = new StartComponent();
-            start.Add("New system", "What is it?", Editor.RegisterText(Make));
-            start.Add("Load system", Editor.Register(delegate { Editor.OfferLoading(); }));
+            start.Add("New system", "What is it?", Editor.RegisterText(Cmd.NewSystem, Make));
+            start.Add("Load system", Editor.Register(Cmd.LoadSystem, delegate { Editor.OfferLoading(); }));
             components.Add(start);
 
             _list = new StatusListComponent();
@@ -65,7 +65,8 @@ namespace Reactor.Editing
                     var instance = instances[n];
                     var entry = new StatusEntry(
                         SystemSummary.DescribeInstance(Editor.World, system, instance),
-                        Editor.Register(delegate { Editor.Push(new SystemPage(Editor, system)); }));
+                        Editor.Register(Cmd.OpenSystem, system.Id, instance.Number,
+                            delegate { Editor.Push(new SystemPage(Editor, system)); }));
                     entry.Depth = 1;
                     _list.Entries.Add(entry);
                     _rowOwners.Add(system);
@@ -73,7 +74,8 @@ namespace Reactor.Editing
                 }
 
                 var another = new StatusEntry("add",
-                    Editor.Register(delegate { Editor.OfferAnother(system); }));
+                    Editor.Register(Cmd.AddInstance, system.Id,
+                        delegate { Editor.OfferAnother(system); }));
                 another.Depth = 1;
                 another.IsAction = true;
                 _list.Entries.Add(another);

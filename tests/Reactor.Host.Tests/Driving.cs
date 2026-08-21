@@ -40,6 +40,19 @@ static class Driving
         editor.Invoke(start.Options.First(o => o.Label == label).Command);
     }
 
+    public static SequenceComponent Sentence(this ReactorEditor editor) =>
+        editor.Component<SequenceComponent>();
+
+    /// <summary>
+    /// Switches a sequence on, which a new one is not.
+    /// </summary>
+    /// <remarks>
+    /// Building and running are separate acts. A sequence is parked while it is written, both
+    /// so a half-built one never fires and so its own switch is what makes it safe to edit.
+    /// </remarks>
+    public static void SwitchOn(this ReactorEditor editor) =>
+        editor.SetToggle(editor.Sentence().ToggleCommand, true);
+
     public static void PressChoice(this ReactorEditor editor, string text)
     {
         foreach (var list in editor.Screen.Components.OfType<ChoiceListComponent>())

@@ -78,7 +78,7 @@ namespace Reactor.Editing
             {
                 var option = _options[i];
                 var entry = new ChoiceEntry(option.Text, option.IsCurrent,
-                    Editor.Register(option.Choose));
+                    Editor.Register(Cmd.Choice, i, option.Choose));
                 entry.IntervalTicks = option.IntervalTicks;
                 entry.Warning = option.Warning;
                 list.Entries.Add(entry);

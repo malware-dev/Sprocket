@@ -122,10 +122,25 @@ So the question is never "is it cheaper to rebuild" - it is "did the shape actua
 A different number of things is a change. Different words in the same number of things is an
 update. Choosing one of the things on offer is an update. Somebody typing is an update.
 
-A corollary, learned by getting it wrong: **never remember a command id.** Core re-issues them
-on every rebuild, so an id captured when a control was made is dead the moment anything
-changes - and the failure is silent, because pressing a dead id does nothing at all. Read it
-at the moment of use.
+**A command id says what it is.** It is a small purpose - back, undo, the up arrow on step
+three, the second slot of the trigger - packed into a number, so the same control gets the
+same id on every rebuild by construction. A target may hold one.
+
+*This was got badly wrong first.* An id used to be a counter reset on every rebuild, so it
+meant "the seventh thing this page registered this time round" - a position, not a reference.
+It was stable only while nothing about the page's shape changed, nothing enforced that, and
+nothing noticed when it stopped being true. It cost us a search box that went dead whenever
+its own list narrowed, because narrowing shifted every id registered after it. The rule that
+grew out of that - *never remember a command id* - was a warning about the flaw rather than a
+principle, and it is retired.
+
+Two things came with the fix. Registering the same identity twice now **throws**, where the
+equivalent mistake under a counter could not be detected at all. And a command no longer has
+to be born during a rebuild, because withholding one does not renumber its neighbours.
+
+It is the same answer as everywhere else in Reactor: references are by identity, never by
+position. R47 says it for blocks, the edit operations say it for what they point at, and this
+was the last place still asking which slot something was in.
 
 ### What counts as one operation
 
