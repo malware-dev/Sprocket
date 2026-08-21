@@ -48,11 +48,11 @@ namespace Reactor.Sequences
         /// </summary>
         public bool Enabled { get; set; }
 
-        /// <summary>The machine this belongs to.</summary>
+        /// <summary>The system this belongs to.</summary>
         public AutomationSystem System { get; internal set; }
 
         /// <summary>
-        /// Whether it may actually run, which needs its own switch and its machine's.
+        /// Whether it may actually run, which needs its own switch and its system's.
         /// </summary>
         /// <remarks>
         /// The two are asked separately everywhere else, because "I parked this one rule" and

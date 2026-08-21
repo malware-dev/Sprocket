@@ -69,7 +69,7 @@ namespace Reactor.Editing
             _sentence.Enabled = _sequence.Enabled;
             _sentence.ToggleCommand = Editor.RegisterToggle(Cmd.Enable, SetEnabled);
 
-            // Everything that changes what the machine does waits until it is switched off.
+            // Everything that changes what the system does waits until it is switched off.
             // The commands are simply not issued, so there is nothing for a target to invoke
             // by accident - and the screen keeps the same shape either way, so nothing appears
             // or disappears as somebody flips the switch.
@@ -187,7 +187,7 @@ namespace Reactor.Editing
         /// <remarks>
         /// Zero is the way a page says "not now". A target cannot invoke it, so there is
         /// nothing to guard against on the far side and no way for a stray press to reach a
-        /// running machine. The screen keeps the same shape either way - the rows are all
+        /// running system. The screen keeps the same shape either way - the rows are all
         /// still there, they simply do nothing until the switch is off, which is why
         /// <see cref="SequenceComponent.LockedText"/> exists to say so.
         /// </remarks>
@@ -406,7 +406,7 @@ namespace Reactor.Editing
         /// </summary>
         /// <remarks>
         /// Undo walks back what a sequence *is*, not whether it is running. Recording the
-        /// switch would mean a press of undo could arm a machine - somebody stepping back
+        /// switch would mean a press of undo could arm a system - somebody stepping back
         /// through their edits and having the airlock quietly go live behind them, which is
         /// the exact accident the switch exists to prevent.
         ///

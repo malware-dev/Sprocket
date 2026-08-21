@@ -149,7 +149,7 @@ public class UndoTests
     /// </summary>
     /// <remarks>
     /// Undo walks back what a sequence is, never whether it is running, so no press of undo
-    /// can arm a machine behind somebody's back.
+    /// can arm a system behind somebody's back.
     /// </remarks>
     [Fact]
     public void TheSwitchIsNotSomethingUndoCanTouch()

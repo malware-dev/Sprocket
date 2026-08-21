@@ -36,11 +36,11 @@ namespace Reactor.Sequences
         /// </remarks>
         public IReadOnlyList<Sequence> Sequences { get { return _sequences; } }
 
-        /// <summary>The machines, which is what the editor opens onto.</summary>
+        /// <summary>The systems, which is what the editor opens onto.</summary>
         public IReadOnlyList<AutomationSystem> Systems { get { return _systems; } }
 
         /// <summary>
-        /// A new machine, with one of it already on the ship.
+        /// A new system, with one of it already on the ship.
         /// </summary>
         /// <remarks>
         /// Making a system and then being asked to place one would be two steps for one
@@ -55,7 +55,7 @@ namespace Reactor.Sequences
         }
 
         /// <summary>
-        /// Puts back a machine that was saved, keeping the id it had.
+        /// Puts back a system that was saved, keeping the id it had.
         /// </summary>
         /// <remarks>
         /// Ids have to survive a reload unchanged, because saved sequences refer to each other
@@ -64,7 +64,7 @@ namespace Reactor.Sequences
         /// runs the wrong sequence.
         ///
         /// No instance is added, unlike <see cref="AddSystem"/>: whatever was saved is what
-        /// comes back, and inventing an extra one would multiply machines on every reload.
+        /// comes back, and inventing an extra one would multiply systems on every reload.
         /// </remarks>
         public AutomationSystem Restore(int id)
         {

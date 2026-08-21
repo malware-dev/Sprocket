@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Reactor.Sequences;
 using Reactor.World;
 
@@ -17,12 +18,32 @@ namespace Reactor.Runtime
         /// </remarks>
         public static bool IsTrue(IWorld world, Condition condition)
         {
+            return IsTrue(world, condition, null);
+        }
+
+        /// <summary>
+        /// The same, for one of a system, so the condition asks about that one's own things.
+        /// </summary>
+        /// <remarks>
+        /// A condition names the parts the system's author built with, exactly as a step does.
+        /// Left unresolved, the port airlock's "once the inner door is shut" would be asking
+        /// about the front airlock's door - true at the wrong moment, and invisibly so.
+        ///
+        /// The resolved list is passed in rather than made here, because this runs for every
+        /// gated step of every running sequence on every tick.
+        /// </remarks>
+        public static bool IsTrue(IWorld world, Condition condition, List<long> resolved)
+        {
             if (condition == null || condition.Entities.Count == 0)
                 return false;
 
-            for (var i = 0; i < condition.Entities.Count; i++)
+            var asking = resolved ?? condition.Entities;
+            if (asking.Count == 0)
+                return false;
+
+            for (var i = 0; i < asking.Count; i++)
             {
-                if (!Holds(world, condition.Entities[i], condition.StateId))
+                if (!Holds(world, asking[i], condition.StateId))
                     return false;
             }
             return true;

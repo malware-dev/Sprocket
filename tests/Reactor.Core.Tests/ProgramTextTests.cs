@@ -49,6 +49,21 @@ public class ProgramTextTests
         vent.Gate = new OnlyIfGate(only);
         out1.Steps.Add(vent);
 
+        // What the author wrote about a part, and a second one of the system that fills the
+        // parts with its own doors.
+        var inner = airlock.RoleFor(1);
+        inner.Name = "the door onto the ship";
+        inner.Instructions = "The one you walk through to get inside.";
+        inner.Optional = false;
+
+        var spare = airlock.RoleFor(3);
+        spare.Name = "the vent";
+        spare.Optional = true;
+
+        var port = airlock.Instances[1];
+        port.Fill(1, new long[] { 21 });
+        port.Fill(3, new long[] { 23, 24 });
+
         var rig = program.AddSystem();
         rig.Name = "Drill Rig";
         rig.Enabled = false;
@@ -107,6 +122,19 @@ public class ProgramTextTests
         Assert.True(airlock.Enabled);
         Assert.Equal(2, airlock.Instances.Count);
         Assert.Equal("Port", airlock.Instances[1].Name);
+
+        // What the author wrote about the parts.
+        Assert.Equal("the door onto the ship", airlock.FindRole(1)!.Name);
+        Assert.Equal("The one you walk through to get inside.", airlock.FindRole(1)!.Instructions);
+        Assert.False(airlock.FindRole(1)!.Optional);
+        Assert.True(airlock.FindRole(3)!.Optional);
+
+        // And which of its own things the second one uses for them, including a part filled
+        // with more than one.
+        var port = airlock.Instances[1];
+        Assert.Equal(new long[] { 21 }, port.FilledWith(1));
+        Assert.Equal(new long[] { 23, 24 }, port.FilledWith(3));
+        Assert.Null(port.FilledWith(99));
 
         Assert.False(after.Systems[1].Enabled);
 

@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Reactor.Host.Features.Shell;
-using Reactor.Host.Machine;
+using Reactor.Host.System;
 using Reactor.Ui;
 using Xunit;
 
@@ -72,7 +72,7 @@ public class WindowSmokeTests
         editor.PressChoice("turn on");
         editor.PressPrimary();
 
-        // The front door: the machines on this ship
+        // The front door: the systems on this ship
         editor.GoToRoot();
         window.Tick();
         Layout(window);

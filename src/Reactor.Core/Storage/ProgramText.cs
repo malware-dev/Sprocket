@@ -37,9 +37,21 @@ namespace Reactor.Storage
                 Line(text, "system", Num(system.Id), OnOff(system.Enabled),
                     Escape(system.Name), Escape(system.Description));
 
+                // What the author wrote about the parts, before the ones that fill them in, so
+                // a reader meets the vocabulary before the answers.
+                var roles = system.Roles;
+                for (var r = 0; r < roles.Count; r++)
+                {
+                    Line(text, "role", Long(roles[r].Id), OnOff(roles[r].Optional),
+                        Escape(roles[r].Name), Escape(roles[r].Instructions));
+                }
+
                 var instances = system.Instances;
                 for (var n = 0; n < instances.Count; n++)
+                {
                     Line(text, "one", Num(instances[n].Number), Escape(instances[n].Name));
+                    WriteFills(text, instances[n]);
+                }
 
                 var sequences = system.Sequences;
                 for (var q = 0; q < sequences.Count; q++)
@@ -47,6 +59,26 @@ namespace Reactor.Storage
             }
 
             return text.ToString();
+        }
+
+        /// <summary>
+        /// Which of this one's own things stand in for the parts the system was built with.
+        /// </summary>
+        /// <remarks>
+        /// Sorted, so a saved file does not churn between runs for no reason: a dictionary
+        /// hands its keys back in whatever order it likes, and a save that differs every time
+        /// is one that gets written every time and reads as a change in a diff.
+        /// </remarks>
+        static void WriteFills(StringBuilder text, SystemInstance instance)
+        {
+            var parts = new List<long>();
+            foreach (var role in instance.Filled)
+                parts.Add(role);
+
+            parts.Sort();
+
+            for (var i = 0; i < parts.Count; i++)
+                Line(text, "fill", Long(parts[i]), Ids(instance.FilledWith(parts[i])));
         }
 
         static void WriteSequence(StringBuilder text, Sequence sequence)
@@ -111,6 +143,7 @@ namespace Reactor.Storage
                 return;
 
             AutomationSystem system = null;
+            SystemInstance instance = null;
             Sequence sequence = null;
             Step step = null;
 
@@ -125,13 +158,31 @@ namespace Reactor.Storage
                         system.Enabled = At(parts, 2) != "off";
                         system.Name = Unescape(At(parts, 3));
                         system.Description = Unescape(At(parts, 4));
+                        instance = null;
                         sequence = null;
                         step = null;
                         break;
 
+                    case "role":
+                        if (system == null)
+                            break;
+                        var role = system.RoleFor(Long(parts, 1));
+                        role.Optional = At(parts, 2) == "on";
+                        role.Name = Unescape(At(parts, 3));
+                        role.Instructions = Unescape(At(parts, 4));
+                        break;
+
                     case "one":
                         if (system != null)
-                            system.Restore(Int(parts, 1), Unescape(At(parts, 2)));
+                            instance = system.Restore(Int(parts, 1), Unescape(At(parts, 2)));
+                        break;
+
+                    case "fill":
+                        if (instance == null)
+                            break;
+                        var filled = new List<long>();
+                        ReadIds(At(parts, 2), filled);
+                        instance.Fill(Long(parts, 1), filled);
                         break;
 
                     case "sequence":
@@ -202,6 +253,19 @@ namespace Reactor.Storage
             for (var i = 0; i < fields.Length; i++)
                 text.Append('|').Append(fields[i]);
             text.Append('\n');
+        }
+
+        static string Long(long value)
+        {
+            return value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        static long Long(string[] parts, int index)
+        {
+            long value;
+            long.TryParse(At(parts, index), System.Globalization.NumberStyles.Integer,
+                System.Globalization.CultureInfo.InvariantCulture, out value);
+            return value;
         }
 
         static string Num(int value)

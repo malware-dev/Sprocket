@@ -3,7 +3,7 @@ using System.IO;
 using Reactor.Sequences;
 using Reactor.Storage;
 
-namespace Reactor.Host.Machine;
+namespace Reactor.Host.System;
 
 /// <summary>
 /// Keeps the prototype's program on disk between runs.

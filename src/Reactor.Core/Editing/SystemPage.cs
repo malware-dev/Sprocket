@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Reactor.Sequences;
 using Reactor.Ui;
@@ -5,7 +6,7 @@ using Reactor.Ui;
 namespace Reactor.Editing
 {
     /// <summary>
-    /// One machine: what it is, and everything it does.
+    /// One system: what it is, and everything it does.
     /// </summary>
     /// <remarks>
     /// Where somebody spends their time. Close to what the editor was before systems existed,
@@ -43,13 +44,32 @@ namespace Reactor.Editing
         public override string Subtitle { get { return _system.Description; } }
 
         /// <summary>
-        /// The whole machine, running or parked.
+        /// The whole system, running or parked.
         /// </summary>
         /// <remarks>
         /// Separate from each sequence's own switch rather than a shortcut for setting them
         /// all, so parking an airlock to work on it and starting it again afterwards leaves a
         /// sequence somebody had deliberately parked still parked.
         /// </remarks>
+        /// <summary>
+        /// A system is renamed the same way a sequence is: on its heading.
+        /// </summary>
+        /// <remarks>
+        /// It could only be named when it was made, which meant a typo was permanent and
+        /// somebody who thought better of "Airlock" a week later had no way to say so. There
+        /// is no reason the two should differ - it is the same act on the same kind of screen.
+        /// </remarks>
+        public override string CustomName { get { return _system.Name ?? ""; } }
+
+        public override bool CanRename { get { return true; } }
+
+        public override string RenamePrompt { get { return "What is it?"; } }
+
+        public override void Rename(string name)
+        {
+            _system.Name = (name ?? "").Trim();
+        }
+
         public override bool CanSwitch { get { return true; } }
 
         public override bool SwitchIsOn { get { return _system.Enabled; } }
@@ -77,12 +97,27 @@ namespace Reactor.Editing
             for (var i = 0; i < _sequences.Count; i++)
             {
                 var sequence = _sequences[i];
-                _list.Entries.Add(new StatusEntry("",
+                var entry = new StatusEntry("",
                     Editor.Register(Cmd.OpenSequence, sequence.Id,
-                        delegate { Editor.Push(new SequencePage(Editor, sequence)); })));
+                        delegate { Editor.Push(new SequencePage(Editor, sequence)); }));
+
+                // The same switch the sentence carries, at the level somebody is looking at.
+                // A system has one on the ship's list and a sequence has one on its own screen;
+                // the row in between having none was the odd one out, and parking one rule
+                // while leaving the rest running is an ordinary thing to want.
+                entry.SwitchCommand = Editor.RegisterToggle(Cmd.Enable, sequence.Id,
+                    Switch(sequence));
+                entry.SwitchIsOn = sequence.Enabled;
+
+                _list.Entries.Add(entry);
             }
 
             components.Add(_list);
+        }
+
+        static Action<bool> Switch(Sequence sequence)
+        {
+            return delegate(bool on) { sequence.Enabled = on; };
         }
 
         public override void Refresh()
@@ -96,6 +131,9 @@ namespace Reactor.Editing
             }
 
             SequenceSummary.Fill(_list.Entries, _sequences, Editor.World, Editor.Runner, Editor.CurrentTick);
+
+            for (var i = 0; i < _list.Entries.Count && i < _sequences.Count; i++)
+                _list.Entries[i].SwitchIsOn = _sequences[i].Enabled;
         }
 
         void Collect()

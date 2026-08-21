@@ -158,7 +158,7 @@ picker writing through *did* affect it. Three questions do the work:
   doing. This is the same boundary undo wants, and the same one that will go over the wire.
 - **Anything the runtime can see may only hold a state somebody chose.** Not "did it need to
   affect integrity" but "was anything watching". A sequence runs while it is edited, so a
-  value written before somebody has settled on it is a machine acting on a decision nobody
+  value written before somebody has settled on it is a system acting on a decision nobody
   made. Half-made choices belong somewhere nothing is looking.
 - **Fold a run of changes into one exactly when the states in between were not chosen.**
   Moving a step up five rows is five operations, because each row it passes through is a
@@ -183,7 +183,7 @@ Three consequences worth stating outright, because they are what make the rest c
   *That is about the program, not about every tap on the way to a decision. This bullet used
   to end "and Done only ever means I have finished, never apply this", and the picker was
   written to match: it was handed the step's own list of targets and ticked entries straight
-  into it, so a half-made choice was already live on a running machine. Choosing a thing is
+  into it, so a half-made choice was already live on a running system. Choosing a thing is
   one process with a beginning and an end, and Done is its end.*
 
 ## The model
@@ -620,7 +620,28 @@ while they are sat in a terminal.
 
 Undecided, and a question about the shape of the editor rather than about the language.
 
-### 9. Failure
+### 9. Where an editing history lives
+
+*Wanted by: nothing in the stories - this one is ours.*
+
+Every change to a sequence is a reversible operation and the undo they make is per sequence and
+in memory. Persisting it was asked for at the time and is the next thing to build, and the
+mechanics are the small half: the operations are already compact records shaped to be sendable,
+so writing them out and putting them on a wire is one job.
+
+**Where it goes is the question.** A history is a fact about somebody's editing session, not
+about the ship - a system that is exported, shared or saved should carry what it is and never
+how its author got there, which is why the history is held on the editor rather than on the
+sequence. But a mod has nowhere else that survives a session: the world save is the only
+durable place, and putting a session there is exactly the mixing that reasoning warns against.
+
+Multiplayer sharpens it. "Somebody's session" is a different person on each client, so one
+history in the save is either wrong for everybody or has to be kept per player - and undoing
+somebody else's edit is a question nobody has asked yet, let alone answered.
+
+*Decide before writing any of it. The cost of being wrong is a save format that has to change.*
+
+### 10. Failure
 
 *Wanted by: M. Load-bearing on H.*
 
@@ -654,12 +675,18 @@ a `PickComponent` of stages, a `SequenceComponent` - and decides nothing about l
 the noun is the host's: core says *entity* and Space Engineers says *block*, because the two
 are not the same claim and only one of them belongs to a game.
 
-Of the nine questions above, quantities is now half answered - see decision 2 - and none of
+Of the ten questions above, quantities is now half answered - see decision 2 - and none of
 the rest contradicts what is built. Reading a block's properties well enough to put them back
 is the one still reaching past the language into the world model, so it is the one to design
 most carefully before writing any of it.
 
+**A system is a template now, not a label.** Its roles are derived from what its sequences
+act on, one of it is a substitution saying which of your own things stand in for the author's,
+and the runtime runs each sequence once per one of them. That was the centre of gravity of the
+whole project - four unrelated stories wanted it - and the half that remains is a screen to
+fill the roles in from, not a model question.
+
 *The editor's own interface has been worked over hard, and `docs/Editor.md` is where that
 lives rather than here. The load-bearing conclusions: narrowing runs one way only, one trip
-through a picker is one edit, a machine cannot be rewired while it runs, and a running
+through a picker is one edit, a system cannot be rewired while it runs, and a running
 sequence is shown as a thing being watched rather than as an editor with its hands tied.*

@@ -38,11 +38,106 @@ namespace Reactor.Runtime
         int _allState = -1;
         bool _awaitingCompletion;
 
-        public SequenceRunner(Sequence sequence)
+        public SequenceRunner(Sequence sequence) : this(sequence, null)
+        {
+        }
+
+        /// <summary>
+        /// One sequence, running for one of a system.
+        /// </summary>
+        /// <remarks>
+        /// The same sequence runs once for each of a system on the ship, each resolving the
+        /// parts the author built with into its own doors. Null means the parts are the
+        /// blocks themselves, which is what the first one of a system does and what every
+        /// system built before roles existed keeps doing.
+        /// </remarks>
+        public SequenceRunner(Sequence sequence, SystemInstance instance)
         {
             _sequence = sequence;
+            _instance = instance;
             LastFiredTick = -1;
             LastSkippedTick = -1;
+        }
+
+        readonly SystemInstance _instance;
+
+        /// <summary>
+        /// Whether this sequence may run for this one of its system.
+        /// </summary>
+        /// <remarks>
+        /// Three switches, all of which have to be on: the sequence's, its system's, and this
+        /// one of the system's. They are asked separately everywhere else because they are
+        /// three different intentions - "I parked this rule", "I am rewiring the whole thing",
+        /// "leave the port airlock alone while I weld" - and none may overwrite another.
+        /// </remarks>
+        bool CanRun
+        {
+            get { return _sequence.CanRun && (_instance == null || _instance.Enabled); }
+        }
+
+        /// <summary>
+        /// Scratch for turning the system's parts into this one's blocks.
+        /// </summary>
+        /// <remarks>
+        /// Two, because the trigger is sampled on the same tick a step is acting and one
+        /// buffer would have them overwrite each other. Reused rather than allocated, because
+        /// this happens for every running sequence on every tick and core sits inside the
+        /// game's update loop.
+        /// </remarks>
+        readonly List<long> _actedOn = new List<long>();
+        readonly List<long> _watched = new List<long>();
+
+        List<long> ActedOn(IList<long> roles)
+        {
+            _actedOn.Clear();
+            if (_instance == null)
+            {
+                for (var i = 0; i < roles.Count; i++)
+                    _actedOn.Add(roles[i]);
+            }
+            else
+            {
+                _instance.Resolve(roles, _actedOn);
+            }
+            return _actedOn;
+        }
+
+        /// <summary>
+        /// A third buffer: a gate is asked while a step is already being acted on.
+        /// </summary>
+        readonly List<long> _guarding = new List<long>();
+
+        List<long> Guarding(Condition condition)
+        {
+            if (condition == null)
+                return null;
+
+            _guarding.Clear();
+            if (_instance == null)
+            {
+                for (var i = 0; i < condition.Entities.Count; i++)
+                    _guarding.Add(condition.Entities[i]);
+            }
+            else
+            {
+                _instance.Resolve(condition.Entities, _guarding);
+            }
+            return _guarding;
+        }
+
+        List<long> Watched(IList<long> roles)
+        {
+            _watched.Clear();
+            if (_instance == null)
+            {
+                for (var i = 0; i < roles.Count; i++)
+                    _watched.Add(roles[i]);
+            }
+            else
+            {
+                _instance.Resolve(roles, _watched);
+            }
+            return _watched;
         }
 
         public Sequence Sequence { get { return _sequence; } }
@@ -65,7 +160,7 @@ namespace Reactor.Runtime
         /// <remarks>
         /// Re-triggering skips rather than queueing, restarting, or running a second
         /// copy. Skipping is the only option that cannot silently accumulate work,
-        /// and it matches how people think about a machine that is busy. With real
+        /// and it matches how people think about a system that is busy. With real
         /// gates the wait is legible - "waiting for the inner door to shut" - so busy
         /// explains itself instead of being a mystery.
         /// </remarks>
@@ -88,7 +183,7 @@ namespace Reactor.Runtime
             // is stateful, so a skipped sample makes the next one wrong.
             var triggered = SampleTrigger(world);
 
-            if (!_sequence.CanRun)
+            if (!CanRun)
             {
                 Stop();
                 return;
@@ -116,7 +211,7 @@ namespace Reactor.Runtime
         /// </remarks>
         public void Call(IWorld world, int tick)
         {
-            if (!_sequence.CanRun)
+            if (!CanRun)
                 return;
 
             if (IsRunning)
@@ -157,9 +252,10 @@ namespace Reactor.Runtime
             if (!step.HasAction)
                 return true;
 
-            for (var i = 0; i < step.Targets.Count; i++)
+            var settling = ActedOn(step.Targets);
+            for (var i = 0; i < settling.Count; i++)
             {
-                var entity = world.FindEntity(step.Targets[i]);
+                var entity = world.FindEntity(settling[i]);
                 if (entity == null)
                     continue;
 
@@ -225,7 +321,7 @@ namespace Reactor.Runtime
                 }
 
                 var guard = step.Gate as OnlyIfGate;
-                if (guard != null && !Conditions.IsTrue(world, guard.Condition))
+                if (guard != null && !Conditions.IsTrue(world, guard.Condition, Guarding(guard.Condition)))
                 {
                     // Passed over rather than waited on, and recorded so the user can
                     // be told which situation was not true.
@@ -275,7 +371,7 @@ namespace Reactor.Runtime
 
             var once = step.Gate as OnceGate;
             if (once != null)
-                return Conditions.IsTrue(world, once.Condition);
+                return Conditions.IsTrue(world, once.Condition, Guarding(once.Condition));
 
             return true;
         }
@@ -285,9 +381,10 @@ namespace Reactor.Runtime
             if (!step.HasAction)
                 return;
 
-            for (var i = 0; i < step.Targets.Count; i++)
+            var acting = ActedOn(step.Targets);
+            for (var i = 0; i < acting.Count; i++)
             {
-                var entity = world.FindEntity(step.Targets[i]);
+                var entity = world.FindEntity(acting[i]);
                 if (entity == null)
                     continue;
 
@@ -316,13 +413,14 @@ namespace Reactor.Runtime
             if (when.RequiresAll)
                 return SampleWhenAll(world, when);
 
+            var sources = Watched(when.Sources);
             var fired = false;
             var anySignalTrue = false;
             var anyMissing = false;
 
-            for (var i = 0; i < when.Sources.Count; i++)
+            for (var i = 0; i < sources.Count; i++)
             {
-                var sourceId = when.Sources[i];
+                var sourceId = sources[i];
                 var entity = world.FindEntity(sourceId);
                 if (entity == null)
                 {
@@ -370,12 +468,13 @@ namespace Reactor.Runtime
         /// </remarks>
         bool SampleWhenAll(IWorld world, WhenTrigger when)
         {
-            var all = when.Sources.Count > 0;
+            var sources = Watched(when.Sources);
+            var all = sources.Count > 0;
             var anyMissing = false;
 
-            for (var i = 0; i < when.Sources.Count; i++)
+            for (var i = 0; i < sources.Count; i++)
             {
-                var entity = world.FindEntity(when.Sources[i]);
+                var entity = world.FindEntity(sources[i]);
                 if (entity == null)
                 {
                     anyMissing = true;

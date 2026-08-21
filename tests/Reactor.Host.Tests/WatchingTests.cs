@@ -5,7 +5,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Reactor.Host.Features.Shell;
-using Reactor.Host.Machine;
+using Reactor.Host.System;
 using Xunit;
 
 namespace Reactor.Host.Tests;
@@ -56,7 +56,7 @@ public class WatchingTests
 
         // Nothing visible is left behind wearing the disabled look, which was the first wrong
         // answer to this: grey says "broken, or not yours to touch", and neither is true of a
-        // machine that is simply running.
+        // system that is simply running.
         Assert.DoesNotContain(
             window.GetVisualDescendants().OfType<Button>().Where(b => b.IsVisible),
             b => !b.IsEnabled);

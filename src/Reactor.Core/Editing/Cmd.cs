@@ -36,6 +36,7 @@ namespace Reactor.Editing
 
         // A sequence.
         Enable,
+        EnableInstance,
         DeleteSequence,
         Undo,
         Redo,

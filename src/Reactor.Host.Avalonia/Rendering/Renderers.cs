@@ -52,7 +52,7 @@ sealed class NoticeRenderer : ComponentRenderer
 }
 
 /// <summary>
-/// The ways a machine comes into being, and how this host asks for what they need.
+/// The ways a system comes into being, and how this host asks for what they need.
 /// </summary>
 /// <remarks>
 /// Core said a name is needed and gave somewhere to send it. Everything below - that it opens
@@ -306,6 +306,9 @@ sealed class StatusListRenderer : ComponentRenderer
         public TextBlock Status = null!;
         public TextBlock LastRun = null!;
         public TextBlock Problem = null!;
+        public Button? Switch;
+        public TextBlock? SwitchText;
+        public bool Governs;
     }
 
     StatusListComponent _model;
@@ -344,7 +347,42 @@ sealed class StatusListRenderer : ComponentRenderer
             row.Lit.IsVisible = entry.JustRan;
             row.Problem.Text = entry.Problem;
             row.Problem.IsVisible = !string.IsNullOrEmpty(entry.Problem);
+
+            if (row.Switch != null)
+            {
+                // Says what pressing it does, not what state it is in, the same as everywhere
+                // else a switch appears.
+                row.Switch.Tag = entry.SwitchIsOn;
+                row.SwitchText!.Text = entry.SwitchIsOn ? "❚❚" : "▶";
+
+                var colour = entry.SwitchIsOn ? Palette.Notice : Palette.Live;
+                if (row.Governs)
+                {
+                    row.Switch.Background = colour;
+                }
+                else
+                {
+                    row.Switch.Background = Brushes.Transparent;
+                    row.Switch.BorderBrush = colour;
+                    row.SwitchText.Foreground = colour;
+                }
+            }
         }
+    }
+
+    /// <summary>
+    /// A nested row sits inside its parent on both sides, not only the left.
+    /// </summary>
+    /// <remarks>
+    /// The left edge already stepped in to say "this belongs to the row above". The right edge
+    /// did not, so a switch on a nested row landed in the same column as the switch that
+    /// governs it, and nothing but reading the labels told you which was which. Stepping in on
+    /// both sides makes the child visibly inside the parent, and puts its controls inside the
+    /// parent's too.
+    /// </remarks>
+    static Thickness Inset(int depth)
+    {
+        return depth > 0 ? new Thickness(22, 0, 22, 4) : new Thickness(0, 0, 0, 4);
     }
 
     void Build()
@@ -363,7 +401,7 @@ sealed class StatusListRenderer : ComponentRenderer
         foreach (var entry in _model.Entries)
         {
             var row = new Row();
-            var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*") };
+            var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto") };
 
             var dot = Widgets.Dot(out var lit);
             row.Lit = lit;
@@ -390,10 +428,39 @@ sealed class StatusListRenderer : ComponentRenderer
             Grid.SetColumn(text, 1);
             grid.Children.Add(text);
 
+            // A system can be stopped from the list, without opening it. Drawn the same way as
+            // the switch on its own screen and on a sequence, because it is the same act.
+            if (entry.CanSwitch)
+            {
+                var toggle = entry.SwitchCommand;
+
+                // A switch over everything below it is drawn filled; one over a single thing
+                // is drawn as an outline. Two of them in a column need telling apart, and the
+                // indent alone says which is nested while the weight says which is the bigger
+                // act - stopping a whole airlock is not the same as stopping one of them.
+                row.Governs = entry.SwitchGovernsAll;
+                row.SwitchText = Widgets.Label("",
+                    entry.SwitchGovernsAll ? Brushes.White : Palette.Muted, 11, true);
+
+                row.Switch = new Button
+                {
+                    Content = row.SwitchText,
+                    BorderThickness = new Thickness(entry.SwitchGovernsAll ? 0 : 1),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(10, 3),
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                row.Switch.Click += (_, _) =>
+                    Editor.SetToggle(toggle, !row.Switch!.Tag!.Equals(true));
+
+                Grid.SetColumn(row.Switch, 2);
+                grid.Children.Add(row.Switch);
+            }
+
             var command = entry.Command;
 
             // No command means there is nothing to press, so it is not drawn as something that
-            // can be. A machine's own row is a heading over the ones of it, and a heading that
+            // can be. A system's own row is a heading over the ones of it, and a heading that
             // lights up under the pointer is a promise it cannot keep.
             if (command == 0)
             {
@@ -401,7 +468,7 @@ sealed class StatusListRenderer : ComponentRenderer
                 {
                     Child = grid,
                     Padding = new Thickness(12, 9),
-                    Margin = new Thickness(entry.Depth > 0 ? 22 : 0, 0, 0, 4)
+                    Margin = Inset(entry.Depth)
                 });
                 _rows.Add(row);
                 continue;
@@ -409,9 +476,9 @@ sealed class StatusListRenderer : ComponentRenderer
 
             var button = Widgets.Row(grid);
 
-            // One level of nesting, ever: a machine, and the ones of it on this ship.
+            // One level of nesting, ever: a system, and the ones of it on this ship.
             if (entry.Depth > 0)
-                button.Margin = new Thickness(22, 0, 0, 4);
+                button.Margin = Inset(entry.Depth);
 
             button.Click += (_, _) => Editor.Invoke(command);
 

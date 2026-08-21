@@ -3,7 +3,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Reactor.Editing;
 using Reactor.Host.Features.Shell;
-using Reactor.Host.Machine;
+using Reactor.Host.System;
 using Xunit;
 
 namespace Reactor.Host.Tests;
@@ -41,7 +41,7 @@ public class ScreenshotTests
 
         Shoot(window, "sequence");
 
-        // The front door: the machines on this ship, and the ones of each that are fitted.
+        // The front door: the systems on this ship, and the ones of each that are fitted.
         editor.GoToRoot();
         Tick(window, 1);
         Shoot(window, "ship");

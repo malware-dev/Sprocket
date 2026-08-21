@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Reactor.Host.Machine;
+using Reactor.Host.System;
 using Reactor.Host.Rendering;
 
 namespace Reactor.Host.Features.Shell;

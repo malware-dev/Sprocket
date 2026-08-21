@@ -216,7 +216,12 @@ namespace Reactor.Editing
 
         internal int RegisterToggle(Cmd kind, int which, Action<bool> action)
         {
-            var id = CommandId.Of(kind, which);
+            return RegisterToggle(kind, which, 0, action);
+        }
+
+        internal int RegisterToggle(Cmd kind, int which, int part, Action<bool> action)
+        {
+            var id = CommandId.Of(kind, which, part);
             Claim(id, kind);
             _toggleActions.Add(id, action);
             return id;
@@ -278,7 +283,7 @@ namespace Reactor.Editing
         /// </summary>
         /// <remarks>
         /// Here rather than on the sequence itself, because it is a fact about somebody's
-        /// editing session and not about the machine. A sequence that is exported, shared or
+        /// editing session and not about the system. A sequence that is exported, shared or
         /// saved should carry what it is, never how its author got there.
         ///
         /// Kept per sequence and across navigation, so backing out to look at something and
@@ -576,11 +581,11 @@ namespace Reactor.Editing
         /// configurator, which needs roles.
         /// </remarks>
         /// <summary>
-        /// Another one of a machine already on the ship. Not built yet, and says so.
+        /// Another one of a system already on the ship. Not built yet, and says so.
         /// </summary>
         /// <remarks>
         /// It opens the same configurator loading does, because they are the same act: point a
-        /// machine at the blocks it should use here. Neither exists until roles do.
+        /// system at the blocks it should use here. Neither exists until roles do.
         /// </remarks>
         internal void OfferAnother(AutomationSystem system)
         {
@@ -600,14 +605,14 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// The ways a sequence can begin, offered on the machine's own screen.
+        /// The ways a sequence can begin, offered on the system's own screen.
         /// </summary>
         /// <remarks>
-        /// These used to be a screen of their own, asked the moment a machine was made. It
+        /// These used to be a screen of their own, asked the moment a system was made. It
         /// bought nothing: a question with two answers and no context, standing between
-        /// somebody and the thing they came to build, and it left the machine's own screen off
-        /// the way back. They belong at the top of the machine, in the same place and the same
-        /// shape as the ship's own "new machine" - it is the same question either way, which is
+        /// somebody and the thing they came to build, and it left the system's own screen off
+        /// the way back. They belong at the top of the system, in the same place and the same
+        /// shape as the ship's own "new system" - it is the same question either way, which is
         /// what would you like to add here.
         ///
         /// The catalogue lives here rather than on the page so a third way to start something
@@ -647,13 +652,13 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// The same, for a sequence that belongs to a machine somebody is already looking at.
+        /// The same, for a sequence that belongs to a system somebody is already looking at.
         /// </summary>
         internal void StartSequence(AutomationSystem system, Trigger trigger)
         {
             _pendingSystem = system;
 
-            // Where to unwind to once the questions are answered. The machine's screen is
+            // Where to unwind to once the questions are answered. The system's screen is
             // already underneath - the starters live on it now - so everything the questions
             // pushed is dropped and the finished sequence lands directly on it.
             var origin = _stack.Count;
@@ -723,7 +728,7 @@ namespace Reactor.Editing
 
             // Parked until somebody says otherwise. A sequence with a trigger and no steps is
             // already live under the old default, and it becomes progressively more live as
-            // each step is added - a machine half-doing something nobody has finished
+            // each step is added - a system half-doing something nobody has finished
             // describing. It is also the only way the switch could gate editing without a new
             // sequence being unbuildable the moment it exists.
             var sequence = _program.AddSequence(system, trigger);
@@ -733,11 +738,11 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// The machine a sequence being built belongs to, or null to make a new one.
+        /// The system a sequence being built belongs to, or null to make a new one.
         /// </summary>
         /// <remarks>
         /// Held across the run of questions rather than passed through them, because every
-        /// question in between is about the sequence and none of them cares which machine it
+        /// question in between is about the sequence and none of them cares which system it
         /// is for. Cleared when the sequence is made, so an abandoned run leaves nothing.
         /// </remarks>
         AutomationSystem _pendingSystem;

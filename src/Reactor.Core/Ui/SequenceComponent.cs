@@ -174,12 +174,12 @@ namespace Reactor.Ui
         /// </summary>
         /// <remarks>
         /// False while it is switched on, because a sequence that is switched on can be
-        /// running, and rewiring a machine mid-operation is how an airlock opens the outer
+        /// running, and rewiring a system mid-operation is how an airlock opens the outer
         /// door having never closed the inner one. Switching it off abandons any run in
-        /// progress and leaves the machine wherever it got to, which is exactly the state
+        /// progress and leaves the system wherever it got to, which is exactly the state
         /// somebody needs in order to fix it.
         ///
-        /// This is a fact about the machine rather than a mode the editor is in. Nobody has to
+        /// This is a fact about the system rather than a mode the editor is in. Nobody has to
         /// be taught it: you cannot rewire a live circuit either.
         ///
         /// The name is not covered. Renaming changes nothing about what the thing does.

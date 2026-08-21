@@ -56,7 +56,7 @@ sealed class EditorView : UserControl
         _title = Widgets.Label("", Palette.Ink, 16, true);
         _subtitle = Widgets.Label("", Palette.Faint, 11);
 
-        // The same control the sentence carries, at the scale of a whole machine, and drawn
+        // The same control the sentence carries, at the scale of a whole system, and drawn
         // the same way on purpose - it is the same act. Labelled with what pressing it does
         // rather than what state it is in, so nobody has to work out which way round it is
         // before daring to press.
@@ -215,11 +215,18 @@ sealed class EditorView : UserControl
 
     Control BuildLayout()
     {
-        var headingGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,Auto") };
+        // The pencil is pinned to the right and the title takes whatever is left, ellipsised
+        // if it has to be. Sized to the title instead, a long name pushed the pencil off the
+        // end of the header and the screen simply stopped offering a rename - which is the
+        // worst way to lose a control, because nothing says it was ever there.
+        var headingGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
+        _title.TextTrimming = TextTrimming.CharacterEllipsis;
         headingGrid.Children.Add(_title);
         Grid.SetColumn(_renameIcon, 1);
         headingGrid.Children.Add(_renameIcon);
+
         _heading.Content = headingGrid;
+        _heading.HorizontalAlignment = HorizontalAlignment.Stretch;
 
         // The two share a cell so the one that is showing decides the height and neither can
         // shift the other's position when they swap.

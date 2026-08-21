@@ -8,7 +8,7 @@ namespace Reactor.Runtime
     /// Runs everything, one tick at a time.
     /// </summary>
     /// <remarks>
-    /// There is no build, no run and no stop. The machine is always live, and edits
+    /// There is no build, no run and no stop. The system is always live, and edits
     /// take effect on the next tick - a sequence added while the ship is working
     /// simply begins working too. Removing the gap between writing something and
     /// seeing it happen is what turns "what will this do?" into something the user
@@ -16,8 +16,20 @@ namespace Reactor.Runtime
     /// </remarks>
     public sealed class AutomationRunner
     {
-        readonly Dictionary<int, SequenceRunner> _runners = new Dictionary<int, SequenceRunner>();
-        readonly List<int> _stale = new List<int>();
+        /// <summary>
+        /// One runner per sequence <em>per one of a system</em>.
+        /// </summary>
+        /// <remarks>
+        /// Two airlocks are the same sequences run twice, each resolving the author's parts
+        /// into its own doors, so each needs its own place to be mid-cycle. One runner per
+        /// sequence meant the second of anything did nothing at all: the ones of a system were
+        /// a name and a number that the runtime never saw.
+        ///
+        /// Keyed by both, packed, so the lookup stays a single dictionary hit on every tick.
+        /// </remarks>
+        readonly Dictionary<long, SequenceRunner> _runners = new Dictionary<long, SequenceRunner>();
+        readonly List<long> _stale = new List<long>();
+        readonly List<long> _live = new List<long>();
         readonly Automation _automation;
         readonly IWorld _world;
 
@@ -49,20 +61,45 @@ namespace Reactor.Runtime
             CurrentTick = tick;
             Reconcile();
 
-            var sequences = _automation.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
+            for (var i = 0; i < _live.Count; i++)
             {
                 SequenceRunner runner;
-                if (_runners.TryGetValue(sequences[i].Id, out runner))
+                if (_runners.TryGetValue(_live[i], out runner))
                     runner.Tick(_world, CurrentTick);
             }
         }
 
-        /// <summary>Live state for a sequence, or null if it has never been ticked.</summary>
+        /// <summary>
+        /// Live state for a sequence on the first of its system, or null if never ticked.
+        /// </summary>
+        /// <remarks>
+        /// The editor shows a system's sequences, not one particular one of it, so it is shown
+        /// the first. That is exactly right while a system has one, and a half-answer as soon
+        /// as it has two - a screen that has to say which one it is talking about is part of
+        /// the configurator work, not of this.
+        /// </remarks>
         public SequenceRunner Get(Sequence sequence)
         {
+            var system = sequence.System;
+            var first = system != null && system.Instances.Count > 0
+                ? system.Instances[0].Number
+                : 0;
+
             SequenceRunner runner;
-            return _runners.TryGetValue(sequence.Id, out runner) ? runner : null;
+            return _runners.TryGetValue(Key(sequence.Id, first), out runner) ? runner : null;
+        }
+
+        /// <summary>Live state for a sequence on one particular one of its system.</summary>
+        public SequenceRunner Get(Sequence sequence, SystemInstance instance)
+        {
+            SequenceRunner runner;
+            var key = Key(sequence.Id, instance == null ? 0 : instance.Number);
+            return _runners.TryGetValue(key, out runner) ? runner : null;
+        }
+
+        static long Key(int sequenceId, int instanceNumber)
+        {
+            return ((long)sequenceId << 20) | (uint)instanceNumber;
         }
 
         /// <summary>Starts a named sequence, as a trigger or another sequence would.</summary>
@@ -73,22 +110,44 @@ namespace Reactor.Runtime
                 runner.Call(_world, CurrentTick);
         }
 
+        /// <summary>
+        /// Keeps the set of runners matching the sequences and the ones of each system.
+        /// </summary>
+        /// <remarks>
+        /// The live list is rebuilt here rather than walked from the systems on every tick,
+        /// because ticking is the hot path and this only has to notice a change.
+        /// </remarks>
         void Reconcile()
         {
-            var sequences = _automation.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
+            _live.Clear();
+
+            var systems = _automation.Systems;
+            for (var s = 0; s < systems.Count; s++)
             {
-                if (!_runners.ContainsKey(sequences[i].Id))
-                    _runners.Add(sequences[i].Id, new SequenceRunner(sequences[i]));
+                var system = systems[s];
+                var instances = system.Instances;
+                var sequences = system.Sequences;
+
+                for (var n = 0; n < instances.Count; n++)
+                {
+                    for (var q = 0; q < sequences.Count; q++)
+                    {
+                        var key = Key(sequences[q].Id, instances[n].Number);
+                        _live.Add(key);
+
+                        if (!_runners.ContainsKey(key))
+                            _runners.Add(key, new SequenceRunner(sequences[q], instances[n]));
+                    }
+                }
             }
 
-            if (_runners.Count == sequences.Count)
+            if (_runners.Count == _live.Count)
                 return;
 
             _stale.Clear();
             foreach (var pair in _runners)
             {
-                if (_automation.FindSequence(pair.Key) == null)
+                if (!_live.Contains(pair.Key))
                     _stale.Add(pair.Key);
             }
 

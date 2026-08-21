@@ -53,7 +53,7 @@ public class EditorTests
     }
 
     /// <summary>
-    /// A machine's switch and a sequence's switch are separate, and both have to hold.
+    /// A system's switch and a sequence's switch are separate, and both have to hold.
     /// </summary>
     /// <remarks>
     /// Parking a whole airlock to weld on it, and then starting it again, must not quietly
@@ -82,7 +82,7 @@ public class EditorTests
         ship.Tick();
         Assert.True(sequence.CanRun);
 
-        // Now park the whole machine from its own screen.
+        // Now park the whole system from its own screen.
         editor.Back();
         ship.Tick();
         Assert.True(editor.Screen.HasSwitch);
@@ -98,7 +98,7 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Nothing that changes what a machine does is offered while it can run.
+    /// Nothing that changes what a system does is offered while it can run.
     /// </summary>
     [Fact]
     public void ARunningSequenceCannotBeRewired()
@@ -127,7 +127,7 @@ public class EditorTests
         Assert.Equal(0, sentence.Trigger.Slots[0].Command);
         Assert.Equal(0, sentence.DeleteCommand);
 
-        // Renaming is exempt: it changes nothing about what the machine does.
+        // Renaming is exempt: it changes nothing about what the system does.
         Assert.True(editor.Screen.CanRename);
     }
 
@@ -312,6 +312,93 @@ public class EditorTests
     }
 
     /// <summary>
+    /// A system can be stopped from the list it appears in, and renamed from its own heading.
+    /// </summary>
+    /// <remarks>
+    /// Somebody welding on a hangar wants that hangar left alone. Making them open it to say
+    /// so is a step that buys nothing, and the list is where they will look to check. Renaming
+    /// used to be possible only at the moment of creation, so a typo was permanent.
+    /// </remarks>
+    [Fact]
+    public void ASystemCanBeStoppedFromTheShipAndRenamedFromItsOwnScreen()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.SwitchOn();
+        ship.Tick();
+
+        var system = ship.Automation.Systems[0];
+        var sequence = ship.Automation.Sequences[0];
+        Assert.True(sequence.CanRun);
+
+        editor.Back();
+        ship.Tick();
+
+        // On its own screen: renameable, the same way a sequence is.
+        Assert.True(editor.Screen.CanRename);
+        Assert.Equal("Airlock", editor.Screen.CustomName);
+        editor.SetText(editor.Screen.RenameCommand, "Front Airlock");
+        ship.Tick();
+        Assert.Equal("Front Airlock", system.Name);
+
+        editor.Back();
+        ship.Tick();
+
+        // On the ship's list: the system's own row carries its switch.
+        var heading = editor.Component<StatusListComponent>().Entries
+            .First(e => e.Depth == 0 && !e.IsAction);
+
+        Assert.True(heading.CanSwitch);
+        Assert.True(heading.SwitchIsOn);
+
+        editor.SetToggle(heading.SwitchCommand, false);
+        ship.Tick();
+
+        Assert.False(system.Enabled);
+        Assert.False(sequence.CanRun);
+        Assert.True(sequence.Enabled);
+        Assert.False(editor.Component<StatusListComponent>().Entries
+            .First(e => e.Depth == 0 && !e.IsAction).SwitchIsOn);
+    }
+
+    /// <summary>
+    /// A thing can be stopped from wherever it is listed, at every level.
+    /// </summary>
+    /// <remarks>
+    /// A system on the ship's list, a sequence on its system's list, and a sequence on its own
+    /// screen. Having it at two of those three and not the middle one was an accident of the
+    /// order they were built in.
+    /// </remarks>
+    [Fact]
+    public void ASequenceCanBeStoppedFromItsSystemsScreen()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.SwitchOn();
+        ship.Tick();
+
+        var sequence = ship.Automation.Sequences[0];
+        Assert.True(sequence.Enabled);
+
+        editor.Back();
+        ship.Tick();
+
+        var row = editor.Component<StatusListComponent>().Entries[0];
+        Assert.True(row.CanSwitch);
+        Assert.True(row.SwitchIsOn);
+
+        editor.SetToggle(row.SwitchCommand, false);
+        ship.Tick();
+
+        Assert.False(sequence.Enabled);
+        Assert.False(editor.Component<StatusListComponent>().Entries[0].SwitchIsOn);
+    }
+
+    /// <summary>
     /// The one irreversible act in the editor asks before it happens.
     /// </summary>
     /// <remarks>
@@ -349,7 +436,7 @@ public class EditorTests
         ship.Editor.PressChoice("Delete it");
         ship.Tick();
 
-        // Gone, and standing on the machine rather than on a question about nothing.
+        // Gone, and standing on the system rather than on a question about nothing.
         Assert.Empty(ship.Automation.Sequences);
         Assert.Equal("Airlock", ship.Editor.Screen.Title);
     }
@@ -388,11 +475,11 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Backing out of a new machine's first sequence lands on the machine.
+    /// Backing out of a new system's first sequence lands on the system.
     /// </summary>
     /// <remarks>
-    /// Making a machine goes straight into its first sequence, because there is nothing on an
-    /// empty machine's screen worth stopping for. That shortcut used to leave the machine's
+    /// Making a system goes straight into its first sequence, because there is nothing on an
+    /// empty system's screen worth stopping for. That shortcut used to leave the system's
     /// own screen off the stack entirely, so the only way back out of that first sequence was
     /// all the way to the ship - past the very thing you had just made.
     /// </remarks>
@@ -595,7 +682,7 @@ public class EditorTests
 
         Assert.Empty(ship.Automation.Sequences);
 
-        // And one more back off the machine itself.
+        // And one more back off the system itself.
         editor.Back();
         Assert.Equal("Your ship", editor.Screen.Title);
     }
@@ -614,7 +701,7 @@ public class EditorTests
         editor.PressChoice("is pressed");
 
         // Both stages are one screen now, and the starters are no longer a screen at all, so
-        // one step back reaches the machine and a second reaches the ship.
+        // one step back reaches the system and a second reaches the ship.
         editor.Back();
         Assert.Equal("Airlock", editor.Screen.Title);
 
@@ -642,7 +729,7 @@ public class EditorTests
         Assert.Equal("Let me out", editor.Screen.Title);
 
         // And in the list, which is the reason naming exists at all. Backing out of the
-        // sequence lands on the machine it belongs to, which is where its sequences are listed.
+        // sequence lands on the system it belongs to, which is where its sequences are listed.
         editor.Back();
         ship.Tick();
 

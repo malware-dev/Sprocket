@@ -7,7 +7,7 @@ namespace Reactor.Ui
     /// </summary>
     /// <remarks>
     /// Every screen that holds a list of things somebody made has one of these above it: the
-    /// ship offers a new machine or a loaded one, a machine offers the ways a sequence can
+    /// ship offers a new system or a loaded one, a system offers the ways a sequence can
     /// begin. The shape is deliberately the same in both places, because it is the same
     /// question - what would you like to add here - and a screen whose top half is learnt once
     /// is learnt everywhere.

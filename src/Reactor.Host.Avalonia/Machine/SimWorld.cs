@@ -1,6 +1,6 @@
 using Reactor.World;
 
-namespace Reactor.Host.Machine;
+namespace Reactor.Host.System;
 
 /// <summary>
 /// The simulated construct.
@@ -47,7 +47,7 @@ sealed class SimWorld : IWorld
     }
 
     /// <summary>
-    /// Advances the machine. Called before the sequences are ticked, so sequences always
+    /// Advances the system. Called before the sequences are ticked, so sequences always
     /// sample signals that are current for this tick.
     /// </summary>
     public void Tick()

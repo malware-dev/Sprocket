@@ -66,7 +66,7 @@ namespace Reactor.Ui
         /// Switches this screen's subject on or off. Zero when it has no such switch.
         /// </summary>
         /// <remarks>
-        /// A machine's switch, where a sequence's lives on the sentence itself. Same idea at a
+        /// A system's switch, where a sequence's lives on the sentence itself. Same idea at a
         /// larger scale: rewiring an airlock means stopping the airlock, not stopping three
         /// sequences one at a time - and a half-stopped one, with the inner door's rule off
         /// and the outer door's rule still live, is worse than either state.

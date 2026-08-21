@@ -353,7 +353,7 @@ sealed class SequenceRenderer : ComponentRenderer
         Grid.SetColumn(wrap, 1);
         grid.Children.Add(wrap);
 
-        // Gone rather than greyed. What is on screen while it runs is a view of a machine
+        // Gone rather than greyed. What is on screen while it runs is a view of a system
         // working, not an editor with its hands tied.
         if (_model.Editable)
         {

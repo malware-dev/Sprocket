@@ -2,7 +2,7 @@ using Reactor.Editing;
 using Reactor.Sequences;
 using Reactor.Runtime;
 
-namespace Reactor.Host.Machine;
+namespace Reactor.Host.System;
 
 /// <summary>
 /// A simulated ship with Reactor running on it.

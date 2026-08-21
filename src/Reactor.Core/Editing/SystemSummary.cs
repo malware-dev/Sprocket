@@ -28,7 +28,7 @@ namespace Reactor.Editing
         /// <remarks>
         /// The suggestion is the leading words its blocks have in common. People prefix block
         /// names constantly - Airlock Inner Door, Airlock Outer Door, Airlock Button - so the
-        /// common part is usually the name of the machine, and using it costs nothing and
+        /// common part is usually the name of the system, and using it costs nothing and
         /// reads as having been understood rather than interrogated.
         ///
         /// Worked out when the screen is built, never on a tick: it walks names and splits
@@ -49,7 +49,7 @@ namespace Reactor.Editing
             return "System " + system.Id;
         }
 
-        /// <summary>What one of a machine is called: Airlock 1, or whatever it was renamed to.</summary>
+        /// <summary>What one of a system is called: Airlock 1, or whatever it was renamed to.</summary>
         public static string DescribeInstance(IWorld world, AutomationSystem system, SystemInstance instance)
         {
             if (instance.HasName)
@@ -58,13 +58,13 @@ namespace Reactor.Editing
             return Describe(world, system) + " " + instance.Number;
         }
 
-        /// <summary>How many of this machine are on the ship.</summary>
+        /// <summary>How many of this system are on the ship.</summary>
         public static string Count(AutomationSystem system)
         {
             return "on this ship: " + system.Instances.Count;
         }
 
-        /// <summary>Whether anything in this machine is doing something.</summary>
+        /// <summary>Whether anything in this system is doing something.</summary>
         public static bool IsRunning(AutomationSystem system, AutomationRunner runner)
         {
             var sequences = system.Sequences;
@@ -135,8 +135,8 @@ namespace Reactor.Editing
         /// </remarks>
         static string CommonPrefix(List<string> names)
         {
-            // One block says nothing about the machine. Naming a system after its only block
-            // reads as a mistake - the machine is not the button - and a number is honest
+            // One block says nothing about the system. Naming a system after its only block
+            // reads as a mistake - the system is not the button - and a number is honest
             // where a guess would be wrong.
             if (!HasTwoDistinct(names))
                 return "";

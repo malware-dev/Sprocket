@@ -17,7 +17,7 @@ The one exception is the editor's own interface, which has just had a working-ov
 prototype is a template for the in-game screens, so its shape is a design artifact rather
 than throwaway scaffolding. `docs/Editor.md` is where that lives.
 
-78 tests, all green - 60 in core, 18 driving the host.
+88 tests, all green - 70 in core, 18 driving the host.
 
 ## The documents, and which is which
 
@@ -59,7 +59,7 @@ requirements derived from each.
 nobody has run this in yet), two retired.
 
 **Next: the decisions.** Requirements are written; several wait on design questions that are
-still open, and tickets cannot be described until those are made. Design.md holds nine of
+still open, and tickets cannot be described until those are made. Design.md holds ten of
 them, ApiUnknowns holds eleven questions about the game - and several of those turned out on
 inspection to be things Morten simply knows, so the register is worth reading down together
 before treating anything in it as blocking.
@@ -80,28 +80,49 @@ The biggest things the pass has produced:
 The screens were reworked around systems, and the shape settled. `docs/Editor.md` is the
 long form; in brief:
 
-- **The root is the machines on this ship**, not a list of sequences. A system is what a
-  machine *is*; the ones on the ship are what somebody *has*, named *Airlock 1* the way the
+- **The root is the systems on this ship**, not a list of sequences. A system is what a
+  system *is*; the ones on the ship are what somebody *has*, named *Airlock 1* the way the
   game names a block *Interior Light 4*. The word "instance" never reaches a screen.
-- **A machine's screen has the same shape as the root** - ways to add on top, a rule, then
-  what is already there. The starter chooser that used to stand between making a machine and
-  building its first sequence is gone; `+ When...` and `+ Every...` live on the machine.
+- **A system's screen has the same shape as the root** - ways to add on top, a rule, then
+  what is already there. The starter chooser that used to stand between making a system and
+  building its first sequence is gone; `+ When...` and `+ Every...` live on the system.
 - **`PathComponent` is `PickComponent`**, drawn by `ColumnPickRenderer`. Core states the
   stages and what each needs back; columns, the search box, the kind list and the double-tap
   are all the host's choices.
 - **Naming is on the heading**, using the game's word `CustomName`, edited in place.
-- **A machine cannot be rewired while it runs.** Editing waits on the switch, and the switch
-  is a fact about the machine rather than a mode the editor is in - you cannot rewire a live
+- **A system cannot be rewired while it runs.** Editing waits on the switch, and the switch
+  is a fact about the system rather than a mode the editor is in - you cannot rewire a live
   circuit either, so nobody has to be taught it. `Sequence.CanRun` needs both the sequence's
-  own switch and its machine's, and switching off abandons any run in progress. A new sequence
+  own switch and its system's, and switching off abandons any run in progress. A new sequence
   starts parked.
 - **A running sequence is drawn as a thing being watched**, not as an editor with its hands
   tied: the arrows, crosses and add buttons are absent rather than greyed, and the sentence
   reads as prose. It is a first slice of the diagnosis view R28 will finish.
 - **Every change is a reversible operation**, with undo and redo beside Pause and Delete as
   fixed-width arrows that never come and go, the description in a tooltip. A new edit ends the redo branch. Neither can touch
-  the switch, so no press of either can arm a machine, and both wait for it like any other
+  the switch, so no press of either can arm a system, and both wait for it like any other
   edit.
+
+## Roles, and the ones of a system
+
+- **A role is derived, never declared.** `AutomationSystem.Parts` walks the sequences and
+  reports what they act on; the same door in a step and a gate is one part, listed once. R23's
+  argument is that a hand-kept list goes stale the first time somebody adds a step.
+- **A role is identified by what the author built with**, and carries authored wording -
+  `SystemRole.Name`, `Instructions`, `Optional` - kept in a side list that outlives the
+  derivation. Delete the last step mentioning a door and the note written for it survives.
+- **One of a system is a substitution**: `SystemInstance.Fill` says "where the author used that
+  door, I use this one". The first one fills in nothing, which is why everything built before
+  roles keeps working untouched. A part may hold several things, which needs no new rule -
+  several on a trigger already means *any*, several in a condition already means *all*.
+- **Three switches, all of which must be on** for a sequence to run for one of a system: the
+  sequence's, the system's, and that one's. Three different intentions - "I parked this rule",
+  "I am rewiring the whole thing", "leave the port airlock alone while I weld" - and none may
+  overwrite another. All three are reachable from the ship's list or one press in.
+- **The runtime runs one runner per instance and sequence.** `SequenceRunner` resolves targets,
+  trigger sources and gate conditions through its instance, using three reused buffers so a
+  tick allocates nothing. Three because a gate is asked while a step is acting and the trigger
+  is sampled on the same tick.
 
 ## The model, as of today
 
@@ -120,16 +141,27 @@ long form; in brief:
 
 Ordered by how much they hurt.
 
-1. **The configurator.** `+ add` on a machine and `Load system` both open a stub that says
-   so. Neither can exist until roles do, and roles are the centre of gravity above.
-2. **The undo history does not survive a restart.** `ProgramText` saves the program; the
-   history lives in `ReactorEditor._history` and `_redo`, keyed by sequence id, in memory only.
-   It was asked for when undo was designed and did not get built. The edits are small records
-   and were shaped to be sendable, so writing them out is the same job as putting them on a
-   wire - do both together rather than twice.
-3. **Calling one sequence from another.** `CalledTrigger` exists and nothing consumes a
-   name, so it is reachable only through *run now*. Wanted by E, and R5's stop is worth
-   nothing without it.
+1. **The configurator screen.** The model and the runtime under it are built - see "roles and
+   the ones of a system" below - but nothing fills a role in from the editor. `+ add` on a
+   system and `Load system` both still open a stub, and `SystemInstance.Fill` is only reachable
+   from code and from a saved file.
+
+   One thing goes with that screen: **the editor does not know which one of a system it is
+   looking at**, so `AutomationRunner.Get(sequence)` answers for the first - right while there
+   is one, a half-answer as soon as there are two.
+2. **The undo history does not survive a restart.** *Next up, and starting with a
+   conversation rather than with code.* `ProgramText` saves the program; the history lives in
+   `ReactorEditor._history` and `_redo`, keyed by sequence id, in memory only.
+
+   The mechanics are small - the edits are already compact records, shaped to be sendable, so
+   writing them out is the same job as putting them on a wire and both should be done together.
+   **Where it goes is the open question**, and it is not obvious. History is a fact about
+   somebody's editing session rather than about the ship, which argues against the world save;
+   but a mod has nowhere else that survives, and in multiplayer "somebody's session" is a
+   different person on each client. Worth deciding before writing any of it.
+3. **Calling one sequence from another.** `CalledTrigger` exists and nothing consumes a name,
+   so nothing can reach it at all - the run-by-hand button that used to is gone. Wanted by E,
+   and R5's stop is worth nothing without it.
 4. **Authoring `only if` and `once`.** The model handles them and the editor renders them;
    nothing creates one.
 5. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
@@ -152,7 +184,7 @@ Ordered by how much they hurt.
 ## Working notes
 
 ```
-dotnet test                                       # 78 tests
+dotnet test                                       # 88 tests
 dotnet run --project src/Reactor.Host.Avalonia    # the prototype
 dotnet test --filter Screenshot                   # PNGs to %TEMP%\reactor-*.png
 ```

@@ -3,7 +3,7 @@ using Reactor.World;
 namespace Reactor.Tests;
 
 /// <summary>
-/// A machine that takes time to do things.
+/// A system that takes time to do things.
 /// </summary>
 /// <remarks>
 /// Doors travel and vents cycle, because instant entities hide every problem worth

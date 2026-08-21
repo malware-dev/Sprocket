@@ -3,7 +3,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Reactor.Host.Features.Shell;
-using Reactor.Host.Machine;
+using Reactor.Host.System;
 using Reactor.Ui;
 using Xunit;
 

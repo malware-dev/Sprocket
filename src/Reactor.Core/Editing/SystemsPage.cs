@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Reactor.Sequences;
 using Reactor.Ui;
@@ -5,16 +6,16 @@ using Reactor.Ui;
 namespace Reactor.Editing
 {
     /// <summary>
-    /// The machines on this ship, and the ones of each that are actually fitted. The front
+    /// The systems on this ship, and the ones of each that are actually fitted. The front
     /// door.
     /// </summary>
     /// <remarks>
     /// Not a list of sequences. Nobody built a procedure - they built an airlock, and that is
     /// what they came back to look at.
     ///
-    /// A machine always shows the ones of it underneath, even when there is only one. That is
+    /// A system always shows the ones of it underneath, even when there is only one. That is
     /// what makes the naming work: <c>Airlock 1</c> reads as provisional and gets renamed
-    /// without a dialog asking for it, and a machine and the one of it never share a row and
+    /// without a dialog asking for it, and a system and the one of it never share a row and
     /// end up saying the same thing twice.
     /// </remarks>
     sealed class SystemsPage : EditorPage
@@ -51,11 +52,15 @@ namespace Reactor.Editing
             {
                 var system = _systems[i];
 
-                // The machine's own row does not open the editor. Editing happens through one
+                // The system's own row does not open the editor. Editing happens through one
                 // of them, where there are real blocks to point at rather than roles to
-                // imagine. What this row should open - what the machine is, its description,
+                // imagine. What this row should open - what the system is, its description,
                 // giving it away - is not decided.
-                _list.Entries.Add(new StatusEntry(SystemSummary.Describe(Editor.World, system), 0));
+                var heading = new StatusEntry(SystemSummary.Describe(Editor.World, system), 0);
+                heading.SwitchCommand = Editor.RegisterToggle(Cmd.Enable, system.Id, Switch(system));
+                heading.SwitchIsOn = system.Enabled;
+                heading.SwitchGovernsAll = true;
+                _list.Entries.Add(heading);
                 _rowOwners.Add(system);
                 _rowInstances.Add(null);
 
@@ -68,6 +73,12 @@ namespace Reactor.Editing
                         Editor.Register(Cmd.OpenSystem, system.Id, instance.Number,
                             delegate { Editor.Push(new SystemPage(Editor, system)); }));
                     entry.Depth = 1;
+
+                    // Stopping one of a system without stopping the rest, which is what
+                    // somebody welding on the port airlock actually wants.
+                    entry.SwitchCommand = Editor.RegisterToggle(
+                        Cmd.EnableInstance, system.Id, instance.Number, Switch(instance));
+                    entry.SwitchIsOn = instance.Enabled;
                     _list.Entries.Add(entry);
                     _rowOwners.Add(system);
                     _rowInstances.Add(instance);
@@ -87,7 +98,7 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// Makes a machine, once somebody has said what it is.
+        /// Makes a system, once somebody has said what it is.
         /// </summary>
         /// <remarks>
         /// The name is what M says when something is stuck, what J navigates by and what K
@@ -95,6 +106,28 @@ namespace Reactor.Editing
         /// numbers - produced something worse than the question, and asking an adult what they
         /// are building is not an imposition. Guessing badly on their behalf is.
         /// </remarks>
+        /// <summary>
+        /// Stopping a system from the list it appears in.
+        /// </summary>
+        /// <remarks>
+        /// The same switch its own screen carries. Somebody who wants a hangar left alone
+        /// while they weld should not have to open it to say so - and having stopped it, the
+        /// list is where they will look to check.
+        /// </remarks>
+        Action<bool> Switch(AutomationSystem system)
+        {
+            return delegate(bool on)
+            {
+                system.Enabled = on;
+                Editor.Invalidate();
+            };
+        }
+
+        static Action<bool> Switch(SystemInstance instance)
+        {
+            return delegate(bool on) { instance.Enabled = on; };
+        }
+
         void Make(string name)
         {
             name = (name ?? "").Trim();
@@ -104,7 +137,7 @@ namespace Reactor.Editing
             var system = Editor.Program.AddSystem();
             system.Name = name;
 
-            // Straight to the machine, and no further. Its screen is where the ways to start
+            // Straight to the system, and no further. Its screen is where the ways to start
             // a sequence live, so there is nothing left to ask on the way.
             Editor.Push(new SystemPage(Editor, system));
         }
@@ -136,11 +169,11 @@ namespace Reactor.Editing
                 if (_rowInstances[i] == null)
                 {
                     entry.Status = SystemSummary.Count(system);
+                    entry.SwitchIsOn = system.Enabled;
                     continue;
                 }
 
-                // Every one of a machine runs the same sequences, so until they point at their
-                // own blocks they are all doing whatever the machine is doing.
+                entry.SwitchIsOn = _rowInstances[i].Enabled;
                 entry.Status = SystemSummary.RunningText(SystemSummary.IsRunning(system, Editor.Runner));
             }
         }

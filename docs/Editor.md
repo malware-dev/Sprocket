@@ -8,11 +8,11 @@ Requirements are referred to by number, from [Requirements.md](Requirements.md).
 
 ## The root
 
-What you see when you open Reactor is **the machines on this ship**, not a list of
+What you see when you open Reactor is **the systems on this ship**, not a list of
 sequences. A player did not build a procedure, they built an airlock, and that is the thing
 they came looking for.
 
-A system is what a machine *is*. The ones on the ship are what they *have*.
+A system is what a system *is*. The ones on the ship are what they *have*.
 
 ```
    + New system
@@ -48,16 +48,16 @@ Both root actions are equally prominent. Most people will never author anything,
 them Reactor is the thing where you load somebody's airlock and tell it which doors are
 yours - so **Load system** is not a secondary path.
 
-**New system asks what the machine is, and then puts you on it.** It does not open an empty
+**New system asks what the system is, and then puts you on it.** It does not open an empty
 container and it does not stop on a question of its own. The name is the one thing that
 cannot be worked out - it is what M says when something is stuck and what K sends to a friend
-- so it is asked, and after that you are standing on the machine with the ways to start a
+- so it is asked, and after that you are standing on the system with the ways to start a
 sequence in front of you.
 
-*There used to be a screen in between, asking "what should start it?" the moment a machine
+*There used to be a screen in between, asking "what should start it?" the moment a system
 was made. It bought nothing: two answers, no context, standing between somebody and the thing
-they came to build, and it kept the machine's own screen off the way back, so leaving the
-first sequence dropped you out to the ship. The answers now live on the machine, which is
+they came to build, and it kept the system's own screen off the way back, so leaving the
+first sequence dropped you out to the ship. The answers now live on the system, which is
 where they were always going to end up.*
 
 That is a sequencing decision, not a vocabulary one. *System* is an ordinary word and the
@@ -137,7 +137,7 @@ never matches.
   they work out what they are doing?
 - What the root shows about the ship as a whole - anything running, anything broken,
   anything stuck - and whether that lives here or somewhere of its own.
-- Where the **ship browser** sits now that the root is machines rather than sequences.
+- Where the **ship browser** sits now that the root is systems rather than sequences.
 - Whether timers, if they are a thing distinct from *every so often*, live here too.
 
 ## Nothing appears or disappears with the data
@@ -164,7 +164,7 @@ choose what should happen to them, and commit - and that whole process is a sing
 the sequence. Live editing has always meant the program has no Save button, never that each
 tap on the way to an answer is committed on its own. *The picker was originally handed the
 step's own list of targets and ticked entries straight into it, so a tentative tap was already
-an edit to a machine that might be running, and Back had nothing to back out of. The Done
+an edit to a system that might be running, and Back had nothing to back out of. The Done
 button existed but only closed the screen. It commits now, which is what it always looked
 like it did.*
 
@@ -207,7 +207,7 @@ a tick you cannot clear.
 
 ## Every screen that holds a list
 
-The ship and a machine are the same screen twice: **the ways to add something on top, a rule
+The ship and a system are the same screen twice: **the ways to add something on top, a rule
 under them, then what is already there.**
 
 ```
@@ -257,7 +257,7 @@ so clearing a name is as ordinary an act as giving one - which is what keeps nam
 optional rather than a step you are quietly expected to complete. The box says "no name"
 where a form would nag.
 
-*This also means any screen can be renameable now, not just a sequence. Machines are the
+*This also means any screen can be renameable now, not just a sequence. Systems are the
 obvious next one.*
 
 **A sequence's heading has no subtitle.** What it is doing right now - *waiting to happen*,
@@ -377,3 +377,23 @@ it, because it has to track the pointer exactly.
 *The arrows are gone.* Keeping both was clutter, and the drag is strictly better on a pointer.
 It does leave this host with no way to reorder without one, which its conformance answer says
 out loud - a real gap for a target that may one day be driven from a controller.
+
+## Two switches in one column
+
+The ship's list shows a system with the ones of it nested underneath, and both levels carry a
+switch. Stacked in a column at the right edge they were indistinguishable, and reading the
+labels to work out which one governs what is not a thing anybody should have to do.
+
+Two things separate them, and they reinforce each other.
+
+**A nested row is inset on both sides.** The left edge already stepped in to say "this belongs
+to the row above"; the right edge did not, so a child's switch landed in the same column as the
+switch that governs it. Stepping in on both makes the child visibly *inside* the parent, and
+its controls inside the parent's.
+
+**A switch over everything below it is filled; one over a single thing is an outline.** Indent
+says which is nested; weight says which is the bigger act. Stopping a whole airlock is not the
+same as stopping one of them, and the louder control should be the one with more behind it.
+
+Core says which is which - `StatusEntry.SwitchGovernsAll` - because only core knows. A target
+reading it off the indent would be guessing from a layout it chose itself.

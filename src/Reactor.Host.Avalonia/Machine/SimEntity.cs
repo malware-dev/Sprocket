@@ -1,6 +1,6 @@
 using Reactor.World;
 
-namespace Reactor.Host.Machine;
+namespace Reactor.Host.System;
 
 /// <summary>
 /// An entity on the simulated ship.

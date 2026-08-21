@@ -6,7 +6,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Reactor.Host.Features.Shell;
-using Reactor.Host.Machine;
+using Reactor.Host.System;
 using Xunit;
 
 namespace Reactor.Host.Tests;

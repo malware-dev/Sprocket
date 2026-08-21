@@ -1030,9 +1030,13 @@ detector that is always right about what it does report.
 
 ### R44 - things can be switched off, and it shows
 
-A sequence can be switched off, and so can a whole system. Off means nothing happens: no
-trigger starts it, no step runs, and nothing about it is lost. Switching it back on returns
-it exactly as it was.
+A sequence can be switched off, and so can a whole system, **and so can one of a system on
+its own.** Off means nothing happens: no trigger starts it, no step runs, and nothing about it
+is lost. Switching it back on returns it exactly as it was.
+
+The three are separate switches and each has to survive the others. Parking the port airlock
+to weld on it must not disturb the front one, and starting the system again afterwards must
+not quietly arm a sequence somebody had deliberately left off.
 
 **Off must look off.** A sequence that is switched off and a sequence that simply has not
 been triggered are both doing nothing, and from outside they are the same. That is M's
@@ -1046,26 +1050,37 @@ them all back.
 **Switching off abandons a run in progress, and that is now load-bearing rather than merely
 probable.** It was open on the grounds that leaving a door half shut is a lot of consequence
 for what feels like a toggle. It is settled by what the switch turned out to be for: nothing
-that changes what a sequence does is offered while it can run, because a machine cannot be
+that changes what a sequence does is offered while it can run, because a system cannot be
 rewired mid-operation. That guarantee only holds if switching off means the runner is
 genuinely no longer anywhere in the steps. Half shut is also the state somebody needs to see
 in order to fix it, and R5 already says nothing a sequence did is undone.
 
 **Starting and stopping must also be things a sequence can do**, not only things a person
-presses. Somebody who can park a machine by hand while they weld will want the same when the
+presses. Somebody who can park a system by hand while they weld will want the same when the
 pressure drops.
 
-*Sequences are the tractable half.* One sequence switching another within the same machine is
+*Sequences are the tractable half.* One sequence switching another within the same system is
 a plain reference by identity, which is R47. Naming a **system** is not: a system has more
 than one of it on a ship, so "switch off the airlock" has to say which airlock, and that is
-the roles-and-instances work that nothing has yet solved. Crossing a machine boundary at all
-runs into the same thing sharing does - a reference to a machine the recipient does not have.
+the roles-and-instances work that nothing has yet solved. Crossing a system boundary at all
+runs into the same thing sharing does - a reference to a system the recipient does not have.
 Sequences first, systems when instances are understood.
 
-*True today for the switches themselves: `Sequence.Enabled`, `AutomationSystem.Enabled` and
-`Sequence.CanRun` exist, the runner honours all three, and both are visible controls. The two
+*One of a system cannot be switched off, and this is not a missing control.* A
+`SystemInstance` holds a number and a name and nothing else; the runtime never sees one, since
+`AutomationRunner` keeps a runner per **sequence**. Two of a system therefore run the same
+sequences once, over the same blocks, and the second changes nothing. A switch on it today
+would be a label that lies whichever way it was thrown.
+
+It becomes meaningful with roles - when a sequence runs once per one-of-a-system against that
+one's own doors, which also means a runner per instance-and-sequence rather than per sequence.
+Until then this half of the requirement is blocked on the configurator, not on the editor.
+
+*True today for the other two: `Sequence.Enabled`, `AutomationSystem.Enabled` and
+`Sequence.CanRun` exist, the runner honours them, and both are visible controls - a sequence's
+on its sentence, a system's on both its own screen and its row in the ship's list. The two
 switches are deliberately separate rather than one setting the other, so parking a whole
-machine and restoring it leaves a deliberately-parked sequence still parked. Not built:
+system and restoring it leaves a deliberately-parked sequence still parked. Not built:
 either of them being programmable.*
 
 ## From story T - when my miner docks
@@ -1154,7 +1169,7 @@ because its whole purpose is to earn trust it has not tested. Somebody who watch
 and then stands in the airlock is relying on having seen the thing that is about to happen.
 
 **This is a diagnostic feature and belongs with R28, not before it.** Nobody would open the
-Reactor terminal, walk down to a machine and then to a sequence, in order to *use* their
+Reactor terminal, walk down to a system and then to a sequence, in order to *use* their
 airlock - they would press the button they built. It is far too cumbersome to be anybody's
 normal route. The only motive for reaching past the button is to watch what happens, which
 means the value is entirely in what can be seen while it runs: which step it is on, what it
