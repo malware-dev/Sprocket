@@ -91,15 +91,17 @@ multiples, so a self-counted clock would drift with server load.
 ```
 build/     Shared build settings and the Space Engineers whitelist gate
 src/
-  Reactor.Core            Everything that matters. No pixels, no platform.
+  Reactor.Core.Mixin      Everything that matters. No pixels, no platform.
     Sequences/            The model: sequences, steps, gates, triggers
     Runtime/              Execution, completion waiting, guards
     World/                What a host must supply: entities, kinds, signals
     Editing/              The editor itself - navigation, pages, wording
     Ui/                   The contract a target renders. Start here; it is small.
+  Reactor.Core            The same sources as an assembly, for the hosts that load one
   Reactor.Host.Avalonia   The prototype: a simulated ship and a renderer
     Machine/              The fake ship (Space Engineers supplies the real one)
     Rendering/            One renderer per component - what a target reimplements
+  Reactor.Host.SpaceEngineers  The mod: the same sources, compiled in-game
 tests/
   Reactor.Core.Tests      The model, the runtime, and the editor
   Reactor.Host.Tests      That every component has a renderer and lays out
@@ -112,8 +114,14 @@ what a sequence says, what can go in a slot, or where pressing something leads.
 ## The Space Engineers constraint
 
 SE does not load assemblies - it compiles a mod's `.cs` files in-game with its own
-Roslyn, under a whitelist. `Reactor.Core` is therefore consumed **two ways**: as a
-normal assembly reference here, and as loose source files there.
+Roslyn, under a whitelist. The core is therefore consumed **two ways**: as a normal
+assembly reference here, and as loose source files there.
+
+That is why the sources live in `Reactor.Core.Mixin`, an MDK2 mixin - a shared project
+rather than a library. `Reactor.Core` imports it to produce the assembly the Avalonia
+host and the tests reference; `Reactor.Host.SpaceEngineers` imports the same sources so
+the packer lays them out as loose files for SE to compile. One set of files, and no
+copy step that can quietly fall behind.
 
 That constraint fails silently, so it is enforced by the compiler instead:
 

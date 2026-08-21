@@ -56,3 +56,6 @@ desktop.ini
 ## Editors / misc
 *.swp
 *~
+
+## MDK2
+mdk.local.ini

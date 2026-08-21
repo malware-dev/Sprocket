@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>c2391ad4-f309-451a-8217-caa76ae37141</SharedGUID>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\Cadences.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\ChoicePage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\Cmd.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\EditorPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\Elapsed.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\EntityQuery.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\PickAnswer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\PickPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\ReactorEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SequencePage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceSummary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SystemPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SystemSummary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SystemsPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\Vocabulary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\AutomationRunner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\Conditions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\SequenceRunner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\Automation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\AutomationSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\Condition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\Sequence.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\SequenceEdit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\Step.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\SystemInstance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\SystemRole.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\Trigger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Storage\ProgramText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Conformance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\EditorComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\EditorScreen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Observable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\ObservableList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\PickComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\SequenceComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\StartComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\Edge.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\EntityAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\EntityEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\EntityKind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\EntityNoun.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\EntityProperty.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\EntityState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\EntityValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\IEntity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\IWorld.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\Relation.cs" />
+  </ItemGroup>
+</Project>

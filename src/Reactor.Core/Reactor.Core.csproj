@@ -26,4 +26,8 @@
         <!-- A banned call is a broken build, not a suggestion. -->
         <WarningsAsErrors>$(WarningsAsErrors);RS0030;RS0031</WarningsAsErrors>
     </PropertyGroup>
+    <!-- The sources live in the mixin, because Space Engineers compiles them as loose files rather than
+         loading this assembly. One set of files, two consumers: this project and Reactor.Host.SpaceEngineers. -->
+    <Import Project="..\Reactor.Core.Mixin\Reactor.Core.Mixin.projitems" Label="Shared" />
+
 </Project>

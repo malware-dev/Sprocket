@@ -6,7 +6,7 @@ this is the state of play.
 ## In one paragraph
 
 Reactor is automation for people who have never programmed, aimed at becoming a Space
-Engineers mod. A working prototype exists - `Reactor.Core` holds the model, the runtime
+Engineers mod. A working prototype exists - `Reactor.Core.Mixin` holds the model, the runtime
 and the whole editor, compiles under C# 6 / netstandard2.0 behind a banned-API gate, and
 an Avalonia host renders it and simulates a ship. **The project is currently in a design
 phase rather than a building one.** The prototype proved the shape works; the documents
@@ -166,11 +166,75 @@ Ordered by how much they hurt.
    nothing creates one.
 5. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
    them.
-6. **The Space Engineers host.** Not started. It implements `Rendering/` against the same
-   `Reactor.Ui` components and supplies an `IWorld` over the real grid. Read "the small window
-   is an opportunity" in `docs/Editor.md` before sketching it: keeping the window small enough
-   to sit beside a usable world, and letting somebody pick a block by pointing at it, are both
-   things the abstraction already allows and both are far cheaper designed in than retrofitted.
+6. **The Space Engineers host.** Started, and then **parked** - see *Phosphor, and why it is on
+   hold* below. `Reactor.Host.SpaceEngineers` is an MDK2 mod project that compiles the whole of
+   `Reactor.Core.Mixin` under SE's own constraints, and it now carries a small UI framework of
+   its own. What is still not there is the part that matters to Reactor: it implements no
+   `Rendering/` against the `Reactor.Ui` components and supplies no `IWorld` over the real grid.
+
+   Read "the small window is an opportunity" in `docs/Editor.md` before going further: keeping
+   the window small enough to sit beside a usable world, and letting somebody pick a block by
+   pointing at it, are both things the abstraction already allows and both are far cheaper
+   designed in than retrofitted.
+
+## Phosphor, and why it is on hold
+
+Space Engineers gained a screen-space drawing API - `MyScreenSpaceText` and
+`MyScreenSpaceSprite` - which is the first time a mod could draw a UI over the world instead of
+onto a block. `Phosphor` is the UI framework built on it, living inside the mod project for now
+under a neutral namespace so it can be lifted out when a second consumer wants it.
+
+**It is parked pending real mod-owned GUI screens**, which Keen may add. That would answer the
+two things below outright, so building further on the workarounds would be building something
+to throw away. Parked because a better door may open, not because it failed: everything
+described here works.
+
+### What it is
+
+- **`IGraphics`** is the whole drawing surface, held to one rule: *every member must be
+  reproducible on an `IMyTextSurface`*. That is what keeps the panel target possible, and it is
+  why there is no sprite-sheet source rectangle, no rotation pivot, no draw layer, no text width
+  limit and no alignment argument - `MySprite` has none of them. A backend may use them
+  internally; it may not expose them.
+- **Coordinates are a fixed UI size**, roughly 1440x1080, scaled to the screen the way the game
+  scales its own HUD: the safe GUI rectangle is 4:3 at the full screen height and the HUD scale
+  is that height over 1080. Working in raw window pixels comes apart, because the game multiplies
+  a font scale by that same factor - boxes would stay put while the text inside them grew. The
+  reference height is a constructor argument rather than a rule, and any choice stays consistent
+  because the font scale is corrected by however far it sits from the game's.
+- **`ClipStack`** does the intersecting push and pop that neither target has, so a backend only
+  ever has to honour one rectangle.
+- **`Element`, `Stack`, `Label`, `TextBox`** are measure, arrange, draw. `Element.Draw` is not
+  virtual on purpose: it pairs the clip push with its pop, and a subclass overrides `DrawContent`
+  so it cannot get between them.
+- **Input suspension is server business, and that is not a preference.**
+  `SetPlayerInputBlacklistState` raises a multiplayer event, so a client cannot suspend its own
+  input. The client resolves which controls to suspend, because only it has the bindings, and
+  ships the list. A heartbeat exists because a client that crashes mid-edit would otherwise leave
+  a player unable to move for the life of that world. Single player dispatches through the same
+  handler as a client rather than short-cutting, so the one configuration that can be tested is
+  the one that will run.
+
+### The two things that made it a workaround
+
+- **No clip rect in screen space.** The renderer has a scissor and the panel API reaches it
+  through `MySprite.CreateClipRect`, but the screen-space queue never enqueues one and
+  `MyRenderProxy.SpriteScissorPush` is not whitelisted. Filip has said he will add it.
+  `ScreenSpaceGraphics.SetClip` and `ClearClip` are two commented lines waiting for the name;
+  everything above them already assumes it works, deliberately, so that no rule about scrolling
+  by whole rows could get built into the framework to serve a gap that is not meant to be there.
+- **Mouse look cannot be suppressed.** `MyInputExtensions.GetRotation` seeds itself from
+  `GetMouseXForGamePlayF`/`GetMouseYForGamePlayF` unconditionally and only *then* adds the
+  `ROTATION_*` controls, which carry the analog contribution alone. So the input blacklist can
+  stop a gamepad turning the view and can never stop a mouse. `LOOKAROUND` is the
+  hold-to-look-around modifier, not mouse-look, so it was never the lever it looks like. Nothing
+  in `MyVisualScriptLogicProvider` locks the camera and there is no mod-facing
+  `SetCameraController`. **This is why a pointer does not work yet**, and the only route left is
+  cancelling the rotation by calling `MoveAndRotate` again with it negated, which fights the
+  engine every frame.
+
+Both are the same shape of gap: the API can draw a UI but cannot own the input a UI needs. Real
+screens would close both, which is the whole reason this is parked.
 
 ## Known problems
 
@@ -187,7 +251,17 @@ Ordered by how much they hurt.
 dotnet test                                       # 88 tests
 dotnet run --project src/Reactor.Host.Avalonia    # the prototype
 dotnet test --filter Screenshot                   # PNGs to %TEMP%\reactor-*.png
+
+dotnet build -c Release src/Reactor.Host.SpaceEngineers   # builds AND deploys the mod
 ```
+
+- **The mod deploys on a Release build and only then.** MDK2 packs it to wherever the local MDK
+  settings point, which is not necessarily the AppData mods folder; the build output says where it
+  went. `mdk.local.ini` is per-machine and gitignored.
+- **`Reactor.Core.Mixin` is a shared project**, listed in the solution but marked not to build: the
+  dotnet CLI cannot build one, so leaving it as a build target fails `dotnet build` on the solution
+  while every real project succeeds. Rider builds it either way, which is why the arrangement
+  differs from the other repos.
 
 - **The prototype remembers its program** between runs, in
   `%LOCALAPPDATA%\Reactor\prototype.reactor`. Delete that file to start from an empty ship.

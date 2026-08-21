@@ -1,7 +1,14 @@
 <Solution>
+  <!-- A shared project produces no output; it is here so the IDE keeps the file list. The dotnet CLI cannot
+       build one (it needs a Visual Studio component), so it is deliberately not a build target. -->
+  <Project Path="src/Reactor.Core.Mixin/Reactor.Core.Mixin.shproj">
+    <Platform Project="AnyCPU" />
+    <Build Project="false" />
+  </Project>
   <Folder Name="/src/">
     <Project Path="src/Reactor.Core/Reactor.Core.csproj" />
     <Project Path="src/Reactor.Host.Avalonia/Reactor.Host.Avalonia.csproj" />
+    <Project Path="src/Reactor.Host.SpaceEngineers/Reactor.Host.SpaceEngineers.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Reactor.Core.Tests/Reactor.Core.Tests.csproj" />
