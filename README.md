@@ -30,7 +30,7 @@ An airlock, in full:
 When the Airlock Button is pressed
   1. close the inner door
   2. lock the inner door
-  3. pump the air out
+  3. depressurize
   4. unlock the outer door
   5. open the outer door
 ```
@@ -94,7 +94,7 @@ src/
   Reactor.Core            Everything that matters. No pixels, no platform.
     Sequences/            The model: sequences, steps, gates, triggers
     Runtime/              Execution, completion waiting, guards
-    World/                What a host must supply: devices, kinds, signals
+    World/                What a host must supply: entities, kinds, signals
     Editing/              The editor itself - navigation, pages, wording
     Ui/                   The contract a target renders. Start here; it is small.
   Reactor.Host.Avalonia   The prototype: a simulated ship and a renderer
@@ -136,7 +136,7 @@ dotnet run --project src/Reactor.Host.Avalonia
 The prototype opens on an empty Reactor asking what should set something off. The
 simulated ship has a hangar door, an airlock, lights, a sensor, a button and a
 hydrogen tank; the strip along the bottom pokes the world so you can watch sequences
-react. Doors travel and vents cycle, because instant devices hide every problem worth
+react. Doors travel and vents cycle, because instant entities hide every problem worth
 finding.
 
 ## Testing it on people

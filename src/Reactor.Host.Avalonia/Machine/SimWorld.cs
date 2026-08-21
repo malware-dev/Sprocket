@@ -12,32 +12,38 @@ namespace Reactor.Host.Machine;
 /// </remarks>
 sealed class SimWorld : IWorld
 {
-    readonly List<SimDevice> _devices = [];
-    readonly Dictionary<long, SimDevice> _byId = [];
+    readonly List<SimEntity> _entities = [];
+    readonly Dictionary<long, SimEntity> _byId = [];
 
-    public IReadOnlyList<IDevice> Devices => _devices;
+    public IReadOnlyList<IEntity> Entities => _entities;
 
-    public IReadOnlyList<SimDevice> SimDevices => _devices;
+    /// <summary>
+    /// Space Engineers says block, so Reactor says block. Nobody playing it has ever called
+    /// a door a device.
+    /// </summary>
+    public EntityNoun Noun { get; } = new EntityNoun("block", "blocks", "Blocks");
 
-    public IDevice? FindDevice(long deviceId) => _byId.GetValueOrDefault(deviceId);
+    public IReadOnlyList<SimEntity> SimEntities => _entities;
 
-    public void Invoke(IDevice device, string actionId) => ((SimDevice)device).Invoke(actionId);
+    public IEntity? FindEntity(long entityId) => _byId.GetValueOrDefault(entityId);
 
-    public T Add<T>(T device) where T : SimDevice
+    public void Invoke(IEntity entity, string actionId) => ((SimEntity)entity).Invoke(actionId);
+
+    public T Add<T>(T entity) where T : SimEntity
     {
-        _devices.Add(device);
-        _byId[device.Id] = device;
-        return device;
+        _entities.Add(entity);
+        _byId[entity.Id] = entity;
+        return entity;
     }
 
     /// <summary>
-    /// Removes a device, standing in for a block being destroyed or ground down.
+    /// Removes an entity, standing in for a block being destroyed or ground down.
     /// Sequences referring to it stay put and start reporting themselves as broken.
     /// </summary>
-    public void Remove(SimDevice device)
+    public void Remove(SimEntity entity)
     {
-        _devices.Remove(device);
-        _byId.Remove(device.Id);
+        _entities.Remove(entity);
+        _byId.Remove(entity.Id);
     }
 
     /// <summary>
@@ -46,8 +52,8 @@ sealed class SimWorld : IWorld
     /// </summary>
     public void Tick()
     {
-        for (var i = 0; i < _devices.Count; i++)
-            _devices[i].Tick();
+        for (var i = 0; i < _entities.Count; i++)
+            _entities[i].Tick();
     }
 }
 

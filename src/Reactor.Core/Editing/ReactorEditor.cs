@@ -76,6 +76,7 @@ namespace Reactor.Editing
             _screen.Title = Current.Title;
             _screen.Subtitle = Current.Subtitle;
             _screen.CustomName = Current.CustomName;
+            _screen.SwitchIsOn = Current.SwitchIsOn;
         }
 
         /// <summary>Acts on a button, a row, or anything else that was pressed.</summary>
@@ -187,8 +188,118 @@ namespace Reactor.Editing
         /// Drops any page showing the given sequence, so deleting one never leaves the
         /// user staring at something that no longer exists.
         /// </summary>
+        /// <summary>
+        /// What has been done to each sequence, so it can be taken back.
+        /// </summary>
+        /// <remarks>
+        /// Here rather than on the sequence itself, because it is a fact about somebody's
+        /// editing session and not about the machine. A sequence that is exported, shared or
+        /// saved should carry what it is, never how its author got there.
+        ///
+        /// Kept per sequence and across navigation, so backing out to look at something and
+        /// coming back does not silently throw the safety net away.
+        /// </remarks>
+        readonly Dictionary<int, List<SequenceEdit>> _history =
+            new Dictionary<int, List<SequenceEdit>>();
+
+        /// <summary>
+        /// How far back one sequence can be walked.
+        /// </summary>
+        /// <remarks>
+        /// Deep enough that nobody reaches the end of it while fixing a mistake, shallow
+        /// enough that a long session cannot grow without bound. Reactor runs inside a game.
+        /// </remarks>
+        const int HistoryDepth = 50;
+
+        /// <summary>
+        /// Makes a change and remembers how to take it back.
+        /// </summary>
+        /// <remarks>
+        /// The only way anything changes a sequence. Applying and recording are one call so
+        /// they cannot come apart - an edit that is applied without being recorded is a hole
+        /// in the way back, and one recorded without being applied is worse.
+        /// </remarks>
+        internal void Do(Sequence sequence, SequenceEdit edit)
+        {
+            Do(sequence, edit, false);
+        }
+
+        /// <summary>
+        /// The same, optionally folding a run of the same kind of change into one.
+        /// </summary>
+        /// <remarks>
+        /// Typing a name arrives one letter at a time. Fifty entries all saying "renaming"
+        /// would be a stack somebody has to press through rather than a way back.
+        /// </remarks>
+        internal void Do(Sequence sequence, SequenceEdit edit, bool coalesce)
+        {
+            if (!edit.Changes)
+                return;
+
+            edit.Apply(sequence);
+
+            var stack = HistoryFor(sequence);
+            if (!coalesce || stack.Count == 0 || stack[stack.Count - 1].Label != edit.Label)
+            {
+                stack.Add(edit);
+
+                if (stack.Count > HistoryDepth)
+                    stack.RemoveAt(0);
+            }
+
+            if (edit.ChangesShape)
+                Invalidate();
+        }
+
+        internal bool CanUndo(Sequence sequence)
+        {
+            List<SequenceEdit> stack;
+            return _history.TryGetValue(sequence.Id, out stack) && stack.Count > 0;
+        }
+
+        /// <summary>What undoing would undo, in the words it happened in.</summary>
+        internal string UndoLabel(Sequence sequence)
+        {
+            List<SequenceEdit> stack;
+            if (!_history.TryGetValue(sequence.Id, out stack) || stack.Count == 0)
+                return "";
+
+            return stack[stack.Count - 1].Label;
+        }
+
+        internal void Undo(Sequence sequence)
+        {
+            List<SequenceEdit> stack;
+            if (!_history.TryGetValue(sequence.Id, out stack) || stack.Count == 0)
+                return;
+
+            var last = stack.Count - 1;
+            stack[last].Undo(sequence);
+            stack.RemoveAt(last);
+
+            Invalidate();
+        }
+
+        List<SequenceEdit> HistoryFor(Sequence sequence)
+        {
+            List<SequenceEdit> stack;
+            if (!_history.TryGetValue(sequence.Id, out stack))
+            {
+                stack = new List<SequenceEdit>();
+                _history[sequence.Id] = stack;
+            }
+            return stack;
+        }
+
+        void ForgetHistory(int sequenceId)
+        {
+            _history.Remove(sequenceId);
+        }
+
         internal void ForgetSequence(int sequenceId)
         {
+            ForgetHistory(sequenceId);
+
             for (var i = _stack.Count - 1; i > 0; i--)
             {
                 var page = _stack[i] as SequencePage;
@@ -234,6 +345,7 @@ namespace Reactor.Editing
             _screen.BackCommand = _screen.CanGoBack ? Register(Pop) : 0;
             _screen.RenameCommand = page.CanRename ? RegisterText(page.Rename) : 0;
             _screen.RenamePrompt = page.RenamePrompt;
+            _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(page.Switch) : 0;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryCommand = _screen.HasPrimary ? Register(page.Primary) : 0;
 
@@ -246,6 +358,7 @@ namespace Reactor.Editing
 
             _screen.Subtitle = page.Subtitle;
             _screen.CustomName = page.CustomName;
+            _screen.SwitchIsOn = page.SwitchIsOn;
             BuildActions();
 
             _structureDirty = false;
@@ -317,7 +430,8 @@ namespace Reactor.Editing
         internal void OfferAnother(AutomationSystem system)
         {
             var page = new ChoicePage(this, "Add another");
-            page.EmptyText = "Not built yet. This would ask which of your blocks this one uses, "
+            page.EmptyText = "Not built yet. This would ask which of your " + _world.Noun.Many
+                + " this one uses, "
                 + "and everything it does would stay the same as the others.";
             Push(page);
         }
@@ -326,7 +440,7 @@ namespace Reactor.Editing
         {
             var page = new ChoicePage(this, "Load system");
             page.EmptyText = "Not built yet. A system somebody sent you would be set up here, "
-                + "asking which of your blocks fill each part of it.";
+                + "asking which of your " + _world.Noun.Many + " fill each part of it.";
             Push(page);
         }
 
@@ -392,12 +506,21 @@ namespace Reactor.Editing
             var when = trigger as WhenTrigger;
             if (when != null)
             {
-                Push(new PickPage(this, "When something happens", when.Sources, true,
-                    delegate { return when.EventId; },
-                    delegate(string id) { when.EventId = id; },
-                    delegate { FinishSequence(when, origin); },
-                    delegate { return when.RequiresAll; },
-                    delegate(bool all) { when.RequiresAll = all; }));
+                Push(new PickPage(this, "When something happens", true,
+                    when.Sources, when.EventId,
+                    delegate(PickAnswer answer)
+                    {
+                        // Nothing to record: the sequence does not exist yet, so there is no
+                        // history for it and nothing to take back to.
+                        when.Sources.Clear();
+                        for (var i = 0; i < answer.Targets.Count; i++)
+                            when.Sources.Add(answer.Targets[i]);
+
+                        when.EventId = answer.Chosen;
+                        when.RequiresAll = answer.All;
+                        FinishSequence(when, origin);
+                    },
+                    true, when.RequiresAll));
                 return;
             }
 
@@ -442,7 +565,16 @@ namespace Reactor.Editing
             _pendingSystem = null;
 
             UnwindTo(origin);
-            Push(new SequencePage(this, _program.AddSequence(system, trigger)));
+
+            // Parked until somebody says otherwise. A sequence with a trigger and no steps is
+            // already live under the old default, and it becomes progressively more live as
+            // each step is added - a machine half-doing something nobody has finished
+            // describing. It is also the only way the switch could gate editing without a new
+            // sequence being unbuildable the moment it exists.
+            var sequence = _program.AddSequence(system, trigger);
+            sequence.Enabled = false;
+
+            Push(new SequencePage(this, sequence));
         }
 
         /// <summary>

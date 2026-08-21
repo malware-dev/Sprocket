@@ -1,0 +1,34 @@
+using System.Collections.Generic;
+
+namespace Reactor.Editing
+{
+    /// <summary>
+    /// What somebody settled on: the things to act on, and what should happen to them.
+    /// </summary>
+    /// <remarks>
+    /// Handed back once, when they say they are done. The picker used to have no such thing
+    /// because it wrote into the sequence as it went, so there was no moment where an answer
+    /// existed - only a model that had been gradually scribbled on.
+    /// </remarks>
+    sealed class PickAnswer
+    {
+        readonly List<long> _targets = new List<long>();
+
+        public PickAnswer(IList<long> targets, string chosen, bool all)
+        {
+            for (var i = 0; i < targets.Count; i++)
+                _targets.Add(targets[i]);
+
+            Chosen = chosen;
+            All = all;
+        }
+
+        public IList<long> Targets { get { return _targets; } }
+
+        /// <summary>The event or action that was chosen.</summary>
+        public string Chosen { get; private set; }
+
+        /// <summary>Whether it takes all of them together, rather than any one.</summary>
+        public bool All { get; private set; }
+    }
+}

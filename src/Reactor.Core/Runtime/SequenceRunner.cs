@@ -76,7 +76,7 @@ namespace Reactor.Runtime
         /// <summary>Whether the watched signal is true right now.</summary>
         public bool TriggerSignalIsTrue { get; private set; }
 
-        /// <summary>One or more listened-to devices are no longer on the construct.</summary>
+        /// <summary>One or more listened-to entities are no longer on the construct.</summary>
         public bool HasMissingSources { get; private set; }
 
         /// <summary>The most recent step passed over by its guard, or null.</summary>
@@ -88,7 +88,7 @@ namespace Reactor.Runtime
             // is stateful, so a skipped sample makes the next one wrong.
             var triggered = SampleTrigger(world);
 
-            if (!_sequence.Enabled)
+            if (!_sequence.CanRun)
             {
                 Stop();
                 return;
@@ -110,9 +110,13 @@ namespace Reactor.Runtime
         }
 
         /// <summary>Starts the sequence by name, from another sequence or a trigger.</summary>
+        /// <remarks>
+        /// The switch holds here. A parked sequence is parked for everything, including being
+        /// called by another one.
+        /// </remarks>
         public void Call(IWorld world, int tick)
         {
-            if (!_sequence.Enabled)
+            if (!_sequence.CanRun)
                 return;
 
             if (IsRunning)
@@ -135,7 +139,7 @@ namespace Reactor.Runtime
         }
 
         /// <summary>
-        /// Whether every device this step acted on has reached the state the action
+        /// Whether every entity this step acted on has reached the state the action
         /// was reaching for.
         /// </summary>
         /// <remarks>
@@ -143,7 +147,7 @@ namespace Reactor.Runtime
         /// the instant it is invoked, so instant things stay instant and only things
         /// that genuinely take time are waited on.
         ///
-        /// A device that never gets there holds the sequence indefinitely. That is
+        /// An entity that never gets there holds the sequence indefinitely. That is
         /// the right failure: carrying on regardless is how a jammed door vents a
         /// ship. It does mean being visibly stuck has to be impossible to miss, which
         /// is why the step being waited on is reported rather than inferred.
@@ -155,19 +159,19 @@ namespace Reactor.Runtime
 
             for (var i = 0; i < step.Targets.Count; i++)
             {
-                var device = world.FindDevice(step.Targets[i]);
-                if (device == null)
+                var entity = world.FindEntity(step.Targets[i]);
+                if (entity == null)
                     continue;
 
-                var action = device.Kind.FindAction(step.ActionId);
+                var action = entity.Kind.FindAction(step.ActionId);
                 if (action == null || string.IsNullOrEmpty(action.LeadsToStateId))
                     continue;
 
-                var state = device.Kind.FindState(action.LeadsToStateId);
+                var state = entity.Kind.FindState(action.LeadsToStateId);
                 if (state == null)
                     continue;
 
-                if (device.GetSignal(state.SignalId) != state.WhenSignal)
+                if (!state.Holds(entity.GetValue(state.PropertyId)))
                     return false;
             }
 
@@ -198,7 +202,7 @@ namespace Reactor.Runtime
         void Advance(IWorld world, int tick)
         {
             // Ungated steps all run in the same tick, so "close the door" followed by
-            // "once it is shut, pump the air out" behaves the way it reads.
+            // "once it is shut, depressurize" behaves the way it reads.
             while (_stepIndex >= 0 && _stepIndex < _sequence.Steps.Count)
             {
                 var step = _sequence.Steps[_stepIndex];
@@ -283,14 +287,14 @@ namespace Reactor.Runtime
 
             for (var i = 0; i < step.Targets.Count; i++)
             {
-                var device = world.FindDevice(step.Targets[i]);
-                if (device == null)
+                var entity = world.FindEntity(step.Targets[i]);
+                if (entity == null)
                     continue;
 
-                if (device.Kind.FindAction(step.ActionId) == null)
+                if (entity.Kind.FindAction(step.ActionId) == null)
                     continue;
 
-                world.Invoke(device, step.ActionId);
+                world.Invoke(entity, step.ActionId);
             }
         }
 
@@ -319,18 +323,18 @@ namespace Reactor.Runtime
             for (var i = 0; i < when.Sources.Count; i++)
             {
                 var sourceId = when.Sources[i];
-                var device = world.FindDevice(sourceId);
-                if (device == null)
+                var entity = world.FindEntity(sourceId);
+                if (entity == null)
                 {
                     anyMissing = true;
                     continue;
                 }
 
-                var definition = device.Kind.FindEvent(when.EventId);
+                var definition = entity.Kind.FindEvent(when.EventId);
                 if (definition == null)
                     continue;
 
-                var now = device.GetSignal(definition.SignalId);
+                var now = entity.GetValue(definition.PropertyId).Flag;
                 if (now)
                     anySignalTrue = true;
 
@@ -340,9 +344,9 @@ namespace Reactor.Runtime
                     // No previous sample means the sequence has only just come into
                     // existence, and an edge needs two. Firing on the first tick
                     // would set every sequence off the moment it was created.
-                    if (definition.Edge == SignalEdge.Rising && !previous && now)
+                    if (definition.Edge == Edge.Rising && !previous && now)
                         fired = true;
-                    else if (definition.Edge == SignalEdge.Falling && previous && !now)
+                    else if (definition.Edge == Edge.Falling && previous && !now)
                         fired = true;
                 }
 
@@ -371,23 +375,23 @@ namespace Reactor.Runtime
 
             for (var i = 0; i < when.Sources.Count; i++)
             {
-                var device = world.FindDevice(when.Sources[i]);
-                if (device == null)
+                var entity = world.FindEntity(when.Sources[i]);
+                if (entity == null)
                 {
                     anyMissing = true;
                     all = false;
                     continue;
                 }
 
-                var definition = device.Kind.FindEvent(when.EventId);
+                var definition = entity.Kind.FindEvent(when.EventId);
                 if (definition == null)
                 {
                     all = false;
                     continue;
                 }
 
-                var wanted = definition.Edge == SignalEdge.Rising;
-                if (device.GetSignal(definition.SignalId) != wanted)
+                var wanted = definition.Edge == Edge.Rising;
+                if (entity.GetValue(definition.PropertyId).Flag != wanted)
                     all = false;
             }
 

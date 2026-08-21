@@ -28,6 +28,8 @@ sealed class EditorView : UserControl
     readonly TextBlock _title;
     readonly TextBlock _subtitle;
     readonly Button _back;
+    readonly Button _switch;
+    readonly TextBlock _switchText;
     readonly Button _heading;
     readonly TextBlock _renameIcon;
     readonly TextBox _renameBox;
@@ -53,6 +55,22 @@ sealed class EditorView : UserControl
 
         _title = Widgets.Label("", Palette.Ink, 16, true);
         _subtitle = Widgets.Label("", Palette.Faint, 11);
+
+        // The same control the sentence carries, at the scale of a whole machine, and drawn
+        // the same way on purpose - it is the same act. Labelled with what pressing it does
+        // rather than what state it is in, so nobody has to work out which way round it is
+        // before daring to press.
+        _switchText = Widgets.Label("", Brushes.White, 12, true);
+        _switch = new Button
+        {
+            Content = _switchText,
+            BorderThickness = new Thickness(0),
+            CornerRadius = new CornerRadius(4),
+            Padding = new Thickness(14, 5),
+            Margin = new Thickness(0, 0, 8, 0)
+        };
+        _switch.Click += (_, _) =>
+            _editor.SetToggle(_editor.Screen.SwitchCommand, !_editor.Screen.SwitchIsOn);
 
         _back = Widgets.Ghost("‹ Back");
         _back.Margin = new Thickness(0, 0, 10, 0);
@@ -136,6 +154,10 @@ sealed class EditorView : UserControl
 
         // Inert rather than disabled on a screen that cannot be renamed: disabling would grey
         // out the title, and the title is the heading, not a control that happens to be off.
+        _switch.IsVisible = screen.HasSwitch;
+        _switchText.Text = screen.SwitchIsOn ? "❚❚  Pause" : "▶  Run";
+        _switch.Background = screen.SwitchIsOn ? Palette.Notice : Palette.Live;
+
         _renameIcon.IsVisible = screen.CanRename;
         _heading.IsHitTestVisible = screen.CanRename;
 
@@ -193,9 +215,6 @@ sealed class EditorView : UserControl
 
     Control BuildLayout()
     {
-        var titles = Widgets.Stack();
-        titles.VerticalAlignment = VerticalAlignment.Center;
-
         var headingGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,Auto") };
         headingGrid.Children.Add(_title);
         Grid.SetColumn(_renameIcon, 1);
@@ -208,13 +227,35 @@ sealed class EditorView : UserControl
         swap.Children.Add(_heading);
         swap.Children.Add(_renameBox);
 
-        titles.Children.Add(swap);
-        titles.Children.Add(_subtitle);
+        // Back sits on the title's row rather than beside the pair of them, so the two line up
+        // whether or not this screen has a subtitle. Centring it against the block put it half
+        // a line below the title on every screen that has none, and reserving the subtitle's
+        // line is not optional: a picker's subtitle empties as you finish picking, and a header
+        // that resized when it did would be the screen moving under somebody's hands.
+        var headerGrid = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"),
+            RowDefinitions = new RowDefinitions("Auto,Auto")
+        };
 
-        var headerGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*") };
+        _back.VerticalAlignment = VerticalAlignment.Center;
         headerGrid.Children.Add(_back);
-        Grid.SetColumn(titles, 1);
-        headerGrid.Children.Add(titles);
+
+        Grid.SetColumn(swap, 1);
+        headerGrid.Children.Add(swap);
+
+        var right = Widgets.Stack(Orientation.Horizontal);
+        right.VerticalAlignment = VerticalAlignment.Center;
+        right.Children.Add(_switch);
+        Grid.SetColumn(right, 2);
+        headerGrid.Children.Add(right);
+
+        // Indented to the heading button's own padding, so the title and the line under it
+        // start at the same place instead of six pixels apart.
+        _subtitle.Margin = new Thickness(6, 0, 0, 0);
+        Grid.SetRow(_subtitle, 1);
+        Grid.SetColumn(_subtitle, 1);
+        headerGrid.Children.Add(_subtitle);
 
         var header = new Border
         {

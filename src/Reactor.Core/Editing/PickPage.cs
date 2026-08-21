@@ -20,17 +20,17 @@ namespace Reactor.Editing
     sealed class PickPage : EditorPage
     {
         readonly string _title;
-        readonly IList<long> _selection;
+        readonly List<long> _selection = new List<long>();
         readonly bool _forEvents;
-        readonly Func<string> _getChosen;
-        readonly Action<string> _setChosen;
-        readonly Action _onComplete;
-        readonly Func<bool> _getAll;
-        readonly Action<bool> _setAll;
+        readonly bool _asksAll;
+        readonly Action<PickAnswer> _done;
 
-        readonly List<IDevice> _candidates = new List<IDevice>();
-        readonly List<IDevice> _filtered = new List<IDevice>();
-        readonly List<DeviceKind> _kinds = new List<DeviceKind>();
+        string _chosen;
+        bool _all;
+
+        readonly List<IEntity> _candidates = new List<IEntity>();
+        readonly List<IEntity> _filtered = new List<IEntity>();
+        readonly List<EntityKind> _kinds = new List<EntityKind>();
 
         string _blockSearch = "";
         string _kind = "";
@@ -43,19 +43,35 @@ namespace Reactor.Editing
         PickStage _blocks;
         PickStage _what;
 
-        public PickPage(ReactorEditor editor, string title, IList<long> selection, bool forEvents,
-            Func<string> getChosen, Action<string> setChosen, Action onComplete,
-            Func<bool> getAll = null, Action<bool> setAll = null)
+        /// <summary>
+        /// Asks what to point at and what should happen to it, starting from whatever the
+        /// answer is now.
+        /// </summary>
+        /// <remarks>
+        /// The page keeps its own answer and hands it back when somebody says they are done.
+        /// It used to be given the step's own list of targets and tick entries straight into
+        /// it, which meant a tentative tap was already an edit to a sequence that might be
+        /// running - the machine acting on a decision nobody had finished making - and Back
+        /// had nothing to back out of.
+        ///
+        /// Live editing is still the rule for the program as a whole: there is no Save button
+        /// anywhere and there should not be. It just cannot mean that every tap in the middle
+        /// of choosing is committed.
+        /// </remarks>
+        public PickPage(ReactorEditor editor, string title, bool forEvents,
+            IList<long> targets, string chosen, Action<PickAnswer> done,
+            bool asksAll = false, bool all = false)
             : base(editor)
         {
             _title = title;
-            _selection = selection;
             _forEvents = forEvents;
-            _getChosen = getChosen;
-            _setChosen = setChosen;
-            _onComplete = onComplete;
-            _getAll = getAll;
-            _setAll = setAll;
+            _chosen = chosen ?? "";
+            _asksAll = asksAll;
+            _all = all;
+            _done = done;
+
+            for (var i = 0; i < targets.Count; i++)
+                _selection.Add(targets[i]);
         }
 
         public override string Title { get { return _title; } }
@@ -65,7 +81,7 @@ namespace Reactor.Editing
             get
             {
                 if (_selection.Count == 0)
-                    return "Start by picking one or more blocks";
+                    return "Start by picking one or more " + Editor.World.Noun.Many;
                 return IsComplete ? "" : "Now pick what happens";
             }
         }
@@ -74,12 +90,12 @@ namespace Reactor.Editing
 
         public override void Primary()
         {
-            _onComplete();
+            _done(new PickAnswer(_selection, _chosen, _all));
         }
 
         bool IsComplete
         {
-            get { return _selection.Count > 0 && !string.IsNullOrEmpty(_getChosen()); }
+            get { return _selection.Count > 0 && !string.IsNullOrEmpty(_chosen); }
         }
 
         public override void Build(List<EditorComponent> components)
@@ -91,7 +107,7 @@ namespace Reactor.Editing
                 _pick = new PickComponent();
                 _pick.Fills = true;
 
-                _blocks = new PickStage("Blocks");
+                _blocks = new PickStage(Editor.World.Noun.Heading);
                 _blocks.AllowsMany = true;
                 _blocks.EmptyText = _forEvents
                     ? "Nothing here has anything that can happen to it."
@@ -105,10 +121,11 @@ namespace Reactor.Editing
             var wanted = _selection.Count > 0;
             if (wanted && _what == null)
             {
+                var noun = Editor.World.Noun.Many;
                 _what = new PickStage(_forEvents ? "What happens" : "What to do");
                 _what.EmptyText = _forEvents
-                    ? "Those blocks have nothing in common that can happen to them."
-                    : "Those blocks have nothing in common that can be done to them.";
+                    ? "Those " + noun + " have nothing in common that can happen to them."
+                    : "Those " + noun + " have nothing in common that can be done to them.";
                 _pick.Add(_what);
             }
             else if (!wanted && _what != null)
@@ -131,7 +148,7 @@ namespace Reactor.Editing
         /// </summary>
         /// <remarks>
         /// Runs on every tick, so it compares before it writes and only speaks up when
-        /// something actually moved. A target then does one comparison of its own and stops.
+        /// something actually moved. A target then does one relation of its own and stops.
         /// </remarks>
         public override void Refresh()
         {
@@ -141,20 +158,20 @@ namespace Reactor.Editing
             var changed = false;
             for (var i = 0; i < _blocks.Entries.Count && i < _filtered.Count; i++)
             {
-                var device = Editor.World.FindDevice(_filtered[i].Id);
-                if (device == null)
+                var entity = Editor.World.FindEntity(_filtered[i].Id);
+                if (entity == null)
                     continue;
 
                 var entry = _blocks.Entries[i];
-                if (entry.Status != device.Status)
+                if (entry.Status != entity.Status)
                 {
-                    entry.Status = device.Status;
+                    entry.Status = entity.Status;
                     changed = true;
                 }
 
-                if (entry.IsActive != device.IsActive)
+                if (entry.IsActive != entity.IsActive)
                 {
-                    entry.IsActive = device.IsActive;
+                    entry.IsActive = entity.IsActive;
                     changed = true;
                 }
             }
@@ -193,18 +210,30 @@ namespace Reactor.Editing
                 changed = true;
             }
 
+            // Off the whole catalogue, not the filtered rows: narrowing must not take the
+            // picture column away and shuffle every row sideways.
+            var icons = false;
+            for (var i = 0; i < _candidates.Count && !icons; i++)
+                icons = !string.IsNullOrEmpty(_candidates[i].Kind.Icon);
+
+            if (_blocks.HasIcons != icons)
+            {
+                _blocks.HasIcons = icons;
+                changed = true;
+            }
+
             changed |= FillFilters();
             changed |= FillOptions();
 
             changed |= Resize(_blocks.Entries, _filtered.Count);
             for (var i = 0; i < _filtered.Count; i++)
             {
-                var device = _filtered[i];
-                var id = device.Id;
+                var entity = _filtered[i];
+                var id = entity.Id;
 
-                changed |= Apply(_blocks.Entries[i], device.Name, device.Kind.DisplayName,
-                    device.Status, device.IsActive, Contains(_selection, id),
-                    Editor.Register(delegate { Toggle(id); }));
+                changed |= Apply(_blocks.Entries[i], entity.Name, entity.Kind.DisplayName,
+                    entity.Status, entity.IsActive, Contains(_selection, id),
+                    Editor.Register(delegate { Toggle(id); }), entity.Kind.Icon);
             }
 
             return changed;
@@ -233,12 +262,12 @@ namespace Reactor.Editing
         /// </summary>
         bool FillOptions()
         {
-            var wanted = _getAll != null && _selection.Count > 1;
+            var wanted = _asksAll && _selection.Count > 1;
             var changed = Resize(_blocks.Options, wanted ? 2 : 0);
             if (!wanted)
                 return changed;
 
-            var all = _getAll();
+            var all = _all;
             changed |= Apply(_blocks.Options[0], "any one of them is enough", !all,
                 Editor.Register(delegate { SetAll(false); }));
             changed |= Apply(_blocks.Options[1], "all of them, together", all,
@@ -273,11 +302,11 @@ namespace Reactor.Editing
 
             // A choice the blocks can no longer honour is dropped rather than left showing, so
             // "Done" never appears over a sentence that could not run.
-            var chosen = _getChosen();
+            var chosen = _chosen;
             if (!_ids.Contains(chosen))
             {
                 chosen = "";
-                _setChosen("");
+                _chosen = "";
             }
 
             var changed = false;
@@ -297,7 +326,7 @@ namespace Reactor.Editing
             _matched.Clear();
             for (var i = 0; i < _names.Count; i++)
             {
-                if (DeviceQuery.MatchesText(_names[i], _whatSearch))
+                if (EntityQuery.MatchesText(_names[i], _whatSearch))
                     _matched.Add(i);
             }
 
@@ -314,9 +343,11 @@ namespace Reactor.Editing
         }
 
         static bool Apply(PickOption entry, string text, string secondary, string status,
-            bool active, bool chosen, int command)
+            bool active, bool chosen, int command, string icon = "")
         {
             var changed = false;
+
+            if (entry.Icon != icon) { entry.Icon = icon; changed = true; }
 
             if (entry.Text != text) { entry.Text = text; changed = true; }
             if (entry.Secondary != secondary) { entry.Secondary = secondary; changed = true; }
@@ -328,7 +359,7 @@ namespace Reactor.Editing
             return changed;
         }
 
-        static bool Apply(BlockFilter filter, string label, int count, bool current, int command)
+        static bool Apply(KindFilter filter, string label, int count, bool current, int command)
         {
             var changed = false;
 
@@ -359,10 +390,10 @@ namespace Reactor.Editing
             return changed;
         }
 
-        static bool Resize(List<BlockFilter> list, int count)
+        static bool Resize(List<KindFilter> list, int count)
         {
             var changed = false;
-            while (list.Count < count) { list.Add(new BlockFilter("", 0, false, 0)); changed = true; }
+            while (list.Count < count) { list.Add(new KindFilter("", 0, false, 0)); changed = true; }
             while (list.Count > count) { list.RemoveAt(list.Count - 1); changed = true; }
             return changed;
         }
@@ -408,24 +439,24 @@ namespace Reactor.Editing
                 _candidates.Add(capable[i]);
 
             _kinds.Clear();
-            DeviceQuery.KindsPresent(_candidates, _kinds);
+            EntityQuery.KindsPresent(_candidates, _kinds);
 
             _filtered.Clear();
             for (var i = 0; i < _candidates.Count; i++)
             {
-                var device = _candidates[i];
-                if (Contains(_selection, device.Id)
-                    || DeviceQuery.Matches(device, _blockSearch, _kind))
-                    _filtered.Add(device);
+                var entity = _candidates[i];
+                if (Contains(_selection, entity.Id)
+                    || EntityQuery.Matches(entity, _blockSearch, _kind))
+                    _filtered.Add(entity);
             }
         }
 
-        void Toggle(long deviceId)
+        void Toggle(long entityId)
         {
-            if (Contains(_selection, deviceId))
-                _selection.Remove(deviceId);
+            if (Contains(_selection, entityId))
+                _selection.Remove(entityId);
             else
-                _selection.Add(deviceId);
+                _selection.Add(entityId);
 
             // What is on offer changes the moment something is picked, so the whole
             // path is rebuilt rather than left stale.
@@ -434,13 +465,13 @@ namespace Reactor.Editing
 
         void Choose(string id)
         {
-            _setChosen(id);
+            _chosen = id;
             Editor.Invalidate();
         }
 
         void SetAll(bool all)
         {
-            _setAll(all);
+            _all = all;
             Editor.Invalidate();
         }
 

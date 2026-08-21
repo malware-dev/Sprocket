@@ -26,11 +26,26 @@ namespace Reactor.Editing
 
         public override string Subtitle
         {
-            get { return _options.Count == 0 ? EmptyText : ""; }
+            get
+            {
+                if (!string.IsNullOrEmpty(Caption))
+                    return Caption;
+                return _options.Count == 0 ? EmptyText : "";
+            }
         }
 
         /// <summary>Shown when there is nothing to choose from yet.</summary>
         public string EmptyText { get; set; }
+
+        /// <summary>
+        /// What the question is about, when the title cannot carry it.
+        /// </summary>
+        /// <remarks>
+        /// "Delete this sequence?" is the question; which sequence is a whole sentence and
+        /// belongs underneath it. Naming the thing is the difference between a question
+        /// somebody can answer and one they have to guess at.
+        /// </remarks>
+        public string Caption { get; set; }
 
         public void Add(string text, bool isCurrent, Action choose)
         {

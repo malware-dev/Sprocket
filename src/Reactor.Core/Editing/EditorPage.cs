@@ -52,6 +52,15 @@ namespace Reactor.Editing
         /// <summary>Takes a new name, or empty to go back to the worked-out heading.</summary>
         public virtual void Rename(string name) { }
 
+        /// <summary>
+        /// Whether this page's subject can be switched on and off.
+        /// </summary>
+        public virtual bool CanSwitch { get { return false; } }
+
+        public virtual bool SwitchIsOn { get { return false; } }
+
+        public virtual void Switch(bool on) { }
+
         public virtual string PrimaryText { get { return ""; } }
 
         public virtual void Primary() { }

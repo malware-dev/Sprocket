@@ -98,9 +98,9 @@ namespace Reactor.Ui
     }
 
     /// <summary>One kind filter offered beside a search box.</summary>
-    public sealed class BlockFilter
+    public sealed class KindFilter
     {
-        public BlockFilter(string label, int count, bool isCurrent, int command)
+        public KindFilter(string label, int count, bool isCurrent, int command)
         {
             Label = label;
             Count = count;

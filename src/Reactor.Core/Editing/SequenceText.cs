@@ -15,24 +15,24 @@ namespace Reactor.Editing
     /// </remarks>
     public static class SequenceText
     {
-        /// <summary>Shown in place of a device that is no longer on the construct.</summary>
-        public const string MissingDeviceText = "something that's gone";
+        /// <summary>Shown in place of an entity that is no longer on the construct.</summary>
+        public const string MissingEntityText = "something that's gone";
 
         /// <summary>Shown in a slot the user has not filled in yet.</summary>
         public const string EmptySlotText = "…";
 
         /// <summary>
-        /// Names a selection of devices, keeping real names visible for as long as
+        /// Names a selection of entities, keeping real names visible for as long as
         /// they fit.
         /// </summary>
         /// <remarks>
-        /// Collapsing straight to "4 devices" would turn the thing the user picked
+        /// Collapsing straight to "4 entities" would turn the thing the user picked
         /// back into an abstraction. Names are what keep a sequence about doors instead
         /// of about identifiers.
         /// </remarks>
-        public static string DescribeDevices(IWorld world, IList<long> deviceIds)
+        public static string DescribeEntities(IWorld world, IList<long> entityIds)
         {
-            return Join(world, deviceIds, " and ");
+            return Join(world, entityIds, " and ");
         }
 
         /// <summary>
@@ -44,21 +44,21 @@ namespace Reactor.Editing
         /// "when the port door or the starboard door finishes opening" agrees, where
         /// "and" would need "finish".
         /// </remarks>
-        public static string DescribeDevicesAny(IWorld world, IList<long> deviceIds)
+        public static string DescribeEntitiesAny(IWorld world, IList<long> entityIds)
         {
-            return Join(world, deviceIds, " or ");
+            return Join(world, entityIds, " or ");
         }
 
-        static string Join(IWorld world, IList<long> deviceIds, string joiner)
+        static string Join(IWorld world, IList<long> entityIds, string joiner)
         {
-            if (deviceIds.Count == 0)
+            if (entityIds.Count == 0)
                 return EmptySlotText;
 
             var names = new List<string>();
-            for (var i = 0; i < deviceIds.Count; i++)
+            for (var i = 0; i < entityIds.Count; i++)
             {
-                var device = world.FindDevice(deviceIds[i]);
-                names.Add(device == null ? MissingDeviceText : device.Name);
+                var entity = world.FindEntity(entityIds[i]);
+                names.Add(entity == null ? MissingEntityText : entity.Name);
             }
 
             if (names.Count == 1)
@@ -79,8 +79,8 @@ namespace Reactor.Editing
         public static string DescribeSources(IWorld world, WhenTrigger when)
         {
             return when.RequiresAll
-                ? DescribeDevices(world, when.Sources)
-                : DescribeDevicesAny(world, when.Sources);
+                ? DescribeEntities(world, when.Sources)
+                : DescribeEntitiesAny(world, when.Sources);
         }
 
         /// <summary>The whole first line: "When the hangar door finishes opening".</summary>
@@ -157,16 +157,16 @@ namespace Reactor.Editing
             if (condition == null)
                 return EmptySlotText;
 
-            var devices = DescribeDevices(world, condition.Devices);
+            var entities = DescribeEntities(world, condition.Entities);
             var text = EmptySlotText;
 
-            for (var i = 0; i < condition.Devices.Count; i++)
+            for (var i = 0; i < condition.Entities.Count; i++)
             {
-                var device = world.FindDevice(condition.Devices[i]);
-                if (device == null)
+                var entity = world.FindEntity(condition.Entities[i]);
+                if (entity == null)
                     continue;
 
-                var state = device.Kind.FindState(condition.StateId);
+                var state = entity.Kind.FindState(condition.StateId);
                 if (state == null)
                     continue;
 
@@ -174,7 +174,7 @@ namespace Reactor.Editing
                 break;
             }
 
-            return devices + " " + text;
+            return entities + " " + text;
         }
 
         static string DescribeAction(IWorld world, Step step)
@@ -193,7 +193,7 @@ namespace Reactor.Editing
                 }
             }
 
-            return text + " " + DescribeDevices(world, step.Targets);
+            return text + " " + DescribeEntities(world, step.Targets);
         }
 
         /// <summary>

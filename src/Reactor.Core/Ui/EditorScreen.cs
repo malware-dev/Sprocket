@@ -62,6 +62,22 @@ namespace Reactor.Ui
         /// <summary>What to ask when offering the rename.</summary>
         public string RenamePrompt { get; set; }
 
+        /// <summary>
+        /// Switches this screen's subject on or off. Zero when it has no such switch.
+        /// </summary>
+        /// <remarks>
+        /// A machine's switch, where a sequence's lives on the sentence itself. Same idea at a
+        /// larger scale: rewiring an airlock means stopping the airlock, not stopping three
+        /// sequences one at a time - and a half-stopped one, with the inner door's rule off
+        /// and the outer door's rule still live, is worse than either state.
+        /// </remarks>
+        public int SwitchCommand { get; set; }
+
+        public bool HasSwitch { get { return SwitchCommand != 0; } }
+
+        /// <summary>Whether it is currently allowed to run.</summary>
+        public bool SwitchIsOn { get; set; }
+
         public bool CanGoBack { get; set; }
 
         public int BackCommand { get; set; }

@@ -881,7 +881,7 @@ which is both wrong and the fastest way to teach somebody to ignore the warnings
 Telling the three apart is something the system has to be able to do, not something we can
 leave to context.
 
-*Already true for the reporting half - a missing device reads as gone and flags the
+*Already true for the reporting half - a missing entity reads as gone and flags the
 sequence. Untested, and the R24 distinction does not exist yet because roles do not.*
 
 ### R40 - repairing is one action, not one per use
@@ -1043,13 +1043,30 @@ The system-wide switch is what S actually asks for. Somebody repairing a hangar 
 hangar left alone, not to hunt down its four sequences individually and remember to put
 them all back.
 
-*Open: what happens to a sequence that is running when it is switched off.* Stopping it
-where it stands is R5's behaviour and is probably right, but it means switching off can
-leave a door half shut, which is a surprising amount of consequence for what feels like a
-toggle. Not decided.
+**Switching off abandons a run in progress, and that is now load-bearing rather than merely
+probable.** It was open on the grounds that leaving a door half shut is a lot of consequence
+for what feels like a toggle. It is settled by what the switch turned out to be for: nothing
+that changes what a sequence does is offered while it can run, because a machine cannot be
+rewired mid-operation. That guarantee only holds if switching off means the runner is
+genuinely no longer anywhere in the steps. Half shut is also the state somebody needs to see
+in order to fix it, and R5 already says nothing a sequence did is undone.
 
-*Half true today: `Sequence.Enabled` exists and the runner honours it. Systems do not exist
-yet, and nothing makes "off" visible.*
+**Starting and stopping must also be things a sequence can do**, not only things a person
+presses. Somebody who can park a machine by hand while they weld will want the same when the
+pressure drops.
+
+*Sequences are the tractable half.* One sequence switching another within the same machine is
+a plain reference by identity, which is R47. Naming a **system** is not: a system has more
+than one of it on a ship, so "switch off the airlock" has to say which airlock, and that is
+the roles-and-instances work that nothing has yet solved. Crossing a machine boundary at all
+runs into the same thing sharing does - a reference to a machine the recipient does not have.
+Sequences first, systems when instances are understood.
+
+*True today for the switches themselves: `Sequence.Enabled`, `AutomationSystem.Enabled` and
+`Sequence.CanRun` exist, the runner honours all three, and both are visible controls. The two
+switches are deliberately separate rather than one setting the other, so parking a whole
+machine and restoring it leaves a deliberately-parked sequence still parked. Not built:
+either of them being programmable.*
 
 ## From story T - when my miner docks
 
@@ -1136,8 +1153,19 @@ same blocks.
 because its whole purpose is to earn trust it has not tested. Somebody who watches it work
 and then stands in the airlock is relying on having seen the thing that is about to happen.
 
-*Half true today: `Runner.Call` exists and the sequence page has a run-by-hand button, and
-nothing has ever specified what it promises.*
+**This is a diagnostic feature and belongs with R28, not before it.** Nobody would open the
+Reactor terminal, walk down to a machine and then to a sequence, in order to *use* their
+airlock - they would press the button they built. It is far too cumbersome to be anybody's
+normal route. The only motive for reaching past the button is to watch what happens, which
+means the value is entirely in what can be seen while it runs: which step it is on, what it
+is waiting for, what got skipped. All of that is R28.
+
+Built on its own it is half a feature with nothing to observe, and R28's walk subsumes it, so
+it would be built twice.
+
+*Deferred with R28. The run-by-hand button that existed in the prototype has been removed
+rather than left standing with nothing behind it; `AutomationRunner.Call` stays, because a
+sequence calling another one needs it.*
 
 ## From story W - drive the crane from the seat
 

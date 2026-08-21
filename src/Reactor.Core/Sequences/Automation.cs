@@ -54,6 +54,42 @@ namespace Reactor.Sequences
             return system;
         }
 
+        /// <summary>
+        /// Puts back a machine that was saved, keeping the id it had.
+        /// </summary>
+        /// <remarks>
+        /// Ids have to survive a reload unchanged, because saved sequences refer to each other
+        /// by them. Reallocating on load would silently repoint every reference - the classic
+        /// way an event-sourced or serialised model goes wrong, and invisible until something
+        /// runs the wrong sequence.
+        ///
+        /// No instance is added, unlike <see cref="AddSystem"/>: whatever was saved is what
+        /// comes back, and inventing an extra one would multiply machines on every reload.
+        /// </remarks>
+        public AutomationSystem Restore(int id)
+        {
+            var system = new AutomationSystem(id);
+            _systems.Add(system);
+
+            if (id >= _nextSystemId)
+                _nextSystemId = id + 1;
+
+            return system;
+        }
+
+        /// <summary>Puts back a sequence that was saved, keeping the id it had.</summary>
+        public Sequence Restore(AutomationSystem system, int id, Trigger trigger)
+        {
+            var sequence = new Sequence(id, trigger);
+            _sequences.Add(sequence);
+            system.Add(sequence);
+
+            if (id >= _nextSequenceId)
+                _nextSequenceId = id + 1;
+
+            return sequence;
+        }
+
         public AutomationSystem FindSystem(int id)
         {
             for (var i = 0; i < _systems.Count; i++)
@@ -130,37 +166,37 @@ namespace Reactor.Sequences
         }
 
         /// <summary>
-        /// How many sequences touch the given device, without allocating.
+        /// How many sequences touch the given entity, without allocating.
         /// </summary>
         /// <remarks>
         /// Asked once per listed block on every tick, so it must not produce garbage
         /// - core runs inside the game's update loop.
         /// </remarks>
-        public int CountReferencing(long deviceId)
+        public int CountReferencing(long entityId)
         {
             var count = 0;
             for (var i = 0; i < _sequences.Count; i++)
             {
-                if (References(_sequences[i], deviceId))
+                if (References(_sequences[i], entityId))
                     count++;
             }
             return count;
         }
 
-        public static bool References(Sequence sequence, long deviceId)
+        public static bool References(Sequence sequence, long entityId)
         {
             var when = sequence.Trigger as WhenTrigger;
-            if (when != null && when.Sources.Contains(deviceId))
+            if (when != null && when.Sources.Contains(entityId))
                 return true;
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var step = sequence.Steps[i];
-                if (step.Targets.Contains(deviceId))
+                if (step.Targets.Contains(entityId))
                     return true;
 
                 var gate = step.Gate as OnceGate;
-                if (gate != null && gate.Condition.Devices.Contains(deviceId))
+                if (gate != null && gate.Condition.Entities.Contains(entityId))
                     return true;
             }
             return false;

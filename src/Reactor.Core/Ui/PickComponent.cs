@@ -14,12 +14,23 @@ namespace Reactor.Ui
         {
             Text = text;
             Command = command;
+            Icon = "";
         }
 
         public string Text { get; set; }
 
         /// <summary>Something quieter about it, such as a block's kind.</summary>
         public string Secondary { get; set; }
+
+        /// <summary>
+        /// Names a picture for this option, or empty for none.
+        /// </summary>
+        /// <remarks>
+        /// Passed straight through from the kind. Core neither draws it nor knows what it
+        /// means; a target that has the artwork resolves the word, and one that has not
+        /// ignores it and loses nothing but decoration.
+        /// </remarks>
+        public string Icon { get; set; }
 
         /// <summary>Live state, in the user's words. Empty for things that have none.</summary>
         public string Status { get; set; }
@@ -51,7 +62,7 @@ namespace Reactor.Ui
         public PickStage(string title)
         {
             Title = title;
-            Filters = new List<BlockFilter>();
+            Filters = new List<KindFilter>();
             Options = new List<ChoiceEntry>();
             Entries = new List<PickOption>();
         }
@@ -64,6 +75,21 @@ namespace Reactor.Ui
         /// <summary>Whether picking one un-picks the last, or adds to them.</summary>
         public bool AllowsMany { get; set; }
 
+        /// <summary>
+        /// Whether the options in this stage come with pictures.
+        /// </summary>
+        /// <remarks>
+        /// A fact about the answers, not an instruction to draw anything. A target uses it to
+        /// decide whether to keep room for them; how big they are, or whether to show them at
+        /// all, was never core's to say - and a game with no artwork sets it nowhere and gets
+        /// screens with no gap where pictures would have been.
+        ///
+        /// Read off everything the stage could offer rather than what is currently listed, so
+        /// narrowing to a handful of things that happen to have no picture does not take the
+        /// column away mid-search.
+        /// </remarks>
+        public bool HasIcons { get; set; }
+
         /// <summary>Whether this stage can be narrowed by typing.</summary>
         public bool CanNarrow { get { return NarrowCommand != 0; } }
 
@@ -74,7 +100,7 @@ namespace Reactor.Ui
         public int NarrowCommand { get; set; }
 
         /// <summary>Ways to narrow by kind, built from what is actually here.</summary>
-        public List<BlockFilter> Filters { get; private set; }
+        public List<KindFilter> Filters { get; private set; }
 
         /// <summary>
         /// Choices about the picking itself rather than about the things - whether any of them
@@ -125,7 +151,7 @@ namespace Reactor.Ui
         /// <remarks>
         /// Called only when something actually differs. A page that walks its stages every
         /// tick and finds them unchanged says nothing, and a target that sees the same number
-        /// as last time does nothing at all - one comparison and it stops.
+        /// as last time does nothing at all - one relation and it stops.
         /// </remarks>
         public void Changed()
         {

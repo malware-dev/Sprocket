@@ -17,7 +17,7 @@ The one exception is the editor's own interface, which has just had a working-ov
 prototype is a template for the in-game screens, so its shape is a design artifact rather
 than throwaway scaffolding. `docs/Editor.md` is where that lives.
 
-36 tests, all green - 30 in core, 6 driving the host.
+62 tests, all green - 55 in core, 7 driving the host.
 
 ## The documents, and which is which
 
@@ -30,7 +30,7 @@ than throwaway scaffolding. `docs/Editor.md` is where that lives.
 | `docs/Editor.md` | Internal. The interface: what each screen is, what core states about it, and what is left to whoever draws it. |
 | `docs/ApiUnknowns.md` | Internal. Eleven questions about Space Engineers that block requirements. Two have already been struck out as things we knew after all. |
 
-Nothing from the internal four belongs in the public one.
+Nothing from the internal five belongs in the public one.
 
 ## How work is supposed to flow
 
@@ -90,6 +90,29 @@ long form; in brief:
   stages and what each needs back; columns, the search box, the kind list and the double-tap
   are all the host's choices.
 - **Naming is on the heading**, using the game's word `CustomName`, edited in place.
+- **A machine cannot be rewired while it runs.** Editing waits on the switch, and the switch
+  is a fact about the machine rather than a mode the editor is in - you cannot rewire a live
+  circuit either, so nobody has to be taught it. `Sequence.CanRun` needs both the sequence's
+  own switch and its machine's, and switching off abandons any run in progress. A new sequence
+  starts parked.
+- **A running sequence is drawn as a thing being watched**, not as an editor with its hands
+  tied: the arrows, crosses and add buttons are absent rather than greyed, and the sentence
+  reads as prose. It is a first slice of the diagnosis view R28 will finish.
+- **Every change is a reversible operation** with an undo beside Pause and Delete that names
+  what it would undo. Undo cannot touch the switch, so no press of it can arm a machine.
+
+## The model, as of today
+
+- **Core says `entity`, the host says what players say.** `IWorld.Noun` carries block/blocks/
+  Blocks for Space Engineers; another game supplies its own. Core never writes the player's
+  noun into a sentence itself.
+- **Properties are the primitive.** A reading is an `EntityValue` - flag, number or text. An
+  `EntityEvent` is an edge on a property, an `EntityState` is a `Relation` against one. There
+  are no "signals" any more; a flag is just a property whose readings are true and false.
+- **`EntityKind.Icon`** names a picture the host resolves, and `PickStage.HasIcons` says
+  whether a stage's answers have them. Core never learns what a picture is.
+- **The prototype persists.** `Reactor.Storage.ProgramText` writes a program as text and reads
+  it back; core never touches a file, because the game does not whitelist IO.
 
 ## What is not built
 
@@ -105,16 +128,14 @@ Ordered by how much they hurt.
 4. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
    them.
 5. **The Space Engineers host.** Not started. It implements `Rendering/` against the same
-   `Reactor.Ui` components and supplies an `IWorld` over the real grid.
+   `Reactor.Ui` components and supplies an `IWorld` over the real grid. Read "the small window
+   is an opportunity" in `docs/Editor.md` before sketching it: keeping the window small enough
+   to sit beside a usable world, and letting somebody pick a block by pointing at it, are both
+   things the abstraction already allows and both are far cheaper designed in than retrofitted.
 
 ## Known problems
 
-- **The heading sits above centre on a screen with no subtitle.** The subtitle's line is
-  still measured when its text is empty, so the title is pushed up by about eight pixels
-  and no longer lines up with *Back*. Visible on a sequence, which stopped having a
-  subtitle when its duplicated status was removed. Measured, not guessed: title top at
-  y=11, Back at y=22. `EditorView.BuildLayout` is where the two are stacked.
-- **A jammed device stalls a sequence silently.** Deliberate - proceeding is how a stuck
+- **A jammed entity stalls a sequence silently.** Deliberate - proceeding is how a stuck
   door vents a ship - but nothing shows it. Now specified as R30.
 - **Momentary signals can be missed.** A one-frame press between updates on `Update10` or
   `Update100` is never sampled. See ApiUnknowns 10; it may decide the whole runtime shape.
@@ -124,11 +145,16 @@ Ordered by how much they hurt.
 ## Working notes
 
 ```
-dotnet test                                       # 36 tests
+dotnet test                                       # 62 tests
 dotnet run --project src/Reactor.Host.Avalonia    # the prototype
 dotnet test --filter Screenshot                   # PNGs to %TEMP%\reactor-*.png
 ```
 
+- **The prototype remembers its program** between runs, in
+  `%LOCALAPPDATA%\Reactor\prototype.reactor`. Delete that file to start from an empty ship.
+  The format is `Reactor.Storage.ProgramText` in core - core formats the text and never
+  touches a file, because Space Engineers does not whitelist IO. Tests build their window
+  with `Simulation.Fresh()` so they never read it.
 - **Core is pinned to C# 6 and netstandard2.0**, with `build/BannedSymbols.txt` failing
   the build on reflection, LINQ, IO, threading and wall-clock time. That gate was silently
   inert for a while and is now verified to fire. Host code is exempt.
@@ -167,3 +193,11 @@ Argued out rather than guessed. The reasoning is in Design.md.
   what is already there - and everything that adds something carries a plus.
 - **Naming happens on the heading**, and an empty name is an answer rather than a missing
   one. It hands the heading back to the sentence.
+- **An operation is what the user would say they did**, anything the runtime can see holds
+  only states somebody chose, and a run of changes folds into one exactly when the states
+  between were not chosen. Design.md, "What counts as one operation" - the rule that was
+  missing when the picker was written.
+- **Every change to a sequence is a reversible operation**, applied and recorded in one call
+  so they cannot come apart, with a round-trip test per edit. Snapshotting and log-replay were
+  both considered and lost to the same fact: Reactor is live, so rebuilding a sequence to undo
+  would orphan every reference the runner and the open pages hold.

@@ -159,6 +159,15 @@ Core says: **picking several things in an order, where each one narrows what the
 be.** Blocks, and then what can happen to them - the second exists only because of the first
 and cannot be asked before it. That dependency is the whole of what core states.
 
+**One trip through the picker is one edit.** You look through, tick the things you want,
+choose what should happen to them, and commit - and that whole process is a single change to
+the sequence. Live editing has always meant the program has no Save button, never that each
+tap on the way to an answer is committed on its own. *The picker was originally handed the
+step's own list of targets and ticked entries straight into it, so a tentative tap was already
+an edit to a machine that might be running, and Back had nothing to back out of. The Done
+button existed but only closed the screen. It commits now, which is what it always looked
+like it did.*
+
 Each stage says what is being asked, what the answers are, which are chosen, whether picking
 one adds to the others or replaces them, and that it *can* be narrowed by typing. Whether a
 way to narrow is worth showing, and at what point a list is long enough to want one, is the
@@ -255,3 +264,46 @@ obvious next one.*
 *running* - used to be repeated there as well as on the sentence, and two lines saying the
 same words read as two different claims. State belongs on the sentence, beside the switch and
 the run button that change it.
+
+## Taking it back
+
+Every change to a sequence is an operation that knows how to reverse itself: the step it
+removed, the name it replaced. Undo is offered on the heading and **says what it would take
+back** - *Undo deleting a step*, not a bare *Undo*. Asking somebody to remember what they last
+did is asking it of the one person least able to answer, because they have just made a
+mistake.
+
+Two designs were weighed and the second was wrong for a specific reason worth keeping.
+Snapshot-and-restore, or replaying a log of forward operations from a base, both avoid writing
+a reverse for each edit - which matters, because a reverse only ever runs on the unhappy path.
+But **Reactor is live.** Sequences run while they are edited, and the runner and the open pages
+hold references to the very objects involved. Both of those approaches rebuild the sequence,
+leaving every one of those references pointing at an orphan. Operations mutate in place, so
+identity survives.
+
+The risk that made the alternatives attractive is answered by a round-trip test on every edit
+- apply it, undo it, and the sequence must read as exactly what it was - rather than by care.
+
+*Deleting a whole sequence is not undoable and asks instead. Redo is not built; with edits that
+already know both directions, it is a second list.*
+
+## For the game host: the small window is an opportunity, not only a constraint
+
+One screen at a time, and a layout that assumes no room, was adopted as a floor - the editor
+has to work wherever it is embedded, so it may not assume a sidebar plus a detail pane. It
+turns out to buy something nobody was aiming for.
+
+**A window small enough to sit off to one side leaves the world visible and usable.** The
+player can keep flying, keep walking, keep looking at the airlock they are describing, while
+the editor is open beside it. Everything Reactor is about is a thing in the world, and an
+editor that covers the world makes somebody hold it in their head instead.
+
+Which opens a stronger possibility: **picking a block by pointing at it.** Core already says
+only *choose one or more entities, here is what is on offer, tell me which*. A list with a
+search is one way to answer that. Clicking the actual door is another, and for somebody who
+knows exactly which door they mean and not what the game calls it, it is obviously the better
+one. The picker's abstraction already permits it - `PickStage` never says "list".
+
+*Not now, and not in the Avalonia prototype, which has no world to click. Recorded because it
+should shape the game host from its first sketch rather than be retrofitted, and because it
+argues for keeping the window small even when a target could afford to sprawl.*

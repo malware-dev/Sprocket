@@ -19,9 +19,9 @@ namespace Reactor.Editing
         /// <summary>How long after firing a sequence still counts as having just run.</summary>
         const int JustRanTicks = 10;
 
-        public static bool References(Sequence sequence, long deviceId)
+        public static bool References(Sequence sequence, long entityId)
         {
-            return Automation.References(sequence, deviceId);
+            return Automation.References(sequence, entityId);
         }
 
         /// <summary>Updates one entry per sequence, in place.</summary>
@@ -123,7 +123,7 @@ namespace Reactor.Editing
 
                 for (var t = 0; t < step.Targets.Count; t++)
                 {
-                    if (world.FindDevice(step.Targets[t]) == null)
+                    if (world.FindEntity(step.Targets[t]) == null)
                         return "This affects something that isn't on the ship any more.";
                 }
 
@@ -138,9 +138,9 @@ namespace Reactor.Editing
                 if (condition == null)
                     continue;
 
-                for (var t = 0; t < condition.Devices.Count; t++)
+                for (var t = 0; t < condition.Entities.Count; t++)
                 {
-                    if (world.FindDevice(condition.Devices[t]) == null)
+                    if (world.FindEntity(condition.Entities[t]) == null)
                         return "This waits on something that isn't on the ship any more.";
                 }
             }

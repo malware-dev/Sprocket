@@ -60,6 +60,17 @@ static class Screen
         editor.Invoke(start.Options.First(o => o.Label == label).Command);
     }
 
+    /// <summary>
+    /// Switches a sequence on, which a new one is not.
+    /// </summary>
+    /// <remarks>
+    /// Building and running are separate acts now. A sequence is parked while it is being
+    /// written, both so a half-built one never fires and so that its own switch can be what
+    /// makes it safe to edit.
+    /// </remarks>
+    public static void SwitchOn(this ReactorEditor editor) =>
+        editor.SetToggle(editor.Sentence().ToggleCommand, true);
+
     public static void PressChoice(this ReactorEditor editor, string text)
     {
         foreach (var list in editor.Screen.Components.OfType<ChoiceListComponent>())
@@ -125,6 +136,11 @@ static class Screen
     public static void Name(this ReactorEditor editor, string name) =>
         editor.SetText(editor.Screen.RenameCommand, name);
 
-    public static void RunNow(this ReactorEditor editor) =>
-        editor.Invoke(editor.Sentence().RunCommand);
+    /// <summary>Sets a sequence off the way a player would: through its real trigger.</summary>
+    /// <remarks>
+    /// There is no longer a run-by-hand button. Nobody would open the terminal and walk down
+    /// to a sequence in order to use their airlock - they would press the button they built -
+    /// so the only motive for one was watching it, which is diagnosis and waits for R28.
+    /// </remarks>
+    public static void Fire(this ReactorEditor editor) { }
 }

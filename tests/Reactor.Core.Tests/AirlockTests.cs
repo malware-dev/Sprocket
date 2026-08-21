@@ -1,4 +1,5 @@
 using Reactor.Runtime;
+using Reactor.World;
 using Reactor.Sequences;
 using Xunit;
 
@@ -45,11 +46,11 @@ public class AirlockTests
         public SequenceRunner State => Runner.Get(LetMeOut)!;
     }
 
-    static Condition Is(string stateId, params long[] devices)
+    static Condition Is(string stateId, params long[] entities)
     {
         var condition = new Condition(stateId);
-        foreach (var device in devices)
-            condition.Devices.Add(device);
+        foreach (var entity in entities)
+            condition.Entities.Add(entity);
         return condition;
     }
 
@@ -76,7 +77,7 @@ public class AirlockTests
         a.LetMeOut.Name = "Let me out";
 
         a.LetMeOut.Steps.Add(Do("close", a.Inner.Id));
-        a.LetMeOut.Steps.Add(Do("pump-out", a.Vent.Id));
+        a.LetMeOut.Steps.Add(Do("depressurize", a.Vent.Id));
         a.LetMeOut.Steps.Add(Do("open", a.Outer.Id));
 
         a.Runner = new AutomationRunner(a.Automation, a.World);
@@ -103,11 +104,11 @@ public class AirlockTests
         Assert.Equal(0, a.State.CurrentStep);
 
         a.Tick(10);
-        Assert.Contains("Airlock Vent:pump-out", a.World.Log);
+        Assert.Contains("Airlock Vent:depressurize", a.World.Log);
         Assert.DoesNotContain("Outer Door:open", a.World.Log);
 
         a.Tick(15);
-        Assert.Equal(["Inner Door:close", "Airlock Vent:pump-out", "Outer Door:open"], a.World.Log);
+        Assert.Equal(["Inner Door:close", "Airlock Vent:depressurize", "Outer Door:open"], a.World.Log);
 
         a.Tick(15);
         Assert.False(a.State.IsRunning);
@@ -251,7 +252,7 @@ public class AirlockTests
     public void BothDoorsAreNeverOpenAtOnce_WithNoSafetyFeatureAtAll()
     {
         var a = Build();
-        var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "pump-out");
+        var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "depressurize");
 
         // Someone has just walked in from inside, so the inner door is open.
         a.Inner.ForceOpen();
@@ -275,13 +276,13 @@ public class AirlockTests
         // The outer door is already shut, so step 1 costs nothing and the sequence
         // moves straight on. This is what removes the need for conditionals.
         var a = Build();
-        var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "pump-out");
+        var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "depressurize");
 
         a.Tick(3);
         a.World.Log.Clear();
         a.Runner.Call(letMeOut);
 
-        Assert.Equal(["Inner Door:close", "Inner Door:lock", "Airlock Vent:pump-out"], a.World.Log);
+        Assert.Equal(["Inner Door:close", "Inner Door:lock", "Airlock Vent:depressurize"], a.World.Log);
     }
 
     [Fact]
@@ -291,7 +292,7 @@ public class AirlockTests
         // where it is - so skipping the wait leaves the door the sequence was trying
         // to secure standing open.
         var a = Build();
-        var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "pump-out");
+        var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "depressurize");
         letMeOut.Steps[0].WaitsForCompletion = false;
 
         a.Inner.ForceOpen();
@@ -377,7 +378,7 @@ public class AirlockTests
     public void TheReverseDirectionIsTheSameSequenceMirrored()
     {
         var a = Build();
-        var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pump-in");
+        var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
 
         a.Outer.ForceOpen();
         a.Tick(3);
@@ -386,5 +387,77 @@ public class AirlockTests
 
         Assert.Equal("open", a.Inner.Status);
         Assert.Equal("shut", a.Outer.Status);
+    }
+}
+
+/// <summary>
+/// A reading is a reading, whatever sort it is.
+/// </summary>
+/// <remarks>
+/// The model used to have boolean signals as its primitive, so a tank had to decide it was
+/// "low" and hand core a flag, throwing the number away before anything could ask a different
+/// question of it. A flag is just a property whose readings are true and false; the level and
+/// the label are properties too, and a state is a relation against whichever one it names.
+/// </remarks>
+public class PropertyTests
+{
+    static (TestWorld World, TestTank Tank) Build()
+    {
+        var world = new TestWorld();
+        var tank = world.Add(new TestTank(1, "Hydrogen Tank"));
+        return (world, tank);
+    }
+
+    [Fact]
+    public void AStateOverANumberComparesAgainstIt()
+    {
+        var (world, tank) = Build();
+        var low = tank.Kind.FindState("is-low")!;
+        var fine = tank.Kind.FindState("is-fine")!;
+
+        tank.SetFill(0.10);
+        Assert.True(low.Holds(tank.GetValue("fill")));
+        Assert.False(fine.Holds(tank.GetValue("fill")));
+
+        // The boundary belongs to "has plenty": is-low is Below, is-fine is AtLeast, so the
+        // pair covers every reading exactly once and no level is both or neither.
+        tank.SetFill(0.25);
+        Assert.False(low.Holds(tank.GetValue("fill")));
+        Assert.True(fine.Holds(tank.GetValue("fill")));
+    }
+
+    [Fact]
+    public void AStateOverTextComparesAgainstIt()
+    {
+        var (world, tank) = Build();
+        var spare = tank.Kind.FindState("is-spare")!;
+
+        tank.SetLabel("main");
+        Assert.False(spare.Holds(tank.GetValue("label")));
+
+        tank.SetLabel("spare");
+        Assert.True(spare.Holds(tank.GetValue("label")));
+    }
+
+    [Fact]
+    public void AFlagIsJustAPropertyWhoseReadingsAreTrueAndFalse()
+    {
+        var world = new TestWorld();
+        var door = world.Add(new TestDoor(1, "Inner Door"));
+        var open = door.Kind.FindState("is-open")!;
+
+        Assert.Equal(ValueKind.Flag, door.Kind.FindProperty("open")!.Kind);
+        Assert.Equal(Relation.Is, open.Relation);
+        Assert.True(open.Operand.Flag);
+    }
+
+    /// <summary>Only a number can be above something; anything can equal something.</summary>
+    [Fact]
+    public void TheRelationsOfferedDependOnWhatIsBeingRead()
+    {
+        Assert.True(Relations.Suits(Relation.Is, ValueKind.Text));
+        Assert.False(Relations.Suits(Relation.Above, ValueKind.Text));
+        Assert.False(Relations.Suits(Relation.Above, ValueKind.Flag));
+        Assert.True(Relations.Suits(Relation.Above, ValueKind.Number));
     }
 }

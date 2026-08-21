@@ -3,7 +3,7 @@ using Reactor.World;
 namespace Reactor.Host.Machine;
 
 /// <summary>
-/// A device on the simulated ship.
+/// An entity on the simulated ship.
 /// </summary>
 /// <remarks>
 /// These behave like the real thing in the one way that matters for the UX
@@ -12,30 +12,37 @@ namespace Reactor.Host.Machine;
 /// other are exactly what people get wrong, and they only show up when things have
 /// duration.
 /// </remarks>
-abstract class SimDevice(long id, string name, DeviceKind kind) : IDevice
+abstract class SimEntity(long id, string name, EntityKind kind) : IEntity
 {
-    protected readonly Dictionary<string, bool> Signals = [];
+    protected readonly Dictionary<string, EntityValue> Values = [];
 
     public long Id { get; } = id;
     public string Name { get; set; } = name;
-    public DeviceKind Kind { get; } = kind;
+    public EntityKind Kind { get; } = kind;
 
-    /// <summary>Live state for the device list, in the user's words.</summary>
+    /// <summary>Live state for the entity list, in the user's words.</summary>
     public abstract string Status { get; }
 
-    /// <summary>Whether this device is doing something interesting right now.</summary>
+    /// <summary>Whether this entity is doing something interesting right now.</summary>
     public virtual bool IsActive => false;
 
-    public bool GetSignal(string signalId) => Signals.TryGetValue(signalId, out var value) && value;
+    public EntityValue GetValue(string propertyId) =>
+        Values.TryGetValue(propertyId, out var value) ? value : default;
 
-    protected void Set(string signalId, bool value) => Signals[signalId] = value;
+    protected void Set(string propertyId, bool value) => Values[propertyId] = EntityValue.Of(value);
+
+    protected void Set(string propertyId, double value) => Values[propertyId] = EntityValue.Of(value);
+
+    protected void Set(string propertyId, string value) => Values[propertyId] = EntityValue.Of(value);
+
+    protected bool Flag(string propertyId) => GetValue(propertyId).Flag;
 
     public virtual void Invoke(string actionId) { }
 
     public virtual void Tick() { }
 }
 
-sealed class SimDoor(long id, string name) : SimDevice(id, name, Kinds.Door)
+sealed class SimDoor(long id, string name) : SimEntity(id, name, Kinds.Door)
 {
     const int TravelTicks = 45;
 
@@ -95,11 +102,11 @@ sealed class SimDoor(long id, string name) : SimDevice(id, name, Kinds.Door)
     }
 }
 
-sealed class SimLight(long id, string name) : SimDevice(id, name, Kinds.Light)
+sealed class SimLight(long id, string name) : SimEntity(id, name, Kinds.Light)
 {
-    public override string Status => GetSignal("on") ? "on" : "off";
+    public override string Status => Flag("on") ? "on" : "off";
 
-    public override bool IsActive => GetSignal("on");
+    public override bool IsActive => Flag("on");
 
     public override void Invoke(string actionId)
     {
@@ -111,11 +118,11 @@ sealed class SimLight(long id, string name) : SimDevice(id, name, Kinds.Light)
 }
 
 /// <summary>A sensor the tester trips by hand, standing in for a ship flying up.</summary>
-sealed class SimSensor(long id, string name) : SimDevice(id, name, Kinds.Sensor)
+sealed class SimSensor(long id, string name) : SimEntity(id, name, Kinds.Sensor)
 {
-    public override string Status => GetSignal("detecting") ? "detecting" : "clear";
+    public override string Status => Flag("detecting") ? "detecting" : "clear";
 
-    public override bool IsActive => GetSignal("detecting");
+    public override bool IsActive => Flag("detecting");
 
     public void SetDetecting(bool detecting) => Set("detecting", detecting);
 }
@@ -124,7 +131,7 @@ sealed class SimSensor(long id, string name) : SimDevice(id, name, Kinds.Sensor)
 /// A button. Its signal is true for a single tick, which is what makes "is pressed"
 /// a moment rather than a state.
 /// </summary>
-sealed class SimButton(long id, string name) : SimDevice(id, name, Kinds.Button)
+sealed class SimButton(long id, string name) : SimEntity(id, name, Kinds.Button)
 {
     bool _queued;
 
@@ -139,27 +146,30 @@ sealed class SimButton(long id, string name) : SimDevice(id, name, Kinds.Button)
     }
 }
 
-sealed class SimTank(long id, string name) : SimDevice(id, name, Kinds.Tank)
+sealed class SimTank(long id, string name) : SimEntity(id, name, Kinds.Tank)
 {
-    const float LowThreshold = 0.25f;
-
     float _level = 1f;
 
     public bool Draining { get; set; }
 
-    public override string Status => $"{(int)(_level * 100)}%" + (GetSignal("low") ? " - low" : "");
+    public override string Status => $"{(int)(_level * 100)}%" + (Flag("low") ? " - low" : "");
 
-    public override bool IsActive => GetSignal("low");
+    public override bool IsActive => Flag("low");
 
     public override void Tick()
     {
         _level += Draining ? -0.002f : 0.0008f;
         _level = Math.Clamp(_level, 0f, 1f);
-        Set("low", _level < LowThreshold);
+
+        // The reading core gets is the level itself. "Low" is a relation the kind declares
+        // against it, not something decided here and flattened to a bool on the way out -
+        // which is what used to happen, and it threw the number away before anything could
+        // ask a different question of it.
+        Set("fill", _level);
     }
 }
 
-sealed class SimVent(long id, string name) : SimDevice(id, name, Kinds.Vent)
+sealed class SimVent(long id, string name) : SimEntity(id, name, Kinds.Vent)
 {
     const int CycleTicks = 90;
 
@@ -176,9 +186,9 @@ sealed class SimVent(long id, string name) : SimDevice(id, name, Kinds.Vent)
 
     public override void Invoke(string actionId)
     {
-        if (actionId == "pump-in")
+        if (actionId == "pressurize")
             _pressurizing = true;
-        else if (actionId == "pump-out")
+        else if (actionId == "depressurize")
             _pressurizing = false;
     }
 

@@ -53,6 +53,128 @@ public class EditorTests
     }
 
     /// <summary>
+    /// A machine's switch and a sequence's switch are separate, and both have to hold.
+    /// </summary>
+    /// <remarks>
+    /// Parking a whole airlock to weld on it, and then starting it again, must not quietly
+    /// arm the one sequence somebody had deliberately left off. Those are two different
+    /// intentions and neither may overwrite the other.
+    /// </remarks>
+    [Fact]
+    public void ParkingAMachineDoesNotForgetWhichSequencesWereAlreadyParked()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.SwitchOn();
+        ship.Tick();
+
+        var sequence = ship.Automation.Sequences[0];
+        Assert.True(sequence.CanRun);
+
+        // Deliberately park this one sequence.
+        editor.SetToggle(editor.Sentence().ToggleCommand, false);
+        ship.Tick();
+        Assert.False(sequence.CanRun);
+
+        editor.SwitchOn();
+        ship.Tick();
+        Assert.True(sequence.CanRun);
+
+        // Now park the whole machine from its own screen.
+        editor.Back();
+        ship.Tick();
+        Assert.True(editor.Screen.HasSwitch);
+
+        editor.SetToggle(editor.Screen.SwitchCommand, false);
+        ship.Tick();
+        Assert.False(sequence.CanRun);
+        Assert.True(sequence.Enabled);
+
+        editor.SetToggle(editor.Screen.SwitchCommand, true);
+        ship.Tick();
+        Assert.True(sequence.CanRun);
+    }
+
+    /// <summary>
+    /// Nothing that changes what a machine does is offered while it can run.
+    /// </summary>
+    [Fact]
+    public void ARunningSequenceCannotBeRewired()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        ship.Tick();
+
+        // Parked while it is being built, so the sentence is open for work.
+        var sentence = editor.Sentence();
+        Assert.True(sentence.Editable);
+        Assert.NotEqual(0, sentence.AddOptions[0].Command);
+
+        editor.SwitchOn();
+        ship.Tick();
+
+        // Live: the rows are all still there and the screen has not changed shape, but
+        // nothing on it will do anything, and it says why.
+        sentence = editor.Sentence();
+        Assert.False(sentence.Editable);
+        Assert.NotEmpty(sentence.LockedText);
+        Assert.Equal(2, sentence.AddOptions.Count);
+        Assert.Equal(0, sentence.AddOptions[0].Command);
+        Assert.Equal(0, sentence.Trigger.Slots[0].Command);
+        Assert.Equal(0, sentence.DeleteCommand);
+
+        // Renaming is exempt: it changes nothing about what the machine does.
+        Assert.True(editor.Screen.CanRename);
+    }
+
+    /// <summary>
+    /// The one irreversible act in the editor asks before it happens.
+    /// </summary>
+    /// <remarks>
+    /// Everything else here is live and undone by doing the opposite. This throws away
+    /// everything somebody built and there is no undo, so it used to be the single press that
+    /// could not be walked back.
+    /// </remarks>
+    [Fact]
+    public void DeletingASequenceAsksFirst()
+    {
+        var ship = Build();
+        StartOnTheButton(ship.Editor);
+        ship.Tick();
+
+        var sentence = ship.Editor.Sentence();
+        ship.Editor.Invoke(sentence.DeleteCommand);
+        ship.Tick();
+
+        // Nothing has gone yet, and the question names what it is about.
+        Assert.Single(ship.Automation.Sequences);
+        Assert.Equal("Delete this sequence?", ship.Editor.Screen.Title);
+        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Subtitle);
+
+        // The safe answer comes first, so a reflex press lands on it.
+        var options = ship.Editor.Component<ChoiceListComponent>().Entries;
+        Assert.Equal("Keep it, Delete it", string.Join(", ", options.Select(e => e.Text)));
+
+        ship.Editor.PressChoice("Keep it");
+        ship.Tick();
+        Assert.Single(ship.Automation.Sequences);
+        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title);
+
+        ship.Editor.Invoke(ship.Editor.Sentence().DeleteCommand);
+        ship.Tick();
+        ship.Editor.PressChoice("Delete it");
+        ship.Tick();
+
+        // Gone, and standing on the machine rather than on a question about nothing.
+        Assert.Empty(ship.Automation.Sequences);
+        Assert.Equal("Airlock", ship.Editor.Screen.Title);
+    }
+
+    /// <summary>
     /// Naming lives on the heading, and clearing it hands the heading back.
     /// </summary>
     /// <remarks>
@@ -225,7 +347,10 @@ public class EditorTests
     }
 
     static TestDoor Door(Ship ship, string name) =>
-        ship.World.Devices.OfType<TestDoor>().First(d => d.Name == name);
+        ship.World.Entities.OfType<TestDoor>().First(d => d.Name == name);
+
+    static TestButton Button(Ship ship, string name) =>
+        ship.World.Entities.OfType<TestButton>().First(b => b.Name == name);
 
     [Fact]
     public void AllOfThemTogether_ReadsAsAndAndFiresWhenTheLastArrives()
@@ -248,6 +373,7 @@ public class EditorTests
         editor.PressBlock("Airlock Light");
         editor.PressChoice("turn on");
         editor.PressPrimary();
+        editor.SwitchOn();
 
         ship.Tick(3);
         Door(ship, "Inner Door").ForceOpen();
@@ -430,11 +556,12 @@ public class EditorTests
         editor.PressChoice("is pressed");
         editor.PressPrimary();
 
+        editor.SwitchOn();
         ship.Tick();
         Assert.Equal("", editor.Sentence().LastRun);
 
-        editor.RunNow();
-        ship.Tick();
+        Button(ship, "Airlock Button").Press();
+        ship.Tick(2);
         Assert.Equal("just now", editor.Sentence().LastRun);
 
         ship.Tick(180);
@@ -453,29 +580,4 @@ public class EditorTests
         Assert.Equal("a minute ago", editor.Sentence().LastRun);
     }
 
-    [Fact]
-    public void RunNow_StartsItWithoutWaitingForTheTrigger()
-    {
-        var ship = Build();
-        var editor = ship.Editor;
-
-        editor.NewSystem("Airlock");
-        editor.PressStart("When...");
-        editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
-        editor.PressPrimary();
-
-        editor.PressAdd("do something");
-        editor.PressBlock("Airlock Light");
-        editor.PressChoice("turn on");
-        editor.PressPrimary();
-
-        ship.Tick(3);
-        Assert.Empty(ship.World.Log);
-
-        editor.RunNow();
-        ship.Tick();
-
-        Assert.Contains("Airlock Light:on", ship.World.Log);
-    }
 }

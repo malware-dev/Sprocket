@@ -65,8 +65,21 @@ namespace Reactor.Editing
             _sentence = new SequenceComponent(_sequence.Id, BuildTrigger());
             _sentence.Enabled = _sequence.Enabled;
             _sentence.ToggleCommand = Editor.RegisterToggle(SetEnabled);
-            _sentence.DeleteCommand = Editor.Register(Delete);
-            _sentence.RunCommand = Editor.Register(Run);
+
+            // Everything that changes what the machine does waits until it is switched off.
+            // The commands are simply not issued, so there is nothing for a target to invoke
+            // by accident - and the screen keeps the same shape either way, so nothing appears
+            // or disappears as somebody flips the switch.
+            _sentence.Editable = !_sequence.CanRun;
+            _sentence.LockedText = "Running. Stop it to make changes - whatever it has already "
+                + "done stays done.";
+            _sentence.DeleteCommand = Change(Delete);
+
+            // Undo is an edit like any other, so it waits for the switch too.
+            _sentence.UndoCommand = Editor.CanUndo(_sequence)
+                ? Change(delegate { Editor.Undo(_sequence); })
+                : 0;
+            _sentence.UndoText = Editor.UndoLabel(_sequence);
 
             for (var i = 0; i < _sequence.Steps.Count; i++)
                 _sentence.Steps.Add(BuildStep(i, _sequence.Steps[i]));
@@ -75,9 +88,9 @@ namespace Reactor.Editing
             // action on a block and pretending otherwise is what makes the flow
             // awkward - it gets its own door instead.
             _sentence.AddOptions.Add(new ChoiceEntry("do something", false,
-                Editor.Register(AddAction)));
+                Change(AddAction)));
             _sentence.AddOptions.Add(new ChoiceEntry("wait", false,
-                Editor.Register(AddWait)));
+                Change(AddWait)));
 
             components.Add(_sentence);
         }
@@ -130,12 +143,12 @@ namespace Reactor.Editing
             trigger.Slots.Add(new SentenceSlot(
                 SequenceText.DescribeSources(Editor.World, when),
                 when.Sources.Count == 0,
-                Editor.Register(EditTrigger)));
+                Change(EditTrigger)));
 
             trigger.Slots.Add(new SentenceSlot(
                 EventText(events, when.EventId),
                 events.Count == 0 || !HasEvent(events, when.EventId),
-                Editor.Register(EditTrigger)));
+                Change(EditTrigger)));
 
             return trigger;
         }
@@ -146,18 +159,33 @@ namespace Reactor.Editing
             trigger.Slots.Add(new SentenceSlot(
                 every.IntervalTicks == 1 ? "tick" : every.IntervalTicks + " ticks",
                 false,
-                Editor.Register(EditCadence)));
+                Change(EditCadence)));
 
             return trigger;
+        }
+
+        /// <summary>
+        /// Issues a command only while the sequence is switched off.
+        /// </summary>
+        /// <remarks>
+        /// Zero is the way a page says "not now". A target cannot invoke it, so there is
+        /// nothing to guard against on the far side and no way for a stray press to reach a
+        /// running machine. The screen keeps the same shape either way - the rows are all
+        /// still there, they simply do nothing until the switch is off, which is why
+        /// <see cref="SequenceComponent.LockedText"/> exists to say so.
+        /// </remarks>
+        int Change(System.Action action)
+        {
+            return _sequence.CanRun ? 0 : Editor.Register(action);
         }
 
         SentenceStep BuildStep(int index, Step step)
         {
             var position = index;
             var built = new SentenceStep(index + 1);
-            built.MoveUpCommand = Editor.Register(delegate { Move(position, position - 1); });
-            built.MoveDownCommand = Editor.Register(delegate { Move(position, position + 1); });
-            built.DeleteCommand = Editor.Register(delegate { RemoveStep(step); });
+            built.MoveUpCommand = Change(delegate { Move(position, position - 1); });
+            built.MoveDownCommand = Change(delegate { Move(position, position + 1); });
+            built.DeleteCommand = Change(delegate { RemoveStep(step); });
 
             // A pure wait has no blocks and no verb, just a duration.
             var pause = step.Gate as AfterGate;
@@ -166,7 +194,7 @@ namespace Reactor.Editing
                 built.Lead = "wait";
                 built.Slots.Add(new SentenceSlot(
                     SequenceText.DescribeDuration(pause.Ticks), false,
-                    Editor.Register(delegate { EditWait(step); })));
+                    Change(delegate { EditWait(step); })));
                 return built;
             }
 
@@ -182,12 +210,12 @@ namespace Reactor.Editing
             built.Slots.Add(new SentenceSlot(
                 ActionText(actions, step.ActionId),
                 actions.Count == 0 || !HasAction(actions, step.ActionId),
-                Editor.Register(delegate { EditStep(step); })));
+                Change(delegate { EditStep(step); })));
 
             built.Slots.Add(new SentenceSlot(
-                SequenceText.DescribeDevices(Editor.World, step.Targets),
+                SequenceText.DescribeEntities(Editor.World, step.Targets),
                 step.Targets.Count == 0,
-                Editor.Register(delegate { EditStep(step); })));
+                Change(delegate { EditStep(step); })));
 
             return built;
         }
@@ -205,12 +233,15 @@ namespace Reactor.Editing
             if (when == null)
                 return;
 
-            Editor.Push(new PickPage(Editor, "When something happens", when.Sources, true,
-                delegate { return when.EventId; },
-                delegate(string id) { when.EventId = id; },
-                Editor.Pop,
-                delegate { return when.RequiresAll; },
-                delegate(bool all) { when.RequiresAll = all; }));
+            Editor.Push(new PickPage(Editor, "When something happens", true,
+                when.Sources, when.EventId,
+                delegate(PickAnswer answer)
+                {
+                    Editor.Do(_sequence,
+                        new ChangeTrigger(when, answer.Targets, answer.Chosen, answer.All));
+                    Editor.Pop();
+                },
+                true, when.RequiresAll));
         }
 
         void EditCadence()
@@ -221,15 +252,28 @@ namespace Reactor.Editing
 
             // Same page the wizard uses, so the rates read identically wherever they
             // are met. Choosing one here simply returns.
-            Editor.Push(Editor.RatePage(every, Editor.Pop));
+            var was = every.IntervalTicks;
+            Editor.Push(Editor.RatePage(every, delegate
+            {
+                var now = every.IntervalTicks;
+                every.IntervalTicks = was;
+                Editor.Do(_sequence, new SetCadence(was, now));
+                Editor.Pop();
+            }));
         }
 
         void EditStep(Step step)
         {
-            Editor.Push(new PickPage(Editor, "Do something", step.Targets, false,
-                delegate { return step.ActionId; },
-                delegate(string id) { step.ActionId = id; },
-                Editor.Pop));
+            var index = _sequence.Steps.IndexOf(step);
+
+            Editor.Push(new PickPage(Editor, "Do something", false,
+                step.Targets, step.ActionId,
+                delegate(PickAnswer answer)
+                {
+                    Editor.Do(_sequence,
+                        new ChangeStep(index, step, answer.Targets, answer.Chosen));
+                    Editor.Pop();
+                }));
         }
 
         /// <summary>
@@ -246,14 +290,19 @@ namespace Reactor.Editing
         void AddAction()
         {
             var origin = Editor.Depth;
-            var step = new Step("");
 
-            Editor.Push(new PickPage(Editor, "Do something", step.Targets, false,
-                delegate { return step.ActionId; },
-                delegate(string id) { step.ActionId = id; },
-                delegate
+            Editor.Push(new PickPage(Editor, "Do something", false,
+                new List<long>(), "",
+                delegate(PickAnswer answer)
                 {
-                    _sequence.Steps.Add(step);
+                    // Only once both answers are in. Backing out of the questions adds no
+                    // step, so there is nothing to take back.
+                    var step = new Step(answer.Chosen);
+                    for (var i = 0; i < answer.Targets.Count; i++)
+                        step.Targets.Add(answer.Targets[i]);
+
+                    Editor.Do(_sequence,
+                        new AddStep("adding a step", _sequence.Steps.Count, step));
                     Editor.UnwindTo(origin);
                 }));
         }
@@ -269,7 +318,8 @@ namespace Reactor.Editing
             {
                 var step = new Step("");
                 step.Gate = new AfterGate(ticks);
-                _sequence.Steps.Add(step);
+                Editor.Do(_sequence,
+                    new AddStep("adding a wait", _sequence.Steps.Count, step));
                 Editor.UnwindTo(origin);
             }));
         }
@@ -291,15 +341,16 @@ namespace Reactor.Editing
             var origin = Editor.Depth;
             Editor.Push(WaitPage(delegate(int ticks)
             {
-                step.Gate = new AfterGate(ticks);
+                var after = step.Gate as AfterGate;
+                Editor.Do(_sequence,
+                    new SetWait(_sequence.Steps.IndexOf(step), after == null ? 0 : after.Ticks, ticks));
                 Editor.UnwindTo(origin);
             }));
         }
 
         void RemoveStep(Step step)
         {
-            _sequence.Steps.Remove(step);
-            Editor.Invalidate();
+            Editor.Do(_sequence, new RemoveStep(_sequence.Steps.IndexOf(step), step));
         }
 
         void Move(int from, int to)
@@ -307,10 +358,7 @@ namespace Reactor.Editing
             if (to < 0 || to >= _sequence.Steps.Count)
                 return;
 
-            var step = _sequence.Steps[from];
-            _sequence.Steps.RemoveAt(from);
-            _sequence.Steps.Insert(to, step);
-            Editor.Invalidate();
+            Editor.Do(_sequence, new MoveStep(from, to));
         }
 
         /// <summary>
@@ -320,28 +368,66 @@ namespace Reactor.Editing
         /// </summary>
         void SetName(string value)
         {
-            _sequence.Name = value;
+            // Folded into one, because a name arrives a letter at a time.
+            Editor.Do(_sequence, new Rename(_sequence.Name, value), true);
         }
 
-        /// <summary>Starts it by hand, standing in for whatever would normally set it off.</summary>
-        void Run()
-        {
-            Editor.Runner.Call(_sequence);
-        }
-
+        /// <summary>
+        /// Running or parked, which is not one of the things undo covers.
+        /// </summary>
+        /// <remarks>
+        /// Undo walks back what a sequence *is*, not whether it is running. Recording the
+        /// switch would mean a press of undo could arm a machine - somebody stepping back
+        /// through their edits and having the airlock quietly go live behind them, which is
+        /// the exact accident the switch exists to prevent.
+        ///
+        /// Nothing is lost by leaving it out: the switch is one press either way and it is the
+        /// most visible control on the screen.
+        /// </remarks>
         void SetEnabled(bool on)
         {
             _sequence.Enabled = on;
             Editor.Invalidate();
         }
 
+        /// <summary>
+        /// Asks first. There is no undo, and this throws away everything somebody built.
+        /// </summary>
+        /// <remarks>
+        /// It used to delete on the press, which is the one place in the editor where a
+        /// mistake could not be walked back: every other action is live and reversible by
+        /// doing the opposite, and this one is not reversible at all.
+        ///
+        /// The safe answer is listed first, so the reflex press lands on it, and it is spelt
+        /// out rather than left to Back. Back does mean keep - it always means return to where
+        /// you came from - but a screen whose only row is the destructive one is a screen where
+        /// a stray press destroys something.
+        ///
+        /// How the question gets asked is the target's business as usual. Core says there is a
+        /// question, what it is about, and what the answers do.
+        /// </remarks>
         void Delete()
         {
-            Editor.Program.RemoveSequence(_sequence);
-            Editor.ForgetSequence(_sequence.Id);
+            var page = new ChoicePage(Editor, "Delete this sequence?");
+            page.Caption = SequenceSummary.Describe(Editor.World, _sequence);
+
+            page.Add("Keep it", false, delegate { Editor.Pop(); });
+
+            page.Add("Delete it", false, delegate
+            {
+                // The question goes first. Forgetting the sequence drops the page showing it,
+                // but not this one on top of it, which would leave somebody standing on a
+                // question about something that no longer exists.
+                Editor.Pop();
+                Editor.Program.RemoveSequence(_sequence);
+                Editor.ForgetSequence(_sequence.Id);
+            });
+            page.WarnOnLast("This cannot be undone.");
+
+            Editor.Push(page);
         }
 
-        static bool HasEvent(List<DeviceEvent> events, string id)
+        static bool HasEvent(List<EntityEvent> events, string id)
         {
             for (var i = 0; i < events.Count; i++)
             {
@@ -351,7 +437,7 @@ namespace Reactor.Editing
             return false;
         }
 
-        static bool HasAction(List<DeviceAction> actions, string id)
+        static bool HasAction(List<EntityAction> actions, string id)
         {
             for (var i = 0; i < actions.Count; i++)
             {
@@ -361,7 +447,7 @@ namespace Reactor.Editing
             return false;
         }
 
-        static string EventText(List<DeviceEvent> events, string id)
+        static string EventText(List<EntityEvent> events, string id)
         {
             for (var i = 0; i < events.Count; i++)
             {
@@ -371,7 +457,7 @@ namespace Reactor.Editing
             return SequenceText.EmptySlotText;
         }
 
-        static string ActionText(List<DeviceAction> actions, string id)
+        static string ActionText(List<EntityAction> actions, string id)
         {
             for (var i = 0; i < actions.Count; i++)
             {

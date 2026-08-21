@@ -6,62 +6,71 @@ namespace Reactor.Tests;
 /// A machine that takes time to do things.
 /// </summary>
 /// <remarks>
-/// Doors travel and vents cycle, because instant devices hide every problem worth
+/// Doors travel and vents cycle, because instant entities hide every problem worth
 /// finding. Gates, overlapping sequences and interlocks only mean anything once
 /// things have duration.
 /// </remarks>
 sealed class TestWorld : IWorld
 {
-    readonly List<TestDevice> _devices = [];
+    readonly List<TestEntity> _entities = [];
 
     public List<string> Log { get; } = [];
 
-    public IReadOnlyList<IDevice> Devices => _devices;
+    public IReadOnlyList<IEntity> Entities => _entities;
 
-    public T Add<T>(T device) where T : TestDevice
+    public EntityNoun Noun { get; } = new EntityNoun("block", "blocks", "Blocks");
+
+    public T Add<T>(T entity) where T : TestEntity
     {
-        _devices.Add(device);
-        return device;
+        _entities.Add(entity);
+        return entity;
     }
 
-    public void Remove(long id) => _devices.RemoveAll(d => d.Id == id);
+    public void Remove(long id) => _entities.RemoveAll(d => d.Id == id);
 
-    public IDevice? FindDevice(long deviceId) => _devices.FirstOrDefault(d => d.Id == deviceId);
+    public IEntity? FindEntity(long entityId) => _entities.FirstOrDefault(d => d.Id == entityId);
 
-    public void Invoke(IDevice device, string actionId)
+    public void Invoke(IEntity entity, string actionId)
     {
-        Log.Add($"{device.Name}:{actionId}");
-        ((TestDevice)device).Invoke(actionId);
+        Log.Add($"{entity.Name}:{actionId}");
+        ((TestEntity)entity).Invoke(actionId);
     }
 
     public void Tick()
     {
-        foreach (var device in _devices)
-            device.Tick();
+        foreach (var entity in _entities)
+            entity.Tick();
     }
 }
 
-abstract class TestDevice(long id, string name, DeviceKind kind) : IDevice
+abstract class TestEntity(long id, string name, EntityKind kind) : IEntity
 {
-    protected readonly Dictionary<string, bool> Signals = [];
+    protected readonly Dictionary<string, EntityValue> Values = [];
 
     public long Id { get; } = id;
     public string Name { get; } = name;
-    public DeviceKind Kind { get; } = kind;
+    public EntityKind Kind { get; } = kind;
 
     public abstract string Status { get; }
     public virtual bool IsActive => false;
 
-    public bool GetSignal(string signalId) => Signals.TryGetValue(signalId, out var v) && v;
+    public EntityValue GetValue(string propertyId) =>
+        Values.TryGetValue(propertyId, out var v) ? v : default;
 
-    protected void Set(string signalId, bool value) => Signals[signalId] = value;
+    protected void Set(string propertyId, bool value) => Values[propertyId] = EntityValue.Of(value);
+
+    protected void Set(string propertyId, double value) => Values[propertyId] = EntityValue.Of(value);
+
+    protected void Set(string propertyId, string value) => Values[propertyId] = EntityValue.Of(value);
+
+    protected bool Flag(string propertyId) => GetValue(propertyId).Flag;
 
     public virtual void Invoke(string actionId) { }
 
     public virtual void Tick() { }
 }
 
-sealed class TestDoor(long id, string name) : TestDevice(id, name, Kinds.Door)
+sealed class TestDoor(long id, string name) : TestEntity(id, name, Kinds.Door)
 {
     const int Travel = 10;
 
@@ -130,7 +139,7 @@ sealed class TestDoor(long id, string name) : TestDevice(id, name, Kinds.Door)
     }
 }
 
-sealed class TestVent(long id, string name) : TestDevice(id, name, Kinds.Vent)
+sealed class TestVent(long id, string name) : TestEntity(id, name, Kinds.Vent)
 {
     const int Cycle = 10;
 
@@ -141,9 +150,9 @@ sealed class TestVent(long id, string name) : TestDevice(id, name, Kinds.Vent)
 
     public override void Invoke(string actionId)
     {
-        if (actionId == "pump-in")
+        if (actionId == "pressurize")
             _filling = true;
-        else if (actionId == "pump-out")
+        else if (actionId == "depressurize")
             _filling = false;
     }
 
@@ -160,9 +169,9 @@ sealed class TestVent(long id, string name) : TestDevice(id, name, Kinds.Vent)
 }
 
 /// <summary>A lamp: its actions reach for no particular state, so they are instant.</summary>
-sealed class TestLamp(long id, string name) : TestDevice(id, name, Kinds.Lamp)
+sealed class TestLamp(long id, string name) : TestEntity(id, name, Kinds.Lamp)
 {
-    public override string Status => GetSignal("on") ? "on" : "off";
+    public override string Status => Flag("on") ? "on" : "off";
 
     public override void Invoke(string actionId)
     {
@@ -173,7 +182,16 @@ sealed class TestLamp(long id, string name) : TestDevice(id, name, Kinds.Lamp)
     }
 }
 
-sealed class TestButton(long id, string name) : TestDevice(id, name, Kinds.Button)
+sealed class TestTank(long id, string name) : TestEntity(id, name, Kinds.Tank)
+{
+    public override string Status => $"{(int)(GetValue("fill").Number * 100)}%";
+
+    public void SetFill(double fill) => Set("fill", fill);
+
+    public void SetLabel(string label) => Set("label", label);
+}
+
+sealed class TestButton(long id, string name) : TestEntity(id, name, Kinds.Button)
 {
     bool _queued;
 
@@ -194,9 +212,12 @@ sealed class TestButton(long id, string name) : TestDevice(id, name, Kinds.Butto
 /// </summary>
 static class Kinds
 {
-    public static readonly DeviceKind Door = new DeviceKind("door", "Door")
-        .WithEvent("opened", "open", SignalEdge.Rising, "finishes opening")
-        .WithEvent("shut", "shut", SignalEdge.Rising, "finishes closing")
+    public static readonly EntityKind Door = new EntityKind("door", "Door")
+        .WithProperty("open", "open")
+        .WithProperty("shut", "shut")
+        .WithProperty("locked", "locked")
+        .WithEvent("opened", "open", Edge.Rising, "finishes opening")
+        .WithEvent("shut", "shut", Edge.Rising, "finishes closing")
         .WithState("is-open", "open", true, "is open")
         .WithState("is-shut", "shut", true, "is shut")
         .WithState("is-locked", "locked", true, "is locked")
@@ -206,19 +227,31 @@ static class Kinds
         .WithAction("lock", "lock", "is-locked")
         .WithAction("unlock", "unlock", "is-unlocked");
 
-    public static readonly DeviceKind Vent = new DeviceKind("vent", "Air Vent")
-        .WithEvent("emptied", "empty", SignalEdge.Rising, "finishes emptying")
-        .WithEvent("filled", "air", SignalEdge.Rising, "finishes filling")
+    public static readonly EntityKind Vent = new EntityKind("vent", "Air Vent")
+        .WithProperty("air", "has air")
+        .WithProperty("empty", "is empty")
+        .WithEvent("emptied", "empty", Edge.Rising, "finishes emptying")
+        .WithEvent("filled", "air", Edge.Rising, "finishes filling")
         .WithState("has-air", "air", true, "has air")
         .WithState("is-empty", "empty", true, "is empty")
-        .WithAction("pump-out", "pump the air out", "is-empty")
-        .WithAction("pump-in", "pump the air back in", "has-air");
+        .WithAction("depressurize", "depressurize", "is-empty")
+        .WithAction("pressurize", "pressurize", "has-air");
 
-    public static readonly DeviceKind Lamp = new DeviceKind("lamp", "Lamp")
+    public static readonly EntityKind Lamp = new EntityKind("lamp", "Lamp")
+        .WithProperty("on", "switched on")
         .WithState("is-on", "on", true, "is on")
         .WithAction("on", "turn on")
         .WithAction("off", "turn off");
 
-    public static readonly DeviceKind Button = new DeviceKind("button", "Button")
-        .WithEvent("pressed", "pressed", SignalEdge.Rising, "is pressed");
+    public static readonly EntityKind Button = new EntityKind("button", "Button")
+        .WithProperty("pressed", "pressed")
+        .WithEvent("pressed", "pressed", Edge.Rising, "is pressed");
+
+    /// <summary>Reads a number, and says "low" by comparing against it.</summary>
+    public static readonly EntityKind Tank = new EntityKind("tank", "Tank")
+        .WithProperty("fill", ValueKind.Number, "fill level")
+        .WithState("is-low", "fill", Relation.Below, EntityValue.Of(0.25), "is low")
+        .WithState("is-fine", "fill", Relation.AtLeast, EntityValue.Of(0.25), "has plenty")
+        .WithProperty("label", ValueKind.Text, "label")
+        .WithState("is-spare", "label", Relation.Is, EntityValue.Of("spare"), "is the spare");
 }

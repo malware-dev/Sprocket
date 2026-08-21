@@ -100,7 +100,7 @@ namespace Reactor.Sequences
         /// <remarks>
         /// True by default, and this is the single most important default in the
         /// language. A numbered list already means "and then" to anyone who has
-        /// followed a recipe: "close the inner door, pump the air out, open the outer
+        /// followed a recipe: "close the inner door, depressurize, open the outer
         /// door" needs no further explanation of the ordering, because the ordering
         /// is what a list <em>is</em>.
         ///
@@ -110,15 +110,15 @@ namespace Reactor.Sequences
         /// venting a ship the day a door sticks.
         ///
         /// Doing several things at once is therefore the thing you have to ask for.
-        /// Note that acting on several devices in one step was always simultaneous,
+        /// Note that acting on several entities in one step was always simultaneous,
         /// so this is only needed for genuinely different actions overlapping.
         /// </remarks>
         public bool WaitsForCompletion { get; set; }
 
-        /// <summary>Devices affected. All of them, together, in this step.</summary>
+        /// <summary>Entities affected. All of them, together, in this step.</summary>
         public IList<long> Targets { get { return _targets; } }
 
-        /// <summary>The <see cref="World.DeviceAction"/> id to invoke.</summary>
+        /// <summary>The <see cref="World.EntityAction"/> id to invoke.</summary>
         public string ActionId { get; set; }
 
         public bool HasAction

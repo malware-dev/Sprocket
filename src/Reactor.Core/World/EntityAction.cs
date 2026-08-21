@@ -1,16 +1,16 @@
 namespace Reactor.World
 {
     /// <summary>
-    /// Something a sequence can tell a device to do.
+    /// Something a sequence can tell an entity to do.
     /// </summary>
     /// <remarks>
     /// Actions carry no parameters. That is a scope decision, not an oversight:
     /// parameters bring value pickers, types and unit formatting with them, and none
     /// of that is needed to find out whether people can build a working airlock.
     /// </remarks>
-    public sealed class DeviceAction
+    public sealed class EntityAction
     {
-        public DeviceAction(string id, string text, string leadsToStateId)
+        public EntityAction(string id, string text, string leadsToStateId)
         {
             Id = id;
             Text = text;
@@ -27,7 +27,7 @@ namespace Reactor.World
         public string Text { get; private set; }
 
         /// <summary>
-        /// The <see cref="DeviceState"/> this action is trying to bring about, or
+        /// The <see cref="EntityState"/> this action is trying to bring about, or
         /// null if it does not settle into a state.
         /// </summary>
         /// <remarks>

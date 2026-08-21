@@ -42,6 +42,24 @@ namespace Reactor.Editing
         /// </remarks>
         public override string Subtitle { get { return _system.Description; } }
 
+        /// <summary>
+        /// The whole machine, running or parked.
+        /// </summary>
+        /// <remarks>
+        /// Separate from each sequence's own switch rather than a shortcut for setting them
+        /// all, so parking an airlock to work on it and starting it again afterwards leaves a
+        /// sequence somebody had deliberately parked still parked.
+        /// </remarks>
+        public override bool CanSwitch { get { return true; } }
+
+        public override bool SwitchIsOn { get { return _system.Enabled; } }
+
+        public override void Switch(bool on)
+        {
+            _system.Enabled = on;
+            Editor.Invalidate();
+        }
+
         public override void Build(List<EditorComponent> components)
         {
             Collect();

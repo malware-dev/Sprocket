@@ -116,14 +116,51 @@ namespace Reactor.Ui
         public int SequenceId { get; set; }
 
         /// <summary>
-        /// Starts the sequence by hand, as if its trigger had fired.
+        /// Takes back the last change to this sequence. Zero when there is nothing to take
+        /// back, or while it is running and nothing may be changed at all.
         /// </summary>
         /// <remarks>
-        /// Not a "run" button in the sense of a program being run - everything is
-        /// always running. It is a stand-in for the thing that would normally set it
-        /// off, so an airlock can be tested without walking to the button.
+        /// On the sentence rather than on the screen, because the history is per sequence -
+        /// it is one of the things you do to this sequence, alongside pausing and deleting it,
+        /// and it belongs with them.
         /// </remarks>
-        public int RunCommand { get; set; }
+        public int UndoCommand { get; set; }
+
+        /// <summary>
+        /// What undoing would undo, e.g. "deleting a step".
+        /// </summary>
+        /// <remarks>
+        /// "Undo" alone asks somebody to remember what they last did, which is exactly what a
+        /// person who has just made a mistake is worst at.
+        /// </remarks>
+        public string UndoText { get; set; }
+
+        /// <summary>
+        /// Whether this can be changed right now.
+        /// </summary>
+        /// <remarks>
+        /// False while it is switched on, because a sequence that is switched on can be
+        /// running, and rewiring a machine mid-operation is how an airlock opens the outer
+        /// door having never closed the inner one. Switching it off abandons any run in
+        /// progress and leaves the machine wherever it got to, which is exactly the state
+        /// somebody needs in order to fix it.
+        ///
+        /// This is a fact about the machine rather than a mode the editor is in. Nobody has to
+        /// be taught it: you cannot rewire a live circuit either.
+        ///
+        /// The name is not covered. Renaming changes nothing about what the thing does.
+        /// </remarks>
+        public bool Editable { get; set; }
+
+        /// <summary>
+        /// Why it cannot be changed, when it cannot.
+        /// </summary>
+        /// <remarks>
+        /// Controls that quietly do nothing are a screen ignoring somebody. Whether this is
+        /// shown as a banner, a tooltip or greyed rows is the target's business, but it has to
+        /// be reachable somehow.
+        /// </remarks>
+        public string LockedText { get; set; }
 
         public SentenceTrigger Trigger { get; set; }
 

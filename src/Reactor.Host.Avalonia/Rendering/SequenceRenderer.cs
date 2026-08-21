@@ -38,6 +38,10 @@ sealed class SequenceRenderer : ComponentRenderer
     Border _problemBanner = null!;
     Border _liveBadge = null!;
     Button _enable = null!;
+    TextBlock _enableText = null!;
+    Border _lockedBanner = null!;
+    Button _undo = null!;
+    TextBlock _locked = null!;
 
     public SequenceRenderer(ReactorEditor editor, SequenceComponent model) : base(editor)
     {
@@ -61,8 +65,16 @@ sealed class SequenceRenderer : ComponentRenderer
         _problem.Text = _model.Problem;
 
         _liveBadge.IsVisible = _model.Trigger.IsLiveNow;
-        _enable.Content = _model.Enabled ? "on" : "off";
-        _enable.Foreground = _model.Enabled ? Palette.Live : Palette.Faint;
+        // Says what pressing it does, not what state it is in - a switch labelled with its
+        // own state makes somebody work out which way round it is before they dare press it.
+        _enableText.Text = _model.Enabled ? "❚❚  Pause" : "▶  Run";
+        _enable.Background = _model.Enabled ? Palette.Notice : Palette.Live;
+
+        _lockedBanner.IsVisible = !_model.Editable;
+        _locked.Text = _model.LockedText;
+
+        _undo.IsVisible = _model.UndoCommand != 0;
+        _undo.Content = "↶ Undo " + _model.UndoText;
 
         for (var i = 0; i < _triggerSlots.Count && i < _model.Trigger.Slots.Count; i++)
             _triggerSlots[i].Content = _model.Trigger.Slots[i].Text;
@@ -99,13 +111,15 @@ sealed class SequenceRenderer : ComponentRenderer
         _triggerSlots.Clear();
 
         _root.Children.Add(BuildHeader());
+        _root.Children.Add(BuildLocked());
         _root.Children.Add(BuildProblem());
         _root.Children.Add(BuildTrigger());
 
         foreach (var step in _model.Steps)
             _root.Children.Add(BuildStep(step));
 
-        _root.Children.Add(BuildAdders());
+        if (_model.Editable)
+            _root.Children.Add(BuildAdders());
 
         Update();
     }
@@ -143,24 +157,54 @@ sealed class SequenceRenderer : ComponentRenderer
         Grid.SetColumn(_skippedBadge, 1);
         grid.Children.Add(_skippedBadge);
 
-        // Standing in for whatever would normally set this off, so an airlock can be
-        // tried without walking to the button.
-        var run = Widgets.Ghost("Run now");
-        run.Click += (_, _) => Editor.Invoke(_model.RunCommand);
-        Grid.SetColumn(run, 2);
-        grid.Children.Add(run);
+        // The switch this whole design hangs on, so it is the loudest thing in the row rather
+        // than a word in the corner. Off is not a disabled state here - it is the state you
+        // work in, and it has to look like somewhere you would willingly be.
+        _undo = Widgets.Ghost("");
+        _undo.Click += (_, _) => Editor.Invoke(_model.UndoCommand);
+        Grid.SetColumn(_undo, 2);
+        grid.Children.Add(_undo);
 
-        _enable = Widgets.Ghost("on");
+        _enableText = Widgets.Label("", Brushes.White, 12, true);
+        _enable = new Button
+        {
+            Content = _enableText,
+            BorderThickness = new Thickness(0),
+            CornerRadius = new CornerRadius(4),
+            Padding = new Thickness(14, 5),
+            Margin = new Thickness(8, 0, 0, 0)
+        };
         _enable.Click += (_, _) => Editor.SetToggle(_model.ToggleCommand, !_model.Enabled);
         Grid.SetColumn(_enable, 3);
         grid.Children.Add(_enable);
 
-        var delete = Widgets.Ghost("Delete");
-        delete.Click += (_, _) => Editor.Invoke(_model.DeleteCommand);
-        Grid.SetColumn(delete, 4);
-        grid.Children.Add(delete);
+        if (_model.Editable)
+        {
+            var delete = Widgets.Ghost("Delete");
+            delete.Click += (_, _) => Editor.Invoke(_model.DeleteCommand);
+            Grid.SetColumn(delete, 4);
+            grid.Children.Add(delete);
+        }
 
         return grid;
+    }
+
+    /// <summary>
+    /// How to get from watching it to changing it.
+    /// </summary>
+    /// <remarks>
+    /// Not a warning about disabled controls - there are none, they are simply absent. This
+    /// is the one thing the watching view has to say that it could not say by showing: that
+    /// there is a way through to editing, and what it is. Without it, somebody looking for the
+    /// add button concludes it is gone rather than waiting.
+    /// </remarks>
+    Control BuildLocked()
+    {
+        _locked = Widgets.Label("", Palette.Muted, 12);
+        _lockedBanner = Widgets.Wash(_locked, Palette.SlotFill);
+        _lockedBanner.Margin = new Thickness(0, 0, 0, 10);
+        _lockedBanner.IsVisible = false;
+        return _lockedBanner;
     }
 
     Control BuildProblem()
@@ -190,7 +234,10 @@ sealed class SequenceRenderer : ComponentRenderer
             var button = Widgets.Slot(slot.Text);
             if (slot.IsEmpty)
                 button.FontStyle = FontStyle.Italic;
-            button.Click += (_, _) => Editor.Invoke(command);
+            if (_model.Editable)
+                button.Click += (_, _) => Editor.Invoke(command);
+            else
+                Reading(button);
             wrap.Children.Add(button);
             _triggerSlots.Add(button);
         }
@@ -236,19 +283,27 @@ sealed class SequenceRenderer : ComponentRenderer
             var button = Widgets.Slot(slot.Text);
             if (slot.IsEmpty)
                 button.FontStyle = FontStyle.Italic;
-            button.Click += (_, _) => Editor.Invoke(command);
+            if (_model.Editable)
+                button.Click += (_, _) => Editor.Invoke(command);
+            else
+                Reading(button);
             wrap.Children.Add(button);
             visual.Slots.Add(button);
         }
         Grid.SetColumn(wrap, 1);
         grid.Children.Add(wrap);
 
-        var tools = Widgets.Stack(Orientation.Horizontal);
-        tools.Children.Add(Tool("↑", step.MoveUpCommand));
-        tools.Children.Add(Tool("↓", step.MoveDownCommand));
-        tools.Children.Add(Tool("✕", step.DeleteCommand));
-        Grid.SetColumn(tools, 2);
-        grid.Children.Add(tools);
+        // Gone rather than greyed. What is on screen while it runs is a view of a machine
+        // working, not an editor with its hands tied.
+        if (_model.Editable)
+        {
+            var tools = Widgets.Stack(Orientation.Horizontal);
+            tools.Children.Add(Tool("↑", step.MoveUpCommand));
+            tools.Children.Add(Tool("↓", step.MoveDownCommand));
+            tools.Children.Add(Tool("✕", step.DeleteCommand));
+            Grid.SetColumn(tools, 2);
+            grid.Children.Add(tools);
+        }
 
         visual.Frame = new Border
         {
@@ -267,6 +322,25 @@ sealed class SequenceRenderer : ComponentRenderer
         var button = Widgets.Ghost(glyph);
         button.Click += (_, _) => Editor.Invoke(command);
         return button;
+    }
+
+    /// <summary>
+    /// Turns a slot from something you press into something you read.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately not disabled. Disabling greys it, and grey says "broken, or not yours to
+    /// touch" - neither of which is true. A running sequence is not a crippled editor, it is
+    /// the thing being watched, and its words are the most important thing on the screen. So
+    /// the chip goes and the sentence stays at full contrast: no fill, no underline, and no
+    /// response to the pointer, because there is nothing there to press.
+    /// </remarks>
+    static void Reading(Button slot)
+    {
+        slot.IsHitTestVisible = false;
+        slot.Background = Brushes.Transparent;
+        slot.BorderThickness = new Thickness(0);
+        slot.Foreground = Palette.Ink;
+        slot.Padding = new Thickness(0, 4, 6, 4);
     }
 
     Control BuildAdders()

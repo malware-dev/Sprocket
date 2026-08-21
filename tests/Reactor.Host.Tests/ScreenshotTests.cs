@@ -20,7 +20,7 @@ public class ScreenshotTests
     [AvaloniaFact]
     public void Capture()
     {
-        var window = new MainWindow();
+        var window = new MainWindow(Simulation.Fresh());
         window.Show();
 
         var editor = window.Editor;
@@ -35,7 +35,7 @@ public class ScreenshotTests
         // already true when a sequence appears is not an edge.
         Tick(window, 3);
 
-        var button = window.Simulation.World.SimDevices.OfType<SimButton>().First();
+        var button = window.Simulation.World.SimEntities.OfType<SimButton>().First();
         button.Press();
         Tick(window, 8);
 
@@ -83,7 +83,7 @@ public class ScreenshotTests
 
         Step(editor, "Airlock Inner Door", "close");
         Step(editor, "Airlock Inner Door", "lock");
-        Step(editor, "Airlock Vent", "pump the air out");
+        Step(editor, "Airlock Vent", "depressurize");
         Step(editor, "Airlock Outer Door", "unlock");
         Step(editor, "Airlock Outer Door", "open");
 

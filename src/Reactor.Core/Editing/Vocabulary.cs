@@ -15,48 +15,48 @@ namespace Reactor.Editing
     public static class Vocabulary
     {
         /// <summary>
-        /// Events every one of the given devices can raise.
+        /// Events every one of the given entities can raise.
         /// </summary>
         /// <remarks>
         /// The intersection, not the union. "When any of these happens" has to mean
-        /// something for every device in the selection, or the sentence stops being
+        /// something for every entity in the selection, or the sentence stops being
         /// true of the things it names.
         /// </remarks>
-        public static List<DeviceEvent> EventsFor(IWorld world, IList<long> deviceIds)
+        public static List<EntityEvent> EventsFor(IWorld world, IList<long> entityIds)
         {
-            var result = new List<DeviceEvent>();
-            var devices = Resolve(world, deviceIds);
-            if (devices.Count == 0)
+            var result = new List<EntityEvent>();
+            var entities = Resolve(world, entityIds);
+            if (entities.Count == 0)
                 return result;
 
-            var candidates = devices[0].Kind.Events;
+            var candidates = entities[0].Kind.Events;
             for (var i = 0; i < candidates.Count; i++)
             {
-                if (AllHaveEvent(devices, candidates[i].Id))
+                if (AllHaveEvent(entities, candidates[i].Id))
                     result.Add(candidates[i]);
             }
             return result;
         }
 
-        /// <summary>Actions every one of the given devices accepts.</summary>
-        public static List<DeviceAction> ActionsFor(IWorld world, IList<long> deviceIds)
+        /// <summary>Actions every one of the given entities accepts.</summary>
+        public static List<EntityAction> ActionsFor(IWorld world, IList<long> entityIds)
         {
-            var result = new List<DeviceAction>();
-            var devices = Resolve(world, deviceIds);
-            if (devices.Count == 0)
+            var result = new List<EntityAction>();
+            var entities = Resolve(world, entityIds);
+            if (entities.Count == 0)
                 return result;
 
-            var candidates = devices[0].Kind.Actions;
+            var candidates = entities[0].Kind.Actions;
             for (var i = 0; i < candidates.Count; i++)
             {
-                if (AllHaveAction(devices, candidates[i].Id))
+                if (AllHaveAction(entities, candidates[i].Id))
                     result.Add(candidates[i]);
             }
             return result;
         }
 
         /// <summary>
-        /// Devices that have anything to offer at all: something that can happen to
+        /// Entities that have anything to offer at all: something that can happen to
         /// them, or something that can be done to them.
         /// </summary>
         /// <remarks>
@@ -74,48 +74,48 @@ namespace Reactor.Editing
         /// is not the selection talking, it is the question: there is nothing to ask
         /// about a block that nothing can happen to.
         /// </remarks>
-        public static List<IDevice> Capable(IWorld world, bool forEvents)
+        public static List<IEntity> Capable(IWorld world, bool forEvents)
         {
-            var result = new List<IDevice>();
-            var devices = world.Devices;
-            for (var i = 0; i < devices.Count; i++)
+            var result = new List<IEntity>();
+            var entities = world.Entities;
+            for (var i = 0; i < entities.Count; i++)
             {
-                var device = devices[i];
-                var kind = device.Kind;
+                var entity = entities[i];
+                var kind = entity.Kind;
                 var count = forEvents ? kind.Events.Count : kind.Actions.Count;
                 if (count > 0)
-                    result.Add(device);
+                    result.Add(entity);
             }
             return result;
         }
 
-        static List<IDevice> Resolve(IWorld world, IList<long> deviceIds)
+        static List<IEntity> Resolve(IWorld world, IList<long> entityIds)
         {
-            var result = new List<IDevice>();
-            for (var i = 0; i < deviceIds.Count; i++)
+            var result = new List<IEntity>();
+            for (var i = 0; i < entityIds.Count; i++)
             {
-                var device = world.FindDevice(deviceIds[i]);
-                if (device != null)
-                    result.Add(device);
+                var entity = world.FindEntity(entityIds[i]);
+                if (entity != null)
+                    result.Add(entity);
             }
             return result;
         }
 
-        static bool AllHaveEvent(List<IDevice> devices, string eventId)
+        static bool AllHaveEvent(List<IEntity> entities, string eventId)
         {
-            for (var i = 1; i < devices.Count; i++)
+            for (var i = 1; i < entities.Count; i++)
             {
-                if (devices[i].Kind.FindEvent(eventId) == null)
+                if (entities[i].Kind.FindEvent(eventId) == null)
                     return false;
             }
             return true;
         }
 
-        static bool AllHaveAction(List<IDevice> devices, string actionId)
+        static bool AllHaveAction(List<IEntity> entities, string actionId)
         {
-            for (var i = 1; i < devices.Count; i++)
+            for (var i = 1; i < entities.Count; i++)
             {
-                if (devices[i].Kind.FindAction(actionId) == null)
+                if (entities[i].Kind.FindAction(actionId) == null)
                     return false;
             }
             return true;

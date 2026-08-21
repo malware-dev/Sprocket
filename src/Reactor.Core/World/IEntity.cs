@@ -3,7 +3,7 @@ namespace Reactor.World
     /// <summary>
     /// One addressable thing on the machine - a door, a light, a sensor.
     /// </summary>
-    public interface IDevice
+    public interface IEntity
     {
         /// <summary>
         /// Stable identity. Space Engineers gives blocks a unique id that survives
@@ -15,7 +15,7 @@ namespace Reactor.World
         /// <summary>The user-facing name. May change at any time; never an identifier.</summary>
         string Name { get; }
 
-        DeviceKind Kind { get; }
+        EntityKind Kind { get; }
 
         /// <summary>
         /// Live state in the user's own words - "closed", "opening…", "62%".
@@ -27,13 +27,18 @@ namespace Reactor.World
         /// </remarks>
         string Status { get; }
 
-        /// <summary>Whether this device is doing something right now.</summary>
+        /// <summary>Whether this entity is doing something right now.</summary>
         bool IsActive { get; }
 
         /// <summary>
-        /// Current value of a named boolean signal, or false if this device does not
-        /// have one by that name.
+        /// What this entity currently reads for one of its properties.
         /// </summary>
-        bool GetSignal(string signalId);
+        /// <remarks>
+        /// An unknown name gives back a default reading rather than throwing. A rule can
+        /// outlive the thing it was written about - a block gets shot off and welded back as
+        /// a different type - and a vocabulary that has moved on under a saved sequence is a
+        /// thing to surface calmly, not to crash on.
+        /// </remarks>
+        EntityValue GetValue(string propertyId);
     }
 }

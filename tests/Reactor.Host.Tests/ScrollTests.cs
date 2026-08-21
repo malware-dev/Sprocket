@@ -6,6 +6,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Reactor.Host.Features.Shell;
+using Reactor.Host.Machine;
 using Xunit;
 
 namespace Reactor.Host.Tests;
@@ -23,7 +24,7 @@ public class ScrollTests
     [AvaloniaFact]
     public void TheBlocksListScrollsWhenItIsTallerThanItsColumn()
     {
-        var window = new MainWindow();
+        var window = new MainWindow(Simulation.Fresh());
         window.Show();
         var editor = window.Editor;
 

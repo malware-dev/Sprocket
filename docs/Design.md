@@ -127,6 +127,33 @@ on every rebuild, so an id captured when a control was made is dead the moment a
 changes - and the failure is silent, because pressing a dead id does nothing at all. Read it
 at the moment of use.
 
+### What counts as one operation
+
+Every change to a sequence is recorded so it can be taken back, which forces a question that
+had never been asked out loud: **where does one change stop and the next begin?** It can be as
+small as one press of *move up*, or as large as searching a whole ship, selecting eight blocks
+and settling on one thing to do to them.
+
+"Does this affect the integrity of the system" is the obvious test and it is not enough - the
+picker writing through *did* affect it. Three questions do the work:
+
+- **An operation is what the user would say they did.** Ask a player. They say "I moved that
+  step up", or "I made it close the outer door instead". Nobody has ever said "I ticked the
+  outer door" - that was not a thing they did, it was a keystroke inside a thing they were
+  doing. This is the same boundary undo wants, and the same one that will go over the wire.
+- **Anything the runtime can see may only hold a state somebody chose.** Not "did it need to
+  affect integrity" but "was anything watching". A sequence runs while it is edited, so a
+  value written before somebody has settled on it is a machine acting on a decision nobody
+  made. Half-made choices belong somewhere nothing is looking.
+- **Fold a run of changes into one exactly when the states in between were not chosen.**
+  Moving a step up five rows is five operations, because each row it passes through is a
+  position somebody clicked to and would be content to leave it at. Typing a nine-letter name
+  is one, because "Let me o" is not a name anybody chose - it is debris on the way to one.
+
+The first two are independent and both have to be asked. Correct boundaries with a live model
+still lets the runtime watch a half-choice; a scratch buffer with wrong boundaries still gives
+an undo that either throws away too much or has to be pressed eleven times.
+
 Three consequences worth stating outright, because they are what make the rest cohere:
 
 - **Nothing nests.** Steps are a flat numbered list. Nesting is what defeats novices,
@@ -135,9 +162,14 @@ Three consequences worth stating outright, because they are what make the rest c
 - **Nothing iterates.** A trigger or a step takes several blocks at once, so the
   collection is the ordinary case and the loop never appears. There is no counter, no
   termination condition and no iteration variable.
-- **The program is live.** There is no build, no run, no save. A change takes effect
-  as it is made, which is why nothing needs committing and why "Done" only ever means
-  "I have finished", never "apply this".
+- **The program is live.** There is no build, no run, no save. A change takes effect as it
+  is made, and the program as a whole never needs committing.
+
+  *That is about the program, not about every tap on the way to a decision. This bullet used
+  to end "and Done only ever means I have finished, never apply this", and the picker was
+  written to match: it was handed the step's own list of targets and ticked entries straight
+  into it, so a half-made choice was already live on a running machine. Choosing a thing is
+  one process with a beginning and an end, and Done is its end.*
 
 ## The model
 
@@ -407,17 +439,31 @@ the arm is halfway out for most of the time it is moving.
 
 *Wanted by: B, F, G, and the middle rung of O.*
 
-Every state today is a boolean signal; a vent's "62%" is display text the language
-cannot reach.
+**The model half of this is now built.** A reading is an `EntityValue` - a flag, a number
+or a text - and a state is a `Relation` against one: is, is not, above, at least, below, at
+most. A host declares what kind each property gives, so the editor can offer the comparisons
+that mean something and no others. The simulated tank publishes its level as a number and
+"is low" is `Below 0.25` declared on the kind, where it used to decide it was low and hand
+core a bare bool, throwing the number away before anything could ask a different question.
+
+*It got there by way of a mistake worth remembering.* The model had boolean signals as its
+primitive and treated a number as something it might support one day. That is backwards: a
+flag is a property whose readings happen to be true and false, no more special than a fill
+level or the name somebody gave a block. Every attempt to keep "state" and "property" as
+separate ideas ran into the fact that they are the same idea.
+
+What is **not** built is the authoring. Only a host can declare a state today; nobody using
+Reactor can write "below a fifth" for themselves, which is what F and G actually ask for.
 
 The stories split this cleanly in two, and the split is the decision:
 
 - **against a chosen number** - below a fifth, above half. Satisfies F and G, and a
-  progress bar.
+  progress bar. *The runtime can do this now; only the authoring is missing.*
 - **against another reading** - match the far side. Only B wants this, and B cannot be
   satisfied without it, because neither operand is ever a constant: not the outside,
   which is whatever the planet is, and not the inside, which is whatever damage has
-  left it.
+  left it. *Not modelled: a relation compares a reading to a fixed operand, never to a
+  second reading.*
 
 The first is much the cheaper and does most of the work. Building only the first is a
 defensible answer, so long as it is a decision rather than an accident.
@@ -522,7 +568,7 @@ sequences.
 
 *Wanted by: P, K.*
 
-A device is referenced by id. A rebuilt block is a new entity with a new id and usually
+An entity is referenced by id. A rebuilt block is a new entity with a new id and usually
 a default name, so every reference to the destroyed one is dead and each has to be
 repaired separately. A door used by six steps across two sequences is six repairs.
 
@@ -587,11 +633,18 @@ explanation. Losing the easy cases is how the hard ones become unanswerable.
 
 ## Where the prototype stands
 
-The editor works, and the abstraction has held up: core hands a target a small set of
-domain-shaped components - a block list, a search, a column path, a sequence - and
-decides nothing about layout. A second target reimplements one file.
+The editor works, and the abstraction has held up under a lot of pushing. Core hands a
+target a small set of domain-shaped components - a `StartComponent`, a `StatusListComponent`,
+a `PickComponent` of stages, a `SequenceComponent` - and decides nothing about layout. Even
+the noun is the host's: core says *entity* and Space Engineers says *block*, because the two
+are not the same claim and only one of them belongs to a game.
 
-Of the nine questions above, none contradicts what is built. Two reach past the
-language into the world model rather than adding to it - quantities, and reading a
-block's properties well enough to put them back - so those are the ones to design most
-carefully before writing any of them.
+Of the nine questions above, quantities is now half answered - see decision 2 - and none of
+the rest contradicts what is built. Reading a block's properties well enough to put them back
+is the one still reaching past the language into the world model, so it is the one to design
+most carefully before writing any of it.
+
+*The editor's own interface has been worked over hard, and `docs/Editor.md` is where that
+lives rather than here. The load-bearing conclusions: narrowing runs one way only, one trip
+through a picker is one edit, a machine cannot be rewired while it runs, and a running
+sequence is shown as a thing being watched rather than as an editor with its hands tied.*

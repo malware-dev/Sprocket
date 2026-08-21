@@ -3,7 +3,7 @@ using Reactor.World;
 namespace Reactor.Host.Machine;
 
 /// <summary>
-/// The device vocabulary for the simulated ship.
+/// The entity vocabulary for the simulated ship.
 /// </summary>
 /// <remarks>
 /// Core knows nothing about doors or lights. In Space Engineers this catalogue is
@@ -21,9 +21,13 @@ namespace Reactor.Host.Machine;
 /// </remarks>
 static class Kinds
 {
-    public static readonly DeviceKind Door = new DeviceKind("door", "Door")
-        .WithEvent("opened", "open", SignalEdge.Rising, "finishes opening")
-        .WithEvent("shut", "shut", SignalEdge.Rising, "finishes closing")
+    public static readonly EntityKind Door = new EntityKind("door", "Door")
+        .WithIcon("door")
+        .WithProperty("open", "open")
+        .WithProperty("shut", "shut")
+        .WithProperty("locked", "locked")
+        .WithEvent("opened", "open", Edge.Rising, "finishes opening")
+        .WithEvent("shut", "shut", Edge.Rising, "finishes closing")
         .WithState("is-open", "open", true, "is open")
         .WithState("is-shut", "shut", true, "is shut")
         .WithState("is-locked", "locked", true, "is locked")
@@ -33,34 +37,50 @@ static class Kinds
         .WithAction("lock", "lock", "is-locked")
         .WithAction("unlock", "unlock", "is-unlocked");
 
-    public static readonly DeviceKind Light = new DeviceKind("light", "Light")
-        .WithEvent("switched-on", "on", SignalEdge.Rising, "comes on")
-        .WithEvent("switched-off", "on", SignalEdge.Falling, "goes out")
+    public static readonly EntityKind Light = new EntityKind("light", "Light")
+        .WithIcon("light")
+        .WithProperty("on", "switched on")
+        .WithEvent("switched-on", "on", Edge.Rising, "comes on")
+        .WithEvent("switched-off", "on", Edge.Falling, "goes out")
         .WithState("is-on", "on", true, "is on")
         .WithState("is-off", "on", false, "is off")
         .WithAction("on", "turn on", "is-on")
         .WithAction("off", "turn off", "is-off");
 
-    public static readonly DeviceKind Sensor = new DeviceKind("sensor", "Sensor")
-        .WithEvent("detects", "detecting", SignalEdge.Rising, "detects something")
-        .WithEvent("clears", "detecting", SignalEdge.Falling, "stops detecting")
+    public static readonly EntityKind Sensor = new EntityKind("sensor", "Sensor")
+        .WithIcon("sensor")
+        .WithProperty("detecting", "detecting something")
+        .WithEvent("detects", "detecting", Edge.Rising, "detects something")
+        .WithEvent("clears", "detecting", Edge.Falling, "stops detecting")
         .WithState("is-detecting", "detecting", true, "is detecting something")
         .WithState("is-clear", "detecting", false, "is clear");
 
-    public static readonly DeviceKind Button = new DeviceKind("button", "Button")
-        .WithEvent("pressed", "pressed", SignalEdge.Rising, "is pressed");
+    // No state over "pressed" on purpose. It is true for a single tick, so "only if the
+    // button is pressed" would be a condition that is essentially never met - a sentence
+    // that reads perfectly and never works.
+    public static readonly EntityKind Button = new EntityKind("button", "Button")
+        .WithIcon("button")
+        .WithProperty("pressed", "pressed")
+        .WithEvent("pressed", "pressed", Edge.Rising, "is pressed");
 
-    public static readonly DeviceKind Tank = new DeviceKind("tank", "Hydrogen Tank")
-        .WithEvent("runs-low", "low", SignalEdge.Rising, "runs low")
-        .WithEvent("recovers", "low", SignalEdge.Falling, "is topped up")
-        .WithState("is-low", "low", true, "is low")
-        .WithState("is-fine", "low", false, "has plenty");
+    /// <summary>
+    /// The kind that shows why properties are worth having: it reads a number, and "low" is
+    /// a relation against it rather than something the tank decided in advance.
+    /// </summary>
+    public static readonly EntityKind Tank = new EntityKind("tank", "Hydrogen Tank")
+        .WithIcon("tank")
+        .WithProperty("fill", ValueKind.Number, "fill level")
+        .WithState("is-low", "fill", Relation.Below, EntityValue.Of(0.25), "is low")
+        .WithState("is-fine", "fill", Relation.AtLeast, EntityValue.Of(0.25), "has plenty");
 
-    public static readonly DeviceKind Vent = new DeviceKind("vent", "Air Vent")
-        .WithEvent("filled", "air", SignalEdge.Rising, "finishes filling")
-        .WithEvent("emptied", "empty", SignalEdge.Rising, "finishes emptying")
+    public static readonly EntityKind Vent = new EntityKind("vent", "Air Vent")
+        .WithIcon("vent")
+        .WithProperty("air", "has air")
+        .WithProperty("empty", "is empty")
+        .WithEvent("filled", "air", Edge.Rising, "finishes filling")
+        .WithEvent("emptied", "empty", Edge.Rising, "finishes emptying")
         .WithState("has-air", "air", true, "has air")
         .WithState("is-empty", "empty", true, "is empty")
-        .WithAction("pump-in", "pump the air back in", "has-air")
-        .WithAction("pump-out", "pump the air out", "is-empty");
+        .WithAction("pressurize", "pressurize", "has-air")
+        .WithAction("depressurize", "depressurize", "is-empty");
 }

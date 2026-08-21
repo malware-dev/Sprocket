@@ -7,7 +7,7 @@ namespace Reactor.World
     /// </summary>
     /// <remarks>
     /// Scope is the host's responsibility, and it is not negotiable at this level:
-    /// <see cref="Devices"/> contains this construct only - the grid the Reactor unit
+    /// <see cref="Entities"/> contains this construct only - the grid the Reactor unit
     /// sits on plus anything mechanically connected to it by rotors, pistons and
     /// hinges. Connectors, landing gear and magplates are docking, not construction,
     /// so whatever is on the other side of them is somebody else's machine and never
@@ -23,10 +23,20 @@ namespace Reactor.World
         /// Everything on this construct, right now. Re-read rather than cached -
         /// blocks get welded on and shot off while the program is running.
         /// </summary>
-        IReadOnlyList<IDevice> Devices { get; }
+        IReadOnlyList<IEntity> Entities { get; }
 
         /// <summary>
-        /// Looks up a device by id, or returns null if it is no longer part of this
+        /// What the people playing call these things.
+        /// </summary>
+        /// <remarks>
+        /// Here rather than anywhere else because everything else about what an entity is comes
+        /// from the host too - the words for its status, the display name of its kind. What it
+        /// is called as a category is the same kind of fact, from the same authority.
+        /// </remarks>
+        EntityNoun Noun { get; }
+
+        /// <summary>
+        /// Looks up an entity by id, or returns null if it is no longer part of this
         /// construct.
         /// </summary>
         /// <remarks>
@@ -35,9 +45,9 @@ namespace Reactor.World
         /// indistinguishable from a rule that is working, which is exactly the kind
         /// of silent failure that makes automation impossible to trust.
         /// </remarks>
-        IDevice FindDevice(long deviceId);
+        IEntity FindEntity(long entityId);
 
-        /// <summary>Tells a device to do something.</summary>
-        void Invoke(IDevice device, string actionId);
+        /// <summary>Tells an entity to do something.</summary>
+        void Invoke(IEntity entity, string actionId);
     }
 }

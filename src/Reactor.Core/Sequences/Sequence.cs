@@ -47,5 +47,21 @@ namespace Reactor.Sequences
         /// normal way to work out what it was doing, so this is not deletion.
         /// </summary>
         public bool Enabled { get; set; }
+
+        /// <summary>The machine this belongs to.</summary>
+        public AutomationSystem System { get; internal set; }
+
+        /// <summary>
+        /// Whether it may actually run, which needs its own switch and its machine's.
+        /// </summary>
+        /// <remarks>
+        /// The two are asked separately everywhere else, because "I parked this one rule" and
+        /// "I am rewiring the whole airlock" are different intentions and each has to survive
+        /// the other. This is the only place they meet.
+        /// </remarks>
+        public bool CanRun
+        {
+            get { return Enabled && (System == null || System.Enabled); }
+        }
     }
 }

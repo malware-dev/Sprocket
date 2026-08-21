@@ -3,6 +3,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Reactor.Host.Features.Shell;
+using Reactor.Host.Machine;
 using Reactor.Ui;
 using Xunit;
 
@@ -21,7 +22,7 @@ public class RepeatedTickTests
     [AvaloniaFact]
     public void TickingRepeatedlyOnEveryScreenDoesNotThrow()
     {
-        var window = new MainWindow();
+        var window = new MainWindow(Simulation.Fresh());
         window.Show();
         var editor = window.Editor;
 
@@ -72,7 +73,7 @@ public class RepeatedTickTests
     [AvaloniaFact]
     public void ScreensDoNotRebuildThemselvesWhileNothingHappens()
     {
-        var window = new MainWindow();
+        var window = new MainWindow(Simulation.Fresh());
         window.Show();
         var editor = window.Editor;
 

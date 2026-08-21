@@ -16,11 +16,21 @@ namespace Reactor.Host.Features.Shell;
 /// </remarks>
 public class MainWindow : Window
 {
-    readonly Simulation _simulation = new();
+    readonly Simulation _simulation;
     readonly EditorView _view;
 
-    public MainWindow()
+    public MainWindow() : this(new Simulation())
     {
+    }
+
+    /// <summary>
+    /// With a ship of somebody else's choosing - which in practice means a test's, so it can
+    /// start from an empty program rather than from whatever is in the real save.
+    /// </summary>
+    internal MainWindow(Simulation simulation)
+    {
+        _simulation = simulation;
+
         Title = "Reactor";
         Width = 820;
         Height = 680;
@@ -36,6 +46,9 @@ public class MainWindow : Window
         root.Children.Add(strip);
         root.Children.Add(_view);
         Content = root;
+
+        // Closing is the one moment a timer cannot cover.
+        Closing += (_, _) => _simulation.Save();
     }
 
     /// <summary>The editor being rendered. Exposed so tests can drive it.</summary>
@@ -56,9 +69,9 @@ public class MainWindow : Window
         var row = Widgets.Stack(Orientation.Horizontal);
         row.Children.Add(Widgets.Label("Prototype - stands in for the game:", Palette.Faint, 11));
 
-        foreach (var device in _simulation.Pokeable())
+        foreach (var entity in _simulation.Pokeable())
         {
-            switch (device)
+            switch (entity)
             {
                 case SimButton button:
                 {

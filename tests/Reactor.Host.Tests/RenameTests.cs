@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Reactor.Host.Features.Shell;
+using Reactor.Host.Machine;
 using Xunit;
 
 namespace Reactor.Host.Tests;
@@ -18,7 +19,7 @@ public class RenameTests
     [AvaloniaFact]
     public void PressingAnywhereOnTheHeadingEditsItInPlace()
     {
-        var window = new MainWindow();
+        var window = new MainWindow(Simulation.Fresh());
         window.Show();
         var editor = window.Editor;
 
@@ -59,6 +60,55 @@ public class RenameTests
         Assert.False(box.IsVisible);
         Assert.Equal(before, header.Bounds.Height);
     }
+
+    /// <summary>
+    /// The heading and Back line up, and the header does not resize as a screen changes.
+    /// </summary>
+    /// <remarks>
+    /// Back used to be centred against the title and subtitle together, which put it half a
+    /// line below the title on every screen with no subtitle. The subtitle's line stays
+    /// reserved either way: a picker's empties the moment the pick is complete, and a header
+    /// that shrank when it did would move the screen under somebody mid-task.
+    /// </remarks>
+    [AvaloniaFact]
+    public void TheHeadingLinesUpWithBackAndTheHeaderHoldsItsHeight()
+    {
+        var window = new MainWindow(Simulation.Fresh());
+        window.Show();
+        var editor = window.Editor;
+
+        editor.NewSystem("Airlock");
+        editor.PressStart("When...");
+        editor.PressBlock("Airlock Button");
+        Run(window);
+
+        // Mid-pick: this screen has a subtitle.
+        var tall = Header(window).Bounds.Height;
+        Assert.NotEqual("", editor.Screen.Subtitle);
+
+        editor.PressChoice("is pressed");
+        Run(window);
+
+        // Complete: the subtitle emptied, and the header must not have moved.
+        Assert.Equal("", editor.Screen.Subtitle);
+        Assert.Equal(tall, Header(window).Bounds.Height);
+
+        editor.PressPrimary();
+        Run(window);
+
+        // A sequence never has one at all, and the title still lines up with Back.
+        Assert.Equal(tall, Header(window).Bounds.Height);
+        Assert.Equal(Middle(window, Back(window)), Middle(window, Title(window)), 1);
+    }
+
+    static double Middle(MainWindow window, Visual visual) =>
+        visual.TranslatePoint(new Point(0, visual.Bounds.Height / 2), window)!.Value.Y;
+
+    static TextBlock Title(MainWindow window) =>
+        window.GetVisualDescendants().OfType<TextBlock>().First(t => t.FontSize > 14);
+
+    static Button Back(MainWindow window) =>
+        window.GetVisualDescendants().OfType<Button>().First(b => b.Content is "‹ Back");
 
     static Border Header(MainWindow window) =>
         window.GetVisualDescendants().OfType<Border>()

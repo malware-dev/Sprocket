@@ -30,10 +30,23 @@ sealed class ColumnPickRenderer : ComponentRenderer
 {
     const double ColumnWidth = 250;
 
+    /// <summary>
+    /// How big a thing's picture is drawn here.
+    /// </summary>
+    /// <remarks>
+    /// Entirely this host's number. Core hands over a name and says nothing about size, which
+    /// it should not: what a picture is worth depends on the game. Space Engineers draws
+    /// recognisable artwork for every block type and it earns the room; a game whose things
+    /// all look alike would want it smaller, or absent.
+    /// </remarks>
+    const double IconSize = 34;
+
     sealed class RowVisual
     {
         public Button Button = null!;
         public TextBlock Mark = null!;
+        public Border? Icon;
+        public TextBlock? IconGlyph;
         public TextBlock Name = null!;
         public TextBlock Detail = null!;
         public Ellipse Light = null!;
@@ -95,7 +108,7 @@ sealed class ColumnPickRenderer : ComponentRenderer
     public override void Update()
     {
         // Core says when it has changed something, and says nothing the rest of the time. An
-        // ordinary tick therefore costs one comparison, which is the whole point of the number.
+        // ordinary tick therefore costs one relation, which is the whole point of the number.
         if (_seenRevision == _model.Revision)
             return;
 
@@ -388,7 +401,7 @@ sealed class ColumnPickRenderer : ComponentRenderer
 
         while (visual.Visible.Count < stage.Entries.Count)
         {
-            var row = BuildRow(single);
+            var row = BuildRow(single, stage.HasIcons);
             visual.Visible.Add(row);
             visual.Rows.Children.Add(row.Button);
         }
@@ -412,6 +425,14 @@ sealed class ColumnPickRenderer : ComponentRenderer
                 : (stage.AllowsMany ? "○" : "·");
             row.Mark.Foreground = entry.IsChosen ? Palette.Live : Palette.Faint;
 
+            // Standing in for artwork we do not have. A host with real pictures resolves the
+            // name; this one takes its first letter and admits what it is.
+            if (row.IconGlyph != null)
+            {
+                var icon = entry.Icon ?? "";
+                row.IconGlyph.Text = icon.Length == 0 ? "" : icon.Substring(0, 1).ToUpperInvariant();
+            }
+
             row.Name.Text = entry.Text;
 
             var detail = Detail(entry);
@@ -425,15 +446,38 @@ sealed class ColumnPickRenderer : ComponentRenderer
         }
     }
 
-    RowVisual BuildRow(bool single)
+    RowVisual BuildRow(bool single, bool withIcon)
     {
         var row = new RowVisual();
-        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto") };
+        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,Auto,*,Auto") };
 
         // A tick for things you collect, a dot for things you settle on.
         row.Mark = Widgets.Label("", Palette.Faint, 13, true);
         row.Mark.Margin = new Thickness(0, 0, 8, 0);
         grid.Children.Add(row.Mark);
+
+        // The game has artwork for every kind of thing and this is where it goes. We have
+        // none, so a letter stands in - enough to prove the picture reaches the row and to
+        // show what the column costs. Reserved for the whole stage or for none of it, so rows
+        // never jog sideways depending on which kinds happen to be listed.
+        if (withIcon)
+        {
+            row.IconGlyph = Widgets.Label("", Palette.Muted, 15, true);
+            row.IconGlyph.HorizontalAlignment = HorizontalAlignment.Center;
+            row.IconGlyph.VerticalAlignment = VerticalAlignment.Center;
+            row.Icon = new Border
+            {
+                Child = row.IconGlyph,
+                Width = IconSize,
+                Height = IconSize,
+                CornerRadius = new CornerRadius(4),
+                Background = Palette.SlotFill,
+                Margin = new Thickness(0, 0, 8, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(row.Icon, 1);
+            grid.Children.Add(row.Icon);
+        }
 
         row.Name = Widgets.Label("", Palette.Ink, 12);
         row.Detail = Widgets.Label("", Palette.Faint, 11);
@@ -441,7 +485,7 @@ sealed class ColumnPickRenderer : ComponentRenderer
         var text = Widgets.Stack();
         text.Children.Add(row.Name);
         text.Children.Add(row.Detail);
-        Grid.SetColumn(text, 1);
+        Grid.SetColumn(text, 2);
         grid.Children.Add(text);
 
         row.Light = new Ellipse
@@ -451,7 +495,7 @@ sealed class ColumnPickRenderer : ComponentRenderer
             Fill = Palette.Live,
             VerticalAlignment = VerticalAlignment.Center
         };
-        Grid.SetColumn(row.Light, 2);
+        Grid.SetColumn(row.Light, 3);
         grid.Children.Add(row.Light);
 
         row.BadgeText = Widgets.Label("", Palette.Muted, 11);
@@ -463,7 +507,7 @@ sealed class ColumnPickRenderer : ComponentRenderer
             Padding = new Thickness(6, 1),
             VerticalAlignment = VerticalAlignment.Center
         };
-        Grid.SetColumn(row.Badge, 2);
+        Grid.SetColumn(row.Badge, 3);
         grid.Children.Add(row.Badge);
 
         row.Button = Widgets.Row(grid);

@@ -10,11 +10,11 @@ namespace Reactor.Sequences
     }
 
     /// <summary>
-    /// "When any of these devices ___".
+    /// "When any of these entities ___".
     /// </summary>
     /// <remarks>
     /// Sources are picked inline and belong to this sequence alone - no named sets,
-    /// no saved groups, nothing to maintain. Selecting several devices is the
+    /// no saved groups, nothing to maintain. Selecting several entities is the
     /// ordinary case rather than an advanced one, which is what lets the whole
     /// concept of iterating over a collection stay out of the language.
     ///
@@ -47,7 +47,7 @@ namespace Reactor.Sequences
         /// </remarks>
         public bool RequiresAll { get; set; }
 
-        /// <summary>The <see cref="World.DeviceEvent"/> id being listened for.</summary>
+        /// <summary>The <see cref="World.EntityEvent"/> id being listened for.</summary>
         public string EventId { get; set; }
     }
 

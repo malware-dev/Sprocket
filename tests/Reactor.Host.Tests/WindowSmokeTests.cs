@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Reactor.Host.Features.Shell;
+using Reactor.Host.Machine;
 using Reactor.Ui;
 using Xunit;
 
@@ -34,7 +35,7 @@ public class WindowSmokeTests
     [AvaloniaFact]
     public void EveryComponentRendersAndLaysOut()
     {
-        var window = new MainWindow();
+        var window = new MainWindow(Simulation.Fresh());
         window.Show();
         window.Tick();
         Layout(window);

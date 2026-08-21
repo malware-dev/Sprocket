@@ -17,12 +17,41 @@ namespace Reactor.Host.Machine;
 /// </remarks>
 sealed class Simulation
 {
+    /// <summary>
+    /// How often the program is written out, in ticks.
+    /// </summary>
+    /// <remarks>
+    /// A second. Frequent enough that nothing anybody built is ever more than a moment from
+    /// safety, rare enough that it is not a file write per frame - and the write is skipped
+    /// entirely when the text has not changed, which is nearly always.
+    /// </remarks>
+    const int SaveEvery = 60;
+
+    readonly Store _store;
+
     int _frame;
 
-    public Simulation()
+    public Simulation() : this(new Store("prototype"))
     {
+    }
+
+    /// <summary>A ship that remembers nothing, for tests.</summary>
+    public static Simulation Fresh()
+    {
+        return new Simulation(Store.Nowhere());
+    }
+
+    public Simulation(Store store)
+    {
+        _store = store;
+
         World = DemoShip.Build();
         Program = new Automation();
+
+        // Before the runner and the editor exist, so neither ever sees an empty program that
+        // is about to be filled in underneath it.
+        _store.Load(Program);
+
         Runner = new AutomationRunner(Program, World);
         Editor = new ReactorEditor(World, Program, Runner);
     }
@@ -34,6 +63,11 @@ sealed class Simulation
     public AutomationRunner Runner { get; }
 
     public ReactorEditor Editor { get; }
+
+    /// <summary>Writes the program out now, whatever the clock says.</summary>
+    public void Save() => _store.SaveIfChanged(Program);
+
+    public string Where => _store.Path_;
 
     /// <summary>
     /// One tick. The ship moves first so the sequences always sample signals that are
@@ -49,15 +83,18 @@ sealed class Simulation
 
         World.Tick();
         Editor.Tick(_frame);
+
+        if (_frame % SaveEvery == 0)
+            _store.SaveIfChanged(Program);
     }
 
-    /// <summary>Devices the tester can poke, standing in for the world doing something.</summary>
-    public IEnumerable<SimDevice> Pokeable()
+    /// <summary>Entities the tester can poke, standing in for the world doing something.</summary>
+    public IEnumerable<SimEntity> Pokeable()
     {
-        foreach (var device in World.SimDevices)
+        foreach (var entity in World.SimEntities)
         {
-            if (device is SimSensor or SimButton or SimTank)
-                yield return device;
+            if (entity is SimSensor or SimButton or SimTank)
+                yield return entity;
         }
     }
 }

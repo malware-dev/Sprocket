@@ -40,7 +40,7 @@ namespace Reactor.Editing
                 return system.Name;
 
             Names.Clear();
-            CollectDeviceNames(world, system, Names);
+            CollectEntityNames(world, system, Names);
 
             var common = CommonPrefix(Names);
             if (common.Length > 0)
@@ -82,7 +82,7 @@ namespace Reactor.Editing
             return running ? Running : Idle;
         }
 
-        static void CollectDeviceNames(IWorld world, AutomationSystem system, List<string> result)
+        static void CollectEntityNames(IWorld world, AutomationSystem system, List<string> result)
         {
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
@@ -100,7 +100,7 @@ namespace Reactor.Editing
 
                     var gate = step.Gate as OnceGate;
                     if (gate != null)
-                        AddNames(world, gate.Condition.Devices, result);
+                        AddNames(world, gate.Condition.Entities, result);
                 }
             }
         }
@@ -119,9 +119,9 @@ namespace Reactor.Editing
         {
             for (var i = 0; i < ids.Count; i++)
             {
-                var device = world.FindDevice(ids[i]);
-                if (device != null && !string.IsNullOrEmpty(device.Name))
-                    result.Add(device.Name);
+                var entity = world.FindEntity(ids[i]);
+                if (entity != null && !string.IsNullOrEmpty(entity.Name))
+                    result.Add(entity.Name);
             }
         }
 

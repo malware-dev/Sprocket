@@ -4,24 +4,24 @@ using Reactor.World;
 namespace Reactor.Editing
 {
     /// <summary>
-    /// Narrows a list of devices by free text and kind.
+    /// Narrows a list of entities by free text and kind.
     /// </summary>
     /// <remarks>
     /// A real construct has hundreds of blocks, so every list that can contain
-    /// devices has to be searchable - the ship browser and the slot pickers alike.
+    /// entities has to be searchable - the ship browser and the slot pickers alike.
     /// This lives in core so all of them narrow identically: a target that invented
     /// its own matching would quietly behave differently from the others.
     ///
     /// Matching is deliberately forgiving. Someone hunting for a door types "door",
     /// not a prefix, and case is never their problem.
     /// </remarks>
-    public static class DeviceQuery
+    public static class EntityQuery
     {
         /// <summary>
-        /// Appends every device matching both filters to <paramref name="result"/>.
+        /// Appends every entity matching both filters to <paramref name="result"/>.
         /// An empty search or a null kind means "no opinion", not "match nothing".
         /// </summary>
-        public static void Filter(IList<IDevice> candidates, string search, string kindId, List<IDevice> result)
+        public static void Filter(IList<IEntity> candidates, string search, string kindId, List<IEntity> result)
         {
             for (var i = 0; i < candidates.Count; i++)
             {
@@ -36,26 +36,26 @@ namespace Reactor.Editing
             return string.IsNullOrEmpty(search) || ContainsIgnoreCase(text, search);
         }
 
-        public static bool Matches(IDevice device, string search, string kindId)
+        public static bool Matches(IEntity entity, string search, string kindId)
         {
-            if (device == null)
+            if (entity == null)
                 return false;
 
-            if (!string.IsNullOrEmpty(kindId) && device.Kind.Id != kindId)
+            if (!string.IsNullOrEmpty(kindId) && entity.Kind.Id != kindId)
                 return false;
 
             if (string.IsNullOrEmpty(search))
                 return true;
 
-            return ContainsIgnoreCase(device.Name, search)
-                || ContainsIgnoreCase(device.Kind.DisplayName, search);
+            return ContainsIgnoreCase(entity.Name, search)
+                || ContainsIgnoreCase(entity.Kind.DisplayName, search);
         }
 
         /// <summary>
         /// The distinct kinds present among the candidates, so the kind filter offers
         /// only what is actually on this construct rather than a fixed catalogue.
         /// </summary>
-        public static void KindsPresent(IList<IDevice> candidates, List<DeviceKind> result)
+        public static void KindsPresent(IList<IEntity> candidates, List<EntityKind> result)
         {
             for (var i = 0; i < candidates.Count; i++)
             {
@@ -65,7 +65,7 @@ namespace Reactor.Editing
             }
         }
 
-        static bool Contains(List<DeviceKind> kinds, DeviceKind kind)
+        static bool Contains(List<EntityKind> kinds, EntityKind kind)
         {
             for (var i = 0; i < kinds.Count; i++)
             {
@@ -75,7 +75,7 @@ namespace Reactor.Editing
             return false;
         }
 
-        // Written out rather than using string.IndexOf with a comparison enum, which
+        // Written out rather than using string.IndexOf with a relation enum, which
         // is one of the overloads that is easy to lose on an older target framework.
         static bool ContainsIgnoreCase(string haystack, string needle)
         {

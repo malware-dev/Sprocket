@@ -7,51 +7,51 @@ namespace Reactor.Runtime
     public static class Conditions
     {
         /// <summary>
-        /// True when every named device is in the named state.
+        /// True when every named entity is in the named state.
         /// </summary>
         /// <remarks>
-        /// An unfinished condition - no devices picked yet - is false rather than
+        /// An unfinished condition - no entities picked yet - is false rather than
         /// true. A half-written gate that let everything through would be a sequence
         /// that appears to work while the user is still building it, and then behaves
         /// differently once they finish.
         /// </remarks>
         public static bool IsTrue(IWorld world, Condition condition)
         {
-            if (condition == null || condition.Devices.Count == 0)
+            if (condition == null || condition.Entities.Count == 0)
                 return false;
 
-            for (var i = 0; i < condition.Devices.Count; i++)
+            for (var i = 0; i < condition.Entities.Count; i++)
             {
-                if (!Holds(world, condition.Devices[i], condition.StateId))
+                if (!Holds(world, condition.Entities[i], condition.StateId))
                     return false;
             }
             return true;
         }
 
-        /// <summary>As <see cref="IsTrue"/>, but ignoring one device.</summary>
-        public static bool IsTrueExcept(IWorld world, Condition condition, long ignoreDeviceId)
+        /// <summary>As <see cref="IsTrue"/>, but ignoring one entity.</summary>
+        public static bool IsTrueExcept(IWorld world, Condition condition, long ignoreEntityId)
         {
-            for (var i = 0; i < condition.Devices.Count; i++)
+            for (var i = 0; i < condition.Entities.Count; i++)
             {
-                if (condition.Devices[i] == ignoreDeviceId)
+                if (condition.Entities[i] == ignoreEntityId)
                     continue;
-                if (!Holds(world, condition.Devices[i], condition.StateId))
+                if (!Holds(world, condition.Entities[i], condition.StateId))
                     return false;
             }
             return true;
         }
 
-        static bool Holds(IWorld world, long deviceId, string stateId)
+        static bool Holds(IWorld world, long entityId, string stateId)
         {
-            var device = world.FindDevice(deviceId);
-            if (device == null)
+            var entity = world.FindEntity(entityId);
+            if (entity == null)
                 return false;
 
-            var state = device.Kind.FindState(stateId);
+            var state = entity.Kind.FindState(stateId);
             if (state == null)
                 return false;
 
-            return device.GetSignal(state.SignalId) == state.WhenSignal;
+            return state.Holds(entity.GetValue(state.PropertyId));
         }
     }
 }

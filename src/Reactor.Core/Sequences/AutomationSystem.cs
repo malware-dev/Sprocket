@@ -27,6 +27,7 @@ namespace Reactor.Sequences
             Id = id;
             Name = "";
             Description = "";
+            Enabled = true;
         }
 
         public int Id { get; private set; }
@@ -52,6 +53,20 @@ namespace Reactor.Sequences
         /// </remarks>
         public string Description { get; set; }
 
+        /// <summary>
+        /// Whether this machine may run at all.
+        /// </summary>
+        /// <remarks>
+        /// Separate from each sequence's own switch rather than a shortcut for setting them
+        /// all, so switching an airlock off to rewire it and switching it back on afterwards
+        /// leaves the one sequence somebody had deliberately parked still parked.
+        ///
+        /// Rewiring means stopping the machine, not stopping three sequences one at a time -
+        /// and a half-stopped airlock, with the inner door's rule off and the outer door's
+        /// rule still live, is worse than either state.
+        /// </remarks>
+        public bool Enabled { get; set; }
+
         public IReadOnlyList<Sequence> Sequences { get { return _sequences; } }
 
         /// <summary>The ones on this ship. Never empty.</summary>
@@ -72,9 +87,19 @@ namespace Reactor.Sequences
             return instance;
         }
 
+        /// <summary>Puts back one of this machine that was saved, number and name intact.</summary>
+        public SystemInstance Restore(int number, string name)
+        {
+            var instance = new SystemInstance(number);
+            instance.Name = name;
+            _instances.Add(instance);
+            return instance;
+        }
+
         internal void Add(Sequence sequence)
         {
             _sequences.Add(sequence);
+            sequence.System = this;
         }
 
         internal bool Remove(Sequence sequence)

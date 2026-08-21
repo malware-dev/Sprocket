@@ -191,7 +191,7 @@ thing alongside sequences is a design question.
 **P - one door gone.** Half, and the half that exists is the good half. Reactor
 already notices: a lost block reads as "something's gone" in the sentence, and the
 sequence is flagged rather than quietly doing nothing. What is missing is repair. A
-device is referenced by `long Id`, and a rebuilt block in Space Engineers is a new
+entity is referenced by `long Id`, and a rebuilt block in Space Engineers is a new
 entity with a new id and usually a default name, so nothing re-binds on its own. One
 door used by six steps across two sequences is six repairs today.
 
@@ -291,7 +291,7 @@ What is left is narrower than it was. A keyboard's positional controls are held 
 and carry no magnitude; a stick's do. Rotational input is a rate rather than a position,
 which suits a crane well but means "how far over" is not always a question with an answer.
 So W's done-when is satisfiable with a stick and approximable with a keyboard, and that is a
-property of the input device rather than of anything we build.
+property of the input entity rather than of anything we build.
 
 *A note on an earlier claim.* This was briefly written up as the second story wanting
 something that is not a sequence, alongside O's screen. That was wrong, and O stands
