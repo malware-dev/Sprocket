@@ -54,6 +54,23 @@ namespace Reactor.Sim.Simulation
             _ship.Tick();
         }
 
+        /// <summary>
+        /// What screen the editor is on, and what it is called.
+        /// </summary>
+        /// <remarks>
+        /// For the headless harness to say where a script ended up. A press that misses lands nowhere
+        /// and looks exactly like a press that worked, which has already cost an hour once.
+        /// </remarks>
+        public string OnScreen
+        {
+            get
+            {
+                Reactor.Ui.EditorScreen screen = _ship.Editor.Screen;
+                return screen.Title + (string.IsNullOrEmpty(screen.Subtitle)
+                    ? "" : "  |  " + screen.Subtitle);
+            }
+        }
+
         /// <summary>Whether a question is open and wants the keyboard.</summary>
         public bool IsAsking
         {
@@ -91,6 +108,38 @@ namespace Reactor.Sim.Simulation
         public void Typed()
         {
             _view.Typed();
+        }
+
+        /// <summary>
+        /// The box keystrokes belong in, or null when nothing on screen is being typed into.
+        /// </summary>
+        /// <remarks>
+        /// Asked here rather than worked out by each caller. A question owns the keyboard while it is
+        /// open; otherwise it goes to whatever was focused, which is how a search box narrows a list as
+        /// somebody types. The window and the headless harness both need that answer and must not be
+        /// allowed to arrive at different ones.
+        /// </remarks>
+        public Phosphor.TextBox Typing
+        {
+            get { return _view.IsAsking ? _view.AskBox : _view.Focus; }
+        }
+
+        /// <summary>Types <paramref name="text" /> into whatever has the keyboard.</summary>
+        public void Type(string text)
+        {
+            Phosphor.TextBox box = Typing;
+            if (box == null || string.IsNullOrEmpty(text))
+                return;
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] >= ' ')
+                    box.InsertChar(text[i]);
+            }
+
+            // Every keystroke, not just the last. A search that only narrowed once somebody stopped
+            // typing would feel broken, and this is the path that proves it.
+            Typed();
         }
 
         /// <summary>Moves whatever is under the pointer. Positive scrolls down.</summary>

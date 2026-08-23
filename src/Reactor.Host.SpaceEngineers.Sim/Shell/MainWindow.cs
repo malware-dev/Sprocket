@@ -393,12 +393,7 @@ namespace Reactor.Sim.Shell
             if (_showProbe)
                 return _probe.Box;
 
-            if (_editor.IsAsking)
-                return _editor.AskBox;
-
-            // A search box on the screen itself, which is typed into in place rather than through a
-            // question. Every keystroke goes on to core, so the list narrows as somebody types.
-            return _editor.Focus;
+            return _editor.Typing;
         }
 
         /// <summary>Shows the caret immediately after an edit, so typing never hides it mid-blink.</summary>

@@ -30,12 +30,16 @@ namespace Reactor.Sim.Simulation
             public const int Drag = 1;
             public const int Tick = 2;
             public const int Scroll = 3;
+            public const int Type = 4;
+            public const int Enter = 5;
+            public const int Escape = 6;
 
             public int Kind;
             public Vector2 At;
             public Vector2 To;
             public int Count;
             public float Amount;
+            public string Text;
         }
 
         public static void Save(string path, int width, int height)
@@ -51,7 +55,7 @@ namespace Reactor.Sim.Simulation
         /// nothing knows where it is until it has been arranged, so a press before the first draw has
         /// nothing to land on.
         /// </remarks>
-        public static void Save(string path, int width, int height, IList<Step> script)
+        public static string Save(string path, int width, int height, IList<Step> script)
         {
             var surface = new PhosphorSurface();
             var scene = new EditorScene();
@@ -78,6 +82,7 @@ namespace Reactor.Sim.Simulation
                 }
 
                 bitmap.Save(path);
+                return scene.OnScreen;
             }
         }
 
@@ -86,6 +91,27 @@ namespace Reactor.Sim.Simulation
             if (step.Kind == Step.Press)
             {
                 scene.Press(step.At, 1);
+                bitmap.Render(root);
+                return;
+            }
+
+            if (step.Kind == Step.Type)
+            {
+                scene.Type(step.Text);
+                bitmap.Render(root);
+                return;
+            }
+
+            if (step.Kind == Step.Enter)
+            {
+                scene.CommitAsk();
+                bitmap.Render(root);
+                return;
+            }
+
+            if (step.Kind == Step.Escape)
+            {
+                scene.CancelAsk();
                 bitmap.Render(root);
                 return;
             }

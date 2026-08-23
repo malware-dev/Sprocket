@@ -34,7 +34,7 @@ namespace Reactor.Screens
         readonly Label _back = Widgets.Ghost(Widgets.Caps("< Back"));
         readonly Stack _titleRow = Widgets.RowOf(Space.Item);
         readonly Label _title = Widgets.Label("", Palette.Ink, Type.Title);
-        readonly TextBox _titleBox = new TextBox();
+        readonly TextBox _titleBox = Widgets.Box(Type.Title, Palette.PanelHot);
         readonly Label _pencil = Widgets.Label("rename", Palette.Faint, Type.Tiny);
         readonly Label _switch = Widgets.Label("", Palette.Ink, Type.Small);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Type.Small);
@@ -50,7 +50,7 @@ namespace Reactor.Screens
 
         readonly Stack _popup = Widgets.Column(Space.Item);
         readonly Label _askLabel = Widgets.Label("", Palette.Muted, Type.Tiny);
-        readonly TextBox _askBox = new TextBox();
+        readonly TextBox _askBox = Widgets.Box(Type.Body, Palette.Page);
         readonly Label _confirm = Widgets.Label("Continue", Palette.Ink, Type.Small);
 
         readonly List<ComponentView> _views = new List<ComponentView>();
@@ -96,9 +96,10 @@ namespace Reactor.Screens
             // The heading and the box that edits it share a place and a size, so swapping them moves
             // nothing. A popup would put a second copy of the name over the top of the first and ask which
             // one is real; the heading already says it, so it becomes the box instead of summoning one.
-            _titleBox.Scale = Type.Title;
-            _titleBox.Color = Palette.Ink;
-            _titleBox.Background = Palette.PanelHot;
+            // No padding on the heading's box: it stands where the heading stands, and room added
+            // inside it is room the heading did not have.
+            _titleBox.Padding = new Thickness();
+            _titleBox.Edge = Palette.None;
             _titleBox.IsEditing = true;
 
             _titleRow.Children.Add(_title);
@@ -130,10 +131,6 @@ namespace Reactor.Screens
             header.Children.Add(headerBlock);
             header.Children.Add(Widgets.Line());
 
-            _askBox.Scale = Type.Body;
-            _askBox.Background = Palette.Page;
-            _askBox.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
-            _askBox.Edge = Palette.Line;
             _askBox.IsEditing = true;
 
             _confirm.Padding = new Thickness(Space.PadX, Space.ChipY * 1.3f);
@@ -647,6 +644,12 @@ namespace Reactor.Screens
                 return;
 
             string answer = AskBox.Text;
+
+            // Carried from when the box opened, which is safe: an id is derived from what a command is
+            // for rather than counted out, so a rebuild between opening the box and answering it hands
+            // the same control the same number. Worth stating because `SetText` ignores an id it does
+            // not know without a word, so if this were ever wrong the answer would go missing in
+            // silence rather than fail.
             int command = _askCommand;
 
             // Empty means something when renaming - it hands the heading back to whatever the thing says
@@ -656,8 +659,6 @@ namespace Reactor.Screens
 
             Close();
 
-            // Read at the moment of use. Command ids are re-issued on a rebuild, so one captured when the
-            // box opened can be stale by the time the typing has finished.
             if (command != 0)
                 _editor.SetText(command, answer);
         }

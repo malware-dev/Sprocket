@@ -55,8 +55,9 @@ namespace Reactor.Sim
             {
                 BuildAvaloniaApp().SetupWithoutStarting();
 
-                Shot.Save(args[1], 1280, 690, Script(args, 2));
+                string ended = Shot.Save(args[1], 1280, 690, Script(args, 2));
                 Console.WriteLine("wrote " + args[1]);
+                Console.WriteLine("ended on: " + ended);
                 return;
             }
 
@@ -88,8 +89,9 @@ namespace Reactor.Sim
         /// A bare pair of numbers is a press, because that is nearly every line of nearly every script
         /// and making the common case wordless is worth the small asymmetry. <c>tick n</c> advances the
         /// ship's clock, which is the only way to reach anything drawn because a system is actually
-        /// running. <c>drag x y x y</c> picks something up and puts it down somewhere else, and
-        /// <c>scroll x y n</c> turns the wheel over a point.
+        /// running. <c>drag x y x y</c> picks something up and puts it down somewhere else,
+        /// <c>scroll x y n</c> turns the wheel over a point, and <c>type "words"</c>, <c>enter</c> and
+        /// <c>escape</c> work whatever box currently has the keyboard.
         /// </remarks>
         static List<Shot.Step> Script(string[] args, int from)
         {
@@ -106,6 +108,26 @@ namespace Reactor.Sim
                     tick.Count = int.Parse(args[i + 1], CultureInfo.InvariantCulture);
 
                     script.Add(tick);
+                    i += 1;
+                    continue;
+                }
+
+                if (word == "enter" || word == "escape")
+                {
+                    var key = new Shot.Step();
+                    key.Kind = word == "enter" ? Shot.Step.Enter : Shot.Step.Escape;
+
+                    script.Add(key);
+                    continue;
+                }
+
+                if (word == "type" && i + 1 < args.Length)
+                {
+                    var typed = new Shot.Step();
+                    typed.Kind = Shot.Step.Type;
+                    typed.Text = args[i + 1];
+
+                    script.Add(typed);
                     i += 1;
                     continue;
                 }

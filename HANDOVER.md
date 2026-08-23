@@ -309,6 +309,67 @@ Decoding uses `DirectXTexNet`, the same package Malforge's `DocGen` and `MyTsDes
 use for the same job. It is native and win-x64/x86 only, which makes the simulator formally
 Windows-only - it already was in practice.
 
+## Pick up here
+
+### Working without the game installed
+
+**Possible, and proven rather than assumed - but treat it as the exception.** The realistic
+expectation is that this project lives on the machine with the game. What follows is what
+actually happens on one without it, so that the state is recognisable rather than mysterious.
+
+With the game unreachable and only the cache present, the simulator renders identically - the game's own letterforms, the game's own
+block artwork, the same layout. Everything the code reaches for has been extracted already: the
+font page, both cursors, and the six block icons.
+
+**One thing has to travel: `%LOCALAPPDATA%\Reactor\SimContent`.** Thirteen files, 468 KB. It is
+outside the repository on purpose - it is Keen's content and not ours to redistribute - so
+nothing copies it for you and nothing can, because a machine without the game has nothing to
+copy it from.
+
+Forget it and the simulator still runs and is still usable. It fails *loudly*, which was the
+point: block artwork becomes magenta crossed boxes, and text falls back to a desktop face whose
+widths run 9 to 17 percent narrow. Layout work done in that state would be layout work done
+against the wrong numbers, so check `--content` before trusting a screenshot.
+
+What you cannot do without the game is **add** anything - a new symbol, another block icon, a
+colour to sample. That needs `--extract` on a machine that has it. So the polish pass wants one
+sitting of extraction here, taking everything the symbol work is going to need, before moving.
+
+### What the last sitting added
+
+- `Widgets.Box`, and the three colours it fixes. The caret, the selection and the hint were
+  Phosphor's own defaults and had never been shown the palette - a foreign blue behind a selected
+  heading. The cause was a missing factory: there is `Row`, `Ghost`, `Chip`, `Wash` and there was
+  no `Box`, so three text boxes were each assembled by hand and drifted.
+- The harness keyboard: `type "words"`, `enter`, `escape`. Routed through one
+  `EditorScene.Typing` so the window and the harness cannot disagree about where keystrokes go.
+- `ended on:` printed after every shot. A press that misses lands nowhere and looks exactly like
+  a press that worked.
+
+### What to check next time
+
+The layout and behaviour are where they should be **on the path I walked**, which was home to a
+system to a sequence to a picker. Both bugs found by using it - the options jumping, the wheel
+doing nothing - were on paths I had not. These are the ones still unwalked:
+
+1. **Drag-to-reorder.** Verified before the spacing pass, and `RowGap` moved from 3 to 4.8 in it.
+   The drag arithmetic has to agree with the layout or the gap opens somewhere the row does not
+   land. `--shot out.png <nav> drag x1 y1 x2 y2`.
+2. **A pick with three or more stages.** The only way the horizontal strip scrolling is
+   reachable, and the fallback in it - a column with nowhere to go carries the whole strip
+   sideways - is a judgement nobody has looked at yet.
+3. **A sequence with a wait step, a problem banner, a skipped badge.** All three are drawn from
+   state that has never been produced, so they have never been seen at all.
+
+### A gotcha that cost an hour
+
+**Tick once before believing a screen.** `ReactorEditor.Tick` re-reads `Title`, `Subtitle` and
+`CustomName` every tick, and nothing else does. A rename therefore lands in the model
+immediately and appears in the heading on the next tick - so a headless script that presses
+Enter and looks straight away sees the old name and reads exactly like a silent failure. It is
+not one. `SetText` also ignores an id it does not know without a word, which makes the wrong
+diagnosis very easy to reach for.
+
 ## Waiting for the polish pass
 
 Deliberately deferred, not forgotten. The layout and the behaviour are where they should be;

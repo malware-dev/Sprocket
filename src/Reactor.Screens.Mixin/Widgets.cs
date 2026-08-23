@@ -379,6 +379,34 @@ namespace Reactor.Screens
             return chip;
         }
 
+        /// <summary>
+        /// Somewhere to type.
+        /// </summary>
+        /// <remarks>
+        /// Here because it was not, and three boxes made in three places quietly kept Phosphor's own
+        /// defaults for the caret, the selection and the hint - three colours on screen that the palette
+        /// had never been asked about. Phosphor is right to have them: it knows nothing about Reactor
+        /// and something has to be drawn. Reactor is wrong to leave them.
+        /// </remarks>
+        public static TextBox Box(float scale, Color background)
+        {
+            var box = new TextBox();
+            box.Font = MyFontEnum.White;
+            box.Scale = scale;
+            box.Color = Palette.Ink;
+            box.Background = background;
+            box.Edge = Palette.Line;
+            box.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
+
+            box.CaretColor = Palette.Ink;
+            box.HintColor = Palette.Faint;
+
+            // A mid tone rather than the focus blue. The words stay their own colour while they are
+            // selected, and pale ink on the pale focus fill is two things the same brightness.
+            box.SelectionColor = Palette.Line;
+            return box;
+        }
+
         /// <summary>Something said against a coloured ground, because it needs reading.</summary>
         public static Label Wash(string text, Color ink, Color background)
         {

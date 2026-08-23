@@ -153,7 +153,7 @@ namespace Reactor.Screens
         readonly Stack _head = Widgets.Column(Space.Row);
         readonly Label _title = Widgets.Label("", Palette.Ink, Type.Body);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Type.Tiny);
-        readonly TextBox _narrow = new TextBox();
+        readonly TextBox _narrow = Widgets.Box(Type.Small, Palette.Page);
         readonly Label _kindLine = Widgets.Ghost("");
         readonly Label _showing = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly Stack _options = Widgets.RowOf(Space.Region);
@@ -180,10 +180,6 @@ namespace Reactor.Screens
             _title.Wraps = false;
             _title.Trims = true;
 
-            _narrow.Scale = Type.Small;
-            _narrow.Background = Palette.Page;
-            _narrow.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
-            _narrow.Edge = Palette.Line;
             _narrow.Hint = "Search";
 
             _empty.Padding = new Thickness(Space.Line, Space.Item, 0f, 0f);
