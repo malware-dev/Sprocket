@@ -35,6 +35,7 @@ namespace Phosphor
         {
             float along = 0f;
             float across = 0f;
+            bool placed = false;
 
             for (int i = 0; i < _children.Count; i++)
             {
@@ -53,13 +54,20 @@ namespace Phosphor
 
                 child.Measure(g, room);
 
+                // A collapsed child takes no room and no spacing either. Spacing counted from whether
+                // anything has actually been placed rather than from the index, or a collapsed first
+                // child would leave a gap where it used to be.
+                if (child.Collapsed)
+                    continue;
+
                 float childAlong = Horizontal ? child.DesiredSize.X : child.DesiredSize.Y;
                 float childAcross = Horizontal ? child.DesiredSize.Y : child.DesiredSize.X;
 
-                if (i > 0)
+                if (placed)
                     along += Spacing;
 
                 along += childAlong;
+                placed = true;
 
                 if (childAcross > across)
                     across = childAcross;
@@ -71,19 +79,34 @@ namespace Phosphor
         protected override void ArrangeContent(RectangleF bounds)
         {
             float cursor = Horizontal ? bounds.X : bounds.Y;
+            bool placed = false;
 
             for (int i = 0; i < _children.Count; i++)
             {
                 Element child = _children[i];
 
-                if (i > 0)
+                if (child.Collapsed)
+                    continue;
+
+                if (placed)
                     cursor += Spacing;
+
+                placed = true;
 
                 if (Horizontal)
                 {
-                    // Across the line a child is given the whole width, which is what makes a row of them
-                    // line up rather than each sitting at its own height.
-                    child.Arrange(new RectangleF(cursor, bounds.Y, child.DesiredSize.X, bounds.Height));
+                    // Across the line a child sits on the middle rather than being stretched to the
+                    // height of the tallest. A row is a line of words and controls of different sizes -
+                    // a switch beside a name, a light beside a sentence - and hanging the short ones from
+                    // the top makes them read as superscript rather than as part of the line.
+                    float height = child.DesiredSize.Y;
+                    float y = height > 0f && height < bounds.Height
+                        ? bounds.Y + (bounds.Height - height) * 0.5f
+                        : bounds.Y;
+
+                    child.Arrange(new RectangleF(
+                        cursor, y, child.DesiredSize.X, height > 0f ? height : bounds.Height));
+
                     cursor += child.DesiredSize.X;
                 }
                 else

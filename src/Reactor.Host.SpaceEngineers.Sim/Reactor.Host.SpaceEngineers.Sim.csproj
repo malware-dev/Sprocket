@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>Reactor.Sim</RootNamespace>
+        <AssemblyName>Reactor.Host.SpaceEngineers.Sim</AssemblyName>
+
+        <!-- Phosphor's sources are written for the game's compiler, which is C# 6 and knows neither of
+             these. They are nonetheless left on here, because the simulated ship shares its sources with
+             the Avalonia host and does expect them, and C# 6 code is perfectly happy compiled by a modern
+             compiler that has them. "annotations" rather than "enable": the syntax is understood, and no
+             warnings are raised against code written years before it existed. -->
+        <Nullable>annotations</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+
+        <!-- For copying the decoded font page about, which is a megapixel of bytes and is done once per
+             colour. Confined to the two loops in GlyphAtlas that actually need it. -->
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="12.0.3" />
+        <PackageReference Include="Avalonia.Desktop" Version="12.0.3" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.3" />
+
+        <!-- The game ships its artwork as block-compressed DDS, which nothing in .NET reads. This is the
+             same decoder Malforge's DocGen and MyTsDesigner already use, for the same job; a third
+             hand-written BC1 unpacker would only be a third place to get it wrong.
+
+             Touched only on a machine that has the game, because what it produces is cached as PNG and
+             it is the cache the other machine reads. It is a managed wrapper over a native library, so
+             it loads when it is first called and not before. -->
+        <PackageReference Include="DirectXTexNet" Version="1.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Reactor.Core\Reactor.Core.csproj" />
+    </ItemGroup>
+
+    <!-- The same files the mod compiles. Not a copy, not a port: if it draws here it draws there. -->
+    <Import Project="..\Phosphor.Mixin\Phosphor.Mixin.projitems" Label="Shared" />
+
+    <!-- And the same simulated ship the Avalonia host runs the editor against, so the two targets are
+         driven by one world rather than by two hand-made approximations of one. -->
+    <Import Project="..\Reactor.Machine.Mixin\Reactor.Machine.Mixin.projitems" Label="Shared" />
+
+    <!-- This target's editor. Shared rather than owned, because these are the files the mod will ship:
+         what is seen in this window is what a player sees, not a preview of it. -->
+    <Import Project="..\Reactor.Screens.Mixin\Reactor.Screens.Mixin.projitems" Label="Shared" />
+</Project>

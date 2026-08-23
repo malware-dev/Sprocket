@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>a41f8d73-2e69-4c15-b8a7-0d3f5e2c91b4</SharedGUID>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)EditorView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Widgets.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SimpleViews.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SequenceView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PickView.cs" />
+  </ItemGroup>
+</Project>

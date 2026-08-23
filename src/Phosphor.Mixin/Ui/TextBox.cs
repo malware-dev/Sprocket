@@ -29,6 +29,7 @@ namespace Phosphor
             Scale = 1f;
             Color = Color.White;
             SelectionColor = new Color(40, 90, 150);
+            HintColor = new Color(110, 122, 138);
             CaretColor = Color.White;
             CaretVisible = true;
         }
@@ -45,6 +46,18 @@ namespace Phosphor
         public Color SelectionColor { get; set; }
 
         public Color CaretColor { get; set; }
+
+        /// <summary>
+        /// What to show while the box is empty, in place of the words that are not there yet.
+        /// </summary>
+        /// <remarks>
+        /// Says what the box is for without spending a line on a caption above it, and without an example
+        /// specific enough to read as a requirement. Drawn in its own colour so it cannot be mistaken for
+        /// something somebody typed.
+        /// </remarks>
+        public string Hint { get; set; }
+
+        public Color HintColor { get; set; }
 
         /// <summary>
         /// Whether the caret is drawn this frame. Blinking is somebody else's business, because a widget with
@@ -232,21 +245,23 @@ namespace Phosphor
         protected override void DrawContent(IGraphics g)
         {
             float height = g.LineHeight(Font, Scale);
-            Vector2 at = new Vector2(Bounds.X, Bounds.Y);
+            Vector2 at = new Vector2(ContentBounds.X, ContentBounds.Y);
 
             if (HasSelection)
             {
                 float from = WidthTo(g, SelectionStart);
                 float to = WidthTo(g, SelectionEnd);
-                g.DrawSprite(Fill, new RectangleF(at.X + from, at.Y, to - from, height), SelectionColor, 0f);
+                g.DrawSprite(Solid, new RectangleF(at.X + from, at.Y, to - from, height), SelectionColor, 0f);
             }
 
             if (_text.Length > 0)
                 g.DrawText(Font, _text.ToString(), at, Scale, Color);
+            else if (!string.IsNullOrEmpty(Hint))
+                g.DrawText(Font, Hint, at, Scale, HintColor);
 
             // Drawn over the text rather than under it, so it stays visible inside a selection.
             if (IsEditing && CaretVisible)
-                g.DrawSprite(Fill, new RectangleF(at.X + WidthTo(g, _caret), at.Y, 1.5f, height), CaretColor, 0f);
+                g.DrawSprite(Solid, new RectangleF(at.X + WidthTo(g, _caret), at.Y, 1.5f, height), CaretColor, 0f);
         }
 
         /// <summary>The width of the first <paramref name="count" /> characters.</summary>

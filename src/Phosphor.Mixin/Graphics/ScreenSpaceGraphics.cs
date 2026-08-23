@@ -193,16 +193,25 @@ namespace Phosphor
                 ClearClip();
         }
 
-        /// <summary>Narrows drawing to <paramref name="rect" />, in window pixels. One line, pending a name.</summary>
+        /// <summary>
+        /// Narrows drawing to <paramref name="rect" />, in window pixels.
+        /// <para>
+        /// <b>This does not compile against the game yet.</b> The method it calls is the one Keen has
+        /// said is coming, and the mod is unusable until it arrives regardless, so there is nothing to be
+        /// bought by keeping a build green that could not be played. The simulator supplies its own and
+        /// runs this line for real; the mod compiles again the day the signature lands, and if it differs
+        /// from this guess, this call and its twin below are the whole cost of having guessed.
+        /// </para>
+        /// </summary>
         private void SetClip(Rectangle rect)
         {
-            // MyScreenSpaceSprite.SetClip(rect, _layer);
+            MyScreenSpaceSprite.SetClip(rect, _layer);
         }
 
-        /// <summary>Removes the clip entirely. One line, pending a name.</summary>
+        /// <summary>Removes the clip entirely. Waiting on the same method as <see cref="SetClip" />.</summary>
         private void ClearClip()
         {
-            // MyScreenSpaceSprite.ClearClip(_layer);
+            MyScreenSpaceSprite.ClearClip(_layer);
         }
 
         /// <summary>

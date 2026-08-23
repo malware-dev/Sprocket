@@ -8,16 +8,17 @@ this is the state of play.
 Reactor is automation for people who have never programmed, aimed at becoming a Space
 Engineers mod. A working prototype exists - `Reactor.Core.Mixin` holds the model, the runtime
 and the whole editor, compiles under C# 6 / netstandard2.0 behind a banned-API gate, and
-an Avalonia host renders it and simulates a ship. **The project is currently in a design
-phase rather than a building one.** The prototype proved the shape works; the documents
-now being written are the attempt to find out what it actually has to do before more of
-it gets built.
+an Avalonia host renders it and simulates a ship. **The requirements are in a design phase
+rather than a building one.** The prototype proved the shape works; the documents being
+written are the attempt to find out what it actually has to do before more of it gets built.
 
-The one exception is the editor's own interface, which has just had a working-over: the
-prototype is a template for the in-game screens, so its shape is a design artifact rather
-than throwaway scaffolding. `docs/Editor.md` is where that lives.
+The exception is the editor's own interface, which has been built rather than described.
+The Avalonia host is the **template** for the in-game screens, so its shape is a design
+artifact rather than throwaway scaffolding, and the Space Engineers screens are a
+duplicate of it rather than an interpretation. `docs/Editor.md` is where that lives.
 
-88 tests, all green - 70 in core, 18 driving the host.
+90 tests, all green - 70 in core, 18 driving the Avalonia host, 2 answering conformance
+for Space Engineers.
 
 ## The documents, and which is which
 
@@ -166,28 +167,44 @@ Ordered by how much they hurt.
    nothing creates one.
 5. **Anything about diagnosis.** Skipped steps are recorded structurally; nothing surfaces
    them.
-6. **The Space Engineers host.** Started, and then **parked** - see *Phosphor, and why it is on
-   hold* below. `Reactor.Host.SpaceEngineers` is an MDK2 mod project that compiles the whole of
-   `Reactor.Core.Mixin` under SE's own constraints, and it now carries a small UI framework of
-   its own. What is still not there is the part that matters to Reactor: it implements no
-   `Rendering/` against the `Reactor.Ui` components and supplies no `IWorld` over the real grid.
+6. **`IWorld` over a real grid.** The Space Engineers screens are built - see *The four shared
+   projects* below - and every component the Avalonia host draws has a counterpart that draws
+   it on the game's screen. What is still not there is the other half of the mod: nothing
+   supplies an `IWorld` over an actual construct, so the only ship Reactor has ever run against
+   is the invented one in `Reactor.Machine.Mixin`.
 
    Read "the small window is an opportunity" in `docs/Editor.md` before going further: keeping
    the window small enough to sit beside a usable world, and letting somebody pick a block by
    pointing at it, are both things the abstraction already allows and both are far cheaper
    designed in than retrofitted.
 
-## Phosphor, and why it is on hold
+## The four shared projects
+
+The mod compiles loose `.cs` files and cannot load an assembly, so everything shared between
+targets is shared as **source** - `.shproj` plus `.projitems`, imported by whoever needs it.
+That is why these are projects rather than libraries.
+
+| | |
+|---|---|
+| `Phosphor.Mixin` | The drawing seam and the layout. `IGraphics`, `ClipStack`, `ScreenSpaceGraphics`, and `Element`/`Stack`/`Bar`/`Dock`/`Scroll`/`Wrap`/`Label`/`TextBox`/`Thickness`. Knows nothing about Reactor. |
+| `Reactor.Machine.Mixin` | The invented ship. Shared so both hosts drive one world rather than two hand-made approximations of one. |
+| `Reactor.Screens.Mixin` | The Space Engineers presentation - the files the mod ships. One view per component, plus the screen chrome. |
+| `Reactor.Core.Mixin` | The model, the runtime and the editor. Pinned to C# 6 and netstandard2.0. |
+
+Consumed by three things: the mod (`Reactor.Host.SpaceEngineers`), the simulator
+(`Reactor.Host.SpaceEngineers.Sim`) and the Avalonia host, which takes the ship only.
+
+## Phosphor
 
 Space Engineers gained a screen-space drawing API - `MyScreenSpaceText` and
 `MyScreenSpaceSprite` - which is the first time a mod could draw a UI over the world instead of
-onto a block. `Phosphor` is the UI framework built on it, living inside the mod project for now
-under a neutral namespace so it can be lifted out when a second consumer wants it.
+onto a block. `Phosphor` is the UI framework built on it, under a neutral namespace so it can
+be lifted out when a second consumer wants it.
 
-**It is parked pending real mod-owned GUI screens**, which Keen may add. That would answer the
-two things below outright, so building further on the workarounds would be building something
-to throw away. Parked because a better door may open, not because it failed: everything
-described here works.
+**It was parked pending real mod-owned GUI screens and has since been un-parked**, because the
+simulator made it possible to build against the API without launching the game. The two gaps
+below are unchanged and still real; what changed is that neither now blocks progress on
+everything else.
 
 ### What it is
 
@@ -204,9 +221,18 @@ described here works.
   because the font scale is corrected by however far it sits from the game's.
 - **`ClipStack`** does the intersecting push and pop that neither target has, so a backend only
   ever has to honour one rectangle.
-- **`Element`, `Stack`, `Label`, `TextBox`** are measure, arrange, draw. `Element.Draw` is not
-  virtual on purpose: it pairs the clip push with its pop, and a subclass overrides `DrawContent`
-  so it cannot get between them.
+- **`Element` and the containers** are measure, arrange, draw. `Element.Draw` is not virtual on
+  purpose: it pairs the clip push with its pop, and a subclass overrides `DrawContent` so it
+  cannot get between them. `Stack` is a line of things, `Bar` is left/fill/right, `Dock` is
+  top/fill/bottom, `Wrap` flows a sentence onto the next line, `Scroll` moves a region.
+- **Padding, clipping, the edge hairline and `Collapsed` all live on `Element`**, for one reason
+  repeated four times: each is a property of a rectangle rather than of any particular widget.
+  `Collapsed` is out of the layout entirely rather than merely invisible, and containers skip a
+  collapsed child completely, spacing included - an empty label still holds its line, which is
+  right for anything that must not move and wrong for a warning that is usually absent.
+- **A horizontal `Stack` centres its children across the line**, and `Wrap` centres within each
+  line. Not a preference: a row is a line of words and controls of different sizes, and hanging
+  the short ones from the top makes them read as superscript rather than as part of the line.
 - **Input suspension is server business, and that is not a preference.**
   `SetPlayerInputBlacklistState` raises a multiplayer event, so a client cannot suspend its own
   input. The client resolves which controls to suspend, because only it has the bindings, and
@@ -220,9 +246,13 @@ described here works.
 - **No clip rect in screen space.** The renderer has a scissor and the panel API reaches it
   through `MySprite.CreateClipRect`, but the screen-space queue never enqueues one and
   `MyRenderProxy.SpriteScissorPush` is not whitelisted. Filip has said he will add it.
-  `ScreenSpaceGraphics.SetClip` and `ClearClip` are two commented lines waiting for the name;
-  everything above them already assumes it works, deliberately, so that no rule about scrolling
-  by whole rows could get built into the framework to serve a gap that is not meant to be there.
+
+  **`ScreenSpaceGraphics.SetClip` and `ClearClip` call it anyway, so the mod project does not
+  compile.** Two errors, both on those lines, and that is deliberate: the mod is unusable until
+  the API lands, and writing a fallback would mean building a rule about scrolling by whole rows
+  into the framework to serve a gap that is not meant to be there. Everything above those two
+  lines assumes it works. The simulator implements the same calls and honours them, so the
+  behaviour is already built and tested against.
 - **Mouse look cannot be suppressed.** `MyInputExtensions.GetRotation` seeds itself from
   `GetMouseXForGamePlayF`/`GetMouseYForGamePlayF` unconditionally and only *then* adds the
   `ROTATION_*` controls, which carry the analog contribution alone. So the input blacklist can
@@ -234,7 +264,38 @@ described here works.
   engine every frame.
 
 Both are the same shape of gap: the API can draw a UI but cannot own the input a UI needs. Real
-screens would close both, which is the whole reason this is parked.
+screens would close both.
+
+## The simulator
+
+`Reactor.Host.SpaceEngineers.Sim` runs the mod's own screens without the game. It compiles the
+same `Phosphor.Mixin` and `Reactor.Screens.Mixin` sources the mod does - not a copy and not a
+port - over substitute `VRageMath` and screen-space types that carry only the members Phosphor
+actually calls. Substitutes rather than the real assemblies because `MyScreenSpace*` are static
+classes and static methods cannot be intercepted; there was never a version of this that
+referenced the game.
+
+It exists for two reasons. Development stops needing a game launch and a world reload per
+change, and the whole thing keeps working on a machine that cannot have Space Engineers
+installed at all.
+
+**What is true and what is a stand-in.** The letterforms, the advances, the block artwork and
+the palette are all the game's own. The palette values were sampled out of the game's textures
+and each one names the file it came from - the eye remembers Space Engineers as dark navy and it
+is not, its panels are a light grey-green steel and its highlight is a pale ice blue. What is
+invented is the backdrop behind the screen, which is a hull and a horizon so that the veil the
+overlay is drawn behind has something to veil.
+
+**Extraction runs where the game is.** `--extract` decodes the font page, the cursors and the
+block icons out of DDS and writes PNG into `%LOCALAPPDATA%\Reactor\SimContent`. The DDS is never
+cached, only what comes out of it, so the machine without the game needs no decoder - **but that
+cache folder has to be copied there by hand.** Nothing does it automatically and nothing can:
+that machine has no game to read. `--content` prints which machine this is, whether the game was
+found and what is in the cache.
+
+Decoding uses `DirectXTexNet`, the same package Malforge's `DocGen` and `MyTsDesigner` already
+use for the same job. It is native and win-x64/x86 only, which makes the simulator formally
+Windows-only - it already was in practice.
 
 ## Known problems
 
@@ -248,12 +309,31 @@ screens would close both, which is the whole reason this is parked.
 ## Working notes
 
 ```
-dotnet test                                       # 88 tests
+dotnet test                                       # 90 tests
 dotnet run --project src/Reactor.Host.Avalonia    # the prototype
 dotnet test --filter Screenshot                   # PNGs to %TEMP%\reactor-*.png
 
 dotnet build -c Release src/Reactor.Host.SpaceEngineers   # builds AND deploys the mod
 ```
+
+The simulator, which is where the in-game screens are actually worked on. Coordinates are UI
+units, not window pixels; `--dump` prints both so a point can be converted.
+
+```
+Sim.exe                              # the window
+Sim.exe --quiet                      # the window, behind everything, without taking focus
+Sim.exe --raise                      # bring it forward   /  --dismiss  send it back
+Sim.exe --content                    # which machine, is the game here, what is cached
+Sim.exe --extract                    # decode font, cursors and block art into the cache
+
+Sim.exe --dump                       # the frame as a draw list
+Sim.exe --shot out.png 657 311 tick 40 drag 100 200 100 400
+```
+
+`--shot` takes a script: a bare pair of numbers is a press, `tick n` advances the ship's clock,
+`drag x y x y` picks something up and puts it down. Order matters and it is drawn between every
+step, because nothing knows where it is until it has been arranged - and because a light that is
+lit for one tick is invisible to a script that advances forty and then looks once.
 
 - **The mod deploys on a Release build and only then.** MDK2 packs it to wherever the local MDK
   settings point, which is not necessarily the AppData mods folder; the build output says where it

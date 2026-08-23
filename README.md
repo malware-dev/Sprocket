@@ -98,13 +98,17 @@ src/
     Editing/              The editor itself - navigation, pages, wording
     Ui/                   The contract a target renders. Start here; it is small.
   Reactor.Core            The same sources as an assembly, for the hosts that load one
-  Reactor.Host.Avalonia   The prototype: a simulated ship and a renderer
-    Machine/              The fake ship (Space Engineers supplies the real one)
+  Reactor.Machine.Mixin   The fake ship (Space Engineers supplies the real one)
+  Phosphor.Mixin          Drawing and layout for the game's screen. Knows nothing of Reactor.
+  Reactor.Screens.Mixin   One view per component, for Space Engineers - what the mod ships
+  Reactor.Host.Avalonia   The prototype, and the template the screens above duplicate
     Rendering/            One renderer per component - what a target reimplements
-  Reactor.Host.SpaceEngineers  The mod: the same sources, compiled in-game
+  Reactor.Host.SpaceEngineers      The mod: the same sources, compiled in-game
+  Reactor.Host.SpaceEngineers.Sim  Those screens, run without the game
 tests/
   Reactor.Core.Tests      The model, the runtime, and the editor
   Reactor.Host.Tests      That every component has a renderer and lays out
+  Reactor.Host.SpaceEngineers.Tests   The same, for the in-game screens
 ```
 
 The split is the point: Core holds the model, the runtime **and the whole editor**. A
@@ -122,6 +126,11 @@ rather than a library. `Reactor.Core` imports it to produce the assembly the Ava
 host and the tests reference; `Reactor.Host.SpaceEngineers` imports the same sources so
 the packer lays them out as loose files for SE to compile. One set of files, and no
 copy step that can quietly fall behind.
+
+The same reasoning made three more: `Phosphor.Mixin` for the drawing and layout,
+`Reactor.Screens.Mixin` for the views the mod ships, and `Reactor.Machine.Mixin` for the
+invented ship both hosts drive. The simulator imports the first two, so what is seen
+there is what ships rather than a preview of it.
 
 That constraint fails silently, so it is enforced by the compiler instead:
 

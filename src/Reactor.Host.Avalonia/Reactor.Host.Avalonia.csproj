@@ -23,4 +23,9 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Reactor.Host.Tests" />
     </ItemGroup>
+
+    <!-- The simulated ship, shared with the Space Engineers screen simulator. It was always written to be
+         independent of any window; this makes that structural rather than a claim in a comment. -->
+    <Import Project="..\Reactor.Machine.Mixin\Reactor.Machine.Mixin.projitems" Label="Shared" />
+
 </Project>
