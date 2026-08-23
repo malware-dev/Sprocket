@@ -29,11 +29,13 @@ namespace Reactor.Sim.Simulation
             public const int Press = 0;
             public const int Drag = 1;
             public const int Tick = 2;
+            public const int Scroll = 3;
 
             public int Kind;
             public Vector2 At;
             public Vector2 To;
             public int Count;
+            public float Amount;
         }
 
         public static void Save(string path, int width, int height)
@@ -85,6 +87,13 @@ namespace Reactor.Sim.Simulation
             if (step.Kind == Step.Press)
             {
                 scene.Press(step.At, 1);
+                bitmap.Render(root);
+                return;
+            }
+
+            if (step.Kind == Step.Scroll)
+            {
+                scene.ScrollBy(step.At, step.Amount);
                 bitmap.Render(root);
                 return;
             }

@@ -188,7 +188,7 @@ That is why these are projects rather than libraries.
 |---|---|
 | `Phosphor.Mixin` | The drawing seam and the layout. `IGraphics`, `ClipStack`, `ScreenSpaceGraphics`, and `Element`/`Stack`/`Bar`/`Dock`/`Scroll`/`Wrap`/`Label`/`TextBox`/`Thickness`. Knows nothing about Reactor. |
 | `Reactor.Machine.Mixin` | The invented ship. Shared so both hosts drive one world rather than two hand-made approximations of one. |
-| `Reactor.Screens.Mixin` | The Space Engineers presentation - the files the mod ships. One view per component, plus the screen chrome. |
+| `Reactor.Screens.Mixin` | The Space Engineers presentation - the files the mod ships. One view per component, plus the screen chrome. `Palette`, `Type`, `Space` and `Sizes` in `Widgets.cs` are the whole look: colours sampled from the game's textures, text scales, spacings and the few fixed sizes. A pass over the appearance is those four classes and nothing else. |
 | `Reactor.Core.Mixin` | The model, the runtime and the editor. Pinned to C# 6 and netstandard2.0. |
 
 Consumed by three things: the mod (`Reactor.Host.SpaceEngineers`), the simulator
@@ -219,6 +219,13 @@ everything else.
   a font scale by that same factor - boxes would stay put while the text inside them grew. The
   reference height is a constructor argument rather than a rule, and any choice stays consistent
   because the font scale is corrected by however far it sits from the game's.
+- **How big one of the game's screens is, measured rather than remembered.** `MyGuiManager`
+  normalizes against `m_safeGuiRectangle` and nothing else, so 1.0 in the game's GUI
+  coordinates *is* the safe area. `MyGuiScreenTerminal` is `new Vector2(1.0157f, 0.9172f)` -
+  fractionally wider than the safe area and about nine tenths of its height. That is worth
+  writing down because it is not what it looks like: a working screen is essentially full
+  width, and it is the game's *dialogs* that are small (creating a faction is 0.66 by 0.64,
+  loading a world 0.92 by 0.97). `EditorView.ScreenWidth` and `ScreenHeight` hold it.
 - **`ClipStack`** does the intersecting push and pop that neither target has, so a backend only
   ever has to honour one rectangle.
 - **`Element` and the containers** are measure, arrange, draw. `Element.Draw` is not virtual on
@@ -331,9 +338,17 @@ Sim.exe --shot out.png 657 311 tick 40 drag 100 200 100 400
 ```
 
 `--shot` takes a script: a bare pair of numbers is a press, `tick n` advances the ship's clock,
-`drag x y x y` picks something up and puts it down. Order matters and it is drawn between every
-step, because nothing knows where it is until it has been arranged - and because a light that is
-lit for one tick is invisible to a script that advances forty and then looks once.
+`drag x y x y` picks something up and puts it down, `scroll x y n` turns the wheel over a point.
+Order matters and it is drawn between every step, because nothing knows where it is until it has
+been arranged - and because a light that is lit for one tick is invisible to a script that
+advances forty and then looks once.
+
+A note on scrolling, because it was wrong for a while and the fault is easy to reintroduce:
+**the wheel is routed by where the pointer is**, not sent to the screen's own scroller. A
+component that scrolls itself is not inside that scroller and on a picker is not even in the
+layout, so a screen that sent every turn to its own would leave a picker unable to scroll at
+all. Views get first refusal through `ComponentView.ScrollBy`; a picker moves the column under
+the pointer, and carries the whole strip sideways when that column has nowhere left to go.
 
 - **The mod deploys on a Release build and only then.** MDK2 packs it to wherever the local MDK
   settings point, which is not necessarily the AppData mods folder; the build output says where it
@@ -387,6 +402,14 @@ Argued out rather than guessed. The reasoning is in Design.md.
   position and killed anything holding one, silently.
 - **Nothing on screen appears or disappears with how much data there is.** A search box that
   arrives at eight rows, a count that comes and goes: the screen has no shape to learn.
+
+  **And holding the room is not the way to obey this.** The any/all choice on a pick used to
+  arrive on the second block, which put it under the pointer at the moment somebody was reaching
+  for a third. Reserving space for it fixed the jump and bought a hole that sat open the rest of
+  the time, which is barely an improvement. The answer was to stop hiding it: it is two short
+  phrases, it goes on one line across, and it is simply always there on a stage that can ask -
+  which also means it can be set before it matters instead of only after. Reach for that shape
+  first; a gap held open is the same mistake wearing a different face.
 - **Every screen holding a list has the same top** - the ways to add something, a rule, then
   what is already there - and everything that adds something carries a plus.
 - **Naming happens on the heading**, and an empty name is an answer rather than a missing

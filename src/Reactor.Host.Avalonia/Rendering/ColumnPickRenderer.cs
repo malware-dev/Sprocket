@@ -219,8 +219,10 @@ sealed class ColumnPickRenderer : ComponentRenderer
             top(visual.Showing);
         }
 
-        // Choices about the picking itself sit above the rows they describe.
-        visual.Options = Widgets.Stack();
+        // Choices about the picking itself sit above the rows they describe, on one line across
+        // rather than stacked down. Core keeps them for the whole life of a stage that can ask, so
+        // the column has its shape from the start and nothing arrives under somebody's pointer.
+        visual.Options = Widgets.Stack(Orientation.Horizontal);
         top(visual.Options);
 
         visual.Empty = Widgets.Label(stage.EmptyText, Palette.Muted, 12);
@@ -358,8 +360,6 @@ sealed class ColumnPickRenderer : ComponentRenderer
         {
             var index = visual.OptionButtons.Count;
             var button = Widgets.Ghost("");
-            button.HorizontalAlignment = HorizontalAlignment.Stretch;
-            button.HorizontalContentAlignment = HorizontalAlignment.Left;
             button.Click += (_, _) =>
             {
                 var stages = _model.Stages;

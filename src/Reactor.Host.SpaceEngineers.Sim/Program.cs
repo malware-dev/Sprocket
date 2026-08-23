@@ -88,7 +88,8 @@ namespace Reactor.Sim
         /// A bare pair of numbers is a press, because that is nearly every line of nearly every script
         /// and making the common case wordless is worth the small asymmetry. <c>tick n</c> advances the
         /// ship's clock, which is the only way to reach anything drawn because a system is actually
-        /// running. <c>drag x y x y</c> picks something up and puts it down somewhere else.
+        /// running. <c>drag x y x y</c> picks something up and puts it down somewhere else, and
+        /// <c>scroll x y n</c> turns the wheel over a point.
         /// </remarks>
         static List<Shot.Step> Script(string[] args, int from)
         {
@@ -106,6 +107,18 @@ namespace Reactor.Sim
 
                     script.Add(tick);
                     i += 1;
+                    continue;
+                }
+
+                if (word == "scroll" && i + 3 < args.Length)
+                {
+                    var scroll = new Shot.Step();
+                    scroll.Kind = Shot.Step.Scroll;
+                    scroll.At = Point(args, i + 1);
+                    scroll.Amount = float.Parse(args[i + 3], CultureInfo.InvariantCulture);
+
+                    script.Add(scroll);
+                    i += 3;
                     continue;
                 }
 

@@ -37,10 +37,10 @@ namespace Reactor.Screens
         }
 
         /// <summary>The gap under each step, which the drag arithmetic has to agree with.</summary>
-        const float RowGap = 3f;
+        const float RowGap = Space.Row * 0.8f;
 
         readonly SequenceComponent _component;
-        readonly Stack _root = Widgets.Column(8f);
+        readonly Stack _root = Widgets.Column(Space.Item);
 
         readonly Bar _header = new Bar();
         readonly Label _status = Widgets.Label("", Palette.Muted, Type.Small);
@@ -63,9 +63,9 @@ namespace Reactor.Screens
         readonly Label _liveBadge = Widgets.Wash("true right now", Palette.Live, Palette.LiveWash);
         readonly List<Element> _triggerSlots = new List<Element>();
 
-        readonly Stack _steps = Widgets.Column(3f);
+        readonly Stack _steps = Widgets.Column(Space.Row * 0.8f);
         readonly List<StepRow> _stepRows = new List<StepRow>();
-        readonly Stack _adders = Widgets.RowOf(6f);
+        readonly Stack _adders = Widgets.RowOf(Space.Item);
         readonly List<Label> _adderRows = new List<Label>();
 
         bool _builtEditable;
@@ -87,36 +87,36 @@ namespace Reactor.Screens
             _liveBadge.Wraps = false;
             _delete.Wraps = false;
 
-            _enable.Padding = new Thickness(14f, 5f);
+            _enable.Padding = new Thickness(Space.PadX, Space.ChipY * 1.3f);
 
             // Both hold their place for the whole time the sentence is editable and go quiet when there is
             // nothing to walk back. Hiding them would move Run and Delete sideways every time somebody
             // made or undid a change, under the pointer they were about to use.
-            _undoSlot = new Sized(30f);
+            _undoSlot = new Sized(48f);
             _undoSlot.Content = _undo;
 
-            _redoSlot = new Sized(30f);
+            _redoSlot = new Sized(48f);
             _redoSlot.Content = _redo;
 
-            Stack state = Widgets.RowOf(8f);
+            Stack state = Widgets.RowOf(Space.Item);
             state.Children.Add(_status);
             state.Children.Add(_lastRun);
 
-            Stack tools = Widgets.RowOf(6f);
+            Stack tools = Widgets.RowOf(Space.Item);
             tools.Children.Add(_undoSlot);
             tools.Children.Add(_redoSlot);
             tools.Children.Add(_enable);
             tools.Children.Add(_delete);
 
-            _header.Spacing = 10f;
+            _header.Spacing = Space.Region;
             _header.Left = state;
             _header.Fill = _skipped;
             _header.Right = tools;
 
-            _trigger.ItemSpacing = 6f;
-            _trigger.LineSpacing = 4f;
+            _trigger.ItemSpacing = Space.Item;
+            _trigger.LineSpacing = Space.Row;
 
-            _adders.Padding = new Thickness(20f, 6f, 0f, 0f);
+            _adders.Padding = new Thickness(32f, Space.Item, 0f, 0f);
         }
 
         public override Element Root
@@ -476,14 +476,14 @@ namespace Reactor.Screens
                 row.Number = Widgets.Label("", Palette.Faint, Type.Small);
                 row.Number.Wraps = false;
 
-                var grip = new Sized(16f);
+                var grip = new Sized(26f);
                 grip.Content = row.Grip;
                 grip.Collapsed = !_component.Editable;
 
-                var number = new Sized(18f);
+                var number = new Sized(29f);
                 number.Content = row.Number;
 
-                Stack handle = Widgets.RowOf(2f);
+                Stack handle = Widgets.RowOf(Space.Line);
                 handle.Children.Add(grip);
                 handle.Children.Add(number);
 
@@ -492,8 +492,8 @@ namespace Reactor.Screens
                 row.Delete.Collapsed = !_component.Editable;
 
                 row.Line = new Bar();
-                row.Line.Spacing = 6f;
-                row.Line.Padding = new Thickness(6f, 5f);
+                row.Line.Spacing = Space.Item;
+                row.Line.Padding = new Thickness(Space.Item, Space.ChipY * 1.3f);
                 row.Line.Left = handle;
                 row.Line.Fill = row.Sentence.Root;
                 row.Line.Right = row.Delete;
@@ -597,8 +597,8 @@ namespace Reactor.Screens
 
         public SentenceView(bool editable, int slots)
         {
-            _wrap.ItemSpacing = 6f;
-            _wrap.LineSpacing = 4f;
+            _wrap.ItemSpacing = Space.Item;
+            _wrap.LineSpacing = Space.Row;
 
             _lead = Widgets.Label("", Palette.Muted, Type.Body);
             _lead.Wraps = false;

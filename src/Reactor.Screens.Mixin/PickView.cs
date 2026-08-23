@@ -21,10 +21,10 @@ namespace Reactor.Screens
     /// </remarks>
     public sealed class PickView : ComponentView
     {
-        public const float ColumnWidth = 250f;
+        public const float ColumnWidth = Sizes.Column;
 
         readonly PickComponent _component;
-        readonly Stack _columns = Widgets.RowOf(8f);
+        readonly Stack _columns = Widgets.RowOf(Space.Item);
         readonly Scroll _strip = new Scroll();
         readonly List<StageView> _stages = new List<StageView>();
 
@@ -74,6 +74,32 @@ namespace Reactor.Screens
                 _stages[i].Collect(hits, _component.Stages[i], i, Host);
         }
 
+        /// <summary>
+        /// Moves the column being pointed at, or the whole strip when that column has nowhere to go.
+        /// </summary>
+        /// <remarks>
+        /// The fallback is not a flourish. With several stages open the strip runs off the side, and a
+        /// wheel that did nothing because this particular column happened to fit would read as the
+        /// screen being broken rather than as the column being full.
+        /// </remarks>
+        public override bool ScrollBy(Vector2 point, float amount)
+        {
+            if (!EditorView.Contains(_strip.Bounds, point))
+                return false;
+
+            for (int i = 0; i < _stages.Count; i++)
+            {
+                if (_stages[i].ScrollBy(point, amount))
+                    return true;
+            }
+
+            if (!_strip.CanScroll)
+                return false;
+
+            _strip.ScrollBy(amount);
+            return true;
+        }
+
         void Rebuild()
         {
             _stages.Clear();
@@ -117,28 +143,28 @@ namespace Reactor.Screens
         /// should not: Space Engineers draws recognisable artwork for every block type and it earns the
         /// room, where a game whose things all look alike would want it smaller or absent.
         /// </remarks>
-        const float IconSize = 30f;
+        const float IconSize = Sizes.Icon;
 
         readonly PickComponent _component;
         readonly int _index;
 
         readonly Sized _root = new Sized(PickView.ColumnWidth);
         readonly Dock _column = new Dock();
-        readonly Stack _head = Widgets.Column(5f);
+        readonly Stack _head = Widgets.Column(Space.Row);
         readonly Label _title = Widgets.Label("", Palette.Ink, Type.Body);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly TextBox _narrow = new TextBox();
         readonly Label _kindLine = Widgets.Ghost("");
         readonly Label _showing = Widgets.Label("", Palette.Faint, Type.Tiny);
-        readonly Stack _options = Widgets.Column(2f);
+        readonly Stack _options = Widgets.RowOf(Space.Region);
         readonly List<Label> _optionRows = new List<Label>();
 
         readonly Scroll _scroll = new Scroll();
-        readonly Stack _rows = Widgets.Column(2f);
+        readonly Stack _rows = Widgets.Column(Space.Line);
         readonly List<RowVisual> _visible = new List<RowVisual>();
         readonly Label _empty = Widgets.Label("", Palette.Muted, Type.Small);
 
-        readonly Stack _kindList = Widgets.Column(1f);
+        readonly Stack _kindList = Widgets.Column(Space.Hair * 2f);
         readonly List<KindVisual> _kindRows = new List<KindVisual>();
 
         bool _hasNarrow;
@@ -156,15 +182,15 @@ namespace Reactor.Screens
 
             _narrow.Scale = Type.Small;
             _narrow.Background = Palette.Page;
-            _narrow.Padding = new Thickness(8f, 5f);
+            _narrow.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
             _narrow.Edge = Palette.Line;
             _narrow.Hint = "Search";
 
-            _empty.Padding = new Thickness(2f, 8f, 0f, 0f);
+            _empty.Padding = new Thickness(Space.Line, Space.Item, 0f, 0f);
 
             _kindList.Background = Palette.PanelHot;
             _kindList.Edge = Palette.Line;
-            _kindList.Padding = new Thickness(6f);
+            _kindList.Padding = new Thickness(Space.Item);
 
             _head.Children.Add(_title);
             _head.Children.Add(_subtitle);
@@ -185,14 +211,16 @@ namespace Reactor.Screens
             if (stage.Filters.Count > 0)
                 _head.Children.Add(_showing);
 
-            // Choices about the picking itself sit above the rows they describe.
+            // Choices about the picking itself sit above the rows they describe, on one line across
+            // rather than stacked down: there are two of them, they are three words each, and a
+            // column has width to spare where every line of height comes out of the list.
             _head.Children.Add(_options);
 
             _scroll.Content = _rows;
 
             _column.Background = Palette.Panel;
             _column.Edge = Palette.Line;
-            _column.Padding = new Thickness(10f);
+            _column.Padding = new Thickness(Space.Region);
             _column.Top = _head;
             _column.Fill = _scroll;
 
@@ -202,6 +230,16 @@ namespace Reactor.Screens
         public Element Root
         {
             get { return _root; }
+        }
+
+        /// <summary>Moves this column's rows, if the point is in it and there is anything out of sight.</summary>
+        public bool ScrollBy(Vector2 point, float amount)
+        {
+            if (!EditorView.Contains(_root.Bounds, point) || !_scroll.CanScroll)
+                return false;
+
+            _scroll.ScrollBy(amount);
+            return true;
         }
 
         public void Update(PickStage stage, IScreenHost host)
@@ -298,8 +336,8 @@ namespace Reactor.Screens
                 row.Count.Wraps = false;
 
                 row.Line = new Bar();
-                row.Line.Spacing = 16f;
-                row.Line.Padding = new Thickness(8f, 5f);
+                row.Line.Spacing = Space.Region * 1.6f;
+                row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
                 row.Line.Fill = row.Label;
                 row.Line.Right = row.Count;
 
@@ -424,7 +462,7 @@ namespace Reactor.Screens
             row.Mark = Widgets.Label("", Palette.Faint, Type.Small);
             row.Mark.Wraps = false;
 
-            Stack left = Widgets.RowOf(8f);
+            Stack left = Widgets.RowOf(Space.Item);
             left.Children.Add(row.Mark);
 
             // Reserved for the whole stage or for none of it, so rows never jog sideways depending on
@@ -440,7 +478,7 @@ namespace Reactor.Screens
             row.Name = Widgets.Label("", Palette.Ink, Type.Small);
             row.Detail = Widgets.Label("", Palette.Faint, Type.Tiny);
 
-            Stack text = Widgets.Column(1f);
+            Stack text = Widgets.Column(Space.Line * 0.6f);
             text.Children.Add(row.Name);
             text.Children.Add(row.Detail);
 
@@ -450,18 +488,18 @@ namespace Reactor.Screens
             row.Badge = Widgets.Label("", Palette.Muted, Type.Tiny);
             row.Badge.Background = Palette.SlotFill;
             row.Badge.Wraps = false;
-            row.Badge.Padding = new Thickness(6f, 1f);
+            row.Badge.Padding = new Thickness(Space.Item, Space.Hair * 2f);
 
             // A stack, not a bar. A bar spans whatever width it is offered, which is exactly right for a
             // header and exactly wrong here: as the right-hand end of a row it claimed the whole line and
             // left the name to wrap one word at a time.
-            Stack right = Widgets.RowOf(4f);
+            Stack right = Widgets.RowOf(Space.Row);
             right.Children.Add(row.Light);
             right.Children.Add(row.Badge);
 
             row.Line = new Bar();
-            row.Line.Spacing = 8f;
-            row.Line.Padding = new Thickness(8f, 6f);
+            row.Line.Spacing = Space.Item;
+            row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f);
             row.Line.Left = left;
             row.Line.Fill = text;
             row.Line.Right = right;

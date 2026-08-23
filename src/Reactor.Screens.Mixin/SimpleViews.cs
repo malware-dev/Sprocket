@@ -67,6 +67,19 @@ namespace Reactor.Screens
         }
 
         /// <summary>
+        /// Offers a turn of the wheel at <paramref name="point" />, and answers whether it was used.
+        /// </summary>
+        /// <remarks>
+        /// Only a view that scrolls itself has anything to do here, and it is handed the point because
+        /// it may well have several regions that scroll - a picker has one per column. Everything else
+        /// sits inside the screen's own scroller and is moved by it.
+        /// </remarks>
+        public virtual bool ScrollBy(Vector2 point, float amount)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Whether this manages its own scrolling and must not be wrapped in a scroller.
         /// </summary>
         /// <remarks>
@@ -132,7 +145,7 @@ namespace Reactor.Screens
         public HeadingView(HeadingComponent component)
         {
             _component = component;
-            _label.Padding = new Thickness(2f, 8f, 0f, 4f);
+            _label.Padding = new Thickness(Space.Line, Space.Item, 0f, Space.Row);
         }
 
         public override Element Root
@@ -188,7 +201,7 @@ namespace Reactor.Screens
         public const string Plus = "+ ";
 
         readonly StartComponent _component;
-        readonly Stack _stack = Widgets.Column(4f);
+        readonly Stack _stack = Widgets.Column(Space.Row);
         readonly List<Label> _rows = new List<Label>();
         readonly Rule _line = Widgets.Line();
 
@@ -221,7 +234,7 @@ namespace Reactor.Screens
                 _rows.Add(Widgets.Row(Plus + option.Label + (option.Asks ? "..." : ""), Palette.Ink));
             }
 
-            _line.Padding = new Thickness(0f, 8f);
+            _line.Padding = new Thickness(0f, Space.Item);
 
             _stack.Children.Clear();
             for (int i = 0; i < _rows.Count; i++)
@@ -265,7 +278,7 @@ namespace Reactor.Screens
         }
 
         readonly ChoiceListComponent _component;
-        readonly Stack _stack = Widgets.Column(4f);
+        readonly Stack _stack = Widgets.Column(Space.Row);
         readonly List<Row> _rows = new List<Row>();
 
         int _revision = -1;
@@ -326,7 +339,7 @@ namespace Reactor.Screens
             if (_component.Entries.Count == 0)
             {
                 Label empty = Widgets.Label(_component.EmptyText, Palette.Muted, Type.Small);
-                empty.Padding = new Thickness(4f, 4f, 0f, 0f);
+                empty.Padding = new Thickness(Space.Row, Space.Row, 0f, 0f);
                 _stack.Children.Add(empty);
                 return;
             }
@@ -343,13 +356,13 @@ namespace Reactor.Screens
                 row.Warning = Widgets.Label("", Palette.Notice, Type.Tiny);
                 row.Current = Widgets.Label("", Palette.Live, Type.Small);
 
-                Stack text = Widgets.Column(1f);
+                Stack text = Widgets.Column(Space.Line * 0.6f);
                 text.Children.Add(row.Text);
                 text.Children.Add(row.Warning);
 
                 row.Line = new Bar();
-                row.Line.Spacing = 12f;
-                row.Line.Padding = new Thickness(12f, 9f);
+                row.Line.Spacing = Space.PadX;
+                row.Line.Padding = new Thickness(Space.PadX, Space.PadY);
                 row.Line.Background = Palette.Panel;
                 row.Line.Fill = text;
                 row.Line.Right = row.Current;
@@ -370,7 +383,7 @@ namespace Reactor.Screens
     public sealed class StatusListView : ComponentView
     {
         readonly StatusListComponent _component;
-        readonly Stack _stack = Widgets.Column(4f);
+        readonly Stack _stack = Widgets.Column(Space.Row);
         readonly List<StatusRow> _rows = new List<StatusRow>();
 
         int _revision = -1;
@@ -414,7 +427,7 @@ namespace Reactor.Screens
             if (_component.Entries.Count == 0)
             {
                 Label empty = Widgets.Label(_component.EmptyText, Palette.Muted, Type.Small);
-                empty.Padding = new Thickness(4f, 4f, 0f, 0f);
+                empty.Padding = new Thickness(Space.Row, Space.Row, 0f, 0f);
                 _stack.Children.Add(empty);
                 return;
             }
@@ -445,7 +458,7 @@ namespace Reactor.Screens
         /// edge did not, so a switch on a nested row landed in the same column as the switch governing it,
         /// and nothing but reading the labels told them apart.
         /// </remarks>
-        const float Inset = 22f;
+        const float Inset = 35f;
 
         readonly Bar _line = new Bar();
         readonly Dot _light = new Dot();
@@ -454,8 +467,8 @@ namespace Reactor.Screens
         readonly Label _lastRun = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly Label _problem = Widgets.Label("", Palette.Problem, Type.Tiny);
         readonly Toggle _switch = new Toggle();
-        readonly Stack _text = Widgets.Column(1f);
-        readonly Stack _detail = Widgets.RowOf(8f);
+        readonly Stack _text = Widgets.Column(Space.Line * 0.6f);
+        readonly Stack _detail = Widgets.RowOf(Space.Item);
 
         public StatusRow()
         {
@@ -466,7 +479,7 @@ namespace Reactor.Screens
             _text.Children.Add(_detail);
             _text.Children.Add(_problem);
 
-            _line.Spacing = 12f;
+            _line.Spacing = Space.PadX;
             _line.Background = Palette.Panel;
             _line.Left = _light;
             _line.Fill = _text;
@@ -480,8 +493,8 @@ namespace Reactor.Screens
 
         public void Update(StatusEntry entry)
         {
-            float side = 12f + (entry.Depth > 0 ? Inset : 0f);
-            _line.Padding = new Thickness(side, 9f, side, 9f);
+            float side = Space.PadX + (entry.Depth > 0 ? Inset : 0f);
+            _line.Padding = new Thickness(side, Space.PadY, side, Space.PadY);
 
             // The same plus the start block uses, for the same reason: this row adds something. Core marks
             // it as an action and leaves the drawing to us.

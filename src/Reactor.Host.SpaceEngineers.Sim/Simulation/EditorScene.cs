@@ -93,10 +93,10 @@ namespace Reactor.Sim.Simulation
             _view.Typed();
         }
 
-        /// <summary>Moves the scrolling region. Positive scrolls down.</summary>
-        public void ScrollBy(float amount)
+        /// <summary>Moves whatever is under the pointer. Positive scrolls down.</summary>
+        public void ScrollBy(Vector2 point, float amount)
         {
-            _view.ScrollBy(amount);
+            _view.ScrollBy(point, amount);
         }
 
         /// <summary>Presses whatever is at <paramref name="point" />, in UI units.</summary>
@@ -128,15 +128,10 @@ namespace Reactor.Sim.Simulation
 
         public void Draw(ScreenSpaceGraphics g)
         {
-            Vector2 size = g.Size;
-
             _view.Update();
 
-            // A column down the middle, roughly where a terminal panel sits. Not a considered layout yet:
-            // the point of this frame is to find out what the real screens need, and guessing at chrome
-            // before seeing them would be deciding it twice.
-            const float width = 620f;
-            _view.Draw(g, new RectangleF((size.X - width) * 0.5f, 48f, width, size.Y - 96f));
+            // Where it goes is the editor's own business, and it is the same answer in the mod.
+            _view.Draw(g);
         }
     }
 }

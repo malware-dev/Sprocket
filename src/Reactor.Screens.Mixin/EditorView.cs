@@ -32,7 +32,7 @@ namespace Reactor.Screens
         readonly Dock _root = new Dock();
         readonly Bar _headerBar = new Bar();
         readonly Label _back = Widgets.Ghost(Widgets.Caps("< Back"));
-        readonly Stack _titleRow = Widgets.RowOf(8f);
+        readonly Stack _titleRow = Widgets.RowOf(Space.Item);
         readonly Label _title = Widgets.Label("", Palette.Ink, Type.Title);
         readonly TextBox _titleBox = new TextBox();
         readonly Label _pencil = Widgets.Label("rename", Palette.Faint, Type.Tiny);
@@ -45,10 +45,10 @@ namespace Reactor.Screens
         readonly Stack _above = Widgets.Column(0f);
         readonly Stack _below = Widgets.Column(0f);
 
-        readonly Stack _actions = Widgets.RowOf(6f);
+        readonly Stack _actions = Widgets.RowOf(Space.Item);
         readonly Label _primary = Widgets.Label("", Palette.Chrome, Type.Body);
 
-        readonly Stack _popup = Widgets.Column(6f);
+        readonly Stack _popup = Widgets.Column(Space.Item);
         readonly Label _askLabel = Widgets.Label("", Palette.Muted, Type.Tiny);
         readonly TextBox _askBox = new TextBox();
         readonly Label _confirm = Widgets.Label("Continue", Palette.Ink, Type.Small);
@@ -82,7 +82,7 @@ namespace Reactor.Screens
         {
             _editor = editor;
 
-            _switch.Padding = new Thickness(10f, 4f);
+            _switch.Padding = new Thickness(Space.ChipX, Space.ChipY);
 
             // The heading holds one line whatever the name. Trimming it to an ellipsis is what the other
             // host does and what this wants; until Phosphor can trim, it overflows rather than growing the
@@ -109,10 +109,10 @@ namespace Reactor.Screens
             // stopped a system. The fill is the slot rather than the words, so the shape does not change
             // either - only what it says.
             _switch.Centres = true;
-            var switchSlot = new Sized(104f);
+            var switchSlot = new Sized(166f);
             switchSlot.Content = _switch;
 
-            _headerBar.Spacing = 10f;
+            _headerBar.Spacing = Space.Region;
             _headerBar.Left = _back;
             _headerBar.Fill = _titleRow;
             _headerBar.Right = switchSlot;
@@ -120,9 +120,9 @@ namespace Reactor.Screens
             // The subtitle's line is reserved whether or not there is one. A picker's subtitle empties as
             // the picking finishes, and a header that resized when it did would be the screen moving under
             // somebody's hands.
-            Stack headerBlock = Widgets.Column(2f);
+            Stack headerBlock = Widgets.Column(Space.Line);
             headerBlock.Background = Palette.Chrome;
-            headerBlock.Padding = new Thickness(12f, 9f);
+            headerBlock.Padding = new Thickness(Space.PadX, Space.PadY);
             headerBlock.Children.Add(_headerBar);
             headerBlock.Children.Add(_subtitle);
 
@@ -132,14 +132,14 @@ namespace Reactor.Screens
 
             _askBox.Scale = Type.Body;
             _askBox.Background = Palette.Page;
-            _askBox.Padding = new Thickness(8f, 5f);
+            _askBox.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
             _askBox.Edge = Palette.Line;
             _askBox.IsEditing = true;
 
-            _confirm.Padding = new Thickness(14f, 5f);
+            _confirm.Padding = new Thickness(Space.PadX, Space.ChipY * 1.3f);
 
             var entry = new Bar();
-            entry.Spacing = 8f;
+            entry.Spacing = Space.Item;
             entry.Fill = _askBox;
             entry.Right = _confirm;
 
@@ -147,23 +147,23 @@ namespace Reactor.Screens
             // down, and it is anchored to whatever opened it. Core knows none of that and should not.
             _popup.Background = Palette.PanelHot;
             _popup.Edge = Palette.Line;
-            _popup.Padding = new Thickness(10f, 8f);
+            _popup.Padding = new Thickness(Space.Region, Space.Item);
             _popup.Children.Add(_askLabel);
             _popup.Children.Add(entry);
 
             _scroll.Content = _body;
-            _bodyDock.Padding = new Thickness(12f);
+            _bodyDock.Padding = new Thickness(Space.PadX);
 
-            _primary.Padding = new Thickness(14f, 5f);
+            _primary.Padding = new Thickness(Space.PadX, Space.ChipY * 1.3f);
 
             var footerBar = new Bar();
-            footerBar.Spacing = 10f;
+            footerBar.Spacing = Space.Region;
             footerBar.Left = _actions;
             footerBar.Right = _primary;
 
             Stack footerBlock = Widgets.Column(0f);
             footerBlock.Background = Palette.Chrome;
-            footerBlock.Padding = new Thickness(10f, 7f);
+            footerBlock.Padding = new Thickness(Space.Region, Space.PadY * 0.8f);
             footerBlock.Children.Add(footerBar);
 
             Stack footer = Widgets.Column(0f);
@@ -256,7 +256,52 @@ namespace Reactor.Screens
         }
 
         /// <summary>How wide a question's popup is, whatever it is hanging under.</summary>
-        const float PopupWidth = 320f;
+        const float PopupWidth = Sizes.Popup;
+
+        /// <summary>
+        /// How big one of the game's own screens is, as a share of the safe area.
+        /// </summary>
+        /// <remarks>
+        /// Read out of the game rather than guessed at. Space Engineers sizes a GUI screen in normalized
+        /// units where 1.0 is the safe GUI rectangle exactly - <c>MyGuiManager</c> multiplies by
+        /// <c>m_safeGuiRectangle</c> and nothing else - and its terminal, which is the screen Reactor is
+        /// the closest thing to, is <c>new Vector2(1.0157f, 0.9172f)</c>.
+        /// <para>
+        /// So a working screen is the full width of the safe area and about nine tenths of its height.
+        /// That is worth writing down because it is not what it looks like: the safe area is four by
+        /// three at the full height of the monitor, so on anything wider the screen already sits in a
+        /// generous letterbox of its own and does not need a second one. The game's dialogs are a
+        /// different thing entirely and much smaller - creating a faction is 0.66 by 0.64.
+        /// </para>
+        /// <para>
+        /// The width here is 1.0 rather than the terminal's 1.0157. That overhang is under a percent
+        /// either side and exists because the game's screen background has soft edges to hide; ours has
+        /// hard ones, and <see cref="IGraphics.Size" /> is the area the seam calls drawable.
+        /// </para>
+        /// </remarks>
+        public const float ScreenWidth = 1f;
+
+        public const float ScreenHeight = 0.9172f;
+
+        /// <summary>
+        /// Draws the editor at the size one of the game's screens is, centred where they are centred.
+        /// </summary>
+        /// <remarks>
+        /// Here rather than in whatever calls it. Where the editor sits is a presentation decision like
+        /// every other one in this file, and leaving it to the caller meant the mod and the simulator
+        /// each deciding it separately - which is two chances to disagree about the one thing somebody
+        /// notices first.
+        /// </remarks>
+        public void Draw(IGraphics g)
+        {
+            Vector2 size = g.Size;
+
+            float width = size.X * ScreenWidth;
+            float height = size.Y * ScreenHeight;
+
+            Draw(g, new RectangleF(
+                (size.X - width) * 0.5f, (size.Y - height) * 0.5f, width, height));
+        }
 
         public void Draw(IGraphics g, RectangleF bounds)
         {
@@ -411,9 +456,22 @@ namespace Reactor.Screens
             _popup.Draw(g);
         }
 
-        /// <summary>Moves the scrolling region, if there is one and there is anything out of sight.</summary>
-        public void ScrollBy(float amount)
+        /// <summary>
+        /// Moves whatever is under <paramref name="point" />, if anything there can move.
+        /// </summary>
+        /// <remarks>
+        /// Offered to the views first, because a component that scrolls itself is not inside the
+        /// screen's scroller and the screen's scroller is not even in the layout - so sending every
+        /// turn of the wheel to it meant a picker could not be scrolled at all.
+        /// </remarks>
+        public void ScrollBy(Vector2 point, float amount)
         {
+            for (int i = 0; i < _views.Count; i++)
+            {
+                if (_views[i].ScrollBy(point, amount))
+                    return;
+            }
+
             if (_scroll.Parent != null)
                 _scroll.ScrollBy(amount);
         }

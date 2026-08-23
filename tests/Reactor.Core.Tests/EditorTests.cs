@@ -631,7 +631,7 @@ public class EditorTests
         editor.PressStart("When...");
         editor.PressBlock("Inner Door");
         editor.PressBlock("Outer Door");
-        editor.PressChoice("all of them, together");
+        editor.PressChoice("all of them");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
         Assert.Equal("Inner Door and Outer Door", editor.Sentence().Trigger.Slots[0].Text);
@@ -653,18 +653,26 @@ public class EditorTests
     }
 
     [Fact]
-    public void TheAnyOrAllChoiceOnlyAppearsOnceItMatters()
+    public void TheAnyOrAllChoiceIsThereBeforeItMatters()
     {
+        // It used to arrive on the second block, which put it on screen underneath the pointer at
+        // the moment somebody was reaching for a third. Holding room for it was no better - a hole
+        // sitting open whenever it was not needed. So it is simply always there on a stage that can
+        // ask, which also means it can be set before it matters rather than only after.
         var ship = Build();
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
         editor.PressStart("When...");
+
+        Assert.True(editor.HasChoice("any one"));
+        Assert.True(editor.HasChoice("all of them"));
+
         editor.PressBlock("Inner Door");
-        Assert.False(editor.HasChoice("all of them, together"));
+        Assert.True(editor.HasChoice("all of them"));
 
         editor.PressBlock("Outer Door");
-        Assert.True(editor.HasChoice("all of them, together"));
+        Assert.True(editor.HasChoice("all of them"));
     }
 
     [Fact]

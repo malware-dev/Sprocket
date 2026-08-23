@@ -258,20 +258,26 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// Only worth asking once there is more than one, and only where the distinction means
-        /// anything - a step always acts on all its blocks.
+        /// Offered wherever the distinction means anything - a step always acts on all its blocks, so
+        /// only some stages ask at all.
         /// </summary>
+        /// <remarks>
+        /// Stated for the whole life of such a stage, and worded the same throughout. Waiting until
+        /// there was more than one thing picked was worse in two ways at once: the choice arrived
+        /// under the pointer at the moment somebody was reaching for a third block, and holding the
+        /// room for it instead only traded that for a hole sitting open the rest of the time. Short
+        /// enough to be one line, and a setting somebody can see is one they can change before it
+        /// matters rather than after.
+        /// </remarks>
         bool FillOptions()
         {
-            var wanted = _asksAll && _selection.Count > 1;
-            var changed = Resize(_blocks.Options, wanted ? 2 : 0);
-            if (!wanted)
+            var changed = Resize(_blocks.Options, _asksAll ? 2 : 0);
+            if (!_asksAll)
                 return changed;
 
-            var all = _all;
-            changed |= Apply(_blocks.Options[0], "any one of them is enough", !all,
+            changed |= Apply(_blocks.Options[0], "any one", !_all,
                 Editor.Register(Cmd.RequireAny, delegate { SetAll(false); }));
-            changed |= Apply(_blocks.Options[1], "all of them, together", all,
+            changed |= Apply(_blocks.Options[1], "all of them", _all,
                 Editor.Register(Cmd.RequireAll, delegate { SetAll(true); }));
 
             return changed;

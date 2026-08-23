@@ -96,7 +96,7 @@ namespace Reactor.Sim.Shell
                 // A notch moves about three rows, which is what a list this size wants. The editor clamps
                 // it, so pushing past either end simply stops.
                 if (!_showProbe)
-                    _editor.ScrollBy((float)-e.Delta.Y * 60f);
+                    _editor.ScrollBy(ToUi(e.GetPosition(_surface)), (float)-e.Delta.Y * 60f);
 
                 _surface.InvalidateVisual();
             };

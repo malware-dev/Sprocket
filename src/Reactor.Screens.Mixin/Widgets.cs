@@ -115,6 +115,74 @@ namespace Reactor.Screens
         public const float Tiny = 0.45f;
     }
 
+    /// <summary>
+    /// Room, named for what it separates.
+    /// </summary>
+    /// <remarks>
+    /// Here for the same reason <see cref="Type" /> is: these were sixty literals scattered across five
+    /// files, every one of them a judgement about how much air something needs, and none of them
+    /// findable. Naming them makes a pass over the whole look six numbers rather than an archaeology
+    /// expedition.
+    /// <para>
+    /// They are larger than the Avalonia host's, and that is not a disagreement with the template. That
+    /// host draws into a window somebody sized with a mouse; this draws one of the game's own screens,
+    /// which is four by three at the full height of the monitor. The same layout in the same proportions
+    /// simply has half as much again to work with, and holding onto the smaller numbers would be leaving
+    /// a third of the screen empty out of habit.
+    /// </para>
+    /// </remarks>
+    public static class Space
+    {
+        /// <summary>A rule. One unit is one pixel at the height the UI is defined against.</summary>
+        public const float Hair = 1f;
+
+        /// <summary>Between two lines that are one thing - a name, and what it is doing.</summary>
+        public const float Line = 3f;
+
+        /// <summary>Between one row of a list and the next.</summary>
+        public const float Row = 6f;
+
+        /// <summary>Between two controls sitting side by side.</summary>
+        public const float Item = 10f;
+
+        /// <summary>Between one region of a screen and another.</summary>
+        public const float Region = 16f;
+
+        /// <summary>Inside a row, across.</summary>
+        public const float PadX = 19f;
+
+        /// <summary>Inside a row, down. Less than across, because a line of text is wider than it is tall.</summary>
+        public const float PadY = 14f;
+
+        /// <summary>Inside something small that is not a row - a chip, a switch, a quiet control.</summary>
+        public const float ChipX = 16f;
+
+        public const float ChipY = 6f;
+    }
+
+    /// <summary>Things that are a size rather than a gap.</summary>
+    public static class Sizes
+    {
+        /// <summary>A state light.</summary>
+        public const float Dot = 13f;
+
+        /// <summary>
+        /// A block's picture.
+        /// </summary>
+        /// <remarks>
+        /// Entirely this target's number. Core hands over a name and says nothing about size, which it
+        /// should not: Space Engineers draws recognisable artwork for every block type and it earns the
+        /// room, where a game whose things all look alike would want it smaller or absent.
+        /// </remarks>
+        public const float Icon = 54f;
+
+        /// <summary>One stage of a pick.</summary>
+        public const float Column = 400f;
+
+        /// <summary>Anything hanging over the screen - a question, a list that opens downward.</summary>
+        public const float Popup = 512f;
+    }
+
     /// <summary>A hairline across a block, with room around it.</summary>
     /// <remarks>
     /// The line is drawn rather than being the element's background, so that padding puts space around it
@@ -157,7 +225,7 @@ namespace Reactor.Screens
     /// </remarks>
     public class Dot : Element
     {
-        public const float Size = 8f;
+        public const float Size = Sizes.Dot;
 
         public Dot()
         {
@@ -196,7 +264,7 @@ namespace Reactor.Screens
             Scale = Type.Body;
             Color = Palette.Ink;
             Background = Palette.SlotFill;
-            Padding = new Thickness(9f, 4f);
+            Padding = new Thickness(Space.ChipX, Space.ChipY);
             Underline = Palette.SlotEdge;
 
             // A slot is one thing named, and a wrapped one would stop reading as a single chip.
@@ -232,7 +300,7 @@ namespace Reactor.Screens
         public Toggle()
         {
             Scale = Type.Tiny;
-            Padding = new Thickness(10f, 3f);
+            Padding = new Thickness(Space.ChipX, Space.ChipY);
             Wraps = false;
         }
 
@@ -285,7 +353,7 @@ namespace Reactor.Screens
         {
             Label row = Label(text, color, Type.Body);
             row.Background = Palette.Panel;
-            row.Padding = new Thickness(12f, 9f);
+            row.Padding = new Thickness(Space.PadX, Space.PadY);
             return row;
         }
 
@@ -293,7 +361,7 @@ namespace Reactor.Screens
         public static Label Ghost(string text)
         {
             Label ghost = Label(text, Palette.Muted, Type.Small);
-            ghost.Padding = new Thickness(8f, 3f);
+            ghost.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
 
             // A control rather than a sentence. One that broke onto two lines would change the height of
             // whatever row it sits in, which is the fidgeting this screen is trying not to do.
@@ -313,7 +381,7 @@ namespace Reactor.Screens
         {
             Label chip = Label(text, on ? Palette.Chrome : Palette.Muted, Type.Small);
             chip.Background = on ? Palette.Accent : Palette.Panel;
-            chip.Padding = new Thickness(10f, 3f);
+            chip.Padding = new Thickness(Space.ChipX, Space.ChipY);
             chip.Wraps = false;
             return chip;
         }
@@ -323,7 +391,7 @@ namespace Reactor.Screens
         {
             Label wash = Label(text, ink, Type.Small);
             wash.Background = background;
-            wash.Padding = new Thickness(10f, 6f);
+            wash.Padding = new Thickness(Space.ChipX, Space.ChipY * 1.6f);
             return wash;
         }
 
@@ -343,7 +411,7 @@ namespace Reactor.Screens
 
         public static Rule Line()
         {
-            return new Rule(1f, Palette.Line);
+            return new Rule(Space.Hair, Palette.Line);
         }
 
         public static Stack Column(float spacing)
