@@ -260,18 +260,23 @@ everything else.
   into the framework to serve a gap that is not meant to be there. Everything above those two
   lines assumes it works. The simulator implements the same calls and honours them, so the
   behaviour is already built and tested against.
-- **Mouse look cannot be suppressed.** `MyInputExtensions.GetRotation` seeds itself from
-  `GetMouseXForGamePlayF`/`GetMouseYForGamePlayF` unconditionally and only *then* adds the
-  `ROTATION_*` controls, which carry the analog contribution alone. So the input blacklist can
-  stop a gamepad turning the view and can never stop a mouse. `LOOKAROUND` is the
-  hold-to-look-around modifier, not mouse-look, so it was never the lever it looks like. Nothing
-  in `MyVisualScriptLogicProvider` locks the camera and there is no mod-facing
-  `SetCameraController`. **This is why a pointer does not work yet**, and the only route left is
-  cancelling the rotation by calling `MoveAndRotate` again with it negated, which fights the
-  engine every frame.
+- **Mouse look cannot be suppressed** *(no longer applies - kept so nobody re-derives it)*.
+  `MyInputExtensions.GetRotation` seeds itself from `GetMouseXForGamePlayF`/`GetMouseYForGamePlayF`
+  unconditionally and only *then* adds the `ROTATION_*` controls, which carry the analog
+  contribution alone. So the input blacklist can stop a gamepad turning the view and can never
+  stop a mouse. `LOOKAROUND` is the hold-to-look-around modifier, not mouse-look, so it was never
+  the lever it looks like.
 
-Both are the same shape of gap: the API can draw a UI but cannot own the input a UI needs. Real
-screens would close both.
+  This mattered only while the plan was to draw over live gameplay, and that is not the plan.
+
+**We are working from the assumption that Keen gives us a real screen.** That changes what the
+rest of this section is about. A screen owns its input the way the terminal does, so nothing has
+to fight the camera, nothing has to blacklist controls, and a pointer is simply a pointer -
+which means hover, drag and everything else a pointer implies are ordinary rather than blocked.
+The input-suspension machinery below is written down because it was worked out and it was right
+for the world it was written for; it is not the world we are building for.
+
+What survives the assumption is the clip rect, because that is about drawing rather than input.
 
 ## The simulator
 
@@ -303,6 +308,25 @@ found and what is in the cache.
 Decoding uses `DirectXTexNet`, the same package Malforge's `DocGen` and `MyTsDesigner` already
 use for the same job. It is native and win-x64/x86 only, which makes the simulator formally
 Windows-only - it already was in practice.
+
+## Waiting for the polish pass
+
+Deliberately deferred, not forgotten. The layout and the behaviour are where they should be;
+what is left is appearance, and it is worth doing in one pass rather than a piece at a time.
+
+- **Symbols.** `::` for a drag grip, `x` for delete, `|>` and `II` on the switches, `< BACK`,
+  the `v` on the kinds line, `(*)` and `( )` on the option rows. The game's font has none of
+  the glyphs these stand in for, so they want real artwork - `Textures/GUI/Icons/Symbols` and
+  the `buttons` folder are the place to look, and `--extract` already does the decoding.
+- **The U+2192 in `SequenceSummary.cs`.** Core's own wording, and the one character core emits
+  that the game's font cannot draw. Every string literal in `Reactor.Core.Mixin` was checked
+  against the font's 496 glyphs and this is the only one. Either core says it in ASCII or the
+  screens translate it; the simulator already draws the replacement box so it cannot be missed.
+- **Scroll indication.** A region scrolls and nothing says so. Cheap to draw - it is a
+  rectangle - and it needs deciding whether it shows always or only while moving.
+- **Hover.** Nothing responds to the pointer resting on it. The game has the colour for it -
+  `DarkBlueBackground_highlight.png`, already in the palette as `PanelHot` - and a screen owns
+  its own pointer, so this is ordinary work rather than anything blocked.
 
 ## Known problems
 

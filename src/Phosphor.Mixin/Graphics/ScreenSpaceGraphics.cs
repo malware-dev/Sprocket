@@ -7,7 +7,7 @@ using VRageMath;
 namespace Phosphor
 {
     /// <summary>
-    /// Draws through <c>MyScreenSpaceText</c> and <c>MyScreenSpaceSprite</c>, over the world rather than onto
+    /// Draws through <c>MyScreenSpaceText</c> and <c>MyScreenSpaceSprite</c>, on the screen rather than onto
     /// a block.
     /// <para>
     /// Its coordinates are a <b>fixed UI size</b>, scaled to whatever the screen happens to be, which is what

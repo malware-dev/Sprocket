@@ -57,9 +57,8 @@ namespace Reactor.Sim.Simulation
             var scene = new EditorScene();
             surface.Frame += scene.Draw;
 
-            // The world the overlay is drawn over. Without something behind it the bitmap is transparent,
-            // which reads as white and makes every light-on-dark choice look wrong - and with something
-            // flat behind it, the one thing that cannot be judged is how much of the world shows through.
+            // Something behind it, or the bitmap is transparent - which reads as white and makes every
+            // light-on-dark choice look wrong. See Backdrop for what it is and is not claiming.
             var root = new Panel();
             root.Children.Add(new Backdrop());
             root.Children.Add(surface);

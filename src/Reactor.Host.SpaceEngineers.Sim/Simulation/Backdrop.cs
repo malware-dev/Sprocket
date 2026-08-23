@@ -5,14 +5,19 @@ using Avalonia.Media;
 namespace Reactor.Sim.Simulation
 {
     /// <summary>
-    /// Something for the screen to be drawn over.
+    /// Something for the screen to sit in front of.
     /// </summary>
     /// <remarks>
-    /// Scaffolding, and not a picture of anything. The screen-space overlay is drawn over the game, so a
-    /// simulator that put it on a flat colour would be judging one of its most important decisions -
-    /// how much of the world shows through - against a backdrop that cannot show it. Any lit, uneven
-    /// surface answers the question; this one is a hull and a horizon because those are two shapes to
-    /// draw and the point is only that the veil has something to veil.
+    /// Scaffolding, and not a picture of anything. It exists so the screen has edges: on a flat colour
+    /// there is no telling where Reactor stops and the window begins, which is exactly the judgement
+    /// somebody is looking at a screenshot to make.
+    /// <para>
+    /// It is <b>not</b> a claim about what is really behind. We are working from the assumption that
+    /// Keen hands us a real screen, which means the game paints its own background and dims what is
+    /// beyond it by the player's own setting. What this ought to draw, once the shape of that is known,
+    /// is that frame with Reactor inside it - a hull with our panel floating on it is left over from
+    /// when the plan was to draw over live gameplay.
+    /// </para>
     /// </remarks>
     public sealed class Backdrop : Control
     {

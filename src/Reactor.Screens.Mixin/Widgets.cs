@@ -11,13 +11,13 @@ namespace Reactor.Screens
     /// value here is this target's own opinion. The <b>roles</b> are the Avalonia host's, one for one, and
     /// deliberately so: two targets that agree on what a slot is are two targets somebody learns once.
     /// The <b>values</b> are not, and should not be. That host is a desktop application and wears a
-    /// desktop's dark theme; this one is drawn over a ship, in a game with a look of its own, and a
-    /// panel that ignored it would read as something bolted on.
+    /// desktop's dark theme; this one is a screen in a game with a look of its own, and a panel that
+    /// ignored it would read as something bolted on.
     /// </para>
     /// <para>
-    /// So: the same neutral slate, turned cold and blue and let the world through. Space Engineers is
-    /// steel and glass lit blue, with hard corners, hairlines rather than borders, and colour saved for
-    /// the few things that mean something - which is the same restraint the roles below already had.
+    /// So: the same neutral slate, turned cold and blue. Space Engineers is steel and glass lit blue,
+    /// with hard corners, hairlines rather than borders, and colour saved for the few things that mean
+    /// something - which is the same restraint the roles below already had.
     /// </para>
     /// <para>
     /// Most of the values below were taken out of the game's own textures rather than guessed at, and
@@ -28,31 +28,24 @@ namespace Reactor.Screens
     /// </summary>
     public static class Palette
     {
-        /// <summary>
-        /// The world behind shows through. This is drawn over the game rather than on a page.
-        /// </summary>
-        /// <remarks>
-        /// The single biggest thing that makes an overlay look like it belongs to the game rather than
-        /// like a window pasted over it. Not so far that the ship behind competes with the words: enough
-        /// that the screen reads as glass with something beyond it.
-        /// <para>
-        /// The game's own panels are opaque, because they are drawn on a menu that has already dimmed
-        /// everything. This is drawn over a ship nobody dimmed, so it does the dimming itself.
-        /// </para>
-        /// </remarks>
-        public const byte Veil = 226;
-
         /// <summary>Darker than a panel, so panels read as sitting on it. Derived from <see cref="Panel" />.</summary>
-        public static readonly Color Page = new Color(20, 27, 32, Veil);
+        /// <remarks>
+        /// Opaque, along with everything else here. How much of the world shows through a screen is not
+        /// this target's business and never was: the game draws the screen's own background and multiplies
+        /// it by <c>UIBkOpacity</c>, which is a slider in the player's options. Reactor draws content into
+        /// a screen somebody else opened, so a veil applied here would be a second one over the top of
+        /// the player's, in a quantity nobody asked for.
+        /// </remarks>
+        public static readonly Color Page = new Color(20, 27, 32);
 
         /// <summary>Header and footer. A step darker again, so the screen's edges settle.</summary>
-        public static readonly Color Chrome = new Color(27, 36, 42, 242);
+        public static readonly Color Chrome = new Color(27, 36, 42);
 
         /// <summary>Textures/GUI/Controls/DarkBlueBackground.png, which is flat and entirely this colour.</summary>
-        public static readonly Color Panel = new Color(41, 54, 62, 218);
+        public static readonly Color Panel = new Color(41, 54, 62);
 
         /// <summary>DarkBlueBackground_highlight.png. What the game does to a panel under the pointer.</summary>
-        public static readonly Color PanelHot = new Color(60, 76, 82, 246);
+        public static readonly Color PanelHot = new Color(60, 76, 82);
 
         /// <summary>rectangle_button_center_checked.png. The game's mid tone, which reads as a hairline.</summary>
         public static readonly Color Line = new Color(91, 115, 123);
