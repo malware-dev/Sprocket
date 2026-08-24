@@ -466,7 +466,7 @@ namespace Reactor.Screens
         readonly Label _status = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly Label _lastRun = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly Label _problem = Widgets.Label("", Palette.Problem, Type.Tiny);
-        readonly Toggle _switch = new Toggle();
+        readonly Switch _switch = new Switch(Type.Small);
         readonly Stack _text = Widgets.Column(Space.Line * 0.6f);
         readonly Stack _detail = Widgets.RowOf(Space.Item);
 
@@ -520,20 +520,13 @@ namespace Reactor.Screens
             _problem.Text = entry.Problem;
             _problem.Collapsed = string.IsNullOrEmpty(entry.Problem);
 
-            // Says what pressing it does, not what state it is in, the same as everywhere else a switch
-            // appears. Filled when it governs everything under it, outlined when it governs only itself.
-            if (!entry.CanSwitch)
-            {
-                _switch.Hide();
-            }
+            // Says what state it is in, the way the game's own on/off control does. The light on the
+            // left of this row says whether the thing is doing something right now; this says whether it
+            // has been left switched on, which is not the same question and is the one a switch answers.
+            if (entry.CanSwitch)
+                _switch.Show(entry.SwitchIsOn, entry.SwitchGovernsAll);
             else
-            {
-                Color colour = entry.SwitchIsOn ? Palette.Notice : Palette.Live;
-
-                _switch.Text = entry.SwitchIsOn ? "II" : "|>";
-                _switch.Show(entry.SwitchGovernsAll, colour,
-                    entry.SwitchGovernsAll ? Palette.Chrome : colour);
-            }
+                _switch.Hide();
         }
 
         public void Collect(List<Hit> hits, StatusEntry entry)

@@ -47,8 +47,12 @@ namespace Reactor.Sim.Shell
             ShowActivated = !OpensQuietly;
 
             Title = "Reactor - Space Engineers screen";
+
+            // Where it was last time, if that is still somewhere it can be seen. These two are the
+            // fallback for a first run or a monitor that has gone away.
             Width = 1280;
             Height = 720;
+            WindowPlace.Restore(this);
             Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(28, 34, 40));
 
             _status.Margin = new Thickness(10, 6);
@@ -128,6 +132,9 @@ namespace Reactor.Sim.Shell
             blink.Start();
 
             Opened += (s, e) => _surface.Focus();
+
+            // On Closing rather than Closed, because by the time it has closed its position is gone.
+            Closing += (s, e) => WindowPlace.Remember(this);
         }
 
         void OnFrame(Phosphor.ScreenSpaceGraphics g)
@@ -135,7 +142,11 @@ namespace Reactor.Sim.Shell
             // Window pixels to UI units, derived from what the backend reports rather than recomputed
             // alongside it, so a mistake in there shows up here instead of being mirrored.
             _screen = g.ScreenBounds;
-            _scale = _screen.Width > 0f ? (float)_surface.Bounds.Width / _screen.Width : 1f;
+
+            // Against the target rather than against the control. The frame is drawn at the target and
+            // then fitted into the window, so this is UI units to target pixels; the window part of the
+            // journey is ToTarget's business and belongs in one place.
+            _scale = _screen.Width > 0f ? _surface.Target.Width / _screen.Width : 1f;
 
             if (_showProbe)
             {
@@ -151,9 +162,10 @@ namespace Reactor.Sim.Shell
 
             Vector2 size = g.Size;
             string status = string.Format(
-                "{0}   UI {1:0}x{2:0}   window {3:0}x{4:0}   text: {5}   [F1] {6}",
+                "{0}   UI {1:0}x{2:0}   drawn at {3}x{4}   shown at {5:0}%   text: {6}   [F1] {7}",
                 _showProbe ? "probe" : "Reactor",
-                size.X, size.Y, _surface.Bounds.Width, _surface.Bounds.Height,
+                size.X, size.Y, _surface.Target.Width, _surface.Target.Height,
+                _surface.Target.Width > 0 ? _surface.Viewport.Width / _surface.Target.Width * 100d : 0d,
                 _surface.MetricsSource,
                 _showProbe ? "show Reactor" : "show the drawing probe");
 
@@ -267,7 +279,8 @@ namespace Reactor.Sim.Shell
             if (_scale <= 0f)
                 return Vector2.Zero;
 
-            return new Vector2((float)point.X / _scale + _screen.X, (float)point.Y / _scale + _screen.Y);
+            Avalonia.Point at = _surface.ToTarget(point);
+            return new Vector2((float)at.X / _scale + _screen.X, (float)at.Y / _scale + _screen.Y);
         }
 
         void OnPointerPressed(object sender, PointerPressedEventArgs e)

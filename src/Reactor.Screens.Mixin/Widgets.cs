@@ -1,5 +1,6 @@
 using Phosphor;
 using VRage.Game;
+using VRage.Utils;
 using VRageMath;
 
 namespace Reactor.Screens
@@ -90,6 +91,18 @@ namespace Reactor.Screens
         public static readonly Color NoticeWash = new Color(58, 46, 24);
 
         public static readonly Color None = new Color(0, 0, 0, 0);
+
+        /// <summary>switch_on_off_*_checked.dds. The half of a switch that is in force.</summary>
+        public static readonly Color SwitchLit = new Color(27, 44, 51);
+
+        /// <summary>
+        /// switch_on_off_*.dds. The half that is not.
+        /// </summary>
+        /// <remarks>
+        /// Darker than anything else in this palette, and deliberately so in the game as well: the two
+        /// halves are told apart by the difference between them rather than by either one being marked.
+        /// </remarks>
+        public static readonly Color SwitchDark = new Color(6, 10, 12);
     }
 
     /// <summary>
@@ -174,6 +187,12 @@ namespace Reactor.Screens
 
         /// <summary>Anything hanging over the screen - a question, a list that opens downward.</summary>
         public const float Popup = 512f;
+
+        /// <summary>A chevron or a cross standing beside a line of text.</summary>
+        public const float Symbol = 18f;
+
+        /// <summary>The box or circle at the head of a row in a list of things to choose between.</summary>
+        public const float Mark = 15f;
     }
 
     /// <summary>A hairline across a block, with room around it.</summary>
@@ -242,6 +261,168 @@ namespace Reactor.Screens
     }
 
     /// <summary>
+    /// The handle a row is dragged by: six small squares, two across and three down.
+    /// </summary>
+    /// <remarks>
+    /// Drawn rather than fetched. The game has no grip of its own to borrow - nothing in it is dragged
+    /// the way a step in a sequence is - and six rectangles are crisp at any size where a picture
+    /// squeezed to eleven pixels across would be six grey smudges.
+    /// </remarks>
+    public class Grip : Element
+    {
+        const int Across = 2;
+        const int Down = 3;
+
+        /// <summary>How big one square is, and how far apart they sit.</summary>
+        const float Square = 3f;
+
+        const float Gap = 3f;
+
+        public Grip(Color color)
+        {
+            Color = color;
+        }
+
+        public Color Color { get; set; }
+
+        protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
+        {
+            return new Vector2(
+                Across * Square + (Across - 1) * Gap,
+                Down * Square + (Down - 1) * Gap);
+        }
+
+        protected override void DrawContent(IGraphics g)
+        {
+            float width = Across * Square + (Across - 1) * Gap;
+            float height = Down * Square + (Down - 1) * Gap;
+
+            float left = ContentBounds.X + (ContentBounds.Width - width) * 0.5f;
+            float top = ContentBounds.Y + (ContentBounds.Height - height) * 0.5f;
+
+            for (int x = 0; x < Across; x++)
+                for (int y = 0; y < Down; y++)
+                    g.DrawSprite(Solid, new RectangleF(
+                        left + x * (Square + Gap), top + y * (Square + Gap), Square, Square), Color, 0f);
+        }
+    }
+
+    /// <summary>
+    /// The box or circle at the head of a row somebody is choosing from.
+    /// </summary>
+    /// <remarks>
+    /// Square where several may be chosen and round where only one may, which is the one piece of this
+    /// screen borrowed from desktops rather than from the game. Space Engineers has a checkbox and no
+    /// radio button, because nothing in it asks a question that way; the shape still carries the answer
+    /// to "may I pick more than one of these", and that is worth more here than the consistency is.
+    /// <para>
+    /// The square is drawn and the circle is a sprite, for the same reason everything else here is one or
+    /// the other: a rectangle is exact at any size and a curve cannot be made of them.
+    /// </para>
+    /// </remarks>
+    public class Mark : Element
+    {
+        /// <summary>How far inside the box or circle the filled part sits.</summary>
+        const float Inset = 4f;
+
+        public Mark()
+        {
+            Color = Palette.Faint;
+        }
+
+        /// <summary>Whether more than one of the rows this heads may be chosen.</summary>
+        public bool Many { get; set; }
+
+        /// <summary>Whether this one has been.</summary>
+        public bool Chosen { get; set; }
+
+        public Color Color { get; set; }
+
+        protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
+        {
+            return new Vector2(Sizes.Mark, Sizes.Mark);
+        }
+
+        protected override void DrawContent(IGraphics g)
+        {
+            RectangleF box = new RectangleF(
+                ContentBounds.X + (ContentBounds.Width - Sizes.Mark) * 0.5f,
+                ContentBounds.Y + (ContentBounds.Height - Sizes.Mark) * 0.5f,
+                Sizes.Mark, Sizes.Mark);
+
+            if (!Many)
+            {
+                g.DrawSprite(Chosen ? Symbols.Disc : Symbols.Ring, box, Color, 0f);
+                return;
+            }
+
+            Outline(g, box, Color, Space.Hair);
+
+            if (Chosen)
+                g.DrawSprite(Solid, new RectangleF(
+                    box.X + Inset, box.Y + Inset,
+                    box.Width - Inset * 2f, box.Height - Inset * 2f), Color, 0f);
+        }
+    }
+
+    /// <summary>
+    /// A word with an arrowhead beside it, saying where pressing it goes.
+    /// </summary>
+    /// <remarks>
+    /// Two things rather than the word alone. Back is the only way out of a screen and a list of kinds is
+    /// the only thing on a column that opens downward, and an audience who have never used one of these
+    /// finds an arrow before it reads anything.
+    /// <para>
+    /// The arrow leads where it points away from the word - Back, going left - and trails where it points
+    /// at what the word is about to open. Both are the same picture turned.
+    /// </para>
+    /// </remarks>
+    public class Signpost : Stack
+    {
+        readonly Glyph _arrow;
+        readonly Label _word;
+
+        public Signpost(string word, float turn, bool leads)
+        {
+            Horizontal = true;
+            Spacing = Space.Row;
+
+            _arrow = new Glyph(Symbols.Chevron, Sizes.Symbol, Palette.Muted);
+            _arrow.Rotation = turn;
+
+            _word = Widgets.Ghost(Widgets.Caps(word));
+            _word.Wraps = false;
+
+            if (leads)
+            {
+                Children.Add(_arrow);
+                Children.Add(_word);
+            }
+            else
+            {
+                Children.Add(_word);
+                Children.Add(_arrow);
+            }
+        }
+
+        /// <summary>What it says. The arrow beside it does not change.</summary>
+        public string Text
+        {
+            set { _word.Text = value; }
+        }
+
+        /// <summary>Colours the arrow and the word together, so the two cannot disagree.</summary>
+        public Color Tint
+        {
+            set
+            {
+                _arrow.Tint = value;
+                _word.Color = value;
+            }
+        }
+    }
+
+    /// <summary>
     /// A fillable part of a sentence.
     /// </summary>
     /// <remarks>
@@ -280,42 +461,132 @@ namespace Reactor.Screens
     }
 
     /// <summary>
-    /// A switch, drawn filled when it governs everything under it and as an outline when it governs only
-    /// itself.
+    /// The game's own on/off control: two halves side by side, both words always readable, the half that
+    /// is in force filled light and the other left dark.
     /// </summary>
     /// <remarks>
-    /// Two of them in a column need telling apart. The indent already says which is nested; the weight
-    /// says which is the bigger act, because stopping a whole airlock is not the same as stopping one of
-    /// them. The outline is drawn as four thin rectangles, since the seam has no borders.
+    /// Copied from <c>MyGuiControlOnOffSwitch</c> rather than invented. That control is a bordered box
+    /// holding two half-width checkboxes and two labels; the state is shown by which half is checked and
+    /// by the font each label is drawn in - White on the side in force, Blue on the side that is not.
+    /// Every part of it is a flat fill, a one-pixel border or a word, so all of it is reproducible here.
+    /// <para>
+    /// It says <b>what state the thing is in</b>, where everything else on these screens says what
+    /// pressing it does. That is the game's convention and it is worth the inconsistency: an audience
+    /// who have never programmed should not have to work out whether a lone word is a label or a button,
+    /// and a switch showing both of its positions cannot be read the wrong way round.
+    /// </para>
     /// </remarks>
-    public class Toggle : Label
+    public class Switch : Element
     {
-        public Toggle()
+        readonly ElementCollection _children;
+        readonly Label _on;
+        readonly Label _off;
+
+        float _half;
+
+        public Switch(float scale)
         {
-            Scale = Type.Tiny;
-            Padding = new Thickness(Space.ChipX, Space.ChipY);
-            Wraps = false;
+            _children = new ElementCollection(this);
+
+            _on = Half(Widgets.Caps("on"), scale);
+            _off = Half(Widgets.Caps("off"), scale);
+
+            _children.Add(_on);
+            _children.Add(_off);
+
+            Edge = Palette.Dim;
+            EdgeThickness = Space.Hair;
         }
 
-        /// <summary>Whether this governs everything below it, and is therefore drawn solid.</summary>
-        public bool Governs { get; set; }
+        /// <summary>Which way it is set. The lit half and the bright word both follow this.</summary>
+        public bool IsOn { get; private set; }
 
-        /// <summary>Puts it in the one state or the other, so the two can never be half set.</summary>
-        public void Show(bool governs, Color accent, Color ink)
+        /// <summary>
+        /// Whether this governs everything below it as well as itself.
+        /// </summary>
+        /// <remarks>
+        /// Two of them in a column need telling apart, because stopping a whole airlock is not the same
+        /// as stopping one of its sequences. The indent already says which is nested; this says which is
+        /// the bigger act, as a brighter border - the weight the old switch carried as a solid fill is
+        /// spoken for now that both halves are drawn.
+        /// </remarks>
+        public bool Governs { get; private set; }
+
+        /// <summary>Sets both halves at once, so the two can never disagree about which is lit.</summary>
+        public void Show(bool isOn, bool governs)
         {
+            Collapsed = false;
+            IsOn = isOn;
             Governs = governs;
-            Color = ink;
-            Background = governs ? accent : Palette.None;
-            Edge = governs ? Palette.None : accent;
+
+            // The game leaves both words nearly as bright as each other - its inactive font is
+            // (220, 244, 252) against a white one - and lets the difference between the two fills carry
+            // the state. That works at the size it draws a switch, which is a hundred and seventy pixels
+            // to a half. Ours is a fifth of that, so the word on the dark side takes the colour this
+            // palette already means by unlit, the same one an unlit light is drawn in.
+            _on.Color = isOn ? Palette.Ink : Palette.Dim;
+            _off.Color = isOn ? Palette.Dim : Palette.Ink;
+
+            Edge = governs ? Palette.Line : Palette.Dim;
         }
 
-        /// <summary>Nothing to switch here, so nothing is drawn.</summary>
+        /// <summary>Nothing to switch here, so it takes up no room at all.</summary>
         public void Hide()
         {
-            Text = "";
-            Color = Palette.None;
-            Background = Palette.None;
-            Edge = Palette.None;
+            Collapsed = true;
+        }
+
+        protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
+        {
+            _on.Measure(g, available);
+            _off.Measure(g, available);
+
+            // Both halves take the width of the longer word. Otherwise the control would change shape as
+            // it was switched, and a row of them down a screen would not line up with each other.
+            _half = _on.DesiredSize.X > _off.DesiredSize.X ? _on.DesiredSize.X : _off.DesiredSize.X;
+
+            float height = _on.DesiredSize.Y > _off.DesiredSize.Y ? _on.DesiredSize.Y : _off.DesiredSize.Y;
+            return new Vector2(_half * 2f, height);
+        }
+
+        protected override void ArrangeContent(RectangleF bounds)
+        {
+            _on.Arrange(new RectangleF(bounds.X, bounds.Y, _half, bounds.Height));
+            _off.Arrange(new RectangleF(bounds.X + _half, bounds.Y, _half, bounds.Height));
+        }
+
+        protected override void DrawContent(IGraphics g)
+        {
+            // Inside the border rather than over it, so the one pixel the game draws its controls with
+            // survives the fills going on top of it.
+            float inset = EdgeThickness;
+            var inner = new RectangleF(
+                Bounds.X + inset, Bounds.Y + inset,
+                Bounds.Width - inset * 2f, Bounds.Height - inset * 2f);
+
+            // The dark tone underneath the whole of it, then the lit half over the top. Two halves drawn
+            // side by side is the obvious way and it is wrong: a backend rounds each rectangle on its own,
+            // so on a fractional width the two either overlap by a pixel or leave a line of whatever is
+            // behind them showing through the middle. One rectangle cannot have a seam in it.
+            g.DrawSprite(Solid, inner, Palette.SwitchDark, 0f);
+
+            float half = inner.Width * 0.5f;
+            g.DrawSprite(Solid, IsOn
+                ? new RectangleF(inner.X, inner.Y, half, inner.Height)
+                : new RectangleF(inner.X + half, inner.Y, inner.Width - half, inner.Height),
+                Palette.SwitchLit, 0f);
+
+            _on.Draw(g);
+            _off.Draw(g);
+        }
+
+        static Label Half(string text, float scale)
+        {
+            Label half = Widgets.Label(text, Palette.Faint, scale);
+            half.Padding = new Thickness(Space.ChipX, Space.ChipY);
+            half.Centres = true;
+            half.Wraps = false;
+            return half;
         }
     }
 
@@ -440,6 +711,20 @@ namespace Reactor.Screens
             var stack = new Stack();
             stack.Spacing = spacing;
             return stack;
+        }
+
+        /// <summary>One symbol, at the size a symbol stands beside a line of text.</summary>
+        public static Glyph Symbol(MyStringId material, Color tint)
+        {
+            return new Glyph(material, Sizes.Symbol, tint);
+        }
+
+        /// <summary>An arrowhead pointing whichever way <paramref name="turn" /> says.</summary>
+        public static Glyph Chevron(float turn, Color tint)
+        {
+            Glyph chevron = Symbol(Symbols.Chevron, tint);
+            chevron.Rotation = turn;
+            return chevron;
         }
 
         public static Stack RowOf(float spacing)

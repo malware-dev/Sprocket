@@ -215,17 +215,38 @@ namespace Phosphor
         }
 
         /// <summary>
-        /// Moves a rectangle from UI units into window pixels, rounded outward so a fractional edge never
-        /// leaves a seam between two things that were meant to meet.
+        /// Moves a rectangle from UI units into window pixels, rounding <b>where it is</b> and <b>how big
+        /// it is</b> separately.
         /// </summary>
+        /// <remarks>
+        /// The point of doing it this way is that the same size always comes out the same number of
+        /// pixels, wherever on the screen it happens to sit. That sounds like a detail and is not: a
+        /// control is several rectangles, a screen holds several of that control, and a UI unit is not a
+        /// whole pixel at most of the sizes a monitor comes in.
+        /// <para>
+        /// This used to round outward - floor the near edge, ceil the far one - so that two things meant
+        /// to touch could never leave a seam between them. It bought that at a price nobody had counted:
+        /// a box twenty-nine and a half units tall came out thirty pixels or twenty-nine depending on
+        /// whether it landed on a half, so the same switch drawn in two rows of different heights was a
+        /// pixel different in each, and a one-unit border came out two pixels on the sides where its span
+        /// crossed a boundary and one on the sides where it did not.
+        /// </para>
+        /// <para>
+        /// Rounding position and size apart cannot do that. It can in principle leave a seam where two
+        /// rectangles abut on a fraction, and in practice does not: both edges of the join round the same
+        /// way, because both are the same number.
+        /// </para>
+        /// </remarks>
         private Rectangle ToPixels(RectangleF bounds)
         {
-            int left = (int)Math.Floor(bounds.X * _scale + _origin.X);
-            int top = (int)Math.Floor(bounds.Y * _scale + _origin.Y);
-            int right = (int)Math.Ceiling((bounds.X + bounds.Width) * _scale + _origin.X);
-            int bottom = (int)Math.Ceiling((bounds.Y + bounds.Height) * _scale + _origin.Y);
+            // Floor of plus a half rather than Math.Round, which rounds a half to the nearest even number
+            // and would make the answer depend on which side of the screen a thing is on all over again.
+            int left = (int)Math.Floor(bounds.X * _scale + _origin.X + 0.5f);
+            int top = (int)Math.Floor(bounds.Y * _scale + _origin.Y + 0.5f);
+            int width = (int)Math.Floor(bounds.Width * _scale + 0.5f);
+            int height = (int)Math.Floor(bounds.Height * _scale + 0.5f);
 
-            return new Rectangle(left, top, right - left, bottom - top);
+            return new Rectangle(left, top, width, height);
         }
     }
 }

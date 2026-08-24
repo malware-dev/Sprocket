@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Phosphor;
 using Reactor.Sim.Content;
 using Reactor.Screens;
@@ -33,8 +34,46 @@ namespace Reactor.Sim.Simulation
         readonly GlyphAtlas _atlas;
         readonly Dictionary<string, IBrush> _brushes = new Dictionary<string, IBrush>();
         readonly Dictionary<string, Bitmap> _art = new Dictionary<string, Bitmap>();
+        readonly Dictionary<string, Bitmap> _symbols = new Dictionary<string, Bitmap>();
 
         ScreenSpaceGraphics _graphics;
+
+        /// <summary>
+        /// The resolution the screen is drawn at, whatever size the window happens to be.
+        /// </summary>
+        /// <remarks>
+        /// <b>This is a harness concern and stays here.</b> Phosphor has no idea it exists, and the mod
+        /// does not need it: in the game the screen is drawn at the monitor's resolution and there is
+        /// nothing to fit it into.
+        /// <para>
+        /// It exists because the alternative was laying out against the window. Somebody drags a corner and
+        /// the layout is suddenly being asked to fit six hundred and ninety units of height, which is not a
+        /// height anybody plays at - so every judgement made while looking at it is a judgement about a
+        /// screen that will never exist. The layout now always runs at this size and only the picture of it
+        /// is scaled, which is the difference between a small window and a small screen.
+        /// </para>
+        /// </remarks>
+        public PixelSize Target { get; set; } = new PixelSize(1920, 1080);
+
+        /// <summary>
+        /// Where <see cref="Target" /> landed inside the control, letterboxed to keep its shape.
+        /// </summary>
+        /// <remarks>
+        /// Public because the pointer has to come back the other way. A press arrives in window
+        /// coordinates and the screen thinks in target pixels, and having one place that knows the
+        /// mapping is what stops the two drifting apart.
+        /// </remarks>
+        public Rect Viewport { get; private set; }
+
+        /// <summary>Turns a point on the control into the target pixel under it.</summary>
+        public Point ToTarget(Point window)
+        {
+            if (Viewport.Width <= 0d || Viewport.Height <= 0d)
+                return window;
+
+            double scale = Viewport.Width / Target.Width;
+            return new Point((window.X - Viewport.X) / scale, (window.Y - Viewport.Y) / scale);
+        }
 
         public PhosphorSurface()
         {
@@ -83,10 +122,21 @@ namespace Reactor.Sim.Simulation
 
         public override void Render(DrawingContext context)
         {
-            double width = Bounds.Width;
-            double height = Bounds.Height;
-            if (width <= 0d || height <= 0d)
+            if (Bounds.Width <= 0d || Bounds.Height <= 0d || Target.Width <= 0 || Target.Height <= 0)
                 return;
+
+            // The whole frame is built at Target and then fitted, rather than built at whatever the window
+            // is. Letterboxed rather than stretched, because the shape of a screen is part of what is being
+            // checked and a squashed one would quietly answer a different question.
+            double fit = Math.Min(Bounds.Width / Target.Width, Bounds.Height / Target.Height);
+            double shown = Target.Width * fit;
+            double tall = Target.Height * fit;
+
+            Viewport = new Rect(
+                (Bounds.Width - shown) / 2d, (Bounds.Height - tall) / 2d, shown, tall);
+
+            double width = Target.Width;
+            double height = Target.Height;
 
             // What MyScreenSpace.GetSafeGuiArea answers: four by three at the full height of the screen,
             // centred. Anything wider than that is outside a layout and reachable only by a pointer.
@@ -108,7 +158,15 @@ namespace Reactor.Sim.Simulation
             if (frame != null)
                 frame(_graphics);
 
-            Replay(context);
+            // Everything below was recorded in target pixels, so the fit goes on here rather than being
+            // folded into any of it. Clipped to the viewport as well, since a letterbox that let the
+            // screen paint into its own margins would not be a letterbox.
+            using (context.PushClip(Viewport))
+            using (context.PushTransform(
+                Matrix.CreateScale(fit, fit) * Matrix.CreateTranslation(Viewport.X, Viewport.Y)))
+            {
+                Replay(context);
+            }
         }
 
         void Replay(DrawingContext context)
@@ -189,9 +247,17 @@ namespace Reactor.Sim.Simulation
                     Bitmap art = ArtFor(material.Substring(Icons.Prefix.Length));
                     if (art != null)
                     {
-                        context.DrawImage(art, destination);
+                        Shrink(context, art, destination);
                         return;
                     }
+                }
+
+                // A symbol, in whatever colour was asked for.
+                Bitmap symbol = SymbolFor(material, command.Color);
+                if (symbol != null)
+                {
+                    Shrink(context, symbol, destination);
+                    return;
                 }
 
                 DrawMissing(context, destination, material);
@@ -200,6 +266,28 @@ namespace Reactor.Sim.Simulation
             {
                 if (rotation != null)
                     rotation.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Draws a picture into a box a good deal smaller than it is.
+        /// </summary>
+        /// <remarks>
+        /// The sampling is asked for by name because the default is not good enough for what these are. A
+        /// ring is a five-hundred-pixel picture of a hairline and the mark it is drawn into is fifteen
+        /// across, and sampled cheaply that reduction keeps whichever pixels it happens to land on and
+        /// throws the rest away - which draws a dotted circle. The game's own sampler averages what it
+        /// skips, so cheap scaling here would be the simulator inventing a defect the mod does not have,
+        /// and that is the one thing it must never do.
+        /// </remarks>
+        static void Shrink(DrawingContext context, Bitmap picture, Rect destination)
+        {
+            using (context.PushRenderOptions(new RenderOptions
+            {
+                BitmapInterpolationMode = BitmapInterpolationMode.HighQuality
+            }))
+            {
+                context.DrawImage(picture, destination);
             }
         }
 
@@ -329,6 +417,15 @@ namespace Reactor.Sim.Simulation
                 ? context.PushOpacity(command.Color.A / 255d)
                 : null;
 
+            // Once for the whole run, for the reason spelled out on Shrink: a cell on the page is
+            // forty-five tall and a small line of text draws it at half that, and sampled cheaply a
+            // one-texel diagonal falls between the samples and disappears. It is why ON came out broken
+            // where OFF beside it did not - N is the only letter of the three with a diagonal in it.
+            IDisposable sampling = context.PushRenderOptions(new RenderOptions
+            {
+                BitmapInterpolationMode = BitmapInterpolationMode.HighQuality
+            });
+
             try
             {
                 for (int i = 0; i < text.Length; i++)
@@ -360,11 +457,83 @@ namespace Reactor.Sim.Simulation
             }
             finally
             {
+                sampling.Dispose();
+
                 if (fade != null)
                     fade.Dispose();
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// One symbol in one colour, made the first time that pairing is asked for.
+        /// </summary>
+        /// <remarks>
+        /// The colour is taken as a flat tint over the picture's own coverage rather than multiplied
+        /// through it, which is what the glyph page does and for the same reason: every symbol here is
+        /// white to within a few points, so the two answers differ by nothing anybody could see, and a
+        /// flat fill cannot end up a shade off the colour that was asked for.
+        /// <para>
+        /// Kept per pairing. A screen asks for perhaps a dozen, where doing it at draw time would be four
+        /// hundred small bitmaps a second to arrive at the same twelve.
+        /// </para>
+        /// </remarks>
+        Bitmap SymbolFor(string material, Color color)
+        {
+            string key = material + "#" + color.R + "," + color.G + "," + color.B + "," + color.A;
+
+            Bitmap tinted;
+            if (_symbols.TryGetValue(key, out tinted))
+                return tinted;
+
+            string relative = SymbolArt.PathFor(material);
+            string png = relative == null ? null : SafeResolve(relative);
+
+            tinted = png == null ? null : Tint(png, color);
+            _symbols.Add(key, tinted);
+            return tinted;
+        }
+
+        /// <summary>Paints <paramref name="color" /> through the coverage of the picture at <paramref name="png" />.</summary>
+        static Bitmap Tint(string png, Color color)
+        {
+            using (var source = new Bitmap(png))
+            {
+                var size = new PixelSize(source.PixelSize.Width, source.PixelSize.Height);
+                var pixels = new byte[size.Width * size.Height * 4];
+
+                unsafe
+                {
+                    fixed (byte* start = pixels)
+                    {
+                        source.CopyPixels(
+                            new PixelRect(0, 0, size.Width, size.Height),
+                            (IntPtr)start, pixels.Length, size.Width * 4);
+                    }
+                }
+
+                for (int i = 0; i < pixels.Length; i += 4)
+                {
+                    pixels[i] = color.B;
+                    pixels[i + 1] = color.G;
+                    pixels[i + 2] = color.R;
+                    pixels[i + 3] = (byte)(pixels[i + 3] * color.A / 255);
+                }
+
+                var bitmap = new WriteableBitmap(
+                    size, new Vector(96, 96), PixelFormat.Bgra8888, AlphaFormat.Unpremul);
+
+                using (ILockedFramebuffer buffer = bitmap.Lock())
+                {
+                    for (int y = 0; y < size.Height; y++)
+                        System.Runtime.InteropServices.Marshal.Copy(
+                            pixels, y * size.Width * 4,
+                            buffer.Address + y * buffer.RowBytes, size.Width * 4);
+                }
+
+                return bitmap;
+            }
         }
 
         /// <summary>

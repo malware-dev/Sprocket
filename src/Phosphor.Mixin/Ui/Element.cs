@@ -25,7 +25,7 @@ namespace Phosphor
         /// Named for the texture rather than for the act, because <c>Fill</c> is what a container calls
         /// the child that takes the slack and one of the two had to give way.
         /// </remarks>
-        protected static readonly MyStringId Solid = MyStringId.GetOrCompute("Phosphor_Fill");
+        protected static readonly MyStringId Solid = Symbols.Fill;
 
         /// <summary>Set when this is added to another element's children. Null while it is loose.</summary>
         public Element Parent { get; internal set; }

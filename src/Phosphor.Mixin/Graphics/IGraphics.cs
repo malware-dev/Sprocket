@@ -15,6 +15,36 @@ namespace Phosphor
     /// neither does this. A backend may still use them internally; it may not expose them.
     /// </para>
     /// <para>
+    /// What the rule does <b>not</b> reach is how a backend turns a call into pixels, or how a control
+    /// composes itself out of calls. Those are each renderer's own business, and the two renderers are
+    /// genuinely different machines. Three consequences worth writing down, because each was found the
+    /// hard way:
+    /// <list type="bullet">
+    /// <item><description>
+    /// <b>Rounding belongs in the backend, never in the layout.</b> <c>MyScreenSpaceSprite.DrawPixels</c>
+    /// takes a <c>Rectangle</c>, so the screen has to round and the only question is how; <c>MySprite</c>
+    /// takes <c>Vector2?</c>, so a surface never has to and should not. If <see cref="Element.Arrange" />
+    /// ever rounds, that choice is taken away from both at once. It is a rasterising concern and it stays
+    /// below this line.
+    /// </description></item>
+    /// <item><description>
+    /// <b>Round position and size apart, not the edges outward.</b> Whatever a backend does, the property
+    /// worth having is that the same size is the same number of pixels wherever it sits. Rounding the near
+    /// edge down and the far edge up does not have it: the same control in two rows of different heights
+    /// came out thirty pixels in one and twenty-nine in the other, and a one-unit border came out two
+    /// pixels on the sides whose span crossed a boundary.
+    /// </description></item>
+    /// <item><description>
+    /// <b>The targets are not the same size and it is not close.</b> A screen is 1440x1080 units. A text
+    /// panel's render target is 512, 256 or 128 at whatever aspect its block declares - so a unit is
+    /// roughly a quarter of a texel there, and a tenth of one on the smallest. Anything a unit thick is
+    /// sub-texel, which is why rounding on that target would erase every hairline on the screen rather
+    /// than tidy it. It is also why this rule promises that <i>a</i> Phosphor UI can be drawn on a
+    /// surface, and not that <i>any given</i> one can.
+    /// </description></item>
+    /// </list>
+    /// </para>
+    /// <para>
     /// Coordinates are <b>UI units</b> throughout, with the origin at the top-left of the drawable area. A
     /// unit is a pixel on a target that does not scale, and a target that does scale hides that behind
     /// <see cref="Size" />: a text panel is its own unchanging pixel size, and the screen is a fixed size the

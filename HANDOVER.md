@@ -337,14 +337,25 @@ sitting of extraction here, taking everything the symbol work is going to need, 
 
 ### What the last sitting added
 
-- `Widgets.Box`, and the three colours it fixes. The caret, the selection and the hint were
-  Phosphor's own defaults and had never been shown the palette - a foreign blue behind a selected
-  heading. The cause was a missing factory: there is `Row`, `Ghost`, `Chip`, `Wash` and there was
-  no `Box`, so three text boxes were each assembled by hand and drifted.
-- The harness keyboard: `type "words"`, `enter`, `escape`. Routed through one
-  `EditorScene.Typing` so the window and the harness cannot disagree about where keystrokes go.
-- `ended on:` printed after every shot. A press that misses lands nowhere and looks exactly like
-  a press that worked.
+The polish pass started, and turned out to be as much about the harness as about the screens.
+See **The polish pass** below for what is done and what is left.
+
+- The game's on/off switch, four symbol materials, drawn grips and marks.
+- `ToPixels` rounds position and size apart, which is a change to what the **mod** draws and not
+  only to what the harness shows.
+- The harness draws at a real resolution and fits the picture, rather than laying out against the
+  window. It also remembers where its window was.
+
+Three things were diagnosed wrongly on the way, and each wasted real time. Worth reading once,
+because none of them will look different the second time:
+
+1. **A broken capital N was the window being 690 pixels tall**, not the font, not the sampling.
+   Check what resolution a screenshot was taken at before believing anything about legibility.
+2. **A switch a pixel shorter than its twin was `ToPixels`**, and the numbers were sitting in
+   `--dump` the whole time. `--dump` answers "what is actually being drawn" and it is quicker
+   than looking.
+3. **A press that appeared not to register was a row that has no command.** A system's row on the
+   ship's list is a heading; only its switch answers. Nothing was broken.
 
 ### What to check next time
 
@@ -370,24 +381,45 @@ Enter and looks straight away sees the old name and reads exactly like a silent 
 not one. `SetText` also ignores an id it does not know without a word, which makes the wrong
 diagnosis very easy to reach for.
 
-## Waiting for the polish pass
+## The polish pass
 
-Deliberately deferred, not forgotten. The layout and the behaviour are where they should be;
-what is left is appearance, and it is worth doing in one pass rather than a piece at a time.
+### Done
 
-- **Symbols.** `::` for a drag grip, `x` for delete, `|>` and `II` on the switches, `< BACK`,
-  the `v` on the kinds line, `(*)` and `( )` on the option rows. The game's font has none of
-  the glyphs these stand in for, so they want real artwork - `Textures/GUI/Icons/Symbols` and
-  the `buttons` folder are the place to look, and `--extract` already does the decoding.
+- **The switches are the game's own on/off control.** Copied from `MyGuiControlOnOffSwitch`
+  rather than invented: two halves, both words always readable, the half in force filled light
+  against a near-black other half. It needs no artwork - every part of it is a flat fill, a
+  one-pixel border or a word. It says **what state the thing is in**, where everything else on
+  these screens says what pressing it does; that is the game's convention and it was taken
+  deliberately, because an audience who have never programmed should not have to work out
+  whether a lone word is a label or a button. One size everywhere.
+- **Symbols are real.** Four materials, declared in `TransparentMaterials.sbc` against files the
+  game already ships and mirrored in the simulator's `SymbolArt`: `Phosphor_Chevron` (one
+  arrowhead, turned four ways), `Phosphor_Cross`, `Phosphor_Disc`, `Phosphor_Ring`. Only the
+  `_highlight` variants are white, and only a white picture can be tinted, because a tint is a
+  multiply on both targets and cannot brighten anything.
+- **What rectangles can make is drawn, not fetched.** The drag grip is six squares, the checkbox
+  is a rectangle inside another, a pause would be two bars. A rectangle is exact at any size and
+  a texture squeezed to eleven pixels is six grey smudges.
+- **The picker marks say how many may be chosen** - square where several may, round where only
+  one may. The one thing on screen borrowed from desktops rather than from the game, kept
+  because the shape carries an answer the words do not.
+
+### Left
+
+- **A band that cannot be pressed should not look pressable.** A system's row on the ship's list
+  carries no command on purpose - it is a heading over the sequences under it - but it is drawn
+  in exactly the same panel as the rows that do answer. Found by clicking it and assuming the
+  pointer mapping was broken, which is the same mistake a player would make with less to go on.
+- **Hover**, including on the switch. Nothing responds to the pointer resting on it. The game
+  has the colour - `DarkBlueBackground_highlight.png`, already in the palette as `PanelHot` -
+  and a screen owns its own pointer, so this is ordinary work rather than anything blocked. It
+  is also the other half of the item above: what hovers is what can be pressed.
+- **Scroll indication.** A region scrolls and nothing says so. Cheap to draw - it is a
+  rectangle - and it needs deciding whether it shows always or only while moving.
 - **The U+2192 in `SequenceSummary.cs`.** Core's own wording, and the one character core emits
   that the game's font cannot draw. Every string literal in `Reactor.Core.Mixin` was checked
   against the font's 496 glyphs and this is the only one. Either core says it in ASCII or the
   screens translate it; the simulator already draws the replacement box so it cannot be missed.
-- **Scroll indication.** A region scrolls and nothing says so. Cheap to draw - it is a
-  rectangle - and it needs deciding whether it shows always or only while moving.
-- **Hover.** Nothing responds to the pointer resting on it. The game has the colour for it -
-  `DarkBlueBackground_highlight.png`, already in the palette as `PanelHot` - and a screen owns
-  its own pointer, so this is ordinary work rather than anything blocked.
 
 ## Known problems
 
@@ -420,6 +452,7 @@ Sim.exe --extract                    # decode font, cursors and block art into t
 
 Sim.exe --dump                       # the frame as a draw list
 Sim.exe --shot out.png 657 311 tick 40 drag 100 200 100 400
+Sim.exe --shot out.png at 2560 1440 657 311      # at a resolution somebody actually has
 ```
 
 `--shot` takes a script: a bare pair of numbers is a press, `tick n` advances the ship's clock,
@@ -427,6 +460,33 @@ Sim.exe --shot out.png 657 311 tick 40 drag 100 200 100 400
 Order matters and it is drawn between every step, because nothing knows where it is until it has
 been arranged - and because a light that is lit for one tick is invisible to a script that
 advances forty and then looks once.
+
+**The screen is always drawn at a real resolution and the picture of it is what gets fitted.**
+Both the window and `--shot` build the frame at 1920x1080 by default and letterbox that into
+whatever they have; `at W H` changes it. This is a harness concern and lives in
+`PhosphorSurface.Target` - Phosphor knows nothing about it, and the mod needs nothing like it,
+because in the game the screen *is* the monitor. It exists because laying out against the window
+meant that dragging a corner asked the layout to fit 690 units of height, which is not a height
+anybody plays at, so every judgement made while looking at it was a judgement about a screen that
+will never exist. **The old default was 1280x690 and it lied**: at that size a hairline diagonal
+in the game's font falls between the samples and a capital N comes out broken, which cost an
+evening being diagnosed as a font problem.
+
+**The window remembers where it was**, in `%LOCALAPPDATA%\Reactor\SimWindow.txt` - position,
+size and whether it was maximised. Restored only if a decent corner of it would land on a screen
+that still exists, so unplugging a monitor cannot hide it. It fails silently: a tool that will
+not open because a preferences file is malformed is worse than one that forgets.
+
+A note on rounding, because it is subtle and it bit hard. `ScreenSpaceGraphics.ToPixels` rounds
+**where a rectangle is** and **how big it is** separately, so that the same size is always the
+same number of pixels wherever it sits. It used to round outward - floor the near edge, ceil the
+far one - so that two things meant to touch could never leave a seam, and the price of that was
+never counted: the same switch came out 30 pixels tall in one row and 29 in another, and a
+one-unit border came out two pixels on the sides whose span crossed a boundary. The rule and its
+two companions are written on `IGraphics`, the short version being that **rounding is the
+backend's business and must never migrate into `Element.Arrange`** - the screen has to round
+because `DrawPixels` takes a `Rectangle`, and a text panel must not because `MySprite` takes
+floats and a UI unit is a quarter of a texel there.
 
 A note on scrolling, because it was wrong for a while and the fault is easy to reintroduce:
 **the wheel is routed by where the pointer is**, not sent to the screen's own scroller. A

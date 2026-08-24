@@ -120,7 +120,7 @@ namespace Reactor.Screens
         sealed class RowVisual
         {
             public Bar Line;
-            public Label Mark;
+            public Mark Mark;
             public IconBox Icon;
             public Label Name;
             public Label Detail;
@@ -154,7 +154,7 @@ namespace Reactor.Screens
         readonly Label _title = Widgets.Label("", Palette.Ink, Type.Body);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly TextBox _narrow = Widgets.Box(Type.Small, Palette.Page);
-        readonly Label _kindLine = Widgets.Ghost("");
+        readonly Signpost _kindLine = new Signpost("", Symbols.TurnedDown, false);
         readonly Label _showing = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly Stack _options = Widgets.RowOf(Space.Region);
         readonly List<Label> _optionRows = new List<Label>();
@@ -322,7 +322,7 @@ namespace Reactor.Screens
                     current = stage.Filters[i];
             }
 
-            _kindLine.Text = current.Label + "  v";
+            _kindLine.Text = current.Label;
 
             while (_kindRows.Count < stage.Filters.Count)
             {
@@ -427,7 +427,8 @@ namespace Reactor.Screens
                 RowVisual row = _visible[i];
 
                 // A tick for things you collect, a dot for things you settle on.
-                row.Mark.Text = entry.IsChosen ? (many ? "x" : "*") : (many ? "o" : "-");
+                row.Mark.Many = many;
+                row.Mark.Chosen = entry.IsChosen;
                 row.Mark.Color = entry.IsChosen ? Palette.Live : Palette.Faint;
 
                 if (row.Icon != null)
@@ -455,8 +456,7 @@ namespace Reactor.Screens
         {
             var row = new RowVisual();
 
-            row.Mark = Widgets.Label("", Palette.Faint, Type.Small);
-            row.Mark.Wraps = false;
+            row.Mark = new Mark();
 
             Stack left = Widgets.RowOf(Space.Item);
             left.Children.Add(row.Mark);

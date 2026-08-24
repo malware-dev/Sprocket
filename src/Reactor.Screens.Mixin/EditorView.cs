@@ -31,12 +31,12 @@ namespace Reactor.Screens
 
         readonly Dock _root = new Dock();
         readonly Bar _headerBar = new Bar();
-        readonly Label _back = Widgets.Ghost(Widgets.Caps("< Back"));
+        readonly Signpost _back = new Signpost("Back", 0f, true);
         readonly Stack _titleRow = Widgets.RowOf(Space.Item);
         readonly Label _title = Widgets.Label("", Palette.Ink, Type.Title);
         readonly TextBox _titleBox = Widgets.Box(Type.Title, Palette.PanelHot);
         readonly Label _pencil = Widgets.Label("rename", Palette.Faint, Type.Tiny);
-        readonly Label _switch = Widgets.Label("", Palette.Ink, Type.Small);
+        readonly Switch _switch = new Switch(Type.Small);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Type.Small);
 
         readonly Dock _bodyDock = new Dock();
@@ -82,15 +82,11 @@ namespace Reactor.Screens
         {
             _editor = editor;
 
-            _switch.Padding = new Thickness(Space.ChipX, Space.ChipY);
-
             // The heading holds one line whatever the name. Trimming it to an ellipsis is what the other
             // host does and what this wants; until Phosphor can trim, it overflows rather than growing the
             // header, which is the lesser of the two wrongs.
             _title.Wraps = false;
             _title.Trims = true;
-            _switch.Wraps = false;
-            _back.Wraps = false;
             _pencil.Wraps = false;
 
             // The heading and the box that edits it share a place and a size, so swapping them moves
@@ -105,18 +101,13 @@ namespace Reactor.Screens
             _titleRow.Children.Add(_title);
             _titleRow.Children.Add(_pencil);
 
-            // Held to the width of the longer word, with both centred in it, because the two are not the
-            // same length in a proportional face and the title would step sideways every time somebody
-            // stopped a system. The fill is the slot rather than the words, so the shape does not change
-            // either - only what it says.
-            _switch.Centres = true;
-            var switchSlot = new Sized(166f);
-            switchSlot.Content = _switch;
-
+            // No slot holding it to a width any more. A switch showing both of its positions is already
+            // the width of the longer word twice over whichever way it is set, so the title cannot be
+            // shifted sideways by somebody stopping a system.
             _headerBar.Spacing = Space.Region;
             _headerBar.Left = _back;
             _headerBar.Fill = _titleRow;
-            _headerBar.Right = switchSlot;
+            _headerBar.Right = _switch;
 
             // The subtitle's line is reserved whether or not there is one. A picker's subtitle empties as
             // the picking finishes, and a header that resized when it did would be the screen moving under
@@ -217,17 +208,14 @@ namespace Reactor.Screens
             // Kept in place and merely dimmed out rather than emptied. An element with no text still holds
             // its line, but it does not hold its width, and a title that slid sideways whenever Back came
             // and went would be exactly the fidgeting this screen is trying not to do.
-            _back.Color = screen.CanGoBack ? Palette.Muted : Palette.None;
+            _back.Tint = screen.CanGoBack ? Palette.Muted : Palette.None;
             _pencil.Color = screen.CanRename && !_renaming ? Palette.Faint : Palette.None;
 
-            // Both words are padded to one width, so toggling it does not shuffle the title along. Worded
-            // by what pressing it does rather than by what state it is in, so nobody has to work out which
-            // way round it is before daring to press.
-            _switch.Text = Widgets.Caps(screen.SwitchIsOn ? "Pause" : "Run");
-            _switch.Background = screen.HasSwitch
-                ? (screen.SwitchIsOn ? Palette.Notice : Palette.Live)
-                : Palette.None;
-            _switch.Color = screen.HasSwitch ? Palette.Chrome : Palette.None;
+            // Governs everything on the screen under it, which is what a switch in the header means.
+            if (screen.HasSwitch)
+                _switch.Show(screen.SwitchIsOn, true);
+            else
+                _switch.Hide();
 
             // Dark words on the lit fill, the way the game does it: its focus colour is pale, so a
             // control wearing it reads as lit only if what it says goes dark.

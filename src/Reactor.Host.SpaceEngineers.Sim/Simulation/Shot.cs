@@ -57,7 +57,10 @@ namespace Reactor.Sim.Simulation
         /// </remarks>
         public static string Save(string path, int width, int height, IList<Step> script)
         {
+            // Drawn at exactly the size asked for, so a shot is the screen at that resolution rather
+            // than a picture of it scaled to fit something else.
             var surface = new PhosphorSurface();
+            surface.Target = new PixelSize(width, height);
             var scene = new EditorScene();
             surface.Frame += scene.Draw;
 

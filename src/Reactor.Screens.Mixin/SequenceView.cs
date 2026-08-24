@@ -23,10 +23,10 @@ namespace Reactor.Screens
         sealed class StepRow
         {
             public Bar Line;
-            public Label Grip;
+            public Grip Grip;
             public Label Number;
             public SentenceView Sentence;
-            public Label Delete;
+            public Glyph Delete;
             public int Position;
 
             /// <summary>Where this row is being drawn relative to where the layout put it.</summary>
@@ -46,12 +46,12 @@ namespace Reactor.Screens
         readonly Label _status = Widgets.Label("", Palette.Muted, Type.Small);
         readonly Label _lastRun = Widgets.Label("", Palette.Faint, Type.Small);
         readonly Label _skipped = Widgets.Wash("", Palette.Notice, Palette.NoticeWash);
-        readonly Label _undo = Widgets.Ghost("<");
-        readonly Label _redo = Widgets.Ghost(">");
+        readonly Glyph _undo = Widgets.Chevron(0f, Palette.Muted);
+        readonly Glyph _redo = Widgets.Chevron(Symbols.TurnedRight, Palette.Muted);
 
         readonly Sized _undoSlot;
         readonly Sized _redoSlot;
-        readonly Toggle _enable = new Toggle();
+        readonly Switch _enable = new Switch(Type.Small);
         readonly Label _delete = Widgets.Ghost(Widgets.Caps("Delete"));
 
         readonly Label _locked = Widgets.Wash("", Palette.Muted, Palette.SlotFill);
@@ -86,8 +86,6 @@ namespace Reactor.Screens
             _skipped.Wraps = false;
             _liveBadge.Wraps = false;
             _delete.Wraps = false;
-
-            _enable.Padding = new Thickness(Space.PadX, Space.ChipY * 1.3f);
 
             // Both hold their place for the whole time the sentence is editable and go quiet when there is
             // nothing to walk back. Hiding them would move Run and Delete sideways every time somebody
@@ -147,10 +145,9 @@ namespace Reactor.Screens
             // moment and a situation, shown rather than explained.
             _liveBadge.Collapsed = !_component.Trigger.IsLiveNow;
 
-            // Says what pressing it does, not what state it is in. A switch labelled with its own state
-            // makes somebody work out which way round it is before they dare press it.
-            _enable.Text = Widgets.Caps(_component.Enabled ? "II  Pause" : "|>  Run");
-            _enable.Show(true, _component.Enabled ? Palette.Notice : Palette.Live, Palette.Chrome);
+            // Governs, because a sequence's switch is the only one on this screen and switching it off
+            // stops the whole of what the screen is showing.
+            _enable.Show(_component.Enabled, true);
 
             Waiting(_undo, _component.UndoCommand);
             Waiting(_redo, _component.RedoCommand);
@@ -469,8 +466,7 @@ namespace Reactor.Screens
                 // A grip rather than the whole line, because the line is full of chips and "press
                 // anywhere that is not one" is a rule nobody can see. A handle says where to grab, and
                 // says that grabbing is a thing you can do at all.
-                row.Grip = Widgets.Label("::", Palette.Faint, Type.Small);
-                row.Grip.Wraps = false;
+                row.Grip = new Grip(Palette.Faint);
                 row.Grip.Collapsed = !_component.Editable;
 
                 row.Number = Widgets.Label("", Palette.Faint, Type.Small);
@@ -488,7 +484,7 @@ namespace Reactor.Screens
                 handle.Children.Add(number);
 
                 row.Sentence = new SentenceView(_component.Editable, step.Slots.Count);
-                row.Delete = Widgets.Ghost("x");
+                row.Delete = Widgets.Symbol(Symbols.Cross, Palette.Faint);
                 row.Delete.Collapsed = !_component.Editable;
 
                 row.Line = new Bar();
@@ -582,9 +578,9 @@ namespace Reactor.Screens
         }
 
         /// <summary>Quiet when there is nothing to walk back, and in place either way.</summary>
-        static void Waiting(Label button, int command)
+        static void Waiting(Glyph button, int command)
         {
-            button.Color = command != 0 ? Palette.Muted : Palette.Dim;
+            button.Tint = command != 0 ? Palette.Muted : Palette.Dim;
         }
     }
 

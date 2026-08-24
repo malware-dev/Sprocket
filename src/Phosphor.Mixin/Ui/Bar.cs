@@ -56,14 +56,18 @@ namespace Phosphor
             float used = 0f;
             float height = 0f;
 
-            if (_left != null)
+            // A collapsed part is skipped along with its spacing, the way a stack skips one. Counting the
+            // spacing anyway would hold open a gap the width of the room between two controls, on every
+            // row that happens not to have the control - which is the reserved emptiness this layout is
+            // supposed to be rid of.
+            if (Shows(_left))
             {
                 _left.Measure(g, available);
                 used += _left.DesiredSize.X + Spacing;
                 height = Taller(height, _left.DesiredSize.Y);
             }
 
-            if (_right != null)
+            if (Shows(_right))
             {
                 _right.Measure(g, available);
                 used += _right.DesiredSize.X + Spacing;
@@ -86,14 +90,14 @@ namespace Phosphor
             float left = bounds.X;
             float right = bounds.X + bounds.Width;
 
-            if (_left != null)
+            if (Shows(_left))
             {
                 float width = _left.DesiredSize.X;
                 _left.Arrange(Centred(left, bounds, width, _left.DesiredSize.Y));
                 left += width + Spacing;
             }
 
-            if (_right != null)
+            if (Shows(_right))
             {
                 float width = _right.DesiredSize.X;
                 _right.Arrange(Centred(right - width, bounds, width, _right.DesiredSize.Y));
@@ -117,6 +121,12 @@ namespace Phosphor
 
             if (_right != null)
                 _right.Draw(g);
+        }
+
+        /// <summary>Whether a part is there at all and is asking to be seen.</summary>
+        private static bool Shows(Element part)
+        {
+            return part != null && !part.Collapsed;
         }
 
         /// <summary>

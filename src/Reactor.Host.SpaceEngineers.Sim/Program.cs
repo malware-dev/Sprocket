@@ -55,8 +55,27 @@ namespace Reactor.Sim
             {
                 BuildAvaloniaApp().SetupWithoutStarting();
 
-                string ended = Shot.Save(args[1], 1280, 690, Script(args, 2));
-                Console.WriteLine("wrote " + args[1]);
+                // The size is worth being able to say, and worth defaulting to one somebody actually
+                // has. The screen is a fixed number of UI units that the game stretches to the monitor,
+                // so how big a letter lands is decided by this number and by nothing in the layout. The
+                // default used to be the window's own 1280x690, which draws the whole screen at
+                // two-thirds - small enough that a hairline diagonal in the font falls between the
+                // samples and a capital N comes out broken. That is the harness inventing a defect, and
+                // a judgement about legibility made at a size no player has is a judgement about
+                // nothing.
+                int width = 1920;
+                int height = 1080;
+                int from = 2;
+
+                if (args.Length > 4 && args[2] == "at")
+                {
+                    width = int.Parse(args[3], CultureInfo.InvariantCulture);
+                    height = int.Parse(args[4], CultureInfo.InvariantCulture);
+                    from = 5;
+                }
+
+                string ended = Shot.Save(args[1], width, height, Script(args, from));
+                Console.WriteLine("wrote " + args[1] + "   " + width + "x" + height);
                 Console.WriteLine("ended on: " + ended);
                 return;
             }
@@ -66,7 +85,7 @@ namespace Reactor.Sim
                 // Avalonia is still set up, because text has to be measured and only it has a font. It is
                 // simply never started, so nothing is shown and nothing waits for a person.
                 BuildAvaloniaApp().SetupWithoutStarting();
-                Console.WriteLine(FrameDump.Render(1280f, 690f));
+                Console.WriteLine(FrameDump.Render(1920f, 1080f));
                 return;
             }
 
