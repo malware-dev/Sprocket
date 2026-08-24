@@ -251,7 +251,9 @@ namespace Reactor.Screens
 
                 // The row is what the question hangs under, so it is handed over with the hit. Nothing
                 // here opens anything: the row does not know a popup exists, only that pressing it asks.
-                hits.Add(new Hit(_rows[i].Bounds, option.Command, option.Question, _rows[i]));
+                var ask = new Hit(_rows[i].Bounds, option.Command, option.Question, _rows[i]);
+                ask.Hot = _rows[i];
+                hits.Add(ask);
             }
         }
     }
@@ -310,7 +312,10 @@ namespace Reactor.Screens
                 row.Warning.Text = entry.Warning;
                 row.Warning.Collapsed = string.IsNullOrEmpty(entry.Warning);
                 row.Current.Text = entry.IsCurrent ? "*" : "";
+                // The one already chosen is drawn in the hot tone at rest, so hovering it has to go a
+                // step further again or it would look like nothing happened.
                 row.Line.Background = entry.IsCurrent ? Palette.PanelHot : Palette.Panel;
+                row.Line.Highlight = entry.IsCurrent ? Palette.Line : Palette.PanelHot;
 
                 if (row.Blink == null)
                     continue;
@@ -328,7 +333,7 @@ namespace Reactor.Screens
         public override void Collect(List<Hit> hits)
         {
             for (int i = 0; i < _rows.Count && i < _component.Entries.Count; i++)
-                hits.Add(new Hit(_rows[i].Line.Bounds, _component.Entries[i].Command));
+                hits.Add(Hit.On(_rows[i].Line, _component.Entries[i].Command));
         }
 
         void Rebuild()
@@ -496,6 +501,15 @@ namespace Reactor.Screens
             float side = Space.PadX + (entry.Depth > 0 ? Inset : 0f);
             _line.Padding = new Thickness(side, Space.PadY, side, Space.PadY);
 
+            // A system's row carries no command - it is a heading over the sequences under it, and a
+            // heading that answered to a press would be a promise it cannot keep. So it is not drawn as a
+            // panel either. It used to be, and the only way to find out it was inert was to press it,
+            // which is the same discovery a player would make with less patience for it. The light and
+            // the switch stay, because those are real; the slab that said "press me" does not.
+            bool pressable = entry.Command != 0;
+            _line.Background = pressable ? Palette.Panel : Palette.None;
+            _line.Highlight = pressable ? Palette.PanelHot : Palette.None;
+
             // The same plus the start block uses, for the same reason: this row adds something. Core marks
             // it as an action and leaves the drawing to us.
             _summary.Text = entry.IsAction ? StartView.Plus + entry.Summary : entry.Summary;
@@ -529,16 +543,46 @@ namespace Reactor.Screens
                 _switch.Hide();
         }
 
+        /// <summary>What pressing a switch would do, said in full.</summary>
+        internal static string Switching(string name, bool governsAll, bool isOn)
+        {
+            if (!governsAll)
+                return isOn ? "Switch " + name + " off" : "Switch " + name + " on";
+
+            return isOn
+                ? "Switch the whole " + name + " system off, stopping every sequence in it"
+                : "Switch the whole " + name + " system on";
+        }
+
         public void Collect(List<Hit> hits, StatusEntry entry)
         {
             // No command means there is nothing to press. A system's own row is a heading over the ones of
             // it, and a heading that answers to a press is a promise it cannot keep.
             if (entry.Command != 0)
-                hits.Add(new Hit(_line.Bounds, entry.Command));
+            {
+                var line = new Hit(_line.Bounds, entry.Command);
+                line.Hot = _line;
+                hits.Add(line);
+            }
 
             // Added after the row, so the switch wins where the two overlap.
             if (entry.CanSwitch)
-                hits.Add(Hit.Switch(_switch.Bounds, entry.SwitchCommand, !entry.SwitchIsOn));
+            {
+                Hit toggle = Hit.Switch(_switch.Bounds, entry.SwitchCommand, !entry.SwitchIsOn);
+                toggle.Hot = _switch;
+
+                // Named, and told apart, because a column of these all say ON and OFF and nothing else
+                // separates the one governing a whole system from the one governing a single sequence
+                // under it. SwitchGovernsAll is core's answer to exactly that question - reading the
+                // indent instead would be guessing from a layout this target chose itself.
+                //
+                // Only the off direction carries the consequence. Switching a system on does not start
+                // anything by itself, where switching it off stops everything in it at once, and a note
+                // that warned about both equally would be a note nobody finished reading.
+                toggle.Tip = Switching(entry.Summary, entry.SwitchGovernsAll, entry.SwitchIsOn);
+
+                hits.Add(toggle);
+            }
         }
     }
 

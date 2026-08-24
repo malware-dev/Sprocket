@@ -46,13 +46,19 @@ namespace Reactor.Screens
         readonly Label _status = Widgets.Label("", Palette.Muted, Type.Small);
         readonly Label _lastRun = Widgets.Label("", Palette.Faint, Type.Small);
         readonly Label _skipped = Widgets.Wash("", Palette.Notice, Palette.NoticeWash);
-        readonly Glyph _undo = Widgets.Chevron(0f, Palette.Muted);
-        readonly Glyph _redo = Widgets.Chevron(Symbols.TurnedRight, Palette.Muted);
+        // Not chevrons. An arrow that turns back on itself is what undo is; a chevron is where a press
+        // goes, and Back already owns that shape on the same screen.
+        readonly Glyph _undo = Widgets.Symbol(Symbols.Undo, Palette.Muted);
+        readonly Glyph _redo = Widgets.Symbol(Symbols.Redo, Palette.Muted);
 
         readonly Sized _undoSlot;
         readonly Sized _redoSlot;
         readonly Switch _enable = new Switch(Type.Small);
-        readonly Label _delete = Widgets.Ghost(Widgets.Caps("Delete"));
+        // The same bin the step rows use. Deleting a sequence and deleting a step out of one are the
+        // same act at two sizes, and drawing them as a word and a picture said they were different kinds
+        // of thing. What separates them is where they sit: this one is up in the tools row, apart from
+        // the steps, beside the switch that governs the whole sequence.
+        readonly Glyph _delete = Widgets.Symbol(Symbols.Delete, Palette.Muted);
 
         readonly Label _locked = Widgets.Wash("", Palette.Muted, Palette.SlotFill);
         readonly Label _problem = Widgets.Wash("", Palette.Problem, Palette.ProblemWash);
@@ -85,7 +91,8 @@ namespace Reactor.Screens
             _lastRun.Wraps = false;
             _skipped.Wraps = false;
             _liveBadge.Wraps = false;
-            _delete.Wraps = false;
+            // Deleting the whole sequence, so the same red warning the per-step crosses use.
+            _delete.Highlight = Palette.ProblemWash;
 
             // Both hold their place for the whole time the sentence is editable and go quiet when there is
             // nothing to walk back. Hiding them would move Run and Delete sideways every time somebody
@@ -100,11 +107,17 @@ namespace Reactor.Screens
             state.Children.Add(_status);
             state.Children.Add(_lastRun);
 
+            // The switch is last, and that is the whole point of the order. This row is anchored to the
+            // right edge and lays out leftwards from it, so a control's position depends only on what
+            // stands to its right - which means the last one cannot be moved by anything. Undo, redo and
+            // Delete all come and go with whether the sequence is running; the switch is the one control
+            // that is always here, and it is also the one being pressed when the others leave. Putting it
+            // anywhere but last meant pressing it slid it out from under the pointer that pressed it.
             Stack tools = Widgets.RowOf(Space.Item);
             tools.Children.Add(_undoSlot);
             tools.Children.Add(_redoSlot);
-            tools.Children.Add(_enable);
             tools.Children.Add(_delete);
+            tools.Children.Add(_enable);
 
             _header.Spacing = Space.Region;
             _header.Left = state;
@@ -176,16 +189,19 @@ namespace Reactor.Screens
         {
             if (_component.Editable)
             {
+                // The verb is this screen's word and the thing it acts on is core's, which already
+                // publishes it - UndoText exists because "Undo" alone asks somebody to remember what they
+                // just did, and somebody who has made a mistake is worst at exactly that.
                 if (_component.UndoCommand != 0)
-                    hits.Add(new Hit(_undo.Bounds, _component.UndoCommand));
+                    hits.Add(Says(Hit.On(_undo, _component.UndoCommand), "Undo " + _component.UndoText));
 
                 if (_component.RedoCommand != 0)
-                    hits.Add(new Hit(_redo.Bounds, _component.RedoCommand));
+                    hits.Add(Says(Hit.On(_redo, _component.RedoCommand), "Redo " + _component.RedoText));
 
-                hits.Add(new Hit(_delete.Bounds, _component.DeleteCommand));
+                hits.Add(Says(Hit.On(_delete, _component.DeleteCommand), "Delete this sequence"));
 
                 for (int i = 0; i < _triggerSlots.Count && i < _component.Trigger.Slots.Count; i++)
-                    hits.Add(new Hit(_triggerSlots[i].Bounds, _component.Trigger.Slots[i].Command));
+                    hits.Add(Hit.On(_triggerSlots[i], _component.Trigger.Slots[i].Command));
 
                 for (int i = 0; i < _stepRows.Count && i < _component.Steps.Count; i++)
                 {
@@ -193,14 +209,21 @@ namespace Reactor.Screens
                     StepRow row = _stepRows[i];
 
                     row.Sentence.Collect(hits, step.Slots);
-                    hits.Add(new Hit(row.Delete.Bounds, step.DeleteCommand));
+                    hits.Add(Says(Hit.On(row.Delete, step.DeleteCommand), "Delete step " + row.Position));
                 }
 
                 for (int i = 0; i < _adderRows.Count && i < _component.AddOptions.Count; i++)
-                    hits.Add(new Hit(_adderRows[i].Bounds, _component.AddOptions[i].Command));
+                    hits.Add(Hit.On(_adderRows[i], _component.AddOptions[i].Command));
             }
 
-            hits.Add(Hit.Switch(_enable.Bounds, _component.ToggleCommand, !_component.Enabled));
+            // Says the act, where the switch itself says the state. The two together are the whole
+            // reason a state switch is safe for an audience who have never programmed: the control cannot
+            // be read the wrong way round, and the note says what pressing it would do.
+            Hit enable = Hit.Switch(_enable.Bounds, _component.ToggleCommand, !_component.Enabled);
+            enable.Hot = _enable;
+            hits.Add(Says(enable, _component.Enabled
+                ? "Switch this sequence off"
+                : "Switch this sequence on"));
         }
 
         public override bool TryGrab(Vector2 point)
@@ -426,8 +449,10 @@ namespace Reactor.Screens
             }
 
             // Gone rather than greyed, so what is on screen while it runs is a view of a system working.
-            // Walking a change back is not something a running sequence can offer at all, so the pair go
-            // with the rest of the editor rather than sitting there dimmed as if they might yet answer.
+            // Walking a change back is not something a running sequence can offer at all, and neither is
+            // deleting it, so all three go rather than sitting there dimmed as if they might yet answer.
+            // Safe to take away only because the switch stands to the right of them - see the order they
+            // were added in.
             _delete.Collapsed = !_component.Editable;
             _undoSlot.Collapsed = !_component.Editable;
             _redoSlot.Collapsed = !_component.Editable;
@@ -484,7 +509,11 @@ namespace Reactor.Screens
                 handle.Children.Add(number);
 
                 row.Sentence = new SentenceView(_component.Editable, step.Slots.Count);
-                row.Delete = Widgets.Symbol(Symbols.Cross, Palette.Faint);
+                // Washed red rather than the ordinary panel, because this is the one control on the row
+                // that destroys something. It is the only place on these screens where hovering says
+                // "careful" rather than "go on".
+                row.Delete = Widgets.Symbol(Symbols.Delete, Palette.Faint);
+                row.Delete.Highlight = Palette.ProblemWash;
                 row.Delete.Collapsed = !_component.Editable;
 
                 row.Line = new Bar();
@@ -507,6 +536,7 @@ namespace Reactor.Screens
             for (int i = 0; i < _component.AddOptions.Count; i++)
             {
                 Label adder = Widgets.Ghost("+ " + _component.AddOptions[i].Text);
+                adder.Highlight = Palette.Panel;
                 _adderRows.Add(adder);
                 _adders.Children.Add(adder);
             }
@@ -578,9 +608,26 @@ namespace Reactor.Screens
         }
 
         /// <summary>Quiet when there is nothing to walk back, and in place either way.</summary>
+        /// <summary>
+        /// Dims an arrow that has nothing to walk back, and stops it answering the pointer.
+        /// </summary>
+        /// <remarks>
+        /// Both halves matter. It keeps its place either way - hiding it would move Delete sideways under
+        /// the pointer somebody was about to use - so the only thing left to say "there is nothing here"
+        /// is that it is dim and does not light up.
+        /// </remarks>
+        /// <summary>Gives a hit something to say while the pointer rests on it.</summary>
+        static Hit Says(Hit hit, string tip)
+        {
+            hit.Tip = tip;
+            return hit;
+        }
+
         static void Waiting(Glyph button, int command)
         {
-            button.Tint = command != 0 ? Palette.Muted : Palette.Dim;
+            bool ready = command != 0;
+            button.Tint = ready ? Palette.Muted : Palette.Dim;
+            button.Highlight = ready ? Palette.Panel : Palette.None;
         }
     }
 
@@ -641,7 +688,7 @@ namespace Reactor.Screens
         public void Collect(List<Hit> hits, List<SentenceSlot> slots)
         {
             for (int i = 0; i < _slots.Count && i < slots.Count; i++)
-                hits.Add(new Hit(_slots[i].Bounds, slots[i].Command));
+                hits.Add(Hit.On(_slots[i], slots[i].Command));
         }
 
         /// <summary>

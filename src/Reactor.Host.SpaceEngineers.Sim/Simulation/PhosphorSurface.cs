@@ -34,7 +34,8 @@ namespace Reactor.Sim.Simulation
         readonly GlyphAtlas _atlas;
         readonly Dictionary<string, IBrush> _brushes = new Dictionary<string, IBrush>();
         readonly Dictionary<string, Bitmap> _art = new Dictionary<string, Bitmap>();
-        readonly Dictionary<string, Bitmap> _symbols = new Dictionary<string, Bitmap>();
+        readonly SeFontMetrics _symbols;
+        readonly GlyphAtlas _symbolAtlas;
 
         ScreenSpaceGraphics _graphics;
 
@@ -54,6 +55,27 @@ namespace Reactor.Sim.Simulation
         /// </para>
         /// </remarks>
         public PixelSize Target { get; set; } = new PixelSize(1920, 1080);
+
+        /// <summary>
+        /// Whether the simulated monitor takes the shape of whatever it is being shown in, keeping only
+        /// its <see cref="Target" /> height.
+        /// </summary>
+        /// <remarks>
+        /// On for a window somebody resizes, off for a shot at a stated resolution. A player's monitor is
+        /// whatever shape it is and the game adapts to it, so pretending a fixed sixteen-by-nine monitor
+        /// sits inside a differently shaped window means two letterboxes: one round the monitor, which is
+        /// invented, and one round the four-by-three safe area inside it, which is real. This removes the
+        /// invented one. The real one stays, because that margin is where the world shows through in the
+        /// game and it is part of what the screen looks like.
+        /// <para>
+        /// <b>Never narrower than four by three</b>, whatever the window does. The game lays its GUI out in
+        /// coordinates that run nought to one across the safe rectangle, and that rectangle is
+        /// <c>min(width, height * 4/3)</c> - so on every monitor anybody plays on it is four by three and
+        /// the layout simply scales. Letting a tall thin window narrow it would hand the layout less room
+        /// than any player has, which is the harness inventing a screen again.
+        /// </para>
+        /// </remarks>
+        public bool ShapedByWindow { get; set; }
 
         /// <summary>
         /// Where <see cref="Target" /> landed inside the control, letterboxed to keep its shape.
@@ -88,7 +110,18 @@ namespace Reactor.Sim.Simulation
             _shapes = new FallbackFonts(_device, "Segoe UI");
             _exact = SeFontMetrics.Load(_device);
             _atlas = _exact == null ? null : GlyphAtlas.Load(_exact.PageFile);
-            _device.Fonts = (IFontMetrics)_exact ?? _shapes;
+
+            // The symbol font is ours, so it is simply there - no cache, no game, no fallback. A missing
+            // one is a broken build rather than a machine without Space Engineers, and it should look
+            // like a fault instead of quietly drawing nothing.
+            string here = AppContext.BaseDirectory;
+            string maltek = Path.Combine(here, "Content", "Fonts", "Maltek");
+
+            _symbols = SeFontMetrics.LoadFrom(
+                _device, Path.Combine(maltek, "MaltekSymbols.xml"), "the mod's own content", true);
+            _symbolAtlas = GlyphAtlas.FromDds(Path.Combine(maltek, "MaltekSymbols-0.dds"));
+
+            _device.Fonts = new FontSet((IFontMetrics)_exact ?? _shapes, _symbols);
             _device.Install();
             Focusable = true;
         }
@@ -128,6 +161,14 @@ namespace Reactor.Sim.Simulation
             // The whole frame is built at Target and then fitted, rather than built at whatever the window
             // is. Letterboxed rather than stretched, because the shape of a screen is part of what is being
             // checked and a squashed one would quietly answer a different question.
+            if (ShapedByWindow && Bounds.Height > 0d)
+            {
+                int square = (int)Math.Round(Target.Height * 4d / 3d);
+                int wide = (int)Math.Round(Target.Height * Bounds.Width / Bounds.Height);
+
+                Target = new PixelSize(wide > square ? wide : square, Target.Height);
+            }
+
             double fit = Math.Min(Bounds.Width / Target.Width, Bounds.Height / Target.Height);
             double shown = Target.Width * fit;
             double tall = Target.Height * fit;
@@ -138,9 +179,10 @@ namespace Reactor.Sim.Simulation
             double width = Target.Width;
             double height = Target.Height;
 
-            // What MyScreenSpace.GetSafeGuiArea answers: four by three at the full height of the screen,
-            // centred. Anything wider than that is outside a layout and reachable only by a pointer.
-            double safeWidth = height * 4d / 3d;
+            // What MyScreenSpace.GetSafeGuiArea answers, and it answers it out of MyGuiManager, which
+            // does exactly this: the full height, four by three wide, centred - and never wider than the
+            // screen, which is the case a monitor taller than it is wide would otherwise get wrong.
+            double safeWidth = Math.Min(width, height * 4d / 3d);
             _device.SafeGuiArea = new RectangleF(
                 (float)((width - safeWidth) / 2d), 0f, (float)safeWidth, (float)height);
             _device.ViewportSize = new Vector2((float)width, (float)height);
@@ -252,14 +294,6 @@ namespace Reactor.Sim.Simulation
                     }
                 }
 
-                // A symbol, in whatever colour was asked for.
-                Bitmap symbol = SymbolFor(material, command.Color);
-                if (symbol != null)
-                {
-                    Shrink(context, symbol, destination);
-                    return;
-                }
-
                 DrawMissing(context, destination, material);
             }
             finally
@@ -349,9 +383,20 @@ namespace Reactor.Sim.Simulation
 
             // Drawn as the game would draw it, boxes and all. Anything else here has glyphs Space
             // Engineers has never heard of, and letting them show would make this window flatter the mod.
-            string text = _exact == null ? command.Text : _exact.AsDrawn(command.Text);
+            bool symbolic = command.Font == Phosphor.Symbols.Font;
 
-            if (_atlas != null && DrawGlyphs(context, command, text))
+            SeFontMetrics metrics = symbolic ? _symbols : _exact;
+            GlyphAtlas page = symbolic ? _symbolAtlas : _atlas;
+
+            string text = metrics == null ? command.Text : metrics.AsDrawn(command.Text);
+
+            if (page != null && metrics != null && DrawGlyphs(context, command, text, metrics, page))
+                return;
+
+            // A symbol with no page behind it has no business falling back to a desktop typeface, which
+            // would draw the letter the character happens to be - a literal "d" where a bin belongs. That
+            // is worse than nothing, because it looks deliberate.
+            if (symbolic)
                 return;
 
             FormattedText formatted = _shapes.Build(
@@ -398,16 +443,17 @@ namespace Reactor.Sim.Simulation
         /// and drawn by this one, and a run that measured one width and drew another would look like a
         /// wrapping bug for as long as it took somebody to suspect the font.
         /// </remarks>
-        bool DrawGlyphs(DrawingContext context, DrawCommand command, string text)
+        bool DrawGlyphs(DrawingContext context, DrawCommand command, string text,
+            SeFontMetrics metrics, GlyphAtlas atlas)
         {
-            float unit = _exact.EffectiveScale(command.Scale);
+            float unit = metrics.EffectiveScale(command.Scale);
             if (unit <= 0f)
                 return false;
 
-            Bitmap page = _atlas.Tinted(command.Color.R, command.Color.G, command.Color.B);
+            Bitmap page = atlas.Tinted(command.Color.R, command.Color.G, command.Color.B);
 
             double pen = command.Position.X;
-            double top = command.Position.Y + _exact.CellTop * unit;
+            double top = command.Position.Y + metrics.CellTop * unit;
             char previous = ' ';
 
             // The whole run's alpha at once, rather than a paler tint per colour: the page is already a
@@ -433,14 +479,14 @@ namespace Reactor.Sim.Simulation
                     char c = text[i];
 
                     SeFontMetrics.Glyph glyph;
-                    if (!_exact.TryGlyph(c, out glyph) && !_exact.TryReplacement(out glyph))
+                    if (!metrics.TryGlyph(c, out glyph) && !metrics.TryReplacement(out glyph))
                     {
                         previous = c;
                         continue;
                     }
 
                     if (previous != ' ')
-                        pen += _exact.Kerning(previous, c) * unit;
+                        pen += metrics.Kerning(previous, c) * unit;
 
                     if (glyph.Width > 0 && glyph.Height > 0)
                     {
@@ -464,76 +510,6 @@ namespace Reactor.Sim.Simulation
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// One symbol in one colour, made the first time that pairing is asked for.
-        /// </summary>
-        /// <remarks>
-        /// The colour is taken as a flat tint over the picture's own coverage rather than multiplied
-        /// through it, which is what the glyph page does and for the same reason: every symbol here is
-        /// white to within a few points, so the two answers differ by nothing anybody could see, and a
-        /// flat fill cannot end up a shade off the colour that was asked for.
-        /// <para>
-        /// Kept per pairing. A screen asks for perhaps a dozen, where doing it at draw time would be four
-        /// hundred small bitmaps a second to arrive at the same twelve.
-        /// </para>
-        /// </remarks>
-        Bitmap SymbolFor(string material, Color color)
-        {
-            string key = material + "#" + color.R + "," + color.G + "," + color.B + "," + color.A;
-
-            Bitmap tinted;
-            if (_symbols.TryGetValue(key, out tinted))
-                return tinted;
-
-            string relative = SymbolArt.PathFor(material);
-            string png = relative == null ? null : SafeResolve(relative);
-
-            tinted = png == null ? null : Tint(png, color);
-            _symbols.Add(key, tinted);
-            return tinted;
-        }
-
-        /// <summary>Paints <paramref name="color" /> through the coverage of the picture at <paramref name="png" />.</summary>
-        static Bitmap Tint(string png, Color color)
-        {
-            using (var source = new Bitmap(png))
-            {
-                var size = new PixelSize(source.PixelSize.Width, source.PixelSize.Height);
-                var pixels = new byte[size.Width * size.Height * 4];
-
-                unsafe
-                {
-                    fixed (byte* start = pixels)
-                    {
-                        source.CopyPixels(
-                            new PixelRect(0, 0, size.Width, size.Height),
-                            (IntPtr)start, pixels.Length, size.Width * 4);
-                    }
-                }
-
-                for (int i = 0; i < pixels.Length; i += 4)
-                {
-                    pixels[i] = color.B;
-                    pixels[i + 1] = color.G;
-                    pixels[i + 2] = color.R;
-                    pixels[i + 3] = (byte)(pixels[i + 3] * color.A / 255);
-                }
-
-                var bitmap = new WriteableBitmap(
-                    size, new Vector(96, 96), PixelFormat.Bgra8888, AlphaFormat.Unpremul);
-
-                using (ILockedFramebuffer buffer = bitmap.Lock())
-                {
-                    for (int y = 0; y < size.Height; y++)
-                        System.Runtime.InteropServices.Marshal.Copy(
-                            pixels, y * size.Width * 4,
-                            buffer.Address + y * buffer.RowBytes, size.Width * 4);
-                }
-
-                return bitmap;
-            }
         }
 
         /// <summary>

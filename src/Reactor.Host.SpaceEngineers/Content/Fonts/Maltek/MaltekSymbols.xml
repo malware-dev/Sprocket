@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<font
+	xmlns="http://xna.microsoft.com/bitmapfont"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+	name="MaltekSymbols" base="43" height="53"
+	face="Maltek Symbols" size="53"
+	>
+<bitmaps>
+<bitmap id="0" name="MaltekSymbols-0.dds" size="512x512" />
+</bitmaps>
+<glyphs>
+<glyph ch="u" code="0075" bm="0" origin="0,0" size="64x64" aw="63" lsb="-10" />
+<glyph ch="r" code="0072" bm="0" origin="64,0" size="64x64" aw="63" lsb="-10" />
+<glyph ch="d" code="0064" bm="0" origin="128,0" size="64x64" aw="63" lsb="-10" />
+<glyph ch="&lt;" code="003C" bm="0" origin="192,0" size="64x64" aw="63" lsb="-10" />
+<glyph ch="^" code="005E" bm="0" origin="256,0" size="64x64" aw="63" lsb="-10" />
+<glyph ch="&gt;" code="003E" bm="0" origin="320,0" size="64x64" aw="63" lsb="-10" />
+<glyph ch="v" code="0076" bm="0" origin="384,0" size="64x64" aw="63" lsb="-10" />
+<glyph ch="o" code="006F" bm="0" origin="448,0" size="64x64" aw="63" lsb="-10" />
+<glyph ch="0" code="0030" bm="0" origin="0,64" size="64x64" aw="63" lsb="-10" />
+<glyph ch="-" code="002D" bm="0" origin="64,64" size="64x64" aw="63" lsb="-10" />
+<glyph ch="+" code="002B" bm="0" origin="128,64" size="64x64" aw="63" lsb="-10" />
+</glyphs>
+<kernpairs>
+</kernpairs>
+</font>

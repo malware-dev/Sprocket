@@ -57,6 +57,37 @@ namespace Phosphor
         /// </remarks>
         public Color Edge { get; set; }
 
+        /// <summary>
+        /// Painted instead of <see cref="Background" /> while the pointer is resting on this.
+        /// </summary>
+        /// <remarks>
+        /// Transparent by default, and that default is load-bearing: <b>setting one of these is how a
+        /// thing declares that it can be pressed.</b> An element that answers to nothing never lights up,
+        /// so the pointer is a way of asking the screen what is real - and the same rule read the other
+        /// way says a row that lights up had better do something when it is pressed.
+        /// </remarks>
+        public Color Highlight { get; set; }
+
+        /// <summary>Drawn instead of <see cref="Edge" /> while the pointer is resting on this.</summary>
+        /// <remarks>
+        /// Separate from <see cref="Highlight" /> because some controls are mostly outline - a switch is
+        /// two fills of its own and a border, and brightening the border is the only response it has room
+        /// for. The game does the same thing: its highlight textures differ from its normal ones by the
+        /// edge far more than by the middle.
+        /// </remarks>
+        public Color HighlightEdge { get; set; }
+
+        /// <summary>
+        /// Whether the pointer is on this right now. Set by whatever owns the screen, once a frame.
+        /// </summary>
+        /// <remarks>
+        /// A property rather than something worked out here, because an element knows its own rectangle
+        /// and nothing else - not whether something is drawn over it, not whether it has been scrolled out
+        /// of sight, and not whether a popup has taken the screen. The thing holding the list of what can
+        /// be pressed knows all three.
+        /// </remarks>
+        public bool IsHot { get; set; }
+
         /// <summary>How thick <see cref="Edge" /> is drawn.</summary>
         public float EdgeThickness { get; set; }
 
@@ -158,11 +189,13 @@ namespace Phosphor
             if (Collapsed)
                 return;
 
-            if (Background.A > 0)
-                g.DrawSprite(Solid, Bounds, Background, 0f);
+            Color fill = IsHot && Highlight.A > 0 ? Highlight : Background;
+            if (fill.A > 0)
+                g.DrawSprite(Solid, Bounds, fill, 0f);
 
-            if (Edge.A > 0)
-                Outline(g, Bounds, Edge, EdgeThickness > 0f ? EdgeThickness : 1f);
+            Color edge = IsHot && HighlightEdge.A > 0 ? HighlightEdge : Edge;
+            if (edge.A > 0)
+                Outline(g, Bounds, edge, EdgeThickness > 0f ? EdgeThickness : 1f);
 
             if (!ClipsContent)
             {

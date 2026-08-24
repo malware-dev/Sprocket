@@ -18,6 +18,18 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
+    <!--
+        The symbol font the mod ships, copied so the simulator draws the same glyphs the game will.
+        Referenced where it lives rather than duplicated: one page, one set of metrics, and no chance of
+        the harness showing symbols the mod does not have.
+    -->
+    <ItemGroup>
+        <None Include="..\Reactor.Host.SpaceEngineers\Content\Fonts\Maltek\**\*">
+            <Link>Content\Fonts\Maltek\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="12.0.3" />
         <PackageReference Include="Avalonia.Desktop" Version="12.0.3" />

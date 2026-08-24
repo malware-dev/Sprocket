@@ -1,5 +1,4 @@
 using VRage.Utils;
-using VRageMath;
 
 namespace Phosphor
 {
@@ -7,52 +6,72 @@ namespace Phosphor
     /// The shapes a screen is built from that letters cannot draw.
     /// </summary>
     /// <remarks>
-    /// Everything here is a <b>resource</b>, and resources are the part of drawing that both targets have
-    /// to agree on. How a control composes itself out of draw calls is each renderer's own business - a
-    /// screen and a text panel are two different renderers and are allowed to differ - but neither of them
-    /// can invent a picture that is not there. So a material named here must resolve on both, and the mod
-    /// declares each one in <c>TransparentMaterials.sbc</c> against a file the game already ships.
+    /// <b>A font, not a set of sprites.</b> Both targets already draw text, and both resolve a font by
+    /// subtype out of the one definition registry every loaded mod contributes to - so a glyph costs
+    /// nothing at this seam, where a sprite costs a material declared once per target per icon, in two
+    /// files that have to be kept agreeing. Measuring comes free with it, which is what lets a symbol sit
+    /// inline in a sentence rather than only in a slot sized for it.
     /// <para>
-    /// The list is short on purpose, and everything that can be drawn instead is. A pause is two
-    /// rectangles, a drag grip is six small ones, a checkbox is a rectangle inside another - none of those
-    /// are here, because a rectangle is crisp at any size and a texture stretched to eleven pixels is not.
-    /// What is here is what rectangles cannot make: a diagonal and a curve.
+    /// The font is drawn rather than borrowed. Space Engineers has no undo, no redo and no delete glyph -
+    /// its only cross is <c>button_close_symbol</c>, which means dismiss, and using it for destroy was
+    /// the mistake this replaces. What the game does have is used where it fits and nothing here
+    /// duplicates it.
+    /// </para>
+    /// <para>
+    /// The characters are readable on purpose. Nothing but symbols is ever drawn in this face, so there
+    /// is no collision to design around, and a draw list that says <c>"d"</c> is one somebody can read.
     /// </para>
     /// </remarks>
     public static class Symbols
     {
         /// <summary>
-        /// Flat white, tinted to whatever colour is asked for. The only way to fill a rectangle, since the
-        /// seam draws sprites and knows nothing of solid colours.
-        /// </summary>
-        public static readonly MyStringId Fill = MyStringId.GetOrCompute("Phosphor_Fill");
-
-        /// <summary>
-        /// A single arrowhead, pointing <b>left</b> when it is not turned.
+        /// The font every symbol here is drawn in.
         /// </summary>
         /// <remarks>
-        /// One texture for all four directions, turned by <see cref="TurnedRight" /> and the rest. A
-        /// sprite can be rotated about its own centre on either target, so four files would be three
-        /// files nobody has to keep in step with each other.
+        /// Shipped as content, so it has to be declared in a <c>Fonts.sbc</c> that the game loads. It is
+        /// meant to become a mod of its own that display mods depend on rather than each carrying a copy -
+        /// which is why nothing about it is named for Reactor.
         /// </remarks>
-        public static readonly MyStringId Chevron = MyStringId.GetOrCompute("Phosphor_Chevron");
+        public const string Font = "MaltekSymbols";
 
-        /// <summary>Two strokes crossing. What deleting one row out of a list is called everywhere.</summary>
-        public static readonly MyStringId Cross = MyStringId.GetOrCompute("Phosphor_Cross");
+        /// <summary>An arrow that turns back on itself. Walking a change back.</summary>
+        public const string Undo = "u";
 
-        /// <summary>A filled circle.</summary>
-        public static readonly MyStringId Disc = MyStringId.GetOrCompute("Phosphor_Disc");
+        /// <summary>The same arrow the other way. Walking it forward again.</summary>
+        public const string Redo = "r";
 
-        /// <summary>An unfilled circle, the same size and weight as <see cref="Disc" />.</summary>
-        public static readonly MyStringId Ring = MyStringId.GetOrCompute("Phosphor_Ring");
+        /// <summary>A bin. Destroying something, as opposed to putting it away.</summary>
+        public const string Delete = "d";
 
-        /// <summary>A quarter turn clockwise, which points <see cref="Chevron" /> up.</summary>
-        public const float TurnedUp = MathHelper.PiOver2;
+        /// <summary>An open arrowhead. Where pressing this goes.</summary>
+        public const string Left = "<";
 
-        /// <summary>A half turn, which points <see cref="Chevron" /> right.</summary>
-        public const float TurnedRight = MathHelper.Pi;
+        public const string Up = "^";
 
-        /// <summary>Three quarters of a turn, which points <see cref="Chevron" /> down.</summary>
-        public const float TurnedDown = MathHelper.Pi + MathHelper.PiOver2;
+        public const string Right = ">";
+
+        public const string Down = "v";
+
+        /// <summary>An unfilled circle. A choice not taken, where only one may be.</summary>
+        public const string Ring = "o";
+
+        /// <summary>The same circle filled. The one that was taken.</summary>
+        public const string Disc = "0";
+
+        /// <summary>Taking one away. The inverse of the plus that added it.</summary>
+        public const string Minus = "-";
+
+        /// <summary>Adding one.</summary>
+        public const string Plus = "+";
+
+        /// <summary>
+        /// Flat white, tinted to whatever colour is wanted. The only way to fill a rectangle, since the
+        /// seam draws sprites and knows nothing of solid colours.
+        /// </summary>
+        /// <remarks>
+        /// The one thing here that is still a material, because it is not a symbol - it is the absence of
+        /// one, and a rectangle of colour is what every fill, rule and border on either target is made of.
+        /// </remarks>
+        public static readonly MyStringId Fill = MyStringId.GetOrCompute("Phosphor_Fill");
     }
 }

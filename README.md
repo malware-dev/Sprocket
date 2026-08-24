@@ -132,6 +132,11 @@ The same reasoning made three more: `Phosphor.Mixin` for the drawing and layout,
 invented ship both hosts drive. The simulator imports the first two, so what is seen
 there is what ships rather than a preview of it.
 
+The mod also ships **content**: a symbol font for the things a screen needs and Space
+Engineers has no artwork for - undo, redo, delete. It is drawn rather than borrowed, and it
+is built by `art/symbols` rather than committed by hand. It is meant to become a mod of its
+own that any display mod can depend on, so nothing about it is named for Reactor.
+
 That constraint fails silently, so it is enforced by the compiler instead:
 
 - `netstandard2.0` shrinks the API surface to roughly .NET Framework shape.

@@ -55,9 +55,6 @@ namespace Reactor.Sim.Content
             for (int i = 0; i < Wanted.Length; i++)
                 One(report, Wanted[i][0], Wanted[i][1]);
 
-            foreach (System.Collections.Generic.KeyValuePair<string, string> symbol in SymbolArt.All)
-                One(report, symbol.Value, "the picture behind " + symbol.Key);
-
             foreach (System.Collections.Generic.KeyValuePair<string, string> art in BlockArt.All)
                 One(report, art.Value, "what a " + art.Key + " looks like");
 

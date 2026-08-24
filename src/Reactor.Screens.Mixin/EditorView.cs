@@ -31,7 +31,7 @@ namespace Reactor.Screens
 
         readonly Dock _root = new Dock();
         readonly Bar _headerBar = new Bar();
-        readonly Signpost _back = new Signpost("Back", 0f, true);
+        readonly Signpost _back = new Signpost("Back", Symbols.Left, true);
         readonly Stack _titleRow = Widgets.RowOf(Space.Item);
         readonly Label _title = Widgets.Label("", Palette.Ink, Type.Title);
         readonly TextBox _titleBox = Widgets.Box(Type.Title, Palette.PanelHot);
@@ -59,6 +59,14 @@ namespace Reactor.Screens
             new Dictionary<EditorComponent, ComponentView>();
 
         readonly List<Hit> _hits = new List<Hit>();
+
+        /// <summary>What is lit right now, so it can be put out without searching for it.</summary>
+        Element _lit;
+
+        /// <summary>What the lit thing had to say, if anything.</summary>
+        string _saying;
+
+        readonly Label _tip = Widgets.Tip();
         readonly List<Hit> _actionHits = new List<Hit>();
 
         int _actionRevision = -1;
@@ -208,7 +216,11 @@ namespace Reactor.Screens
             // Kept in place and merely dimmed out rather than emptied. An element with no text still holds
             // its line, but it does not hold its width, and a title that slid sideways whenever Back came
             // and went would be exactly the fidgeting this screen is trying not to do.
+            // Only while it can be pressed. A Back that lit up on the first screen would be offering
+            // something that is not there.
             _back.Tint = screen.CanGoBack ? Palette.Muted : Palette.None;
+            _back.Highlight = screen.CanGoBack ? Palette.Panel : Palette.None;
+            _title.Highlight = screen.CanRename && !_renaming ? Palette.Panel : Palette.None;
             _pencil.Color = screen.CanRename && !_renaming ? Palette.Faint : Palette.None;
 
             // Governs everything on the screen under it, which is what a switch in the header means.
@@ -222,6 +234,7 @@ namespace Reactor.Screens
             _primary.Text = screen.HasPrimary ? Widgets.Caps(screen.PrimaryText) : "";
             _primary.Background = screen.HasPrimary ? Palette.Accent : Palette.None;
             _primary.Color = screen.HasPrimary ? Palette.Chrome : Palette.None;
+            _primary.Highlight = screen.HasPrimary ? Palette.Ink : Palette.None;
 
             // A screen that cannot be renamed while the box is open takes the box away with it.
             if (_renaming && !screen.CanRename)
@@ -292,11 +305,134 @@ namespace Reactor.Screens
         {
             _root.Measure(g, new Vector2(bounds.Width, bounds.Height));
             _root.Arrange(bounds);
+
+            LightWhatIsUnderThePointer();
+
             _root.Draw(g);
 
             DrawPopup(g, bounds);
             DrawOverlay(g, bounds);
+            DrawTip(g, bounds);
             CollectHits();
+        }
+
+        /// <summary>
+        /// Where the pointer is, in UI units. Somewhere outside the screen means there is not one.
+        /// </summary>
+        /// <remarks>
+        /// A property the host sets rather than an argument to <see cref="Draw" />, because a target
+        /// without a pointer - a text panel, a screenshot, a test - should not have to pass one. What it
+        /// leaves alone stays where it was, which is off the screen and therefore over nothing.
+        /// </remarks>
+        public Vector2 Pointer { get; set; }
+
+        /// <summary>
+        /// Lights the one thing the pointer is resting on, and puts out whatever was lit before.
+        /// </summary>
+        /// <remarks>
+        /// Worked out from <b>the previous frame's</b> hits, which is why this can run before anything is
+        /// drawn. Hits are gathered after a layout because that is when rectangles exist, so the only
+        /// alternative was arranging everything, gathering, and then drawing everything - two passes over
+        /// the popup and the overlay to save one frame of lag on a highlight nobody can perceive.
+        /// <para>
+        /// Only one thing is ever lit. Hits are walked last first, the same order a press walks them, so
+        /// the thing that would be pressed is the thing that lights - and a row under a popup cannot light
+        /// up through it.
+        /// </para>
+        /// </remarks>
+        void LightWhatIsUnderThePointer()
+        {
+            Element wanted = null;
+            string says = null;
+
+            if (!_asking)
+                wanted = Under(Pointer, out says);
+
+            _saying = says;
+
+            if (wanted == _lit)
+                return;
+
+            if (_lit != null)
+                _lit.IsHot = false;
+
+            _lit = wanted;
+
+            if (_lit != null)
+                _lit.IsHot = true;
+        }
+
+        /// <summary>What would be lit if the pointer were at <paramref name="point" />, or null.</summary>
+        Element Under(Vector2 point, out string says)
+        {
+            says = null;
+
+            bool overlaid = _overlay != null;
+            if (overlaid && !Contains(_overlayBounds, point))
+                return null;
+
+            for (int i = _hits.Count - 1; i >= 0; i--)
+            {
+                Hit hit = _hits[i];
+
+                if (hit.Hot == null || !Contains(hit.Bounds, point))
+                    continue;
+
+                if (hit.Scrolled && !Contains(_bodyDock.Bounds, point))
+                    continue;
+
+                if (overlaid && !Contains(_overlayBounds, Middle(hit.Bounds)))
+                    continue;
+
+                says = hit.Tip;
+                return hit.Hot;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Puts a note beside the pointer, if what it is resting on had anything to say.
+        /// </summary>
+        /// <remarks>
+        /// Drawn last, after the popup and the overlay, because it is the one thing on the screen that is
+        /// allowed over everything - including the list a person opened, whose rows it may well be
+        /// describing.
+        /// <para>
+        /// It follows the pointer rather than hanging off the control, which is the opposite of what the
+        /// overlay does and is right for the same reason the overlay is: a menu belongs to the thing that
+        /// opened it, and a note belongs to the eye that is already looking at the pointer.
+        /// </para>
+        /// </remarks>
+        void DrawTip(IGraphics g, RectangleF bounds)
+        {
+            if (string.IsNullOrEmpty(_saying))
+                return;
+
+            _tip.Text = _saying;
+            _tip.Measure(g, new Vector2(Sizes.Popup, bounds.Height));
+
+            Vector2 size = _tip.DesiredSize;
+
+            // Below and to the right, where the arrow is not covering what was just read. Only flipped
+            // when there is no room, so it does not dance about the pointer near an edge.
+            float x = Pointer.X + Space.Item;
+            float y = Pointer.Y + Space.Region;
+
+            if (x + size.X > bounds.X + bounds.Width)
+                x = Pointer.X - size.X - Space.Item;
+
+            if (y + size.Y > bounds.Y + bounds.Height)
+                y = Pointer.Y - size.Y - Space.Row;
+
+            if (x < bounds.X)
+                x = bounds.X;
+
+            if (y < bounds.Y)
+                y = bounds.Y;
+
+            _tip.Arrange(new RectangleF(x, y, size.X, size.Y));
+            _tip.Draw(g);
         }
 
         /// <summary>
@@ -709,16 +845,25 @@ namespace Reactor.Screens
             EditorScreen screen = _editor.Screen;
 
             if (screen.CanGoBack)
-                _hits.Add(Hit.Fixed(_back.Bounds, screen.BackCommand));
+                _hits.Add(Hit.OnFixed(_back, screen.BackCommand));
 
             // Renaming hangs off the heading, because the heading is what the name is for.
             if (screen.CanRename && !_renaming)
-                _hits.Add(Hit.Fixed(_title.Bounds, screen.RenameCommand, screen.RenamePrompt));
+            {
+                Hit rename = Hit.Fixed(_title.Bounds, screen.RenameCommand, screen.RenamePrompt);
+                rename.Hot = _title;
+                _hits.Add(rename);
+            }
 
             if (screen.HasSwitch)
             {
                 Hit toggle = Hit.Switch(_switch.Bounds, screen.SwitchCommand, !screen.SwitchIsOn);
                 toggle.Scrolled = false;
+                toggle.Hot = _switch;
+                // A system's, always - core says so where it declares the command, and a sequence's
+                // switch lives on the sentence rather than up here.
+                toggle.Tip = StatusRow.Switching(screen.Title, true, screen.SwitchIsOn);
+
                 _hits.Add(toggle);
             }
 
@@ -726,10 +871,10 @@ namespace Reactor.Screens
                 _views[i].Collect(_hits);
 
             for (int i = 0; i < _actionHits.Count && i < _actions.Children.Count; i++)
-                _hits.Add(Hit.Fixed(_actions.Children[i].Bounds, _actionHits[i].Command));
+                _hits.Add(Hit.OnFixed(_actions.Children[i], _actionHits[i].Command));
 
             if (screen.HasPrimary)
-                _hits.Add(Hit.Fixed(_primary.Bounds, screen.PrimaryCommand));
+                _hits.Add(Hit.OnFixed(_primary, screen.PrimaryCommand));
         }
 
         /// <summary>
@@ -866,6 +1011,7 @@ namespace Reactor.Screens
                 ChoiceEntry entry = screen.Actions[i];
 
                 Label action = Widgets.Ghost(Widgets.Caps(entry.Text));
+                action.Highlight = Palette.Panel;
                 if (entry.IsCurrent)
                     action.Color = Palette.Ink;
 
@@ -960,6 +1106,33 @@ namespace Reactor.Screens
         /// <summary>Whether pressing this a second time means "and move on".</summary>
         public bool Confirms;
 
+        /// <summary>
+        /// What to light up while the pointer is resting here. Null for a hit with nothing to light.
+        /// </summary>
+        /// <remarks>
+        /// The element rather than the rectangle, because the rectangle is already in <see cref="Bounds" />
+        /// and drawing over it would put a wash on top of the words. An element lights itself, from the
+        /// inside, using colours it chose - see <see cref="Element.Highlight" />.
+        /// </remarks>
+        public Element Hot;
+
+        /// <summary>
+        /// What to say about this while the pointer rests on it. Null for most things.
+        /// </summary>
+        /// <remarks>
+        /// <b>Only for a control that cannot say what it is.</b> A row reading "Airlock 1" needs no note
+        /// telling you it is Airlock 1, and a screen that explained every word on it would be a screen
+        /// nobody could scan. What earns one is a picture: a bin, an arrow that turns back on itself, a
+        /// switch whose two words say the state rather than the act.
+        /// <para>
+        /// The wording is the host's, except where core already publishes the thing being named - undo
+        /// borrows <c>UndoText</c>, which exists precisely because "Undo" alone asks somebody to remember
+        /// what they just did. Nothing here adds a string to core; who should own that wording is Design
+        /// decision 11 and is deliberately still open.
+        /// </para>
+        /// </remarks>
+        public string Tip;
+
         public Hit(RectangleF bounds, int command)
         {
             Bounds = bounds;
@@ -972,6 +1145,8 @@ namespace Reactor.Screens
             Toggles = false;
             ToggleTo = false;
             Confirms = false;
+            Hot = null;
+            Tip = null;
         }
 
         public Hit(RectangleF bounds, int command, string question)
@@ -986,6 +1161,8 @@ namespace Reactor.Screens
             Toggles = false;
             ToggleTo = false;
             Confirms = false;
+            Hot = null;
+            Tip = null;
         }
 
         public Hit(RectangleF bounds, int command, string question, Element anchor)
@@ -1000,6 +1177,30 @@ namespace Reactor.Screens
             Toggles = false;
             ToggleTo = false;
             Confirms = false;
+            Hot = null;
+            Tip = null;
+        }
+
+        /// <summary>
+        /// A hit on <paramref name="element" />, which lights up while the pointer rests on it.
+        /// </summary>
+        /// <remarks>
+        /// Takes the element rather than its rectangle because it needs both and they must agree. Passing
+        /// one thing's bounds and another thing's element is a class of mistake this makes unavailable.
+        /// </remarks>
+        public static Hit On(Element element, int command)
+        {
+            var hit = new Hit(element.Bounds, command);
+            hit.Hot = element;
+            return hit;
+        }
+
+        /// <summary>A hit on an element in the chrome, which is never scrolled away.</summary>
+        public static Hit OnFixed(Element element, int command)
+        {
+            Hit hit = On(element, command);
+            hit.Scrolled = false;
+            return hit;
         }
 
         /// <summary>A hit that puts a switch into <paramref name="on" />.</summary>

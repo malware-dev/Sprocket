@@ -96,6 +96,42 @@ namespace Reactor.Sim.Simulation
             }
         }
 
+        /// <summary>
+        /// Loads a page straight out of a DDS, for a font this project ships rather than borrows.
+        /// </summary>
+        /// <remarks>
+        /// No cache in front of it, unlike the game's own page. That one is decoded once and kept because
+        /// the machine reading it may not have the game at all; this one is in the repository, is a
+        /// fortieth of the size, and decoding it costs less than deciding whether to.
+        /// </remarks>
+        public static GlyphAtlas FromDds(string path)
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                return null;
+
+            DdsImage.Pixels pixels;
+            try
+            {
+                pixels = DdsImage.Read(path);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            if (pixels == null)
+                return null;
+
+            var coverage = new byte[pixels.Width * pixels.Height];
+            for (int y = 0; y < pixels.Height; y++)
+                for (int x = 0; x < pixels.Width; x++)
+                    coverage[y * pixels.Width + x] = pixels.Bgra[y * pixels.Stride + x * 4 + 3];
+
+            var atlas = new GlyphAtlas(pixels.Width, pixels.Height, coverage);
+            atlas.Source = path;
+            return atlas;
+        }
+
         /// <summary>The page in one colour, made the first time that colour is asked for.</summary>
         public Bitmap Tinted(byte r, byte g, byte b)
         {

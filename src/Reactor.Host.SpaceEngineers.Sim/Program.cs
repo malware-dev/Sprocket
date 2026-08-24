@@ -109,8 +109,9 @@ namespace Reactor.Sim
         /// and making the common case wordless is worth the small asymmetry. <c>tick n</c> advances the
         /// ship's clock, which is the only way to reach anything drawn because a system is actually
         /// running. <c>drag x y x y</c> picks something up and puts it down somewhere else,
-        /// <c>scroll x y n</c> turns the wheel over a point, and <c>type "words"</c>, <c>enter</c> and
-        /// <c>escape</c> work whatever box currently has the keyboard.
+        /// <c>scroll x y n</c> turns the wheel over a point, <c>move x y</c> rests the pointer somewhere
+        /// without pressing it, and <c>type "words"</c>, <c>enter</c> and <c>escape</c> work whatever box
+        /// currently has the keyboard.
         /// </remarks>
         static List<Shot.Step> Script(string[] args, int from)
         {
@@ -148,6 +149,17 @@ namespace Reactor.Sim
 
                     script.Add(typed);
                     i += 1;
+                    continue;
+                }
+
+                if (word == "move" && i + 2 < args.Length)
+                {
+                    var move = new Shot.Step();
+                    move.Kind = Shot.Step.Move;
+                    move.At = Point(args, i + 1);
+
+                    script.Add(move);
+                    i += 2;
                     continue;
                 }
 

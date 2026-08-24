@@ -70,6 +70,10 @@ namespace Reactor.Sim.Shell
 
             // The same stand-in for the world the headless shot draws on, and for the same reason: the
             // veil the screen is drawn behind cannot be judged against a flat colour.
+            // A window is resized, so the monitor it stands in for takes its shape. A shot names a
+            // resolution instead and keeps it.
+            _surface.ShapedByWindow = true;
+
             var stage = new Panel();
             stage.Children.Add(new Backdrop());
             stage.Children.Add(_surface);
@@ -305,6 +309,7 @@ namespace Reactor.Sim.Shell
         void OnPointerMoved(object sender, PointerEventArgs e)
         {
             _pointer = e.GetPosition(_surface);
+            _editor.MoveTo(ToUi(_pointer));
 
             if (_showProbe)
             {

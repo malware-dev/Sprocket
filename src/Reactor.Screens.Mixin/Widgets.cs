@@ -42,14 +42,43 @@ namespace Reactor.Screens
         /// <summary>Header and footer. A step darker again, so the screen's edges settle.</summary>
         public static readonly Color Chrome = new Color(27, 36, 42);
 
-        /// <summary>Textures/GUI/Controls/DarkBlueBackground.png, which is flat and entirely this colour.</summary>
+        /// <summary>
+        /// DarkBlueBackground.png, which is flat and entirely this colour - and also button_default,
+        /// textbox_center and rectangle_button_center. <b>Every control in the game starts from this
+        /// tone.</b>
+        /// </summary>
+        /// <remarks>
+        /// It becomes one of two things when a pointer arrives, because the game keeps the same four
+        /// states twice over. The <b>panel</b> family is DarkBlueBackground and its variants -
+        /// <see cref="PanelHot" />, <see cref="Accent" />, <see cref="Line" />. The <b>control</b> family is
+        /// button_default and its variants - <see cref="ControlHot" />, <see cref="ControlFocus" />,
+        /// <see cref="SwitchLit" />. They start together and part company under the pointer: a panel is a
+        /// surface and lifts towards it, a control is a well and deepens under it.
+        /// </remarks>
         public static readonly Color Panel = new Color(41, 54, 62);
 
         /// <summary>DarkBlueBackground_highlight.png. What the game does to a panel under the pointer.</summary>
         public static readonly Color PanelHot = new Color(60, 76, 82);
 
-        /// <summary>rectangle_button_center_checked.png. The game's mid tone, which reads as a hairline.</summary>
+        /// <summary>
+        /// DarkBlueBackground_active.png, the panel family pressed - which is also the game's mid tone and
+        /// reads as a hairline at one pixel, which is what most of this project uses it for.
+        /// </summary>
         public static readonly Color Line = new Color(91, 115, 123);
+
+        /// <summary>
+        /// button_default_highlight.dds, and textbox_center_highlight, and every other control's - all of
+        /// them exactly this. <b>A control under the pointer goes darker in this game.</b>
+        /// </summary>
+        /// <remarks>
+        /// Surprising, and worth not overriding on instinct. Nearly every desktop lightens what the
+        /// pointer is on; this game darkens a control and lightens a panel, and the two together are what
+        /// make its chrome read as pressed metal rather than as a web page.
+        /// </remarks>
+        public static readonly Color ControlHot = new Color(12, 18, 22);
+
+        /// <summary>button_default_focus.dds. A control with the keyboard in it.</summary>
+        public static readonly Color ControlFocus = new Color(69, 128, 157);
 
         /// <summary>
         /// Textures/GUI/Icons/*.png, which are single-colour and drawn in exactly this.
@@ -79,6 +108,8 @@ namespace Reactor.Screens
         public static readonly Color SlotEdge = new Color(142, 188, 207);
         public static readonly Color SlotFill = new Color(55, 72, 81);
 
+
+
         /// <summary>checkbox_green_checked.png. Vivid, and nothing like a desktop's mint.</summary>
         public static readonly Color Live = new Color(58, 204, 0);
 
@@ -92,7 +123,10 @@ namespace Reactor.Screens
 
         public static readonly Color None = new Color(0, 0, 0, 0);
 
-        /// <summary>switch_on_off_*_checked.dds. The half of a switch that is in force.</summary>
+        /// <summary>
+        /// switch_on_off_*_checked.dds, which is also button_default_active - the control family pressed.
+        /// A checked half of a switch and a held-down button are the same thing to this game.
+        /// </summary>
         public static readonly Color SwitchLit = new Color(27, 44, 51);
 
         /// <summary>
@@ -119,6 +153,16 @@ namespace Reactor.Screens
         public const float Body = 0.55f;
         public const float Small = 0.5f;
         public const float Tiny = 0.45f;
+
+        /// <summary>
+        /// A symbol standing beside a line of text.
+        /// </summary>
+        /// <remarks>
+        /// Larger than the text it accompanies, and deliberately. A letter has its neighbours to lean on
+        /// and a symbol has none - it is read alone and at a glance, and the first cut of these was drawn
+        /// at the same size as small text and came out as a smudge.
+        /// </remarks>
+        public const float Symbol = 0.5f;
     }
 
     /// <summary>
@@ -188,10 +232,7 @@ namespace Reactor.Screens
         /// <summary>Anything hanging over the screen - a question, a list that opens downward.</summary>
         public const float Popup = 512f;
 
-        /// <summary>A chevron or a cross standing beside a line of text.</summary>
-        public const float Symbol = 18f;
-
-        /// <summary>The box or circle at the head of a row in a list of things to choose between.</summary>
+        /// <summary>The box at the head of a row in a list of several things to choose between.</summary>
         public const float Mark = 15f;
     }
 
@@ -325,6 +366,8 @@ namespace Reactor.Screens
         /// <summary>How far inside the box or circle the filled part sits.</summary>
         const float Inset = 4f;
 
+        readonly Glyph _circle = Widgets.Symbol(Symbols.Ring, Palette.Faint);
+
         public Mark()
         {
             Color = Palette.Faint;
@@ -340,21 +383,34 @@ namespace Reactor.Screens
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
+            // The circle is measured here even on a row that will draw a square, because which one this
+            // is can change between a measure and a draw - a stage that allowed one choice and now allows
+            // several - and a glyph arranged without having been measured centres itself against nothing.
+            // That was worth an hour: the ring drew low and to the right of where it belonged, which
+            // reads as bad artwork rather than as a missed call.
+            _circle.Symbol = Chosen ? Symbols.Disc : Symbols.Ring;
+            _circle.Tint = Color;
+            _circle.Measure(g, available);
+
             return new Vector2(Sizes.Mark, Sizes.Mark);
         }
 
         protected override void DrawContent(IGraphics g)
         {
+            if (!Many)
+            {
+                // Given the whole box rather than a square cut out of it, because a glyph centres its own
+                // line inside whatever it is handed and that line is taller than the square a drawn
+                // checkbox wants.
+                _circle.Arrange(ContentBounds);
+                _circle.Draw(g);
+                return;
+            }
+
             RectangleF box = new RectangleF(
                 ContentBounds.X + (ContentBounds.Width - Sizes.Mark) * 0.5f,
                 ContentBounds.Y + (ContentBounds.Height - Sizes.Mark) * 0.5f,
                 Sizes.Mark, Sizes.Mark);
-
-            if (!Many)
-            {
-                g.DrawSprite(Chosen ? Symbols.Disc : Symbols.Ring, box, Color, 0f);
-                return;
-            }
 
             Outline(g, box, Color, Space.Hair);
 
@@ -382,13 +438,12 @@ namespace Reactor.Screens
         readonly Glyph _arrow;
         readonly Label _word;
 
-        public Signpost(string word, float turn, bool leads)
+        public Signpost(string word, string arrow, bool leads)
         {
             Horizontal = true;
             Spacing = Space.Row;
 
-            _arrow = new Glyph(Symbols.Chevron, Sizes.Symbol, Palette.Muted);
-            _arrow.Rotation = turn;
+            _arrow = Widgets.Symbol(arrow, Palette.Muted);
 
             _word = Widgets.Ghost(Widgets.Caps(word));
             _word.Wraps = false;
@@ -438,6 +493,7 @@ namespace Reactor.Screens
             Scale = Type.Body;
             Color = Palette.Ink;
             Background = Palette.SlotFill;
+            Highlight = Palette.ControlHot;
             Padding = new Thickness(Space.ChipX, Space.ChipY);
             Underline = Palette.SlotEdge;
 
@@ -496,6 +552,11 @@ namespace Reactor.Screens
 
             Edge = Palette.Dim;
             EdgeThickness = Space.Hair;
+
+            // A switch is two fills and a border, so the border is the only response it has room for.
+            // The game does the same: its highlight textures differ from its normal ones at the edge far
+            // more than in the middle.
+            HighlightEdge = Palette.Muted;
         }
 
         /// <summary>Which way it is set. The lit half and the bright word both follow this.</summary>
@@ -617,6 +678,7 @@ namespace Reactor.Screens
         {
             Label row = Label(text, color, Type.Body);
             row.Background = Palette.Panel;
+            row.Highlight = Palette.PanelHot;
             row.Padding = new Thickness(Space.PadX, Space.PadY);
             return row;
         }
@@ -714,17 +776,31 @@ namespace Reactor.Screens
         }
 
         /// <summary>One symbol, at the size a symbol stands beside a line of text.</summary>
-        public static Glyph Symbol(MyStringId material, Color tint)
+        public static Glyph Symbol(string symbol, Color tint)
         {
-            return new Glyph(material, Sizes.Symbol, tint);
+            return new Glyph(symbol, Type.Symbol, tint);
         }
 
-        /// <summary>An arrowhead pointing whichever way <paramref name="turn" /> says.</summary>
-        public static Glyph Chevron(float turn, Color tint)
+        /// <summary>
+        /// A note that follows the pointer, saying what a control is when the control cannot.
+        /// </summary>
+        /// <remarks>
+        /// Drawn on <see cref="Palette.Chrome" /> rather than a panel tone, so it reads as sitting above
+        /// the screen rather than as another row of it - it is the only thing here that is allowed over
+        /// everything, and it should look borrowed rather than built in.
+        /// </remarks>
+        public static Label Tip()
         {
-            Glyph chevron = Symbol(Symbols.Chevron, tint);
-            chevron.Rotation = turn;
-            return chevron;
+            Label tip = Label("", Palette.Ink, Type.Small);
+            tip.Background = Palette.Chrome;
+            tip.Edge = Palette.Line;
+            tip.EdgeThickness = Space.Hair;
+            tip.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY);
+
+            // One line however long it is. A note that wrapped would change shape as the pointer moved
+            // along a row of controls, which is the fidgeting this screen keeps being pulled back from.
+            tip.Wraps = false;
+            return tip;
         }
 
         public static Stack RowOf(float spacing)

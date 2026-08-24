@@ -68,12 +68,18 @@ namespace Reactor.Sim.Content
         /// </remarks>
         public const int GlyphBaselineInCell = 35;
 
+        /// <summary>The cell that measurement was made on, so another font can be scaled against it.</summary>
+        public const int GameCellHeight = 45;
+
         readonly Dictionary<char, Glyph> _glyphs = new Dictionary<char, Glyph>();
         readonly Dictionary<char, int> _advances = new Dictionary<char, int>();
         readonly Dictionary<long, int> _kerning = new Dictionary<long, int>();
         readonly ScreenSpaceDevice _device;
         readonly int _lineHeight;
         readonly int _base;
+
+        /// <summary>How tall a cell on this page is, taken from the first glyph that says.</summary>
+        int _cellHeight;
 
         SeFontMetrics(ScreenSpaceDevice device, int lineHeight, int baseline, string source, bool fromGame)
         {
@@ -92,7 +98,26 @@ namespace Reactor.Sim.Content
         /// </summary>
         public int CellTop
         {
-            get { return _base - GlyphBaselineInCell; }
+            get { return _base - BaselineInCell; }
+        }
+
+        /// <summary>
+        /// Where the baseline falls inside this font's cell, in its own units.
+        /// </summary>
+        /// <remarks>
+        /// In the game's proportion rather than as a flat constant, because a constant is only right for
+        /// the cell it was measured on. A font with a bigger cell has its baseline further down it, and
+        /// treating 35 as universal put this project's own symbols six pixels below the words they stand
+        /// beside - which reads as the artwork being wrong rather than the arithmetic.
+        /// </remarks>
+        public int BaselineInCell
+        {
+            get
+            {
+                return _cellHeight <= 0 || _cellHeight == GameCellHeight
+                    ? GlyphBaselineInCell
+                    : (int)System.Math.Round(_cellHeight * (double)GlyphBaselineInCell / GameCellHeight);
+            }
         }
 
         /// <summary>Where <paramref name="c" /> is on the page, if the game has it at all.</summary>
@@ -141,6 +166,22 @@ namespace Reactor.Sim.Content
             if (path == null)
                 return null;
 
+            return LoadFrom(device, path, GameContent.HasGame ? "the game" : "cache", GameContent.HasGame);
+        }
+
+        /// <summary>
+        /// Reads any XNA bitmapfont, not only the game's.
+        /// </summary>
+        /// <remarks>
+        /// Split out when this project started shipping a font of its own. The format is the same one
+        /// either way - it is what the game reads - so a second reader would have been a second place for
+        /// the same parsing to be subtly different.
+        /// </remarks>
+        public static SeFontMetrics LoadFrom(ScreenSpaceDevice device, string path, string source, bool live)
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                return null;
+
             try
             {
                 XDocument document;
@@ -155,8 +196,7 @@ namespace Reactor.Sim.Content
                 int lineHeight = (int?)font.Attribute("height") ?? 37;
                 int baseline = (int?)font.Attribute("base") ?? 30;
 
-                var metrics = new SeFontMetrics(device, lineHeight, baseline,
-                    GameContent.HasGame ? "the game" : "cache", GameContent.HasGame);
+                var metrics = new SeFontMetrics(device, lineHeight, baseline, source, live);
 
                 XElement page = font.Descendants(ns + "bitmap").FirstOrDefault();
                 metrics.PageFile = page == null ? null : (string)page.Attribute("name");
@@ -173,7 +213,12 @@ namespace Reactor.Sim.Content
 
                     Glyph cell;
                     if (ReadCell(glyph, advance.Value, out cell))
+                    {
                         metrics._glyphs[character[0]] = cell;
+
+                        if (metrics._cellHeight == 0)
+                            metrics._cellHeight = cell.Height;
+                    }
                 }
 
                 if (metrics._advances.Count == 0)

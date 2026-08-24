@@ -340,13 +340,17 @@ sitting of extraction here, taking everything the symbol work is going to need, 
 The polish pass started, and turned out to be as much about the harness as about the screens.
 See **The polish pass** below for what is done and what is left.
 
-- The game's on/off switch, four symbol materials, drawn grips and marks.
+- The game's on/off switch, and `MaltekSymbols` - a symbol font this project draws and ships,
+  which replaced the sprite symbols entirely rather than sitting beside them.
+- Hover everywhere, on a rule that also fixed the inert heading: an element lights up only if it
+  was given a highlight, so declaring one *is* declaring that it can be pressed.
+- Tooltips, on the rule that a control with a word on it does not get one.
 - `ToPixels` rounds position and size apart, which is a change to what the **mod** draws and not
   only to what the harness shows.
 - The harness draws at a real resolution and fits the picture, rather than laying out against the
   window. It also remembers where its window was.
 
-Three things were diagnosed wrongly on the way, and each wasted real time. Worth reading once,
+Five things were diagnosed wrongly on the way, and each wasted real time. Worth reading once,
 because none of them will look different the second time:
 
 1. **A broken capital N was the window being 690 pixels tall**, not the font, not the sampling.
@@ -356,6 +360,12 @@ because none of them will look different the second time:
    than looking.
 3. **A press that appeared not to register was a row that has no command.** A system's row on the
    ship's list is a heading; only its switch answers. Nothing was broken.
+4. **Symbols drawn twelve pixels low were one hardcoded constant.** `GlyphBaselineInCell` was
+   measured on the game's 45 cell and applied to every font. It is now taken in proportion to the
+   cell actually being read.
+5. **A ring drawn low and to the right was a glyph arranged without being measured.** A glyph
+   centres its own line using the size it recorded at measure time; `Mark` never called it, so it
+   centred against zero. Arrange without measure is silent and looks like bad artwork.
 
 ### What to check next time
 
@@ -392,34 +402,52 @@ diagnosis very easy to reach for.
   these screens says what pressing it does; that is the game's convention and it was taken
   deliberately, because an audience who have never programmed should not have to work out
   whether a lone word is a label or a button. One size everywhere.
-- **Symbols are real.** Four materials, declared in `TransparentMaterials.sbc` against files the
-  game already ships and mirrored in the simulator's `SymbolArt`: `Phosphor_Chevron` (one
-  arrowhead, turned four ways), `Phosphor_Cross`, `Phosphor_Disc`, `Phosphor_Ring`. Only the
-  `_highlight` variants are white, and only a white picture can be tinted, because a tint is a
-  multiply on both targets and cannot brighten anything.
+- **Symbols are a font we ship**, `MaltekSymbols` - undo, redo, a bin, four chevrons, a ring, a
+  disc, a minus and a plus. A font rather than sprites because both targets already draw text and
+  both resolve a font by subtype out of one registry, where a sprite wants a material declared
+  once per target per icon. It also measures, so a symbol can sit inline in a sentence.
+  **It has to move into a mod of its own before this one is published** - it is meant to be
+  depended on rather than copied, and `Fonts.sbc` says so in capitals.
+- **The font is drawn, not scavenged.** The game has no undo, no redo and no delete glyph; its
+  only cross is `button_close_symbol`, which means dismiss. Borrowing it for destroy was the
+  mistake this replaced. `art/symbols/build_font.py` draws the shapes and `art/symbols/FontTool`
+  encodes the page - both live together because both move out together.
 - **What rectangles can make is drawn, not fetched.** The drag grip is six squares, the checkbox
-  is a rectangle inside another, a pause would be two bars. A rectangle is exact at any size and
-  a texture squeezed to eleven pixels is six grey smudges.
+  is a rectangle inside another. A rectangle is exact at any size and a texture squeezed to
+  eleven pixels is six grey smudges.
 - **The picker marks say how many may be chosen** - square where several may, round where only
   one may. The one thing on screen borrowed from desktops rather than from the game, kept
   because the shape carries an answer the words do not.
+- **Hover, and the rule under it.** An element lights up only if it has been given a `Highlight`,
+  so **setting one is how a thing declares it can be pressed**. That single mechanism also fixed
+  the inert system heading: it carries no command, so it gets no highlight and no panel, and now
+  reads as a heading over its sequences rather than as a row that ignores you.
+- **The game keeps two families of the same four states**, both starting from `(41,54,62)`, and
+  they go opposite ways: a panel lightens under the pointer, a control darkens. Sampled, not
+  guessed - `ControlHot` and `ControlFocus` were the two the palette was missing. Nearly every
+  desktop lightens everything, and that pair is much of why the game's chrome reads as pressed
+  metal rather than as a web page.
+- **Tooltips**, on the rule that **a tooltip is for a control that cannot say what it is**.
+  Anything with a word on it gets none. The wording is the host's, except that undo and redo
+  borrow core's `UndoText` and `RedoText`, which exist for exactly this. A switch's note says
+  what it governs, from core's `SwitchGovernsAll` rather than from the indent, and only the off
+  direction carries the consequence - switching a system on starts nothing by itself.
 
 ### Left
 
-- **A band that cannot be pressed should not look pressable.** A system's row on the ship's list
-  carries no command on purpose - it is a heading over the sequences under it - but it is drawn
-  in exactly the same panel as the rows that do answer. Found by clicking it and assuming the
-  pointer mapping was broken, which is the same mistake a player would make with less to go on.
-- **Hover**, including on the switch. Nothing responds to the pointer resting on it. The game
-  has the colour - `DarkBlueBackground_highlight.png`, already in the palette as `PanelHot` -
-  and a screen owns its own pointer, so this is ordinary work rather than anything blocked. It
-  is also the other half of the item above: what hovers is what can be pressed.
 - **Scroll indication.** A region scrolls and nothing says so. Cheap to draw - it is a
   rectangle - and it needs deciding whether it shows always or only while moving.
 - **The U+2192 in `SequenceSummary.cs`.** Core's own wording, and the one character core emits
   that the game's font cannot draw. Every string literal in `Reactor.Core.Mixin` was checked
   against the font's 496 glyphs and this is the only one. Either core says it in ASCII or the
   screens translate it; the simulator already draws the replacement box so it cannot be missed.
+  There is now a third option that did not exist before - put an arrow in `MaltekSymbols` and
+  have the screens draw it - but that one waits on **Design decision 11**, because it is the
+  same question in miniature: who owns the words.
+- **Who owns the words.** Design decision 11, raised by tooltips and parked deliberately. Core
+  hands over a lot of finished English; whether it should hand over facts instead is the sort of
+  thing that gets decided by accident if new core strings keep being added. **So do not add
+  any** until it is settled.
 
 ## Known problems
 
@@ -471,6 +499,28 @@ anybody plays at, so every judgement made while looking at it was a judgement ab
 will never exist. **The old default was 1280x690 and it lied**: at that size a hairline diagonal
 in the game's font falls between the samples and a capital N comes out broken, which cost an
 evening being diagnosed as a font problem.
+
+The symbol font, which is content rather than code and is built rather than committed by hand.
+
+```
+python art/symbols/build_font.py                        # draws the glyphs, writes page + xml
+art/symbols/FontTool/... FontTool.exe page.png page.dds # encodes what the game will load
+art/symbols/FontTool/... FontTool.exe --check page.dds back.png   # and reads it back
+```
+
+`build_font.py` holds the shapes as coordinates rather than as image files, so the whole set
+re-cuts at a different weight by changing one number. `FontTool` exists because the game will not
+load anything else: **BC7_UNORM_SRGB, a full mip chain, premultiplied alpha**, checked against
+`FontDataPA-0.dds` rather than assumed. Two things it is easy to get wrong and hard to see -
+straight alpha looks right in every viewer and only goes dirty once the game blends it, and a page
+without mips draws a ring as a dotted circle.
+
+**The metrics are the game's own proportions.** A 45 cell with height 37, base 30 and lsb -7,
+scaled to whatever cell this font uses. Nothing here can see what the renderer then does with those
+numbers - that drawing lives in the render assembly, not the ModAPI - so rather than guess the rule,
+the font is built to the same shape. Whatever the rule is, it lands the same way on both. The first
+cut declared a baseline of 56 in a 64 cell and every symbol drew twelve pixels below the words
+beside it.
 
 **The window remembers where it was**, in `%LOCALAPPDATA%\Reactor\SimWindow.txt` - position,
 size and whether it was maximised. Restored only if a decent corner of it would land on a screen

@@ -142,6 +142,18 @@ namespace Reactor.Sim.Simulation
             Typed();
         }
 
+        /// <summary>
+        /// Says where the pointer is, so the screen can light whatever it is resting on.
+        /// </summary>
+        /// <remarks>
+        /// Separate from pressing because moving is not pressing, and because a script that only ever
+        /// presses should not accidentally be testing the highlight as well.
+        /// </remarks>
+        public void MoveTo(Vector2 point)
+        {
+            _view.Pointer = point;
+        }
+
         /// <summary>Moves whatever is under the pointer. Positive scrolls down.</summary>
         public void ScrollBy(Vector2 point, float amount)
         {

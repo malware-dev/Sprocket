@@ -667,6 +667,38 @@ H is the constraint nobody would guess. Reactor can only explain what it can see
 every case somebody sets up in the game's own terminal instead is a hole in the
 explanation. Losing the easy cases is how the hard ones become unanswerable.
 
+### 11. Who owns the words
+
+*Raised by tooltips. Load-bearing on anything translated.*
+
+Core hands the host a lot of finished English: `Title`, `Subtitle`, a step's `Text` and
+`Lead`, `Status`, `LastRun`, `Problem`, `LockedText`, and `UndoText` - which today reads
+"deleting a step". The host writes the rest: Back, the switch, `+ do something`, Delete.
+
+There is a line that fits what exists, and it is tidy: **core says what a thing is, the host
+says what a control does.** Only core knows what the last edit was; only the host knows there
+is an arrow drawn for it. By that reading a tooltip is composed rather than owned - the host
+supplies the verb, core supplies the object - and it needs no change to core at all.
+
+**The objection is sharper than the rule.** Granting that every host wants to know what would
+be undone does not grant that core owns the *sentence* describing it. Core could publish the
+fact - an edit of this kind, on that step - and leave the wording to whoever is drawing. That
+reading puts the same boundary one level lower, and it is not obvious which is right.
+
+What tips it, and is worth deciding before more strings are added rather than after: **a mod
+gets translated.** If core owns the wording then translating means changing core, in a project
+whose whole point is that core is the part that does not change per target. If core owns the
+facts, a language is a host concern and core never learns what a language is. Against that,
+facts are more API to keep stable, and "deleting a step" written once beats the same sentence
+assembled in three hosts that drift.
+
+`PrimaryText` is the anomaly either way. It is core naming a button caption, which is the one
+place core is already doing the host's job under any reading of the rule.
+
+Parked deliberately. Tooltips are not blocked on it - they can be built from what exists and
+reworded later - but adding *new* core strings before it is settled is how the answer gets
+decided by accident.
+
 ## Where the prototype stands
 
 The editor works, and the abstraction has held up under a lot of pushing. Core hands a

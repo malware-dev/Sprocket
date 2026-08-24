@@ -33,6 +33,7 @@ namespace Reactor.Sim.Simulation
             public const int Type = 4;
             public const int Enter = 5;
             public const int Escape = 6;
+            public const int Move = 7;
 
             public int Kind;
             public Vector2 At;
@@ -93,7 +94,18 @@ namespace Reactor.Sim.Simulation
         {
             if (step.Kind == Step.Press)
             {
+                // Moved there first, because a press in the game arrives under a pointer that was already
+                // resting on the thing. A script that pressed without moving would leave the highlight on
+                // whatever it was last over, which is a state no player can produce.
+                scene.MoveTo(step.At);
                 scene.Press(step.At, 1);
+                bitmap.Render(root);
+                return;
+            }
+
+            if (step.Kind == Step.Move)
+            {
+                scene.MoveTo(step.At);
                 bitmap.Render(root);
                 return;
             }

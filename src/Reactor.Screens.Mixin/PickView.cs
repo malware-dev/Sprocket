@@ -154,7 +154,7 @@ namespace Reactor.Screens
         readonly Label _title = Widgets.Label("", Palette.Ink, Type.Body);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly TextBox _narrow = Widgets.Box(Type.Small, Palette.Page);
-        readonly Signpost _kindLine = new Signpost("", Symbols.TurnedDown, false);
+        readonly Signpost _kindLine = new Signpost("", Symbols.Down, false);
         readonly Label _showing = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly Stack _options = Widgets.RowOf(Space.Region);
         readonly List<Label> _optionRows = new List<Label>();
@@ -181,6 +181,7 @@ namespace Reactor.Screens
             _title.Trims = true;
 
             _narrow.Hint = "Search";
+            _kindLine.Highlight = Palette.PanelHot;
 
             _empty.Padding = new Thickness(Space.Line, Space.Item, 0f, 0f);
 
@@ -272,15 +273,16 @@ namespace Reactor.Screens
             {
                 Hit opener = Hit.Opens(_kindLine.Bounds, _kindList);
                 opener.Anchor = _kindLine;
+                opener.Hot = _kindLine;
                 hits.Add(opener);
             }
 
             for (int i = 0; i < _optionRows.Count && i < stage.Options.Count; i++)
-                hits.Add(new Hit(_optionRows[i].Bounds, stage.Options[i].Command));
+                hits.Add(Hit.On(_optionRows[i], stage.Options[i].Command));
 
             for (int i = 0; i < _visible.Count && i < stage.Entries.Count; i++)
             {
-                var row = new Hit(_visible[i].Line.Bounds, stage.Entries[i].Command);
+                Hit row = Hit.On(_visible[i].Line, stage.Entries[i].Command);
                 row.Confirms = !stage.AllowsMany;
                 hits.Add(row);
             }
@@ -293,7 +295,7 @@ namespace Reactor.Screens
                 return;
 
             for (int i = 0; i < _kindRows.Count && i < stage.Filters.Count; i++)
-                hits.Add(new Hit(_kindRows[i].Line.Bounds, stage.Filters[i].Command));
+                hits.Add(Hit.On(_kindRows[i].Line, stage.Filters[i].Command));
         }
 
         /// <summary>The list of kinds, for the screen to hang over everything when this line is pressed.</summary>
@@ -334,6 +336,9 @@ namespace Reactor.Screens
                 row.Line = new Bar();
                 row.Line.Spacing = Space.Region * 1.6f;
                 row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
+
+                // The list itself is already the hot tone, so its rows have to go a step past it.
+                row.Line.Highlight = Palette.Line;
                 row.Line.Fill = row.Label;
                 row.Line.Right = row.Count;
 
@@ -363,6 +368,7 @@ namespace Reactor.Screens
             while (_optionRows.Count < stage.Options.Count)
             {
                 Label option = Widgets.Ghost("");
+                option.Highlight = Palette.PanelHot;
                 _optionRows.Add(option);
                 _options.Children.Add(option);
             }
@@ -496,6 +502,7 @@ namespace Reactor.Screens
             row.Line = new Bar();
             row.Line.Spacing = Space.Item;
             row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f);
+            row.Line.Highlight = Palette.PanelHot;
             row.Line.Left = left;
             row.Line.Fill = text;
             row.Line.Right = right;
