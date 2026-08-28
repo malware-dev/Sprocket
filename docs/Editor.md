@@ -181,6 +181,33 @@ target might ask one stage at a time and be right to. The renderer is called
 *This was previously `PathComponent` with `Pane`s, and core counted rows to decide when a
 search box appeared. Both were core deciding presentation.*
 
+### Two ways to tick, and both of them ordinary
+
+**The checkbox toggles that one row. Anywhere else on the row is an ordinary list selection** -
+click selects just that one, ctrl adds and removes, shift takes a range.
+
+Neither is a fallback for the other. The checkbox is the whole picker for somebody who has never
+met a modifier key, and it is the only route that works on a gamepad, where ctrl and shift do not
+exist. The list behaviour is for the far larger group who have played this game, used its terminal,
+and already know what clicking a list does. Nothing is reachable only by modifier, so nothing has to
+be discovered.
+
+It also fixes a real asymmetry. Toggling alone means a wrong tap leaves a wrong row ticked, to be
+noticed and undone; with ordinary selection the next click simply replaces it, so a mistake corrects
+itself rather than accumulating.
+
+**Two things this rests on.** The checkbox's hit target has to be comfortably larger than the
+checkbox, because a near miss does not do nothing - it replaces the selection, and a list that seems
+to forget things at random is worse than one that is merely slow. And the row click is destructive
+by design, so what it costs has to stay small: a picker's selection is not yet a sequence, so there
+is nothing for undo to walk back.
+
+**The shift anchor belongs to core**, which is the one part of this that is not ordinary. The list
+narrows as somebody types, so an anchor held by the target would come to span rows that had stopped
+being adjacent. Core has no idea what shift is and should not: the target decides which command a
+press invokes, and core offers the row a toggle and a select rather than one command that means
+both.
+
 ### The dependency runs one way
 
 Narrowing runs left to right and never back. Picking blocks decides what can be said about
