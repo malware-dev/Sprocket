@@ -52,8 +52,34 @@ OVER = 8
 # Getting it wrong is not subtle, but it is easy to misread: the first cut declared a baseline of 56
 # in a 64 cell, and every symbol drew twelve pixels below the words beside it.
 LINE = round(CELL * 37 / 45)
-BASE = round(CELL * 30 / 45)
-LSB = round(CELL * -7 / 45)
+
+# The baseline where our own artwork's baseline falls, not where the game's does.
+#
+# A renderer puts a glyph's cell at (base - baseline in cell) from the top of the line. Declaring the
+# game's 30/45 left ours seven units adrift of its own ink, so the symbol hung below the box it had
+# just been centred in. Declaring the same proportion the cell is actually built to makes that
+# difference zero and the cell start exactly at the top of the line.
+BASE = round(CELL * 35 / 45)
+
+# And the ink is centred on the LINE rather than on the cell.
+#
+# The cell is square and the line is shorter, because the game's face spends the difference on
+# descenders and ours copies its proportions. Nothing here has a descender, so ink centred in the cell
+# sits low in the line by half that difference - which is exactly how far the tick sat off the middle
+# of its checkbox.
+#
+# The factor is empirical. Half the cell/line difference was the arithmetic answer and still drew low
+# in the game, so it is a whole difference now. Nothing outside the game can referee this: the
+# simulator's vertical rule is its own reconstruction and it drew both acceptably.
+INK = (CELL - LINE) / CELL
+
+# And a bearing of zero, which is the one metric NOT copied from the game's face.
+#
+# Its -7 is there to tuck letters together as a pen walks along a word. A symbol is never in a word:
+# it is drawn on its own and centred in whatever room it was given, using the advance width to work
+# out the middle. A negative bearing then drags it left of that middle by a tenth of its cell, which
+# looks exactly like a glyph that was drawn wrong - it sat touching the left wall of its checkbox.
+LSB = 0
 
 
 def poly(*points):
@@ -99,6 +125,36 @@ def uturn(mirrored):
     if mirrored:
         shapes = [[(1.0 - x, y) for (x, y) in s] for s in shapes]
     return shapes
+
+
+def arrow():
+    """
+    A shaft with a head on it: "leads to".
+
+    Distinct from the chevron on purpose. A chevron is a direction to travel and belongs on a
+    control somebody presses; this is a consequence, and belongs in a sentence between what
+    happened and what it caused. Same head as the undo arrow, so the two read as one family.
+    """
+    y = 0.52
+    return [
+        stroke((0.16, y), (0.60, y)),
+        head((0.84, y), (0.58, y), 0.30),
+    ]
+
+
+def check():
+    """
+    A tick. Yes, as opposed to the game's own filled square.
+
+    Space Engineers draws a checked box as a smaller box inside a bigger one, and its indeterminate
+    state as a bar - which is faithful to itself and reads as "partly" to anybody who has used any
+    other interface in their life. This audience has used other interfaces and not this one, so the
+    tick wins over the convention. Flat terminals like everything else here; no taper.
+    """
+    return [
+        stroke((0.20, 0.50), (0.41, 0.71)),
+        stroke((0.38, 0.71), (0.80, 0.29)),
+    ]
 
 
 def bin_():
@@ -179,6 +235,8 @@ GLYPHS = [
     ("0", "disc", disc()),
     ("-", "minus", solid(minus())),
     ("+", "plus", solid(plus())),
+    ("a", "arrow", solid(arrow())),
+    ("c", "check", solid(check())),
 ]
 
 
@@ -192,10 +250,10 @@ def render(glyph):
     draw = ImageDraw.Draw(page)
 
     for shape in shapes:
-        draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
+        draw.polygon([(x * size, (y - INK) * size) for (x, y) in shape], fill=255)
 
     for hole in holes:
-        draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
+        draw.polygon([(x * size, (y - INK) * size) for (x, y) in hole], fill=0)
 
     return page.resize((CELL, CELL), Image.LANCZOS)
 

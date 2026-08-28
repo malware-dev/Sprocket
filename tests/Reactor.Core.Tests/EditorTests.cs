@@ -46,7 +46,7 @@ public class EditorTests
     static void StartOnTheButton(ReactorEditor editor)
     {
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
@@ -271,7 +271,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Inner Door");
         ship.Tick();
 
@@ -291,6 +291,44 @@ public class EditorTests
         Assert.Equal(narrow, stages[0].NarrowCommand);
         Assert.Equal(kinds, stages[0].Filters[0].Command);
         Assert.Equal(firstChoice, stages[1].Entries[0].Command);
+    }
+
+    /// <summary>
+    /// A picker opens on a ship whose blocks carry the game's own ids.
+    /// </summary>
+    /// <remarks>
+    /// Block ids belong to the game, and Space Engineers hands them out in the quintillions. A command's
+    /// number is twelve bits, so packing a raw entity id into one clamped every block to the same number
+    /// and the second row registered threw - the editor could not open a picker on any real ship at all.
+    ///
+    /// Every other fake in this suite numbers its blocks from one, which is exactly why nothing here
+    /// caught it and why the first real ship did, immediately.
+    /// </remarks>
+    [Fact]
+    public void APickerOpensOnGameSizedEntityIds()
+    {
+        var ship = new Ship();
+        // The low word is what matters: a command number is twelve bits, so any id whose bottom
+        // thirty-two bits exceed 4095 is clamped to the same slot as every other. Real ids land there
+        // essentially always; picking round numbers here would test nothing.
+        ship.World.Add(new TestDoor(1152921504606946976, "Inner Door"));
+        ship.World.Add(new TestDoor(1152921504607046976, "Outer Door"));
+        ship.World.Add(new TestButton(1152921504607146976, "Airlock Button"));
+
+        ship.Runner = new AutomationRunner(ship.Automation, ship.World);
+        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner);
+
+        ship.Editor.NewSystem("Airlock");
+
+        // Throws before returning if two blocks claim one command.
+        ship.Editor.PressStart("When…");
+
+        var rows = ship.Editor.Component<PickComponent>().Stages[0].Entries;
+        Assert.Equal(3, rows.Count);
+
+        var seen = new HashSet<int>();
+        for (var i = 0; i < rows.Count; i++)
+            Assert.True(seen.Add(rows[i].Command), $"row {i} shares a command id with an earlier row");
     }
 
     /// <summary>
@@ -513,7 +551,7 @@ public class EditorTests
     {
         var ship = Build();
         ship.Editor.NewSystem("Airlock");
-        ship.Editor.PressStart("When...");
+        ship.Editor.PressStart("When…");
 
         var before = Listed(ship.Editor);
         ship.Editor.PressBlock("Airlock Button");
@@ -522,7 +560,9 @@ public class EditorTests
 
         // The lamp is absent throughout, and that is the question talking rather than the
         // selection: nothing can happen to it, so there is nothing to ask about it here.
-        Assert.Equal("Inner Door, Outer Door, Airlock Button", before);
+        // Listed by name rather than in the order the ship handed them over, which on a real
+        // construct is whatever walking the grid produced.
+        Assert.Equal("Airlock Button, Inner Door, Outer Door", before);
     }
 
     /// <summary>
@@ -533,7 +573,7 @@ public class EditorTests
     {
         var ship = Build();
         ship.Editor.NewSystem("Airlock");
-        ship.Editor.PressStart("When...");
+        ship.Editor.PressStart("When…");
         ship.Editor.PressBlock("Airlock Button");
         ship.Editor.PressBlock("Inner Door");
 
@@ -569,7 +609,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
 
         // One pane to begin with; the second appears once it has something to be about.
         Assert.Single(editor.Component<PickComponent>().Stages);
@@ -597,7 +637,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Inner Door");
         editor.PressBlock("Outer Door");
         editor.PressChoice("finishes opening");
@@ -628,7 +668,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Inner Door");
         editor.PressBlock("Outer Door");
         editor.PressChoice("all of them");
@@ -663,7 +703,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
 
         Assert.True(editor.HasChoice("any one"));
         Assert.True(editor.HasChoice("all of them"));
@@ -684,7 +724,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Airlock Button");
         editor.Back();
 
@@ -702,7 +742,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         Assert.Equal("When something happens", editor.Screen.Title);
 
         editor.PressBlock("Airlock Button");
@@ -724,7 +764,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
@@ -753,7 +793,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("Every...");
+        editor.PressStart("Every…");
         editor.PressChoice("steady - every 100 ticks");
 
         // The component instances must survive, or a target rebuilds its controls
@@ -826,7 +866,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();

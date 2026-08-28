@@ -124,7 +124,6 @@ namespace Reactor.Screens
             public IconBox Icon;
             public Label Name;
             public Label Detail;
-            public Dot Light;
             public Label Badge;
         }
 
@@ -157,7 +156,24 @@ namespace Reactor.Screens
         readonly Signpost _kindLine = new Signpost("", Symbols.Down, false);
         readonly Label _showing = Widgets.Label("", Palette.Faint, Type.Tiny);
         readonly Stack _options = Widgets.RowOf(Space.Region);
-        readonly List<Label> _optionRows = new List<Label>();
+        readonly List<OptionRow> _optionRows = new List<OptionRow>();
+
+        /// <summary>
+        /// One of the two answers to "any of these, or all of them", drawn the way every other
+        /// one-of-several choice on this screen is drawn.
+        /// </summary>
+        /// <remarks>
+        /// This used to be the words with "(*) " or "( ) " stuck on the front of them. A round mark is
+        /// what the rest of the editor uses to say only one of these may be chosen, and there is a glyph
+        /// for it in the font we ship, so spelling it out of brackets and an asterisk was the one place on
+        /// screen pretending to be a terminal.
+        /// </remarks>
+        sealed class OptionRow
+        {
+            public Stack Row;
+            public Mark Mark;
+            public Label Text;
+        }
 
         readonly Scroll _scroll = new Scroll();
         readonly Stack _rows = Widgets.Column(Space.Line);
@@ -278,7 +294,7 @@ namespace Reactor.Screens
             }
 
             for (int i = 0; i < _optionRows.Count && i < stage.Options.Count; i++)
-                hits.Add(Hit.On(_optionRows[i], stage.Options[i].Command));
+                hits.Add(Hit.On(_optionRows[i].Row, stage.Options[i].Command));
 
             for (int i = 0; i < _visible.Count && i < stage.Entries.Count; i++)
             {
@@ -367,25 +383,40 @@ namespace Reactor.Screens
         {
             while (_optionRows.Count < stage.Options.Count)
             {
-                Label option = Widgets.Ghost("");
-                option.Highlight = Palette.PanelHot;
+                var option = new OptionRow();
+                option.Mark = new Mark();
+                option.Text = Widgets.Label("", Palette.Muted, Type.Small);
+
+                option.Row = Widgets.RowOf(Space.Item);
+                option.Row.Children.Add(option.Mark);
+                option.Row.Children.Add(option.Text);
+                option.Row.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
+                option.Row.Highlight = Palette.PanelHot;
+
                 _optionRows.Add(option);
-                _options.Children.Add(option);
+                _options.Children.Add(option.Row);
             }
 
             while (_optionRows.Count > stage.Options.Count)
             {
                 int last = _optionRows.Count - 1;
-                _options.Children.Remove(_optionRows[last]);
+                _options.Children.Remove(_optionRows[last].Row);
                 _optionRows.RemoveAt(last);
             }
 
             for (int i = 0; i < stage.Options.Count; i++)
             {
                 ChoiceEntry option = stage.Options[i];
+                OptionRow row = _optionRows[i];
 
-                _optionRows[i].Text = (option.IsCurrent ? "(*) " : "( ) ") + option.Text;
-                _optionRows[i].Color = option.IsCurrent ? Palette.Ink : Palette.Muted;
+                // Round, never square: exactly one of these holds at a time, and that is what the shape
+                // says before anybody reads the words beside it.
+                row.Mark.Many = false;
+                row.Mark.Chosen = option.IsCurrent;
+                row.Mark.Color = option.IsCurrent ? Palette.Live : Palette.Faint;
+
+                row.Text.Text = option.Text;
+                row.Text.Color = option.IsCurrent ? Palette.Ink : Palette.Muted;
             }
         }
 
@@ -446,13 +477,11 @@ namespace Reactor.Screens
                 row.Detail.Text = detail;
                 row.Detail.Collapsed = string.IsNullOrEmpty(detail);
 
-                bool lit = !string.IsNullOrEmpty(entry.Status) && entry.IsActive;
                 bool badged = string.IsNullOrEmpty(entry.Status) && entry.Badge > 0;
 
-                // Out of the row rather than drawn in nothing. Held space would be right if these came
-                // and went as somebody used the screen, but which rows have a light and which have a
-                // count is a property of the things themselves and settled before the list is drawn.
-                row.Light.Collapsed = !lit;
+                // Out of the row rather than drawn in nothing. Held space would be right if this came and
+                // went as somebody used the screen, but which rows carry a count is a property of the
+                // things themselves and settled before the list is drawn.
                 row.Badge.Collapsed = !badged;
                 row.Badge.Text = badged ? entry.Badge.ToString() : "";
             }
@@ -484,9 +513,6 @@ namespace Reactor.Screens
             text.Children.Add(row.Name);
             text.Children.Add(row.Detail);
 
-            row.Light = new Dot();
-            row.Light.IsLit = true;
-
             row.Badge = Widgets.Label("", Palette.Muted, Type.Tiny);
             row.Badge.Background = Palette.SlotFill;
             row.Badge.Wraps = false;
@@ -496,7 +522,6 @@ namespace Reactor.Screens
             // header and exactly wrong here: as the right-hand end of a row it claimed the whole line and
             // left the name to wrap one word at a time.
             Stack right = Widgets.RowOf(Space.Row);
-            right.Children.Add(row.Light);
             right.Children.Add(row.Badge);
 
             row.Line = new Bar();

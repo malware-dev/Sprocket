@@ -51,7 +51,7 @@ public class WindowSmokeTests
         Layout(window);
         Record(seen, editor);
 
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         window.Tick();
         Layout(window);
         Record(seen, editor);

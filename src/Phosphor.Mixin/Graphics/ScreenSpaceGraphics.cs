@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Sandbox.ModAPI;
 using VRage.Utils;
@@ -40,6 +41,8 @@ namespace Phosphor
 
         private readonly MyScreenSpaceLayer _layer;
         private readonly ClipStack _clip = new ClipStack();
+        private readonly List<MyScreenSpace.MyScissorScope> _scissors =
+            new List<MyScreenSpace.MyScissorScope>();
         private readonly float _referenceHeight;
 
         private Vector2 _origin;
@@ -105,8 +108,8 @@ namespace Phosphor
                 viewport.X / _scale,
                 viewport.Y / _scale);
 
+            CloseScissors();
             _clip.Clear();
-            ApplyClip();
         }
 
         public Vector2 Size
@@ -124,16 +127,53 @@ namespace Phosphor
             get { return _screen; }
         }
 
+        /// <summary>
+        /// Narrows drawing to <paramref name="bounds" />, intersected with whatever is already in force.
+        /// <para>
+        /// The scissor arrived as a scope rather than as the two ordered calls this used to guess at.
+        /// <c>MyScreenSpace.UsingScissorRectanglePixels</c> hands back something to dispose, and nested
+        /// scopes intersect, so the game does for free what <see cref="ClipStack" /> does. It is still
+        /// <see cref="ClipStack.Current" /> that gets handed over rather than the raw bounds: narrowing an
+        /// already-narrowed rectangle by its parent gives the same rectangle back, and it keeps the promise
+        /// the seam makes to both targets, that a backend only ever honours one rectangle.
+        /// </para>
+        /// <para>
+        /// <b>The layer is not optional.</b> It defaults to <c>BelowHud</c>, and everything here draws on
+        /// whichever layer this instance was built for, so leaving it out would push a scissor onto a layer
+        /// nothing is drawn to and quietly clip nothing at all.
+        /// </para>
+        /// <para>
+        /// The scopes are kept in a typed list rather than as <c>IDisposable</c> because
+        /// <c>MyScissorScope</c> is a struct, and one box per clipped element per frame is not a thing to
+        /// pay for. Disposing a copy of one is safe: it reads its two fields and pops.
+        /// </para>
+        /// <para>
+        /// <b>Not verified in the game yet:</b> whether a scope is recorded into a buffered layer's queue or
+        /// applied when that queue replays. The simulator honours it either way, and the demo mod only
+        /// exercises it inside a screen's own draw.
+        /// </para>
+        /// </summary>
         public void PushClip(RectangleF bounds)
         {
             _clip.Push(bounds);
-            ApplyClip();
+            _scissors.Add(MyScreenSpace.UsingScissorRectanglePixels(ToPixels(_clip.Current), _layer));
         }
 
+        /// <summary>Drops the innermost clip, leaving its parent's standing.</summary>
+        /// <remarks>
+        /// Pairing is guaranteed by <c>Element.Draw</c> not being virtual: it pushes and pops around
+        /// <c>DrawContent</c>, so a subclass cannot get between them and these are strictly nested.
+        /// </remarks>
         public void PopClip()
         {
+            int last = _scissors.Count - 1;
+            if (last >= 0)
+            {
+                _scissors[last].Dispose();
+                _scissors.RemoveAt(last);
+            }
+
             _clip.Pop();
-            ApplyClip();
         }
 
         public void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation)
@@ -170,48 +210,37 @@ namespace Phosphor
         }
 
         /// <summary>
-        /// Hands the clip now in force to the game, or clears it when the stack has emptied.
-        /// <para>
-        /// <b>The one thing here that is not written yet.</b> The screen-space API is expected to carry a
-        /// scissor, the way the panel API carries <c>MySprite.CreateClipRect</c>, and the two calls below are
-        /// where it goes. It has to be ordered with the draws rather than set as state, because the buffered
-        /// layers replay their queue later, which is also why this is called on every push and pop rather
-        /// than read back at draw time.
-        /// </para>
-        /// <para>
-        /// Everything above assumes it works. There is deliberately no fallback: approximating a scissor
-        /// means sprites cut by source rectangle and text that can only be shortened on the right, which
-        /// would put a rule about scrolling by whole rows into the framework to serve a gap that is not
-        /// meant to be there.
-        /// </para>
+        /// Ends every scissor still standing, innermost first. For the start of a frame, where a clip left
+        /// open by an abandoned draw would otherwise narrow the next one.
         /// </summary>
-        private void ApplyClip()
+        private void CloseScissors()
         {
-            if (_clip.HasClip)
-                SetClip(ToPixels(_clip.Current));
-            else
-                ClearClip();
+            for (int i = _scissors.Count - 1; i >= 0; i--)
+                _scissors[i].Dispose();
+
+            _scissors.Clear();
         }
 
         /// <summary>
-        /// Narrows drawing to <paramref name="rect" />, in window pixels.
-        /// <para>
-        /// <b>This does not compile against the game yet.</b> The method it calls is the one Keen has
-        /// said is coming, and the mod is unusable until it arrives regardless, so there is nothing to be
-        /// bought by keeping a build green that could not be played. The simulator supplies its own and
-        /// runs this line for real; the mod compiles again the day the signature lands, and if it differs
-        /// from this guess, this call and its twin below are the whole cost of having guessed.
-        /// </para>
+        /// Moves a point from window pixels back into UI units.
         /// </summary>
-        private void SetClip(Rectangle rect)
+        /// <remarks>
+        /// The inverse of the position half of <see cref="ToPixels" />, and it does not round: a pointer is
+        /// allowed to sit between two units, and rounding one to a whole unit would make the last pixel of
+        /// travel before a boundary do nothing.
+        /// </remarks>
+        public Vector2 FromPixels(Vector2 pixels)
         {
-            MyScreenSpaceSprite.SetClip(rect, _layer);
+            return _scale > 0f ? (pixels - _origin) / _scale : pixels;
         }
 
-        /// <summary>Removes the clip entirely. Waiting on the same method as <see cref="SetClip" />.</summary>
-        private void ClearClip()
+        /// <summary>
+        /// Moves a size from window pixels back into UI units. A size has no origin, which is the whole
+        /// difference between this and <see cref="FromPixels" />.
+        /// </summary>
+        public Vector2 FromPixelSize(Vector2 pixels)
         {
-            MyScreenSpaceSprite.ClearClip(_layer);
+            return _scale > 0f ? pixels / _scale : pixels;
         }
 
         /// <summary>

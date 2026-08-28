@@ -363,10 +363,7 @@ namespace Reactor.Screens
     /// </remarks>
     public class Mark : Element
     {
-        /// <summary>How far inside the box or circle the filled part sits.</summary>
-        const float Inset = 4f;
-
-        readonly Glyph _circle = Widgets.Symbol(Symbols.Ring, Palette.Faint);
+        readonly Glyph _glyph = Widgets.Symbol(Symbols.Ring, Palette.Faint);
 
         public Mark()
         {
@@ -388,9 +385,10 @@ namespace Reactor.Screens
             // several - and a glyph arranged without having been measured centres itself against nothing.
             // That was worth an hour: the ring drew low and to the right of where it belonged, which
             // reads as bad artwork rather than as a missed call.
-            _circle.Symbol = Chosen ? Symbols.Disc : Symbols.Ring;
-            _circle.Tint = Color;
-            _circle.Measure(g, available);
+            _glyph.Symbol = Many ? Symbols.Check : (Chosen ? Symbols.Disc : Symbols.Ring);
+            _glyph.Scale = Many ? Type.Symbol * 0.58f : Type.Symbol;
+            _glyph.Tint = Color;
+            _glyph.Measure(g, available);
 
             return new Vector2(Sizes.Mark, Sizes.Mark);
         }
@@ -402,8 +400,8 @@ namespace Reactor.Screens
                 // Given the whole box rather than a square cut out of it, because a glyph centres its own
                 // line inside whatever it is handed and that line is taller than the square a drawn
                 // checkbox wants.
-                _circle.Arrange(ContentBounds);
-                _circle.Draw(g);
+                _glyph.Arrange(ContentBounds);
+                _glyph.Draw(g);
                 return;
             }
 
@@ -414,10 +412,18 @@ namespace Reactor.Screens
 
             Outline(g, box, Color, Space.Hair);
 
+            // A tick, and not the smaller filled square the game itself draws. That square is what every
+            // other interface uses for "partly", and this audience learned checkboxes everywhere except
+            // here.
+            //
+            // Sized down from the ring's scale, which is the one difference between them: the ring is
+            // drawn *instead of* a box and may fill the space, while the tick is drawn *inside* one and at
+            // full size climbs out of it. Two thirds still caught the top-right corner; this clears it.
             if (Chosen)
-                g.DrawSprite(Solid, new RectangleF(
-                    box.X + Inset, box.Y + Inset,
-                    box.Width - Inset * 2f, box.Height - Inset * 2f), Color, 0f);
+            {
+                _glyph.Arrange(ContentBounds);
+                _glyph.Draw(g);
+            }
         }
     }
 

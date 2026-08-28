@@ -66,6 +66,7 @@ namespace Reactor.Sim.Simulation
         public static ScreenSpaceDevice Current = new ScreenSpaceDevice();
 
         readonly List<DrawCommand> _commands = new List<DrawCommand>();
+        readonly List<Rectangle> _scissors = new List<Rectangle>();
 
         public ScreenSpaceDevice()
         {
@@ -93,6 +94,7 @@ namespace Reactor.Sim.Simulation
         public void BeginFrame()
         {
             _commands.Clear();
+            _scissors.Clear();
         }
 
         /// <summary>
@@ -196,12 +198,41 @@ namespace Reactor.Sim.Simulation
             });
         }
 
-        public void SetClip(Rectangle rect, MyScreenSpaceLayer layer)
+        /// <summary>
+        /// Starts a scissor, and answers whether it took, as the game's does.
+        /// </summary>
+        /// <remarks>
+        /// The stack lives here rather than in the caller because that is where the game keeps its own, and
+        /// because a clip still has to reach the frame as an ordered command: the renderer replays a list
+        /// and <c>--dump</c> reads one, and neither should have to know a stack exists.
+        /// </remarks>
+        public bool PushScissor(Rectangle rect, MyScreenSpaceLayer layer)
+        {
+            _scissors.Add(rect);
+            SetClip(rect, layer);
+            return true;
+        }
+
+        /// <summary>Ends the innermost scissor, putting its parent's back rather than clearing outright.</summary>
+        public void PopScissor(MyScreenSpaceLayer layer)
+        {
+            if (_scissors.Count == 0)
+                return;
+
+            _scissors.RemoveAt(_scissors.Count - 1);
+
+            if (_scissors.Count > 0)
+                SetClip(_scissors[_scissors.Count - 1], layer);
+            else
+                ClearClip(layer);
+        }
+
+        void SetClip(Rectangle rect, MyScreenSpaceLayer layer)
         {
             _commands.Add(new DrawCommand { Kind = DrawKind.SetClip, Layer = layer, Clip = rect });
         }
 
-        public void ClearClip(MyScreenSpaceLayer layer)
+        void ClearClip(MyScreenSpaceLayer layer)
         {
             _commands.Add(new DrawCommand { Kind = DrawKind.ClearClip, Layer = layer });
         }

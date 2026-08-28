@@ -36,56 +36,5 @@
             </UVSize>
         </TransparentMaterial>
 
-        <!-- The game's own arrow. -->
-        <TransparentMaterial>
-            <Id>
-                <TypeId>TransparentMaterialDefinition</TypeId>
-                <SubtypeId>Phosphor_Cursor</SubtypeId>
-            </Id>
-            <AlphaMistingEnable>false</AlphaMistingEnable>
-            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
-            <AlphaSaturation>1</AlphaSaturation>
-            <Emissivity>0</Emissivity>
-            <IgnoreDepth>false</IgnoreDepth>
-            <NeedSort>false</NeedSort>
-            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
-            <Texture>Textures\GUI\MouseCursor.dds</Texture>
-            <Reflectivity>0</Reflectivity>
-            <UseAtlas>false</UseAtlas>
-            <UVOffset>
-                <X>0</X>
-                <Y>0</Y>
-            </UVOffset>
-            <UVSize>
-                <X>1</X>
-                <Y>1</Y>
-            </UVSize>
-        </TransparentMaterial>
-
-        <!-- The game's own hand, for when the thing under the pointer can be pressed. -->
-        <TransparentMaterial>
-            <Id>
-                <TypeId>TransparentMaterialDefinition</TypeId>
-                <SubtypeId>Phosphor_CursorHand</SubtypeId>
-            </Id>
-            <AlphaMistingEnable>false</AlphaMistingEnable>
-            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
-            <AlphaSaturation>1</AlphaSaturation>
-            <Emissivity>0</Emissivity>
-            <IgnoreDepth>false</IgnoreDepth>
-            <NeedSort>false</NeedSort>
-            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
-            <Texture>Textures\GUI\MouseCursorHand.dds</Texture>
-            <Reflectivity>0</Reflectivity>
-            <UseAtlas>false</UseAtlas>
-            <UVOffset>
-                <X>0</X>
-                <Y>0</Y>
-            </UVOffset>
-            <UVSize>
-                <X>1</X>
-                <Y>1</Y>
-            </UVSize>
-        </TransparentMaterial>
     </TransparentMaterials>
 </Definitions>

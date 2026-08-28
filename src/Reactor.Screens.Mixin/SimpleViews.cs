@@ -231,7 +231,7 @@ namespace Reactor.Screens
 
                 // An ellipsis on the ones that will ask something, which is the convention every desktop
                 // already uses for "this opens a question rather than doing it".
-                _rows.Add(Widgets.Row(Plus + option.Label + (option.Asks ? "..." : ""), Palette.Ink));
+                _rows.Add(Widgets.Row(Plus + option.Label + (option.Asks ? "…" : ""), Palette.Ink));
             }
 
             _line.Padding = new Thickness(0f, Space.Item);

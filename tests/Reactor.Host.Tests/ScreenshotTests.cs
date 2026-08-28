@@ -49,7 +49,7 @@ public class ScreenshotTests
         // How often - labelled, blinking at the real rate, and warning about the
         // rates that cost the server dearly.
         editor.NewSystem("Airlock");
-        editor.PressStart("Every...");
+        editor.PressStart("Every…");
         Tick(window, 1);
         Shoot(window, "rates");
     }
@@ -67,7 +67,7 @@ public class ScreenshotTests
         // happens. Answering the verb lands directly on the block picker, with no
         // stop at a half-empty sentence in between.
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         Tick(window, 1);
         Shoot(window, "listen");
 

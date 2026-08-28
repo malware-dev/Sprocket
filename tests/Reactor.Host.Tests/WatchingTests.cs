@@ -29,7 +29,7 @@ public class WatchingTests
         var editor = window.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
@@ -80,7 +80,7 @@ public class WatchingTests
         var editor = window.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
@@ -112,7 +112,7 @@ public class WatchingTests
         var editor = window.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();

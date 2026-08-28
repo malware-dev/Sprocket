@@ -240,7 +240,7 @@ namespace Phosphor
 
                 _scratch.Clear();
                 _scratch.Append(_text, 0, keep);
-                _scratch.Append("...");
+                _scratch.Append("…");
 
                 if (g.MeasureText(Font, _scratch, Scale).X <= width)
                     break;

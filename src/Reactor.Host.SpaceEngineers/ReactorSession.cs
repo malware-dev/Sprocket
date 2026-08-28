@@ -1,77 +1,175 @@
-using Phosphor;
+using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
-using VRage.Game;
 using VRage.Game.Components;
-using VRage.Game.ModAPI;
 using VRage.Utils;
-using VRageMath;
 
 namespace Reactor.Host.SpaceEngineers
 {
     /// <summary>
-    /// The mod's entry point. Nothing of Reactor's editor is wired to it yet; what it establishes is the route
-    /// in - a button on the programmable block that shuts the terminal and hands the editor a world it can
-    /// take input from.
-    /// <para>
-    /// It updates every tick even on a dedicated server, which draws nothing and has no terminal. That is not
-    /// waste: input suspension is applied server-side and has to be released for a player whose client went
-    /// away, and nobody else is left to do it.
-    /// </para>
+    /// Owns the Reactors on this client, and gives them a clock.
     /// </summary>
+    /// <remarks>
+    /// A unit runs whether or not anybody is looking at it, which is the whole point of automation, so the
+    /// ticking lives here and not in the screen. The screen is a way to look at a unit and nothing more.
+    /// </remarks>
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
     public class ReactorSession : MySessionComponentBase
     {
-        private InputSuspension m_suspension;
-        private TextEditor m_editor;
-        private ScreenSpaceGraphics m_graphics;
-        private TextBox m_box;
-        private MousePointer m_pointer;
+        static ReactorSession _current;
 
-        /// <summary>
-        /// The editor draws nothing until somebody opens it, so adding the mod to a world changes nothing a
-        /// player can see. It is a thing you open, never something that greets you.
-        /// </summary>
-        private bool m_open;
+        readonly Dictionary<long, ReactorUnit> _units = new Dictionary<long, ReactorUnit>();
 
-        /// <summary>
-        /// The block the editor was opened from. Held because the terminal is gone by the time we draw, so
-        /// InteractedEntity has stopped answering.
-        /// </summary>
-        private IMyTerminalBlock m_block;
+        ReactorScreen _screen;
+        long _open;
 
-        private bool m_started;
-
-        /// <summary>
-        /// Set when the button is pressed, cleared once the terminal has actually gone. Opening cannot happen
-        /// in the same breath as the press: the terminal is still up and its cursor still showing, and the
-        /// abandon sweep would see that and throw the edit away before the first frame was drawn.
-        /// </summary>
-        private bool m_opening;
-
-        private int m_openingSince;
-
-        public override void BeforeStart()
+        public override void LoadData()
         {
-            if (m_started)
+            _current = this;
+        }
+
+        /// <summary>
+        /// Takes on a block that carries a program, so it starts running.
+        /// </summary>
+        /// <remarks>
+        /// Static because the caller is a game logic component on the block, which has no way to reach a
+        /// session component otherwise. Answers null off the main path rather than throwing: a block can
+        /// come alive during a session teardown and that is not a thing to crash over.
+        /// </remarks>
+        public static ReactorUnit Adopt(IMyTerminalBlock block)
+        {
+            if (_current == null || block == null || !IsServer)
+                return null;
+
+            return _current.UnitFor(block);
+        }
+
+        /// <summary>
+        /// Whether this machine is the one that runs things.
+        /// </summary>
+        /// <remarks>
+        /// Reactor's runtime lives on the server and nowhere else, which is also where the game raises a
+        /// button press: <c>MyButtonPanel.ActivateButton</c> is a server event, so a client never hears one.
+        /// A client running its own copy would be a second airlock nobody asked for, opening the same doors
+        /// a moment apart.
+        ///
+        /// True in single player, where the client is the server.
+        /// </remarks>
+        static bool IsServer
+        {
+            get
+            {
+                return MyAPIGateway.Multiplayer == null || MyAPIGateway.Multiplayer.IsServer;
+            }
+        }
+
+        ReactorUnit UnitFor(IMyTerminalBlock block)
+        {
+            ReactorUnit unit;
+            if (_units.TryGetValue(block.EntityId, out unit))
+                return unit;
+
+            unit = new ReactorUnit(block);
+            _units.Add(block.EntityId, unit);
+            return unit;
+        }
+
+        /// <summary>
+        /// Opens the editor on the construct this block sits on.
+        /// </summary>
+        /// <remarks>
+        /// The terminal is closed rather than left standing behind, because two screens describing the same
+        /// ship is clutter and the one underneath cannot be reached anyway while this one has focus.
+        /// </remarks>
+        internal static void Open(IMyTerminalBlock block)
+        {
+            ReactorUnit unit = Adopt(block);
+            if (unit == null)
+            {
+                // Said out loud rather than silently doing nothing. A client editing a program the server
+                // has never heard of is worse than a client being told it cannot yet, and getting the edits
+                // onto a wire is its own piece of work.
+                if (MyAPIGateway.Utilities != null)
+                    MyAPIGateway.Utilities.ShowNotification("Reactor cannot be edited from a client yet.", 4000);
+
+                return;
+            }
+
+            _current.Show(block, unit);
+        }
+
+        void Show(IMyTerminalBlock block, ReactorUnit unit)
+        {
+            if (_screen == null || _open != block.EntityId)
+            {
+                if (_screen != null)
+                    _screen.CloseNow();
+
+                _screen = new ReactorScreen(unit);
+                _open = block.EntityId;
+            }
+
+            if (MyAPIGateway.Gui != null)
+                MyAPIGateway.Gui.CloseTerminalScreen();
+
+            _screen.Open();
+        }
+
+        public override void UpdateAfterSimulation()
+        {
+            if (_units.Count == 0 || MyAPIGateway.Session == null)
                 return;
 
-            m_started = true;
+            int frame = MyAPIGateway.Session.GameplayFrameCounter;
+            foreach (KeyValuePair<long, ReactorUnit> unit in _units)
+                unit.Value.Tick(frame);
+        }
 
-            // Built on every machine, server included: the server is the only place a blacklist can be
-            // applied or lifted, and it has to hear the messages to do either.
-            m_suspension = new InputSuspension();
+        /// <summary>
+        /// Writes every program back to its block before the world is written out.
+        /// </summary>
+        /// <remarks>
+        /// The screen already does this as it closes, which covers the ordinary way somebody finishes. This
+        /// covers saving with the editor still open, and costs a string per Reactor.
+        /// </remarks>
+        public override void SaveData()
+        {
+            foreach (KeyValuePair<long, ReactorUnit> unit in _units)
+                unit.Value.Persist();
+        }
 
-            // True because this target is pointed at with a mouse: the movement that would turn the player's
-            // head is the movement that moves the pointer. A text panel target would pass false, since there
-            // looking is the only way to aim at it.
-            m_editor = new TextEditor(m_suspension, true);
+        protected override void UnloadData()
+        {
+            if (_screen != null)
+                _screen.CloseNow();
 
-            if (MyAPIGateway.Utilities == null || MyAPIGateway.Utilities.IsDedicated)
+            foreach (KeyValuePair<long, ReactorUnit> unit in _units)
+                unit.Value.Dispose();
+
+            _units.Clear();
+            _screen = null;
+            _current = null;
+        }
+    }
+
+    /// <summary>
+    /// The button on a programmable block that opens Reactor.
+    /// </summary>
+    /// <remarks>
+    /// Controls are global per block type rather than per block, so this runs exactly once per mod load,
+    /// driven off the first programmable block to come alive. See <see cref="ReactorBlock" /> for why it
+    /// cannot be done any earlier than that.
+    /// </remarks>
+    static class ReactorControls
+    {
+        static bool _done;
+
+        public static void DoOnce()
+        {
+            if (_done)
                 return;
 
-            m_graphics = new ScreenSpaceGraphics(MyScreenSpaceLayer.AboveHud);
-            m_pointer = new MousePointer();
+            _done = true;
 
             IMyTerminalControlButton open = MyAPIGateway.TerminalControls
                 .CreateControl<IMyTerminalControlButton, IMyProgrammableBlock>("Reactor_Open");
@@ -81,131 +179,9 @@ namespace Reactor.Host.SpaceEngineers
             open.SupportsMultipleBlocks = false;
             open.Visible = block => true;
             open.Enabled = block => true;
-            open.Action = Open;
+            open.Action = ReactorSession.Open;
 
             MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(open);
-        }
-
-        protected override void UnloadData()
-        {
-            // The blacklist is process state rather than world state, so anything left standing would follow
-            // the player into whatever world they load next.
-            if (m_suspension != null)
-                m_suspension.Dispose();
-
-            m_suspension = null;
-            m_editor = null;
-            m_graphics = null;
-            m_box = null;
-        }
-
-        /// <summary>
-        /// Closes the terminal before showing anything, because input is the constraint. A mod can intercept
-        /// input aimed at the game world; there is no equivalent for the terminal, so an editor left inside it
-        /// could be drawn but never operated. The world staying visible behind it is a bonus, not the reason.
-        /// </summary>
-        private void Open(IMyTerminalBlock block)
-        {
-            m_block = block;
-            m_opening = true;
-            m_openingSince = MyAPIGateway.Session == null ? 0 : MyAPIGateway.Session.GameplayFrameCounter;
-
-            MyAPIGateway.Gui.CloseTerminalScreen();
-        }
-
-        /// <summary>
-        /// Finishes what <see cref="Open" /> asked for, once the terminal has closed and taken its cursor
-        /// with it. Gives up after a couple of seconds rather than waiting on something that is not coming.
-        /// </summary>
-        private void ContinueOpening()
-        {
-            int now = MyAPIGateway.Session == null ? 0 : MyAPIGateway.Session.GameplayFrameCounter;
-
-            if (now - m_openingSince > 120)
-            {
-                // Logged rather than shown: it means the game did not do something it was asked to, which is
-                // a thing to find in a log rather than a thing to bother a player about.
-                m_opening = false;
-                MyLog.Default.WriteLineAndConsole("[Reactor] terminal did not close; not opening");
-                return;
-            }
-
-            if (MyAPIGateway.Gui == null
-                || MyAPIGateway.Gui.GetCurrentScreen != MyTerminalPageEnum.None
-                || MyAPIGateway.Gui.IsCursorVisible)
-                return;
-
-            m_opening = false;
-            m_open = true;
-
-            if (m_box == null)
-            {
-                m_box = new TextBox();
-                m_box.Scale = 0.7f;
-                m_box.Background = new Color(20, 34, 48, 235);
-                m_box.Committed += OnNameCommitted;
-            }
-
-            m_box.Text = m_block == null ? "" : m_block.CustomName;
-            m_editor.Begin(m_box);
-
-            // Starts in the middle rather than wherever it was left, so it is always somewhere the player is
-            // already looking when the UI appears.
-            m_pointer.Center(m_graphics.ScreenBounds);
-        }
-
-        /// <summary>
-        /// Writes the name back to the block. The game's own word for it, edited in place, which is what
-        /// docs/Editor.md says naming is; and the setter syncs, so a client renaming it is seen by everyone.
-        /// </summary>
-        private void OnNameCommitted(TextBox box)
-        {
-            if (m_block != null)
-                m_block.CustomName = box.Text;
-        }
-
-        public override void UpdateAfterSimulation()
-        {
-            if (m_editor != null)
-                m_editor.Update();
-
-            if (m_opening)
-                ContinueOpening();
-        }
-
-        public override void HandleInput()
-        {
-            if (!m_open || m_editor == null)
-                return;
-
-            m_pointer.Update(m_graphics.ScreenBounds);
-            m_editor.HandleInput();
-
-            // The edit ending for any reason takes the overlay with it, for now. Once there is more than one
-            // thing on this screen that will become a focus question rather than a session one.
-            if (!m_editor.IsEditing)
-            {
-                m_open = false;
-                m_block = null;
-            }
-        }
-
-        public override void Draw()
-        {
-            if (!m_open)
-                return;
-
-            m_graphics.Begin();
-
-            Vector2 size = m_graphics.Size;
-            const float width = 520f;
-
-            m_box.Measure(m_graphics, new Vector2(width, size.Y));
-            m_box.Arrange(new RectangleF((size.X - width) * 0.5f, size.Y * 0.3f, width, m_box.DesiredSize.Y));
-            m_box.Draw(m_graphics);
-
-            // Last, so it is over everything the UI drew.
-            m_pointer.Draw(m_graphics);
         }
     }
 }

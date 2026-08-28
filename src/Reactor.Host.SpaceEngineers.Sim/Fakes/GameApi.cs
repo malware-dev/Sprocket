@@ -5,6 +5,7 @@
 // through IWorld as strings and longs. So the only game surface that ever reaches a drawing layer is the
 // drawing itself, and that was already held to what an IMyTextSurface can do.
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Reactor.Sim.Simulation;
@@ -107,6 +108,41 @@ namespace Sandbox.ModAPI
 
     public static class MyScreenSpace
     {
+        /// <summary>
+        /// The scope of one scissor rectangle, shaped like the game's. A struct, so that holding one costs no
+        /// allocation, and with a flag so that disposing one whose push was refused does nothing.
+        /// </summary>
+        public struct MyScissorScope : IDisposable
+        {
+            readonly MyScreenSpaceLayer _layer;
+            readonly bool _pushed;
+
+            internal MyScissorScope(MyScreenSpaceLayer layer)
+            {
+                _layer = layer;
+                _pushed = true;
+            }
+
+            public void Dispose()
+            {
+                if (_pushed)
+                    ScreenSpaceDevice.Current.PopScissor(_layer);
+            }
+        }
+
+        /// <summary>
+        /// Narrows drawing to a rectangle in window pixels until the scope is disposed, with nested scopes
+        /// intersecting. The layer carries the game's own default, which is a default worth not taking:
+        /// everything Phosphor draws names its layer, and a scissor on the wrong layer clips nothing.
+        /// </summary>
+        public static MyScissorScope UsingScissorRectanglePixels(Rectangle rect,
+            MyScreenSpaceLayer layer = MyScreenSpaceLayer.BelowHud)
+        {
+            return ScreenSpaceDevice.Current.PushScissor(rect, layer)
+                ? new MyScissorScope(layer)
+                : default(MyScissorScope);
+        }
+
         public static RectangleF GetSafeGuiArea()
         {
             return ScreenSpaceDevice.Current.SafeGuiArea;
@@ -143,26 +179,6 @@ namespace Sandbox.ModAPI
             Color color, float rotation, MyScreenSpaceLayer layer)
         {
             ScreenSpaceDevice.Current.DrawSprite(material, destination, source, color, rotation, layer);
-        }
-
-        /// <summary>
-        /// Assumed, not observed. Keen has said a scissor is coming and this is the shape we are betting on:
-        /// ordered with the draws rather than set as state, because the buffered layers replay their queue
-        /// later, and in window pixels because that is what everything else on this API speaks.
-        /// <para>
-        /// If the real one differs, this file and the two call sites in ScreenSpaceGraphics are the entire
-        /// cost of being wrong.
-        /// </para>
-        /// </summary>
-        public static void SetClip(Rectangle rect, MyScreenSpaceLayer layer)
-        {
-            ScreenSpaceDevice.Current.SetClip(rect, layer);
-        }
-
-        /// <summary>Assumed, as above.</summary>
-        public static void ClearClip(MyScreenSpaceLayer layer)
-        {
-            ScreenSpaceDevice.Current.ClearClip(layer);
         }
     }
 

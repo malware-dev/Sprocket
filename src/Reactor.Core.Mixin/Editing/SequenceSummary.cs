@@ -61,13 +61,13 @@ namespace Reactor.Editing
 
             var trigger = SequenceText.DescribeTrigger(world, sequence.Trigger);
             if (sequence.Steps.Count == 0)
-                return trigger + " → nothing yet";
+                return trigger + " » nothing yet";
 
             var first = SequenceText.DescribeStep(world, sequence.Steps[0]);
             if (sequence.Steps.Count == 1)
-                return trigger + " → " + first;
+                return trigger + " » " + first;
 
-            return trigger + " → " + first + " (+" + (sequence.Steps.Count - 1) + " more)";
+            return trigger + " » " + first + " (+" + (sequence.Steps.Count - 1) + " more)";
         }
 
         /// <summary>

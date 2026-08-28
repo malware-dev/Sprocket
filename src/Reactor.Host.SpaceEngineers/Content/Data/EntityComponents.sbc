@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <EntityComponents>
+        <!--
+        Claims the key Reactor keeps a construct's program under, in the mod storage on the block the
+        program belongs to.
+
+        WITHOUT THIS THE PROGRAM IS SILENTLY THROWN AWAY. MyModStorageComponent.Serialize walks the keys
+        it holds and writes only the ones some mod has claimed here; everything else is dropped with a
+        line in the log saying "not claimed". So the program is written, works for the whole session,
+        survives being read back - and is gone the moment the world is saved and loaded.
+
+        The GUID must match ReactorUnit.ProgramKey exactly, and must never change. A different one reads
+        as a Reactor nobody has written a program on yet, which discards somebody's ship without saying so.
+        -->
+        <EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
+            <Id>
+                <TypeId>ModStorageComponent</TypeId>
+                <SubtypeId>Reactor</SubtypeId>
+            </Id>
+            <RegisteredStorageGuids>
+                <guid>9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7</guid>
+            </RegisteredStorageGuids>
+        </EntityComponent>
+    </EntityComponents>
+</Definitions>

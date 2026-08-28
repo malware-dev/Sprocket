@@ -168,7 +168,7 @@ public class DragTests
         editor = window.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();

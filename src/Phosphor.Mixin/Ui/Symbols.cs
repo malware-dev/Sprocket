@@ -65,6 +65,27 @@ namespace Phosphor
         public const string Plus = "+";
 
         /// <summary>
+        /// A shaft with a head on it. What one thing led to.
+        /// </summary>
+        /// <remarks>
+        /// Not the chevron. A chevron is a direction to travel and sits on something you press; this is a
+        /// consequence and sits in a sentence, between what happened and what it caused. The game's font
+        /// has no arrow at all, which is what this face exists for.
+        /// </remarks>
+        public const string Arrow = "a";
+
+        /// <summary>
+        /// A tick. Yes, in a box where several may be said yes to.
+        /// </summary>
+        /// <remarks>
+        /// The game draws a ticked box as a smaller filled box inside a bigger one, and its indeterminate
+        /// state as a bar. Faithful to itself, and it reads as "partly" to anybody whose experience of a
+        /// checkbox came from anywhere else - which is this audience exactly. So this is one of the few
+        /// places the game has something and we deliberately do not use it.
+        /// </remarks>
+        public const string Check = "c";
+
+        /// <summary>
         /// Flat white, tinted to whatever colour is wanted. The only way to fill a rectangle, since the
         /// seam draws sprites and knows nothing of solid colours.
         /// </summary>

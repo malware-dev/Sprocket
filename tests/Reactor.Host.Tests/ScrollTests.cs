@@ -29,7 +29,7 @@ public class ScrollTests
         var editor = window.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         Run(window);
 
         var scroller = window.GetVisualDescendants().OfType<ScrollViewer>()

@@ -30,6 +30,45 @@ namespace Reactor.Editing
 
         readonly List<IEntity> _candidates = new List<IEntity>();
         readonly List<IEntity> _filtered = new List<IEntity>();
+
+        /// <summary>
+        /// A small number per entity, handed out in the order they are first seen and kept for the life of
+        /// this page.
+        /// </summary>
+        /// <remarks>
+        /// A command's number is twelve bits, and an entity's id is whatever the game hands us. Space
+        /// Engineers gives blocks ids in the quintillions, so casting one into that field clamped every
+        /// block to the same number and the second one registered threw. The invented ship numbers its
+        /// blocks from zero, which is why this only ever appeared against a real one.
+        ///
+        /// A row's position would fit and would be wrong: narrowing the list, or a block being welded on,
+        /// would leave a held id pointing at a different block. That is the "which slot was it in" bug the
+        /// whole command redesign existed to kill, so the map is by identity and outlives any rebuild.
+        /// </remarks>
+        readonly Dictionary<long, int> _slots = new Dictionary<long, int>();
+
+        /// <summary>
+        /// Name first, then id.
+        /// </summary>
+        /// <remarks>
+        /// Ordinal rather than the player's culture, because the same ship has to list in the same order
+        /// wherever it is opened. The id breaks ties, and there are always ties: a ship carries a dozen
+        /// blocks called "Interior Light" and they must not swap places between one rebuild and the next.
+        /// </remarks>
+        static readonly NameOrder ByName = new NameOrder();
+
+        /// <remarks>
+        /// A comparer object rather than a <c>Comparison</c> delegate, which Space Engineers does not
+        /// whitelist.
+        /// </remarks>
+        sealed class NameOrder : IComparer<IEntity>
+        {
+            public int Compare(IEntity a, IEntity b)
+            {
+                var byName = string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+                return byName != 0 ? byName : a.Id.CompareTo(b.Id);
+            }
+        }
         readonly List<EntityKind> _kinds = new List<EntityKind>();
 
         string _blockSearch = "";
@@ -233,11 +272,30 @@ namespace Reactor.Editing
 
                 changed |= Apply(_blocks.Entries[i], entity.Name, entity.Kind.DisplayName,
                     entity.Status, entity.IsActive, Contains(_selection, id),
-                    Editor.Register(Cmd.PickEntity, (int)id, delegate { Toggle(id); }),
+                    Editor.Register(Cmd.PickEntity, Slot(id), delegate { Toggle(id); }),
                     entity.Kind.Icon);
             }
 
             return changed;
+        }
+
+        /// <summary>
+        /// The number this entity is known by on this page, assigned the first time it is seen.
+        /// </summary>
+        /// <remarks>
+        /// Never reused and never reassigned, so an id a target is holding keeps meaning the same block for
+        /// as long as the page is open. Leaving and returning builds a fresh page and a fresh map, which is
+        /// fine: nothing holds an id across screens.
+        /// </remarks>
+        int Slot(long id)
+        {
+            int slot;
+            if (_slots.TryGetValue(id, out slot))
+                return slot;
+
+            slot = _slots.Count;
+            _slots.Add(id, slot);
+            return slot;
         }
 
         bool FillFilters()
@@ -434,8 +492,11 @@ namespace Reactor.Editing
         ///
         /// Narrowing is the one thing that can hide a row, and a picked block is exempt: a
         /// choice has to be undoable from where it was made, and a tick you cannot find is a
-        /// tick you cannot clear. Order is the ship's order throughout, so nothing moves when
-        /// it is picked either.
+        /// tick you cannot clear.
+        ///
+        /// Sorted by name, and not by the order the world hands them over. That order is whatever
+        /// walking the grid produced, which means nothing to somebody looking for a door. Picking
+        /// still moves nothing, because the sort does not know what is selected.
         /// </remarks>
         void Collect()
         {
@@ -444,6 +505,8 @@ namespace Reactor.Editing
             var capable = Vocabulary.Capable(Editor.World, _forEvents);
             for (var i = 0; i < capable.Count; i++)
                 _candidates.Add(capable[i]);
+
+            _candidates.Sort(ByName);
 
             _kinds.Clear();
             EntityQuery.KindsPresent(_candidates, _kinds);

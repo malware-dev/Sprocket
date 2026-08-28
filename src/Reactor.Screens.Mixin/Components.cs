@@ -124,6 +124,12 @@ namespace Reactor.Screens
 
         public static MyStringId MaterialFor(string name)
         {
+            // A slash means it is the game's own block definition id, and the screen-space API resolves
+            // one to that block's picture by itself. Anything without a slash is a word made up by a host
+            // that has no blocks to ask, and gets the prefix a stand-in backend goes looking for.
+            if (name != null && name.IndexOf('/') >= 0)
+                return MyStringId.GetOrCompute(name);
+
             return MyStringId.GetOrCompute(Prefix + name);
         }
     }

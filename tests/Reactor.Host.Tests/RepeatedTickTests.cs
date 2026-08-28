@@ -29,7 +29,7 @@ public class RepeatedTickTests
         Run(window, 60);
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         Run(window, 60);
 
         editor.PressBlock("Airlock Button");
@@ -80,7 +80,7 @@ public class RepeatedTickTests
         AssertStill(window, "the sequence list");
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When...");
+        editor.PressStart("When…");
         AssertStill(window, "picking what happens");
 
         editor.PressBlock("Airlock Button");

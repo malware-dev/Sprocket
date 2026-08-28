@@ -89,6 +89,15 @@ namespace Reactor.Editing
             return Of(kind, which, 0);
         }
 
+        /// <summary>
+        /// <paramref name="which" /> and <paramref name="part" /> are <b>ordinals, never identifiers</b>.
+        /// </summary>
+        /// <remarks>
+        /// Twelve bits each, and out of range is clamped rather than refused, which is right for a count of
+        /// steps and quietly catastrophic for an id. A block's id belongs to the game and arrives in the
+        /// quintillions, so passing one here collapsed every block on a real ship onto the same number.
+        /// Give an entity a small number of your own and pass that; <c>PickPage.Slot</c> is the pattern.
+        /// </remarks>
         public static int Of(Cmd kind, int which, int part)
         {
             // Clamped rather than checked. A page with four thousand steps is not a case worth

@@ -618,18 +618,18 @@ namespace Reactor.Editing
         /// The catalogue lives here rather than on the page so a third way to start something
         /// is one line in one place.
         ///
-        /// Each label is the first word of the sentence it makes: "When..." becomes "When the
-        /// airlock button is pressed", "Every..." becomes "Every 30 seconds". The ellipsis is
+        /// Each label is the first word of the sentence it makes: "When…" becomes "When the
+        /// airlock button is pressed", "Every…" becomes "Every 30 seconds". The ellipsis is
         /// the promise that the rest gets filled in. They read as answers to a question -
         /// "when something happens", "every so often" - only because they were once exactly
         /// that, on a screen headed "What should start it?" that no longer exists.
         /// </remarks>
         internal void AddStarters(StartComponent start, AutomationSystem system)
         {
-            start.Add("When...",
+            start.Add("When…",
                 Register(Cmd.StartWhen, delegate { StartSequence(system, new WhenTrigger("")); }));
 
-            start.Add("Every...", Register(Cmd.StartEvery,
+            start.Add("Every…", Register(Cmd.StartEvery,
                 delegate { StartSequence(system, new EveryTrigger(Cadences.Default)); }));
         }
 

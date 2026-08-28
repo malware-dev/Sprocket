@@ -1,8 +1,8 @@
 # Reactor
 
-Automation for people who have never programmed. The end goal is a Space Engineers
-mod; the Avalonia app in this repo is the prototype used to find out whether the idea
-works before any of it goes near the game.
+Automation for people who have never programmed, as a Space Engineers mod. The editor
+runs in the game, as a screen the game owns. The Avalonia app in this repo is the
+prototype the screens were designed against, and is on its way out.
 
 ## What problem this is actually solving
 
@@ -151,15 +151,75 @@ uses whatever C# it likes.
 ## Running it
 
 ```
-dotnet test Reactor.slnx
-dotnet run --project src/Reactor.Host.Avalonia
+dotnet test                                     # 91 tests
+dotnet build src/Reactor.Host.SpaceEngineers    # builds AND deploys the mod
+dotnet run --project src/Reactor.Host.Avalonia  # the prototype
 ```
+
+In the game, a programmable block's terminal grows a **Reactor** button, which opens the
+editor as a screen the game owns.
 
 The prototype opens on an empty Reactor asking what should set something off. The
 simulated ship has a hangar door, an airlock, lights, a sensor, a button and a
 hydrogen tank; the strip along the bottom pokes the world so you can watch sequences
 react. Doors travel and vents cycle, because instant entities hide every problem worth
 finding.
+
+### The simulator
+
+`Reactor.Host.SpaceEngineers.Sim` runs the mod's own screens without launching the game.
+It compiles the same `Phosphor.Mixin` and `Reactor.Screens.Mixin` sources the mod does, so
+what is seen there is what ships. Coordinates are UI units rather than window pixels;
+`--dump` prints both, so a point can be converted.
+
+```
+Sim.exe                    # the window
+Sim.exe --content          # which machine, is the game here, what is cached
+Sim.exe --extract          # decode font, cursors and block art into the cache
+Sim.exe --dump             # the frame as a draw list
+Sim.exe --shot out.png 657 311 tick 40 drag 100 200 100 400
+Sim.exe --shot out.png at 2560 1440 657 311     # at a resolution somebody actually has
+```
+
+`--shot` takes a script: a bare pair of numbers is a press, `tick n` advances the ship's
+clock, `drag x y x y` picks something up and puts it down, `scroll x y n` turns the wheel
+over a point. Order matters, and it is drawn between every step, because nothing knows
+where it is until it has been arranged.
+
+The symbol font is content rather than code, and is built rather than committed by hand.
+`build_font.py` holds the shapes as coordinates, so the whole set re-cuts at a different
+weight by changing one number.
+
+```
+python art/symbols/build_font.py                          # glyphs, page and metrics
+art/symbols/FontTool/... FontTool.exe page.png page.dds   # what the game will load
+```
+
+`FontTool` exists because the game will not load anything else: BC7_UNORM_SRGB, a full mip
+chain, premultiplied alpha. Both halves are invisible until they are wrong - straight alpha
+looks right in every viewer and only goes dirty once the game blends it, and a page without
+mips draws a ring as a dotted circle.
+
+### Things that will bite
+
+- **Every build of the mod deploys it**, Debug included. MDK2 packs it to wherever the local
+  MDK settings point rather than to the default mods folder, and the build output says where it
+  went. `mdk.local.ini` is per-machine and gitignored.
+- **`Reactor.Core.Mixin` is in the solution but marked not to build.** The dotnet CLI cannot
+  build a shared project and would fail the whole solution over it. Rider builds it either
+  way, which is why the arrangement differs from the other repos.
+- **The running prototype locks `Reactor.Core.dll`.** Close it before rebuilding.
+- **`%LOCALAPPDATA%\Reactor\SimContent` is not in the repository**, because it is Keen's
+  content and not ours to redistribute. Run `--extract` once. Without it the simulator still
+  runs and fails loudly: block artwork becomes magenta crossed boxes and text falls back to a
+  desktop face whose widths run 9 to 17 percent narrow, so any layout judgement made in that
+  state is made against the wrong numbers. Check `--content` before trusting a screenshot.
+- **Tick once before believing a screen.** Core re-reads a screen's title, subtitle and name
+  on the tick and nowhere else, so a headless script that presses Enter and looks straight
+  away sees the old name and reads exactly like a silent failure.
+- **Git identity is repo-local.** `gh` defaults to a different account; use
+  `GH_TOKEN=$(gh auth token -u malware-dev)` for API calls rather than switching accounts.
+- **No em dashes anywhere.** Ordinary hyphens.
 
 ## Testing it on people
 
@@ -173,6 +233,16 @@ Watch for where they stall. The open question is whether people can build someth
 that works and tell what it is doing - and the thing most likely to be missing is an
 answer to *"why didn't it happen?"*, which is deliberately not built yet.
 
-## Where to pick it up
+## The documents
 
-See [HANDOVER.md](HANDOVER.md) for what is built, what is not, and the open questions.
+| | |
+|---|---|
+| `docs/UserStories.md` | **Public.** Twenty-three wants in players' own words. |
+| `docs/StoryNotes.md` | Our judgement on each story. |
+| `docs/Requirements.md` | What Reactor must do, derived one story at a time. |
+| `docs/Design.md` | The model, what is excluded, and the open decisions. |
+| `docs/Editor.md` | The interface: what each screen is and what core states about it. |
+| `docs/ApiUnknowns.md` | What we still do not know about the game. |
+| `docs/Catalogue.md` | What the game offers a mod, and what Reactor needs to use it. |
+
+Nothing from the internal six belongs in the public one.
