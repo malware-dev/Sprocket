@@ -26,6 +26,17 @@ namespace Reactor.Screens
         readonly PickComponent _component;
         readonly Stack _columns = Widgets.RowOf(Space.Item);
         readonly Scroll _strip = new Scroll();
+
+        /// <summary>What <see cref="_grabbed" /> says when the strip's own bar is the one being held.</summary>
+        const int Strip = -2;
+
+        const int None = -1;
+
+        /// <summary>Which column's bar is being dragged, or <see cref="Strip" />, or nothing.</summary>
+        int _grabbed = None;
+
+        /// <summary>Where the pointer was when the strip last moved.</summary>
+        float _held;
         readonly List<StageView> _stages = new List<StageView>();
 
         int _revision = -1;
@@ -35,6 +46,7 @@ namespace Reactor.Screens
         {
             _component = component;
             _strip.Horizontal = true;
+            Widgets.Barred(_strip);
             _strip.Content = _columns;
         }
 
@@ -98,6 +110,60 @@ namespace Reactor.Screens
 
             _strip.ScrollBy(amount);
             return true;
+        }
+
+        /// <summary>
+        /// Takes hold of a scrollbar - a column's, or the strip's own.
+        /// </summary>
+        /// <remarks>
+        /// Through the drag path rather than the press path, because a bar is the one control here that
+        /// wants every move of the pointer rather than the fact of a click. It costs nothing: this view
+        /// had no other use for grabbing, and the screen already offers a grab before it offers a press.
+        /// </remarks>
+        public override bool TryGrab(Vector2 point)
+        {
+            for (int i = 0; i < _stages.Count; i++)
+            {
+                if (!_stages[i].TryGrabBar(point))
+                    continue;
+
+                _grabbed = i;
+                return true;
+            }
+
+            if (!_strip.HasBar || !EditorView.Contains(_strip.Track, point))
+                return false;
+
+            if (!EditorView.Contains(_strip.Thumb, point))
+                _strip.ThumbTo(point.X);
+
+            _strip.BarHeld = true;
+            _held = point.X;
+            _grabbed = Strip;
+            return true;
+        }
+
+        public override void Carry(Vector2 point)
+        {
+            if (_grabbed == Strip)
+            {
+                _strip.DragBy(point.X - _held);
+                _held = point.X;
+                return;
+            }
+
+            if (_grabbed >= 0 && _grabbed < _stages.Count)
+                _stages[_grabbed].CarryBar(point);
+        }
+
+        public override void Drop()
+        {
+            _strip.BarHeld = false;
+
+            for (int i = 0; i < _stages.Count; i++)
+                _stages[i].DropBar();
+
+            _grabbed = None;
         }
 
         void Rebuild()
@@ -177,6 +243,9 @@ namespace Reactor.Screens
 
         readonly Scroll _scroll = new Scroll();
         readonly Stack _rows = Widgets.Column(Space.Line);
+
+        /// <summary>Where the pointer was when the thumb last moved. Only meaningful while it is held.</summary>
+        float _held;
         readonly List<RowVisual> _visible = new List<RowVisual>();
         readonly Label _empty = Widgets.Label("", Palette.Muted, Type.Small);
 
@@ -229,6 +298,7 @@ namespace Reactor.Screens
             // column has width to spare where every line of height comes out of the list.
             _head.Children.Add(_options);
 
+            Widgets.Barred(_scroll);
             _scroll.Content = _rows;
 
             _column.Background = Palette.Panel;
@@ -253,6 +323,39 @@ namespace Reactor.Screens
 
             _scroll.ScrollBy(amount);
             return true;
+        }
+
+        /// <summary>Takes hold of this column's thumb, if that is what was pressed.</summary>
+        /// <remarks>
+        /// A press anywhere on the bar counts, not only on the thumb itself: the empty part jumps the
+        /// thumb to the pointer and then carries on as an ordinary drag, so overshooting the thumb by a
+        /// few units does something useful instead of nothing.
+        /// </remarks>
+        public bool TryGrabBar(Vector2 point)
+        {
+            if (!_scroll.HasBar || !EditorView.Contains(_scroll.Track, point))
+                return false;
+
+            if (!EditorView.Contains(_scroll.Thumb, point))
+                _scroll.ThumbTo(point.Y);
+
+            _scroll.BarHeld = true;
+            _held = point.Y;
+            return true;
+        }
+
+        public void CarryBar(Vector2 point)
+        {
+            if (!_scroll.BarHeld)
+                return;
+
+            _scroll.DragBy(point.Y - _held);
+            _held = point.Y;
+        }
+
+        public void DropBar()
+        {
+            _scroll.BarHeld = false;
         }
 
         public void Update(PickStage stage, IScreenHost host)

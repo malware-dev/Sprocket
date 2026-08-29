@@ -164,6 +164,20 @@ namespace Reactor.Screens
         public static readonly Color Notice = new Color(240, 172, 40);
         public static readonly Color NoticeWash = new Color(40, 30, 9);
 
+        /// <summary>
+        /// A scrollbar's thumb, and the same held.
+        /// </summary>
+        /// <remarks>
+        /// The game's own is (78, 87, 101) drawn against its window ground with no groove behind it, which
+        /// is a shade under 2:1 - quiet enough to read as furniture rather than as content. Ours is the
+        /// unlit tone for the same reason it draws an unlit light: it is a thing that is present and not
+        /// doing anything. It brightens one step while it is being held, which is the only feedback a bar
+        /// has room for.
+        /// </remarks>
+        public static readonly Color Thumb = Dim;
+
+        public static readonly Color ThumbHeld = Faint;
+
         public static readonly Color None = new Color(0, 0, 0, 0);
 
         /// <summary>
@@ -313,6 +327,20 @@ namespace Reactor.Screens
 
         /// <summary>The box at the head of a row in a list of several things to choose between.</summary>
         public const float Mark = 17f;
+
+        /// <summary>
+        /// A scrollbar, across. The game reserves twelve units for its own and so do we.
+        /// </summary>
+        public const float Bar = 12f;
+
+        /// <summary>
+        /// How short a thumb may get before it stops telling the truth about how much is out of sight.
+        /// </summary>
+        /// <remarks>
+        /// Roughly two rows tall. Below that it is quicker to reach for the wheel than to catch it, which
+        /// makes the bar decoration.
+        /// </remarks>
+        public const float Thumb = 34f;
     }
 
     /// <summary>A hairline across a block, with room around it.</summary>
@@ -831,6 +859,22 @@ namespace Reactor.Screens
             // selected, and pale ink on the pale focus fill is two things the same brightness.
             box.SelectionColor = Palette.Line;
             return box;
+        }
+
+        /// <summary>Gives a scroller a bar, in this target's colours.</summary>
+        /// <remarks>
+        /// Here rather than at each of the three call sites, because a bar that differed between the block
+        /// list and the screen behind it would read as two different controls doing the same job. Phosphor
+        /// knows the geometry and nothing about the look, which is the same split every other widget here
+        /// is built on.
+        /// </remarks>
+        public static Scroll Barred(Scroll scroll)
+        {
+            scroll.BarWidth = Sizes.Bar;
+            scroll.BarMinLength = Sizes.Thumb;
+            scroll.BarColor = Palette.Thumb;
+            scroll.BarHeldColor = Palette.ThumbHeld;
+            return scroll;
         }
 
         /// <summary>Something said against a coloured ground, because it needs reading.</summary>

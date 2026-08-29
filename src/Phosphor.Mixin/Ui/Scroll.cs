@@ -30,12 +30,41 @@ namespace Phosphor
         private float _offset;
         private float _extent;
         private float _viewport;
+        private float _across;
 
         public Scroll()
         {
             _children = new ElementCollection(this);
             ClipsContent = true;
         }
+
+        /// <summary>
+        /// How wide the bar is, across the direction of travel. Zero for no bar at all.
+        /// </summary>
+        /// <remarks>
+        /// The room is taken from the content whether or not there is anything to scroll, so a list does
+        /// not shuffle sideways the moment it grows past its box.
+        /// </remarks>
+        public float BarWidth { get; set; }
+
+        /// <summary>The thumb. Nothing is drawn while this is transparent, whatever the width says.</summary>
+        public Color BarColor { get; set; }
+
+        /// <summary>The thumb while it is being held. Falls back to <see cref="BarColor" />.</summary>
+        public Color BarHeldColor { get; set; }
+
+        /// <summary>
+        /// How short the thumb is allowed to get.
+        /// </summary>
+        /// <remarks>
+        /// A thumb is the same fraction of the track that the viewport is of the content, which on a very
+        /// long list is a few units of nothing. It stops shrinking here and starts lying instead, which is
+        /// the right way round: a thumb nobody can grab tells you less than one slightly out of place.
+        /// </remarks>
+        public float BarMinLength { get; set; }
+
+        /// <summary>Whether the thumb is being dragged right now, which only changes its colour.</summary>
+        public bool BarHeld { get; set; }
 
         /// <summary>Whether this scrolls across rather than down.</summary>
         public bool Horizontal { get; set; }
@@ -93,6 +122,124 @@ namespace Phosphor
             get { return MaxOffset > 0f; }
         }
 
+        /// <summary>Whether a thumb is being drawn: one was asked for, and there is something to scroll.</summary>
+        public bool HasBar
+        {
+            get { return BarWidth > 0f && BarColor.A > 0 && CanScroll; }
+        }
+
+        /// <summary>
+        /// The whole of the bar, thumb and empty part alike. Where a press counts as being on it.
+        /// </summary>
+        /// <remarks>
+        /// Answered even when there is nothing to scroll, so a caller testing it does not also have to
+        /// test <see cref="HasBar" /> before asking a question about a rectangle.
+        /// </remarks>
+        public RectangleF Track
+        {
+            get
+            {
+                // ContentBounds and not Bounds, because that is what the viewport was measured against.
+                // Padding would otherwise put the thumb's travel and the content's travel out of step by
+                // exactly the padding, which reads as a thumb that stops short of the end of its own list.
+                RectangleF box = ContentBounds;
+
+                if (BarWidth <= 0f)
+                    return new RectangleF(box.X, box.Y, 0f, 0f);
+
+                return Horizontal
+                    ? new RectangleF(box.X, box.Y + box.Height - BarWidth, box.Width, BarWidth)
+                    : new RectangleF(box.X + box.Width - BarWidth, box.Y, BarWidth, box.Height);
+            }
+        }
+
+        /// <summary>The part of the track that stands for what is on show.</summary>
+        public RectangleF Thumb
+        {
+            get
+            {
+                RectangleF track = Track;
+                float length = ThumbLength;
+
+                return Horizontal
+                    ? new RectangleF(track.X + Travel * Fraction, track.Y, length, track.Height)
+                    : new RectangleF(track.X, track.Y + Travel * Fraction, track.Width, length);
+            }
+        }
+
+        /// <summary>How far along the content is, from nothing to all of it.</summary>
+        private float Fraction
+        {
+            get
+            {
+                float max = MaxOffset;
+                return max > 0f ? _offset / max : 0f;
+            }
+        }
+
+        private float ThumbLength
+        {
+            get
+            {
+                if (_extent <= 0f || _viewport <= 0f)
+                    return _viewport;
+
+                float length = _viewport * _viewport / _extent;
+
+                if (length < BarMinLength)
+                    length = BarMinLength;
+                if (length > _viewport)
+                    length = _viewport;
+
+                return length;
+            }
+        }
+
+        /// <summary>How much room the thumb has to move in.</summary>
+        private float Travel
+        {
+            get
+            {
+                float travel = _viewport - ThumbLength;
+                return travel > 0f ? travel : 0f;
+            }
+        }
+
+        /// <summary>
+        /// Moves the content as though the thumb had been dragged <paramref name="distance" /> units.
+        /// </summary>
+        /// <remarks>
+        /// The conversion is the whole reason this lives here rather than in the caller: a thumb travels
+        /// the track while the content travels its own length, and the two are the same only on a list one
+        /// screen long. Doing it in the view would put the extent and the viewport in two places.
+        /// </remarks>
+        public void DragBy(float distance)
+        {
+            float travel = Travel;
+            if (travel <= 0f)
+                return;
+
+            ScrollBy(distance * MaxOffset / travel);
+        }
+
+        /// <summary>Puts the middle of the thumb at <paramref name="at" />, in screen units.</summary>
+        /// <remarks>
+        /// What a press on the empty part of the track does. Jumping to where the pointer is beats paging
+        /// towards it: it is one gesture rather than several, and it is what the press already looked like
+        /// it was going to do.
+        /// </remarks>
+        public void ThumbTo(float at)
+        {
+            float travel = Travel;
+            if (travel <= 0f)
+                return;
+
+            RectangleF track = Track;
+            float start = Horizontal ? track.X : track.Y;
+
+            _offset = Clamp((at - start - ThumbLength * 0.5f) * MaxOffset / travel);
+        }
+
         /// <summary>Moves by <paramref name="amount" /> and stays inside the content.</summary>
         public void ScrollBy(float amount)
         {
@@ -101,11 +248,13 @@ namespace Phosphor
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
+            _across = BarWidth > 0f ? BarWidth : 0f;
+
             if (_content != null)
             {
                 _content.Measure(g, Horizontal
-                    ? new Vector2(Unbounded, available.Y)
-                    : new Vector2(available.X, Unbounded));
+                    ? new Vector2(Unbounded, Room(available.Y))
+                    : new Vector2(Room(available.X), Unbounded));
             }
 
             // Takes what it is given rather than what its content wants, which is what makes it a window
@@ -116,6 +265,7 @@ namespace Phosphor
         protected override void ArrangeContent(RectangleF bounds)
         {
             _viewport = Horizontal ? bounds.Width : bounds.Height;
+            _across = BarWidth > 0f ? BarWidth : 0f;
 
             if (_content == null)
             {
@@ -128,14 +278,29 @@ namespace Phosphor
             _offset = Clamp(_offset);
 
             _content.Arrange(Horizontal
-                ? new RectangleF(bounds.X - _offset, bounds.Y, _extent, bounds.Height)
-                : new RectangleF(bounds.X, bounds.Y - _offset, bounds.Width, _extent));
+                ? new RectangleF(bounds.X - _offset, bounds.Y, _extent, Room(bounds.Height))
+                : new RectangleF(bounds.X, bounds.Y - _offset, Room(bounds.Width), _extent));
         }
 
         protected override void DrawContent(IGraphics g)
         {
             if (_content != null)
                 _content.Draw(g);
+
+            if (!HasBar)
+                return;
+
+            // No groove behind it. The game draws the thumb alone against whatever the panel already is,
+            // and a track under ours would be a line down every list saying nothing the thumb does not.
+            Color thumb = BarHeld && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
+            g.DrawSprite(Solid, Thumb, thumb, 0f);
+        }
+
+        /// <summary>Whatever is left of a side once the bar has had its share.</summary>
+        private float Room(float whole)
+        {
+            float room = whole - _across;
+            return room > 0f ? room : 0f;
         }
 
         private float Clamp(float value)

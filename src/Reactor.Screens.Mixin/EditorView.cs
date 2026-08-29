@@ -41,6 +41,9 @@ namespace Reactor.Screens
 
         readonly Dock _bodyDock = new Dock();
         readonly Scroll _scroll = new Scroll();
+
+        /// <summary>Where the pointer was when this screen's own thumb last moved.</summary>
+        float _held;
         readonly Stack _body = Widgets.Column(0f);
         readonly Stack _above = Widgets.Column(0f);
         readonly Stack _below = Widgets.Column(0f);
@@ -147,6 +150,7 @@ namespace Reactor.Screens
             _popup.Children.Add(_askLabel);
             _popup.Children.Add(entry);
 
+            Widgets.Barred(_scroll);
             _scroll.Content = _body;
             _bodyDock.Padding = new Thickness(Space.PadX);
 
@@ -616,12 +620,29 @@ namespace Reactor.Screens
                 return true;
             }
 
-            return false;
+            // After the views, not before. A picker fills the body with its own columns and their bars sit
+            // inside this one's track; offering the screen's bar first would take every one of them.
+            if (_scroll.Parent == null || !_scroll.HasBar || !Contains(_scroll.Track, point))
+                return false;
+
+            if (!Contains(_scroll.Thumb, point))
+                _scroll.ThumbTo(point.Y);
+
+            _scroll.BarHeld = true;
+            _held = point.Y;
+            return true;
         }
 
         /// <summary>Where the thing being carried has got to. Ignored when nothing is being carried.</summary>
         public void Carry(Vector2 point)
         {
+            if (_scroll.BarHeld)
+            {
+                _scroll.DragBy(point.Y - _held);
+                _held = point.Y;
+                return;
+            }
+
             if (_dragging != null)
                 _dragging.Carry(point);
         }
@@ -629,6 +650,8 @@ namespace Reactor.Screens
         /// <summary>Lets go of whatever was being carried.</summary>
         public void Drop()
         {
+            _scroll.BarHeld = false;
+
             if (_dragging == null)
                 return;
 
@@ -639,7 +662,7 @@ namespace Reactor.Screens
         /// <summary>Whether something is being carried right now.</summary>
         public bool IsDragging
         {
-            get { return _dragging != null; }
+            get { return _dragging != null || _scroll.BarHeld; }
         }
 
         /// <summary>
