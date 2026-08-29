@@ -15,10 +15,17 @@ namespace Phosphor
     /// </summary>
     public class TextBox : Element
     {
+        private string _font;
+        private float _scale;
+
         private readonly StringBuilder _text = new StringBuilder(64);
 
         /// <summary>Reused for measuring a run of the text, so a caret position costs no allocation.</summary>
         private readonly StringBuilder _run = new StringBuilder(64);
+
+        private float _line;
+        private float _lineAt = -1f;
+        private string _lineIn;
 
         private int _caret;
         private int _anchor;
@@ -37,9 +44,31 @@ namespace Phosphor
         /// <summary>Raised when an edit is committed, never while one is in progress.</summary>
         public event Action<TextBox> Committed;
 
-        public string Font { get; set; }
+        public string Font
+        {
+            get { return _font; }
+            set
+            {
+                if (_font == value)
+                    return;
 
-        public float Scale { get; set; }
+                _font = value;
+                InvalidateMeasure();
+            }
+        }
+
+        public float Scale
+        {
+            get { return _scale; }
+            set
+            {
+                if (_scale == value)
+                    return;
+
+                _scale = value;
+                InvalidateMeasure();
+            }
+        }
 
         public Color Color { get; set; }
 
@@ -78,6 +107,7 @@ namespace Phosphor
                     _text.Append(value);
 
                 ClampCaret();
+                InvalidateMeasure();
             }
         }
 
@@ -111,6 +141,7 @@ namespace Phosphor
 
         public void InsertChar(char c)
         {
+            InvalidateMeasure();
             DeleteSelection();
             _text.Insert(_caret, c);
             _caret++;
@@ -119,6 +150,7 @@ namespace Phosphor
 
         public void Insert(string s)
         {
+            InvalidateMeasure();
             if (string.IsNullOrEmpty(s))
                 return;
 
@@ -130,6 +162,7 @@ namespace Phosphor
 
         public void Backspace()
         {
+            InvalidateMeasure();
             if (DeleteSelection())
                 return;
 
@@ -143,6 +176,7 @@ namespace Phosphor
 
         public void DeleteForward()
         {
+            InvalidateMeasure();
             if (DeleteSelection())
                 return;
 
@@ -233,7 +267,7 @@ namespace Phosphor
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            float height = g.LineHeight(Font, Scale);
+            float height = LineOf(g);
 
             if (_text.Length == 0)
                 return new Vector2(0f, height);
@@ -242,9 +276,29 @@ namespace Phosphor
             return new Vector2(size.X, height > size.Y ? height : size.Y);
         }
 
+        /// <summary>
+        /// The line height, kept between frames. Drawing must ask the font nothing it can remember.
+        /// </summary>
+        /// <remarks>
+        /// A lookup rather than a measurement, so it is cheap - but it is cheap sixty times a second for
+        /// every one of these on screen, to be told a number that only changes when the font or the scale
+        /// does. Draw is the one path invalidation cannot help, because it always runs.
+        /// </remarks>
+        private float LineOf(IGraphics g)
+        {
+            if (_lineAt != Scale || _lineIn != Font)
+            {
+                _lineAt = Scale;
+                _lineIn = Font;
+                _line = g.LineHeight(Font, Scale);
+            }
+
+            return _line;
+        }
+
         protected override void DrawContent(IGraphics g)
         {
-            float height = g.LineHeight(Font, Scale);
+            float height = LineOf(g);
             Vector2 at = new Vector2(ContentBounds.X, ContentBounds.Y);
 
             if (HasSelection)

@@ -26,6 +26,10 @@ namespace Phosphor
     /// </remarks>
     public class Nameplate : Element
     {
+        private float _gap;
+        private float _leastWidth;
+        private Color _penColor;
+
         private readonly ElementCollection _children;
         private readonly Label _label = new Label();
         private readonly TextBox _box = new TextBox();
@@ -142,7 +146,19 @@ namespace Phosphor
         /// under somebody's hands - see <see cref="DrawContent" />.
         /// </para>
         /// </remarks>
-        public Color PenColor { get; set; }
+        public Color PenColor
+        {
+            get { return _penColor; }
+            set
+            {
+                if (_penColor.R == value.R && _penColor.G == value.G
+                    && _penColor.B == value.B && _penColor.A == value.A)
+                    return;
+
+                _penColor = value;
+                InvalidateMeasure();
+            }
+        }
 
         public Color SelectionColor
         {
@@ -161,6 +177,7 @@ namespace Phosphor
 
                 _box.Hint = value;
                 _measuring.Length = 0;
+                InvalidateMeasure();
 
                 if (!string.IsNullOrEmpty(value))
                     _measuring.Append(value);
@@ -210,7 +227,18 @@ namespace Phosphor
         public float WrongEdgeThickness { get; set; }
 
         /// <summary>Room between the name and the pencil.</summary>
-        public float Gap { get; set; }
+        public float Gap
+        {
+            get { return _gap; }
+            set
+            {
+                if (_gap == value)
+                    return;
+
+                _gap = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>
         /// How narrow the name is allowed to get. A line tall's worth when nobody says otherwise.
@@ -224,7 +252,18 @@ namespace Phosphor
         /// with. This only matters where there was little or nothing there to begin with.
         /// </para>
         /// </remarks>
-        public float LeastWidth { get; set; }
+        public float LeastWidth
+        {
+            get { return _leastWidth; }
+            set
+            {
+                if (_leastWidth == value)
+                    return;
+
+                _leastWidth = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>Whether the box is up. Set it through <see cref="Begin" /> and <see cref="End" />.</summary>
         public bool IsEditing
@@ -241,6 +280,8 @@ namespace Phosphor
         public void Begin()
         {
             _editing = true;
+            InvalidateMeasure();
+
             _box.Text = _label.Text;
             _box.SelectAll();
 
@@ -255,6 +296,7 @@ namespace Phosphor
         {
             _editing = false;
             _box.IsEditing = false;
+            InvalidateMeasure();
         }
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)

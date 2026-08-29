@@ -43,6 +43,11 @@ namespace Phosphor
             _items.Add(child);
             child.Parent = _owner;
             child.Holder = this;
+
+            // The child arrives dirty - it has never been measured where it now is - and the owner has to
+            // hear about it, because a container's size is made of what is in it.
+            child.InvalidateMeasure();
+            _owner.InvalidateMeasure();
         }
 
         public bool Remove(Element child)
@@ -52,6 +57,7 @@ namespace Phosphor
 
             child.Parent = null;
             child.Holder = null;
+            _owner.InvalidateMeasure();
             return true;
         }
 
@@ -64,6 +70,7 @@ namespace Phosphor
             }
 
             _items.Clear();
+            _owner.InvalidateMeasure();
         }
 
         public List<Element>.Enumerator GetEnumerator()

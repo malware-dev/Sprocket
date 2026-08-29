@@ -18,6 +18,9 @@ namespace Phosphor
     /// </summary>
     public class Wrap : Element
     {
+        private float _itemSpacing;
+        private float _lineSpacing;
+
         private readonly ElementCollection _children;
 
         public Wrap()
@@ -31,10 +34,32 @@ namespace Phosphor
         }
 
         /// <summary>Blank room between one child and the next along a line.</summary>
-        public float ItemSpacing { get; set; }
+        public float ItemSpacing
+        {
+            get { return _itemSpacing; }
+            set
+            {
+                if (_itemSpacing == value)
+                    return;
+
+                _itemSpacing = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>Blank room between one line and the next.</summary>
-        public float LineSpacing { get; set; }
+        public float LineSpacing
+        {
+            get { return _lineSpacing; }
+            set
+            {
+                if (_lineSpacing == value)
+                    return;
+
+                _lineSpacing = value;
+                InvalidateMeasure();
+            }
+        }
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {

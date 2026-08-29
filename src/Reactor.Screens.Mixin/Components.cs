@@ -14,6 +14,8 @@ namespace Reactor.Screens
     /// </remarks>
     public class Sized : Element
     {
+        private float _width;
+
         readonly ElementCollection _children;
 
         Element _content;
@@ -24,7 +26,18 @@ namespace Reactor.Screens
             Width = width;
         }
 
-        public float Width { get; set; }
+        public float Width
+        {
+            get { return _width; }
+            set
+            {
+                if (_width == value)
+                    return;
+
+                _width = value;
+                InvalidateMeasure();
+            }
+        }
 
         public Element Content
         {
@@ -76,13 +89,26 @@ namespace Reactor.Screens
     /// </remarks>
     public class IconBox : Element
     {
+        private float _size;
+
         public IconBox(float size)
         {
             Size = size;
         }
 
         /// <summary>Square, and the same square on every row whatever is being listed.</summary>
-        public float Size { get; set; }
+        public float Size
+        {
+            get { return _size; }
+            set
+            {
+                if (_size == value)
+                    return;
+
+                _size = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>
         /// What core called this kind of thing.

@@ -18,6 +18,9 @@ namespace Phosphor
     /// </summary>
     public class Scroll : Element
     {
+        private float _barWidth;
+        private bool _horizontal;
+
         /// <summary>
         /// The height offered to content when measuring. Not infinity: a stack works out its height by
         /// subtracting as it goes, and infinity minus anything stays infinity, which is true but useless.
@@ -45,7 +48,18 @@ namespace Phosphor
         /// The room is taken from the content whether or not there is anything to scroll, so a list does
         /// not shuffle sideways the moment it grows past its box.
         /// </remarks>
-        public float BarWidth { get; set; }
+        public float BarWidth
+        {
+            get { return _barWidth; }
+            set
+            {
+                if (_barWidth == value)
+                    return;
+
+                _barWidth = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>The thumb. Nothing is drawn while this is transparent, whatever the width says.</summary>
         public Color BarColor { get; set; }
@@ -67,7 +81,18 @@ namespace Phosphor
         public bool BarHeld { get; set; }
 
         /// <summary>Whether this scrolls across rather than down.</summary>
-        public bool Horizontal { get; set; }
+        public bool Horizontal
+        {
+            get { return _horizontal; }
+            set
+            {
+                if (_horizontal == value)
+                    return;
+
+                _horizontal = value;
+                InvalidateMeasure();
+            }
+        }
 
         public Element Content
         {
@@ -88,10 +113,22 @@ namespace Phosphor
         }
 
         /// <summary>How far down the content has been moved, in UI units. Never past its end.</summary>
+        /// <remarks>
+        /// Moving the content is an arrangement and not a size, so this says so. Nothing else does: the
+        /// tree is only laid out when something has said it changed, and a scroller that moved in silence
+        /// simply did not move - the offset was new and the arrangement that reads it never ran again.
+        /// </remarks>
         public float Scrolled
         {
             get { return _offset; }
-            set { _offset = value; }
+            set
+            {
+                if (_offset == value)
+                    return;
+
+                _offset = value;
+                InvalidateArrange();
+            }
         }
 
         /// <summary>The full height of the content, once measured.</summary>
@@ -237,13 +274,13 @@ namespace Phosphor
             RectangleF track = Track;
             float start = Horizontal ? track.X : track.Y;
 
-            _offset = Clamp((at - start - ThumbLength * 0.5f) * MaxOffset / travel);
+            Scrolled = Clamp((at - start - ThumbLength * 0.5f) * MaxOffset / travel);
         }
 
         /// <summary>Moves by <paramref name="amount" /> and stays inside the content.</summary>
         public void ScrollBy(float amount)
         {
-            _offset = Clamp(_offset + amount);
+            Scrolled = Clamp(_offset + amount);
         }
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)

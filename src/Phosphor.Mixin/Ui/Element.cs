@@ -106,7 +106,18 @@ namespace Phosphor
         /// across the whole of <see cref="Bounds" /> while the words sit inside the padding is what makes
         /// a chip or a row look like one at all.
         /// </remarks>
-        public Thickness Padding { get; set; }
+        public Thickness Padding
+        {
+            get { return _padding; }
+            set
+            {
+                if (_padding.Equals(value))
+                    return;
+
+                _padding = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>
         /// Moved by this much after being placed, without anything having measured it there.
@@ -116,7 +127,20 @@ namespace Phosphor
         /// it, and only the drawing disagrees. Dragging a row needs exactly that - the row follows the
         /// pointer while the list underneath keeps its own arithmetic, and letting go simply stops lying.
         /// </remarks>
-        public Vector2 Offset { get; set; }
+        public Vector2 Offset
+        {
+            get { return _offset; }
+            set
+            {
+                // Field by field, because the substitute maths the simulator builds against does not
+                // define the operators the game's does, and a seam has to compile on both.
+                if (_offset.X == value.X && _offset.Y == value.Y)
+                    return;
+
+                _offset = value;
+                InvalidateArrange();
+            }
+        }
 
         /// <summary>
         /// Whether this is out of the layout entirely, rather than merely invisible.
@@ -128,7 +152,74 @@ namespace Phosphor
         /// strip of empty panel under it on every screen. Containers skip a collapsed child completely,
         /// spacing included, so nothing is left behind to say it was there.
         /// </remarks>
-        public bool Collapsed { get; set; }
+        public bool Collapsed
+        {
+            get { return _collapsed; }
+            set
+            {
+                if (_collapsed == value)
+                    return;
+
+                _collapsed = value;
+                InvalidateMeasure();
+            }
+        }
+
+        private Thickness _padding;
+        private Vector2 _offset;
+        private bool _collapsed;
+
+        private bool _measureDirty = true;
+        private bool _arrangeDirty = true;
+
+        private Vector2 _measuredFor;
+        private RectangleF _arrangedTo;
+
+        /// <summary>
+        /// Says this needs measuring again, and everything above it with it.
+        /// </summary>
+        /// <remarks>
+        /// A screen is drawn sixty times a second and used perhaps twice a minute, so laying it out on
+        /// every frame is almost entirely wasted: the game answers a text measurement by walking the
+        /// string a character at a time with kerning, and a screenful of labels asks it the same question
+        /// about the same words for as long as somebody is looking. This is what makes the answer keep.
+        /// <para>
+        /// Upwards only, and it stops at the first parent that is already dirty - whoever made it dirty
+        /// has told everything above it already. So a change costs the depth of the tree once, and
+        /// nothing at all when several things change in the same frame.
+        /// </para>
+        /// <para>
+        /// The rule for a property is what it can move. Anything that changes how big this wants to be
+        /// belongs here; anything that only changes where it sits within what it was given belongs in
+        /// <see cref="InvalidateArrange" />; and colour changes nothing at all, which matters because the
+        /// views set colours on every element on every tick.
+        /// </para>
+        /// </remarks>
+        public void InvalidateMeasure()
+        {
+            // A size that changed has to be placed again, so this implies the other.
+            _arrangeDirty = true;
+
+            if (_measureDirty)
+                return;
+
+            _measureDirty = true;
+
+            if (Parent != null)
+                Parent.InvalidateMeasure();
+        }
+
+        /// <summary>Says this needs placing again, without its size having changed.</summary>
+        public void InvalidateArrange()
+        {
+            if (_arrangeDirty)
+                return;
+
+            _arrangeDirty = true;
+
+            if (Parent != null)
+                Parent.InvalidateArrange();
+        }
 
         /// <summary>What the last measure asked for, padding included.</summary>
         public Vector2 DesiredSize { get; private set; }
@@ -142,6 +233,15 @@ namespace Phosphor
         /// <summary>Asks how much room this would like, given <paramref name="available" />.</summary>
         public void Measure(IGraphics g, Vector2 available)
         {
+            // Nothing has changed and the offer is the same, so the answer is the same. Safe to stop here
+            // rather than walking on down: a child that had changed would have said so, and saying so
+            // reaches every parent between it and the root.
+            if (!_measureDirty && _measuredFor.X == available.X && _measuredFor.Y == available.Y)
+                return;
+
+            _measureDirty = false;
+            _measuredFor = available;
+
             if (Collapsed)
             {
                 DesiredSize = Vector2.Zero;
@@ -164,6 +264,14 @@ namespace Phosphor
         /// <summary>Tells this what it got. A parent may hand over less than was asked for.</summary>
         public void Arrange(RectangleF bounds)
         {
+            if (!_arrangeDirty
+                && _arrangedTo.X == bounds.X && _arrangedTo.Y == bounds.Y
+                && _arrangedTo.Width == bounds.Width && _arrangedTo.Height == bounds.Height)
+                return;
+
+            _arrangeDirty = false;
+            _arrangedTo = bounds;
+
             bounds = new RectangleF(bounds.X + Offset.X, bounds.Y + Offset.Y, bounds.Width, bounds.Height);
             Bounds = bounds;
 

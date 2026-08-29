@@ -13,6 +13,9 @@ namespace Phosphor
     /// </summary>
     public class Stack : Element
     {
+        private bool _horizontal;
+        private float _spacing;
+
         private readonly ElementCollection _children;
 
         public Stack()
@@ -26,10 +29,32 @@ namespace Phosphor
         }
 
         /// <summary>Down the screen unless told otherwise, which is what a list of anything wants.</summary>
-        public bool Horizontal { get; set; }
+        public bool Horizontal
+        {
+            get { return _horizontal; }
+            set
+            {
+                if (_horizontal == value)
+                    return;
+
+                _horizontal = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>Blank room left between one child and the next.</summary>
-        public float Spacing { get; set; }
+        public float Spacing
+        {
+            get { return _spacing; }
+            set
+            {
+                if (_spacing == value)
+                    return;
+
+                _spacing = value;
+                InvalidateMeasure();
+            }
+        }
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {

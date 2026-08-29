@@ -20,6 +20,11 @@ namespace Phosphor
     /// </summary>
     public class Label : Element
     {
+        private string _font;
+        private float _scale;
+        private bool _wraps;
+        private bool _trims;
+
         private readonly StringBuilder _measured = new StringBuilder(64);
         private readonly StringBuilder _scratch = new StringBuilder(64);
         private readonly List<string> _lines = new List<string>();
@@ -29,8 +34,27 @@ namespace Phosphor
         private float _laidOutFor = -1f;
         private float _laidOutAt = -1f;
         private string _laidOutIn;
+        private float _line;
+        private float _lineAt = -1f;
+        private string _lineIn;
+
         private bool _dirty = true;
         private Vector2 _wrapped;
+
+        /// <summary>
+        /// The width of the line last centred, kept so that centring does not cost a measurement.
+        /// </summary>
+        /// <remarks>
+        /// Drawing is not invalidated - it happens on every frame by definition - so anything that asks
+        /// the font a question here asks it sixty times a second no matter what the layout does. Centring
+        /// did: it measured the words to work out how far in to start them, on every frame, for every
+        /// centred label. That is both halves of a switch on every switch on screen.
+        /// </remarks>
+        private string _centred;
+
+        private float _centredAt = -1f;
+        private string _centredIn;
+        private float _centredWidth;
 
         public Label()
         {
@@ -52,19 +76,54 @@ namespace Phosphor
                 _measured.Clear();
                 _measured.Append(incoming);
                 _dirty = true;
+                InvalidateMeasure();
+                InvalidateMeasure();
             }
         }
 
-        public string Font { get; set; }
+        public string Font
+        {
+            get { return _font; }
+            set
+            {
+                if (_font == value)
+                    return;
 
-        public float Scale { get; set; }
+                _font = value;
+                InvalidateMeasure();
+            }
+        }
+
+        public float Scale
+        {
+            get { return _scale; }
+            set
+            {
+                if (_scale == value)
+                    return;
+
+                _scale = value;
+                InvalidateMeasure();
+            }
+        }
 
         public Color Color { get; set; }
 
         /// <summary>
         /// Whether a run too wide for its room continues on the next line rather than running off the end.
         /// </summary>
-        public bool Wraps { get; set; }
+        public bool Wraps
+        {
+            get { return _wraps; }
+            set
+            {
+                if (_wraps == value)
+                    return;
+
+                _wraps = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>
         /// Whether a run too wide for its room is cut short with an ellipsis instead of overflowing.
@@ -78,7 +137,18 @@ namespace Phosphor
         /// this one.
         /// </para>
         /// </remarks>
-        public bool Trims { get; set; }
+        public bool Trims
+        {
+            get { return _trims; }
+            set
+            {
+                if (_trims == value)
+                    return;
+
+                _trims = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>
         /// Whether the words sit in the middle of the room they were given rather than at its left edge.
@@ -118,6 +188,26 @@ namespace Phosphor
             return _wrapped;
         }
 
+        /// <summary>
+        /// The line height, kept between frames. Drawing must ask the font nothing it can remember.
+        /// </summary>
+        /// <remarks>
+        /// A lookup rather than a measurement, so it is cheap - but it is cheap sixty times a second for
+        /// every one of these on screen, to be told a number that only changes when the font or the scale
+        /// does. Draw is the one path invalidation cannot help, because it always runs.
+        /// </remarks>
+        private float LineOf(IGraphics g)
+        {
+            if (_lineAt != Scale || _lineIn != Font)
+            {
+                _lineAt = Scale;
+                _lineIn = Font;
+                _line = g.LineHeight(Font, Scale);
+            }
+
+            return _line;
+        }
+
         protected override void DrawContent(IGraphics g)
         {
             if (_text.Length == 0)
@@ -130,7 +220,7 @@ namespace Phosphor
                 return;
             }
 
-            float line = g.LineHeight(Font, Scale);
+            float line = LineOf(g);
             float y = ContentBounds.Y;
 
             for (int i = 0; i < _lines.Count; i++)
@@ -146,10 +236,18 @@ namespace Phosphor
             if (!Centres)
                 return ContentBounds.X;
 
-            _scratch.Clear();
-            _scratch.Append(line);
+            if (_centred != line || _centredAt != Scale || _centredIn != Font)
+            {
+                _scratch.Clear();
+                _scratch.Append(line);
 
-            float width = g.MeasureText(Font, _scratch, Scale).X;
+                _centred = line;
+                _centredAt = Scale;
+                _centredIn = Font;
+                _centredWidth = g.MeasureText(Font, _scratch, Scale).X;
+            }
+
+            float width = _centredWidth;
             if (width >= ContentBounds.Width)
                 return ContentBounds.X;
 
@@ -172,7 +270,7 @@ namespace Phosphor
 
             _lines.Clear();
 
-            float line = g.LineHeight(Font, Scale);
+            float line = LineOf(g);
             float widest = 0f;
 
             _scratch.Clear();

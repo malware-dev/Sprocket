@@ -14,6 +14,8 @@ namespace Phosphor
     /// </remarks>
     public class Glyph : Element
     {
+        private float _scale;
+
         readonly StringBuilder _measuring = new StringBuilder(2);
 
         string _symbol;
@@ -37,6 +39,7 @@ namespace Phosphor
 
                 _symbol = value;
                 _measuring.Length = 0;
+                InvalidateMeasure();
 
                 if (value != null)
                     _measuring.Append(value);
@@ -51,7 +54,18 @@ namespace Phosphor
         /// symbol behave like the text it stands among - the same number next to a label's scale means the
         /// same height, whatever either target's units happen to be.
         /// </remarks>
-        public float Scale { get; set; }
+        public float Scale
+        {
+            get { return _scale; }
+            set
+            {
+                if (_scale == value)
+                    return;
+
+                _scale = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>
         /// What colour to draw it. Transparent draws nothing and keeps the room.

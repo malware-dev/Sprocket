@@ -18,6 +18,8 @@ namespace Phosphor
     /// </summary>
     public class Bar : Element
     {
+        private float _spacing;
+
         private readonly ElementCollection _children;
 
         private Element _left;
@@ -49,7 +51,18 @@ namespace Phosphor
         }
 
         /// <summary>Blank room between the parts.</summary>
-        public float Spacing { get; set; }
+        public float Spacing
+        {
+            get { return _spacing; }
+            set
+            {
+                if (_spacing == value)
+                    return;
+
+                _spacing = value;
+                InvalidateMeasure();
+            }
+        }
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
