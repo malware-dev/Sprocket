@@ -49,7 +49,28 @@ namespace Reactor.Editing
         /// <summary>What to ask when offering the rename.</summary>
         public virtual string RenamePrompt { get { return ""; } }
 
-        /// <summary>Takes a new name, or empty to go back to the worked-out heading.</summary>
+        /// <summary>
+        /// Whether the name is the only thing this page has to be called by.
+        /// </summary>
+        /// <remarks>
+        /// False nearly everywhere, and it should stay that way: a sequence with no name reads as the
+        /// sentence it makes and is no worse off, which is what keeps naming genuinely optional rather
+        /// than a step somebody is quietly expected to complete.
+        /// <para>
+        /// A system is the exception, because there is nothing underneath it to fall back to. It is not
+        /// made of anything that describes itself - it is a name and the ones of it - so a system with its
+        /// name taken away is a row nobody can tell from the next one.
+        /// </para>
+        /// </remarks>
+        public virtual bool NameRequired { get { return false; } }
+
+        /// <summary>
+        /// Takes a new name, or empty to go back to the worked-out heading.
+        /// </summary>
+        /// <remarks>
+        /// A page that says <see cref="NameRequired" /> has to refuse an empty one here too, rather than
+        /// rely on a target having asked. Targets are the part that can be written wrong.
+        /// </remarks>
         public virtual void Rename(string name) { }
 
         /// <summary>

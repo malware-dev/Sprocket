@@ -505,6 +505,7 @@ namespace Reactor.Editing
             _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Pop) : 0;
             _screen.RenameCommand = page.CanRename ? RegisterText(Cmd.Rename, page.Rename) : 0;
             _screen.RenamePrompt = page.RenamePrompt;
+            _screen.NameRequired = page.NameRequired;
             _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(Cmd.Switch, page.Switch) : 0;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryCommand = _screen.HasPrimary ? Register(Cmd.Primary, page.Primary) : 0;

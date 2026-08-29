@@ -3,7 +3,6 @@ using Reactor.Editing;
 using Reactor.Screens;
 using Reactor.Ui;
 using Sandbox.ModAPI;
-using VRage.Input;
 using VRage.ModAPI;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
@@ -63,7 +62,11 @@ namespace Reactor.Host.SpaceEngineers
             // or clipping silently does nothing.
             _graphics = new ScreenSpaceGraphics(MyScreenSpaceLayer.BelowHud);
 
-            CloseButtonEnabled = true;
+            // Off, and the view draws its own cross instead. The harness lays its controls down before it
+            // calls the mod - MyGuiScreenModHost.Draw is base.Draw then OnDraw - so the first opaque thing
+            // this screen paints buries the button while leaving it live. An invisible way out is bad; an
+            // invisible way out that still works is a corner that shuts the editor for no visible reason.
+            CloseButtonEnabled = false;
             CloseOnEscape = true;
             EnabledBackgroundFade = true;
 
@@ -92,29 +95,23 @@ namespace Reactor.Host.SpaceEngineers
         }
 
         /// <summary>
-        /// Escape, and the close button, both arrive here.
+        /// Escape, and the cross in the header, both arrive here.
         /// </summary>
         /// <remarks>
         /// A question open on the screen owns Escape: dismissing it is what somebody pressing Escape meant,
         /// and closing the whole editor out from under them is not. Refusing the close is how that is said,
         /// and it is the reason Escape is not read as a key anywhere else - acting on it in two places would
         /// cancel the question and shut the screen in the same breath.
+        /// <para>
+        /// There used to be a guard at the top of this that threw away any close arriving on an Enter or a
+        /// Space release. It was needed because the harness's close button is a real focusable control that
+        /// takes focus on the screen's first update and fires on a key being released - so every Enter that
+        /// finished a rename, and every space typed into a search box, arrived here as a request to leave.
+        /// Switching the button off took the cause away, and the guard with it.
+        /// </para>
         /// </remarks>
         protected override bool OnCancelling()
         {
-            // The close button is a real control on the host screen, it takes focus on the screen's first
-            // update, and it activates on Enter or Space being *released* while it holds focus. So every
-            // Enter that finished a rename, and every space bar typed into a search box, arrived here as a
-            // request to shut the editor.
-            //
-            // Nothing is passed to say what happened, but the three ways in use different edges and that is
-            // enough: the button fires on a release, Escape fires on a press. A release means a key that
-            // belonged to whatever somebody was typing into, and never a request to leave.
-            IMyInput input = MyAPIGateway.Input;
-            if (input != null
-                && (input.IsNewKeyReleased(MyKeys.Enter) || input.IsNewKeyReleased(MyKeys.Space)))
-                return false;
-
             if (_view.IsAsking)
             {
                 _view.CancelAsk();
@@ -201,6 +198,16 @@ namespace Reactor.Host.SpaceEngineers
                     _view.Press(_pointer, Clicks());
 
                 _grabbed = false;
+
+                // Straight out, and deliberately not down the road Escape takes. The cross is the quick
+                // exit: it does not retreat a page, it does not put a question away and wait to be pressed
+                // again, it leaves. Somebody four screens deep who wants to be gone has asked to be gone.
+                //
+                // What that abandons is a question or a rename in progress, and abandoning those costs
+                // nothing: neither is sent to core until it is committed, so there is no half-finished
+                // edit to strand. The program itself is written out on the way through OnClosed.
+                if (_view.TakeClose())
+                    Close();
             }
 
             _wasDown = down;

@@ -63,6 +63,17 @@ namespace Reactor.Ui
         public string RenamePrompt { get; set; }
 
         /// <summary>
+        /// Whether an empty name is an answer here, or is not allowed to be given.
+        /// </summary>
+        /// <remarks>
+        /// Nearly everywhere an empty name means "go back to whatever this thing says about itself", which
+        /// is what makes naming optional. Where there is nothing for it to say, clearing the name has to be
+        /// refused instead - and a target has to be told which of the two it is, or it offers a commit that
+        /// core will silently ignore.
+        /// </remarks>
+        public bool NameRequired { get; set; }
+
+        /// <summary>
         /// Switches this screen's subject on or off. Zero when it has no such switch.
         /// </summary>
         /// <remarks>

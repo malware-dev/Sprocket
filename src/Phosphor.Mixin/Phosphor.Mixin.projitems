@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ui\Stack.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ui\Label.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ui\TextBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Nameplate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Input\IPointer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Input\KeyRepeater.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Input\Clipboard.cs" />

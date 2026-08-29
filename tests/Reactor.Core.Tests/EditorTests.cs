@@ -132,6 +132,49 @@ public class EditorTests
     }
 
     /// <summary>
+    /// A system keeps its name whatever anybody types, and a sequence is free to lose one.
+    /// </summary>
+    /// <remarks>
+    /// The two are deliberately opposite and the difference is not cosmetic. A sequence with no
+    /// name reads as the sentence it makes, so clearing one is an ordinary act and naming stays
+    /// genuinely optional. A system is a name and the ones of it and nothing else, so an empty
+    /// one leaves a row on the front door that cannot be told apart from any other.
+    ///
+    /// Enforced in the page rather than only where the name is typed. A target that forgot to
+    /// ask would otherwise erase the only thing a system can be called by, and the rule would
+    /// end up living once per target instead of once.
+    /// </remarks>
+    [Fact]
+    public void ASystemCannotBeLeftWithoutAName()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        // One step back from the sequence is the system it belongs to, which is the only screen
+        // in the editor where the name is the whole of what the thing is called.
+        StartOnTheButton(editor);
+        editor.Back();
+
+        Assert.True(editor.Screen.NameRequired);
+        Assert.Equal("Airlock", editor.Screen.CustomName);
+
+        // Ticked after each one because that is when the screen is brought up to date, the same
+        // as it is in a target. Reading CustomName without it reads the answer to the question
+        // before last.
+        editor.Name("");
+        ship.Tick();
+        Assert.Equal("Airlock", editor.Screen.CustomName);
+
+        editor.Name("   ");
+        ship.Tick();
+        Assert.Equal("Airlock", editor.Screen.CustomName);
+
+        editor.Name("Outer lock");
+        ship.Tick();
+        Assert.Equal("Outer lock", editor.Screen.CustomName);
+    }
+
+    /// <summary>
     /// Undo and redo walk the same list in both directions, and a new edit ends the branch.
     /// </summary>
     /// <remarks>

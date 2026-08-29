@@ -208,6 +208,55 @@ def ring():
     return [circle(0.30)], [circle(0.30 - WEIGHT)]
 
 
+def pencil():
+    """
+    Rename: a pencil, lying at a diagonal with its point to the lower left.
+
+    The one symbol here that stands for an act on words rather than on a thing, and the reason it
+    exists is that the word "rename" beside a heading read as a second heading. A picture beside a
+    name is furniture; a word beside a name is a name.
+
+    Barrel and nib as one line, with the ferrule taken back out of it as a hole rather than drawn
+    as a gap - a gap would need the barrel in two pieces and they would not stay aligned when the
+    weight changes. Nothing else about it: at the size this is drawn, an eraser and a wood grain
+    are three grey pixels that make the shape harder to read rather than easier.
+    """
+    # Sized to the extent the rest of the set occupies rather than to the cell. A stroke squares its
+    # ends, so at forty-five degrees the barrel's corners stand half its width out in both directions
+    # past where the line stops - which is why the far end sits short of where it looks like it should.
+    tip = (0.25, 0.75)
+    neck = (0.38, 0.62)
+    butt = (0.665, 0.335)
+    barrel = 0.24
+
+    # Across the barrel rather than along it, so the cut stays square to the pencil at any weight.
+    cut = 0.085
+    return [stroke(neck, butt, barrel), head(tip, neck, barrel)],            [stroke((neck[0] - cut, neck[1] - cut), (neck[0] + cut, neck[1] + cut), 0.05)]
+
+
+def cross():
+    """
+    Dismiss: putting something away, which is never destroying what is on it. That is the bin, and
+    the two are deliberately nothing alike.
+
+    The one shape here the game also has, kept anyway because its copy cannot be borrowed. The
+    game's cross belongs to a control on the host screen, and the harness draws its controls before
+    it hands over to the mod - so the first opaque thing a mod paints buries it. Anything that
+    draws its own panel has to carry its own way off it.
+
+    Not drawn by Reactor today: the chevron in the header does that job, on every screen including
+    the front door. It is here for the dialogs that do not exist yet, where a corner cross is the
+    only thing anybody will look for.
+
+    Same extent as the chevrons, so a row of controls in the chrome reads as one set.
+    """
+    near, far = 0.30, 0.70
+    return [
+        stroke((near, near), (far, far)),
+        stroke((near, far), (far, near)),
+    ]
+
+
 def minus():
     return [stroke((0.24, 0.5), (0.76, 0.5))]
 
@@ -237,6 +286,8 @@ GLYPHS = [
     ("+", "plus", solid(plus())),
     ("a", "arrow", solid(arrow())),
     ("c", "check", solid(check())),
+    ("p", "pencil", pencil()),
+    ("x", "cross", solid(cross())),
 ]
 
 

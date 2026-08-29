@@ -65,9 +65,27 @@ namespace Reactor.Editing
 
         public override string RenamePrompt { get { return "What is it?"; } }
 
+        /// <summary>
+        /// A system has to be called something.
+        /// </summary>
+        /// <remarks>
+        /// Unlike a sequence, which reads as its own sentence when it is unnamed. A system is a name and
+        /// the ones of it and nothing else, so an empty one leaves a row on the front door that cannot be
+        /// told apart from any other.
+        /// </remarks>
+        public override bool NameRequired { get { return true; } }
+
         public override void Rename(string name)
         {
-            _system.Name = (name ?? "").Trim();
+            var wanted = (name ?? "").Trim();
+
+            // Refused here as well as wherever it was typed. A target that forgot to ask would otherwise
+            // erase the only thing this system can be called by, and the rule would end up living in every
+            // target rather than in the one place that owns it.
+            if (wanted.Length == 0)
+                return;
+
+            _system.Name = wanted;
         }
 
         public override bool CanSwitch { get { return true; } }

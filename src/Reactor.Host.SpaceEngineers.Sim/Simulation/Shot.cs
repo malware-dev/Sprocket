@@ -34,6 +34,7 @@ namespace Reactor.Sim.Simulation
             public const int Enter = 5;
             public const int Escape = 6;
             public const int Move = 7;
+            public const int Clear = 8;
 
             public int Kind;
             public Vector2 At;
@@ -127,6 +128,13 @@ namespace Reactor.Sim.Simulation
             if (step.Kind == Step.Escape)
             {
                 scene.CancelAsk();
+                bitmap.Render(root);
+                return;
+            }
+
+            if (step.Kind == Step.Clear)
+            {
+                scene.Clear();
                 bitmap.Render(root);
                 return;
             }

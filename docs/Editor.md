@@ -139,6 +139,11 @@ never matches.
   anything stuck - and whether that lives here or somewhere of its own.
 - Where the **ship browser** sits now that the root is systems rather than sequences.
 - Whether timers, if they are a thing distinct from *every so often*, live here too.
+- **The game's interface makes noises and ours is silent.** A press, a hover, a screen opening
+  and closing all have a sound in Space Engineers, and a panel drawn to look like the game's
+  that answers nothing to the ear reads as slightly dead once you notice it. Which sounds, on
+  which acts, and whether they are the game's own or ours is open - as is whether this belongs
+  in the seam at all, since the other host has neither those sounds nor a reason to fake them.
 
 ## Nothing appears or disappears with the data
 
@@ -286,6 +291,39 @@ where a form would nag.
 
 *This also means any screen can be renameable now, not just a sequence. Systems are the
 obvious next one.*
+
+### The heading is one thing today and wants to be several
+
+The heading is a single string plus a name, and that is already costing something. A
+sequence's sentence is *when this happens* and *then this runs*, and naming it replaces the
+whole line - so anybody who wants a better word for what a sequence **does** loses the
+trigger that starts it, and gets it back only by typing the trigger into the name by hand.
+The model is making the person do its job.
+
+So a heading becomes a **sentence**: fixed words and parts, each part either generated or
+named. Core already has that shape and it is load-bearing - a step is a lead-in plus slots,
+and a slot already looks like the thing you change. The only new thing a heading's part needs
+is to say that it edits where it stands rather than opening a picker. One flag on a model
+that exists, not a second model.
+
+*Deliberately not settled: whether the trigger half takes a name of its own as well as the
+doing half.*
+
+### Naming as publishing, and why that cannot be silent
+
+A name buys two things, and the second one has never been drawn. `SequencePage` has said from
+the start that a name means "more than one trigger can start the same one" - so naming is
+what would promote a sequence from something private to its trigger into something other
+triggers can point at.
+
+**The naive version of that is an invisible feature.** Nothing about typing a name suggests
+you have just published something, and nothing afterwards shows that you could now refer to
+it, or that anything does. A person would have to be told, which means they will not find it.
+
+Whatever makes referencing real has to make the promotion visible - at the moment of naming,
+in what a named sequence then looks like, and in what a sequence being used from elsewhere
+says about itself. That is the actual work, and it is why this is a later extension rather
+than a consequence that falls out of naming for free.
 
 **A sequence's heading has no subtitle.** What it is doing right now - *waiting to happen*,
 *running* - used to be repeated there as well as on the sentence, and two lines saying the

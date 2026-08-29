@@ -124,6 +124,25 @@ namespace Reactor.Sim.Simulation
             get { return _view.IsAsking ? _view.AskBox : _view.Focus; }
         }
 
+        /// <summary>
+        /// Empties whatever has the keyboard, the way holding backspace would.
+        /// </summary>
+        /// <remarks>
+        /// Here because a script had no way to reach an empty box, and an empty box is where most of what
+        /// is interesting about a text field happens - a hint appearing, a name being refused, a search
+        /// giving a list back. Typing could only ever add.
+        /// </remarks>
+        public void Clear()
+        {
+            Phosphor.TextBox box = Typing;
+            if (box == null)
+                return;
+
+            box.SelectAll();
+            box.Backspace();
+            Typed();
+        }
+
         /// <summary>Types <paramref name="text" /> into whatever has the keyboard.</summary>
         public void Type(string text)
         {
@@ -163,7 +182,13 @@ namespace Reactor.Sim.Simulation
         /// <summary>Presses whatever is at <paramref name="point" />, in UI units.</summary>
         public bool Press(Vector2 point, int clicks)
         {
-            return _view.Press(point, clicks);
+            bool hit = _view.Press(point, clicks);
+
+            // Taken and dropped on the floor, on purpose. There is no window here to close - the editor is
+            // the whole of what this program draws - and leaving the request standing would mean the next
+            // host to ask got a yes for a press somebody made minutes ago.
+            _view.TakeClose();
+            return hit;
         }
 
         /// <summary>Offers the press as a grab first, so a drag is not also a click.</summary>

@@ -160,6 +160,22 @@ namespace Reactor.Screens
         public static readonly Color LiveWash = new Color(14, 40, 10);
 
         public static readonly Color Problem = new Color(232, 74, 58);
+
+        /// <summary>
+        /// What a field is filled with while what is in it cannot be accepted.
+        /// </summary>
+        /// <remarks>
+        /// It stands in for <see cref="PanelHot" />, which is a blue-grey well; this is a red-brown one,
+        /// and the hue is most of what does the work. Brightness cannot: red is dark, and the very
+        /// lightest wash that still reads as red is a third of a step off the chrome behind it where the
+        /// ordinary well is most of a step the other way.
+        /// <para>
+        /// Which is why the border matters more than the fill. <see cref="Problem" /> against the chrome
+        /// is 4.1:1 and unmistakable, and text stays <see cref="Ink" /> on top at 12:1 - a field being
+        /// refused is still a field somebody is reading what they typed in.
+        /// </para>
+        /// </remarks>
+        public static readonly Color WrongFill = new Color(74, 34, 31);
         public static readonly Color ProblemWash = new Color(36, 12, 10);
         public static readonly Color Notice = new Color(240, 172, 40);
         public static readonly Color NoticeWash = new Color(40, 30, 9);
@@ -327,6 +343,20 @@ namespace Reactor.Screens
 
         /// <summary>The box at the head of a row in a list of several things to choose between.</summary>
         public const float Mark = 17f;
+
+        /// <summary>
+        /// How narrow an editable name may get before it stops being something anybody can hit.
+        /// </summary>
+        /// <remarks>
+        /// Reached by clearing a name, which is an ordinary act rather than a mistake - an unnamed
+        /// sequence reads as its own sentence and is no worse off. What is not ordinary is a heading that
+        /// shrinks to a point the moment the last character comes out of it.
+        /// <para>
+        /// Half what it was, because it used to have to hold a hint and now holds only a caret and its
+        /// well. Sized to say "a field, and an empty one" and nothing more.
+        /// </para>
+        /// </remarks>
+        public const float Name = 48f;
 
         /// <summary>
         /// A scrollbar, across. The game reserves twelve units for its own and so do we.
@@ -875,6 +905,59 @@ namespace Reactor.Screens
             scroll.BarColor = Palette.Thumb;
             scroll.BarHeldColor = Palette.ThumbHeld;
             return scroll;
+        }
+
+        /// <summary>
+        /// A name somebody can change where it stands.
+        /// </summary>
+        /// <remarks>
+        /// The pencil goes a step above the size a symbol usually gets, because it stands beside the
+        /// largest text on a screen rather than beside a row. At the ordinary size it read as a speck
+        /// somebody had dropped on the heading.
+        /// </remarks>
+        public static Nameplate Nameplate(float scale)
+        {
+            var plate = new Nameplate(Symbols.Pencil, Type.Body);
+
+            plate.Font = MyFontEnum.White;
+            plate.Scale = scale;
+            // Smaller than it looks, because a glyph is measured by its cell and the pencil fills only
+            // half of one - so about ten units of the space between the two are already inside the
+            // symbol, and whatever is set here is added on top of that rather than being the whole of it.
+            // At a control's usual spacing the pencil read as a separate thing parked beside the name.
+            plate.Gap = Space.Line;
+            plate.LeastWidth = Sizes.Name;
+
+            plate.Color = Palette.Ink;
+            plate.PenColor = Palette.Faint;
+
+            // No hint, deliberately. A hint says what a blank box is for, and a heading is never a blank
+            // box: it stands where the name stands, in the largest text on the screen, with a pencil on it
+            // that somebody pressed to get here. There is nothing left to explain.
+            //
+            // It had the rename prompt in it for a while, which was wrong twice over. The prompt is
+            // written to be asked - "What is it?" - which reads as a question nobody put a question mark
+            // in, and it is far longer than a box sized to a name, so it was clipped in every case that
+            // mattered. The prompt has a home already: the popup that asks it, where the box really is
+            // blank and really is unlabelled.
+
+            // The hot panel tone rather than a control's well, because a heading is not sunk into the
+            // chrome - it sits on it, and the fill is here to say "this is a field now" rather than to
+            // make a hole for it.
+            plate.Well = Palette.PanelHot;
+
+            // Red-brown in place of the blue-grey well, and a rule under it in the loud red. The fill says
+            // "this one" at a glance across the screen; the rule is the part that survives being looked at
+            // on a dim monitor, because a red wash cannot get far enough from the chrome to do it alone.
+            plate.WrongWell = Palette.WrongFill;
+            plate.WrongEdge = Palette.Problem;
+            plate.WrongEdgeThickness = 2f;
+
+            // A mid tone rather than the focus blue, for the reason a search box takes the same one: the
+            // words keep their own colour while they are selected, and pale ink on the pale focus fill is
+            // two things the same brightness.
+            plate.SelectionColor = Palette.Line;
+            return plate;
         }
 
         /// <summary>Something said against a coloured ground, because it needs reading.</summary>

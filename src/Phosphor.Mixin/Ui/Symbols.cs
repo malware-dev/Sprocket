@@ -86,6 +86,34 @@ namespace Phosphor
         public const string Check = "c";
 
         /// <summary>
+        /// A pencil. Changing what something is called, as opposed to changing what it does.
+        /// </summary>
+        /// <remarks>
+        /// The one symbol here that acts on words rather than on a thing, and it exists because the
+        /// alternative was the word "rename" standing beside a heading - where a word beside a name reads
+        /// as a second name, and a picture beside a name reads as furniture.
+        /// </remarks>
+        public const string Pencil = "p";
+
+        /// <summary>
+        /// A cross. Putting something away, and never destroying what is on it - that is
+        /// <see cref="Delete" />, and the two are deliberately nothing alike.
+        /// </summary>
+        /// <remarks>
+        /// The game has this one too, and it is here anyway because its copy cannot be borrowed: it
+        /// belongs to a control on the host screen, and the harness draws its own controls before it hands
+        /// over to the mod, so the first opaque thing a mod paints buries it. Anything drawing its own
+        /// panel has to carry its own way off it.
+        /// <para>
+        /// <b>Nothing draws it yet.</b> The chevron in the header leaves a screen, on every screen
+        /// including the front door, so Reactor has no use for a second way out. This is here for the
+        /// dialogs that do not exist yet, where a cross in the corner is the only thing anybody will look
+        /// for - and a shared symbol set with no dismiss in it is an incomplete one.
+        /// </para>
+        /// </remarks>
+        public const string Close = "x";
+
+        /// <summary>
         /// Flat white, tinted to whatever colour is wanted. The only way to fill a rectangle, since the
         /// seam draws sprites and knows nothing of solid colours.
         /// </summary>

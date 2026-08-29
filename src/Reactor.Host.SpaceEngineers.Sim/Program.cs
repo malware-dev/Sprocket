@@ -110,8 +110,8 @@ namespace Reactor.Sim
         /// ship's clock, which is the only way to reach anything drawn because a system is actually
         /// running. <c>drag x y x y</c> picks something up and puts it down somewhere else,
         /// <c>scroll x y n</c> turns the wheel over a point, <c>move x y</c> rests the pointer somewhere
-        /// without pressing it, and <c>type "words"</c>, <c>enter</c> and <c>escape</c> work whatever box
-        /// currently has the keyboard.
+        /// without pressing it, and <c>type "words"</c>, <c>clear</c>, <c>enter</c> and <c>escape</c> work
+        /// whatever box currently has the keyboard.
         /// </remarks>
         static List<Shot.Step> Script(string[] args, int from)
         {
@@ -132,10 +132,12 @@ namespace Reactor.Sim
                     continue;
                 }
 
-                if (word == "enter" || word == "escape")
+                if (word == "enter" || word == "escape" || word == "clear")
                 {
                     var key = new Shot.Step();
-                    key.Kind = word == "enter" ? Shot.Step.Enter : Shot.Step.Escape;
+                    key.Kind = word == "enter"
+                        ? Shot.Step.Enter
+                        : word == "escape" ? Shot.Step.Escape : Shot.Step.Clear;
 
                     script.Add(key);
                     continue;

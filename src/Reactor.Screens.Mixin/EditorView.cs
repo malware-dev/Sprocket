@@ -31,19 +31,27 @@ namespace Reactor.Screens
 
         readonly Dock _root = new Dock();
         readonly Bar _headerBar = new Bar();
-        readonly Signpost _back = new Signpost("Back", Symbols.Left, true);
-        readonly Stack _titleRow = Widgets.RowOf(Space.Item);
-        readonly Label _title = Widgets.Label("", Palette.Ink, Type.Title);
-        readonly TextBox _titleBox = Widgets.Box(Type.Title, Palette.PanelHot);
-        readonly Label _pencil = Widgets.Label("rename", Palette.Faint, Type.Tiny);
+        // The chevron alone. It carried the word BACK beside it for a while, which cost most of the room
+        // between the left edge and the heading to say what the arrow had already said. What replaces the
+        // word is the hover tip, which is where a control that cannot speak for itself is supposed to say
+        // what it is - so nothing is actually lost except the space.
+        readonly Glyph _back = Widgets.Symbol(Symbols.Left, Palette.Muted);
+        readonly Nameplate _title = Widgets.Nameplate(Type.Title);
+
         readonly Switch _switch = new Switch(Type.Small);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Type.Small);
+
+        /// <summary>Whether the screen now up has written a subtitle at any point since it opened.</summary>
+        bool _hadSubtitle;
 
         readonly Dock _bodyDock = new Dock();
         readonly Scroll _scroll = new Scroll();
 
         /// <summary>Where the pointer was when this screen's own thumb last moved.</summary>
         float _held;
+
+        /// <summary>Set by a press on the cross, and read once by whoever owns the window.</summary>
+        bool _wantsClose;
         readonly Stack _body = Widgets.Column(0f);
         readonly Stack _above = Widgets.Column(0f);
         readonly Stack _below = Widgets.Column(0f);
@@ -93,39 +101,38 @@ namespace Reactor.Screens
         {
             _editor = editor;
 
-            // The heading holds one line whatever the name. Trimming it to an ellipsis is what the other
-            // host does and what this wants; until Phosphor can trim, it overflows rather than growing the
-            // header, which is the lesser of the two wrongs.
-            _title.Wraps = false;
-            _title.Trims = true;
-            _pencil.Wraps = false;
+            // The heading, its pencil and the box that replaces it are one control, so the plate is what
+            // lights up and what gets pressed. A pencil somebody could see and not press is worse than no
+            // pencil: it names the act and then refuses it.
+            _title.Padding = new Thickness(Space.Row, Space.ChipY);
 
-            // The heading and the box that edits it share a place and a size, so swapping them moves
-            // nothing. A popup would put a second copy of the name over the top of the first and ask which
-            // one is real; the heading already says it, so it becomes the box instead of summoning one.
-            // No padding on the heading's box: it stands where the heading stands, and room added
-            // inside it is room the heading did not have.
-            _titleBox.Padding = new Thickness();
-            _titleBox.Edge = Palette.None;
-            _titleBox.IsEditing = true;
-
-            _titleRow.Children.Add(_title);
-            _titleRow.Children.Add(_pencil);
+            // Inside a stack that takes the slack, because Fill stretches whatever it is given and a
+            // heading lit across the whole header would be a highlight the size of the screen. A
+            // horizontal stack hands each child its own width, which is exactly the hug wanted here.
+            var titleLane = Widgets.RowOf(0f);
+            titleLane.Children.Add(_title);
 
             // No slot holding it to a width any more. A switch showing both of its positions is already
             // the width of the longer word twice over whichever way it is set, so the title cannot be
             // shifted sideways by somebody stopping a system.
-            _headerBar.Spacing = Space.Region;
+            _headerBar.Spacing = Space.Row;
             _headerBar.Left = _back;
-            _headerBar.Fill = _titleRow;
+            _headerBar.Fill = titleLane;
             _headerBar.Right = _switch;
 
-            // The subtitle's line is reserved whether or not there is one. A picker's subtitle empties as
-            // the picking finishes, and a header that resized when it did would be the screen moving under
-            // somebody's hands.
+            // The subtitle's line is held for as long as a screen that has ever had one is up, and not
+            // at all on a screen that never does. Reserving it everywhere was the first answer and it was
+            // paying for the picker's guidance on every screen in the editor - a fifth of the header, on
+            // screens where nothing can ever write there. Dropping the reservation outright was the other
+            // wrong answer: a picker's guidance clears the moment the picking is done, and a header that
+            // shrank at that moment would take the whole screen up with it.
             Stack headerBlock = Widgets.Column(Space.Line);
             headerBlock.Background = Palette.Chrome;
-            headerBlock.Padding = new Thickness(Space.PadX, Space.PadY);
+
+            // Less than a row's down the screen, because the title inside it now carries its own - it is
+            // a control since the pencil joined it, and the two paddings stack. Eighteen units of chrome
+            // above a heading was most of why the header looked like a banner.
+            headerBlock.Padding = new Thickness(Space.PadX, Space.Item);
             headerBlock.Children.Add(_headerBar);
             headerBlock.Children.Add(_subtitle);
 
@@ -176,16 +183,64 @@ namespace Reactor.Screens
             _root.Bottom = footer;
         }
 
+        /// <summary>
+        /// Whether somebody has just asked to leave, answered once and then forgotten.
+        /// </summary>
+        /// <remarks>
+        /// Taken rather than read, so a host that forgets to ask does not close the screen three frames
+        /// later on a press nobody remembers making.
+        /// </remarks>
+        public bool TakeClose()
+        {
+            bool wanted = _wantsClose;
+            _wantsClose = false;
+            return wanted;
+        }
+
         /// <summary>Whether a question is open and wants the keyboard.</summary>
         public bool IsAsking
         {
             get { return _asking; }
         }
 
+        /// <summary>
+        /// Why this screen cannot be left as it stands, or empty when it can.
+        /// </summary>
+        /// <remarks>
+        /// One place that answers "may this be walked away from", because the alternative turned out to be
+        /// every control deciding for itself and three of them getting it wrong. Back walked off a refused
+        /// rename and left the box open on the screen it arrived at; the door did the same; only Escape was
+        /// right, and only by accident, because it cancels before it does anything else.
+        /// <para>
+        /// It is about the <b>edit in hand</b> and not about the model. Core never sees an empty required
+        /// name - its own <c>Rename</c> refuses one - so nothing here is ever saved wrong. What is wrong is
+        /// a box somebody is being told to fill in, and walking away from that would throw away their words
+        /// without saying it had. Core's own idea of a thing being incomplete is a separate business and
+        /// already has somewhere to live: the problem line on a sequence.
+        /// </para>
+        /// <para>
+        /// Escape is deliberately not gated. Something has to get you out of a modal state or it is a trap,
+        /// and Escape already means "abandon this edit" rather than "leave the screen" while a box is up -
+        /// so the way out exists, costs nothing, and is the one everybody already reaches for.
+        /// </para>
+        /// </remarks>
+        public string Blocked
+        {
+            get
+            {
+                if (!_renaming || !_editor.Screen.NameRequired)
+                    return "";
+
+                // Says what to do rather than what is wrong. "Needs a name" is a diagnosis and leaves
+                // somebody to work out the cure; there is only one cure and it fits in three words.
+                return string.IsNullOrEmpty(AskBox.Text.Trim()) ? "Give it a name first" : "";
+            }
+        }
+
         /// <summary>The box a question is being answered in. Only meaningful while <see cref="IsAsking" />.</summary>
         public TextBox AskBox
         {
-            get { return _renaming ? _titleBox : _askBox; }
+            get { return _renaming ? _title.Box : _askBox; }
         }
 
         /// <summary>Whether the caret is drawn this frame. The blink belongs to whoever owns a clock.</summary>
@@ -194,7 +249,7 @@ namespace Reactor.Screens
             set
             {
                 _askBox.CaretVisible = value;
-                _titleBox.CaretVisible = value;
+                _title.Box.CaretVisible = value;
 
                 if (_focus != null)
                     _focus.CaretVisible = value;
@@ -215,17 +270,28 @@ namespace Reactor.Screens
             if (!_renaming)
                 _title.Text = screen.Title;
 
-            _subtitle.Text = screen.Subtitle;
+            // Latched rather than read straight off, so the line does not come and go inside one screen.
+            // Cleared in Rebuild, which is where one screen becomes another.
+            if (!string.IsNullOrEmpty(screen.Subtitle))
+                _hadSubtitle = true;
 
-            // Kept in place and merely dimmed out rather than emptied. An element with no text still holds
-            // its line, but it does not hold its width, and a title that slid sideways whenever Back came
-            // and went would be exactly the fidgeting this screen is trying not to do.
-            // Only while it can be pressed. A Back that lit up on the first screen would be offering
-            // something that is not there.
-            _back.Tint = screen.CanGoBack ? Palette.Muted : Palette.None;
-            _back.Highlight = screen.CanGoBack ? Palette.Panel : Palette.None;
-            _title.Highlight = screen.CanRename && !_renaming ? Palette.Panel : Palette.None;
-            _pencil.Color = screen.CanRename && !_renaming ? Palette.Faint : Palette.None;
+            _subtitle.Text = screen.Subtitle;
+            _subtitle.Collapsed = !_hadSubtitle;
+
+            bool renameable = screen.CanRename && !_renaming;
+
+            // Lit on every screen, the root included, where it leaves the editor rather than retreating a
+            // page. Not two controls: a chevron means "leave what I am looking at", and on the front door
+            // what you are looking at is the editor. That is the rule Escape has always followed here and
+            // nobody has ever found Escape confusing.
+            //
+            // It was dark on the root for a while, which left the one screen everybody arrives on as the
+            // one screen with no visible way off it.
+            _back.Tint = Palette.Muted;
+            _back.Highlight = Palette.Panel;
+            _title.Highlight = renameable ? Palette.Panel : Palette.None;
+            _title.Wrong = Blocked.Length > 0;
+            _title.PenColor = screen.CanRename ? Palette.Faint : Palette.None;
 
             // Governs everything on the screen under it, which is what a switch in the header means.
             if (screen.HasSwitch)
@@ -349,7 +415,10 @@ namespace Reactor.Screens
             Element wanted = null;
             string says = null;
 
-            if (!_asking)
+            // A popup owns the screen and nothing behind it should answer the pointer. A rename does not:
+            // it happens in place, on a screen that is otherwise ordinary, and it is the one state where
+            // something on that screen has a reason to say what is wrong with it.
+            if (!_asking || _renaming)
                 wanted = Under(Pointer, out says);
 
             _saying = says;
@@ -702,6 +771,15 @@ namespace Reactor.Screens
                 return true;
             }
 
+            // An unfinishable edit owns the screen too, and more firmly: nothing outside the box it is in
+            // will answer at all. Letting the odd control through was the first shape of this and it does
+            // not work - every one of them either navigates away from the box or ends up committing it,
+            // and a rule with a list of exceptions is a rule nobody can predict.
+            //
+            // Blunt, and the screen is already saying why in the box itself. Escape is the way out.
+            if (Blocked.Length > 0)
+                return Contains(_title.Bounds, point);
+
             // An overlay owns the screen the same way a question does, except that what is inside it is
             // ordinary and can be pressed through the usual list.
             bool overlaid = _overlay != null;
@@ -751,6 +829,20 @@ namespace Reactor.Screens
 
                 Unfocus();
 
+                // Before anything the press might do, and not only before an ordinary command. Pressing a
+                // switch, or the way out, or a control that asks its own question, is pressing away from
+                // the rename just as much as pressing a row is - and three of the branches below return
+                // without ever reaching the line that used to do this, so those three quietly threw the
+                // typing away instead of keeping it.
+                if (_renaming)
+                    CommitAsk();
+
+                if (hit.Closes)
+                {
+                    _wantsClose = true;
+                    return true;
+                }
+
                 if (hit.Toggles)
                 {
                     SetToggle(hit.Command, hit.ToggleTo);
@@ -763,11 +855,6 @@ namespace Reactor.Screens
                     return true;
                 }
 
-                // Pressing away from a rename keeps what was typed. Enter and clicking elsewhere mean
-                // the same thing - the name is what the box says - because there is no confirm to press.
-                if (_renaming)
-                    CommitAsk();
-
                 _editor.Invoke(hit.Command);
 
                 // Taking a choice and moving on in one gesture, where one thing is being chosen. Where
@@ -779,6 +866,25 @@ namespace Reactor.Screens
                 return true;
             }
 
+            // Nothing under the pointer, which is still an act rather than a miss. A caret left blinking
+            // in a search box goes on taking every key typed after it, wherever somebody thought they were
+            // typing; and a heading left standing as a box is one nobody asked to go on editing. Pressing
+            // away from either is how they are put down, and it is the only way to put the first down at
+            // all - there is nothing else to press that means "stop typing".
+            //
+            // A press inside the box being typed in is not away. Nothing collects a hit for it while it is
+            // up, so without this it would fall through here and commit the very edit it was aiming into.
+            //
+            // Everywhere else, pressing away from a rename keeps what was typed. Enter and pressing
+            // elsewhere mean the same thing - the name is whatever the box says - because there is no
+            // confirm button to press and never was.
+            if (_renaming && Contains(_title.Bounds, point))
+                return true;
+
+            if (_renaming)
+                CommitAsk();
+
+            Unfocus();
             return false;
         }
 
@@ -802,8 +908,13 @@ namespace Reactor.Screens
             int command = _askCommand;
 
             // Empty means something when renaming - it hands the heading back to whatever the thing says
-            // about itself - and means nothing at all when starting one, so only the first accepts it.
-            if (!_renaming && string.IsNullOrEmpty(answer))
+            // about itself - and means nothing at all when starting one. It also means nothing where core
+            // says a name is required, which is where there is no worked-out heading to hand it back to.
+            //
+            // Refused by leaving the box open rather than by closing it and doing nothing. Somebody who
+            // has just emptied a name they are required to give is mid-thought, and taking the box away
+            // makes them find the pencil again to finish it.
+            if (string.IsNullOrEmpty(answer) && (!_renaming || _editor.Screen.NameRequired))
                 return;
 
             Close();
@@ -830,15 +941,11 @@ namespace Reactor.Screens
 
             if (hit.Command == _editor.Screen.RenameCommand)
             {
-                // The heading becomes the box, in the heading's own place.
+                // The heading becomes the box, in the heading's own place. What that takes is the plate's
+                // business now; it used to be four lines here and the same four in two other methods.
                 _renaming = true;
-                _titleBox.Text = _editor.Screen.CustomName;
-                _titleBox.SelectAll();
-                _pencil.Color = Palette.None;
-
-                _titleRow.Children.Clear();
-                _titleRow.Children.Add(_titleBox);
-                _titleRow.Children.Add(_pencil);
+                _title.Text = _editor.Screen.CustomName;
+                _title.Begin();
                 return;
             }
 
@@ -853,9 +960,7 @@ namespace Reactor.Screens
             if (_renaming)
             {
                 _renaming = false;
-                _titleRow.Children.Clear();
-                _titleRow.Children.Add(_title);
-                _titleRow.Children.Add(_pencil);
+                _title.End();
             }
 
             _anchor = null;
@@ -869,8 +974,33 @@ namespace Reactor.Screens
 
             EditorScreen screen = _editor.Screen;
 
-            if (screen.CanGoBack)
-                _hits.Add(Hit.OnFixed(_back, screen.BackCommand));
+            // One control, two acts: a command while there is somewhere to retreat to, and the door once
+            // there is not. Which of the two it is gets said in the tip rather than in the picture - a
+            // symbol that changed as somebody walked back up the pages would be a control moving under the
+            // pointer without moving.
+            //
+            // It earns a tip at all because it has no word beside it any more, which is the case the tip
+            // exists for exactly. The wording is this target's own: core publishes none for Back, and
+            // putting one there is Design decision 11.
+            Hit back = screen.CanGoBack
+                ? Hit.OnFixed(_back, screen.BackCommand)
+                : Hit.Leaves(_back);
+
+            back.Tip = screen.CanGoBack ? "Back" : "Close the editor";
+            _hits.Add(back);
+
+            // While the name is one that cannot be given, the heading's note says so instead of saying
+            // what the heading usually says. Not a timer and not a thing of its own: it is the ordinary
+            // note, on the ordinary control, carrying different words for exactly as long as they are
+            // true. Nothing else on the screen has to know that an error can exist.
+            string wrong = Blocked;
+            if (wrong.Length > 0)
+            {
+                Hit says = Hit.Fixed(_title.Bounds, 0);
+                says.Hot = _title;
+                says.Tip = wrong;
+                _hits.Add(says);
+            }
 
             // Renaming hangs off the heading, because the heading is what the name is for.
             if (screen.CanRename && !_renaming)
@@ -932,6 +1062,7 @@ namespace Reactor.Screens
 
             _views.Clear();
             _shown.Clear();
+            _hadSubtitle = false;
 
             for (int i = 0; i < screen.Components.Count; i++)
             {
@@ -1132,6 +1263,16 @@ namespace Reactor.Screens
         public bool Confirms;
 
         /// <summary>
+        /// Whether this asks to leave the editor rather than to do anything inside it.
+        /// </summary>
+        /// <remarks>
+        /// A flag and not a command, because there is no command: core has no idea it is being looked at
+        /// and closing a window is not a thing it could be asked to do. The host reads
+        /// <see cref="EditorView.TakeClose" /> after a press and decides what leaving means.
+        /// </remarks>
+        public bool Closes;
+
+        /// <summary>
         /// What to light up while the pointer is resting here. Null for a hit with nothing to light.
         /// </summary>
         /// <remarks>
@@ -1170,6 +1311,7 @@ namespace Reactor.Screens
             Toggles = false;
             ToggleTo = false;
             Confirms = false;
+            Closes = false;
             Hot = null;
             Tip = null;
         }
@@ -1186,6 +1328,7 @@ namespace Reactor.Screens
             Toggles = false;
             ToggleTo = false;
             Confirms = false;
+            Closes = false;
             Hot = null;
             Tip = null;
         }
@@ -1202,6 +1345,7 @@ namespace Reactor.Screens
             Toggles = false;
             ToggleTo = false;
             Confirms = false;
+            Closes = false;
             Hot = null;
             Tip = null;
         }
@@ -1213,6 +1357,16 @@ namespace Reactor.Screens
         /// Takes the element rather than its rectangle because it needs both and they must agree. Passing
         /// one thing's bounds and another thing's element is a class of mistake this makes unavailable.
         /// </remarks>
+        /// <summary>A control that puts the editor away.</summary>
+        public static Hit Leaves(Element element)
+        {
+            var hit = new Hit(element.Bounds, 0);
+            hit.Scrolled = false;
+            hit.Closes = true;
+            hit.Hot = element;
+            return hit;
+        }
+
         public static Hit On(Element element, int command)
         {
             var hit = new Hit(element.Bounds, command);
