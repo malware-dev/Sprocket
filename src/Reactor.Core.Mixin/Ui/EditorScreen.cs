@@ -18,60 +18,48 @@ namespace Reactor.Ui
         {
             Components = new ObservableList<EditorComponent>();
             Actions = new ObservableList<ChoiceEntry>();
+            Heading = new List<HeadingPart>();
         }
 
-        public string Title { get; set; }
+        /// <summary>
+        /// What this screen is called, in order, one part at a time.
+        /// </summary>
+        /// <remarks>
+        /// Never empty: every screen has at least one part, and most have exactly one. A sequence has two
+        /// because it is two things - what starts it, and what it then does - and naming the second used
+        /// to replace both.
+        /// <para>
+        /// <b>There is deliberately no joined-up string of the whole thing here.</b> One was easy to add
+        /// and every target would have drawn it, because drawing one string is easier than drawing several
+        /// - and the whole reason this is a list is that a heading has to show which part of it is
+        /// somebody's to change. An API that offers the easy wrong thing gets the easy wrong thing.
+        /// </para>
+        /// </remarks>
+        public List<HeadingPart> Heading { get; private set; }
 
         /// <summary>Context the title cannot carry - a count, a live status.</summary>
         public string Subtitle { get; set; }
 
-        /// <summary>
-        /// The name somebody typed for this screen's subject, or empty when the heading is
-        /// worked out instead.
-        /// </summary>
+        /// <summary>Whether any part of the heading is somebody's to change.</summary>
         /// <remarks>
-        /// Named for the game's own term. Space Engineers calls a player-supplied name a block's
-        /// CustomName throughout its API, and a mod that invents a different word for the same
-        /// idea makes its author translate every time they read it.
+        /// Naming belongs on the heading because the heading is what the name is for. It replaced a
+        /// naming box that sat inside the sequence, under a heading that already showed the name - two
+        /// places for one thing, one announcing it and one setting it. Whether it is a pencil beside the
+        /// words, a long press, or typing straight over them is the target's business.
         /// </remarks>
-        /// <remarks>
-        /// Separate from <see cref="Title"/> because they are not the same thing. The title is
-        /// always something to read - a name if there is one, a description of the thing
-        /// otherwise - while this is only ever what a person typed. A target offering to
-        /// change the name needs to know which it is looking at, or it prefills its box with a
-        /// sentence nobody wrote and calls it their name.
-        /// </remarks>
-        public string CustomName { get; set; }
+        public bool CanRename
+        {
+            get
+            {
+                for (var i = 0; i < Heading.Count; i++)
+                {
+                    if (Heading[i].CanRename)
+                        return true;
+                }
 
-        public bool CanRename { get { return RenameCommand != 0; } }
-
-        /// <summary>
-        /// Send a new name here, or empty to go back to the worked-out heading.
-        /// </summary>
-        /// <remarks>
-        /// Zero when this screen's heading is not somebody's to change.
-        ///
-        /// This replaced a naming box that sat inside the sequence, under a heading that
-        /// already showed the name - two places for one thing, one of them announcing it and
-        /// one of them setting it. Naming belongs on the heading because the heading is what
-        /// the name is for. Whether that is a pencil beside it, a long press, or typing
-        /// straight over it is the target's business.
-        /// </remarks>
-        public int RenameCommand { get; set; }
-
-        /// <summary>What to ask when offering the rename.</summary>
-        public string RenamePrompt { get; set; }
-
-        /// <summary>
-        /// Whether an empty name is an answer here, or is not allowed to be given.
-        /// </summary>
-        /// <remarks>
-        /// Nearly everywhere an empty name means "go back to whatever this thing says about itself", which
-        /// is what makes naming optional. Where there is nothing for it to say, clearing the name has to be
-        /// refused instead - and a target has to be told which of the two it is, or it offers a commit that
-        /// core will silently ignore.
-        /// </remarks>
-        public bool NameRequired { get; set; }
+                return false;
+            }
+        }
 
         /// <summary>
         /// Switches this screen's subject on or off. Zero when it has no such switch.

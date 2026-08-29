@@ -266,7 +266,7 @@ namespace Reactor.Screens
             _title.Trims = true;
 
             _narrow.Hint = "Search";
-            _kindLine.Highlight = Palette.ControlHot;
+            _kindLine.Highlight = Palette.PanelHot;
 
             _empty.Padding = new Thickness(Space.Line, Space.Item, 0f, 0f);
 
@@ -456,10 +456,8 @@ namespace Reactor.Screens
                 row.Line.Spacing = Space.Region * 1.6f;
                 row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
 
-                // Down, not up. A row you can press is a control, and a control deepens under the
-                // pointer in this game - which also means the words on the one row somebody is actually
-                // reading get brighter against their ground rather than dimmer.
-                row.Line.Highlight = Palette.ControlHot;
+                // The list itself is already the highlight tone, so its rows have to go a step past it.
+                row.Line.Highlight = Palette.Line;
                 row.Line.Fill = row.Label;
                 row.Line.Right = row.Count;
 
@@ -496,7 +494,7 @@ namespace Reactor.Screens
                 option.Row.Children.Add(option.Mark);
                 option.Row.Children.Add(option.Text);
                 option.Row.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
-                option.Row.Highlight = Palette.ControlHot;
+                option.Row.Highlight = Palette.PanelHot;
 
                 _optionRows.Add(option);
                 _options.Children.Add(option.Row);
@@ -635,7 +633,7 @@ namespace Reactor.Screens
             row.Line = new Bar();
             row.Line.Spacing = Space.Item;
             row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f);
-            row.Line.Highlight = Palette.ControlHot;
+            row.Line.Highlight = Palette.PanelHot;
             row.Line.Left = left;
             row.Line.Fill = text;
             row.Line.Right = right;

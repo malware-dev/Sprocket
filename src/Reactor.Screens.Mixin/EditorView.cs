@@ -36,7 +36,7 @@ namespace Reactor.Screens
         // word is the hover tip, which is where a control that cannot speak for itself is supposed to say
         // what it is - so nothing is actually lost except the space.
         readonly Glyph _back = Widgets.Symbol(Symbols.Left, Palette.Muted);
-        readonly Nameplate _title = Widgets.Nameplate(Type.Title);
+        readonly HeadingRow _title = new HeadingRow();
 
         readonly Switch _switch = new Switch(Type.Small);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Type.Small);
@@ -83,7 +83,8 @@ namespace Reactor.Screens
         int _actionRevision = -1;
         int _askCommand;
         bool _asking;
-        bool _renaming;
+        /// <summary>Which part of the heading is being typed into, or -1 when none is.</summary>
+        int _renaming = -1;
         Element _anchor;
         RectangleF _popupBounds;
 
@@ -104,13 +105,13 @@ namespace Reactor.Screens
             // The heading, its pencil and the box that replaces it are one control, so the plate is what
             // lights up and what gets pressed. A pencil somebody could see and not press is worse than no
             // pencil: it names the act and then refuses it.
-            _title.Padding = new Thickness(Space.Row, Space.ChipY);
+
 
             // Inside a stack that takes the slack, because Fill stretches whatever it is given and a
             // heading lit across the whole header would be a highlight the size of the screen. A
             // horizontal stack hands each child its own width, which is exactly the hug wanted here.
             var titleLane = Widgets.RowOf(0f);
-            titleLane.Children.Add(_title);
+            titleLane.Children.Add(_title.Root);
 
             // No slot holding it to a width any more. A switch showing both of its positions is already
             // the width of the longer word twice over whichever way it is set, so the title cannot be
@@ -228,7 +229,11 @@ namespace Reactor.Screens
         {
             get
             {
-                if (!_renaming || !_editor.Screen.NameRequired)
+                if (_renaming < 0)
+                    return "";
+
+                List<HeadingPart> parts = _editor.Screen.Heading;
+                if (_renaming >= parts.Count || !parts[_renaming].NameRequired)
                     return "";
 
                 // Says what to do rather than what is wrong. "Needs a name" is a diagnosis and leaves
@@ -240,7 +245,7 @@ namespace Reactor.Screens
         /// <summary>The box a question is being answered in. Only meaningful while <see cref="IsAsking" />.</summary>
         public TextBox AskBox
         {
-            get { return _renaming ? _title.Box : _askBox; }
+            get { return _renaming >= 0 ? _title[_renaming].Box : _askBox; }
         }
 
         /// <summary>Whether the caret is drawn this frame. The blink belongs to whoever owns a clock.</summary>
@@ -249,7 +254,9 @@ namespace Reactor.Screens
             set
             {
                 _askBox.CaretVisible = value;
-                _title.Box.CaretVisible = value;
+
+                for (int i = 0; i < _title.Count; i++)
+                    _title[i].Box.CaretVisible = value;
 
                 if (_focus != null)
                     _focus.CaretVisible = value;
@@ -265,10 +272,7 @@ namespace Reactor.Screens
         {
             EditorScreen screen = _editor.Screen;
 
-            // Whatever is being typed is the truth while it is being typed. Writing the screen's own name
-            // back into the box every tick would fight the caret for it.
-            if (!_renaming)
-                _title.Text = screen.Title;
+            _title.Update(screen.Heading, _renaming);
 
             // Latched rather than read straight off, so the line does not come and go inside one screen.
             // Cleared in Rebuild, which is where one screen becomes another.
@@ -278,7 +282,7 @@ namespace Reactor.Screens
             _subtitle.Text = screen.Subtitle;
             _subtitle.Collapsed = !_hadSubtitle;
 
-            bool renameable = screen.CanRename && !_renaming;
+
 
             // Lit on every screen, the root included, where it leaves the editor rather than retreating a
             // page. Not two controls: a chevron means "leave what I am looking at", and on the front door
@@ -289,9 +293,9 @@ namespace Reactor.Screens
             // one screen with no visible way off it.
             _back.Tint = Palette.Muted;
             _back.Highlight = Palette.Panel;
-            _title.Highlight = renameable ? Palette.Panel : Palette.None;
-            _title.Wrong = Blocked.Length > 0;
-            _title.PenColor = screen.CanRename ? Palette.Faint : Palette.None;
+            // Which part wears the pencil is the row's business now, because it is a per-part answer.
+            if (_renaming >= 0)
+                _title[_renaming].Wrong = Blocked.Length > 0;
 
             // Governs everything on the screen under it, which is what a switch in the header means.
             if (screen.HasSwitch)
@@ -307,7 +311,7 @@ namespace Reactor.Screens
             _primary.Highlight = screen.HasPrimary ? Palette.Ink : Palette.None;
 
             // A screen that cannot be renamed while the box is open takes the box away with it.
-            if (_renaming && !screen.CanRename)
+            if (_renaming >= 0 && !screen.CanRename)
                 CancelAsk();
 
             if (!ShowingSameComponents(screen))
@@ -418,7 +422,7 @@ namespace Reactor.Screens
             // A popup owns the screen and nothing behind it should answer the pointer. A rename does not:
             // it happens in place, on a screen that is otherwise ordinary, and it is the one state where
             // something on that screen has a reason to say what is wrong with it.
-            if (!_asking || _renaming)
+            if (!_asking || _renaming >= 0)
                 wanted = Under(Pointer, out says);
 
             _saying = says;
@@ -616,7 +620,7 @@ namespace Reactor.Screens
         /// </summary>
         void DrawPopup(IGraphics g, RectangleF bounds)
         {
-            if (!_asking || _renaming || _anchor == null)
+            if (!_asking || _renaming >= 0 || _anchor == null)
             {
                 _popupBounds = new RectangleF();
                 return;
@@ -757,7 +761,7 @@ namespace Reactor.Screens
             // While a question is open it owns the screen. Pressing inside it is the only thing that can
             // reach anything, and pressing anywhere else puts it away and goes no further - the press that
             // dismisses is not also a press on whatever happened to be underneath.
-            if (_asking && !_renaming)
+            if (_asking && _renaming < 0)
             {
                 if (!Contains(_popupBounds, point))
                 {
@@ -778,7 +782,7 @@ namespace Reactor.Screens
             //
             // Blunt, and the screen is already saying why in the box itself. Escape is the way out.
             if (Blocked.Length > 0)
-                return Contains(_title.Bounds, point);
+                return Contains(_title[_renaming].Bounds, point);
 
             // An overlay owns the screen the same way a question does, except that what is inside it is
             // ordinary and can be pressed through the usual list.
@@ -834,7 +838,7 @@ namespace Reactor.Screens
                 // the rename just as much as pressing a row is - and three of the branches below return
                 // without ever reaching the line that used to do this, so those three quietly threw the
                 // typing away instead of keeping it.
-                if (_renaming)
+                if (_renaming >= 0)
                     CommitAsk();
 
                 if (hit.Closes)
@@ -878,10 +882,10 @@ namespace Reactor.Screens
             // Everywhere else, pressing away from a rename keeps what was typed. Enter and pressing
             // elsewhere mean the same thing - the name is whatever the box says - because there is no
             // confirm button to press and never was.
-            if (_renaming && Contains(_title.Bounds, point))
+            if (_renaming >= 0 && Contains(_title[_renaming].Bounds, point))
                 return true;
 
-            if (_renaming)
+            if (_renaming >= 0)
                 CommitAsk();
 
             Unfocus();
@@ -914,7 +918,7 @@ namespace Reactor.Screens
             // Refused by leaving the box open rather than by closing it and doing nothing. Somebody who
             // has just emptied a name they are required to give is mid-thought, and taking the box away
             // makes them find the pencil again to finish it.
-            if (string.IsNullOrEmpty(answer) && (!_renaming || _editor.Screen.NameRequired))
+            if (string.IsNullOrEmpty(answer) && (_renaming < 0 || Blocked.Length > 0))
                 return;
 
             Close();
@@ -939,13 +943,20 @@ namespace Reactor.Screens
             _askCommand = hit.Command;
             _asking = true;
 
-            if (hit.Command == _editor.Screen.RenameCommand)
+            // Which part of the heading this was, if it was one at all. Matched on the command rather
+            // than carried on the hit, because the command is the one thing that already identifies a
+            // part and a second way of saying it is a second way of being wrong.
+            List<HeadingPart> parts = _editor.Screen.Heading;
+            for (int i = 0; i < parts.Count && i < _title.Count; i++)
             {
-                // The heading becomes the box, in the heading's own place. What that takes is the plate's
+                if (parts[i].RenameCommand != hit.Command || hit.Command == 0)
+                    continue;
+
+                // The words become the box, in the words' own place. What that takes is the plate's
                 // business now; it used to be four lines here and the same four in two other methods.
-                _renaming = true;
-                _title.Text = _editor.Screen.CustomName;
-                _title.Begin();
+                _renaming = i;
+                _title[i].Text = parts[i].Name;
+                _title[i].Begin();
                 return;
             }
 
@@ -957,10 +968,11 @@ namespace Reactor.Screens
 
         void Close()
         {
-            if (_renaming)
+            if (_renaming >= 0)
             {
-                _renaming = false;
-                _title.End();
+                _title[_renaming].End();
+                _title[_renaming].Wrong = false;
+                _renaming = -1;
             }
 
             _anchor = null;
@@ -993,21 +1005,29 @@ namespace Reactor.Screens
             // what the heading usually says. Not a timer and not a thing of its own: it is the ordinary
             // note, on the ordinary control, carrying different words for exactly as long as they are
             // true. Nothing else on the screen has to know that an error can exist.
+            // Renaming hangs off the heading, because the heading is what the name is for - and off the
+            // part of it that the name belongs to, which is the whole reason a heading is several things.
+            for (int i = 0; i < screen.Heading.Count && i < _title.Count; i++)
+            {
+                HeadingPart part = screen.Heading[i];
+                if (!part.CanRename || i == _renaming)
+                    continue;
+
+                Hit rename = Hit.Fixed(_title[i].Bounds, part.RenameCommand, part.Prompt);
+                rename.Hot = _title[i];
+                _hits.Add(rename);
+            }
+
+            // While the name in hand is one that cannot be given, that part's note says so instead of
+            // saying what it usually says. Not a timer and not a thing of its own: the ordinary note, on
+            // the ordinary control, carrying different words for exactly as long as they are true.
             string wrong = Blocked;
             if (wrong.Length > 0)
             {
-                Hit says = Hit.Fixed(_title.Bounds, 0);
-                says.Hot = _title;
+                Hit says = Hit.Fixed(_title[_renaming].Bounds, 0);
+                says.Hot = _title[_renaming];
                 says.Tip = wrong;
                 _hits.Add(says);
-            }
-
-            // Renaming hangs off the heading, because the heading is what the name is for.
-            if (screen.CanRename && !_renaming)
-            {
-                Hit rename = Hit.Fixed(_title.Bounds, screen.RenameCommand, screen.RenamePrompt);
-                rename.Hot = _title;
-                _hits.Add(rename);
             }
 
             if (screen.HasSwitch)
@@ -1017,7 +1037,7 @@ namespace Reactor.Screens
                 toggle.Hot = _switch;
                 // A system's, always - core says so where it declares the command, and a sequence's
                 // switch lives on the sentence rather than up here.
-                toggle.Tip = StatusRow.Switching(screen.Title, true, screen.SwitchIsOn);
+                toggle.Tip = StatusRow.Switching(screen.Heading[0].Text, true, screen.SwitchIsOn);
 
                 _hits.Add(toggle);
             }

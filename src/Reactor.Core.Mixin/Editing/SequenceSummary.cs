@@ -46,28 +46,65 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// What to call this sequence: its name if it has one, otherwise the whole
-        /// thing read as a sentence.
+        /// What to call this sequence on one line: what starts it, then what it does or is called.
         /// </summary>
         /// <remarks>
-        /// The name wins everywhere it exists, which is the entire point of allowing
-        /// one - a list of twenty sentences is unreadable, a list of twenty names is
-        /// not. Everything unnamed still reads perfectly well on its own.
+        /// A name replaces what a sequence <b>does</b> and never what starts it, here exactly as it does
+        /// on the sequence's own heading. The name used to win the whole line, so naming something made
+        /// its row in a list stop saying when it happens - and a list of twenty sequences that all say
+        /// only a name is a list where the one useful thing to compare has been taken away.
+        /// <para>
+        /// Still a joined string, unlike the heading, and that is not an oversight. A row is a label
+        /// rather than a control: there is nothing on it to press, no part of it is somebody's to edit,
+        /// and one line has to stand for the whole sequence. The heading is a list precisely because the
+        /// opposite is true of it.
+        /// </para>
         /// </remarks>
         public static string Describe(IWorld world, Sequence sequence)
         {
-            if (sequence.HasName)
-                return sequence.Name;
+            return DescribeTrigger(world, sequence) + " » " + DescribeDoing(world, sequence);
+        }
 
-            var trigger = SequenceText.DescribeTrigger(world, sequence.Trigger);
+        /// <summary>
+        /// The half a name replaces: what somebody called it, or what it actually does.
+        /// </summary>
+        /// <remarks>
+        /// One rule in one place, because the heading and the list row have to agree about it. They did
+        /// not for a while and the disagreement was invisible until somebody named a sequence and looked
+        /// at both.
+        /// </remarks>
+        public static string DescribeDoing(IWorld world, Sequence sequence)
+        {
+            return sequence.HasName ? sequence.Name : DescribeSteps(world, sequence);
+        }
+
+        /// <summary>
+        /// What starts this sequence, on its own.
+        /// </summary>
+        /// <remarks>
+        /// Split out from <see cref="Describe" /> because a heading is two things and the joined-up
+        /// version only serves a list, where one line has to stand for the whole sequence. On the
+        /// sequence's own screen the two halves are separate: this one always says itself, and the
+        /// other one is the half a name replaces.
+        /// </remarks>
+        public static string DescribeTrigger(IWorld world, Sequence sequence)
+        {
+            return SequenceText.DescribeTrigger(world, sequence.Trigger);
+        }
+
+        /// <summary>
+        /// What this sequence does, in a few words, ignoring any name it was given.
+        /// </summary>
+        public static string DescribeSteps(IWorld world, Sequence sequence)
+        {
             if (sequence.Steps.Count == 0)
-                return trigger + " » nothing yet";
+                return "nothing yet";
 
             var first = SequenceText.DescribeStep(world, sequence.Steps[0]);
             if (sequence.Steps.Count == 1)
-                return trigger + " » " + first;
+                return first;
 
-            return trigger + " » " + first + " (+" + (sequence.Steps.Count - 1) + " more)";
+            return first + " (+" + (sequence.Steps.Count - 1) + " more)";
         }
 
         /// <summary>
@@ -115,7 +152,7 @@ namespace Reactor.Editing
         public static string Problem(IWorld world, Sequence sequence, SequenceRunner state)
         {
             if (state != null && state.HasMissingSources)
-                return "This listens to something that isn't on the ship any more.";
+                return "This listens to something that isn't here any more.";
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
@@ -124,7 +161,7 @@ namespace Reactor.Editing
                 for (var t = 0; t < step.Targets.Count; t++)
                 {
                     if (world.FindEntity(step.Targets[t]) == null)
-                        return "This affects something that isn't on the ship any more.";
+                        return "This affects something that isn't here any more.";
                 }
 
                 var gate = step.Gate as OnceGate;
@@ -141,7 +178,7 @@ namespace Reactor.Editing
                 for (var t = 0; t < condition.Entities.Count; t++)
                 {
                     if (world.FindEntity(condition.Entities[t]) == null)
-                        return "This waits on something that isn't on the ship any more.";
+                        return "This waits on something that isn't here any more.";
                 }
             }
 

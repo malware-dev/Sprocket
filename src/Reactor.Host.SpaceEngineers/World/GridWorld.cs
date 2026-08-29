@@ -73,6 +73,39 @@ namespace Reactor.Host.SpaceEngineers
             get { return Blocks; }
         }
 
+        /// <summary>
+        /// The construct's name, which in this game is the block's own grid's.
+        /// </summary>
+        /// <remarks>
+        /// The grid the Reactor sits on rather than any of the ones welded to it. A construct is several
+        /// grids joined by rotors and pistons and each of them has a name of its own, so there is no one
+        /// answer - but there is an obvious one, and it is the thing somebody opened the terminal on.
+        /// <para>
+        /// Never empty: Space Engineers names every grid, and a name the game made up reads no differently
+        /// from one nobody has got round to changing. There is no way to tell those apart and no reason to.
+        /// </para>
+        /// </remarks>
+        public string Name
+        {
+            get
+            {
+                IMyCubeGrid grid = _anchor == null ? null : _anchor.CubeGrid;
+                return grid == null ? "" : grid.CustomName;
+            }
+        }
+
+        public bool CanRename
+        {
+            get { return _anchor != null && _anchor.CubeGrid != null; }
+        }
+
+        public void Rename(string name)
+        {
+            IMyCubeGrid grid = _anchor == null ? null : _anchor.CubeGrid;
+            if (grid != null)
+                grid.CustomName = name;
+        }
+
         public IEntity FindEntity(long entityId)
         {
             if (_stale)

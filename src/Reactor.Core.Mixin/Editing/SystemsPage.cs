@@ -30,7 +30,51 @@ namespace Reactor.Editing
         {
         }
 
-        public override string Title { get { return "Your ship"; } }
+        /// <summary>
+        /// What the construct is called, with what this screen is about led in front of it.
+        /// </summary>
+        /// <remarks>
+        /// It said "Your ship" for a long time, which made two claims and could be wrong about both: not
+        /// every construct is a ship, and on a server it is the faction's rather than yours. Worse, it
+        /// said the same thing on every Reactor in the game, so the one screen somebody arrives on never
+        /// told them where they had arrived.
+        /// <para>
+        /// The lead is here because this is <b>not</b> an overview of the machine. It is the automation on
+        /// it, and a heading that was only a name would be promising the rest.
+        /// </para>
+        /// </remarks>
+        public override string Title { get { return Editor.World.Name; } }
+
+        public override string CustomName { get { return Editor.World.Name; } }
+
+        /// <summary>
+        /// Reaching outside the automation to rename the machine itself, which is deliberate.
+        /// </summary>
+        /// <remarks>
+        /// It is the one thing on this screen that is not automation, and it is here because the name is
+        /// already here and being read. Somebody looking at a construct called "Large Grid 8321" and
+        /// wanting it called something else should not have to leave, find the terminal, and come back.
+        /// </remarks>
+        public override bool CanRename { get { return Editor.World.CanRename; } }
+
+        public override string RenamePrompt { get { return "What is this called?"; } }
+
+        public override bool NameRequired { get { return true; } }
+
+        public override void Rename(string name)
+        {
+            var wanted = (name ?? "").Trim();
+            if (wanted.Length == 0)
+                return;
+
+            Editor.World.Rename(wanted);
+        }
+
+        public override void Heading(List<HeadingPart> parts)
+        {
+            base.Heading(parts);
+            parts[0].Lead = "Automation for";
+        }
 
         public override void Build(List<EditorComponent> components)
         {
@@ -43,7 +87,7 @@ namespace Reactor.Editing
 
             _list = new StatusListComponent();
             _list.Fills = true;
-            _list.EmptyText = "No systems on this ship yet.";
+            _list.EmptyText = "Nothing automated here yet.";
 
             _rowOwners.Clear();
             _rowInstances.Clear();

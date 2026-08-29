@@ -75,7 +75,7 @@ static class Driving
             return;
         }
 
-        throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title}'.");
+        throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title()}'.");
     }
 
     public static void PressAdd(this ReactorEditor editor, string text)
@@ -105,7 +105,40 @@ static class Driving
         editor.Invoke(editor.Screen.Actions.First(a => a.Text == text).Command);
 
     public static void Name(this ReactorEditor editor, string name) =>
-        editor.SetText(editor.Screen.RenameCommand, name);
+        editor.SetText(Nameable(editor.Screen)?.RenameCommand ?? 0, name);
+
+    /// <summary>The whole heading as one string. A test convenience; core publishes no such thing.</summary>
+    public static string Title(this EditorScreen screen)
+    {
+        var joined = "";
+        for (var i = 0; i < screen.Heading.Count; i++)
+        {
+            var part = screen.Heading[i];
+
+            if (joined.Length > 0)
+                joined += part.Lead.Length > 0 ? " " : " » ";
+
+            if (part.Lead.Length > 0)
+                joined += part.Lead + " ";
+
+            joined += part.Text;
+        }
+
+        return joined;
+    }
+
+    public static HeadingPart? Nameable(this EditorScreen screen)
+    {
+        for (var i = 0; i < screen.Heading.Count; i++)
+        {
+            if (screen.Heading[i].CanRename)
+                return screen.Heading[i];
+        }
+
+        return null;
+    }
+
+    public static string CustomName(this EditorScreen screen) => screen.Nameable()?.Name ?? "";
 
     public static void Back(this ReactorEditor editor) => editor.Invoke(editor.Screen.BackCommand);
 
@@ -113,7 +146,7 @@ static class Driving
     public static void PressPrimary(this ReactorEditor editor)
     {
         if (!editor.Screen.HasPrimary)
-            throw new InvalidOperationException($"'{editor.Screen.Title}' has nothing to move on to.");
+            throw new InvalidOperationException($"'{editor.Screen.Title()}' has nothing to move on to.");
         editor.Invoke(editor.Screen.PrimaryCommand);
     }
 }

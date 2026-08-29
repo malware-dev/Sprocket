@@ -148,7 +148,7 @@ sealed class EditorView : UserControl
         if (!ShowingSameComponents(screen))
             Rebuild();
 
-        _title.Text = screen.Title;
+        _title.Text = Heading(screen);
         _subtitle.Text = screen.Subtitle;
         _back.IsVisible = screen.CanGoBack;
 
@@ -173,6 +173,39 @@ sealed class EditorView : UserControl
             renderer.Update();
     }
 
+    /// <summary>
+    /// The whole heading as one line, and the first part of it that can be renamed.
+    /// </summary>
+    /// <remarks>
+    /// <b>A stopgap, and a knowing one.</b> Core publishes a heading in parts because each part answers
+    /// for itself whether it can be renamed - a sequence's trigger cannot and what it then does can - and
+    /// a host that draws them properly gives each part its own control. This one does not yet: it flattens
+    /// them into a line and offers the rename of whichever part comes first.
+    /// <para>
+    /// Which is exactly why core does not offer a joined-up string of its own. Flattening is a decision a
+    /// target makes, and it should have to write it down where somebody can see it costing something.
+    /// </para>
+    /// </remarks>
+    static string Heading(EditorScreen screen)
+    {
+        var joined = "";
+        for (var i = 0; i < screen.Heading.Count; i++)
+            joined += i > 0 ? " » " + screen.Heading[i].Text : screen.Heading[i].Text;
+
+        return joined;
+    }
+
+    static HeadingPart? Nameable(EditorScreen screen)
+    {
+        for (var i = 0; i < screen.Heading.Count; i++)
+        {
+            if (screen.Heading[i].CanRename)
+                return screen.Heading[i];
+        }
+
+        return null;
+    }
+
     /// <summary>Turns the heading into the box, holding its place exactly.</summary>
     void StartRenaming()
     {
@@ -180,7 +213,7 @@ sealed class EditorView : UserControl
             return;
 
         _renaming = true;
-        _renameBox.Text = _editor.Screen.CustomName ?? "";
+        _renameBox.Text = Nameable(_editor.Screen)?.Name ?? "";
         _heading.IsVisible = false;
         _renameBox.IsVisible = true;
         _renameBox.SelectAll();
@@ -208,7 +241,7 @@ sealed class EditorView : UserControl
 
         // Read at the moment of use. Command ids are re-issued on every rebuild, so one
         // captured when the box opened is already stale by the time typing has finished.
-        var command = _editor.Screen.RenameCommand;
+        var command = Nameable(_editor.Screen)?.RenameCommand ?? 0;
         if (keep && command != 0)
             _editor.SetText(command, text);
     }

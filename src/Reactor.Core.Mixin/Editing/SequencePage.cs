@@ -63,6 +63,47 @@ namespace Reactor.Editing
             SetName(name);
         }
 
+        /// <summary>
+        /// Two parts: what starts it, and what it then does. Only the second takes a name.
+        /// </summary>
+        /// <remarks>
+        /// This is the whole reason a heading is a list. It used to be one line and a name replaced all of
+        /// it, so wanting a better word for what a sequence <b>does</b> cost you the trigger that starts
+        /// it - and the only way to keep the trigger was to type it into the name by hand, exactly as it
+        /// already read, and then keep it in step by hand forever after.
+        /// <para>
+        /// The trigger half is not nameable, and that is a decision rather than an omission. "When the
+        /// airlock button is pressed" is already the best possible name for itself; replacing it with
+        /// "Entry request" trades legibility for reuse, and reuse only pays once a trigger is a thing you
+        /// can point at from somewhere else. The shape here carries a name for it the day that arrives.
+        /// </para>
+        /// </remarks>
+        public override void Heading(List<HeadingPart> parts)
+        {
+            parts.Add(new HeadingPart(""));
+
+            var does = new HeadingPart("");
+            does.Prompt = RenamePrompt;
+            does.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename);
+
+            parts.Add(does);
+            RefreshHeading(parts);
+        }
+
+        public override void RefreshHeading(List<HeadingPart> parts)
+        {
+            if (parts.Count < 2)
+                return;
+
+            parts[0].Text = SequenceSummary.DescribeTrigger(Editor.World, _sequence);
+
+            // The name where there is one, and what it actually does where there is not - so an unnamed
+            // sequence still reads as a whole sentence and naming one is a choice rather than a chore.
+            // The same call a list row makes, so the two cannot come to disagree.
+            parts[1].Name = CustomName;
+            parts[1].Text = SequenceSummary.DescribeDoing(Editor.World, _sequence);
+        }
+
         public override void Build(List<EditorComponent> components)
         {
             _sentence = new SequenceComponent(_sequence.Id, BuildTrigger());

@@ -75,10 +75,17 @@ namespace Reactor.Screens
         /// pointer is on; this game darkens a control and lightens a panel, and the two together are what
         /// make its chrome read as pressed metal rather than as a web page.
         /// <para>
-        /// <b>A row you can press is a control.</b> Reactor's lists lifted for a while, which was the
-        /// wrong half of the rule and had a second cost: a lift closes the gap between a panel and the
-        /// text on it, so the one row somebody had the pointer on was the one row hardest to read. The
-        /// smallest text went under 3:1 on hover. Deepening moves every tier the other way.
+        /// <b>Rows are not controls for this purpose, whatever they behave like.</b> They deepened for a
+        /// while, on the reasoning that a row you can press is a control - which reads well and is not what
+        /// the game does. <c>MyGuiConstants.HIGHLIGHT_BACKGROUND_COLOR</c> is (60, 76, 82), which is
+        /// <see cref="PanelHot" /> exactly, and <c>CONTROL_MOUSE_OVER_BACKGROUND_COLOR_MULTIPLIER</c> is
+        /// 1.2 - the game brightens what the pointer is on, by a named colour or by a fifth. Deepening is
+        /// what its button textures do and nothing else.
+        /// </para>
+        /// <para>
+        /// It cost something to come back: the smallest text reads 3.3:1 on a lifted row against 6.9 on a
+        /// deepened one. That is the price of looking like the game rather than being easiest to read on,
+        /// and it is the game's own price - its lists have the same problem and it has not bothered anybody.
         /// </para>
         /// </remarks>
         public static readonly Color ControlHot = new Color(12, 18, 22);
@@ -352,11 +359,12 @@ namespace Reactor.Screens
         /// sequence reads as its own sentence and is no worse off. What is not ordinary is a heading that
         /// shrinks to a point the moment the last character comes out of it.
         /// <para>
-        /// Half what it was, because it used to have to hold a hint and now holds only a caret and its
-        /// well. Sized to say "a field, and an empty one" and nothing more.
+        /// Zero, meaning a plate falls back to its own height - a square, and no more. It held a hint once
+        /// and was sized for one; now it holds a caret and a well, and every unit past a square is room
+        /// kept for words that are not there, in the gap between a name and its pencil.
         /// </para>
         /// </remarks>
-        public const float Name = 48f;
+        public const float Name = 0f;
 
         /// <summary>
         /// A scrollbar, across. The game reserves twelve units for its own and so do we.
@@ -829,7 +837,7 @@ namespace Reactor.Screens
         {
             Label row = Label(text, color, Type.Body);
             row.Background = Palette.Panel;
-            row.Highlight = Palette.ControlHot;
+            row.Highlight = Palette.PanelHot;
             row.Padding = new Thickness(Space.PadX, Space.PadY);
             return row;
         }
@@ -921,11 +929,11 @@ namespace Reactor.Screens
 
             plate.Font = MyFontEnum.White;
             plate.Scale = scale;
-            // Smaller than it looks, because a glyph is measured by its cell and the pencil fills only
-            // half of one - so about ten units of the space between the two are already inside the
-            // symbol, and whatever is set here is added on top of that rather than being the whole of it.
-            // At a control's usual spacing the pencil read as a separate thing parked beside the name.
-            plate.Gap = Space.Line;
+            // None at all, because the pencil brings its own. A symbol advances a full square cell and
+            // this one fills about half of it, so at heading size there are already ten units of empty
+            // cell between the name and the first ink of the pencil - and ten more after it. Anything
+            // added here is on top of that.
+            plate.Gap = 0f;
             plate.LeastWidth = Sizes.Name;
 
             plate.Color = Palette.Ink;

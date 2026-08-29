@@ -155,23 +155,23 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.Back();
 
-        Assert.True(editor.Screen.NameRequired);
-        Assert.Equal("Airlock", editor.Screen.CustomName);
+        Assert.True(editor.Screen.NameRequired());
+        Assert.Equal("Airlock", editor.Screen.CustomName());
 
         // Ticked after each one because that is when the screen is brought up to date, the same
         // as it is in a target. Reading CustomName without it reads the answer to the question
         // before last.
         editor.Name("");
         ship.Tick();
-        Assert.Equal("Airlock", editor.Screen.CustomName);
+        Assert.Equal("Airlock", editor.Screen.CustomName());
 
         editor.Name("   ");
         ship.Tick();
-        Assert.Equal("Airlock", editor.Screen.CustomName);
+        Assert.Equal("Airlock", editor.Screen.CustomName());
 
         editor.Name("Outer lock");
         ship.Tick();
-        Assert.Equal("Outer lock", editor.Screen.CustomName);
+        Assert.Equal("Outer lock", editor.Screen.CustomName());
     }
 
     /// <summary>
@@ -419,8 +419,8 @@ public class EditorTests
 
         // On its own screen: renameable, the same way a sequence is.
         Assert.True(editor.Screen.CanRename);
-        Assert.Equal("Airlock", editor.Screen.CustomName);
-        editor.SetText(editor.Screen.RenameCommand, "Front Airlock");
+        Assert.Equal("Airlock", editor.Screen.CustomName());
+        editor.SetText(editor.Screen.RenameCommand(), "Front Airlock");
         ship.Tick();
         Assert.Equal("Front Airlock", system.Name);
 
@@ -500,7 +500,7 @@ public class EditorTests
 
         // Nothing has gone yet, and the question names what it is about.
         Assert.Single(ship.Automation.Sequences);
-        Assert.Equal("Delete this sequence?", ship.Editor.Screen.Title);
+        Assert.Equal("Delete this sequence?", ship.Editor.Screen.Title());
         Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Subtitle);
 
         // The safe answer comes first, so a reflex press lands on it.
@@ -510,7 +510,7 @@ public class EditorTests
         ship.Editor.PressChoice("Keep it");
         ship.Tick();
         Assert.Single(ship.Automation.Sequences);
-        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title);
+        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title());
 
         ship.Editor.Invoke(ship.Editor.Sentence().DeleteCommand);
         ship.Tick();
@@ -519,7 +519,7 @@ public class EditorTests
 
         // Gone, and standing on the system rather than on a question about nothing.
         Assert.Empty(ship.Automation.Sequences);
-        Assert.Equal("Airlock", ship.Editor.Screen.Title);
+        Assert.Equal("Airlock", ship.Editor.Screen.Title());
     }
 
     /// <summary>
@@ -529,6 +529,11 @@ public class EditorTests
     /// There used to be a naming box inside the sequence, underneath a heading that already
     /// showed the name: two places for one thing, one announcing it and one setting it. The
     /// name belongs on the heading because the heading is what a name is for.
+    ///
+    /// And on the half of the heading the name is for. A sequence's heading is two parts - what
+    /// starts it, and what it then does - and only the second takes a name. It used to be one
+    /// part, so naming it swallowed the trigger as well, and the only way to keep the trigger
+    /// on screen was to type it into the name by hand and keep it in step by hand forever.
     /// </remarks>
     [Fact]
     public void TheHeadingIsWhereNamingHappens()
@@ -537,22 +542,32 @@ public class EditorTests
         StartOnTheButton(ship.Editor);
         ship.Tick();
 
-        // Unnamed: the heading says what the thing does, and there is no name behind it for a
+        var heading = ship.Editor.Screen.Heading;
+
+        // Unnamed: both halves say what they are, and there is no name behind either for a
         // target to prefill a box with.
-        Assert.True(ship.Editor.Screen.CanRename);
-        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title);
-        Assert.Equal("", ship.Editor.Screen.CustomName);
+        Assert.Equal(2, heading.Count);
+        Assert.Equal("When Airlock Button is pressed", heading[0].Text);
+        Assert.Equal("", heading[1].Name);
+
+        // The trigger is not somebody's to name. It is already the best possible name for itself.
+        Assert.False(heading[0].CanRename);
+        Assert.True(heading[1].CanRename);
 
         ship.Editor.Name("Let me out");
         ship.Tick();
-        Assert.Equal("Let me out", ship.Editor.Screen.Title);
-        Assert.Equal("Let me out", ship.Editor.Screen.CustomName);
+
+        // The name takes the half it belongs to. The trigger is still there, and still generated.
+        Assert.Equal("When Airlock Button is pressed", heading[0].Text);
+        Assert.Equal("Let me out", heading[1].Text);
+        Assert.Equal("Let me out", heading[1].Name);
 
         // Clearing is as ordinary an act as naming, and the sentence comes back.
         ship.Editor.Name("");
         ship.Tick();
-        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title);
-        Assert.Equal("", ship.Editor.Screen.CustomName);
+        Assert.Equal("When Airlock Button is pressed", heading[0].Text);
+        Assert.Equal("", heading[1].Name);
+        Assert.NotEqual("", heading[1].Text);
     }
 
     /// <summary>
@@ -572,11 +587,11 @@ public class EditorTests
 
         ship.Editor.Back();
 
-        Assert.Equal("Airlock", ship.Editor.Screen.Title);
+        Assert.Equal("Airlock", ship.Editor.Screen.Title());
         Assert.True(ship.Editor.Screen.CanGoBack);
 
         ship.Editor.Back();
-        Assert.Equal("Your ship", ship.Editor.Screen.Title);
+        Assert.Equal("Automation for Hangar Bay Alpha", ship.Editor.Screen.Title());
     }
 
     /// <summary>
@@ -635,7 +650,7 @@ public class EditorTests
 
         // The same screen an established ship gets, with nothing in the list yet - not a
         // different screen that rearranges itself the moment anything is built.
-        Assert.Equal("Your ship", ship.Editor.Screen.Title);
+        Assert.Equal("Automation for Hangar Bay Alpha", ship.Editor.Screen.Title());
         Assert.Empty(ship.Editor.Component<StatusListComponent>().Entries);
 
         // Both ways in are offered. How a target asks for the name is its own business, so
@@ -775,7 +790,7 @@ public class EditorTests
 
         // And one more back off the system itself.
         editor.Back();
-        Assert.Equal("Your ship", editor.Screen.Title);
+        Assert.Equal("Automation for Hangar Bay Alpha", editor.Screen.Title());
     }
 
     [Fact]
@@ -786,7 +801,7 @@ public class EditorTests
 
         editor.NewSystem("Airlock");
         editor.PressStart("When…");
-        Assert.Equal("When something happens", editor.Screen.Title);
+        Assert.Equal("When something happens", editor.Screen.Title());
 
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
@@ -794,14 +809,27 @@ public class EditorTests
         // Both stages are one screen now, and the starters are no longer a screen at all, so
         // one step back reaches the system and a second reaches the ship.
         editor.Back();
-        Assert.Equal("Airlock", editor.Screen.Title);
+        Assert.Equal("Airlock", editor.Screen.Title());
 
         editor.Back();
-        Assert.Equal("Your ship", editor.Screen.Title);
+        Assert.Equal("Automation for Hangar Bay Alpha", editor.Screen.Title());
     }
 
+    /// <summary>
+    /// A name replaces what a sequence does, and never what starts it - on its own screen and in
+    /// the list alike.
+    /// </summary>
+    /// <remarks>
+    /// It used to replace the whole line, which was defensible while a heading was one thing. Once
+    /// the heading became two, the list kept the old rule and the two quietly disagreed: name a
+    /// sequence and its heading still said when it happens while its row had stopped saying so.
+    ///
+    /// The row is the worse place to lose it. A list of twenty sequences is read by comparing them,
+    /// and when they happen is the thing worth comparing - twenty rows saying only a name have had
+    /// the one useful column taken away.
+    /// </remarks>
     [Fact]
-    public void NamingASequence_ReplacesTheSentenceEverywhere()
+    public void NamingASequenceReplacesWhatItDoesAndNotWhatStartsIt()
     {
         var ship = Build();
         var editor = ship.Editor;
@@ -813,19 +841,24 @@ public class EditorTests
         editor.PressPrimary();
 
         ship.Tick();
-        Assert.StartsWith("When Airlock Button is pressed", editor.Screen.Title);
+        Assert.StartsWith("When Airlock Button is pressed", editor.Screen.Title());
 
         editor.Name("Let me out");
         ship.Tick();
-        Assert.Equal("Let me out", editor.Screen.Title);
 
-        // And in the list, which is the reason naming exists at all. Backing out of the
-        // sequence lands on the system it belongs to, which is where its sequences are listed.
+        // On the sequence's own screen the name takes the half it is for and the trigger stays.
+        Assert.Equal("Let me out", editor.Screen.Heading[1].Text);
+        Assert.Equal("When Airlock Button is pressed", editor.Screen.Heading[0].Text);
+
+        // And the same in the list, which is where the two used to disagree. A row is one line, so
+        // it joins them - but it joins the same two halves, and the trigger survives being named.
         editor.Back();
         ship.Tick();
 
-        Assert.Equal("Airlock", editor.Screen.Title);
-        Assert.Equal("Let me out", editor.Component<StatusListComponent>().Entries[0].Summary);
+        Assert.Equal("Airlock", editor.Screen.Title());
+        Assert.Equal(
+            "When Airlock Button is pressed » Let me out",
+            editor.Component<StatusListComponent>().Entries[0].Summary);
     }
 
     [Fact]
@@ -855,7 +888,7 @@ public class EditorTests
         StartOnTheButton(editor);
 
         editor.PressAdd("do something");
-        Assert.Equal("Do something", editor.Screen.Title);
+        Assert.Equal("Do something", editor.Screen.Title());
         Assert.Single(editor.Component<PickComponent>().Stages);
 
         editor.PressBlock("Inner Door");
@@ -893,7 +926,7 @@ public class EditorTests
         StartOnTheButton(editor);
 
         editor.PressAdd("wait");
-        Assert.Equal("How long should it wait?", editor.Screen.Title);
+        Assert.Equal("How long should it wait?", editor.Screen.Title());
 
         editor.PressChoice("5 seconds - 300 ticks");
 

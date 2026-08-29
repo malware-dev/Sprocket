@@ -23,6 +23,12 @@ sealed class SimWorld : IWorld
     /// </summary>
     public EntityNoun Noun { get; } = new EntityNoun("block", "blocks", "Blocks");
 
+    public string Name { get; private set; } = "Test Rig";
+
+    public bool CanRename => true;
+
+    public void Rename(string name) => Name = name;
+
     public IReadOnlyList<SimEntity> SimEntities => _entities;
 
     public IEntity? FindEntity(long entityId) => _byId.GetValueOrDefault(entityId);

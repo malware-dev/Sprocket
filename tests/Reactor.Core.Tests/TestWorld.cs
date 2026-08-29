@@ -20,6 +20,12 @@ sealed class TestWorld : IWorld
 
     public EntityNoun Noun { get; } = new EntityNoun("block", "blocks", "Blocks");
 
+    public string Name { get; private set; } = "Hangar Bay Alpha";
+
+    public bool CanRename => true;
+
+    public void Rename(string name) => Name = name;
+
     public T Add<T>(T entity) where T : TestEntity
     {
         _entities.Add(entity);

@@ -54,8 +54,11 @@ public class RenameTests
         window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
         Run(window);
 
-        Assert.Equal("Let me out", editor.Screen.CustomName);
-        Assert.Equal("Let me out", editor.Screen.Title);
+        Assert.Equal("Let me out", editor.Screen.CustomName());
+
+        // In the heading, not the whole of it. A sequence's heading is two parts and the name takes the
+        // half it is for; the trigger that starts it is not somebody's to name and stays where it was.
+        Assert.EndsWith("Let me out", editor.Screen.Title());
         Assert.True(heading.IsVisible);
         Assert.False(box.IsVisible);
         Assert.Equal(before, header.Bounds.Height);

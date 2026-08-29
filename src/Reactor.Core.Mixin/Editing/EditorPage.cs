@@ -21,7 +21,60 @@ namespace Reactor.Editing
 
         protected ReactorEditor Editor { get; private set; }
 
+        /// <summary>
+        /// What this page is called, when it is called one thing.
+        /// </summary>
+        /// <remarks>
+        /// Still one string, and only in here. What a target sees is <see cref="EditorScreen.Heading" />,
+        /// which is a list - this is the simple case, fed into it by <see cref="Heading" />, because nearly
+        /// every page is one thing with one name and should not have to say so in a list to prove it.
+        /// </remarks>
         public abstract string Title { get; }
+
+        /// <summary>
+        /// Fills in what this page is called, in as many parts as it takes.
+        /// </summary>
+        /// <remarks>
+        /// The default is one part carrying <see cref="Title" /> and whatever the page says about renaming,
+        /// which is right for every page that is about one thing. A page whose heading is really two things
+        /// overrides it - see <c>SequencePage</c>, where what starts a sequence and what it then does are
+        /// separate, and naming the second used to swallow the first.
+        /// </remarks>
+        /// <remarks>
+        /// Paired with <see cref="RefreshHeading" /> exactly the way <see cref="Build" /> is paired with
+        /// <see cref="Refresh" />, and for the same reason: this one runs when the screen is made and may
+        /// claim command ids, which can only be claimed once; the other runs every tick and may only change
+        /// words. A page that overrides one nearly always has to override the other.
+        /// </remarks>
+        public virtual void Heading(List<HeadingPart> parts)
+        {
+            var part = new HeadingPart(Title);
+            part.Prompt = RenamePrompt;
+            part.NameRequired = NameRequired;
+
+            if (CanRename)
+                part.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename);
+
+            parts.Add(part);
+            RefreshHeading(parts);
+        }
+
+        /// <summary>
+        /// Brings the words in the heading up to date, without touching its shape.
+        /// </summary>
+        /// <remarks>
+        /// Every tick, so that naming something shows up in the heading straight away rather than at the
+        /// next rebuild. It must not add, remove or renumber anything - the target is holding these and has
+        /// already decided what to draw for each one.
+        /// </remarks>
+        public virtual void RefreshHeading(List<HeadingPart> parts)
+        {
+            if (parts.Count == 0)
+                return;
+
+            parts[0].Text = Title;
+            parts[0].Name = CustomName;
+        }
 
         public virtual string Subtitle { get { return ""; } }
 

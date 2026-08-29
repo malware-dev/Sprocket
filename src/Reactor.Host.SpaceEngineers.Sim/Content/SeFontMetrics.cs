@@ -242,14 +242,30 @@ namespace Reactor.Sim.Content
             }
         }
 
+        /// <summary>
+        /// What the game answers when asked how big a string is.
+        /// </summary>
+        /// <remarks>
+        /// <b>The cell, not the line, and the two are not the same number.</b> <c>MyFont.MeasureString</c>
+        /// walks the glyphs and takes the tallest, and in this face every glyph is a uniform 45 units in a
+        /// line of 37 - so a measured string comes back a fifth taller than the line it will be drawn on,
+        /// for any text at all.
+        /// <para>
+        /// This returned the line height for both, which made the difference invisible here and cost two
+        /// wrong diagnoses of the same misalignment: anything laid out against a measured height sat
+        /// correctly in the simulator and wrongly in the game, and the simulator agreed with every guess.
+        /// A harness that cannot be wrong about the thing being tested is not a harness.
+        /// </para>
+        /// </remarks>
         public Vector2 MeasurePixels(string font, string text, float scale)
         {
             float perUnit = EffectiveScale(scale);
+            float height = (_cellHeight > 0 ? _cellHeight : GameCellHeight) * perUnit;
 
             if (string.IsNullOrEmpty(text))
-                return new Vector2(0f, _lineHeight * perUnit);
+                return new Vector2(0f, height);
 
-            return new Vector2(WidthInUnits(text) * perUnit, _lineHeight * perUnit);
+            return new Vector2(WidthInUnits(text) * perUnit, height);
         }
 
         public float LineHeightPixels(string font, float scale)

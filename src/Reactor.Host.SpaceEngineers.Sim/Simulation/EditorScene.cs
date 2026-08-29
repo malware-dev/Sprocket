@@ -66,7 +66,25 @@ namespace Reactor.Sim.Simulation
             get
             {
                 Reactor.Ui.EditorScreen screen = _ship.Editor.Screen;
-                return screen.Title + (string.IsNullOrEmpty(screen.Subtitle)
+
+                // Joined here rather than asked of core, which publishes a heading in parts and no
+                // string of the whole thing on purpose - a target handed one would draw one. This is a
+                // line of log output, so joining it is a report rather than a rendering.
+                string heading = "";
+                for (int i = 0; i < screen.Heading.Count; i++)
+                {
+                    Reactor.Ui.HeadingPart part = screen.Heading[i];
+
+                    if (heading.Length > 0)
+                        heading += part.Lead.Length > 0 ? " " : " > ";
+
+                    if (part.Lead.Length > 0)
+                        heading += part.Lead + " ";
+
+                    heading += part.Text;
+                }
+
+                return heading + (string.IsNullOrEmpty(screen.Subtitle)
                     ? "" : "  |  " + screen.Subtitle);
             }
         }

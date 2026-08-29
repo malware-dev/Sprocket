@@ -97,8 +97,16 @@ namespace Phosphor
             if (_text.Length == 0)
                 return new Vector2(0f, g.LineHeight(Font, Scale));
 
+            // A line, like the three answers around it, because a line is what this draws. DrawText places
+            // a line box at ContentBounds.Y and the renderer puts the baseline inside it; how far the
+            // particular letters reach has nothing to do with how much room the drawing takes.
+            //
+            // Measuring answered with the glyph cell instead, which in the game's face is 45 units against
+            // a line of 37 - a fifth taller, for any text at all. So a label reported a size it did not
+            // draw at, and anything that centred it put it a tenth of a line out. Only the width is worth
+            // asking the letters about.
             if (!Wraps && !Trims)
-                return g.MeasureText(Font, _measured, Scale);
+                return new Vector2(g.MeasureText(Font, _measured, Scale).X, g.LineHeight(Font, Scale));
 
             if (!Wraps)
             {

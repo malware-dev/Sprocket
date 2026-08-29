@@ -71,11 +71,11 @@ namespace Reactor.Editing
 
             Current.Refresh();
 
-            // All three are read every tick rather than only when the screen is
-            // rebuilt, so naming something shows up in the heading straight away.
-            _screen.Title = Current.Title;
+            // Read every tick rather than only when the screen is rebuilt, so naming something shows up
+            // in the heading straight away. The heading's words only - its shape was settled when the
+            // screen was made and the target has already built controls to match it.
+            Current.RefreshHeading(_screen.Heading);
             _screen.Subtitle = Current.Subtitle;
-            _screen.CustomName = Current.CustomName;
             _screen.SwitchIsOn = Current.SwitchIsOn;
         }
 
@@ -500,12 +500,14 @@ namespace Reactor.Editing
             _numberActions.Clear();
 
             var page = Current;
-            _screen.Title = page.Title;
+
+            // Rebuilt in place rather than swapped, because a target holds this list across a refresh and
+            // compares what is in it to decide whether its own controls need making again.
+            _screen.Heading.Clear();
+            page.Heading(_screen.Heading);
+
             _screen.CanGoBack = _stack.Count > 1;
             _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Pop) : 0;
-            _screen.RenameCommand = page.CanRename ? RegisterText(Cmd.Rename, page.Rename) : 0;
-            _screen.RenamePrompt = page.RenamePrompt;
-            _screen.NameRequired = page.NameRequired;
             _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(Cmd.Switch, page.Switch) : 0;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryCommand = _screen.HasPrimary ? Register(Cmd.Primary, page.Primary) : 0;
@@ -518,7 +520,6 @@ namespace Reactor.Editing
                 _screen.Components.Reset(_gathered);
 
             _screen.Subtitle = page.Subtitle;
-            _screen.CustomName = page.CustomName;
             _screen.SwitchIsOn = page.SwitchIsOn;
             BuildActions();
 

@@ -47,6 +47,29 @@ namespace Reactor.World
         /// </remarks>
         IEntity FindEntity(long entityId);
 
+        /// <summary>
+        /// What this construct is called.
+        /// </summary>
+        /// <remarks>
+        /// The host's answer, like <see cref="Noun"/>, and for the same reason - what a machine is called
+        /// is a fact about the game and not about automation. Never empty: a game that names nothing can
+        /// answer with whatever it puts on the thing itself, which in Space Engineers is a name the game
+        /// made up and the player has simply not changed yet. There is no way to tell those apart and no
+        /// reason to try.
+        /// </remarks>
+        string Name { get; }
+
+        /// <summary>Whether <see cref="Rename"/> will do anything.</summary>
+        /// <remarks>
+        /// False is a real answer. A target drawing onto a text panel is looking at somebody else's
+        /// machine and has no business renaming it, and a screen that offered to would be offering
+        /// something it cannot do.
+        /// </remarks>
+        bool CanRename { get; }
+
+        /// <summary>Changes what this construct is called.</summary>
+        void Rename(string name);
+
         /// <summary>Tells an entity to do something.</summary>
         void Invoke(IEntity entity, string actionId);
     }

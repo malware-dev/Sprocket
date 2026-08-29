@@ -58,10 +58,18 @@ namespace Reactor.Editing
             return Describe(world, system) + " " + instance.Number;
         }
 
-        /// <summary>How many of this system are on the ship.</summary>
+        /// <summary>
+        /// How many of this system are fitted.
+        /// </summary>
+        /// <remarks>
+        /// Without naming what they are fitted to. Core used to say "on this ship", which is the same
+        /// mistake <see cref="EntityNoun"/> exists to prevent one level up - not every construct is a
+        /// ship, and no game but this one has ships at all. It turned out none of the six places that
+        /// said it actually needed the word: the screen is already showing the thing.
+        /// </remarks>
         public static string Count(AutomationSystem system)
         {
-            return "on this ship: " + system.Instances.Count;
+            return "fitted " + system.Instances.Count + (system.Instances.Count == 1 ? " time" : " times");
         }
 
         /// <summary>Whether anything in this system is doing something.</summary>

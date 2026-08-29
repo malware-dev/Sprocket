@@ -22,7 +22,7 @@ static class Screen
         }
 
         throw new InvalidOperationException(
-            $"No {typeof(T).Name} on '{editor.Screen.Title}'. Present: " +
+            $"No {typeof(T).Name} on '{editor.Screen.Title()}'. Present: " +
             string.Join(", ", editor.Screen.Components.Select(c => c.GetType().Name)));
     }
 
@@ -36,7 +36,7 @@ static class Screen
     {
         var entry = editor.PathEntries().FirstOrDefault(e => e.Text == name)
                     ?? throw new InvalidOperationException(
-                        $"No block '{name}' on '{editor.Screen.Title}'.");
+                        $"No block '{name}' on '{editor.Screen.Title()}'.");
         editor.Invoke(entry.Command);
     }
 
@@ -99,7 +99,7 @@ static class Screen
             }
         }
 
-        throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title}'.");
+        throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title()}'.");
     }
 
     public static bool HasChoice(this ReactorEditor editor, string text) =>
@@ -116,7 +116,7 @@ static class Screen
     public static void PressPrimary(this ReactorEditor editor)
     {
         if (!editor.Screen.HasPrimary)
-            throw new InvalidOperationException($"'{editor.Screen.Title}' has nothing to move on to.");
+            throw new InvalidOperationException($"'{editor.Screen.Title()}' has nothing to move on to.");
         editor.Invoke(editor.Screen.PrimaryCommand);
     }
 
@@ -133,8 +133,55 @@ static class Screen
 
     public static void Back(this ReactorEditor editor) => editor.Invoke(editor.Screen.BackCommand);
 
+    /// <summary>
+    /// The whole heading as one string, for an assertion that does not care how it is made of parts.
+    /// </summary>
+    /// <remarks>
+    /// A test convenience and deliberately only that. <c>EditorScreen</c> publishes no joined-up version
+    /// of its heading, because a target handed one would draw one - and the one thing a heading has to
+    /// show is which part of it somebody can change. Here there is no such risk: a test is asserting on
+    /// words, not drawing them.
+    /// </remarks>
+    public static string Title(this EditorScreen screen)
+    {
+        var joined = "";
+        for (var i = 0; i < screen.Heading.Count; i++)
+        {
+            var part = screen.Heading[i];
+
+            if (joined.Length > 0)
+                joined += part.Lead.Length > 0 ? " " : " » ";
+
+            if (part.Lead.Length > 0)
+                joined += part.Lead + " ";
+
+            joined += part.Text;
+        }
+
+        return joined;
+    }
+
+    /// <summary>The first part of the heading anybody can rename, or null when none can be.</summary>
+    static HeadingPart Nameable(this EditorScreen screen)
+    {
+        for (var i = 0; i < screen.Heading.Count; i++)
+        {
+            if (screen.Heading[i].CanRename)
+                return screen.Heading[i];
+        }
+
+        return null;
+    }
+
+    /// <summary>What somebody typed for the part of the heading that takes a name.</summary>
+    public static string CustomName(this EditorScreen screen) => screen.Nameable()?.Name ?? "";
+
+    public static int RenameCommand(this EditorScreen screen) => screen.Nameable()?.RenameCommand ?? 0;
+
+    public static bool NameRequired(this EditorScreen screen) => screen.Nameable()?.NameRequired ?? false;
+
     public static void Name(this ReactorEditor editor, string name) =>
-        editor.SetText(editor.Screen.RenameCommand, name);
+        editor.SetText(editor.Screen.RenameCommand(), name);
 
     /// <summary>Sets a sequence off the way a player would: through its real trigger.</summary>
     /// <remarks>

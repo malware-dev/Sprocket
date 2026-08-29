@@ -292,22 +292,32 @@ where a form would nag.
 *This also means any screen can be renameable now, not just a sequence. Systems are the
 obvious next one.*
 
-### The heading is one thing today and wants to be several
+### A heading is several things, and only some of them are yours to name
 
-The heading is a single string plus a name, and that is already costing something. A
-sequence's sentence is *when this happens* and *then this runs*, and naming it replaces the
-whole line - so anybody who wants a better word for what a sequence **does** loses the
-trigger that starts it, and gets it back only by typing the trigger into the name by hand.
-The model is making the person do its job.
+It was a single string plus one name, and that cost something real. A sequence's sentence is
+*when this happens* and *then this runs*, and naming it replaced the whole line - so anybody
+who wanted a better word for what a sequence **does** lost the trigger that starts it, and
+got it back only by typing the trigger into the name by hand, exactly as it already read, and
+keeping it in step by hand forever after. The model was making the person do its job.
 
-So a heading becomes a **sentence**: fixed words and parts, each part either generated or
-named. Core already has that shape and it is load-bearing - a step is a lead-in plus slots,
-and a slot already looks like the thing you change. The only new thing a heading's part needs
-is to say that it edits where it stands rather than opening a picker. One flag on a model
-that exists, not a second model.
+So `EditorScreen.Heading` is a list of parts, each one answering for itself whether it can be
+renamed. A sequence has two: the trigger, which is generated and not nameable, and what it
+then does, which is where a name lands. Every other screen has one, and pages get that for
+free - `EditorPage.Heading` defaults to a single part built from the page's own title.
 
-*Deliberately not settled: whether the trigger half takes a name of its own as well as the
-doing half.*
+**There is deliberately no joined-up string of the whole heading on `EditorScreen`.** One was
+easy to add and every target would have drawn it, because drawing one string is easier than
+drawing several - and the entire point of the list is showing which part is somebody's to
+change. Where a target really must flatten it, it writes that out in its own file, where the
+cost is visible: the Avalonia host does exactly that today and says so.
+
+Words between the parts are the target's. This one draws the arrow it already uses for a cause
+and its consequence; a narrow one could break the line instead. A heading that ever needs a
+connective word can carry it as a part with no rename command, which is the same mechanism
+rather than a second one.
+
+*Deliberately not settled: whether the trigger half takes a name of its own as well. The shape
+carries one the day referencing a sequence from elsewhere earns it, which is the next section.*
 
 ### Naming as publishing, and why that cannot be silent
 

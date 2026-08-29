@@ -132,8 +132,15 @@ namespace Phosphor
         /// The pencil. Transparent for a name that cannot be changed, which then draws as a plain heading.
         /// </summary>
         /// <remarks>
-        /// Its room is kept either way, so a screen where some names can be renamed and others cannot does
-        /// not have its headings start at two different places.
+        /// A plate with no pencil takes no room for one. That was the other way round for a while, on the
+        /// reasoning that headings on different screens should start in the same place - which is wrong
+        /// twice over: the pencil is a suffix, so dropping it moves nothing to its left, and a heading made
+        /// of several parts had the un-nameable ones holding a pencil-shaped hole in the middle of the
+        /// line. It read as forty units of unexplained space where a word gap is sixteen.
+        /// <para>
+        /// The room is kept while the box is up, though, because there the pencil really does come and go
+        /// under somebody's hands - see <see cref="DrawContent" />.
+        /// </para>
         /// </remarks>
         public Color PenColor { get; set; }
 
@@ -206,7 +213,7 @@ namespace Phosphor
         public float Gap { get; set; }
 
         /// <summary>
-        /// How narrow the name is allowed to get.
+        /// How narrow the name is allowed to get. A line tall's worth when nobody says otherwise.
         /// </summary>
         /// <remarks>
         /// A name somebody has emptied measures nothing, and a box with no width is a box nobody can find
@@ -254,20 +261,32 @@ namespace Phosphor
         {
             _pen.Measure(g, available);
 
-            float aside = _pen.DesiredSize.X + Gap;
+            // Nothing set aside for a pencil this plate will never draw. While it is being edited the
+            // pencil is hidden rather than absent, and there the room has to stay or the words jog
+            // sideways at the moment somebody starts typing.
+            bool pen = _editing || PenColor.A > 0;
+            float aside = pen ? _pen.DesiredSize.X + Gap : 0f;
             Vector2 room = new Vector2(available.X - aside, available.Y);
             if (room.X < 0f)
                 room.X = 0f;
 
-            // Both, every time, and the wider of the two wins. Measuring only the one on show would let the
-            // plate change width at the moment of the flip, which is the one thing this element exists to
-            // prevent - and while an edit is running the two disagree by however much has been typed.
+            // Both, every time, because the one that is not showing still has to be arranged. Only the
+            // one on show gets a say in how wide this is, though - and while an edit is running, both do,
+            // so the plate never narrows under the pointer as characters come out of the box.
+            //
+            // Letting the box speak while it was put away was a real fault and an invisible one. A box
+            // keeps what was last typed into it, so a plate that had once held a longer name stayed as
+            // wide as that name for the rest of the session: rename "Large Grid 6883" to "Test Rig A" and
+            // the pencil stopped seventy units to the right of the words, holding a space for letters that
+            // had been deleted.
             _label.Measure(g, room);
             _box.Measure(g, room);
 
-            float name = _label.DesiredSize.X > _box.DesiredSize.X
-                ? _label.DesiredSize.X
-                : _box.DesiredSize.X;
+            float line = g.LineHeight(_label.Font, _label.Scale);
+
+            float name = _label.DesiredSize.X;
+            if (_editing && _box.DesiredSize.X > name)
+                name = _box.DesiredSize.X;
 
             // A box measures the words in it and an empty one measures nothing, so a hint drawn in an
             // empty box is drawn in a plate that made no room for it - which is how the first hint here
@@ -280,35 +299,50 @@ namespace Phosphor
                     name = hint;
             }
 
-            if (name < LeastWidth)
-                name = LeastWidth;
+            // No wider than the plate is tall unless somebody insists. A field that has been emptied has
+            // to stay findable and that is all it has to do; anything past a square of it is room held for
+            // words that are not there, sitting between the name and the pencil.
+            float least = LeastWidth > 0f ? LeastWidth : line;
+            if (name < least)
+                name = least;
 
-            float height = _label.DesiredSize.Y > _box.DesiredSize.Y
-                ? _label.DesiredSize.Y
-                : _box.DesiredSize.Y;
-
-            if (_pen.DesiredSize.Y > height)
-                height = _pen.DesiredSize.Y;
-
-            return new Vector2(name + aside, height);
+            // One line of this font at this scale, and nothing in the plate can change it. Not the longest
+            // name anybody types, not whether the pencil is showing, not which of the two modes is up.
+            //
+            // That is the invariant the whole thing rests on. A plate has to be the same height as every
+            // other plate and as a plain label beside it, because a row centres what is in it - so a plate
+            // a few units taller than its neighbour puts its words a couple of units above them, and a
+            // heading reads as though somebody had nudged half of it. It was measured from the tallest of
+            // the label, the box and the pencil, and the pencil won: a symbol measures its whole square
+            // cell, and that cell stands clear of the text line at any size worth drawing it.
+            return new Vector2(name + aside, line);
         }
 
         protected override void ArrangeContent(RectangleF bounds)
         {
-            float pen = _pen.DesiredSize.X;
-            float name = bounds.Width - pen - Gap;
+            float pen = _editing || PenColor.A > 0 ? _pen.DesiredSize.X : 0f;
+            float name = bounds.Width - pen - (pen > 0f ? Gap : 0f);
             if (name < 0f)
                 name = 0f;
 
-            var where = new RectangleF(bounds.X, bounds.Y, name, bounds.Height);
-            _label.Arrange(where);
-            _box.Arrange(where);
+            // Everything on the middle of the line, including the words. Given a fixed height, centring is
+            // what lets the parts disagree about their own without any of them moving: a pencil whose cell
+            // is taller than the text, a box that measures a hair differently from the label it replaces.
+            // Each one sits on the same middle and any excess hangs off both ends rather than pushing down
+            // from the top.
+            Centre(_label, bounds, bounds.X, name);
+            Centre(_box, bounds, bounds.X, name);
+            Centre(_pen, bounds, bounds.X + bounds.Width - pen, pen);
+        }
 
-            // On the middle of the line, the way a stack would put it. A pencil hung from the top of a
-            // heading reads as a superscript rather than as part of the name.
-            float top = bounds.Y + (bounds.Height - _pen.DesiredSize.Y) * 0.5f;
-            _pen.Arrange(new RectangleF(
-                bounds.X + bounds.Width - pen, top, pen, _pen.DesiredSize.Y));
+        /// <summary>Puts one part on the middle of the plate's line, at its own height.</summary>
+        static void Centre(Element part, RectangleF bounds, float x, float width)
+        {
+            float height = part.DesiredSize.Y;
+            if (height <= 0f)
+                height = bounds.Height;
+
+            part.Arrange(new RectangleF(x, bounds.Y + (bounds.Height - height) * 0.5f, width, height));
         }
 
         protected override void DrawContent(IGraphics g)
