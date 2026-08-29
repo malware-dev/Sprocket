@@ -571,7 +571,9 @@ namespace Reactor.Screens
             // Dead until there is something to send, because an empty answer here is not a meaningful
             // one. Renaming is the opposite case and allows it, which is why the two are told apart.
             bool ready = !string.IsNullOrEmpty(_askBox.Text);
-            _confirm.Background = ready ? Palette.Accent : Palette.Dim;
+            // A well rather than a light fill when it is not ready. Dim is what an unlit thing is drawn
+            // in, and a button wearing it with quiet text on top was two near-identical greys.
+            _confirm.Background = ready ? Palette.Accent : Palette.SlotFill;
             _confirm.Color = ready ? Palette.Chrome : Palette.Faint;
 
             _popup.Draw(g);

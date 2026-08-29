@@ -501,7 +501,7 @@ namespace Reactor.Screens
                 grip.Content = row.Grip;
                 grip.Collapsed = !_component.Editable;
 
-                var number = new Sized(29f);
+                var number = new Sized(34f);
                 number.Content = row.Number;
 
                 Stack handle = Widgets.RowOf(Space.Line);

@@ -197,7 +197,7 @@ namespace Reactor.Screens
             _title.Trims = true;
 
             _narrow.Hint = "Search";
-            _kindLine.Highlight = Palette.PanelHot;
+            _kindLine.Highlight = Palette.ControlHot;
 
             _empty.Padding = new Thickness(Space.Line, Space.Item, 0f, 0f);
 
@@ -353,8 +353,10 @@ namespace Reactor.Screens
                 row.Line.Spacing = Space.Region * 1.6f;
                 row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
 
-                // The list itself is already the hot tone, so its rows have to go a step past it.
-                row.Line.Highlight = Palette.Line;
+                // Down, not up. A row you can press is a control, and a control deepens under the
+                // pointer in this game - which also means the words on the one row somebody is actually
+                // reading get brighter against their ground rather than dimmer.
+                row.Line.Highlight = Palette.ControlHot;
                 row.Line.Fill = row.Label;
                 row.Line.Right = row.Count;
 
@@ -391,7 +393,7 @@ namespace Reactor.Screens
                 option.Row.Children.Add(option.Mark);
                 option.Row.Children.Add(option.Text);
                 option.Row.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
-                option.Row.Highlight = Palette.PanelHot;
+                option.Row.Highlight = Palette.ControlHot;
 
                 _optionRows.Add(option);
                 _options.Children.Add(option.Row);
@@ -506,7 +508,10 @@ namespace Reactor.Screens
                 left.Children.Add(row.Icon);
             }
 
-            row.Name = Widgets.Label("", Palette.Ink, Type.Small);
+            // The size the game writes a block list in, because that is what this is. It was a step
+            // down for a while, which made the one thing on the screen somebody is here to read the
+            // smallest name on it.
+            row.Name = Widgets.Label("", Palette.Ink, Type.Body);
             row.Detail = Widgets.Label("", Palette.Faint, Type.Tiny);
 
             Stack text = Widgets.Column(Space.Line * 0.6f);
@@ -527,7 +532,7 @@ namespace Reactor.Screens
             row.Line = new Bar();
             row.Line.Spacing = Space.Item;
             row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f);
-            row.Line.Highlight = Palette.PanelHot;
+            row.Line.Highlight = Palette.ControlHot;
             row.Line.Left = left;
             row.Line.Fill = text;
             row.Line.Right = right;

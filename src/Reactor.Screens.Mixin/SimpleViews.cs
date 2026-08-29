@@ -312,10 +312,10 @@ namespace Reactor.Screens
                 row.Warning.Text = entry.Warning;
                 row.Warning.Collapsed = string.IsNullOrEmpty(entry.Warning);
                 row.Current.Text = entry.IsCurrent ? "*" : "";
-                // The one already chosen is drawn in the hot tone at rest, so hovering it has to go a
-                // step further again or it would look like nothing happened.
+                // The one already chosen is lifted at rest, and both of them deepen under the pointer -
+                // one answer rather than two, and it reads from either starting tone.
                 row.Line.Background = entry.IsCurrent ? Palette.PanelHot : Palette.Panel;
-                row.Line.Highlight = entry.IsCurrent ? Palette.Line : Palette.PanelHot;
+                row.Line.Highlight = Palette.ControlHot;
 
                 if (row.Blink == null)
                     continue;
@@ -508,7 +508,7 @@ namespace Reactor.Screens
             // the switch stay, because those are real; the slab that said "press me" does not.
             bool pressable = entry.Command != 0;
             _line.Background = pressable ? Palette.Panel : Palette.None;
-            _line.Highlight = pressable ? Palette.PanelHot : Palette.None;
+            _line.Highlight = pressable ? Palette.ControlHot : Palette.None;
 
             // The same plus the start block uses, for the same reason: this row adds something. Core marks
             // it as an action and leaves the drawing to us.

@@ -74,6 +74,12 @@ namespace Reactor.Screens
         /// Surprising, and worth not overriding on instinct. Nearly every desktop lightens what the
         /// pointer is on; this game darkens a control and lightens a panel, and the two together are what
         /// make its chrome read as pressed metal rather than as a web page.
+        /// <para>
+        /// <b>A row you can press is a control.</b> Reactor's lists lifted for a while, which was the
+        /// wrong half of the rule and had a second cost: a lift closes the gap between a panel and the
+        /// text on it, so the one row somebody had the pointer on was the one row hardest to read. The
+        /// smallest text went under 3:1 on hover. Deepening moves every tier the other way.
+        /// </para>
         /// </remarks>
         public static readonly Color ControlHot = new Color(12, 18, 22);
 
@@ -81,20 +87,32 @@ namespace Reactor.Screens
         public static readonly Color ControlFocus = new Color(69, 128, 157);
 
         /// <summary>
-        /// Textures/GUI/Icons/*.png, which are single-colour and drawn in exactly this.
+        /// The colour the game writes in: every label, list row and field in the terminal is this.
         /// </summary>
         /// <remarks>
         /// Not white, which is what it looks like next to the panels and is the mistake worth avoiding.
-        /// Everything the game draws as a symbol is this pale ice blue, so text in it belongs to the same
-        /// family as the icons beside it.
+        /// <para>
+        /// It was the icon colour for a while - Textures/GUI/Icons/*.png are single-colour and drawn a
+        /// few steps darker than this - which was a reasonable guess and a measurably wrong one. Sampling
+        /// the terminal's own text settled it: the game reserves plain white for the row you have
+        /// selected and writes everything else in this.
+        /// </para>
         /// </remarks>
-        public static readonly Color Ink = new Color(191, 230, 242);
+        public static readonly Color Ink = new Color(220, 245, 253);
 
         /// <summary>A step down from <see cref="Ink" />, toward the focus blue.</summary>
-        public static readonly Color Muted = new Color(146, 178, 192);
+        public static readonly Color Muted = new Color(162, 195, 205);
 
-        /// <summary>A step down again, still clear of the panel it sits on.</summary>
-        public static readonly Color Faint = new Color(101, 128, 140);
+        /// <summary>
+        /// A step down again, and the bottom of the ramp. Nothing quieter than this carries a word.
+        /// </summary>
+        /// <remarks>
+        /// Set by the floor rather than by eye: this reads 4.5:1 against <see cref="Panel" />, which is
+        /// what the smallest text on these screens needs to be read at all. The first cut of it was three
+        /// steps darker and looked right in isolation, which is the trap - it was under 3:1, and a step
+        /// number or a "ran 4s ago" written in it was decoration rather than information.
+        /// </remarks>
+        public static readonly Color Faint = new Color(133, 161, 169);
 
         /// <summary>
         /// DarkBlueBackground_focus.png. What the game fills a control with when it is the one in hand.
@@ -113,13 +131,38 @@ namespace Reactor.Screens
         /// <summary>checkbox_green_checked.png. Vivid, and nothing like a desktop's mint.</summary>
         public static readonly Color Live = new Color(58, 204, 0);
 
-        public static readonly Color Dim = new Color(60, 76, 82);
-        public static readonly Color LiveWash = new Color(30, 58, 26);
+        /// <summary>
+        /// The other half of <see cref="Live" />: a light that is off, a border that is not in force, a
+        /// control with nothing to do.
+        /// </summary>
+        /// <remarks>
+        /// It used to be exactly <see cref="PanelHot" />, which made an unlit light and the panel behind
+        /// it the same colour to within a rounding error - you could not see there was a light there at
+        /// all, only that a green one sometimes appeared. Off is a state and has to be drawn.
+        /// <para>
+        /// Lighter than the panel rather than darker, because nothing can be darker than these panels by
+        /// enough to matter: the page is already near black and the arithmetic has no room left below it.
+        /// </para>
+        /// </remarks>
+        public static readonly Color Dim = new Color(95, 114, 120);
+
+        /// <summary>
+        /// The grounds that say what kind of thing a row is - running, wrong, worth reading.
+        /// </summary>
+        /// <remarks>
+        /// All three are darker than the panel they interrupt, and that is the whole of why they changed.
+        /// They were mid-toned and landed within a few percent of <see cref="Panel" />'s own brightness,
+        /// which left the hue carrying the entire signal: correct on this monitor, absent for the one
+        /// player in twelve who cannot separate a green wash from a blue one. Deepening them costs
+        /// nothing - the text on them was already the brightest thing in the palette - and gives every
+        /// eye a second way to see it.
+        /// </remarks>
+        public static readonly Color LiveWash = new Color(14, 40, 10);
 
         public static readonly Color Problem = new Color(232, 74, 58);
-        public static readonly Color ProblemWash = new Color(58, 32, 30);
+        public static readonly Color ProblemWash = new Color(36, 12, 10);
         public static readonly Color Notice = new Color(240, 172, 40);
-        public static readonly Color NoticeWash = new Color(58, 46, 24);
+        public static readonly Color NoticeWash = new Color(40, 30, 9);
 
         public static readonly Color None = new Color(0, 0, 0, 0);
 
@@ -149,10 +192,41 @@ namespace Reactor.Screens
     /// </summary>
     public static class Type
     {
-        public const float Title = 0.8f;
-        public const float Body = 0.55f;
-        public const float Small = 0.5f;
-        public const float Tiny = 0.45f;
+        /// <summary>
+        /// A screen's name. The one size the game has no equivalent for, because it has no screens.
+        /// </summary>
+        public const float Title = 0.9f;
+
+        /// <summary>
+        /// Everything that is a sentence, a row or a label. <b>The size the game writes in.</b>
+        /// </summary>
+        /// <remarks>
+        /// Measured rather than chosen. The terminal is almost perfectly uniform - list rows, section
+        /// headings, field contents, button captions and the window's own title are all one size, a cap
+        /// height of fourteen units - and this is the scale that lands there. The first cut of these was
+        /// a quarter smaller across the board, which is what a panel drawn against a mock-up looks like
+        /// rather than one drawn against the game beside it.
+        /// </remarks>
+        public const float Body = 0.64f;
+
+        /// <summary>
+        /// A step down, for a control rather than a sentence.
+        /// </summary>
+        /// <remarks>
+        /// Also the game's, and the only other size it has: its tabs and the buttons along the top of
+        /// the terminal are cut back to about twelve and a half units, and nothing in it goes below that.
+        /// </remarks>
+        public const float Small = 0.57f;
+
+        /// <summary>
+        /// The quietest thing that still carries a word - a count, a "ran 4s ago", a kind under a name.
+        /// </summary>
+        /// <remarks>
+        /// Below anything the game draws, which is why it is one step rather than three. Reactor has a
+        /// tier of detail the terminal has no equivalent for, and it has to be smaller than the name it
+        /// belongs to; it does not have to be half of it.
+        /// </remarks>
+        public const float Tiny = 0.5f;
 
         /// <summary>
         /// A symbol standing beside a line of text.
@@ -162,7 +236,7 @@ namespace Reactor.Screens
         /// and a symbol has none - it is read alone and at a glance, and the first cut of these was drawn
         /// at the same size as small text and came out as a smudge.
         /// </remarks>
-        public const float Symbol = 0.5f;
+        public const float Symbol = 0.57f;
     }
 
     /// <summary>
@@ -227,13 +301,18 @@ namespace Reactor.Screens
         public const float Icon = 54f;
 
         /// <summary>One stage of a pick.</summary>
-        public const float Column = 400f;
+        /// <remarks>
+        /// Near enough the width the terminal gives its own block list, which was not the reason for the
+        /// number and is a good check on it. There is room for it: a mod screen is handed the same box
+        /// the terminal draws in, and two of these columns leave a third of it still empty.
+        /// </remarks>
+        public const float Column = 460f;
 
         /// <summary>Anything hanging over the screen - a question, a list that opens downward.</summary>
         public const float Popup = 512f;
 
         /// <summary>The box at the head of a row in a list of several things to choose between.</summary>
-        public const float Mark = 15f;
+        public const float Mark = 17f;
     }
 
     /// <summary>A hairline across a block, with room around it.</summary>
@@ -589,12 +668,20 @@ namespace Reactor.Screens
             // The game leaves both words nearly as bright as each other - its inactive font is
             // (220, 244, 252) against a white one - and lets the difference between the two fills carry
             // the state. That works at the size it draws a switch, which is a hundred and seventy pixels
-            // to a half. Ours is a fifth of that, so the word on the dark side takes the colour this
-            // palette already means by unlit, the same one an unlit light is drawn in.
-            _on.Color = isOn ? Palette.Ink : Palette.Dim;
-            _off.Color = isOn ? Palette.Dim : Palette.Ink;
+            // to a half; ours is a fifth of that, so the word has to help.
+            //
+            // But only help. This was the unlit colour for a while, which put the off word at 2.2:1
+            // against the dark half and made a control whose whole promise is that both of its positions
+            // can be read into one that could not be. The bottom of the text ramp is the floor here as
+            // everywhere: quiet, and still a word.
+            _on.Color = isOn ? Palette.Ink : Palette.Faint;
+            _off.Color = isOn ? Palette.Faint : Palette.Ink;
 
-            Edge = governs ? Palette.Line : Palette.Dim;
+            // Two steps of the text ramp rather than a line tone and an unlit one. Those two used to be
+            // far apart and are now within a percent of each other, which would have quietly turned the
+            // difference between stopping one sequence and stopping the whole airlock into no difference
+            // at all.
+            Edge = governs ? Palette.Faint : Palette.Dim;
         }
 
         /// <summary>Nothing to switch here, so it takes up no room at all.</summary>
@@ -684,7 +771,7 @@ namespace Reactor.Screens
         {
             Label row = Label(text, color, Type.Body);
             row.Background = Palette.Panel;
-            row.Highlight = Palette.PanelHot;
+            row.Highlight = Palette.ControlHot;
             row.Padding = new Thickness(Space.PadX, Space.PadY);
             return row;
         }
