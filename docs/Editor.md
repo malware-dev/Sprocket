@@ -139,6 +139,11 @@ never matches.
   anything stuck - and whether that lives here or somewhere of its own.
 - Where the **ship browser** sits now that the root is systems rather than sequences.
 - Whether timers, if they are a thing distinct from *every so often*, live here too.
+- **The component surface hands a target a rendered sentence, and should hand it the script.**
+  `SentenceSlot` is text plus a command, so word order and vocabulary are fixed in core - and the
+  words it arranges were the host's to begin with, pulled out of `EntityKind`. See `Script.md`; it
+  changes what a slot is, and most of `SequenceText` goes with it.
+
 - **The picker's subtitle does not belong in the header, and the picker wants redesigning for it.**
   The header is deliberately designed without one: a subtitle was rare enough that reserving its line
   made the header look wrong on every screen that had none. The picker is the only screen that shows

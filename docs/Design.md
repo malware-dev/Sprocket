@@ -735,6 +735,21 @@ Pin it from the game rather than deriving it again. Left alone deliberately for 
 single number, it is wrong by a small amount, and guessing at it a third time is how the last
 two attempts went.
 
+### Core has a presentation layer it should not have
+
+Worked out in conversation and written up in `Script.md`. In short: there is the script - ids and
+nodes, what the runtime sees - and there is the presentation, what a person reads. Core owns only
+the first, and today it does not hold to that: `SentenceSlot` carries rendered English text, so
+`SequenceComponent` hands a target a finished sentence rather than the script.
+
+That is also the answer to localisation, which is where the conversation started. Core holds no text
+at all, each host localises by whatever its own platform offers, and the Space Engineers host
+hardcodes English for V1. It is why there is no phrasebook interface and no string table anywhere in
+core, and why proposals for either should be read against `Script.md` before being taken up again.
+
+The same document carries the design for the stored script as an actual script language, and for
+block references, which are the one part that cannot look like a normal language.
+
 ### The Avalonia host has been removed
 
 It was the only *independent* consumer of core's component surface - the simulator is not a second
