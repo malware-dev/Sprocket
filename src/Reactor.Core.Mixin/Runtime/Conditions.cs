@@ -72,7 +72,7 @@ namespace Reactor.Runtime
             if (state == null)
                 return false;
 
-            return state.Holds(entity.GetValue(state.PropertyId));
+            return state.Holds(world.Values, entity.GetValue(state.PropertyId));
         }
     }
 }

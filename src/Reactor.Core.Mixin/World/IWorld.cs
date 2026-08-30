@@ -48,6 +48,18 @@ namespace Reactor.World
         IEntity FindEntity(long entityId);
 
         /// <summary>
+        /// Makes and reads the values this world deals in.
+        /// </summary>
+        /// <remarks>
+        /// One store, because a comparison meets a reading its entities produced and an operand
+        /// declared on one of their kinds, and a slot only means anything against the lists it was
+        /// taken from. Anything that fits in eight bytes needs none of this - see
+        /// <see cref="EntityValue.Of(bool)" /> - so a host only reaches for it to carry something
+        /// wider, which today means text.
+        /// </remarks>
+        Values Values { get; }
+
+        /// <summary>
         /// What this construct is called.
         /// </summary>
         /// <remarks>

@@ -248,11 +248,27 @@ namespace Reactor.Runtime
                 if (state == null)
                     continue;
 
-                if (!state.Holds(entity.GetValue(state.PropertyId)))
+                if (!state.Holds(world.Values, entity.GetValue(state.PropertyId)))
                     return false;
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Whether a signal reads as true right now.
+        /// </summary>
+        /// <remarks>
+        /// A value does not carry its own kind, so reading one needs the world that made it. An event
+        /// is declared against a property whose reading is a flag in every case that matters, and
+        /// anything else answers the same question - is there anything there.
+        /// </remarks>
+        static bool Reads(IWorld world, IEntity entity, string propertyId)
+        {
+            var property = entity.Kind.FindProperty(propertyId);
+            var kind = property == null ? ValueKind.Flag : property.Kind;
+
+            return world.Values.Flag(kind, entity.GetValue(propertyId));
         }
 
         void Start(IWorld world, int tick)
@@ -413,7 +429,7 @@ namespace Reactor.Runtime
                 if (definition == null)
                     continue;
 
-                var now = entity.GetValue(definition.PropertyId).Flag;
+                var now = Reads(world, entity, definition.PropertyId);
                 if (now)
                     anySignalTrue = true;
 
@@ -471,7 +487,7 @@ namespace Reactor.Runtime
                 }
 
                 var wanted = definition.Edge == Edge.Rising;
-                if (entity.GetValue(definition.PropertyId).Flag != wanted)
+                if (Reads(world, entity, definition.PropertyId) != wanted)
                     all = false;
             }
 

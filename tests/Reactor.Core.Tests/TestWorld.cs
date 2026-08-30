@@ -16,6 +16,9 @@ sealed class TestWorld : IWorld
 
     public List<string> Log { get; } = [];
 
+    /// <summary>The values this world deals in, and the lists behind the wide ones.</summary>
+    public Values Values { get; } = new Values();
+
     public IReadOnlyList<IEntity> Entities => _entities;
 
     public EntityNoun Noun { get; } = new EntityNoun("block", "blocks", "Blocks");
@@ -28,6 +31,7 @@ sealed class TestWorld : IWorld
 
     public T Add<T>(T entity) where T : TestEntity
     {
+        entity.Store = Values;
         _entities.Add(entity);
         return entity;
     }
@@ -63,13 +67,31 @@ abstract class TestEntity(long id, string name, EntityKind kind) : IEntity
     public EntityValue GetValue(string propertyId) =>
         Values.TryGetValue(propertyId, out var v) ? v : default;
 
+    /// <summary>
+    /// The world's value store, set when this joins one.
+    /// </summary>
+    /// <remarks>
+    /// A value carries no kind and text lives in a list, so making or reading one needs the store the
+    /// rest of the world uses. Set on joining rather than taken in the constructor, so a new sort of
+    /// entity does not have to thread it through every subclass.
+    /// </remarks>
+    internal Values Store { get; set; } = new Values();
+
     protected void Set(string propertyId, bool value) => Values[propertyId] = EntityValue.Of(value);
 
     protected void Set(string propertyId, double value) => Values[propertyId] = EntityValue.Of(value);
 
-    protected void Set(string propertyId, string value) => Values[propertyId] = EntityValue.Of(value);
+    /// <summary>Written into the slot this reading already owns, so a per-tick read takes no new one.</summary>
+    protected void Set(string propertyId, string value) =>
+        Values[propertyId] = Store.Text(GetValue(propertyId), value);
 
-    protected bool Flag(string propertyId) => GetValue(propertyId).Flag;
+    protected bool Flag(string propertyId) => Store.Flag(KindOf(propertyId), GetValue(propertyId));
+
+    ValueKind KindOf(string propertyId)
+    {
+        var property = Kind.FindProperty(propertyId);
+        return property == null ? ValueKind.Flag : property.Kind;
+    }
 
     public virtual void Invoke(string actionId) { }
 
@@ -188,9 +210,9 @@ sealed class TestLamp(long id, string name) : TestEntity(id, name, Kinds.Lamp)
     }
 }
 
-sealed class TestTank(long id, string name) : TestEntity(id, name, Kinds.Tank)
+sealed class TestTank(long id, string name, Values values) : TestEntity(id, name, Kinds.Tank(values))
 {
-    public override string Status => $"{(int)(GetValue("fill").Number * 100)}%";
+    public override string Status => $"{(int)(Store.AsNumber(ValueKind.Real, GetValue("fill")) * 100)}%";
 
     public void SetFill(double fill) => Set("fill", fill);
 
@@ -253,11 +275,19 @@ static class Kinds
         .WithProperty("pressed", "pressed")
         .WithEvent("pressed", "pressed", Edge.Rising, "is pressed");
 
-    /// <summary>Reads a number, and says "low" by comparing against it.</summary>
-    public static readonly EntityKind Tank = new EntityKind("tank", "Tank")
-        .WithProperty("fill", ValueKind.Number, "fill level")
+    /// <summary>
+    /// Reads a number, and says "low" by comparing against it. Also carries a text operand.
+    /// </summary>
+    /// <remarks>
+    /// A method rather than a field, unlike its neighbours, and that is the design showing through: a
+    /// text operand is a slot in a store, so a declaration carrying one has to be built against the
+    /// store it will later be compared in. Only declarations whose operands fit in eight bytes can be
+    /// static.
+    /// </remarks>
+    public static EntityKind Tank(Values values) => new EntityKind("tank", "Tank")
+        .WithProperty("fill", ValueKind.Real, "fill level")
         .WithState("is-low", "fill", Relation.Below, EntityValue.Of(0.25), "is low")
         .WithState("is-fine", "fill", Relation.AtLeast, EntityValue.Of(0.25), "has plenty")
         .WithProperty("label", ValueKind.Text, "label")
-        .WithState("is-spare", "label", Relation.Is, EntityValue.Of("spare"), "is the spare");
+        .WithState("is-spare", "label", Relation.Is, values.Text("spare"), "is the spare");
 }

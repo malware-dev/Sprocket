@@ -404,7 +404,7 @@ public class PropertyTests
     static (TestWorld World, TestTank Tank) Build()
     {
         var world = new TestWorld();
-        var tank = world.Add(new TestTank(1, "Hydrogen Tank"));
+        var tank = world.Add(new TestTank(1, "Hydrogen Tank", world.Values));
         return (world, tank);
     }
 
@@ -416,14 +416,14 @@ public class PropertyTests
         var fine = tank.Kind.FindState("is-fine")!;
 
         tank.SetFill(0.10);
-        Assert.True(low.Holds(tank.GetValue("fill")));
-        Assert.False(fine.Holds(tank.GetValue("fill")));
+        Assert.True(low.Holds(world.Values, tank.GetValue("fill")));
+        Assert.False(fine.Holds(world.Values, tank.GetValue("fill")));
 
         // The boundary belongs to "has plenty": is-low is Below, is-fine is AtLeast, so the
         // pair covers every reading exactly once and no level is both or neither.
         tank.SetFill(0.25);
-        Assert.False(low.Holds(tank.GetValue("fill")));
-        Assert.True(fine.Holds(tank.GetValue("fill")));
+        Assert.False(low.Holds(world.Values, tank.GetValue("fill")));
+        Assert.True(fine.Holds(world.Values, tank.GetValue("fill")));
     }
 
     [Fact]
@@ -433,10 +433,10 @@ public class PropertyTests
         var spare = tank.Kind.FindState("is-spare")!;
 
         tank.SetLabel("main");
-        Assert.False(spare.Holds(tank.GetValue("label")));
+        Assert.False(spare.Holds(world.Values, tank.GetValue("label")));
 
         tank.SetLabel("spare");
-        Assert.True(spare.Holds(tank.GetValue("label")));
+        Assert.True(spare.Holds(world.Values, tank.GetValue("label")));
     }
 
     [Fact]
@@ -448,7 +448,7 @@ public class PropertyTests
 
         Assert.Equal(ValueKind.Flag, door.Kind.FindProperty("open")!.Kind);
         Assert.Equal(Relation.Is, open.Relation);
-        Assert.True(open.Operand.Flag);
+        Assert.True(world.Values.Flag(ValueKind.Flag, open.Operand));
     }
 
     /// <summary>Only a number can be above something; anything can equal something.</summary>
@@ -458,6 +458,6 @@ public class PropertyTests
         Assert.True(Relations.Suits(Relation.Is, ValueKind.Text));
         Assert.False(Relations.Suits(Relation.Above, ValueKind.Text));
         Assert.False(Relations.Suits(Relation.Above, ValueKind.Flag));
-        Assert.True(Relations.Suits(Relation.Above, ValueKind.Number));
+        Assert.True(Relations.Suits(Relation.Above, ValueKind.Real));
     }
 }

@@ -75,7 +75,7 @@ static class Kinds
     /// </summary>
     public static readonly EntityKind Tank = new EntityKind("tank", "Hydrogen Tank")
         .WithIcon("tank")
-        .WithProperty("fill", ValueKind.Number, "fill level")
+        .WithProperty("fill", ValueKind.Real, "fill level")
         .WithState("is-low", "fill", Relation.Below, EntityValue.Of(0.25), "is low")
         .WithState("is-fine", "fill", Relation.AtLeast, EntityValue.Of(0.25), "has plenty");
 

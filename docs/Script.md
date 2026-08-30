@@ -290,6 +290,65 @@ relations that mean something for the property just chosen.
 explain why a relation is not on offer, rather than silently having a shorter list. Same shape as
 `Blocked` and the problem line: a refusal that can say why.
 
+### How a value is built - BUILT
+
+Five kinds so far: `Flag`, `Integer`, `Real`, `Text`, `Color`. The shape is settled by what the
+whitelist allows rather than by preference - there are no unions and no reinterpretation worth
+having, since `FieldOffsetAttribute`, `GCHandle`, `IntPtr` and `Marshal` are all prohibited and the
+routes that do pass all allocate. See `docs/Catalogue.md`.
+
+**An `EntityValue` is eight bytes: one long, and nothing else.** No kind tag and no reference.
+
+**The kind is not a property of the value, it is a property of the declaration.** A reading is a
+reading of a declared property; an operand is attached to a declared state. A value never floats
+free, so it never has to carry what it is - `EntityState` takes the kind from its property when the
+state is added, so the two cannot disagree.
+
+**Anything that fits in the long is in the long** - a flag, a whole number, a real through
+`BitConverter`, a packed colour - and can be made with no context at all: `EntityValue.Of(true)`.
+That is why the change did not spread: every extension that reads a flag or a number is untouched.
+
+**Anything wider is a slot** into a list held by `Values`, one list per wide kind. So a matrix would
+live unboxed inside an array rather than as a heap object of its own, and adding a kind never grows
+the value whatever the kind is made of. This is the part that a reference payload could not do: an
+`object` means one heap object per value, in a loop that runs sixty times a second.
+
+**A reading owns its slot and writes into it.** `Values.Text(slot, text)` reuses the slot the reading
+already has, so a property read every tick takes one slot for the life of the world rather than one
+per tick. The lists grow to hold what is live at once and then stop.
+
+**Reading a value goes through `Values`**, which has both the kind and the lists - `TryInteger`,
+`TryReal`, `TryText`, `TryColor`. A property answering `Red` on a text would hand back a byte of
+something else and the caller would never know. Two coercions survive and are named as such:
+`AsNumber`, which is what a relation compares and why a flag reads one or zero, and `AsText`.
+
+**One store per world**, on `IWorld`, because a comparison meets a reading its entities produced and
+an operand declared on one of their kinds, and a slot only means anything against the lists it came
+from. Both comparison sites already had the world in scope, which is why this did not go viral.
+
+Two things fell out rather than being decided:
+
+**A declaration carrying a wide operand must be built against the store it will be compared in.**
+Only declarations whose operands fit in eight bytes can be static - which is why the test fixture's
+tank kind became a method taking `Values` while its flag-only neighbours stayed static fields.
+
+**Slots are one-based**, because `default(EntityValue)` is zero and a reading that has not been given
+a slot yet has to be told apart from one holding the first. Getting that wrong made the first text
+reading overwrite the first text literal.
+
+### Still to prove
+
+**Only text uses a slot today.** The machinery is right but it has not carried anything genuinely
+wide, so the shape of a matrix list - and whether a host can reasonably keep one - is untested.
+
+**Holding a reading is not the same as holding a value.** A reading rewrites its own slot, so
+something that keeps one and reads again finds the contents changed underneath it. Fine for a
+comparison, which happens immediately; a rule to state properly before anything stores one.
+
+**The operator table is half of one.** `Relation` is comparison. Arithmetic is a second axis and does
+not exist yet - and it will, because a scripting language that cannot do maths is a poor one. When it
+arrives, *which operators apply to which kinds* has to answer for both.
+
 ## Canonical, not a projection
 
 Settled, and it is forced rather than chosen: **there is nothing else to project from.** The model
@@ -557,10 +616,46 @@ entity-id grounds alone:
 | `StringBuilder` | `Text` |
 | `Color` | `Color` |
 
-**`Color` is the sixth type**, settled. A `Vector` would lose alpha and pretend a colour is a
-position; a packed `Integer` is unreadable in a file and unorderable in a comparison. It supports
-equality and nothing else, which is a very small row in the operator table, and `#FF8800` being
-readable where `4294934528` is not is itself an argument for the type being real.
+**`Color` is a type of its own**, settled. A packed `Integer` is unreadable in a file and unorderable
+in a comparison, and `#FF8800` being readable where `4294934528` is not is itself an argument. It
+supports equality and nothing else, which is a very small row in the operator table.
+
+### How a value is built - PROVISIONAL
+
+**Not settled.** What follows is where the reasoning landed, and it is what the code currently does,
+but it has not met a real wide reading and the lifetime rule it implies is a docblock rather than
+anything enforced. Treat the payload shape as open. What is unlikely to move is the
+`Integer`/`Real` split and its reason, kind-checked access, and `Color` being a kind.
+
+Five kinds so far - `Flag`, `Integer`, `Real`, `Text`, `Color` - and the shape is settled by what the
+whitelist allows rather than by preference. There are no unions and no reinterpretation worth having;
+`FieldOffsetAttribute`, `GCHandle`, `IntPtr` and `Marshal` are all prohibited, and the routes that do
+pass all allocate. See `docs/Catalogue.md`.
+
+**So a value is a kind, one 64-bit field, and one reference.** Anything eight bytes or under lives in
+the number - a double and a whole number are both sixty-four bits, so `BitConverter` lets them share
+it, a colour packs into it, and a flag is worked out rather than stored. Anything wider lives behind
+the reference, which is what text already does.
+
+**There is no payload width that would hold everything, and that is not a guess.** Vectors are
+certain and matrices are likely; `MatrixD` is sixteen doubles. Sizing the inline payload for the
+widest kind stops being a trade at that point. This way the struct is twenty-four bytes whatever
+arrives, and every new kind is free.
+
+**Getting a value out is kind-checked.** `TryInteger`, `TryReal`, `TryText`, `TryColor`. A property
+answering `Red` on a text would hand back a byte of something else and the caller would never know,
+which is the failure the type exists to prevent. Two coercions survive and are named as such:
+`AsNumber()`, which is what a relation compares and why a flag reads one or zero, and `AsText()`.
+
+**The price, and it must be written down before the first wide kind rather than after:** whoever
+exposes one hands back storage it owns and reuses, never a fresh allocation per tick - so **a reading
+that carries wide data is valid only until the next read from that entity**. A literal written in a
+script owns its payload; a reading borrows one. Boxing per read would put an allocation in the 60Hz
+loop, which is the one thing the struct exists to prevent.
+
+**And the operator table we have is half of one.** `Relation` is comparison. Arithmetic is a second
+axis that does not exist yet - and it will, because a scripting language that cannot do maths is a
+poor one. When it arrives, *which operators apply to which kinds* has to answer for both.
 
 **Actions come in triples** - `Open`, `Open_On`, `Open_Off` - and they are derived from a boolean
 property of the same name.
@@ -595,7 +690,7 @@ authoring them.
 
 ## Still open
 
-Two, and both are blocked on the same thing rather than on argument.
+None of these is an argument still running - each says what would settle it.
 
 **What a kind means as a constraint.** `Door/LargeBlockDoor` is a definition, right for finding the
 same block again. A premade airlock does not need that exact door - it needs *something that opens

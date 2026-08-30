@@ -21,7 +21,7 @@ public class ProgramTextTests
 
         var airlock = program.AddSystem();
         airlock.Name = "Airlock";
-        airlock.Description = "Cycles the front airlock";
+        airlock.Annotation = "Cycles the front airlock";
         airlock.AddInstance().Name = "Port";
 
         var when = new WhenTrigger("pressed");
@@ -32,10 +32,12 @@ public class ProgramTextTests
         var out1 = program.AddSequence(airlock, when);
         out1.Name = "Let me out";
         out1.Enabled = false;
+        out1.Annotation = "Inside to outside.";
 
         var close = new Step("close");
         close.Targets.Add(1);
         close.WaitsForCompletion = true;
+        close.Annotation = "the vent needs the full sixty seconds";
         out1.Steps.Add(close);
 
         var pause = new Step("");
@@ -118,7 +120,7 @@ public class ProgramTextTests
 
         var airlock = after.Systems[0];
         Assert.Equal("Airlock", airlock.Name);
-        Assert.Equal("Cycles the front airlock", airlock.Description);
+        Assert.Equal("Cycles the front airlock", airlock.Annotation);
         Assert.True(airlock.Enabled);
         Assert.Equal(2, airlock.Instances.Count);
         Assert.Equal("Port", airlock.Instances[1].Name);
@@ -170,7 +172,7 @@ public class ProgramTextTests
         var program = new Automation();
         var system = program.AddSystem();
         system.Name = @"Air|lock \ 2";
-        system.Description = "line one\nline two";
+        system.Annotation = "line one\nline two";
 
         var sequence = program.AddSequence(system, new CalledTrigger());
         sequence.Name = "|||";
@@ -179,7 +181,7 @@ public class ProgramTextTests
         ProgramText.Load(ProgramText.Save(program), after);
 
         Assert.Equal(@"Air|lock \ 2", after.Systems[0].Name);
-        Assert.Equal("line one\nline two", after.Systems[0].Description);
+        Assert.Equal("line one\nline two", after.Systems[0].Annotation);
         Assert.Equal("|||", after.Sequences[0].Name);
     }
 

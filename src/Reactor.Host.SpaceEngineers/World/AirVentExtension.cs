@@ -41,7 +41,7 @@ namespace Reactor.Host.SpaceEngineers.World
         {
             kind.WithProperty(Air, "has air")
                 .WithProperty(Empty, "is empty")
-                .WithProperty(Level, ValueKind.Number, "oxygen level")
+                .WithProperty(Level, ValueKind.Real, "oxygen level")
                 .WithProperty(Sealed_, "airtight")
                 .WithEvent("filled", Air, Edge.Rising, "finishes filling")
                 .WithEvent("emptied", Empty, Edge.Rising, "finishes emptying")

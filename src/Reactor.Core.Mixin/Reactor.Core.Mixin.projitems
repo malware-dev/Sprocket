@@ -90,5 +90,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ui\ConformancePoint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)World\Relations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)World\ValueKind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\Values.cs" />
   </ItemGroup>
 </Project>

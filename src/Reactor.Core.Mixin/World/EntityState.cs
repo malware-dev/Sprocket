@@ -20,10 +20,12 @@ namespace Reactor.World
     /// </remarks>
     public sealed class EntityState
     {
-        public EntityState(string id, string propertyId, Relation relation, EntityValue operand, string text)
+        public EntityState(
+            string id, string propertyId, ValueKind kind, Relation relation, EntityValue operand, string text)
         {
             Id = id;
             PropertyId = propertyId;
+            Kind = kind;
             Relation = relation;
             Operand = operand;
             Text = text;
@@ -34,6 +36,15 @@ namespace Reactor.World
 
         /// <summary>The property this reads.</summary>
         public string PropertyId { get; private set; }
+
+        /// <summary>
+        /// What sort of reading that property gives.
+        /// </summary>
+        /// <remarks>
+        /// Carried here because a value does not carry its own kind - the declaration does, and this is
+        /// the declaration. Taken from the property when the state is added, so the two cannot disagree.
+        /// </remarks>
+        public ValueKind Kind { get; private set; }
 
         public Relation Relation { get; private set; }
 
@@ -46,9 +57,9 @@ namespace Reactor.World
         /// </summary>
         public string Text { get; private set; }
 
-        public bool Holds(EntityValue reading)
+        public bool Holds(Values values, EntityValue reading)
         {
-            return Relations.Holds(reading, Relation, Operand);
+            return Relations.Holds(values, Kind, reading, Relation, Operand);
         }
     }
 }

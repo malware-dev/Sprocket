@@ -64,6 +64,9 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <c>OnBlockAdded</c> and <c>OnBlockRemoved</c> mark it stale instead. Same answer, paid for once
         /// per change rather than once per look.
         /// </remarks>
+        /// <summary>The values this world deals in, and the lists behind the wide ones.</summary>
+        public Values Values { get; } = new Values();
+
         public IReadOnlyList<IEntity> Entities
         {
             get

@@ -1,64 +1,64 @@
+using System;
+
 namespace Reactor.World
 {
     /// <summary>
-    /// One reading off an entity.
+    /// One reading off an entity, or one literal written in a script.
     /// </summary>
     /// <remarks>
-    /// A struct, and deliberately not <c>object</c>. Every running sequence reads properties
-    /// on every tick, on a server with many constructs; boxing a bool that often would put
-    /// the garbage collector in the game's update loop, which is the one place it must never
-    /// be. Holding a string reference in a struct field costs nothing - the string is already
-    /// a reference, and nothing here copies one.
-    ///
-    /// A flag is a value like any other, and so is a name. A boolean is a property whose readings
-    /// happen to be true and false, no more special than a fill level or the name somebody gave a
-    /// block, so nothing here treats it as the primitive.
+    /// Eight bytes, and opaque. What is inside depends on the kind, and the kind is not here - it is
+    /// a property of the <i>declaration</i>, which is where a value always comes from. A reading is a
+    /// reading of a declared property; an operand is attached to a declared state. A value never
+    /// floats free, so it never has to carry what it is.
+    /// <para>
+    /// Anything that fits in sixty-four bits is here directly, and can be made without anything else:
+    /// a flag, a whole number, a real through <c>BitConverter</c>, a packed colour. Anything wider is
+    /// a slot in <see cref="Values" /> - so a matrix would live unboxed inside an array rather than as
+    /// a heap object of its own, and the value naming it is still eight bytes. Adding a kind never
+    /// grows this, whatever the kind is made of.
+    /// </para>
+    /// <para>
+    /// Reading one goes through <see cref="Values" />, which has both the kind and the lists, so a
+    /// colour cannot be read off a text by accident.
+    /// </para>
     /// </remarks>
     public struct EntityValue
     {
-        // Chained through the default constructor because core is pinned to C# 6, where a
-        // struct may not touch its own auto-properties until every field is assigned.
-        EntityValue(ValueKind kind, bool flag, double number, string text) : this()
+        internal EntityValue(long bits) : this()
         {
-            Kind = kind;
-            Flag = flag;
-            Number = number;
-            _text = text;
+            Bits = bits;
         }
 
         public static EntityValue Of(bool flag)
         {
-            return new EntityValue(ValueKind.Flag, flag, flag ? 1 : 0, flag ? "yes" : "no");
+            return new EntityValue(flag ? 1 : 0);
         }
-
-        public static EntityValue Of(double number)
-        {
-            return new EntityValue(ValueKind.Number, number != 0, number, null);
-        }
-
-        public static EntityValue Of(string text)
-        {
-            return new EntityValue(ValueKind.Text, !string.IsNullOrEmpty(text), 0, text);
-        }
-
-        public ValueKind Kind { get; private set; }
-
-        /// <summary>The reading as a flag. A number is false at zero, a text when it is empty.</summary>
-        public bool Flag { get; private set; }
-
-        /// <summary>The reading as a number. A flag reads one or zero.</summary>
-        public double Number { get; private set; }
 
         /// <summary>
-        /// The reading as text, never null.
+        /// A whole number, held exactly.
         /// </summary>
         /// <remarks>
-        /// A number gives back nothing here rather than a rendering of itself. How a number
-        /// is written - decimals, thousands, a unit - is presentation, and core deciding it
-        /// once for everybody is exactly the sort of thing the host is meant to own.
+        /// Why <see cref="ValueKind.Integer" /> is not <see cref="ValueKind.Real" />: a double holds
+        /// integers exactly only to 2^53, and an entity id runs to seventeen digits. One that went
+        /// through a double would come back a different id, silently.
         /// </remarks>
-        public string Text { get { return _text ?? ""; } }
+        public static EntityValue Of(long integer)
+        {
+            return new EntityValue(integer);
+        }
 
-        readonly string _text;
+        public static EntityValue Of(double real)
+        {
+            return new EntityValue(BitConverter.DoubleToInt64Bits(real));
+        }
+
+        /// <summary>A colour, packed rather than given a list of its own. It fits.</summary>
+        public static EntityValue Of(byte r, byte g, byte b, byte a)
+        {
+            return new EntityValue(((long)r << 24) | ((long)g << 16) | ((long)b << 8) | a);
+        }
+
+        /// <summary>Meaningless without the kind. See <see cref="Values" />.</summary>
+        internal long Bits { get; private set; }
     }
 }

@@ -102,7 +102,10 @@ namespace Reactor.World
         /// </remarks>
         public EntityKind WithState(string id, string propertyId, Relation relation, EntityValue operand, string text)
         {
-            _states.Add(new EntityState(id, propertyId, relation, operand, text));
+            var property = FindProperty(propertyId);
+            var kind = property == null ? ValueKind.Flag : property.Kind;
+
+            _states.Add(new EntityState(id, propertyId, kind, relation, operand, text));
             return this;
         }
 

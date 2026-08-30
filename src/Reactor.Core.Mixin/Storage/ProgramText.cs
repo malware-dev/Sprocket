@@ -35,7 +35,7 @@ namespace Reactor.Storage
             {
                 var system = systems[i];
                 Line(text, "system", Num(system.Id), OnOff(system.Enabled),
-                    Escape(system.Name), Escape(system.Description));
+                    Escape(system.Name), Escape(system.Annotation));
 
                 // What the author wrote about the parts, before the ones that fill them in, so
                 // a reader meets the vocabulary before the answers.
@@ -84,7 +84,7 @@ namespace Reactor.Storage
         static void WriteSequence(StringBuilder text, Sequence sequence)
         {
             Line(text, "sequence", Num(sequence.Id), OnOff(sequence.Enabled),
-                Escape(sequence.Name));
+                Escape(sequence.Name), Escape(sequence.Annotation));
 
             var when = sequence.Trigger as WhenTrigger;
             if (when != null)
@@ -104,7 +104,8 @@ namespace Reactor.Storage
             {
                 var step = sequence.Steps[i];
                 Line(text, "step", Escape(step.ActionId),
-                    step.WaitsForCompletion ? "wait" : "now", Ids(step.Targets));
+                    step.WaitsForCompletion ? "wait" : "now", Ids(step.Targets),
+                    Escape(step.Annotation));
 
                 var after = step.Gate as AfterGate;
                 if (after != null)
@@ -157,7 +158,7 @@ namespace Reactor.Storage
                         system = program.Restore(Int(parts, 1));
                         system.Enabled = At(parts, 2) != "off";
                         system.Name = Unescape(At(parts, 3));
-                        system.Description = Unescape(At(parts, 4));
+                        system.Annotation = Unescape(At(parts, 4));
                         instance = null;
                         sequence = null;
                         step = null;
@@ -191,6 +192,7 @@ namespace Reactor.Storage
                         sequence = program.Restore(system, Int(parts, 1), new CalledTrigger());
                         sequence.Enabled = At(parts, 2) != "off";
                         sequence.Name = Unescape(At(parts, 3));
+                        sequence.Annotation = Unescape(At(parts, 4));
                         step = null;
                         break;
 
@@ -219,6 +221,7 @@ namespace Reactor.Storage
                         step = new Step(Unescape(At(parts, 1)));
                         step.WaitsForCompletion = At(parts, 2) != "now";
                         ReadIds(At(parts, 3), step.Targets);
+                        step.Annotation = Unescape(At(parts, 4));
                         sequence.Steps.Add(step);
                         break;
 

@@ -26,9 +26,20 @@ namespace Reactor.Sequences
             Id = id;
             Trigger = trigger;
             Enabled = true;
+            Annotation = "";
         }
 
         public int Id { get; private set; }
+
+        /// <summary>
+        /// What somebody wrote about this, in their own words, or empty.
+        /// </summary>
+        /// <remarks>
+        /// Data somebody typed, not a comment: it is part of the model, round-tripped like a name, and
+        /// shown by whatever is drawing. What a target labels it on screen - "description", "notes",
+        /// anything, in any language - is the host's word and has no bearing on this one.
+        /// </remarks>
+        public string Annotation { get; set; }
 
         /// <summary>What the user calls this, e.g. "Let me out". May be empty.</summary>
         public string Name { get; set; }

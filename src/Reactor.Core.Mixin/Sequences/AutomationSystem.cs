@@ -27,7 +27,7 @@ namespace Reactor.Sequences
         {
             Id = id;
             Name = "";
-            Description = "";
+            Annotation = "";
             Enabled = true;
         }
 
@@ -52,7 +52,15 @@ namespace Reactor.Sequences
         /// A label to its author and the only explanation anybody who receives it will ever
         /// get, so it travels with the system when it is shared.
         /// </remarks>
-        public string Description { get; set; }
+        /// <summary>
+        /// What somebody wrote about this, in their own words, or empty.
+        /// </summary>
+        /// <remarks>
+        /// Data somebody typed, not a comment: it is part of the model, round-tripped like a name, and
+        /// shown by whatever is drawing. What a target labels it on screen - "description", "notes",
+        /// anything, in any language - is the host's word and has no bearing on this one.
+        /// </remarks>
+        public string Annotation { get; set; }
 
         /// <summary>
         /// Whether this system may run at all.

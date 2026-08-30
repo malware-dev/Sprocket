@@ -19,7 +19,18 @@ namespace Reactor.Sequences
         {
             ActionId = actionId;
             WaitsForCompletion = true;
+            Annotation = "";
         }
+
+        /// <summary>
+        /// What somebody wrote about this, in their own words, or empty.
+        /// </summary>
+        /// <remarks>
+        /// Data somebody typed, not a comment: it is part of the model, round-tripped like a name, and
+        /// shown by whatever is drawing. What a target labels it on screen - "description", "notes",
+        /// anything, in any language - is the host's word and has no bearing on this one.
+        /// </remarks>
+        public string Annotation { get; set; }
 
         /// <summary>When this step may start, or null to start immediately.</summary>
         /// <remarks>

@@ -20,6 +20,9 @@ sealed class SimWorld : IWorld
     readonly List<SimEntity> _entities = [];
     readonly Dictionary<long, SimEntity> _byId = [];
 
+    /// <summary>The values this world deals in, and the lists behind the wide ones.</summary>
+    public Values Values { get; } = new Values();
+
     public IReadOnlyList<IEntity> Entities => _entities;
 
     /// <summary>
@@ -42,6 +45,7 @@ sealed class SimWorld : IWorld
 
     public T Add<T>(T entity) where T : SimEntity
     {
+        entity.Store = Values;
         _entities.Add(entity);
         _byId[entity.Id] = entity;
         return entity;

@@ -95,6 +95,29 @@ controls should be created".
 filters on capability; an extension filters on knowledge. A denylist of ids would be wrong
 the first time a mod added one of its own.
 
+### There is no way to reinterpret memory
+
+Test-compiled, because it decides how a discriminated value type has to be built.
+
+| Route | Verdict |
+|---|---|
+| `[StructLayout(LayoutKind.Explicit)]` | passes, which makes it look available |
+| `FieldOffsetAttribute` | **prohibited** - so no unions |
+| `GCHandle`, `IntPtr`, `Marshal` | **prohibited** - so no pinning and no address-of |
+| `BitConverter.DoubleToInt64Bits` | allowed |
+| `Buffer.BlockCopy` | allowed |
+| `decimal.GetBits`, `new decimal(int[])` | allowed |
+| `new Guid(byte[])` | allowed |
+
+The three allowed reinterpretations all go through an array, and `decimal` and `Guid` have no
+non-allocating way back out - `GetBits` returns a fresh `int[]` every call. So for anything read on
+every tick they are worse than the problem.
+
+**What that leaves:** a discriminated value is a kind tag, one 64-bit field for anything that fits,
+and a reference for anything that does not. `BitConverter` is what lets a `double` and a `long` share
+the one field. There is no payload width that would hold everything - `MatrixD` is sixteen doubles -
+so the reference is not a fallback, it is the design. See `EntityValue` and `docs/Script.md`.
+
 ### What the direct layer reaches
 
 Almost nothing. Test-compiled against the MDK2 analyzer:

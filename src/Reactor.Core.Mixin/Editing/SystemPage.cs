@@ -41,7 +41,7 @@ namespace Reactor.Editing
         /// ever get. Empty until somebody writes one, and empty reads as nothing rather than
         /// as a blank waiting to be filled.
         /// </remarks>
-        public override string Subtitle { get { return _system.Description; } }
+        public override string Subtitle { get { return _system.Annotation; } }
 
         /// <summary>
         /// The whole system, running or parked.
