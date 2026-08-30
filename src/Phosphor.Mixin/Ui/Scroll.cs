@@ -1,21 +1,17 @@
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// Shows part of something taller than the room available, and cuts the rest off.
+    /// <summary>Shows part of something taller than the room available, and cuts the rest off.</summary>
+    /// <remarks>
+    /// Content arranged higher than the box it sits in, and the clip that stops it spilling. It therefore
+    /// needs nothing of a backend that a clipped panel could not also do.
     /// <para>
-    /// Built out of the two things that already exist rather than out of anything new: content arranged
-    /// higher than the box it sits in, and the clip that stops it spilling. Which means it works on either
-    /// target for the same reason a clipped panel does, and needs nothing of a backend that a panel could
-    /// not also do.
+    /// One direction at a time, chosen by <see cref="Horizontal" />: a list of rows scrolls down, and a
+    /// strip of columns scrolls across.
     /// </para>
-    /// <para>
-    /// One direction at a time, chosen by <see cref="Horizontal" />. Both at once is a different thing
-    /// with a different feel, and nothing here wants it: a list of rows scrolls down, and a strip of
-    /// columns scrolls across.
-    /// </para>
-    /// </summary>
+    /// </remarks>
     public class Scroll : Element
     {
         private float _barWidth;

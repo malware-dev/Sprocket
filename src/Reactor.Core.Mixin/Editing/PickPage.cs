@@ -87,15 +87,15 @@ namespace Reactor.Editing
         /// answer is now.
         /// </summary>
         /// <remarks>
-        /// The page keeps its own answer and hands it back when somebody says they are done.
-        /// It used to be given the step's own list of targets and tick entries straight into
-        /// it, which meant a tentative tap was already an edit to a sequence that might be
-        /// running - the system acting on a decision nobody had finished making - and Back
-        /// had nothing to back out of.
-        ///
-        /// Live editing is still the rule for the program as a whole: there is no Save button
-        /// anywhere and there should not be. It just cannot mean that every tap in the middle
-        /// of choosing is committed.
+        /// The page keeps its own answer and hands it back when somebody says they are done. Ticking
+        /// entries straight into the step would make a tentative tap an edit to a sequence that might
+        /// be running - the system acting on a decision nobody had finished making - and would leave
+        /// back with nothing to back out of.
+        /// <para>
+        /// Live editing is still the rule for the program as a whole: there is no save button anywhere
+        /// and there should not be. It just cannot mean that every tap in the middle of choosing is
+        /// committed.
+        /// </para>
         /// </remarks>
         public PickPage(ReactorEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Action<PickAnswer> done,

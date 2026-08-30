@@ -1,16 +1,13 @@
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// Puts its children in a line, down the screen or across it.
-    /// <para>
-    /// The only container to start with, because it is the one every other layout turns out to be a special
-    /// case of, and because a second one written before the first has a consumer would be guesswork. Give it
-    /// a <see cref="Element.Background" /> and it is a panel; set <see cref="Element.ClipsContent" /> and it
-    /// is the beginnings of a scrolling one.
-    /// </para>
-    /// </summary>
+    /// <summary>Puts its children in a line, down the screen or across it.</summary>
+    /// <remarks>
+    /// Give it a <see cref="Element.Background" /> and it is a panel; set
+    /// <see cref="Element.ClipsContent" /> and it is the beginnings of a scrolling one.
+    /// </remarks>
     public class Stack : Element
     {
         private bool _horizontal;

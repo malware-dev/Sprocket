@@ -1,0 +1,65 @@
+window        1920 x 1080
+safe gui area {X:240 Y:0 W:1440 H:1080}
+UI size       {X:1440 Y:1080}
+screen bounds {X:-240 Y:-0 W:1920 H:1080}
+on screen     When something happens  |  Start by picking one or more blocks
+
+000  Sprite     Phosphor_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
+001  SetClip    {X:259 Y:142 W:1402 H:812}
+002  Sprite     Phosphor_Fill         {X:259 Y:142 W:460 H:800}  #29363EFF
+003  Sprite     Phosphor_Fill         {X:259 Y:142 W:460 H:1}  #5B737BFF
+004  Sprite     Phosphor_Fill         {X:259 Y:941 W:460 H:1}  #5B737BFF
+005  Sprite     Phosphor_Fill         {X:259 Y:142 W:1 H:800}  #5B737BFF
+006  Sprite     Phosphor_Fill         {X:718 Y:142 W:1 H:800}  #5B737BFF
+007  SetClip    {X:275 Y:347 W:428 H:579}
+008  Text       at {X:378.8 Y:361.462} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
+009  Text       at {X:378.8 Y:386.942} scale 0.5  #85A1A9FF  "Door   shut"
+010  Sprite     Phosphor_Fill         {X:288 Y:375 W:17 H:1}  #85A1A9FF
+011  Sprite     Phosphor_Fill         {X:288 Y:391 W:17 H:1}  #85A1A9FF
+012  Sprite     Phosphor_Fill         {X:288 Y:375 W:1 H:17}  #85A1A9FF
+013  Sprite     Phosphor_Fill         {X:304 Y:375 W:1 H:17}  #85A1A9FF
+014  Sprite     Phosphor_Fill         {X:315 Y:356 W:54 H:54}  #374851FF
+015  Sprite     Reactor_Block_door    {X:315 Y:356 W:54 H:54}  #FFFFFFFF
+016  Text       at {X:378.8 Y:437.66202} scale 0.64  #DCF5FDFF  "Airlock Outer Door"
+017  Text       at {X:378.8 Y:463.142} scale 0.5  #85A1A9FF  "Door   shut"
+018  Sprite     Phosphor_Fill         {X:288 Y:451 W:17 H:1}  #85A1A9FF
+019  Sprite     Phosphor_Fill         {X:288 Y:467 W:17 H:1}  #85A1A9FF
+020  Sprite     Phosphor_Fill         {X:288 Y:451 W:1 H:17}  #85A1A9FF
+021  Sprite     Phosphor_Fill         {X:304 Y:451 W:1 H:17}  #85A1A9FF
+022  Sprite     Phosphor_Fill         {X:315 Y:433 W:54 H:54}  #374851FF
+023  Sprite     Reactor_Block_door    {X:315 Y:433 W:54 H:54}  #FFFFFFFF
+024  Text       at {X:378.8 Y:513.862} scale 0.64  #DCF5FDFF  "Hangar Door"
+025  Text       at {X:378.8 Y:539.342} scale 0.5  #85A1A9FF  "Door   shut"
+026  Sprite     Phosphor_Fill         {X:288 Y:527 W:17 H:1}  #85A1A9FF
+027  Sprite     Phosphor_Fill         {X:288 Y:543 W:17 H:1}  #85A1A9FF
+028  Sprite     Phosphor_Fill         {X:288 Y:527 W:1 H:17}  #85A1A9FF
+029  Sprite     Phosphor_Fill         {X:304 Y:527 W:1 H:17}  #85A1A9FF
+030  Sprite     Phosphor_Fill         {X:315 Y:509 W:54 H:54}  #374851FF
+031  Sprite     Reactor_Block_door    {X:315 Y:509 W:54 H:54}  #FFFFFFFF
+032  SetClip    {X:259 Y:142 W:1402 H:812}
+033  Text       at {X:275 Y:158.102} scale 0.64  #DCF5FDFF  "BLOCKS"
+034  Text       at {X:275 Y:187.78201} scale 0.5  #85A1A9FF  "none picked"
+035  Sprite     Phosphor_Fill         {X:275 Y:212 W:428 H:37}  #141B20FF
+036  Sprite     Phosphor_Fill         {X:275 Y:212 W:428 H:1}  #5B737BFF
+037  Sprite     Phosphor_Fill         {X:275 Y:248 W:428 H:1}  #5B737BFF
+038  Sprite     Phosphor_Fill         {X:275 Y:212 W:1 H:37}  #5B737BFF
+039  Sprite     Phosphor_Fill         {X:702 Y:212 W:1 H:37}  #5B737BFF
+040  Text       at {X:287.8 Y:220.08202} scale 0.57  #DCF5FDFF  "door"
+041  Sprite     Phosphor_Fill         {X:321 Y:220 W:2 H:21}  #DCF5FDFF
+042  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Anything"
+043  Text       at {X:369.97064 Y:259.772} scale 0.57  #A2C3CDFF  "v"
+044  Text       at {X:275 Y:291.66202} scale 0.5  #85A1A9FF  "3 of 10"
+045  Text       at {X:292.02625 Y:320.962} scale 0.57  #3ACC00FF  "0"
+046  Text       at {X:314.8 Y:320.962} scale 0.57  #DCF5FDFF  "any one"
+047  Text       at {X:415.8675 Y:320.962} scale 0.57  #85A1A9FF  "o"
+048  Text       at {X:439.01288 Y:320.962} scale 0.57  #A2C3CDFF  "all of them"
+049  ClearClip  
+050  Sprite     Phosphor_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+051  SetClip    {X:276 Y:55 W:290 H:33}
+052  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "When something happens"
+053  ClearClip  
+054  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
+055  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Start by picking one or more blocks"
+056  Sprite     Phosphor_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+057  Sprite     Phosphor_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+058  Sprite     Phosphor_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

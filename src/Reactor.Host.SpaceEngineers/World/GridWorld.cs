@@ -3,23 +3,30 @@ using System.Collections.Generic;
 using Reactor.World;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Ui;
 
-namespace Reactor.Host.SpaceEngineers
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// The construct the editor was opened on, as Reactor sees it.
-    /// <para>
+    /// </summary>
+    /// <remarks>
     /// <b>This is the universal floor and nothing more.</b> Every block gets the same small vocabulary -
     /// whether it is switched on, whether it is working, and the two actions that change the first. That is
     /// deliberate rather than unfinished: <c>docs/Catalogue.md</c> argues it is the one thing every block on
     /// the surface can answer, modded blocks included, and therefore the thing to build before anything that
     /// knows what a door is.
-    /// </para>
     /// <para>
     /// What is not here yet is the base layer proper, which reads a block's own terminal properties and
     /// actions, and the extensions above it.
     /// </para>
-    /// </summary>
+    /// </remarks>
     public sealed class GridWorld : IWorld, IDisposable
     {
         /// <summary>
@@ -229,187 +236,6 @@ namespace Reactor.Host.SpaceEngineers
         {
             DropListeners();
             Watch(new List<IMyCubeGrid>());
-        }
-    }
-
-    /// <summary>One block, answering the small set of questions every block can answer.</summary>
-    sealed class GridEntity : IEntity
-    {
-        internal const string OnProperty = "on";
-        internal const string WorkingProperty = "working";
-
-        readonly IMyTerminalBlock _block;
-        readonly EntityKind _kind;
-        readonly IBlockExtension _extension;
-        readonly IBlockListener _listener;
-
-        public GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension,
-            IBlockListener listener)
-        {
-            _block = block;
-            _kind = kind;
-            _extension = extension;
-            _listener = listener;
-        }
-
-        public long Id
-        {
-            get { return _block.EntityId; }
-        }
-
-        public string Name
-        {
-            get { return _block.CustomName; }
-        }
-
-        public EntityKind Kind
-        {
-            get { return _kind; }
-        }
-
-        /// <summary>
-        /// Live state in the player's own words.
-        /// </summary>
-        /// <remarks>
-        /// Four answers rather than two, because "off" and "no power" are different problems and telling
-        /// somebody the wrong one is worse than telling them nothing. Damage comes first because a damaged
-        /// block is not working for a reason no switch will fix.
-        /// </remarks>
-        public string Status
-        {
-            get
-            {
-                // What this block is doing, when something knows. "closing" beats "on" on a list of forty.
-                if (_extension != null)
-                {
-                    string told = _extension.StatusOf(_block);
-                    if (!string.IsNullOrEmpty(told))
-                        return told;
-                }
-
-                if (!_block.IsFunctional)
-                    return "damaged";
-
-                IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
-                if (functional != null && !functional.Enabled)
-                    return "off";
-
-                return _block.IsWorking ? "on" : "no power";
-            }
-        }
-
-        /// <summary>
-        /// Whether this block is doing something right now.
-        /// </summary>
-        /// <remarks>
-        /// Not whether it works. A row in the ship list lights up on this, and answering it with "powered
-        /// and switched on" lit every row on the ship, which made the light mean nothing at all. Only
-        /// something that knows the block can say it is in motion, so a block nobody has written an
-        /// extension for is never busy.
-        /// </remarks>
-        public bool IsActive
-        {
-            get { return _extension != null && _extension.IsBusy(_block); }
-        }
-
-        public EntityValue GetValue(string propertyId)
-        {
-            EntityValue told;
-
-            // What the block told us, then what it can be asked, then the floor every block stands on.
-            if (_listener != null && _listener.TryRead(propertyId, out told))
-                return told;
-
-            if (_extension != null && _extension.TryRead(_block, propertyId, out told))
-                return told;
-
-            if (propertyId == OnProperty)
-            {
-                IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
-                return EntityValue.Of(functional != null && functional.Enabled);
-            }
-
-            if (propertyId == WorkingProperty)
-                return EntityValue.Of(_block.IsWorking);
-
-            // An unknown name gives back a default rather than throwing: a saved sequence can outlive the
-            // vocabulary it was written against, and that is a thing to surface calmly.
-            return EntityValue.Of(false);
-        }
-
-        public void Invoke(string actionId)
-        {
-            if (_extension != null && _extension.TryInvoke(_block, actionId))
-                return;
-
-            IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
-            if (functional == null)
-                return;
-
-            if (actionId == BlockKinds.SwitchOn)
-                functional.Enabled = true;
-            else if (actionId == BlockKinds.SwitchOff)
-                functional.Enabled = false;
-        }
-    }
-
-    /// <summary>
-    /// One <see cref="EntityKind" /> per block definition, built the first time one of that block is seen.
-    /// </summary>
-    /// <remarks>
-    /// Per definition rather than one kind for everything, because the ship list groups by kind and a list
-    /// where every row says "Block" is not a list anybody can use. The vocabulary is identical across all of
-    /// them for now; what differs is the name the game gives the type.
-    /// </remarks>
-    sealed class BlockKinds
-    {
-        internal const string SwitchOn = "on";
-        internal const string SwitchOff = "off";
-
-        readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
-
-        public EntityKind For(IMyTerminalBlock block)
-        {
-            string id = block.BlockDefinition.TypeIdString + "/" + block.BlockDefinition.SubtypeName;
-
-            EntityKind kind;
-            if (_kinds.TryGetValue(id, out kind))
-                return kind;
-
-            string name = string.IsNullOrEmpty(block.DefinitionDisplayNameText)
-                ? block.BlockDefinition.SubtypeName
-                : block.DefinitionDisplayNameText;
-
-            // The block's own definition id doubles as its icon: the screen-space sprite API resolves
-            // one straight to that block's picture, so nothing has to be declared, extracted or shipped.
-            // It is the same string as the kind id, which is not a coincidence - both are "which block
-            // type is this".
-            kind = new EntityKind(id, name).WithIcon(id);
-
-            // What this block is, before what every block is, so a door offers "open" above "switch on".
-            IBlockExtension extension = BlockExtensions.For(block);
-            if (extension != null)
-                extension.Describe(kind);
-
-            kind.WithProperty(GridEntity.WorkingProperty, "working")
-                .WithState("is-working", GridEntity.WorkingProperty, true, "is working")
-                .WithState("is-not-working", GridEntity.WorkingProperty, false, "is not working");
-
-            // Only a block with a switch gets the words for one. A cargo container has no on and off, and
-            // offering them would be offering a sentence that cannot come true.
-            if (block is IMyFunctionalBlock)
-            {
-                kind.WithProperty(GridEntity.OnProperty, "switched on")
-                    .WithEvent("switched-on", GridEntity.OnProperty, Edge.Rising, "is switched on")
-                    .WithEvent("switched-off", GridEntity.OnProperty, Edge.Falling, "is switched off")
-                    .WithState("is-on", GridEntity.OnProperty, true, "is on")
-                    .WithState("is-off", GridEntity.OnProperty, false, "is off")
-                    .WithAction(SwitchOn, "switch on", "is-on")
-                    .WithAction(SwitchOff, "switch off", "is-off");
-            }
-
-            _kinds.Add(id, kind);
-            return kind;
         }
     }
 }

@@ -1,26 +1,64 @@
-using Phosphor;
-using Ship = Reactor.Host.System.Simulation;
+using Ship = Reactor.Sim.Machine.Simulation;
 using Reactor.Screens;
 using VRageMath;
+using Phosphor.Graphics;
+using Phosphor.Ui;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
     /// <summary>
     /// Reactor itself, running on a made-up ship, drawn the way the mod will draw it.
-    /// <para>
+    /// </summary>
+    /// <remarks>
     /// Three things meet here and none of them knows about the other two: core decides what is on screen,
     /// <see cref="EditorView" /> decides how this target draws it, and the simulated ship supplies a world
     /// and a clock. The same three meet in the mod, with the game supplying the third.
-    /// </para>
-    /// </summary>
+    /// </remarks>
     public sealed class EditorScene
     {
-        readonly Ship _ship = new Ship();
+        readonly Ship _ship;
         readonly EditorView _view;
 
-        public EditorScene()
+        public EditorScene() : this(new Ship())
         {
+        }
+
+        /// <summary>
+        /// A screen on a construct that remembers nothing.
+        /// </summary>
+        /// <remarks>
+        /// What anything running without a person in front of it wants. The windowed simulator keeps its
+        /// program between runs on purpose, because it is a playground - but a frame captured for
+        /// comparison, or a test, must not depend on what somebody last built by hand, and must not
+        /// write into that playground either.
+        /// </remarks>
+        public static EditorScene Nowhere()
+        {
+            return new EditorScene(Ship.Fresh());
+        }
+
+        EditorScene(Ship ship)
+        {
+            _ship = ship;
             _view = new EditorView(_ship.Editor);
+        }
+
+        /// <summary>
+        /// The editor itself, for anything that needs to drive it rather than press at it.
+        /// </summary>
+        /// <remarks>
+        /// A test that is about what the editor does, rather than about where this target puts it,
+        /// says so by coming through here instead of pressing coordinates.
+        /// </remarks>
+        public Reactor.Editing.ReactorEditor Editor
+        {
+            get { return _ship.Editor; }
         }
 
         /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
@@ -37,7 +75,7 @@ namespace Reactor.Sim.Simulation
         /// something the world does, and in the game a ship actually flies up to the sensor - so none of
         /// this is Reactor, and none of it goes anywhere the mod can compile.
         /// </remarks>
-        internal System.Collections.Generic.IEnumerable<Reactor.Host.System.SimEntity> Pokeable()
+        internal System.Collections.Generic.IEnumerable<Reactor.Sim.Machine.SimEntity> Pokeable()
         {
             return _ship.Pokeable();
         }
@@ -96,7 +134,7 @@ namespace Reactor.Sim.Simulation
         }
 
         /// <summary>The box that question is being answered in.</summary>
-        public Phosphor.TextBox AskBox
+        public Phosphor.Ui.TextBox AskBox
         {
             get { return _view.AskBox; }
         }
@@ -117,7 +155,7 @@ namespace Reactor.Sim.Simulation
         }
 
         /// <summary>The box the keyboard is in, when something on the screen has taken it.</summary>
-        public Phosphor.TextBox Focus
+        public Phosphor.Ui.TextBox Focus
         {
             get { return _view.Focus; }
         }
@@ -137,7 +175,7 @@ namespace Reactor.Sim.Simulation
         /// somebody types. The window and the headless harness both need that answer and must not be
         /// allowed to arrive at different ones.
         /// </remarks>
-        public Phosphor.TextBox Typing
+        public Phosphor.Ui.TextBox Typing
         {
             get { return _view.IsAsking ? _view.AskBox : _view.Focus; }
         }
@@ -152,7 +190,7 @@ namespace Reactor.Sim.Simulation
         /// </remarks>
         public void Clear()
         {
-            Phosphor.TextBox box = Typing;
+            Phosphor.Ui.TextBox box = Typing;
             if (box == null)
                 return;
 
@@ -164,7 +202,7 @@ namespace Reactor.Sim.Simulation
         /// <summary>Types <paramref name="text" /> into whatever has the keyboard.</summary>
         public void Type(string text)
         {
-            Phosphor.TextBox box = Typing;
+            Phosphor.Ui.TextBox box = Typing;
             if (box == null || string.IsNullOrEmpty(text))
                 return;
 

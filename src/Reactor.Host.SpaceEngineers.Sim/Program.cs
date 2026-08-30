@@ -1,11 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Text;
 using Avalonia;
 using Reactor.Sim.Content;
 using Reactor.Sim.Shell;
 using Reactor.Sim.Simulation;
 using VRageMath;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
 
 namespace Reactor.Sim
 {
@@ -51,18 +59,23 @@ namespace Reactor.Sim
                 return;
             }
 
+            if (args.Length > 2 && args[0] == "--suite")
+            {
+                BuildAvaloniaApp().SetupWithoutStarting();
+                Console.Write(Suite.Run(args[1], args[2]));
+                return;
+            }
+
             if (args.Length > 1 && args[0] == "--shot")
             {
                 BuildAvaloniaApp().SetupWithoutStarting();
 
-                // The size is worth being able to say, and worth defaulting to one somebody actually
-                // has. The screen is a fixed number of UI units that the game stretches to the monitor,
-                // so how big a letter lands is decided by this number and by nothing in the layout. The
-                // default used to be the window's own 1280x690, which draws the whole screen at
-                // two-thirds - small enough that a hairline diagonal in the font falls between the
-                // samples and a capital N comes out broken. That is the harness inventing a defect, and
-                // a judgement about legibility made at a size no player has is a judgement about
-                // nothing.
+                // Defaulted to a size somebody actually has. The screen is a fixed number of UI units
+                // that the game stretches to the monitor, so how big a letter lands is decided by this
+                // number and by nothing in the layout. At the window's own 1280x690 the whole screen
+                // draws at two-thirds, small enough that a hairline diagonal falls between the samples
+                // and a capital N comes out broken - the harness inventing a defect, and a judgement
+                // about legibility made at a size no player has.
                 int width = 1920;
                 int height = 1080;
                 int from = 2;
@@ -74,7 +87,7 @@ namespace Reactor.Sim
                     from = 5;
                 }
 
-                string ended = Shot.Save(args[1], width, height, Script(args, from));
+                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from));
                 Console.WriteLine("wrote " + args[1] + "   " + width + "x" + height);
                 Console.WriteLine("ended on: " + ended);
                 return;
@@ -85,7 +98,39 @@ namespace Reactor.Sim
                 // Avalonia is still set up, because text has to be measured and only it has a font. It is
                 // simply never started, so nothing is shown and nothing waits for a person.
                 BuildAvaloniaApp().SetupWithoutStarting();
-                Console.WriteLine(FrameDump.Render(1920f, 1080f));
+
+                float width = 1920f;
+                float height = 1080f;
+                int from = 1;
+                string into = null;
+
+                // A path first, or "-" to say out loud. Without one the whole line is a script, which
+                // keeps the bare --dump somebody types by hand working as it always has.
+                if (args.Length > 1 && !IsStep(args[1]))
+                {
+                    into = args[1] == "-" ? null : args[1];
+                    from = 2;
+                }
+
+                if (args.Length > from + 2 && args[from] == "at")
+                {
+                    width = float.Parse(args[from + 1], CultureInfo.InvariantCulture);
+                    height = float.Parse(args[from + 2], CultureInfo.InvariantCulture);
+                    from += 3;
+                }
+
+                string frame = FrameDump.Render(width, height, Script.Parse(args, from));
+
+                if (into == null)
+                {
+                    Console.Write(frame);
+                    return;
+                }
+
+                // Written without a byte order mark and with one kind of line ending, because these are
+                // compared against each other and a difference has to mean the screen changed.
+                File.WriteAllText(into, frame.Replace(Cr, string.Empty), new UTF8Encoding(false));
+                Console.WriteLine("wrote " + into + "   " + width + "x" + height);
                 return;
             }
 
@@ -101,113 +146,20 @@ namespace Reactor.Sim
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 
-        /// <summary>
-        /// Reads the rest of the command line as things to do to the screen, in order.
-        /// </summary>
-        /// <remarks>
-        /// A bare pair of numbers is a press, because that is nearly every line of nearly every script
-        /// and making the common case wordless is worth the small asymmetry. <c>tick n</c> advances the
-        /// ship's clock, which is the only way to reach anything drawn because a system is actually
-        /// running. <c>drag x y x y</c> picks something up and puts it down somewhere else,
-        /// <c>scroll x y n</c> turns the wheel over a point, <c>move x y</c> rests the pointer somewhere
-        /// without pressing it, and <c>type "words"</c>, <c>clear</c>, <c>enter</c> and <c>escape</c> work
-        /// whatever box currently has the keyboard.
-        /// </remarks>
-        static List<Shot.Step> Script(string[] args, int from)
+        /// <summary>The carriage return that a dump written for comparison does without.</summary>
+        static readonly string Cr = ((char)13).ToString();
+
+        /// <summary>Whether a word begins a script step rather than naming a file.</summary>
+        static bool IsStep(string word)
         {
-            var script = new List<Shot.Step>();
+            string bare = word.TrimStart('-');
 
-            for (int i = from; i < args.Length; i++)
-            {
-                string word = args[i].TrimStart('-');
+            if (bare == "at" || bare == "tick" || bare == "drag" || bare == "move" || bare == "scroll"
+                || bare == "type" || bare == "enter" || bare == "escape" || bare == "clear")
+                return true;
 
-                if (word == "tick" && i + 1 < args.Length)
-                {
-                    var tick = new Shot.Step();
-                    tick.Kind = Shot.Step.Tick;
-                    tick.Count = int.Parse(args[i + 1], CultureInfo.InvariantCulture);
-
-                    script.Add(tick);
-                    i += 1;
-                    continue;
-                }
-
-                if (word == "enter" || word == "escape" || word == "clear")
-                {
-                    var key = new Shot.Step();
-                    key.Kind = word == "enter"
-                        ? Shot.Step.Enter
-                        : word == "escape" ? Shot.Step.Escape : Shot.Step.Clear;
-
-                    script.Add(key);
-                    continue;
-                }
-
-                if (word == "type" && i + 1 < args.Length)
-                {
-                    var typed = new Shot.Step();
-                    typed.Kind = Shot.Step.Type;
-                    typed.Text = args[i + 1];
-
-                    script.Add(typed);
-                    i += 1;
-                    continue;
-                }
-
-                if (word == "move" && i + 2 < args.Length)
-                {
-                    var move = new Shot.Step();
-                    move.Kind = Shot.Step.Move;
-                    move.At = Point(args, i + 1);
-
-                    script.Add(move);
-                    i += 2;
-                    continue;
-                }
-
-                if (word == "scroll" && i + 3 < args.Length)
-                {
-                    var scroll = new Shot.Step();
-                    scroll.Kind = Shot.Step.Scroll;
-                    scroll.At = Point(args, i + 1);
-                    scroll.Amount = float.Parse(args[i + 3], CultureInfo.InvariantCulture);
-
-                    script.Add(scroll);
-                    i += 3;
-                    continue;
-                }
-
-                if (word == "drag" && i + 4 < args.Length)
-                {
-                    var drag = new Shot.Step();
-                    drag.Kind = Shot.Step.Drag;
-                    drag.At = Point(args, i + 1);
-                    drag.To = Point(args, i + 3);
-
-                    script.Add(drag);
-                    i += 4;
-                    continue;
-                }
-
-                if (i + 1 >= args.Length)
-                    break;
-
-                var press = new Shot.Step();
-                press.Kind = Shot.Step.Press;
-                press.At = Point(args, i);
-
-                script.Add(press);
-                i += 1;
-            }
-
-            return script;
-        }
-
-        static Vector2 Point(string[] args, int at)
-        {
-            return new Vector2(
-                float.Parse(args[at], CultureInfo.InvariantCulture),
-                float.Parse(args[at + 1], CultureInfo.InvariantCulture));
+            float ignored;
+            return float.TryParse(bare, NumberStyles.Float, CultureInfo.InvariantCulture, out ignored);
         }
 
         public static AppBuilder BuildAvaloniaApp()

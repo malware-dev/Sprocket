@@ -1,0 +1,44 @@
+window        1920 x 1080
+safe gui area {X:240 Y:0 W:1440 H:1080}
+UI size       {X:1440 Y:1080}
+screen bounds {X:-240 Y:-0 W:1920 H:1080}
+on screen     When Airlock Button is pressed > nothing yet
+
+000  Sprite     Phosphor_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
+001  SetClip    {X:259 Y:142 W:1402 H:812}
+002  Text       at {X:259 Y:148.10197} scale 0.57  #A2C3CDFF  "switched off"
+003  Text       at {X:1414.2987 Y:148.10197} scale 0.57  #5F7278FF  "u"
+004  Text       at {X:1474.0292 Y:148.10197} scale 0.57  #5F7278FF  "r"
+005  Text       at {X:1510.7854 Y:148.10197} scale 0.57  #A2C3CDFF  "d"
+006  Sprite     Phosphor_Fill         {X:1530 Y:142 W:119 H:1}  #85A1A9FF
+007  Sprite     Phosphor_Fill         {X:1530 Y:174 W:119 H:1}  #85A1A9FF
+008  Sprite     Phosphor_Fill         {X:1530 Y:142 W:1 H:33}  #85A1A9FF
+009  Sprite     Phosphor_Fill         {X:1648 Y:142 W:1 H:33}  #85A1A9FF
+010  Sprite     Phosphor_Fill         {X:1531 Y:143 W:117 H:31}  #060A0CFF
+011  Sprite     Phosphor_Fill         {X:1590 Y:143 W:58 H:31}  #1B2C33FF
+012  Text       at {X:1547.9342 Y:148.10197} scale 0.57  #85A1A9FF  "ON"
+013  Text       at {X:1605.5613 Y:148.10197} scale 0.57  #DCF5FDFF  "OFF"
+014  Sprite     Phosphor_Fill         {X:259 Y:197 W:13 H:13}  #5F7278FF
+015  Text       at {X:282 Y:191.19197} scale 0.64  #A2C3CDFF  "When"
+016  Sprite     Phosphor_Fill         {X:338 Y:185 W:144 H:36}  #374851FF
+017  Sprite     Phosphor_Fill         {X:338 Y:219 W:144 H:2}  #8EBCCFFF
+018  Text       at {X:354.09082 Y:191.19197} scale 0.64  #DCF5FDFF  "Airlock Button"
+019  Sprite     Phosphor_Fill         {X:492 Y:185 W:110 H:36}  #374851FF
+020  Sprite     Phosphor_Fill         {X:492 Y:219 W:110 H:2}  #8EBCCFFF
+021  Text       at {X:507.62326 Y:191.19197} scale 0.64  #DCF5FDFF  "is pressed"
+022  Text       at {X:303.8 Y:255.67198} scale 0.57  #A2C3CDFF  "+ do something"
+023  Text       at {X:452.0271 Y:255.67198} scale 0.57  #A2C3CDFF  "+ wait"
+024  ClearClip  
+025  Sprite     Phosphor_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+026  SetClip    {X:276 Y:55 W:345 H:33}
+027  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "When Airlock Button is pressed"
+028  ClearClip  
+029  Text       at {X:626.36255 Y:60.816975} scale 0.57  #85A1A9FF  "a"
+030  SetClip    {X:640 Y:55 W:137 H:33}
+031  Text       at {X:640.43005 Y:54.711975} scale 0.9  #DCF5FDFF  "nothing yet"
+032  Text       at {X:767.4444 Y:59.521973} scale 0.64  #85A1A9FF  "p"
+033  ClearClip  
+034  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
+035  Sprite     Phosphor_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+036  Sprite     Phosphor_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+037  Sprite     Phosphor_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

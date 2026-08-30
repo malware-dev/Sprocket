@@ -3,6 +3,14 @@ using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.ModAPI;
 using VRage.ObjectBuilders;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Ui;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers
 {

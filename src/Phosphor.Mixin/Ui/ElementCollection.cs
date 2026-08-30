@@ -1,16 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// The children of one element.
-    /// <para>
-    /// A list of its own rather than a bare <c>List&lt;Element&gt;</c> for one reason: adding a child is what
-    /// gives it a parent, and a plain list cannot do that. Leaving it to the caller means a child that was
-    /// added and never adopted, which reads correctly and is wrong.
-    /// </para>
-    /// </summary>
+    /// <summary>The children of one element.</summary>
+    /// <remarks>
+    /// A list of its own rather than a bare <c>List&lt;Element&gt;</c> because adding a child is what
+    /// gives it a parent, and a plain list cannot do that.
+    /// </remarks>
     public sealed class ElementCollection : IEnumerable<Element>
     {
         private readonly List<Element> _items = new List<Element>();

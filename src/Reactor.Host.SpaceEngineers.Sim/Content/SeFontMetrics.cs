@@ -5,23 +5,30 @@ using System.Linq;
 using System.Xml.Linq;
 using Reactor.Sim.Simulation;
 using VRageMath;
+using Phosphor.Ui;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
 
 namespace Reactor.Sim.Content
 {
     /// <summary>
     /// The game's own text measurements, read from the bitmap font it actually draws with.
-    /// <para>
+    /// </summary>
+    /// <remarks>
     /// Worth being exact about, because the simulator is self-consistent: it measures with whatever it
     /// draws with, so a wrong font still looks right here and only goes wrong in the game. Measured against
     /// this font's real advances, a desktop face was coming out between nine and seventeen percent narrow,
     /// which is the difference between a row that fits and a row that runs off the panel.
-    /// </para>
     /// <para>
     /// The numbers are integers baked by BMFontGen from <c>space_engineers.ttf</c> at size 23, which is why
     /// they cannot be re-derived from the TrueType file: rounding at bake time and the game's own
     /// per-character spacing are both outside what the outline knows.
     /// </para>
-    /// </summary>
+    /// </remarks>
     public sealed class SeFontMetrics : IFontMetrics
     {
         /// <summary>

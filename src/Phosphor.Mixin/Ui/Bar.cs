@@ -1,21 +1,19 @@
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
     /// <summary>
     /// Something on the left, something on the right, and whatever is in the middle taking the slack.
-    /// <para>
-    /// <see cref="Dock" /> lying down, and it exists for the same reason: a header wants back on one side
-    /// and a switch on the other with the title between them, and a footer wants the navigation on one
-    /// side and the way forward on the other. A stack cannot do that, because a stack gives every child
-    /// exactly what it asked for and there is no way to say "and you take the rest".
-    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Dock" /> lying down. A stack cannot do this, because it gives every child exactly what
+    /// it asked for and there is no way to say "and you take the rest".
     /// <para>
     /// The middle is measured against what the other two left behind, so a long title gives way to the
-    /// controls rather than pushing one of them off the end - which is the failure worth designing
-    /// against, because a control that has been pushed out of sight leaves nothing to say it existed.
+    /// controls rather than pushing one off the end, where nothing would be left to say it existed.
     /// </para>
-    /// </summary>
+    /// </remarks>
     public class Bar : Element
     {
         private float _spacing;

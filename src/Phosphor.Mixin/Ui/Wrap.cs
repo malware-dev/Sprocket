@@ -1,21 +1,19 @@
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// Puts its children in a line and starts a new one when the line runs out.
-    /// <para>
-    /// A sentence is what this is for. A trigger reads "When the hangar door finishes opening" with the
+    /// <summary>Puts its children in a line and starts a new one when the line runs out.</summary>
+    /// <remarks>
+    /// A sentence is what this is for: a trigger reads "When the hangar door finishes opening" with the
     /// nouns as chips, and a stack would run that off the right-hand edge the moment somebody picked a
-    /// block with a long name. Flowing onto the next line is the only arrangement that survives names
-    /// people actually type.
-    /// </para>
+    /// block with a long name.
     /// <para>
-    /// Children keep the size they asked for and are never stretched, because every one of them is a word
-    /// or a chip. A child wider than the whole line is put on a line of its own and left to overflow,
-    /// which is visible and therefore fixable, rather than being silently shrunk into something unreadable.
+    /// Children keep the size they asked for and are never stretched. A child wider than the whole line
+    /// is put on a line of its own and left to overflow, which is visible and therefore fixable, rather
+    /// than being silently shrunk into something unreadable.
     /// </para>
-    /// </summary>
+    /// </remarks>
     public class Wrap : Element
     {
         private float _itemSpacing;

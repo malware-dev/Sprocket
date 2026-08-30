@@ -1,8 +1,7 @@
 # Reactor
 
 Automation for people who have never programmed, as a Space Engineers mod. The editor
-runs in the game, as a screen the game owns. The Avalonia app in this repo is the
-prototype the screens were designed against, and is on its way out.
+runs in the game, as a screen the game owns.
 
 ## What problem this is actually solving
 
@@ -98,17 +97,28 @@ src/
     Editing/              The editor itself - navigation, pages, wording
     Ui/                   The contract a target renders. Start here; it is small.
   Reactor.Core            The same sources as an assembly, for the hosts that load one
-  Reactor.Machine.Mixin   The fake ship (Space Engineers supplies the real one)
-  Phosphor.Mixin          Drawing and layout for the game's screen. Knows nothing of Reactor.
-  Reactor.Screens.Mixin   One view per component, for Space Engineers - what the mod ships
-  Reactor.Host.Avalonia   The prototype, and the template the screens above duplicate
-    Rendering/            One renderer per component - what a target reimplements
+  Phosphor.Mixin          Drawing and layout. Knows nothing of Reactor.
+    Graphics/             The seam a target draws through, and the screen's backend
+    Input/                Pointers, held keys, copied text
+    Ui/                   Elements, containers, text
+  Reactor.Screens.Mixin   What the mod ships: Reactor drawn on a Space Engineers screen
+    Look/                 Palette, type scale, spacing, sizes, icons
+    Controls/             The pieces a screen is built from
+    Host/                 The screen itself, and its furniture
+    Lists/                Rows of things to choose or watch
+    Picking/              Choosing blocks and what happens to them
+    Sequences/            Drawing a sentence
   Reactor.Host.SpaceEngineers      The mod: the same sources, compiled in-game
   Reactor.Host.SpaceEngineers.Sim  Those screens, run without the game
+    Machine/              The made-up machine they run against
+    Fakes/                Substitutes for the game types the screens draw through
+    Content/              The game's own fonts and block art, read off disk
+    Simulation/           A frame with nobody watching, and the scripts that drive one
 tests/
   Reactor.Core.Tests      The model, the runtime, and the editor
-  Reactor.Host.Tests      That every component has a renderer and lays out
-  Reactor.Host.SpaceEngineers.Tests   The same, for the in-game screens
+  Reactor.Screens.Tests   The screens, driven and read through the simulator
+  Reactor.Host.SpaceEngineers.Tests   What the mod says it does about each conformance point
+  Reference/              The screens held still, one frame per state, as committed text
 ```
 
 The split is the point: Core holds the model, the runtime **and the whole editor**. A
@@ -122,8 +132,8 @@ Roslyn, under a whitelist. The core is therefore consumed **two ways**: as a nor
 assembly reference here, and as loose source files there.
 
 That is why the sources live in `Reactor.Core.Mixin`, an MDK2 mixin - a shared project
-rather than a library. `Reactor.Core` imports it to produce the assembly the Avalonia
-host and the tests reference; `Reactor.Host.SpaceEngineers` imports the same sources so
+rather than a library. `Reactor.Core` imports it to produce the assembly the tests and
+the simulator reference; `Reactor.Host.SpaceEngineers` imports the same sources so
 the packer lays them out as loose files for SE to compile. One set of files, and no
 copy step that can quietly fall behind.
 
@@ -145,21 +155,21 @@ That constraint fails silently, so it is enforced by the compiler instead:
   LINQ, wall-clock time. A banned call is a build error, not a warning.
 
 `LangVersion` is a one-line change in `build/Reactor.SharedSources.props` once SE's
-real ceiling has been verified in-game. **Host code is exempt** - the Avalonia project
-uses whatever C# it likes.
+real ceiling has been verified in-game. **Host code is exempt** - the simulator and the
+tests use whatever C# they like.
 
 ## Running it
 
 ```
-dotnet test                                     # 91 tests
-dotnet build src/Reactor.Host.SpaceEngineers    # builds AND deploys the mod
-dotnet run --project src/Reactor.Host.Avalonia  # the prototype
+dotnet test                                          # 94 tests
+dotnet build src/Reactor.Host.SpaceEngineers         # builds AND deploys the mod
+dotnet run --project src/Reactor.Host.SpaceEngineers.Sim   # the screens, without the game
 ```
 
 In the game, a programmable block's terminal grows a **Reactor** button, which opens the
 editor as a screen the game owns.
 
-The prototype opens on an empty Reactor asking what should set something off. The
+The simulator opens on an empty Reactor asking what should set something off. The
 simulated ship has a hangar door, an airlock, lights, a sensor, a button and a
 hydrogen tank; the strip along the bottom pokes the world so you can watch sequences
 react. Doors travel and vents cycle, because instant entities hide every problem worth
@@ -208,7 +218,7 @@ mips draws a ring as a dotted circle.
 - **`Reactor.Core.Mixin` is in the solution but marked not to build.** The dotnet CLI cannot
   build a shared project and would fail the whole solution over it. Rider builds it either
   way, which is why the arrangement differs from the other repos.
-- **The running prototype locks `Reactor.Core.dll`.** Close it before rebuilding.
+- **The running simulator locks `Reactor.Core.dll`.** Close it before rebuilding.
 - **`%LOCALAPPDATA%\Reactor\SimContent` is not in the repository**, because it is Keen's
   content and not ours to redistribute. Run `--extract` once. Without it the simulator still
   runs and fails loudly: block artwork becomes magenta crossed boxes and text falls back to a

@@ -6,12 +6,39 @@
     <SharedGUID>a41f8d73-2e69-4c15-b8a7-0d3f5e2c91b4</SharedGUID>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)EditorView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)HeadingRow.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Components.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Widgets.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SimpleViews.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SequenceView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PickView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Dot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Grip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\IconBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Mark.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Rule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Signpost.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Sized.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Slot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Switch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Widgets.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lists\ChoiceListView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lists\StartView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lists\StatusListView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lists\StatusRow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Icons.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Palette.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Sizes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Space.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Picking\PickView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Picking\StageView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\SentenceView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\SequenceView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\ComponentView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\EditorView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\HeadingRow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\HeadingView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\Hit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\IScreenHost.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\NoticeView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\Overlay.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\Pin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\UnsupportedView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Host\Ask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Lettering.cs" />
   </ItemGroup>
 </Project>

@@ -1,20 +1,16 @@
 using System.Collections.Generic;
 
-namespace Phosphor
+namespace Phosphor.Input
 {
-    /// <summary>
-    /// Turns a held key into the press, pause, flood pattern every text field has.
+    /// <summary>Turns a held key into the press, pause, flood pattern every text field has.</summary>
+    /// <remarks>
+    /// The game reports a key as newly pressed for exactly one tick, which is right for a jump and wrong
+    /// for a caret. Typed characters do not need this: the keyboard's own repeat has already put them in
+    /// the text buffer by the time we see it. This is only for the keys that are read raw.
     /// <para>
-    /// The game reports a key as newly pressed for exactly one tick, which is right for a jump and wrong for
-    /// a caret: holding left should walk along the line. Typed characters do not need this, because the
-    /// keyboard's own repeat has already put them in the text buffer by the time we see it. This is only for
-    /// the keys that are read raw.
+    /// The caller passes the tick and the key state, so none of it needs a game running.
     /// </para>
-    /// <para>
-    /// Pure logic. The caller passes the tick and the key state, so it can be reasoned about, and later
-    /// tested, without a game running.
-    /// </para>
-    /// </summary>
+    /// </remarks>
     public sealed class KeyRepeater
     {
         private struct State

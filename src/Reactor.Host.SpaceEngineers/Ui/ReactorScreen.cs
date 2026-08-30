@@ -1,4 +1,3 @@
-using Phosphor;
 using Reactor.Editing;
 using Reactor.Screens;
 using Reactor.Ui;
@@ -6,23 +5,32 @@ using Sandbox.ModAPI;
 using VRage.ModAPI;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
+using Phosphor.Graphics;
+using Phosphor.Ui;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.World;
+using Reactor.Host.SpaceEngineers.Input;
 
-namespace Reactor.Host.SpaceEngineers
+namespace Reactor.Host.SpaceEngineers.Ui
 {
     /// <summary>
     /// Reactor's editor, as a screen the game owns.
-    /// <para>
+    /// </summary>
+    /// <remarks>
     /// Three things meet here and none of them knows about the other two: core decides what is on screen,
     /// <see cref="EditorView" /> decides how this target draws it, and the game supplies a world and a
     /// clock. The simulator's <c>EditorScene</c> is the same three with a made-up ship in the third place,
     /// which is why the two can be kept honest against each other.
-    /// </para>
     /// <para>
-    /// Everything the old overlay needed in order to survive being drawn over live gameplay is gone. The
-    /// screen owns its input, so nothing blacklists controls, nothing fights the camera, and the pointer is
-    /// simply a pointer.
+    /// The screen owns its input, so nothing blacklists controls, nothing fights the camera, and the
+    /// pointer is simply a pointer. None of the work a thing drawn over live gameplay would need is here.
     /// </para>
-    /// </summary>
+    /// </remarks>
     public sealed class ReactorScreen : MyModScreen
     {
         /// <summary>Frames within which a second press counts as a double, and how far it may wander.</summary>
@@ -70,9 +78,9 @@ namespace Reactor.Host.SpaceEngineers
             CloseOnEscape = true;
             EnabledBackgroundFade = true;
 
-            // The game draws the cursor, so the mod does not. The old MousePointer integrated mouse movement
-            // because during play the game holds the mouse still and reports only deltas; a screen has a real
-            // cursor and hands it over.
+            // The game draws the cursor, so the mod does not. Integrating mouse deltas is what something
+            // drawn during play has to do, because the game holds the mouse still and reports only
+            // movement; a screen has a real cursor and hands it over.
             DrawMouseCursor = true;
 
             // Nothing here multiplies its colours by the transition alpha yet, so a fade would draw the
@@ -103,11 +111,11 @@ namespace Reactor.Host.SpaceEngineers
         /// and it is the reason Escape is not read as a key anywhere else - acting on it in two places would
         /// cancel the question and shut the screen in the same breath.
         /// <para>
-        /// There used to be a guard at the top of this that threw away any close arriving on an Enter or a
-        /// Space release. It was needed because the harness's close button is a real focusable control that
-        /// takes focus on the screen's first update and fires on a key being released - so every Enter that
-        /// finished a rename, and every space typed into a search box, arrived here as a request to leave.
-        /// Switching the button off took the cause away, and the guard with it.
+        /// No guard here against a close arriving on an Enter or a Space release, because the cause is
+        /// gone: the harness's close button is a real focusable control that takes focus on the screen's
+        /// first update and fires on a key being released, so with it enabled every Enter finishing a
+        /// rename and every space typed into a search box arrives as a request to leave. The button is
+        /// switched off instead.
         /// </para>
         /// </remarks>
         protected override bool OnCancelling()

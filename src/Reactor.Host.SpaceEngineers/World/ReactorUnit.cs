@@ -7,17 +7,24 @@ using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Utils;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Ui;
 
-namespace Reactor.Host.SpaceEngineers
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// One Reactor, on one construct: its world, its program, the runtime that runs it, and the editor.
     /// </summary>
     /// <remarks>
-    /// All of this used to live inside the screen, which meant a sequence only ran while somebody was
-    /// looking at it. An airlock is worth nothing on those terms. So the program and its runtime belong to
-    /// the block, the session ticks them whether or not anything is open, and the screen is only a way to
-    /// look at them.
+    /// The program and its runtime belong to the block, not to the screen: the session ticks them whether
+    /// or not anything is open, and the screen is only a way to look at them. Owned by the screen, a
+    /// sequence would run only while somebody was watching it, and an airlock is worth nothing on those
+    /// terms.
     /// </remarks>
     public sealed class ReactorUnit : IDisposable
     {

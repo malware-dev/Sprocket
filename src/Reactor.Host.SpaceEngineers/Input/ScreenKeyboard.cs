@@ -6,28 +6,28 @@ using VRage.Input;
 // one is what MyAPIGateway.Input hands back. Saying which removes an ambiguity that otherwise resolves to
 // the wrong one and fails only at the whitelist gate.
 using IMyInput = VRage.ModAPI.IMyInput;
+using Phosphor.Input;
+using Phosphor.Ui;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Ui;
+using Reactor.Host.SpaceEngineers.World;
 
-namespace Phosphor
+namespace Reactor.Host.SpaceEngineers.Input
 {
-    /// <summary>What a pass over the keyboard did.</summary>
-    public struct KeyboardOutcome
-    {
-        /// <summary>The text or the caret moved, so anything watching should look again.</summary>
-        public bool Changed;
-
-        /// <summary>Enter was pressed. What that means is the caller's business.</summary>
-        public bool Commit;
-    }
-
     /// <summary>
     /// Types into whichever box the screen says has the keyboard.
-    /// <para>
+    /// </summary>
+    /// <remarks>
     /// This replaced a text editor that owned its box: it was handed one, opened an edit on it, remembered
     /// the original text and put it back on cancel. That shape belonged to an overlay where exactly one
     /// thing could be edited at a time. A screen has focus of its own, and <c>EditorView</c> already decides
     /// what has the keyboard - a question while one is open, otherwise whatever was last focused - so this
     /// is handed the answer rather than keeping one.
-    /// </para>
     /// <para>
     /// Characters come from the game's own text buffer, which has already dealt with the keyboard layout,
     /// dead keys and modifiers, so what arrives is what the player meant to type. Everything else is read as
@@ -38,7 +38,7 @@ namespace Phosphor
     /// <c>OnCancelling</c>, which is where a question gets to refuse the close and dismiss itself instead.
     /// Reading it here as well would act on it twice.
     /// </para>
-    /// </summary>
+    /// </remarks>
     public sealed class ScreenKeyboard
     {
         readonly KeyRepeater _repeat = new KeyRepeater();

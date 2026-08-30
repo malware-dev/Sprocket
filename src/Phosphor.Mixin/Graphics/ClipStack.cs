@@ -1,18 +1,16 @@
 using System.Collections.Generic;
 using VRageMath;
 
-namespace Phosphor
+namespace Phosphor.Graphics
 {
-    /// <summary>
-    /// A stack of clip rectangles where every entry is already intersected with the one below it.
-    /// <para>
-    /// Neither target has this. A text panel has a single clip state - one sprite sets it, another clears it -
-    /// with no stack and no intersection, and screen space has nothing at all. Both need the same two things
-    /// on top: an inner container must never be able to widen its parent's clip, and tearing an inner clip
+    /// <summary>A stack of clip rectangles where every entry is already intersected with the one below it.</summary>
+    /// <remarks>
+    /// Neither target has this. A text panel has a single clip state - one sprite sets it, another clears
+    /// it - with no stack and no intersection, and screen space has nothing at all. Both need the same two
+    /// things on top: an inner container must never widen its parent's clip, and tearing an inner clip
     /// down must leave the parent's standing rather than clearing outright. Doing it here means a backend
-    /// only ever has to honour one rectangle, which is the least either of them can be asked for.
-    /// </para>
-    /// </summary>
+    /// only ever has to honour one rectangle.
+    /// </remarks>
     public sealed class ClipStack
     {
         private readonly List<RectangleF> _stack = new List<RectangleF>();

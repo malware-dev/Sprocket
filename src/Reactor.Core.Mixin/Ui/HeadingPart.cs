@@ -4,11 +4,10 @@ namespace Reactor.Ui
     /// One piece of a screen's heading: some words, and whether they are somebody's to change.
     /// </summary>
     /// <remarks>
-    /// A heading used to be one string and one rename beside it, which was fine while every screen was
-    /// about one thing. A sequence is not. It is <i>when this happens</i> and <i>then this runs</i>, and
-    /// naming it replaced the whole line - so anybody who wanted a better word for what a sequence
-    /// <b>does</b> lost the trigger that starts it, and got it back only by typing the trigger into the
-    /// name by hand. The model was making the person do its job.
+    /// One string and one rename beside it is enough while a screen is about one thing. A sequence is
+    /// not: it is <i>when this happens</i> and <i>then this runs</i>, so a name replacing the whole line
+    /// would cost anybody who wanted a better word for what a sequence <b>does</b> the trigger that
+    /// starts it, recoverable only by typing the trigger into the name by hand.
     /// <para>
     /// So a heading is several of these, in order, and each one answers for itself whether it can be
     /// renamed. There is deliberately no joined-up version of the whole thing on
@@ -61,7 +60,7 @@ namespace Reactor.Ui
         /// What somebody actually typed, or empty where nobody has.
         /// </summary>
         /// <remarks>
-        /// <b>Not the same as <see cref="Text" /> and the difference is load-bearing.</b> A target opens
+        /// <b>Not the same as <see cref="Lettering" /> and the difference is load-bearing.</b> A target opens
         /// its rename box on this; opening it on the text would hand somebody a generated sentence and
         /// call it their name, which they then have to delete before they can answer.
         /// </remarks>

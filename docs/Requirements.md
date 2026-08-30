@@ -1178,9 +1178,9 @@ is waiting for, what got skipped. All of that is R28.
 Built on its own it is half a feature with nothing to observe, and R28's walk subsumes it, so
 it would be built twice.
 
-*Deferred with R28. The run-by-hand button that existed in the prototype has been removed
-rather than left standing with nothing behind it; `AutomationRunner.Call` stays, because a
-sequence calling another one needs it.*
+*Deferred with R28. The run-by-hand button that once existed has been removed rather than left
+standing with nothing behind it; `AutomationRunner.Call` stays, because a sequence calling
+another one needs it.*
 
 ## From story W - drive the crane from the seat
 

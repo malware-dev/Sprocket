@@ -7,6 +7,12 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Reactor.Sim.Simulation;
 using VRageMath;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
 
 namespace Reactor.Sim.Shell
 {
@@ -141,7 +147,7 @@ namespace Reactor.Sim.Shell
             Closing += (s, e) => WindowPlace.Remember(this);
         }
 
-        void OnFrame(Phosphor.ScreenSpaceGraphics g)
+        void OnFrame(Phosphor.Graphics.ScreenSpaceGraphics g)
         {
             // Window pixels to UI units, derived from what the backend reports rather than recomputed
             // alongside it, so a mistake in there shows up here instead of being mirrored.
@@ -207,16 +213,16 @@ namespace Reactor.Sim.Shell
                 VerticalAlignment = VerticalAlignment.Center
             });
 
-            foreach (Reactor.Host.System.SimEntity entity in _editor.Pokeable())
+            foreach (Reactor.Sim.Machine.SimEntity entity in _editor.Pokeable())
             {
-                var button = entity as Reactor.Host.System.SimButton;
+                var button = entity as Reactor.Sim.Machine.SimButton;
                 if (button != null)
                 {
                     row.Children.Add(Poke("press " + button.Name, () => button.Press()));
                     continue;
                 }
 
-                var sensor = entity as Reactor.Host.System.SimSensor;
+                var sensor = entity as Reactor.Sim.Machine.SimSensor;
                 if (sensor != null)
                 {
                     bool tripped = false;
@@ -232,7 +238,7 @@ namespace Reactor.Sim.Shell
                     continue;
                 }
 
-                var tank = entity as Reactor.Host.System.SimTank;
+                var tank = entity as Reactor.Sim.Machine.SimTank;
                 if (tank != null)
                 {
                     Button control = null;
@@ -331,7 +337,7 @@ namespace Reactor.Sim.Shell
             if (string.IsNullOrEmpty(e.Text))
                 return;
 
-            Phosphor.TextBox box = Typing();
+            Phosphor.Ui.TextBox box = Typing();
             if (box == null)
                 return;
 
@@ -356,7 +362,7 @@ namespace Reactor.Sim.Shell
                 return;
             }
 
-            Phosphor.TextBox box = Typing();
+            Phosphor.Ui.TextBox box = Typing();
             if (box == null)
                 return;
 
@@ -406,7 +412,7 @@ namespace Reactor.Sim.Shell
         /// Whichever box is currently taking keys, or null when nothing is. The probe always has one; the
         /// editor only while a question is open, so typing does not silently land somewhere invisible.
         /// </summary>
-        Phosphor.TextBox Typing()
+        Phosphor.Ui.TextBox Typing()
         {
             if (_showProbe)
                 return _probe.Box;

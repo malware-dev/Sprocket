@@ -6,9 +6,8 @@ namespace Reactor.Editing
     /// What somebody settled on: the things to act on, and what should happen to them.
     /// </summary>
     /// <remarks>
-    /// Handed back once, when they say they are done. The picker used to have no such thing
-    /// because it wrote into the sequence as it went, so there was no moment where an answer
-    /// existed - only a model that had been gradually scribbled on.
+    /// Handed back once, when they say they are done, rather than written into the sequence as the
+    /// picking goes along. There is therefore a moment where an answer exists and can be refused.
     /// </remarks>
     sealed class PickAnswer
     {

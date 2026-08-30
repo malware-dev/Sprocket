@@ -1,20 +1,28 @@
 using System.Text;
-using Phosphor;
 using VRage.Game;
 using VRage.Utils;
 using VRageMath;
+using Phosphor.Graphics;
+using Phosphor.Input;
+using Phosphor.Ui;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
     /// <summary>
     /// What the simulator draws until there is a Reactor screen to draw instead.
-    /// <para>
+    /// </summary>
+    /// <remarks>
     /// Deliberately not a pretty demo. Every part of it is here to make one thing visible that is otherwise
     /// only observable by launching the game: where the fixed UI box actually falls, whether a clip cuts a
     /// glyph or a whole row, whether text lands where the layout measured it, and whether a pointer can
     /// reach past the layout to the edge of the screen.
-    /// </para>
-    /// </summary>
+    /// </remarks>
     public sealed class ProbeScene
     {
         static readonly MyStringId Fill = MyStringId.GetOrCompute("Phosphor_Fill");
@@ -67,12 +75,12 @@ namespace Reactor.Sim.Simulation
 
         /// <summary>
         /// Where the pointer is, in UI units.
-        /// <para>
+        /// </summary>
+        /// <remarks>
         /// Set absolutely here, where a real cursor exists in a real window. In the game it is integrated
         /// from mouse deltas instead, because the game holds the cursor still and reports only movement.
         /// The difference is confined to this line: the clamping and everything downstream is the same.
-        /// </para>
-        /// </summary>
+        /// </remarks>
         public void MovePointer(Vector2 position, RectangleF bounds)
         {
             _pointer.MoveTo(position, bounds);

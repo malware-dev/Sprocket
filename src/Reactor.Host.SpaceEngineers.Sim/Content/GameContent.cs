@@ -1,23 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
 
 namespace Reactor.Sim.Content
 {
     /// <summary>
     /// Finds the game's content on a machine that has it, and keeps a copy of the little we need on one
     /// that does not.
-    /// <para>
+    /// </summary>
+    /// <remarks>
     /// The split matters more than it looks. Everything the simulator needs from Space Engineers is small,
     /// static and derived from files rather than from a running game, so it can be fetched once here and
     /// read anywhere afterwards. That is what lets this be developed on a machine the game is not installed
     /// on, and it is the same shape the block catalogue will take when we get to it: a tool that runs where
     /// the game is, producing a file that stands in where it is not.
-    /// </para>
     /// <para>
     /// The cache lives outside the repository on purpose. It is Keen's content, not ours to redistribute.
     /// </para>
-    /// </summary>
+    /// </remarks>
     public static class GameContent
     {
         /// <summary>Point this at a Content folder to override every guess below.</summary>

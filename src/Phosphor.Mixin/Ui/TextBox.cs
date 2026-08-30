@@ -2,17 +2,16 @@ using System;
 using System.Text;
 using VRage.Game;
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// One line of editable text, with a caret and a selection.
-    /// <para>
-    /// It knows nothing about keyboards, sessions or the network. Every edit is a method somebody else calls,
-    /// which is what lets the same box be driven by a key, by a test, or eventually by something that is not
-    /// a keyboard at all. What drives it is <see cref="TextEditor" />.
-    /// </para>
-    /// </summary>
+    /// <summary>One line of editable text, with a caret and a selection.</summary>
+    /// <remarks>
+    /// It knows nothing about keyboards, sessions or the network. Every edit is a method somebody else
+    /// calls, so the same box can be driven by a key, by a script, or by something that is not a keyboard
+    /// at all. Whatever owns the screen decides which.
+    /// </remarks>
     public class TextBox : Element
     {
         private string _font;

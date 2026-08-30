@@ -1,13 +1,5 @@
 namespace Reactor.World
 {
-    /// <summary>What sort of reading a property gives.</summary>
-    public enum ValueKind
-    {
-        Flag,
-        Number,
-        Text
-    }
-
     /// <summary>
     /// One reading off an entity.
     /// </summary>
@@ -18,10 +10,9 @@ namespace Reactor.World
     /// be. Holding a string reference in a struct field costs nothing - the string is already
     /// a reference, and nothing here copies one.
     ///
-    /// A flag is a value like any other, and so is a name. The model used to have boolean
-    /// signals as its primitive, which had it backwards: a boolean is a property whose
-    /// readings happen to be true and false, no more special than a fill level or the name
-    /// somebody gave a block.
+    /// A flag is a value like any other, and so is a name. A boolean is a property whose readings
+    /// happen to be true and false, no more special than a fill level or the name somebody gave a
+    /// block, so nothing here treats it as the primitive.
     /// </remarks>
     public struct EntityValue
     {

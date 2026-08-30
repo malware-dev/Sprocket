@@ -139,6 +139,16 @@ never matches.
   anything stuck - and whether that lives here or somewhere of its own.
 - Where the **ship browser** sits now that the root is systems rather than sequences.
 - Whether timers, if they are a thing distinct from *every so often*, live here too.
+- **The picker's subtitle does not belong in the header, and the picker wants redesigning for it.**
+  The header is deliberately designed without one: a subtitle was rare enough that reserving its line
+  made the header look wrong on every screen that had none. The picker is the only screen that shows
+  one, and it pays for it by standing 77 units tall where every other screen stands 53 - so the
+  header bends for a case that is the exception rather than the rule. The line the picker is using it
+  for is real work ("Start by picking one or more blocks", "Now pick what happens", and empty once
+  the pick is complete): it says what stage somebody is at, which is the one screen where that is not
+  obvious from what is on it. So it is not the subtitle that goes, it is where the subtitle lives.
+  Note that whatever replaces it must not appear and disappear with the data - see below.
+
 - **The game's interface makes noises and ours is silent.** A press, a hover, a screen opening
   and closing all have a sound in Space Engineers, and a panel drawn to look like the game's
   that answers nothing to the ear reads as slightly dead once you notice it. Which sounds, on
@@ -309,7 +319,7 @@ free - `EditorPage.Heading` defaults to a single part built from the page's own 
 easy to add and every target would have drawn it, because drawing one string is easier than
 drawing several - and the entire point of the list is showing which part is somebody's to
 change. Where a target really must flatten it, it writes that out in its own file, where the
-cost is visible: the Avalonia host does exactly that today and says so.
+cost is visible.
 
 Words between the parts are the target's. This one draws the arrow it already uses for a cause
 and its consequence; a narrow one could break the line instead. A heading that ever needs a
@@ -399,9 +409,9 @@ search is one way to answer that. Clicking the actual door is another, and for s
 knows exactly which door they mean and not what the game calls it, it is obviously the better
 one. The picker's abstraction already permits it - `PickStage` never says "list".
 
-*Not now, and not in the Avalonia prototype, which has no world to click. Recorded because it
-should shape the game host from its first sketch rather than be retrofitted, and because it
-argues for keeping the window small even when a target could afford to sprawl.*
+*Not now. Recorded because it should shape the game host from its first sketch rather than be
+retrofitted, and because it argues for keeping the window small even when a target could afford
+to sprawl.*
 
 ## What a target must provide, and how little of that can be enforced
 

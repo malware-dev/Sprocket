@@ -54,7 +54,6 @@
 
     <!-- And the same simulated ship the Avalonia host runs the editor against, so the two targets are
          driven by one world rather than by two hand-made approximations of one. -->
-    <Import Project="..\Reactor.Machine.Mixin\Reactor.Machine.Mixin.projitems" Label="Shared" />
 
     <!-- This target's editor. Shared rather than owned, because these are the files the mod will ship:
          what is seen in this window is what a player sees, not a preview of it. -->

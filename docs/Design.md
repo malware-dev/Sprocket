@@ -699,7 +699,7 @@ Parked deliberately. Tooltips are not blocked on it - they can be built from wha
 reworded later - but adding *new* core strings before it is settled is how the answer gets
 decided by accident.
 
-## Where the prototype stands
+## Where the editor stands
 
 The editor works, and the abstraction has held up under a lot of pushing. Core hands a
 target a small set of domain-shaped components - a `StartComponent`, a `StatusListComponent`,
@@ -735,28 +735,34 @@ Pin it from the game rather than deriving it again. Left alone deliberately for 
 single number, it is wrong by a small amount, and guessing at it a third time is how the last
 two attempts went.
 
-### The Avalonia host is to be removed
+### The Avalonia host has been removed
 
-It is the only *independent* consumer of core's component surface - the simulator is not a
-second target, it shares `Screens.Mixin` and `Phosphor.Mixin` with the game and swaps only the
-backend - and for a while that was worth something. Two implementations is the classic minimum
-for an abstraction to be real, and it earned its keep as recently as the heading work, where
-having to write the flattening in its own file is what made the cost of a flattened heading
-visible.
+It was the only *independent* consumer of core's component surface - the simulator is not a second
+target, it shares `Screens.Mixin` and `Phosphor.Mixin` with the game and swaps only the backend -
+and for a while that was worth something. Two implementations is the classic minimum for an
+abstraction to be real, and it earned its keep as recently as the heading work, where having to
+write the flattening in its own file is what made the cost of a flattened heading visible.
 
-But it has stopped being that. It renders all seven component types and it compiles, and it can
-no longer draw a heading properly - it joins the parts into a line and offers the rename of
-whichever comes first. **A lagging second implementation gives confidence rather than
-pressure**: it stops pushing back on core and starts agreeing with whatever core does, while
-still costing a port on every change. Three and a half thousand lines for that, in a repository
-whose product is a mod.
+But it stopped being that. It rendered all seven component types and it compiled, and it could no
+longer draw a heading properly - it joined the parts into a line and offered the rename of whichever
+came first. **A lagging second implementation gives confidence rather than pressure**: it stops
+pushing back on core and starts agreeing with whatever core does, while still costing a port on
+every change. Three and a half thousand lines for that, in a repository whose product is a mod.
 
-So it goes, in the cleanup. What goes with it has to be replaced deliberately, because it is
-real: nothing else tests that core can be rendered by something that is not this game. The
-cheap honest version is a **paper target** in the test project - render every component to text
-and assert it can be done - which keeps the pressure for a few hundred lines and no UI
-framework. `Reactor.Machine.Mixin` goes at the same time and for a duller reason: it uses
-`System.IO` and file-scoped namespaces, so it cannot be a mixin at all despite the name.
+What went with it has been replaced deliberately, because the thing it provided was real: nothing
+else tested that core can be rendered by something that is not this game. That is now
+`PaperTarget` in `Reactor.Core.Tests` - a target made of text, with no drawing, no layout and no
+game near it, which refuses to render a component type nobody has told it about. A new component
+therefore stops the tests until somebody has said what a target should show for one. A hundred and
+seventy lines, and it cannot drift into agreement because it cannot draw at all.
+
+Its eighteen tests moved onto the simulator, where they test what ships rather than what was
+sketched. The move paid for itself immediately: two of them had been passing against whatever the
+developer last built by hand, because the simulator's fixture is persisted between runs.
+
+`Reactor.Machine.Mixin` went with it, for a duller reason: it used `System.IO` and file-scoped
+namespaces, so it could never have been a mixin despite the name. The simulator was its only
+consumer, so it is now the simulator's `Machine/` folder.
 
 *The editor's own interface has been worked over hard, and `docs/Editor.md` is where that
 lives rather than here. The load-bearing conclusions: narrowing runs one way only, one trip

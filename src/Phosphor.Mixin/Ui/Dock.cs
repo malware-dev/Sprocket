@@ -1,20 +1,17 @@
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// A band at the top, a band at the bottom, and everything left over in between.
+    /// <summary>A band at the top, a band at the bottom, and everything left over in between.</summary>
+    /// <remarks>
+    /// Three named places rather than a side per child, which would need per-child metadata that
+    /// <see cref="ElementCollection" /> does not carry.
     /// <para>
-    /// Three named places rather than a general docking panel with a side per child, because this exists
-    /// to serve one shape - chrome above, chrome below, the screen itself in the middle - and a general
-    /// one would need per-child metadata that <see cref="ElementCollection" /> does not carry. If a
-    /// second shape ever turns up, that is the moment to generalise it, not before.
+    /// The middle is given whatever height is left rather than what it asked for, which is what lets one
+    /// region scroll while the header and footer stay put.
     /// </para>
-    /// <para>
-    /// The middle is given whatever height is left rather than what it asked for, which is the entire
-    /// point: it is what lets one region scroll while the header and footer stay put.
-    /// </para>
-    /// </summary>
+    /// </remarks>
     public class Dock : Element
     {
         private readonly ElementCollection _children;

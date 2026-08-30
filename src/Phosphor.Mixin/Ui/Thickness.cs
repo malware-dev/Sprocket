@@ -1,13 +1,7 @@
-namespace Phosphor
+
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// Room on each side of something.
-    /// <para>
-    /// Pure layout, which is why it is allowed to exist: nothing here asks a backend to do anything, it
-    /// only changes where things are measured and put. A text panel and a screen can both honour it by
-    /// arithmetic alone.
-    /// </para>
-    /// </summary>
+    /// <summary>Room on each side of something.</summary>
     public struct Thickness
     {
         public float Left;

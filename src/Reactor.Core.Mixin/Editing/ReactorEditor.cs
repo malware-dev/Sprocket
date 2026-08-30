@@ -161,14 +161,13 @@ namespace Reactor.Editing
         /// Gives a command an id that says what it is.
         /// </summary>
         /// <remarks>
-        /// The same control gets the same id on every rebuild, by construction. That is the
-        /// whole point: an id used to be a position in this rebuild's registration order, so
-        /// anything holding one went stale the moment a page changed shape, silently, because
-        /// <see cref="Invoke"/> ignores what it does not recognise.
-        ///
-        /// Registering the same identity twice is a mistake and says so. Under the old counter
-        /// the equivalent - two controls that ought to be distinguishable ending up
-        /// indistinguishable - could not be detected at all.
+        /// The same control gets the same id on every rebuild, by construction. An id derived from
+        /// registration order would instead go stale the moment a page changed shape, and silently,
+        /// because <see cref="Invoke"/> ignores what it does not recognise.
+        /// <para>
+        /// Registering the same identity twice is a mistake and says so, which is what stops two
+        /// controls that ought to be distinguishable ending up indistinguishable.
+        /// </para>
         /// </remarks>
         internal int Register(Cmd kind, Action action)
         {
@@ -563,27 +562,7 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// Asks what should start it, before anything else.
-        /// </summary>
-        /// <remarks>
-        /// The opening question is the verb, not the thing. Someone who arrives
-        /// knowing what they want thinks "when the button is pressed, open the door"
-        /// - so "When" is the first word they should meet, and the blocks come after
-        /// it in the order the sentence reads.
-        ///
-        /// Browsing the ship is still there, but as a way to look things up rather
-        /// than as the only door in.
-        /// </remarks>
-        /// <summary>
-        /// Loading a system somebody else made. Not built yet, and says so.
-        /// </summary>
-        /// <remarks>
-        /// Present rather than hidden because it is half of what the front door offers, and
-        /// a screen that grows an option later teaches itself twice. What it needs is the
-        /// configurator, which needs roles.
-        /// </remarks>
-        /// <summary>
-        /// Another one of a system already on the ship. Not built yet, and says so.
+        /// Another one of a system already fitted. Not built yet, and says so.
         /// </summary>
         /// <remarks>
         /// It opens the same configurator loading does, because they are the same act: point a
@@ -598,6 +577,14 @@ namespace Reactor.Editing
             Push(page);
         }
 
+        /// <summary>
+        /// Loading a system somebody else made. Not built yet, and says so.
+        /// </summary>
+        /// <remarks>
+        /// Present rather than hidden because it is half of what the front door offers, and a
+        /// screen that grows an option later teaches itself twice. What it needs is the
+        /// configurator, which needs roles.
+        /// </remarks>
         internal void OfferLoading()
         {
             var page = new ChoicePage(this, "Load system");
@@ -610,21 +597,17 @@ namespace Reactor.Editing
         /// The ways a sequence can begin, offered on the system's own screen.
         /// </summary>
         /// <remarks>
-        /// These used to be a screen of their own, asked the moment a system was made. It
-        /// bought nothing: a question with two answers and no context, standing between
-        /// somebody and the thing they came to build, and it left the system's own screen off
-        /// the way back. They belong at the top of the system, in the same place and the same
-        /// shape as the ship's own "new system" - it is the same question either way, which is
-        /// what would you like to add here.
-        ///
-        /// The catalogue lives here rather than on the page so a third way to start something
-        /// is one line in one place.
-        ///
-        /// Each label is the first word of the sentence it makes: "When…" becomes "When the
-        /// airlock button is pressed", "Every…" becomes "Every 30 seconds". The ellipsis is
-        /// the promise that the rest gets filled in. They read as answers to a question -
-        /// "when something happens", "every so often" - only because they were once exactly
-        /// that, on a screen headed "What should start it?" that no longer exists.
+        /// At the top of the system, in the same place and the same shape as the construct's own
+        /// "new system", because it is the same question either way: what would you like to add here.
+        /// <para>
+        /// The catalogue lives here rather than on the page, so a third way to start something is one
+        /// line in one place.
+        /// </para>
+        /// <para>
+        /// Each label is the first word of the sentence it makes: "When…" becomes "When the airlock
+        /// button is pressed", "Every…" becomes "Every 30 seconds". The ellipsis is the promise that
+        /// the rest gets filled in.
+        /// </para>
         /// </remarks>
         internal void AddStarters(StartComponent start, AutomationSystem system)
         {
@@ -728,11 +711,11 @@ namespace Reactor.Editing
 
             UnwindTo(origin);
 
-            // Parked until somebody says otherwise. A sequence with a trigger and no steps is
-            // already live under the old default, and it becomes progressively more live as
-            // each step is added - a system half-doing something nobody has finished
-            // describing. It is also the only way the switch could gate editing without a new
-            // sequence being unbuildable the moment it exists.
+            // Parked until somebody says otherwise. Enabled by default, a sequence with a trigger and
+            // no steps would already be live, and would get progressively more so as each step was
+            // added - a system half-doing something nobody has finished describing. It is also the only
+            // way the switch can gate editing without a new sequence being unbuildable the moment it
+            // exists.
             var sequence = _program.AddSequence(system, trigger);
             sequence.Enabled = false;
 

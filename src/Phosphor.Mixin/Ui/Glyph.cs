@@ -1,25 +1,25 @@
 using System.Text;
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
     /// <summary>
     /// One symbol, centred in whatever room it is given.
     /// </summary>
     /// <remarks>
     /// A character drawn in <see cref="Symbols.Font" /> rather than a picture, so it costs the same call
-    /// as a word and is measured the same way. That is what lets one sit on the middle of a line beside
-    /// two lines of text: a row is as tall as its tallest thing, and without the centring a symbol next to
-    /// a summary and its status would hang off the first line.
+    /// as a word and is measured the same way. Centred because a row is as tall as its tallest thing, and
+    /// a symbol next to two lines of text would otherwise hang off the first.
     /// </remarks>
     public class Glyph : Element
     {
         private float _scale;
 
-        readonly StringBuilder _measuring = new StringBuilder(2);
+        private readonly StringBuilder _measuring = new StringBuilder(2);
 
-        string _symbol;
-        Vector2 _size;
+        private string _symbol;
+        private Vector2 _size;
 
         public Glyph(string symbol, float scale, Color tint)
         {
@@ -46,13 +46,10 @@ namespace Phosphor
             }
         }
 
-        /// <summary>
-        /// How big, as a font scale.
-        /// </summary>
+        /// <summary>How big, as a font scale.</summary>
         /// <remarks>
-        /// A scale rather than a size in units, because that is what the seam takes and because it makes a
-        /// symbol behave like the text it stands among - the same number next to a label's scale means the
-        /// same height, whatever either target's units happen to be.
+        /// A scale rather than a size in units, so the same number next to a label's scale means the same
+        /// height whatever either target's units happen to be.
         /// </remarks>
         public float Scale
         {
@@ -67,13 +64,10 @@ namespace Phosphor
             }
         }
 
-        /// <summary>
-        /// What colour to draw it. Transparent draws nothing and keeps the room.
-        /// </summary>
+        /// <summary>What colour to draw it. Transparent draws nothing and keeps the room.</summary>
         /// <remarks>
-        /// Keeping the room is the point: a symbol that turns off and on - an undo with nothing to walk
-        /// back, a Back on the first screen - would otherwise drag everything beside it sideways. Use
-        /// <see cref="Element.Collapsed" /> for one that should give its room back.
+        /// Keeping the room is the point: a symbol that turns off and on would otherwise drag everything
+        /// beside it sideways. Use <see cref="Element.Collapsed" /> for one that should give its room back.
         /// </remarks>
         public Color Tint { get; set; }
 

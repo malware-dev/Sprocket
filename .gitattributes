@@ -15,3 +15,9 @@
 *.jpg       binary
 *.ico       binary
 *.dll       binary
+
+# The frames the screens are held to. The simulator writes them with one kind of line ending and
+# compares what it writes against what is committed, so a checkout that changed them would report a
+# difference on every run and mean nothing by it.
+tests/Reference/frames/*.txt  text eol=lf
+tests/Reference/suite.txt     text eol=lf

@@ -5,25 +5,23 @@ using Sandbox.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
-namespace Phosphor
+namespace Phosphor.Graphics
 {
     /// <summary>
-    /// Draws through <c>MyScreenSpaceText</c> and <c>MyScreenSpaceSprite</c>, on the screen rather than onto
-    /// a block.
-    /// <para>
-    /// Its coordinates are a <b>fixed UI size</b>, scaled to whatever the screen happens to be, which is what
-    /// the game itself does: the safe GUI rectangle is 4:3 at the full screen height, and the HUD's scale is
-    /// that height over 1080. So this draws into roughly 1440x1080 whatever the resolution, exactly as a text
-    /// panel draws into its own unchanging pixel size.
-    /// </para>
-    /// <para>
-    /// That is the default because it is what the game does, not because it is the only option. The height
-    /// everything is measured against is a constructor argument, and <see cref="NativePixels" /> turns the
-    /// scaling off and works in real window pixels instead. Whatever is chosen stays self-consistent: the
-    /// game multiplies a font scale by its own factor before drawing, so text is corrected by however far
-    /// the chosen height sits from the game's, and text and layout move together either way.
-    /// </para>
+    /// Draws through <c>MyScreenSpaceText</c> and <c>MyScreenSpaceSprite</c>, on the screen rather than
+    /// onto a block.
     /// </summary>
+    /// <remarks>
+    /// Its coordinates are a <b>fixed UI size</b>, scaled to whatever the screen happens to be, which is
+    /// what the game does: the safe GUI rectangle is 4:3 at the full screen height, and the HUD's scale is
+    /// that height over 1080. So this draws into roughly 1440x1080 whatever the resolution.
+    /// <para>
+    /// The height everything is measured against is a constructor argument, and
+    /// <see cref="NativePixels" /> turns the scaling off and works in real window pixels instead. The game
+    /// multiplies a font scale by its own factor before drawing, so text is corrected by however far the
+    /// chosen height sits from the game's, and text and layout move together either way.
+    /// </para>
+    /// </remarks>
     public sealed class ScreenSpaceGraphics : IGraphics
     {
         /// <summary>
@@ -77,12 +75,12 @@ namespace Phosphor
 
         /// <summary>
         /// Samples the safe area and drops any clip left over. Call once at the top of a frame.
-        /// <para>
+        /// </summary>
+        /// <remarks>
         /// Not on <see cref="IGraphics" />, because a frame is opened differently on either target and the
         /// thing being drawn should not know which. A text panel backend would open its <c>DrawFrame</c>
         /// here instead.
-        /// </para>
-        /// </summary>
+        /// </remarks>
         public void Begin()
         {
             RectangleF area = MyScreenSpace.GetSafeGuiArea();
@@ -129,14 +127,14 @@ namespace Phosphor
 
         /// <summary>
         /// Narrows drawing to <paramref name="bounds" />, intersected with whatever is already in force.
-        /// <para>
+        /// </summary>
+        /// <remarks>
         /// The scissor arrived as a scope rather than as the two ordered calls this used to guess at.
         /// <c>MyScreenSpace.UsingScissorRectanglePixels</c> hands back something to dispose, and nested
         /// scopes intersect, so the game does for free what <see cref="ClipStack" /> does. It is still
         /// <see cref="ClipStack.Current" /> that gets handed over rather than the raw bounds: narrowing an
         /// already-narrowed rectangle by its parent gives the same rectangle back, and it keeps the promise
         /// the seam makes to both targets, that a backend only ever honours one rectangle.
-        /// </para>
         /// <para>
         /// <b>The layer is not optional.</b> It defaults to <c>BelowHud</c>, and everything here draws on
         /// whichever layer this instance was built for, so leaving it out would push a scissor onto a layer
@@ -152,7 +150,7 @@ namespace Phosphor
         /// applied when that queue replays. The simulator honours it either way, and the demo mod only
         /// exercises it inside a screen's own draw.
         /// </para>
-        /// </summary>
+        /// </remarks>
         public void PushClip(RectangleF bounds)
         {
             _clip.Push(bounds);

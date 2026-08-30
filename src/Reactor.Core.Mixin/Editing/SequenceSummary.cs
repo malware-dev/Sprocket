@@ -50,9 +50,9 @@ namespace Reactor.Editing
         /// </summary>
         /// <remarks>
         /// A name replaces what a sequence <b>does</b> and never what starts it, here exactly as it does
-        /// on the sequence's own heading. The name used to win the whole line, so naming something made
-        /// its row in a list stop saying when it happens - and a list of twenty sequences that all say
-        /// only a name is a list where the one useful thing to compare has been taken away.
+        /// on the sequence's own heading. A name winning the whole line would make naming something stop
+        /// its row saying when it happens, and a list of twenty sequences that all say only a name is a
+        /// list where the one useful thing to compare has been taken away.
         /// <para>
         /// Still a joined string, unlike the heading, and that is not an oversight. A row is a label
         /// rather than a control: there is nothing on it to press, no part of it is somebody's to edit,
@@ -69,9 +69,8 @@ namespace Reactor.Editing
         /// The half a name replaces: what somebody called it, or what it actually does.
         /// </summary>
         /// <remarks>
-        /// One rule in one place, because the heading and the list row have to agree about it. They did
-        /// not for a while and the disagreement was invisible until somebody named a sequence and looked
-        /// at both.
+        /// One rule in one place, because the heading and the list row have to agree about it, and a
+        /// disagreement between them is invisible until somebody names a sequence and looks at both.
         /// </remarks>
         public static string DescribeDoing(IWorld world, Sequence sequence)
         {

@@ -62,10 +62,10 @@ namespace Reactor.Editing
         /// How many of this system are fitted.
         /// </summary>
         /// <remarks>
-        /// Without naming what they are fitted to. Core used to say "on this ship", which is the same
-        /// mistake <see cref="EntityNoun"/> exists to prevent one level up - not every construct is a
-        /// ship, and no game but this one has ships at all. It turned out none of the six places that
-        /// said it actually needed the word: the screen is already showing the thing.
+        /// Without naming what they are fitted to. Saying "on this ship" is the same mistake
+        /// <see cref="EntityNoun"/> exists to prevent one level up - not every construct is a ship, and
+        /// no game but this one has ships at all. Nowhere needs the word: the screen is already showing
+        /// the thing.
         /// </remarks>
         public static string Count(AutomationSystem system)
         {

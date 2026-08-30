@@ -7,10 +7,9 @@ namespace Reactor.World
     /// to it, what situations it can be in, and what it can be told to do.
     /// </summary>
     /// <remarks>
-    /// The host owns this catalogue. Space Engineers builds kinds from real block
-    /// types; the prototype host writes a handful by hand. Core never hardcodes a
-    /// door or a light, which is what keeps the editor driven by whatever machine it
-    /// happens to be pointed at.
+    /// The host owns this catalogue. Space Engineers builds kinds from real block types; a made-up
+    /// machine writes a handful by hand. Core never hardcodes a door or a light, which is what keeps
+    /// the editor driven by whatever machine it happens to be pointed at.
     /// </remarks>
     public sealed class EntityKind
     {

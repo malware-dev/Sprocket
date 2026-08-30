@@ -1,4 +1,11 @@
 using VRageMath;
+using Phosphor.Ui;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
@@ -38,7 +45,7 @@ namespace Reactor.Sim.Simulation
 
         IFontMetrics For(string font)
         {
-            return font == Phosphor.Symbols.Font && _symbols != null ? _symbols : _text;
+            return font == Phosphor.Ui.Symbols.Font && _symbols != null ? _symbols : _text;
         }
     }
 }

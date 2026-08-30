@@ -2,22 +2,20 @@ using System.Collections.Generic;
 using System.Text;
 using VRage.Game;
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// A run of text, on one line or on as many as it needs.
-    /// <para>
-    /// It keeps a <c>StringBuilder</c> beside the string it was given, because measuring happens every layout
-    /// pass and the only allocation-free way to measure is from one of those. Writing <see cref="Text" />
-    /// syncs it, so the cost lands when somebody changes the words rather than sixty times a second.
-    /// </para>
+    /// <summary>A run of text, on one line or on as many as it needs.</summary>
+    /// <remarks>
+    /// It keeps a <c>StringBuilder</c> beside the string it was given, because the only allocation-free
+    /// way to measure is from one of those. Writing <see cref="Lettering" /> syncs it, so the cost lands when
+    /// somebody changes the words.
     /// <para>
     /// Wrapping is off by default and is not free: breaking a run costs a measurement per word, so the
-    /// result is kept until the words, the size or the room they have to fit in actually change. A notice
-    /// or a banner wants it; a row of one short phrase does not.
+    /// result is kept until the words, the size or the room they have to fit in change.
     /// </para>
-    /// </summary>
+    /// </remarks>
     public class Label : Element
     {
         private string _font;
@@ -41,14 +39,10 @@ namespace Phosphor
         private bool _dirty = true;
         private Vector2 _wrapped;
 
-        /// <summary>
-        /// The width of the line last centred, kept so that centring does not cost a measurement.
-        /// </summary>
+        /// <summary>The width of the line last centred, kept so that centring does not cost a measurement.</summary>
         /// <remarks>
         /// Drawing is not invalidated - it happens on every frame by definition - so anything that asks
-        /// the font a question here asks it sixty times a second no matter what the layout does. Centring
-        /// did: it measured the words to work out how far in to start them, on every frame, for every
-        /// centred label. That is both halves of a switch on every switch on screen.
+        /// the font a question here asks it sixty times a second no matter what the layout does.
         /// </remarks>
         private string _centred;
 
@@ -76,7 +70,6 @@ namespace Phosphor
                 _measured.Clear();
                 _measured.Append(incoming);
                 _dirty = true;
-                InvalidateMeasure();
                 InvalidateMeasure();
             }
         }
@@ -129,12 +122,10 @@ namespace Phosphor
         /// Whether a run too wide for its room is cut short with an ellipsis instead of overflowing.
         /// </summary>
         /// <remarks>
-        /// For the things that must stay one line and must stay inside their box. A heading is the case:
-        /// a long name that pushed past the edge would carry whatever sits beside it off the end, and a
-        /// control pushed out of sight leaves nothing behind to say it was ever there.
+        /// For the things that must stay one line and inside their box - a heading, where a long name
+        /// pushing past the edge would carry whatever sits beside it off the end.
         /// <para>
-        /// Ignored when <see cref="Wraps" /> is set, since a run that can use another line has no need of
-        /// this one.
+        /// Ignored when <see cref="Wraps" /> is set.
         /// </para>
         /// </remarks>
         public bool Trims
@@ -154,11 +145,9 @@ namespace Phosphor
         /// Whether the words sit in the middle of the room they were given rather than at its left edge.
         /// </summary>
         /// <remarks>
-        /// For a control held to a width it did not choose. A switch labelled by what pressing it does
-        /// says two different words in two states, and the honest way to stop the header stepping about
-        /// as they swap is to give it the width of the longer one and put both in the middle of it -
-        /// rather than padding one with spaces until it happens to match, which is arithmetic done by eye
-        /// in a font that was never asked.
+        /// For a control held to a width it did not choose. A switch says two different words in two
+        /// states, and the way to stop it stepping about as they swap is to give it the width of the
+        /// longer one and put both in the middle of it.
         /// </remarks>
         public bool Centres { get; set; }
 
@@ -167,14 +156,12 @@ namespace Phosphor
             if (_text.Length == 0)
                 return new Vector2(0f, g.LineHeight(Font, Scale));
 
-            // A line, like the three answers around it, because a line is what this draws. DrawText places
-            // a line box at ContentBounds.Y and the renderer puts the baseline inside it; how far the
-            // particular letters reach has nothing to do with how much room the drawing takes.
-            //
-            // Measuring answered with the glyph cell instead, which in the game's face is 45 units against
-            // a line of 37 - a fifth taller, for any text at all. So a label reported a size it did not
-            // draw at, and anything that centred it put it a tenth of a line out. Only the width is worth
-            // asking the letters about.
+            // A line tall, because a line is what this draws: DrawText places a line box at
+            // ContentBounds.Y and the renderer puts the baseline inside it, so how far the particular
+            // letters reach has nothing to do with how much room the drawing takes. The glyph cell is not
+            // the same number - in the game's face it is 45 against a line of 37 - so a label measured
+            // that way reports a size it does not draw at. Only the width is worth asking the letters
+            // about.
             if (!Wraps && !Trims)
                 return new Vector2(g.MeasureText(Font, _measured, Scale).X, g.LineHeight(Font, Scale));
 
@@ -188,13 +175,11 @@ namespace Phosphor
             return _wrapped;
         }
 
-        /// <summary>
-        /// The line height, kept between frames. Drawing must ask the font nothing it can remember.
-        /// </summary>
+        /// <summary>The line height, kept between frames.</summary>
         /// <remarks>
-        /// A lookup rather than a measurement, so it is cheap - but it is cheap sixty times a second for
-        /// every one of these on screen, to be told a number that only changes when the font or the scale
-        /// does. Draw is the one path invalidation cannot help, because it always runs.
+        /// Cheap, but cheap sixty times a second for every label on screen, to be told a number that only
+        /// changes when the font or the scale does. Draw is the one path invalidation cannot help,
+        /// because it always runs.
         /// </remarks>
         private float LineOf(IGraphics g)
         {

@@ -1,90 +1,70 @@
 using VRage.Utils;
 using VRageMath;
+using Phosphor.Graphics;
 
-namespace Phosphor
+namespace Phosphor.Ui
 {
-    /// <summary>
-    /// Anything that occupies a rectangle and draws in it.
+    /// <summary>Anything that occupies a rectangle and draws in it.</summary>
+    /// <remarks>
+    /// Laying out happens in two passes: <b>measure</b> asks how much room a thing would like given how
+    /// much is going spare, and <b>arrange</b> tells it what it actually got. A parent cannot decide what
+    /// to give until it has heard from all of its children, and a child cannot always answer without
+    /// knowing the width it has to wrap into.
     /// <para>
-    /// Laying out happens in two passes, the arrangement every layout in this shape uses: <b>measure</b> asks
-    /// how much room a thing would like given how much is going spare, and <b>arrange</b> tells it what it
-    /// actually got. They are separate because a parent cannot decide what to give until it has heard from
-    /// all of its children, and a child cannot always answer without knowing the width it has to wrap into.
+    /// Clipping lives here rather than in each container, which is what guarantees every push is matched
+    /// by a pop even when a child throws its own drawing away.
     /// </para>
-    /// <para>
-    /// Clipping lives here rather than in each container that wants it, because a clip is a property of a
-    /// rectangle rather than of any particular widget, and because doing it in one place is what guarantees
-    /// every push is matched by a pop even when a child throws its own drawing away.
-    /// </para>
-    /// </summary>
+    /// </remarks>
     public abstract class Element
     {
-        /// <summary>A flat white texture, tinted to whatever colour is wanted. The only way to fill a
-        /// rectangle, since the seam draws sprites and knows nothing of solid colours.</summary>
-        /// <remarks>
-        /// Named for the texture rather than for the act, because <c>Fill</c> is what a container calls
-        /// the child that takes the slack and one of the two had to give way.
-        /// </remarks>
+        /// <summary>
+        /// A flat white texture, tinted to whatever colour is wanted. The only way to fill a rectangle,
+        /// since the seam draws sprites and knows nothing of solid colours.
+        /// </summary>
+        /// <remarks>Named for the texture rather than the act, because <c>Fill</c> is taken by
+        /// <see cref="Dock.Fill" />.</remarks>
         protected static readonly MyStringId Solid = Symbols.Fill;
 
         /// <summary>Set when this is added to another element's children. Null while it is loose.</summary>
         public Element Parent { get; internal set; }
 
-        /// <summary>
-        /// The collection this sits in, so being added somewhere else can take it out of where it was. Kept
-        /// here rather than reached through the parent, because that would mean every element having
-        /// children in order that a label could be moved.
-        /// </summary>
+        /// <summary>The collection this sits in, so being added somewhere else can take it out of where it was.</summary>
         internal ElementCollection Holder { get; set; }
 
         /// <summary>
-        /// Painted across <see cref="Bounds" /> before anything else. Transparent by default, so an element
-        /// that has not been given one costs no draw call rather than a clear one.
+        /// Painted across <see cref="Bounds" /> before anything else. Transparent by default, so an
+        /// element that has not been given one costs no draw call rather than a clear one.
         /// </summary>
         public Color Background { get; set; }
 
-        /// <summary>
-        /// A hairline drawn around <see cref="Bounds" />, inside it. Transparent by default.
-        /// </summary>
+        /// <summary>A hairline drawn around <see cref="Bounds" />, inside it. Transparent by default.</summary>
         /// <remarks>
-        /// Here rather than in each container that wants one, for the same reason padding and clipping
-        /// are: it is a property of a rectangle. It is four sprites and it is drawn only when a colour has
-        /// been set, so an element that has not asked for one costs a comparison.
-        /// <para>
         /// Four rectangles rather than a border, because the seam has no borders - a rectangle of colour
-        /// is the whole of what either target can be asked for.
-        /// </para>
+        /// is the whole of what either target can be asked for. Drawn only when a colour has been set.
         /// </remarks>
         public Color Edge { get; set; }
 
-        /// <summary>
-        /// Painted instead of <see cref="Background" /> while the pointer is resting on this.
-        /// </summary>
+        /// <summary>Painted instead of <see cref="Background" /> while the pointer is resting on this.</summary>
         /// <remarks>
         /// Transparent by default, and that default is load-bearing: <b>setting one of these is how a
-        /// thing declares that it can be pressed.</b> An element that answers to nothing never lights up,
-        /// so the pointer is a way of asking the screen what is real - and the same rule read the other
-        /// way says a row that lights up had better do something when it is pressed.
+        /// thing declares that it can be pressed.</b> Read the other way, a row that lights up had better
+        /// do something when it is pressed.
         /// </remarks>
         public Color Highlight { get; set; }
 
         /// <summary>Drawn instead of <see cref="Edge" /> while the pointer is resting on this.</summary>
         /// <remarks>
-        /// Separate from <see cref="Highlight" /> because some controls are mostly outline - a switch is
-        /// two fills of its own and a border, and brightening the border is the only response it has room
-        /// for. The game does the same thing: its highlight textures differ from its normal ones by the
-        /// edge far more than by the middle.
+        /// Separate from <see cref="Highlight" /> because some controls are mostly outline. The game does
+        /// the same: its highlight textures differ from its normal ones by the edge far more than by the
+        /// middle.
         /// </remarks>
         public Color HighlightEdge { get; set; }
 
-        /// <summary>
-        /// Whether the pointer is on this right now. Set by whatever owns the screen, once a frame.
-        /// </summary>
+        /// <summary>Whether the pointer is on this right now. Set by whatever owns the screen, once a frame.</summary>
         /// <remarks>
-        /// A property rather than something worked out here, because an element knows its own rectangle
-        /// and nothing else - not whether something is drawn over it, not whether it has been scrolled out
-        /// of sight, and not whether a popup has taken the screen. The thing holding the list of what can
-        /// be pressed knows all three.
+        /// Not worked out here: an element knows its own rectangle and nothing else - not whether
+        /// something is drawn over it, not whether it has been scrolled out of sight, and not whether a
+        /// popup has taken the screen.
         /// </remarks>
         public bool IsHot { get; set; }
 
@@ -92,19 +72,15 @@ namespace Phosphor
         public float EdgeThickness { get; set; }
 
         /// <summary>
-        /// Whether children and content are cut to <see cref="Bounds" />. Off by default: most elements are
-        /// laid out to fit and clipping them would only cost a pair of calls to prove it.
+        /// Whether children and content are cut to <see cref="Bounds" />. Off by default: most elements
+        /// are laid out to fit, and clipping them would only cost a pair of calls to prove it.
         /// </summary>
         public bool ClipsContent { get; set; }
 
-        /// <summary>
-        /// Room held clear inside <see cref="Bounds" />, which content is measured and placed within.
-        /// </summary>
+        /// <summary>Room held clear inside <see cref="Bounds" />, which content is measured and placed within.</summary>
         /// <remarks>
-        /// On the element rather than on each container that wants it, for the same reason clipping is:
-        /// it is a property of a rectangle rather than of any particular widget. A background painted
-        /// across the whole of <see cref="Bounds" /> while the words sit inside the padding is what makes
-        /// a chip or a row look like one at all.
+        /// <see cref="Background" /> is painted across the whole of <see cref="Bounds" /> while the
+        /// content sits inside the padding, which is what makes a chip or a row look like one at all.
         /// </remarks>
         public Thickness Padding
         {
@@ -119,13 +95,11 @@ namespace Phosphor
             }
         }
 
-        /// <summary>
-        /// Moved by this much after being placed, without anything having measured it there.
-        /// </summary>
+        /// <summary>Moved by this much after being placed, without anything having measured it there.</summary>
         /// <remarks>
-        /// What a render transform is for elsewhere: the layout still believes the thing is where it put
-        /// it, and only the drawing disagrees. Dragging a row needs exactly that - the row follows the
-        /// pointer while the list underneath keeps its own arithmetic, and letting go simply stops lying.
+        /// The layout still believes the thing is where it put it, and only the drawing disagrees, which
+        /// is what a dragged row needs: it follows the pointer while the list underneath keeps its own
+        /// arithmetic.
         /// </remarks>
         public Vector2 Offset
         {
@@ -142,15 +116,10 @@ namespace Phosphor
             }
         }
 
-        /// <summary>
-        /// Whether this is out of the layout entirely, rather than merely invisible.
-        /// </summary>
+        /// <summary>Whether this is out of the layout entirely, rather than merely invisible.</summary>
         /// <remarks>
-        /// Not the same as drawing nothing. A label with no words still holds a line, which is exactly
-        /// right for anything that must not move when its value comes and goes, and exactly wrong for a
-        /// warning that is usually absent - a row that reserves three lines to show one is a row with a
-        /// strip of empty panel under it on every screen. Containers skip a collapsed child completely,
-        /// spacing included, so nothing is left behind to say it was there.
+        /// Not the same as drawing nothing: a label with no words still holds a line. Containers skip a
+        /// collapsed child completely, spacing included.
         /// </remarks>
         public bool Collapsed
         {
@@ -175,24 +144,20 @@ namespace Phosphor
         private Vector2 _measuredFor;
         private RectangleF _arrangedTo;
 
-        /// <summary>
-        /// Says this needs measuring again, and everything above it with it.
-        /// </summary>
+        /// <summary>Says this needs measuring again, and everything above it with it.</summary>
         /// <remarks>
-        /// A screen is drawn sixty times a second and used perhaps twice a minute, so laying it out on
-        /// every frame is almost entirely wasted: the game answers a text measurement by walking the
-        /// string a character at a time with kerning, and a screenful of labels asks it the same question
-        /// about the same words for as long as somebody is looking. This is what makes the answer keep.
+        /// A screen is drawn sixty times a second and used perhaps twice a minute. The game answers a
+        /// text measurement by walking the string a character at a time with kerning, so laying out every
+        /// frame asks it the same question about the same words for as long as somebody is looking.
         /// <para>
-        /// Upwards only, and it stops at the first parent that is already dirty - whoever made it dirty
-        /// has told everything above it already. So a change costs the depth of the tree once, and
-        /// nothing at all when several things change in the same frame.
+        /// Upwards only, and it stops at the first parent that is already dirty, so a change costs the
+        /// depth of the tree once and nothing at all when several things change in the same frame.
         /// </para>
         /// <para>
-        /// The rule for a property is what it can move. Anything that changes how big this wants to be
-        /// belongs here; anything that only changes where it sits within what it was given belongs in
-        /// <see cref="InvalidateArrange" />; and colour changes nothing at all, which matters because the
-        /// views set colours on every element on every tick.
+        /// <b>The rule for a property is what it can move.</b> Anything that changes how big this wants
+        /// to be belongs here; anything that only changes where it sits within what it was given belongs
+        /// in <see cref="InvalidateArrange" />; and colour changes nothing at all, which matters because
+        /// the views set colours on every element on every tick.
         /// </para>
         /// </remarks>
         public void InvalidateMeasure()
@@ -233,9 +198,8 @@ namespace Phosphor
         /// <summary>Asks how much room this would like, given <paramref name="available" />.</summary>
         public void Measure(IGraphics g, Vector2 available)
         {
-            // Nothing has changed and the offer is the same, so the answer is the same. Safe to stop here
-            // rather than walking on down: a child that had changed would have said so, and saying so
-            // reaches every parent between it and the root.
+            // Safe to stop here rather than walking on down: a child that had changed would have said so,
+            // and saying so reaches every parent between it and the root.
             if (!_measureDirty && _measuredFor.X == available.X && _measuredFor.Y == available.Y)
                 return;
 
@@ -288,10 +252,12 @@ namespace Phosphor
         }
 
         /// <summary>
-        /// Draws the background, then the content, with the clip in place if one was asked for. Not virtual:
-        /// the pairing of push and pop is the thing this method exists to guarantee, so a subclass overrides
-        /// <see cref="DrawContent" /> instead and cannot get between them.
+        /// Draws the background, then the content, with the clip in place if one was asked for.
         /// </summary>
+        /// <remarks>
+        /// Not virtual: pairing the push with the pop is what this method exists to guarantee, so a
+        /// subclass overrides <see cref="DrawContent" /> and cannot get between them.
+        /// </remarks>
         public void Draw(IGraphics g)
         {
             if (Collapsed)

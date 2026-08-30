@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Phosphor;
 using Reactor.Sim.Content;
 using Reactor.Screens;
 using Sandbox.ModAPI;
@@ -14,18 +13,26 @@ using AvColor = Avalonia.Media.Color;
 using Color = VRageMath.Color;
 using Point = Avalonia.Point;
 using Rect = Avalonia.Rect;
+using Phosphor.Graphics;
+using Phosphor.Ui;
+using Reactor.Screens.Controls;
+using Reactor.Screens.Host;
+using Reactor.Screens.Lists;
+using Reactor.Screens.Look;
+using Reactor.Screens.Picking;
+using Reactor.Screens.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
     /// <summary>
     /// A window pretending to be the game's screen.
-    /// <para>
+    /// </summary>
+    /// <remarks>
     /// It sets up what the game would have supplied - a safe GUI area, a viewport - then runs a real
     /// <see cref="ScreenSpaceGraphics" /> over whatever the scene draws, and replays the calls it recorded.
     /// Nothing here reaches into Phosphor: the backend under test is the one the mod ships, unmodified, and
     /// the only thing swapped out from under it is the game.
-    /// </para>
-    /// </summary>
+    /// </remarks>
     public sealed class PhosphorSurface : Control
     {
         readonly ScreenSpaceDevice _device = new ScreenSpaceDevice();
@@ -383,7 +390,7 @@ namespace Reactor.Sim.Simulation
 
             // Drawn as the game would draw it, boxes and all. Anything else here has glyphs Space
             // Engineers has never heard of, and letting them show would make this window flatter the mod.
-            bool symbolic = command.Font == Phosphor.Symbols.Font;
+            bool symbolic = command.Font == Phosphor.Ui.Symbols.Font;
 
             SeFontMetrics metrics = symbolic ? _symbols : _exact;
             GlyphAtlas page = symbolic ? _symbolAtlas : _atlas;
@@ -454,7 +461,7 @@ namespace Reactor.Sim.Simulation
 
             double pen = command.Position.X;
             double top = command.Position.Y + metrics.CellTop * unit;
-            char previous = ' ';
+            char previous = '\0';
 
             // The whole run's alpha at once, rather than a paler tint per colour: the page is already a
             // coverage mask, so tinting and fading are separate concerns and only one of them is worth
@@ -485,7 +492,7 @@ namespace Reactor.Sim.Simulation
                         continue;
                     }
 
-                    if (previous != ' ')
+                    if (previous != '\0')
                         pen += metrics.Kerning(previous, c) * unit;
 
                     if (glyph.Width > 0 && glyph.Height > 0)

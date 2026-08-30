@@ -38,13 +38,13 @@ namespace Reactor.Editing
         /// The default is one part carrying <see cref="Title" /> and whatever the page says about renaming,
         /// which is right for every page that is about one thing. A page whose heading is really two things
         /// overrides it - see <c>SequencePage</c>, where what starts a sequence and what it then does are
-        /// separate, and naming the second used to swallow the first.
-        /// </remarks>
-        /// <remarks>
+        /// separate, and only the second is somebody's to name.
+        /// <para>
         /// Paired with <see cref="RefreshHeading" /> exactly the way <see cref="Build" /> is paired with
         /// <see cref="Refresh" />, and for the same reason: this one runs when the screen is made and may
         /// claim command ids, which can only be claimed once; the other runs every tick and may only change
         /// words. A page that overrides one nearly always has to override the other.
+        /// </para>
         /// </remarks>
         public virtual void Heading(List<HeadingPart> parts)
         {

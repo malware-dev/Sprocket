@@ -32,10 +32,9 @@ namespace Reactor.Editing
         /// cannot already see.
         /// </summary>
         /// <remarks>
-        /// No subtitle. What the sequence is doing right now used to be repeated up here, and
-        /// it reads as two different things saying the same words. Its state belongs on the
-        /// sentence itself, beside the switch and the run button that change it, where it is
-        /// next to the thing it is about.
+        /// No subtitle. What the sequence is doing right now belongs on the sentence itself, beside
+        /// the switch that changes it - repeating it up here reads as two different things saying the
+        /// same words.
         /// </remarks>
         public override string Title
         {
@@ -67,10 +66,10 @@ namespace Reactor.Editing
         /// Two parts: what starts it, and what it then does. Only the second takes a name.
         /// </summary>
         /// <remarks>
-        /// This is the whole reason a heading is a list. It used to be one line and a name replaced all of
-        /// it, so wanting a better word for what a sequence <b>does</b> cost you the trigger that starts
-        /// it - and the only way to keep the trigger was to type it into the name by hand, exactly as it
-        /// already read, and then keep it in step by hand forever after.
+        /// This is the whole reason a heading is a list. One line with a name replacing all of it would
+        /// mean that wanting a better word for what a sequence <b>does</b> cost you the trigger that
+        /// starts it, with no way to keep both but to type the trigger into the name and hold the two
+        /// in step by hand forever after.
         /// <para>
         /// The trigger half is not nameable, and that is a decision rather than an omission. "When the
         /// airlock button is pressed" is already the best possible name for itself; replacing it with
@@ -464,17 +463,18 @@ namespace Reactor.Editing
         /// Asks first. There is no undo, and this throws away everything somebody built.
         /// </summary>
         /// <remarks>
-        /// It used to delete on the press, which is the one place in the editor where a
-        /// mistake could not be walked back: every other action is live and reversible by
-        /// doing the opposite, and this one is not reversible at all.
-        ///
-        /// The safe answer is listed first, so the reflex press lands on it, and it is spelt
-        /// out rather than left to Back. Back does mean keep - it always means return to where
-        /// you came from - but a screen whose only row is the destructive one is a screen where
-        /// a stray press destroys something.
-        ///
-        /// How the question gets asked is the target's business as usual. Core says there is a
-        /// question, what it is about, and what the answers do.
+        /// The one place in the editor where a mistake cannot be walked back: every other action is
+        /// live and reversible by doing the opposite, and this one is not reversible at all.
+        /// <para>
+        /// The safe answer is listed first, so the reflex press lands on it, and it is spelt out rather
+        /// than left to back. Back does mean keep - it always means return to where you came from - but
+        /// a screen whose only row is the destructive one is a screen where a stray press destroys
+        /// something.
+        /// </para>
+        /// <para>
+        /// How the question gets asked is the target's business as usual. Core says there is a question,
+        /// what it is about, and what the answers do.
+        /// </para>
         /// </remarks>
         void Delete()
         {
