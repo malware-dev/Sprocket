@@ -19,13 +19,13 @@ namespace Reactor.Editing
         /// <summary>How long after firing a sequence still counts as having just run.</summary>
         const int JustRanTicks = 10;
 
-        public static bool References(Sequence sequence, long entityId)
+        public static bool References(Sequence sequence, string name)
         {
-            return Automation.References(sequence, entityId);
+            return Automation.References(sequence, name);
         }
 
         /// <summary>Updates one entry per sequence, in place.</summary>
-        public static void Fill(ObservableList<StatusEntry> entries, List<Sequence> sequences, IWorld world,
+        public static void Fill(ObservableList<StatusEntry> entries, List<Sequence> sequences, Bindings bindings,
             AutomationRunner runner, int tick, ISequenceText wording, ITimeText time)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
@@ -33,15 +33,15 @@ namespace Reactor.Editing
             {
                 var sequence = sequences[i];
                 var entry = entries[i];
-                var state = runner.Get(sequence);
+                var running = runner.Get(sequence);
 
-                entry.Summary = wording.Sequence(world, sequence);
-                entry.Status = wording.Status(Status(sequence, state));
-                entry.JustRan = state != null && state.LastFiredTick >= 0
-                    && tick - state.LastFiredTick < JustRanTicks;
-                entry.Problem = wording.Problem(Problem(world, sequence, state));
+                entry.Summary = wording.Sequence(bindings, sequence);
+                entry.Status = wording.Status(Status(sequence, running));
+                entry.JustRan = running != null && running.LastFiredTick >= 0
+                    && tick - running.LastFiredTick < JustRanTicks;
+                entry.Problem = wording.Problem(Problem(bindings, sequence, running));
 
-                entry.LastRun = time.Ago(TicksSinceRun(state, tick));
+                entry.LastRun = time.Ago(TicksSinceRun(running, tick));
             }
         }
 
@@ -68,10 +68,12 @@ namespace Reactor.Editing
         }
 
         /// <summary>Why this sequence cannot work, or <see cref="SequenceProblem.None" />.</summary>
-        public static SequenceProblem Problem(IWorld world, Sequence sequence, SequenceRunner state)
+        public static SequenceProblem Problem(Bindings bindings, Sequence sequence, SequenceRunner state)
         {
             if (state != null && state.HasMissingSources)
                 return SequenceProblem.MissingSource;
+
+            var adrift = false;
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
@@ -79,8 +81,11 @@ namespace Reactor.Editing
 
                 for (var t = 0; t < step.Targets.Count; t++)
                 {
-                    if (world.FindEntity(step.Targets[t]) == null)
+                    var points = bindings.State(step.Targets[t]);
+                    if (points == RefState.Lost)
                         return SequenceProblem.MissingTarget;
+                    if (points == RefState.Adrift)
+                        adrift = true;
                 }
 
                 var gate = step.Gate as OnceGate;
@@ -96,12 +101,17 @@ namespace Reactor.Editing
 
                 for (var t = 0; t < condition.Entities.Count; t++)
                 {
-                    if (world.FindEntity(condition.Entities[t]) == null)
+                    var held = bindings.State(condition.Entities[t]);
+                    if (held == RefState.Lost)
                         return SequenceProblem.MissingGate;
+                    if (held == RefState.Adrift)
+                        adrift = true;
                 }
             }
 
-            return SequenceProblem.None;
+            // Reported only once nothing is outright missing, because being gone is the worse news
+            // and a line can only say one thing.
+            return adrift ? SequenceProblem.Adrift : SequenceProblem.None;
         }
     }
 }

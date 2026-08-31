@@ -121,7 +121,7 @@ namespace Reactor.Host.SpaceEngineers.World
 
             string text;
             if (storage.TryGetValue(ProgramKey, out text) && !string.IsNullOrEmpty(text))
-                ProgramText.Load(text, _program);
+                ProgramText.Load(text, _program, _world.Values);
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 return;
             }
 
-            storage.SetValue(ProgramKey, ProgramText.Save(_program));
+            storage.SetValue(ProgramKey, ProgramText.Save(_program, _world.Values));
         }
 
         public void Dispose()

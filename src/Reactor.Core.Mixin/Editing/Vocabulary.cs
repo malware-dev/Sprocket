@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Reactor.Runtime;
 using Reactor.World;
 
 namespace Reactor.Editing
@@ -22,10 +23,26 @@ namespace Reactor.Editing
         /// something for every entity in the selection, or the sentence stops being
         /// true of the things it names.
         /// </remarks>
-        public static List<EntityEvent> EventsFor(IWorld world, IList<long> entityIds)
+        public static List<EntityEvent> EventsFor(Bindings bindings, IList<string> names)
+        {
+            return EventsOf(Held(bindings, names));
+        }
+
+        /// <summary>
+        /// The same, asked about blocks somebody is holding rather than about a sequence.
+        /// </summary>
+        /// <remarks>
+        /// A picker has blocks and no declarations yet - it is the thing that turns one into the
+        /// other. Everything else asks the first form.
+        /// </remarks>
+        public static List<EntityEvent> EventsOf(IWorld world, IList<long> entityIds)
+        {
+            return EventsOf(Blocks(world, entityIds));
+        }
+
+        static List<EntityEvent> EventsOf(List<IEntity> entities)
         {
             var result = new List<EntityEvent>();
-            var entities = Resolve(world, entityIds);
             if (entities.Count == 0)
                 return result;
 
@@ -39,10 +56,20 @@ namespace Reactor.Editing
         }
 
         /// <summary>Actions every one of the given entities accepts.</summary>
-        public static List<EntityAction> ActionsFor(IWorld world, IList<long> entityIds)
+        public static List<EntityAction> ActionsFor(Bindings bindings, IList<string> names)
+        {
+            return ActionsOf(Held(bindings, names));
+        }
+
+        /// <summary>The same, asked about blocks somebody is holding.</summary>
+        public static List<EntityAction> ActionsOf(IWorld world, IList<long> entityIds)
+        {
+            return ActionsOf(Blocks(world, entityIds));
+        }
+
+        static List<EntityAction> ActionsOf(List<IEntity> entities)
         {
             var result = new List<EntityAction>();
-            var entities = Resolve(world, entityIds);
             if (entities.Count == 0)
                 return result;
 
@@ -89,7 +116,27 @@ namespace Reactor.Editing
             return result;
         }
 
-        static List<IEntity> Resolve(IWorld world, IList<long> entityIds)
+        /// <summary>
+        /// What these names currently point at, skipping the ones that point at nothing.
+        /// </summary>
+        /// <remarks>
+        /// An adrift reference is included, because this decides what may be <i>said</i> about a
+        /// selection rather than what may be done to it. Refusing to offer "open" for a door whose
+        /// id died would leave somebody unable to describe the thing they are about to re-point.
+        /// </remarks>
+        static List<IEntity> Held(Bindings bindings, IList<string> names)
+        {
+            var result = new List<IEntity>();
+            for (var i = 0; i < names.Count; i++)
+            {
+                var entity = bindings.Entity(names[i]);
+                if (entity != null)
+                    result.Add(entity);
+            }
+            return result;
+        }
+
+        static List<IEntity> Blocks(IWorld world, IList<long> entityIds)
         {
             var result = new List<IEntity>();
             for (var i = 0; i < entityIds.Count; i++)
@@ -121,11 +168,11 @@ namespace Reactor.Editing
             return true;
         }
 
-        static bool Contains(IList<long> ids, long id)
+        static bool Contains(IList<string> names, string name)
         {
-            for (var i = 0; i < ids.Count; i++)
+            for (var i = 0; i < names.Count; i++)
             {
-                if (ids[i] == id)
+                if (names[i] == name)
                     return true;
             }
             return false;

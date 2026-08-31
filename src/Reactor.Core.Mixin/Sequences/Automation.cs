@@ -259,37 +259,37 @@ namespace Reactor.Sequences
         }
 
         /// <summary>
-        /// How many sequences touch the given entity, without allocating.
+        /// How many sequences name this declaration, without allocating.
         /// </summary>
         /// <remarks>
         /// Asked once per listed block on every tick, so it must not produce garbage
         /// - core runs inside the game's update loop.
         /// </remarks>
-        public int CountReferencing(long entityId)
+        public int CountReferencing(string name)
         {
             var count = 0;
             for (var i = 0; i < _sequences.Count; i++)
             {
-                if (References(_sequences[i], entityId))
+                if (References(_sequences[i], name))
                     count++;
             }
             return count;
         }
 
-        public static bool References(Sequence sequence, long entityId)
+        public static bool References(Sequence sequence, string name)
         {
             var when = sequence.Trigger as WhenTrigger;
-            if (when != null && when.Sources.Contains(entityId))
+            if (when != null && when.Sources.Contains(name))
                 return true;
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var step = sequence.Steps[i];
-                if (step.Targets.Contains(entityId))
+                if (step.Targets.Contains(name))
                     return true;
 
                 var gate = step.Gate as OnceGate;
-                if (gate != null && gate.Condition.Entities.Contains(entityId))
+                if (gate != null && gate.Condition.Entities.Contains(name))
                     return true;
             }
             return false;

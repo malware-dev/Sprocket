@@ -34,13 +34,13 @@ namespace Reactor.Editing
         /// Worked out when the screen is built, never on a tick: it walks names and splits
         /// strings, which is not something to do sixty times a second.
         /// </remarks>
-        public static string Describe(IWorld world, AutomationSystem system)
+        public static string Describe(Bindings bindings, AutomationSystem system)
         {
             if (system.HasName)
                 return system.Name;
 
             Names.Clear();
-            CollectEntityNames(world, system, Names);
+            CollectEntityNames(bindings, system, Names);
 
             var common = CommonPrefix(Names);
             if (common.Length > 0)
@@ -50,12 +50,12 @@ namespace Reactor.Editing
         }
 
         /// <summary>What one of a system is called: Airlock 1, or whatever it was renamed to.</summary>
-        public static string DescribeInstance(IWorld world, AutomationSystem system, SystemInstance instance)
+        public static string DescribeInstance(Bindings bindings, AutomationSystem system, SystemInstance instance)
         {
             if (instance.HasName)
                 return instance.Name;
 
-            return Describe(world, system) + " " + instance.Number;
+            return Describe(bindings, system) + " " + instance.Number;
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Reactor.Editing
             return running ? Running : Idle;
         }
 
-        static void CollectEntityNames(IWorld world, AutomationSystem system, List<string> result)
+        static void CollectEntityNames(Bindings bindings, AutomationSystem system, List<string> result)
         {
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
@@ -99,16 +99,16 @@ namespace Reactor.Editing
 
                 var when = sequence.Trigger as WhenTrigger;
                 if (when != null)
-                    AddNames(world, when.Sources, result);
+                    AddNames(bindings, when.Sources, result);
 
                 for (var s = 0; s < sequence.Steps.Count; s++)
                 {
                     var step = sequence.Steps[s];
-                    AddNames(world, step.Targets, result);
+                    AddNames(bindings, step.Targets, result);
 
                     var gate = step.Gate as OnceGate;
                     if (gate != null)
-                        AddNames(world, gate.Condition.Entities, result);
+                        AddNames(bindings, gate.Condition.Entities, result);
                 }
             }
         }
@@ -123,11 +123,11 @@ namespace Reactor.Editing
             return false;
         }
 
-        static void AddNames(IWorld world, IList<long> ids, List<string> result)
+        static void AddNames(Bindings bindings, IList<string> refs, List<string> result)
         {
-            for (var i = 0; i < ids.Count; i++)
+            for (var i = 0; i < refs.Count; i++)
             {
-                var entity = world.FindEntity(ids[i]);
+                var entity = bindings.Entity(refs[i]);
                 if (entity != null && !string.IsNullOrEmpty(entity.Name))
                     result.Add(entity.Name);
             }

@@ -8,14 +8,14 @@ namespace Reactor.Sequences
     /// </summary>
     sealed class ChangeTrigger : SequenceEdit
     {
-        readonly List<long> _wasSources;
+        readonly List<string> _wasSources;
         readonly string _wasEvent;
         readonly bool _wasAll;
-        readonly List<long> _nowSources;
+        readonly List<string> _nowSources;
         readonly string _nowEvent;
         readonly bool _nowAll;
 
-        public ChangeTrigger(WhenTrigger trigger, IList<long> sources, string eventId, bool all)
+        public ChangeTrigger(WhenTrigger trigger, IList<string> sources, string eventId, bool all)
         {
             _wasSources = CopyOf(trigger.Sources);
             _wasEvent = trigger.EventId;
@@ -41,7 +41,7 @@ namespace Reactor.Sequences
             Put(sequence, _wasSources, _wasEvent, _wasAll);
         }
 
-        static void Put(Sequence sequence, IList<long> sources, string eventId, bool all)
+        static void Put(Sequence sequence, IList<string> sources, string eventId, bool all)
         {
             var when = sequence.Trigger as WhenTrigger;
             if (when == null)

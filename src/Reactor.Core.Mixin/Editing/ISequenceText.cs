@@ -1,5 +1,5 @@
+using Reactor.Runtime;
 using Reactor.Sequences;
-using Reactor.World;
 
 namespace Reactor.Editing
 {
@@ -19,6 +19,11 @@ namespace Reactor.Editing
     /// door, and belongs somewhere else - or nowhere.
     /// </para>
     /// <para>
+    /// <b>Given the bindings rather than the world</b>, because a sequence names claims and what
+    /// those currently point at is the only thing a renderer can put words on. Resolving is the
+    /// editor's job and it has already been done once for this tick.
+    /// </para>
+    /// <para>
     /// <b>One subject per interface.</b> Split from <see cref="ITimeText" /> so neither grows into
     /// a place to put any string that needs a home, and so a target can answer them from wherever it
     /// keeps each kind of wording. When one of these stops being about one subject, it splits again.
@@ -33,10 +38,10 @@ namespace Reactor.Editing
         /// Read on every tick for whatever is on screen, so an implementation that builds a fresh
         /// string each time is building one sixty times a second.
         /// </remarks>
-        string Sequence(IWorld world, Sequence sequence);
+        string Sequence(Bindings bindings, Sequence sequence);
 
         /// <summary>What starts a sequence, on its own.</summary>
-        string Trigger(IWorld world, Trigger trigger);
+        string Trigger(Bindings bindings, Trigger trigger);
 
         /// <summary>
         /// The half a name replaces: what somebody called it, or what it actually does.
@@ -45,7 +50,7 @@ namespace Reactor.Editing
         /// Split out because a heading is two things and only the second takes a name. A name winning
         /// the whole line would make naming a sequence stop its row saying when it happens.
         /// </remarks>
-        string Doing(IWorld world, Sequence sequence);
+        string Doing(Bindings bindings, Sequence sequence);
 
         string Status(SequenceStatus status);
 

@@ -213,7 +213,7 @@ public class EditorTests
         editor.Invoke(editor.Sentence().RedoCommand);
         ship.Tick();
         Assert.Single(sequence.Steps);
-        Assert.Equal("Airlock Light", ship.World.FindEntity(sequence.Steps[0].Targets[0])!.Name);
+        Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(sequence.Steps[0].Targets[0])!.Name);
 
         // Walk back, then do something different: the road not taken is gone, because putting
         // a step back at an index that now means something else is worse than not offering.

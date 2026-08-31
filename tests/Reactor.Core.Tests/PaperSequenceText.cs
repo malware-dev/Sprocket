@@ -1,4 +1,5 @@
 using Reactor.Editing;
+using Reactor.Runtime;
 using Reactor.Sequences;
 using Reactor.World;
 
@@ -18,14 +19,14 @@ namespace Reactor.Tests;
 /// </remarks>
 sealed class PaperSequenceText : ISequenceText
 {
-    public string Sequence(IWorld world, Sequence sequence) =>
-        Trigger(world, sequence.Trigger) + " -> " + Doing(world, sequence);
+    public string Sequence(Bindings bindings, Sequence sequence) =>
+        Trigger(bindings, sequence.Trigger) + " -> " + Doing(bindings, sequence);
 
-    public string Trigger(IWorld world, Trigger trigger)
+    public string Trigger(Bindings bindings, Trigger trigger)
     {
         if (trigger is WhenTrigger when)
         {
-            var events = Vocabulary.EventsFor(world, when.Sources);
+            var events = Vocabulary.EventsFor(bindings, when.Sources);
             var text = "____";
             foreach (var happening in events)
             {
@@ -36,13 +37,13 @@ sealed class PaperSequenceText : ISequenceText
                 }
             }
 
-            return "when " + Names(world, when.Sources, when.RequiresAll) + " " + text;
+            return "when " + Names(bindings, when.Sources, when.RequiresAll) + " " + text;
         }
 
         return trigger is EveryTrigger every ? "every " + every.IntervalTicks + " ticks" : "____";
     }
 
-    public string Doing(IWorld world, Sequence sequence)
+    public string Doing(Bindings bindings, Sequence sequence)
     {
         if (sequence.HasName)
             return sequence.Name;
@@ -50,7 +51,7 @@ sealed class PaperSequenceText : ISequenceText
         if (sequence.Steps.Count == 0)
             return "nothing";
 
-        var first = Step(world, sequence.Steps[0]);
+        var first = Step(bindings, sequence.Steps[0]);
         return sequence.Steps.Count == 1 ? first : first + " +" + (sequence.Steps.Count - 1);
     }
 
@@ -59,7 +60,7 @@ sealed class PaperSequenceText : ISequenceText
     public string Problem(SequenceProblem problem) =>
         problem == SequenceProblem.None ? "" : problem.ToString().ToLowerInvariant();
 
-    static string Step(IWorld world, Step step)
+    static string Step(Bindings bindings, Step step)
     {
         if (!step.HasAction && step.Gate is AfterGate pause)
             return "wait " + pause.Ticks;
@@ -67,7 +68,7 @@ sealed class PaperSequenceText : ISequenceText
         if (step.Targets.Count == 0)
             return "____";
 
-        var actions = Vocabulary.ActionsFor(world, step.Targets);
+        var actions = Vocabulary.ActionsFor(bindings, step.Targets);
         var text = "____";
         foreach (var action in actions)
         {
@@ -78,18 +79,18 @@ sealed class PaperSequenceText : ISequenceText
             }
         }
 
-        return text + " " + Names(world, step.Targets, true);
+        return text + " " + Names(bindings, step.Targets, true);
     }
 
-    static string Names(IWorld world, System.Collections.Generic.IList<long> ids, bool all)
+    static string Names(Bindings bindings, System.Collections.Generic.IList<string> refs, bool all)
     {
-        if (ids.Count == 0)
+        if (refs.Count == 0)
             return "____";
 
         var names = new System.Collections.Generic.List<string>();
-        foreach (var id in ids)
+        foreach (var name in refs)
         {
-            var entity = world.FindEntity(id);
+            var entity = bindings.Entity(name);
             names.Add(entity == null ? "(gone)" : entity.Name);
         }
 

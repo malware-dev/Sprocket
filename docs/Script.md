@@ -786,7 +786,26 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
 3. ~~**`ValueKind` gains `Integer`, `Number` becomes `Real`**, and the operator table arrives with
    them.~~ **Done**, along with `Color` and the eight-byte value.
 4. ~~**`Description` becomes `Annotation`**, and sequences and steps gain one.~~ **Done.**
-5. **References become opaque host-minted values rather than `long`**, which threads through the
-   model, the runtime and the save format. This is the big one, and it is what makes a shareable
-   automation reachable at all.
+5. ~~**References become opaque host-minted values rather than `long`**~~ - **the model, the runtime
+   and the save format are done.**
+
+   `Step.Targets`, `WhenTrigger.Sources` and `Condition.Entities` hold declaration names.
+   `Automation` owns the declarations; `SystemRole` and `SystemInstance` key by them, so fitting a
+   system to a second set of blocks is now one claim standing in for another rather than one id
+   standing in for another. `ProgramText` writes a `block` line per declaration, with its keys
+   tagged only by value kind - the tag says how to read the value back, never what it means.
+
+   Resolution is `Bindings`, refreshed when the world's revision or the program's moves and not
+   otherwise. `SequenceProblem` gained `Adrift`, so a sequence whose door was rebuilt says so
+   instead of either running on the wrong block or claiming the block is gone.
+
+   **What step 5 still owes:**
+
+   - **Nothing can accept a proposal yet.** An adrift reference is reported and cannot be re-pointed
+     from the editor, which is the payoff the three states exist for.
+   - **`Automation.DropUnusedRefs` is written and unwired.** It can be called now that
+     `References(sequence, name)` exists; nothing calls it, so declarations accumulate as steps are
+     deleted.
+   - **Position is still not a key.** A pasted blueprint keeps every position and changes every id,
+     which makes it the valuable middle key, and it needs a `ValueKind` wide enough to hold one.
 6. **The script language**, once 5 has settled what a reference is.

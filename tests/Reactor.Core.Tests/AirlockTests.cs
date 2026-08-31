@@ -32,6 +32,9 @@ public class AirlockTests
 
         public Sequence LetMeOut = null!;
 
+        /// <summary>Names a block, so a test builds sequences the way the editor does.</summary>
+        public string Ref(IEntity entity) => Automation.Declare(World, entity).Name;
+
         int _frame;
 
         public void Tick(int ticks = 1)
@@ -46,7 +49,7 @@ public class AirlockTests
         public SequenceRunner State => Runner.Get(LetMeOut)!;
     }
 
-    static Condition Is(string stateId, params long[] entities)
+    static Condition Is(string stateId, params string[] entities)
     {
         var condition = new Condition(stateId);
         foreach (var entity in entities)
@@ -54,7 +57,7 @@ public class AirlockTests
         return condition;
     }
 
-    static Step Do(string actionId, params long[] targets)
+    static Step Do(string actionId, params string[] targets)
     {
         var step = new Step(actionId);
         foreach (var target in targets)
@@ -71,14 +74,14 @@ public class AirlockTests
         a.Inside = a.World.Add(new TestButton(4, "Inside Button"));
 
         var trigger = new WhenTrigger("pressed");
-        trigger.Sources.Add(a.Inside.Id);
+        trigger.Sources.Add(a.Ref(a.Inside));
 
         a.LetMeOut = a.Automation.AddSequence(trigger);
         a.LetMeOut.Name = "Let me out";
 
-        a.LetMeOut.Steps.Add(Do("close", a.Inner.Id));
-        a.LetMeOut.Steps.Add(Do("depressurize", a.Vent.Id));
-        a.LetMeOut.Steps.Add(Do("open", a.Outer.Id));
+        a.LetMeOut.Steps.Add(Do("close", a.Ref(a.Inner)));
+        a.LetMeOut.Steps.Add(Do("depressurize", a.Ref(a.Vent)));
+        a.LetMeOut.Steps.Add(Do("open", a.Ref(a.Outer)));
 
         a.Runner = new AutomationRunner(a.Automation, a.World);
         return a;
@@ -148,8 +151,8 @@ public class AirlockTests
         var beacon = a.World.Add(new TestLamp(5, "Beacon"));
 
         var sequence = a.Automation.AddSequence(new EveryTrigger(1));
-        sequence.Steps.Add(Do("on", beacon.Id));
-        sequence.Steps.Add(Do("close", a.Inner.Id));
+        sequence.Steps.Add(Do("on", a.Ref(beacon)));
+        sequence.Steps.Add(Do("close", a.Ref(a.Inner)));
 
         a.Tick();
         Assert.Equal(["Beacon:on", "Inner Door:close"], a.World.Log);
@@ -165,10 +168,10 @@ public class AirlockTests
         a.World.Log.Clear();
 
         var sequence = a.Automation.AddSequence(new EveryTrigger(1000));
-        var first = Do("close", a.Inner.Id);
+        var first = Do("close", a.Ref(a.Inner));
         first.WaitsForCompletion = false;
         sequence.Steps.Add(first);
-        sequence.Steps.Add(Do("close", a.Outer.Id));
+        sequence.Steps.Add(Do("close", a.Ref(a.Outer)));
 
         a.Tick();                       // lets the runner pick the new sequence up
         a.World.Log.Clear();
@@ -204,7 +207,7 @@ public class AirlockTests
         // guard passes the step over and the sequence carries on.
         var a = Build();
         a.LetMeOut.Steps[0].WaitsForCompletion = false;
-        a.LetMeOut.Steps[2].Gate = new OnlyIfGate(Is("is-shut", a.Inner.Id));
+        a.LetMeOut.Steps[2].Gate = new OnlyIfGate(Is("is-shut", a.Ref(a.Inner)));
 
         a.Inner.ForceOpen();
         a.Tick(3);
@@ -240,11 +243,11 @@ public class AirlockTests
     {
         var sequence = a.Automation.AddSequence(new CalledTrigger());
         sequence.Name = name;
-        sequence.Steps.Add(Do("close", leave.Id));
-        sequence.Steps.Add(Do("lock", leave.Id));
-        sequence.Steps.Add(Do(pump, a.Vent.Id));
-        sequence.Steps.Add(Do("unlock", enter.Id));
-        sequence.Steps.Add(Do("open", enter.Id));
+        sequence.Steps.Add(Do("close", a.Ref(leave)));
+        sequence.Steps.Add(Do("lock", a.Ref(leave)));
+        sequence.Steps.Add(Do(pump, a.Ref(a.Vent)));
+        sequence.Steps.Add(Do("unlock", a.Ref(enter)));
+        sequence.Steps.Add(Do("open", a.Ref(enter)));
         return sequence;
     }
 
@@ -320,16 +323,16 @@ public class AirlockTests
     static void Mutex(Airlock a, TestDoor door, TestDoor other)
     {
         var opened = new WhenTrigger("opened");
-        opened.Sources.Add(door.Id);
+        opened.Sources.Add(a.Ref(door));
         var secure = a.Automation.AddSequence(opened);
         secure.Name = $"Secure the other door while {door.Name} is open";
-        secure.Steps.Add(Do("lock", other.Id));
+        secure.Steps.Add(Do("lock", a.Ref(other)));
 
         var shut = new WhenTrigger("shut");
-        shut.Sources.Add(door.Id);
+        shut.Sources.Add(a.Ref(door));
         var release = a.Automation.AddSequence(shut);
         release.Name = $"Release the other door when {door.Name} shuts";
-        release.Steps.Add(Do("unlock", other.Id));
+        release.Steps.Add(Do("unlock", a.Ref(other)));
     }
 
     [Fact]
@@ -347,7 +350,7 @@ public class AirlockTests
 
         // Anything trying to open the outer door now gets nowhere.
         var careless = a.Automation.AddSequence(new EveryTrigger(1));
-        careless.Steps.Add(Do("open", a.Outer.Id));
+        careless.Steps.Add(Do("open", a.Ref(a.Outer)));
         a.Tick(30);
 
         Assert.NotEqual("open", a.Outer.Status);
@@ -368,7 +371,7 @@ public class AirlockTests
         a.Tick(15);
 
         var opener = a.Automation.AddSequence(new EveryTrigger(1));
-        opener.Steps.Add(Do("open", a.Outer.Id));
+        opener.Steps.Add(Do("open", a.Ref(a.Outer)));
         a.Tick(30);
 
         Assert.Equal("open", a.Outer.Status);

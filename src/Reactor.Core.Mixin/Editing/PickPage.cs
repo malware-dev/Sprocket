@@ -345,7 +345,7 @@ namespace Reactor.Editing
 
             if (_forEvents)
             {
-                var events = Vocabulary.EventsFor(Editor.World, _selection);
+                var events = Vocabulary.EventsOf(Editor.World, _selection);
                 for (var i = 0; i < events.Count; i++)
                 {
                     _names.Add(events[i].Text);
@@ -354,7 +354,7 @@ namespace Reactor.Editing
             }
             else
             {
-                var actions = Vocabulary.ActionsFor(Editor.World, _selection);
+                var actions = Vocabulary.ActionsOf(Editor.World, _selection);
                 for (var i = 0; i < actions.Count; i++)
                 {
                     _names.Add(actions[i].Text);

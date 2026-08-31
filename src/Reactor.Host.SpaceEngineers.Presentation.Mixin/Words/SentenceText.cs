@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Reactor.Editing;
+using Reactor.Runtime;
 using Reactor.Sequences;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using Reactor.Ui;
@@ -97,14 +98,41 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
             if (entityIds.Count == 0)
                 return Empty;
 
-            var joiner = requiresAll ? " and " : " or ";
-
             var names = new List<string>();
             for (var i = 0; i < entityIds.Count; i++)
             {
                 var entity = world.FindEntity(entityIds[i]);
                 names.Add(entity == null ? Missing : entity.Name);
             }
+
+            return Joined(names, requiresAll);
+        }
+
+        /// <summary>
+        /// The same, for a sentence read straight off the model, where the parts are claims.
+        /// </summary>
+        /// <remarks>
+        /// A slot already holds blocks, because the editor resolved them when it built the screen. A
+        /// row and a heading are worded from the sequence itself, so they resolve here.
+        /// </remarks>
+        public static string Named(Bindings bindings, IList<string> refs, bool requiresAll)
+        {
+            if (refs.Count == 0)
+                return Empty;
+
+            var names = new List<string>();
+            for (var i = 0; i < refs.Count; i++)
+            {
+                var entity = bindings.Entity(refs[i]);
+                names.Add(entity == null ? Missing : entity.Name);
+            }
+
+            return Joined(names, requiresAll);
+        }
+
+        static string Joined(List<string> names, bool requiresAll)
+        {
+            var joiner = requiresAll ? " and " : " or ";
 
             if (names.Count == 1)
                 return names[0];

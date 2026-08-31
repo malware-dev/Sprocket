@@ -28,7 +28,7 @@ namespace Reactor.Editing
 
         public int SystemId => _system.Id;
 
-        public override string Title => SystemSummary.Describe(Editor.World, _system);
+        public override string Title => SystemSummary.Describe(Editor.Runner.Bindings, _system);
 
         /// <summary>
         /// What the author said this thing is.
@@ -145,7 +145,7 @@ namespace Reactor.Editing
                 return;
             }
 
-            SequenceSummary.Fill(_list.Entries, _sequences, Editor.World, Editor.Runner, Editor.CurrentTick,
+            SequenceSummary.Fill(_list.Entries, _sequences, Editor.Runner.Bindings, Editor.Runner, Editor.CurrentTick,
                 Editor.SequenceText, Editor.TimeText);
 
             for (var i = 0; i < _list.Entries.Count && i < _sequences.Count; i++)

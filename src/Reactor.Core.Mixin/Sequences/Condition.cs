@@ -17,14 +17,14 @@ namespace Reactor.Sequences
     /// </remarks>
     public sealed class Condition
     {
-        readonly List<long> _entities = new List<long>();
+        readonly List<string> _entities = new List<string>();
 
         public Condition(string stateId)
         {
             StateId = stateId;
         }
 
-        public IList<long> Entities => _entities;
+        public IList<string> Entities => _entities;
 
         /// <summary>The <see cref="World.EntityState"/> id every entity must be in.</summary>
         public string StateId { get; set; }

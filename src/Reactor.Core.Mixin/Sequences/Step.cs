@@ -13,7 +13,7 @@ namespace Reactor.Sequences
     /// </remarks>
     public sealed class Step
     {
-        readonly List<long> _targets = new List<long>();
+        readonly List<string> _targets = new List<string>();
 
         public Step(string actionId)
         {
@@ -62,7 +62,7 @@ namespace Reactor.Sequences
         public bool WaitsForCompletion { get; set; }
 
         /// <summary>Entities affected. All of them, together, in this step.</summary>
-        public IList<long> Targets => _targets;
+        public IList<string> Targets => _targets;
 
         /// <summary>The <see cref="World.EntityAction"/> id to invoke.</summary>
         public string ActionId { get; set; }

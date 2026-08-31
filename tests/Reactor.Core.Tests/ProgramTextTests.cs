@@ -1,5 +1,6 @@
 using Reactor.Sequences;
 using Reactor.Storage;
+using Reactor.World;
 using Xunit;
 
 namespace Reactor.Tests;
@@ -15,9 +16,33 @@ namespace Reactor.Tests;
 /// </remarks>
 public class ProgramTextTests
 {
+    static readonly Values Store = new Values();
+
+    static string Save(Automation program) => ProgramText.Save(program, Store);
+
+    static void Load(string text, Automation program) => ProgramText.Load(text, program, Store);
+
+    /// <summary>A declaration with the keys a world would have minted for it.</summary>
+    static EntityRef Declared(string name, string kindId, Values values, long id, string blockName)
+    {
+        var declared = new EntityRef(name, kindId);
+        declared.Keys.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(id)));
+        declared.Keys.Add(new EntityKey(ValueKind.Text, values.Text(blockName)));
+        return declared;
+    }
+
     static Automation Build()
     {
         var program = new Automation();
+
+        // Declared by hand, because this test has no world to mint keys from. The names are what
+        // everything below points at, exactly as they would be after the editor made them.
+        var values = new Values();
+        program.Restore(Declared("inner", "door", values, 1, "Inner Door"));
+        program.Restore(Declared("outer", "door", values, 2, "Outer Door"));
+        program.Restore(Declared("vent", "vent", values, 3, "Airlock Vent"));
+        program.Restore(Declared("call", "button", values, 4, "Airlock Button"));
+        program.Restore(Declared("spare", "button", values, 5, "Spare Button"));
 
         var airlock = program.AddSystem();
         airlock.Name = "Airlock";
@@ -25,8 +50,8 @@ public class ProgramTextTests
         airlock.AddInstance().Name = "Port";
 
         var when = new WhenTrigger("pressed");
-        when.Sources.Add(4);
-        when.Sources.Add(5);
+        when.Sources.Add("call");
+        when.Sources.Add("spare");
         when.RequiresAll = true;
 
         var out1 = program.AddSequence(airlock, when);
@@ -35,7 +60,7 @@ public class ProgramTextTests
         out1.Annotation = "Inside to outside.";
 
         var close = new Step("close");
-        close.Targets.Add(1);
+        close.Targets.Add("inner");
         close.WaitsForCompletion = true;
         close.Annotation = "the vent needs the full sixty seconds";
         out1.Steps.Add(close);
@@ -45,26 +70,26 @@ public class ProgramTextTests
         out1.Steps.Add(pause);
 
         var vent = new Step("depressurize");
-        vent.Targets.Add(3);
+        vent.Targets.Add("vent");
         var only = new Condition("is-shut");
-        only.Entities.Add(1);
+        only.Entities.Add("inner");
         vent.Gate = new OnlyIfGate(only);
         out1.Steps.Add(vent);
 
         // What the author wrote about a part, and a second one of the system that fills the
         // parts with its own doors.
-        var inner = airlock.RoleFor(1);
+        var inner = airlock.RoleFor("inner");
         inner.Name = "the door onto the ship";
         inner.Instructions = "The one you walk through to get inside.";
         inner.Optional = false;
 
-        var spare = airlock.RoleFor(3);
+        var spare = airlock.RoleFor("vent");
         spare.Name = "the vent";
         spare.Optional = true;
 
         var port = airlock.Instances[1];
-        port.Fill(1, new long[] { 21 });
-        port.Fill(3, new long[] { 23, 24 });
+        port.Fill("inner", new[] { "outer" });
+        port.Fill("vent", new[] { "call", "spare" });
 
         var rig = program.AddSystem();
         rig.Name = "Drill Rig";
@@ -74,9 +99,9 @@ public class ProgramTextTests
         timed.Name = "Top up";
 
         var lower = new Step("open");
-        lower.Targets.Add(2);
+        lower.Targets.Add("outer");
         var once = new Condition("is-low");
-        once.Entities.Add(7);
+        once.Entities.Add("inner");
         lower.Gate = new OnceGate(once);
         timed.Steps.Add(lower);
 
@@ -87,12 +112,12 @@ public class ProgramTextTests
     public void AProgramSurvivesBeingWrittenAndReadBack()
     {
         var before = Build();
-        var text = ProgramText.Save(before);
+        var text = Save(before);
 
         var after = new Automation();
-        ProgramText.Load(text, after);
+        Load(text, after);
 
-        Assert.Equal(text, ProgramText.Save(after));
+        Assert.Equal(text, Save(after));
     }
 
     [Fact]
@@ -100,7 +125,7 @@ public class ProgramTextTests
     {
         var before = Build();
         var after = new Automation();
-        ProgramText.Load(ProgramText.Save(before), after);
+        Load(Save(before), after);
 
         Assert.Equal(before.Systems[0].Id, after.Systems[0].Id);
         Assert.Equal(before.Sequences[0].Id, after.Sequences[0].Id);
@@ -116,7 +141,7 @@ public class ProgramTextTests
     public void EverySavedDetailComesBack()
     {
         var after = new Automation();
-        ProgramText.Load(ProgramText.Save(Build()), after);
+        Load(Save(Build()), after);
 
         var airlock = after.Systems[0];
         Assert.Equal("Airlock", airlock.Name);
@@ -126,17 +151,17 @@ public class ProgramTextTests
         Assert.Equal("Port", airlock.Instances[1].Name);
 
         // What the author wrote about the parts.
-        Assert.Equal("the door onto the ship", airlock.FindRole(1)!.Name);
-        Assert.Equal("The one you walk through to get inside.", airlock.FindRole(1)!.Instructions);
-        Assert.False(airlock.FindRole(1)!.Optional);
-        Assert.True(airlock.FindRole(3)!.Optional);
+        Assert.Equal("the door onto the ship", airlock.FindRole("inner")!.Name);
+        Assert.Equal("The one you walk through to get inside.", airlock.FindRole("inner")!.Instructions);
+        Assert.False(airlock.FindRole("inner")!.Optional);
+        Assert.True(airlock.FindRole("vent")!.Optional);
 
         // And which of its own things the second one uses for them, including a part filled
         // with more than one.
         var port = airlock.Instances[1];
-        Assert.Equal(new long[] { 21 }, port.FilledWith(1));
-        Assert.Equal(new long[] { 23, 24 }, port.FilledWith(3));
-        Assert.Null(port.FilledWith(99));
+        Assert.Equal(new[] { "outer" }, port.FilledWith("inner"));
+        Assert.Equal(new[] { "call", "spare" }, port.FilledWith("vent"));
+        Assert.Null(port.FilledWith("nothing-like-this"));
 
         Assert.False(after.Systems[1].Enabled);
 
@@ -147,7 +172,7 @@ public class ProgramTextTests
         var when = Assert.IsType<WhenTrigger>(letMeOut.Trigger);
         Assert.Equal("pressed", when.EventId);
         Assert.True(when.RequiresAll);
-        Assert.Equal(new long[] { 4, 5 }, when.Sources);
+        Assert.Equal(new[] { "call", "spare" }, when.Sources);
 
         Assert.Equal(3, letMeOut.Steps.Count);
         Assert.Equal("close", letMeOut.Steps[0].ActionId);
@@ -156,7 +181,7 @@ public class ProgramTextTests
 
         var only = Assert.IsType<OnlyIfGate>(letMeOut.Steps[2].Gate);
         Assert.Equal("is-shut", only.Condition.StateId);
-        Assert.Equal(new long[] { 1 }, only.Condition.Entities);
+        Assert.Equal(new[] { "inner" }, only.Condition.Entities);
 
         var timed = after.Sequences[1];
         Assert.Equal(600, Assert.IsType<EveryTrigger>(timed.Trigger).IntervalTicks);
@@ -178,7 +203,7 @@ public class ProgramTextTests
         sequence.Name = "|||";
 
         var after = new Automation();
-        ProgramText.Load(ProgramText.Save(program), after);
+        Load(Save(program), after);
 
         Assert.Equal(@"Air|lock \ 2", after.Systems[0].Name);
         Assert.Equal("line one\nline two", after.Systems[0].Annotation);
@@ -191,10 +216,10 @@ public class ProgramTextTests
     [Fact]
     public void LinesThisBuildDoesNotUnderstandAreSkipped()
     {
-        var text = ProgramText.Save(Build()) + "somethingnew|1|2|3\n";
+        var text = Save(Build()) + "somethingnew|1|2|3\n";
 
         var after = new Automation();
-        ProgramText.Load(text, after);
+        Load(text, after);
 
         Assert.Equal(2, after.Systems.Count);
         Assert.Equal(2, after.Sequences.Count);
@@ -204,8 +229,8 @@ public class ProgramTextTests
     public void NothingSavedLoadsAsNothing()
     {
         var after = new Automation();
-        ProgramText.Load("", after);
-        ProgramText.Load(null, after);
+        Load("", after);
+        Load(null, after);
 
         Assert.Empty(after.Systems);
         Assert.Empty(after.Sequences);

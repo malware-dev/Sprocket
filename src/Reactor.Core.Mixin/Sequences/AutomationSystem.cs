@@ -90,24 +90,24 @@ namespace Reactor.Sequences
         /// </remarks>
         public IReadOnlyList<SystemRole> Roles => _roles;
 
-        public SystemRole FindRole(long id)
+        public SystemRole FindRole(string name)
         {
             for (var i = 0; i < _roles.Count; i++)
             {
-                if (_roles[i].Id == id)
+                if (_roles[i].Id == name)
                     return _roles[i];
             }
             return null;
         }
 
         /// <summary>What the author said about a part, making a blank record if they said nothing.</summary>
-        public SystemRole RoleFor(long id)
+        public SystemRole RoleFor(string name)
         {
-            var role = FindRole(id);
+            var role = FindRole(name);
             if (role != null)
                 return role;
 
-            role = new SystemRole(id);
+            role = new SystemRole(name);
             _roles.Add(role);
             return role;
         }
@@ -121,7 +121,7 @@ namespace Reactor.Sequences
         /// five places is one part, listed once, so whoever sets this up answers "which is the
         /// inner door" exactly once.
         /// </remarks>
-        public void Parts(List<long> into)
+        public void Parts(List<string> into)
         {
             into.Clear();
 
@@ -149,7 +149,7 @@ namespace Reactor.Sequences
             }
         }
 
-        static void Gather(IList<long> ids, List<long> into)
+        static void Gather(IList<string> ids, List<string> into)
         {
             for (var i = 0; i < ids.Count; i++)
             {

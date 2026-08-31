@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Reactor.Sequences;
+using Reactor.World;
 
 namespace Reactor.Storage
 {
@@ -25,10 +26,20 @@ namespace Reactor.Storage
     {
         const string Version = "reactor 1";
 
-        public static string Save(Automation program)
+        public static string Save(Automation program, Values values)
         {
             var text = new StringBuilder();
             text.Append(Version).Append('\n');
+
+            // Before anything that names one, so a reader has them in hand by the time it meets a
+            // step. The keys are written out as the host minted them and are never interpreted here.
+            var refs = program.Refs;
+            for (var i = 0; i < refs.Count; i++)
+            {
+                var declared = refs[i];
+                Line(text, "block", Escape(declared.Name), Escape(declared.KindId),
+                    Keys(values, declared.Keys));
+            }
 
             var systems = program.Systems;
             for (var i = 0; i < systems.Count; i++)
@@ -42,7 +53,7 @@ namespace Reactor.Storage
                 var roles = system.Roles;
                 for (var r = 0; r < roles.Count; r++)
                 {
-                    Line(text, "role", Long(roles[r].Id), OnOff(roles[r].Optional),
+                    Line(text, "role", Escape(roles[r].Id), OnOff(roles[r].Optional),
                         Escape(roles[r].Name), Escape(roles[r].Instructions));
                 }
 
@@ -71,14 +82,14 @@ namespace Reactor.Storage
         /// </remarks>
         static void WriteFills(StringBuilder text, SystemInstance instance)
         {
-            var parts = new List<long>();
+            var parts = new List<string>();
             foreach (var role in instance.Filled)
                 parts.Add(role);
 
-            parts.Sort();
+            parts.Sort(System.StringComparer.Ordinal);
 
             for (var i = 0; i < parts.Count; i++)
-                Line(text, "fill", Long(parts[i]), Ids(instance.FilledWith(parts[i])));
+                Line(text, "fill", Escape(parts[i]), Ids(instance.FilledWith(parts[i])));
         }
 
         static void WriteSequence(StringBuilder text, Sequence sequence)
@@ -138,7 +149,7 @@ namespace Reactor.Storage
         /// step. It keeps the format flat enough to read at a glance, and it is the same shape
         /// the thing being described has.
         /// </remarks>
-        public static void Load(string saved, Automation program)
+        public static void Load(string saved, Automation program, Values values)
         {
             if (string.IsNullOrEmpty(saved))
                 return;
@@ -164,10 +175,16 @@ namespace Reactor.Storage
                         step = null;
                         break;
 
+                    case "block":
+                        var declared = new EntityRef(Unescape(At(parts, 1)), Unescape(At(parts, 2)));
+                        ReadKeys(values, At(parts, 3), declared.Keys);
+                        program.Restore(declared);
+                        break;
+
                     case "role":
                         if (system == null)
                             break;
-                        var role = system.RoleFor(Long(parts, 1));
+                        var role = system.RoleFor(Unescape(At(parts, 1)));
                         role.Optional = At(parts, 2) == "on";
                         role.Name = Unescape(At(parts, 3));
                         role.Instructions = Unescape(At(parts, 4));
@@ -181,9 +198,9 @@ namespace Reactor.Storage
                     case "fill":
                         if (instance == null)
                             break;
-                        var filled = new List<long>();
+                        var filled = new List<string>();
                         ReadIds(At(parts, 2), filled);
-                        instance.Fill(Long(parts, 1), filled);
+                        instance.Fill(Unescape(At(parts, 1)), filled);
                         break;
 
                     case "sequence":
@@ -281,7 +298,106 @@ namespace Reactor.Storage
             return on ? "on" : "off";
         }
 
-        static string Ids(IList<long> ids)
+        /// <summary>
+        /// A declaration's keys, each tagged with what sort of value it is and nothing more.
+        /// </summary>
+        /// <remarks>
+        /// The tag says how to read the value back, not what the key means - which stays the host's,
+        /// exactly as it is in memory. A kind this build does not know is dropped rather than
+        /// guessed at, and the declaration keeps the keys it could read.
+        /// </remarks>
+        static string Keys(Values values, IList<EntityKey> keys)
+        {
+            var joined = new StringBuilder();
+            for (var i = 0; i < keys.Count; i++)
+            {
+                if (joined.Length > 0)
+                    joined.Append(',');
+
+                var key = keys[i];
+                if (key.Kind == ValueKind.Text)
+                {
+                    string text;
+                    values.TryText(key.Kind, key.Value, out text);
+                    joined.Append("t:").Append(Escape(text));
+                }
+                else if (key.Kind == ValueKind.Integer)
+                {
+                    long whole;
+                    values.TryInteger(key.Kind, key.Value, out whole);
+                    joined.Append("i:").Append(whole);
+                }
+                else if (key.Kind == ValueKind.Flag)
+                {
+                    joined.Append("f:").Append(values.Flag(key.Kind, key.Value) ? "1" : "0");
+                }
+                else if (key.Kind == ValueKind.Color)
+                {
+                    byte r, g, b, a;
+                    values.TryColor(key.Kind, key.Value, out r, out g, out b, out a);
+                    joined.Append("c:").Append(r).Append(' ').Append(g).Append(' ')
+                        .Append(b).Append(' ').Append(a);
+                }
+                else
+                {
+                    double real;
+                    values.TryReal(ValueKind.Real, key.Value, out real);
+                    joined.Append("r:").Append(real.ToString("R",
+                        System.Globalization.CultureInfo.InvariantCulture));
+                }
+            }
+
+            return joined.ToString();
+        }
+
+        static void ReadKeys(Values values, string field, IList<EntityKey> into)
+        {
+            if (string.IsNullOrEmpty(field))
+                return;
+
+            var parts = field.Split(',');
+            for (var i = 0; i < parts.Length; i++)
+            {
+                var part = parts[i];
+                if (part.Length < 2 || part[1] != ':')
+                    continue;
+
+                var body = part.Substring(2);
+                switch (part[0])
+                {
+                    case 't':
+                        into.Add(new EntityKey(ValueKind.Text, values.Text(Unescape(body))));
+                        break;
+                    case 'i':
+                        into.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(ReadLong(body))));
+                        break;
+                    case 'f':
+                        into.Add(new EntityKey(ValueKind.Flag, EntityValue.Of(body == "1")));
+                        break;
+                    case 'c':
+                        var bits = body.Split(' ');
+                        if (bits.Length == 4)
+                            into.Add(new EntityKey(ValueKind.Color, EntityValue.Of(
+                                (byte)ReadLong(bits[0]), (byte)ReadLong(bits[1]),
+                                (byte)ReadLong(bits[2]), (byte)ReadLong(bits[3]))));
+                        break;
+                    case 'r':
+                        double real;
+                        if (double.TryParse(body, System.Globalization.NumberStyles.Float,
+                                System.Globalization.CultureInfo.InvariantCulture, out real))
+                            into.Add(new EntityKey(ValueKind.Real, EntityValue.Of(real)));
+                        break;
+                }
+            }
+        }
+
+        static long ReadLong(string text)
+        {
+            long value;
+            return long.TryParse(text, out value) ? value : 0;
+        }
+
+        static string Ids(IList<string> ids)
         {
             var text = new StringBuilder();
             for (var i = 0; i < ids.Count; i++)
@@ -293,7 +409,7 @@ namespace Reactor.Storage
             return text.ToString();
         }
 
-        static void ReadIds(string field, IList<long> into)
+        static void ReadIds(string field, IList<string> into)
         {
             into.Clear();
             if (string.IsNullOrEmpty(field))
@@ -302,10 +418,9 @@ namespace Reactor.Storage
             var parts = field.Split(',');
             for (var i = 0; i < parts.Length; i++)
             {
-                long id;
-                if (long.TryParse(parts[i], System.Globalization.NumberStyles.Integer,
-                        System.Globalization.CultureInfo.InvariantCulture, out id))
-                    into.Add(id);
+                var name = Unescape(parts[i]);
+                if (name.Length > 0)
+                    into.Add(name);
             }
         }
 

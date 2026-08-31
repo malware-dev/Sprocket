@@ -32,6 +32,7 @@ namespace Reactor.Runtime
         readonly List<long> _live = new List<long>();
         readonly Automation _automation;
         readonly IWorld _world;
+        readonly Bindings _bindings = new Bindings();
 
         public AutomationRunner(Automation automation, IWorld world)
         {
@@ -55,17 +56,43 @@ namespace Reactor.Runtime
         /// </remarks>
         public int CurrentTick { get; private set; }
 
+        /// <summary>
+        /// What the program's declarations currently point at.
+        /// </summary>
+        /// <remarks>
+        /// Owned here because this is the one place that has both the program and the world and is
+        /// woken on a clock. Everything that needs to turn a name into a block reads it from here
+        /// rather than resolving for itself, so the resolving happens once per change rather than
+        /// once per asker.
+        /// </remarks>
+        public Bindings Bindings
+        {
+            get
+            {
+                // Checked on the way out rather than only on a tick, because the editor declares a
+                // block and reads the sentence back in the same breath - and waiting for the next
+                // frame would show it "something that's gone" for a block it just picked. Two
+                // integer comparisons, so asking costs nothing when nothing moved.
+                _bindings.Refresh(_world, _automation);
+                return _bindings;
+            }
+        }
+
         /// <summary>Advances everything to the given frame.</summary>
         public void Tick(int tick)
         {
             CurrentTick = tick;
             Reconcile();
 
+            // Two integer comparisons on an ordinary tick. See Bindings.Refresh.
+            _bindings.Refresh(_world, _automation);
+
+
             for (var i = 0; i < _live.Count; i++)
             {
                 SequenceRunner runner;
                 if (_runners.TryGetValue(_live[i], out runner))
-                    runner.Tick(_world, CurrentTick);
+                    runner.Tick(_world, _bindings, CurrentTick);
             }
         }
 
@@ -107,7 +134,7 @@ namespace Reactor.Runtime
         {
             var runner = Get(sequence);
             if (runner != null)
-                runner.Call(_world, CurrentTick);
+                runner.Call(_world, _bindings, CurrentTick);
         }
 
         /// <summary>

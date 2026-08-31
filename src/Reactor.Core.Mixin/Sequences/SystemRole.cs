@@ -22,7 +22,7 @@ namespace Reactor.Sequences
     /// </remarks>
     public sealed class SystemRole
     {
-        public SystemRole(long id)
+        public SystemRole(string id)
         {
             Id = id;
             Name = "";
@@ -32,7 +32,7 @@ namespace Reactor.Sequences
         /// <summary>
         /// What the system's own sequences point at, which is whatever its author built with.
         /// </summary>
-        public long Id { get; private set; }
+        public string Id { get; private set; }
 
         /// <summary>
         /// What the author calls this part, or empty to fall back on what they built it with.

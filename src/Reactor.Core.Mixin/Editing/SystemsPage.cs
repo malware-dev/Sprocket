@@ -100,7 +100,7 @@ namespace Reactor.Editing
                 // of them, where there are real blocks to point at rather than roles to
                 // imagine. What this row should open - what the system is, its description,
                 // giving it away - is not decided.
-                var heading = new StatusEntry(SystemSummary.Describe(Editor.World, system), 0);
+                var heading = new StatusEntry(SystemSummary.Describe(Editor.Runner.Bindings, system), 0);
                 heading.SwitchCommand = Editor.RegisterToggle(Cmd.Enable, system.Id, Switch(system));
                 heading.SwitchIsOn = system.Enabled;
                 heading.SwitchGovernsAll = true;
@@ -113,7 +113,7 @@ namespace Reactor.Editing
                 {
                     var instance = instances[n];
                     var entry = new StatusEntry(
-                        SystemSummary.DescribeInstance(Editor.World, system, instance),
+                        SystemSummary.DescribeInstance(Editor.Runner.Bindings, system, instance),
                         Editor.Register(Cmd.OpenSystem, system.Id, instance.Number,
                             delegate { Editor.Push(new SystemPage(Editor, system)); }));
                     entry.Depth = 1;

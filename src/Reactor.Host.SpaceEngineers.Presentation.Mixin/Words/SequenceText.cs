@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Reactor.Editing;
+using Reactor.Runtime;
 using Reactor.Sequences;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using Reactor.Ui;
@@ -28,19 +29,19 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// is a label: there is nothing on it to press, no part of it is somebody's to edit, and one
         /// line has to stand for the whole sequence.
         /// </remarks>
-        public string Sequence(IWorld world, Sequence sequence)
+        public string Sequence(Bindings bindings, Sequence sequence)
         {
-            return Trigger(world, sequence.Trigger) + " » " + Doing(world, sequence);
+            return Trigger(bindings, sequence.Trigger) + " » " + Doing(bindings, sequence);
         }
 
 
         /// <summary>The whole first line: "When the hangar door finishes opening".</summary>
-        public string Trigger(IWorld world, Trigger trigger)
+        public string Trigger(Bindings bindings, Trigger trigger)
         {
             var when = trigger as WhenTrigger;
             if (when != null)
             {
-                var events = Vocabulary.EventsFor(world, when.Sources);
+                var events = Vocabulary.EventsFor(bindings, when.Sources);
                 var text = SentenceText.Empty;
                 for (var i = 0; i < events.Count; i++)
                 {
@@ -51,7 +52,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
                     }
                 }
 
-                return "When " + SentenceText.Entities(world, when.Sources, when.RequiresAll) + " " + text;
+                return "When " + SentenceText.Named(bindings, when.Sources, when.RequiresAll) + " " + text;
             }
 
             var every = trigger as EveryTrigger;
@@ -62,7 +63,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         }
 
 
-        public string Doing(IWorld world, Sequence sequence)
+        public string Doing(Bindings bindings, Sequence sequence)
         {
             if (sequence.HasName)
                 return sequence.Name;
@@ -70,7 +71,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
             if (sequence.Steps.Count == 0)
                 return "nothing yet";
 
-            var first = Step(world, sequence.Steps[0]);
+            var first = Step(bindings, sequence.Steps[0]);
             return sequence.Steps.Count == 1
                 ? first
                 : first + " (+" + (sequence.Steps.Count - 1) + " more)";
@@ -111,7 +112,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// being a list already does - a step waits for its own action to finish before the next one
         /// starts. A gate only appears when the step waits on something this sequence did not cause.
         /// </remarks>
-        static string Step(IWorld world, Step step)
+        static string Step(Bindings bindings, Step step)
         {
             // A step with a duration and nothing to do is simply a wait, and reads better as one than
             // as "after 5 seconds - nothing".
@@ -122,18 +123,18 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
                     return "wait " + TimeText.Duration(pause.Ticks);
             }
 
-            var body = Action(world, step);
-            var gate = Gate(world, step.Gate);
+            var body = Action(bindings, step);
+            var gate = Gate(bindings, step.Gate);
             return gate.Length == 0 ? body : gate + " - " + body;
         }
 
 
-        static string Action(IWorld world, Step step)
+        static string Action(Bindings bindings, Step step)
         {
             if (step.Targets.Count == 0)
                 return SentenceText.Empty;
 
-            var actions = Vocabulary.ActionsFor(world, step.Targets);
+            var actions = Vocabulary.ActionsFor(bindings, step.Targets);
             var text = SentenceText.Empty;
             for (var i = 0; i < actions.Count; i++)
             {
@@ -144,20 +145,20 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
                 }
             }
 
-            return text + " " + SentenceText.Entities(world, step.Targets, true);
+            return text + " " + SentenceText.Named(bindings, step.Targets, true);
         }
 
 
         /// <summary>The "once ..." or "only if ..." prefix, or empty for the usual case.</summary>
-        static string Gate(IWorld world, StepGate gate)
+        static string Gate(Bindings bindings, StepGate gate)
         {
             var once = gate as OnceGate;
             if (once != null)
-                return "once " + Condition(world, once.Condition);
+                return "once " + Condition(bindings, once.Condition);
 
             var only = gate as OnlyIfGate;
             if (only != null)
-                return "only if " + Condition(world, only.Condition);
+                return "only if " + Condition(bindings, only.Condition);
 
             var after = gate as AfterGate;
             if (after != null)
@@ -167,7 +168,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         }
 
 
-        static string Condition(IWorld world, Condition condition)
+        static string Condition(Bindings bindings, Condition condition)
         {
             if (condition == null)
                 return SentenceText.Empty;
@@ -175,7 +176,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
             var text = SentenceText.Empty;
             for (var i = 0; i < condition.Entities.Count; i++)
             {
-                var entity = world.FindEntity(condition.Entities[i]);
+                var entity = bindings.Entity(condition.Entities[i]);
                 if (entity == null)
                     continue;
 
@@ -187,7 +188,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
                 break;
             }
 
-            return SentenceText.Entities(world, condition.Entities, true) + " " + text;
+            return SentenceText.Named(bindings, condition.Entities, true) + " " + text;
         }
     }
 }

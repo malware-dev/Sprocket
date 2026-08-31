@@ -36,7 +36,7 @@ namespace Reactor.Editing
         /// the switch that changes it - repeating it up here reads as two different things saying the
         /// same words.
         /// </remarks>
-        public override string Title => Editor.SequenceText.Sequence(Editor.World, _sequence);
+        public override string Title => Editor.SequenceText.Sequence(Editor.Runner.Bindings, _sequence);
 
         /// <summary>
         /// Naming happens on the heading, because the heading is what the name is for.
@@ -91,13 +91,13 @@ namespace Reactor.Editing
             if (parts.Count < 2)
                 return;
 
-            parts[0].Text = Editor.SequenceText.Trigger(Editor.World, _sequence.Trigger);
+            parts[0].Text = Editor.SequenceText.Trigger(Editor.Runner.Bindings, _sequence.Trigger);
 
             // The name where there is one, and what it actually does where there is not - so an unnamed
             // sequence still reads as a whole sentence and naming one is a choice rather than a chore.
             // The same call a list row makes, so the two cannot come to disagree.
             parts[1].Name = CustomName;
-            parts[1].Text = Editor.SequenceText.Doing(Editor.World, _sequence);
+            parts[1].Text = Editor.SequenceText.Doing(Editor.Runner.Bindings, _sequence);
         }
 
         public override void Build(List<EditorComponent> components)
@@ -146,7 +146,7 @@ namespace Reactor.Editing
 
             _sentence.Enabled = _sequence.Enabled;
             _sentence.Status = Editor.SequenceText.Status(SequenceSummary.Status(_sequence, state));
-            _sentence.Problem = Editor.SequenceText.Problem(SequenceSummary.Problem(Editor.World, _sequence, state));
+            _sentence.Problem = Editor.SequenceText.Problem(SequenceSummary.Problem(Editor.Runner.Bindings, _sequence, state));
             _sentence.JustRan = state != null && state.LastFiredTick >= 0
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
@@ -183,7 +183,7 @@ namespace Reactor.Editing
 
         SentenceTrigger BuildWhen(WhenTrigger when)
         {
-            var events = Vocabulary.EventsFor(Editor.World, when.Sources);
+            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, when.Sources);
             var chosen = FindEvent(events, when.EventId);
 
             // Changing the blocks can invalidate the chosen event. Moving to a valid
@@ -198,7 +198,7 @@ namespace Reactor.Editing
             // Both slots open the same trip - which blocks and what happens to them are one
             // question - but they are two controls and must be two identities.
             var trigger = new SentenceTrigger(TriggerKind.When);
-            trigger.Slots.Add(new EntitiesSlot(when.Sources, when.RequiresAll,
+            trigger.Slots.Add(new EntitiesSlot(Resolved(when.Sources), when.RequiresAll,
                 Change(Cmd.TriggerSlot, 0, EditTrigger)));
 
             trigger.Slots.Add(new EventSlot(chosen, Change(Cmd.TriggerSlot, 1, EditTrigger)));
@@ -267,7 +267,7 @@ namespace Reactor.Editing
             // as a lead-in, and only appears when one was deliberately added.
             built.Gate = BuildGate(step.Gate);
 
-            var actions = Vocabulary.ActionsFor(Editor.World, step.Targets);
+            var actions = Vocabulary.ActionsFor(Editor.Runner.Bindings, step.Targets);
             var chosen = FindAction(actions, step.ActionId);
             if (actions.Count > 0 && chosen == null)
             {
@@ -278,7 +278,7 @@ namespace Reactor.Editing
             built.Slots.Add(new ActionSlot(chosen,
                 Change(Cmd.StepSlot, position, 0, delegate { EditStep(step); })));
 
-            built.Slots.Add(new EntitiesSlot(step.Targets, true,
+            built.Slots.Add(new EntitiesSlot(Resolved(step.Targets), true,
                 Change(Cmd.StepSlot, position, 1, delegate { EditStep(step); })));
 
             return built;
@@ -316,9 +316,9 @@ namespace Reactor.Editing
         SentenceGate Guard(GateKind kind, Condition condition)
         {
             var built = new SentenceGate(kind);
-            var entities = condition == null ? new List<long>() : condition.Entities;
+            var entities = condition == null ? new List<string>() : condition.Entities;
 
-            built.Slots.Add(new EntitiesSlot(entities, true, 0));
+            built.Slots.Add(new EntitiesSlot(Resolved(entities), true, 0));
             built.Slots.Add(new StateSlot(FindState(condition), 0));
 
             return built;
@@ -338,7 +338,7 @@ namespace Reactor.Editing
 
             for (var i = 0; i < condition.Entities.Count; i++)
             {
-                var entity = Editor.World.FindEntity(condition.Entities[i]);
+                var entity = Editor.Runner.Bindings.Entity(condition.Entities[i]);
                 if (entity == null)
                     continue;
 
@@ -364,11 +364,11 @@ namespace Reactor.Editing
                 return;
 
             Editor.Push(new PickPage(Editor, "When something happens", true,
-                when.Sources, when.EventId,
+                Resolved(when.Sources), when.EventId,
                 delegate(PickAnswer answer)
                 {
                     Editor.Do(_sequence,
-                        new ChangeTrigger(when, answer.Targets, answer.Chosen, answer.All));
+                        new ChangeTrigger(when, Declared(answer.Targets), answer.Chosen, answer.All));
                     Editor.Pop();
                 },
                 true, when.RequiresAll));
@@ -397,11 +397,11 @@ namespace Reactor.Editing
             var index = _sequence.Steps.IndexOf(step);
 
             Editor.Push(new PickPage(Editor, "Do something", false,
-                step.Targets, step.ActionId,
+                Resolved(step.Targets), step.ActionId,
                 delegate(PickAnswer answer)
                 {
                     Editor.Do(_sequence,
-                        new ChangeStep(index, step, answer.Targets, answer.Chosen));
+                        new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen));
                     Editor.Pop();
                 }));
         }
@@ -428,8 +428,9 @@ namespace Reactor.Editing
                     // Only once both answers are in. Backing out of the questions adds no
                     // step, so there is nothing to take back.
                     var step = new Step(answer.Chosen);
-                    for (var i = 0; i < answer.Targets.Count; i++)
-                        step.Targets.Add(answer.Targets[i]);
+                    var named = Declared(answer.Targets);
+                    for (var i = 0; i < named.Count; i++)
+                        step.Targets.Add(named[i]);
 
                     Editor.Do(_sequence,
                         new AddStep("adding a step", _sequence.Steps.Count, step));
@@ -539,7 +540,7 @@ namespace Reactor.Editing
         void Delete()
         {
             var page = new ChoicePage(Editor, "Delete this sequence?");
-            page.Caption = Editor.SequenceText.Sequence(Editor.World, _sequence);
+            page.Caption = Editor.SequenceText.Sequence(Editor.Runner.Bindings, _sequence);
 
             page.Add("Keep it", false, delegate { Editor.Pop(); });
 

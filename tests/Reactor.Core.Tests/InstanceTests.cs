@@ -26,6 +26,9 @@ public class InstanceTests
         public AutomationRunner Runner = null!;
         public AutomationSystem Airlock = null!;
 
+        /// <summary>Names a block, so a test builds sequences the way the editor does.</summary>
+        public string Ref(long id) => Program.Declare(World, World.FindEntity(id)!).Name;
+
         int _frame;
 
         public void Tick(int ticks = 1)
@@ -57,19 +60,19 @@ public class InstanceTests
         ship.Airlock.Name = "Airlock";
 
         var when = new WhenTrigger("pressed");
-        when.Sources.Add(1);
+        when.Sources.Add(ship.Ref(1));
 
         var cycle = ship.Program.AddSequence(ship.Airlock, when);
         cycle.Name = "Cycle";
 
         var close = new Step("close");
-        close.Targets.Add(2);
+        close.Targets.Add(ship.Ref(2));
         cycle.Steps.Add(close);
 
         var open = new Step("open");
-        open.Targets.Add(3);
+        open.Targets.Add(ship.Ref(3));
         var onceShut = new Condition("is-shut");
-        onceShut.Entities.Add(2);
+        onceShut.Entities.Add(ship.Ref(2));
         open.Gate = new OnceGate(onceShut);
         cycle.Steps.Add(open);
 
@@ -77,11 +80,18 @@ public class InstanceTests
         return ship;
     }
 
-    static void Fit(AutomationSystem system, SystemInstance instance)
+    /// <summary>
+    /// Points one of the system at the port doors instead of the front ones.
+    /// </summary>
+    /// <remarks>
+    /// Both sides are declarations now: the system was written against one set of claims and this
+    /// says which claims stand in for them here.
+    /// </remarks>
+    static void Fit(Ship ship, SystemInstance instance)
     {
-        instance.Fill(1, new long[] { 11 });
-        instance.Fill(2, new long[] { 12 });
-        instance.Fill(3, new long[] { 13 });
+        instance.Fill(ship.Ref(1), new[] { ship.Ref(11) });
+        instance.Fill(ship.Ref(2), new[] { ship.Ref(12) });
+        instance.Fill(ship.Ref(3), new[] { ship.Ref(13) });
     }
 
     static TestButton Button(Ship ship, string name) =>
@@ -94,7 +104,7 @@ public class InstanceTests
     public void EachOneOfASystemActsOnItsOwnThings()
     {
         var ship = Build();
-        Fit(ship.Airlock, ship.Airlock.AddInstance());
+        Fit(ship, ship.Airlock.AddInstance());
 
         Door(ship, "Front Inner").ForceOpen();
         Door(ship, "Port Inner").ForceOpen();
@@ -113,7 +123,7 @@ public class InstanceTests
     public void TheFirstOneOfASystemNeedsNoFillingIn()
     {
         var ship = Build();
-        Fit(ship.Airlock, ship.Airlock.AddInstance());
+        Fit(ship, ship.Airlock.AddInstance());
 
         Door(ship, "Front Inner").ForceOpen();
         ship.Tick(2);
@@ -138,7 +148,7 @@ public class InstanceTests
     public void AGateAsksAboutTheThingsOfTheOneItIsRunningFor()
     {
         var ship = Build();
-        Fit(ship.Airlock, ship.Airlock.AddInstance());
+        Fit(ship, ship.Airlock.AddInstance());
 
         // The front inner door is shut; the port one is wedged open by a lock.
         Door(ship, "Port Inner").ForceOpen();
@@ -159,7 +169,7 @@ public class InstanceTests
     public void EachOneOfASystemKeepsItsOwnPlaceInTheSequence()
     {
         var ship = Build();
-        Fit(ship.Airlock, ship.Airlock.AddInstance());
+        Fit(ship, ship.Airlock.AddInstance());
 
         var cycle = ship.Program.Sequences[0];
         var front = ship.Airlock.Instances[0];
@@ -188,7 +198,7 @@ public class InstanceTests
     {
         var ship = Build();
         var port = ship.Airlock.AddInstance();
-        Fit(ship.Airlock, port);
+        Fit(ship, port);
 
         Door(ship, "Front Inner").ForceOpen();
         Door(ship, "Port Inner").ForceOpen();
@@ -213,7 +223,7 @@ public class InstanceTests
     {
         var ship = Build();
         var port = ship.Airlock.AddInstance();
-        Fit(ship.Airlock, port);
+        Fit(ship, port);
 
         var cycle = ship.Program.Sequences[0];
         var front = ship.Airlock.Instances[0];
@@ -244,12 +254,12 @@ public class InstanceTests
     {
         var ship = Build();
 
-        var parts = new List<long>();
+        var parts = new List<string>();
         ship.Airlock.Parts(parts);
 
         // The button, the inner door, the outer door - and the inner door only once, though it
         // appears in a step and in a gate.
-        Assert.Equal(new long[] { 1, 2, 3 }, parts);
+        Assert.Equal(new[] { ship.Ref(1), ship.Ref(2), ship.Ref(3) }, parts);
     }
 
     [Fact]
@@ -259,26 +269,26 @@ public class InstanceTests
         ship.World.Add(new TestLamp(4, "Front Light"));
 
         var warn = new Step("on");
-        warn.Targets.Add(4);
+        warn.Targets.Add(ship.Ref(4));
         ship.Program.Sequences[0].Steps.Add(warn);
 
-        var role = ship.Airlock.RoleFor(4);
+        var role = ship.Airlock.RoleFor(ship.Ref(4));
         role.Name = "the warning light";
         role.Instructions = "Whatever you want flashing while the doors move.";
 
-        var parts = new List<long>();
+        var parts = new List<string>();
         ship.Airlock.Parts(parts);
-        Assert.Contains(4, parts);
+        Assert.Contains(ship.Ref(4), parts);
 
         // The only step that used it goes. The part goes with it - the list is derived, so it
         // cannot disagree with what the system does - but what its author wrote does not.
         ship.Program.Sequences[0].Steps.Remove(warn);
 
         ship.Airlock.Parts(parts);
-        Assert.DoesNotContain(4, parts);
+        Assert.DoesNotContain(ship.Ref(4), parts);
 
-        Assert.Equal("the warning light", ship.Airlock.FindRole(4)!.Name);
+        Assert.Equal("the warning light", ship.Airlock.FindRole(ship.Ref(4))!.Name);
         Assert.Equal("Whatever you want flashing while the doors move.",
-            ship.Airlock.FindRole(4)!.Instructions);
+            ship.Airlock.FindRole(ship.Ref(4))!.Instructions);
     }
 }

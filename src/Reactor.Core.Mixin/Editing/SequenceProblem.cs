@@ -19,6 +19,16 @@ namespace Reactor.Editing
         MissingTarget,
 
         /// <summary>It waits on something that is no longer here.</summary>
-        MissingGate
+        MissingGate,
+
+        /// <summary>
+        /// Everything it names is here, but at least one of them was found by a weaker key.
+        /// </summary>
+        /// <remarks>
+        /// A door was rebuilt, or the ship was pasted from a blueprint. There is a candidate and it
+        /// is not accepted, because accepting it silently is how the wrong door gets cycled. The
+        /// sequence does not run until somebody says that is the right one.
+        /// </remarks>
+        Adrift
     }
 }

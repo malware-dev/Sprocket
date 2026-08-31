@@ -675,15 +675,20 @@ namespace Reactor.Editing
             var when = trigger as WhenTrigger;
             if (when != null)
             {
+                // Nothing picked yet: the sequence is being made, so there is nothing to resolve.
                 Push(new PickPage(this, "When something happens", true,
-                    when.Sources, when.EventId,
+                    new List<long>(), when.EventId,
                     delegate(PickAnswer answer)
                     {
                         // Nothing to record: the sequence does not exist yet, so there is no
                         // history for it and nothing to take back to.
                         when.Sources.Clear();
                         for (var i = 0; i < answer.Targets.Count; i++)
-                            when.Sources.Add(answer.Targets[i]);
+                        {
+                            var entity = _world.FindEntity(answer.Targets[i]);
+                            if (entity != null)
+                                when.Sources.Add(_program.Declare(_world, entity).Name);
+                        }
 
                         when.EventId = answer.Chosen;
                         when.RequiresAll = answer.All;

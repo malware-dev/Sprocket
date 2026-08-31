@@ -48,22 +48,22 @@ namespace Reactor.Sequences
         /// </remarks>
         public virtual bool ChangesShape => true;
 
-        protected static List<long> CopyOf(IList<long> ids)
+        protected static List<string> CopyOf(IList<string> ids)
         {
-            var copy = new List<long>();
+            var copy = new List<string>();
             for (var i = 0; i < ids.Count; i++)
                 copy.Add(ids[i]);
             return copy;
         }
 
-        protected static void Refill(IList<long> target, IList<long> source)
+        protected static void Refill(IList<string> target, IList<string> source)
         {
             target.Clear();
             for (var i = 0; i < source.Count; i++)
                 target.Add(source[i]);
         }
 
-        protected static bool Same(IList<long> left, IList<long> right)
+        protected static bool Same(IList<string> left, IList<string> right)
         {
             if (left.Count != right.Count)
                 return false;

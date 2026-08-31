@@ -10,7 +10,7 @@ namespace Reactor.Runtime
     /// </summary>
     public sealed class SequenceRunner
     {
-        readonly Dictionary<long, bool> _lastSignal = new Dictionary<long, bool>();
+        readonly Dictionary<string, bool> _lastSignal = new Dictionary<string, bool>();
         readonly Sequence _sequence;
 
         int _stepIndex = -1;
@@ -62,10 +62,20 @@ namespace Reactor.Runtime
         /// this happens for every running sequence on every tick and core sits inside the
         /// game's update loop.
         /// </remarks>
-        readonly List<long> _actedOn = new List<long>();
-        readonly List<long> _watched = new List<long>();
+        /// <summary>
+        /// What the program's names point at, for the length of this tick.
+        /// </summary>
+        /// <remarks>
+        /// Held rather than passed down, because every private step of a tick wants it and threading
+        /// it through eight signatures says nothing the field does not. Set by the two public entry
+        /// points, so nothing below them can read one from a previous tick.
+        /// </remarks>
+        Bindings _bindings;
 
-        List<long> ActedOn(IList<long> roles)
+        readonly List<string> _actedOn = new List<string>();
+        readonly List<string> _watched = new List<string>();
+
+        List<string> ActedOn(IList<string> roles)
         {
             _actedOn.Clear();
             if (_instance == null)
@@ -83,9 +93,9 @@ namespace Reactor.Runtime
         /// <summary>
         /// A third buffer: a gate is asked while a step is already being acted on.
         /// </summary>
-        readonly List<long> _guarding = new List<long>();
+        readonly List<string> _guarding = new List<string>();
 
-        List<long> Guarding(Condition condition)
+        List<string> Guarding(Condition condition)
         {
             if (condition == null)
                 return null;
@@ -103,7 +113,7 @@ namespace Reactor.Runtime
             return _guarding;
         }
 
-        List<long> Watched(IList<long> roles)
+        List<string> Watched(IList<string> roles)
         {
             _watched.Clear();
             if (_instance == null)
@@ -155,8 +165,10 @@ namespace Reactor.Runtime
         /// <summary>The most recent step passed over by its guard, or null.</summary>
         public SkippedStep LastSkippedStep { get; private set; }
 
-        public void Tick(IWorld world, int tick)
+        public void Tick(IWorld world, Bindings bindings, int tick)
         {
+            _bindings = bindings;
+
             // Sample every tick, even while running or switched off. Edge detection
             // is stateful, so a skipped sample makes the next one wrong.
             var triggered = SampleTrigger(world);
@@ -187,8 +199,10 @@ namespace Reactor.Runtime
         /// The switch holds here. A parked sequence is parked for everything, including being
         /// called by another one.
         /// </remarks>
-        public void Call(IWorld world, int tick)
+        public void Call(IWorld world, Bindings bindings, int tick)
         {
+            _bindings = bindings;
+
             if (!CanRun)
                 return;
 
@@ -233,7 +247,7 @@ namespace Reactor.Runtime
             var settling = ActedOn(step.Targets);
             for (var i = 0; i < settling.Count; i++)
             {
-                var entity = world.FindEntity(settling[i]);
+                var entity = _bindings.Entity(settling[i]);
                 if (entity == null)
                     continue;
 
@@ -315,7 +329,7 @@ namespace Reactor.Runtime
                 }
 
                 var guard = step.Gate as OnlyIfGate;
-                if (guard != null && !Conditions.IsTrue(world, guard.Condition, Guarding(guard.Condition)))
+                if (guard != null && !Conditions.IsTrue(world, _bindings, guard.Condition, Guarding(guard.Condition)))
                 {
                     // Passed over rather than waited on, and recorded so the user can
                     // be told which situation was not true.
@@ -365,7 +379,7 @@ namespace Reactor.Runtime
 
             var once = step.Gate as OnceGate;
             if (once != null)
-                return Conditions.IsTrue(world, once.Condition, Guarding(once.Condition));
+                return Conditions.IsTrue(world, _bindings, once.Condition, Guarding(once.Condition));
 
             return true;
         }
@@ -378,7 +392,7 @@ namespace Reactor.Runtime
             var acting = ActedOn(step.Targets);
             for (var i = 0; i < acting.Count; i++)
             {
-                var entity = world.FindEntity(acting[i]);
+                var entity = _bindings.Entity(acting[i]);
                 if (entity == null)
                     continue;
 
@@ -415,7 +429,7 @@ namespace Reactor.Runtime
             for (var i = 0; i < sources.Count; i++)
             {
                 var sourceId = sources[i];
-                var entity = world.FindEntity(sourceId);
+                var entity = _bindings.Entity(sourceId);
                 if (entity == null)
                 {
                     anyMissing = true;
@@ -468,7 +482,7 @@ namespace Reactor.Runtime
 
             for (var i = 0; i < sources.Count; i++)
             {
-                var entity = world.FindEntity(sources[i]);
+                var entity = _bindings.Entity(sources[i]);
                 if (entity == null)
                 {
                     anyMissing = true;

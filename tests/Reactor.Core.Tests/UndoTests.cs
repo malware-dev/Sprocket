@@ -28,18 +28,18 @@ public class UndoTests
         world.Add(new TestButton(4, "Airlock Button"));
 
         var trigger = new WhenTrigger("pressed");
-        trigger.Sources.Add(4);
+        trigger.Sources.Add("call");
 
         var sequence = new Sequence(1, trigger);
         sequence.Name = "Let me out";
-        sequence.Steps.Add(StepFor("close", 1));
-        sequence.Steps.Add(StepFor("depressurize", 3));
-        sequence.Steps.Add(StepFor("open", 2));
+        sequence.Steps.Add(StepFor("close", "inner"));
+        sequence.Steps.Add(StepFor("depressurize", "vent"));
+        sequence.Steps.Add(StepFor("open", "outer"));
 
         return (world, sequence);
     }
 
-    static Step StepFor(string actionId, params long[] targets)
+    static Step StepFor(string actionId, params string[] targets)
     {
         var step = new Step(actionId);
         foreach (var target in targets)
@@ -94,11 +94,11 @@ public class UndoTests
 
     [Fact]
     public void AddingAStepReversesExactly() =>
-        RoundTrip(new AddStep("adding a step", 3, StepFor("close", 2)));
+        RoundTrip(new AddStep("adding a step", 3, StepFor("close", "outer")));
 
     [Fact]
     public void AddingAStepInTheMiddleReversesExactly() =>
-        RoundTrip(new AddStep("adding a step", 1, StepFor("close", 2)));
+        RoundTrip(new AddStep("adding a step", 1, StepFor("close", "outer")));
 
     [Fact]
     public void RemovingAStepReversesExactly()
@@ -124,7 +124,7 @@ public class UndoTests
     public void ChangingAStepReversesExactly()
     {
         var (_, sequence) = Build();
-        RoundTrip(new ChangeStep(0, sequence.Steps[0], new long[] { 1, 2 }, "lock"));
+        RoundTrip(new ChangeStep(0, sequence.Steps[0], new[] { "inner", "outer" }, "lock"));
     }
 
     [Fact]
@@ -164,7 +164,7 @@ public class UndoTests
     {
         var (_, sequence) = Build();
         var when = (WhenTrigger)sequence.Trigger;
-        RoundTrip(new ChangeTrigger(when, new long[] { 1, 2 }, "opened", true));
+        RoundTrip(new ChangeTrigger(when, new[] { "inner", "outer" }, "opened", true));
     }
 
     [Fact]
@@ -194,8 +194,8 @@ public class UndoTests
         var (_, sequence) = Build();
         var when = (WhenTrigger)sequence.Trigger;
 
-        Assert.False(new ChangeStep(0, sequence.Steps[0], new long[] { 1 }, "close").Changes);
-        Assert.False(new ChangeTrigger(when, new long[] { 4 }, "pressed", false).Changes);
+        Assert.False(new ChangeStep(0, sequence.Steps[0], new[] { "inner" }, "close").Changes);
+        Assert.False(new ChangeTrigger(when, new[] { "call" }, "pressed", false).Changes);
         Assert.False(new Rename("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
         Assert.False(new SetCadence(60, 60).Changes);

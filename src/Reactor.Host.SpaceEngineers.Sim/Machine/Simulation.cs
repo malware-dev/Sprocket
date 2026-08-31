@@ -60,7 +60,7 @@ sealed class Simulation
 
         // Before the runner and the editor exist, so neither ever sees an empty program that
         // is about to be filled in underneath it.
-        _store.Load(Program);
+        _store.Load(Program, World.Values);
 
         Runner = new AutomationRunner(Program, World);
         Editor = new ReactorEditor(World, Program, Runner, _sequenceWords, _timeWords);
@@ -75,7 +75,7 @@ sealed class Simulation
     public ReactorEditor Editor { get; }
 
     /// <summary>Writes the program out now, whatever the clock says.</summary>
-    public void Save() => _store.SaveIfChanged(Program);
+    public void Save() => _store.SaveIfChanged(Program, World.Values);
 
     public string Where => _store.Path_;
 
@@ -95,7 +95,7 @@ sealed class Simulation
         Editor.Tick(_frame);
 
         if (_frame % SaveEvery == 0)
-            _store.SaveIfChanged(Program);
+            _store.SaveIfChanged(Program, World.Values);
     }
 
     /// <summary>Entities the tester can poke, standing in for the world doing something.</summary>

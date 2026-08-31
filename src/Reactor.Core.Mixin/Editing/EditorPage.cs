@@ -14,6 +14,52 @@ namespace Reactor.Editing
     /// </remarks>
     abstract class EditorPage
     {
+        /// <summary>
+        /// What these declarations point at, as blocks, for a control that shows blocks.
+        /// </summary>
+        /// <remarks>
+        /// The model points at claims; a picker and a sentence show things on the ship. This is the
+        /// one place the two meet, and it is on the editor rather than in a component because
+        /// resolving is the editor's job and a target has no business doing it.
+        /// <para>
+        /// A reference that points at nothing is left out rather than represented by a zero. What to
+        /// say about the gap is the target's, and it can already see that fewer came back than the
+        /// sentence claims.
+        /// </para>
+        /// </remarks>
+        protected List<long> Resolved(IList<string> names)
+        {
+            var found = new List<long>();
+            for (var i = 0; i < names.Count; i++)
+            {
+                var entity = Editor.Runner.Bindings.Entity(names[i]);
+                if (entity != null)
+                    found.Add(entity.Id);
+            }
+
+            return found;
+        }
+
+        /// <summary>
+        /// Declares each of these blocks, so what is stored is a claim rather than an id.
+        /// </summary>
+        /// <remarks>
+        /// Where picking a block turns into naming one. The same block picked in two places is one
+        /// declaration, which is what makes re-pointing it later a single act.
+        /// </remarks>
+        protected List<string> Declared(IList<long> entityIds)
+        {
+            var named = new List<string>();
+            for (var i = 0; i < entityIds.Count; i++)
+            {
+                var entity = Editor.World.FindEntity(entityIds[i]);
+                if (entity != null)
+                    named.Add(Editor.Program.Declare(Editor.World, entity).Name);
+            }
+
+            return named;
+        }
+
         protected EditorPage(ReactorEditor editor)
         {
             Editor = editor;

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Reactor.Sequences;
 using Reactor.Storage;
+using Reactor.World;
 using Reactor.Host.SpaceEngineers.Presentation.Controls;
 using Reactor.Host.SpaceEngineers.Presentation.Screen;
 using Reactor.Host.SpaceEngineers.Presentation.Lists;
@@ -66,7 +67,7 @@ sealed class Store
     /// <summary>What went wrong last time, or empty.</summary>
     public string Trouble { get; private set; } = "";
 
-    public void Load(Automation program)
+    public void Load(Automation program, Values values)
     {
         try
         {
@@ -74,7 +75,7 @@ sealed class Store
                 return;
 
             _lastWritten = File.ReadAllText(_path);
-            ProgramText.Load(_lastWritten, program);
+            ProgramText.Load(_lastWritten, program, values);
         }
         catch (Exception error)
         {
@@ -92,12 +93,12 @@ sealed class Store
     /// second. Saving is silent by design: somebody building an airlock should never be
     /// thinking about whether their work is safe.
     /// </remarks>
-    public void SaveIfChanged(Automation program)
+    public void SaveIfChanged(Automation program, Values values)
     {
         string text;
         try
         {
-            text = ProgramText.Save(program);
+            text = ProgramText.Save(program, values);
         }
         catch (Exception error)
         {

@@ -8,12 +8,12 @@ namespace Reactor.Sequences
     sealed class ChangeStep : SequenceEdit
     {
         readonly int _index;
-        readonly List<long> _wasTargets;
+        readonly List<string> _wasTargets;
         readonly string _wasAction;
-        readonly List<long> _nowTargets;
+        readonly List<string> _nowTargets;
         readonly string _nowAction;
 
-        public ChangeStep(int index, Step step, IList<long> targets, string actionId)
+        public ChangeStep(int index, Step step, IList<string> targets, string actionId)
         {
             _index = index;
             _wasTargets = CopyOf(step.Targets);
@@ -36,7 +36,7 @@ namespace Reactor.Sequences
             Put(sequence, _wasTargets, _wasAction);
         }
 
-        void Put(Sequence sequence, IList<long> targets, string action)
+        void Put(Sequence sequence, IList<string> targets, string action)
         {
             var step = sequence.Steps[_index];
             Refill(step.Targets, targets);

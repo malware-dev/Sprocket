@@ -16,9 +16,9 @@ namespace Reactor.Runtime
         /// that appears to work while the user is still building it, and then behaves
         /// differently once they finish.
         /// </remarks>
-        public static bool IsTrue(IWorld world, Condition condition)
+        public static bool IsTrue(IWorld world, Bindings bindings, Condition condition)
         {
-            return IsTrue(world, condition, null);
+            return IsTrue(world, bindings, condition, null);
         }
 
         /// <summary>
@@ -32,7 +32,8 @@ namespace Reactor.Runtime
         /// The resolved list is passed in rather than made here, because this runs for every
         /// gated step of every running sequence on every tick.
         /// </remarks>
-        public static bool IsTrue(IWorld world, Condition condition, List<long> resolved)
+        public static bool IsTrue(IWorld world, Bindings bindings, Condition condition,
+            List<string> resolved)
         {
             if (condition == null || condition.Entities.Count == 0)
                 return false;
@@ -43,28 +44,39 @@ namespace Reactor.Runtime
 
             for (var i = 0; i < asking.Count; i++)
             {
-                if (!Holds(world, asking[i], condition.StateId))
+                if (!Holds(world, bindings, asking[i], condition.StateId))
                     return false;
             }
             return true;
         }
 
         /// <summary>As <see cref="IsTrue"/>, but ignoring one entity.</summary>
-        public static bool IsTrueExcept(IWorld world, Condition condition, long ignoreEntityId)
+        public static bool IsTrueExcept(IWorld world, Bindings bindings, Condition condition,
+            string ignored)
         {
             for (var i = 0; i < condition.Entities.Count; i++)
             {
-                if (condition.Entities[i] == ignoreEntityId)
+                if (condition.Entities[i] == ignored)
                     continue;
-                if (!Holds(world, condition.Entities[i], condition.StateId))
+                if (!Holds(world, bindings, condition.Entities[i], condition.StateId))
                     return false;
             }
             return true;
         }
 
-        static bool Holds(IWorld world, long entityId, string stateId)
+        /// <summary>
+        /// Whether one named thing is in a state.
+        /// </summary>
+        /// <remarks>
+        /// Only a bound reference answers. An adrift one has a candidate and no binding, and reading
+        /// a state off a candidate is the silent rebinding this design exists to refuse.
+        /// </remarks>
+        static bool Holds(IWorld world, Bindings bindings, string name, string stateId)
         {
-            var entity = world.FindEntity(entityId);
+            if (!bindings.Holds(name))
+                return false;
+
+            var entity = bindings.Entity(name);
             if (entity == null)
                 return false;
 

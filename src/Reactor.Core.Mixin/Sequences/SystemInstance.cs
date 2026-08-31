@@ -71,17 +71,17 @@ namespace Reactor.Sequences
         /// condition already means <em>all of them</em>, so a wide airlock with two inner doors
         /// says the right thing in both places without anybody deciding it should.
         /// </remarks>
-        readonly Dictionary<long, List<long>> _fills = new Dictionary<long, List<long>>();
+        readonly Dictionary<string, List<string>> _fills = new Dictionary<string, List<string>>();
 
-        public IEnumerable<long> Filled => _fills.Keys;
+        public IEnumerable<string> Filled => _fills.Keys;
 
         /// <summary>Points a part of the system at the things this one uses for it.</summary>
-        public void Fill(long role, IList<long> entities)
+        public void Fill(string role, IList<string> entities)
         {
-            List<long> chosen;
+            List<string> chosen;
             if (!_fills.TryGetValue(role, out chosen))
             {
-                chosen = new List<long>();
+                chosen = new List<string>();
                 _fills[role] = chosen;
             }
 
@@ -90,14 +90,14 @@ namespace Reactor.Sequences
                 chosen.Add(entities[i]);
         }
 
-        public void Clear(long role)
+        public void Clear(string role)
         {
             _fills.Remove(role);
         }
 
-        public IList<long> FilledWith(long role)
+        public IList<string> FilledWith(string role)
         {
-            List<long> chosen;
+            List<string> chosen;
             return _fills.TryGetValue(role, out chosen) ? chosen : null;
         }
 
@@ -114,11 +114,11 @@ namespace Reactor.Sequences
         /// it goes on pointing at somebody else's door until it is told better, which is
         /// visible, rather than silently doing nothing.
         /// </remarks>
-        public void Resolve(IList<long> roles, List<long> into)
+        public void Resolve(IList<string> roles, List<string> into)
         {
             for (var i = 0; i < roles.Count; i++)
             {
-                List<long> chosen;
+                List<string> chosen;
                 if (!_fills.TryGetValue(roles[i], out chosen))
                 {
                     into.Add(roles[i]);

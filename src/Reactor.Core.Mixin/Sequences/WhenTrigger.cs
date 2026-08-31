@@ -15,14 +15,14 @@ namespace Reactor.Sequences
     /// </remarks>
     public sealed class WhenTrigger : Trigger
     {
-        readonly List<long> _sources = new List<long>();
+        readonly List<string> _sources = new List<string>();
 
         public WhenTrigger(string eventId)
         {
             EventId = eventId;
         }
 
-        public IList<long> Sources => _sources;
+        public IList<string> Sources => _sources;
 
         /// <summary>
         /// Whether every source has to be in the event's state, rather than any one
