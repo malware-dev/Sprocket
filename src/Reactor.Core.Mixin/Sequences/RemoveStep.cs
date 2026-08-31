@@ -13,7 +13,7 @@ namespace Reactor.Sequences
             _step = step;
         }
 
-        public override string Label { get { return "deleting a step"; } }
+        public override string Label => "deleting a step";
 
         public override void Apply(Sequence sequence)
         {

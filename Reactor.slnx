@@ -5,11 +5,7 @@
     <Platform Project="AnyCPU" />
     <Build Project="false" />
   </Project>
-  <Project Path="src/Phosphor.Mixin/Phosphor.Mixin.shproj">
-    <Platform Project="AnyCPU" />
-    <Build Project="false" />
-  </Project>
-  <Project Path="src/Reactor.Screens.Mixin/Reactor.Screens.Mixin.shproj">
+  <Project Path="src/Reactor.Host.SpaceEngineers.Presentation.Mixin/Reactor.Host.SpaceEngineers.Presentation.Mixin.shproj">
     <Platform Project="AnyCPU" />
     <Build Project="false" />
   </Project>
@@ -21,6 +17,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/Reactor.Core.Tests/Reactor.Core.Tests.csproj" />
     <Project Path="tests/Reactor.Host.SpaceEngineers.Tests/Reactor.Host.SpaceEngineers.Tests.csproj" />
-    <Project Path="tests/Reactor.Screens.Tests/Reactor.Screens.Tests.csproj" />
+    <Project Path="tests/Reactor.Host.SpaceEngineers.Presentation.Tests/Reactor.Host.SpaceEngineers.Presentation.Tests.csproj" />
   </Folder>
 </Solution>

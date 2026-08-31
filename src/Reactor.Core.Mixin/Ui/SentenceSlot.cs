@@ -1,28 +1,27 @@
-using System.Collections.Generic;
-
 namespace Reactor.Ui
 {
     /// <summary>
-    /// A fillable part of a sentence.
+    /// A fillable part of a sentence: what it refers to, and how to change it.
     /// </summary>
     /// <remarks>
-    /// The only thing on screen that changes what a sequence means. A target must render
-    /// these as unmistakably fillable, and must not give anything else the same look.
+    /// The only thing on screen that changes what a sequence means. A target must render these as
+    /// unmistakably fillable, and must not give anything else the same look.
+    /// <para>
+    /// A slot says what it refers to and never what it reads as. The words are the target's, because
+    /// the words are the only part of a sentence that has a language - and a slot that carried its own
+    /// text would carry English into every target that ever renders one.
+    /// </para>
     /// </remarks>
-    public sealed class SentenceSlot
+    public abstract class SentenceSlot
     {
-        public SentenceSlot(string text, bool isEmpty, int command)
+        protected SentenceSlot(int command)
         {
-            Text = text;
-            IsEmpty = isEmpty;
             Command = command;
         }
 
-        public string Text { get; set; }
-
         /// <summary>Nothing chosen yet, so it should read as an invitation.</summary>
-        public bool IsEmpty { get; set; }
+        public abstract bool IsEmpty { get; }
 
-        public int Command { get; set; }
+        public int Command { get; private set; }
     }
 }

@@ -91,5 +91,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)World\Relations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)World\ValueKind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)World\Values.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\ActionSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\DurationSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\EntitiesSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\EventSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\GateKind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\SentenceGate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\StateSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\StepKind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\TriggerKind.cs" />
   </ItemGroup>
 </Project>

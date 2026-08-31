@@ -11,16 +11,20 @@ namespace Reactor.Ui
     /// </remarks>
     public sealed class SentenceStep
     {
-        public SentenceStep(int number)
+        public SentenceStep(int number, StepKind kind)
         {
             Number = number;
+            Kind = kind;
             Slots = new List<SentenceSlot>();
         }
 
         public int Number { get; set; }
 
-        /// <summary>A word before the slots, such as "wait". Often empty.</summary>
-        public string Lead { get; set; }
+        /// <summary>Which sort of line this is, which decides how a target opens it.</summary>
+        public StepKind Kind { get; private set; }
+
+        /// <summary>What holds this step back, or null for the ordinary case.</summary>
+        public SentenceGate Gate { get; set; }
 
         public List<SentenceSlot> Slots { get; private set; }
 

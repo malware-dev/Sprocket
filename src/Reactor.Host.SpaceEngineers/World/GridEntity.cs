@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Reactor.World;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
-using Reactor.Host.SpaceEngineers.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
+using Reactor.Host.SpaceEngineers.Terminal;
 
 namespace Reactor.Host.SpaceEngineers.World
 {
@@ -33,20 +33,11 @@ namespace Reactor.Host.SpaceEngineers.World
             _listener = listener;
         }
 
-        public long Id
-        {
-            get { return _block.EntityId; }
-        }
+        public long Id => _block.EntityId;
 
-        public string Name
-        {
-            get { return _block.CustomName; }
-        }
+        public string Name => _block.CustomName;
 
-        public EntityKind Kind
-        {
-            get { return _kind; }
-        }
+        public EntityKind Kind => _kind;
 
         /// <summary>
         /// Live state in the player's own words.
@@ -88,10 +79,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// something that knows the block can say it is in motion, so a block nobody has written an
         /// extension for is never busy.
         /// </remarks>
-        public bool IsActive
-        {
-            get { return _extension != null && _extension.IsBusy(_block); }
-        }
+        public bool IsActive => _extension != null && _extension.IsBusy(_block);
 
         public EntityValue GetValue(string propertyId)
         {

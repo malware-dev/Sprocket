@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using Reactor.Sim.Simulation;
 using VRageMath;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Sandbox.ModAPI
 {
@@ -39,7 +39,7 @@ namespace Sandbox.ModAPI
         /// <summary>
         /// Narrows drawing to a rectangle in window pixels until the scope is disposed, with nested scopes
         /// intersecting. The layer carries the game's own default, which is a default worth not taking:
-        /// everything Phosphor draws names its layer, and a scissor on the wrong layer clips nothing.
+        /// everything the editor draws names its layer, and a scissor on the wrong layer clips nothing.
         /// </summary>
         public static MyScissorScope UsingScissorRectanglePixels(Rectangle rect,
             MyScreenSpaceLayer layer = MyScreenSpaceLayer.BelowHud)

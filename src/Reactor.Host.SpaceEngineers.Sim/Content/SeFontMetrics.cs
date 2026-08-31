@@ -5,13 +5,13 @@ using System.Linq;
 using System.Xml.Linq;
 using Reactor.Sim.Simulation;
 using VRageMath;
-using Phosphor.Ui;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Content
 {
@@ -103,10 +103,7 @@ namespace Reactor.Sim.Content
         /// <summary>
         /// How far above the top of a line a glyph's cell begins, in font units. Negative, always.
         /// </summary>
-        public int CellTop
-        {
-            get { return _base - BaselineInCell; }
-        }
+        public int CellTop => _base - BaselineInCell;
 
         /// <summary>
         /// Where the baseline falls inside this font's cell, in its own units.
@@ -117,15 +114,10 @@ namespace Reactor.Sim.Content
         /// treating 35 as universal put this project's own symbols six pixels below the words they stand
         /// beside - which reads as the artwork being wrong rather than the arithmetic.
         /// </remarks>
-        public int BaselineInCell
-        {
-            get
-            {
-                return _cellHeight <= 0 || _cellHeight == GameCellHeight
-                    ? GlyphBaselineInCell
-                    : (int)System.Math.Round(_cellHeight * (double)GlyphBaselineInCell / GameCellHeight);
-            }
-        }
+        public int BaselineInCell =>
+            _cellHeight <= 0 || _cellHeight == GameCellHeight
+                ? GlyphBaselineInCell
+                : (int)System.Math.Round(_cellHeight * (double)GlyphBaselineInCell / GameCellHeight);
 
         /// <summary>Where <paramref name="c" /> is on the page, if the game has it at all.</summary>
         public bool TryGlyph(char c, out Glyph glyph)
@@ -146,10 +138,7 @@ namespace Reactor.Sim.Content
             return _kerning.TryGetValue(Key(left, right), out adjust) ? adjust : 0;
         }
 
-        public bool IsExact
-        {
-            get { return true; }
-        }
+        public bool IsExact => true;
 
         /// <summary>Where the numbers came from, for the line in the window that says how true this is.</summary>
         public string Source { get; private set; }
@@ -158,10 +147,7 @@ namespace Reactor.Sim.Content
         public bool FromGame { get; private set; }
 
         /// <summary>The height of a line in font units, which is what every advance is relative to.</summary>
-        public int FontLineHeight
-        {
-            get { return _lineHeight; }
-        }
+        public int FontLineHeight => _lineHeight;
 
         /// <summary>
         /// Loads the font the game's white UI text uses, from the game or the cache. Null when neither has

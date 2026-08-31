@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Content
 {
@@ -62,16 +62,10 @@ namespace Reactor.Sim.Content
         }
 
         /// <summary>Whether what we are reading came from the game itself rather than from the cache.</summary>
-        public static bool HasGame
-        {
-            get { return FindContentFolder() != null; }
-        }
+        public static bool HasGame => FindContentFolder() != null;
 
         /// <summary>Where the game's content was found, or null on a machine that does not have it.</summary>
-        public static string ContentFolder
-        {
-            get { return FindContentFolder(); }
-        }
+        public static string ContentFolder => FindContentFolder();
 
         static string _contentFolder;
         static bool _searched;

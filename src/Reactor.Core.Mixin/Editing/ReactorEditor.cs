@@ -46,10 +46,10 @@ namespace Reactor.Editing
         }
 
         /// <summary>What to show right now.</summary>
-        public EditorScreen Screen { get { return _screen; } }
+        public EditorScreen Screen => _screen;
 
         /// <summary>Ticks elapsed. The only honest unit of time available.</summary>
-        public int CurrentTick { get { return _runner.CurrentTick; } }
+        public int CurrentTick => _runner.CurrentTick;
 
         /// <summary>
         /// Advances everything to the given frame and brings the screen up to date.
@@ -134,16 +134,24 @@ namespace Reactor.Editing
             Settle();
         }
 
-        internal IWorld World { get { return _world; } }
+        /// <summary>
+        /// What is being edited, for a target that has words to put on what core names by id.
+        /// </summary>
+        /// <remarks>
+        /// A sentence says which blocks it is about and never what they are called, because a name is
+        /// read off here and what to say about one that is gone is the target's to phrase. So the
+        /// target needs this to render one.
+        /// </remarks>
+        public IWorld World => _world;
 
-        internal Automation Program { get { return _program; } }
+        internal Automation Program => _program;
 
-        internal AutomationRunner Runner { get { return _runner; } }
+        internal AutomationRunner Runner => _runner;
 
-        internal EditorPage Current { get { return _stack[_stack.Count - 1]; } }
+        internal EditorPage Current => _stack[_stack.Count - 1];
 
         /// <summary>How deep the stack is, for a run of questions to return to.</summary>
-        internal int Depth { get { return _stack.Count; } }
+        internal int Depth => _stack.Count;
 
         /// <summary>
         /// Drops every page above the given depth, so answering the last question

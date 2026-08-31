@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Reactor.World;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
-using Reactor.Host.SpaceEngineers.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
+using Reactor.Host.SpaceEngineers.Terminal;
 
 namespace Reactor.Host.SpaceEngineers.World
 {
@@ -78,10 +78,7 @@ namespace Reactor.Host.SpaceEngineers.World
             }
         }
 
-        public EntityNoun Noun
-        {
-            get { return Blocks; }
-        }
+        public EntityNoun Noun => Blocks;
 
         /// <summary>
         /// The construct's name, which in this game is the block's own grid's.
@@ -104,10 +101,7 @@ namespace Reactor.Host.SpaceEngineers.World
             }
         }
 
-        public bool CanRename
-        {
-            get { return _anchor != null && _anchor.CubeGrid != null; }
-        }
+        public bool CanRename => _anchor != null && _anchor.CubeGrid != null;
 
         public void Rename(string name)
         {

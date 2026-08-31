@@ -72,7 +72,7 @@ namespace Reactor.Ui
         /// </remarks>
         public int SwitchCommand { get; set; }
 
-        public bool HasSwitch { get { return SwitchCommand != 0; } }
+        public bool HasSwitch => SwitchCommand != 0;
 
         /// <summary>Whether it is currently allowed to run.</summary>
         public bool SwitchIsOn { get; set; }
@@ -97,7 +97,7 @@ namespace Reactor.Ui
 
         public int PrimaryCommand { get; set; }
 
-        public bool HasPrimary { get { return !string.IsNullOrEmpty(PrimaryText); } }
+        public bool HasPrimary => !string.IsNullOrEmpty(PrimaryText);
 
         /// <summary>What to show, in order.</summary>
         public ObservableList<EditorComponent> Components { get; private set; }

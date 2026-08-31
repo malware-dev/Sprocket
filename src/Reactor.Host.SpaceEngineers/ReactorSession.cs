@@ -3,14 +3,15 @@ using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.Game.Components;
 using VRage.Utils;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
-using Reactor.Host.SpaceEngineers.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
+using Reactor.Host.SpaceEngineers.Terminal;
 using Reactor.Host.SpaceEngineers.World;
+
 
 namespace Reactor.Host.SpaceEngineers
 {
@@ -63,13 +64,7 @@ namespace Reactor.Host.SpaceEngineers
         ///
         /// True in single player, where the client is the server.
         /// </remarks>
-        static bool IsServer
-        {
-            get
-            {
-                return MyAPIGateway.Multiplayer == null || MyAPIGateway.Multiplayer.IsServer;
-            }
-        }
+        static bool IsServer => MyAPIGateway.Multiplayer == null || MyAPIGateway.Multiplayer.IsServer;
 
         ReactorUnit UnitFor(IMyTerminalBlock block)
         {

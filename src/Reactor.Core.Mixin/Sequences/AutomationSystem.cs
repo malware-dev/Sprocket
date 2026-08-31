@@ -43,7 +43,7 @@ namespace Reactor.Sequences
         /// </remarks>
         public string Name { get; set; }
 
-        public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
+        public bool HasName => !string.IsNullOrEmpty(Name);
 
         /// <summary>
         /// What this thing is, in the words of whoever built it.
@@ -76,7 +76,7 @@ namespace Reactor.Sequences
         /// </remarks>
         public bool Enabled { get; set; }
 
-        public IReadOnlyList<Sequence> Sequences { get { return _sequences; } }
+        public IReadOnlyList<Sequence> Sequences => _sequences;
 
         /// <summary>
         /// What the author wrote about the parts this system needs.
@@ -88,7 +88,7 @@ namespace Reactor.Sequences
         /// the last step that mentioned a door must not quietly discard the name and the note
         /// its author wrote for it.
         /// </remarks>
-        public IReadOnlyList<SystemRole> Roles { get { return _roles; } }
+        public IReadOnlyList<SystemRole> Roles => _roles;
 
         public SystemRole FindRole(long id)
         {
@@ -159,7 +159,7 @@ namespace Reactor.Sequences
         }
 
         /// <summary>The ones on this ship. Never empty.</summary>
-        public IReadOnlyList<SystemInstance> Instances { get { return _instances; } }
+        public IReadOnlyList<SystemInstance> Instances => _instances;
 
         /// <summary>
         /// Adds another of this system, named after the system and its number.

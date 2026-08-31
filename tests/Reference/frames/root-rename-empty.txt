@@ -4,23 +4,23 @@ UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:-0 W:1920 H:1080}
 on screen     Automation for Test Rig
 
-000  Sprite     Phosphor_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
+000  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:254 W:1402 H:699}
 002  Text       at {X:265 Y:260.37198} scale 0.57  #A2C3CDFF  "Nothing automated here yet."
 003  ClearClip  
-004  Sprite     Phosphor_Fill         {X:259 Y:118 W:1402 H:52}  #29363EFF
+004  Sprite     Reactor_Fill          {X:259 Y:118 W:1402 H:52}  #29363EFF
 005  Text       at {X:278 Y:132.01198} scale 0.64  #DCF5FDFF  "+ New system…"
-006  Sprite     Phosphor_Fill         {X:259 Y:176 W:1402 H:52}  #29363EFF
+006  Sprite     Reactor_Fill          {X:259 Y:176 W:1402 H:52}  #29363EFF
 007  Text       at {X:278 Y:189.69199} scale 0.64  #DCF5FDFF  "+ Load system"
-008  Sprite     Phosphor_Fill         {X:259 Y:243 W:1402 H:1}  #5B737BFF
-009  Sprite     Phosphor_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
+008  Sprite     Reactor_Fill          {X:259 Y:243 W:1402 H:1}  #5B737BFF
+009  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
 010  Text       at {X:275.84695 Y:54.711975} scale 0.9  #A2C3CDFF  "Automation for"
 011  SetClip    {X:451 Y:55 W:96 H:33}
-012  Sprite     Phosphor_Fill         {X:451 Y:55 W:86 H:33}  #4A221FFF
-013  Sprite     Phosphor_Fill         {X:451 Y:55 W:2 H:33}  #DCF5FDFF
-014  Sprite     Phosphor_Fill         {X:451 Y:86 W:86 H:2}  #E84A3AFF
+012  Sprite     Reactor_Fill          {X:451 Y:55 W:86 H:33}  #4A221FFF
+013  Sprite     Reactor_Fill          {X:451 Y:55 W:2 H:33}  #DCF5FDFF
+014  Sprite     Reactor_Fill          {X:451 Y:86 W:86 H:2}  #E84A3AFF
 015  ClearClip  
 016  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-017  Sprite     Phosphor_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
-018  Sprite     Phosphor_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-019  Sprite     Phosphor_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+017  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
+018  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+019  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

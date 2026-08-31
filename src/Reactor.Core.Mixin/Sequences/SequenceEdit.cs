@@ -37,7 +37,7 @@ namespace Reactor.Sequences
         /// Going to a picker and coming back having settled on what was already there is not
         /// an edit, and recording it would offer to undo something nobody did.
         /// </remarks>
-        public virtual bool Changes { get { return true; } }
+        public virtual bool Changes => true;
 
         /// <summary>
         /// Whether this changes the shape of the screen, rather than only what it says.
@@ -46,7 +46,7 @@ namespace Reactor.Sequences
         /// Renaming does not. Rebuilding for it would recreate the field being typed into and
         /// throw away the caret mid-word, and the heading is read every tick anyway.
         /// </remarks>
-        public virtual bool ChangesShape { get { return true; } }
+        public virtual bool ChangesShape => true;
 
         protected static List<long> CopyOf(IList<long> ids)
         {

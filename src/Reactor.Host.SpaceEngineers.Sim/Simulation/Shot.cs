@@ -1,12 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
@@ -30,7 +30,7 @@ namespace Reactor.Sim.Simulation
         {
             // Drawn at exactly the size asked for, so a shot is the screen at that resolution rather
             // than a picture of it scaled to fit something else.
-            var surface = new PhosphorSurface();
+            var surface = new Surface();
             surface.Target = new PixelSize(width, height);
             var scene = new EditorScene();
             surface.Frame += scene.Draw;

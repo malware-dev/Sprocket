@@ -1,11 +1,11 @@
 using VRageMath;
-using Phosphor.Ui;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
@@ -45,7 +45,7 @@ namespace Reactor.Sim.Simulation
 
         IFontMetrics For(string font)
         {
-            return font == Phosphor.Ui.Symbols.Font && _symbols != null ? _symbols : _text;
+            return font == Reactor.Host.SpaceEngineers.Presentation.Ui.Symbols.Font && _symbols != null ? _symbols : _text;
         }
     }
 }

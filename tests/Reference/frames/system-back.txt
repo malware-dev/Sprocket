@@ -4,52 +4,52 @@ UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:-0 W:1920 H:1080}
 on screen     Automation for Test Rig
 
-000  Sprite     Phosphor_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
+000  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:254 W:1402 H:699}
 002  Text       at {X:310 Y:268.37198} scale 0.64  #DCF5FDFF  "Airlock"
 003  Text       at {X:310 Y:293.85196} scale 0.5  #85A1A9FF  "fitted 1 time"
-004  Sprite     Phosphor_Fill         {X:278 Y:284 W:13 H:13}  #5F7278FF
-005  Sprite     Phosphor_Fill         {X:1511 Y:274 W:119 H:1}  #85A1A9FF
-006  Sprite     Phosphor_Fill         {X:1511 Y:306 W:119 H:1}  #85A1A9FF
-007  Sprite     Phosphor_Fill         {X:1511 Y:274 W:1 H:33}  #85A1A9FF
-008  Sprite     Phosphor_Fill         {X:1629 Y:274 W:1 H:33}  #85A1A9FF
-009  Sprite     Phosphor_Fill         {X:1512 Y:275 W:117 H:31}  #060A0CFF
-010  Sprite     Phosphor_Fill         {X:1512 Y:275 W:58 H:31}  #1B2C33FF
+004  Sprite     Reactor_Fill          {X:278 Y:284 W:13 H:13}  #5F7278FF
+005  Sprite     Reactor_Fill          {X:1511 Y:274 W:119 H:1}  #85A1A9FF
+006  Sprite     Reactor_Fill          {X:1511 Y:306 W:119 H:1}  #85A1A9FF
+007  Sprite     Reactor_Fill          {X:1511 Y:274 W:1 H:33}  #85A1A9FF
+008  Sprite     Reactor_Fill          {X:1629 Y:274 W:1 H:33}  #85A1A9FF
+009  Sprite     Reactor_Fill          {X:1512 Y:275 W:117 H:31}  #060A0CFF
+010  Sprite     Reactor_Fill          {X:1512 Y:275 W:58 H:31}  #1B2C33FF
 011  Text       at {X:1528.9343 Y:279.817} scale 0.57  #DCF5FDFF  "ON"
 012  Text       at {X:1586.5614 Y:279.817} scale 0.57  #85A1A9FF  "OFF"
-013  Sprite     Phosphor_Fill         {X:259 Y:332 W:1390 H:61}  #29363EFF
+013  Sprite     Reactor_Fill          {X:259 Y:332 W:1390 H:61}  #29363EFF
 014  Text       at {X:345 Y:351.05698} scale 0.64  #DCF5FDFF  "Airlock 1"
-015  Sprite     Phosphor_Fill         {X:313 Y:356 W:13 H:13}  #5F7278FF
-016  Sprite     Phosphor_Fill         {X:1476 Y:346 W:119 H:1}  #5F7278FF
-017  Sprite     Phosphor_Fill         {X:1476 Y:378 W:119 H:1}  #5F7278FF
-018  Sprite     Phosphor_Fill         {X:1476 Y:346 W:1 H:33}  #5F7278FF
-019  Sprite     Phosphor_Fill         {X:1594 Y:346 W:1 H:33}  #5F7278FF
-020  Sprite     Phosphor_Fill         {X:1477 Y:347 W:117 H:31}  #060A0CFF
-021  Sprite     Phosphor_Fill         {X:1477 Y:347 W:58 H:31}  #1B2C33FF
+015  Sprite     Reactor_Fill          {X:313 Y:356 W:13 H:13}  #5F7278FF
+016  Sprite     Reactor_Fill          {X:1476 Y:346 W:119 H:1}  #5F7278FF
+017  Sprite     Reactor_Fill          {X:1476 Y:378 W:119 H:1}  #5F7278FF
+018  Sprite     Reactor_Fill          {X:1476 Y:346 W:1 H:33}  #5F7278FF
+019  Sprite     Reactor_Fill          {X:1594 Y:346 W:1 H:33}  #5F7278FF
+020  Sprite     Reactor_Fill          {X:1477 Y:347 W:117 H:31}  #060A0CFF
+021  Sprite     Reactor_Fill          {X:1477 Y:347 W:58 H:31}  #1B2C33FF
 022  Text       at {X:1493.9343 Y:352.352} scale 0.57  #DCF5FDFF  "ON"
 023  Text       at {X:1551.5614 Y:352.352} scale 0.57  #85A1A9FF  "OFF"
-024  Sprite     Phosphor_Fill         {X:259 Y:399 W:1390 H:52}  #29363EFF
+024  Sprite     Reactor_Fill          {X:259 Y:399 W:1390 H:52}  #29363EFF
 025  Text       at {X:345 Y:413.442} scale 0.64  #A2C3CDFF  "+ add"
 026  ClearClip  
-027  Sprite     Phosphor_Fill         {X:259 Y:118 W:1402 H:52}  #29363EFF
+027  Sprite     Reactor_Fill          {X:259 Y:118 W:1402 H:52}  #29363EFF
 028  Text       at {X:278 Y:132.01198} scale 0.64  #DCF5FDFF  "+ New system…"
-029  Sprite     Phosphor_Fill         {X:259 Y:176 W:1402 H:52}  #29363EFF
+029  Sprite     Reactor_Fill          {X:259 Y:176 W:1402 H:52}  #29363EFF
 030  Text       at {X:278 Y:189.69199} scale 0.64  #DCF5FDFF  "+ Load system"
-031  Sprite     Phosphor_Fill         {X:259 Y:243 W:1402 H:1}  #5B737BFF
-032  Sprite     Phosphor_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
+031  Sprite     Reactor_Fill          {X:259 Y:243 W:1402 H:1}  #5B737BFF
+032  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
 033  Text       at {X:275.84695 Y:54.711975} scale 0.9  #A2C3CDFF  "Automation for"
 034  SetClip    {X:451 Y:55 W:96 H:33}
 035  Text       at {X:451.07306 Y:54.711975} scale 0.9  #DCF5FDFF  "Test Rig"
 036  Text       at {X:536.5846 Y:59.521973} scale 0.64  #85A1A9FF  "p"
 037  ClearClip  
-038  Sprite     Phosphor_Fill         {X:259 Y:61 W:11 H:21}  #29363EFF
+038  Sprite     Reactor_Fill          {X:259 Y:61 W:11 H:21}  #29363EFF
 039  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-040  Sprite     Phosphor_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
-041  Sprite     Phosphor_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-042  Sprite     Phosphor_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-043  Sprite     Phosphor_Fill         {X:275 Y:78 W:58 H:33}  #1B242AFF
-044  Sprite     Phosphor_Fill         {X:275 Y:78 W:58 H:1}  #5B737BFF
-045  Sprite     Phosphor_Fill         {X:275 Y:110 W:58 H:1}  #5B737BFF
-046  Sprite     Phosphor_Fill         {X:275 Y:78 W:1 H:33}  #5B737BFF
-047  Sprite     Phosphor_Fill         {X:332 Y:78 W:1 H:33}  #5B737BFF
+040  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
+041  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+042  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+043  Sprite     Reactor_Fill          {X:275 Y:78 W:58 H:33}  #1B242AFF
+044  Sprite     Reactor_Fill          {X:275 Y:78 W:58 H:1}  #5B737BFF
+045  Sprite     Reactor_Fill          {X:275 Y:110 W:58 H:1}  #5B737BFF
+046  Sprite     Reactor_Fill          {X:275 Y:78 W:1 H:33}  #5B737BFF
+047  Sprite     Reactor_Fill          {X:332 Y:78 W:1 H:33}  #5B737BFF
 048  Text       at {X:287.8 Y:84} scale 0.57  #DCF5FDFF  "Back"

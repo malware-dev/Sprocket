@@ -69,7 +69,7 @@ namespace Reactor.Ui
         /// <summary>Where a new name for this part is sent, or zero when it cannot be renamed.</summary>
         public int RenameCommand { get; set; }
 
-        public bool CanRename { get { return RenameCommand != 0; } }
+        public bool CanRename => RenameCommand != 0;
 
         /// <summary>What to ask when offering the rename.</summary>
         public string Prompt { get; set; }

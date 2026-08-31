@@ -5,7 +5,7 @@
         <RootNamespace>Reactor.Sim</RootNamespace>
         <AssemblyName>Reactor.Host.SpaceEngineers.Sim</AssemblyName>
 
-        <!-- Phosphor's sources are written for the game's compiler, which is C# 6 and knows neither of
+        <!-- The mod's sources are written for the game's compiler, which is C# 6 and knows neither of
              these. They are nonetheless left on here, because the simulated ship shares its sources with
              the Avalonia host and does expect them, and C# 6 code is perfectly happy compiled by a modern
              compiler that has them. "annotations" rather than "enable": the syntax is understood, and no
@@ -50,12 +50,11 @@
     </ItemGroup>
 
     <!-- The same files the mod compiles. Not a copy, not a port: if it draws here it draws there. -->
-    <Import Project="..\Phosphor.Mixin\Phosphor.Mixin.projitems" Label="Shared" />
 
     <!-- And the same simulated ship the Avalonia host runs the editor against, so the two targets are
          driven by one world rather than by two hand-made approximations of one. -->
 
     <!-- This target's editor. Shared rather than owned, because these are the files the mod will ship:
          what is seen in this window is what a player sees, not a preview of it. -->
-    <Import Project="..\Reactor.Screens.Mixin\Reactor.Screens.Mixin.projitems" Label="Shared" />
+    <Import Project="..\Reactor.Host.SpaceEngineers.Presentation.Mixin\Reactor.Host.SpaceEngineers.Presentation.Mixin.projitems" Label="Shared" />
 </Project>

@@ -3,12 +3,12 @@ using System.Text;
 using Sandbox.ModAPI;
 using VRage.Utils;
 using VRageMath;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
@@ -45,10 +45,7 @@ namespace Reactor.Sim.Simulation
         public IFontMetrics Fonts { get; set; }
 
         /// <summary>This frame's calls, in the order they were made.</summary>
-        public IList<DrawCommand> Commands
-        {
-            get { return _commands; }
-        }
+        public IList<DrawCommand> Commands => _commands;
 
         public void BeginFrame()
         {
@@ -76,10 +73,7 @@ namespace Reactor.Sim.Simulation
                 _camera = new SimCamera(device);
             }
 
-            public IMyCamera Camera
-            {
-                get { return _camera; }
-            }
+            public IMyCamera Camera => _camera;
         }
 
         sealed class SimCamera : IMyCamera
@@ -91,10 +85,7 @@ namespace Reactor.Sim.Simulation
                 _device = device;
             }
 
-            public Vector2 ViewportSize
-            {
-                get { return _device.ViewportSize; }
-            }
+            public Vector2 ViewportSize => _device.ViewportSize;
         }
 
         public Vector2 NormalizedSizeToPixels(Vector2 size)
@@ -107,7 +98,7 @@ namespace Reactor.Sim.Simulation
             if (Fonts == null || text == null)
                 return Vector2.Zero;
 
-            // The real one measures the builder without unpacking it, which is the reason Phosphor holds one
+            // The real one measures the builder without unpacking it, which is the reason a builder is held
             // at all. Here the string is fine: nothing in this process is running inside a game's frame.
             return Fonts.MeasurePixels(font, text.ToString(), scale);
         }

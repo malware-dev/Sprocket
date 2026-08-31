@@ -7,12 +7,12 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Reactor.Sim.Simulation;
 using VRageMath;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Shell
 {
@@ -31,7 +31,7 @@ namespace Reactor.Sim.Shell
         /// </remarks>
         public static bool OpensQuietly;
 
-        readonly PhosphorSurface _surface = new PhosphorSurface();
+        readonly Surface _surface = new Surface();
         readonly EditorScene _editor = new EditorScene();
         readonly ProbeScene _probe = new ProbeScene();
         readonly TextBlock _status = new TextBlock();
@@ -147,7 +147,7 @@ namespace Reactor.Sim.Shell
             Closing += (s, e) => WindowPlace.Remember(this);
         }
 
-        void OnFrame(Phosphor.Graphics.ScreenSpaceGraphics g)
+        void OnFrame(Reactor.Host.SpaceEngineers.Presentation.Graphics.ScreenSpaceGraphics g)
         {
             // Window pixels to UI units, derived from what the backend reports rather than recomputed
             // alongside it, so a mistake in there shows up here instead of being mirrored.
@@ -337,7 +337,7 @@ namespace Reactor.Sim.Shell
             if (string.IsNullOrEmpty(e.Text))
                 return;
 
-            Phosphor.Ui.TextBox box = Typing();
+            Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox box = Typing();
             if (box == null)
                 return;
 
@@ -362,7 +362,7 @@ namespace Reactor.Sim.Shell
                 return;
             }
 
-            Phosphor.Ui.TextBox box = Typing();
+            Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox box = Typing();
             if (box == null)
                 return;
 
@@ -412,7 +412,7 @@ namespace Reactor.Sim.Shell
         /// Whichever box is currently taking keys, or null when nothing is. The probe always has one; the
         /// editor only while a question is open, so typing does not silently land somewhere invisible.
         /// </summary>
-        Phosphor.Ui.TextBox Typing()
+        Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox Typing()
         {
             if (_showProbe)
                 return _probe.Box;

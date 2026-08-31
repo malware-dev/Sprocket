@@ -29,32 +29,32 @@ public class PaperTargetTests
         var editor = ship.Editor;
         var seen = new HashSet<string>();
 
-        Note(seen, editor);
+        Note(seen, ship);
 
         editor.NewSystem("Airlock");
-        Note(seen, editor);
+        Note(seen, ship);
 
         editor.PressStart("When…");
-        Note(seen, editor);
+        Note(seen, ship);
 
         editor.PressBlock("Airlock Button");
-        Note(seen, editor);
+        Note(seen, ship);
 
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        Note(seen, editor);
+        Note(seen, ship);
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("turn on");
         editor.PressPrimary();
-        Note(seen, editor);
+        Note(seen, ship);
 
         editor.GoToRoot();
-        Note(seen, editor);
+        Note(seen, ship);
 
         editor.PressStart("Load system");
-        Note(seen, editor);
+        Note(seen, ship);
 
         Assert.Contains(nameof(StartComponent), seen);
         Assert.Contains(nameof(StatusListComponent), seen);
@@ -81,7 +81,7 @@ public class PaperTargetTests
         editor.PressChoice("close");
         editor.PressPrimary();
 
-        var paper = PaperTarget.Draw(editor.Screen);
+        var paper = PaperTarget.Draw(ship.World, editor.Screen);
 
         Assert.Contains("When Airlock Button is pressed", paper);
         Assert.Contains("1. close Inner Door", paper);
@@ -97,19 +97,19 @@ public class PaperTargetTests
         editor.NewSystem("Airlock");
         editor.PressStart("When…");
 
-        var paper = PaperTarget.Draw(editor.Screen);
+        var paper = PaperTarget.Draw(ship.World, editor.Screen);
 
         Assert.Contains("pick:", paper);
         Assert.Contains("[ ] Airlock Button", paper);
     }
 
-    static void Note(HashSet<string> seen, ReactorEditor editor)
+    static void Note(HashSet<string> seen, Ship ship)
     {
         // Drawn every time, not only at the end: the refusal is what is being exercised, and a walk
         // that renders once would step straight past whatever it could not have written down.
-        Assert.NotEqual("", PaperTarget.Draw(editor.Screen));
+        Assert.NotEqual("", PaperTarget.Draw(ship.World, ship.Editor.Screen));
 
-        foreach (var component in editor.Screen.Components)
+        foreach (var component in ship.Editor.Screen.Components)
             seen.Add(component.GetType().Name);
     }
 

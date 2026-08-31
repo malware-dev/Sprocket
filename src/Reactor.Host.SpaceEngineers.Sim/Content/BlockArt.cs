@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Content
 {
@@ -37,10 +37,7 @@ namespace Reactor.Sim.Content
         };
 
         /// <summary>Every kind this knows a picture for, so the extractor can ask for them all.</summary>
-        public static IEnumerable<KeyValuePair<string, string>> All
-        {
-            get { return Art; }
-        }
+        public static IEnumerable<KeyValuePair<string, string>> All => Art;
 
         /// <summary>
         /// Where <paramref name="name" /> lives in the game's content, or null for a kind with no picture.

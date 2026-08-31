@@ -113,7 +113,7 @@ namespace Reactor.Editing
                 _selection.Add(targets[i]);
         }
 
-        public override string Title { get { return _title; } }
+        public override string Title => _title;
 
         public override string Subtitle
         {
@@ -125,17 +125,14 @@ namespace Reactor.Editing
             }
         }
 
-        public override string PrimaryText { get { return IsComplete ? "Done" : ""; } }
+        public override string PrimaryText => IsComplete ? "Done" : "";
 
         public override void Primary()
         {
             _done(new PickAnswer(_selection, _chosen, _all));
         }
 
-        bool IsComplete
-        {
-            get { return _selection.Count > 0 && !string.IsNullOrEmpty(_chosen); }
-        }
+        bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen);
 
         public override void Build(List<EditorComponent> components)
         {

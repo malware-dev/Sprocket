@@ -73,7 +73,7 @@ measure text and keeps it.
 |---|---|---|---|---|
 | 2 | `Phosphor.Mixin` | 3,452 | 19 | Smallest and most self-contained. The rules get their first real exercise where a mistake is cheapest. |
 | 3 | `Reactor.Core.Mixin` | 8,057 | 49 | The domain. Folders are already sorted by capability, so mostly comments, statics and type splits. |
-| 4 | `Reactor.Screens.Mixin` | 4,776 | 7 | The worst of it. `EditorView.cs` at 1,446 lines doing six jobs, `Widgets.cs` at 1,042 holding twelve types, and no folders at all. |
+| 4 | `Reactor.Host.SpaceEngineers.Presentation.Mixin` | 4,776 | 7 | The worst of it. `EditorView.cs` at 1,446 lines doing six jobs, `Widgets.cs` at 1,042 holding twelve types, and no folders at all. |
 | 5 | `Reactor.Host.SpaceEngineers` + `Reactor.Machine.Mixin` | 2,294 | 12 | The mod entry point and the machine model. |
 | 6 | `Reactor.Host.SpaceEngineers.Sim` | 4,336 | 24 | Test scaffolding, held to the same structural rules. |
 
@@ -99,7 +99,7 @@ The run ends with a findings file and a dirty tree.
 
 **Context.** A pass this size will be summarised several times, and the real risk is that late-phase
 work forgets an early-phase decision. Everything chosen that is not already in the two skills - the
-folder scheme for `Reactor.Screens.Mixin`, in particular - is written to a decisions log in the
+folder scheme for `Reactor.Host.SpaceEngineers.Presentation.Mixin`, in particular - is written to a decisions log in the
 repository, not left in the conversation.
 
 **Phase 4 is where over-reach lives.** Splitting `EditorView` into six types is a design act. The

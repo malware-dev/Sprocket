@@ -1,10 +1,10 @@
 using System;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace VRageMath
 {
@@ -23,13 +23,13 @@ namespace VRageMath
             Height = height;
         }
 
-        public float Left { get { return X; } }
+        public float Left => X;
 
-        public float Top { get { return Y; } }
+        public float Top => Y;
 
-        public float Right { get { return X + Width; } }
+        public float Right => X + Width;
 
-        public float Bottom { get { return Y + Height; } }
+        public float Bottom => Y + Height;
 
         public override string ToString()
         {

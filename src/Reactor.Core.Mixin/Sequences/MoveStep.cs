@@ -13,9 +13,9 @@ namespace Reactor.Sequences
             _to = to;
         }
 
-        public override string Label { get { return "moving a step"; } }
+        public override string Label => "moving a step";
 
-        public override bool Changes { get { return _from != _to; } }
+        public override bool Changes => _from != _to;
 
         public override void Apply(Sequence sequence)
         {

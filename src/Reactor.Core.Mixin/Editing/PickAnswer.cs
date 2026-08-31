@@ -22,7 +22,7 @@ namespace Reactor.Editing
             All = all;
         }
 
-        public IList<long> Targets { get { return _targets; } }
+        public IList<long> Targets => _targets;
 
         /// <summary>The event or action that was chosen.</summary>
         public string Chosen { get; private set; }

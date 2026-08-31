@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>a41f8d73-2e69-4c15-b8a7-0d3f5e2c91b4</SharedGUID>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Dot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Grip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\IconBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Mark.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Rule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Signpost.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Sized.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Slot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Switch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Widgets.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lists\ChoiceListView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lists\StartView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lists\StatusListView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lists\StatusRow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Icons.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Palette.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Sizes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Space.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Picking\PickView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Picking\StageView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\SentenceView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\SequenceView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\ComponentView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\EditorView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\HeadingRow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\HeadingView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\Hit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\IScreenHost.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\NoticeView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\Overlay.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\Pin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\UnsupportedView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\Ask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Look\Lettering.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\Wording.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Bar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Dock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Element.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\ElementCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Glyph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Label.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Nameplate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Scroll.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Stack.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Symbols.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\TextBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Thickness.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ui\Wrap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\ClipStack.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\IGraphics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\ScreenSpaceGraphics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Input\Clipboard.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Input\IPointer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Input\KeyRepeater.cs" />
+  </ItemGroup>
+</Project>

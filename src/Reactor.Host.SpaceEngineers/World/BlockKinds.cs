@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Reactor.World;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
-using Reactor.Host.SpaceEngineers.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
+using Reactor.Host.SpaceEngineers.Terminal;
 
 namespace Reactor.Host.SpaceEngineers.World
 {

@@ -7,13 +7,13 @@ using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Utils;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
-using Reactor.Host.SpaceEngineers.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
+using Reactor.Host.SpaceEngineers.Terminal;
 
 namespace Reactor.Host.SpaceEngineers.World
 {
@@ -77,15 +77,9 @@ namespace Reactor.Host.SpaceEngineers.World
             _editor = new ReactorEditor(_world, _program, _runner);
         }
 
-        public ReactorEditor Editor
-        {
-            get { return _editor; }
-        }
+        public ReactorEditor Editor => _editor;
 
-        public GridWorld World
-        {
-            get { return _world; }
-        }
+        public GridWorld World => _world;
 
         /// <summary>
         /// Advances everything by one frame.

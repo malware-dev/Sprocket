@@ -1,10 +1,10 @@
 using System;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace VRageMath
 {
@@ -25,10 +25,7 @@ namespace VRageMath
             Y = value;
         }
 
-        public static Vector2 Zero
-        {
-            get { return new Vector2(0f, 0f); }
-        }
+        public static Vector2 Zero => new(0f, 0f);
 
         public static Vector2 operator +(Vector2 a, Vector2 b)
         {

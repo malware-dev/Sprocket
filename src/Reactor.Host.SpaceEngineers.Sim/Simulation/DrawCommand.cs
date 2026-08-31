@@ -3,19 +3,19 @@ using System.Text;
 using Sandbox.ModAPI;
 using VRage.Utils;
 using VRageMath;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
     /// <summary>One thing the game was asked to draw, kept as data rather than done immediately.</summary>
     /// <remarks>
     /// Recorded rather than drawn for two reasons. The near one is mechanical: a canvas only hands out
-    /// something to draw with inside its own render pass, while Phosphor lays out and draws in one go and
+    /// something to draw with inside its own render pass, while the editor lays out and draws in one go and
     /// should not have to care. The far one is the useful one - a frame that exists as a list can be
     /// compared to another frame, which is how this stops being something to look at and starts being
     /// something to assert on.

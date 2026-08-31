@@ -53,15 +53,15 @@ namespace Reactor.World
         }
 
         /// <summary>Everything that can be read off one of these.</summary>
-        public IList<EntityProperty> Properties { get { return _properties; } }
+        public IList<EntityProperty> Properties => _properties;
 
         /// <summary>Moments. These start sequences, and nothing else.</summary>
-        public IList<EntityEvent> Events { get { return _events; } }
+        public IList<EntityEvent> Events => _events;
 
         /// <summary>Situations. These gate steps and guard interlocks, and nothing else.</summary>
-        public IList<EntityState> States { get { return _states; } }
+        public IList<EntityState> States => _states;
 
-        public IList<EntityAction> Actions { get { return _actions; } }
+        public IList<EntityAction> Actions => _actions;
 
         /// <summary>Declares something that can be read off this kind.</summary>
         public EntityKind WithProperty(string id, ValueKind kind, string label)

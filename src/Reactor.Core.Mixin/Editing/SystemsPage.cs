@@ -43,9 +43,9 @@ namespace Reactor.Editing
         /// it, and a heading that was only a name would be promising the rest.
         /// </para>
         /// </remarks>
-        public override string Title { get { return Editor.World.Name; } }
+        public override string Title => Editor.World.Name;
 
-        public override string CustomName { get { return Editor.World.Name; } }
+        public override string CustomName => Editor.World.Name;
 
         /// <summary>
         /// Reaching outside the automation to rename the machine itself, which is deliberate.
@@ -55,11 +55,11 @@ namespace Reactor.Editing
         /// already here and being read. Somebody looking at a construct called "Large Grid 8321" and
         /// wanting it called something else should not have to leave, find the terminal, and come back.
         /// </remarks>
-        public override bool CanRename { get { return Editor.World.CanRename; } }
+        public override bool CanRename => Editor.World.CanRename;
 
-        public override string RenamePrompt { get { return "What is this called?"; } }
+        public override string RenamePrompt => "What is this called?";
 
-        public override bool NameRequired { get { return true; } }
+        public override bool NameRequired => true;
 
         public override void Rename(string name)
         {

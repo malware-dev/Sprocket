@@ -13,11 +13,11 @@ namespace Reactor.Sequences
             _now = now;
         }
 
-        public override string Label { get { return "renaming"; } }
+        public override string Label => "renaming";
 
-        public override bool ChangesShape { get { return false; } }
+        public override bool ChangesShape => false;
 
-        public override bool Changes { get { return _was != _now; } }
+        public override bool Changes => _was != _now;
 
         public override void Apply(Sequence sequence)
         {

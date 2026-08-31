@@ -1,8 +1,12 @@
 # The script, and everything that follows from it
 
-Design worked out in conversation and **not yet built**. Nothing here is in the code. It began as a
-question about localisation and turned into something larger, because the localisation problem was a
-symptom.
+Design worked out in conversation, now partly built. It began as a question about localisation and
+turned into something larger, because the localisation problem was a symptom.
+
+**What is built is marked BUILT or struck through in the order of work at the end.** The value
+system and the sentence are done; everything about the stored script and the grammar is still
+design. The findings below are kept in the tense they were found in, because the reasoning is the
+point and a record rewritten to match the code stops being evidence for it.
 
 ## The finding
 
@@ -58,15 +62,42 @@ Rejected on the way, and worth recording so they are not re-proposed:
 
 ## What has to change in core
 
-**`SentenceSlot.Text` is the root.** Delete it and most of the rest follows: `DescribeEntities`,
-`DescribeCondition`, `DescribeAction`, the `" and "` and `" or "` joins, `SequenceSummary`'s
-flattening, and the two-representations problem its own comment already worries about.
+**`SentenceSlot.Text` is the root - BUILT.** A slot is now what it refers to plus its command, and
+the words are the target's. `SentenceSlot` is abstract with five subclasses - `EntitiesSlot`,
+`EventSlot`, `ActionSlot`, `StateSlot`, `DurationSlot` - matching how the model already discriminates
+triggers, gates and edits. `IsEmpty` is derived rather than told, because a slot knows whether it has
+anything in it. `SentenceTrigger.Lead` became `TriggerKind`, `SentenceStep.Lead` became `StepKind`
+plus a `SentenceGate`, and `Reactor.Host.SpaceEngineers.Presentation.Sequences.Wording` is now the only file in the repo that
+knows the sentence is in English.
 
-A slot becomes what it *refers to* plus its command. Every slot is one of four things: some
-entities, a state, an action, or a quantity. `PickComponent` already hands over entity ids rather
-than names, so the surface has precedent for exactly this shape.
+Five things fell out of doing it:
 
-Also core's, and smaller:
+**Wording is not free, and the sentence is drawn sixty times a second.** Core used to word a slot
+once, when the page was built, and the view copied a string reference per tick. Moving the words out
+moved the work into the per-tick path, which is the mistake this project has already made once with
+layout. So the views remember what they last put on each element and leave an unchanged slot alone -
+and because core rebuilds a sentence by making new slots, being the same object is the same question
+as being unchanged. **Any future presentation moved out of core has to answer this same question
+before it lands.**
+
+**A target rendering a sentence needs the world.** Core names blocks by id, so somebody has to turn
+one into a name - and what to say about a block that is gone is a sentence in the target's language.
+`IScreenHost` gained `IWorld World`, which cost one property on `EditorView` and nothing else, and
+`ReactorEditor.World` stopped being internal.
+
+**"Every 5 ticks" and "wait 5 seconds" are not the same rendering**, and the difference is a real
+one: a repeat rate said in seconds would be a promise the simulation breaks under load, which is what
+`Cadences` was already saying. So `Wording` has `InTrigger` and `InStep`, and says why.
+
+**`PaperTarget` became a real second target rather than a printer.** It used to copy the strings core
+handed it; it now joins names, words gates and refuses a slot kind nobody has words for, the same way
+it refuses a component. That refusal is the whole reason it exists, and it now covers sentences too.
+
+**The reference suite had a hole exactly here.** Its walk stopped at an empty sequence, so no
+committed frame contained a step - the thing being changed. `sequence-step` and `sequence-wait` close
+it, and both were diffed against the same walk run on the previous commit before being committed.
+
+Still core's, and smaller:
 
 | Where | Today | Becomes |
 |---|---|---|
@@ -715,15 +746,17 @@ Everything else that was open is settled above: the value system is one system w
 table including `Color`, the script is canonical rather than a projection, the grammar is fixed,
 triggers run sequences rather than belonging to them, and the switch belongs to the trigger.
 
-## Order of work, when it starts
+## Order of work
 
-1. **Take the presentation out of core** - `SentenceSlot.Text` first, since the rest follows it.
-2. **The small ones:** `Cadence`, `Elapsed`, `SystemSummary.Count`, prompts, empty text, undo labels.
-3. **`ValueKind` gains `Integer` and `Vector`, `Number` becomes `Real`**, and the operator table
-   arrives with them. Independent of the rest and worth doing early, because every later step that
-   touches a literal is safer once integers cannot be doubles.
-4. **`Description` becomes `Annotation`**, and sequences and steps gain one. Small, and it unblocks
-   the editor being able to set what the loader has been able to write all along.
+1. ~~**Take the presentation out of core** - `SentenceSlot.Text` first, since the rest follows it.~~
+   **Done.** The sentence is structural; see above for what fell out of it.
+2. **The rest of the presentation.** `SequenceSummary` is the next root - it is the last thing
+   holding `SequenceText` up, and it words a list row and a heading as single strings. Then the small
+   ones: `Cadence`, `Elapsed`, `SystemSummary.Count`, prompts, empty text, undo labels, the wait
+   preset labels, `ChoiceEntry` and `PickOption` text, `SequenceComponent.LockedText`.
+3. ~~**`ValueKind` gains `Integer`, `Number` becomes `Real`**, and the operator table arrives with
+   them.~~ **Done**, along with `Color` and the eight-byte value.
+4. ~~**`Description` becomes `Annotation`**, and sequences and steps gain one.~~ **Done.**
 5. **References become opaque host-minted values rather than `long`**, which threads through the
    model, the runtime and the save format. This is the big one, and it is what makes a shareable
    automation reachable at all.

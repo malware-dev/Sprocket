@@ -37,7 +37,7 @@ namespace Reactor.Ui
         /// </summary>
         public int Revision { get; private set; }
 
-        public int Count { get { return _items.Count; } }
+        public int Count => _items.Count;
 
         public T this[int index]
         {

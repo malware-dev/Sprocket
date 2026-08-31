@@ -13,14 +13,14 @@ namespace Reactor.Ui
     /// </remarks>
     public sealed class SentenceTrigger
     {
-        public SentenceTrigger(string lead)
+        public SentenceTrigger(TriggerKind kind)
         {
-            Lead = lead;
+            Kind = kind;
             Slots = new List<SentenceSlot>();
         }
 
-        /// <summary>The opening word: "When" or "Every".</summary>
-        public string Lead { get; set; }
+        /// <summary>Which sort of moment this is, which is what a target opens the line with.</summary>
+        public TriggerKind Kind { get; private set; }
 
         public List<SentenceSlot> Slots { get; private set; }
 

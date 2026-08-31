@@ -26,12 +26,9 @@ namespace Reactor.Editing
             _system = system;
         }
 
-        public int SystemId { get { return _system.Id; } }
+        public int SystemId => _system.Id;
 
-        public override string Title
-        {
-            get { return SystemSummary.Describe(Editor.World, _system); }
-        }
+        public override string Title => SystemSummary.Describe(Editor.World, _system);
 
         /// <summary>
         /// What the author said this thing is.
@@ -41,7 +38,7 @@ namespace Reactor.Editing
         /// ever get. Empty until somebody writes one, and empty reads as nothing rather than
         /// as a blank waiting to be filled.
         /// </remarks>
-        public override string Subtitle { get { return _system.Annotation; } }
+        public override string Subtitle => _system.Annotation;
 
         /// <summary>
         /// The whole system, running or parked.
@@ -59,11 +56,11 @@ namespace Reactor.Editing
         /// somebody who thought better of "Airlock" a week later had no way to say so. There
         /// is no reason the two should differ - it is the same act on the same kind of screen.
         /// </remarks>
-        public override string CustomName { get { return _system.Name ?? ""; } }
+        public override string CustomName => _system.Name ?? "";
 
-        public override bool CanRename { get { return true; } }
+        public override bool CanRename => true;
 
-        public override string RenamePrompt { get { return "What is it?"; } }
+        public override string RenamePrompt => "What is it?";
 
         /// <summary>
         /// A system has to be called something.
@@ -73,7 +70,7 @@ namespace Reactor.Editing
         /// the ones of it and nothing else, so an empty one leaves a row on the front door that cannot be
         /// told apart from any other.
         /// </remarks>
-        public override bool NameRequired { get { return true; } }
+        public override bool NameRequired => true;
 
         public override void Rename(string name)
         {
@@ -88,9 +85,9 @@ namespace Reactor.Editing
             _system.Name = wanted;
         }
 
-        public override bool CanSwitch { get { return true; } }
+        public override bool CanSwitch => true;
 
-        public override bool SwitchIsOn { get { return _system.Enabled; } }
+        public override bool SwitchIsOn => _system.Enabled;
 
         public override void Switch(bool on)
         {

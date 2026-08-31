@@ -2,7 +2,7 @@
 <Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <TransparentMaterials>
         <!--
-            Phosphor draws sprites by material id, and these are the ones it needs to exist.
+            The editor draws sprites by material id, and these are the ones it needs to exist.
 
             The textures are the game's own, so this mod ships no art. That is not only about size: the cursor
             a player already knows is the right cursor to draw, and there is no id to reach it by, because
@@ -14,7 +14,7 @@
         <TransparentMaterial>
             <Id>
                 <TypeId>TransparentMaterialDefinition</TypeId>
-                <SubtypeId>Phosphor_Fill</SubtypeId>
+                <SubtypeId>Reactor_Fill</SubtypeId>
             </Id>
             <AlphaMistingEnable>false</AlphaMistingEnable>
             <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>

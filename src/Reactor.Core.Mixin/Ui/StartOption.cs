@@ -19,7 +19,7 @@ namespace Reactor.Ui
         /// </summary>
         public string Question { get; set; }
 
-        public bool Asks { get { return !string.IsNullOrEmpty(Question); } }
+        public bool Asks => !string.IsNullOrEmpty(Question);
 
         /// <summary>
         /// Where the answer goes, or what to press when there is no question.

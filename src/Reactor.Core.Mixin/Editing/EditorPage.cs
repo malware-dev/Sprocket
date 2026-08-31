@@ -76,7 +76,7 @@ namespace Reactor.Editing
             parts[0].Name = CustomName;
         }
 
-        public virtual string Subtitle { get { return ""; } }
+        public virtual string Subtitle => "";
 
         /// <summary>
         /// The obvious next move on this page, or empty for none.
@@ -95,12 +95,12 @@ namespace Reactor.Editing
         /// is any use alone: a target has to know what the current name is before it can offer
         /// to change it, or it opens a box holding a sentence nobody typed.
         /// </remarks>
-        public virtual string CustomName { get { return ""; } }
+        public virtual string CustomName => "";
 
-        public virtual bool CanRename { get { return false; } }
+        public virtual bool CanRename => false;
 
         /// <summary>What to ask when offering the rename.</summary>
-        public virtual string RenamePrompt { get { return ""; } }
+        public virtual string RenamePrompt => "";
 
         /// <summary>
         /// Whether the name is the only thing this page has to be called by.
@@ -115,7 +115,7 @@ namespace Reactor.Editing
         /// name taken away is a row nobody can tell from the next one.
         /// </para>
         /// </remarks>
-        public virtual bool NameRequired { get { return false; } }
+        public virtual bool NameRequired => false;
 
         /// <summary>
         /// Takes a new name, or empty to go back to the worked-out heading.
@@ -129,13 +129,13 @@ namespace Reactor.Editing
         /// <summary>
         /// Whether this page's subject can be switched on and off.
         /// </summary>
-        public virtual bool CanSwitch { get { return false; } }
+        public virtual bool CanSwitch => false;
 
-        public virtual bool SwitchIsOn { get { return false; } }
+        public virtual bool SwitchIsOn => false;
 
         public virtual void Switch(bool on) { }
 
-        public virtual string PrimaryText { get { return ""; } }
+        public virtual string PrimaryText => "";
 
         public virtual void Primary() { }
 

@@ -1,14 +1,14 @@
 using Ship = Reactor.Sim.Machine.Simulation;
-using Reactor.Screens;
+using Reactor.Host.SpaceEngineers.Presentation;
 using VRageMath;
-using Phosphor.Graphics;
-using Phosphor.Ui;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Graphics;
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
@@ -56,16 +56,10 @@ namespace Reactor.Sim.Simulation
         /// A test that is about what the editor does, rather than about where this target puts it,
         /// says so by coming through here instead of pressing coordinates.
         /// </remarks>
-        public Reactor.Editing.ReactorEditor Editor
-        {
-            get { return _ship.Editor; }
-        }
+        public Reactor.Editing.ReactorEditor Editor => _ship.Editor;
 
         /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
-        public string Where
-        {
-            get { return _ship.Where; }
-        }
+        public string Where => _ship.Where;
 
         /// <summary>
         /// The things on the made-up ship that can be poked at from outside.
@@ -128,20 +122,14 @@ namespace Reactor.Sim.Simulation
         }
 
         /// <summary>Whether a question is open and wants the keyboard.</summary>
-        public bool IsAsking
-        {
-            get { return _view.IsAsking; }
-        }
+        public bool IsAsking => _view.IsAsking;
 
         /// <summary>The box that question is being answered in.</summary>
-        public Phosphor.Ui.TextBox AskBox
-        {
-            get { return _view.AskBox; }
-        }
+        public Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox AskBox => _view.AskBox;
 
         public bool CaretVisible
         {
-            set { _view.CaretVisible = value; }
+            set => _view.CaretVisible = value;
         }
 
         public void CommitAsk()
@@ -155,10 +143,7 @@ namespace Reactor.Sim.Simulation
         }
 
         /// <summary>The box the keyboard is in, when something on the screen has taken it.</summary>
-        public Phosphor.Ui.TextBox Focus
-        {
-            get { return _view.Focus; }
-        }
+        public Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox Focus => _view.Focus;
 
         /// <summary>Sends what was just typed wherever it belongs.</summary>
         public void Typed()
@@ -175,10 +160,7 @@ namespace Reactor.Sim.Simulation
         /// somebody types. The window and the headless harness both need that answer and must not be
         /// allowed to arrive at different ones.
         /// </remarks>
-        public Phosphor.Ui.TextBox Typing
-        {
-            get { return _view.IsAsking ? _view.AskBox : _view.Focus; }
-        }
+        public Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox Typing => _view.IsAsking ? _view.AskBox : _view.Focus;
 
         /// <summary>
         /// Empties whatever has the keyboard, the way holding backspace would.
@@ -190,7 +172,7 @@ namespace Reactor.Sim.Simulation
         /// </remarks>
         public void Clear()
         {
-            Phosphor.Ui.TextBox box = Typing;
+            Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox box = Typing;
             if (box == null)
                 return;
 
@@ -202,7 +184,7 @@ namespace Reactor.Sim.Simulation
         /// <summary>Types <paramref name="text" /> into whatever has the keyboard.</summary>
         public void Type(string text)
         {
-            Phosphor.Ui.TextBox box = Typing;
+            Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox box = Typing;
             if (box == null || string.IsNullOrEmpty(text))
                 return;
 
@@ -263,10 +245,7 @@ namespace Reactor.Sim.Simulation
             _view.Drop();
         }
 
-        public bool IsDragging
-        {
-            get { return _view.IsDragging; }
-        }
+        public bool IsDragging => _view.IsDragging;
 
         public void Draw(ScreenSpaceGraphics g)
         {

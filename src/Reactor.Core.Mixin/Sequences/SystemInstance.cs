@@ -40,7 +40,7 @@ namespace Reactor.Sequences
         /// </remarks>
         public string Name { get; set; }
 
-        public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
+        public bool HasName => !string.IsNullOrEmpty(Name);
 
         /// <summary>
         /// Whether this one may run, independently of the others.
@@ -73,7 +73,7 @@ namespace Reactor.Sequences
         /// </remarks>
         readonly Dictionary<long, List<long>> _fills = new Dictionary<long, List<long>>();
 
-        public IEnumerable<long> Filled { get { return _fills.Keys; } }
+        public IEnumerable<long> Filled => _fills.Keys;
 
         /// <summary>Points a part of the system at the things this one uses for it.</summary>
         public void Fill(long role, IList<long> entities)

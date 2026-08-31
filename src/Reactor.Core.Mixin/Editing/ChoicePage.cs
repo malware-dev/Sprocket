@@ -22,7 +22,7 @@ namespace Reactor.Editing
             _title = title;
         }
 
-        public override string Title { get { return _title; } }
+        public override string Title => _title;
 
         public override string Subtitle
         {

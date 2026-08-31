@@ -37,6 +37,5 @@
     <None Remove="thumb.png" />
   </ItemGroup>
   <Import Project="..\Reactor.Core.Mixin\Reactor.Core.Mixin.projitems" Label="Shared" />
-  <Import Project="..\Phosphor.Mixin\Phosphor.Mixin.projitems" Label="Shared" />
-  <Import Project="..\Reactor.Screens.Mixin\Reactor.Screens.Mixin.projitems" Label="Shared" />
+  <Import Project="..\Reactor.Host.SpaceEngineers.Presentation.Mixin\Reactor.Host.SpaceEngineers.Presentation.Mixin.projitems" Label="Shared" />
 </Project>

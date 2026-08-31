@@ -753,7 +753,7 @@ block references, which are the one part that cannot look like a normal language
 ### The Avalonia host has been removed
 
 It was the only *independent* consumer of core's component surface - the simulator is not a second
-target, it shares `Screens.Mixin` and `Phosphor.Mixin` with the game and swaps only the backend -
+target, it shares `Presentation.Mixin` with the game and swaps only the backend -
 and for a while that was worth something. Two implementations is the classic minimum for an
 abstraction to be real, and it earned its keep as recently as the heading work, where having to
 write the flattening in its own file is what made the cost of a flattened heading visible.

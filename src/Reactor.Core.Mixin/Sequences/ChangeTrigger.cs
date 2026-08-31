@@ -25,16 +25,11 @@ namespace Reactor.Sequences
             _nowAll = all;
         }
 
-        public override string Label { get { return "changing when it runs"; } }
+        public override string Label => "changing when it runs";
 
-        public override bool Changes
-        {
-            get
-            {
-                return _wasEvent != _nowEvent || _wasAll != _nowAll
-                    || !Same(_wasSources, _nowSources);
-            }
-        }
+        public override bool Changes =>
+            _wasEvent != _nowEvent || _wasAll != _nowAll
+                                   || !Same(_wasSources, _nowSources);
 
         public override void Apply(Sequence sequence)
         {

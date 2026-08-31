@@ -97,18 +97,17 @@ src/
     Editing/              The editor itself - navigation, pages, wording
     Ui/                   The contract a target renders. Start here; it is small.
   Reactor.Core            The same sources as an assembly, for the hosts that load one
-  Phosphor.Mixin          Drawing and layout. Knows nothing of Reactor.
+  Reactor.Host.SpaceEngineers.Presentation.Mixin  Reactor as a person sees it. Knows the game's screen, not its world.
     Graphics/             The seam a target draws through, and the screen's backend
     Input/                Pointers, held keys, copied text
-    Ui/                   Elements, containers, text
-  Reactor.Screens.Mixin   What the mod ships: Reactor drawn on a Space Engineers screen
+    Ui/                   Elements, containers, text - the layout, knowing nothing of Reactor
     Look/                 Palette, type scale, spacing, sizes, icons
     Controls/             The pieces a screen is built from
-    Host/                 The screen itself, and its furniture
+    Screen/               The screen itself, and its furniture
     Lists/                Rows of things to choose or watch
     Picking/              Choosing blocks and what happens to them
-    Sequences/            Drawing a sentence
-  Reactor.Host.SpaceEngineers      The mod: the same sources, compiled in-game
+    Sequences/            Drawing a sentence, and the only English in the repository
+  Reactor.Host.SpaceEngineers      The mod: the game's half - blocks, session, screen, input
   Reactor.Host.SpaceEngineers.Sim  Those screens, run without the game
     Machine/              The made-up machine they run against
     Fakes/                Substitutes for the game types the screens draw through
@@ -116,7 +115,7 @@ src/
     Simulation/           A frame with nobody watching, and the scripts that drive one
 tests/
   Reactor.Core.Tests      The model, the runtime, and the editor
-  Reactor.Screens.Tests   The screens, driven and read through the simulator
+  Reactor.Host.SpaceEngineers.Presentation.Tests   The screens, driven and read through the simulator
   Reactor.Host.SpaceEngineers.Tests   What the mod says it does about each conformance point
   Reference/              The screens held still, one frame per state, as committed text
 ```
@@ -137,10 +136,10 @@ the simulator reference; `Reactor.Host.SpaceEngineers` imports the same sources 
 the packer lays them out as loose files for SE to compile. One set of files, and no
 copy step that can quietly fall behind.
 
-The same reasoning made three more: `Phosphor.Mixin` for the drawing and layout,
-`Reactor.Screens.Mixin` for the views the mod ships, and `Reactor.Machine.Mixin` for the
-invented ship both hosts drive. The simulator imports the first two, so what is seen
-there is what ships rather than a preview of it.
+The same reasoning made one more: `Reactor.Host.SpaceEngineers.Presentation.Mixin`, holding the layout, the drawing
+and the views the mod ships. The simulator imports it, so what is seen there is what ships
+rather than a preview of it - down to the sprites, because the simulator runs the mod's own
+screen backend against a substitute screen-space API rather than drawing its own way.
 
 The mod also ships **content**: a symbol font for the things a screen needs and Space
 Engineers has no artwork for - undo, redo, delete. It is drawn rather than borrowed, and it
@@ -178,7 +177,7 @@ finding.
 ### The simulator
 
 `Reactor.Host.SpaceEngineers.Sim` runs the mod's own screens without launching the game.
-It compiles the same `Phosphor.Mixin` and `Reactor.Screens.Mixin` sources the mod does, so
+It compiles the same `Reactor.Host.SpaceEngineers.Presentation.Mixin` sources the mod does, so
 what is seen there is what ships. Coordinates are UI units rather than window pixels;
 `--dump` prints both, so a point can be converted.
 

@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
-using Phosphor.Graphics;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Graphics;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
@@ -46,16 +46,10 @@ namespace Reactor.Sim.Simulation
             _scene = EditorScene.Nowhere();
         }
 
-        public EditorScene Scene
-        {
-            get { return _scene; }
-        }
+        public EditorScene Scene => _scene;
 
         /// <summary>The last frame's calls. Beginning a frame empties it, so this is never a history.</summary>
-        public IList<DrawCommand> Commands
-        {
-            get { return _device.Commands; }
-        }
+        public IList<DrawCommand> Commands => _device.Commands;
 
         /// <summary>How tall a line of this font stands, in the units the screen lays out in.</summary>
         public float LineHeight(string font, float scale)

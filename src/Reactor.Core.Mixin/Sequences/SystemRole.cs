@@ -44,7 +44,7 @@ namespace Reactor.Sequences
         /// </remarks>
         public string Name { get; set; }
 
-        public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
+        public bool HasName => !string.IsNullOrEmpty(Name);
 
         /// <summary>
         /// What the author wants said to whoever is filling this in.

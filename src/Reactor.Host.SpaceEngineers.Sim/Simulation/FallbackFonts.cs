@@ -1,12 +1,12 @@
 using System.Globalization;
 using Avalonia.Media;
 using VRageMath;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
@@ -47,10 +47,7 @@ namespace Reactor.Sim.Simulation
 
         /// <summary>Whether these measurements are the game's. They are not, and will not be until the
         /// glyph tables are read.</summary>
-        public bool IsExact
-        {
-            get { return false; }
-        }
+        public bool IsExact => false;
 
         public Vector2 MeasurePixels(string font, string text, float scale)
         {

@@ -1,5 +1,6 @@
 using System.Text;
 using Reactor.Ui;
+using Reactor.World;
 
 namespace Reactor.Tests;
 
@@ -13,7 +14,7 @@ namespace Reactor.Tests;
 /// a lagging second implementation gives confidence rather than pressure - it stops pushing back and
 /// starts agreeing with whatever core does.
 /// <para>
-/// This is the honest cheap version. It knows nothing of Phosphor, of Space Engineers, or of any
+/// This is the honest cheap version. It knows nothing of the screens, of Space Engineers, or of any
 /// drawing at all: it is handed a screen and writes down what is on it. What it cannot render, it
 /// refuses to render - see <see cref="Draw(EditorComponent)" /> - so a new component type breaks it
 /// until somebody has said what a target is meant to do with one.
@@ -21,7 +22,7 @@ namespace Reactor.Tests;
 /// </remarks>
 static class PaperTarget
 {
-    public static string Draw(EditorScreen screen)
+    public static string Draw(IWorld world, EditorScreen screen)
     {
         var paper = new StringBuilder();
 
@@ -44,7 +45,7 @@ static class PaperTarget
             paper.Append("  ").AppendLine(screen.Subtitle);
 
         foreach (var component in screen.Components)
-            paper.Append(Draw(component));
+            paper.Append(Draw(world, component));
 
         return paper.ToString();
     }
@@ -57,7 +58,7 @@ static class PaperTarget
     /// forgetting to say how a target shows it is silent everywhere else; here it stops the build's
     /// tests until somebody has answered.
     /// </remarks>
-    static string Draw(EditorComponent component)
+    static string Draw(IWorld world, EditorComponent component)
     {
         var paper = new StringBuilder();
 
@@ -139,10 +140,10 @@ static class PaperTarget
         if (component is SequenceComponent sequence)
         {
             paper.Append("sequence ").Append(sequence.SequenceId).AppendLine(":");
-            paper.Append("  ").AppendLine(Say(sequence.Trigger.Lead, sequence.Trigger.Slots));
+            paper.Append("  ").AppendLine(Say(world, sequence.Trigger));
 
             foreach (var step in sequence.Steps)
-                paper.Append("  ").Append(step.Number).Append(". ").AppendLine(Say(step.Lead, step.Slots));
+                paper.Append("  ").Append(step.Number).Append(". ").AppendLine(Say(world, step));
 
             paper.Append("  undo: ").Append(Blank(sequence.UndoText))
                 .Append("  redo: ").AppendLine(Blank(sequence.RedoText));
@@ -157,28 +158,109 @@ static class PaperTarget
     }
 
     /// <summary>
-    /// A trigger or a step as the one line it reads as.
+    /// The first line, in this target's own words.
     /// </summary>
     /// <remarks>
-    /// A lead is optional - a step usually has none and starts straight at its verb - so the space
-    /// goes between words rather than in front of them.
+    /// Its own words on purpose. Core hands over what the sentence refers to and never what it says,
+    /// so a second target writing the same English as the first proves nothing - the point is that it
+    /// could write something else and core would not know.
     /// </remarks>
-    static string Say(string lead, List<SentenceSlot> slots)
+    static string Say(IWorld world, SentenceTrigger trigger)
+    {
+        var line = new StringBuilder();
+        line.Append(trigger.Kind == TriggerKind.Every ? "Every" : "When");
+
+        foreach (var slot in trigger.Slots)
+            line.Append(' ').Append(Say(world, slot));
+
+        return line.ToString();
+    }
+
+    /// <summary>
+    /// One numbered line.
+    /// </summary>
+    /// <remarks>
+    /// A step usually opens straight at its verb, so the space goes between words rather than in
+    /// front of them.
+    /// </remarks>
+    static string Say(IWorld world, SentenceStep step)
     {
         var line = new StringBuilder();
 
-        if (Some(lead))
-            line.Append(lead);
+        if (step.Kind == StepKind.Wait)
+            line.Append("wait");
+        else if (step.Gate != null)
+            line.Append(Say(world, step.Gate));
 
-        foreach (var slot in slots)
+        foreach (var slot in step.Slots)
         {
             if (line.Length > 0)
                 line.Append(' ');
 
-            line.Append(slot.IsEmpty ? "____" : slot.Text);
+            line.Append(Say(world, slot));
         }
 
         return line.ToString();
+    }
+
+    static string Say(IWorld world, SentenceGate gate)
+    {
+        var line = new StringBuilder();
+
+        if (gate.Kind == GateKind.Once)
+            line.Append("once");
+        else if (gate.Kind == GateKind.OnlyIf)
+            line.Append("only if");
+        else
+            line.Append("after");
+
+        foreach (var slot in gate.Slots)
+            line.Append(' ').Append(Say(world, slot));
+
+        return line.ToString();
+    }
+
+    /// <summary>
+    /// One slot, as the words this target would print for it.
+    /// </summary>
+    /// <remarks>
+    /// The refusal at the end is the same pressure as the one on components. A slot kind core
+    /// invented and nobody has words for is a gap in a sentence, and a gap in a sentence reads
+    /// exactly like a slot somebody has not filled in yet.
+    /// </remarks>
+    static string Say(IWorld world, SentenceSlot slot)
+    {
+        if (slot.IsEmpty)
+            return "____";
+
+        if (slot is EntitiesSlot entities)
+        {
+            var names = new List<string>();
+            foreach (var id in entities.Entities)
+            {
+                var entity = world.FindEntity(id);
+                names.Add(entity == null ? "(gone)" : entity.Name);
+            }
+
+            return string.Join(entities.RequiresAll ? " and " : " or ", names);
+        }
+
+        if (slot is EventSlot happening)
+            return happening.Event.Text;
+
+        if (slot is ActionSlot action)
+            return action.Action.Text;
+
+        if (slot is StateSlot state)
+            return state.State.Text;
+
+        if (slot is DurationSlot duration)
+            return duration.Ticks + " ticks";
+
+        throw new InvalidOperationException(
+            $"Core put a {slot.GetType().Name} in a sentence and nothing here knows what words go on "
+            + "one. Say what it reads as before shipping it to a real target, or the first anybody "
+            + "hears of it is a hole in the middle of a sentence.");
     }
 
     static string Blank(string text) => Some(text) ? text : "-";

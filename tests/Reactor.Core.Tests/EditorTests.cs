@@ -687,10 +687,11 @@ public class EditorTests
     }
 
     [Fact]
-    public void SeveralBlocksReadAsEitherOnATrigger_AndBothOnAStep()
+    public void SeveralBlocksAreEitherOnATrigger_AndBothOnAStep()
     {
-        // A trigger fires on whichever happens first, a step acts on all of them.
-        // Saying "and" in both places would state the wrong thing in one of them.
+        // A trigger fires on whichever happens first, a step acts on all of them. The two are a
+        // different claim about the same pair of blocks, and a target that joined both with "and"
+        // would state the wrong one - so the sentence says which it is rather than which word to use.
         var ship = Build();
         var editor = ship.Editor;
 
@@ -700,7 +701,9 @@ public class EditorTests
         editor.PressBlock("Outer Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
-        Assert.Equal("Inner Door or Outer Door", editor.Sentence().Trigger.Slots[0].Text);
+        var sources = Assert.IsType<EntitiesSlot>(editor.Sentence().Trigger.Slots[0]);
+        Assert.Equal(2, sources.Entities.Count);
+        Assert.False(sources.RequiresAll);
 
         editor.PressAdd("do something");
         editor.PressBlock("Inner Door");
@@ -708,7 +711,9 @@ public class EditorTests
         editor.PressChoice("close");
         editor.PressPrimary();
 
-        Assert.Equal("Inner Door and Outer Door", editor.Sentence().Steps[0].Slots[1].Text);
+        var targets = Assert.IsType<EntitiesSlot>(editor.Sentence().Steps[0].Slots[1]);
+        Assert.Equal(2, targets.Entities.Count);
+        Assert.True(targets.RequiresAll);
     }
 
     static TestDoor Door(Ship ship, string name) =>
@@ -718,7 +723,7 @@ public class EditorTests
         ship.World.Entities.OfType<TestButton>().First(b => b.Name == name);
 
     [Fact]
-    public void AllOfThemTogether_ReadsAsAndAndFiresWhenTheLastArrives()
+    public void AllOfThemTogether_IsItsOwnClaimAndFiresWhenTheLastArrives()
     {
         // "When tank A and tank B are empty" is a different sentence from "either of
         // them", and fires at a different moment - when the last one gets there.
@@ -732,7 +737,9 @@ public class EditorTests
         editor.PressChoice("all of them");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
-        Assert.Equal("Inner Door and Outer Door", editor.Sentence().Trigger.Slots[0].Text);
+        var sources = Assert.IsType<EntitiesSlot>(editor.Sentence().Trigger.Slots[0]);
+        Assert.Equal(2, sources.Entities.Count);
+        Assert.True(sources.RequiresAll);
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
@@ -898,8 +905,10 @@ public class EditorTests
         editor.PressPrimary();
 
         Assert.Single(editor.Sentence().Steps);
-        Assert.Equal("close", editor.Sentence().Steps[0].Slots[0].Text);
-        Assert.Equal("Inner Door", editor.Sentence().Steps[0].Slots[1].Text);
+        Assert.Equal("close", Assert.IsType<ActionSlot>(editor.Sentence().Steps[0].Slots[0]).Action.Text);
+
+        var targets = Assert.IsType<EntitiesSlot>(editor.Sentence().Steps[0].Slots[1]);
+        Assert.Equal(Door(ship, "Inner Door").Id, Assert.Single(targets.Entities));
     }
 
     [Fact]
@@ -931,8 +940,8 @@ public class EditorTests
         editor.PressChoice("5 seconds - 300 ticks");
 
         var step = Assert.Single(editor.Sentence().Steps);
-        Assert.Equal("wait", step.Lead);
-        Assert.Equal("5 seconds", step.Slots[0].Text);
+        Assert.Equal(StepKind.Wait, step.Kind);
+        Assert.Equal(300, Assert.IsType<DurationSlot>(step.Slots[0]).Ticks);
     }
 
     [Fact]

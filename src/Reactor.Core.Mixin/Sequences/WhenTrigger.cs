@@ -22,7 +22,7 @@ namespace Reactor.Sequences
             EventId = eventId;
         }
 
-        public IList<long> Sources { get { return _sources; } }
+        public IList<long> Sources => _sources;
 
         /// <summary>
         /// Whether every source has to be in the event's state, rather than any one

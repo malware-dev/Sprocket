@@ -15,9 +15,9 @@ namespace Reactor.Sequences
             _now = now;
         }
 
-        public override string Label { get { return "changing a wait"; } }
+        public override string Label => "changing a wait";
 
-        public override bool Changes { get { return _was != _now; } }
+        public override bool Changes => _was != _now;
 
         public override void Apply(Sequence sequence)
         {

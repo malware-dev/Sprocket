@@ -1,10 +1,10 @@
 using System;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace VRageMath
 {
@@ -41,11 +41,11 @@ namespace VRageMath
             A = Clamp((int)Math.Round(alpha * 255f));
         }
 
-        public static Color White { get { return new Color(255, 255, 255); } }
+        public static Color White => new(255, 255, 255);
 
-        public static Color Black { get { return new Color(0, 0, 0); } }
+        public static Color Black => new(0, 0, 0);
 
-        public static Color Transparent { get { return new Color(0, 0, 0, 0); } }
+        public static Color Transparent => new(0, 0, 0, 0);
 
         static byte Clamp(int value)
         {

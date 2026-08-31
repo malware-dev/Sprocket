@@ -41,7 +41,7 @@ namespace Reactor.Editing
             new Cadence("rare", 3600, false)
         };
 
-        public static IList<Cadence> All { get { return _all; } }
+        public static IList<Cadence> All => _all;
 
         /// <summary>The offered rate nearest a raw tick count, for display.</summary>
         public static Cadence Nearest(int ticks)

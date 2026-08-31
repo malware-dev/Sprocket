@@ -6,20 +6,25 @@ using Reactor.World;
 namespace Reactor.Editing
 {
     /// <summary>
-    /// Turns sequences into the sentences the user reads.
+    /// The English left in core, and all of it on its way out.
     /// </summary>
     /// <remarks>
-    /// This lives in core rather than in a host because it is meaning, not
-    /// presentation. A target decides how a slot looks and how it is picked; it does
-    /// not get to decide what the sequence says.
+    /// This used to word the sentence too, on the reasoning that a sentence is meaning rather than
+    /// presentation. The split was drawn one notch too far into words: word order alone disproves it,
+    /// since German puts the verb last and core owning the meaning does not move it. The sentence now
+    /// says what it refers to and a target says it - see <see cref="Ui.SentenceSlot" />.
+    /// <para>
+    /// What is left serves the one-line forms a list row and a heading are still strings of, and the
+    /// label on a wait preset. Those go the same way; see the order of work in <c>docs/Script.md</c>.
+    /// </para>
     /// </remarks>
-    public static class SequenceText
+    static class SequenceText
     {
         /// <summary>Shown in place of an entity that is no longer on the construct.</summary>
-        public const string MissingEntityText = "something that's gone";
+        const string MissingEntityText = "something that's gone";
 
         /// <summary>Shown in a slot the user has not filled in yet.</summary>
-        public const string EmptySlotText = "…";
+        const string EmptySlotText = "…";
 
         /// <summary>
         /// Names a selection of entities, keeping real names visible for as long as
@@ -30,7 +35,7 @@ namespace Reactor.Editing
         /// back into an abstraction. Names are what keep a sequence about doors instead
         /// of about identifiers.
         /// </remarks>
-        public static string DescribeEntities(IWorld world, IList<long> entityIds)
+        static string DescribeEntities(IWorld world, IList<long> entityIds)
         {
             return Join(world, entityIds, " and ");
         }
@@ -44,7 +49,7 @@ namespace Reactor.Editing
         /// "when the port door or the starboard door finishes opening" agrees, where
         /// "and" would need "finish".
         /// </remarks>
-        public static string DescribeEntitiesAny(IWorld world, IList<long> entityIds)
+        static string DescribeEntitiesAny(IWorld world, IList<long> entityIds)
         {
             return Join(world, entityIds, " or ");
         }
@@ -76,7 +81,7 @@ namespace Reactor.Editing
         /// <summary>
         /// Names a trigger's sources with the joiner that says what it actually does.
         /// </summary>
-        public static string DescribeSources(IWorld world, WhenTrigger when)
+        static string DescribeSources(IWorld world, WhenTrigger when)
         {
             return when.RequiresAll
                 ? DescribeEntities(world, when.Sources)
@@ -135,7 +140,7 @@ namespace Reactor.Editing
         }
 
         /// <summary>The "once …" or "only if …" prefix, or empty for the usual case.</summary>
-        public static string DescribeGate(IWorld world, StepGate gate)
+        static string DescribeGate(IWorld world, StepGate gate)
         {
             var once = gate as OnceGate;
             if (once != null)
@@ -152,7 +157,7 @@ namespace Reactor.Editing
             return "";
         }
 
-        public static string DescribeCondition(IWorld world, Condition condition)
+        static string DescribeCondition(IWorld world, Condition condition)
         {
             if (condition == null)
                 return EmptySlotText;

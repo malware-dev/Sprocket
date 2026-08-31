@@ -15,7 +15,7 @@ namespace Reactor.Sequences
             _step = step;
         }
 
-        public override string Label { get { return _label; } }
+        public override string Label => _label;
 
         public override void Apply(Sequence sequence)
         {

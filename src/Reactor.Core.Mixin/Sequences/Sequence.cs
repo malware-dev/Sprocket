@@ -44,14 +44,11 @@ namespace Reactor.Sequences
         /// <summary>What the user calls this, e.g. "Let me out". May be empty.</summary>
         public string Name { get; set; }
 
-        public bool HasName
-        {
-            get { return !string.IsNullOrEmpty(Name); }
-        }
+        public bool HasName => !string.IsNullOrEmpty(Name);
 
         public Trigger Trigger { get; set; }
 
-        public IList<Step> Steps { get { return _steps; } }
+        public IList<Step> Steps => _steps;
 
         /// <summary>
         /// Whether it may run. Switching a sequence off to see what changes is a
@@ -70,9 +67,6 @@ namespace Reactor.Sequences
         /// "I am rewiring the whole airlock" are different intentions and each has to survive
         /// the other. This is the only place they meet.
         /// </remarks>
-        public bool CanRun
-        {
-            get { return Enabled && (System == null || System.Enabled); }
-        }
+        public bool CanRun => Enabled && (System == null || System.Enabled);
     }
 }

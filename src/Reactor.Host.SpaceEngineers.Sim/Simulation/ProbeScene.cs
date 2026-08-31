@@ -2,15 +2,15 @@ using System.Text;
 using VRage.Game;
 using VRage.Utils;
 using VRageMath;
-using Phosphor.Graphics;
-using Phosphor.Input;
-using Phosphor.Ui;
-using Reactor.Screens.Controls;
-using Reactor.Screens.Host;
-using Reactor.Screens.Lists;
-using Reactor.Screens.Look;
-using Reactor.Screens.Picking;
-using Reactor.Screens.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Graphics;
+using Reactor.Host.SpaceEngineers.Presentation.Input;
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Presentation.Controls;
+using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Lists;
+using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Picking;
+using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {
@@ -25,9 +25,9 @@ namespace Reactor.Sim.Simulation
     /// </remarks>
     public sealed class ProbeScene
     {
-        static readonly MyStringId Fill = MyStringId.GetOrCompute("Phosphor_Fill");
-        static readonly MyStringId Cursor = MyStringId.GetOrCompute("Phosphor_Cursor");
-        static readonly MyStringId Unknown = MyStringId.GetOrCompute("Phosphor_NoSuchMaterial");
+        static readonly MyStringId Fill = MyStringId.GetOrCompute("Reactor_Fill");
+        static readonly MyStringId Cursor = MyStringId.GetOrCompute("Reactor_Cursor");
+        static readonly MyStringId Unknown = MyStringId.GetOrCompute("Reactor_NoSuchMaterial");
 
         readonly Stack _panel = new Stack();
         readonly Stack _clipped = new Stack();
@@ -38,7 +38,7 @@ namespace Reactor.Sim.Simulation
         {
             _panel.Spacing = 8f;
             _panel.Background = new Color(16, 22, 30, 230);
-            _panel.Children.Add(Heading("Phosphor, out of the game"));
+            _panel.Children.Add(Heading("The editor, out of the game"));
 
             _box.Scale = 0.7f;
             _box.Background = new Color(20, 34, 48, 235);
@@ -62,15 +62,12 @@ namespace Reactor.Sim.Simulation
                     + " runs off the right-hand edge of this panel, and is cut mid-glyph rather than mid-word"));
         }
 
-        public TextBox Box
-        {
-            get { return _box; }
-        }
+        public TextBox Box => _box;
 
         /// <summary>Whether the caret is drawn this frame. The blink is the window's clock, not the box's.</summary>
         public bool CaretVisible
         {
-            set { _box.CaretVisible = value; }
+            set => _box.CaretVisible = value;
         }
 
         /// <summary>
@@ -163,25 +160,13 @@ namespace Reactor.Sim.Simulation
             bool _wasPressed;
             bool _available;
 
-            public bool IsAvailable
-            {
-                get { return _available; }
-            }
+            public bool IsAvailable => _available;
 
-            public Vector2 Position
-            {
-                get { return _position; }
-            }
+            public Vector2 Position => _position;
 
-            public bool IsPressed
-            {
-                get { return _pressed; }
-            }
+            public bool IsPressed => _pressed;
 
-            public bool WasPressed
-            {
-                get { return _wasPressed; }
-            }
+            public bool WasPressed => _wasPressed;
 
             public void MoveTo(Vector2 position, RectangleF bounds)
             {

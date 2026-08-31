@@ -62,7 +62,7 @@ spacing constant in `Widgets.cs` moved all sixteen frames. The guard catches wha
 ## Phase 1 - the Avalonia host
 
 Done. `src/Reactor.Host.Avalonia` (2,559 lines) and `tests/Reactor.Host.Tests` are gone, and
-`tests/Reactor.Screens.Tests` drives the simulator in their place.
+`tests/Reactor.Host.SpaceEngineers.Presentation.Tests` drives the simulator in their place.
 
 Its eighteen tests were dealt with one at a time rather than in a batch, in a separate project
 alongside the old one, so the suite stayed green throughout and nothing had to be trusted:
@@ -77,7 +77,7 @@ alongside the old one, so the suite stayed green throughout and nothing had to b
 - **`PaperTarget` was written**, which was the condition `docs/Design.md` set for removing the host.
 
 **The paper target is the replacement for what the prototype provided**, and it is not the
-simulator. The simulator shares `Screens.Mixin` with the game and is not an independent consumer of
+simulator. The simulator shares `Presentation.Mixin` with the game and is not an independent consumer of
 core, so porting onto it alone would have quietly dropped the only evidence that core can be
 rendered by something which is not this game. `PaperTarget` lives in `Reactor.Core.Tests`, has no
 drawing, no layout and no game near it, and **refuses to render a component type nobody has told it
@@ -179,7 +179,7 @@ picker hands its answer back once rather than writing into the sequence as it go
   silently dropped. Merged.
 - A sweep for the same fault across `src` and `tests` found no others.
 
-## Phase 4 - Reactor.Screens.Mixin
+## Phase 4 - Reactor.Host.SpaceEngineers.Presentation.Mixin
 
 ### The folder scheme, decided before anything moved
 
@@ -210,14 +210,14 @@ records any decision about namespaces at all, and that code was written without 
 convention with one exception is not a choice between two conventions, so the agreed rule applies and
 Phosphor is what moves.
 
-`Screen/` was renamed to `Host/` in the same change. `Reactor.Screens.Screen` reads badly, which is
+`Screen/` was renamed to `Host/` in the same change. `Reactor.Host.SpaceEngineers.Presentation.Screen` reads badly, which is
 the folder name being weak rather than the rule being wrong - and `IScreenHost` was already calling
 it that.
 
 ### What was done
 
 7 files to 33. Every type now has its own file, in the folders above, and every one is registered in
-`Reactor.Screens.Mixin.projitems`. Mod builds, 94 tests green, reference suite byte for byte
+`Reactor.Host.SpaceEngineers.Presentation.Mixin.projitems`. Mod builds, 94 tests green, reference suite byte for byte
 identical after each batch.
 
 `Overlay` was lifted out of `EditorView`: three fields and four methods that were only ever about
@@ -313,7 +313,7 @@ never went back to Screens once Phosphor moved. The mod host was untouched as we
 Now audited rather than asserted - every folder in every project, checked against the namespace its
 files declare:
 
-- `Reactor.Screens.Mixin` - all six folders now name themselves: `Reactor.Screens.Look`,
+- `Reactor.Host.SpaceEngineers.Presentation.Mixin` - all six folders now name themselves: `Reactor.Host.SpaceEngineers.Presentation.Look`,
   `.Controls`, `.Host`, `.Lists`, `.Picking`, `.Sequences`.
 - `Reactor.Host.SpaceEngineers` - `Ui/`, `World/` and `Input/` all now say so.
 

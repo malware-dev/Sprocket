@@ -34,10 +34,10 @@ namespace Reactor.Sequences
         /// are kept in step here rather than by flattening on demand - the runtime asks for
         /// this on every tick and must not be given a freshly built list each time.
         /// </remarks>
-        public IReadOnlyList<Sequence> Sequences { get { return _sequences; } }
+        public IReadOnlyList<Sequence> Sequences => _sequences;
 
         /// <summary>The systems, which is what the editor opens onto.</summary>
-        public IReadOnlyList<AutomationSystem> Systems { get { return _systems; } }
+        public IReadOnlyList<AutomationSystem> Systems => _systems;
 
         /// <summary>
         /// A new system, with one of it already on the ship.

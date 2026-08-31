@@ -25,7 +25,7 @@ namespace Reactor.Ui
     {
         readonly List<StartOption> _options = new List<StartOption>();
 
-        public List<StartOption> Options { get { return _options; } }
+        public List<StartOption> Options => _options;
 
         public StartOption Add(string label, int command)
         {

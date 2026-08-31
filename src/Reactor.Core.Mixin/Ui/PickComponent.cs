@@ -20,7 +20,7 @@ namespace Reactor.Ui
         readonly List<PickStage> _stages = new List<PickStage>();
 
         /// <summary>In order, each narrowing the next.</summary>
-        public IList<PickStage> Stages { get { return _stages; } }
+        public IList<PickStage> Stages => _stages;
 
         /// <summary>
         /// Bumped whenever the stages are replaced.

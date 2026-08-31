@@ -47,7 +47,7 @@ namespace Reactor.Ui
         public bool HasIcons { get; set; }
 
         /// <summary>Whether this stage can be narrowed by typing.</summary>
-        public bool CanNarrow { get { return NarrowCommand != 0; } }
+        public bool CanNarrow => NarrowCommand != 0;
 
         /// <summary>What it has been narrowed to so far.</summary>
         public string NarrowText { get; set; }

@@ -24,7 +24,7 @@ namespace Reactor.Editing
             _sequence = sequence;
         }
 
-        public int SequenceId { get { return _sequence.Id; } }
+        public int SequenceId => _sequence.Id;
 
         /// <summary>
         /// A named sequence is called by its name; an unnamed one reads as its own
@@ -36,10 +36,7 @@ namespace Reactor.Editing
         /// the switch that changes it - repeating it up here reads as two different things saying the
         /// same words.
         /// </remarks>
-        public override string Title
-        {
-            get { return SequenceSummary.Describe(Editor.World, _sequence); }
-        }
+        public override string Title => SequenceSummary.Describe(Editor.World, _sequence);
 
         /// <summary>
         /// Naming happens on the heading, because the heading is what the name is for.
@@ -51,11 +48,11 @@ namespace Reactor.Editing
         /// An unnamed sequence reads as its own sentence and is no worse off, which is why
         /// clearing the name is as ordinary an act as giving one.
         /// </remarks>
-        public override string CustomName { get { return _sequence.Name ?? ""; } }
+        public override string CustomName => _sequence.Name ?? "";
 
-        public override bool CanRename { get { return true; } }
+        public override bool CanRename => true;
 
-        public override string RenamePrompt { get { return "What do you call this?"; } }
+        public override string RenamePrompt => "What do you call this?";
 
         public override void Rename(string name)
         {
@@ -181,41 +178,38 @@ namespace Reactor.Editing
             if (every != null)
                 return BuildEvery(every);
 
-            return new SentenceTrigger("When");
+            return new SentenceTrigger(TriggerKind.When);
         }
 
         SentenceTrigger BuildWhen(WhenTrigger when)
         {
             var events = Vocabulary.EventsFor(Editor.World, when.Sources);
+            var chosen = FindEvent(events, when.EventId);
 
             // Changing the blocks can invalidate the chosen event. Moving to a valid
             // one keeps the sentence honest; leaving it would show something that
             // reads fine but could never fire.
-            if (events.Count > 0 && !HasEvent(events, when.EventId))
-                when.EventId = events[0].Id;
+            if (events.Count > 0 && chosen == null)
+            {
+                chosen = events[0];
+                when.EventId = chosen.Id;
+            }
 
             // Both slots open the same trip - which blocks and what happens to them are one
             // question - but they are two controls and must be two identities.
-            var trigger = new SentenceTrigger("When");
-            trigger.Slots.Add(new SentenceSlot(
-                SequenceText.DescribeSources(Editor.World, when),
-                when.Sources.Count == 0,
+            var trigger = new SentenceTrigger(TriggerKind.When);
+            trigger.Slots.Add(new EntitiesSlot(when.Sources, when.RequiresAll,
                 Change(Cmd.TriggerSlot, 0, EditTrigger)));
 
-            trigger.Slots.Add(new SentenceSlot(
-                EventText(events, when.EventId),
-                events.Count == 0 || !HasEvent(events, when.EventId),
-                Change(Cmd.TriggerSlot, 1, EditTrigger)));
+            trigger.Slots.Add(new EventSlot(chosen, Change(Cmd.TriggerSlot, 1, EditTrigger)));
 
             return trigger;
         }
 
         SentenceTrigger BuildEvery(EveryTrigger every)
         {
-            var trigger = new SentenceTrigger("Every");
-            trigger.Slots.Add(new SentenceSlot(
-                every.IntervalTicks == 1 ? "tick" : every.IntervalTicks + " ticks",
-                false,
+            var trigger = new SentenceTrigger(TriggerKind.Every);
+            trigger.Slots.Add(new DurationSlot(every.IntervalTicks,
                 Change(Cmd.EditCadence, EditCadence)));
 
             return trigger;
@@ -249,20 +243,21 @@ namespace Reactor.Editing
         SentenceStep BuildStep(int index, Step step)
         {
             var position = index;
-            var built = new SentenceStep(index + 1);
+
+            // A pure wait has no blocks and no verb, just a duration.
+            var pause = step.Gate as AfterGate;
+            var waits = step.Targets.Count == 0 && pause != null;
+
+            var built = new SentenceStep(index + 1, waits ? StepKind.Wait : StepKind.Do);
             built.Position = position;
             built.MoveToCommand = _sequence.CanRun
                 ? 0
                 : Editor.RegisterNumber(Cmd.MoveStep, position, delegate(int to) { Move(position, to); });
             built.DeleteCommand = Change(Cmd.DeleteStep, position, delegate { RemoveStep(step); });
 
-            // A pure wait has no blocks and no verb, just a duration.
-            var pause = step.Gate as AfterGate;
-            if (step.Targets.Count == 0 && pause != null)
+            if (waits)
             {
-                built.Lead = "wait";
-                built.Slots.Add(new SentenceSlot(
-                    SequenceText.DescribeDuration(pause.Ticks), false,
+                built.Slots.Add(new DurationSlot(pause.Ticks,
                     Change(Cmd.StepSlot, position, 0, delegate { EditWait(step); })));
                 return built;
             }
@@ -270,23 +265,89 @@ namespace Reactor.Editing
             // Ordinarily a step is just "close the inner door" - the ordering is
             // carried by the list, so nothing here says when it happens. A gate reads
             // as a lead-in, and only appears when one was deliberately added.
-            built.Lead = SequenceText.DescribeGate(Editor.World, step.Gate);
+            built.Gate = BuildGate(step.Gate);
 
             var actions = Vocabulary.ActionsFor(Editor.World, step.Targets);
-            if (actions.Count > 0 && !HasAction(actions, step.ActionId))
-                step.ActionId = actions[0].Id;
+            var chosen = FindAction(actions, step.ActionId);
+            if (actions.Count > 0 && chosen == null)
+            {
+                chosen = actions[0];
+                step.ActionId = chosen.Id;
+            }
 
-            built.Slots.Add(new SentenceSlot(
-                ActionText(actions, step.ActionId),
-                actions.Count == 0 || !HasAction(actions, step.ActionId),
+            built.Slots.Add(new ActionSlot(chosen,
                 Change(Cmd.StepSlot, position, 0, delegate { EditStep(step); })));
 
-            built.Slots.Add(new SentenceSlot(
-                SequenceText.DescribeEntities(Editor.World, step.Targets),
-                step.Targets.Count == 0,
+            built.Slots.Add(new EntitiesSlot(step.Targets, true,
                 Change(Cmd.StepSlot, position, 1, delegate { EditStep(step); })));
 
             return built;
+        }
+
+        /// <summary>
+        /// What holds a step back, or null where nothing does.
+        /// </summary>
+        /// <remarks>
+        /// The slots carry no command, because a gate cannot yet be changed from the sentence. They
+        /// are slots all the same, so that the day it can be, a command number appears on one rather
+        /// than a second way of saying the same thing arriving beside them.
+        /// </remarks>
+        SentenceGate BuildGate(StepGate gate)
+        {
+            var once = gate as OnceGate;
+            if (once != null)
+                return Guard(GateKind.Once, once.Condition);
+
+            var only = gate as OnlyIfGate;
+            if (only != null)
+                return Guard(GateKind.OnlyIf, only.Condition);
+
+            var after = gate as AfterGate;
+            if (after != null)
+            {
+                var timed = new SentenceGate(GateKind.After);
+                timed.Slots.Add(new DurationSlot(after.Ticks, 0));
+                return timed;
+            }
+
+            return null;
+        }
+
+        SentenceGate Guard(GateKind kind, Condition condition)
+        {
+            var built = new SentenceGate(kind);
+            var entities = condition == null ? new List<long>() : condition.Entities;
+
+            built.Slots.Add(new EntitiesSlot(entities, true, 0));
+            built.Slots.Add(new StateSlot(FindState(condition), 0));
+
+            return built;
+        }
+
+        /// <summary>
+        /// The state a condition reads, taken from the first entity that still declares it.
+        /// </summary>
+        /// <remarks>
+        /// A condition names one state id across several entities, and they need not all still be
+        /// here. The first that answers is enough to say what the condition is about.
+        /// </remarks>
+        EntityState FindState(Condition condition)
+        {
+            if (condition == null)
+                return null;
+
+            for (var i = 0; i < condition.Entities.Count; i++)
+            {
+                var entity = Editor.World.FindEntity(condition.Entities[i]);
+                if (entity == null)
+                    continue;
+
+                var state = entity.Kind.FindState(condition.StateId);
+                if (state != null)
+                    return state;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -497,44 +558,24 @@ namespace Reactor.Editing
             Editor.Push(page);
         }
 
-        static bool HasEvent(List<EntityEvent> events, string id)
+        static EntityEvent FindEvent(List<EntityEvent> events, string id)
         {
             for (var i = 0; i < events.Count; i++)
             {
                 if (events[i].Id == id)
-                    return true;
+                    return events[i];
             }
-            return false;
+            return null;
         }
 
-        static bool HasAction(List<EntityAction> actions, string id)
+        static EntityAction FindAction(List<EntityAction> actions, string id)
         {
             for (var i = 0; i < actions.Count; i++)
             {
                 if (actions[i].Id == id)
-                    return true;
+                    return actions[i];
             }
-            return false;
-        }
-
-        static string EventText(List<EntityEvent> events, string id)
-        {
-            for (var i = 0; i < events.Count; i++)
-            {
-                if (events[i].Id == id)
-                    return events[i].Text;
-            }
-            return SequenceText.EmptySlotText;
-        }
-
-        static string ActionText(List<EntityAction> actions, string id)
-        {
-            for (var i = 0; i < actions.Count; i++)
-            {
-                if (actions[i].Id == id)
-                    return actions[i].Text;
-            }
-            return SequenceText.EmptySlotText;
+            return null;
         }
     }
 }

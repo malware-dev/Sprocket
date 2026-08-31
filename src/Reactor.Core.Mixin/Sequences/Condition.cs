@@ -24,7 +24,7 @@ namespace Reactor.Sequences
             StateId = stateId;
         }
 
-        public IList<long> Entities { get { return _entities; } }
+        public IList<long> Entities => _entities;
 
         /// <summary>The <see cref="World.EntityState"/> id every entity must be in.</summary>
         public string StateId { get; set; }

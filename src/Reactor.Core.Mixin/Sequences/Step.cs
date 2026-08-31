@@ -62,14 +62,11 @@ namespace Reactor.Sequences
         public bool WaitsForCompletion { get; set; }
 
         /// <summary>Entities affected. All of them, together, in this step.</summary>
-        public IList<long> Targets { get { return _targets; } }
+        public IList<long> Targets => _targets;
 
         /// <summary>The <see cref="World.EntityAction"/> id to invoke.</summary>
         public string ActionId { get; set; }
 
-        public bool HasAction
-        {
-            get { return Targets.Count > 0 && !string.IsNullOrEmpty(ActionId); }
-        }
+        public bool HasAction => Targets.Count > 0 && !string.IsNullOrEmpty(ActionId);
     }
 }

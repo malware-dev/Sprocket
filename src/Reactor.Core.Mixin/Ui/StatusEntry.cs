@@ -48,7 +48,7 @@ namespace Reactor.Ui
         /// </remarks>
         public int SwitchCommand { get; set; }
 
-        public bool CanSwitch { get { return SwitchCommand != 0; } }
+        public bool CanSwitch => SwitchCommand != 0;
 
         /// <summary>
         /// Whether this row's switch governs everything nested under it, or only itself.

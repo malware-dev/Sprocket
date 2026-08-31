@@ -22,12 +22,9 @@ namespace Reactor.Sequences
             _nowAction = actionId;
         }
 
-        public override string Label { get { return "changing a step"; } }
+        public override string Label => "changing a step";
 
-        public override bool Changes
-        {
-            get { return _wasAction != _nowAction || !Same(_wasTargets, _nowTargets); }
-        }
+        public override bool Changes => _wasAction != _nowAction || !Same(_wasTargets, _nowTargets);
 
         public override void Apply(Sequence sequence)
         {

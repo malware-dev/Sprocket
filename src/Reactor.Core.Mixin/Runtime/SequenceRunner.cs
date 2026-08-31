@@ -51,10 +51,7 @@ namespace Reactor.Runtime
         /// three different intentions - "I parked this rule", "I am rewiring the whole thing",
         /// "leave the port airlock alone while I weld" - and none may overwrite another.
         /// </remarks>
-        bool CanRun
-        {
-            get { return _sequence.CanRun && (_instance == null || _instance.Enabled); }
-        }
+        bool CanRun => _sequence.CanRun && (_instance == null || _instance.Enabled);
 
         /// <summary>
         /// Scratch for turning the system's parts into this one's blocks.
@@ -121,12 +118,12 @@ namespace Reactor.Runtime
             return _watched;
         }
 
-        public Sequence Sequence { get { return _sequence; } }
+        public Sequence Sequence => _sequence;
 
         public bool IsRunning { get; private set; }
 
         /// <summary>Which step is executing or waiting, or -1 when idle.</summary>
-        public int CurrentStep { get { return _stepIndex; } }
+        public int CurrentStep => _stepIndex;
 
         /// <summary>True while the current step's gate has not opened.</summary>
         public bool IsWaiting { get; private set; }
