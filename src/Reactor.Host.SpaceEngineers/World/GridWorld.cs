@@ -67,6 +67,22 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <summary>The values this world deals in, and the lists behind the wide ones.</summary>
         public Values Values { get; } = new Values();
 
+        /// <summary>
+        /// Bumped by <see cref="Rebuild" />, which is the only place the set changes.
+        /// </summary>
+        /// <remarks>
+        /// <b>Only as truthful as the staleness that drives it, and that is known to be incomplete.</b>
+        /// A rotor or piston head detaching takes a whole subgrid out of this construct without adding
+        /// or removing a single block, and a grid splitting or merging does the same. None of those
+        /// raises the events this listens to, so both this and <see cref="Entities" /> can be wrong
+        /// after one - a sequence going on cycling a door that floated away.
+        /// <para>
+        /// Deferred rather than unknown, and must be closed before release: see
+        /// <c>docs/ApiUnknowns.md</c>, question 3.
+        /// </para>
+        /// </remarks>
+        public int Revision { get; private set; }
+
         public IReadOnlyList<IEntity> Entities
         {
             get
@@ -201,6 +217,7 @@ namespace Reactor.Host.SpaceEngineers.World
         void Rebuild()
         {
             _stale = false;
+            Revision++;
             _entities.Clear();
             _byId.Clear();
             DropListeners();

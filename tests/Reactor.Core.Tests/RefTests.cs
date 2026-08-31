@@ -110,6 +110,125 @@ public class RefTests
         Assert.Null(bindings.Entity("nothing-like-this"));
     }
 
+    /// <summary>The same block picked twice is one declaration, so re-pointing it is one act.</summary>
+    [Fact]
+    public void DeclaringTheSameBlockTwiceNamesItOnce()
+    {
+        var program = new Automation();
+        var door = Add(1, "Inner Door");
+
+        var first = program.Declare(_world, door);
+        var again = program.Declare(_world, door);
+
+        Assert.Same(first, again);
+        Assert.Single(program.Refs);
+    }
+
+    [Fact]
+    public void TwoBlocksAreTwoDeclarations()
+    {
+        var program = new Automation();
+
+        program.Declare(_world, Add(1, "Inner Door"));
+        program.Declare(_world, Add(2, "Outer Door"));
+
+        Assert.Equal(2, program.Refs.Count);
+        Assert.NotEqual(program.Refs[0].Name, program.Refs[1].Name);
+    }
+
+    /// <summary>
+    /// A name read back from storage is never handed out again to something else.
+    /// </summary>
+    /// <remarks>
+    /// Generated names count up, so a program loaded with entity1 and entity2 must not mint entity2
+    /// for the next block picked - two declarations sharing a name is two claims about one door.
+    /// </remarks>
+    [Fact]
+    public void ARestoredNameIsNotMintedAgain()
+    {
+        var program = new Automation();
+        program.Restore(new EntityRef("entity7", ""));
+
+        var minted = program.Declare(_world, Add(1, "Inner Door"));
+
+        Assert.NotEqual("entity7", minted.Name);
+        Assert.Same(program.FindRef("entity7"), program.Refs[0]);
+    }
+
+    /// <summary>A name somebody wrote is left alone by the counting.</summary>
+    [Fact]
+    public void AWrittenNameDoesNotDisturbTheNumbering()
+    {
+        var program = new Automation();
+        program.Restore(new EntityRef("inner", ""));
+
+        Assert.Equal("entity1", program.Declare(_world, Add(1, "Inner Door")).Name);
+    }
+
+    /// <summary>
+    /// An ordinary tick looks at nothing, which is the number that matters.
+    /// </summary>
+    /// <remarks>
+    /// Matching walks every key against every block. Doing it per reference per tick, inside the
+    /// game's update loop, is the failure this design is shaped to avoid - and the only honest proof
+    /// is a count, because the wrong version works perfectly and is invisible in every screenshot.
+    /// </remarks>
+    [Fact]
+    public void TenSecondsOfIdleTicksMatchNothing()
+    {
+        var program = new Automation();
+        program.Declare(_world, Add(1, "Inner Door"));
+        program.Declare(_world, Add(2, "Outer Door"));
+
+        var bindings = new Bindings();
+        bindings.Refresh(_world, program);
+
+        var settled = _world.Matches;
+
+        for (var tick = 0; tick < 600; tick++)
+            bindings.Refresh(_world, program);
+
+        Assert.Equal(settled, _world.Matches);
+    }
+
+    /// <summary>Welding something on is what makes it look again.</summary>
+    [Fact]
+    public void ABlockArrivingMakesItResolveOnce()
+    {
+        var program = new Automation();
+        program.Declare(_world, Add(1, "Inner Door"));
+
+        var bindings = new Bindings();
+        bindings.Refresh(_world, program);
+        var settled = bindings.Revision;
+
+        Add(2, "Outer Door");
+
+        bindings.Refresh(_world, program);
+        Assert.NotEqual(settled, bindings.Revision);
+
+        var after = bindings.Revision;
+        bindings.Refresh(_world, program);
+        Assert.Equal(after, bindings.Revision);
+    }
+
+    /// <summary>And so is declaring something, which is the other half of the chain.</summary>
+    [Fact]
+    public void ANewDeclarationMakesItResolveOnce()
+    {
+        var program = new Automation();
+        program.Declare(_world, Add(1, "Inner Door"));
+
+        var bindings = new Bindings();
+        bindings.Refresh(_world, program);
+        var settled = bindings.Revision;
+
+        program.Declare(_world, Add(2, "Outer Door"));
+
+        bindings.Refresh(_world, program);
+        Assert.NotEqual(settled, bindings.Revision);
+    }
+
     TestDoor Add(long id, string name)
     {
         var door = new TestDoor(id, name);

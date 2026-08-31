@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Reactor.World;
 
 namespace Reactor.Sequences
 {
@@ -22,9 +23,11 @@ namespace Reactor.Sequences
     {
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
+        readonly List<EntityRef> _refs = new List<EntityRef>();
 
         int _nextSequenceId = 1;
         int _nextSystemId = 1;
+        int _nextRefNumber = 1;
 
         /// <summary>
         /// Every sequence, flat, in the order they were made.
@@ -38,6 +41,96 @@ namespace Reactor.Sequences
 
         /// <summary>The systems, which is what the editor opens onto.</summary>
         public IReadOnlyList<AutomationSystem> Systems => _systems;
+
+        /// <summary>
+        /// Every block this program names, declared once and pointed at from wherever it is used.
+        /// </summary>
+        /// <remarks>
+        /// Declared once rather than repeated, because a claim about which door was meant is worth
+        /// mending in one place. Twenty steps that each carried their own copy would be twenty
+        /// things to re-point when somebody rebuilds the door.
+        /// </remarks>
+        public IReadOnlyList<EntityRef> Refs => _refs;
+
+        /// <summary>
+        /// Bumped whenever a declaration is added, removed or re-pointed.
+        /// </summary>
+        /// <remarks>
+        /// The other half of <see cref="World.IWorld.Revision" />. Between them they say whether
+        /// what a name points at could possibly have moved, which is what lets the runtime look at
+        /// nothing at all on an ordinary tick.
+        /// </remarks>
+        public int Revision { get; private set; }
+
+        /// <summary>
+        /// Names this entity, or hands back the name it already has.
+        /// </summary>
+        /// <remarks>
+        /// Asked while editing, never while running. The same block picked twice is one declaration,
+        /// which is what makes re-pointing it later a single act - and the way to tell is to resolve
+        /// what is already declared rather than to remember an id, because an id is exactly the thing
+        /// that stops being true.
+        /// </remarks>
+        public EntityRef Declare(IWorld world, IEntity entity)
+        {
+            for (var i = 0; i < _refs.Count; i++)
+            {
+                int matched;
+                var found = world.Match(_refs[i].Keys, out matched);
+                if (found != null && found.Id == entity.Id && _refs[i].KindId == entity.Kind.Id)
+                    return _refs[i];
+            }
+
+            var declared = new EntityRef("entity" + _nextRefNumber++, entity.Kind.Id);
+            world.Identify(entity, declared.Keys);
+            _refs.Add(declared);
+            Revision++;
+            return declared;
+        }
+
+        /// <summary>
+        /// Puts back a declaration read from storage, keeping generated names from colliding with it.
+        /// </summary>
+        public EntityRef Restore(EntityRef declared)
+        {
+            _refs.Add(declared);
+            Revision++;
+
+            var number = Number(declared.Name);
+            if (number >= _nextRefNumber)
+                _nextRefNumber = number + 1;
+
+            return declared;
+        }
+
+        public EntityRef FindRef(string name)
+        {
+            for (var i = 0; i < _refs.Count; i++)
+            {
+                if (_refs[i].Name == name)
+                    return _refs[i];
+            }
+
+            return null;
+        }
+
+        /// <summary>The number a generated name ends in, or zero for one somebody wrote.</summary>
+        static int Number(string name)
+        {
+            var digits = 0;
+            while (digits < name.Length && name[name.Length - 1 - digits] >= '0'
+                   && name[name.Length - 1 - digits] <= '9')
+                digits++;
+
+            if (digits == 0 || digits == name.Length)
+                return 0;
+
+            var number = 0;
+            for (var i = name.Length - digits; i < name.Length; i++)
+                number = number * 10 + (name[i] - '0');
+
+            return number;
+        }
 
         /// <summary>
         /// A new system, with one of it already on the ship.

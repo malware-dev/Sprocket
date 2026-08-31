@@ -48,6 +48,22 @@ namespace Reactor.World
         IEntity FindEntity(long entityId);
 
         /// <summary>
+        /// Bumped whenever the set of entities changes, and never otherwise.
+        /// </summary>
+        /// <remarks>
+        /// <b>Matching is expensive and the answer only changes when this does.</b> Resolving what a
+        /// program's declarations point at walks keys against blocks; doing that on every tick, for
+        /// every reference, inside the game's update loop, is the shape this number exists to
+        /// prevent. A reader compares one integer and does nothing the rest of the time.
+        /// <para>
+        /// The host is the only thing that can know. Space Engineers says so through the grid's own
+        /// block-added and block-removed events, which is the same signal that already decides when
+        /// <see cref="Entities" /> is rebuilt.
+        /// </para>
+        /// </remarks>
+        int Revision { get; }
+
+        /// <summary>
         /// Writes down every way this entity could be found again, strongest first.
         /// </summary>
         /// <remarks>

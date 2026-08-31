@@ -47,6 +47,33 @@ thing, and it makes R40's healing part of ordinary construction rather than only
 *Affects* R39, R40, R41 and R24, which between them now carry three different meanings for
 "there is no block here".
 
+### 3. When does a construct stop being the same construct
+
+**Must be answered before release. It is a correctness hole, not a question of polish.**
+
+`IWorld` promises that `Entities` is this construct only - the grid the Reactor sits on plus
+whatever is mechanically connected to it by rotors, pistons and hinges. `GridWorld` keeps that
+promise by marking itself stale on the grids' own `OnBlockAdded` and `OnBlockRemoved`, and
+rebuilding when somebody looks.
+
+**That signal does not cover every way membership changes**, and at least three ways are ordinary
+play rather than edge cases:
+
+- **A rotor or piston head detaching.** No block is added and none is removed. The subgrid simply
+  stops being part of this construct, and nothing tells us.
+- **A grid splitting.** Cutting or shooting a construct in two leaves blocks that are still there
+  and no longer ours.
+- **Two grids merging**, which is the same problem arriving rather than leaving.
+
+Until this is answered, a sequence can go on cycling a door that floated away five minutes ago, and
+the editor will list it as present. It is also what `IWorld.Revision` rests on, so a reference now
+resolves against a construct that may quietly be wrong.
+
+**This is not an unknown; it is deferred work.** The game does say enough - `OnGridSplit`,
+`OnGridMerge` and the mechanical connection blocks' attach and detach between them cover it. It sits
+in this file because this is where things that must be settled before release are kept, and because
+somebody reading `GridWorld` needs one place to be sent.
+
 ---
 
 ## Answered, and where the answers went

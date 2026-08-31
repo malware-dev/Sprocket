@@ -19,6 +19,11 @@ sealed class TestWorld : IWorld
     /// <summary>The values this world deals in, and the lists behind the wide ones.</summary>
     public Values Values { get; } = new Values();
 
+    public int Revision { get; private set; }
+
+    /// <summary>How many times anything has been matched, so a test can assert it stopped.</summary>
+    public int Matches { get; private set; }
+
     public IReadOnlyList<IEntity> Entities => _entities;
 
     public EntityNoun Noun { get; } = new EntityNoun("block", "blocks", "Blocks");
@@ -32,11 +37,16 @@ sealed class TestWorld : IWorld
     public T Add<T>(T entity) where T : TestEntity
     {
         entity.Store = Values;
+        Revision++;
         _entities.Add(entity);
         return entity;
     }
 
-    public void Remove(long id) => _entities.RemoveAll(d => d.Id == id);
+    public void Remove(long id)
+    {
+        Revision++;
+        _entities.RemoveAll(d => d.Id == id);
+    }
 
     public IEntity? FindEntity(long entityId) => _entities.FirstOrDefault(d => d.Id == entityId);
 
@@ -50,6 +60,8 @@ sealed class TestWorld : IWorld
 
     public IEntity? Match(IList<EntityKey> keys, out int matched)
     {
+        Matches++;
+
         for (var i = 0; i < keys.Count; i++)
         {
             var found = Matching(keys[i]);

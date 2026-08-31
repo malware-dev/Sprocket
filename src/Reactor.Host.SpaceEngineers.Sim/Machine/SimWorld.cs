@@ -23,6 +23,9 @@ sealed class SimWorld : IWorld
     /// <summary>The values this world deals in, and the lists behind the wide ones.</summary>
     public Values Values { get; } = new Values();
 
+    /// <summary>Bumped where the set changes, which here is adding and removing.</summary>
+    public int Revision { get; private set; }
+
     public IReadOnlyList<IEntity> Entities => _entities;
 
     /// <summary>
@@ -93,6 +96,7 @@ sealed class SimWorld : IWorld
     public T Add<T>(T entity) where T : SimEntity
     {
         entity.Store = Values;
+        Revision++;
         _entities.Add(entity);
         _byId[entity.Id] = entity;
         return entity;
@@ -104,6 +108,7 @@ sealed class SimWorld : IWorld
     /// </summary>
     public void Remove(SimEntity entity)
     {
+        Revision++;
         _entities.Remove(entity);
         _byId.Remove(entity.Id);
     }

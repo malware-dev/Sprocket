@@ -22,9 +22,43 @@ namespace Reactor.Runtime
         readonly Dictionary<string, IEntity> _bound = new Dictionary<string, IEntity>();
         readonly Dictionary<string, RefState> _states = new Dictionary<string, RefState>();
 
-        /// <summary>Resolves every declaration against the world as it is now.</summary>
+        int _world = -1;
+        int _program = -1;
+
+        /// <summary>
+        /// Bumped whenever these were worked out again, so a reader can cache off it.
+        /// </summary>
+        /// <remarks>
+        /// Anything that resolves a name to an entity on every tick should hold what it found and
+        /// compare this instead. The chain is the whole point: the world says when its blocks
+        /// changed, the program says when its declarations did, this says when either mattered, and
+        /// the tick reads a cached answer.
+        /// </remarks>
+        public int Revision { get; private set; }
+
+        /// <summary>
+        /// Works these out again only if something has changed since last time.
+        /// </summary>
+        /// <remarks>
+        /// <b>Called on every tick, and does nothing on almost all of them.</b> Two integer
+        /// comparisons in the ordinary case, because matching walks every key against every entity
+        /// and that cost belongs at the moment a block is welded on rather than sixty times a second
+        /// forever after.
+        /// </remarks>
+        public void Refresh(IWorld world, Automation program)
+        {
+            if (world.Revision == _world && program.Revision == _program)
+                return;
+
+            _world = world.Revision;
+            _program = program.Revision;
+            Resolve(world, program.Refs);
+        }
+
+        /// <summary>Resolves every declaration against the world as it is now, unconditionally.</summary>
         public void Resolve(IWorld world, IReadOnlyList<EntityRef> refs)
         {
+            Revision++;
             _bound.Clear();
             _states.Clear();
 
