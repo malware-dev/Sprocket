@@ -24,9 +24,12 @@ is worth stopping over.
 
 ## Where the words live
 
-`Sequences/Wording.cs`, and nowhere else. It is the only file in the repository that knows the editor
-speaks English. A second language, or a second host with different phrasing, is a change to that file
-and nothing above it.
+`Words/`, and nowhere else. `SentenceText` words a sentence, `SequenceText` words a sequence where it
+can only be read, `TimeText` words a length of time. One file per thing the words are about, so none
+of them becomes the place any string goes when it needs a home.
+
+A second language, or a host that phrases things differently, is a change inside that folder and
+nothing above it moves.
 
 ## The rule the three projects follow
 

@@ -22,6 +22,9 @@ namespace Reactor.Tests;
 /// </remarks>
 public class PaperTargetTests
 {
+    static readonly PaperSequenceText SequenceWords = new PaperSequenceText();
+    static readonly PaperTimeText TimeWords = new PaperTimeText();
+
     [Fact]
     public void EveryComponentCoreProducesCanBeWrittenDown()
     {
@@ -122,7 +125,7 @@ public class PaperTargetTests
         ship.World.Add(new TestLamp(4, "Airlock Light"));
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
         return ship;
     }
 

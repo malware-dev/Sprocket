@@ -11,6 +11,9 @@ namespace Reactor.Tests;
 /// </summary>
 public class EditorTests
 {
+    static readonly PaperSequenceText SequenceWords = new PaperSequenceText();
+    static readonly PaperTimeText TimeWords = new PaperTimeText();
+
     sealed class Ship
     {
         public TestWorld World = new();
@@ -39,7 +42,7 @@ public class EditorTests
         ship.World.Add(new TestLamp(4, "Airlock Light"));
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
         return ship;
     }
 
@@ -359,7 +362,7 @@ public class EditorTests
         ship.World.Add(new TestButton(1152921504607146976, "Airlock Button"));
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
 
         ship.Editor.NewSystem("Airlock");
 
@@ -501,7 +504,7 @@ public class EditorTests
         // Nothing has gone yet, and the question names what it is about.
         Assert.Single(ship.Automation.Sequences);
         Assert.Equal("Delete this sequence?", ship.Editor.Screen.Title());
-        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Subtitle);
+        Assert.StartsWith("when Airlock Button is pressed", ship.Editor.Screen.Subtitle);
 
         // The safe answer comes first, so a reflex press lands on it.
         var options = ship.Editor.Component<ChoiceListComponent>().Entries;
@@ -510,7 +513,7 @@ public class EditorTests
         ship.Editor.PressChoice("Keep it");
         ship.Tick();
         Assert.Single(ship.Automation.Sequences);
-        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title());
+        Assert.StartsWith("when Airlock Button is pressed", ship.Editor.Screen.Title());
 
         ship.Editor.Invoke(ship.Editor.Sentence().DeleteCommand);
         ship.Tick();
@@ -547,7 +550,7 @@ public class EditorTests
         // Unnamed: both halves say what they are, and there is no name behind either for a
         // target to prefill a box with.
         Assert.Equal(2, heading.Count);
-        Assert.Equal("When Airlock Button is pressed", heading[0].Text);
+        Assert.Equal("when Airlock Button is pressed", heading[0].Text);
         Assert.Equal("", heading[1].Name);
 
         // The trigger is not somebody's to name. It is already the best possible name for itself.
@@ -558,14 +561,14 @@ public class EditorTests
         ship.Tick();
 
         // The name takes the half it belongs to. The trigger is still there, and still generated.
-        Assert.Equal("When Airlock Button is pressed", heading[0].Text);
+        Assert.Equal("when Airlock Button is pressed", heading[0].Text);
         Assert.Equal("Let me out", heading[1].Text);
         Assert.Equal("Let me out", heading[1].Name);
 
         // Clearing is as ordinary an act as naming, and the sentence comes back.
         ship.Editor.Name("");
         ship.Tick();
-        Assert.Equal("When Airlock Button is pressed", heading[0].Text);
+        Assert.Equal("when Airlock Button is pressed", heading[0].Text);
         Assert.Equal("", heading[1].Name);
         Assert.NotEqual("", heading[1].Text);
     }
@@ -848,14 +851,14 @@ public class EditorTests
         editor.PressPrimary();
 
         ship.Tick();
-        Assert.StartsWith("When Airlock Button is pressed", editor.Screen.Title());
+        Assert.StartsWith("when Airlock Button is pressed", editor.Screen.Title());
 
         editor.Name("Let me out");
         ship.Tick();
 
         // On the sequence's own screen the name takes the half it is for and the trigger stays.
         Assert.Equal("Let me out", editor.Screen.Heading[1].Text);
-        Assert.Equal("When Airlock Button is pressed", editor.Screen.Heading[0].Text);
+        Assert.Equal("when Airlock Button is pressed", editor.Screen.Heading[0].Text);
 
         // And the same in the list, which is where the two used to disagree. A row is one line, so
         // it joins them - but it joins the same two halves, and the trigger survives being named.
@@ -864,7 +867,7 @@ public class EditorTests
 
         Assert.Equal("Airlock", editor.Screen.Title());
         Assert.Equal(
-            "When Airlock Button is pressed » Let me out",
+            "when Airlock Button is pressed -> Let me out",
             editor.Component<StatusListComponent>().Entries[0].Summary);
     }
 
@@ -937,15 +940,24 @@ public class EditorTests
         editor.PressAdd("wait");
         Assert.Equal("How long should it wait?", editor.Screen.Title());
 
-        editor.PressChoice("5 seconds - 300 ticks");
+        editor.PressChoice("300 ticks");
 
         var step = Assert.Single(editor.Sentence().Steps);
         Assert.Equal(StepKind.Wait, step.Kind);
         Assert.Equal(300, Assert.IsType<DurationSlot>(step.Slots[0]).Ticks);
     }
 
+    /// <summary>
+    /// Core keeps the reading up to date. What it reads as is the target's.
+    /// </summary>
+    /// <remarks>
+    /// This used to assert "just now" and "3 seconds ago", and that the same string came back
+    /// unallocated on the next tick. Both are the target's business since the words moved out - see
+    /// <c>TimeTextTests</c> beside the shipped words, which asserts them against the real thing
+    /// rather than against a stand-in.
+    /// </remarks>
     [Fact]
-    public void LastRunIsWordedForPeople_AndNotRebuiltEveryTick()
+    public void LastRunIsKeptUpToDate()
     {
         var ship = Build();
         var editor = ship.Editor;
@@ -962,22 +974,23 @@ public class EditorTests
 
         Button(ship, "Airlock Button").Press();
         ship.Tick(2);
-        Assert.Equal("just now", editor.Sentence().LastRun);
+        var first = Ticks(editor.Sentence().LastRun);
 
+        // Time passes, and the reading follows it exactly.
         ship.Tick(180);
-        var words = editor.Sentence().LastRun;
-        Assert.Equal("3 seconds ago", words);
+        Assert.Equal(first + 180, Ticks(editor.Sentence().LastRun));
 
-        // Half a second later it still says the same thing, and says it with the very
-        // same string - the words are not rebuilt sixty times a second.
-        ship.Tick(30);
-        Assert.Same(words, editor.Sentence().LastRun);
+        // It fires again, so the count starts over rather than carrying on.
+        Button(ship, "Airlock Button").Press();
+        ship.Tick(2);
+        Assert.True(Ticks(editor.Sentence().LastRun) < first + 180);
+    }
 
-        ship.Tick(60);
-        Assert.Equal("4 seconds ago", editor.Sentence().LastRun);
-
-        ship.Tick(60 * 60);
-        Assert.Equal("a minute ago", editor.Sentence().LastRun);
+    /// <summary>The number out of whatever this target chose to say around it.</summary>
+    static int Ticks(string words)
+    {
+        Assert.EndsWith(" ticks ago", words);
+        return int.Parse(words.Substring(0, words.Length - " ticks ago".Length));
     }
 
 }

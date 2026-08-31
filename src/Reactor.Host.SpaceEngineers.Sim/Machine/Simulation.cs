@@ -6,7 +6,7 @@ using Reactor.Host.SpaceEngineers.Presentation.Screen;
 using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
 using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Words;
 
 namespace Reactor.Sim.Machine;
 
@@ -32,6 +32,10 @@ sealed class Simulation
     /// entirely when the text has not changed, which is nearly always.
     /// </remarks>
     const int SaveEvery = 60;
+
+    /// <summary>One object answering two interfaces: how a sequence reads, and how a time reads.</summary>
+    readonly SequenceText _sequenceWords = new SequenceText();
+    readonly TimeText _timeWords = new TimeText();
 
     readonly Store _store;
 
@@ -59,7 +63,7 @@ sealed class Simulation
         _store.Load(Program);
 
         Runner = new AutomationRunner(Program, World);
-        Editor = new ReactorEditor(World, Program, Runner);
+        Editor = new ReactorEditor(World, Program, Runner, _sequenceWords, _timeWords);
     }
 
     public SimWorld World { get; }

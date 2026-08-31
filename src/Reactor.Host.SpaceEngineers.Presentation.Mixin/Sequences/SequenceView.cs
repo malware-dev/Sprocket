@@ -6,6 +6,7 @@ using Reactor.Host.SpaceEngineers.Presentation.Controls;
 using Reactor.Host.SpaceEngineers.Presentation.Screen;
 using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Words;
 using Reactor.Host.SpaceEngineers.Presentation.Picking;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
@@ -173,7 +174,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
             Waiting(_undo, _component.UndoCommand);
             Waiting(_redo, _component.RedoCommand);
 
-            _triggerLead.Text = Wording.Lead(_component.Trigger);
+            _triggerLead.Text = SentenceText.Lead(_component.Trigger);
 
             // Only when it changes. Wording a slot builds strings, and this runs on every tick - see
             // SentenceView, which remembers the same way for the same reason.
@@ -184,7 +185,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
                     continue;
 
                 _shownTrigger[i] = slot;
-                SentenceView.Apply(_triggerSlots[i], slot, Wording.InTrigger(Host.World, slot));
+                SentenceView.Apply(_triggerSlots[i], slot, SentenceText.InTrigger(Host.World, slot));
             }
 
             for (int i = 0; i < _stepRows.Count && i < _component.Steps.Count; i++)

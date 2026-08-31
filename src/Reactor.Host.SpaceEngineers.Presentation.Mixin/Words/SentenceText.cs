@@ -1,35 +1,42 @@
 using System.Collections.Generic;
 using System.Text;
+using Reactor.Editing;
+using Reactor.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using Reactor.Ui;
 using Reactor.World;
 
-namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
+namespace Reactor.Host.SpaceEngineers.Presentation.Words
 {
     /// <summary>
-    /// The English a sentence reads as.
+    /// The words a sentence reads as.
     /// </summary>
     /// <remarks>
-    /// Core says what a sentence refers to and nothing about what it says. Every word a person reads
-    /// on this screen is decided here, which is what makes another target able to say it differently -
-    /// or in another language - without core knowing.
+    /// Core says what a slot refers to and nothing about what it says. Every word in a sentence on
+    /// this screen is decided here, which is what lets another target say it differently - or in
+    /// another language - without core knowing.
     /// <para>
-    /// English only, and deliberately hardcoded. This host speaks one language; the day it speaks two,
-    /// this is the file that changes and nothing above it moves.
+    /// Static, because a sentence is worded from what it is handed and nothing else, and because the
+    /// views ask for a slot's words while laying out rather than through anything they were given.
     /// </para>
     /// </remarks>
-    public static class Wording
+    public static class SentenceText
     {
+
         /// <summary>A slot nobody has filled in yet.</summary>
-        const string Empty = "…";
+        public const string Empty = "…";
+
 
         /// <summary>Something the sentence names that is no longer on the construct.</summary>
-        const string Missing = "something that's gone";
+        public const string Missing = "something that's gone";
+
 
         /// <summary>The word a trigger opens with.</summary>
         public static string Lead(SentenceTrigger trigger)
         {
             return trigger.Kind == TriggerKind.Every ? "Every" : "When";
         }
+
 
         /// <summary>
         /// What comes before a step's slots: the word "wait", a gate, or nothing at all.
@@ -46,6 +53,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
             return step.Gate == null ? "" : Gate(world, step.Gate);
         }
 
+
         /// <summary>What a slot of a trigger reads as.</summary>
         /// <remarks>
         /// A duration in a trigger is a rate, and rates are said in ticks. Seconds would be a promise
@@ -56,10 +64,11 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return Rate(duration.Ticks);
+                return TimeText.Rate(duration.Ticks);
 
             return Of(world, slot);
         }
+
 
         /// <summary>What a slot of a step reads as.</summary>
         /// <remarks>
@@ -70,30 +79,11 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return Duration(duration.Ticks);
+                return TimeText.Duration(duration.Ticks);
 
             return Of(world, slot);
         }
 
-        /// <summary>
-        /// A length of time in the units a person would say it in.
-        /// </summary>
-        /// <remarks>
-        /// The tick count is still shown alongside when the duration is being chosen, which is where
-        /// the two vocabularies need to meet.
-        /// </remarks>
-        public static string Duration(int ticks)
-        {
-            if (ticks < 60)
-                return ticks == 1 ? "1 tick" : ticks + " ticks";
-
-            var seconds = ticks / 60;
-            if (seconds < 60)
-                return seconds == 1 ? "1 second" : seconds + " seconds";
-
-            var minutes = seconds / 60;
-            return minutes == 1 ? "a minute" : minutes + " minutes";
-        }
 
         /// <summary>
         /// Names a selection, keeping real names visible for as long as they fit.
@@ -128,6 +118,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
             return builder.ToString();
         }
 
+
         static string Of(IWorld world, SentenceSlot slot)
         {
             var entities = slot as EntitiesSlot;
@@ -148,12 +139,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
 
             var duration = slot as DurationSlot;
             if (duration != null)
-                return Duration(duration.Ticks);
+                return TimeText.Duration(duration.Ticks);
 
             // A slot kind core invented and nobody here has words for. Saying nothing would leave a
             // gap that reads exactly like a slot waiting to be filled, which is a thing that happens.
             return "(" + slot.GetType().Name + ")";
         }
+
 
         static string Gate(IWorld world, SentenceGate gate)
         {
@@ -169,15 +161,10 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
             for (var i = 0; i < gate.Slots.Count; i++)
             {
                 var duration = gate.Slots[i] as DurationSlot;
-                words.Append(' ').Append(duration != null ? Rate(duration.Ticks) : Of(world, gate.Slots[i]));
+                words.Append(' ').Append(duration != null ? TimeText.Rate(duration.Ticks) : Of(world, gate.Slots[i]));
             }
 
             return words.ToString();
-        }
-
-        static string Rate(int ticks)
-        {
-            return ticks == 1 ? "tick" : ticks + " ticks";
         }
     }
 }

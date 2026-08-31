@@ -750,10 +750,39 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
 
 1. ~~**Take the presentation out of core** - `SentenceSlot.Text` first, since the rest follows it.~~
    **Done.** The sentence is structural; see above for what fell out of it.
-2. **The rest of the presentation.** `SequenceSummary` is the next root - it is the last thing
-   holding `SequenceText` up, and it words a list row and a heading as single strings. Then the small
-   ones: `Cadence`, `Elapsed`, `SystemSummary.Count`, prompts, empty text, undo labels, the wait
-   preset labels, `ChoiceEntry` and `PickOption` text, `SequenceComponent.LockedText`.
+2. **The rest of the presentation.** Half done.
+
+   **Done: everything derived from the model.** The seam is a set of small `I…Text` interfaces, one
+   per subject - `ISequenceText`, `ITimeText` - rather than one that everything joins. Core hands
+   over a model object and gets back one line. The old `SequenceText` and `Elapsed` are deleted, and
+   `SequenceSummary` now
+   answers in `SequenceStatus` and `SequenceProblem` rather than in English, and `ReactorEditor`
+   takes an `IWording` with no default, because a default nobody overrides is the problem wearing a
+   label. The rule it follows: **structure where it can be pressed, words where it can only be
+   read** - a sentence is slots because every part is somebody's to change, a list row is a string
+   because nothing on it can be pressed and one line has to stand for a whole sequence.
+
+   It is not the phrasebook that was rejected, and the difference is that every method takes a model
+   object rather than a string id, so it is bounded by the model instead of by how much text a
+   screen happens to have.
+
+   **Left: the fixed labels, and they split two ways.**
+
+   Some are simply the host's and should stop existing in core at all - the delete confirmation and
+   its "Keep it" / "Delete it", the rename prompt, the "Not built yet" explanations, `LockedText`.
+   Whether to confirm a deletion, and in what words, is a target's decision; core's part is that
+   deleting is a command and that it cannot be undone.
+
+   The rest are derived after all, and take an `I…Text` of their own: `Cadence` names from a tick
+   count, `SystemSummary.Count` from a number, "1 picked" from a selection, and the pick stage
+   titles, which today are core assembling the host's own `Noun` into English - the same mistake the
+   sentence had.
+
+   **One interface per thing the words are about**, named `I…Text`, so none of them grows into a
+   place to put any string that needs a home. The plumbing question that comes with that granularity:
+   `ReactorEditor` takes each as a constructor argument today, which stops scaling somewhere around
+   the fourth. When it does, the answer is one interface inheriting the small ones, so the units stay
+   separately implementable while the editor still takes one thing.
 3. ~~**`ValueKind` gains `Integer`, `Number` becomes `Real`**, and the operator table arrives with
    them.~~ **Done**, along with `Color` and the eight-byte value.
 4. ~~**`Description` becomes `Annotation`**, and sequences and steps gain one.~~ **Done.**

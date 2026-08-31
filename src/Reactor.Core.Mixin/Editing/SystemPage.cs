@@ -145,7 +145,8 @@ namespace Reactor.Editing
                 return;
             }
 
-            SequenceSummary.Fill(_list.Entries, _sequences, Editor.World, Editor.Runner, Editor.CurrentTick);
+            SequenceSummary.Fill(_list.Entries, _sequences, Editor.World, Editor.Runner, Editor.CurrentTick,
+                Editor.SequenceText, Editor.TimeText);
 
             for (var i = 0; i < _list.Entries.Count && i < _sequences.Count; i++)
                 _list.Entries[i].SwitchIsOn = _sequences[i].Enabled;

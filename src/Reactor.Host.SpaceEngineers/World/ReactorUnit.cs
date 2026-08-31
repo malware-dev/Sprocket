@@ -12,7 +12,7 @@ using Reactor.Host.SpaceEngineers.Presentation.Screen;
 using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
 using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
+using Reactor.Host.SpaceEngineers.Presentation.Words;
 using Reactor.Host.SpaceEngineers.Terminal;
 
 namespace Reactor.Host.SpaceEngineers.World
@@ -28,6 +28,10 @@ namespace Reactor.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class ReactorUnit : IDisposable
     {
+        /// <summary>One object answering two interfaces: how a sequence reads, and how a time reads.</summary>
+        readonly SequenceText _sequenceWords = new SequenceText();
+        readonly TimeText _timeWords = new TimeText();
+
         /// <summary>
         /// Where the program sits in the block's mod storage.
         /// </summary>
@@ -74,7 +78,7 @@ namespace Reactor.Host.SpaceEngineers.World
             // Before the editor, which builds its first screen out of whatever the program already says.
             Load();
 
-            _editor = new ReactorEditor(_world, _program, _runner);
+            _editor = new ReactorEditor(_world, _program, _runner, _sequenceWords, _timeWords);
         }
 
         public ReactorEditor Editor => _editor;

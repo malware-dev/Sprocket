@@ -7,6 +7,7 @@ using Reactor.Host.SpaceEngineers.Presentation.Controls;
 using Reactor.Host.SpaceEngineers.Presentation.Screen;
 using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Words;
 using Reactor.Host.SpaceEngineers.Presentation.Picking;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
@@ -79,7 +80,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
             if (!ReferenceEquals(_shownStep, step))
             {
                 _shownStep = step;
-                _lead.Text = Wording.Lead(world, step);
+                _lead.Text = SentenceText.Lead(world, step);
             }
 
             for (int i = 0; i < _slots.Count && i < step.Slots.Count; i++)
@@ -88,7 +89,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
                     continue;
 
                 _shown[i] = step.Slots[i];
-                Apply(_slots[i], step.Slots[i], Wording.InStep(world, step.Slots[i]));
+                Apply(_slots[i], step.Slots[i], SentenceText.InStep(world, step.Slots[i]));
             }
         }
 

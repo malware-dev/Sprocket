@@ -10,14 +10,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editing\ChoicePage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\Cmd.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\EditorPage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editing\Elapsed.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\EntityQuery.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\PickAnswer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\PickPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\ReactorEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\SequencePage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceSummary.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceText.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\SystemPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\SystemSummary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\SystemsPage.cs" />
@@ -100,5 +98,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ui\StateSlot.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ui\StepKind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ui\TriggerKind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceStatus.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceProblem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\ISequenceText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\ITimeText.cs" />
   </ItemGroup>
 </Project>

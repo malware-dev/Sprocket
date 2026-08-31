@@ -40,7 +40,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Screen\UnsupportedView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Screen\Ask.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Look\Lettering.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Sequences\Wording.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ui\Bar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ui\Dock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ui\Element.cs" />
@@ -60,5 +59,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Input\Clipboard.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Input\IPointer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Input\KeyRepeater.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Words\SentenceText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Words\SequenceText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Words\TimeText.cs" />
   </ItemGroup>
 </Project>

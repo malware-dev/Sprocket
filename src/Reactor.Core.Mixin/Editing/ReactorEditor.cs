@@ -25,6 +25,8 @@ namespace Reactor.Editing
         readonly IWorld _world;
         readonly Automation _program;
         readonly AutomationRunner _runner;
+        readonly ISequenceText _sequenceText;
+        readonly ITimeText _timeText;
         readonly List<EditorPage> _stack = new List<EditorPage>();
         readonly Dictionary<int, Action> _actions = new Dictionary<int, Action>();
         readonly Dictionary<int, Action<string>> _textActions = new Dictionary<int, Action<string>>();
@@ -36,17 +38,31 @@ namespace Reactor.Editing
 
         bool _structureDirty;
 
-        public ReactorEditor(IWorld world, Automation program, AutomationRunner runner)
+        public ReactorEditor(IWorld world, Automation program, AutomationRunner runner,
+            ISequenceText sequenceText, ITimeText timeText)
         {
             _world = world;
             _program = program;
             _runner = runner;
+            _sequenceText = sequenceText;
+            _timeText = timeText;
             _stack.Add(new SystemsPage(this));
             Rebuild();
         }
 
         /// <summary>What to show right now.</summary>
         public EditorScreen Screen => _screen;
+
+        /// <summary>How a sequence reads, supplied by whoever renders this.</summary>
+        /// <remarks>
+        /// No default, here or on <see cref="TimeText" />: a target that renders the editor is a target
+        /// that has decided how it reads, and core shipping a fallback English would be a default
+        /// nobody overrides.
+        /// </remarks>
+        public ISequenceText SequenceText => _sequenceText;
+
+        /// <summary>How a length of time reads.</summary>
+        public ITimeText TimeText => _timeText;
 
         /// <summary>Ticks elapsed. The only honest unit of time available.</summary>
         public int CurrentTick => _runner.CurrentTick;

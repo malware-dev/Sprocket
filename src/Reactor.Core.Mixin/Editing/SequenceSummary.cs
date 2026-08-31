@@ -7,12 +7,12 @@ using Reactor.World;
 namespace Reactor.Editing
 {
     /// <summary>
-    /// Words a sequence's one-line form and its live state.
+    /// What is true of a sequence right now, for every place one is listed.
     /// </summary>
     /// <remarks>
-    /// Shared by every place a sequence is listed, so a sequence reads identically whether
-    /// it is seen from the block it affects or from the full list. Wording that a
-    /// target had to supply would drift between targets, and worse, between screens.
+    /// Facts only. This works out which state a sequence is in and what is wrong with it; what those
+    /// read as belongs to <see cref="ISequenceText" />, so a sequence reads identically wherever it is
+    /// seen without core deciding what it says.
     /// </remarks>
     static class SequenceSummary
     {
@@ -26,7 +26,7 @@ namespace Reactor.Editing
 
         /// <summary>Updates one entry per sequence, in place.</summary>
         public static void Fill(ObservableList<StatusEntry> entries, List<Sequence> sequences, IWorld world,
-            AutomationRunner runner, int tick)
+            AutomationRunner runner, int tick, ISequenceText wording, ITimeText time)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
             for (var i = 0; i < count; i++)
@@ -35,89 +35,16 @@ namespace Reactor.Editing
                 var entry = entries[i];
                 var state = runner.Get(sequence);
 
-                entry.Summary = Describe(world, sequence);
-                entry.Status = Status(sequence, state);
+                entry.Summary = wording.Sequence(world, sequence);
+                entry.Status = wording.Status(Status(sequence, state));
                 entry.JustRan = state != null && state.LastFiredTick >= 0
                     && tick - state.LastFiredTick < JustRanTicks;
-                entry.Problem = Problem(world, sequence, state);
+                entry.Problem = wording.Problem(Problem(world, sequence, state));
 
-                entry.LastRun = Elapsed.Ago(TicksSinceRun(state, tick));
+                entry.LastRun = time.Ago(TicksSinceRun(state, tick));
             }
         }
 
-        /// <summary>
-        /// What to call this sequence on one line: what starts it, then what it does or is called.
-        /// </summary>
-        /// <remarks>
-        /// A name replaces what a sequence <b>does</b> and never what starts it, here exactly as it does
-        /// on the sequence's own heading. A name winning the whole line would make naming something stop
-        /// its row saying when it happens, and a list of twenty sequences that all say only a name is a
-        /// list where the one useful thing to compare has been taken away.
-        /// <para>
-        /// Still a joined string, unlike the heading, and that is not an oversight. A row is a label
-        /// rather than a control: there is nothing on it to press, no part of it is somebody's to edit,
-        /// and one line has to stand for the whole sequence. The heading is a list precisely because the
-        /// opposite is true of it.
-        /// </para>
-        /// </remarks>
-        public static string Describe(IWorld world, Sequence sequence)
-        {
-            return DescribeTrigger(world, sequence) + " » " + DescribeDoing(world, sequence);
-        }
-
-        /// <summary>
-        /// The half a name replaces: what somebody called it, or what it actually does.
-        /// </summary>
-        /// <remarks>
-        /// One rule in one place, because the heading and the list row have to agree about it, and a
-        /// disagreement between them is invisible until somebody names a sequence and looks at both.
-        /// </remarks>
-        public static string DescribeDoing(IWorld world, Sequence sequence)
-        {
-            return sequence.HasName ? sequence.Name : DescribeSteps(world, sequence);
-        }
-
-        /// <summary>
-        /// What starts this sequence, on its own.
-        /// </summary>
-        /// <remarks>
-        /// Split out from <see cref="Describe" /> because a heading is two things and the joined-up
-        /// version only serves a list, where one line has to stand for the whole sequence. On the
-        /// sequence's own screen the two halves are separate: this one always says itself, and the
-        /// other one is the half a name replaces.
-        /// </remarks>
-        public static string DescribeTrigger(IWorld world, Sequence sequence)
-        {
-            return SequenceText.DescribeTrigger(world, sequence.Trigger);
-        }
-
-        /// <summary>
-        /// What this sequence does, in a few words, ignoring any name it was given.
-        /// </summary>
-        public static string DescribeSteps(IWorld world, Sequence sequence)
-        {
-            if (sequence.Steps.Count == 0)
-                return "nothing yet";
-
-            var first = SequenceText.DescribeStep(world, sequence.Steps[0]);
-            if (sequence.Steps.Count == 1)
-                return first;
-
-            return first + " (+" + (sequence.Steps.Count - 1) + " more)";
-        }
-
-        /// <summary>
-        /// What this sequence is doing, in a handful of words.
-        /// </summary>
-        /// <remarks>
-        /// Every answer is a constant, deliberately. This is read on every tick for
-        /// whatever is on screen, so anything built from a number would allocate
-        /// sixty times a second inside the game's update loop.
-        ///
-        /// Nothing is lost by it. The step it is on is already shown by that step
-        /// being lit, and a count of ticks since it last ran is a number nobody
-        /// reads - the indicator flashing when it fires is the part that carries.
-        /// </remarks>
         /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
         public static int TicksSinceRun(SequenceRunner state, int tick)
         {
@@ -126,32 +53,25 @@ namespace Reactor.Editing
             return tick - state.LastFiredTick;
         }
 
-        public static string Status(Sequence sequence, SequenceRunner state)
+        public static SequenceStatus Status(Sequence sequence, SequenceRunner state)
         {
             if (!sequence.Enabled)
-                return "switched off";
+                return SequenceStatus.Off;
 
             if (state == null)
-                return "waiting to happen";
+                return SequenceStatus.NeverRun;
 
             if (state.IsRunning)
-                return state.IsWaiting ? "running - waiting for this step" : "running";
+                return state.IsWaiting ? SequenceStatus.RunningWaiting : SequenceStatus.Running;
 
-            return state.LastFiredTick < 0 ? "waiting to happen" : "waiting";
+            return state.LastFiredTick < 0 ? SequenceStatus.NeverRun : SequenceStatus.Waiting;
         }
 
-        /// <summary>
-        /// Why this sequence cannot work, or empty.
-        /// </summary>
-        /// <remarks>
-        /// A sequence pointing at a block that got shot off must never simply do nothing.
-        /// Silence is indistinguishable from working, and that is precisely the kind
-        /// of failure a non-programmer has no way to diagnose.
-        /// </remarks>
-        public static string Problem(IWorld world, Sequence sequence, SequenceRunner state)
+        /// <summary>Why this sequence cannot work, or <see cref="SequenceProblem.None" />.</summary>
+        public static SequenceProblem Problem(IWorld world, Sequence sequence, SequenceRunner state)
         {
             if (state != null && state.HasMissingSources)
-                return "This listens to something that isn't here any more.";
+                return SequenceProblem.MissingSource;
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
@@ -160,7 +80,7 @@ namespace Reactor.Editing
                 for (var t = 0; t < step.Targets.Count; t++)
                 {
                     if (world.FindEntity(step.Targets[t]) == null)
-                        return "This affects something that isn't here any more.";
+                        return SequenceProblem.MissingTarget;
                 }
 
                 var gate = step.Gate as OnceGate;
@@ -177,11 +97,11 @@ namespace Reactor.Editing
                 for (var t = 0; t < condition.Entities.Count; t++)
                 {
                     if (world.FindEntity(condition.Entities[t]) == null)
-                        return "This waits on something that isn't here any more.";
+                        return SequenceProblem.MissingGate;
                 }
             }
 
-            return "";
+            return SequenceProblem.None;
         }
     }
 }

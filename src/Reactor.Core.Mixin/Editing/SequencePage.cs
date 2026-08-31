@@ -36,7 +36,7 @@ namespace Reactor.Editing
         /// the switch that changes it - repeating it up here reads as two different things saying the
         /// same words.
         /// </remarks>
-        public override string Title => SequenceSummary.Describe(Editor.World, _sequence);
+        public override string Title => Editor.SequenceText.Sequence(Editor.World, _sequence);
 
         /// <summary>
         /// Naming happens on the heading, because the heading is what the name is for.
@@ -91,13 +91,13 @@ namespace Reactor.Editing
             if (parts.Count < 2)
                 return;
 
-            parts[0].Text = SequenceSummary.DescribeTrigger(Editor.World, _sequence);
+            parts[0].Text = Editor.SequenceText.Trigger(Editor.World, _sequence.Trigger);
 
             // The name where there is one, and what it actually does where there is not - so an unnamed
             // sequence still reads as a whole sentence and naming one is a choice rather than a chore.
             // The same call a list row makes, so the two cannot come to disagree.
             parts[1].Name = CustomName;
-            parts[1].Text = SequenceSummary.DescribeDoing(Editor.World, _sequence);
+            parts[1].Text = Editor.SequenceText.Doing(Editor.World, _sequence);
         }
 
         public override void Build(List<EditorComponent> components)
@@ -145,13 +145,13 @@ namespace Reactor.Editing
             var state = Editor.Runner.Get(_sequence);
 
             _sentence.Enabled = _sequence.Enabled;
-            _sentence.Status = SequenceSummary.Status(_sequence, state);
-            _sentence.Problem = SequenceSummary.Problem(Editor.World, _sequence, state);
+            _sentence.Status = Editor.SequenceText.Status(SequenceSummary.Status(_sequence, state));
+            _sentence.Problem = Editor.SequenceText.Problem(SequenceSummary.Problem(Editor.World, _sequence, state));
             _sentence.JustRan = state != null && state.LastFiredTick >= 0
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
 
-            _sentence.LastRun = Elapsed.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
+            _sentence.LastRun = Editor.TimeText.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
             _sentence.Trigger.IsLiveNow = state != null && state.TriggerSignalIsTrue;
 
             for (var i = 0; i < _sentence.Steps.Count; i++)
@@ -460,8 +460,7 @@ namespace Reactor.Editing
             for (var i = 0; i < WaitPresets.Length; i++)
             {
                 var ticks = WaitPresets[i];
-                var label = SequenceText.DescribeDuration(ticks) + " - " + ticks + " ticks";
-                page.Add(label, false, delegate { chosen(ticks); });
+                page.Add(Editor.TimeText.WaitChoice(ticks), false, delegate { chosen(ticks); });
             }
             return page;
         }
@@ -540,7 +539,7 @@ namespace Reactor.Editing
         void Delete()
         {
             var page = new ChoicePage(Editor, "Delete this sequence?");
-            page.Caption = SequenceSummary.Describe(Editor.World, _sequence);
+            page.Caption = Editor.SequenceText.Sequence(Editor.World, _sequence);
 
             page.Add("Keep it", false, delegate { Editor.Pop(); });
 
