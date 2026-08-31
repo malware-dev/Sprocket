@@ -40,6 +40,45 @@ sealed class TestWorld : IWorld
 
     public IEntity? FindEntity(long entityId) => _entities.FirstOrDefault(d => d.Id == entityId);
 
+    /// <summary>An id and a name, in that order, which is enough to tell bound from adrift.</summary>
+    public void Identify(IEntity entity, List<EntityKey> keys)
+    {
+        keys.Clear();
+        keys.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id)));
+        keys.Add(new EntityKey(ValueKind.Text, Values.Text(entity.Name)));
+    }
+
+    public IEntity? Match(IList<EntityKey> keys, out int matched)
+    {
+        for (var i = 0; i < keys.Count; i++)
+        {
+            var found = Matching(keys[i]);
+            if (found == null)
+                continue;
+
+            matched = i;
+            return found;
+        }
+
+        matched = -1;
+        return null;
+    }
+
+    IEntity? Matching(EntityKey key)
+    {
+        if (key.Kind == ValueKind.Integer)
+        {
+            Values.TryInteger(key.Kind, key.Value, out var id);
+            return FindEntity(id);
+        }
+
+        if (key.Kind != ValueKind.Text)
+            return null;
+
+        Values.TryText(key.Kind, key.Value, out var name);
+        return name.Length == 0 ? null : _entities.FirstOrDefault(d => d.Name == name);
+    }
+
     public void Invoke(IEntity entity, string actionId)
     {
         Log.Add($"{entity.Name}:{actionId}");

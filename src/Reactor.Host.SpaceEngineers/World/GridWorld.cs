@@ -110,6 +110,67 @@ namespace Reactor.Host.SpaceEngineers.World
                 grid.CustomName = name;
         }
 
+        /// <summary>
+        /// An id and a name, in that order.
+        /// </summary>
+        /// <remarks>
+        /// The id is exact and dies with a blueprint; the name survives one and is the thing a player
+        /// edits casually. Grid position belongs between them, because a pasted copy keeps every
+        /// position and changes every id - it is not here yet because there is no value kind wide
+        /// enough to write one down. See "Still to prove" in <c>docs/Script.md</c>.
+        /// </remarks>
+        public void Identify(IEntity entity, List<EntityKey> keys)
+        {
+            keys.Clear();
+            keys.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id)));
+            keys.Add(new EntityKey(ValueKind.Text, Values.Text(entity.Name)));
+        }
+
+        public IEntity Match(IList<EntityKey> keys, out int matched)
+        {
+            for (var i = 0; i < keys.Count; i++)
+            {
+                var found = Matching(keys[i]);
+                if (found == null)
+                    continue;
+
+                matched = i;
+                return found;
+            }
+
+            matched = -1;
+            return null;
+        }
+
+        IEntity Matching(EntityKey key)
+        {
+            if (key.Kind == ValueKind.Integer)
+            {
+                long id;
+                Values.TryInteger(key.Kind, key.Value, out id);
+                return FindEntity(id);
+            }
+
+            if (key.Kind != ValueKind.Text)
+                return null;
+
+            string name;
+            Values.TryText(key.Kind, key.Value, out name);
+            if (name.Length == 0)
+                return null;
+
+            // Deliberately the first of several. Two blocks may share a name, and picking one is
+            // still better than losing the reference - it is a proposal either way, because a name
+            // is never the strongest key.
+            for (var i = 0; i < _entities.Count; i++)
+            {
+                if (_entities[i].Name == name)
+                    return _entities[i];
+            }
+
+            return null;
+        }
+
         public IEntity FindEntity(long entityId)
         {
             if (_stale)

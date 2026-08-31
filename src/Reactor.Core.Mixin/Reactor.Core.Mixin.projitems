@@ -102,5 +102,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceProblem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\ISequenceText.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\ITimeText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World\EntityKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\EntityRef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\RefState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\Bindings.cs" />
   </ItemGroup>
 </Project>

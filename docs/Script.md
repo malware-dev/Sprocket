@@ -757,8 +757,8 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
    over a model object and gets back one line. The old `SequenceText` and `Elapsed` are deleted, and
    `SequenceSummary` now
    answers in `SequenceStatus` and `SequenceProblem` rather than in English, and `ReactorEditor`
-   takes an `IWording` with no default, because a default nobody overrides is the problem wearing a
-   label. The rule it follows: **structure where it can be pressed, words where it can only be
+   takes both interfaces with no default, because a default nobody overrides is the problem wearing
+   a label. The rule it follows: **structure where it can be pressed, words where it can only be
    read** - a sentence is slots because every part is somebody's to change, a list row is a string
    because nothing on it can be pressed and one line has to stand for a whole sequence.
 

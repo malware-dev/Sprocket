@@ -48,6 +48,33 @@ namespace Reactor.World
         IEntity FindEntity(long entityId);
 
         /// <summary>
+        /// Writes down every way this entity could be found again, strongest first.
+        /// </summary>
+        /// <remarks>
+        /// The host decides what a key is and what order they go in, because only the host can match
+        /// one later. An id is the strongest and the most fragile: it survives a rename and does not
+        /// survive a blueprint, where every id changes and every position is identical.
+        /// <para>
+        /// Called when a reference is first made and whenever it is re-pointed, never per tick.
+        /// </para>
+        /// </remarks>
+        void Identify(IEntity entity, List<EntityKey> keys);
+
+        /// <summary>
+        /// Finds whatever these keys point at, and says which one found it.
+        /// </summary>
+        /// <remarks>
+        /// Tried in order and the first hit wins. <paramref name="matched" /> is that key's index,
+        /// which is how core tells a reference that still holds from one that only has a candidate:
+        /// zero is the strongest key and anything else is a proposal rather than a binding.
+        /// <para>
+        /// Null with <paramref name="matched" /> at -1 when nothing matched, which includes a
+        /// declaration with no keys at all.
+        /// </para>
+        /// </remarks>
+        IEntity Match(IList<EntityKey> keys, out int matched);
+
+        /// <summary>
         /// Makes and reads the values this world deals in.
         /// </summary>
         /// <remarks>
