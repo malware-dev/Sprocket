@@ -33,6 +33,13 @@ namespace Reactor.Host.SpaceEngineers.World
             _listener = listener;
         }
 
+        /// <summary>The block behind this, for the few things that need the game's own object.</summary>
+        /// <remarks>
+        /// Reactor works through <see cref="IEntity" /> everywhere else. Writing a toolbar is the
+        /// exception: it is the game's own structure and there is nothing to abstract about it.
+        /// </remarks>
+        public IMyTerminalBlock Block => _block;
+
         public long Id => _block.EntityId;
 
         public string Name => _block.CustomName;

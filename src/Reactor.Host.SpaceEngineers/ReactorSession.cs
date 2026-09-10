@@ -32,6 +32,38 @@ namespace Reactor.Host.SpaceEngineers
         ReactorScreen _screen;
         long _open;
 
+        /// <summary>
+        /// The unit a block carries, or null. Never creates one.
+        /// </summary>
+        /// <remarks>
+        /// What a fired toolbar slot resolves through: the slot names the block, and the block is
+        /// the only thing that says which program it belongs to.
+        /// </remarks>
+        public static ReactorUnit UnitOf(IMyTerminalBlock block)
+        {
+            ReactorUnit unit;
+            return _current != null && block != null
+                && _current._units.TryGetValue(block.EntityId, out unit) ? unit : null;
+        }
+
+        /// <summary>
+        /// Registers the trigger action, on every machine.
+        /// </summary>
+        /// <remarks>
+        /// Here rather than in <see cref="LoadData" />, where <c>MyAPIGateway.TerminalControls</c>
+        /// does not exist yet - registering there is a null reference that takes the session down
+        /// before the world loads.
+        /// <para>
+        /// And not behind <see cref="IsServer" /> with the rest of Reactor: a slot stores the
+        /// action's id and each machine resolves it to draw the slot, so a client that resolves
+        /// nothing draws somebody's wired button as unassigned. See <c>TriggerAction</c>.
+        /// </para>
+        /// </remarks>
+        public override void BeforeStart()
+        {
+            Terminal.TriggerAction.Register();
+        }
+
         public override void LoadData()
         {
             _current = this;
