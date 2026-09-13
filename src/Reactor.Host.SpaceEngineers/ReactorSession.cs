@@ -53,7 +53,7 @@ namespace Reactor.Host.SpaceEngineers
         /// </remarks>
         public override void BeforeStart()
         {
-            Terminal.TriggerAction.Register();
+            TriggerAction.Register();
         }
 
         public override void LoadData()

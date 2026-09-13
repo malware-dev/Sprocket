@@ -1,3 +1,4 @@
+using System.Globalization;
 using Avalonia.Headless.XUnit;
 using Reactor.Editing;
 using Xunit;
@@ -129,7 +130,7 @@ public class RenameTests
         screen.Drawings.Any(d => !d.IsText && d.Where.Width == 2 && d.Where.Height > 20);
 
     static string Say(float value) =>
-        value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        value.ToString("0.##", CultureInfo.InvariantCulture);
 
     static void Sequence(ReactorEditor editor)
     {

@@ -16,6 +16,19 @@ root = true
 # cannot be configured here - and the inspection is deliberately left on, because turning it off to
 # silence the survivors would hide the real ones too.
 
+# Cleanup is run through the one profile the repository ships, in Reactor.slnx.DotSettings:
+#
+#   jb cleanupcode Reactor.slnx --profile=Narrow
+#
+# It removes redundancies and shortens qualified references, and nothing else. Do not run the default
+# profile: full cleanup reformats all 258 files, and brace, spacing and line-break style here is left
+# alone on purpose - the real change would be buried in a repository-wide restyle.
+#
+# The profile also does not optimise usings, and must not, for the reason directly above.
+#
+# (That file cannot carry its own explanation: an XML comment inside it stops the profile being
+# found at all, with the unhelpful message that the profile does not exist.)
+
 [*.cs]
 
 # ---------------------------------------------------------------------------------------------------

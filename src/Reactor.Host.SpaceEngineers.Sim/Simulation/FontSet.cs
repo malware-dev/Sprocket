@@ -1,3 +1,4 @@
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using VRageMath;
 
 namespace Reactor.Sim.Simulation
@@ -38,7 +39,7 @@ namespace Reactor.Sim.Simulation
 
         IFontMetrics For(string font)
         {
-            return font == Reactor.Host.SpaceEngineers.Presentation.Ui.Symbols.Font && _symbols != null ? _symbols : _text;
+            return font == Symbols.Font && _symbols != null ? _symbols : _text;
         }
     }
 }

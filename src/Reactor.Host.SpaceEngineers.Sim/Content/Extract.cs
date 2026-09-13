@@ -53,7 +53,7 @@ namespace Reactor.Sim.Content
             for (int i = 0; i < Wanted.Length; i++)
                 One(report, Wanted[i][0], Wanted[i][1]);
 
-            foreach (System.Collections.Generic.KeyValuePair<string, string> art in BlockArt.All)
+            foreach (KeyValuePair<string, string> art in BlockArt.All)
                 One(report, art.Value, "what a " + art.Key + " looks like");
 
             return report.ToString();

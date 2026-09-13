@@ -4,8 +4,12 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Reactor.Host.SpaceEngineers.Presentation.Graphics;
+using Reactor.Sim.Machine;
 using Reactor.Sim.Simulation;
 using VRageMath;
+using Color = Avalonia.Media.Color;
+using TextBox = Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox;
 
 namespace Reactor.Sim.Shell
 {
@@ -29,7 +33,7 @@ namespace Reactor.Sim.Shell
         readonly ProbeScene _probe = new ProbeScene();
         readonly TextBlock _status = new TextBlock();
 
-        Avalonia.Point _pointer;
+        Point _pointer;
         bool _caretVisible = true;
         bool _showProbe;
         string _lastStatus;
@@ -52,7 +56,7 @@ namespace Reactor.Sim.Shell
             Width = 1280;
             Height = 720;
             WindowPlace.Restore(this);
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(28, 34, 40));
+            Background = new SolidColorBrush(Color.FromRgb(28, 34, 40));
 
             _status.Margin = new Thickness(10, 6);
             _status.FontSize = 12;
@@ -140,7 +144,7 @@ namespace Reactor.Sim.Shell
             Closing += (s, e) => WindowPlace.Remember(this);
         }
 
-        void OnFrame(Reactor.Host.SpaceEngineers.Presentation.Graphics.ScreenSpaceGraphics g)
+        void OnFrame(ScreenSpaceGraphics g)
         {
             // Window pixels to UI units, derived from what the backend reports rather than recomputed
             // alongside it, so a mistake in there shows up here instead of being mirrored.
@@ -206,16 +210,16 @@ namespace Reactor.Sim.Shell
                 VerticalAlignment = VerticalAlignment.Center
             });
 
-            foreach (Reactor.Sim.Machine.SimEntity entity in _editor.Pokeable())
+            foreach (SimEntity entity in _editor.Pokeable())
             {
-                var button = entity as Reactor.Sim.Machine.SimButton;
+                var button = entity as SimButton;
                 if (button != null)
                 {
                     row.Children.Add(Poke("press " + button.Name, () => button.Press()));
                     continue;
                 }
 
-                var sensor = entity as Reactor.Sim.Machine.SimSensor;
+                var sensor = entity as SimSensor;
                 if (sensor != null)
                 {
                     bool tripped = false;
@@ -235,7 +239,7 @@ namespace Reactor.Sim.Shell
                     continue;
                 }
 
-                var tank = entity as Reactor.Sim.Machine.SimTank;
+                var tank = entity as SimTank;
                 if (tank != null)
                 {
                     Button control = null;
@@ -283,12 +287,12 @@ namespace Reactor.Sim.Shell
         }
 
         /// <summary>A point in the window, in the units a layout was measured in.</summary>
-        Vector2 ToUi(Avalonia.Point point)
+        Vector2 ToUi(Point point)
         {
             if (_scale <= 0f)
                 return Vector2.Zero;
 
-            Avalonia.Point at = _surface.ToTarget(point);
+            Point at = _surface.ToTarget(point);
             return new Vector2((float)at.X / _scale + _screen.X, (float)at.Y / _scale + _screen.Y);
         }
 
@@ -336,7 +340,7 @@ namespace Reactor.Sim.Shell
             if (string.IsNullOrEmpty(e.Text))
                 return;
 
-            Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox box = Typing();
+            TextBox box = Typing();
             if (box == null)
                 return;
 
@@ -361,7 +365,7 @@ namespace Reactor.Sim.Shell
                 return;
             }
 
-            Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox box = Typing();
+            TextBox box = Typing();
             if (box == null)
                 return;
 
@@ -411,7 +415,7 @@ namespace Reactor.Sim.Shell
         /// Whichever box is currently taking keys, or null when nothing is. The probe always has one; the
         /// editor only while a question is open, so typing does not silently land somewhere invisible.
         /// </summary>
-        Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox Typing()
+        TextBox Typing()
         {
             if (_showProbe)
                 return _probe.Box;

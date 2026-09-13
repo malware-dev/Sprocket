@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Reactor.Sequences;
 using Reactor.World;
@@ -86,7 +88,7 @@ namespace Reactor.Storage
             foreach (var role in instance.Filled)
                 parts.Add(role);
 
-            parts.Sort(System.StringComparer.Ordinal);
+            parts.Sort(StringComparer.Ordinal);
 
             for (var i = 0; i < parts.Count; i++)
                 Line(text, "fill", Escape(parts[i]), Ids(instance.FilledWith(parts[i])));
@@ -277,7 +279,7 @@ namespace Reactor.Storage
 
         static string Number(int value)
         {
-            return value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return value.ToString(CultureInfo.InvariantCulture);
         }
 
         static string OnOff(bool on)
@@ -330,7 +332,7 @@ namespace Reactor.Storage
                     double real;
                     values.TryReal(ValueKind.Real, key.Value, out real);
                     joined.Append("r:").Append(real.ToString("R",
-                        System.Globalization.CultureInfo.InvariantCulture));
+                        CultureInfo.InvariantCulture));
                 }
             }
 
@@ -370,8 +372,8 @@ namespace Reactor.Storage
                         break;
                     case 'r':
                         double real;
-                        if (double.TryParse(body, System.Globalization.NumberStyles.Float,
-                                System.Globalization.CultureInfo.InvariantCulture, out real))
+                        if (double.TryParse(body, NumberStyles.Float,
+                                CultureInfo.InvariantCulture, out real))
                             into.Add(new EntityKey(ValueKind.Real, EntityValue.Of(real)));
                         break;
                 }
@@ -391,7 +393,7 @@ namespace Reactor.Storage
             {
                 if (i > 0)
                     text.Append(',');
-                text.Append(ids[i].ToString(System.Globalization.CultureInfo.InvariantCulture));
+                text.Append(ids[i].ToString(CultureInfo.InvariantCulture));
             }
             return text.ToString();
         }
@@ -419,8 +421,8 @@ namespace Reactor.Storage
         static int Int(string[] parts, int index)
         {
             int value;
-            int.TryParse(At(parts, index), System.Globalization.NumberStyles.Integer,
-                System.Globalization.CultureInfo.InvariantCulture, out value);
+            int.TryParse(At(parts, index), NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out value);
             return value;
         }
 

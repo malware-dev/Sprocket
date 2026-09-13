@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Reactor.Sequences;
 using Reactor.Ui;
@@ -335,17 +336,17 @@ namespace Reactor.Editing
         /// still there, they simply do nothing until the switch is off, which is why
         /// <see cref="SequenceComponent.LockedText"/> exists to say so.
         /// </remarks>
-        int Change(Cmd kind, System.Action action)
+        int Change(Cmd kind, Action action)
         {
             return Change(kind, 0, 0, action);
         }
 
-        int Change(Cmd kind, int which, System.Action action)
+        int Change(Cmd kind, int which, Action action)
         {
             return Change(kind, which, 0, action);
         }
 
-        int Change(Cmd kind, int which, int part, System.Action action)
+        int Change(Cmd kind, int which, int part, Action action)
         {
             return _sequence.CanRun ? 0 : Editor.Register(kind, which, part, action);
         }
@@ -566,7 +567,7 @@ namespace Reactor.Editing
             }));
         }
 
-        ChoicePage WaitPage(System.Action<int> chosen)
+        ChoicePage WaitPage(Action<int> chosen)
         {
             var page = new ChoicePage(Editor, "How long should it wait?");
             for (var i = 0; i < WaitPresets.Length; i++)

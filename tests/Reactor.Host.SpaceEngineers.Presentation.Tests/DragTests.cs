@@ -1,3 +1,4 @@
+using System.Globalization;
 using Avalonia.Headless.XUnit;
 using Reactor.Editing;
 using Reactor.Ui;
@@ -154,7 +155,7 @@ public class DragTests
     }
 
     static string Say(float value) =>
-        value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        value.ToString("0.##", CultureInfo.InvariantCulture);
 
     static string Order(ReactorEditor editor) =>
         string.Join(", ", editor.Component<SequenceComponent>().Steps

@@ -1,7 +1,11 @@
+using Reactor.Editing;
 using Ship = Reactor.Sim.Machine.Simulation;
 using VRageMath;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
 using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Sim.Machine;
+using Reactor.Ui;
 
 namespace Reactor.Sim.Simulation
 {
@@ -49,7 +53,7 @@ namespace Reactor.Sim.Simulation
         /// A test that is about what the editor does, rather than about where this target puts it,
         /// says so by coming through here instead of pressing coordinates.
         /// </remarks>
-        public Reactor.Editing.ReactorEditor Editor => _ship.Editor;
+        public ReactorEditor Editor => _ship.Editor;
 
         /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
         public string Where => _ship.Where;
@@ -62,7 +66,7 @@ namespace Reactor.Sim.Simulation
         /// something the world does, and in the game a ship actually flies up to the sensor - so none of
         /// this is Reactor, and none of it goes anywhere the mod can compile.
         /// </remarks>
-        internal System.Collections.Generic.IEnumerable<Reactor.Sim.Machine.SimEntity> Pokeable()
+        internal IEnumerable<SimEntity> Pokeable()
         {
             return _ship.Pokeable();
         }
@@ -90,7 +94,7 @@ namespace Reactor.Sim.Simulation
         {
             get
             {
-                Reactor.Ui.EditorScreen screen = _ship.Editor.Screen;
+                EditorScreen screen = _ship.Editor.Screen;
 
                 // Joined here rather than asked of core, which publishes a heading in parts and no
                 // string of the whole thing on purpose - a target handed one would draw one. This is a
@@ -98,7 +102,7 @@ namespace Reactor.Sim.Simulation
                 string heading = "";
                 for (int i = 0; i < screen.Heading.Count; i++)
                 {
-                    Reactor.Ui.HeadingPart part = screen.Heading[i];
+                    HeadingPart part = screen.Heading[i];
 
                     if (heading.Length > 0)
                         heading += part.Lead.Length > 0 ? " " : " > ";
@@ -118,7 +122,7 @@ namespace Reactor.Sim.Simulation
         public bool IsAsking => _view.IsAsking;
 
         /// <summary>The box that question is being answered in.</summary>
-        public Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox AskBox => _view.AskBox;
+        public TextBox AskBox => _view.AskBox;
 
         public bool CaretVisible
         {
@@ -136,7 +140,7 @@ namespace Reactor.Sim.Simulation
         }
 
         /// <summary>The box the keyboard is in, when something on the screen has taken it.</summary>
-        public Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox Focus => _view.Focus;
+        public TextBox Focus => _view.Focus;
 
         /// <summary>Sends what was just typed wherever it belongs.</summary>
         public void Typed()
@@ -153,7 +157,7 @@ namespace Reactor.Sim.Simulation
         /// somebody types. The window and the headless harness both need that answer and must not be
         /// allowed to arrive at different ones.
         /// </remarks>
-        public Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox Typing => _view.IsAsking ? _view.AskBox : _view.Focus;
+        public TextBox Typing => _view.IsAsking ? _view.AskBox : _view.Focus;
 
         /// <summary>
         /// Empties whatever has the keyboard, the way holding backspace would.
@@ -165,7 +169,7 @@ namespace Reactor.Sim.Simulation
         /// </remarks>
         public void Clear()
         {
-            Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox box = Typing;
+            TextBox box = Typing;
             if (box == null)
                 return;
 
@@ -177,7 +181,7 @@ namespace Reactor.Sim.Simulation
         /// <summary>Types <paramref name="text" /> into whatever has the keyboard.</summary>
         public void Type(string text)
         {
-            Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox box = Typing;
+            TextBox box = Typing;
             if (box == null || string.IsNullOrEmpty(text))
                 return;
 

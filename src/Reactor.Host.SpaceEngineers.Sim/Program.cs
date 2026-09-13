@@ -15,7 +15,7 @@ namespace Reactor.Sim
             // Nothing is started for these: they are about a window some other run already put up.
             if (args.Length > 0 && args[0] == "--dismiss")
             {
-                int sent = Shell.Attention.StandBack();
+                int sent = Attention.StandBack();
                 Console.WriteLine(sent == 0
                     ? "no simulator window is open"
                     : "sent " + sent + " behind");
@@ -24,7 +24,7 @@ namespace Reactor.Sim
 
             if (args.Length > 0 && args[0] == "--raise")
             {
-                int raised = Shell.Attention.ComeForward();
+                int raised = Attention.ComeForward();
                 Console.WriteLine(raised == 0
                     ? "no simulator window is open"
                     : "brought " + raised + " forward");
@@ -130,7 +130,7 @@ namespace Reactor.Sim
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == "--quiet" || args[i] == "--background")
-                    Shell.MainWindow.OpensQuietly = true;
+                    MainWindow.OpensQuietly = true;
             }
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

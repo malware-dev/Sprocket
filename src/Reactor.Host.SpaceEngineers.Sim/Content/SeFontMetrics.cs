@@ -1,3 +1,4 @@
+using System.Xml;
 using System.Xml.Linq;
 using Reactor.Sim.Simulation;
 using VRageMath;
@@ -106,7 +107,7 @@ namespace Reactor.Sim.Content
         public int BaselineInCell =>
             _cellHeight <= 0 || _cellHeight == GameCellHeight
                 ? GlyphBaselineInCell
-                : (int)System.Math.Round(_cellHeight * (double)GlyphBaselineInCell / GameCellHeight);
+                : (int)Math.Round(_cellHeight * (double)GlyphBaselineInCell / GameCellHeight);
 
         /// <summary>Where <paramref name="c" /> is on the page, if the game has it at all.</summary>
         public bool TryGlyph(char c, out Glyph glyph)
@@ -218,7 +219,7 @@ namespace Reactor.Sim.Content
 
                 return metrics;
             }
-            catch (Exception error) when (error is IOException || error is System.Xml.XmlException)
+            catch (Exception error) when (error is IOException || error is XmlException)
             {
                 return null;
             }

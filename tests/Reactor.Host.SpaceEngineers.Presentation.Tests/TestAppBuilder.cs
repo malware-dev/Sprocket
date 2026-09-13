@@ -1,8 +1,9 @@
 using Avalonia;
 using Avalonia.Headless;
+using Reactor.Host.SpaceEngineers.Presentation.Tests;
 using Reactor.Sim.Shell;
 
-[assembly: AvaloniaTestApplication(typeof(Reactor.Host.SpaceEngineers.Presentation.Tests.TestAppBuilder))]
+[assembly: AvaloniaTestApplication(typeof(TestAppBuilder))]
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 

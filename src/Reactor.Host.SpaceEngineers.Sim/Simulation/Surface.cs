@@ -11,6 +11,7 @@ using Point = Avalonia.Point;
 using Rect = Avalonia.Rect;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
 
 namespace Reactor.Sim.Simulation
 {
@@ -377,7 +378,7 @@ namespace Reactor.Sim.Simulation
 
             // Drawn as the game would draw it, boxes and all. Anything else here has glyphs Space
             // Engineers has never heard of, and letting them show would make this window flatter the mod.
-            bool symbolic = command.Font == Reactor.Host.SpaceEngineers.Presentation.Ui.Symbols.Font;
+            bool symbolic = command.Font == Symbols.Font;
 
             SeFontMetrics metrics = symbolic ? _symbols : _exact;
             GlyphAtlas page = symbolic ? _symbolAtlas : _atlas;

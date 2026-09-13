@@ -1,6 +1,7 @@
 using VRage.Game.ModAPI;
 using System;
 using System.Collections.Generic;
+using Reactor.Host.SpaceEngineers.Terminal;
 using Reactor.World;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
@@ -83,7 +84,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 return false;
 
             MyToolbarItemInfo held;
-            if (!toolbar.TryGetItem(button, out held) || held.ActionId != Terminal.TriggerAction.ActionId)
+            if (!toolbar.TryGetItem(button, out held) || held.ActionId != TriggerAction.ActionId)
                 return false;
 
             _read.Clear();

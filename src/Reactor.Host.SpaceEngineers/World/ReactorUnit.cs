@@ -668,7 +668,7 @@ namespace Reactor.Host.SpaceEngineers.World
         // Temporary, for proving the claim path. Goes when it is proven.
         static void Trace(string what)
         {
-            VRage.Utils.MyLog.Default.WriteLineAndConsole("[Reactor] " + what);
+            MyLog.Default.WriteLineAndConsole("[Reactor] " + what);
         }
 
         public void Tick(int frame)

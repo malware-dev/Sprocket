@@ -83,12 +83,12 @@ sealed class PaperSequenceText : ISequenceText
         return text + " " + Names(bindings, step.Targets, true);
     }
 
-    static string Names(Bindings bindings, System.Collections.Generic.IList<string> refs, bool all)
+    static string Names(Bindings bindings, IList<string> refs, bool all)
     {
         if (refs.Count == 0)
             return "____";
 
-        var names = new System.Collections.Generic.List<string>();
+        var names = new List<string>();
         foreach (var name in refs)
         {
             var entity = bindings.Entity(name);

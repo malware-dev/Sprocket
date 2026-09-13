@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -76,7 +77,7 @@ namespace Reactor.Sim.Content
                     for (int y = 0; y < pixels.Height; y++)
                     {
                         IntPtr destination = buffer.Address + y * buffer.RowBytes;
-                        System.Runtime.InteropServices.Marshal.Copy(
+                        Marshal.Copy(
                             pixels.Bgra, y * pixels.Stride, destination, pixels.Width * 4);
                     }
                 }

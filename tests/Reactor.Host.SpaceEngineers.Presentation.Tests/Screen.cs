@@ -1,3 +1,5 @@
+using Reactor.Editing;
+using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using Reactor.Sim.Simulation;
 using VRageMath;
 
@@ -39,7 +41,7 @@ sealed class Screen
     public EditorScene Scene => _frame.Scene;
 
     /// <summary>The editor, for tests about what it does rather than where this target draws it.</summary>
-    public Reactor.Editing.ReactorEditor Editor => _frame.Scene.Editor;
+    public ReactorEditor Editor => _frame.Scene.Editor;
 
     /// <summary>
     /// Advances the clock, drawing every tick.
@@ -143,7 +145,7 @@ readonly struct Drawn(DrawCommand command, RectangleF clip)
     public bool IsText => command.Kind == DrawKind.Text;
 
     /// <summary>Whether this is one of the drawn marks rather than words somebody reads.</summary>
-    public bool IsSymbol => IsText && command.Font == Reactor.Host.SpaceEngineers.Presentation.Ui.Symbols.Font;
+    public bool IsSymbol => IsText && command.Font == Symbols.Font;
 
     public string Text => command.Text ?? "";
 
