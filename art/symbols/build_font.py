@@ -157,6 +157,23 @@ def check():
     ]
 
 
+def bang():
+    """
+    An exclamation. Says something is wrong without saying what.
+
+    Plain, rather than inside a triangle. A triangle with a bar and a dot inside it is three
+    shapes competing for about twenty pixels once it is drawn at the size a row heading uses,
+    and the outline is the first thing to turn to mush - where the bar alone stays legible.
+
+    The gap between bar and dot is wider than a letter's would be, because at this size a
+    tight one closes up and reads as a single stroke.
+    """
+    return [
+        stroke((0.50, 0.17), (0.50, 0.56)),
+        stroke((0.50, 0.71), (0.50, 0.79)),
+    ]
+
+
 def bin_():
     """
     Delete: a bin. It says destroy and nothing else, which is exactly what the game's close
@@ -288,6 +305,7 @@ GLYPHS = [
     ("c", "check", solid(check())),
     ("p", "pencil", pencil()),
     ("x", "cross", solid(cross())),
+    ("!", "warning", solid(bang())),
 ]
 
 

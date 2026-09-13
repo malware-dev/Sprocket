@@ -26,6 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Sequences\Automation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sequences\AutomationSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sequences\Condition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequences\Naming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sequences\Sequence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sequences\SequenceEdit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sequences\Step.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ui\StepKind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ui\TriggerKind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceStatus.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceFault.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\SequenceProblem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\ISequenceText.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editing\ITimeText.cs" />

@@ -90,6 +90,32 @@ namespace Reactor.Editing
             return running ? Running : Idle;
         }
 
+        /// <summary>
+        /// How many of a system's sequences have something wrong with them.
+        /// </summary>
+        /// <remarks>
+        /// On a cadence rather than on a tick: <see cref="SequenceSummary.Fault" /> may send a host
+        /// off to read something expensive.
+        /// </remarks>
+        public static int Problems(IWorld world, Bindings bindings, AutomationRunner runner,
+            AutomationSystem system, SystemInstance instance)
+        {
+            var count = 0;
+            var sequences = system.Sequences;
+
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                SequenceRunner state = instance == null
+                    ? runner.Get(sequences[i])
+                    : runner.Get(sequences[i], instance);
+
+                if (SequenceSummary.Fault(world, bindings, sequences[i], state).Exists)
+                    count++;
+            }
+
+            return count;
+        }
+
         static void CollectEntityNames(Bindings bindings, AutomationSystem system, List<string> result)
         {
             var sequences = system.Sequences;

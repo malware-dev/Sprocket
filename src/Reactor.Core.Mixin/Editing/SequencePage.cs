@@ -42,17 +42,27 @@ namespace Reactor.Editing
         /// Naming happens on the heading, because the heading is what the name is for.
         /// </summary>
         /// <remarks>
-        /// Optional, and it has to stay optional. A name buys two things - a list of twenty
-        /// sequences becomes legible, and more than one trigger can start the same one - but
-        /// requiring it puts a naming task in front of somebody who only wants a door to open.
-        /// An unnamed sequence reads as its own sentence and is no worse off, which is why
-        /// clearing the name is as ordinary an act as giving one.
+        /// A sequence arrives already named - "Sequence 3" - the way a block does, so this is always
+        /// overtyping rather than filling in a blank. That is a reversal of what stood here before,
+        /// which argued naming had to stay optional because an unnamed sequence read as its own
+        /// sentence. It did read, but it meant a row's identity changed as somebody edited it, and
+        /// naming was still a chore they were expected to get round to eventually. A default asks
+        /// nothing and a person renames it when they care.
         /// </remarks>
         public override string CustomName => _sequence.Name ?? "";
 
         public override bool CanRename => true;
 
         public override string RenamePrompt => "What do you call this?";
+
+        /// <summary>
+        /// A sequence has to be called something, now that the name is what identifies it.
+        /// </summary>
+        /// <remarks>
+        /// The same reasoning a system already carried: with nothing underneath to fall back on, an
+        /// empty name leaves a row in a list that cannot be told from the one below it.
+        /// </remarks>
+        public override bool NameRequired => true;
 
         public override void Rename(string name)
         {
@@ -80,6 +90,7 @@ namespace Reactor.Editing
 
             var does = new HeadingPart("");
             does.Prompt = RenamePrompt;
+            does.NameRequired = NameRequired;
             does.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename);
 
             parts.Add(does);
@@ -146,7 +157,6 @@ namespace Reactor.Editing
 
             _sentence.Enabled = _sequence.Enabled;
             _sentence.Status = Editor.SequenceText.Status(SequenceSummary.Status(_sequence, state));
-            _sentence.Problem = Editor.SequenceText.Problem(SequenceSummary.Problem(Editor.Runner.Bindings, _sequence, state));
             _sentence.JustRan = state != null && state.LastFiredTick >= 0
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
@@ -166,6 +176,35 @@ namespace Reactor.Editing
             var canRedo = Editor.CanRedo(_sequence);
             _sentence.RedoCommand = canRedo ? _redoCommand : 0;
             _sentence.RedoText = canRedo ? Editor.RedoLabel(_sequence) : "";
+
+            if (SecondPassed())
+                Mark();
+        }
+
+        /// <summary>
+        /// Says what is wrong once, and marks the line it is wrong on.
+        /// </summary>
+        /// <remarks>
+        /// Two statements that do not repeat each other: the words say what, the mark says where.
+        /// Words alone in front of a nine-step sequence leave somebody reading all of it to work out
+        /// which part is being complained about, and they were led here from two screens away
+        /// precisely so they would not have to look.
+        /// <para>
+        /// Every line is cleared and one is set, rather than the marks being left where they were.
+        /// A fault that has been mended has to stop showing, and the line that was wrong is
+        /// frequently the line that was just changed.
+        /// </para>
+        /// </remarks>
+        void Mark()
+        {
+            var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
+                Editor.Runner.Get(_sequence));
+
+            _sentence.Problem = Editor.SequenceText.Problem(fault.Problem);
+            _sentence.Trigger.HasProblem = fault.Exists && fault.Step == SequenceFault.Trigger;
+
+            for (var i = 0; i < _sentence.Steps.Count; i++)
+                _sentence.Steps[i].HasProblem = fault.Exists && fault.Step == i;
         }
 
         SentenceTrigger BuildTrigger()
@@ -369,6 +408,7 @@ namespace Reactor.Editing
                 {
                     Editor.Do(_sequence,
                         new ChangeTrigger(when, Declared(answer.Targets), answer.Chosen, answer.All));
+
                     Editor.Pop();
                 },
                 true, when.RequiresAll));
@@ -498,8 +538,14 @@ namespace Reactor.Editing
         /// </summary>
         void SetName(string value)
         {
+            // Refused here as well as wherever it was typed, because a target is the part that can be
+            // written wrong - and cut to length in the one place that owns what a name may be.
+            var wanted = Naming.Clean(value);
+            if (wanted.Length == 0)
+                return;
+
             // Folded into one, because a name arrives a letter at a time.
-            Editor.Do(_sequence, new Rename(_sequence.Name, value), true);
+            Editor.Do(_sequence, new Rename(_sequence.Name, wanted), true);
         }
 
         /// <summary>

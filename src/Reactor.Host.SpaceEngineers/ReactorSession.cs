@@ -125,7 +125,7 @@ namespace Reactor.Host.SpaceEngineers
                 // has never heard of is worse than a client being told it cannot yet, and getting the edits
                 // onto a wire is its own piece of work.
                 if (MyAPIGateway.Utilities != null)
-                    MyAPIGateway.Utilities.ShowNotification("Reactor cannot be edited from a client yet.", 4000);
+                    MyAPIGateway.Utilities.ShowNotification("Automation cannot be edited from a client yet.", 4000);
 
                 return;
             }

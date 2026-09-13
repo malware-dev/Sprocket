@@ -57,6 +57,8 @@ sealed class PaperSequenceText : ISequenceText
 
     public string Status(SequenceStatus status) => status.ToString().ToLowerInvariant();
 
+    public string DefaultName(int number) => "sequence " + number;
+
     public string Problem(SequenceProblem problem) =>
         problem == SequenceProblem.None ? "" : problem.ToString().ToLowerInvariant();
 

@@ -34,7 +34,30 @@ namespace Reactor.Host.SpaceEngineers.World
     {
         bool Claims(IMyTerminalBlock block);
 
-        void Describe(EntityKind kind);
+        /// <summary>
+        /// Whether this block is arranged to raise that event <b>into this key</b>.
+        /// </summary>
+        /// <remarks>
+        /// True for anything with nothing to arrange. A button panel is the exception: its slot has
+        /// to hold Reactor's action <i>and</i> the key of the thing that should run, because a slot
+        /// pointed at a different sequence is wired and useless to this one. Somebody who cleared or
+        /// re-pointed it has said something, and that is a thing to report rather than to undo.
+        /// <para>
+        /// Reading a toolbar is not free, so this is asked on a cadence and never on a tick.
+        /// </para>
+        /// </remarks>
+        bool Raises(IMyTerminalBlock block, string eventId, string key);
+
+        /// <summary>
+        /// Says what this sort of block can do, be, and have happen to it.
+        /// </summary>
+        /// <remarks>
+        /// Handed the block as well as the kind, because a kind is cached per definition and some
+        /// definitions differ in what they offer - a four-button panel has four buttons to name and
+        /// a one-button panel has one. The block is a representative of its definition and nothing
+        /// more: anything read from it here is read once, for every block of that type.
+        /// </remarks>
+        void Describe(EntityKind kind, IMyTerminalBlock block);
 
         bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value);
 

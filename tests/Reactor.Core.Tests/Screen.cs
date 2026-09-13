@@ -107,6 +107,18 @@ static class Screen
         || editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
             .Any(p => p.Options.Any(e => e.Text == text) || p.Entries.Any(e => e.Text == text));
 
+    /// <summary>The rows of the one status list on this screen.</summary>
+    public static ObservableList<StatusEntry> Rows(this ReactorEditor editor) =>
+        editor.Component<StatusListComponent>().Entries;
+
+    /// <summary>Opens a row of that list, by where it sits.</summary>
+    /// <remarks>
+    /// By position rather than by name, because the names on these rows are the target's words and a
+    /// test that matched on them would be asserting about English on its way somewhere else.
+    /// </remarks>
+    public static void PressRow(this ReactorEditor editor, int row) =>
+        editor.Invoke(editor.Rows()[row].Command);
+
     public static void PressAdd(this ReactorEditor editor, string text) =>
         editor.Invoke(editor.Sentence().AddOptions.First(o => o.Text == text).Command);
 

@@ -74,7 +74,7 @@ namespace Reactor.Editing
 
         public override void Rename(string name)
         {
-            var wanted = (name ?? "").Trim();
+            var wanted = Naming.Clean(name);
 
             // Refused here as well as wherever it was typed. A target that forgot to ask would otherwise
             // erase the only thing this system can be called by, and the rule would end up living in every
@@ -150,6 +150,36 @@ namespace Reactor.Editing
 
             for (var i = 0; i < _list.Entries.Count && i < _sequences.Count; i++)
                 _list.Entries[i].SwitchIsOn = _sequences[i].Enabled;
+
+            if (SecondPassed())
+                Mark();
+        }
+
+        /// <summary>
+        /// Marks the sequences that are broken, and says what is wrong with each.
+        /// </summary>
+        /// <remarks>
+        /// The row somebody arrives at from the ship's screen and the row they open to mend it are
+        /// the same row, which is the whole point of the mark being here: the trail is a mark on
+        /// every screen between the front door and the line at fault, and a screen in the middle
+        /// that stayed quiet would end it.
+        /// <para>
+        /// One apiece rather than a count. A sequence is one thing that either works or does not,
+        /// and <see cref="StatusEntry.Problem" /> already says which way.
+        /// </para>
+        /// </remarks>
+        void Mark()
+        {
+            var entries = _list.Entries;
+            for (var i = 0; i < entries.Count && i < _sequences.Count; i++)
+            {
+                var sequence = _sequences[i];
+                var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, sequence,
+                    Editor.Runner.Get(sequence));
+
+                entries[i].Problem = Editor.SequenceText.Problem(fault.Problem);
+                entries[i].Problems = fault.Exists ? 1 : 0;
+            }
         }
 
         void Collect()

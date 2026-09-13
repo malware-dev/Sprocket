@@ -537,6 +537,9 @@ public class EditorTests
     /// starts it, and what it then does - and only the second takes a name. It used to be one
     /// part, so naming it swallowed the trigger as well, and the only way to keep the trigger
     /// on screen was to type it into the name by hand and keep it in step by hand forever.
+    ///
+    /// A sequence is named from birth now, so this is about overtyping a default rather than
+    /// filling in a blank, and clearing it is refused.
     /// </remarks>
     [Fact]
     public void TheHeadingIsWhereNamingHappens()
@@ -547,11 +550,11 @@ public class EditorTests
 
         var heading = ship.Editor.Screen.Heading;
 
-        // Unnamed: both halves say what they are, and there is no name behind either for a
-        // target to prefill a box with.
+        // Already named, the way a new block is. So a target opening a box to rename it has
+        // something to prefill, and this is always overtyping rather than filling in a blank.
         Assert.Equal(2, heading.Count);
         Assert.Equal("when Airlock Button is pressed", heading[0].Text);
-        Assert.Equal("", heading[1].Name);
+        Assert.Equal("sequence 1", heading[1].Name);
 
         // The trigger is not somebody's to name. It is already the best possible name for itself.
         Assert.False(heading[0].CanRename);
@@ -565,12 +568,78 @@ public class EditorTests
         Assert.Equal("Let me out", heading[1].Text);
         Assert.Equal("Let me out", heading[1].Name);
 
-        // Clearing is as ordinary an act as naming, and the sentence comes back.
+        // Clearing is refused now that the name is what identifies the row. Nothing is lost by
+        // refusing: there is always a name to fall back to, because there was one from birth.
         ship.Editor.Name("");
         ship.Tick();
-        Assert.Equal("when Airlock Button is pressed", heading[0].Text);
-        Assert.Equal("", heading[1].Name);
-        Assert.NotEqual("", heading[1].Text);
+        Assert.Equal("Let me out", heading[1].Name);
+        Assert.True(ship.Editor.Screen.NameRequired());
+    }
+
+    /// <summary>
+    /// A new sequence takes the first free number in its system, not a running count.
+    /// </summary>
+    /// <remarks>
+    /// So deleting the second of three and adding another gives "sequence 2" back, rather than a
+    /// fourth number for a third sequence. The numbering is per system because that is the list it
+    /// has to be told apart in.
+    /// </remarks>
+    [Fact]
+    public void ANewSequenceTakesTheFirstFreeNumber()
+    {
+        var ship = Build();
+        StartOnTheButton(ship.Editor);
+        ship.Tick();
+        Assert.Equal("sequence 1", ship.Editor.Screen.CustomName());
+
+        AnotherOnTheButton(ship);
+        Assert.Equal("sequence 2", ship.Editor.Screen.CustomName());
+
+        // The first one goes, so its number is free again.
+        var system = ship.Automation.Systems[0];
+        ship.Automation.RemoveSequence(system.Sequences[0]);
+
+        AnotherOnTheButton(ship);
+        Assert.Equal("sequence 1", ship.Editor.Screen.CustomName());
+    }
+
+    /// <summary>
+    /// Another sequence on the system that is already there, rather than a second system.
+    /// </summary>
+    /// <remarks>
+    /// Through the system's own screen, which is where the ways to start one live. Numbering is per
+    /// system, so a second system would start counting again and prove nothing.
+    /// </remarks>
+    static void AnotherOnTheButton(Ship ship)
+    {
+        ship.Editor.GoToRoot();
+        ship.Tick();
+
+        // Row 0 is the system's heading, which is inert; row 1 is the one of it that opens.
+        ship.Editor.PressRow(1);
+        ship.Editor.PressStart("When…");
+        ship.Editor.PressBlock("Airlock Button");
+        ship.Editor.PressChoice("is pressed");
+        ship.Editor.PressPrimary();
+        ship.Tick();
+    }
+
+    /// <summary>A name is cut to length by the model, not only by whatever asked for it.</summary>
+    /// <remarks>
+    /// A target should refuse it earlier and more kindly, while somebody is still typing. This is
+    /// the backstop, because a target is the part that can be written wrong.
+    /// </remarks>
+    [Fact]
+    public void ANameIsCutToLength()
+    {
+        var ship = Build();
+        StartOnTheButton(ship.Editor);
+        ship.Tick();
+
+        ship.Editor.Name(new string('x', Naming.MaxLength + 20));
+        ship.Tick();
+
+        Assert.Equal(Naming.MaxLength, ship.Editor.Screen.CustomName().Length);
     }
 
     /// <summary>

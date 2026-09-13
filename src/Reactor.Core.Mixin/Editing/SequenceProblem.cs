@@ -22,6 +22,22 @@ namespace Reactor.Editing
         MissingGate,
 
         /// <summary>
+        /// Nothing is missing and nothing will ever start it.
+        /// </summary>
+        /// <remarks>
+        /// A different kind of wrong from the rest of these. Every other member says something the
+        /// sequence names is gone; this one says the sequence is complete, correct, and unreachable -
+        /// so the fix is not to mend a reference but to give it something that fires it.
+        /// <para>
+        /// Two ways in so far. A button whose toolbar slot is no longer Reactor's, because somebody
+        /// cleared it from the terminal - which is a legitimate way to say "stop doing that", so it
+        /// is reported rather than undone. And a named sequence nothing calls, which has been
+        /// possible since sequences could be named and has never been reported.
+        /// </para>
+        /// </remarks>
+        NeverTriggered,
+
+        /// <summary>
         /// Everything it names is here, but at least one of them was found by a weaker key.
         /// </summary>
         /// <remarks>

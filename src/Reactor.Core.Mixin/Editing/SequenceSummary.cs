@@ -39,10 +39,43 @@ namespace Reactor.Editing
                 entry.Status = wording.Status(Status(sequence, running));
                 entry.JustRan = running != null && running.LastFiredTick >= 0
                     && tick - running.LastFiredTick < JustRanTicks;
-                entry.Problem = wording.Problem(Problem(bindings, sequence, running));
 
                 entry.LastRun = time.Ago(TicksSinceRun(running, tick));
             }
+        }
+
+        /// <summary>
+        /// Whether nothing can ever start this sequence.
+        /// </summary>
+        /// <remarks>
+        /// An unfinished trigger is not unreachable. Somebody half way through picking blocks has a
+        /// sequence that cannot fire yet, and saying so would be scolding them for not having
+        /// finished.
+        /// <para>
+        /// A <c>CalledTrigger</c> sequence is not judged either, though today nothing can call one -
+        /// that waits for the language to have a way to say <c>run</c>, at which point "named and
+        /// never called" becomes the second thing this reports.
+        /// </para>
+        /// <para>
+        /// One question to the host rather than one per source. The host knows what it arranged and
+        /// for which sequence; core walking the sources and asking about each in turn was both dearer
+        /// and weaker, since it could only ask whether <i>something</i> was wired there.
+        /// </para>
+        /// </remarks>
+        static bool NeverTriggered(IWorld world, Sequence sequence)
+        {
+            var when = sequence.Trigger as WhenTrigger;
+            if (when == null)
+                return false;
+
+            // Nothing left to start it, on something that has already been built. An empty trigger on
+            // a sequence with no steps is somebody half way through and is left alone; an empty one
+            // on a sequence that does something is a sequence that cannot run, however it got that
+            // way - abandoned mid-build, or a button taken away underneath it.
+            if (when.Sources.Count == 0 || string.IsNullOrEmpty(when.EventId))
+                return sequence.Steps.Count > 0;
+
+            return !world.CanStart(sequence);
         }
 
         /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
@@ -67,13 +100,22 @@ namespace Reactor.Editing
             return state.LastFiredTick < 0 ? SequenceStatus.NeverRun : SequenceStatus.Waiting;
         }
 
-        /// <summary>Why this sequence cannot work, or <see cref="SequenceProblem.None" />.</summary>
-        public static SequenceProblem Problem(Bindings bindings, Sequence sequence, SequenceRunner state)
+        /// <summary>
+        /// What is wrong with this sequence and where, or <see cref="SequenceFault.None" />.
+        /// </summary>
+        /// <remarks>
+        /// <b>Not free, and not for a tick.</b> Reachability can send a host off to read something
+        /// expensive - a toolbar, in Space Engineers - so every screen asks this on a cadence, which
+        /// is what <see cref="EditorPage.SecondPassed" /> is for. Nothing that breaks a sequence
+        /// breaks it faster than a person can do it by hand, so a second is soon enough.
+        /// </remarks>
+        public static SequenceFault Fault(IWorld world, Bindings bindings, Sequence sequence,
+            SequenceRunner state)
         {
             if (state != null && state.HasMissingSources)
-                return SequenceProblem.MissingSource;
+                return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger);
 
-            var adrift = false;
+            var adrift = SequenceFault.None;
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
@@ -83,19 +125,12 @@ namespace Reactor.Editing
                 {
                     var points = bindings.State(step.Targets[t]);
                     if (points == RefState.Lost)
-                        return SequenceProblem.MissingTarget;
-                    if (points == RefState.Adrift)
-                        adrift = true;
+                        return new SequenceFault(SequenceProblem.MissingTarget, i);
+                    if (points == RefState.Adrift && !adrift.Exists)
+                        adrift = new SequenceFault(SequenceProblem.Adrift, i);
                 }
 
-                var gate = step.Gate as OnceGate;
-                var condition = gate != null ? gate.Condition : null;
-                if (condition == null)
-                {
-                    var guard = step.Gate as OnlyIfGate;
-                    condition = guard != null ? guard.Condition : null;
-                }
-
+                var condition = ConditionOf(step);
                 if (condition == null)
                     continue;
 
@@ -103,15 +138,33 @@ namespace Reactor.Editing
                 {
                     var held = bindings.State(condition.Entities[t]);
                     if (held == RefState.Lost)
-                        return SequenceProblem.MissingGate;
-                    if (held == RefState.Adrift)
-                        adrift = true;
+                        return new SequenceFault(SequenceProblem.MissingGate, i);
+                    if (held == RefState.Adrift && !adrift.Exists)
+                        adrift = new SequenceFault(SequenceProblem.Adrift, i);
                 }
             }
 
             // Reported only once nothing is outright missing, because being gone is the worse news
             // and a line can only say one thing.
-            return adrift ? SequenceProblem.Adrift : SequenceProblem.None;
+            if (adrift.Exists)
+                return adrift;
+
+            // Last, because it is the only one that is about the sequence as a whole rather than
+            // about something it names, and anything missing is the more useful thing to say.
+            return NeverTriggered(world, sequence)
+                ? new SequenceFault(SequenceProblem.NeverTriggered, SequenceFault.Trigger)
+                : SequenceFault.None;
+        }
+
+        /// <summary>What a step waits on, whichever kind of gate holds it back, or null.</summary>
+        static Condition ConditionOf(Step step)
+        {
+            var once = step.Gate as OnceGate;
+            if (once != null)
+                return once.Condition;
+
+            var guard = step.Gate as OnlyIfGate;
+            return guard != null ? guard.Condition : null;
         }
     }
 }

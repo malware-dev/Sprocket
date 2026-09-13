@@ -35,8 +35,8 @@ namespace Reactor.Host.SpaceEngineers.Terminal
             IMyTerminalControlButton open = MyAPIGateway.TerminalControls
                 .CreateControl<IMyTerminalControlButton, IMyProgrammableBlock>("Reactor_Open");
 
-            open.Title = MyStringId.GetOrCompute("Reactor");
-            open.Tooltip = MyStringId.GetOrCompute("Open the Reactor editor.");
+            open.Title = MyStringId.GetOrCompute("Automation");
+            open.Tooltip = MyStringId.GetOrCompute("Open the automation editor.");
             open.SupportsMultipleBlocks = false;
             open.Visible = block => true;
             open.Enabled = block => true;

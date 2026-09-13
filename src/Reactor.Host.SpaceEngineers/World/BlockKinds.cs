@@ -49,7 +49,7 @@ namespace Reactor.Host.SpaceEngineers.World
             // What this block is, before what every block is, so a door offers "open" above "switch on".
             IBlockExtension extension = BlockExtensions.For(block);
             if (extension != null)
-                extension.Describe(kind);
+                extension.Describe(kind, block);
 
             kind.WithProperty(GridEntity.WorkingProperty, "working")
                 .WithState("is-working", GridEntity.WorkingProperty, true, "is working")

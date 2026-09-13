@@ -25,6 +25,7 @@
 <glyph ch="c" code="0063" bm="0" origin="256,64" size="64x64" aw="63" lsb="0" />
 <glyph ch="p" code="0070" bm="0" origin="320,64" size="64x64" aw="63" lsb="0" />
 <glyph ch="x" code="0078" bm="0" origin="384,64" size="64x64" aw="63" lsb="0" />
+<glyph ch="!" code="0021" bm="0" origin="448,64" size="64x64" aw="63" lsb="0" />
 </glyphs>
 <kernpairs>
 </kernpairs>

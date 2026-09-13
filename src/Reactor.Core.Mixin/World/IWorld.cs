@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+using Reactor.Sequences;
+
 namespace Reactor.World
 {
     /// <summary>
@@ -124,6 +126,29 @@ namespace Reactor.World
 
         /// <summary>Changes what this construct is called.</summary>
         void Rename(string name);
+
+        /// <summary>
+        /// Whether anything could start this sequence at all, as things currently stand.
+        /// </summary>
+        /// <remarks>
+        /// Not whether it <i>will</i> - whether it <i>can</i>. A host may have to arrange something
+        /// outside the program for a trigger to reach Reactor at all: in Space Engineers a button
+        /// panel raises nothing from a slot that no longer points at Reactor, so a sequence listening
+        /// to that button is complete, correct and unreachable. Only the host can tell.
+        /// <para>
+        /// <b>Asked about the sequence rather than about each of its sources</b>, which is what makes
+        /// it affordable and what makes it right. Affordable, because a host can keep the answer ready
+        /// and hand back a lookup instead of reading something expensive once per source. Right,
+        /// because "is there anything wired here" is a weaker question than "is there anything wired
+        /// here that starts <i>this</i>" - a button pointed at a different sequence answers yes to the
+        /// first and is no use to this one.
+        /// </para>
+        /// <para>
+        /// A host with nothing to arrange answers true and is done.
+        /// </para>
+        /// </remarks>
+        bool CanStart(Sequence sequence);
+
 
         /// <summary>Tells an entity to do something.</summary>
         void Invoke(IEntity entity, string actionId);

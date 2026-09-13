@@ -39,12 +39,29 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Lists
         readonly Stack _text = Widgets.Column(Space.Line * 0.6f);
         readonly Stack _detail = Widgets.RowOf(Space.Item);
 
+        /// <summary>
+        /// Says that something below this row is wrong, without saying what.
+        /// </summary>
+        /// <remarks>
+        /// Immediately after the name, rather than under it or at the far edge. A row that owns a
+        /// problem puts the sentence on its own line; a row that merely contains one has nothing to
+        /// say yet, and the point is to tell somebody which way to go rather than to explain here.
+        /// </remarks>
+        readonly Glyph _below = Widgets.Symbol(Symbols.Warning, Palette.Problem);
+
+        readonly Stack _heading = Widgets.RowOf(Space.Item);
+
         public StatusRow()
         {
             _detail.Children.Add(_status);
             _detail.Children.Add(_lastRun);
 
-            _text.Children.Add(_summary);
+            // Hugging the name, not filling the row. A mark at the far right lands beside the
+            // switch and reads as belonging to it, which is a different claim entirely.
+            _heading.Children.Add(_summary);
+            _heading.Children.Add(_below);
+
+            _text.Children.Add(_heading);
             _text.Children.Add(_detail);
             _text.Children.Add(_problem);
 
@@ -70,7 +87,14 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Lists
             // a panel either: a panel says "press me", and the only way to find out it was inert would be
             // to press it. The light and the switch stay, because those are real.
             bool pressable = entry.Command != 0;
-            _line.Background = pressable ? Palette.Panel : Palette.None;
+            // A row leading to something wrong is washed rather than merely marked. A small glyph
+            // beside a name is something you find when you already suspect; the point of this is to
+            // be seen by somebody who does not yet know to look.
+            var wrong = entry.Problems > 0;
+
+            _line.Background = wrong
+                ? Palette.ProblemWash
+                : (pressable ? Palette.Panel : Palette.None);
             _line.Highlight = pressable ? Palette.PanelHot : Palette.None;
 
             // The same plus the start block uses, for the same reason: this row adds something. Core marks
@@ -80,9 +104,11 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Lists
 
             // A row that does something has no state to show, so it gets no light - only the space where
             // one would be, which keeps its text lined up with its neighbours.
-            _light.Background = entry.IsAction
-                ? Palette.None
-                : (entry.JustRan ? Palette.Live : Palette.Dim);
+            // Broken outranks recently-run. A green light on a row that cannot work is the screen
+            // contradicting itself, and the light is the first thing the eye lands on.
+            _light.Background = wrong
+                ? Palette.Problem
+                : (entry.IsAction ? Palette.None : (entry.JustRan ? Palette.Live : Palette.Dim));
 
             _status.Text = entry.Status;
             _lastRun.Text = entry.LastRun;
@@ -96,6 +122,10 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Lists
             // are two different readings, and losing one to show the other is how a diagnosis screen lies.
             _problem.Text = entry.Problem;
             _problem.Collapsed = string.IsNullOrEmpty(entry.Problem);
+
+            // Nothing wrong is the ordinary case, so it takes no room rather than drawing blank - a
+            // column of rows each reserving space for a mark reads as a column of marks.
+            _below.Collapsed = entry.Problems == 0;
 
             // Says what state it is in, the way the game's own on/off control does. The light on the
             // left of this row says whether the thing is doing something right now; this says whether it

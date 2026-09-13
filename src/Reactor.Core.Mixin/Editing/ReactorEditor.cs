@@ -79,6 +79,14 @@ namespace Reactor.Editing
         {
             _runner.Tick(tick);
 
+            // Once a second, and whether or not anybody has a screen open, because a sequence that
+            // cannot work is not made safer by nobody looking at it.
+            if (tick - _parked >= Second || tick < _parked)
+            {
+                _parked = tick;
+                ParkBroken();
+            }
+
             if (_structureDirty)
             {
                 Rebuild();
@@ -94,6 +102,49 @@ namespace Reactor.Editing
             _screen.Subtitle = Current.Subtitle;
             _screen.SwitchIsOn = Current.SwitchIsOn;
         }
+
+        /// <summary>
+        /// Switches off anything that cannot work.
+        /// </summary>
+        /// <remarks>
+        /// Reactor switching off somebody's automation, which it does nowhere else, and the reason it
+        /// is allowed here is that there is nothing to switch off: the thing is already not running.
+        /// A sequence nothing can start never fires, and one whose blocks are gone can only get part
+        /// way through - which is worse than not starting, because it leaves a machine half-way.
+        /// <para>
+        /// It also removes a step. A sequence may only be edited while it is switched off, so finding
+        /// a broken one meant switching it off yourself before you could mend it - an errand on top of
+        /// a problem you did not ask for.
+        /// </para>
+        /// <para>
+        /// <b>Off, and never back on.</b> Mending it leaves it parked, and switching a sequence on is
+        /// somebody's decision every time - Reactor starting a machine on its own judgement is the one
+        /// direction that can hurt. Leaving the editor with it off is where the offer to switch it on
+        /// belongs.
+        /// </para>
+        /// </remarks>
+        void ParkBroken()
+        {
+            var sequences = _program.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                Sequence sequence = sequences[i];
+                if (!sequence.Enabled)
+                    continue;
+
+                if (SequenceSummary.Fault(_world, _runner.Bindings, sequence, _runner.Get(sequence))
+                    .Exists)
+                {
+                    sequence.Enabled = false;
+                }
+            }
+        }
+
+        /// <summary>Ticks in a second, at the rate the game runs at.</summary>
+        const int Second = 60;
+
+        /// <summary>A second behind the start, so the first tick looks rather than waiting.</summary>
+        int _parked = -Second;
 
         /// <summary>Acts on a button, a row, or anything else that was pressed.</summary>
         public void Invoke(int command)
@@ -362,6 +413,10 @@ namespace Reactor.Editing
                 return;
 
             edit.Apply(sequence);
+
+            // Any deliberate change may have moved what a trigger points at, and whatever arranges
+            // triggers outside the program has no other way to know.
+            _program.Rewire();
 
             // A new edit is a new branch, so whatever was walked back is gone.
             _redo.Remove(sequence.Id);
@@ -747,8 +802,61 @@ namespace Reactor.Editing
             // exists.
             var sequence = _program.AddSequence(system, trigger);
             sequence.Enabled = false;
+            sequence.Name = Name(sequence);
 
             Push(new SequencePage(this, sequence));
+        }
+
+        /// <summary>
+        /// Names a new sequence the way the game names a new block.
+        /// </summary>
+        /// <remarks>
+        /// Named from birth rather than left blank, which is a reversal: a sequence used to read as
+        /// its own sentence and naming one was optional. That made the identity of a row depend on
+        /// what the row happened to say, so it changed as somebody edited, and it made a name a chore
+        /// they were quietly expected to get round to. A default they can overtype is what everybody
+        /// already knows from the game, and it asks nothing.
+        /// <para>
+        /// The first free number rather than a running count, so deleting the second of three and
+        /// adding another gives "Sequence 2" back instead of a fourth number for a third sequence.
+        /// Numbered within its system, because that is where it is listed and where it has to be told
+        /// apart from its neighbours.
+        /// </para>
+        /// <para>
+        /// It is a real name from here on, stored and renameable. Nothing re-derives it, so renaming
+        /// one never renumbers another.
+        /// </para>
+        /// </remarks>
+        string Name(Sequence sequence)
+        {
+            AutomationSystem owner = null;
+            for (var i = 0; i < _program.Systems.Count && owner == null; i++)
+            {
+                var sequences = _program.Systems[i].Sequences;
+                for (var q = 0; q < sequences.Count; q++)
+                {
+                    if (sequences[q] != sequence)
+                        continue;
+
+                    owner = _program.Systems[i];
+                    break;
+                }
+            }
+
+            if (owner == null)
+                return SequenceText.DefaultName(1);
+
+            for (var number = 1; ; number++)
+            {
+                var wanted = SequenceText.DefaultName(number);
+
+                var taken = false;
+                for (var i = 0; i < owner.Sequences.Count && !taken; i++)
+                    taken = owner.Sequences[i] != sequence && owner.Sequences[i].Name == wanted;
+
+                if (!taken)
+                    return wanted;
+            }
         }
 
         /// <summary>

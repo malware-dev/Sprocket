@@ -1,3 +1,4 @@
+using Reactor.Sequences;
 using Reactor.World;
 using Reactor.Host.SpaceEngineers.Presentation.Controls;
 using Reactor.Host.SpaceEngineers.Presentation.Screen;
@@ -43,6 +44,9 @@ sealed class SimWorld : IWorld
     public IReadOnlyList<SimEntity> SimEntities => _entities;
 
     public IEntity? FindEntity(long entityId) => _byId.GetValueOrDefault(entityId);
+
+    /// <summary>Nothing here has to be arranged outside the program, so anything can start.</summary>
+    public bool CanStart(Sequence sequence) => true;
 
     /// <summary>
     /// An id and a name, in that order.

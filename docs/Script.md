@@ -809,3 +809,38 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
    - **Position is still not a key.** A pasted blueprint keeps every position and changes every id,
      which makes it the valuable middle key, and it needs a `ValueKind` wide enough to hold one.
 6. **The script language**, once 5 has settled what a reference is.
+7. **Error reporting and debugging.** Started. A trail exists; the section it belongs to does not.
+
+   **Done: a problem is marked on every screen between the front door and the line at fault.**
+   `SequenceSummary.Fault` answers one question - what is wrong and *where* - as a
+   `SequenceFault`, which is a `SequenceProblem` plus either a step index or
+   `SequenceFault.Trigger`. The ship's screen marks the failing *instance* and not the system;
+   the system's screen marks the failing sequence and says what is wrong with it; the sequence's
+   screen says what is wrong once, in words, and marks the one line it is about. In the Space
+   Engineers target that mark is a washed row and a red light, the same treatment at all three
+   levels, so arriving from one screen arrives at something already recognised.
+
+   `SequenceProblem` gained `NeverTriggered` for the case that started this: a sequence that is
+   complete, correct and unreachable, because somebody cleared its button out of the game's own
+   terminal. That is a legitimate way to say "stop doing that", so it is reported rather than
+   undone.
+
+   **The rule that came with it: a fault is not free and is never worked out on a tick.**
+   Answering can send a host off to read a toolbar. Every page asks on a cadence through
+   `EditorPage.SecondPassed`, which is soon enough because nothing breaks a sequence faster than
+   a person can do it by hand.
+
+   **Left:**
+
+   - **Nothing yet takes you to the fix; it only shows you where it is.** The mark is on the row
+     you would press, which is most of the way there, but a press on the mark itself does
+     nothing and there is no "show me what is wrong" anywhere.
+   - **`Adrift` is reported and cannot be acted on** - the same debt step 5 owes, seen from here.
+   - **The words are still one line per problem.** "Nothing can start this" does not say that the
+     button's slot was cleared or which button it was, and it is the one problem whose cause is
+     outside Reactor entirely.
+   - **Nothing reports a named sequence that nothing calls**, which waits for the language to have
+     a way to say `run`.
+   - **Leaving the sequence editor with the sequence switched off should offer to switch it on.**
+     Not a fault, the same family: something built that cannot work, said at the moment it can be
+     fixed for free.

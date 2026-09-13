@@ -52,6 +52,20 @@ namespace Reactor.Editing
         /// </remarks>
         string Doing(Bindings bindings, Sequence sequence);
 
+        /// <summary>
+        /// What to call a sequence nobody has named yet, given its number within its system.
+        /// </summary>
+        /// <remarks>
+        /// A sequence is named from birth, the way a block is - "Sequence 3", overtypeable, and the
+        /// thing a row is identified by. The number is core's and the word is yours, which is the only
+        /// reason this is here rather than in core: "Sequence" is English.
+        /// <para>
+        /// It is a real name once given, stored and round-tripped like any other. Nothing re-derives
+        /// it, so renaming the third sequence does not make the fourth become the third.
+        /// </para>
+        /// </remarks>
+        string DefaultName(int number);
+
         string Status(SequenceStatus status);
 
         /// <summary>Empty for <see cref="SequenceProblem.None" />.</summary>

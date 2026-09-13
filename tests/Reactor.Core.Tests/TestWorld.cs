@@ -1,3 +1,4 @@
+using Reactor.Sequences;
 using Reactor.World;
 
 namespace Reactor.Tests;
@@ -49,6 +50,13 @@ sealed class TestWorld : IWorld
     }
 
     public IEntity? FindEntity(long entityId) => _entities.FirstOrDefault(d => d.Id == entityId);
+
+    /// <summary>
+    /// Sequences nothing can start. Told, so a test can make one unreachable without a host.
+    /// </summary>
+    public readonly HashSet<int> Unstartable = [];
+
+    public bool CanStart(Sequence sequence) => !Unstartable.Contains(sequence.Id);
 
     /// <summary>An id and a name, in that order, which is enough to tell bound from adrift.</summary>
     public void Identify(IEntity entity, List<EntityKey> keys)

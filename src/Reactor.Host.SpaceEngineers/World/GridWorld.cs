@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Reactor.Sequences;
 using Reactor.World;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
@@ -135,6 +136,57 @@ namespace Reactor.Host.SpaceEngineers.World
         /// position and changes every id - it is not here yet because there is no value kind wide
         /// enough to write one down. See "Still to prove" in <c>docs/Script.md</c>.
         /// </remarks>
+        /// <summary>
+        /// Sequences nothing can currently start, by id.
+        /// </summary>
+        /// <remarks>
+        /// Held rather than worked out, and held as the exceptions rather than the rule, because
+        /// almost nothing is ever in it: a sequence started by something the game pushes needs no
+        /// arranging at all, and a button that is wired stays wired. So the ordinary answer costs one
+        /// lookup in an empty set.
+        /// <para>
+        /// Filled in by whatever owns the wiring - it knows what it arranged and for which sequence,
+        /// which is exactly what makes the question answerable without reading a toolbar per ask.
+        /// </para>
+        /// </remarks>
+        readonly HashSet<int> _unstartable = new HashSet<int>();
+
+        /// <summary>Which declarations are not arranged, per sequence that names them.</summary>
+        /// <remarks>
+        /// Only ever holds the broken ones, so it is empty on a working construct and costs a lookup
+        /// that fails immediately.
+        /// </remarks>
+        readonly Dictionary<int, List<string>> _unarranged = new Dictionary<int, List<string>>();
+
+        public void Unstartable(List<int> sequenceIds, Dictionary<int, List<string>> sources)
+        {
+            _unstartable.Clear();
+            for (var i = 0; i < sequenceIds.Count; i++)
+                _unstartable.Add(sequenceIds[i]);
+
+            _unarranged.Clear();
+            foreach (var pair in sources)
+                _unarranged[pair.Key] = pair.Value;
+        }
+
+        public void Unarranged(Sequence sequence, List<string> sources)
+        {
+            if (_unarranged.Count == 0)
+                return;
+
+            List<string> broken;
+            if (!_unarranged.TryGetValue(sequence.Id, out broken))
+                return;
+
+            for (var i = 0; i < broken.Count; i++)
+                sources.Add(broken[i]);
+        }
+
+        public bool CanStart(Sequence sequence)
+        {
+            return _unstartable.Count == 0 || !_unstartable.Contains(sequence.Id);
+        }
+
         public void Identify(IEntity entity, List<EntityKey> keys)
         {
             keys.Clear();

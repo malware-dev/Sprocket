@@ -33,5 +33,15 @@ namespace Reactor.Ui
         /// event-versus-state distinction the user has to end up understanding.
         /// </remarks>
         public bool IsLiveNow { get; set; }
+
+        /// <summary>
+        /// Whether the reason this sequence cannot work is here, on this line.
+        /// </summary>
+        /// <remarks>
+        /// What is wrong is said once, in words, by <see cref="SequenceComponent.Problem" />. This
+        /// says where, and a target has to draw it: somebody led down two screens to get here came
+        /// to be shown the thing to fix.
+        /// </remarks>
+        public bool HasProblem { get; set; }
     }
 }

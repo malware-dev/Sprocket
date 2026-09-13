@@ -123,6 +123,7 @@ namespace Reactor.Editing
                     entry.SwitchCommand = Editor.RegisterToggle(
                         Cmd.EnableInstance, system.Id, instance.Number, Switch(instance));
                     entry.SwitchIsOn = instance.Enabled;
+
                     _list.Entries.Add(entry);
                     _rowOwners.Add(system);
                     _rowInstances.Add(instance);
@@ -174,7 +175,7 @@ namespace Reactor.Editing
 
         void Make(string name)
         {
-            name = (name ?? "").Trim();
+            name = Naming.Clean(name);
             if (name.Length == 0)
                 return;
 
@@ -199,6 +200,7 @@ namespace Reactor.Editing
             if (_list == null)
                 return;
 
+            var recount = SecondPassed();
             var entries = _list.Entries;
             var count = entries.Count < _rowOwners.Count ? entries.Count : _rowOwners.Count;
 
@@ -209,6 +211,14 @@ namespace Reactor.Editing
 
                 if (entry.IsAction)
                     continue;
+
+                // Only one of a system is ever marked, never the system itself. The system is not
+                // what is broken and not what somebody opens to mend it, and marking both says
+                // there are two problems.
+                if (recount && _rowInstances[i] != null)
+                    entry.Problems = SystemSummary.Problems(
+                        Editor.World, Editor.Runner.Bindings, Editor.Runner, system,
+                        _rowInstances[i]);
 
                 if (_rowInstances[i] == null)
                 {

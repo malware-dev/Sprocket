@@ -87,6 +87,15 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
         public const string Close = "x";
 
         /// <summary>
+        /// Something below here is wrong, without saying what.
+        /// </summary>
+        /// <remarks>
+        /// Plain rather than inside a triangle: three shapes competing for twenty pixels loses the
+        /// outline first. See <c>art/symbols/build_font.py</c>, which draws it.
+        /// </remarks>
+        public const string Warning = "!";
+
+        /// <summary>
         /// Flat white, tinted to whatever colour is wanted. The only way to fill a rectangle, since the
         /// seam draws sprites and knows nothing of solid colours.
         /// </summary>

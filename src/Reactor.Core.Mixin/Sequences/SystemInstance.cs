@@ -14,9 +14,10 @@ namespace Reactor.Sequences
     /// invite a better name without a dialog asking for one, and it never collides with the
     /// name of the system it belongs to.
     ///
-    /// It holds nothing but a name so far. What it is for is the blocks: each of these will
-    /// point the system's roles at its own doors and its own vent, which is why one system can
-    /// run two airlocks at opposite ends of a ship.
+    /// What it is for is the blocks: each of these points the system's roles at its own doors
+    /// and its own vent, which is why one system can run two airlocks at opposite ends of a
+    /// ship. See <see cref="Fill" /> and <see cref="Resolve" /> - the runtime goes through them
+    /// on every step of every running sequence.
     /// </remarks>
     public sealed class SystemInstance
     {

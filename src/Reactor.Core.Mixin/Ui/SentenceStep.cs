@@ -46,6 +46,15 @@ namespace Reactor.Ui
         public int Position { get; set; }
 
         /// <summary>
+        /// Whether the reason the sequence cannot work is this step.
+        /// </summary>
+        /// <remarks>
+        /// At most one line of a sentence carries this at a time - see <c>SequenceFault</c>, which
+        /// reports one fault so that a screen says one thing.
+        /// </remarks>
+        public bool HasProblem { get; set; }
+
+        /// <summary>
         /// Send a position here to move this step there.
         /// </summary>
         /// <remarks>

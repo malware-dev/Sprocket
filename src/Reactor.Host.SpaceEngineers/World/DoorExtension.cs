@@ -36,7 +36,13 @@ namespace Reactor.Host.SpaceEngineers.World
             return block is IMyDoor;
         }
 
-        public void Describe(EntityKind kind)
+        /// <summary>Nothing to arrange: this block's events fire when they fire.</summary>
+        public bool Raises(IMyTerminalBlock block, string eventId, string key)
+        {
+            return true;
+        }
+
+        public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithProperty(Open, "open")
                 .WithProperty(Shut, "shut")

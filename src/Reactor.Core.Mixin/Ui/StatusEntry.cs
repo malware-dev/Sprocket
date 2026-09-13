@@ -8,6 +8,7 @@ namespace Reactor.Ui
         string _lastRun;
         string _problem;
         bool _ranLight;
+        int _problems;
 
         public StatusEntry(string summary, int command)
         {
@@ -102,6 +103,26 @@ namespace Reactor.Ui
         {
             get { return _ranLight; }
             set { Set(ref _ranLight, value, "JustRan"); }
+        }
+
+        /// <summary>
+        /// How many things have something wrong with them at or below this row.
+        /// </summary>
+        /// <remarks>
+        /// A count rather than a mark, and it travels upward: the only way to find a broken sequence
+        /// was to open every system and look, so every row on the way now carries the number of
+        /// broken things it leads to. The row that owns the problem counts itself, and says what is
+        /// wrong in <see cref="Problem" /> as well - one number for where, one line for what.
+        /// <para>
+        /// A target draws an exclamation, a colour, the number, or nothing; core only counts. It has
+        /// to draw something, though, because this is the whole of how somebody finds the one broken
+        /// row among forty.
+        /// </para>
+        /// </remarks>
+        public int Problems
+        {
+            get { return _problems; }
+            set { Set(ref _problems, value, "Problems"); }
         }
 
         public string Problem

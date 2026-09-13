@@ -100,6 +100,35 @@ public class InstanceTests
     static TestDoor Door(Ship ship, string name) =>
         ship.World.Entities.OfType<TestDoor>().First(d => d.Name == name);
 
+    /// <summary>
+    /// Calling a sequence names which one of its system to run it on.
+    /// </summary>
+    /// <remarks>
+    /// What a button on the port airlock means, as against a button on the front one. Before this
+    /// there was only <c>Call(Sequence)</c>, which runs the first of them - so a toolbar slot could
+    /// say which sequence and never which airlock, and a second one of a system could be started
+    /// only by its own blocks changing.
+    /// </remarks>
+    [Fact]
+    public void CallingNamesWhichOneOfTheSystemToRun()
+    {
+        var ship = Build();
+        var port = ship.Airlock.AddInstance();
+        Fit(ship, port);
+
+        Door(ship, "Front Inner").ForceOpen();
+        Door(ship, "Port Inner").ForceOpen();
+        ship.Tick(2);
+        ship.World.Log.Clear();
+
+        ship.Runner.Call(ship.Program.Sequences[0], port);
+        ship.Tick(3);
+
+        // The port one ran, and the front one did not - no button was pressed at all.
+        Assert.Contains("Port Inner:close", ship.World.Log);
+        Assert.DoesNotContain("Front Inner:close", ship.World.Log);
+    }
+
     [Fact]
     public void EachOneOfASystemActsOnItsOwnThings()
     {

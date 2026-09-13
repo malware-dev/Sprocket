@@ -34,7 +34,7 @@ namespace Reactor.Host.SpaceEngineers.Terminal
         /// <summary>
         /// Stored inside somebody's saved game, so it can never change.
         /// </summary>
-        const string Id = "Reactor_Trigger";
+        public const string ActionId = "Reactor_Trigger";
 
         /// <summary>
         /// Hidden from every list a player can assign from.
@@ -57,9 +57,12 @@ namespace Reactor.Host.SpaceEngineers.Terminal
         /// </remarks>
         static List<MyToolbarType> EveryList()
         {
+            // ButtonPanel is deliberately absent. Hiding it from that type also stops an assigned
+            // slot resolving for display there, so the button never lights up - working, and looking
+            // broken, on the one toolbar type Reactor actually writes to.
             return new List<MyToolbarType>
             {
-                MyToolbarType.ButtonPanel, MyToolbarType.Character, MyToolbarType.Ship,
+                MyToolbarType.Character, MyToolbarType.Ship,
                 MyToolbarType.Seat, MyToolbarType.BuildCockpit, MyToolbarType.Spectator
             };
         }
@@ -69,19 +72,31 @@ namespace Reactor.Host.SpaceEngineers.Terminal
         /// <summary>What a slot points at: this block, and this trigger of it.</summary>
         public static MyToolbarItemInfo Slot(long reactorBlockId)
         {
-            return MyToolbarItemInfo.BlockAction(reactorBlockId, Id);
+            return MyToolbarItemInfo.BlockAction(reactorBlockId, ActionId);
         }
 
         public static bool IsOurs(MyToolbarItemInfo info)
         {
-            return info.ActionId == Id;
+            return info.ActionId == ActionId;
         }
 
-        /// <summary>The argument that says which trigger, ready to write into a slot.</summary>
-        public static List<TerminalActionParameter> Argument(long trigger)
+        /// <summary>The argument that says which sequence of which system, ready to write into a slot.</summary>
+        /// <remarks>
+        /// A key rather than a number, and <b>one parameter rather than three.</b> A parameter list's
+        /// arity and types are frozen by every slot in every saved world, and Reactor may not rewrite
+        /// a slot, so three parameters would make growing the key depend on the game tolerating a
+        /// saved item that is one short. A string's contents are Reactor's business alone.
+        /// <para>
+        /// Reactor used to write a dense index it minted itself and keep a table beside it, which
+        /// cost a table that had to survive a save, a rule about never reusing a number, and a
+        /// rewrite of every slot on load to recover the numbering - and that rewrite was what
+        /// silently undid a button somebody had cleared by hand.
+        /// </para>
+        /// </remarks>
+        public static List<TerminalActionParameter> Argument(string key)
         {
             var arguments = new List<TerminalActionParameter>();
-            arguments.Add(TerminalActionParameter.Get(trigger));
+            arguments.Add(TerminalActionParameter.Get(key));
             return arguments;
         }
 
@@ -92,16 +107,17 @@ namespace Reactor.Host.SpaceEngineers.Terminal
 
             _registered = true;
 
-            IMyTerminalAction action = MyAPIGateway.TerminalControls.CreateAction<IMyProgrammableBlock>(Id);
-            action.Name = new StringBuilder("Reactor: trigger");
+            IMyTerminalAction action = MyAPIGateway.TerminalControls.CreateAction<IMyProgrammableBlock>(ActionId);
+            action.Name = new StringBuilder("Automation: trigger");
 
             // Never rendered for a slot Reactor labelled, and the fallback when it has not been.
-            action.Writer = delegate(IMyTerminalBlock block, StringBuilder text) { text.Append("Reactor"); };
+            action.Writer = delegate(IMyTerminalBlock block, StringBuilder text) { text.Append("Automation"); };
 
             // The value fixes the parameter's type, and is what the action receives if it is ever run
-            // with none. A long because the argument indexes a table rather than naming anything:
-            // Reactor's runtime cannot afford a string lookup on a path a sensor can drive hard.
-            action.ParameterDefinitions.Add(TerminalActionParameter.Get(0L));
+            // with none. A string, because what a slot carries is a key naming a sequence of a system
+            // rather than an index into anything - and an empty one resolves to nothing, which is the
+            // right answer to a slot nobody has configured.
+            action.ParameterDefinitions.Add(TerminalActionParameter.Get(string.Empty));
             action.ActionWithParameters = Run;
 
             action.InvalidToolbarTypes = EveryList();
@@ -126,15 +142,16 @@ namespace Reactor.Host.SpaceEngineers.Terminal
             if (block == null || parameters.Count == 0)
                 return;
 
-            // The value is boxed, and the type is whatever was written rather than what was
-            // declared - so a slot somebody edited by hand is a wrong type rather than a wrong
-            // number, and silence is the right answer to it.
-            if (!(parameters[0].Value is long))
+            // The value is boxed, and its type is whatever was written rather than what was
+            // declared - so a slot somebody edited by hand is a wrong type rather than a wrong key,
+            // and silence is the right answer to it.
+            var key = parameters[0].Value as string;
+            if (string.IsNullOrEmpty(key))
                 return;
 
             ReactorUnit unit = ReactorSession.UnitOf(block);
             if (unit != null)
-                unit.Fire((long)parameters[0].Value);
+                unit.Fire(key);
         }
     }
 }

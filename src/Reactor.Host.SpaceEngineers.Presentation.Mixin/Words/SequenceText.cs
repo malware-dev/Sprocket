@@ -63,11 +63,26 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         }
 
 
+        /// <summary>What to call a sequence nobody has renamed: "Sequence 3".</summary>
+        /// <remarks>
+        /// Numbered, not described. Reactor used to word a row out of what the sequence did, which
+        /// read well and made a row's identity change as somebody edited it. The game names a block
+        /// and lets you overtype it, and everybody already knows that.
+        /// </remarks>
+        public string DefaultName(int number)
+        {
+            return "Sequence " + number;
+        }
+
+
         public string Doing(Bindings bindings, Sequence sequence)
         {
             if (sequence.HasName)
                 return sequence.Name;
 
+            // The way out for a sequence the editor did not make - the model still allows a nameless
+            // one, so this stays rather than leaving a blank row behind. No longer the intended path:
+            // anything built through the editor is named from birth.
             if (sequence.Steps.Count == 0)
                 return "nothing yet";
 
@@ -97,6 +112,8 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
                 return "This listens to something that isn't here any more.";
             if (problem == SequenceProblem.MissingTarget)
                 return "This affects something that isn't here any more.";
+            if (problem == SequenceProblem.NeverTriggered)
+                return "Nothing can start this.";
             if (problem == SequenceProblem.MissingGate)
                 return "This waits on something that isn't here any more.";
 

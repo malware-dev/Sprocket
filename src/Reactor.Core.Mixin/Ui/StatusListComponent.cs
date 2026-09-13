@@ -23,6 +23,7 @@ namespace Reactor.Ui
 
         public ObservableList<StatusEntry> Entries { get; private set; }
 
+
         public string EmptyText
         {
             get { return _emptyText; }

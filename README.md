@@ -1,5 +1,9 @@
 # Reactor
 
+Starting fresh, or on a different machine? Read [`HANDOVER.md`](HANDOVER.md) as well - it holds where
+things stand, what comes next, and the things a clean checkout gets wrong. This file holds what the
+project is, which changes slowly; that one holds the situation, which does not.
+
 Automation for people who have never programmed, as a Space Engineers mod. The editor
 runs in the game, as a screen the game owns.
 

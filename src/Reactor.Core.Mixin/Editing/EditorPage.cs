@@ -15,6 +15,22 @@ namespace Reactor.Editing
     abstract class EditorPage
     {
         /// <summary>
+        /// When <see cref="SecondPassed" /> last said yes.
+        /// </summary>
+        /// <remarks>
+        /// A whole second behind the start of the world, so the first ask is answered rather than
+        /// held back - a page is refreshed the instant it is built, and that is when it most needs
+        /// to know. Zero would have made the first second of a new world the one second in which
+        /// nothing is checked; <c>int.MinValue</c> was worse, because subtracting it from a tick
+        /// overflows to a negative number, so "long ago" reads as "just now" and the answer is
+        /// never yes again.
+        /// </remarks>
+        int _asked = -Second;
+
+        /// <summary>Ticks in a second, at the rate the game runs at.</summary>
+        const int Second = 60;
+
+        /// <summary>
         /// What these declarations point at, as blocks, for a control that shows blocks.
         /// </summary>
         /// <remarks>
@@ -195,6 +211,30 @@ namespace Reactor.Editing
         /// focus and caret somebody may be typing into.
         /// </remarks>
         public abstract void Build(List<EditorComponent> components);
+
+        /// <summary>
+        /// True about once a second, for facts too dear to work out on a tick.
+        /// </summary>
+        /// <remarks>
+        /// Whether a sequence is broken is the one that needs this. A host may have to read a
+        /// toolbar to answer, and something outside Reactor can break a sequence while the screen
+        /// is open - somebody clearing a button from the game's own terminal - so an answer taken
+        /// only when the screen was built would never notice. Asking sixty times a second about
+        /// something that changes by hand is the other mistake.
+        /// <para>
+        /// Ask once per <see cref="Refresh" />. It records that it said yes, so a second ask in the
+        /// same tick is told no and whatever depended on it silently does not happen.
+        /// </para>
+        /// </remarks>
+        protected bool SecondPassed()
+        {
+            var now = Editor.CurrentTick;
+            if (now - _asked < Second && now >= _asked)
+                return false;
+
+            _asked = now;
+            return true;
+        }
 
         /// <summary>Updates live values on components that already exist.</summary>
         public virtual void Refresh() { }

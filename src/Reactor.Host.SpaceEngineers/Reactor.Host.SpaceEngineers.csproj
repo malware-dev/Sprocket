@@ -1,9 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netframework48</TargetFramework>
     <RootNamespace>Reactor.Host.SpaceEngineers</RootNamespace>
     <LangVersion>6</LangVersion>
-
     <!-- The repo root sets both of these; each needs a compiler newer than SE's.
          Reactor.SharedSources.props turns them off for core for the same reason. -->
     <Nullable>disable</Nullable>
@@ -17,7 +17,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.10">
+    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

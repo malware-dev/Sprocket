@@ -1,3 +1,5 @@
+using VRage.Game.ModAPI;
+using System;
 using System.Collections.Generic;
 using Reactor.World;
 using Sandbox.ModAPI;
@@ -13,6 +15,8 @@ using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
 using Reactor.Host.SpaceEngineers.Presentation.Picking;
 using Reactor.Host.SpaceEngineers.Presentation.Sequences;
+// The Ingame one, which is where action arguments live.
+using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 using Reactor.Host.SpaceEngineers.Terminal;
 
 namespace Reactor.Host.SpaceEngineers.World
@@ -31,17 +35,102 @@ namespace Reactor.Host.SpaceEngineers.World
     /// </remarks>
     sealed class ButtonPanelExtension : IBlockExtension
     {
-        public const string Pressed = "pressed";
+        /// <summary>
+        /// One property per button, named by its number from one.
+        /// </summary>
+        /// <remarks>
+        /// A property each rather than one for the panel, because "when the airlock button is
+        /// pressed" is only the right sentence on a panel with one button. On a panel with four it
+        /// has to say which, and the picker offers whatever a kind declares - so declaring four
+        /// events is the whole of making them selectable.
+        /// </remarks>
+        public static string Pressed(int button)
+        {
+            return "pressed-" + button;
+        }
+
+        /// <summary>
+        /// Which button an event names, counting from zero, or -1 for anything else.
+        /// </summary>
+        /// <remarks>
+        /// The only place that knows how a button event is spelled. A toolbar slot has to be claimed
+        /// on the button somebody chose, and the event id is where that choice is recorded.
+        /// </remarks>
+        public static int ButtonOf(string eventId)
+        {
+            if (string.IsNullOrEmpty(eventId) || !eventId.StartsWith("pressed-"))
+                return -1;
+
+            int number;
+            return int.TryParse(eventId.Substring("pressed-".Length), out number) && number >= 1
+                ? number - 1
+                : -1;
+        }
+
+        /// <summary>
+        /// How many buttons a panel has.
+        /// </summary>
+        /// <remarks>
+        /// Its toolbar's slot count, which is the same number and is the game's own answer. Before
+        /// the toolbar API the only way to ask was to probe <c>IsButtonAssigned</c> up to a guessed
+        /// ceiling of four.
+        /// </remarks>
+        static int Buttons(IMyTerminalBlock block)
+        {
+            IMyToolbar toolbar = Toolbars.Of(block);
+            return toolbar == null ? 0 : toolbar.SlotCount;
+        }
 
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyButtonPanel;
         }
 
-        public void Describe(EntityKind kind)
+        /// <summary>
+        /// Whether that button still starts that particular thing.
+        /// </summary>
+        /// <remarks>
+        /// <c>IsButtonAssigned</c> is not the question, and neither is "does this hold a Reactor
+        /// action". A slot can hold ours and start something else, or hold ours and carry a key from
+        /// a format we no longer write - both are assigned, both reach Reactor, and neither starts
+        /// what is asking. So the key is compared, not just the action.
+        /// </remarks>
+        public bool Raises(IMyTerminalBlock block, string eventId, string key)
         {
-            kind.WithProperty(Pressed, "pressed")
-                .WithEvent("pressed", Pressed, Edge.Rising, "is pressed");
+            var button = ButtonOf(eventId);
+            if (button < 0)
+                return true;
+
+            IMyToolbar toolbar = Toolbars.Of(block);
+            if (toolbar == null || button >= toolbar.SlotCount)
+                return false;
+
+            MyToolbarItemInfo held;
+            if (!toolbar.TryGetItem(button, out held) || held.ActionId != Terminal.TriggerAction.ActionId)
+                return false;
+
+            _read.Clear();
+            toolbar.GetParameters(button, _read);
+
+            return _read.Count > 0
+                && string.Equals(_read[0].Value as string, key, StringComparison.Ordinal);
+        }
+
+        /// <summary>Reused, because this is asked once per wired button per second.</summary>
+        readonly List<TerminalActionParameter> _read = new List<TerminalActionParameter>();
+
+        public void Describe(EntityKind kind, IMyTerminalBlock block)
+        {
+            var buttons = Buttons(block);
+
+            for (var i = 1; i <= buttons; i++)
+            {
+                // "button 2 is pressed" on a panel with several, and plain "is pressed" on a panel
+                // with one, where saying which would be saying something nobody needs to know.
+                var words = buttons == 1 ? "is pressed" : "button " + i + " is pressed";
+                kind.WithProperty(Pressed(i), words)
+                    .WithEvent(Pressed(i), Pressed(i), Edge.Rising, words);
+            }
         }
 
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
@@ -70,7 +159,8 @@ namespace Reactor.Host.SpaceEngineers.World
             if (panel == null)
                 return null;
 
-            for (int i = 0; i < 4; i++)
+            var buttons = Buttons(block);
+            for (int i = 0; i < buttons; i++)
             {
                 if (panel.IsButtonAssigned(i))
                     return null;
@@ -94,7 +184,9 @@ namespace Reactor.Host.SpaceEngineers.World
         sealed class ButtonListener : IBlockListener
         {
             readonly IMyButtonPanel _panel;
-            bool _pressed;
+
+            /// <summary>Which buttons were pressed since a tick last looked, by index.</summary>
+            readonly HashSet<int> _pressed = new HashSet<int>();
 
             public ButtonListener(IMyButtonPanel panel)
             {
@@ -102,32 +194,26 @@ namespace Reactor.Host.SpaceEngineers.World
                 _panel.ButtonPressed += OnPressed;
             }
 
-            /// <summary>
-            /// Any button, rather than one property per button.
-            /// </summary>
-            /// <remarks>
-            /// "When the airlock button is pressed" is the sentence people write, and a panel by a door is
-            /// almost always doing one job. Which button it was is carried by the event and can be offered
-            /// later without changing what is already written.
-            /// </remarks>
             void OnPressed(int index)
             {
-                _pressed = true;
+                _pressed.Add(index);
             }
 
             public bool TryRead(string propertyId, out EntityValue value)
             {
                 value = default(EntityValue);
-                if (propertyId != Pressed)
+
+                var button = ButtonOf(propertyId);
+                if (button < 0)
                     return false;
 
-                value = EntityValue.Of(_pressed);
+                value = EntityValue.Of(_pressed.Contains(button));
                 return true;
             }
 
             public void Clear()
             {
-                _pressed = false;
+                _pressed.Clear();
             }
 
             public void Dispose()

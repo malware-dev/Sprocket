@@ -63,6 +63,29 @@ namespace Reactor.Sequences
         public int Revision { get; private set; }
 
         /// <summary>
+        /// Bumped whenever somebody has said what a trigger is.
+        /// </summary>
+        /// <remarks>
+        /// Not the same question as <see cref="Revision" />, which is about declarations moving, and
+        /// not the same as "the program changed" either. A host may have to arrange something outside
+        /// the program for a trigger to work - a toolbar slot, in Space Engineers - and it needs to
+        /// know when to look again.
+        /// <para>
+        /// <b>Bumped even when nothing changed.</b> Somebody who opens a trigger and picks the same
+        /// button has asserted what they want, and that assertion is the whole of how a trigger gets
+        /// repaired: the model is quite right that nothing changed, and the arrangement outside it is
+        /// exactly what did.
+        /// </para>
+        /// </remarks>
+        public int Wiring { get; private set; }
+
+        /// <summary>Says that something moved and whatever arranges triggers should look again.</summary>
+        public void Rewire()
+        {
+            Wiring++;
+        }
+
+        /// <summary>
         /// Names this entity, or hands back the name it already has.
         /// </summary>
         /// <remarks>
@@ -85,6 +108,7 @@ namespace Reactor.Sequences
             world.Identify(entity, declared.Keys);
             _refs.Add(declared);
             Revision++;
+            Wiring++;
             return declared;
         }
 
@@ -95,6 +119,7 @@ namespace Reactor.Sequences
         {
             _refs.Add(declared);
             Revision++;
+            Wiring++;
 
             var number = Number(declared.Name);
             if (number >= _nextRefNumber)
@@ -228,6 +253,7 @@ namespace Reactor.Sequences
             var sequence = new Sequence(_nextSequenceId++, trigger);
             _sequences.Add(sequence);
             system.Add(sequence);
+            Wiring++;
             return sequence;
         }
 
@@ -236,6 +262,8 @@ namespace Reactor.Sequences
             _sequences.Remove(sequence);
             for (var i = 0; i < _systems.Count; i++)
                 _systems[i].Remove(sequence);
+
+            Wiring++;
         }
 
         public Sequence FindSequence(int id)

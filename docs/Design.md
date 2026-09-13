@@ -533,6 +533,109 @@ roles are filled once when it is placed or supplied by whoever calls into it. Th
 is closer to how blueprints already work and is probably right; the second is closer to
 passing arguments and is probably too programmer-shaped, but neither is decided.
 
+### 4b. How a block outside Reactor names a sequence
+
+*Worked out 2026-09-12. The scheme is settled. The naming rules are not, and no longer block
+anything - see "the separator became reversible" below.*
+
+A button panel starts a sequence through a custom terminal action, and the slot holding it is
+**written once, when the block is bound, and never touched again.** After that the game owns the
+slot: a player may clear it, re-point it or copy it, and all three are legitimate. A cleared slot is
+an instruction and gets reported, never repaired.
+
+That rule is what decides everything else, because it means whatever the slot carries can never be
+corrected afterwards.
+
+**The slot carries two halves.** The Reactor block's entity id, which is the game's own unique long
+and makes "which Reactor" unambiguous, and an argument that names the target inside that program:
+`system`, `instance`, `sequence`. The instance being in it is the part today's design cannot express
+at all - the slot names only a sequence, so nothing chooses which airlock it runs on.
+
+**The argument is an opaque string and is never parsed.** Reactor builds one dictionary per
+construct, ordinal-keyed, whose value already holds the sequence and the resolved instance. A key
+Reactor did not build has nothing behind it to parse, so a stale or copied slot finds nothing and
+stays silent. The cost on the firing path is one hash of a string the game hands us and one
+compare - no allocation, nothing split or concatenated. **That last part is the whole of why it is
+affordable**, and the reason to fear "string lookup" was always the parsing rather than the lookup.
+
+**One string parameter, and only ever one.** Not three parameters for the three parts, tempting as
+that looks. A parameter list's arity, order and types are frozen by every slot in every saved world,
+and Reactor may not rewrite slots - so growing the key later would mean relying on the game
+tolerating a saved item with three parameters against a definition declaring four. A string's
+*content* is Reactor's business and nobody else's: add a part, keep registering the old spelling
+alongside the new one, and every slot already out there goes on resolving with no migration.
+
+**Two spellings of the same key.** The form Reactor writes uses ids, which are immutable, so
+renaming cannot break wiring. The name form is registered against the same entry as an alias, so a
+person or a script can write one by hand.
+
+**Why the separator became reversible.** Nothing *stored* has to contain a name. The key Reactor
+writes is ids - `12/3/47` - so the only characters in a stored key are digits and whatever joins
+them, and **no name ever enters one.** The forbidden-separator problem was created by putting names
+in the stored form and it disappears when we don't. The name spelling is then an alias that is
+stored nowhere, so choosing its separator wrongly costs a changed convention rather than a migration
+of saved worlds.
+
+Candidates argued over for that spelling: `::`, `/`, `->`, `{}` bracketing. `[]` is out because
+`[tag]` is the established convention for marking blocks up for programmable-block scripts; `/` and
+`->` both occur in real block names. Not decided, and it no longer needs to be decided first.
+
+*One trap on the way:* do not reach for a separator nobody can type, such as a unit separator. Saves
+are XML and U+001F is not legal in XML 1.0 text, so it would break writing the world rather than
+fail where somebody could see it.
+
+**The sequence selector.** When a player drags Reactor's trigger action onto a slot themselves,
+Reactor answers with **its own chooser** - pick the system, pick which one of it, pick the sequence -
+rather than asking anybody to type a key. `IMyTerminalAction.DoUserParameterRequestWithItem` is
+mod-facing, and the game has no parameter dialog of its own: without that callback it silently
+applies the definitions' defaults. So supplying one is not an extra, it is the only way a
+hand-assigned slot gets a meaningful argument at all.
+
+`IUserCustomizableTerminalAction` also carries `SetCustomIconTitle`, so the slot can be labelled with
+what it does - a wired button reading "Cycle inner" on the panel instead of the flat "Reactor" that
+`TriggerAction.Writer` paints today. `MyMotorStator` does exactly this for its rotate-to-angle
+action.
+
+This is worth having whichever way the key question had gone, and it is the thing that removes the
+last reason anybody would ever type a key: after it, the only consumer wanting a writable address is
+a programmable-block script.
+
+**Naming rules still to design**, none of them now blocking:
+
+- A length limit on system and sequence names, chosen for what a list row can show rather than for
+  the key, and the same number for both.
+- Uniqueness among siblings: system names unique on a construct, sequence names unique within a
+  system.
+- **Sequences get default names** - "Sequence 1", "Sequence 2" - the way the game names blocks,
+  rather than the generated display sentence, which has limited value as an identity. This also
+  dissolves the optional-versus-required tension recorded in `SequencePage`: a sequence is always
+  named and the name is always overtypeable. The generated sentence stays as the sentence.
+- Whatever separator is chosen, **the script language uses the same one for the same job.** A `run`
+  naming a sequence in another system and a hand-written toolbar address are one thing spelt twice.
+
+**What this rests on.** An imported system arrives *unbound* - it carries roles, not instances - so
+every slot Reactor ever writes is written against local ids after any import that could have
+disturbed them. That single fact is what makes per-program ids sufficient and removes the need for a
+durable cross-world key. It also means import may renumber arrivals and **must never re-key what was
+already on the construct**, because bound slots depend on it.
+
+**Blocked on one thing.** "Which Reactor" is only well defined if Reactor is per-construct. It is
+not today: `ReactorSession` keys units by block entity id, `HasProgram` is asked of every
+programmable block, and a program lives in that block's own mod storage, so two Reactor blocks on
+one construct are two programs. Per-construct, with a programmable block as an entry point that
+opens the same view whichever one you enter from, is the intended model and is unbuilt.
+
+*Still to prove in the game*, the way the global action was: that a mod's parameter dialog actually
+opens when a player drags the action to a slot, and that what it sets survives a save and reload.
+
+*Rejected on the way, with the reasons, so they are not re-proposed.* A Reactor-minted dense trigger
+index - it lived only in memory, so the only way to recover the numbering after a load was to
+rewrite every slot, and that rewrite silently undid a button somebody had cleared by hand. A
+globally unique 64-bit key - unguaranteeable, and unnecessary once imports arrive unbound. Qualified
+*user* names as the only reference - that forces naming every conditional. A slot naming the block
+that owns the toolbar, so wiring would survive a paste or a projector print - it needs the action
+present on arbitrary blocks, and it is not, see ApiUnknowns 4.
+
 ### 5. Named state
 
 *Wanted by: I, C, D.*

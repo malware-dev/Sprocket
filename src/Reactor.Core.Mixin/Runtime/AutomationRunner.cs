@@ -138,6 +138,21 @@ namespace Reactor.Runtime
         }
 
         /// <summary>
+        /// Starts a sequence on one particular one of its system.
+        /// </summary>
+        /// <remarks>
+        /// Which is what a button on the port airlock means, as against a button on the front one.
+        /// The runners are already held per sequence and per one-of-a-system, so this is the same
+        /// lookup the editor makes, used to fire rather than to read.
+        /// </remarks>
+        public void Call(Sequence sequence, SystemInstance instance)
+        {
+            var runner = Get(sequence, instance);
+            if (runner != null)
+                runner.Call(_world, _bindings, CurrentTick);
+        }
+
+        /// <summary>
         /// Keeps the set of runners matching the sequences and the ones of each system.
         /// </summary>
         /// <remarks>

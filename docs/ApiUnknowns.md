@@ -24,6 +24,10 @@ sampled events are the only ones that can be missed entirely. It is worth knowin
 which of the common ones - a button pressed, a door finishing, a sensor tripping, a
 connector locking - are told to us.
 
+**Mostly answered, by the toolbar ModAPI.** Every block that has a toolbar can be made to *tell* us,
+by putting a Reactor action in a slot, rather than being sampled - so the catalogue below shrinks to
+the blocks that have no toolbar. That API is unreleased and unmerged; see `HANDOVER.md`.
+
 **What can be missed is bounded, and the bound is comfortable.** A level that is held
 survives being sampled late; the state simply differs from the last sample and the change is
 derived. What is lost is only a sampled thing that changes and changes back inside one
@@ -43,6 +47,22 @@ it, arrives fresh alongside the new grid, or has to be reconstructed.
 construct is welded up block by block, so a system can be running before the blocks it needs
 exist. That is not damage, and it is not a role deliberately left empty. It is a third
 thing, and it makes R40's healing part of ordinary construction rather than only of repair.
+
+**Toolbar preservation across a copy is imperfect, period** - Mal, 2026-09-12, from experience of
+the game rather than from the source. The object builders say it should work: a slot storing a block
+action carries `BlockEntityId`, and `MyObjectBuilder_ToolbarItemTerminalBlock.Remap` rewrites it
+through `IMyRemapHelper` while `MyObjectBuilder_Toolbar.Remap` walks every slot. So a paste *should*
+point a slot at the pasted copy of the block. In practice it does not reliably survive, and a
+projector print is the worse case.
+
+*What that settles for Reactor.* Wiring surviving a copy can never be relied on, so the bind-once
+rule stands and the reporting carries the weight: a pasted construct arrives with some buttons wired
+and some not, Reactor adopts what is there and writes nothing - it cannot tell a lost slot from a
+deliberately cleared one - and the sequences whose buttons are gone report as unreachable. Which
+makes a repair control load-bearing rather than a nicety; see Design.md 4b.
+
+*Still to measure here:* whether a block's mod storage travels in a blueprint at all. The program
+surviving a paste rests entirely on it, and nothing has tested it.
 
 *Affects* R39, R40, R41 and R24, which between them now carry three different meanings for
 "there is no block here".
@@ -73,6 +93,41 @@ resolves against a construct that may quietly be wrong.
 `OnGridMerge` and the mechanical connection blocks' attach and detach between them cover it. It sits
 in this file because this is where things that must be settled before release are kept, and because
 somebody reading `GridWorld` needs one place to be sent.
+
+### 4. Measured: a terminal action cannot be registered once for every block
+
+**Answered by measurement on 2026-09-12, and the answer is no.** It is here rather than in
+Design.md because it closes off a design, and somebody will propose that design again.
+
+`MyAPIGateway.TerminalControls.AddAction<IMyTerminalBlock>` looks like it should reach every
+terminal block. The source says so too: `MyTerminalBlock` carries
+`[MyTerminalInterface(typeof(IMyTerminalBlock), ...)]`, nothing else links that interface, and
+`MyTerminalControlFactory.InitializeControls` walks `BaseType` upward copying each base's actions
+down - which every terminal block's chain passes through.
+
+**It does not work.** One action registered that way appeared on a door and an interior light, and
+was absent from a battery, a reactor, a button panel, an air vent, a cockpit, a timer and a
+programmable block. Unreliable rather than unavailable, which is worse: it would have looked
+correct in whatever the author happened to test.
+
+The mechanism, as far as it goes: a concrete type's action list is built **once**, the first time
+anything asks for that type, by copying what its bases hold *at that moment*, and is never
+revisited. So a type whose list already exists cannot receive a later registration. That much is
+our own fault in one case - `TriggerAction.Register` asks for `IMyProgrammableBlock` first, which
+builds that type's list before the global action exists - but it does not explain the rest, and the
+rest is what makes the approach unusable. `MyTerminalControlFactory.Unload()` clears the cache on
+session unload, so staleness between world loads is not it either.
+
+*What it closes off.* A toolbar slot that names **the block owning the toolbar** rather than
+Reactor's own block. That would have let wiring survive a paste or a projector print, since the
+paste remaps a self-reference and cannot remap a pointer to a Reactor on another ship. It needs the
+action present on arbitrary blocks, so it is off the table in that form.
+
+*What it leaves open.* Only blocks that own a toolbar ever need the action - button panels, timers,
+sensors, event controllers, cockpits - which is a short enumerable list rather than every block in
+the game. Registering per type across that list was never tested and is not ruled out by this.
+
+*Affects* question 2, which is where wiring surviving a copy belongs.
 
 ---
 

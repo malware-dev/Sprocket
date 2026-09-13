@@ -135,6 +135,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
 
             _trigger.ItemSpacing = Space.Item;
             _trigger.LineSpacing = Space.Row;
+            _trigger.Padding = new Thickness(Space.Item, Space.ChipY * 1.3f);
 
             _adders.Padding = new Thickness(32f, Space.Item, 0f, 0f);
         }
@@ -151,7 +152,19 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
 
             _status.Text = _component.Status;
             _lastRun.Text = _component.LastRun;
-            _ranLight.Background = _component.JustRan ? Palette.Live : Palette.Dim;
+
+            // The same wash and the same red light a broken row in a list gets, so arriving here
+            // from one arrives at something already recognised. Core says which line; this says so
+            // loudly, because being led two screens deep and then having to hunt is worse than not
+            // being led at all.
+            bool triggerWrong = _component.Trigger.HasProblem;
+            _trigger.Background = triggerWrong ? Palette.ProblemWash : Palette.None;
+
+            // Broken outranks recently-run. A green light on a line that cannot fire is the screen
+            // contradicting itself, and the light is the first thing the eye lands on.
+            _ranLight.Background = triggerWrong
+                ? Palette.Problem
+                : (_component.JustRan ? Palette.Live : Palette.Dim);
 
             bool skipping = _component.SkippedCount > 0;
             _skipped.Collapsed = !skipping;
@@ -198,8 +211,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
 
                 // Left alone while it is being carried. This runs every tick, and it would otherwise
                 // repaint the row being dragged in the colour it is not, sixty times a second.
+                //
+                // Broken outranks being the current step, which the two can only be at once for the
+                // instant between a block going away and the run abandoning the step that named it.
                 if (_carrying < 0)
-                    row.Line.Background = step.IsCurrent ? Palette.LiveWash : Palette.None;
+                    row.Line.Background = step.HasProblem
+                        ? Palette.ProblemWash
+                        : (step.IsCurrent ? Palette.LiveWash : Palette.None);
             }
 
             Slide();
