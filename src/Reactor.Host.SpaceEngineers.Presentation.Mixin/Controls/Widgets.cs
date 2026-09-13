@@ -75,10 +75,10 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Controls
         /// Somewhere to type.
         /// </summary>
         /// <remarks>
-        /// Here because it was not, and three boxes made in three places quietly kept the layout's own
-        /// defaults for the caret, the selection and the hint - three colours on screen that the palette
-        /// had never been asked about. The layout is right to have them: it knows nothing about Reactor
-        /// and something has to be drawn. Reactor is wrong to leave them.
+        /// Made here so the caret, the selection and the hint come from the palette. The layout has its
+        /// own defaults for all three and is right to: it knows nothing about Reactor and something has
+        /// to be drawn. A box made anywhere else keeps them, which puts three colours on screen that the
+        /// palette was never asked about.
         /// </remarks>
         public static TextBox Box(float scale, Color background)
         {

@@ -21,6 +21,14 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Picking
             public Label Name;
             public Label Detail;
             public Label Badge;
+
+            /// <summary>What the badge was last written from, so a number is formatted only once.</summary>
+            /// <remarks>
+            /// This runs every frame. Formatting an int allocates a string whether or not the label
+            /// keeps it, so comparing after the fact saves nothing - the number has to be compared
+            /// instead. Minus one because no badge ever carries it.
+            /// </remarks>
+            public int Badged = -1;
         }
 
         sealed class KindVisual
@@ -28,6 +36,9 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Picking
             public Bar Line;
             public Label Label;
             public Label Count;
+
+            /// <summary>What the count was last written from. Minus one because no filter holds it.</summary>
+            public int Counted = -1;
         }
 
         /// <summary>
@@ -307,7 +318,12 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Picking
 
                 _kindRows[i].Label.Text = filter.Label;
                 _kindRows[i].Label.Color = filter.IsCurrent ? Palette.Ink : Palette.Muted;
-                _kindRows[i].Count.Text = filter.Count.ToString();
+
+                if (_kindRows[i].Counted != filter.Count)
+                {
+                    _kindRows[i].Counted = filter.Count;
+                    _kindRows[i].Count.Text = filter.Count.ToString();
+                }
             }
         }
 
@@ -415,7 +431,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Picking
                 // went as somebody used the screen, but which rows carry a count is a property of the
                 // things themselves and settled before the list is drawn.
                 row.Badge.Collapsed = !badged;
-                row.Badge.Text = badged ? entry.Badge.ToString() : "";
+
+                var badge = badged ? entry.Badge : -1;
+                if (row.Badged != badge)
+                {
+                    row.Badged = badge;
+                    row.Badge.Text = badged ? entry.Badge.ToString() : "";
+                }
             }
         }
 

@@ -35,6 +35,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
             public Glyph Delete;
             public int Position;
 
+            /// <summary>What the number label was last written from.</summary>
+            /// <remarks>
+            /// Formatting an int allocates, and this runs every frame - so the number is compared
+            /// rather than the string it would make. Zero is never a step number; they start at one.
+            /// </remarks>
+            public int Numbered;
+
             /// <summary>Where this row is being drawn relative to where the layout put it.</summary>
             public float Shift;
 
@@ -206,7 +213,11 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
                 SentenceStep step = _component.Steps[i];
                 StepRow row = _stepRows[i];
 
-                row.Number.Text = step.Number.ToString();
+                if (row.Numbered != step.Number)
+                {
+                    row.Numbered = step.Number;
+                    row.Number.Text = step.Number.ToString();
+                }
                 row.Sentence.Update(Host.World, step);
 
                 // Left alone while it is being carried. This runs every tick, and it would otherwise

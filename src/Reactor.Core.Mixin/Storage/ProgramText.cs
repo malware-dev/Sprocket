@@ -45,7 +45,7 @@ namespace Reactor.Storage
             for (var i = 0; i < systems.Count; i++)
             {
                 var system = systems[i];
-                Line(text, "system", Num(system.Id), OnOff(system.Enabled),
+                Line(text, "system", Number(system.Id), OnOff(system.Enabled),
                     Escape(system.Name), Escape(system.Annotation));
 
                 // What the author wrote about the parts, before the ones that fill them in, so
@@ -60,7 +60,7 @@ namespace Reactor.Storage
                 var instances = system.Instances;
                 for (var n = 0; n < instances.Count; n++)
                 {
-                    Line(text, "one", Num(instances[n].Number), Escape(instances[n].Name));
+                    Line(text, "one", Number(instances[n].Number), Escape(instances[n].Name));
                     WriteFills(text, instances[n]);
                 }
 
@@ -94,7 +94,7 @@ namespace Reactor.Storage
 
         static void WriteSequence(StringBuilder text, Sequence sequence)
         {
-            Line(text, "sequence", Num(sequence.Id), OnOff(sequence.Enabled),
+            Line(text, "sequence", Number(sequence.Id), OnOff(sequence.Enabled),
                 Escape(sequence.Name), Escape(sequence.Annotation));
 
             var when = sequence.Trigger as WhenTrigger;
@@ -106,7 +106,7 @@ namespace Reactor.Storage
 
             var every = sequence.Trigger as EveryTrigger;
             if (every != null)
-                Line(text, "every", Num(every.IntervalTicks));
+                Line(text, "every", Number(every.IntervalTicks));
 
             if (sequence.Trigger is CalledTrigger)
                 Line(text, "called");
@@ -120,7 +120,7 @@ namespace Reactor.Storage
 
                 var after = step.Gate as AfterGate;
                 if (after != null)
-                    Line(text, "after", Num(after.Ticks));
+                    Line(text, "after", Number(after.Ticks));
 
                 var once = step.Gate as OnceGate;
                 if (once != null)
@@ -288,7 +288,7 @@ namespace Reactor.Storage
             return value;
         }
 
-        static string Num(int value)
+        static string Number(int value)
         {
             return value.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }

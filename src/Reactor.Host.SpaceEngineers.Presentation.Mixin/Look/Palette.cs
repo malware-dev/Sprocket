@@ -115,9 +115,9 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Look
         /// </summary>
         /// <remarks>
         /// Set by the floor rather than by eye: this reads 4.5:1 against <see cref="Panel" />, which is
-        /// what the smallest text on these screens needs to be read at all. The first cut of it was three
-        /// steps darker and looked right in isolation, which is the trap - it was under 3:1, and a step
-        /// number or a "ran 4s ago" written in it was decoration rather than information.
+        /// what the smallest text on these screens needs to be read at all. Anything quieter looks right
+        /// in isolation and falls under 3:1, at which a step number is decoration rather than
+        /// information.
         /// </remarks>
         public static readonly Color Faint = new Color(133, 161, 169);
 
@@ -157,12 +157,11 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Look
         /// The grounds that say what kind of thing a row is - running, wrong, worth reading.
         /// </summary>
         /// <remarks>
-        /// All three are darker than the panel they interrupt, and that is the whole of why they changed.
-        /// They were mid-toned and landed within a few percent of <see cref="Panel" />'s own brightness,
-        /// which left the hue carrying the entire signal: correct on this monitor, absent for the one
-        /// player in twelve who cannot separate a green wash from a blue one. Deepening them costs
-        /// nothing - the text on them was already the brightest thing in the palette - and gives every
-        /// eye a second way to see it.
+        /// All three are darker than the panel they interrupt, and that is what has to hold. Mid-toned,
+        /// they land within a few percent of <see cref="Panel" />'s own brightness, which leaves the hue
+        /// carrying the entire signal: correct on this monitor, absent for the one player in twelve who
+        /// cannot separate a green wash from a blue one. Depth costs nothing here - the text on them is
+        /// the brightest thing in the palette - and gives every eye a second way to see it.
         /// </remarks>
         public static readonly Color LiveWash = new Color(14, 40, 10);
 

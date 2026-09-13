@@ -96,15 +96,32 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
         /// <summary>Whether an edit session currently owns this box. Set by <see cref="TextEditor" />.</summary>
         public bool IsEditing { get; internal set; }
 
+        /// <summary>
+        /// What is typed, as a string, made once per change rather than once per frame.
+        /// </summary>
+        /// <remarks>
+        /// The text is kept in a builder so that typing a letter does not rebuild it, and drawing
+        /// needs a string - so asking the builder on the draw path allocated one every frame a box
+        /// was on screen, whether or not anything had been typed. Cleared wherever the builder is
+        /// written to, which is the only way to know.
+        /// </remarks>
+        private string Written
+        {
+            get { return _written ?? (_written = _text.ToString()); }
+        }
+
+        private string _written;
+
         public string Text
         {
-            get { return _text.ToString(); }
+            get { return Written; }
             set
             {
                 _text.Clear();
                 if (!string.IsNullOrEmpty(value))
                     _text.Append(value);
 
+                _written = null;
                 ClampCaret();
                 InvalidateMeasure();
             }
@@ -121,13 +138,12 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
 
         private int SelectionEnd => _caret < _anchor ? _anchor : _caret;
 
-        // ---- editing ----
-
         public void InsertChar(char c)
         {
             InvalidateMeasure();
             DeleteSelection();
             _text.Insert(_caret, c);
+            _written = null;
             _caret++;
             _anchor = _caret;
         }
@@ -140,6 +156,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
 
             DeleteSelection();
             _text.Insert(_caret, s);
+            _written = null;
             _caret += s.Length;
             _anchor = _caret;
         }
@@ -154,6 +171,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
                 return;
 
             _text.Remove(_caret - 1, 1);
+            _written = null;
             _caret--;
             _anchor = _caret;
         }
@@ -168,6 +186,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
                 return;
 
             _text.Remove(_caret, 1);
+            _written = null;
         }
 
         public void MoveCaretLeft(bool select)
@@ -234,6 +253,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
 
             int start = SelectionStart;
             _text.Remove(start, SelectionEnd - start);
+            _written = null;
             _caret = start;
             _anchor = start;
             return true;
@@ -246,8 +266,6 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
             if (_anchor > _text.Length)
                 _anchor = _text.Length;
         }
-
-        // ---- layout and drawing ----
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
@@ -293,7 +311,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
             }
 
             if (_text.Length > 0)
-                g.DrawText(Font, _text.ToString(), at, Scale, Color);
+                g.DrawText(Font, Written, at, Scale, Color);
             else if (!string.IsNullOrEmpty(Hint))
                 g.DrawText(Font, Hint, at, Scale, HintColor);
 
