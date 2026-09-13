@@ -555,10 +555,9 @@ namespace Reactor.Host.SpaceEngineers.World
 
         /// <summary>Whether a slot of ours carries a key this program can resolve.</summary>
         /// <remarks>
-        /// Read once per wanted button on the first pass after a load, never on a tick. The wrong
-        /// type counts as unresolvable rather than as an error: what a slot holds is whatever was
-        /// written, not what the action declares, so a key from a previous format arrives as a
-        /// number and answers no here without anything having to know it used to be one.
+        /// Read once per wanted button on the first pass after a load, never on a tick. A slot holds
+        /// whatever was written into it rather than what the action declares, so anything that is not
+        /// a key this program knows answers no - wrong type included.
         /// </remarks>
         bool Understood(IMyToolbar toolbar, int slot)
         {

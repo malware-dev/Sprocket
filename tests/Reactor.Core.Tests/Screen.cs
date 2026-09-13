@@ -119,6 +119,15 @@ static class Screen
     public static void PressRow(this ReactorEditor editor, int row) =>
         editor.Invoke(editor.Rows()[row].Command);
 
+    /// <summary>The short question hanging over the screen, or empty.</summary>
+    public static string Question(this ReactorEditor editor) => editor.Screen.Question;
+
+    public static bool HasAnswer(this ReactorEditor editor, string text) =>
+        editor.Screen.Answers.Any(a => a.Text == text);
+
+    public static void PressAnswer(this ReactorEditor editor, string text) =>
+        editor.Invoke(editor.Screen.Answers.First(a => a.Text == text).Command);
+
     public static void PressAdd(this ReactorEditor editor, string text) =>
         editor.Invoke(editor.Sentence().AddOptions.First(o => o.Text == text).Command);
 
@@ -133,11 +142,21 @@ static class Screen
     }
 
     /// <summary>Back out to the front door, however deep we are.</summary>
+    /// <remarks>
+    /// Answering anything asked on the way, with the first answer - which is the safe one by
+    /// convention. A page may ask a question when it is left, and a question stands until it is
+    /// answered, so a walk that only pressed back would alternate between asking and dismissing.
+    /// </remarks>
     public static void GoToRoot(this ReactorEditor editor)
     {
         var guard = 0;
         while (editor.Screen.CanGoBack && guard++ < 20)
+        {
             editor.Back();
+
+            if (editor.Screen.HasQuestion)
+                editor.Invoke(editor.Screen.Answers.First().Command);
+        }
     }
 
     public static void PressAction(this ReactorEditor editor, string text) =>

@@ -23,11 +23,8 @@ namespace Reactor.Host.SpaceEngineers.Input
     /// Types into whichever box the screen says has the keyboard.
     /// </summary>
     /// <remarks>
-    /// This replaced a text editor that owned its box: it was handed one, opened an edit on it, remembered
-    /// the original text and put it back on cancel. That shape belonged to an overlay where exactly one
-    /// thing could be edited at a time. A screen has focus of its own, and <c>EditorView</c> already decides
-    /// what has the keyboard - a question while one is open, otherwise whatever was last focused - so this
-    /// is handed the answer rather than keeping one.
+    /// Owns no box. <c>EditorView</c> decides what has the keyboard - a question while one is open,
+    /// otherwise whatever was last focused - and this is handed the answer.
     /// <para>
     /// Characters come from the game's own text buffer, which has already dealt with the keyboard layout,
     /// dead keys and modifiers, so what arrives is what the player meant to type. Everything else is read as

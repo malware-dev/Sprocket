@@ -22,6 +22,10 @@ namespace Reactor.Editing
         public SequencePage(ReactorEditor editor, Sequence sequence) : base(editor)
         {
             _sequence = sequence;
+
+            // Here rather than in Build, which runs again every time the sentence changes shape -
+            // which is exactly when something has just been edited.
+            _quiet = editor.Program.Wiring;
         }
 
         public int SequenceId => _sequence.Id;
@@ -43,11 +47,7 @@ namespace Reactor.Editing
         /// </summary>
         /// <remarks>
         /// A sequence arrives already named - "Sequence 3" - the way a block does, so this is always
-        /// overtyping rather than filling in a blank. That is a reversal of what stood here before,
-        /// which argued naming had to stay optional because an unnamed sequence read as its own
-        /// sentence. It did read, but it meant a row's identity changed as somebody edited it, and
-        /// naming was still a chore they were expected to get round to eventually. A default asks
-        /// nothing and a person renames it when they care.
+        /// overtyping rather than filling in a blank.
         /// </remarks>
         public override string CustomName => _sequence.Name ?? "";
 
@@ -147,6 +147,77 @@ namespace Reactor.Editing
 
             components.Add(_sentence);
         }
+
+        /// <summary>
+        /// Offers to switch a finished sequence on, on the way out.
+        /// </summary>
+        /// <remarks>
+        /// A sequence is parked while it is built, deliberately - a half-written rule must not fire,
+        /// and the switch is what makes editing safe. The cost is that somebody finishes, walks away,
+        /// and concludes the whole thing does not work. Leaving is the moment that costs one press to
+        /// put right, and the only moment anybody is still thinking about this sequence.
+        /// <para>
+        /// Only when something was actually changed, and only once per change. Opening a sequence to
+        /// read it and leaving asks nothing; nor does leaving again after somebody has already
+        /// answered. Being asked a question you have answered is how a helpful prompt turns into one
+        /// people learn to dismiss without reading.
+        /// </para>
+        /// <para>
+        /// Dismissing it is not answering it. Somebody who backs out has said they did not mean to
+        /// leave, so pressing back again asks again - the question is only spent once one of its
+        /// answers is taken.
+        /// </para>
+        /// <para>
+        /// Nothing with no steps is offered: there is nothing to switch on yet, and asking would be
+        /// treating an abandoned start as though it were finished work. Nor is anything broken -
+        /// Reactor switched that off itself because it cannot run, and offering to start it would be
+        /// the screen arguing with its own judgement one press after making it.
+        /// </para>
+        /// </remarks>
+        public override bool Leaving()
+        {
+            var changed = Editor.Program.Wiring;
+            if (changed == _quiet || _sequence.Enabled || _sequence.Steps.Count == 0)
+                return true;
+
+            // Never offer to start something that cannot run. Reactor parked it in the first place
+            // because it is broken, and asking would be the screen offering to undo its own
+            // judgement one press after making it.
+            if (SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
+                    Editor.Runner.Get(_sequence)).Exists)
+            {
+                return true;
+            }
+
+            Editor.Ask("Switch this sequence on?");
+
+            // Leaving it parked first, because that is what pressing back already meant - the offer
+            // must not turn the safe answer into the one that takes a second press.
+            Editor.Answer("Leave it off", delegate
+            {
+                _quiet = Editor.Program.Wiring;
+                Editor.Pop();
+            });
+
+            Editor.Answer("Switch it on", delegate
+            {
+                _quiet = Editor.Program.Wiring;
+                SetEnabled(true);
+                Editor.Pop();
+            });
+
+            return false;
+        }
+
+        /// <summary>
+        /// What the program's edit count was when this last had nothing to ask about.
+        /// </summary>
+        /// <remarks>
+        /// Set on the way in and again whenever the question is put, so leaving a sequence somebody
+        /// only came to look at asks nothing at all - and so does leaving again after they have
+        /// already answered. Only a change since then earns another question.
+        /// </remarks>
+        int _quiet;
 
         public override void Refresh()
         {

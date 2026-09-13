@@ -18,6 +18,8 @@ namespace Reactor.Ui
         {
             Components = new ObservableList<EditorComponent>();
             Actions = new ObservableList<ChoiceEntry>();
+            Answers = new ObservableList<ChoiceEntry>();
+            Question = "";
             Heading = new List<HeadingPart>();
         }
 
@@ -107,6 +109,27 @@ namespace Reactor.Ui
         /// from scratch. A target renders these wherever it puts navigation.
         /// </summary>
         public ObservableList<ChoiceEntry> Actions { get; private set; }
+
+        /// <summary>
+        /// A short question waiting to be answered, or empty.
+        /// </summary>
+        /// <remarks>
+        /// Not a screen. A target draws this over whatever is already there and nothing about it moves
+        /// - which is the difference between "switch this on?" and "delete this forever?", and why the
+        /// second one is still a page of its own.
+        /// <para>
+        /// While one is up, a target must offer <see cref="Answers" /> and nothing else. Core cannot
+        /// enforce that, and a question somebody can walk around is a question that gets answered by
+        /// accident.
+        /// </para>
+        /// </remarks>
+        public string Question { get; set; }
+
+        public bool HasQuestion => !string.IsNullOrEmpty(Question);
+
+        /// <summary>The ways to answer it, in the order they should be offered.</summary>
+        /// <remarks>The first is the one a reflex press should land on, so it is the safe one.</remarks>
+        public ObservableList<ChoiceEntry> Answers { get; private set; }
 
     }
 }

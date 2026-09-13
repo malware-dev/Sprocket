@@ -120,6 +120,15 @@ namespace Reactor.Host.SpaceEngineers.Terminal
         /// </remarks>
         protected override bool OnCancelling()
         {
+            // A question with answers takes Escape first, and dismissing it means "I did not mean to
+            // leave" rather than picking the answer that leaves. Before the retreat below, because
+            // that would read Escape as back and act on the very thing being asked about.
+            if (_view.IsQuestioning)
+            {
+                _editor.Unask();
+                return false;
+            }
+
             if (_view.IsAsking)
             {
                 _view.CancelAsk();

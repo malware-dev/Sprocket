@@ -67,14 +67,8 @@ namespace Reactor.Host.SpaceEngineers.World
                 : -1;
         }
 
-        /// <summary>
-        /// How many buttons a panel has.
-        /// </summary>
-        /// <remarks>
-        /// Its toolbar's slot count, which is the same number and is the game's own answer. Before
-        /// the toolbar API the only way to ask was to probe <c>IsButtonAssigned</c> up to a guessed
-        /// ceiling of four.
-        /// </remarks>
+        /// <summary>How many buttons a panel has.</summary>
+        /// <remarks>Its toolbar's slot count, which is the game's own answer to the same question.</remarks>
         static int Buttons(IMyTerminalBlock block)
         {
             IMyToolbar toolbar = Toolbars.Of(block);
@@ -86,15 +80,7 @@ namespace Reactor.Host.SpaceEngineers.World
             return block is IMyButtonPanel;
         }
 
-        /// <summary>
-        /// Whether that button still starts that particular thing.
-        /// </summary>
-        /// <remarks>
-        /// <c>IsButtonAssigned</c> is not the question, and neither is "does this hold a Reactor
-        /// action". A slot can hold ours and start something else, or hold ours and carry a key from
-        /// a format we no longer write - both are assigned, both reach Reactor, and neither starts
-        /// what is asking. So the key is compared, not just the action.
-        /// </remarks>
+        /// <summary>Whether that button still starts that particular thing.</summary>
         public bool Raises(IMyTerminalBlock block, string eventId, string key)
         {
             var button = ButtonOf(eventId);
@@ -116,7 +102,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 && string.Equals(_read[0].Value as string, key, StringComparison.Ordinal);
         }
 
-        /// <summary>Reused, because this is asked once per wired button per second.</summary>
+        /// <summary>Reused: asked once per wired button per second, so it must not allocate.</summary>
         readonly List<TerminalActionParameter> _read = new List<TerminalActionParameter>();
 
         public void Describe(EntityKind kind, IMyTerminalBlock block)

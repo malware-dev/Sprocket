@@ -236,6 +236,23 @@ namespace Reactor.Editing
             return true;
         }
 
+        /// <summary>
+        /// Somebody has pressed back. True to go, false to have asked something instead.
+        /// </summary>
+        /// <remarks>
+        /// The one hook a page gets on the way out, and it exists for questions that only make sense
+        /// at that moment - a thing built and left switched off is the example, because leaving is
+        /// when it stops being a work in progress and starts being something that does not happen.
+        /// <para>
+        /// A page that answers false must have pushed something, or back has done nothing and the
+        /// person is left pressing a control that appears broken.
+        /// </para>
+        /// </remarks>
+        public virtual bool Leaving()
+        {
+            return true;
+        }
+
         /// <summary>Updates live values on components that already exist.</summary>
         public virtual void Refresh() { }
     }

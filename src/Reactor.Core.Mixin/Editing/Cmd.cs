@@ -17,6 +17,7 @@ namespace Reactor.Editing
 
         // Screen furniture. One of each per screen.
         Back,
+        Answer,
         Primary,
         Rename,
         Switch,

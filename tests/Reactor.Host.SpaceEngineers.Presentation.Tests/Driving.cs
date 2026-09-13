@@ -101,11 +101,20 @@ static class Driving
         editor.Invoke(editor.Component<SequenceComponent>().Trigger.Slots[slot].Command);
 
     /// <summary>Back out to the front door, however deep we are.</summary>
+    /// <remarks>
+    /// Answering anything asked on the way with the first answer, which is the safe one by
+    /// convention. A page may ask a question when it is left, and a question stands until answered.
+    /// </remarks>
     public static void GoToRoot(this ReactorEditor editor)
     {
         var guard = 0;
         while (editor.Screen.CanGoBack && guard++ < 20)
+        {
             editor.Back();
+
+            if (editor.Screen.HasQuestion)
+                editor.Invoke(editor.Screen.Answers.First().Command);
+        }
     }
 
     public static void PressAction(this ReactorEditor editor, string text) =>

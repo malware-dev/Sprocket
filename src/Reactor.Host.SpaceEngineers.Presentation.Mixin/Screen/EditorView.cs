@@ -73,6 +73,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         readonly Label _primary = Widgets.Label("", Palette.Chrome, Lettering.Body);
 
         readonly Ask _ask = new Ask();
+        readonly Confirm _question = new Confirm();
 
         readonly List<ComponentView> _views = new List<ComponentView>();
         readonly List<EditorComponent> _shown = new List<EditorComponent>();
@@ -259,6 +260,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         public void Update()
         {
             EditorScreen screen = _editor.Screen;
+
+            // Opened and closed from what the screen says, rather than remembered here. Core raises a
+            // question and clears it when it is answered, so there is one place that knows.
+            if (screen.HasQuestion && !_question.IsUp)
+                _question.Open(screen.Question, screen.Answers);
+            else if (!screen.HasQuestion && _question.IsUp)
+                _question.Close();
 
             _title.Update(screen.Heading, _renaming);
 
@@ -602,6 +610,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
                 return;
 
             _ask.Draw(g, bounds, PopupWidth);
+            _question.Draw(g, bounds, PopupWidth);
         }
 
         /// <summary>
@@ -706,6 +715,20 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         /// </param>
         public bool Press(Vector2 point, int clicks)
         {
+            // A question with answers owns the screen absolutely: nothing outside it responds, and
+            // pressing away does not dismiss it. Every answer leads somewhere, so there is nothing to
+            // escape from, and a question that can be shrugged off is one that gets shrugged off.
+            if (_question.IsUp)
+            {
+                var answered = _question.CommandAt(point);
+                if (answered != 0)
+                    _editor.Invoke(answered);
+                else if (!_question.Covers(point))
+                    _editor.Unask();
+
+                return true;
+            }
+
             // While a question is open it owns the screen. Pressing inside it is the only thing that can
             // reach anything, and pressing anywhere else puts it away and goes no further - the press that
             // dismisses is not also a press on whatever happened to be underneath.
@@ -876,6 +899,12 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
                 return;
 
             Close();
+        }
+
+        /// <summary>Whether a question with answers is waiting, which owns Escape.</summary>
+        public bool IsQuestioning
+        {
+            get { return _question.IsUp; }
         }
 
         void BeginAsk(Hit hit)

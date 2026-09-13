@@ -5,7 +5,7 @@ namespace Reactor.Sequences
     /// </summary>
     /// <remarks>
     /// There were two of these and the middle one is new, which is the point of the whole design.
-    /// Something that used to be simply gone can now be gone-but-here-is-a-candidate.
+    /// A reference is bound, adrift with a candidate to offer, or lost.
     /// </remarks>
     public enum RefState
     {

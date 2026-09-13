@@ -82,16 +82,9 @@ namespace Reactor.Host.SpaceEngineers.Terminal
 
         /// <summary>The argument that says which sequence of which system, ready to write into a slot.</summary>
         /// <remarks>
-        /// A key rather than a number, and <b>one parameter rather than three.</b> A parameter list's
-        /// arity and types are frozen by every slot in every saved world, and Reactor may not rewrite
-        /// a slot, so three parameters would make growing the key depend on the game tolerating a
-        /// saved item that is one short. A string's contents are Reactor's business alone.
-        /// <para>
-        /// Reactor used to write a dense index it minted itself and keep a table beside it, which
-        /// cost a table that had to survive a save, a rule about never reusing a number, and a
-        /// rewrite of every slot on load to recover the numbering - and that rewrite was what
-        /// silently undid a button somebody had cleared by hand.
-        /// </para>
+        /// <b>One parameter, and its contents are opaque.</b> A parameter list's arity and types are
+        /// frozen by every slot in every saved world and a slot is never rewritten, so the key can
+        /// only grow inside the string.
         /// </remarks>
         public static List<TerminalActionParameter> Argument(string key)
         {

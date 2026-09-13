@@ -624,6 +624,142 @@ public class EditorTests
         ship.Tick();
     }
 
+    /// <summary>
+    /// Leaving a sequence somebody built and left switched off offers to switch it on.
+    /// </summary>
+    /// <remarks>
+    /// A sequence is parked while it is being built, so the way this fails is silent: somebody
+    /// finishes, walks away, and concludes the whole thing does not work. Leaving is the last moment
+    /// they are still thinking about it and the first at which one press puts it right.
+    /// </remarks>
+    [Fact]
+    public void LeavingASequenceThatIsOffOffersToSwitchItOn()
+    {
+        var ship = Built();
+
+        ship.Editor.Back();
+        ship.Tick();
+
+        Assert.Equal("Switch this sequence on?", ship.Editor.Question());
+        Assert.True(ship.Editor.HasAnswer("Switch it on"));
+        Assert.True(ship.Editor.HasAnswer("Leave it off"));
+
+        ship.Editor.PressAnswer("Switch it on");
+        ship.Tick();
+
+        Assert.True(ship.Automation.Sequences[0].Enabled);
+    }
+
+    /// <summary>
+    /// The answer stands until something changes again.
+    /// </summary>
+    /// <remarks>
+    /// Being asked a question you have already answered is how a helpful prompt becomes one people
+    /// learn to dismiss without reading. Editing it again is a different moment and earns one more.
+    /// </remarks>
+    [Fact]
+    public void TheOfferIsNotRepeatedUntilSomethingChanges()
+    {
+        var ship = Built();
+
+        ship.Editor.Back();
+        ship.Tick();
+        ship.Editor.PressAnswer("Leave it off");
+        ship.Tick();
+
+        Assert.False(ship.Automation.Sequences[0].Enabled);
+
+        // Straight back in and out again, having touched nothing. Leaving landed on the system's
+        // own screen, where the sequences are listed, so going back in is one press.
+        ship.Editor.PressRow(0);
+        ship.Tick();
+        ship.Editor.Back();
+        ship.Tick();
+
+        Assert.False(ship.Editor.HasAnswer("Switch it on"));
+
+        // Now change something, and it is worth asking again.
+        ship.Editor.PressRow(0);
+        ship.Tick();
+        ship.Editor.Name("Let me out");
+        ship.Tick();
+        ship.Editor.Back();
+        ship.Tick();
+
+        Assert.True(ship.Editor.HasAnswer("Switch it on"));
+    }
+
+    /// <summary>
+    /// Dismissing the question is not answering it, so pressing back again asks again.
+    /// </summary>
+    /// <remarks>
+    /// Backing out of "switch this on?" says "I did not mean to leave", which is neither answer - so
+    /// the sequence stays open, stays off, and the question is not spent.
+    /// </remarks>
+    [Fact]
+    public void DismissingTheQuestionIsNotAnswering()
+    {
+        var ship = Built();
+
+        ship.Editor.Back();
+        ship.Tick();
+        Assert.True(ship.Editor.HasAnswer("Switch it on"));
+
+        ship.Editor.Unask();
+        ship.Tick();
+
+        // Still here, still off, and still worth asking about.
+        Assert.Equal("", ship.Editor.Question());
+        Assert.False(ship.Automation.Sequences[0].Enabled);
+
+        ship.Editor.Back();
+        ship.Tick();
+        Assert.True(ship.Editor.HasAnswer("Switch it on"));
+    }
+
+    /// <summary>Nothing that cannot run is offered, since that is why it is off.</summary>
+    [Fact]
+    public void ABrokenSequenceIsNotOfferedToSwitchOn()
+    {
+        var ship = Built();
+        ship.World.Unstartable.Add(ship.Automation.Sequences[0].Id);
+
+        ship.Editor.Back();
+        ship.Tick();
+
+        Assert.False(ship.Editor.HasAnswer("Switch it on"));
+    }
+
+    /// <summary>Nothing built yet is not something to be nagged about.</summary>
+    [Fact]
+    public void ASequenceWithNoStepsIsNotOffered()
+    {
+        var ship = Build();
+        StartOnTheButton(ship.Editor);
+        ship.Tick();
+
+        ship.Editor.Back();
+        ship.Tick();
+
+        Assert.False(ship.Editor.HasAnswer("Switch it on"));
+    }
+
+    /// <summary>A sequence somebody built and left on has nothing to be asked about.</summary>
+    static Ship Built()
+    {
+        var ship = Build();
+        StartOnTheButton(ship.Editor);
+        ship.Tick();
+
+        ship.Editor.PressAdd("do something");
+        ship.Editor.PressBlock("Inner Door");
+        ship.Editor.PressChoice("close");
+        ship.Editor.PressPrimary();
+        ship.Tick();
+
+        return ship;
+    }
+
     /// <summary>A name is cut to length by the model, not only by whatever asked for it.</summary>
     /// <remarks>
     /// A target should refuse it earlier and more kindly, while somebody is still typing. This is

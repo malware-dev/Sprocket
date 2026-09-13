@@ -146,12 +146,87 @@ namespace Reactor.Editing
         /// <summary>A second behind the start, so the first tick looks rather than waiting.</summary>
         int _parked = -Second;
 
+        /// <summary>
+        /// Puts a short question on the screen, to be answered before anything else.
+        /// </summary>
+        /// <remarks>
+        /// For a question that is small enough to hang over the screen. A choice that needs a caption,
+        /// a warning and room to think is a page - see the one that asks before deleting a sequence.
+        /// </remarks>
+        internal void Ask(string question)
+        {
+            Release();
+            _screen.Question = question;
+        }
+
+        /// <summary>Adds a way to answer, in the order they are offered.</summary>
+        internal void Answer(string text, Action chosen)
+        {
+            _screen.Answers.Add(new ChoiceEntry(text, false, Register(Cmd.Answer, _screen.Answers.Count, chosen)));
+        }
+
+        /// <summary>
+        /// Takes the question away without answering it.
+        /// </summary>
+        /// <remarks>
+        /// A third outcome, and not one of the answers: somebody who dismisses "switch this on?" has
+        /// said they did not mean to leave at all, which is different from saying leave it off. So
+        /// whatever raised the question does not happen either.
+        /// </remarks>
+        public void Unask()
+        {
+            if (!_screen.HasQuestion)
+                return;
+
+            _screen.Question = "";
+            Release();
+        }
+
+        /// <summary>
+        /// Gives back the command numbers the last set of answers was using.
+        /// </summary>
+        /// <remarks>
+        /// A command number is claimed for the life of a screen and refused twice, which is what
+        /// catches a page registering the same control twice over. A question outlives none of that:
+        /// it can be raised, dismissed and raised again without the screen ever being rebuilt, so its
+        /// numbers have to be handed back rather than held.
+        /// </remarks>
+        bool IsAnswer(int command)
+        {
+            foreach (ChoiceEntry answer in _screen.Answers)
+            {
+                if (answer.Command == command)
+                    return true;
+            }
+
+            return false;
+        }
+
+        void Release()
+        {
+            foreach (ChoiceEntry answer in _screen.Answers)
+                _actions.Remove(answer.Command);
+
+            _screen.Answers.Clear();
+        }
+
         /// <summary>Acts on a button, a row, or anything else that was pressed.</summary>
         public void Invoke(int command)
         {
             Action action;
             if (!_actions.TryGetValue(command, out action))
                 return;
+
+            // While a question stands, only its own answers are honoured. Anything else dismisses it
+            // and goes no further - the press that puts a question away is not also a press on
+            // whatever was behind it, and back in particular must not raise the same question again.
+            if (_screen.HasQuestion && !IsAnswer(command))
+            {
+                Unask();
+                return;
+            }
+
+            Unask();
 
             action();
             Settle();
@@ -333,6 +408,20 @@ namespace Reactor.Editing
 
             _stack.RemoveAt(_stack.Count - 1);
             _structureDirty = true;
+        }
+
+        /// <summary>
+        /// Goes back, unless the page has something to say about it first.
+        /// </summary>
+        /// <remarks>
+        /// Back is the one control on every screen, so a page that wants a word on the way out has
+        /// nowhere else to get it. It may only ask a question, never refuse - a person pressing back
+        /// must always end up somewhere other than where they were, or the control has lied to them.
+        /// </remarks>
+        void Leave()
+        {
+            if (Current.Leaving())
+                Pop();
         }
 
         internal void Reset(EditorPage page)
@@ -585,7 +674,7 @@ namespace Reactor.Editing
             page.Heading(_screen.Heading);
 
             _screen.CanGoBack = _stack.Count > 1;
-            _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Pop) : 0;
+            _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Leave) : 0;
             _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(Cmd.Switch, page.Switch) : 0;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryCommand = _screen.HasPrimary ? Register(Cmd.Primary, page.Primary) : 0;
@@ -811,20 +900,10 @@ namespace Reactor.Editing
         /// Names a new sequence the way the game names a new block.
         /// </summary>
         /// <remarks>
-        /// Named from birth rather than left blank, which is a reversal: a sequence used to read as
-        /// its own sentence and naming one was optional. That made the identity of a row depend on
-        /// what the row happened to say, so it changed as somebody edited, and it made a name a chore
-        /// they were quietly expected to get round to. A default they can overtype is what everybody
-        /// already knows from the game, and it asks nothing.
+        /// The first free number in the system rather than a running count, so deleting the second of
+        /// three and adding another gives "Sequence 2" back.
         /// <para>
-        /// The first free number rather than a running count, so deleting the second of three and
-        /// adding another gives "Sequence 2" back instead of a fourth number for a third sequence.
-        /// Numbered within its system, because that is where it is listed and where it has to be told
-        /// apart from its neighbours.
-        /// </para>
-        /// <para>
-        /// It is a real name from here on, stored and renameable. Nothing re-derives it, so renaming
-        /// one never renumbers another.
+        /// Stored from here on, and never re-derived, so renaming one cannot renumber another.
         /// </para>
         /// </remarks>
         string Name(Sequence sequence)

@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Sequences\SentenceView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sequences\SequenceView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Screen\ComponentView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Screen\Confirm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Screen\EditorView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Screen\HeadingRow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Screen\HeadingView.cs" />
