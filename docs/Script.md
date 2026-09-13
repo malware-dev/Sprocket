@@ -218,6 +218,13 @@ passing. And **`Real` and `Vector` have no use site yet**: a condition today is 
 in this declared state*, with the operand baked into the `EntityState` the host declared. Those types
 arrive properly with expressions and with `set`.
 
+**Since built:** `instance` is the word, and it cost nothing - the model's concept was always
+`SystemInstance`, so `one` was the odd one out rather than the name. `Real` has a use site after all:
+a declaration's key can be one, because the host mints keys and the syntax carries the kind. A
+`Vector` still cannot be a key, since `ValueKind` has nothing wide enough to hold one, so the parser
+reads a vector and `ProgramText` drops it - which is step 5's outstanding debt seen from the format's
+side rather than a new one.
+
 ## Block references
 
 **This is the part that cannot look like a normal script language.** A block reference is not a
@@ -808,7 +815,53 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
      deleted.
    - **Position is still not a key.** A pasted blueprint keeps every position and changes every id,
      which makes it the valuable middle key, and it needs a `ValueKind` wide enough to hold one.
-6. **The script language**, once 5 has settled what a reference is.
+6. ~~**The script language**, once 5 has settled what a reference is.~~ **Done. The save format is
+   the language**, and there is only one format: `Storage` holds a lexer, a parser, a writer and the
+   mapping between statements and the model, and `reactor 2` is what a save says.
+
+   **What the grammar bought, beyond reading nicely.** Braces mean a construct nobody recognises is
+   dropped *with its block*, where the line format could only skip the line and left the children to
+   be read as somebody else's - a gate landing on the wrong step. Quoting by doubling means a
+   forgotten escape cannot produce a file that still parses, just wrong. And the syntax carries a
+   value's kind, so a declaration's keys stopped needing the `i:`/`t:` tags they used to: a whole
+   number reads back as a whole number because that is what it looks like.
+
+   **Two rules the writing forced, neither of them in the design above.**
+
+   A **step must say `wait` or `now`**, and it is not decoration. Any bare word can be an action id,
+   so `run "Tidy up"` from a later build would otherwise read as a step doing something called *run*.
+   Requiring the word is what lets an unknown statement be dropped instead, which is the promise the
+   format makes. Nothing is reserved, either: the collision was in Mal's own test world on day one,
+   where two actions are named `on` and `off`, and they write as `"on" [ entity2 ] wait`.
+
+   A **name is one line**, because a statement ends at the end of its line. `Naming.Clean` folds a
+   line break to a space and `Pen` folds it again, since a writer that can produce an unreadable save
+   eventually does. Text that genuinely wants lines is an annotation, which is written a line at a
+   time and was already the answer.
+
+   **A kind id is quoted** - `block "Door/LargeBlockDoor" inner` - where the worked example above has
+   it bare. The stated writer rule won over the example on purpose: widening what may be written bare
+   later still reads every old save, and narrowing it would not.
+
+   **`reactor 1` still loads**, through `Lines`, which reads and never writes. A world saved before
+   this migrates on its next save, and the file can go when no save carries the old format. The one
+   thing that is genuinely lost is nothing: every field the old format wrote comes back, and
+   `SystemInstance.Enabled` - which the old format never wrote at all, so parking one instance did not
+   survive a reload - now does.
+
+   **What it does not do yet, because the model does not.** A trigger still belongs to a sequence, so
+   the language cannot say the things that needs: no inline sequence under its trigger, no `run`, no
+   two triggers on one sequence, and the switch is on the sequence rather than on the trigger. Every
+   sequence therefore writes as `sequence <id> <on|off> "name" { … }` with its trigger as the first
+   statement inside. The ids are in the file for a reason and it is not identity for its own sake: a
+   toolbar slot names a sequence by system, instance and sequence ordinal, so a save that dropped them
+   would unwire every button in the world.
+
+   **Left:** a program that would not read is marked `Automation.Intact` false and neither host saves
+   over it, which protects what is on disk - but nothing *says* so. The log has a line and the editor
+   has nothing, so somebody could edit a damaged program all afternoon and lose it. The honest answer
+   is that a damaged program should refuse to be edited, in words, and that is error reporting's job
+   rather than the format's.
 7. **Error reporting and debugging.** Started. A trail exists; the section it belongs to does not.
 
    **Done: a problem is marked on every screen between the front door and the line at fault.**

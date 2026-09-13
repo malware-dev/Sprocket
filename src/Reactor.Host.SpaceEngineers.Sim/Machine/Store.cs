@@ -67,7 +67,7 @@ sealed class Store
                 return;
 
             _lastWritten = File.ReadAllText(_path);
-            ProgramText.Load(_lastWritten, program, values);
+            Trouble = ProgramText.Load(_lastWritten, program, values);
         }
         catch (Exception error)
         {
@@ -87,6 +87,11 @@ sealed class Store
     /// </remarks>
     public void SaveIfChanged(Automation program, Values values)
     {
+        // A program that did not load cleanly is not written back over the file it came from. Saving
+        // runs on a timer, so one edit after a half-read load would put the damage on disk.
+        if (!program.Intact)
+            return;
+
         string text;
         try
         {

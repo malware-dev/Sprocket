@@ -704,8 +704,18 @@ namespace Reactor.Host.SpaceEngineers.World
                 return;
 
             string text;
-            if (storage.TryGetValue(ProgramKey, out text) && !string.IsNullOrEmpty(text))
-                ProgramText.Load(text, _program, _world.Values);
+            if (!storage.TryGetValue(ProgramKey, out text) || string.IsNullOrEmpty(text))
+                return;
+
+            var trouble = ProgramText.Load(text, _program, _world.Values);
+            if (trouble.Length == 0)
+                return;
+
+            // Logged and nowhere else. The program is marked not to be saved over, which is what
+            // actually protects somebody's work; there is no screen for this yet, and inventing
+            // wording for one in here would put core's words on a host's screen.
+            MyLog.Default.WriteLineAndConsole(
+                "[Reactor] " + _block.CustomName + " has a program that would not read: " + trouble);
         }
 
         /// <summary>
@@ -739,6 +749,11 @@ namespace Reactor.Host.SpaceEngineers.World
                     "[Reactor] mod storage would not attach to " + _block.CustomName + "; program not saved");
                 return;
             }
+
+            // Never over a program that did not read cleanly. Persist runs whenever the program might
+            // have changed, so one edit after a half-read load would write the damage into the save.
+            if (!_program.Intact)
+                return;
 
             storage.SetValue(ProgramKey, ProgramText.Save(_program, _world.Values));
         }

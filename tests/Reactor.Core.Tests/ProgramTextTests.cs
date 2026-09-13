@@ -20,7 +20,11 @@ public class ProgramTextTests
 
     static string Save(Automation program) => ProgramText.Save(program, Store);
 
-    static void Load(string text, Automation program) => ProgramText.Load(text, program, Store);
+    /// <summary>Loads, and refuses anything this file writes that does not read back cleanly.</summary>
+    static void Load(string text, Automation program)
+    {
+        Assert.Equal("", ProgramText.Load(text, program, Store));
+    }
 
     /// <summary>A declaration with the keys a world would have minted for it.</summary>
     static EntityRef Declared(string name, string kindId, Values values, long id, string blockName)
@@ -88,6 +92,7 @@ public class ProgramTextTests
         spare.Optional = true;
 
         var port = airlock.Instances[1];
+        port.Enabled = false;
         port.Fill("inner", new[] { "outer" });
         port.Fill("vent", new[] { "call", "spare" });
 
@@ -150,6 +155,10 @@ public class ProgramTextTests
         Assert.Equal(2, airlock.Instances.Count);
         Assert.Equal("Port", airlock.Instances[1].Name);
 
+        // One of them parked. The format could not say this at all until it became a language.
+        Assert.True(airlock.Instances[0].Enabled);
+        Assert.False(airlock.Instances[1].Enabled);
+
         // What the author wrote about the parts.
         Assert.Equal("the door onto the ship", airlock.FindRole("inner")!.Name);
         Assert.Equal("The one you walk through to get inside.", airlock.FindRole("inner")!.Instructions);
@@ -189,40 +198,29 @@ public class ProgramTextTests
     }
 
     /// <summary>
-    /// Names are whatever somebody typed, which includes the separator.
+    /// Names are whatever somebody typed, and a backslash is an ordinary character.
     /// </summary>
+    /// <remarks>
+    /// Which is what quoting by doubling buys: no character changes the meaning of the next one, so a
+    /// name holding one cannot come back as something else. A forgotten escape can only fail loudly.
+    /// </remarks>
     [Fact]
     public void AwkwardNamesSurvive()
     {
         var program = new Automation();
         var system = program.AddSystem();
-        system.Name = @"Air|lock \ 2";
+        system.Name = @"Air\lock ""2""";
         system.Annotation = "line one\nline two";
 
         var sequence = program.AddSequence(system, new CalledTrigger());
-        sequence.Name = "|||";
+        sequence.Name = @"\\\";
 
         var after = new Automation();
         Load(Save(program), after);
 
-        Assert.Equal(@"Air|lock \ 2", after.Systems[0].Name);
+        Assert.Equal(@"Air\lock ""2""", after.Systems[0].Name);
         Assert.Equal("line one\nline two", after.Systems[0].Annotation);
-        Assert.Equal("|||", after.Sequences[0].Name);
-    }
-
-    /// <summary>
-    /// A save from a later build loses what this one cannot read, not everything.
-    /// </summary>
-    [Fact]
-    public void LinesThisBuildDoesNotUnderstandAreSkipped()
-    {
-        var text = Save(Build()) + "somethingnew|1|2|3\n";
-
-        var after = new Automation();
-        Load(text, after);
-
-        Assert.Equal(2, after.Systems.Count);
-        Assert.Equal(2, after.Sequences.Count);
+        Assert.Equal(@"\\\", after.Sequences[0].Name);
     }
 
     [Fact]

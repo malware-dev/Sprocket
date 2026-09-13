@@ -43,6 +43,29 @@ namespace Reactor.Sequences
         public IReadOnlyList<AutomationSystem> Systems => _systems;
 
         /// <summary>
+        /// Whether this is all of the program that was saved.
+        /// </summary>
+        /// <remarks>
+        /// False means something in the script could not be read, and the one thing that must follow
+        /// is that <b>nothing writes this program back over the save it came from</b>. Saving runs
+        /// whenever the program might have changed, so a half-read load plus any edit at all would
+        /// write the damage over the only copy - and it is the only copy, because the script is the
+        /// program rather than a view of it.
+        /// <para>
+        /// It is here rather than in whatever did the reading because it is a fact about this program,
+        /// and every host that saves has to honour it. What was wrong is a separate answer, from
+        /// <see cref="Storage.ProgramText.Load" />, and it stays out of the model: core has no words.
+        /// </para>
+        /// </remarks>
+        public bool Intact { get; private set; } = true;
+
+        /// <summary>Says this program is not all of what was saved, and cannot be saved over it.</summary>
+        public void Damaged()
+        {
+            Intact = false;
+        }
+
+        /// <summary>
         /// Every block this program names, declared once and pointed at from wherever it is used.
         /// </summary>
         /// <remarks>
