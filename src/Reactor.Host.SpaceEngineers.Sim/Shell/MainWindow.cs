@@ -1,4 +1,3 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -7,12 +6,6 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Reactor.Sim.Simulation;
 using VRageMath;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Shell
 {
@@ -226,11 +219,15 @@ namespace Reactor.Sim.Shell
                 if (sensor != null)
                 {
                     bool tripped = false;
+                    // Assigned, then captured, so the handler can reach the button it is on. The
+                    // lambda runs long after the assignment, so it is never null by then.
                     Button control = null;
                     control = Poke("trip " + sensor.Name, () =>
                     {
                         tripped = !tripped;
                         sensor.SetDetecting(tripped);
+                        // ReSharper disable once AccessToModifiedClosure
+                        // ReSharper disable once PossibleNullReferenceException
                         control.Foreground = tripped ? Brushes.LightGreen : Brushes.Gainsboro;
                     });
 
@@ -245,6 +242,8 @@ namespace Reactor.Sim.Shell
                     control = Poke("drain " + tank.Name, () =>
                     {
                         tank.Draining = !tank.Draining;
+                        // ReSharper disable once AccessToModifiedClosure
+                        // ReSharper disable once PossibleNullReferenceException
                         control.Foreground = tank.Draining ? Brushes.LightGreen : Brushes.Gainsboro;
                     });
 

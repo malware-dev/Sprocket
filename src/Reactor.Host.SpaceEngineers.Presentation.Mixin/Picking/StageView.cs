@@ -4,9 +4,7 @@ using VRageMath;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using Reactor.Host.SpaceEngineers.Presentation.Controls;
 using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Picking
 {
@@ -51,9 +49,6 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Picking
         /// </remarks>
         const float IconSize = Sizes.Icon;
 
-        readonly PickComponent _component;
-        readonly int _index;
-
         readonly Sized _root = new Sized(PickView.ColumnWidth);
         readonly Dock _column = new Dock();
         readonly Stack _head = Widgets.Column(Space.Row);
@@ -97,9 +92,6 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Picking
 
         public StageView(PickComponent component, int index)
         {
-            _component = component;
-            _index = index;
-
             PickStage stage = component.Stages[index];
 
             _title.Wraps = false;
@@ -421,7 +413,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Picking
 
                 row.Name.Text = entry.Text;
 
-                string detail = Detail(entry);
+                string detail = DetailOf(entry);
                 row.Detail.Text = detail;
                 row.Detail.Collapsed = string.IsNullOrEmpty(detail);
 
@@ -491,7 +483,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Picking
             return row;
         }
 
-        static string Detail(PickOption entry)
+        static string DetailOf(PickOption entry)
         {
             if (string.IsNullOrEmpty(entry.Secondary))
                 return entry.Status ?? "";

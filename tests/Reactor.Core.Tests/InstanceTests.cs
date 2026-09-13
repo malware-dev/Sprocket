@@ -1,6 +1,5 @@
 using Reactor.Runtime;
 using Reactor.Sequences;
-using Reactor.World;
 using Xunit;
 
 namespace Reactor.Tests;

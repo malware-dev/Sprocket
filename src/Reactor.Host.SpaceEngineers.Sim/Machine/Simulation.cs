@@ -1,11 +1,6 @@
 using Reactor.Editing;
 using Reactor.Sequences;
 using Reactor.Runtime;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
 using Reactor.Host.SpaceEngineers.Presentation.Words;
 
 namespace Reactor.Sim.Machine;

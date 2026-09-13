@@ -93,6 +93,86 @@ pattern catches that.
 
 ---
 
+## The inspection pass
+
+`JetBrains.ReSharper.GlobalTools` was installed for this, and it reads `Reactor.slnx` directly:
+
+```
+jb inspectcode Reactor.slnx --swea --format=Sarif --output=<file> --severity=WARNING
+```
+
+**1585 warnings down to 147.** Use Sarif, not Xml: the Xml report omits the line number for some
+inspections, which silently hides them from anything reading the file. That cost a wrong count once.
+
+### Fixed
+
+- **824 unused `using` directives** across 178 files, in two passes - removing some exposes others.
+- **Six dead members** (`ReactorEditor.GoToSystems`, `Vocabulary.Contains`, two `ProgramText.Long`
+  overloads) and **two fields assigned but never read** in `StageView`, with the constructor
+  parameters that fed them.
+- **Two names shadowing a method in the enclosing type** - `Want.Key` over `ReactorUnit.Key`, and a
+  `Detail` label over a `Detail` method. The methods are now `KeyOf` and `DetailOf`.
+- **A dead assignment** in `Wrap.Arrange`: `advance` set on the wrap branch and never read again.
+- **Seven broken doc references.** Three were wrong in a way that made the sentence nonsense -
+  "Writing `Lettering` syncs it" where `Text` was meant - and one pointed at `SentenceTrigger.Lead`,
+  which stopped existing when it became `TriggerKind`. Two were ambiguous between overloads, and one
+  referenced a type from a namespace that cannot see it.
+- **Small things in the tests**: an unused local, an unused tuple component, a redundant cast, and
+  five `out` discards that are now `out _`.
+
+### Suppressed, each with its reason
+
+- **131 in `.editorconfig` from a single root cause.** The mod and both mixins compile as C# 6, which
+  has no nullable annotations, so the analyser assumes every reference is non-null - and then reports
+  every null check as pointless, every null-guarded body as unreachable, every `??` as constant, and
+  every uninitialised field as a fault. Five inspections, one fact. The file says to revisit if the
+  mixins ever get annotations.
+- **68 float equality comparisons.** Layout setters compare exactly on purpose: the question is "same
+  value", not "close", and a tolerance would skip a small real change and leave the layout stale.
+- **The fakes' names and namespaces**, by path. They are transcribed from the game - `VRageMath`,
+  `MyAPIGateway`, and the game's own spelling of `HORISONTAL` - so neither may be corrected.
+- **Two usings, one collection, two closures and two null dereferences**, inline at the site.
+
+### Deliberately left on, and left reported
+
+**58 `RedundantUsingDirective` survive, and that is correct.** The two `.Mixin` projects are shared
+source compiled once into the mod and once into the simulator, so each file is analysed twice. A using
+needed by one consumer and not the other is reported once and is *not* redundant; one reported twice
+is unused everywhere. That distinction lives in how the run is counted, not in any setting - so it
+cannot be configured, and turning the inspection off to silence the survivors would hide the real
+ones. The rule is written at the top of `.editorconfig`.
+
+### The unused members, evaluated
+
+**None is dead. Every one is surface a ticket will read**, which is what it looks like when a model is
+built ahead of the screens:
+
+| Unread | Waiting on |
+|---|---|
+| `SequenceRunner.LastSkippedTick`, `LastSkippedStep`, all of `SkippedStep` | failure: why didn't it happen |
+| `EntityProperty.Label` | expressions - nothing displays a property yet |
+| `PickOption.Badge` | the picker can draw one; nothing sets one |
+| `EntityNoun.One` | the singular; only the plural and the title are used |
+| `Cadence.IsNative` | marks the rates the game itself uses, for a screen that does not exist |
+| `ConformancePoint` x 3 | host acknowledgement, read only by its own test |
+
+**Kept, and deliberately left reported.** Not suppressed: the report is then a list that gets quieter
+on its own as those tickets land, and a member still unread in a year is worth knowing about.
+Suppressing throws away the one signal that tells "early" from "abandoned".
+
+One was a real tightening rather than a deletion: `SequenceComponent.SequenceId` was publicly
+settable on a host-facing component. It is set once, when the sentence is made, so it is now
+`private set`.
+
+### What is left, all of it cosmetic
+
+**139 remain.** 58 are the shared-project redundant usings above. The rest is 26 redundant qualifiers,
+17 unused parameters in the simulator's window code, 6 redundant default arguments, 5 naming and 2
+field-to-local conversions - mechanical work that Rider's own cleanup does in one pass and better than
+a script, plus the 15 unused members that are staying on purpose.
+
+---
+
 ## What the guards cannot see, and was therefore not touched
 
 - **598 `<remarks>` blocks and 154 `<para>`s.** Sampling them says the great majority earn their

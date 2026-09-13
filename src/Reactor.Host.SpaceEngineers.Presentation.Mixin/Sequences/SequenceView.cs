@@ -4,10 +4,8 @@ using VRageMath;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using Reactor.Host.SpaceEngineers.Presentation.Controls;
 using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
 using Reactor.Host.SpaceEngineers.Presentation.Words;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
 {

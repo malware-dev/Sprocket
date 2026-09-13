@@ -1,4 +1,8 @@
 using System;
+
+// Needed by one of the two projects this shared code is compiled into and not the other, so an
+// inspection run against either will call it redundant. It is not.
+// ReSharper disable once RedundantUsingDirective
 using System.Collections.Generic;
 using System.Text;
 using Sandbox.ModAPI;
@@ -62,10 +66,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
         {
         }
 
-        /// <param name="referenceHeight">
-        /// The height a layout is written against, stretched to the screen. <see cref="NativePixels" /> for
-        /// no scaling at all.
-        /// </param>
+        /// <summary>
+        /// Draws onto a layer, at a scale set by the height a layout is written against.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="referenceHeight" /> is stretched to the screen.
+        /// <see cref="NativePixels" /> for no scaling at all.
+        /// </remarks>
         public ScreenSpaceGraphics(MyScreenSpaceLayer layer, float referenceHeight)
         {
             _layer = layer;

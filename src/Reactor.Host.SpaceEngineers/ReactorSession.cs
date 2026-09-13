@@ -1,14 +1,6 @@
 using System.Collections.Generic;
 using Sandbox.ModAPI;
-using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.Game.Components;
-using VRage.Utils;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 using Reactor.Host.SpaceEngineers.Terminal;
 using Reactor.Host.SpaceEngineers.World;
 

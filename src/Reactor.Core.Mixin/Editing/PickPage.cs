@@ -65,6 +65,9 @@ namespace Reactor.Editing
         {
             public int Compare(IEntity a, IEntity b)
             {
+                // Neither can be null: the only lists sorted with this are the world's own entities,
+                // and nothing ever puts a null in one. The interface allows it; this codebase does not.
+                // ReSharper disable once PossibleNullReferenceException
                 var byName = string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
                 return byName != 0 ? byName : a.Id.CompareTo(b.Id);
             }

@@ -1,4 +1,3 @@
-using Reactor.World;
 using SpaceEngineers.Game.ModAPI;
 using VRage.Game.ModAPI;
 using System.Collections.Generic;
@@ -11,11 +10,6 @@ using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Utils;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
 using Reactor.Host.SpaceEngineers.Presentation.Words;
 using Reactor.Host.SpaceEngineers.Terminal;
 
@@ -155,7 +149,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// is what keeps naming free: a rename cannot break wiring, and nothing has to be forbidden in
         /// a name to protect the separator. Built once, at bind, and read back verbatim.
         /// </remarks>
-        static string Key(AutomationSystem system, SystemInstance instance, Sequence sequence)
+        static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
             return system.Id + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Id;
         }
@@ -208,10 +202,9 @@ namespace Reactor.Host.SpaceEngineers.World
             target.Sequence = sequence;
             target.Instance = instance;
 
-            _byKey[Key(system, instance, sequence)] = target;
+            _byKey[KeyOf(system, instance, sequence)] = target;
         }
 
-        /// <summary>
         /// <summary>
         /// What the program wants wired right now: this button of this panel runs this sequence.
         /// </summary>
@@ -376,7 +369,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 var want = new Want();
                 want.PanelId = PanelId(_sources[source]);
                 want.Slot = slot;
-                want.Key = Key(system, instance, sequence);
+                want.Key = KeyOf(system, instance, sequence);
                 want.Reference = _sources[source];
                 want.EventId = when.EventId;
                 want.SequenceId = sequence.Id;

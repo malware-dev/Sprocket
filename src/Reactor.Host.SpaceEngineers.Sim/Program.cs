@@ -1,19 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Text;
 using Avalonia;
 using Reactor.Sim.Content;
 using Reactor.Sim.Shell;
 using Reactor.Sim.Simulation;
-using VRageMath;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim
 {

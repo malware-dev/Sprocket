@@ -1,4 +1,8 @@
 using System.Collections;
+
+// Needed by one of the two projects this shared code is compiled into and not the other, so an
+// inspection run against either will call it redundant. It is not.
+// ReSharper disable once RedundantUsingDirective
 using System.Collections.Generic;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Ui

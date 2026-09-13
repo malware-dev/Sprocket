@@ -193,7 +193,7 @@ static class Screen
     }
 
     /// <summary>The first part of the heading anybody can rename, or null when none can be.</summary>
-    static HeadingPart Nameable(this EditorScreen screen)
+    static HeadingPart? Nameable(this EditorScreen screen)
     {
         for (var i = 0; i < screen.Heading.Count; i++)
         {

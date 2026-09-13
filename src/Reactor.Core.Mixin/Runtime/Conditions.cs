@@ -50,7 +50,7 @@ namespace Reactor.Runtime
             return true;
         }
 
-        /// <summary>As <see cref="IsTrue"/>, but ignoring one entity.</summary>
+        /// <summary>As <see cref="IsTrue(IWorld,Bindings,Condition)"/>, but ignoring one entity.</summary>
         public static bool IsTrueExcept(IWorld world, Bindings bindings, Condition condition,
             string ignored)
         {

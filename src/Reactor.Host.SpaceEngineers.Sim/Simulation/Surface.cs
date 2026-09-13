@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using Reactor.Sim.Content;
-using Reactor.Host.SpaceEngineers.Presentation;
 using Sandbox.ModAPI;
 using VRageMath;
 using AvColor = Avalonia.Media.Color;
@@ -14,13 +10,7 @@ using Color = VRageMath.Color;
 using Point = Avalonia.Point;
 using Rect = Avalonia.Rect;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
-using Reactor.Host.SpaceEngineers.Presentation.Ui;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Simulation
 {

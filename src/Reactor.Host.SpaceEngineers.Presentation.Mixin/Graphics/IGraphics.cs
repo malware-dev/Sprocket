@@ -14,7 +14,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
     /// <para>
     /// <b>Rounding belongs in the backend, never in the layout.</b>
     /// <c>MyScreenSpaceSprite.DrawPixels</c> takes a <c>Rectangle</c>, so the screen has to round;
-    /// <c>MySprite</c> takes <c>Vector2?</c>, so a surface never has to. If <see cref="Element.Arrange" />
+    /// <c>MySprite</c> takes <c>Vector2?</c>, so a surface never has to. If <c>Element.Arrange</c>
     /// rounds, that choice is taken away from both at once.
     /// </para>
     /// <para>

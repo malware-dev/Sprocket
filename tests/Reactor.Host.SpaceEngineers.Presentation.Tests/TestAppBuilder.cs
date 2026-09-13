@@ -1,12 +1,6 @@
 using Avalonia;
 using Avalonia.Headless;
 using Reactor.Sim.Shell;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 [assembly: AvaloniaTestApplication(typeof(Reactor.Host.SpaceEngineers.Presentation.Tests.TestAppBuilder))]
 

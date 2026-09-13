@@ -21,7 +21,7 @@ namespace Reactor.Ui
             AddOptions = new List<ChoiceEntry>();
         }
 
-        public int SequenceId { get; set; }
+        public int SequenceId { get; private set; }
 
         /// <summary>
         /// Takes back the last change to this sequence. Zero when there is nothing to take

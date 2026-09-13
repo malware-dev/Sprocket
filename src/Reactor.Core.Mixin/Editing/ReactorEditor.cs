@@ -34,6 +34,9 @@ namespace Reactor.Editing
         readonly Dictionary<int, Action<int>> _numberActions = new Dictionary<int, Action<int>>();
         readonly EditorScreen _screen = new EditorScreen();
         readonly List<EditorComponent> _gathered = new List<EditorComponent>();
+        // Deliberately never added to - see where it is published. The analyser is right that it is
+        // never updated; that is the point.
+        // ReSharper disable once CollectionNeverUpdated.Local
         readonly List<ChoiceEntry> _actionBar = new List<ChoiceEntry>();
 
         bool _structureDirty;
@@ -722,11 +725,6 @@ namespace Reactor.Editing
             // learn before you have done anything, and two of the three were only ever
             // navigation - which the screens themselves can offer, where they mean something.
             _screen.Actions.Reset(_actionBar);
-        }
-
-        void GoToSystems()
-        {
-            Reset(new SystemsPage(this));
         }
 
         /// <summary>

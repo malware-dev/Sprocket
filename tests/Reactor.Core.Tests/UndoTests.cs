@@ -170,7 +170,6 @@ public class UndoTests
     [Fact]
     public void ChangingTheCadenceReversesExactly()
     {
-        var world = new TestWorld();
         var sequence = new Sequence(1, new EveryTrigger(60));
         var edit = new SetCadence(60, 600);
 

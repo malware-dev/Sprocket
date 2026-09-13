@@ -1,0 +1,76 @@
+root = true
+
+# Reactor's inspection settings. Only suppressions live here, and every one says why - an inspection
+# turned off without a reason is one nobody can ever turn back on with confidence.
+#
+# Run the inspections with:
+#   jb inspectcode Reactor.slnx --swea --format=Sarif --output=<file> --severity=WARNING
+#
+# Sarif rather than Xml: the Xml report omits the line for some inspections, which silently hides
+# them from anything reading the file.
+#
+# **Reading a RedundantUsingDirective report takes counting.** The two .Mixin projects are shared
+# source, compiled once into the mod and once into the simulator, so each of their files is analysed
+# twice. A using needed by one consumer and not the other is reported once and is not redundant; one
+# reported twice is unused everywhere and can go. That is a property of how the run is done, so it
+# cannot be configured here - and the inspection is deliberately left on, because turning it off to
+# silence the survivors would hide the real ones too.
+
+[*.cs]
+
+# ---------------------------------------------------------------------------------------------------
+# The mod and the two shared projects it is built from compile as C# 6, because that is the ceiling
+# for code Space Engineers will load. C# 6 has no nullable reference annotations - there is no way to
+# write `Element?` - so the analyser assumes every reference is non-null and then reports every null
+# check as pointless and every uninitialised field as a fault.
+#
+# All three of these come from that one fact. They are not defects, and there are 131 of them.
+#
+# **Revisit if the mixins ever get annotations.** Until then these inspections cannot tell a real
+# mistake from the language's own limits, and an inspection that cannot be trusted is worse than one
+# that is off: it buries the ones that can.
+# ---------------------------------------------------------------------------------------------------
+
+resharper_assign_null_to_not_null_attribute_highlighting = none
+resharper_not_null_or_required_member_is_not_initialized_highlighting = none
+resharper_condition_is_always_true_or_false_highlighting = none
+
+# Two more faces of the same thing. A null check the analyser believes can never be true makes its
+# body "unreachable", and a `??` whose left side it believes can never be null makes the operator
+# "constant". Both are correct code.
+resharper_heuristic_unreachable_code_highlighting = none
+resharper_constant_null_coalescing_condition_highlighting = none
+
+# ---------------------------------------------------------------------------------------------------
+# Layout properties compare floats for exact equality on purpose, in setters that decide whether
+# anything has to be measured again:
+#
+#     if (_itemSpacing == value)
+#         return;
+#
+# Exact is the right test. The question is "are these the same value", not "are they close" - and a
+# tolerance would skip a small genuine change and leave the layout stale, which is the bug this
+# guard exists to prevent. It also runs on a repeating path, where a tolerance costs more.
+# ---------------------------------------------------------------------------------------------------
+
+resharper_compare_of_floats_by_equality_operator_highlighting = none
+
+# ---------------------------------------------------------------------------------------------------
+# House style, which differs from the analyser's defaults on purpose. A private field is _camelCase
+# whether or not it is static or readonly; the analyser wants PascalCase once it is both.
+# ---------------------------------------------------------------------------------------------------
+
+resharper_csharp_naming_rule.static_readonly_field = AaBb + _aaBb
+resharper_csharp_naming_rule.constant_field = AaBb + _aaBb
+
+# ---------------------------------------------------------------------------------------------------
+# The simulator's fakes stand in for the game's own types so the shared code can be compiled against
+# something on a machine with no game running. Their names and their namespaces are transcribed -
+# VRageMath, Sandbox.ModAPI, MyAPIGateway, and the game's own spelling of HORISONTAL - so neither
+# matches this repository's folders or its naming, and neither may be corrected. Changing either
+# would stop the fakes standing in for anything.
+# ---------------------------------------------------------------------------------------------------
+
+[src/Reactor.Host.SpaceEngineers.Sim/Fakes/*.cs]
+resharper_check_namespace_highlighting = none
+resharper_inconsistent_naming_highlighting = none

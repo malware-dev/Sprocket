@@ -34,7 +34,7 @@ namespace Reactor.Ui
         /// Words that come before this part and belong to it, or empty for none.
         /// </summary>
         /// <remarks>
-        /// The same idea a sentence's <see cref="SentenceTrigger.Lead" /> already carries, and here for the
+        /// The same idea a sentence's <see cref="SentenceTrigger.Kind" /> already carries, and here for the
         /// same reason: <i>Automation for</i> <b>Hangar Bay Alpha</b> is one named thing with a phrase in
         /// front of it, not two things. The phrase is core's because it says what the screen is about; the
         /// name is somebody's to change and the phrase is not, so they cannot be the same part.
@@ -60,7 +60,7 @@ namespace Reactor.Ui
         /// What somebody actually typed, or empty where nobody has.
         /// </summary>
         /// <remarks>
-        /// <b>Not the same as <see cref="Lettering" /> and the difference is load-bearing.</b> A target opens
+        /// <b>Not the same as <see cref="Text" /> and the difference is load-bearing.</b> A target opens
         /// its rename box on this; opening it on the text would hand somebody a generated sentence and
         /// call it their name, which they then have to delete before they can answer.
         /// </remarks>

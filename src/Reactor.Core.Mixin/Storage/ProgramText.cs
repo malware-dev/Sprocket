@@ -275,19 +275,6 @@ namespace Reactor.Storage
             text.Append('\n');
         }
 
-        static string Long(long value)
-        {
-            return value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        }
-
-        static long Long(string[] parts, int index)
-        {
-            long value;
-            long.TryParse(At(parts, index), System.Globalization.NumberStyles.Integer,
-                System.Globalization.CultureInfo.InvariantCulture, out value);
-            return value;
-        }
-
         static string Number(int value)
         {
             return value.ToString(System.Globalization.CultureInfo.InvariantCulture);

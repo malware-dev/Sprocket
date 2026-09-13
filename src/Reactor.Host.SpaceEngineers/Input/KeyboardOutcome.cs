@@ -1,19 +1,7 @@
-using Sandbox.ModAPI;
-using VRage.Collections;
-using VRage.Input;
 
 // Two interfaces share this name. VRage.Input's is the engine's own and is not whitelisted; the mod-facing
 // one is what MyAPIGateway.Input hands back. Saying which removes an ambiguity that otherwise resolves to
 // the wrong one and fails only at the whitelist gate.
-using IMyInput = VRage.ModAPI.IMyInput;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
-using Reactor.Host.SpaceEngineers.Terminal;
-using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Input
 {

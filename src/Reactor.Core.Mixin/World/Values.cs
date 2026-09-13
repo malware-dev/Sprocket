@@ -14,8 +14,9 @@ namespace Reactor.World
     /// <para>
     /// <b>Wide kinds are lists rather than references.</b> A list of matrices keeps them unboxed and
     /// next to each other; a reference per value would put a heap object in a loop that runs sixty
-    /// times a second. Nothing here allocates once a slot exists - see <see cref="Text(EntityValue,
-    /// string)" />, which writes into the slot a reading already owns rather than taking a new one.
+    /// times a second. Nothing here allocates once a slot exists - see
+    /// <see cref="Text(EntityValue,string)" />, which writes into the slot a reading already owns
+    /// rather than taking a new one.
     /// So the lists grow to hold what is live at once and then stop.
     /// </para>
     /// <para>

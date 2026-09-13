@@ -18,7 +18,6 @@ namespace Reactor.World
     /// for a case that does not exist, is the wrong trade. A position in a block declaration's match
     /// list is script data the host interprets and never becomes one of these.
     /// </para>
-    /// </para>
     /// </remarks>
     public enum ValueKind
     {

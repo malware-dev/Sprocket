@@ -16,7 +16,7 @@ namespace Reactor.Tests;
 /// <para>
 /// This is the honest cheap version. It knows nothing of the screens, of Space Engineers, or of any
 /// drawing at all: it is handed a screen and writes down what is on it. What it cannot render, it
-/// refuses to render - see <see cref="Draw(EditorComponent)" /> - so a new component type breaks it
+/// refuses to render - see the component-drawing method - so a new component type breaks it
 /// until somebody has said what a target is meant to do with one.
 /// </para>
 /// </remarks>

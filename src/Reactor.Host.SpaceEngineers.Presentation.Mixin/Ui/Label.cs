@@ -9,7 +9,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
     /// <summary>A run of text, on one line or on as many as it needs.</summary>
     /// <remarks>
     /// It keeps a <c>StringBuilder</c> beside the string it was given, because the only allocation-free
-    /// way to measure is from one of those. Writing <see cref="Lettering" /> syncs it, so the cost lands when
+    /// way to measure is from one of those. Writing <see cref="Text" /> syncs it, so the cost lands when
     /// somebody changes the words.
     /// <para>
     /// Wrapping is off by default and is not free: breaking a run costs a measurement per word, so the

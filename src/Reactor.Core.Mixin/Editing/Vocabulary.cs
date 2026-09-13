@@ -167,15 +167,5 @@ namespace Reactor.Editing
             }
             return true;
         }
-
-        static bool Contains(IList<string> names, string name)
-        {
-            for (var i = 0; i < names.Count; i++)
-            {
-                if (names[i] == name)
-                    return true;
-            }
-            return false;
-        }
     }
 }

@@ -8,8 +8,6 @@ using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using Reactor.Host.SpaceEngineers.Presentation.Controls;
 using Reactor.Host.SpaceEngineers.Presentation.Lists;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Screen
 {
@@ -389,7 +387,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         /// Where the pointer is, in UI units. Somewhere outside the screen means there is not one.
         /// </summary>
         /// <remarks>
-        /// A property the host sets rather than an argument to <see cref="Draw" />, because a target
+        /// A property the host sets rather than an argument to <see cref="Draw(IGraphics)" />, because a target
         /// without a pointer - a text panel, a screenshot, a test - should not have to pass one. What it
         /// leaves alone stays where it was, which is off the screen and therefore over nothing.
         /// </remarks>
@@ -709,10 +707,14 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
             return Press(point, 1);
         }
 
-        /// <param name="clicks">
-        /// How many presses in quick succession this is. A second one on a row that says it confirms
-        /// means "this one, and move on" - taking the choice and going in one gesture.
-        /// </param>
+        /// <summary>
+        /// Presses at a point.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="clicks" /> is how many presses in quick succession this is. A second one on
+        /// a row that says it confirms means "this one, and move on" - taking the choice and going in
+        /// one gesture.
+        /// </remarks>
         public bool Press(Vector2 point, int clicks)
         {
             // A question with answers owns the screen absolutely: nothing outside it responds, and

@@ -8,14 +8,6 @@ using VRage.Input;
 using IMyInput = VRage.ModAPI.IMyInput;
 using Reactor.Host.SpaceEngineers.Presentation.Input;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
-using Reactor.Host.SpaceEngineers.Terminal;
-using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Input
 {

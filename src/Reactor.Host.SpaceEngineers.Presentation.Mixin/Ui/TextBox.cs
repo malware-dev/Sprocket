@@ -93,7 +93,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
         /// </summary>
         public bool CaretVisible { get; set; }
 
-        /// <summary>Whether an edit session currently owns this box. Set by <see cref="TextEditor" />.</summary>
+        /// <summary>Whether an edit session currently owns this box. Set by whatever holds the focus.</summary>
         public bool IsEditing { get; internal set; }
 
         /// <summary>

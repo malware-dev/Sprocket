@@ -1,14 +1,6 @@
-using System;
 using System.Globalization;
-using System.IO;
 using Avalonia;
 using Avalonia.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Controls;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Lists;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Picking;
-using Reactor.Host.SpaceEngineers.Presentation.Sequences;
 
 namespace Reactor.Sim.Shell
 {
@@ -144,9 +136,8 @@ namespace Reactor.Sim.Shell
             if (window.Screens == null || window.Screens.ScreenCount == 0)
                 return false;
 
-            double density = window.Screens.ScreenFromPoint(at) != null
-                ? window.Screens.ScreenFromPoint(at).Scaling
-                : 1d;
+            var screen = window.Screens.ScreenFromPoint(at);
+            double density = screen != null ? screen.Scaling : 1d;
 
             // Position is in physical pixels and the saved size is in the window's own units, so one of
             // the two has to be converted before they can be compared.

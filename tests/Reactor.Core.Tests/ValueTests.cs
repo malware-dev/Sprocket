@@ -71,16 +71,11 @@ public class ValueTests
     {
         var words = _values.Text("Airlock Inner Door");
 
-        long integer;
-        double real;
-        byte r, g, b, a;
-        string text;
+        Assert.False(_values.TryInteger(ValueKind.Text, words, out _));
+        Assert.False(_values.TryReal(ValueKind.Text, words, out _));
+        Assert.False(_values.TryColor(ValueKind.Text, words, out _, out _, out _, out _));
 
-        Assert.False(_values.TryInteger(ValueKind.Text, words, out integer));
-        Assert.False(_values.TryReal(ValueKind.Text, words, out real));
-        Assert.False(_values.TryColor(ValueKind.Text, words, out r, out g, out b, out a));
-
-        Assert.False(_values.TryText(ValueKind.Color, EntityValue.Of(255, 136, 0, 255), out text));
+        Assert.False(_values.TryText(ValueKind.Color, EntityValue.Of(255, 136, 0, 255), out _));
     }
 
     [Fact]

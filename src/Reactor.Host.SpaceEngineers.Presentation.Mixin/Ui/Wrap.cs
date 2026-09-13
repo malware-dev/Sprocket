@@ -127,7 +127,6 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
                     x = bounds.X;
                     lineHeight = 0f;
                     lineFrom = i;
-                    advance = width;
                 }
 
                 float left = x > bounds.X ? x + ItemSpacing : x;
