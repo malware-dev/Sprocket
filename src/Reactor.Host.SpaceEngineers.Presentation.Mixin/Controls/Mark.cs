@@ -34,12 +34,58 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Controls
         }
 
         /// <summary>Whether more than one of the rows this heads may be chosen.</summary>
-        public bool Many { get; set; }
+        private bool _many;
+        private bool _chosen;
+        private Color _color;
+
+        /// <summary>
+        /// Whether this is one of several that can be held at once.
+        /// </summary>
+        /// <remarks>
+        /// Asks for a new measure when it changes, as do the two below it. Which glyph this is gets
+        /// decided in <see cref="MeasureContent" /> - it has to be, because a glyph centres itself
+        /// against the line it was measured with - so a change that does not ask for a measure is a
+        /// change that never reaches the screen.
+        /// </remarks>
+        public bool Many
+        {
+            get { return _many; }
+            set
+            {
+                if (_many == value)
+                    return;
+
+                _many = value;
+                InvalidateMeasure();
+            }
+        }
 
         /// <summary>Whether this one has been.</summary>
-        public bool Chosen { get; set; }
+        public bool Chosen
+        {
+            get { return _chosen; }
+            set
+            {
+                if (_chosen == value)
+                    return;
 
-        public Color Color { get; set; }
+                _chosen = value;
+                InvalidateMeasure();
+            }
+        }
+
+        public Color Color
+        {
+            get { return _color; }
+            set
+            {
+                if (_color.Equals(value))
+                    return;
+
+                _color = value;
+                InvalidateMeasure();
+            }
+        }
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {

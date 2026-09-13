@@ -47,3 +47,10 @@ sequence-ticked     400 144 type Airlock enter 400 144 200 375 560 272 1380 1000
 # after would show up nowhere else, because nothing else in the suite gets as far as a step.
 sequence-step       400 144 type Airlock enter 400 144 200 375 560 272 1380 1000 70 278 200 375 560 272 1380 1000
 sequence-wait       400 144 type Airlock enter 400 144 200 375 560 272 1380 1000 212 278 100 255
+
+# --- swapping a choice, which nothing else here covers ------------------------------------------
+#
+# The mark beside a chosen row is a ring or a disc, and which one it is gets decided when the row is
+# measured. A change that did not ask for a new measure left the old glyph on screen: the model said
+# one thing and the picker drew another. Pressing a second choice is the whole of what catches that.
+picker-swapped      400 144 type Airlock enter 400 144 200 375 560 272 560 306

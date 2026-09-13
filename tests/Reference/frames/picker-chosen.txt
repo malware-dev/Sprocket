@@ -118,7 +118,7 @@ on screen     When something happens
 111  SetClip    {X:745 Y:255 W:428 H:671}
 112  Sprite     Reactor_Fill          {X:745 Y:255 W:416 H:43}  #3C4C52FF
 113  Text       at {X:784.8 Y:264.572} scale 0.64  #DCF5FDFF  "is pressed"
-114  Text       at {X:761.6546 Y:265.86697} scale 0.57  #85A1A9FF  "o"
+114  Text       at {X:762.02625 Y:265.86697} scale 0.57  #3ACC00FF  "0"
 115  SetClip    {X:259 Y:142 W:1402 H:812}
 116  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT HAPPENS"
 117  Sprite     Reactor_Fill          {X:745 Y:212 W:428 H:37}  #141B20FF

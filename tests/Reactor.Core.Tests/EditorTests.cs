@@ -717,6 +717,35 @@ public class EditorTests
         Assert.True(ship.Editor.HasAnswer("Switch it on"));
     }
 
+    /// <summary>
+    /// Swapping a step's verb changes the sentence, without the screen being rebuilt.
+    /// </summary>
+    /// <remarks>
+    /// A slot carries what it refers to, resolved when it was made, and an edit that leaves the
+    /// screen the same shape does not rebuild it - so the sentence went on saying what used to be
+    /// true while the model said otherwise.
+    /// </remarks>
+    [Fact]
+    public void SwappingAVerbChangesTheSentence()
+    {
+        var ship = Built();
+
+        var before = (ActionSlot)ship.Editor.Sentence().Steps[0].Slots[0];
+        Assert.Equal("close", before.Action.Text);
+
+        ship.Editor.PressStepSlot(0, 0);
+        ship.Tick();
+        ship.Editor.PressChoice("open");
+        ship.Editor.PressPrimary();
+        ship.Tick();
+
+        var after = (ActionSlot)ship.Editor.Sentence().Steps[0].Slots[0];
+        Assert.Equal("open", after.Action.Text);
+
+        // A new object, because a target words a slot once and skips it while it is the same one.
+        Assert.NotSame(before, after);
+    }
+
     /// <summary>Nothing that cannot run is offered, since that is why it is off.</summary>
     [Fact]
     public void ABrokenSequenceIsNotOfferedToSwitchOn()
