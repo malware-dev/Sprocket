@@ -176,10 +176,11 @@ namespace Reactor.Editing
         void Make(string name)
         {
             name = Naming.Clean(name);
-            if (name.Length == 0)
+            if (name.Length == 0 || Editor.Program.FindSystem(Editor.Author, name) != null)
                 return;
 
             var system = Editor.Program.AddSystem();
+            system.Namespace = Editor.Author;
             system.Name = name;
 
             // Straight to the system, and no further. Its screen is where the ways to start

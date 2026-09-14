@@ -25,16 +25,33 @@ namespace Reactor.Storage
         readonly int _from;
         readonly List<Statement> _body;
 
-        public Statement(Reading reading, Keyword key, string head, int from, int count, List<Statement> body)
+        public Statement(Reading reading, int at, Keyword key, string head, int from, int count, int optional,
+            List<Statement> body)
         {
             _reading = reading;
             _from = from;
             _body = body;
+            At = at;
             Key = key;
             Head = head ?? "";
             Count = count;
+            Optional = optional;
             Annotation = "";
         }
+
+        /// <summary>Where in the script it starts, so trouble about it can say which line.</summary>
+        public int At { get; private set; }
+
+        /// <summary>
+        /// Where its optional parts begin: the first value after a comma, or <see cref="Count" /> if there is
+        /// no comma.
+        /// </summary>
+        /// <remarks>
+        /// <c>system MalTek.Airlock is on, changed "..."</c>. The comma is there for whoever reads the line -
+        /// every optional part carries its own keyword, so nothing needs it to parse - and this is what lets a
+        /// reader insist optional parts stay behind it, where a person looks for them.
+        /// </remarks>
+        public int Optional { get; private set; }
 
         /// <summary>
         /// The format's word the statement starts with, or <see cref="Keyword.None" /> when it starts with an id.
@@ -42,7 +59,7 @@ namespace Reactor.Storage
         /// <remarks>
         /// A quoted head never has one, and that is how the language has no reserved words. A step is
         /// <c>open [outer] wait</c>, so an action genuinely called <c>every</c> is written
-        /// <c>"every" [outer] wait</c> and read as what it is.
+        /// <c>'every' [outer] wait</c> and read as what it is.
         /// </remarks>
         public Keyword Key { get; private set; }
 
@@ -64,34 +81,53 @@ namespace Reactor.Storage
         /// <summary>What is inside its braces, empty when it has none.</summary>
         public IList<Statement> Body => _body != null ? (IList<Statement>)_body : Nothing;
 
-        public Value At(int index)
+        public Value ValueAt(int index)
         {
             return index >= 0 && index < Count ? _reading.Values[_from + index] : Value.None;
         }
 
-        /// <summary>An identifier or string at a position, empty when there is none.</summary>
+        /// <summary>A name at a position, bare or quoted, empty when there is none.</summary>
         public string Word(int index)
         {
-            var value = At(index);
+            var value = ValueAt(index);
             return value.IsWord ? value.Word : "";
+        }
+
+        /// <summary>
+        /// Text at a position, empty when there is none.
+        /// </summary>
+        /// <remarks>
+        /// Only double-quoted text. A name where text belongs reads as empty, the same as nothing at all:
+        /// the two are kept apart so that neither can ever stand in for the other.
+        /// </remarks>
+        public string Text(int index)
+        {
+            var value = ValueAt(index);
+            return value.Form == ValueForm.Text ? value.Word : "";
         }
 
         public int Whole(int index)
         {
-            return (int)At(index).Number();
+            return (int)ValueAt(index).Number();
         }
 
         /// <summary>Whether the value at a position is the bare keyword given.</summary>
         public bool Says(int index, Keyword keyword)
         {
-            return At(index).Says(keyword);
+            return ValueAt(index).Says(keyword);
         }
 
         /// <summary>Where the given keyword sits among the values, or -1.</summary>
         public int Find(Keyword keyword)
         {
+            return Find(keyword, 0);
+        }
+
+        /// <summary>Where the given keyword sits among the values from a position on, or -1.</summary>
+        public int Find(Keyword keyword, int from)
+        {
             var values = _reading.Values;
-            for (var i = 0; i < Count; i++)
+            for (var i = from; i < Count; i++)
                 if (values[_from + i].Says(keyword))
                     return i;
 
@@ -101,9 +137,27 @@ namespace Reactor.Storage
         /// <summary>The items of a list at a position, or none where there is no list there.</summary>
         public ValueRange Items(int index)
         {
-            var value = At(index);
+            var value = ValueAt(index);
             return value.Form == ValueForm.List
                 ? new ValueRange(_reading.Items, value.From, value.Count)
+                : new ValueRange();
+        }
+
+        /// <summary>
+        /// The parts of a name at a position: two for <c>MalTek.Airlock</c>, one for a name written alone.
+        /// </summary>
+        /// <remarks>
+        /// A name written alone is answered as a run of one, so a reader asks one question whichever way a
+        /// name was written. None where there is no name there.
+        /// </remarks>
+        public ValueRange Parts(int index)
+        {
+            var value = ValueAt(index);
+            if (value.Form == ValueForm.Qualified)
+                return new ValueRange(_reading.Parts, value.From, value.Count);
+
+            return value.Form == ValueForm.Identifier
+                ? new ValueRange(_reading.Values, _from + index, 1)
                 : new ValueRange();
         }
     }

@@ -27,6 +27,7 @@ namespace Reactor.Editing
         readonly AutomationRunner _runner;
         readonly ISequenceText _sequenceText;
         readonly ITimeText _timeText;
+        string _author = "";
         readonly List<EditorPage> _stack = new List<EditorPage>();
         readonly Dictionary<int, Action> _actions = new Dictionary<int, Action>();
         readonly Dictionary<int, Action<string>> _textActions = new Dictionary<int, Action<string>>();
@@ -66,6 +67,20 @@ namespace Reactor.Editing
 
         /// <summary>How a length of time reads.</summary>
         public ITimeText TimeText => _timeText;
+
+        /// <summary>
+        /// Who the systems made here are by: the namespace a new system gets.
+        /// </summary>
+        /// <remarks>
+        /// Set by the host, which knows who is at the screen - in the game, the player's name until they
+        /// choose one of their own. Empty makes systems with no namespace, which is only ever a host that has
+        /// not said.
+        /// </remarks>
+        public string Author
+        {
+            get { return _author; }
+            set { _author = value ?? ""; }
+        }
 
         /// <summary>Ticks elapsed. The only honest unit of time available.</summary>
         public int CurrentTick => _runner.CurrentTick;

@@ -349,7 +349,10 @@ public static class StorageReport
         void BuildSystem(Automation program, int number)
         {
             var system = program.AddSystem();
-            system.Name = Named("Airlock " + number);
+            // Numbered even when every other name is the same, because a system is its name and two alike
+            // would be a program that does not read cleanly - which would time the wrong thing.
+            system.Namespace = "MalTek";
+            system.Name = Named("Airlock") + " " + number;
             system.Annotation = _annotation;
 
             var role = system.RoleFor(Entity(0));

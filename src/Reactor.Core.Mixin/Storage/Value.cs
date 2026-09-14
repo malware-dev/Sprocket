@@ -41,19 +41,30 @@ namespace Reactor.Storage
 
         public Keyword Keyword { get; private set; }
 
-        /// <summary>Whether this reads as a word, however it was written.</summary>
-        public bool IsWord => Form == ValueForm.Identifier || Form == ValueForm.Keyword || Form == ValueForm.Text;
+        /// <summary>Whether this is a name, bare or quoted. Text is not.</summary>
+        public bool IsWord => Form == ValueForm.Identifier || Form == ValueForm.Keyword;
 
-        /// <summary>Where a list's items start in <see cref="Reading.Items" />.</summary>
+        /// <summary>Where a list's items, or a name's parts, start in the reading.</summary>
         public int From => (int)(Whole >> 32);
 
-        /// <summary>How many items a list holds.</summary>
+        /// <summary>How many items a list holds, or parts a name has.</summary>
         public int Count => (int)(Whole & 0xFFFFFFFF);
 
         /// <summary>A list whose items are a run of <see cref="Reading.Items" />.</summary>
         public static Value Listed(int from, int count)
         {
-            return new Value(ValueForm.List, null, ((long)from << 32) | (uint)count);
+            return new Value(ValueForm.List, null, Run(from, count));
+        }
+
+        /// <summary>A name whose parts are a run of <see cref="Reading.Parts" />.</summary>
+        public static Value Qualified(int from, int count)
+        {
+            return new Value(ValueForm.Qualified, null, Run(from, count));
+        }
+
+        static long Run(int from, int count)
+        {
+            return ((long)from << 32) | (uint)count;
         }
 
         /// <summary>Whether this is the bare keyword given. A quoted word never is.</summary>

@@ -78,8 +78,13 @@ namespace Reactor.Editing
 
             // Refused here as well as wherever it was typed. A target that forgot to ask would otherwise
             // erase the only thing this system can be called by, and the rule would end up living in every
-            // target rather than in the one place that owns it.
+            // target rather than in the one place that owns it. A name another system already has is
+            // refused for the same reason: the name is what the system is.
             if (wanted.Length == 0)
+                return;
+
+            var other = Editor.Program.FindSystem(_system.Namespace, wanted);
+            if (other != null && other != _system)
                 return;
 
             _system.Name = wanted;

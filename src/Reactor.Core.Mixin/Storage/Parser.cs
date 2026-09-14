@@ -172,22 +172,44 @@ namespace Reactor.Storage
         Statement One(string note)
         {
             var kind = _token.Kind;
-            if (kind != TokenKind.Identifier && kind != TokenKind.Keyword && kind != TokenKind.Text)
+            if (kind != TokenKind.Identifier && kind != TokenKind.Keyword)
             {
                 Fail("a statement starts with a word");
                 Recover();
                 return null;
             }
 
+            var at = _token.At;
             var key = _token.Keyword;
             var head = kind == TokenKind.Keyword ? "" : _token.Text.ToString();
             var failures = _failures;
             var values = _reading.Values;
             var from = values.Count;
+            var optional = -1;
 
             Step();
-            while (Valuish())
+            while (true)
+            {
+                if (_token.Kind == TokenKind.Comma)
+                {
+                    if (optional < 0)
+                        optional = values.Count - from;
+
+                    Step();
+                    if (!Valuish())
+                    {
+                        Fail("a comma is followed by what it introduces");
+                        break;
+                    }
+
+                    continue;
+                }
+
+                if (!Valuish())
+                    break;
+
                 values.Add(Next());
+            }
 
             // A line that went wrong is dropped whole rather than half-read, because half a statement is a
             // step with no gate or a trigger with no sources, which reads as a change somebody made.
@@ -198,7 +220,9 @@ namespace Reactor.Storage
             }
 
             var body = _token.Kind == TokenKind.BlockOpen ? new List<Statement>() : null;
-            var statement = new Statement(_reading, key, head, from, values.Count - from, body);
+            var count = values.Count - from;
+            var statement = new Statement(_reading, at, key, head, from, count, optional < 0 ? count : optional,
+                body);
 
             statement.Annotation = Trim(note);
 
@@ -239,7 +263,8 @@ namespace Reactor.Storage
             {
                 case TokenKind.Identifier:
                     Step();
-                    return new Value(ValueForm.Identifier, token.Text.ToString());
+                    var name = new Value(ValueForm.Identifier, token.Text.ToString());
+                    return _token.Kind == TokenKind.Dot ? Qualified(name) : name;
 
                 case TokenKind.Keyword:
                     Step();
@@ -312,6 +337,39 @@ namespace Reactor.Storage
 
             Step();
             return Value.Listed(from, items.Count - from);
+        }
+
+        /// <summary>
+        /// A name in parts, <c>MalTek.Airlock</c>, having read its first part already.
+        /// </summary>
+        /// <remarks>
+        /// The dot is an operator, so spaces around it are nothing and <c>'MalTek Inc.' . Airlock</c> is the
+        /// same name as <c>'MalTek Inc.'.Airlock</c>. A part after a dot may be a keyword written bare - the
+        /// writer never produces one, but a name is still a name - and its text is its part.
+        /// </remarks>
+        Value Qualified(Value first)
+        {
+            var parts = _reading.Parts;
+            var from = parts.Count;
+            parts.Add(first);
+
+            while (_token.Kind == TokenKind.Dot)
+            {
+                Step();
+                if (_token.Kind == TokenKind.Identifier)
+                    parts.Add(new Value(ValueForm.Identifier, _token.Text.ToString()));
+                else if (_token.Kind == TokenKind.Keyword)
+                    parts.Add(new Value(ValueForm.Identifier, Keywords.Name(_token.Keyword)));
+                else
+                {
+                    Fail("a '.' is followed by the next part of a name");
+                    return Value.None;
+                }
+
+                Step();
+            }
+
+            return Value.Qualified(from, parts.Count - from);
         }
 
         Value Vector()

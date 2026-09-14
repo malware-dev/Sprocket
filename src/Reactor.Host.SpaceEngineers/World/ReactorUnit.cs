@@ -81,6 +81,10 @@ namespace Reactor.Host.SpaceEngineers.World
             Load();
 
             _editor = new ReactorEditor(_world, _program, _runner, _sequenceWords, _timeWords);
+
+            // The player's own name is only where a namespace starts; choosing another is theirs to do.
+            if (MyAPIGateway.Multiplayer != null)
+                _editor.Author = MyAPIGateway.Multiplayer.MyName;
         }
 
         public ReactorEditor Editor => _editor;
@@ -129,7 +133,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <para>
         /// Held per construct, which is the scope the slot's other half establishes: the slot carries
         /// the Reactor block's entity id, so a key is only ever asked of the one program that block
-        /// owns. That is what lets the numbers inside it be local ones.
+        /// owns.
         /// </para>
         /// <para>
         /// Rebuilt from the program rather than remembered across a save, so a slot written in an
@@ -145,13 +149,19 @@ namespace Reactor.Host.SpaceEngineers.World
         /// What goes in a slot: which system, which one of it, which sequence.
         /// </summary>
         /// <remarks>
-        /// Local numbers, joined by a character that cannot appear in one. No name goes in here, which
-        /// is what keeps naming free: a rename cannot break wiring, and nothing has to be forbidden in
-        /// a name to protect the separator. Built once, at bind, and read back verbatim.
+        /// <b>The system is named by what it is</b> - its namespace and name, spelt as the script spells
+        /// them - because a number cannot say which system it means once systems are exported, imported, or
+        /// on constructs that join. The quoting in that spelling is what keeps the parts after it
+        /// unambiguous, so no character has to be forbidden in a name.
+        /// <para>
+        /// So renaming a system is making a different one, and a button wired to the old name stops
+        /// resolving and is reported, rather than quietly following the rename. Built once, at bind, and
+        /// read back verbatim.
+        /// </para>
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
-            return system.Id + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Id;
+            return ProgramText.Identity(system) + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Id;
         }
 
         /// <summary>A block fired one of the actions Reactor put in it.</summary>

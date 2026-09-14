@@ -131,7 +131,28 @@ namespace Reactor.Storage
         public Pen Text(string value)
         {
             Space();
-            Quote(value);
+            Quote(_text, value, '"');
+            return this;
+        }
+
+        /// <summary>A name in its parts, <c>MalTek.Airlock</c>, or the name alone when it has no namespace.</summary>
+        public Pen Qualified(string space, string name)
+        {
+            Space();
+            Spell(_text, space, name);
+            return this;
+        }
+
+        /// <summary>
+        /// The comma that starts a statement's optional parts.
+        /// </summary>
+        /// <remarks>
+        /// Written tight against what it follows, the way a person writes one, and the next part brings its
+        /// own space.
+        /// </remarks>
+        public Pen Comma()
+        {
+            _text.Append(',');
             return this;
         }
 
@@ -231,26 +252,58 @@ namespace Reactor.Storage
             _first = false;
         }
 
+        /// <summary>
+        /// How a name in parts is spelt, exactly as the writer spells it.
+        /// </summary>
+        /// <remarks>
+        /// Also the name's identity wherever one string has to stand for it, such as a button's key. The
+        /// quoting is what makes that safe: <c>'a.b'.c</c> and <c>a.'b.c'</c> are different spellings, where
+        /// joining the parts plainly would make them the same.
+        /// </remarks>
+        public static string Spelling(string space, string name)
+        {
+            var spelt = new StringBuilder();
+            Spell(spelt, space, name);
+            return spelt.ToString();
+        }
+
         void Write(string id)
         {
+            Spell(_text, id);
+        }
+
+        static void Spell(StringBuilder into, string space, string name)
+        {
+            if (!string.IsNullOrEmpty(space))
+            {
+                Spell(into, space);
+                into.Append('.');
+            }
+
+            Spell(into, name);
+        }
+
+        /// <summary>A name: bare where it can be, in single quotes where it cannot.</summary>
+        static void Spell(StringBuilder into, string id)
+        {
             if (Keywords.Bare(id))
-                _text.Append(id);
+                into.Append(id);
             else
-                Quote(id);
+                Quote(into, id, '\'');
         }
 
         /// <summary>
-        /// A string, escaping a quote by doubling it.
+        /// Something in quotes, escaping only its own quote, by doubling it.
         /// </summary>
         /// <remarks>
-        /// A line break folds to a space, because a statement ends at the end of its line and a value
-        /// holding one would write a file that cannot be read back. <see cref="Sequences.Naming" /> is
-        /// where that rule belongs and it keeps names to one line, so this is the guard rather than
-        /// the rule: the writer must not be able to produce a broken save whatever reaches it.
+        /// A line break folds to a space, because a statement ends at the end of its line and a value holding
+        /// one would write a file that cannot be read back. <see cref="Sequences.Naming" /> is where that rule
+        /// belongs and it keeps names to one line, so this is the guard rather than the rule: the writer must
+        /// not be able to produce a broken save whatever reaches it.
         /// </remarks>
-        void Quote(string value)
+        static void Quote(StringBuilder into, string value, char quote)
         {
-            _text.Append('"');
+            into.Append(quote);
             if (!string.IsNullOrEmpty(value))
             {
                 for (var i = 0; i < value.Length; i++)
@@ -258,18 +311,18 @@ namespace Reactor.Storage
                     var c = value[i];
                     if (c == '\n' || c == '\r')
                     {
-                        _text.Append(' ');
+                        into.Append(' ');
                         continue;
                     }
 
-                    if (c == '"')
-                        _text.Append('"');
+                    if (c == quote)
+                        into.Append(quote);
 
-                    _text.Append(c);
+                    into.Append(c);
                 }
             }
 
-            _text.Append('"');
+            into.Append(quote);
         }
 
         void Hex(byte value)

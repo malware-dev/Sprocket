@@ -36,7 +36,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Storage\Keyword.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\Keywords.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\Lexer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Storage\Lines.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\Parser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\Pen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\ProgramText.cs" />
@@ -44,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Storage\Statement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\Token.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\TokenKind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Storage\Trouble.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\Value.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\ValueForm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Storage\ValueChunks.cs" />

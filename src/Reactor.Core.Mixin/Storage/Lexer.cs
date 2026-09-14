@@ -13,7 +13,7 @@ namespace Reactor.Storage
     /// something asks for it. A keyword never is.
     /// <para>
     /// Two rules here are worth knowing before reading the code, because both exist to make a mistake loud
-    /// rather than silent. <b>A string escapes a quote by doubling it</b> and backslash means nothing, so a
+    /// rather than silent. <b>A quote is escaped by doubling it</b> and backslash means nothing, so a
     /// writer that forgets to escape cannot produce a file that still parses wrongly - a Windows path
     /// reading back as something else. And <b>every number is read with the invariant culture</b>, so a
     /// player whose decimal separator is a comma does not write <c>0,25</c> and read back <c>25</c> on
@@ -65,8 +65,10 @@ namespace Reactor.Storage
                 case '(': return One(TokenKind.VectorOpen);
                 case ')': return One(TokenKind.VectorClose);
                 case ',': return One(TokenKind.Comma);
+                case '.': return One(TokenKind.Dot);
                 case '#': return Hash();
-                case '"': return Quoted();
+                case '"': return Quoted('"', TokenKind.Text);
+                case '\'': return Quoted('\'', TokenKind.Identifier);
             }
 
             if (c == '-' || Digit(c))
@@ -169,60 +171,66 @@ namespace Reactor.Storage
         }
 
         /// <summary>
-        /// A quoted string, left where it lies unless something in it was doubled.
+        /// Something in quotes, left where it lies unless something in it was doubled.
         /// </summary>
         /// <remarks>
-        /// Most values in a save are quoted - names, kind ids, text keys - and almost none of them contain a
-        /// quote. So the ordinary path finds the closing quote and keeps a segment, and only a string that
-        /// actually holds a doubled quote has a new one built.
+        /// Double quotes are text and single quotes are a name, and each escapes only its own quote, by
+        /// doubling it. Most values in a save are quoted and almost none contain their own quote, so the
+        /// ordinary path finds the closing one and keeps a segment, and only a value that actually holds a
+        /// doubled quote has a new string built.
         /// </remarks>
-        Token Quoted()
+        Token Quoted(char quote, TokenKind kind)
         {
             var start = _ptr;
             _ptr++;
 
             var from = _ptr;
-            var close = _ptr.FindInLine('"');
+            var close = _ptr.FindInLine(quote);
             if (close.IsOutOfBounds())
             {
                 _ptr = _ptr.FindEndOfLine();
-                return Bad(start, "a text value is not closed");
+                return Bad(start, Unclosed(kind));
             }
 
-            if ((close + 1).Char == '"')
-                return Doubled(start, from);
+            if ((close + 1).Char == quote)
+                return Doubled(start, from, quote, kind);
 
             _ptr = close;
             var text = Since(from);
             _ptr++;
-            return new Token(TokenKind.Text, start.Index, text);
+            return new Token(kind, start.Index, text);
         }
 
-        /// <summary>The rare string holding a doubled quote, built up a run at a time between them.</summary>
-        Token Doubled(TextPtr start, TextPtr from)
+        /// <summary>The rare value holding a doubled quote, built up a run at a time between them.</summary>
+        Token Doubled(TextPtr start, TextPtr from, char quote, TokenKind kind)
         {
             var built = new StringBuilder();
             _ptr = from;
 
             while (true)
             {
-                var close = _ptr.FindInLine('"');
+                var close = _ptr.FindInLine(quote);
                 if (close.IsOutOfBounds())
                 {
                     _ptr = _ptr.FindEndOfLine();
-                    return Bad(start, "a text value is not closed");
+                    return Bad(start, Unclosed(kind));
                 }
 
                 built.Append(_ptr.Content, _ptr.Index, close.Index - _ptr.Index);
-                if ((close + 1).Char != '"')
+                if ((close + 1).Char != quote)
                 {
                     _ptr = close + 1;
-                    return new Token(TokenKind.Text, start.Index, new StringSegment(built.ToString()));
+                    return new Token(kind, start.Index, new StringSegment(built.ToString()));
                 }
 
-                built.Append('"');
+                built.Append(quote);
                 _ptr = close + 2;
             }
+        }
+
+        static string Unclosed(TokenKind kind)
+        {
+            return kind == TokenKind.Text ? "a text value is not closed" : "a quoted name is not closed";
         }
 
         /// <summary>

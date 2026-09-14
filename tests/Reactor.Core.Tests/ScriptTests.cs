@@ -34,7 +34,9 @@ public class ScriptTests
         program.Restore(door);
 
         var system = program.AddSystem();
+        system.Namespace = "MalTek";
         system.Name = "Airlock";
+        system.Changed = new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc);
         system.Annotation = "Cycles an airlock.\n\nNothing opens on both sides at once.";
 
         var role = system.RoleFor("inner");
@@ -68,6 +70,15 @@ public class ScriptTests
         return program;
     }
 
+    static Automation SystemCalled(string space, string name)
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+        system.Namespace = space;
+        system.Name = name;
+        return program;
+    }
+
     /// <summary>
     /// What a program looks like written down, in full.
     /// </summary>
@@ -80,14 +91,14 @@ public class ScriptTests
     public void AProgramReadsAsAScript()
     {
         Assert.Equal(
-            "reactor 2\n" +
+            "reactor 3\n" +
             "\n" +
-            "block \"Door/LargeBlockDoor\" inner [ 74857693847562934, \"Airlock Inner Door\" ]\n" +
+            "block 'Door/LargeBlockDoor' inner [ 74857693847562934, \"Airlock Inner Door\" ]\n" +
             "\n" +
             "# Cycles an airlock.\n" +
             "#\n" +
             "# Nothing opens on both sides at once.\n" +
-            "system 1 on \"Airlock\" {\n" +
+            "system MalTek.Airlock is on, changed \"2026-09-14T19:02:11Z\" {\n" +
             "    # The door onto the ship.\n" +
             "    role inner required \"the inner door\"\n" +
             "\n" +
@@ -108,6 +119,116 @@ public class ScriptTests
     }
 
     /// <summary>
+    /// A system is what it is called: its namespace and its name, whatever they contain.
+    /// </summary>
+    [Fact]
+    public void ASystemIsItsNamespaceAndName()
+    {
+        var text = Save(SystemCalled("MalTek Inc.", "Airlock System"));
+        Assert.Contains("system 'MalTek Inc.'.'Airlock System' is on {", text);
+
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+        Assert.True(after.Systems[0].Is("MalTek Inc.", "Airlock System"));
+    }
+
+    /// <summary>
+    /// The dot is an operator, so the spaces around it are nothing and the name is always its parts.
+    /// </summary>
+    [Fact]
+    public void SpacesAroundTheDotAreNothing()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load("reactor 3\n\nsystem 'MalTek Inc.'  .  Airlock is on {\n}\n", after));
+        Assert.True(after.Systems[0].Is("MalTek Inc.", "Airlock"));
+
+        // Written back tight, because the writer has one spelling for a name.
+        Assert.Contains("system 'MalTek Inc.'.Airlock is on {", Save(after));
+    }
+
+    /// <summary>
+    /// Two different names can never spell the same, which is what lets the spelling stand for a system.
+    /// </summary>
+    /// <remarks>
+    /// Joined plainly, <c>a.b</c> and <c>c</c> would collide with <c>a</c> and <c>b.c</c>. The quoting is
+    /// what keeps them apart, and a button's key relies on it.
+    /// </remarks>
+    [Fact]
+    public void TwoDifferentNamesNeverSpellTheSame()
+    {
+        var one = SystemCalled("a.b", "c").Systems[0];
+        var other = SystemCalled("a", "b.c").Systems[0];
+
+        Assert.NotEqual(ProgramText.Identity(one), ProgramText.Identity(other));
+    }
+
+    /// <summary>
+    /// Text is never a name, even when it says the same thing.
+    /// </summary>
+    /// <remarks>
+    /// Once expressions exist, a quote style that meant both would leave <c>"Airlock"</c> undecidable -
+    /// text to compare against, or the thing called that. So the two never stand in for each other.
+    /// </remarks>
+    [Fact]
+    public void TextIsNeverAName()
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load("reactor 3\n\nsystem \"Airlock\" is on {\n}\n", after));
+        Assert.False(after.Intact);
+    }
+
+    [Fact]
+    public void TwoSystemsWithTheSameNameAreTrouble()
+    {
+        var after = new Automation();
+        var trouble = Load("reactor 3\n\nsystem MalTek.Airlock is on {\n}\n\nsystem MalTek.Airlock is off {\n}\n",
+            after);
+
+        Assert.NotEqual("", trouble);
+        Assert.False(after.Intact);
+        Assert.Single(after.Systems);
+    }
+
+    [Fact]
+    public void ASwitchSaysOnOrOff()
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load("reactor 3\n\nsystem Airlock is maybe {\n}\n", after));
+        Assert.False(after.Intact);
+
+        // Still there, because a reader never loses more than it has to.
+        Assert.Single(after.Systems);
+    }
+
+    /// <summary>
+    /// Optional parts come after the comma, where a person looks for them.
+    /// </summary>
+    [Fact]
+    public void AnOptionalPartComesAfterTheComma()
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load("reactor 3\n\nsystem Airlock is on changed \"2026-09-14T19:02:11Z\" {\n}\n",
+            after));
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A changed time is ISO 8601 and nothing else, and is written back as UTC.
+    /// </summary>
+    [Fact]
+    public void AChangedTimeIsIsoAndComesBackAsUtc()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load("reactor 3\n\nsystem Airlock is on, changed \"2026-09-14T21:02:11+02:00\" {\n}\n",
+            after));
+        Assert.Contains("system Airlock is on, changed \"2026-09-14T19:02:11Z\" {", Save(after));
+
+        var local = new Automation();
+        Assert.NotEqual("", Load("reactor 3\n\nsystem Airlock is on, changed \"14/09/2026\" {\n}\n", local));
+        Assert.False(local.Intact);
+    }
+
+    /// <summary>
     /// A step reads as what it does, so an action named after one of the format's words is quoted.
     /// </summary>
     /// <remarks>
@@ -117,19 +238,18 @@ public class ScriptTests
     [Fact]
     public void AnActionNamedAfterAKeywordIsQuoted()
     {
-        var program = new Automation();
-        var system = program.AddSystem();
-        var sequence = program.AddSequence(system, new CalledTrigger());
+        var program = SystemCalled("", "Airlock");
+        var sequence = program.AddSequence(program.Systems[0], new CalledTrigger());
 
         var odd = new Step("every");
         odd.Targets.Add("thing");
         sequence.Steps.Add(odd);
 
         var text = Save(program);
-        Assert.Contains("\"every\" [ thing ] wait\n", text);
+        Assert.Contains("'every' [ thing ] wait\n", text);
 
         var after = new Automation();
-        Load(text, after);
+        Assert.Equal("", Load(text, after));
         Assert.Equal("every", after.Sequences[0].Steps[0].ActionId);
     }
 
@@ -159,18 +279,27 @@ public class ScriptTests
         Assert.Equal(3, after.Sequences[0].Steps.Count);
     }
 
+    /// <summary>
+    /// A name escapes only its own quote, and text only its own.
+    /// </summary>
+    /// <remarks>
+    /// Single quotes for a name and double for text, each doubling only the quote that would end it, so a
+    /// double quote inside a name and a single quote inside text need nothing at all.
+    /// </remarks>
     [Fact]
-    public void TextEscapesAQuoteByDoublingIt()
+    public void EachQuoteEscapesOnlyItself()
     {
-        var program = new Automation();
-        program.AddSystem().Name = "the \"big\" airlock";
+        var program = SystemCalled("", "Mal's \"big\" airlock");
+        program.Systems[0].RoleFor("inner").Name = "the \"inner\" door's";
 
         var text = Save(program);
-        Assert.Contains("\"the \"\"big\"\" airlock\"", text);
+        Assert.Contains("system 'Mal''s \"big\" airlock' is on {", text);
+        Assert.Contains("\"the \"\"inner\"\" door's\"", text);
 
         var after = new Automation();
-        Load(text, after);
-        Assert.Equal("the \"big\" airlock", after.Systems[0].Name);
+        Assert.Equal("", Load(text, after));
+        Assert.Equal("Mal's \"big\" airlock", after.Systems[0].Name);
+        Assert.Equal("the \"inner\" door's", after.Systems[0].FindRole("inner")!.Name);
     }
 
     /// <summary>
@@ -262,15 +391,22 @@ public class ScriptTests
     public void AnAnnotationWithNothingUnderItIsTrouble()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("reactor 2\n\n# about nothing at all\n", after));
+        Assert.NotEqual("", Load("reactor 3\n\n# about nothing at all\n", after));
         Assert.False(after.Intact);
     }
 
+    /// <summary>
+    /// A save in any other version is read as far as it goes and never written back.
+    /// </summary>
+    /// <remarks>
+    /// Not backwards compatible while the language is being designed, so an older save does not load
+    /// cleanly - but nothing on disk is lost, because trouble stops the program being saved over it.
+    /// </remarks>
     [Fact]
-    public void ASaveFromALaterVersionIsReadAsFarAsItGoesAndNotWrittenBack()
+    public void ASaveFromAnotherVersionIsReadAsFarAsItGoesAndNotWrittenBack()
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("reactor 2", "reactor 3"), after);
+        var trouble = Load(Save(Airlock()).Replace("reactor 3", "reactor 2"), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);
@@ -281,55 +417,8 @@ public class ScriptTests
     public void SomethingThatIsNotAProgramIsNotReadAsOne()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("system 1 on \"Airlock\"\n", after));
+        Assert.NotEqual("", Load("system Airlock is on {\n}\n", after));
         Assert.False(after.Intact);
-    }
-
-    /// <summary>
-    /// A save written before the language still opens.
-    /// </summary>
-    /// <remarks>
-    /// Written out by hand rather than generated, because nothing generates it any more. The whole of
-    /// <c>Lines</c> exists for saves like this one and goes when none are left.
-    /// </remarks>
-    [Fact]
-    public void AProgramSavedBeforeTheLanguageStillLoads()
-    {
-        var after = new Automation();
-        var trouble = Load(
-            "reactor 1\n" +
-            "block|inner|door|i:1,t:Inner Door\n" +
-            "system|1|on|Airlock|Cycles the front airlock\n" +
-            "role|inner|off|the door onto the ship|The one you walk through.\n" +
-            "one|1|Forward\n" +
-            "fill|inner|inner\n" +
-            "sequence|1|off|Let me out|Inside to outside.\n" +
-            "when|any|pressed|inner\n" +
-            "step|close|wait|inner|the vent needs a moment\n" +
-            "after|90\n",
-            after);
-
-        Assert.Equal("", trouble);
-        Assert.True(after.Intact);
-
-        var system = after.Systems[0];
-        Assert.Equal("Airlock", system.Name);
-        Assert.Equal("Cycles the front airlock", system.Annotation);
-        Assert.Equal("the door onto the ship", system.FindRole("inner")!.Name);
-        // The one every system starts with, named and filled - the old format wrote its number too.
-        Assert.Equal("Forward", system.Instances[0].Name);
-        Assert.Equal(new[] { "inner" }, system.Instances[0].FilledWith("inner"));
-
-        var sequence = after.Sequences[0];
-        Assert.False(sequence.Enabled);
-        Assert.Equal("Inside to outside.", sequence.Annotation);
-        Assert.Equal("pressed", Assert.IsType<WhenTrigger>(sequence.Trigger).EventId);
-        Assert.Equal("close", sequence.Steps[0].ActionId);
-        Assert.Equal("the vent needs a moment", sequence.Steps[0].Annotation);
-        Assert.Equal(90, Assert.IsType<AfterGate>(sequence.Steps[0].Gate).Ticks);
-
-        // And what it reads is written back as the language, because there is one format now.
-        Assert.StartsWith("reactor 2\n", Save(after));
     }
 
     /// <summary>
@@ -346,11 +435,8 @@ public class ScriptTests
     {
         Assert.Equal("one two", Naming.Clean("one\ntwo"));
 
-        var program = new Automation();
-        program.AddSystem().Name = "one\ntwo";
-
         var after = new Automation();
-        Assert.Equal("", Load(Save(program), after));
+        Assert.Equal("", Load(Save(SystemCalled("", "one\ntwo")), after));
         Assert.Equal("one two", after.Systems[0].Name);
     }
 }

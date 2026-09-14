@@ -1227,4 +1227,37 @@ public class EditorTests
         return int.Parse(words.Substring(0, words.Length - " ticks ago".Length));
     }
 
+    /// <summary>
+    /// A system made at the screen is by whoever is at it.
+    /// </summary>
+    /// <remarks>
+    /// The namespace is half of what a system is, so it cannot be left for later: a system with no author is
+    /// one that collides with everybody else's of the same name the moment it is shared.
+    /// </remarks>
+    [Fact]
+    public void ANewSystemIsByWhoeverMadeIt()
+    {
+        var ship = Build();
+        ship.Editor.Author = "MalTek";
+
+        ship.Editor.NewSystem("Airlock");
+
+        Assert.True(Assert.Single(ship.Automation.Systems).Is("MalTek", "Airlock"));
+    }
+
+    /// <summary>
+    /// A name another system already has is refused, because the name is what a system is.
+    /// </summary>
+    [Fact]
+    public void ANameAnotherSystemAlreadyHasIsRefused()
+    {
+        var ship = Build();
+        ship.Editor.Author = "MalTek";
+
+        ship.Editor.NewSystem("Airlock");
+        ship.Editor.GoToRoot();
+        ship.Editor.NewSystem("Airlock");
+
+        Assert.Single(ship.Automation.Systems);
+    }
 }

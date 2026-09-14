@@ -49,6 +49,7 @@ public class ProgramTextTests
         program.Restore(Declared("spare", "button", values, 5, "Spare Button"));
 
         var airlock = program.AddSystem();
+        airlock.Namespace = "MalTek";
         airlock.Name = "Airlock";
         airlock.Annotation = "Cycles the front airlock";
         airlock.AddInstance().Name = "Port";
@@ -126,13 +127,16 @@ public class ProgramTextTests
     }
 
     [Fact]
-    public void IdentityIsKept_BecauseSavedSequencesReferToItByNumber()
+    public void IdentityIsKept_BecauseButtonsNameWhatTheyRun()
     {
         var before = Build();
         var after = new Automation();
         Load(Save(before), after);
 
-        Assert.Equal(before.Systems[0].Id, after.Systems[0].Id);
+        // A system is its namespace and name, including one with no namespace at all.
+        Assert.True(after.Systems[0].Is("MalTek", "Airlock"));
+        Assert.True(after.Systems[1].Is("", "Drill Rig"));
+
         Assert.Equal(before.Sequences[0].Id, after.Sequences[0].Id);
         Assert.Equal(before.Sequences[1].Id, after.Sequences[1].Id);
 

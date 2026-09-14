@@ -44,6 +44,8 @@ namespace Reactor.Storage
         Wait,
         Now,
         Optional,
-        Required
+        Required,
+        Is,
+        Changed
     }
 }

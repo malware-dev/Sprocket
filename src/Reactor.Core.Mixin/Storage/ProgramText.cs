@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Reactor.Sequences;
 using Reactor.World;
 
@@ -33,16 +34,46 @@ namespace Reactor.Storage
     public static class ProgramText
     {
         /// <summary>
-        /// What this build writes.
+        /// What this build writes, and the only thing it reads.
         /// </summary>
         /// <remarks>
-        /// 1 was one construct per bar-separated line, which <see cref="Lines" /> still reads. A higher
-        /// number than this is a save from a later build: what it says is read as far as it goes, and
-        /// the program is marked not to be written back.
+        /// <b>Not backwards compatible, on purpose, while the language is still being designed.</b> A save
+        /// saying any other number is read as far as it goes and marked not to be written back, so nothing
+        /// on disk is lost - it simply does not load cleanly.
         /// </remarks>
-        const int Version = 2;
+        const int Version = 3;
 
-        const string Language = "reactor";
+        /// <summary>
+        /// How a <c>changed</c> time may be written: ISO 8601, and nothing else.
+        /// </summary>
+        /// <remarks>
+        /// Quoted rather than bare because a bare date is two subtractions once expressions exist. A time with
+        /// no offset is UTC. The writer always uses the first.
+        /// </remarks>
+        static readonly string[] Times =
+        {
+            "yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'",
+            "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFF'Z'",
+            "yyyy'-'MM'-'dd'T'HH':'mm':'sszzz",
+            "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFzzz",
+            "yyyy'-'MM'-'dd'T'HH':'mm':'ss",
+            "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFF",
+            "yyyy'-'MM'-'dd'T'HH':'mm'Z'",
+            "yyyy'-'MM'-'dd'T'HH':'mm",
+            "yyyy'-'MM'-'dd"
+        };
+
+        /// <summary>
+        /// A system's name as one string: its canonical spelling in the script.
+        /// </summary>
+        /// <remarks>
+        /// For anything that needs a single string to stand for a system, a button's key above all. The
+        /// quoting keeps two different names from ever spelling the same.
+        /// </remarks>
+        public static string Identity(AutomationSystem system)
+        {
+            return Pen.Spelling(system.Namespace, system.Name);
+        }
 
         public static string Save(Automation program, Values values)
         {
@@ -78,20 +109,14 @@ namespace Reactor.Storage
             if (string.IsNullOrEmpty(saved))
                 return "";
 
-            if (First(saved) == Language + " 1")
-            {
-                Lines.Load(saved, program, values);
-                return "";
-            }
-
             var parser = new Parser(saved);
             var constructs = parser.Read();
-            var trouble = parser.Trouble;
+            var trouble = new Trouble(saved, parser.Trouble);
 
             if (constructs.Count == 0 || constructs[0].Key != Keyword.Reactor)
-                trouble = Pick(trouble, "this is not a Reactor program");
-            else if (constructs[0].Whole(0) > Version)
-                trouble = Pick(trouble, "this was written by a later version of Reactor");
+                trouble.Say("this is not a Reactor program");
+            else if (constructs[0].Whole(0) != Version)
+                trouble.Say("this was written by a different version of Reactor");
 
             for (var i = 0; i < constructs.Count; i++)
             {
@@ -99,31 +124,13 @@ namespace Reactor.Storage
                 if (construct.Key == Keyword.Block)
                     ReadRef(construct, program, values);
                 else if (construct.Key == Keyword.System)
-                    ReadSystem(construct, program);
+                    ReadSystem(construct, program, trouble);
             }
 
-            if (trouble.Length > 0)
+            if (trouble.What.Length > 0)
                 program.Damaged();
 
-            return trouble;
-        }
-
-        /// <summary>The first line, however the file ends its lines.</summary>
-        static string First(string saved)
-        {
-            var to = saved.IndexOf('\n');
-            if (to < 0)
-                to = saved.Length;
-
-            if (to > 0 && saved[to - 1] == '\r')
-                to--;
-
-            return saved.Substring(0, to);
-        }
-
-        static string Pick(string trouble, string instead)
-        {
-            return trouble.Length > 0 ? trouble : instead;
+            return trouble.What;
         }
 
         static void WriteRef(Pen pen, Values values, EntityRef declared)
@@ -228,12 +235,6 @@ namespace Reactor.Storage
                 case ValueForm.Keyword:
                     if (key.Keyword == Keyword.On || key.Keyword == Keyword.Off)
                         into.Add(new EntityKey(ValueKind.Flag, EntityValue.Of(key.Keyword == Keyword.On)));
-                    else
-                        into.Add(new EntityKey(ValueKind.Text, values.Text(key.Word)));
-                    return;
-
-                case ValueForm.Identifier:
-                    into.Add(new EntityKey(ValueKind.Text, values.Text(key.Word)));
                     return;
             }
         }
@@ -242,8 +243,15 @@ namespace Reactor.Storage
         {
             pen.Blank();
             pen.Note(system.Annotation);
-            pen.Start(Keyword.System).Whole(system.Id).Says(OnOff(system.Enabled));
-            Named(pen, system.Name);
+            pen.Start(Keyword.System).Qualified(system.Namespace, system.Name)
+                .Says(Keyword.Is).Says(OnOff(system.Enabled));
+
+            if (system.Changed.HasValue)
+            {
+                pen.Comma().Says(Keyword.Changed)
+                    .Text(system.Changed.Value.ToString(Times[0], CultureInfo.InvariantCulture));
+            }
+
             pen.Body();
 
             // What the author wrote about the parts, before the ones that fill them in, so a reader
@@ -263,12 +271,46 @@ namespace Reactor.Storage
             pen.Shut();
         }
 
-        static void ReadSystem(Statement statement, Automation program)
+        /// <summary>
+        /// <c>system MalTek.Airlock is on, changed "2026-09-14T19:02:11Z" { … }</c>
+        /// </summary>
+        /// <remarks>
+        /// Strict where it matters. A system is what it is called, so one without a name, or a second with
+        /// the same name, is trouble and not read. A switch that says neither on nor off is trouble but the
+        /// system still loads, switched on, because the parser never loses more than it has to - and trouble
+        /// already stops the program being saved over what is on disk.
+        /// </remarks>
+        static void ReadSystem(Statement statement, Automation program, Trouble trouble)
         {
-            var system = program.Restore(statement.Whole(0));
-            system.Enabled = !statement.Says(1, Keyword.Off);
-            system.Name = statement.Word(2);
+            var name = statement.Parts(0);
+            if (name.Count == 0 || name.Count > 2 || name[name.Count - 1].Word.Length == 0)
+            {
+                trouble.Say(statement, "a system is named, as a name or a namespace and a name");
+                return;
+            }
+
+            var space = name.Count == 2 ? name[0].Word : "";
+            var called = name[name.Count - 1].Word;
+            if (program.FindSystem(space, called) != null)
+            {
+                trouble.Say(statement, "two systems are both " + Pen.Spelling(space, called));
+                return;
+            }
+
+            var system = program.Restore(space, called);
             system.Annotation = statement.Annotation;
+
+            if (!statement.Says(1, Keyword.Is) || !(statement.Says(2, Keyword.On) || statement.Says(2, Keyword.Off)))
+                trouble.Say(statement, "a system says whether it is on or off: is on, is off");
+
+            system.Enabled = !statement.Says(2, Keyword.Off);
+
+            if (statement.Optional > 3)
+                trouble.Say(statement, "what follows 'is on' or 'is off' comes after a comma");
+
+            var changed = statement.Find(Keyword.Changed, statement.Optional);
+            if (changed >= 0)
+                system.Changed = Time(statement, changed + 1, trouble);
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
@@ -281,6 +323,18 @@ namespace Reactor.Storage
                 else if (inner.Key == Keyword.Sequence)
                     ReadSequence(inner, system, program);
             }
+        }
+
+        /// <summary>A <c>changed</c> time, or null and trouble when it is not ISO 8601.</summary>
+        static DateTime? Time(Statement statement, int at, Trouble trouble)
+        {
+            DateTime time;
+            if (DateTime.TryParseExact(statement.Text(at), Times, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out time))
+                return time;
+
+            trouble.Say(statement, "a changed time is written as ISO 8601, like \"2026-09-14T19:02:11Z\"");
+            return null;
         }
 
         static void WriteRole(Pen pen, SystemRole role)
@@ -298,7 +352,7 @@ namespace Reactor.Storage
         {
             var role = system.RoleFor(statement.Word(0));
             role.Optional = statement.Says(1, Keyword.Optional);
-            role.Name = statement.Word(2);
+            role.Name = statement.Text(2);
             role.Instructions = statement.Annotation;
         }
 
@@ -346,7 +400,7 @@ namespace Reactor.Storage
 
         static void ReadInstance(Statement statement, AutomationSystem system)
         {
-            var instance = system.Restore(statement.Whole(0), statement.Word(2));
+            var instance = system.Restore(statement.Whole(0), statement.Text(2));
             instance.Enabled = !statement.Says(1, Keyword.Off);
 
             var body = statement.Body;
@@ -383,7 +437,7 @@ namespace Reactor.Storage
         {
             var sequence = program.Restore(system, statement.Whole(0), new CalledTrigger());
             sequence.Enabled = !statement.Says(1, Keyword.Off);
-            sequence.Name = statement.Word(2);
+            sequence.Name = statement.Text(2);
             sequence.Annotation = statement.Annotation;
 
             var body = statement.Body;
@@ -511,7 +565,7 @@ namespace Reactor.Storage
             var gate = Gate(statement);
             for (var i = 0; i < gate; i++)
             {
-                if (statement.At(i).Form != ValueForm.List)
+                if (statement.ValueAt(i).Form != ValueForm.List)
                     continue;
 
                 Words(statement.Items(i), step.Targets);

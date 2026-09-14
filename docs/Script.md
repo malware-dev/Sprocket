@@ -411,31 +411,47 @@ and fixed by hand" is only true if a person can reach it, and inside the world X
 ```
 file        := version construct*
 construct   := annotation? statement
-statement   := head value* newline
-             | head value* block
+statement   := head values newline
+             | head values block
+values      := value* ("," value+)*
 block       := "{" newline construct* "}" newline
-value       := integer | real | text | vector | colour | list | identifier
+value       := integer | real | text | vector | colour | list | name
+name        := identifier ("." identifier)*
+identifier  := bare | "'" ... "'"
+text        := '"' ... '"'
 vector      := "(" number number number ")"
 colour      := "#" hex{6} | "#" hex{8}
 list        := "[" value ("," value)* "]"
 annotation  := ("#" (" " line)? newline)+
 ```
 
-Tokens are identifier, integer, real, text, vector, colour, `{ } [ ] ( ) ,`, annotation lines, and
-newline. One page, one
-small file. Hand-rolled: C# 6, no regex, no LINQ.
+Tokens are identifier, keyword, integer, real, text, colour, `{ } [ ] ( ) , .`, annotation lines, and
+newline. Hand-rolled: C# 6, no regex, no LINQ. A list may not hold a list.
+
+*Revised 2026-09-14, when the system line was designed:* names and text got different quotes, the dot
+became an operator, and a comma at statement level began a statement's optional parts.
 
 **Newline ends a statement, and there are no continuations.** No semicolons, no line joining. A
 statement too long for a line means the model is too complex for one, which is worth hearing.
 
-**Strings quote by doubling, and there is no escape character.** Backslash is an ordinary character
-with no meaning. This is one rule instead of two, and the rule it removes is the dangerous one: a
-writer that forgets to escape a backslash produces a file that still *parses*, just wrong - a Windows
-path reading back as something else. Silent corruption. Doubling can only fail loudly.
+**A quote is escaped by doubling it, and there is no escape character.** Backslash is an ordinary
+character with no meaning. This is one rule instead of two, and the rule it removes is the dangerous
+one: a writer that forgets to escape a backslash produces a file that still *parses*, just wrong - a
+Windows path reading back as something else. Silent corruption. Doubling can only fail loudly.
 
-**An identifier may always be written as a string.** A quoted identifier is legal anywhere a bare one
-is. That single rule handles host ids with odd characters, subtypes with spaces, and any collision
-with a keyword, so keywords stay contextual rather than reserved.
+**Names go in single quotes, text in double, and neither ever stands in for the other.** Once
+expressions exist, one quote style for both would leave `"Airlock"` undecidable: text to compare
+against, or the thing called that. A single-quoted name handles host ids with odd characters, subtypes
+with spaces and any collision with a keyword, so keywords stay contextual rather than reserved; each
+quote doubles only itself, so `'Mal''s "big" airlock'` and `"the door's"` need nothing more. `[Name]`
+was rejected for names, because `[tag]` is how in-game scripts mark blocks and lists need `[ ]`.
+
+**The dot is an operator.** `'MalTek Inc.' . Airlock` is the same name as `'MalTek Inc.'.Airlock`, and
+a name is kept as its parts, never joined - `'a.b'.c` and `a.'b.c'` are different names.
+
+**A comma at statement level begins the optional parts**: `system MalTek.Airlock is on, changed
+"2026-09-14T19:02:11Z"`. Every optional part carries its own keyword, so nothing needs the comma to
+parse; it is there for the reader, which is the point of a language like this in the first place.
 
 **A dot or an exponent makes a real.** `60` is an integer, `0.25` and `1E-05` are reals. Scientific
 notation is forced rather than chosen: a writer emitting a `double` round-trippably produces `1E-05`
@@ -635,7 +651,7 @@ From `docs/Catalogue.md`, observed rather than anticipated, and it settles three
 **Quoted identifiers are mandatory, not an escape hatch.** The interior light ships properties called
 `Blink Interval` and `Blink Lenght` - with a space, and with the game's own misspelling. `alignment`
 sits lowercase among PascalCase neighbours. So a host id routinely cannot be a bare identifier. The
-writer quotes mechanically: bare if it matches `[A-Za-z][A-Za-z0-9_-]*`, quoted otherwise; the reader
+writer quotes mechanically: bare if it matches `[A-Za-z][A-Za-z0-9_-]*`, in single quotes otherwise; the reader
 accepts either.
 
 **Ids are never transformed.** No case normalisation, no trimming, no correcting `Lenght`. A round
@@ -817,7 +833,7 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
      which makes it the valuable middle key, and it needs a `ValueKind` wide enough to hold one.
 6. ~~**The script language**, once 5 has settled what a reference is.~~ **Done. The save format is
    the language**, and there is only one format: `Storage` holds a lexer, a parser, a writer and the
-   mapping between statements and the model, and `reactor 2` is what a save says.
+   mapping between statements and the model, and `reactor 3` is what a save says.
 
    **What the grammar bought, beyond reading nicely.** Braces mean a construct nobody recognises is
    dropped *with its block*, where the line format could only skip the line and left the children to
@@ -832,30 +848,42 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
    so `run "Tidy up"` from a later build would otherwise read as a step doing something called *run*.
    Requiring the word is what lets an unknown statement be dropped instead, which is the promise the
    format makes. Nothing is reserved, either: the collision was in Mal's own test world on day one,
-   where two actions are named `on` and `off`, and they write as `"on" [ entity2 ] wait`.
+   where two actions are named `on` and `off`, and they write as `'on' [ entity2 ] wait`.
 
    A **name is one line**, because a statement ends at the end of its line. `Naming.Clean` folds a
    line break to a space and `Pen` folds it again, since a writer that can produce an unreadable save
    eventually does. Text that genuinely wants lines is an annotation, which is written a line at a
    time and was already the answer.
 
-   **A kind id is quoted** - `block "Door/LargeBlockDoor" inner` - where the worked example above has
-   it bare. The stated writer rule won over the example on purpose: widening what may be written bare
-   later still reads every old save, and narrowing it would not.
+   **A kind id is quoted** - `block 'Door/LargeBlockDoor' inner` - where the worked example above has
+   it bare. The stated writer rule won over the example on purpose.
 
-   **`reactor 1` still loads**, through `Lines`, which reads and never writes. A world saved before
-   this migrates on its next save, and the file can go when no save carries the old format. The one
-   thing that is genuinely lost is nothing: every field the old format wrote comes back, and
-   `SystemInstance.Enabled` - which the old format never wrote at all, so parking one instance did not
-   survive a reload - now does.
+   **Not backwards compatible, while the language is being designed.** A save in any other version
+   reads as trouble and is never written back over, so nothing on disk is lost, but it does not load.
+   The reader for the old bar-separated format is gone.
+
+   **The system line, built 2026-09-14:** `system MalTek.Airlock is on, changed "2026-09-14T19:02:11Z"`.
+   **A system is its namespace and name** - no number, no separate display name - because a number can
+   never be unique once systems are exported, imported, or on constructs that join. Renaming a system is
+   making a different one, so a button wired to the old name stops resolving and is reported. The
+   editor gives a new system the author the host supplies (the player's name in the game), refuses a name
+   another system already has, and a toolbar key names the system by that spelling. `changed` is quoted
+   ISO 8601, UTC, and optional; core carries it and never reads the clock, which is what the `DateTime`
+   ban on reading `Now` is for.
 
    **What it does not do yet, because the model does not.** A trigger still belongs to a sequence, so
    the language cannot say the things that needs: no inline sequence under its trigger, no `run`, no
    two triggers on one sequence, and the switch is on the sequence rather than on the trigger. Every
    sequence therefore writes as `sequence <id> <on|off> "name" { … }` with its trigger as the first
-   statement inside. The ids are in the file for a reason and it is not identity for its own sake: a
-   toolbar slot names a sequence by system, instance and sequence ordinal, so a save that dropped them
-   would unwire every button in the world.
+   statement inside. The sequence ids are in the file because a toolbar slot names a sequence by its
+   system's name, the instance and the sequence's number, so a save that dropped them would unwire every
+   button in the world.
+
+   **Left for the system line:** a player cannot yet choose their own namespace in the editor, nor is
+   anyone told when a name is refused as taken; nothing stamps `changed` yet, because what counts as a
+   change is undecided; two copies of one system meeting are not detected; and sequence numbers are
+   still one counter for the whole program rather than numbered within their system, which import
+   and export need.
 
    **Left:** a program that would not read is marked `Automation.Intact` false and neither host saves
    over it, which protects what is on disk - but nothing *says* so. The log has a line and the editor

@@ -11,13 +11,13 @@ namespace Reactor.Storage
     /// </remarks>
     enum ValueForm
     {
-        /// <summary>A bare word that is nobody's keyword.</summary>
+        /// <summary>A name: a bare word that is nobody's keyword, or anything in single quotes.</summary>
         Identifier,
 
         /// <summary>A bare word that is one of the format's own.</summary>
         Keyword,
 
-        /// <summary>A quoted string, which is text or an identifier that needed quoting.</summary>
+        /// <summary>Text, in double quotes. Never a name.</summary>
         Text,
 
         Integer,
@@ -34,6 +34,11 @@ namespace Reactor.Storage
         /// </remarks>
         Vector,
 
-        List
+        List,
+
+        /// <summary>
+        /// A name in parts, <c>MalTek.Airlock</c>, whose parts are a run of <see cref="Reading.Parts" />.
+        /// </summary>
+        Qualified
     }
 }

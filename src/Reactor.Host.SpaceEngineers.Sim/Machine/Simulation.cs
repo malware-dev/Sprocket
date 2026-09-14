@@ -59,6 +59,9 @@ sealed class Simulation
 
         Runner = new AutomationRunner(Program, World);
         Editor = new ReactorEditor(World, Program, Runner, _sequenceWords, _timeWords);
+
+        // The desktop's equivalent of the player's name: whoever is signed in.
+        Editor.Author = Environment.UserName;
     }
 
     public SimWorld World { get; }

@@ -9,13 +9,25 @@ namespace Reactor.Storage
         /// <summary>Ends a statement. There are no continuations, so this is structural.</summary>
         Newline,
 
-        /// <summary>A bare word that is not one of the format's own. It carries its text.</summary>
+        /// <summary>
+        /// A name: a bare word that is not one of the format's own, or anything in single quotes.
+        /// </summary>
+        /// <remarks>
+        /// Single quotes are how a name holds what a bare word cannot - a space, a dot, a keyword - and a
+        /// quoted name is never a keyword. It carries its text either way.
+        /// </remarks>
         Identifier,
 
         /// <summary>A bare word that is one of the format's own. It carries no text at all.</summary>
         Keyword,
 
-        /// <summary>A quoted string. Legal anywhere an identifier is, and never a keyword.</summary>
+        /// <summary>
+        /// Text, in double quotes.
+        /// </summary>
+        /// <remarks>
+        /// Never a name. Once expressions exist a quote style cannot mean both - is <c>"Airlock"</c> a
+        /// piece of text to compare, or the thing called that? - so text and names use different ones.
+        /// </remarks>
         Text,
 
         Integer,
@@ -35,6 +47,15 @@ namespace Reactor.Storage
         VectorOpen,
         VectorClose,
         Comma,
+
+        /// <summary>
+        /// Joins the parts of a name: <c>MalTek.Airlock</c>.
+        /// </summary>
+        /// <remarks>
+        /// A token of its own rather than a character inside a word, so spaces around it mean nothing and
+        /// a name is always its parts. <c>'a.b'.'c'</c> and <c>'a'.'b.c'</c> are different names.
+        /// </remarks>
+        Dot,
 
         /// <summary>
         /// Text that is not a token at all, carrying what is wrong with it.

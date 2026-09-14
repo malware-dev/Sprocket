@@ -196,25 +196,21 @@ namespace Reactor.Sequences
         }
 
         /// <summary>
-        /// Puts back a system that was saved, keeping the id it had.
+        /// Puts back a system that was saved, by what it is.
         /// </summary>
         /// <remarks>
-        /// Ids have to survive a reload unchanged, because saved sequences refer to each other
-        /// by them. Reallocating on load would silently repoint every reference - the classic
-        /// way an event-sourced or serialised model goes wrong, and invisible until something
-        /// runs the wrong sequence.
+        /// The system is its namespace and name, so that is what comes back; its session handle is new, since
+        /// nothing outside this session ever held one.
         ///
         /// No instance is added, unlike <see cref="AddSystem"/>: whatever was saved is what
         /// comes back, and inventing an extra one would multiply systems on every reload.
         /// </remarks>
-        public AutomationSystem Restore(int id)
+        public AutomationSystem Restore(string space, string name)
         {
-            var system = new AutomationSystem(id);
+            var system = new AutomationSystem(_nextSystemId++);
+            system.Namespace = space ?? "";
+            system.Name = name ?? "";
             _systems.Add(system);
-
-            if (id >= _nextSystemId)
-                _nextSystemId = id + 1;
-
             return system;
         }
 
@@ -236,6 +232,17 @@ namespace Reactor.Sequences
             for (var i = 0; i < _systems.Count; i++)
             {
                 if (_systems[i].Id == id)
+                    return _systems[i];
+            }
+            return null;
+        }
+
+        /// <summary>The system that is this namespace and name, or null.</summary>
+        public AutomationSystem FindSystem(string space, string name)
+        {
+            for (var i = 0; i < _systems.Count; i++)
+            {
+                if (_systems[i].Is(space, name))
                     return _systems[i];
             }
             return null;

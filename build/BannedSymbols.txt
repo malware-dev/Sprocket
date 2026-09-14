@@ -24,6 +24,8 @@ T:System.Linq.Queryable;Not whitelisted, and not appropriate in a 60Hz loop.
 T:System.Text.RegularExpressions.Regex;Not whitelisted, and far too slow for a 60Hz loop.
 T:System.Net.WebClient;Networking is not whitelisted.
 T:System.Net.Http.HttpClient;Networking is not whitelisted.
-T:System.DateTime;Wall-clock time drifts from simulation time. Count beats instead.
+P:System.DateTime.Now;Wall-clock time drifts from simulation time. Count beats instead.
+P:System.DateTime.UtcNow;Wall-clock time drifts from simulation time. Count beats instead.
+P:System.DateTime.Today;Wall-clock time drifts from simulation time. Count beats instead.
 T:System.Diagnostics.Debug;Core does not log on its own. The host decides what surfaces.
 T:System.Diagnostics.Stopwatch;Wall-clock timing drifts from simulation time.

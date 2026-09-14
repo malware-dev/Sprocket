@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Reactor.Sequences
@@ -22,26 +23,66 @@ namespace Reactor.Sequences
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<SystemInstance> _instances = new List<SystemInstance>();
         readonly List<SystemRole> _roles = new List<SystemRole>();
+        DateTime? _changed;
 
         public AutomationSystem(int id)
         {
             Id = id;
+            Namespace = "";
             Name = "";
             Annotation = "";
             Enabled = true;
         }
 
+        /// <summary>
+        /// A handle for this session only.
+        /// </summary>
+        /// <remarks>
+        /// <b>Not the system's identity, and never saved.</b> It exists so the editor can name a system in a
+        /// command without holding the object, and it means nothing after a reload. What a system is, is its
+        /// <see cref="Namespace" /> and <see cref="Name" />: a number cannot be unique once systems are
+        /// exported, imported, or on constructs that join.
+        /// </remarks>
         public int Id { get; private set; }
+
+        /// <summary>
+        /// Who a system is by - MalTek, a faction, a player's name - or empty.
+        /// </summary>
+        /// <remarks>
+        /// With <see cref="Name" />, what the system is, everywhere: in a save, a button's key, and whatever
+        /// it is exported to. Two people's airlocks are different systems because of this. It comes from the
+        /// player making the system and is theirs to choose; how a target presents it, as authorship or
+        /// otherwise, is the target's business.
+        /// </remarks>
+        public string Namespace { get; set; }
 
         /// <summary>
         /// What the player called it, or empty if they have not said.
         /// </summary>
         /// <remarks>
-        /// Empty is the ordinary state rather than an oversight. Naming happens when there
-        /// is something worth naming, and until then <see cref="HasName"/> is false and the
-        /// editor shows whatever it can work out instead.
+        /// <b>Part of the system's identity, with <see cref="Namespace" />.</b> Renaming a system is making
+        /// a different one, which is why a name has to be chosen with some care. Empty is a system nobody has
+        /// named, which the editor does not let anybody make.
         /// </remarks>
         public string Name { get; set; }
+
+        /// <summary>
+        /// When this system was last changed, in UTC to the second, or null if nobody has said.
+        /// </summary>
+        /// <remarks>
+        /// A hint for a person, never something Reactor decides by. When two copies of the same system meet
+        /// and differ, the player chooses, and "changed two hours ago" against "changed last Tuesday" is what
+        /// helps them. So a clock that disagrees between two servers costs nothing.
+        /// <para>
+        /// Held to the second because that is what the script writes, so what is held and what reads back
+        /// are the same value. Core carries the time and never reads the clock; the host stamps it.
+        /// </para>
+        /// </remarks>
+        public DateTime? Changed
+        {
+            get { return _changed; }
+            set { _changed = value.HasValue ? ToSecond(value.Value) : (DateTime?)null; }
+        }
 
         public bool HasName => !string.IsNullOrEmpty(Name);
 
@@ -194,6 +235,29 @@ namespace Reactor.Sequences
         internal bool Remove(Sequence sequence)
         {
             return _sequences.Remove(sequence);
+        }
+
+        /// <summary>Whether this is the system with that namespace and name.</summary>
+        public bool Is(string space, string name)
+        {
+            return string.Equals(Namespace, space ?? "", StringComparison.Ordinal)
+                && string.Equals(Name, name ?? "", StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// A time as UTC, to the second.
+        /// </summary>
+        /// <remarks>
+        /// A time with no stated zone is taken as UTC rather than as local, because the script's rule is UTC
+        /// and a local reading would move with whoever's machine loaded it.
+        /// </remarks>
+        static DateTime ToSecond(DateTime time)
+        {
+            var utc = time.Kind == DateTimeKind.Local
+                ? time.ToUniversalTime()
+                : DateTime.SpecifyKind(time, DateTimeKind.Utc);
+
+            return new DateTime(utc.Ticks - utc.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc);
         }
     }
 }
