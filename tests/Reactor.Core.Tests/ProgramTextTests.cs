@@ -133,7 +133,9 @@ public class ProgramTextTests
         var after = new Automation();
         Load(Save(before), after);
 
-        // A system is its namespace and name, including one with no namespace at all.
+        // A system is its identity, and keeps its namespace and name, including no namespace at all.
+        Assert.Equal(before.Systems[0].Identity, after.Systems[0].Identity);
+        Assert.Equal(before.Systems[1].Identity, after.Systems[1].Identity);
         Assert.True(after.Systems[0].Is("MalTek", "Airlock"));
         Assert.True(after.Systems[1].Is("", "Drill Rig"));
 
@@ -147,14 +149,10 @@ public class ProgramTextTests
     }
 
     /// <summary>
-    /// A sequence's number comes from the numbers its system already has, and nothing else.
+    /// A sequence's number is one past the last its system handed out, so no number is handed out twice.
     /// </summary>
-    /// <remarks>
-    /// Nothing about numbering is saved, so after a reload the next number is one past the highest that
-    /// exists - including when the highest was the one just deleted.
-    /// </remarks>
     [Fact]
-    public void ANewSequenceTakesOnePastTheHighestItsSystemHas()
+    public void ANewSequenceTakesOnePastTheLastItsSystemHandedOut()
     {
         var program = new Automation();
         var system = program.AddSystem();
@@ -167,6 +165,10 @@ public class ProgramTextTests
 
         program.RemoveSequence(two);
         Assert.Equal(4, program.AddSequence(system, new CalledTrigger()).Number);
+
+        // Including the highest, which is the case a count of what exists would get wrong.
+        program.RemoveSequence(program.Sequences[program.Sequences.Count - 1]);
+        Assert.Equal(5, program.AddSequence(system, new CalledTrigger()).Number);
     }
 
     [Fact]

@@ -115,7 +115,7 @@ namespace Reactor.Editing
             part.NameRequired = NameRequired;
 
             if (CanRename)
-                part.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename);
+                part.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename, AcceptsName);
 
             parts.Add(part);
             RefreshHeading(parts);
@@ -187,6 +187,17 @@ namespace Reactor.Editing
         /// rely on a target having asked. Targets are the part that can be written wrong.
         /// </remarks>
         public virtual void Rename(string name) { }
+
+        /// <summary>
+        /// Whether this name can be given, before it is: false only where something else already has it.
+        /// </summary>
+        /// <remarks>
+        /// An empty name is not refused here; <see cref="NameRequired" /> already tells a target that.
+        /// </remarks>
+        public virtual bool AcceptsName(string name)
+        {
+            return true;
+        }
 
         /// <summary>
         /// Whether this page's subject can be switched on and off.

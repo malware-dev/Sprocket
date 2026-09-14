@@ -27,6 +27,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         private Element _anchor;
         private RectangleF _bounds;
         private int _command;
+        private string _question = "";
         private bool _up;
 
         public Ask()
@@ -70,6 +71,11 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
             get { return _box.Text; }
         }
 
+        /// <summary>
+        /// Why what is typed cannot be sent, said in place of the question, or empty when it can.
+        /// </summary>
+        public string Refused { get; set; }
+
         /// <summary>Whether a point is on the question. False while none is open.</summary>
         public bool Covers(Vector2 point)
         {
@@ -93,7 +99,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
             _up = true;
             _command = command;
             _anchor = anchor;
-            _label.Text = question;
+            _question = question ?? "";
             _box.Text = "";
         }
 
@@ -119,6 +125,12 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
                 return;
             }
 
+            // The question gives way to the reason while there is one, so the words sit where somebody is
+            // already reading, and come back as soon as the answer is one that can be sent.
+            bool refused = !string.IsNullOrEmpty(Refused);
+            _label.Text = refused ? Refused : _question;
+            _label.Color = refused ? Palette.Problem : Palette.Muted;
+
             _popup.Measure(g, new Vector2(width, bounds.Height));
 
             float height = _popup.DesiredSize.Y;
@@ -138,7 +150,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
 
             // Dead until there is something to send, because an empty answer here is not a meaningful
             // one. Renaming is the opposite case and allows it, which is why the two are told apart.
-            bool ready = !string.IsNullOrEmpty(_box.Text);
+            bool ready = !string.IsNullOrEmpty(_box.Text) && !refused;
 
             // A well rather than a light fill when it is not ready. Dim is what an unlit thing is drawn
             // in, and a button wearing it with quiet text on top was two near-identical greys.

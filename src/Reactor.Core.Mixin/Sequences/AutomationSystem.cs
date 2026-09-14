@@ -24,10 +24,12 @@ namespace Reactor.Sequences
         readonly List<SystemInstance> _instances = new List<SystemInstance>();
         readonly List<SystemRole> _roles = new List<SystemRole>();
         DateTime? _changed;
+        int _lastSequence;
 
-        public AutomationSystem(int id)
+        public AutomationSystem(int id, Guid identity)
         {
             Id = id;
+            Identity = identity;
             Namespace = "";
             Name = "";
             Annotation = "";
@@ -40,19 +42,28 @@ namespace Reactor.Sequences
         /// <remarks>
         /// <b>Not the system's identity, and never saved.</b> It exists so the editor can name a system in a
         /// command without holding the object, and it means nothing after a reload. What a system is, is its
-        /// <see cref="Namespace" /> and <see cref="Name" />: a number cannot be unique once systems are
-        /// exported, imported, or on constructs that join.
+        /// <see cref="Identity" />: a number cannot be unique once systems are exported, imported, or on
+        /// constructs that join.
         /// </remarks>
         public int Id { get; private set; }
+
+        /// <summary>
+        /// What this system is, everywhere: in a save, a button's key, and whatever it is exported to.
+        /// </summary>
+        /// <remarks>
+        /// Made once, with the system, and never changed by anything a player does. A name cannot do this
+        /// job: a published system can be renamed in one world and not in the copies elsewhere, and a copy
+        /// meeting a renamed one still has to be recognised as the same system.
+        /// </remarks>
+        public Guid Identity { get; set; }
 
         /// <summary>
         /// Who a system is by - MalTek, a faction, a player's name - or empty.
         /// </summary>
         /// <remarks>
-        /// With <see cref="Name" />, what the system is, everywhere: in a save, a button's key, and whatever
-        /// it is exported to. Two people's airlocks are different systems because of this. It comes from the
-        /// player making the system and is theirs to choose; how a target presents it, as authorship or
-        /// otherwise, is the target's business.
+        /// For people, not for Reactor: it tells two players' airlocks apart in a list, and says who made one.
+        /// It comes from the player making the system and is theirs to choose; how a target presents it, as
+        /// authorship or otherwise, is the target's business.
         /// </remarks>
         public string Namespace { get; set; }
 
@@ -60,8 +71,7 @@ namespace Reactor.Sequences
         /// What the player called it, or empty if they have not said.
         /// </summary>
         /// <remarks>
-        /// <b>Part of the system's identity, with <see cref="Namespace" />.</b> Renaming a system is making
-        /// a different one, which is why a name has to be chosen with some care. Empty is a system nobody has
+        /// Free to change, since <see cref="Identity" /> is what the system is. Empty is a system nobody has
         /// named, which the editor does not let anybody make.
         /// </remarks>
         public string Name { get; set; }
@@ -230,6 +240,7 @@ namespace Reactor.Sequences
         {
             _sequences.Add(sequence);
             sequence.System = this;
+            Used(sequence.Number);
         }
 
         internal bool Remove(Sequence sequence)
@@ -238,20 +249,37 @@ namespace Reactor.Sequences
         }
 
         /// <summary>
-        /// The number a new sequence of this system gets: one past the highest it already has.
+        /// The highest number any sequence of this system has had, including ones since deleted.
         /// </summary>
         /// <remarks>
-        /// Worked out from the sequences that exist and nothing else, so nothing about numbering is saved. A
-        /// system with no sequences starts at 1.
+        /// A failsafe, so a number is never handed out twice: a button still holding a deleted sequence's
+        /// number must not start running whatever is made next. It only needs saving when it is higher than
+        /// <see cref="HighestSequenceNumber" />, which is only after the highest was deleted.
         /// </remarks>
+        public int LastSequenceNumber => _lastSequence;
+
+        /// <summary>The number a new sequence of this system gets: one past the last it had.</summary>
         public int NextSequenceNumber()
+        {
+            return _lastSequence + 1;
+        }
+
+        /// <summary>The highest number a sequence of this system carries now, or 0 for none.</summary>
+        public int HighestSequenceNumber()
         {
             var highest = 0;
             for (var i = 0; i < _sequences.Count; i++)
                 if (_sequences[i].Number > highest)
                     highest = _sequences[i].Number;
 
-            return highest + 1;
+            return highest;
+        }
+
+        /// <summary>Records that a sequence number has been used, so it is never handed out again.</summary>
+        internal void Used(int number)
+        {
+            if (number > _lastSequence)
+                _lastSequence = number;
         }
 
         /// <summary>The sequence of this system with that number, or null.</summary>

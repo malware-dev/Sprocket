@@ -92,6 +92,15 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         int _actionRevision = -1;
         /// <summary>What an open rename will send its answer to.</summary>
         int _renameCommand;
+
+        /// <summary>The text and command core was last asked about, and whether it said the text was taken.</summary>
+        /// <remarks>
+        /// Asked every tick while a box is open, so the answer is kept until the text changes. A box hands back
+        /// the same string until somebody types, which is what makes comparing references enough.
+        /// </remarks>
+        string _checkedText;
+        int _checkedCommand;
+        bool _checkedTaken;
         /// <summary>Which part of the heading is being typed into, or -1 when none is.</summary>
         int _renaming = -1;
 
@@ -220,13 +229,33 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
                     return "";
 
                 List<HeadingPart> parts = _editor.Screen.Heading;
-                if (_renaming >= parts.Count || !parts[_renaming].NameRequired)
+                if (_renaming >= parts.Count)
                     return "";
 
                 // Says what to do rather than what is wrong. "Needs a name" is a diagnosis and leaves
                 // somebody to work out the cure; there is only one cure and it fits in three words.
-                return string.IsNullOrEmpty(AskBox.Text.Trim()) ? "Give it a name first" : "";
+                string text = AskBox.Text;
+                if (parts[_renaming].NameRequired && string.IsNullOrEmpty(text.Trim()))
+                    return "Give it a name first";
+
+                return Taken(_renameCommand, text) ? TakenSays : "";
             }
+        }
+
+        /// <summary>What a box says while its name belongs to something else.</summary>
+        const string TakenSays = "That name is taken";
+
+        /// <summary>Whether core would refuse this text for this command, asked once per change of text.</summary>
+        bool Taken(int command, string text)
+        {
+            if (command != _checkedCommand || !ReferenceEquals(text, _checkedText))
+            {
+                _checkedCommand = command;
+                _checkedText = text;
+                _checkedTaken = !string.IsNullOrEmpty(text) && !_editor.Accepts(command, text);
+            }
+
+            return _checkedTaken;
         }
 
         /// <summary>The box a question is being answered in. Only meaningful while <see cref="IsAsking" />.</summary>
@@ -607,6 +636,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
             if (_renaming >= 0)
                 return;
 
+            _ask.Refused = _ask.IsUp && Taken(_ask.Command, _ask.Answer) ? TakenSays : "";
             _ask.Draw(g, bounds, PopupWidth);
             _question.Draw(g, bounds, PopupWidth);
         }
@@ -885,7 +915,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
             // Refused by leaving the box open rather than by closing it and doing nothing. Somebody who
             // has just emptied a name they are required to give is mid-thought, and taking the box away
             // makes them find the pencil again to finish it.
-            if (string.IsNullOrEmpty(answer) && (_renaming < 0 || Blocked.Length > 0))
+            //
+            // A name something else already has is refused the same way, in both kinds of box, because the
+            // box is already saying so.
+            if (Blocked.Length > 0)
+                return;
+
+            if (_renaming < 0 && (string.IsNullOrEmpty(answer) || Taken(command, answer)))
                 return;
 
             Close();

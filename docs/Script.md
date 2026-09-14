@@ -449,9 +449,10 @@ was rejected for names, because `[tag]` is how in-game scripts mark blocks and l
 **The dot is an operator.** `'MalTek Inc.' . Airlock` is the same name as `'MalTek Inc.'.Airlock`, and
 a name is kept as its parts, never joined - `'a.b'.c` and `a.'b.c'` are different names.
 
-**A comma at statement level begins the optional parts**: `system MalTek.Airlock is on, changed
-"2026-09-14T19:02:11Z"`. Every optional part carries its own keyword, so nothing needs the comma to
-parse; it is there for the reader, which is the point of a language like this in the first place.
+**A comma at statement level begins the optional parts**: `system "…" as MalTek.Airlock is on, changed
+"2026-09-14T19:02:11Z", last sequence 4`. Every optional part carries its own keyword, so nothing needs the
+comma to parse; it is there for the reader, which is the point of a language like this in the first place.
+The writer has one order for them and the reader expects none.
 
 **A dot or an exponent makes a real.** `60` is an integer, `0.25` and `1E-05` are reals. Scientific
 notation is forced rather than chosen: a writer emitting a `double` round-trippably produces `1E-05`
@@ -862,27 +863,30 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
    reads as trouble and is never written back over, so nothing on disk is lost, but it does not load.
    The reader for the old bar-separated format is gone.
 
-   **The system line, built 2026-09-14:** `system MalTek.Airlock is on, changed "2026-09-14T19:02:11Z"`.
-   **A system is its namespace and name** - no number, no separate display name - because a number can
-   never be unique once systems are exported, imported, or on constructs that join. Renaming a system is
-   making a different one, so a button wired to the old name stops resolving and is reported. The
-   editor gives a new system the author the host supplies (the player's name in the game), refuses a name
-   another system already has, and a toolbar key names the system by that spelling. `changed` is quoted
-   ISO 8601, UTC, and optional; core carries it and never reads the clock, which is what the `DateTime`
-   ban on reading `Now` is for.
+   **The system line, built 2026-09-14:**
+   `system "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43" as MalTek.Airlock is on, changed "2026-09-14T19:02:11Z"`.
+   **A system is its identity**, a GUID made with it and never changed - not a number, which can never be
+   unique once systems are exported, imported, or on constructs that join, and not its name, because a
+   published system renamed in one world is not renamed in the copies elsewhere and could never be
+   recognised as an update. The namespace and name are for people: the editor gives a new system the
+   author the host supplies (the player's name in the game) and refuses a name another system already
+   has, but the reader does not, since a name no longer decides anything. A toolbar key names the system
+   by its identity, so a button survives a rename. `changed` is quoted ISO 8601, UTC, and optional; core
+   carries it and never reads the clock, which is what the `DateTime` ban on reading `Now` is for.
 
    **What it does not do yet, because the model does not.** A trigger still belongs to a sequence, so
    the language cannot say the things that needs: no inline sequence under its trigger, no `run`, no
    two triggers on one sequence, and the switch is on the sequence rather than on the trigger. Every
    sequence therefore writes as `sequence 3 as 'Let me out' is on { … }` with its trigger as the first
-   statement inside. **A sequence is its number within its system**, chosen as one past the highest the
-   system has, with nothing about numbering saved; the name is optional, a name rather than text, since
-   `run` will call a sequence by it. A toolbar slot names a sequence by its system's name, the instance
-   and that number, so the number survives renames, export and import.
+   statement inside. **A sequence is its number within its system**, chosen as one past the last the
+   system handed out, so no number is ever handed out twice; the name is optional, a name rather than text,
+   since `run` will call a sequence by it. `last sequence 4` on the system line is a failsafe, written only
+   when the highest number has been deleted, and whichever is higher, it or a sequence in the block, wins.
+   A toolbar slot names a sequence by its system's identity, the instance and that number.
 
-   **Left for the system line:** a player cannot yet choose their own namespace in the editor, nor is
-   anyone told when a name is refused as taken; nothing stamps `changed` yet, because what counts as a
-   change is undecided; and two copies of one system meeting are not detected.
+   **Left for the system line:** a player cannot yet choose their own namespace in the editor; nothing stamps `changed` yet, because what counts as a
+   change is undecided; two copies of one system meeting are not detected; and renaming a system or a
+   sequence does not yet refactor what refers to it by name (considered, not decided).
 
    **Left:** a program that would not read is marked `Automation.Intact` false and neither host saves
    over it, which protects what is on disk - but nothing *says* so. The log has a line and the editor

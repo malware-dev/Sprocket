@@ -252,14 +252,7 @@ namespace Reactor.Storage
             _first = false;
         }
 
-        /// <summary>
-        /// How a name in parts is spelt, exactly as the writer spells it.
-        /// </summary>
-        /// <remarks>
-        /// Also the name's identity wherever one string has to stand for it, such as a button's key. The
-        /// quoting is what makes that safe: <c>'a.b'.c</c> and <c>a.'b.c'</c> are different spellings, where
-        /// joining the parts plainly would make them the same.
-        /// </remarks>
+        /// <summary>How a name in parts is spelt, exactly as the writer spells it.</summary>
         public static string Spelling(string space, string name)
         {
             var spelt = new StringBuilder();

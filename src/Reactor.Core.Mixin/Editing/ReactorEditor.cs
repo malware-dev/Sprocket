@@ -31,6 +31,7 @@ namespace Reactor.Editing
         readonly List<EditorPage> _stack = new List<EditorPage>();
         readonly Dictionary<int, Action> _actions = new Dictionary<int, Action>();
         readonly Dictionary<int, Action<string>> _textActions = new Dictionary<int, Action<string>>();
+        readonly Dictionary<int, Func<string, bool>> _textChecks = new Dictionary<int, Func<string, bool>>();
         readonly Dictionary<int, Action<bool>> _toggleActions = new Dictionary<int, Action<bool>>();
         readonly Dictionary<int, Action<int>> _numberActions = new Dictionary<int, Action<int>>();
         readonly EditorScreen _screen = new EditorScreen();
@@ -250,15 +251,30 @@ namespace Reactor.Editing
             Settle();
         }
 
-        /// <summary>Reports new text for a search box or any other field.</summary>
+        /// <summary>Reports new text for a search box or any other field, unless the field refuses it.</summary>
         public void SetText(int command, string value)
         {
             Action<string> action;
-            if (!_textActions.TryGetValue(command, out action))
+            if (!_textActions.TryGetValue(command, out action) || !Accepts(command, value))
                 return;
 
             action(value ?? "");
             Settle();
+        }
+
+        /// <summary>
+        /// Whether a field would take this text, asked before it is sent.
+        /// </summary>
+        /// <remarks>
+        /// So a target can say a name is taken while it is still being typed, instead of sending it and
+        /// having nothing happen. The same check guards <see cref="SetText" />, so a target that never asks
+        /// still cannot get past it. Only a field with a rule refuses anything; an empty required name is
+        /// the target's to catch, through <see cref="Ui.HeadingPart.NameRequired" />.
+        /// </remarks>
+        public bool Accepts(int command, string value)
+        {
+            Func<string, bool> check;
+            return !_textChecks.TryGetValue(command, out check) || check(value ?? "");
         }
 
         /// <summary>
@@ -365,6 +381,14 @@ namespace Reactor.Editing
             var id = CommandId.Of(kind, which);
             Claim(id, kind);
             _textActions.Add(id, action);
+            return id;
+        }
+
+        /// <summary>A text command that refuses whatever <paramref name="accepts" /> says no to.</summary>
+        internal int RegisterText(Cmd kind, Action<string> action, Func<string, bool> accepts)
+        {
+            var id = RegisterText(kind, 0, action);
+            _textChecks.Add(id, accepts);
             return id;
         }
 
@@ -681,6 +705,7 @@ namespace Reactor.Editing
         {
             _actions.Clear();
             _textActions.Clear();
+            _textChecks.Clear();
             _toggleActions.Clear();
             _numberActions.Clear();
 

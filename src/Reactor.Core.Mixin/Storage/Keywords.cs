@@ -22,7 +22,7 @@ namespace Reactor.Storage
             "",
             "reactor", "block", "system", "role", "instance", "fill", "sequence", "step",
             "when", "every", "called", "after", "once", "onlyif", "run", "set",
-            "on", "off", "all", "any", "wait", "now", "optional", "required", "is", "changed", "as"
+            "on", "off", "all", "any", "wait", "now", "optional", "required", "is", "changed", "as", "last"
         };
 
         /// <summary>

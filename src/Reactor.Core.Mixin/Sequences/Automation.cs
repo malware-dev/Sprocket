@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Reactor.World;
 
@@ -54,7 +55,7 @@ namespace Reactor.Sequences
         /// <para>
         /// It is here rather than in whatever did the reading because it is a fact about this program,
         /// and every host that saves has to honour it. What was wrong is a separate answer, from
-        /// <see cref="Storage.ProgramText.Load" />, and it stays out of the model: core has no words.
+        /// <see cref="Storage.ProgramText.Load(string, Automation, Values, out string)" />, and it stays out of the model: core has no words.
         /// </para>
         /// </remarks>
         public bool Intact { get; private set; } = true;
@@ -189,7 +190,7 @@ namespace Reactor.Sequences
         /// </remarks>
         public AutomationSystem AddSystem()
         {
-            var system = new AutomationSystem(_nextSystemId++);
+            var system = new AutomationSystem(_nextSystemId++, Guid.NewGuid());
             system.AddInstance();
             _systems.Add(system);
             return system;
@@ -199,15 +200,15 @@ namespace Reactor.Sequences
         /// Puts back a system that was saved, by what it is.
         /// </summary>
         /// <remarks>
-        /// The system is its namespace and name, so that is what comes back; its session handle is new, since
+        /// The system is its identity, so that comes back with its name; its session handle is new, since
         /// nothing outside this session ever held one.
         ///
         /// No instance is added, unlike <see cref="AddSystem"/>: whatever was saved is what
         /// comes back, and inventing an extra one would multiply systems on every reload.
         /// </remarks>
-        public AutomationSystem Restore(string space, string name)
+        public AutomationSystem Restore(Guid identity, string space, string name)
         {
-            var system = new AutomationSystem(_nextSystemId++);
+            var system = new AutomationSystem(_nextSystemId++, identity);
             system.Namespace = space ?? "";
             system.Name = name ?? "";
             _systems.Add(system);
@@ -234,7 +235,18 @@ namespace Reactor.Sequences
             return null;
         }
 
-        /// <summary>The system that is this namespace and name, or null.</summary>
+        /// <summary>The system with that identity, or null.</summary>
+        public AutomationSystem FindSystem(Guid identity)
+        {
+            for (var i = 0; i < _systems.Count; i++)
+            {
+                if (_systems[i].Identity == identity)
+                    return _systems[i];
+            }
+            return null;
+        }
+
+        /// <summary>The system called this, by this namespace, or null.</summary>
         public AutomationSystem FindSystem(string space, string name)
         {
             for (var i = 0; i < _systems.Count; i++)

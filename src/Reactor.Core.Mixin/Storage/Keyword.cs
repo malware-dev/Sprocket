@@ -47,6 +47,7 @@ namespace Reactor.Storage
         Required,
         Is,
         Changed,
-        As
+        As,
+        Last
     }
 }

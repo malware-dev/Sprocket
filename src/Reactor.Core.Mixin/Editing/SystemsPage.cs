@@ -81,7 +81,7 @@ namespace Reactor.Editing
             Collect();
 
             var start = new StartComponent();
-            start.Add("New system", "What is it?", Editor.RegisterText(Cmd.NewSystem, Make));
+            start.Add("New system", "What is it?", Editor.RegisterText(Cmd.NewSystem, Make, Free));
             start.Add("Load system", Editor.Register(Cmd.LoadSystem, delegate { Editor.OfferLoading(); }));
             components.Add(start);
 
@@ -168,6 +168,12 @@ namespace Reactor.Editing
             };
         }
 
+        /// <summary>Whether no system by this author is called this yet.</summary>
+        bool Free(string name)
+        {
+            return Editor.Program.FindSystem(Editor.Author, Naming.Clean(name)) == null;
+        }
+
         static Action<bool> Switch(SystemInstance instance)
         {
             return delegate(bool on) { instance.Enabled = on; };
@@ -176,7 +182,7 @@ namespace Reactor.Editing
         void Make(string name)
         {
             name = Naming.Clean(name);
-            if (name.Length == 0 || Editor.Program.FindSystem(Editor.Author, name) != null)
+            if (name.Length == 0 || !Free(name))
                 return;
 
             var system = Editor.Program.AddSystem();

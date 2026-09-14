@@ -27,6 +27,10 @@ system              400 144 type Airlock enter
 system-rename       400 144 type Airlock enter 80 68
 system-back         400 144 type Airlock enter 25 62
 
+# --- a name another system has, refused where it is typed -----------------------------------------
+root-taken          400 144 type Airlock enter 25 62 400 144 type Airlock enter
+system-rename-taken 400 144 type Airlock enter 25 62 400 144 type Hangar enter 80 68 clear type Airlock enter
+
 # --- picking blocks, which is the longest list in the editor ------------------------------------
 picker              400 144 type Airlock enter 400 144
 picker-hover        400 144 type Airlock enter 400 144 move 300 375

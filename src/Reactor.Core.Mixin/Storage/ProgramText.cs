@@ -63,18 +63,6 @@ namespace Reactor.Storage
             "yyyy'-'MM'-'dd"
         };
 
-        /// <summary>
-        /// A system's name as one string: its canonical spelling in the script.
-        /// </summary>
-        /// <remarks>
-        /// For anything that needs a single string to stand for a system, a button's key above all. The
-        /// quoting keeps two different names from ever spelling the same.
-        /// </remarks>
-        public static string Identity(AutomationSystem system)
-        {
-            return Pen.Spelling(system.Namespace, system.Name);
-        }
-
         public static string Save(Automation program, Values values)
         {
             var pen = new Pen();
@@ -106,6 +94,21 @@ namespace Reactor.Storage
         /// </remarks>
         public static string Load(string saved, Automation program, Values values)
         {
+            string warning;
+            return Load(saved, program, values, out warning);
+        }
+
+        /// <summary>
+        /// Reads a program back into an empty one, and answers what was wrong with it and what only looked
+        /// wrong.
+        /// </summary>
+        /// <remarks>
+        /// A warning is something that reads and runs but is probably a mistake, such as two systems with
+        /// the same name. It does not mark the program damaged.
+        /// </remarks>
+        public static string Load(string saved, Automation program, Values values, out string warning)
+        {
+            warning = "";
             if (string.IsNullOrEmpty(saved))
                 return "";
 
@@ -130,6 +133,7 @@ namespace Reactor.Storage
             if (trouble.What.Length > 0)
                 program.Damaged();
 
+            warning = trouble.Warning;
             return trouble.What;
         }
 
@@ -243,7 +247,8 @@ namespace Reactor.Storage
         {
             pen.Blank();
             pen.Note(system.Annotation);
-            pen.Start(Keyword.System).Qualified(system.Namespace, system.Name)
+            pen.Start(Keyword.System).Text(system.Identity.ToString("D"))
+                .Says(Keyword.As).Qualified(system.Namespace, system.Name)
                 .Says(Keyword.Is).Says(OnOff(system.Enabled));
 
             if (system.Changed.HasValue)
@@ -251,6 +256,9 @@ namespace Reactor.Storage
                 pen.Comma().Says(Keyword.Changed)
                     .Text(system.Changed.Value.ToString(Times[0], CultureInfo.InvariantCulture));
             }
+
+            if (system.LastSequenceNumber > system.HighestSequenceNumber())
+                pen.Comma().Says(Keyword.Last).Says(Keyword.Sequence).Whole(system.LastSequenceNumber);
 
             pen.Body();
 
@@ -272,45 +280,63 @@ namespace Reactor.Storage
         }
 
         /// <summary>
-        /// <c>system MalTek.Airlock is on, changed "2026-09-14T19:02:11Z" { … }</c>
+        /// <c>system "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43" as MalTek.Airlock is on, changed "…", last sequence 4 { … }</c>
         /// </summary>
         /// <remarks>
-        /// Strict where it matters. A system is what it is called, so one without a name, or a second with
-        /// the same name, is trouble and not read. A switch that says neither on nor off is trouble but the
-        /// system still loads, switched on, because the parser never loses more than it has to - and trouble
-        /// already stops the program being saved over what is on disk.
+        /// Strict where it matters. A system is its identity, so one without a readable identity, or a second
+        /// with the same one, is trouble and not read; so is one with no name, which the editor never makes. A
+        /// switch that says neither on nor off is trouble but the system still loads, switched on, because the
+        /// parser never loses more than it has to - and trouble already stops the program being saved over
+        /// what is on disk. A second system with the same name loads, with a warning, because the name
+        /// decides nothing but a person still has to tell the two apart. The parts after the comma are found
+        /// by their keywords, in any order.
         /// </remarks>
         static void ReadSystem(Statement statement, Automation program, Trouble trouble)
         {
-            var name = statement.Parts(0);
-            if (name.Count == 0 || name.Count > 2 || name[name.Count - 1].Word.Length == 0)
+            Guid identity;
+            if (!Guid.TryParseExact(statement.Text(0), "D", out identity) || identity == Guid.Empty)
             {
-                trouble.Say(statement, "a system is named, as a name or a namespace and a name");
+                trouble.Say(statement, "a system starts with its identity, like \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\"");
+                return;
+            }
+
+            var name = statement.Parts(2);
+            if (!statement.Says(1, Keyword.As) || name.Count == 0 || name.Count > 2
+                || name[name.Count - 1].Word.Length == 0)
+            {
+                trouble.Say(statement, "a system is named after 'as', as a name or a namespace and a name");
+                return;
+            }
+
+            if (program.FindSystem(identity) != null)
+            {
+                trouble.Say(statement, "two systems are both " + identity.ToString("D"));
                 return;
             }
 
             var space = name.Count == 2 ? name[0].Word : "";
             var called = name[name.Count - 1].Word;
             if (program.FindSystem(space, called) != null)
-            {
-                trouble.Say(statement, "two systems are both " + Pen.Spelling(space, called));
-                return;
-            }
+                trouble.Warn(statement, "two systems are both called " + Pen.Spelling(space, called));
 
-            var system = program.Restore(space, called);
+            var system = program.Restore(identity, space, called);
             system.Annotation = statement.Annotation;
 
-            if (!statement.Says(1, Keyword.Is) || !(statement.Says(2, Keyword.On) || statement.Says(2, Keyword.Off)))
+            if (!statement.Says(3, Keyword.Is) || !(statement.Says(4, Keyword.On) || statement.Says(4, Keyword.Off)))
                 trouble.Say(statement, "a system says whether it is on or off: is on, is off");
 
-            system.Enabled = !statement.Says(2, Keyword.Off);
+            system.Enabled = !statement.Says(4, Keyword.Off);
 
-            if (statement.Optional > 3)
+            if (statement.Optional > 5)
                 trouble.Say(statement, "what follows 'is on' or 'is off' comes after a comma");
 
             var changed = statement.Find(Keyword.Changed, statement.Optional);
             if (changed >= 0)
                 system.Changed = Time(statement, changed + 1, trouble);
+
+            var last = statement.Find(Keyword.Last, statement.Optional);
+            if (last >= 0)
+                LastSequence(statement, last, system, trouble);
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
@@ -323,6 +349,26 @@ namespace Reactor.Storage
                 else if (inner.Key == Keyword.Sequence)
                     ReadSequence(inner, system, program, trouble);
             }
+        }
+
+        /// <summary>
+        /// <c>last sequence 4</c>: the highest number the system has handed out, kept only as a failsafe.
+        /// </summary>
+        /// <remarks>
+        /// Whichever is higher wins, this or the sequences in the block, so a sequence somebody added by hand
+        /// with a higher number is never undercut by a stale one.
+        /// </remarks>
+        static void LastSequence(Statement statement, int at, AutomationSystem system, Trouble trouble)
+        {
+            var number = statement.ValueAt(at + 2);
+            if (!statement.Says(at + 1, Keyword.Sequence) || number.Form != ValueForm.Integer || number.Whole < 1
+                || number.Whole > int.MaxValue)
+            {
+                trouble.Say(statement, "'last' is followed by 'sequence' and a number, like last sequence 4");
+                return;
+            }
+
+            system.Used((int)number.Whole);
         }
 
         /// <summary>A <c>changed</c> time, or null and trouble when it is not ISO 8601.</summary>

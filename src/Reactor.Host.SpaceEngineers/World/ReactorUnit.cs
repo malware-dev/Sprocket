@@ -149,19 +149,13 @@ namespace Reactor.Host.SpaceEngineers.World
         /// What goes in a slot: which system, which one of it, which sequence.
         /// </summary>
         /// <remarks>
-        /// <b>The system is named by what it is</b> - its namespace and name, spelt as the script spells
-        /// them - because a number cannot say which system it means once systems are exported, imported, or
-        /// on constructs that join. The quoting in that spelling is what keeps the parts after it
-        /// unambiguous, so no character has to be forbidden in a name.
-        /// <para>
-        /// So renaming a system is making a different one, and a button wired to the old name stops
-        /// resolving and is reported, rather than quietly following the rename. Built once, at bind, and
-        /// read back verbatim.
-        /// </para>
+        /// <b>The system is named by its identity</b>, because a number cannot say which system it means once
+        /// systems are exported, imported, or on constructs that join, and a name changes. So a button keeps
+        /// working through a rename. Built once, at bind, and read back verbatim.
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
-            return ProgramText.Identity(system) + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Number;
+            return system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Number;
         }
 
         /// <summary>A block fired one of the actions Reactor put in it.</summary>
@@ -717,7 +711,11 @@ namespace Reactor.Host.SpaceEngineers.World
             if (!storage.TryGetValue(ProgramKey, out text) || string.IsNullOrEmpty(text))
                 return;
 
-            var trouble = ProgramText.Load(text, _program, _world.Values);
+            string warning;
+            var trouble = ProgramText.Load(text, _program, _world.Values, out warning);
+            if (warning.Length > 0)
+                MyLog.Default.WriteLineAndConsole("[Reactor] " + _block.CustomName + " has a program with a warning: " + warning);
+
             if (trouble.Length == 0)
                 return;
 

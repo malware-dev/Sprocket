@@ -1246,8 +1246,12 @@ public class EditorTests
     }
 
     /// <summary>
-    /// A name another system already has is refused, because the name is what a system is.
+    /// A name another system already has is refused, and a target can ask before sending it.
     /// </summary>
+    /// <remarks>
+    /// Asking first is what lets a screen say the name is taken while it is typed, rather than send it and
+    /// have nothing happen.
+    /// </remarks>
     [Fact]
     public void ANameAnotherSystemAlreadyHasIsRefused()
     {
@@ -1256,8 +1260,32 @@ public class EditorTests
 
         ship.Editor.NewSystem("Airlock");
         ship.Editor.GoToRoot();
-        ship.Editor.NewSystem("Airlock");
 
+        var start = ship.Editor.Screen.Components.OfType<StartComponent>().First();
+        var make = start.Options.First(o => o.Asks).Command;
+        Assert.False(ship.Editor.Accepts(make, "Airlock"));
+        Assert.False(ship.Editor.Accepts(make, "  Airlock "));
+        Assert.True(ship.Editor.Accepts(make, "Hangar"));
+
+        ship.Editor.NewSystem("Airlock");
         Assert.Single(ship.Automation.Systems);
+    }
+
+    [Fact]
+    public void RenamingASystemToANameAnotherHasIsRefused()
+    {
+        var ship = Build();
+        ship.Editor.Author = "MalTek";
+
+        ship.Editor.NewSystem("Airlock");
+        ship.Editor.GoToRoot();
+        ship.Editor.NewSystem("Hangar");
+
+        var rename = ship.Editor.Screen.Heading[0].RenameCommand;
+        Assert.False(ship.Editor.Accepts(rename, "Airlock"));
+        Assert.True(ship.Editor.Accepts(rename, "Hangar"));
+
+        ship.Editor.SetText(rename, "Airlock");
+        Assert.Equal("Hangar", ship.Automation.Systems[1].Name);
     }
 }

@@ -16,6 +16,11 @@ namespace Reactor.Tests;
 /// </remarks>
 public class ScriptTests
 {
+    const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
+
+    /// <summary>A program's first line and the start of a system with <see cref="Identity" />.</summary>
+    const string Head = "reactor 3\n\nsystem \"" + Identity + "\" as ";
+
     static readonly Values Store = new Values();
 
     static string Save(Automation program) => ProgramText.Save(program, Store);
@@ -34,6 +39,7 @@ public class ScriptTests
         program.Restore(door);
 
         var system = program.AddSystem();
+        system.Identity = new Guid(Identity);
         system.Namespace = "MalTek";
         system.Name = "Airlock";
         system.Changed = new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc);
@@ -74,6 +80,7 @@ public class ScriptTests
     {
         var program = new Automation();
         var system = program.AddSystem();
+        system.Identity = new Guid(Identity);
         system.Namespace = space;
         system.Name = name;
         return program;
@@ -98,7 +105,7 @@ public class ScriptTests
             "# Cycles an airlock.\n" +
             "#\n" +
             "# Nothing opens on both sides at once.\n" +
-            "system MalTek.Airlock is on, changed \"2026-09-14T19:02:11Z\" {\n" +
+            "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock is on, changed \"2026-09-14T19:02:11Z\" {\n" +
             "    # The door onto the ship.\n" +
             "    role inner required \"the inner door\"\n" +
             "\n" +
@@ -119,17 +126,44 @@ public class ScriptTests
     }
 
     /// <summary>
-    /// A system is what it is called: its namespace and its name, whatever they contain.
+    /// A system is its identity, and is called by a namespace and a name, whatever they contain.
     /// </summary>
     [Fact]
-    public void ASystemIsItsNamespaceAndName()
+    public void ASystemIsItsIdentityCalledByANamespaceAndName()
     {
         var text = Save(SystemCalled("MalTek Inc.", "Airlock System"));
-        Assert.Contains("system 'MalTek Inc.'.'Airlock System' is on {", text);
+        Assert.Contains("system \"" + Identity + "\" as 'MalTek Inc.'.'Airlock System' is on {", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
+        Assert.Equal(new Guid(Identity), after.Systems[0].Identity);
         Assert.True(after.Systems[0].Is("MalTek Inc.", "Airlock System"));
+    }
+
+    /// <summary>
+    /// A system with no identity, or one that is not a GUID, is trouble and is not read.
+    /// </summary>
+    [Theory]
+    [InlineData("reactor 3\n\nsystem Airlock is on {\n}\n")]
+    [InlineData("reactor 3\n\nsystem \"airlock\" as Airlock is on {\n}\n")]
+    [InlineData("reactor 3\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock is on {\n}\n")]
+    public void ASystemWithoutAnIdentityIsTrouble(string text)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(text, after));
+        Assert.False(after.Intact);
+        Assert.Empty(after.Systems);
+    }
+
+    [Fact]
+    public void EveryNewSystemHasAnIdentityOfItsOwn()
+    {
+        var program = new Automation();
+        var one = program.AddSystem();
+        var other = program.AddSystem();
+
+        Assert.NotEqual(Guid.Empty, one.Identity);
+        Assert.NotEqual(one.Identity, other.Identity);
     }
 
     /// <summary>
@@ -139,27 +173,25 @@ public class ScriptTests
     public void SpacesAroundTheDotAreNothing()
     {
         var after = new Automation();
-        Assert.Equal("", Load("reactor 3\n\nsystem 'MalTek Inc.'  .  Airlock is on {\n}\n", after));
+        Assert.Equal("", Load(Head + "'MalTek Inc.'  .  Airlock is on {\n}\n", after));
         Assert.True(after.Systems[0].Is("MalTek Inc.", "Airlock"));
 
         // Written back tight, because the writer has one spelling for a name.
-        Assert.Contains("system 'MalTek Inc.'.Airlock is on {", Save(after));
+        Assert.Contains(" as 'MalTek Inc.'.Airlock is on {", Save(after));
     }
 
     /// <summary>
-    /// Two different names can never spell the same, which is what lets the spelling stand for a system.
+    /// Two different names can never spell the same.
     /// </summary>
     /// <remarks>
     /// Joined plainly, <c>a.b</c> and <c>c</c> would collide with <c>a</c> and <c>b.c</c>. The quoting is
-    /// what keeps them apart, and a button's key relies on it.
+    /// what keeps them apart.
     /// </remarks>
     [Fact]
     public void TwoDifferentNamesNeverSpellTheSame()
     {
-        var one = SystemCalled("a.b", "c").Systems[0];
-        var other = SystemCalled("a", "b.c").Systems[0];
-
-        Assert.NotEqual(ProgramText.Identity(one), ProgramText.Identity(other));
+        Assert.Contains(" as 'a.b'.c is on {", Save(SystemCalled("a.b", "c")));
+        Assert.Contains(" as a.'b.c' is on {", Save(SystemCalled("a", "b.c")));
     }
 
     /// <summary>
@@ -173,7 +205,7 @@ public class ScriptTests
     public void TextIsNeverAName()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("reactor 3\n\nsystem \"Airlock\" is on {\n}\n", after));
+        Assert.NotEqual("", Load(Head + "\"Airlock\" is on {\n}\n", after));
         Assert.False(after.Intact);
     }
 
@@ -185,8 +217,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.Equal("", Load(
-            "reactor 3\n\n" +
-            "system Airlock is on {\n" +
+            Head + "Airlock is on {\n" +
             "    sequence 1 as 'Let me out' is on {\n" +
             "    }\n\n" +
             "    sequence 2 is off {\n" +
@@ -208,8 +239,7 @@ public class ScriptTests
     {
         var after = new Automation();
         var trouble = Load(
-            "reactor 3\n\n" +
-            "system Airlock is on {\n" +
+            Head + "Airlock is on {\n" +
             "    sequence 1 is on {\n" +
             "    }\n\n" +
             "    sequence 1 is on {\n" +
@@ -222,10 +252,10 @@ public class ScriptTests
     }
 
     [Fact]
-    public void TwoSystemsWithTheSameNameAreTrouble()
+    public void TwoSystemsWithTheSameIdentityAreTrouble()
     {
         var after = new Automation();
-        var trouble = Load("reactor 3\n\nsystem MalTek.Airlock is on {\n}\n\nsystem MalTek.Airlock is off {\n}\n",
+        var trouble = Load(Head + "MalTek.Airlock is on {\n}\n\nsystem \"" + Identity + "\" as MalTek.Hangar is off {\n}\n",
             after);
 
         Assert.NotEqual("", trouble);
@@ -233,11 +263,29 @@ public class ScriptTests
         Assert.Single(after.Systems);
     }
 
+    /// <summary>
+    /// Two systems with the same name both load, with a warning, since only their identities decide anything.
+    /// </summary>
+    [Fact]
+    public void TwoSystemsWithTheSameNameAreAWarning()
+    {
+        var after = new Automation();
+        string warning;
+        var trouble = ProgramText.Load(
+            Head + "MalTek.Airlock is on {\n}\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock is off {\n}\n",
+            after, Store, out warning);
+
+        Assert.Equal("", trouble);
+        Assert.Equal("line 6: two systems are both called MalTek.Airlock", warning);
+        Assert.True(after.Intact);
+        Assert.Equal(2, after.Systems.Count);
+    }
+
     [Fact]
     public void ASwitchSaysOnOrOff()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("reactor 3\n\nsystem Airlock is maybe {\n}\n", after));
+        Assert.NotEqual("", Load(Head + "Airlock is maybe {\n}\n", after));
         Assert.False(after.Intact);
 
         // Still there, because a reader never loses more than it has to.
@@ -251,7 +299,7 @@ public class ScriptTests
     public void AnOptionalPartComesAfterTheComma()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("reactor 3\n\nsystem Airlock is on changed \"2026-09-14T19:02:11Z\" {\n}\n",
+        Assert.NotEqual("", Load(Head + "Airlock is on changed \"2026-09-14T19:02:11Z\" {\n}\n",
             after));
         Assert.False(after.Intact);
     }
@@ -263,13 +311,79 @@ public class ScriptTests
     public void AChangedTimeIsIsoAndComesBackAsUtc()
     {
         var after = new Automation();
-        Assert.Equal("", Load("reactor 3\n\nsystem Airlock is on, changed \"2026-09-14T21:02:11+02:00\" {\n}\n",
+        Assert.Equal("", Load(Head + "Airlock is on, changed \"2026-09-14T21:02:11+02:00\" {\n}\n",
             after));
-        Assert.Contains("system Airlock is on, changed \"2026-09-14T19:02:11Z\" {", Save(after));
+        Assert.Contains(" as Airlock is on, changed \"2026-09-14T19:02:11Z\" {", Save(after));
 
         var local = new Automation();
-        Assert.NotEqual("", Load("reactor 3\n\nsystem Airlock is on, changed \"14/09/2026\" {\n}\n", local));
+        Assert.NotEqual("", Load(Head + "Airlock is on, changed \"14/09/2026\" {\n}\n", local));
         Assert.False(local.Intact);
+    }
+
+    /// <summary>
+    /// The optional parts are found by what they say, whatever order they come in.
+    /// </summary>
+    [Fact]
+    public void OptionalPartsReadInAnyOrder()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(Head + "Airlock is on, last sequence 4, changed \"2026-09-14T19:02:11Z\" {\n}\n",
+            after));
+
+        Assert.Equal(new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc), after.Systems[0].Changed);
+        Assert.Equal(4, after.Systems[0].LastSequenceNumber);
+
+        // Written back in the writer's own order.
+        Assert.Contains(" as Airlock is on, changed \"2026-09-14T19:02:11Z\", last sequence 4 {", Save(after));
+    }
+
+    /// <summary>
+    /// The last sequence number is written only when the highest has been deleted, as a failsafe.
+    /// </summary>
+    /// <remarks>
+    /// Without it, the next sequence made after a reload would take the deleted one's number, and a button
+    /// still holding that number would start running it.
+    /// </remarks>
+    [Fact]
+    public void TheLastSequenceNumberIsWrittenOnlyWhenTheHighestIsGone()
+    {
+        var program = SystemCalled("", "Airlock");
+        var system = program.Systems[0];
+        program.AddSequence(system, new CalledTrigger());
+        var two = program.AddSequence(system, new CalledTrigger());
+        Assert.DoesNotContain("last", Save(program));
+
+        program.RemoveSequence(two);
+        var text = Save(program);
+        Assert.Contains(" as Airlock is on, last sequence 2 {", text);
+
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+        Assert.Equal(3, after.AddSequence(after.Systems[0], new CalledTrigger()).Number);
+    }
+
+    /// <summary>
+    /// A sequence in the block with a higher number than the failsafe wins over it.
+    /// </summary>
+    [Fact]
+    public void ASequenceHigherThanTheLastNumberWins()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(Head + "Airlock is on, last sequence 3 {\n    sequence 7 is on {\n    }\n}\n", after));
+
+        Assert.Equal(7, after.Systems[0].LastSequenceNumber);
+        Assert.DoesNotContain("last", Save(after));
+    }
+
+    [Theory]
+    [InlineData("last 4")]
+    [InlineData("last sequence")]
+    [InlineData("last sequence \"4\"")]
+    public void ALastSequenceThatDoesNotSayANumberIsTrouble(string part)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(Head + "Airlock is on, " + part + " {\n}\n", after));
+        Assert.False(after.Intact);
     }
 
     /// <summary>
@@ -337,7 +451,7 @@ public class ScriptTests
         program.Systems[0].RoleFor("inner").Name = "the \"inner\" door's";
 
         var text = Save(program);
-        Assert.Contains("system 'Mal''s \"big\" airlock' is on {", text);
+        Assert.Contains(" as 'Mal''s \"big\" airlock' is on {", text);
         Assert.Contains("\"the \"\"inner\"\" door's\"", text);
 
         var after = new Automation();
@@ -461,7 +575,7 @@ public class ScriptTests
     public void SomethingThatIsNotAProgramIsNotReadAsOne()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("system Airlock is on {\n}\n", after));
+        Assert.NotEqual("", Load("system \"" + Identity + "\" as Airlock is on {\n}\n", after));
         Assert.False(after.Intact);
     }
 
