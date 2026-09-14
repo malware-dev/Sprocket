@@ -106,7 +106,7 @@ public class ScriptTests
             "        fill inner [ inner ]\n" +
             "    }\n" +
             "\n" +
-            "    sequence 1 on \"Let me out\" {\n" +
+            "    sequence 1 as 'Let me out' is on {\n" +
             "        when any pressed [ inner ]\n" +
             "        close [ inner ] wait\n" +
             "        step [] wait after 60\n" +
@@ -175,6 +175,50 @@ public class ScriptTests
         var after = new Automation();
         Assert.NotEqual("", Load("reactor 3\n\nsystem \"Airlock\" is on {\n}\n", after));
         Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A sequence is its number within its system, and its name is optional and comes first.
+    /// </summary>
+    [Fact]
+    public void ASequenceIsItsNumberWithItsNameOptional()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(
+            "reactor 3\n\n" +
+            "system Airlock is on {\n" +
+            "    sequence 1 as 'Let me out' is on {\n" +
+            "    }\n\n" +
+            "    sequence 2 is off {\n" +
+            "    }\n" +
+            "}\n", after));
+
+        Assert.Equal("Let me out", after.Sequences[0].Name);
+        Assert.Equal(2, after.Sequences[1].Number);
+        Assert.False(after.Sequences[1].HasName);
+        Assert.False(after.Sequences[1].Enabled);
+
+        var text = Save(after);
+        Assert.Contains("sequence 1 as 'Let me out' is on {", text);
+        Assert.Contains("sequence 2 is off {", text);
+    }
+
+    [Fact]
+    public void TwoSequencesWithTheSameNumberInOneSystemAreTrouble()
+    {
+        var after = new Automation();
+        var trouble = Load(
+            "reactor 3\n\n" +
+            "system Airlock is on {\n" +
+            "    sequence 1 is on {\n" +
+            "    }\n\n" +
+            "    sequence 1 is on {\n" +
+            "    }\n" +
+            "}\n", after);
+
+        Assert.NotEqual("", trouble);
+        Assert.False(after.Intact);
+        Assert.Single(after.Sequences);
     }
 
     [Fact]

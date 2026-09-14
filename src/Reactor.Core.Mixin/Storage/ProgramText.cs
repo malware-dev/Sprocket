@@ -321,7 +321,7 @@ namespace Reactor.Storage
                 else if (inner.Key == Keyword.Instance)
                     ReadInstance(inner, system);
                 else if (inner.Key == Keyword.Sequence)
-                    ReadSequence(inner, system, program);
+                    ReadSequence(inner, system, program, trouble);
             }
         }
 
@@ -420,8 +420,11 @@ namespace Reactor.Storage
         {
             pen.Blank();
             pen.Note(sequence.Annotation);
-            pen.Start(Keyword.Sequence).Whole(sequence.Id).Says(OnOff(sequence.Enabled));
-            Named(pen, sequence.Name);
+            pen.Start(Keyword.Sequence).Whole(sequence.Number);
+            if (sequence.HasName)
+                pen.Says(Keyword.As).Word(sequence.Name);
+
+            pen.Says(Keyword.Is).Says(OnOff(sequence.Enabled));
             pen.Body();
 
             WriteTrigger(pen, sequence.Trigger);
@@ -433,12 +436,48 @@ namespace Reactor.Storage
             pen.Shut();
         }
 
-        static void ReadSequence(Statement statement, AutomationSystem system, Automation program)
+        /// <summary>
+        /// <c>sequence 3 as 'Let me out' is on { … }</c>
+        /// </summary>
+        /// <remarks>
+        /// The number is what the sequence is, within its system, so one without a number or with a number its
+        /// system already has is trouble and not read. The name is optional and comes before the switch.
+        /// </remarks>
+        static void ReadSequence(Statement statement, AutomationSystem system, Automation program, Trouble trouble)
         {
-            var sequence = program.Restore(system, statement.Whole(0), new CalledTrigger());
-            sequence.Enabled = !statement.Says(1, Keyword.Off);
-            sequence.Name = statement.Text(2);
+            var number = statement.ValueAt(0);
+            if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
+            {
+                trouble.Say(statement, "a sequence starts with its number within its system");
+                return;
+            }
+
+            if (system.FindSequence((int)number.Whole) != null)
+            {
+                trouble.Say(statement, "two sequences of one system are both number " + number.Whole);
+                return;
+            }
+
+            var sequence = program.Restore(system, (int)number.Whole, new CalledTrigger());
             sequence.Annotation = statement.Annotation;
+
+            var at = 1;
+            if (statement.Says(at, Keyword.As))
+            {
+                sequence.Name = statement.Word(at + 1);
+                if (sequence.Name.Length == 0)
+                    trouble.Say(statement, "'as' is followed by the sequence's name");
+
+                at += 2;
+            }
+
+            if (!statement.Says(at, Keyword.Is) || !(statement.Says(at + 1, Keyword.On) || statement.Says(at + 1, Keyword.Off)))
+                trouble.Say(statement, "a sequence says whether it is on or off: is on, is off");
+
+            sequence.Enabled = !statement.Says(at + 1, Keyword.Off);
+
+            if (statement.Optional > at + 2)
+                trouble.Say(statement, "what follows 'is on' or 'is off' comes after a comma");
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)

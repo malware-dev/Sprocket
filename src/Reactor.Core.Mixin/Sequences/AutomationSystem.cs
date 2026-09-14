@@ -237,6 +237,33 @@ namespace Reactor.Sequences
             return _sequences.Remove(sequence);
         }
 
+        /// <summary>
+        /// The number a new sequence of this system gets: one past the highest it already has.
+        /// </summary>
+        /// <remarks>
+        /// Worked out from the sequences that exist and nothing else, so nothing about numbering is saved. A
+        /// system with no sequences starts at 1.
+        /// </remarks>
+        public int NextSequenceNumber()
+        {
+            var highest = 0;
+            for (var i = 0; i < _sequences.Count; i++)
+                if (_sequences[i].Number > highest)
+                    highest = _sequences[i].Number;
+
+            return highest + 1;
+        }
+
+        /// <summary>The sequence of this system with that number, or null.</summary>
+        public Sequence FindSequence(int number)
+        {
+            for (var i = 0; i < _sequences.Count; i++)
+                if (_sequences[i].Number == number)
+                    return _sequences[i];
+
+            return null;
+        }
+
         /// <summary>Whether this is the system with that namespace and name.</summary>
         public bool Is(string space, string name)
         {

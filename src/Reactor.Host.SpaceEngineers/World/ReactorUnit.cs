@@ -161,7 +161,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
-            return ProgramText.Identity(system) + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Id;
+            return ProgramText.Identity(system) + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Number;
         }
 
         /// <summary>A block fired one of the actions Reactor put in it.</summary>

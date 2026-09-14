@@ -137,13 +137,36 @@ public class ProgramTextTests
         Assert.True(after.Systems[0].Is("MalTek", "Airlock"));
         Assert.True(after.Systems[1].Is("", "Drill Rig"));
 
-        Assert.Equal(before.Sequences[0].Id, after.Sequences[0].Id);
-        Assert.Equal(before.Sequences[1].Id, after.Sequences[1].Id);
+        // A sequence is its number within its system, so two systems each have a sequence 1.
+        Assert.Equal(1, after.Sequences[0].Number);
+        Assert.Equal(1, after.Sequences[1].Number);
 
-        // And the counters move past what was loaded, or the next thing made would collide
-        // with something already there.
+        // And a new one takes the next number its own system has free, whatever the other system holds.
         var fresh = after.AddSequence(after.Systems[0], new CalledTrigger());
-        Assert.True(fresh.Id > before.Sequences[1].Id);
+        Assert.Equal(2, fresh.Number);
+    }
+
+    /// <summary>
+    /// A sequence's number comes from the numbers its system already has, and nothing else.
+    /// </summary>
+    /// <remarks>
+    /// Nothing about numbering is saved, so after a reload the next number is one past the highest that
+    /// exists - including when the highest was the one just deleted.
+    /// </remarks>
+    [Fact]
+    public void ANewSequenceTakesOnePastTheHighestItsSystemHas()
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+        system.Name = "Airlock";
+
+        var one = program.AddSequence(system, new CalledTrigger());
+        var two = program.AddSequence(system, new CalledTrigger());
+        var three = program.AddSequence(system, new CalledTrigger());
+        Assert.Equal(new[] { 1, 2, 3 }, new[] { one.Number, two.Number, three.Number });
+
+        program.RemoveSequence(two);
+        Assert.Equal(4, program.AddSequence(system, new CalledTrigger()).Number);
     }
 
     [Fact]

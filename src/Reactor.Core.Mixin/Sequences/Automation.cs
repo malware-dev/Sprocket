@@ -215,15 +215,12 @@ namespace Reactor.Sequences
         }
 
         /// <summary>Puts back a sequence that was saved, keeping the id it had.</summary>
-        public Sequence Restore(AutomationSystem system, int id, Trigger trigger)
+        public Sequence Restore(AutomationSystem system, int number, Trigger trigger)
         {
-            var sequence = new Sequence(id, trigger);
+            var sequence = new Sequence(_nextSequenceId++, trigger);
+            sequence.Number = number;
             _sequences.Add(sequence);
             system.Add(sequence);
-
-            if (id >= _nextSequenceId)
-                _nextSequenceId = id + 1;
-
             return sequence;
         }
 
@@ -281,6 +278,7 @@ namespace Reactor.Sequences
                 system = _systems.Count > 0 ? _systems[_systems.Count - 1] : AddSystem();
 
             var sequence = new Sequence(_nextSequenceId++, trigger);
+            sequence.Number = system.NextSequenceNumber();
             _sequences.Add(sequence);
             system.Add(sequence);
             Wiring++;

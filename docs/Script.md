@@ -874,16 +874,15 @@ triggers run sequences rather than belonging to them, and the switch belongs to 
    **What it does not do yet, because the model does not.** A trigger still belongs to a sequence, so
    the language cannot say the things that needs: no inline sequence under its trigger, no `run`, no
    two triggers on one sequence, and the switch is on the sequence rather than on the trigger. Every
-   sequence therefore writes as `sequence <id> <on|off> "name" { … }` with its trigger as the first
-   statement inside. The sequence ids are in the file because a toolbar slot names a sequence by its
-   system's name, the instance and the sequence's number, so a save that dropped them would unwire every
-   button in the world.
+   sequence therefore writes as `sequence 3 as 'Let me out' is on { … }` with its trigger as the first
+   statement inside. **A sequence is its number within its system**, chosen as one past the highest the
+   system has, with nothing about numbering saved; the name is optional, a name rather than text, since
+   `run` will call a sequence by it. A toolbar slot names a sequence by its system's name, the instance
+   and that number, so the number survives renames, export and import.
 
    **Left for the system line:** a player cannot yet choose their own namespace in the editor, nor is
    anyone told when a name is refused as taken; nothing stamps `changed` yet, because what counts as a
-   change is undecided; two copies of one system meeting are not detected; and sequence numbers are
-   still one counter for the whole program rather than numbered within their system, which import
-   and export need.
+   change is undecided; and two copies of one system meeting are not detected.
 
    **Left:** a program that would not read is marked `Automation.Intact` false and neither host saves
    over it, which protects what is on disk - but nothing *says* so. The log has a line and the editor

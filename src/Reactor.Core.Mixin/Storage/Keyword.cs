@@ -46,6 +46,7 @@ namespace Reactor.Storage
         Optional,
         Required,
         Is,
-        Changed
+        Changed,
+        As
     }
 }

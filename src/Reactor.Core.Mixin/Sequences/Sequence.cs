@@ -29,7 +29,27 @@ namespace Reactor.Sequences
             Annotation = "";
         }
 
+        /// <summary>
+        /// A handle for this session only.
+        /// </summary>
+        /// <remarks>
+        /// <b>Never saved.</b> It is unique across the whole program, which is what the runner, the editor's
+        /// history and its commands need to tell sequences apart while it runs, and it means nothing after a
+        /// reload. What a sequence is, to a save or a button, is its <see cref="Number" /> within its system.
+        /// </remarks>
         public int Id { get; private set; }
+
+        /// <summary>
+        /// Which sequence of its system this is: 1, 2, 3.
+        /// </summary>
+        /// <remarks>
+        /// Counted within the system rather than across the program, so a system carries its numbers with it
+        /// when it is exported and imported, and a button naming a system and a number still means the same
+        /// sequence. Chosen from the numbers the system already has - see
+        /// <see cref="AutomationSystem.NextSequenceNumber" /> - and never changed afterwards, so a rename
+        /// cannot unwire anything.
+        /// </remarks>
+        public int Number { get; internal set; }
 
         /// <summary>
         /// What somebody wrote about this, in their own words, or empty.
