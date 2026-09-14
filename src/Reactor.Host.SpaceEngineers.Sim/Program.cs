@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Avalonia;
 using Reactor.Sim.Content;
+using Reactor.Sim.Measuring;
 using Reactor.Sim.Shell;
 using Reactor.Sim.Simulation;
 
@@ -34,6 +35,12 @@ namespace Reactor.Sim
             // Answered without Avalonia, because the question is about this machine rather than about the
             // screen: whether the game is here decides whether real letterforms and real block artwork
             // are on the table at all.
+            if (args.Length > 0 && args[0] == "--profile")
+            {
+                Console.Write(StorageReport.Render());
+                return;
+            }
+
             if (args.Length > 0 && args[0] == "--content")
             {
                 Console.Write(ContentReport.Render());

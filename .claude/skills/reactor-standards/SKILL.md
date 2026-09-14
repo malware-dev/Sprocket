@@ -57,7 +57,14 @@ graphics, and it is the only way to prove a cleanup changed nothing visible.
 --shot <file.png> [at <w> <h>] <script>   render a script and write a picture
 --dump                                     the current frame as readable text
 --content                                  what the game's own assets say
+--profile                                  how long saving and loading a program takes, worst cases included
 ```
+
+**`--profile` is the parser's guard, and it only means anything in Release** (`-c Release`). Loading a
+program lands inside a world load, once per Reactor on every grid on a server, so the column that
+matters is cost per statement across the headroom table: flat means linear. Re-run it whenever the
+language grows - expressions and branching will multiply program sizes - and before believing any claim
+that a change to storage made it faster.
 
 A script is a list of things done to the screen in order: a bare `x y` pair is a press, and then
 `move x y`, `drag x y x y`, `scroll x y n`, `tick n`, `type "words"`, `clear`, `enter`, `escape`.

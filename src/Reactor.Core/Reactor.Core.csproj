@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <Import Project="..\..\build\Reactor.SharedSources.props" />
+    <Import Project="..\..\build\Reactor.GameReferences.props" />
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
@@ -9,8 +10,12 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Reactor.Core.Tests" />
-    </ItemGroup>
 
+        <!-- For measuring only. The simulator times the lexer and the parser separately so a load's cost
+             can be attributed, and neither is public. Nothing in the harness may bind to an internal to
+             get work done - that is what the public surface is for. -->
+        <InternalsVisibleTo Include="Reactor.Host.SpaceEngineers.Sim" />
+    </ItemGroup>
 
     <!-- The Space Engineers whitelist, enforced at build time. Drift here is
          otherwise silent until the mod fails to load in-game. -->

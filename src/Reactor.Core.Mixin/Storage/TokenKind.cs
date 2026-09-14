@@ -9,8 +9,11 @@ namespace Reactor.Storage
         /// <summary>Ends a statement. There are no continuations, so this is structural.</summary>
         Newline,
 
-        /// <summary>A bare word: a keyword, or an id that needed no quoting.</summary>
+        /// <summary>A bare word that is not one of the format's own. It carries its text.</summary>
         Identifier,
+
+        /// <summary>A bare word that is one of the format's own. It carries no text at all.</summary>
+        Keyword,
 
         /// <summary>A quoted string. Legal anywhere an identifier is, and never a keyword.</summary>
         Text,

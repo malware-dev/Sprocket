@@ -47,7 +47,7 @@ namespace Reactor.Storage
         public static string Save(Automation program, Values values)
         {
             var pen = new Pen();
-            pen.Start(Language).Whole(Version);
+            pen.Start(Keyword.Reactor).Whole(Version);
             pen.End();
 
             // Before anything that names one, so a reader has them in hand by the time it meets a step.
@@ -88,7 +88,7 @@ namespace Reactor.Storage
             var constructs = parser.Read();
             var trouble = parser.Trouble;
 
-            if (constructs.Count == 0 || constructs[0].Head != Language)
+            if (constructs.Count == 0 || constructs[0].Key != Keyword.Reactor)
                 trouble = Pick(trouble, "this is not a Reactor program");
             else if (constructs[0].Whole(0) > Version)
                 trouble = Pick(trouble, "this was written by a later version of Reactor");
@@ -96,12 +96,9 @@ namespace Reactor.Storage
             for (var i = 0; i < constructs.Count; i++)
             {
                 var construct = constructs[i];
-                if (construct.Quoted)
-                    continue;
-
-                if (construct.Head == "block")
+                if (construct.Key == Keyword.Block)
                     ReadRef(construct, program, values);
-                else if (construct.Head == "system")
+                else if (construct.Key == Keyword.System)
                     ReadSystem(construct, program);
             }
 
@@ -131,7 +128,7 @@ namespace Reactor.Storage
 
         static void WriteRef(Pen pen, Values values, EntityRef declared)
         {
-            pen.Start("block").Word(declared.KindId).Word(declared.Name);
+            pen.Start(Keyword.Block).Word(declared.KindId).Word(declared.Name);
             pen.OpenList();
 
             var keys = declared.Keys;
@@ -171,7 +168,7 @@ namespace Reactor.Storage
 
             if (key.Kind == ValueKind.Flag)
             {
-                pen.Says(values.Flag(key.Kind, key.Value) ? "on" : "off");
+                pen.Says(values.Flag(key.Kind, key.Value) ? Keyword.On : Keyword.Off);
                 return;
             }
 
@@ -192,9 +189,8 @@ namespace Reactor.Storage
         {
             var declared = new EntityRef(statement.Word(1), statement.Word(0));
             var keys = statement.Items(2);
-            if (keys != null)
-                for (var i = 0; i < keys.Count; i++)
-                    ReadKey(values, keys[i], declared.Keys);
+            for (var i = 0; i < keys.Count; i++)
+                ReadKey(values, keys[i], declared.Keys);
 
             program.Restore(declared);
         }
@@ -229,11 +225,15 @@ namespace Reactor.Storage
                     into.Add(new EntityKey(ValueKind.Color, EntityValue.Of(r, g, b, a)));
                     return;
 
-                case ValueForm.Identifier:
-                    if (key.Word == "on" || key.Word == "off")
-                        into.Add(new EntityKey(ValueKind.Flag, EntityValue.Of(key.Word == "on")));
+                case ValueForm.Keyword:
+                    if (key.Keyword == Keyword.On || key.Keyword == Keyword.Off)
+                        into.Add(new EntityKey(ValueKind.Flag, EntityValue.Of(key.Keyword == Keyword.On)));
                     else
                         into.Add(new EntityKey(ValueKind.Text, values.Text(key.Word)));
+                    return;
+
+                case ValueForm.Identifier:
+                    into.Add(new EntityKey(ValueKind.Text, values.Text(key.Word)));
                     return;
             }
         }
@@ -242,7 +242,7 @@ namespace Reactor.Storage
         {
             pen.Blank();
             pen.Note(system.Annotation);
-            pen.Start("system").Whole(system.Id).Says(OnOff(system.Enabled));
+            pen.Start(Keyword.System).Whole(system.Id).Says(OnOff(system.Enabled));
             Named(pen, system.Name);
             pen.Body();
 
@@ -266,7 +266,7 @@ namespace Reactor.Storage
         static void ReadSystem(Statement statement, Automation program)
         {
             var system = program.Restore(statement.Whole(0));
-            system.Enabled = !statement.Says(1, "off");
+            system.Enabled = !statement.Says(1, Keyword.Off);
             system.Name = statement.Word(2);
             system.Annotation = statement.Annotation;
 
@@ -274,14 +274,11 @@ namespace Reactor.Storage
             for (var i = 0; i < body.Count; i++)
             {
                 var inner = body[i];
-                if (inner.Quoted)
-                    continue;
-
-                if (inner.Head == "role")
+                if (inner.Key == Keyword.Role)
                     ReadRole(inner, system);
-                else if (inner.Head == "instance")
+                else if (inner.Key == Keyword.Instance)
                     ReadInstance(inner, system);
-                else if (inner.Head == "sequence")
+                else if (inner.Key == Keyword.Sequence)
                     ReadSequence(inner, system, program);
             }
         }
@@ -292,7 +289,7 @@ namespace Reactor.Storage
                 pen.Blank();
 
             pen.Note(role.Instructions);
-            pen.Start("role").Word(role.Id).Says(role.Optional ? "optional" : "required");
+            pen.Start(Keyword.Role).Word(role.Id).Says(role.Optional ? Keyword.Optional : Keyword.Required);
             Named(pen, role.Name);
             pen.End();
         }
@@ -300,7 +297,7 @@ namespace Reactor.Storage
         static void ReadRole(Statement statement, AutomationSystem system)
         {
             var role = system.RoleFor(statement.Word(0));
-            role.Optional = statement.Says(1, "optional");
+            role.Optional = statement.Says(1, Keyword.Optional);
             role.Name = statement.Word(2);
             role.Instructions = statement.Annotation;
         }
@@ -308,7 +305,7 @@ namespace Reactor.Storage
         static void WriteInstance(Pen pen, SystemInstance instance)
         {
             pen.Blank();
-            pen.Start("instance").Whole(instance.Number).Says(OnOff(instance.Enabled));
+            pen.Start(Keyword.Instance).Whole(instance.Number).Says(OnOff(instance.Enabled));
             Named(pen, instance.Name);
 
             var parts = Sorted(instance);
@@ -321,7 +318,7 @@ namespace Reactor.Storage
             pen.Body();
             for (var i = 0; i < parts.Count; i++)
             {
-                pen.Start("fill").Word(parts[i]);
+                pen.Start(Keyword.Fill).Word(parts[i]);
                 Names(pen, instance.FilledWith(parts[i]));
                 pen.End();
             }
@@ -350,13 +347,13 @@ namespace Reactor.Storage
         static void ReadInstance(Statement statement, AutomationSystem system)
         {
             var instance = system.Restore(statement.Whole(0), statement.Word(2));
-            instance.Enabled = !statement.Says(1, "off");
+            instance.Enabled = !statement.Says(1, Keyword.Off);
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
             {
                 var inner = body[i];
-                if (inner.Quoted || inner.Head != "fill")
+                if (inner.Key != Keyword.Fill)
                     continue;
 
                 var filled = new List<string>();
@@ -369,7 +366,7 @@ namespace Reactor.Storage
         {
             pen.Blank();
             pen.Note(sequence.Annotation);
-            pen.Start("sequence").Whole(sequence.Id).Says(OnOff(sequence.Enabled));
+            pen.Start(Keyword.Sequence).Whole(sequence.Id).Says(OnOff(sequence.Enabled));
             Named(pen, sequence.Name);
             pen.Body();
 
@@ -385,7 +382,7 @@ namespace Reactor.Storage
         static void ReadSequence(Statement statement, AutomationSystem system, Automation program)
         {
             var sequence = program.Restore(system, statement.Whole(0), new CalledTrigger());
-            sequence.Enabled = !statement.Says(1, "off");
+            sequence.Enabled = !statement.Says(1, Keyword.Off);
             sequence.Name = statement.Word(2);
             sequence.Annotation = statement.Annotation;
 
@@ -393,7 +390,7 @@ namespace Reactor.Storage
             for (var i = 0; i < body.Count; i++)
             {
                 var inner = body[i];
-                if (!inner.Quoted && ReadTrigger(inner, sequence))
+                if (ReadTrigger(inner, sequence))
                     continue;
 
                 var step = ReadStep(inner);
@@ -407,7 +404,7 @@ namespace Reactor.Storage
             var when = trigger as WhenTrigger;
             if (when != null)
             {
-                pen.Start("when").Says(when.RequiresAll ? "all" : "any").Word(when.EventId);
+                pen.Start(Keyword.When).Says(when.RequiresAll ? Keyword.All : Keyword.Any).Word(when.EventId);
                 Names(pen, when.Sources);
                 pen.End();
                 return;
@@ -416,14 +413,14 @@ namespace Reactor.Storage
             var every = trigger as EveryTrigger;
             if (every != null)
             {
-                pen.Start("every").Whole(every.IntervalTicks);
+                pen.Start(Keyword.Every).Whole(every.IntervalTicks);
                 pen.End();
                 return;
             }
 
             if (trigger is CalledTrigger)
             {
-                pen.Start("called");
+                pen.Start(Keyword.Called);
                 pen.End();
             }
         }
@@ -431,22 +428,22 @@ namespace Reactor.Storage
         /// <summary>Whether the statement was a trigger, which is what tells a step from one.</summary>
         static bool ReadTrigger(Statement statement, Sequence sequence)
         {
-            if (statement.Head == "when")
+            if (statement.Key == Keyword.When)
             {
                 var when = new WhenTrigger(statement.Word(1));
-                when.RequiresAll = statement.Says(0, "all");
+                when.RequiresAll = statement.Says(0, Keyword.All);
                 Words(statement.Items(2), when.Sources);
                 sequence.Trigger = when;
                 return true;
             }
 
-            if (statement.Head == "every")
+            if (statement.Key == Keyword.Every)
             {
                 sequence.Trigger = new EveryTrigger(statement.Whole(0));
                 return true;
             }
 
-            if (statement.Head == "called")
+            if (statement.Key == Keyword.Called)
             {
                 sequence.Trigger = new CalledTrigger();
                 return true;
@@ -471,12 +468,12 @@ namespace Reactor.Storage
             pen.Note(step.Annotation);
 
             if (step.ActionId.Length == 0)
-                pen.Start("step");
+                pen.Start(Keyword.Step);
             else
                 pen.Head(step.ActionId);
 
             Names(pen, step.Targets);
-            pen.Says(step.WaitsForCompletion ? "wait" : "now");
+            pen.Says(step.WaitsForCompletion ? Keyword.Wait : Keyword.Now);
             WriteGate(pen, step.Gate);
             pen.End();
         }
@@ -492,19 +489,17 @@ namespace Reactor.Storage
         /// </remarks>
         static Step ReadStep(Statement statement)
         {
-            var waits = statement.Find("wait");
-            var now = statement.Find("now");
+            var waits = statement.Find(Keyword.Wait);
+            var now = statement.Find(Keyword.Now);
             if (waits < 0 && now < 0)
                 return null;
 
-            var action = statement.Head;
-            if (!statement.Quoted && Keywords.Taken(action))
-            {
-                if (action != "step")
-                    return null;
+            // A keyword head is the format speaking, so the only one a step may start with is the word
+            // for a step with no action yet. Anything else is data: an id, quoted or not.
+            if (statement.Key != Keyword.None && statement.Key != Keyword.Step)
+                return null;
 
-                action = "";
-            }
+            var action = statement.Head;
 
             var step = new Step(action);
             step.Annotation = statement.Annotation;
@@ -531,39 +526,39 @@ namespace Reactor.Storage
             var after = gate as AfterGate;
             if (after != null)
             {
-                pen.Says("after").Whole(after.Ticks);
+                pen.Says(Keyword.After).Whole(after.Ticks);
                 return;
             }
 
             var once = gate as OnceGate;
             if (once != null)
             {
-                WriteCondition(pen, "once", once.Condition);
+                WriteCondition(pen, Keyword.Once, once.Condition);
                 return;
             }
 
             var onlyIf = gate as OnlyIfGate;
             if (onlyIf != null)
-                WriteCondition(pen, "onlyif", onlyIf.Condition);
+                WriteCondition(pen, Keyword.OnlyIf, onlyIf.Condition);
         }
 
         static void ReadGate(Statement statement, Step step)
         {
-            var after = statement.Find("after");
+            var after = statement.Find(Keyword.After);
             if (after >= 0)
             {
                 step.Gate = new AfterGate(statement.Whole(after + 1));
                 return;
             }
 
-            var once = statement.Find("once");
+            var once = statement.Find(Keyword.Once);
             if (once >= 0)
             {
                 step.Gate = new OnceGate(ReadCondition(statement, once));
                 return;
             }
 
-            var onlyIf = statement.Find("onlyif");
+            var onlyIf = statement.Find(Keyword.OnlyIf);
             if (onlyIf >= 0)
                 step.Gate = new OnlyIfGate(ReadCondition(statement, onlyIf));
         }
@@ -571,10 +566,10 @@ namespace Reactor.Storage
         /// <summary>Where a gate starts among a step's values, or past the end when it has none.</summary>
         static int Gate(Statement statement)
         {
-            var at = statement.Values.Count;
-            at = Earlier(at, statement.Find("after"));
-            at = Earlier(at, statement.Find("once"));
-            return Earlier(at, statement.Find("onlyif"));
+            var at = statement.Count;
+            at = Earlier(at, statement.Find(Keyword.After));
+            at = Earlier(at, statement.Find(Keyword.Once));
+            return Earlier(at, statement.Find(Keyword.OnlyIf));
         }
 
         static int Earlier(int at, int found)
@@ -582,7 +577,7 @@ namespace Reactor.Storage
             return found >= 0 && found < at ? found : at;
         }
 
-        static void WriteCondition(Pen pen, string keyword, Condition condition)
+        static void WriteCondition(Pen pen, Keyword keyword, Condition condition)
         {
             if (condition == null)
                 return;
@@ -614,12 +609,9 @@ namespace Reactor.Storage
             pen.CloseList();
         }
 
-        static void Words(List<Value> values, IList<string> into)
+        static void Words(ValueRange values, IList<string> into)
         {
             into.Clear();
-            if (values == null)
-                return;
-
             for (var i = 0; i < values.Count; i++)
             {
                 var value = values[i];
@@ -628,9 +620,9 @@ namespace Reactor.Storage
             }
         }
 
-        static string OnOff(bool on)
+        static Keyword OnOff(bool on)
         {
-            return on ? "on" : "off";
+            return on ? Keyword.On : Keyword.Off;
         }
     }
 }

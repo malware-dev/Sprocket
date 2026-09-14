@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace Reactor.Storage
 {
@@ -7,18 +8,29 @@ namespace Reactor.Storage
     /// </summary>
     /// <remarks>
     /// <b>Trouble is recorded, not thrown.</b> The script is the only copy of somebody's program, so
-    /// losing the line that is wrong and keeping the rest is worth far more than a clean failure -
-    /// and whether the program is then safe to write back over is the caller's decision, which is why
+    /// losing the line that is wrong and keeping the rest is worth far more than a clean failure - and
+    /// whether the program is then safe to write back over is the caller's decision, which is why
     /// <see cref="Trouble" /> is an answer rather than an exception.
     /// <para>
-    /// Recovery is to the end of the line. Braces are still counted through it, so one bad step does
-    /// not tip every following statement out of its system.
+    /// Recovery is to the end of the line. Braces are still counted through it, so one bad step does not
+    /// tip every following statement out of its system.
     /// </para>
     /// </remarks>
     sealed class Parser
     {
         readonly Lexer _lexer;
+        readonly Reading _reading = new Reading();
         Token _token;
+
+        /// <summary>
+        /// How many things have gone wrong, where <see cref="Trouble" /> only keeps the first.
+        /// </summary>
+        /// <remarks>
+        /// A count rather than a check on whether trouble is empty, because a line is dropped when it goes
+        /// wrong itself - and once the first line of a file has gone wrong, trouble is never empty again, so
+        /// every later bad line would have been kept half-read.
+        /// </remarks>
+        int _failures;
 
         public Parser(string text)
         {
@@ -40,13 +52,22 @@ namespace Reactor.Storage
         {
             _token = _lexer.Next();
             if (_token.Kind == TokenKind.Bad)
-                Fail(_token.Word);
+                Fail(_token.Text.ToString());
         }
 
+        /// <summary>
+        /// Counts something that went wrong, and says where the first one was.
+        /// </summary>
+        /// <remarks>
+        /// The line is worked out here, by counting from the start, rather than kept up to date as the text
+        /// is read. Only the first trouble is ever reported, so a program that reads cleanly - which is nearly
+        /// all of them - never pays for knowing which line anything was on.
+        /// </remarks>
         void Fail(string what)
         {
+            _failures++;
             if (Trouble.Length == 0)
-                Trouble = "line " + _token.Line + ": " + what;
+                Trouble = "line " + new TextPtr(_lexer.Script, _token.At).FindLineNo() + ": " + what;
         }
 
         /// <summary>Past the end of this line, so reading can pick up at the next construct.</summary>
@@ -114,7 +135,8 @@ namespace Reactor.Storage
 
                 if (_token.Kind == TokenKind.Annotation)
                 {
-                    note = note.Length == 0 ? _token.Word : note + "\n" + _token.Word;
+                    var line = _token.Text.ToString();
+                    note = note.Length == 0 ? line : note + "\n" + line;
                     Step();
                     EndOfLine();
                     continue;
@@ -138,8 +160,8 @@ namespace Reactor.Storage
         /// Annotation text with nothing to belong to.
         /// </summary>
         /// <remarks>
-        /// There is no state where somebody's words exist and nobody knows what they are about, so
-        /// this is trouble rather than something to drop quietly.
+        /// There is no state where somebody's words exist and nobody knows what they are about, so this is
+        /// trouble rather than something to drop quietly.
         /// </remarks>
         void Orphan(string note)
         {
@@ -149,35 +171,36 @@ namespace Reactor.Storage
 
         Statement One(string note)
         {
-            if (_token.Kind != TokenKind.Identifier && _token.Kind != TokenKind.Text)
+            var kind = _token.Kind;
+            if (kind != TokenKind.Identifier && kind != TokenKind.Keyword && kind != TokenKind.Text)
             {
                 Fail("a statement starts with a word");
                 Recover();
                 return null;
             }
 
-            var head = _token.Word;
-            var quoted = _token.Kind == TokenKind.Text;
-            var values = new List<Value>();
-            var wasWrong = Trouble.Length > 0;
+            var key = _token.Keyword;
+            var head = kind == TokenKind.Keyword ? "" : _token.Text.ToString();
+            var failures = _failures;
+            var values = _reading.Values;
+            var from = values.Count;
 
             Step();
             while (Valuish())
                 values.Add(Next());
 
-            // A line that went wrong is dropped whole rather than half-read, because half a statement
-            // is a step with no gate or a trigger with no sources, which reads as a change somebody made.
-            if (!wasWrong && Trouble.Length > 0)
+            // A line that went wrong is dropped whole rather than half-read, because half a statement is a
+            // step with no gate or a trigger with no sources, which reads as a change somebody made.
+            if (_failures > failures)
             {
                 Recover();
                 return null;
             }
 
             var body = _token.Kind == TokenKind.BlockOpen ? new List<Statement>() : null;
-            var statement = new Statement(head, quoted, body);
+            var statement = new Statement(_reading, key, head, from, values.Count - from, body);
+
             statement.Annotation = Trim(note);
-            for (var i = 0; i < values.Count; i++)
-                statement.Add(values[i]);
 
             if (body == null)
             {
@@ -196,6 +219,7 @@ namespace Reactor.Storage
             switch (_token.Kind)
             {
                 case TokenKind.Identifier:
+                case TokenKind.Keyword:
                 case TokenKind.Text:
                 case TokenKind.Integer:
                 case TokenKind.Real:
@@ -215,11 +239,15 @@ namespace Reactor.Storage
             {
                 case TokenKind.Identifier:
                     Step();
-                    return new Value(ValueForm.Identifier, token.Word);
+                    return new Value(ValueForm.Identifier, token.Text.ToString());
+
+                case TokenKind.Keyword:
+                    Step();
+                    return new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
 
                 case TokenKind.Text:
                     Step();
-                    return new Value(ValueForm.Text, token.Word);
+                    return new Value(ValueForm.Text, token.Text.ToString());
 
                 case TokenKind.Integer:
                     Step();
@@ -241,13 +269,28 @@ namespace Reactor.Storage
             }
         }
 
+        /// <summary>
+        /// A list, its items written straight into the reading's shared run.
+        /// </summary>
+        /// <remarks>
+        /// <b>A list may not hold a list.</b> Nothing in the model has a use for one and nothing writes one,
+        /// and refusing it is what keeps a list's items unbroken in <see cref="Reading.Items" />: a list
+        /// inside a list would have its items land in the middle of its parent's.
+        /// </remarks>
         Value List()
         {
-            var items = new List<Value>();
+            var items = _reading.Items;
+            var from = items.Count;
             Step();
 
             while (_token.Kind != TokenKind.ListClose)
             {
+                if (_token.Kind == TokenKind.ListOpen)
+                {
+                    Fail("a list cannot hold a list");
+                    return Value.None;
+                }
+
                 if (!Valuish())
                 {
                     Fail("a list holds values and ends with a ']'");
@@ -268,15 +311,14 @@ namespace Reactor.Storage
             }
 
             Step();
-            return new Value(ValueForm.List, null, 0, 0, items);
+            return Value.Listed(from, items.Count - from);
         }
 
         Value Vector()
         {
-            var items = new List<Value>();
             Step();
 
-            while (items.Count < 3)
+            for (var i = 0; i < 3; i++)
             {
                 if (_token.Kind != TokenKind.Integer && _token.Kind != TokenKind.Real)
                 {
@@ -284,7 +326,7 @@ namespace Reactor.Storage
                     return Value.None;
                 }
 
-                items.Add(Next());
+                Step();
             }
 
             if (_token.Kind != TokenKind.VectorClose)
@@ -294,16 +336,16 @@ namespace Reactor.Storage
             }
 
             Step();
-            return new Value(ValueForm.Vector, null, 0, 0, items);
+            return new Value(ValueForm.Vector);
         }
 
         /// <summary>
         /// Annotation text with its empty first and last lines taken off, so the form round-trips.
         /// </summary>
         /// <remarks>
-        /// A bare hash is an empty paragraph line, which is how spacing works inside a note without a
-        /// blank line breaking the attachment. Leading and trailing ones carry nothing, and keeping
-        /// them would mean a note growing a line every time it was written out and read back.
+        /// A bare hash is an empty paragraph line, which is how spacing works inside a note without a blank
+        /// line breaking the attachment. Leading and trailing ones carry nothing, and keeping them would mean
+        /// a note growing a line every time it was written out and read back.
         /// </remarks>
         static string Trim(string note)
         {
@@ -316,7 +358,7 @@ namespace Reactor.Storage
             while (to > from && note[to - 1] == '\n')
                 to--;
 
-            return note.Substring(from, to - from);
+            return from == 0 && to == note.Length ? note : note.Substring(from, to - from);
         }
     }
 }

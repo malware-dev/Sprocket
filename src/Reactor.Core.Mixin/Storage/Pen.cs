@@ -81,10 +81,10 @@ namespace Reactor.Storage
         }
 
         /// <summary>Starts a statement with one of the format's own words.</summary>
-        public Pen Start(string keyword)
+        public Pen Start(Keyword keyword)
         {
             Pad();
-            _text.Append(keyword);
+            _text.Append(Keywords.Name(keyword));
             _fresh = false;
             return this;
         }
@@ -120,10 +120,10 @@ namespace Reactor.Storage
         /// whole distinction the format rests on - bare is the language speaking, quoted is data - so
         /// it is two methods rather than one that has to guess which it was handed.
         /// </remarks>
-        public Pen Says(string keyword)
+        public Pen Says(Keyword keyword)
         {
             Space();
-            _text.Append(keyword);
+            _text.Append(Keywords.Name(keyword));
             return this;
         }
 
