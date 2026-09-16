@@ -7,13 +7,13 @@
         <RootNamespace>Reactor.Sim</RootNamespace>
         <AssemblyName>Reactor.Host.SpaceEngineers.Sim</AssemblyName>
 
-        <!-- The mod's sources are written for the game's compiler, which is C# 6 and knows neither of
-             these. They are nonetheless left on here, because the simulated ship shares its sources with
-             the Avalonia host and does expect them, and C# 6 code is perfectly happy compiled by a modern
-             compiler that has them. "annotations" rather than "enable": the syntax is understood, and no
-             warnings are raised against code written years before it existed. -->
+        <!-- The mod's sources are compiled here as well as into the mod, so they are compiled the way
+             the mod compiles them: the game's compiler is C# 6 and has neither of these, and a source
+             file that leans on an implicit using here would fail there. "annotations" rather than
+             "enable": the syntax is understood, and no warnings are raised against code written years
+             before it existed. -->
         <Nullable>annotations</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <ImplicitUsings>disable</ImplicitUsings>
 
         <!-- For copying the decoded font page about, which is a megapixel of bytes and is done once per
              colour. Confined to the two loops in GlyphAtlas that actually need it. -->
@@ -33,6 +33,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- Impersonates the game's interfaces at runtime, so the harness answers the dozen members
+             the mod reads instead of implementing the several hundred it does not. Harness only. -->
+        <PackageReference Include="Castle.Core" Version="5.1.1" />
+
         <PackageReference Include="Avalonia" Version="12.0.3" />
         <PackageReference Include="Avalonia.Desktop" Version="12.0.3" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.3" />
@@ -49,6 +53,25 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Reactor.Core\Reactor.Core.csproj" />
+    </ItemGroup>
+
+    <!--
+        The mod's own code, compiled here as well as into the mod.
+
+        Not a port and not a stand-in: the harness drives the same GridWorld and ReactorUnit the game
+        drives, over blocks it makes up. That is what puts the toolbar and storage layer - the fiddliest
+        code in the repo - under the reference frames.
+
+        All of it, including the screen host: what the game declares in Sandbox.Game - the screen host's
+        base, mod storage, the toolbar conveniences - the harness declares itself, because that assembly
+        also holds the screen-space types a recorded frame depends on. See Fakes, and
+        build/Reactor.GameReferences.props.
+    -->
+    <ItemGroup>
+        <Compile Include="..\Reactor.Host.SpaceEngineers\**\*.cs"
+                 Exclude="..\Reactor.Host.SpaceEngineers\obj\**\*.cs;..\Reactor.Host.SpaceEngineers\bin\**\*.cs">
+            <Link>Mod\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        </Compile>
     </ItemGroup>
 
     <!-- The same files the mod compiles. Not a copy, not a port: if it draws here it draws there. -->

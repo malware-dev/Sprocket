@@ -25,7 +25,7 @@ public class WatchingTests
         Sequence(editor);
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("turn on");
+        editor.PressChoice("switch on");
         editor.PressPrimary();
         screen.Run(5);
 
@@ -100,7 +100,7 @@ public class WatchingTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("turn on");
+        editor.PressChoice("switch on");
         editor.PressPrimary();
         screen.Run(5);
 

@@ -13,14 +13,14 @@ on screen     When something happens
 006  Sprite     Reactor_Fill          {X:718 Y:142 W:1 H:800}  #5B737BFF
 007  SetClip    {X:275 Y:347 W:428 H:579}
 008  Text       at {X:378.8 Y:361.462} scale 0.64  #DCF5FDFF  "Airlock Button"
-009  Text       at {X:378.8 Y:386.942} scale 0.5  #85A1A9FF  "Button   ready"
+009  Text       at {X:378.8 Y:386.942} scale 0.5  #85A1A9FF  "Button Panel   not wired"
 010  Sprite     Reactor_Fill          {X:288 Y:375 W:17 H:1}  #3ACC00FF
 011  Sprite     Reactor_Fill          {X:288 Y:391 W:17 H:1}  #3ACC00FF
 012  Sprite     Reactor_Fill          {X:288 Y:375 W:1 H:17}  #3ACC00FF
 013  Sprite     Reactor_Fill          {X:304 Y:375 W:1 H:17}  #3ACC00FF
 014  Text       at {X:294.17596 Y:377.3359} scale 0.331  #3ACC00FF  "c"
 015  Sprite     Reactor_Fill          {X:315 Y:356 W:54 H:54}  #374851FF
-016  Sprite     Reactor_Block_button  {X:315 Y:356 W:54 H:54}  #FFFFFFFF
+016  Sprite     MyObjectBuilder_ButtonPanel/ButtonPanelLarge{X:315 Y:356 W:54 H:54}  #FFFFFFFF
 017  Text       at {X:378.8 Y:437.66202} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
 018  Text       at {X:378.8 Y:463.142} scale 0.5  #85A1A9FF  "Door   shut"
 019  Sprite     Reactor_Fill          {X:288 Y:451 W:17 H:1}  #85A1A9FF
@@ -28,15 +28,15 @@ on screen     When something happens
 021  Sprite     Reactor_Fill          {X:288 Y:451 W:1 H:17}  #85A1A9FF
 022  Sprite     Reactor_Fill          {X:304 Y:451 W:1 H:17}  #85A1A9FF
 023  Sprite     Reactor_Fill          {X:315 Y:433 W:54 H:54}  #374851FF
-024  Sprite     Reactor_Block_door    {X:315 Y:433 W:54 H:54}  #FFFFFFFF
+024  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:433 W:54 H:54}  #FFFFFFFF
 025  Text       at {X:378.8 Y:513.862} scale 0.64  #DCF5FDFF  "Airlock Light"
-026  Text       at {X:378.8 Y:539.342} scale 0.5  #85A1A9FF  "Light   off"
+026  Text       at {X:378.8 Y:539.342} scale 0.5  #85A1A9FF  "Interior Light   on"
 027  Sprite     Reactor_Fill          {X:288 Y:527 W:17 H:1}  #85A1A9FF
 028  Sprite     Reactor_Fill          {X:288 Y:543 W:17 H:1}  #85A1A9FF
 029  Sprite     Reactor_Fill          {X:288 Y:527 W:1 H:17}  #85A1A9FF
 030  Sprite     Reactor_Fill          {X:304 Y:527 W:1 H:17}  #85A1A9FF
 031  Sprite     Reactor_Fill          {X:315 Y:509 W:54 H:54}  #374851FF
-032  Sprite     Reactor_Block_light   {X:315 Y:509 W:54 H:54}  #FFFFFFFF
+032  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:315 Y:509 W:54 H:54}  #FFFFFFFF
 033  Text       at {X:378.8 Y:590.062} scale 0.64  #DCF5FDFF  "Airlock Outer Door"
 034  Text       at {X:378.8 Y:615.542} scale 0.5  #85A1A9FF  "Door   shut"
 035  Sprite     Reactor_Fill          {X:288 Y:604 W:17 H:1}  #85A1A9FF
@@ -44,98 +44,114 @@ on screen     When something happens
 037  Sprite     Reactor_Fill          {X:288 Y:604 W:1 H:17}  #85A1A9FF
 038  Sprite     Reactor_Fill          {X:304 Y:604 W:1 H:17}  #85A1A9FF
 039  Sprite     Reactor_Fill          {X:315 Y:585 W:54 H:54}  #374851FF
-040  Sprite     Reactor_Block_door    {X:315 Y:585 W:54 H:54}  #FFFFFFFF
+040  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:585 W:54 H:54}  #FFFFFFFF
 041  Text       at {X:378.8 Y:666.262} scale 0.64  #DCF5FDFF  "Airlock Vent"
-042  Text       at {X:378.8 Y:691.742} scale 0.5  #85A1A9FF  "Air Vent   has air"
+042  Text       at {X:378.8 Y:691.742} scale 0.5  #85A1A9FF  "Air Vent   pressurized"
 043  Sprite     Reactor_Fill          {X:288 Y:680 W:17 H:1}  #85A1A9FF
 044  Sprite     Reactor_Fill          {X:288 Y:696 W:17 H:1}  #85A1A9FF
 045  Sprite     Reactor_Fill          {X:288 Y:680 W:1 H:17}  #85A1A9FF
 046  Sprite     Reactor_Fill          {X:304 Y:680 W:1 H:17}  #85A1A9FF
 047  Sprite     Reactor_Fill          {X:315 Y:661 W:54 H:54}  #374851FF
-048  Sprite     Reactor_Block_vent    {X:315 Y:661 W:54 H:54}  #FFFFFFFF
+048  Sprite     MyObjectBuilder_AirVent/SmallAirVent{X:315 Y:661 W:54 H:54}  #FFFFFFFF
 049  Text       at {X:378.8 Y:742.46204} scale 0.64  #DCF5FDFF  "Approach Sensor"
-050  Text       at {X:378.8 Y:767.942} scale 0.5  #85A1A9FF  "Sensor   clear"
+050  Text       at {X:378.8 Y:767.942} scale 0.5  #85A1A9FF  "Sensor   on"
 051  Sprite     Reactor_Fill          {X:288 Y:756 W:17 H:1}  #85A1A9FF
 052  Sprite     Reactor_Fill          {X:288 Y:772 W:17 H:1}  #85A1A9FF
 053  Sprite     Reactor_Fill          {X:288 Y:756 W:1 H:17}  #85A1A9FF
 054  Sprite     Reactor_Fill          {X:304 Y:756 W:1 H:17}  #85A1A9FF
 055  Sprite     Reactor_Fill          {X:315 Y:737 W:54 H:54}  #374851FF
-056  Sprite     Reactor_Block_sensor  {X:315 Y:737 W:54 H:54}  #FFFFFFFF
-057  Text       at {X:378.8 Y:818.66205} scale 0.64  #DCF5FDFF  "Cockpit Light"
-058  Text       at {X:378.8 Y:844.142} scale 0.5  #85A1A9FF  "Light   off"
+056  Sprite     MyObjectBuilder_SensorBlock/LargeBlockSensor{X:315 Y:737 W:54 H:54}  #FFFFFFFF
+057  Text       at {X:378.8 Y:818.66205} scale 0.64  #DCF5FDFF  "Automation"
+058  Text       at {X:378.8 Y:844.142} scale 0.5  #85A1A9FF  "Programmable Block   on"
 059  Sprite     Reactor_Fill          {X:288 Y:832 W:17 H:1}  #85A1A9FF
 060  Sprite     Reactor_Fill          {X:288 Y:848 W:17 H:1}  #85A1A9FF
 061  Sprite     Reactor_Fill          {X:288 Y:832 W:1 H:17}  #85A1A9FF
 062  Sprite     Reactor_Fill          {X:304 Y:832 W:1 H:17}  #85A1A9FF
 063  Sprite     Reactor_Fill          {X:315 Y:814 W:54 H:54}  #374851FF
-064  Sprite     Reactor_Block_light   {X:315 Y:814 W:54 H:54}  #FFFFFFFF
-065  Text       at {X:378.8 Y:894.86206} scale 0.64  #DCF5FDFF  "Hangar Door"
-066  Text       at {X:378.8 Y:920.34204} scale 0.5  #85A1A9FF  "Door   shut"
+064  Sprite     MyObjectBuilder_MyProgrammableBlock/LargeProgrammableBlock{X:315 Y:814 W:54 H:54}  #FFFFFFFF
+065  Text       at {X:378.8 Y:894.86206} scale 0.64  #DCF5FDFF  "Cockpit Light"
+066  Text       at {X:378.8 Y:920.34204} scale 0.5  #85A1A9FF  "Interior Light   on"
 067  Sprite     Reactor_Fill          {X:288 Y:908 W:17 H:1}  #85A1A9FF
 068  Sprite     Reactor_Fill          {X:288 Y:924 W:17 H:1}  #85A1A9FF
 069  Sprite     Reactor_Fill          {X:288 Y:908 W:1 H:17}  #85A1A9FF
 070  Sprite     Reactor_Fill          {X:304 Y:908 W:1 H:17}  #85A1A9FF
 071  Sprite     Reactor_Fill          {X:315 Y:890 W:54 H:54}  #374851FF
-072  Sprite     Reactor_Block_door    {X:315 Y:890 W:54 H:54}  #FFFFFFFF
-073  Text       at {X:378.8 Y:971.0621} scale 0.64  #DCF5FDFF  "Landing Lights"
-074  Text       at {X:378.8 Y:996.54205} scale 0.5  #85A1A9FF  "Light   off"
+072  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:315 Y:890 W:54 H:54}  #FFFFFFFF
+073  Text       at {X:378.8 Y:971.0621} scale 0.64  #DCF5FDFF  "Hangar Door"
+074  Text       at {X:378.8 Y:996.54205} scale 0.5  #85A1A9FF  "Hangar Door   shut"
 075  Sprite     Reactor_Fill          {X:288 Y:985 W:17 H:1}  #85A1A9FF
 076  Sprite     Reactor_Fill          {X:288 Y:1001 W:17 H:1}  #85A1A9FF
 077  Sprite     Reactor_Fill          {X:288 Y:985 W:1 H:17}  #85A1A9FF
 078  Sprite     Reactor_Fill          {X:304 Y:985 W:1 H:17}  #85A1A9FF
 079  Sprite     Reactor_Fill          {X:315 Y:966 W:54 H:54}  #374851FF
-080  Sprite     Reactor_Block_light   {X:315 Y:966 W:54 H:54}  #FFFFFFFF
-081  Text       at {X:378.8 Y:1047.2621} scale 0.64  #DCF5FDFF  "Warning Beacon"
-082  Text       at {X:378.8 Y:1072.7422} scale 0.5  #85A1A9FF  "Light   off"
+080  Sprite     MyObjectBuilder_AirtightHangarDoor/AirtightHangarDoor{X:315 Y:966 W:54 H:54}  #FFFFFFFF
+081  Text       at {X:378.8 Y:1047.2621} scale 0.64  #DCF5FDFF  "Hydrogen Tank"
+082  Text       at {X:378.8 Y:1072.7422} scale 0.5  #85A1A9FF  "Hydrogen Tank   on"
 083  Sprite     Reactor_Fill          {X:288 Y:1061 W:17 H:1}  #85A1A9FF
 084  Sprite     Reactor_Fill          {X:288 Y:1077 W:17 H:1}  #85A1A9FF
 085  Sprite     Reactor_Fill          {X:288 Y:1061 W:1 H:17}  #85A1A9FF
 086  Sprite     Reactor_Fill          {X:304 Y:1061 W:1 H:17}  #85A1A9FF
 087  Sprite     Reactor_Fill          {X:315 Y:1042 W:54 H:54}  #374851FF
-088  Sprite     Reactor_Block_light   {X:315 Y:1042 W:54 H:54}  #FFFFFFFF
-089  Sprite     Reactor_Fill          {X:691 Y:347 W:12 H:441}  #5F7278FF
-090  SetClip    {X:259 Y:142 W:1402 H:812}
-091  Text       at {X:275 Y:158.102} scale 0.64  #DCF5FDFF  "BLOCKS"
-092  Text       at {X:275 Y:187.78201} scale 0.5  #85A1A9FF  "1 picked"
-093  Sprite     Reactor_Fill          {X:275 Y:212 W:428 H:37}  #141B20FF
-094  Sprite     Reactor_Fill          {X:275 Y:212 W:428 H:1}  #5B737BFF
-095  Sprite     Reactor_Fill          {X:275 Y:248 W:428 H:1}  #5B737BFF
-096  Sprite     Reactor_Fill          {X:275 Y:212 W:1 H:37}  #5B737BFF
-097  Sprite     Reactor_Fill          {X:702 Y:212 W:1 H:37}  #5B737BFF
-098  Text       at {X:287.8 Y:220.08202} scale 0.57  #85A1A9FF  "Search"
-099  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Anything"
-100  Text       at {X:369.97064 Y:259.772} scale 0.57  #A2C3CDFF  "v"
-101  Text       at {X:275 Y:291.66202} scale 0.5  #85A1A9FF  "10 blocks"
-102  Text       at {X:292.02625 Y:320.962} scale 0.57  #3ACC00FF  "0"
-103  Text       at {X:314.8 Y:320.962} scale 0.57  #DCF5FDFF  "any one"
-104  Text       at {X:415.8675 Y:320.962} scale 0.57  #85A1A9FF  "o"
-105  Text       at {X:439.01288 Y:320.962} scale 0.57  #A2C3CDFF  "all of them"
-106  Sprite     Reactor_Fill          {X:729 Y:142 W:460 H:800}  #29363EFF
-107  Sprite     Reactor_Fill          {X:729 Y:142 W:460 H:1}  #5B737BFF
-108  Sprite     Reactor_Fill          {X:729 Y:941 W:460 H:1}  #5B737BFF
-109  Sprite     Reactor_Fill          {X:729 Y:142 W:1 H:800}  #5B737BFF
-110  Sprite     Reactor_Fill          {X:1188 Y:142 W:1 H:800}  #5B737BFF
-111  SetClip    {X:745 Y:255 W:428 H:671}
-112  Sprite     Reactor_Fill          {X:745 Y:255 W:416 H:43}  #3C4C52FF
-113  Text       at {X:784.8 Y:264.572} scale 0.64  #DCF5FDFF  "is pressed"
-114  Text       at {X:762.02625 Y:265.86697} scale 0.57  #3ACC00FF  "0"
-115  SetClip    {X:259 Y:142 W:1402 H:812}
-116  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT HAPPENS"
-117  Sprite     Reactor_Fill          {X:745 Y:212 W:428 H:37}  #141B20FF
-118  Sprite     Reactor_Fill          {X:745 Y:212 W:428 H:1}  #5B737BFF
-119  Sprite     Reactor_Fill          {X:745 Y:248 W:428 H:1}  #5B737BFF
-120  Sprite     Reactor_Fill          {X:745 Y:212 W:1 H:37}  #5B737BFF
-121  Sprite     Reactor_Fill          {X:1172 Y:212 W:1 H:37}  #5B737BFF
-122  Text       at {X:757.8 Y:220.08202} scale 0.57  #85A1A9FF  "Search"
-123  ClearClip  
-124  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:77}  #1B242AFF
-125  SetClip    {X:276 Y:55 W:290 H:33}
-126  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "When something happens"
-127  ClearClip  
-128  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-129  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
-130  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
-131  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-132  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
-133  Sprite     Reactor_Fill          {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
-134  Text       at {X:1596.7708 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
+088  Sprite     MyObjectBuilder_OxygenTank/LargeHydrogenTank{X:315 Y:1042 W:54 H:54}  #FFFFFFFF
+089  Text       at {X:378.8 Y:1123.462} scale 0.64  #DCF5FDFF  "Landing Lights"
+090  Text       at {X:378.8 Y:1148.9421} scale 0.5  #85A1A9FF  "Interior Light   on"
+091  Sprite     Reactor_Fill          {X:288 Y:1137 W:17 H:1}  #85A1A9FF
+092  Sprite     Reactor_Fill          {X:288 Y:1153 W:17 H:1}  #85A1A9FF
+093  Sprite     Reactor_Fill          {X:288 Y:1137 W:1 H:17}  #85A1A9FF
+094  Sprite     Reactor_Fill          {X:304 Y:1137 W:1 H:17}  #85A1A9FF
+095  Sprite     Reactor_Fill          {X:315 Y:1118 W:54 H:54}  #374851FF
+096  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:315 Y:1118 W:54 H:54}  #FFFFFFFF
+097  Text       at {X:378.8 Y:1199.662} scale 0.64  #DCF5FDFF  "Warning Beacon"
+098  Text       at {X:378.8 Y:1225.1421} scale 0.5  #85A1A9FF  "Beacon   on"
+099  Sprite     Reactor_Fill          {X:288 Y:1213 W:17 H:1}  #85A1A9FF
+100  Sprite     Reactor_Fill          {X:288 Y:1229 W:17 H:1}  #85A1A9FF
+101  Sprite     Reactor_Fill          {X:288 Y:1213 W:1 H:17}  #85A1A9FF
+102  Sprite     Reactor_Fill          {X:304 Y:1213 W:1 H:17}  #85A1A9FF
+103  Sprite     Reactor_Fill          {X:315 Y:1195 W:54 H:54}  #374851FF
+104  Sprite     MyObjectBuilder_Beacon/LargeBlockBeacon{X:315 Y:1195 W:54 H:54}  #FFFFFFFF
+105  Sprite     Reactor_Fill          {X:691 Y:347 W:12 H:368}  #5F7278FF
+106  SetClip    {X:259 Y:142 W:1402 H:812}
+107  Text       at {X:275 Y:158.102} scale 0.64  #DCF5FDFF  "BLOCKS"
+108  Text       at {X:275 Y:187.78201} scale 0.5  #85A1A9FF  "1 picked"
+109  Sprite     Reactor_Fill          {X:275 Y:212 W:428 H:37}  #141B20FF
+110  Sprite     Reactor_Fill          {X:275 Y:212 W:428 H:1}  #5B737BFF
+111  Sprite     Reactor_Fill          {X:275 Y:248 W:428 H:1}  #5B737BFF
+112  Sprite     Reactor_Fill          {X:275 Y:212 W:1 H:37}  #5B737BFF
+113  Sprite     Reactor_Fill          {X:702 Y:212 W:1 H:37}  #5B737BFF
+114  Text       at {X:287.8 Y:220.08202} scale 0.57  #85A1A9FF  "Search"
+115  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Anything"
+116  Text       at {X:369.97064 Y:259.772} scale 0.57  #A2C3CDFF  "v"
+117  Text       at {X:275 Y:291.66202} scale 0.5  #85A1A9FF  "12 blocks"
+118  Text       at {X:292.02625 Y:320.962} scale 0.57  #3ACC00FF  "0"
+119  Text       at {X:314.8 Y:320.962} scale 0.57  #DCF5FDFF  "any one"
+120  Text       at {X:415.8675 Y:320.962} scale 0.57  #85A1A9FF  "o"
+121  Text       at {X:439.01288 Y:320.962} scale 0.57  #A2C3CDFF  "all of them"
+122  Sprite     Reactor_Fill          {X:729 Y:142 W:460 H:800}  #29363EFF
+123  Sprite     Reactor_Fill          {X:729 Y:142 W:460 H:1}  #5B737BFF
+124  Sprite     Reactor_Fill          {X:729 Y:941 W:460 H:1}  #5B737BFF
+125  Sprite     Reactor_Fill          {X:729 Y:142 W:1 H:800}  #5B737BFF
+126  Sprite     Reactor_Fill          {X:1188 Y:142 W:1 H:800}  #5B737BFF
+127  SetClip    {X:745 Y:255 W:428 H:671}
+128  Sprite     Reactor_Fill          {X:745 Y:255 W:416 H:43}  #3C4C52FF
+129  Text       at {X:784.8 Y:264.572} scale 0.64  #DCF5FDFF  "is pressed"
+130  Text       at {X:762.02625 Y:265.86697} scale 0.57  #3ACC00FF  "0"
+131  SetClip    {X:259 Y:142 W:1402 H:812}
+132  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT HAPPENS"
+133  Sprite     Reactor_Fill          {X:745 Y:212 W:428 H:37}  #141B20FF
+134  Sprite     Reactor_Fill          {X:745 Y:212 W:428 H:1}  #5B737BFF
+135  Sprite     Reactor_Fill          {X:745 Y:248 W:428 H:1}  #5B737BFF
+136  Sprite     Reactor_Fill          {X:745 Y:212 W:1 H:37}  #5B737BFF
+137  Sprite     Reactor_Fill          {X:1172 Y:212 W:1 H:37}  #5B737BFF
+138  Text       at {X:757.8 Y:220.08202} scale 0.57  #85A1A9FF  "Search"
+139  ClearClip  
+140  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:77}  #1B242AFF
+141  SetClip    {X:276 Y:55 W:290 H:33}
+142  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "When something happens"
+143  ClearClip  
+144  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
+145  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+146  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
+147  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+148  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+149  Sprite     Reactor_Fill          {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
+150  Text       at {X:1596.7708 Y:992.6081} scale 0.64  #1B242AFF  "DONE"

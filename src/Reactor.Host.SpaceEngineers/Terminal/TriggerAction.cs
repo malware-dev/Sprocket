@@ -104,7 +104,7 @@ namespace Reactor.Host.SpaceEngineers.Terminal
             action.Name = new StringBuilder("Automation: trigger");
 
             // Never rendered for a slot Reactor labelled, and the fallback when it has not been.
-            action.Writer = delegate(IMyTerminalBlock block, StringBuilder text) { text.Append("Automation"); };
+            action.Writer = delegate(IMyTerminalBlock _, StringBuilder text) { text.Append("Automation"); };
 
             // The value fixes the parameter's type, and is what the action receives if it is ever run
             // with none. A string, because what a slot carries is a key naming a sequence of a system

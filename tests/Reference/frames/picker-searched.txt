@@ -19,7 +19,7 @@ on screen     When something happens  |  Start by picking one or more blocks
 012  Sprite     Reactor_Fill          {X:288 Y:375 W:1 H:17}  #85A1A9FF
 013  Sprite     Reactor_Fill          {X:304 Y:375 W:1 H:17}  #85A1A9FF
 014  Sprite     Reactor_Fill          {X:315 Y:356 W:54 H:54}  #374851FF
-015  Sprite     Reactor_Block_door    {X:315 Y:356 W:54 H:54}  #FFFFFFFF
+015  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:356 W:54 H:54}  #FFFFFFFF
 016  Text       at {X:378.8 Y:437.66202} scale 0.64  #DCF5FDFF  "Airlock Outer Door"
 017  Text       at {X:378.8 Y:463.142} scale 0.5  #85A1A9FF  "Door   shut"
 018  Sprite     Reactor_Fill          {X:288 Y:451 W:17 H:1}  #85A1A9FF
@@ -27,15 +27,15 @@ on screen     When something happens  |  Start by picking one or more blocks
 020  Sprite     Reactor_Fill          {X:288 Y:451 W:1 H:17}  #85A1A9FF
 021  Sprite     Reactor_Fill          {X:304 Y:451 W:1 H:17}  #85A1A9FF
 022  Sprite     Reactor_Fill          {X:315 Y:433 W:54 H:54}  #374851FF
-023  Sprite     Reactor_Block_door    {X:315 Y:433 W:54 H:54}  #FFFFFFFF
+023  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:433 W:54 H:54}  #FFFFFFFF
 024  Text       at {X:378.8 Y:513.862} scale 0.64  #DCF5FDFF  "Hangar Door"
-025  Text       at {X:378.8 Y:539.342} scale 0.5  #85A1A9FF  "Door   shut"
+025  Text       at {X:378.8 Y:539.342} scale 0.5  #85A1A9FF  "Hangar Door   shut"
 026  Sprite     Reactor_Fill          {X:288 Y:527 W:17 H:1}  #85A1A9FF
 027  Sprite     Reactor_Fill          {X:288 Y:543 W:17 H:1}  #85A1A9FF
 028  Sprite     Reactor_Fill          {X:288 Y:527 W:1 H:17}  #85A1A9FF
 029  Sprite     Reactor_Fill          {X:304 Y:527 W:1 H:17}  #85A1A9FF
 030  Sprite     Reactor_Fill          {X:315 Y:509 W:54 H:54}  #374851FF
-031  Sprite     Reactor_Block_door    {X:315 Y:509 W:54 H:54}  #FFFFFFFF
+031  Sprite     MyObjectBuilder_AirtightHangarDoor/AirtightHangarDoor{X:315 Y:509 W:54 H:54}  #FFFFFFFF
 032  SetClip    {X:259 Y:142 W:1402 H:812}
 033  Text       at {X:275 Y:158.102} scale 0.64  #DCF5FDFF  "BLOCKS"
 034  Text       at {X:275 Y:187.78201} scale 0.5  #85A1A9FF  "none picked"
@@ -48,7 +48,7 @@ on screen     When something happens  |  Start by picking one or more blocks
 041  Sprite     Reactor_Fill          {X:321 Y:220 W:2 H:21}  #DCF5FDFF
 042  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Anything"
 043  Text       at {X:369.97064 Y:259.772} scale 0.57  #A2C3CDFF  "v"
-044  Text       at {X:275 Y:291.66202} scale 0.5  #85A1A9FF  "3 of 10"
+044  Text       at {X:275 Y:291.66202} scale 0.5  #85A1A9FF  "3 of 12"
 045  Text       at {X:292.02625 Y:320.962} scale 0.57  #3ACC00FF  "0"
 046  Text       at {X:314.8 Y:320.962} scale 0.57  #DCF5FDFF  "any one"
 047  Text       at {X:415.8675 Y:320.962} scale 0.57  #85A1A9FF  "o"

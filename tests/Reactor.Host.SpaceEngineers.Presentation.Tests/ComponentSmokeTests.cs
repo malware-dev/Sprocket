@@ -34,13 +34,13 @@ public class ComponentSmokeTests
         editor.PressBlock("Approach Sensor");
         Record(seen, screen);
 
-        editor.PressChoice("detects something");
+        editor.PressChoice("is switched on");
         editor.PressPrimary();
         Record(seen, screen);
 
         editor.PressAdd("do something");
         editor.PressBlock("Landing Lights");
-        editor.PressChoice("turn on");
+        editor.PressChoice("switch on");
         editor.PressPrimary();
 
         // The front door: the systems on this construct.

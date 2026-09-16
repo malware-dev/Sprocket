@@ -1,4 +1,7 @@
 
+using System;
+using System.IO;
+using System.Collections.Generic;
 namespace Reactor.Sim.Content
 {
     /// <summary>

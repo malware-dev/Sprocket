@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -5,10 +6,11 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
-using Reactor.Sim.Machine;
 using Reactor.Sim.Simulation;
 using VRageMath;
 using Color = Avalonia.Media.Color;
+using Point = Avalonia.Point;
+using Panel = Avalonia.Controls.Panel;
 using TextBox = Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox;
 
 namespace Reactor.Sim.Shell
@@ -210,48 +212,19 @@ namespace Reactor.Sim.Shell
                 VerticalAlignment = VerticalAlignment.Center
             });
 
-            foreach (SimEntity entity in _editor.Pokeable())
+            foreach (Machine.Panel panel in _editor.Panels())
             {
-                var button = entity as SimButton;
-                if (button != null)
+                // One poke per button, because that is what a panel is: several buttons, each of
+                // which may run something different. Pressing one whose slot is empty is a press
+                // nobody hears, exactly as on a real panel.
+                for (var button = 0; button < panel.Buttons; button++)
                 {
-                    row.Children.Add(Poke("press " + button.Name, () => button.Press()));
-                    continue;
-                }
+                    var which = button;
+                    var name = panel.Buttons == 1
+                        ? "press " + panel.Name
+                        : "press " + panel.Name + " " + (which + 1);
 
-                var sensor = entity as SimSensor;
-                if (sensor != null)
-                {
-                    bool tripped = false;
-                    // Assigned, then captured, so the handler can reach the button it is on. The
-                    // lambda runs long after the assignment, so it is never null by then.
-                    Button control = null;
-                    control = Poke("trip " + sensor.Name, () =>
-                    {
-                        tripped = !tripped;
-                        sensor.SetDetecting(tripped);
-                        // ReSharper disable once AccessToModifiedClosure
-                        // ReSharper disable once PossibleNullReferenceException
-                        control.Foreground = tripped ? Brushes.LightGreen : Brushes.Gainsboro;
-                    });
-
-                    row.Children.Add(control);
-                    continue;
-                }
-
-                var tank = entity as SimTank;
-                if (tank != null)
-                {
-                    Button control = null;
-                    control = Poke("drain " + tank.Name, () =>
-                    {
-                        tank.Draining = !tank.Draining;
-                        // ReSharper disable once AccessToModifiedClosure
-                        // ReSharper disable once PossibleNullReferenceException
-                        control.Foreground = tank.Draining ? Brushes.LightGreen : Brushes.Gainsboro;
-                    });
-
-                    row.Children.Add(control);
+                    row.Children.Add(Poke(name, () => panel.Press(which)));
                 }
             }
 

@@ -1,5 +1,9 @@
+using System.Collections.Generic;
 using System.Text;
+using Reactor.Sim.Fakes;
 using Sandbox.ModAPI;
+using VRage.Game.ModAPI;
+using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
@@ -54,31 +58,14 @@ namespace Reactor.Sim.Simulation
         public void Install()
         {
             Current = this;
-            MyAPIGateway.Session = new SimSession(this);
-        }
 
-        sealed class SimSession : IMySession
-        {
-            readonly SimCamera _camera;
+            var camera = Pretend.To<IMyCamera>()
+                .Gives("ViewportSize", () => ViewportSize)
+                .Done();
 
-            public SimSession(ScreenSpaceDevice device)
-            {
-                _camera = new SimCamera(device);
-            }
-
-            public IMyCamera Camera => _camera;
-        }
-
-        sealed class SimCamera : IMyCamera
-        {
-            readonly ScreenSpaceDevice _device;
-
-            public SimCamera(ScreenSpaceDevice device)
-            {
-                _device = device;
-            }
-
-            public Vector2 ViewportSize => _device.ViewportSize;
+            MyAPIGateway.Session = Pretend.To<IMySession>()
+                .Gives("Camera", () => camera)
+                .Done();
         }
 
         public Vector2 NormalizedSizeToPixels(Vector2 size)

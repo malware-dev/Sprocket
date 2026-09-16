@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;

@@ -1,3 +1,6 @@
+using System.IO;
+using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -7,6 +10,7 @@ using Sandbox.ModAPI;
 using VRageMath;
 using AvColor = Avalonia.Media.Color;
 using Color = VRageMath.Color;
+using Matrix = Avalonia.Matrix;
 using Point = Avalonia.Point;
 using Rect = Avalonia.Rect;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;

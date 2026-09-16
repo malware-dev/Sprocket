@@ -1,3 +1,4 @@
+using System;
 using Reactor.Sim.Simulation;
 using VRageMath;
 
@@ -48,6 +49,25 @@ namespace Sandbox.ModAPI
         public static Vector2 NormalizedSizeToPixels(Vector2 size)
         {
             return ScreenSpaceDevice.Current.NormalizedSizeToPixels(size);
+        }
+
+        public static Vector2 NormalizedToPixels(Vector2 position)
+        {
+            return ScreenSpaceDevice.Current.NormalizedSizeToPixels(position);
+        }
+
+        /// <summary>
+        /// Where the mouse is, in window pixels.
+        /// </summary>
+        /// <remarks>
+        /// Always no. The harness drives the editor through its own window and its own recorded
+        /// frames, so nothing here has a game cursor - and the mod's screen reads this only to place
+        /// a pointer it is not being asked to draw.
+        /// </remarks>
+        public static bool TryGetCursorPositionPixels(out Vector2 pixels)
+        {
+            pixels = Vector2.Zero;
+            return false;
         }
     }
 }

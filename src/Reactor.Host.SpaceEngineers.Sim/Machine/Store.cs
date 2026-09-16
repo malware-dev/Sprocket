@@ -1,142 +1,108 @@
-using Reactor.Sequences;
-using Reactor.Storage;
-using Reactor.World;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Sandbox.Game.EntityComponents;
 
 namespace Reactor.Sim.Machine;
 
 /// <summary>
-/// Keeps the prototype's program on disk between runs.
+/// Mod storage that survives closing the window.
 /// </summary>
 /// <remarks>
-/// The harness half of storage. Core turns a program into text and back and never touches a
-/// file, because Space Engineers does not whitelist IO - a mod puts its data in the save. So
-/// everything here is the part that will be written differently in the game and identically
-/// in spirit: work out where this construct's program lives, read it, write it back.
-///
-/// One file per construct, named by the construct. The prototype only has one, but naming it
-/// that way now means the game host is not tempted into a single global blob.
-///
-/// Failing to load is not fatal. A prototype that refuses to start because of a bad save is
-/// worse than one that starts empty and says so - and the file is text, so a broken one can
-/// be looked at.
+/// The mod puts a construct's program in the block's mod storage and the game writes that into the
+/// save. Here the same storage writes through to a file per key, which is what makes the windowed
+/// simulator a playground somebody can come back to.
+/// <para>
+/// A key names its own file, so the program is a text file a person can read and repair - the same
+/// property the script has in the save, and the reason a broken one is worth keeping rather than
+/// refusing to start over.
+/// </para>
 /// </remarks>
-sealed class Store
+sealed class Store : MyModStorageComponent
 {
-    readonly string _path;
-    readonly string _switches;
-
-    string _lastWritten = "";
-    string _lastSwitches = "";
+    readonly string _folder;
+    readonly string _construct;
 
     Store()
     {
-        _path = "";
-        _switches = "";
+        _folder = "";
+        _construct = "";
+    }
+
+    public Store(string construct)
+    {
+        _construct = construct;
+        _folder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Reactor");
+
+        Directory.CreateDirectory(_folder);
+        Read();
     }
 
     /// <summary>
-    /// A store that remembers nothing.
+    /// Storage that remembers nothing.
     /// </summary>
     /// <remarks>
-    /// For tests. Without it every test would load whatever program happened to be sitting in
-    /// the real save and pass or fail depending on what somebody last built by hand, which is
-    /// the sort of flakiness that takes a day to track down.
+    /// For tests and for captured frames. Without it every one of them would load whatever program
+    /// happened to be sitting in the playground and pass or fail on what somebody last built by
+    /// hand, which is the sort of flakiness that takes a day to track down.
     /// </remarks>
     public static Store Nowhere()
     {
         return new Store();
     }
 
-    public Store(string construct)
+    /// <summary>Where this is being kept, for the line at the bottom of the window.</summary>
+    public string Where => _folder.Length == 0 ? "nowhere - nothing is being saved" : _folder;
+
+    protected override void Wrote(Guid key, string value)
     {
-        var folder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Reactor");
+        if (_folder.Length == 0)
+            return;
 
-        Directory.CreateDirectory(folder);
-        _path = Path.Combine(folder, construct + ".reactor");
-
-        // Beside the program, and separate from it, the way the mod keeps them in two keys of the
-        // block's storage.
-        _switches = Path.Combine(folder, construct + ".switches");
+        // The key first, then what it holds. The name is only the start of the key, which cannot be
+        // turned back into one, and a file that says what it is can be read back without guessing.
+        File.WriteAllText(Path.Combine(_folder, Name(key)), key.ToString("D") + "\n" + (value ?? ""));
     }
 
-    public string Path_ => _path;
-
-    /// <summary>What went wrong last time, or empty.</summary>
-    public string Trouble { get; private set; } = "";
-
-    public void Load(Automation program, Values values)
+    void Read()
     {
-        try
+        foreach (var file in Directory.GetFiles(_folder, _construct + ".*.reactor"))
         {
-            if (_path.Length == 0 || !File.Exists(_path))
-                return;
+            var parts = Path.GetFileName(file).Split('.');
+            if (parts.Length != 3)
+                continue;
 
-            _lastWritten = File.ReadAllText(_path);
-            Trouble = ProgramText.Load(_lastWritten, program, values);
-
-            if (!File.Exists(_switches))
-                return;
-
-            _lastSwitches = File.ReadAllText(_switches);
-            var wrong = StateText.Load(_lastSwitches, program);
-            if (Trouble.Length == 0)
-                Trouble = wrong;
-        }
-        catch (Exception error)
-        {
-            Trouble = error.Message;
-            _lastWritten = "";
+            foreach (var pair in Known(parts[1], file))
+                Put(pair.Key, pair.Value);
         }
     }
 
     /// <summary>
-    /// Writes the program out, but only when it differs from what is already there.
+    /// The key a file is named for, where its name is one this store wrote.
     /// </summary>
     /// <remarks>
-    /// Called on a timer rather than hooked to every edit, because there is no single place an
-    /// edit lands - and comparing the text is cheap next to writing a file sixty times a
-    /// second. Saving is silent by design: somebody building an airlock should never be
-    /// thinking about whether their work is safe.
+    /// A file is named by the start of its key, which is enough to tell two apart and short enough
+    /// to read. The whole key is in the file's first line, because the short form cannot be turned
+    /// back into one.
     /// </remarks>
-    public void SaveIfChanged(Automation program, Values values)
+    IEnumerable<KeyValuePair<Guid, string>> Known(string shortKey, string file)
     {
-        // A program that did not load cleanly is not written back over the file it came from. Saving
-        // runs on a timer, so one edit after a half-read load would put the damage on disk.
-        if (!program.Intact)
-            return;
+        var text = File.ReadAllText(file);
+        var end = text.IndexOf('\n');
+        if (end < 0)
+            yield break;
 
-        string text;
-        try
-        {
-            text = ProgramText.Save(program, values);
-        }
-        catch (Exception error)
-        {
-            Trouble = error.Message;
-            return;
-        }
+        Guid key;
+        if (!Guid.TryParseExact(text.Substring(0, end).Trim(), "D", out key)
+            || !Name(key).Contains(shortKey))
+            yield break;
 
-        if (_path.Length == 0)
-            return;
+        yield return new KeyValuePair<Guid, string>(key, text.Substring(end + 1));
+    }
 
-        var switches = StateText.Save(program);
-        if (text == _lastWritten && switches == _lastSwitches)
-            return;
-
-        try
-        {
-            File.WriteAllText(_path, text);
-            _lastWritten = text;
-
-            File.WriteAllText(_switches, switches);
-            _lastSwitches = switches;
-            Trouble = "";
-        }
-        catch (Exception error)
-        {
-            Trouble = error.Message;
-        }
+    string Name(Guid key)
+    {
+        return _construct + "." + key.ToString("D").Substring(0, 8) + ".reactor";
     }
 }

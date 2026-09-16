@@ -29,8 +29,8 @@ namespace Reactor.Host.SpaceEngineers.Terminal
             open.Title = MyStringId.GetOrCompute("Automation");
             open.Tooltip = MyStringId.GetOrCompute("Open the automation editor.");
             open.SupportsMultipleBlocks = false;
-            open.Visible = block => true;
-            open.Enabled = block => true;
+            open.Visible = _ => true;
+            open.Enabled = _ => true;
             open.Action = ReactorSession.Open;
 
             MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(open);

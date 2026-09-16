@@ -776,10 +776,17 @@ namespace Reactor.Host.SpaceEngineers.World
             return block is IMyButtonPanel ? Toolbars.Of(block) : null;
         }
 
-        // Temporary, for proving the claim path. Goes when it is proven.
+        /// <summary>
+        /// Says something in the game's log, where there is one.
+        /// </summary>
+        /// <remarks>
+        /// The log belongs to a running game and the harness runs this same code outside one, so
+        /// there may be nothing to write to. Everything here goes through this for that reason.
+        /// </remarks>
         static void Trace(string what)
         {
-            MyLog.Default.WriteLineAndConsole("[Reactor] " + what);
+            if (MyLog.Default != null)
+                MyLog.Default.WriteLineAndConsole("[Reactor] " + what);
         }
 
         public void Tick(int frame)
@@ -825,7 +832,7 @@ namespace Reactor.Host.SpaceEngineers.World
             string warning;
             var trouble = ProgramText.Load(text, _program, _world.Values, out warning);
             if (warning.Length > 0)
-                MyLog.Default.WriteLineAndConsole("[Reactor] " + _block.CustomName + " has a program with a warning: " + warning);
+                Trace(_block.CustomName + " has a program with a warning: " + warning);
 
             // What is switched off, read after the program, because it names what the program
             // declared. A construct that has nothing parked has nothing here at all.
@@ -834,10 +841,7 @@ namespace Reactor.Host.SpaceEngineers.World
             {
                 var wrong = StateText.Load(state, _program);
                 if (wrong.Length > 0)
-                {
-                    MyLog.Default.WriteLineAndConsole(
-                        "[Reactor] " + _block.CustomName + " has switches that would not read: " + wrong);
-                }
+                    Trace(_block.CustomName + " has switches that would not read: " + wrong);
             }
 
             if (trouble.Length == 0)
@@ -846,8 +850,7 @@ namespace Reactor.Host.SpaceEngineers.World
             // Logged and nowhere else. The program is marked not to be saved over, which is what
             // actually protects somebody's work; there is no screen for this yet, and inventing
             // wording for one in here would put core's words on a host's screen.
-            MyLog.Default.WriteLineAndConsole(
-                "[Reactor] " + _block.CustomName + " has a program that would not read: " + trouble);
+            Trace(_block.CustomName + " has a program that would not read: " + trouble);
         }
 
         /// <summary>
@@ -877,8 +880,7 @@ namespace Reactor.Host.SpaceEngineers.World
             {
                 // Logged rather than thrown. This runs on the way out of a screen and from the world
                 // save, and taking the game down over it would cost far more than the program does.
-                MyLog.Default.WriteLineAndConsole(
-                    "[Reactor] mod storage would not attach to " + _block.CustomName + "; program not saved");
+                Trace("mod storage would not attach to " + _block.CustomName + "; program not saved");
                 return;
             }
 

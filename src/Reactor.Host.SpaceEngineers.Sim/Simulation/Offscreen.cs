@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
@@ -70,10 +71,10 @@ namespace Reactor.Sim.Simulation
         public string Describe()
         {
             var text = new StringBuilder();
-            text.AppendLine("window        " + _width + " x " + _height);
-            text.AppendLine("safe gui area " + _device.SafeGuiArea);
-            text.AppendLine("UI size       " + _graphics.Size);
-            text.AppendLine("screen bounds " + _graphics.ScreenBounds);
+            text.AppendLine("window        " + Shown.Say(_width) + " x " + Shown.Say(_height));
+            text.AppendLine("safe gui area " + Shown.Say(_device.SafeGuiArea));
+            text.AppendLine("UI size       " + Shown.Say(_graphics.Size));
+            text.AppendLine("screen bounds " + Shown.Say(_graphics.ScreenBounds));
             text.AppendLine("on screen     " + _scene.OnScreen);
             text.AppendLine();
 
@@ -87,17 +88,17 @@ namespace Reactor.Sim.Simulation
                 switch (command.Kind)
                 {
                     case DrawKind.SetClip:
-                        text.Append(command.Clip);
+                        text.Append(Shown.Say(command.Clip));
                         break;
                     case DrawKind.ClearClip:
                         break;
                     case DrawKind.Sprite:
                         text.Append(command.Material.String.PadRight(22))
-                            .Append(command.Destination)
+                            .Append(Shown.Say(command.Destination))
                             .Append("  ").Append(Ink(command.Color));
                         break;
                     case DrawKind.Text:
-                        text.Append("at ").Append(command.Position)
+                        text.Append("at ").Append(Shown.Say(command.Position))
                             .Append(" scale ").Append(command.Scale.ToString("0.###"))
                             .Append("  ").Append(Ink(command.Color))
                             .Append("  \"").Append(command.Text).Append('"');

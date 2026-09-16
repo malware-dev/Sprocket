@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Reactor.Editing;
 using Ship = Reactor.Sim.Machine.Simulation;
 using VRageMath;
@@ -66,9 +67,9 @@ namespace Reactor.Sim.Simulation
         /// something the world does, and in the game a ship actually flies up to the sensor - so none of
         /// this is Reactor, and none of it goes anywhere the mod can compile.
         /// </remarks>
-        internal IEnumerable<SimEntity> Pokeable()
+        internal IEnumerable<Panel> Panels()
         {
-            return _ship.Pokeable();
+            return _ship.Panels();
         }
 
         /// <summary>Writes the program out. The one moment a timer cannot cover is closing the window.</summary>

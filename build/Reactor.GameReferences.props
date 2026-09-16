@@ -23,17 +23,20 @@
     </ItemGroup>
 
     <!--
-        Only the assemblies core uses, and not the rest the package brings.
+        Only the assemblies this code uses, and not the rest the package brings.
 
-        The simulator stands in for the game's maths and drawing types with substitutes of its own, and
-        seeing the real VRage.Math beside them makes Point ambiguous and every Vector2 and Color a
-        collision. So this reference set grows by name, one assembly at a time, as core starts using
-        something from it. A name the package adds later and nobody removed here shows up as a collision -
-        loud, which is the right way for it to fail.
+        <b>Sandbox.Graphics, Sandbox.Game and the render assemblies stay out.</b> The screen-space drawing
+        the editor renders through is declared in Sandbox.Game, and the harness declares those few types
+        itself so a frame can be recorded rather than drawn. A type in the assembly being compiled wins
+        over one from a reference, so referencing that assembly would not break the build - it would
+        quietly make the harness draw into the game's own types and record nothing.
+
+        Everything else is the real thing. This set grows by name, one assembly at a time, as the code
+        starts using something from it.
     -->
     <Target Name="ReferenceOnlyWhatCoreUses" AfterTargets="SpaceEngineers">
         <ItemGroup>
-            <Reference Remove="System.Collections.Immutable;Sandbox.Common;Sandbox.Game;Sandbox.Graphics;SpaceEngineers.Game;SpaceEngineers.ObjectBuilders;VRage;VRage.Audio;VRage.Input;VRage.Library;VRage.Math;VRage.Render;VRage.Render11;VRage.Scripting;ProtoBuf.Net.Core" />
+            <Reference Remove="System.Collections.Immutable;Sandbox.Game;Sandbox.Graphics;VRage.Audio;VRage.Render;VRage.Render11;VRage.Scripting;ProtoBuf.Net.Core" />
         </ItemGroup>
     </Target>
 </Project>
