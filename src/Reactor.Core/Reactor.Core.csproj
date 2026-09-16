@@ -3,7 +3,8 @@
     <Import Project="..\..\build\Reactor.GameReferences.props" />
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>net48</TargetFramework>
+        <LangVersion>latest</LangVersion>
         <AssemblyName>Reactor.Core</AssemblyName>
         <RootNamespace>Reactor</RootNamespace>
     </PropertyGroup>
@@ -11,10 +12,14 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Reactor.Core.Tests" />
 
-        <!-- For measuring only. The simulator times the lexer and the parser separately so a load's cost
-             can be attributed, and neither is public. Nothing in the harness may bind to an internal to
-             get work done - that is what the public surface is for. -->
+        <!-- For measuring only. The harness times the lexer and the parser separately so a load's cost
+             can be attributed, and neither is public. Nothing may bind to an internal to get work done -
+             that is what the public surface is for.
+
+             It is granted here and can only be granted here: the game's whitelist bans the attribute
+             outright, so the mod's own assembly can never open itself to anything. -->
         <InternalsVisibleTo Include="Reactor.Host.SpaceEngineers.Sim" />
+
     </ItemGroup>
 
     <!-- The Space Engineers whitelist, enforced at build time. Drift here is

@@ -2,7 +2,6 @@ using System.IO;
 using System;
 using System.Globalization;
 using System.Text;
-using Avalonia;
 using Reactor.Sim.Content;
 using Reactor.Sim.Measuring;
 using Reactor.Sim.Shell;
@@ -34,7 +33,7 @@ namespace Reactor.Sim
                 return;
             }
 
-            // Answered without Avalonia, because the question is about this machine rather than about the
+            // Answered without a window, because the question is about this machine rather than about the
             // screen: whether the game is here decides whether real letterforms and real block artwork
             // are on the table at all.
             if (args.Length > 0 && args[0] == "--profile")
@@ -49,25 +48,22 @@ namespace Reactor.Sim
                 return;
             }
 
-            // Decoding needs Avalonia only to write a PNG, which is a small reason to start it and a
+            // Decoding needs a framework only to write a PNG, which is a small reason to reach for one and a
             // smaller one than adding a second image encoder to this project.
             if (args.Length > 0 && args[0] == "--extract")
             {
-                BuildAvaloniaApp().SetupWithoutStarting();
                 Console.Write(Extract.Run(args.Length > 1 ? args[1] : null));
                 return;
             }
 
             if (args.Length > 2 && args[0] == "--suite")
             {
-                BuildAvaloniaApp().SetupWithoutStarting();
                 Console.Write(Suite.Run(args[1], args[2]));
                 return;
             }
 
             if (args.Length > 1 && args[0] == "--shot")
             {
-                BuildAvaloniaApp().SetupWithoutStarting();
 
                 // Defaulted to a size somebody actually has. The screen is a fixed number of UI units
                 // that the game stretches to the monitor, so how big a letter lands is decided by this
@@ -94,9 +90,6 @@ namespace Reactor.Sim
 
             if (args.Length > 0 && args[0] == "--dump")
             {
-                // Avalonia is still set up, because text has to be measured and only it has a font. It is
-                // simply never started, so nothing is shown and nothing waits for a person.
-                BuildAvaloniaApp().SetupWithoutStarting();
 
                 float width = 1920f;
                 float height = 1080f;
@@ -142,7 +135,7 @@ namespace Reactor.Sim
                     MainWindow.OpensQuietly = true;
             }
 
-            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+            new App().Run();
         }
 
         /// <summary>The carriage return that a dump written for comparison does without.</summary>
@@ -159,13 +152,6 @@ namespace Reactor.Sim
 
             float ignored;
             return float.TryParse(bare, NumberStyles.Float, CultureInfo.InvariantCulture, out ignored);
-        }
-
-        public static AppBuilder BuildAvaloniaApp()
-        {
-            return AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .LogToTrace();
         }
     }
 }

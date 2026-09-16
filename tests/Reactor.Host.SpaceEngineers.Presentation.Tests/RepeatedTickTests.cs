@@ -1,4 +1,3 @@
-using Avalonia.Headless.XUnit;
 using Reactor.Ui;
 using Xunit;
 
@@ -13,7 +12,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class RepeatedTickTests
 {
-    [AvaloniaFact]
+    [Fact]
     public void TickingRepeatedlyOnEveryScreenDoesNotThrow()
     {
         var screen = Screen.Fresh();
@@ -57,7 +56,7 @@ public class RepeatedTickTests
     /// whatever the pointer was over and whatever was being typed into. Sixty times a second that
     /// reads as the whole screen flickering under the mouse.
     /// </remarks>
-    [AvaloniaFact]
+    [Fact]
     public void ScreensDoNotRebuildThemselvesWhileNothingHappens()
     {
         var screen = Screen.Fresh();

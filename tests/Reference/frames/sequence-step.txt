@@ -1,37 +1,37 @@
 window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
-screen bounds {X:-240 Y:-0 W:1920 H:1080}
+screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     When Airlock Button is pressed > Sequence 1
 
 000  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:142 W:1402 H:812}
-002  Text       at {X:259 Y:148.10197} scale 0.57  #A2C3CDFF  "switched off"
-003  Text       at {X:1414.2987 Y:148.10197} scale 0.57  #A2C3CDFF  "u"
-004  Text       at {X:1474.0292 Y:148.10197} scale 0.57  #5F7278FF  "r"
-005  Text       at {X:1510.7854 Y:148.10197} scale 0.57  #A2C3CDFF  "d"
+002  Text       at {X:259 Y:148.102} scale 0.57  #A2C3CDFF  "switched off"
+003  Text       at {X:1414.297 Y:148.102} scale 0.57  #A2C3CDFF  "u"
+004  Text       at {X:1474.027 Y:148.102} scale 0.57  #5F7278FF  "r"
+005  Text       at {X:1510.783 Y:148.102} scale 0.57  #A2C3CDFF  "d"
 006  Sprite     Reactor_Fill          {X:1530 Y:142 W:119 H:1}  #85A1A9FF
 007  Sprite     Reactor_Fill          {X:1530 Y:174 W:119 H:1}  #85A1A9FF
 008  Sprite     Reactor_Fill          {X:1530 Y:142 W:1 H:33}  #85A1A9FF
 009  Sprite     Reactor_Fill          {X:1648 Y:142 W:1 H:33}  #85A1A9FF
 010  Sprite     Reactor_Fill          {X:1531 Y:143 W:117 H:31}  #060A0CFF
 011  Sprite     Reactor_Fill          {X:1590 Y:143 W:58 H:31}  #1B2C33FF
-012  Text       at {X:1547.9342 Y:148.10197} scale 0.57  #85A1A9FF  "ON"
-013  Text       at {X:1605.5613 Y:148.10197} scale 0.57  #DCF5FDFF  "OFF"
+012  Text       at {X:1547.933 Y:148.102} scale 0.57  #85A1A9FF  "ON"
+013  Text       at {X:1605.56 Y:148.102} scale 0.57  #DCF5FDFF  "OFF"
 014  Sprite     Reactor_Fill          {X:269 Y:204 W:13 H:13}  #5F7278FF
-015  Text       at {X:292 Y:198.99197} scale 0.64  #A2C3CDFF  "When"
+015  Text       at {X:292 Y:198.992} scale 0.64  #A2C3CDFF  "When"
 016  Sprite     Reactor_Fill          {X:348 Y:193 W:144 H:36}  #374851FF
 017  Sprite     Reactor_Fill          {X:348 Y:227 W:144 H:2}  #8EBCCFFF
-018  Text       at {X:364.09082 Y:198.99197} scale 0.64  #DCF5FDFF  "Airlock Button"
+018  Text       at {X:364.0933 Y:198.992} scale 0.64  #DCF5FDFF  "Airlock Button"
 019  Sprite     Reactor_Fill          {X:502 Y:193 W:110 H:36}  #374851FF
 020  Sprite     Reactor_Fill          {X:502 Y:227 W:110 H:2}  #8EBCCFFF
-021  Text       at {X:517.6233 Y:198.99197} scale 0.64  #DCF5FDFF  "is pressed"
+021  Text       at {X:517.6367 Y:198.992} scale 0.64  #DCF5FDFF  "is pressed"
 022  Sprite     Reactor_Fill          {X:342 Y:254 W:72 H:36}  #374851FF
 023  Sprite     Reactor_Fill          {X:342 Y:288 W:72 H:2}  #8EBCCFFF
-024  Text       at {X:358 Y:260.27197} scale 0.64  #DCF5FDFF  "open"
+024  Text       at {X:358 Y:260.272} scale 0.64  #DCF5FDFF  "open"
 025  Sprite     Reactor_Fill          {X:424 Y:254 W:175 H:36}  #374851FF
 026  Sprite     Reactor_Fill          {X:424 Y:288 W:175 H:2}  #8EBCCFFF
-027  Text       at {X:440.2838 Y:260.27197} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
+027  Text       at {X:440.2867 Y:260.272} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
 028  Sprite     Reactor_Fill          {X:278 Y:265 W:3 H:3}  #85A1A9FF
 029  Sprite     Reactor_Fill          {X:278 Y:271 W:3 H:3}  #85A1A9FF
 030  Sprite     Reactor_Fill          {X:278 Y:277 W:3 H:3}  #85A1A9FF
@@ -39,21 +39,21 @@ on screen     When Airlock Button is pressed > Sequence 1
 032  Sprite     Reactor_Fill          {X:284 Y:271 W:3 H:3}  #85A1A9FF
 033  Sprite     Reactor_Fill          {X:284 Y:277 W:3 H:3}  #85A1A9FF
 034  Text       at {X:298 Y:261.567} scale 0.57  #85A1A9FF  "1"
-035  Text       at {X:1629.6628 Y:261.567} scale 0.57  #85A1A9FF  "d"
-036  Text       at {X:303.8 Y:322.55194} scale 0.57  #A2C3CDFF  "+ do something"
-037  Text       at {X:452.0271 Y:322.55194} scale 0.57  #A2C3CDFF  "+ wait"
+035  Text       at {X:1629.663 Y:261.567} scale 0.57  #85A1A9FF  "d"
+036  Text       at {X:303.8 Y:322.5519} scale 0.57  #A2C3CDFF  "+ do something"
+037  Text       at {X:452.0233 Y:322.5519} scale 0.57  #A2C3CDFF  "+ wait"
 038  ClearClip  
 039  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:77}  #1B242AFF
 040  SetClip    {X:276 Y:55 W:345 H:33}
-041  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "When Airlock Button is pressed"
+041  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When Airlock Button is pressed"
 042  ClearClip  
-043  Text       at {X:626.36255 Y:60.816975} scale 0.57  #85A1A9FF  "a"
+043  Text       at {X:626.3666 Y:60.81697} scale 0.57  #85A1A9FF  "a"
 044  SetClip    {X:640 Y:55 W:138 H:33}
-045  Text       at {X:640.43005 Y:54.711975} scale 0.9  #DCF5FDFF  "Sequence 1"
-046  Text       at {X:768.0067 Y:59.521973} scale 0.64  #85A1A9FF  "p"
+045  Text       at {X:640.4333 Y:54.71198} scale 0.9  #DCF5FDFF  "Sequence 1"
+046  Text       at {X:768.0133 Y:59.52197} scale 0.64  #85A1A9FF  "p"
 047  ClearClip  
-048  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-049  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+048  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
+049  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
 050  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
 051  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
 052  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

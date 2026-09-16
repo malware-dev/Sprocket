@@ -1,5 +1,4 @@
 using System.Globalization;
-using Avalonia.Headless.XUnit;
 using Reactor.Editing;
 using Reactor.Ui;
 using VRageMath;
@@ -19,7 +18,7 @@ public class DragTests
     /// <summary>How tall the six dots of one grip stand.</summary>
     const float GripHeight = 15f;
 
-    [AvaloniaFact]
+    [Fact]
     public void DraggingAStepMovesItWhereItWasDropped()
     {
         var screen = Build(out var editor);
@@ -38,7 +37,7 @@ public class DragTests
     /// Sending a run of single-step moves would have filled the history with three entries for one
     /// act, and undoing would have crawled the line back a row at a time.
     /// </remarks>
-    [AvaloniaFact]
+    [Fact]
     public void ADragIsASingleUndo()
     {
         var screen = Build(out var editor);
@@ -52,7 +51,7 @@ public class DragTests
         Assert.Equal("close, depressurize, open", Order(editor));
     }
 
-    [AvaloniaFact]
+    [Fact]
     public void DroppingAStepBackWhereItStartedChangesNothing()
     {
         var screen = Build(out var editor);
@@ -74,7 +73,7 @@ public class DragTests
     /// put the space a grab-offset away from the line hovering over it, so it landed somewhere other
     /// than where the gap had been held open. Same drag, three different grab points, one answer.
     /// </remarks>
-    [AvaloniaTheory]
+    [Theory]
     [InlineData(-0.35)]
     [InlineData(0.0)]
     [InlineData(0.35)]

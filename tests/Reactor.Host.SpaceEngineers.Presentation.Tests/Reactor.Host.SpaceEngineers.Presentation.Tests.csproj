@@ -2,7 +2,9 @@
     <Import Project="..\..\build\Reactor.GameReferences.props" />
 
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net48</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
@@ -15,9 +17,6 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
         <PackageReference Include="xunit.v3" Version="3.2.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0" />
-        <!-- Avalonia is here to measure and rasterise text, which is the one thing the substitute
-             game types cannot do for themselves. No window is ever shown. -->
-        <PackageReference Include="Avalonia.Headless.XUnit" Version="12.0.3" />
     </ItemGroup>
 
     <!-- The simulator, which draws the real Space Engineers screen code against a substitute of the

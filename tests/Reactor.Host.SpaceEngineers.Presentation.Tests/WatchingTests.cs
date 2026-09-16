@@ -1,4 +1,3 @@
-using Avalonia.Headless.XUnit;
 using Reactor.Editing;
 using Xunit;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
@@ -16,7 +15,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class WatchingTests
 {
-    [AvaloniaFact]
+    [Fact]
     public void TheEditingAffordancesAreAbsentWhileItRuns()
     {
         var screen = Screen.Fresh();
@@ -53,7 +52,7 @@ public class WatchingTests
     }
 
     /// <summary>The sentence stays readable while it runs, because reading it is the point.</summary>
-    [AvaloniaFact]
+    [Fact]
     public void TheSentenceIsStillFullyLegibleWhileItRuns()
     {
         var screen = Screen.Fresh();
@@ -81,7 +80,7 @@ public class WatchingTests
     /// Hiding them would move the marks beside them sideways every time somebody made or undid a
     /// change - under the pointer they were about to use.
     /// </remarks>
-    [AvaloniaFact]
+    [Fact]
     public void TheUndoPairHoldsItsPlaceWithNothingToUndo()
     {
         var screen = Screen.Fresh();

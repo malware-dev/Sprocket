@@ -1,5 +1,6 @@
 using System.Globalization;
-using Avalonia.Media;
+using System.Windows;
+using System.Windows.Media;
 using VRageMath;
 
 namespace Reactor.Sim.Simulation
@@ -14,10 +15,11 @@ namespace Reactor.Sim.Simulation
     /// that number. So a layout built here has the right number of lines in the right places, and every
     /// individual run is the wrong width by a few percent.
     /// <para>
-    /// That is the lower rung deliberately, and the upper one is already scoped: the same font XML carries
-    /// a per-glyph advance and a kerning table, and reading them gives measurement that is exact rather
-    /// than close. Until that exists, anything asking whether text fits should be read with suspicion, and
-    /// <see cref="IsExact" /> says so out loud rather than leaving it to be discovered.
+    /// That is the lower rung deliberately, and the upper one exists: <see cref="Content.SeFontMetrics" />
+    /// reads the same font file's per-glyph advances and is exact. It needs the game or a warmed cache, so
+    /// it is what the window uses and not what a recorded frame can depend on - a frame has to reproduce
+    /// on a machine that has never had the game. Anything asking whether text fits should be read with
+    /// suspicion here, and <see cref="IsExact" /> says so out loud rather than leaving it to be discovered.
     /// </para>
     /// </remarks>
     public sealed class FallbackFonts : IFontMetrics
@@ -28,6 +30,16 @@ namespace Reactor.Sim.Simulation
         /// <summary>The height the game's own UI, and its font scaling, are designed against.</summary>
         public const float GameReferenceHeight = 1080f;
 
+        /// <summary>
+        /// One pixel per unit.
+        /// </summary>
+        /// <remarks>
+        /// The harness lays out in window pixels and so does the game, so a measurement must not be
+        /// scaled by whatever the monitor this happens to run on is set to - a frame recorded on one
+        /// machine has to be the frame recorded on another.
+        /// </remarks>
+        const double PerPixel = 1d;
+
         readonly Typeface _typeface;
         readonly ScreenSpaceDevice _device;
 
@@ -36,11 +48,11 @@ namespace Reactor.Sim.Simulation
         public FallbackFonts(ScreenSpaceDevice device, string family)
         {
             _device = device;
-            _typeface = new Typeface(FontFamily.Parse(family));
+            _typeface = new Typeface(new FontFamily(family), FontStyles.Normal, FontWeights.Normal,
+                FontStretches.Normal);
         }
 
-        /// <summary>Whether these measurements are the game's. They are not, and will not be until the
-        /// glyph tables are read.</summary>
+        /// <summary>Whether these measurements are the game's. They are not, and will not be here.</summary>
         public bool IsExact => false;
 
         public Vector2 MeasurePixels(string font, string text, float scale)
@@ -49,7 +61,7 @@ namespace Reactor.Sim.Simulation
                 return new Vector2(0f, LineHeightPixels(font, scale));
 
             FormattedText formatted = Build(text, FontSizeFor(font, scale));
-            return new Vector2((float)formatted.Width, (float)formatted.Height);
+            return new Vector2((float)formatted.WidthIncludingTrailingWhitespace, (float)formatted.Height);
         }
 
         public float LineHeightPixels(string font, float scale)
@@ -86,7 +98,7 @@ namespace Reactor.Sim.Simulation
         public FormattedText Build(string text, double size)
         {
             return new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
-                _typeface, size, Brushes.White);
+                _typeface, size, Brushes.White, PerPixel);
         }
     }
 }

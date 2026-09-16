@@ -1,8 +1,7 @@
 using System;
 using System.IO;
 using System.Globalization;
-using Avalonia;
-using Avalonia.Controls;
+using System.Windows;
 
 namespace Reactor.Sim.Shell
 {
@@ -53,13 +52,13 @@ namespace Reactor.Sim.Shell
                 window.Height = saved[3];
             }
 
-            var at = new PixelPoint(saved[0], saved[1]);
-            if (OnAScreen(window, at, saved[2], saved[3]))
+            if (OnAScreen(saved[0], saved[1], saved[2], saved[3]))
             {
                 // Manual placement, or the window manager centres it and the position is overwritten by
                 // the thing that was supposed to be the fallback.
                 window.WindowStartupLocation = WindowStartupLocation.Manual;
-                window.Position = at;
+                window.Left = saved[0];
+                window.Top = saved[1];
             }
 
             if (saved[4] != 0)
@@ -73,24 +72,25 @@ namespace Reactor.Sim.Shell
             {
                 bool maximised = window.WindowState == WindowState.Maximized;
 
-                // A maximised window's own position is the whole screen, which is not what anybody wants
-                // restored when they un-maximise it. Avalonia does not keep the pre-maximise rectangle, so
-                // this keeps the last size it saw as a normal window instead.
+                // A maximised window's own position is the whole screen, which is not what anybody
+                // wants restored when they un-maximise it. The framework keeps a restore rectangle but
+                // only while the window lives, so this keeps the last one it saw as a normal window.
                 int[] previous = Read();
-                PixelPoint at = maximised && previous != null
-                    ? new PixelPoint(previous[0], previous[1])
-                    : window.Position;
+                bool kept = maximised && previous != null;
 
-                double width = maximised && previous != null ? previous[2] : window.Width;
-                double height = maximised && previous != null ? previous[3] : window.Height;
+                int left = kept ? previous[0] : (int)window.Left;
+                int top = kept ? previous[1] : (int)window.Top;
+
+                double width = kept ? previous[2] : window.Width;
+                double height = kept ? previous[3] : window.Height;
 
                 string path = File;
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
 
                 System.IO.File.WriteAllText(path, string.Join(" ", new[]
                 {
-                    at.X.ToString(CultureInfo.InvariantCulture),
-                    at.Y.ToString(CultureInfo.InvariantCulture),
+                    left.ToString(CultureInfo.InvariantCulture),
+                    top.ToString(CultureInfo.InvariantCulture),
                     ((int)width).ToString(CultureInfo.InvariantCulture),
                     ((int)height).ToString(CultureInfo.InvariantCulture),
                     maximised ? "1" : "0"
@@ -132,28 +132,24 @@ namespace Reactor.Sim.Shell
             }
         }
 
-        /// <summary>Whether enough of the window would land somewhere a person could see it.</summary>
-        static bool OnAScreen(Window window, PixelPoint at, int width, int height)
+        /// <summary>
+        /// Whether enough of the window would land somewhere a person could see it.
+        /// </summary>
+        /// <remarks>
+        /// Against the whole virtual desktop rather than each monitor in turn, because that is what the
+        /// framework offers without reaching for the platform: a rectangle covering every screen. It says
+        /// yes to a position over a gap between two monitors, which is a corner nobody has hit, and no to
+        /// the one that matters - a window last closed on a monitor that is no longer there.
+        /// </remarks>
+        static bool OnAScreen(int left, int top, int width, int height)
         {
-            if (window.Screens == null || window.Screens.ScreenCount == 0)
-                return false;
+            var box = new Rect(left, top, width, height);
+            var desktop = new Rect(
+                SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
+                SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
 
-            var screen = window.Screens.ScreenFromPoint(at);
-            double density = screen != null ? screen.Scaling : 1d;
-
-            // Position is in physical pixels and the saved size is in the window's own units, so one of
-            // the two has to be converted before they can be compared.
-            var box = new PixelRect(at,
-                new PixelSize((int)(width * density), (int)(height * density)));
-
-            for (int i = 0; i < window.Screens.All.Count; i++)
-            {
-                PixelRect visible = window.Screens.All[i].WorkingArea.Intersect(box);
-                if (visible.Width >= MustBeVisible && visible.Height >= MustBeVisible)
-                    return true;
-            }
-
-            return false;
+            box.Intersect(desktop);
+            return box.Width >= MustBeVisible && box.Height >= MustBeVisible;
         }
     }
 }

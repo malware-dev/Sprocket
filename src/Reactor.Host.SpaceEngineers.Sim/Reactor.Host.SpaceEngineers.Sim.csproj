@@ -1,17 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="..\..\build\Reactor.GameReferences.props" />
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
+
+        <!--
+            The framework the mod's own target is, which is what MDK spells netframework48. So the mod is
+            a project reference here rather than a second compilation of its sources: one assembly, built
+            once, with its analysers and its whitelist over it, and the harness drives that.
+        -->
+        <TargetFramework>net48</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <LangVersion>latest</LangVersion>
         <RootNamespace>Reactor.Sim</RootNamespace>
         <AssemblyName>Reactor.Host.SpaceEngineers.Sim</AssemblyName>
+        <Platforms>x64</Platforms>
+        <Configurations>Debug;Release</Configurations>
 
-        <!-- The mod's sources are compiled here as well as into the mod, so they are compiled the way
-             the mod compiles them: the game's compiler is C# 6 and has neither of these, and a source
-             file that leans on an implicit using here would fail there. "annotations" rather than
-             "enable": the syntax is understood, and no warnings are raised against code written years
-             before it existed. -->
+        <!-- "annotations" rather than "enable": the syntax is understood, and no warnings are raised
+             against code written years before it existed. -->
         <Nullable>annotations</Nullable>
         <ImplicitUsings>disable</ImplicitUsings>
 
@@ -37,10 +44,6 @@
              the mod reads instead of implementing the several hundred it does not. Harness only. -->
         <PackageReference Include="Castle.Core" Version="5.1.1" />
 
-        <PackageReference Include="Avalonia" Version="12.0.3" />
-        <PackageReference Include="Avalonia.Desktop" Version="12.0.3" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.3" />
-
         <!-- The game ships its artwork as block-compressed DDS, which nothing in .NET reads. This is the
              same decoder Malforge's DocGen and MyTsDesigner already use, for the same job; a third
              hand-written BC1 unpacker would only be a third place to get it wrong.
@@ -56,16 +59,19 @@
     </ItemGroup>
 
     <!--
-        The mod's own code, compiled here as well as into the mod.
+        The mod's own code, compiled here as well as into the mod, on the same framework the mod builds
+        against.
 
         Not a port and not a stand-in: the harness drives the same GridWorld and ReactorUnit the game
-        drives, over blocks it makes up. That is what puts the toolbar and storage layer - the fiddliest
+        drives, over blocks it makes up, which is what puts the toolbar and storage layer - the fiddliest
         code in the repo - under the reference frames.
 
-        All of it, including the screen host: what the game declares in Sandbox.Game - the screen host's
-        base, mod storage, the toolbar conveniences - the harness declares itself, because that assembly
-        also holds the screen-space types a recorded frame depends on. See Fakes, and
-        build/Reactor.GameReferences.props.
+        <b>Compiled rather than referenced, and that is not a preference.</b> What the game declares in
+        Sandbox.Game - the screen-space drawing the editor renders through, the screen host's base, mod
+        storage, the toolbar conveniences - the harness declares itself, so that a frame can be recorded
+        rather than drawn. A declaration like that only wins inside the assembly that makes it: reference
+        the mod's own assembly instead and its drawing binds to the real thing, which outside the game
+        draws nothing and then throws. See Fakes, and build/Reactor.GameReferences.props.
     -->
     <ItemGroup>
         <Compile Include="..\Reactor.Host.SpaceEngineers\**\*.cs"
@@ -73,11 +79,6 @@
             <Link>Mod\%(RecursiveDir)%(Filename)%(Extension)</Link>
         </Compile>
     </ItemGroup>
-
-    <!-- The same files the mod compiles. Not a copy, not a port: if it draws here it draws there. -->
-
-    <!-- And the same simulated ship the Avalonia host runs the editor against, so the two targets are
-         driven by one world rather than by two hand-made approximations of one. -->
 
     <!-- This target's editor. Shared rather than owned, because these are the files the mod will ship:
          what is seen in this window is what a player sees, not a preview of it. -->

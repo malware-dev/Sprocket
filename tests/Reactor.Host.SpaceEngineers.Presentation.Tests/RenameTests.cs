@@ -1,5 +1,4 @@
 using System.Globalization;
-using Avalonia.Headless.XUnit;
 using Reactor.Editing;
 using Xunit;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
@@ -11,7 +10,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 public class RenameTests
 {
-    [AvaloniaFact]
+    [Fact]
     public void PressingAnywhereOnTheHeadingEditsItInPlace()
     {
         var screen = Screen.Fresh();
@@ -61,7 +60,7 @@ public class RenameTests
     /// what wants redesigning; see docs/Editor.md.
     /// </para>
     /// </remarks>
-    [AvaloniaFact]
+    [Fact]
     public void TheHeaderHoldsItsHeightWhileItsSubtitleComesAndGoes()
     {
         var screen = Screen.Fresh();
@@ -97,7 +96,7 @@ public class RenameTests
     /// below the title on every screen with no subtitle. Two pieces of text at different sizes share
     /// a line by their middles, not by their tops.
     /// </remarks>
-    [AvaloniaFact]
+    [Fact]
     public void TheHeadingLinesUpWithBack()
     {
         var screen = Screen.Fresh();

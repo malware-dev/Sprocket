@@ -32,9 +32,26 @@ namespace Reactor.Sim.Simulation
                 + " W:" + Say(value.Width) + " H:" + Say(value.Height) + "}";
         }
 
+        /// <summary>
+        /// A number, to five decimals, with nothing said about how it is held.
+        /// </summary>
+        /// <remarks>
+        /// Spelled out rather than left to the framework, which prints the same float differently on
+        /// .NET Framework and on .NET - seven significant digits against the shortest that round-trips.
+        /// A frame is compared byte for byte, so that difference would read as the screen having moved.
+        /// <para>
+        /// Five decimals is a thousandth of a pixel: far past anything a layout decides, and short
+        /// enough that the last digit is never the framework's rounding showing through.
+        /// </para>
+        /// </remarks>
         public static string Say(float value)
         {
-            return value.ToString(CultureInfo.InvariantCulture);
+            // Negative zero is zero. The two print differently on the two frameworks and mean the same
+            // place on the screen.
+            if (value == 0f)
+                return "0";
+
+            return value.ToString("0.#####", CultureInfo.InvariantCulture);
         }
     }
 }

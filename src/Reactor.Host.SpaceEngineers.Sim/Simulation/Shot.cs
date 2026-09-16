@@ -1,6 +1,7 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Media.Imaging;
+using System.IO;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Reactor.Sim.Simulation
 {
@@ -31,24 +32,44 @@ namespace Reactor.Sim.Simulation
 
             // Something behind it, or the bitmap is transparent - which reads as white and makes every
             // light-on-dark choice look wrong. See Backdrop for what it is and is not claiming.
-            var root = new Panel();
-            root.Children.Add(new Backdrop());
-            root.Children.Add(surface);
-
+            var behind = new Backdrop();
             var size = new Size(width, height);
-            root.Measure(size);
-            root.Arrange(new Rect(size));
 
-            using (var bitmap = new RenderTargetBitmap(new PixelSize(width, height), new Vector(96, 96)))
+            var bitmap = new RenderTargetBitmap(width, height, 96d, 96d, PixelFormats.Pbgra32);
+            Take(bitmap, behind, surface, size);
+
+            if (script != null)
+                script.Play(scene, delegate { Take(bitmap, behind, surface, size); });
+
+            var png = new PngBitmapEncoder();
+            png.Frames.Add(BitmapFrame.Create(bitmap));
+
+            using (FileStream file = File.Create(path))
+                png.Save(file);
+
+            return scene.OnScreen;
+        }
+
+        /// <summary>
+        /// Draws the screen as it is now into the bitmap.
+        /// </summary>
+        /// <remarks>
+        /// Painted into a visual of its own rather than by invalidating a control and rendering it. This
+        /// framework repaints a control when its dispatcher next runs, and a shot has no dispatcher to
+        /// run - so that route quietly writes out the frame before the one that was asked for.
+        /// </remarks>
+        static void Take(RenderTargetBitmap bitmap, Backdrop behind, Surface surface, Size size)
+        {
+            var frame = new DrawingVisual();
+            using (DrawingContext context = frame.RenderOpen())
             {
-                bitmap.Render(root);
-
-                if (script != null)
-                    script.Play(scene, () => bitmap.Render(root));
-
-                bitmap.Save(path);
-                return scene.OnScreen;
+                behind.Paint(context, size);
+                surface.Paint(context, size);
             }
+
+            // Cleared as well, because the bitmap composites onto what is already in it.
+            bitmap.Clear();
+            bitmap.Render(frame);
         }
     }
 }

@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Avalonia;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Reactor.Sim.Content
 {
@@ -67,33 +67,40 @@ namespace Reactor.Sim.Content
 
         static void Write(DdsImage.Pixels pixels, string path)
         {
-            var size = new PixelSize(pixels.Width, pixels.Height);
+            var bitmap = new WriteableBitmap(pixels.Width, pixels.Height, 96d, 96d,
+                PixelFormats.Bgra32, null);
 
-            using (var bitmap = new WriteableBitmap(
-                size, new Vector(96, 96), PixelFormat.Bgra8888, AlphaFormat.Unpremul))
+            // Row by row rather than one copy, because the two strides need not agree: the decoder
+            // packs its rows tight and the bitmap is free to pad them.
+            bitmap.Lock();
+            try
             {
-                using (ILockedFramebuffer buffer = bitmap.Lock())
+                for (int y = 0; y < pixels.Height; y++)
                 {
-                    // Row by row rather than one copy, because the two strides need not agree: the
-                    // decoder packs its rows tight and the bitmap is free to pad them.
-                    for (int y = 0; y < pixels.Height; y++)
-                    {
-                        IntPtr destination = buffer.Address + y * buffer.RowBytes;
-                        Marshal.Copy(
-                            pixels.Bgra, y * pixels.Stride, destination, pixels.Width * 4);
-                    }
+                    IntPtr destination = bitmap.BackBuffer + y * bitmap.BackBufferStride;
+                    Marshal.Copy(pixels.Bgra, y * pixels.Stride, destination, pixels.Width * 4);
                 }
 
-                // Written beside itself and moved into place, so a run that dies halfway through cannot
-                // leave a half-written page in the cache to be trusted on the next start.
-                string partial = path + ".partial";
-                bitmap.Save(partial);
-
-                if (File.Exists(path))
-                    File.Delete(path);
-
-                File.Move(partial, path);
+                bitmap.AddDirtyRect(new Int32Rect(0, 0, pixels.Width, pixels.Height));
             }
+            finally
+            {
+                bitmap.Unlock();
+            }
+
+            var png = new PngBitmapEncoder();
+            png.Frames.Add(BitmapFrame.Create(bitmap));
+
+            // Written beside itself and moved into place, so a run that dies halfway through cannot
+            // leave a half-written page in the cache to be trusted on the next start.
+            string partial = path + ".partial";
+            using (FileStream file = File.Create(partial))
+                png.Save(file);
+
+            if (File.Exists(path))
+                File.Delete(path);
+
+            File.Move(partial, path);
         }
     }
 }

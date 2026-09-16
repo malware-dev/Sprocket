@@ -1,33 +1,33 @@
 window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
-screen bounds {X:-240 Y:-0 W:1920 H:1080}
+screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Airlock
 
 000  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:254 W:1402 H:699}
-002  Text       at {X:265 Y:260.37198} scale 0.57  #A2C3CDFF  "No sequences yet."
+002  Text       at {X:265 Y:260.372} scale 0.57  #A2C3CDFF  "No sequences yet."
 003  ClearClip  
 004  Sprite     Reactor_Fill          {X:259 Y:118 W:1402 H:52}  #29363EFF
-005  Text       at {X:278 Y:132.01198} scale 0.64  #DCF5FDFF  "+ When…"
+005  Text       at {X:278 Y:132.012} scale 0.64  #DCF5FDFF  "+ When…"
 006  Sprite     Reactor_Fill          {X:259 Y:176 W:1402 H:52}  #29363EFF
-007  Text       at {X:278 Y:189.69199} scale 0.64  #DCF5FDFF  "+ Every…"
+007  Text       at {X:278 Y:189.692} scale 0.64  #DCF5FDFF  "+ Every…"
 008  Sprite     Reactor_Fill          {X:259 Y:243 W:1402 H:1}  #5B737BFF
 009  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
 010  SetClip    {X:276 Y:55 W:86 H:33}
-011  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "Airlock"
-012  Text       at {X:351.50543 Y:59.521973} scale 0.64  #85A1A9FF  "p"
+011  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Airlock"
+012  Text       at {X:351.5033 Y:59.52197} scale 0.64  #85A1A9FF  "p"
 013  ClearClip  
-014  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
+014  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
 015  Sprite     Reactor_Fill          {X:1529 Y:55 W:119 H:1}  #85A1A9FF
 016  Sprite     Reactor_Fill          {X:1529 Y:87 W:119 H:1}  #85A1A9FF
 017  Sprite     Reactor_Fill          {X:1529 Y:55 W:1 H:33}  #85A1A9FF
 018  Sprite     Reactor_Fill          {X:1647 Y:55 W:1 H:33}  #85A1A9FF
 019  Sprite     Reactor_Fill          {X:1530 Y:56 W:117 H:31}  #060A0CFF
 020  Sprite     Reactor_Fill          {X:1530 Y:56 W:58 H:31}  #1B2C33FF
-021  Text       at {X:1547.2062 Y:60.816975} scale 0.57  #DCF5FDFF  "ON"
-022  Text       at {X:1604.8333 Y:60.816975} scale 0.57  #85A1A9FF  "OFF"
-023  Text       at {X:1654.2719 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+021  Text       at {X:1547.207 Y:60.81697} scale 0.57  #DCF5FDFF  "ON"
+022  Text       at {X:1604.833 Y:60.81697} scale 0.57  #85A1A9FF  "OFF"
+023  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
 024  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
 025  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
 026  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

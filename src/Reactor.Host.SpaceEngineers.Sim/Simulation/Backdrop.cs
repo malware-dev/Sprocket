@@ -1,6 +1,5 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Media;
+using System.Windows;
+using System.Windows.Media;
 
 namespace Reactor.Sim.Simulation
 {
@@ -19,19 +18,25 @@ namespace Reactor.Sim.Simulation
     /// when the plan was to draw over live gameplay.
     /// </para>
     /// </remarks>
-    public sealed class Backdrop : Control
+    public sealed class Backdrop : FrameworkElement
     {
-        public override void Render(DrawingContext context)
+        protected override void OnRender(DrawingContext context)
         {
-            double width = Bounds.Width;
-            double height = Bounds.Height;
+            Paint(context, RenderSize);
+        }
+
+        /// <summary>Draws it into whatever is handed in - see <see cref="Surface.Paint" />.</summary>
+        public void Paint(DrawingContext context, Size into)
+        {
+            double width = into.Width;
+            double height = into.Height;
             if (width <= 0d || height <= 0d)
                 return;
 
             var space = new LinearGradientBrush
             {
-                StartPoint = new RelativePoint(0d, 0d, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(0d, 1d, RelativeUnit.Relative),
+                StartPoint = new Point(0d, 0d),
+                EndPoint = new Point(0d, 1d),
                 GradientStops =
                 {
                     new GradientStop(Color.FromRgb(9, 13, 20), 0d),
@@ -41,7 +46,7 @@ namespace Reactor.Sim.Simulation
                 }
             };
 
-            context.FillRectangle(space, new Rect(0d, 0d, width, height));
+            context.DrawRectangle(space, null, new Rect(0d, 0d, width, height));
 
             // Hull plating below the horizon, lit from the left, so the veil has edges to soften and
             // not only a wash to darken.
@@ -56,7 +61,7 @@ namespace Reactor.Sim.Simulation
                 var cell = new Rect(i * step, top, step, height - top);
 
                 if ((i & 1) == 0)
-                    context.FillRectangle(plate, cell);
+                    context.DrawRectangle(plate, null, cell);
 
                 context.DrawLine(seam, cell.TopLeft, cell.BottomLeft);
             }

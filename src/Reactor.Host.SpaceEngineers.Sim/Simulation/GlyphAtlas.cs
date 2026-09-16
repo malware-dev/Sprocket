@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Avalonia;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Reactor.Sim.Content;
 
 namespace Reactor.Sim.Simulation
@@ -28,7 +28,7 @@ namespace Reactor.Sim.Simulation
         readonly int _width;
         readonly int _height;
         readonly byte[] _coverage;
-        readonly Dictionary<uint, Bitmap> _tinted = new Dictionary<uint, Bitmap>();
+        readonly Dictionary<uint, BitmapSource> _tinted = new Dictionary<uint, BitmapSource>();
 
         GlyphAtlas(int width, int height, byte[] coverage)
         {
@@ -70,30 +70,24 @@ namespace Reactor.Sim.Simulation
             if (png == null || !File.Exists(png))
                 return null;
 
-            using (var bitmap = new Bitmap(png))
-            {
-                int width = bitmap.PixelSize.Width;
-                int height = bitmap.PixelSize.Height;
+            var decoded = new FormatConvertedBitmap(
+                new BitmapImage(new Uri(png, UriKind.Absolute)), PixelFormats.Bgra32, null, 0d);
 
-                var bgra = new byte[width * height * 4];
+            int width = decoded.PixelWidth;
+            int height = decoded.PixelHeight;
 
-                unsafe
-                {
-                    fixed (byte* into = bgra)
-                        bitmap.CopyPixels(
-                            new PixelRect(0, 0, width, height), (IntPtr)into, bgra.Length, width * 4);
-                }
+            var bgra = new byte[width * height * 4];
+            decoded.CopyPixels(bgra, width * 4, 0);
 
-                // Only the alpha is kept. The colour on the page is the same coverage said again, and
-                // holding a megabyte of it to throw away on every tint would be keeping the wrong copy.
-                var coverage = new byte[width * height];
-                for (int i = 0; i < coverage.Length; i++)
-                    coverage[i] = bgra[i * 4 + 3];
+            // Only the alpha is kept. The colour on the page is the same coverage said again, and
+            // holding a megabyte of it to throw away on every tint would be keeping the wrong copy.
+            var coverage = new byte[width * height];
+            for (int i = 0; i < coverage.Length; i++)
+                coverage[i] = bgra[i * 4 + 3];
 
-                var atlas = new GlyphAtlas(width, height, coverage);
-                atlas.Source = png;
-                return atlas;
-            }
+            var atlas = new GlyphAtlas(width, height, coverage);
+            atlas.Source = png;
+            return atlas;
         }
 
         /// <summary>
@@ -133,23 +127,22 @@ namespace Reactor.Sim.Simulation
         }
 
         /// <summary>The page in one colour, made the first time that colour is asked for.</summary>
-        public Bitmap Tinted(byte r, byte g, byte b)
+        public BitmapSource Tinted(byte r, byte g, byte b)
         {
             uint key = (uint)((r << 16) | (g << 8) | b);
 
-            Bitmap cached;
+            BitmapSource cached;
             if (_tinted.TryGetValue(key, out cached))
                 return cached;
 
-            var bitmap = new WriteableBitmap(
-                new PixelSize(_width, _height), new Vector(96, 96),
-                PixelFormat.Bgra8888, AlphaFormat.Unpremul);
+            var bitmap = new WriteableBitmap(_width, _height, 96d, 96d, PixelFormats.Bgra32, null);
 
-            using (ILockedFramebuffer buffer = bitmap.Lock())
+            bitmap.Lock();
+            try
             {
                 unsafe
                 {
-                    var row = (byte*)buffer.Address;
+                    var row = (byte*)bitmap.BackBuffer;
 
                     for (int y = 0; y < _height; y++)
                     {
@@ -164,10 +157,20 @@ namespace Reactor.Sim.Simulation
                             pixel[3] = _coverage[from + x];
                         }
 
-                        row += buffer.RowBytes;
+                        row += bitmap.BackBufferStride;
                     }
                 }
+
+                bitmap.AddDirtyRect(new Int32Rect(0, 0, _width, _height));
             }
+            finally
+            {
+                bitmap.Unlock();
+            }
+
+            // Frozen, so the canvas can draw it from whatever thread asks and nothing has to copy it
+            // again: a page is four megabytes and a colour is asked for once.
+            bitmap.Freeze();
 
             _tinted.Add(key, bitmap);
             return bitmap;

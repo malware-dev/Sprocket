@@ -1,18 +1,18 @@
 using System.IO;
 using System;
 using System.Collections.Generic;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
+using System.Globalization;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Reactor.Sim.Content;
 using Sandbox.ModAPI;
 using VRageMath;
-using AvColor = Avalonia.Media.Color;
 using Color = VRageMath.Color;
-using Matrix = Avalonia.Matrix;
-using Point = Avalonia.Point;
-using Rect = Avalonia.Rect;
+using Matrix = System.Windows.Media.Matrix;
+using Point = System.Windows.Point;
+using Rect = System.Windows.Rect;
+using Ink = System.Windows.Media.Color;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
@@ -28,14 +28,17 @@ namespace Reactor.Sim.Simulation
     /// Nothing here reaches into the editor: the backend under test is the one the mod ships, unmodified, and
     /// the only thing swapped out from under it is the game.
     /// </remarks>
-    public sealed class Surface : Control
+    public sealed class Surface : FrameworkElement
     {
         readonly ScreenSpaceDevice _device = new ScreenSpaceDevice();
         readonly FallbackFonts _shapes;
+
+        /// <summary>The desktop face this canvas draws letters with, where no game page is loaded.</summary>
+        readonly Typeface _letters = new Typeface("Segoe UI");
         readonly SeFontMetrics _exact;
         readonly GlyphAtlas _atlas;
-        readonly Dictionary<string, IBrush> _brushes = new Dictionary<string, IBrush>();
-        readonly Dictionary<string, Bitmap> _art = new Dictionary<string, Bitmap>();
+        readonly Dictionary<string, Brush> _brushes = new Dictionary<string, Brush>();
+        readonly Dictionary<string, BitmapSource> _art = new Dictionary<string, BitmapSource>();
         readonly SeFontMetrics _symbols;
         readonly GlyphAtlas _symbolAtlas;
 
@@ -152,28 +155,45 @@ namespace Reactor.Sim.Simulation
             }
         }
 
-        public override void Render(DrawingContext context)
+        protected override void OnRender(DrawingContext context)
         {
-            if (Bounds.Width <= 0d || Bounds.Height <= 0d || Target.Width <= 0 || Target.Height <= 0)
+            Paint(context, RenderSize);
+        }
+
+        /// <summary>
+        /// Draws a frame into whatever is handed in, at whatever size is asked for.
+        /// </summary>
+        /// <remarks>
+        /// Public and explicit because a window and a headless shot want opposite things from this
+        /// framework: a window wants to be told it is out of date and repainted when the dispatcher gets
+        /// round to it, and a shot wants a frame now. Invalidating and rendering a control answers the
+        /// first and silently gives the shot the frame before the one it asked for.
+        /// </remarks>
+        public void Paint(DrawingContext context, Size into)
+        {
+            double windowWidth = into.Width;
+            double windowHeight = into.Height;
+
+            if (windowWidth <= 0d || windowHeight <= 0d || Target.Width <= 0 || Target.Height <= 0)
                 return;
 
             // The whole frame is built at Target and then fitted, rather than built at whatever the window
             // is. Letterboxed rather than stretched, because the shape of a screen is part of what is being
             // checked and a squashed one would quietly answer a different question.
-            if (ShapedByWindow && Bounds.Height > 0d)
+            if (ShapedByWindow && windowHeight > 0d)
             {
                 int square = (int)Math.Round(Target.Height * 4d / 3d);
-                int wide = (int)Math.Round(Target.Height * Bounds.Width / Bounds.Height);
+                int wide = (int)Math.Round(Target.Height * windowWidth / windowHeight);
 
                 Target = new PixelSize(wide > square ? wide : square, Target.Height);
             }
 
-            double fit = Math.Min(Bounds.Width / Target.Width, Bounds.Height / Target.Height);
+            double fit = Math.Min(windowWidth / Target.Width, windowHeight / Target.Height);
             double shown = Target.Width * fit;
             double tall = Target.Height * fit;
 
             Viewport = new Rect(
-                (Bounds.Width - shown) / 2d, (Bounds.Height - tall) / 2d, shown, tall);
+                (windowWidth - shown) / 2d, (windowHeight - tall) / 2d, shown, tall);
 
             double width = Target.Width;
             double height = Target.Height;
@@ -202,17 +222,62 @@ namespace Reactor.Sim.Simulation
             // Everything below was recorded in target pixels, so the fit goes on here rather than being
             // folded into any of it. Clipped to the viewport as well, since a letterbox that let the
             // screen paint into its own margins would not be a letterbox.
-            using (context.PushClip(Viewport))
-            using (context.PushTransform(
-                Matrix.CreateScale(fit, fit) * Matrix.CreateTranslation(Viewport.X, Viewport.Y)))
+            var fitted = new Matrix();
+            fitted.Scale(fit, fit);
+            fitted.Translate(Viewport.X, Viewport.Y);
+
+            using (Clipped(context, Viewport))
+            using (Moved(context, fitted))
             {
                 Replay(context);
             }
         }
 
+        /// <summary>
+        /// One thing pushed onto the canvas, popped when it goes out of scope.
+        /// </summary>
+        /// <remarks>
+        /// The desktop framework's canvas pushes and pops rather than handing back something to dispose,
+        /// and a pop that is missed silently poisons every draw after it. So the pops are tied to scopes
+        /// here, and the code that draws reads as what it is doing rather than as bookkeeping.
+        /// </remarks>
+        struct Pushed : IDisposable
+        {
+            readonly DrawingContext _context;
+
+            public Pushed(DrawingContext context)
+            {
+                _context = context;
+            }
+
+            public void Dispose()
+            {
+                if (_context != null)
+                    _context.Pop();
+            }
+        }
+
+        static Pushed Clipped(DrawingContext context, Rect to)
+        {
+            context.PushClip(new RectangleGeometry(to));
+            return new Pushed(context);
+        }
+
+        static Pushed Moved(DrawingContext context, Matrix by)
+        {
+            context.PushTransform(new MatrixTransform(by));
+            return new Pushed(context);
+        }
+
+        static Pushed Faded(DrawingContext context, double opacity)
+        {
+            context.PushOpacity(opacity);
+            return new Pushed(context);
+        }
+
         void Replay(DrawingContext context)
         {
-            IDisposable clip = null;
+            var clip = new Stack<Pushed>();
 
             try
             {
@@ -224,15 +289,12 @@ namespace Reactor.Sim.Simulation
                     switch (command.Kind)
                     {
                         case DrawKind.SetClip:
-                            if (clip != null)
-                                clip.Dispose();
-                            clip = context.PushClip(ToRect(command.Clip));
+                            Unclip(clip);
+                            clip.Push(Clipped(context, ToRect(command.Clip)));
                             break;
 
                         case DrawKind.ClearClip:
-                            if (clip != null)
-                                clip.Dispose();
-                            clip = null;
+                            Unclip(clip);
                             break;
 
                         case DrawKind.Sprite:
@@ -247,9 +309,21 @@ namespace Reactor.Sim.Simulation
             }
             finally
             {
-                if (clip != null)
-                    clip.Dispose();
+                Unclip(clip);
             }
+        }
+
+        /// <summary>
+        /// Lets go of whatever clip is in force.
+        /// </summary>
+        /// <remarks>
+        /// A stack because pops have to happen in the order the pushes did, and the frame's own fit is
+        /// pushed underneath all of this: popping one too many would take the letterbox with it.
+        /// </remarks>
+        static void Unclip(Stack<Pushed> clip)
+        {
+            while (clip.Count > 0)
+                clip.Pop().Dispose();
         }
 
         void DrawSprite(DrawingContext context, DrawCommand command)
@@ -257,21 +331,23 @@ namespace Reactor.Sim.Simulation
             Rect destination = ToRect(command.Destination);
             string material = command.Material.String;
 
-            IDisposable rotation = null;
+            // Radians on the wire, degrees on this canvas. The game says radians and so does the
+            // recorded command; converting here keeps the conversion in one place.
+            Pushed? rotation = null;
             if (Math.Abs(command.Rotation) > 0.0001f)
             {
-                Point centre = destination.Center;
-                rotation = context.PushTransform(
-                    Matrix.CreateTranslation(-centre.X, -centre.Y)
-                    * Matrix.CreateRotation(command.Rotation)
-                    * Matrix.CreateTranslation(centre.X, centre.Y));
+                var spun = new Matrix();
+                spun.RotateAt(command.Rotation * 180d / Math.PI,
+                    destination.X + destination.Width / 2d, destination.Y + destination.Height / 2d);
+
+                rotation = Moved(context, spun);
             }
 
             try
             {
                 if (material == "Reactor_Fill")
                 {
-                    context.FillRectangle(BrushFor(command.Color), destination);
+                    context.DrawRectangle(BrushFor(command.Color), null, destination);
                     return;
                 }
 
@@ -283,9 +359,16 @@ namespace Reactor.Sim.Simulation
 
                 // A block's picture. Missing is a fault like any other missing texture - the screen has
                 // stopped drawing anything else in its place, so nothing here should whisper about it.
-                if (material.StartsWith(Icons.Prefix, StringComparison.Ordinal))
+                // Two shapes, both of them block pictures: a definition id, which the game resolves to
+                // that block's own picture by itself, and a prefixed word from a host with no blocks to
+                // ask. See Icons.MaterialFor, which decides which one a kind gets.
+                bool prefixed = material.StartsWith(Icons.Prefix, StringComparison.Ordinal);
+                if (prefixed || material.IndexOf('/') >= 0)
                 {
-                    Bitmap art = ArtFor(material.Substring(Icons.Prefix.Length));
+                    BitmapSource art = ArtFor(prefixed
+                        ? material.Substring(Icons.Prefix.Length)
+                        : material);
+
                     if (art != null)
                     {
                         Shrink(context, art, destination);
@@ -297,8 +380,8 @@ namespace Reactor.Sim.Simulation
             }
             finally
             {
-                if (rotation != null)
-                    rotation.Dispose();
+                if (rotation.HasValue)
+                    rotation.Value.Dispose();
             }
         }
 
@@ -306,22 +389,15 @@ namespace Reactor.Sim.Simulation
         /// Draws a picture into a box a good deal smaller than it is.
         /// </summary>
         /// <remarks>
-        /// The sampling is asked for by name because the default is not good enough for what these are. A
-        /// ring is a five-hundred-pixel picture of a hairline and the mark it is drawn into is fifteen
-        /// across, and sampled cheaply that reduction keeps whichever pixels it happens to land on and
-        /// throws the rest away - which draws a dotted circle. The game's own sampler averages what it
-        /// skips, so cheap scaling here would be the simulator inventing a defect the mod does not have,
-        /// and that is the one thing it must never do.
+        /// The sampling matters and is not asked for: this canvas averages what it skips by default,
+        /// which is what these need. A ring is a five-hundred-pixel picture of a hairline and the mark it
+        /// is drawn into is fifteen across, and sampled cheaply that reduction would keep whichever
+        /// pixels it happened to land on and throw the rest away - a dotted circle, which is the
+        /// simulator inventing a defect the mod does not have.
         /// </remarks>
-        static void Shrink(DrawingContext context, Bitmap picture, Rect destination)
+        static void Shrink(DrawingContext context, BitmapSource picture, Rect destination)
         {
-            using (context.PushRenderOptions(new RenderOptions
-            {
-                BitmapInterpolationMode = BitmapInterpolationMode.HighQuality
-            }))
-            {
-                context.DrawImage(picture, destination);
-            }
+            context.DrawImage(picture, destination);
         }
 
         /// <summary>
@@ -331,10 +407,10 @@ namespace Reactor.Sim.Simulation
         /// </summary>
         void DrawMissing(DrawingContext context, Rect destination, string material)
         {
-            var fill = new SolidColorBrush(AvColor.FromArgb(90, 255, 0, 200));
-            var edge = new Pen(new SolidColorBrush(AvColor.FromArgb(220, 255, 0, 200)), 1d);
+            var fill = new SolidColorBrush(Ink.FromArgb(90, 255, 0, 200));
+            var edge = new Pen(new SolidColorBrush(Ink.FromArgb(220, 255, 0, 200)), 1d);
 
-            context.FillRectangle(fill, destination);
+            context.DrawRectangle(fill, null, destination);
             context.DrawRectangle(null, edge, destination);
             context.DrawLine(edge, destination.TopLeft, destination.BottomRight);
             context.DrawLine(edge, destination.TopRight, destination.BottomLeft);
@@ -342,8 +418,7 @@ namespace Reactor.Sim.Simulation
             if (destination.Width < 40d || destination.Height < 14d)
                 return;
 
-            FormattedText label = _shapes.Build(material, 11d);
-            label.SetForegroundBrush(Brushes.White);
+            FormattedText label = Letters(material, 11d, Brushes.White);
             context.DrawText(label, new Point(destination.X + 3d, destination.Y + 2d));
         }
 
@@ -361,17 +436,16 @@ namespace Reactor.Sim.Simulation
             var geometry = new StreamGeometry();
             using (StreamGeometryContext figure = geometry.Open())
             {
-                figure.BeginFigure(new Point(x, y), true);
-                figure.LineTo(new Point(x, y + size * 0.78));
-                figure.LineTo(new Point(x + size * 0.22, y + size * 0.58));
-                figure.LineTo(new Point(x + size * 0.38, y + size * 0.92));
-                figure.LineTo(new Point(x + size * 0.52, y + size * 0.85));
-                figure.LineTo(new Point(x + size * 0.36, y + size * 0.52));
-                figure.LineTo(new Point(x + size * 0.62, y + size * 0.50));
-                figure.EndFigure(true);
+                figure.BeginFigure(new Point(x, y), true, true);
+                figure.LineTo(new Point(x, y + size * 0.78), true, false);
+                figure.LineTo(new Point(x + size * 0.22, y + size * 0.58), true, false);
+                figure.LineTo(new Point(x + size * 0.38, y + size * 0.92), true, false);
+                figure.LineTo(new Point(x + size * 0.52, y + size * 0.85), true, false);
+                figure.LineTo(new Point(x + size * 0.36, y + size * 0.52), true, false);
+                figure.LineTo(new Point(x + size * 0.62, y + size * 0.50), true, false);
             }
 
-            IBrush body = hand ? Brushes.Gold : BrushFor(color);
+            Brush body = hand ? Brushes.Gold : BrushFor(color);
             context.DrawGeometry(body, new Pen(Brushes.Black, 1d), geometry);
         }
 
@@ -398,10 +472,8 @@ namespace Reactor.Sim.Simulation
             if (symbolic)
                 return;
 
-            FormattedText formatted = _shapes.Build(
-                text, _shapes.FontSizeFor(command.Font, command.Scale));
-
-            formatted.SetForegroundBrush(BrushFor(command.Color));
+            FormattedText formatted = Letters(text, _shapes.FontSizeFor(command.Font, command.Scale),
+                BrushFor(command.Color));
 
             var origin = new Point(command.Position.X, command.Position.Y);
 
@@ -412,13 +484,13 @@ namespace Reactor.Sim.Simulation
             double target = _device.Fonts.MeasurePixels(command.Font, command.Text, command.Scale).X;
             double stretch = formatted.Width > 0.01d && target > 0d ? target / formatted.Width : 1d;
 
-            IDisposable scaled = null;
+            Pushed? scaled = null;
             if (Math.Abs(stretch - 1d) > 0.001d)
             {
-                scaled = context.PushTransform(
-                    Matrix.CreateTranslation(-origin.X, 0d)
-                    * Matrix.CreateScale(stretch, 1d)
-                    * Matrix.CreateTranslation(origin.X, 0d));
+                var wider = new Matrix();
+                wider.ScaleAt(stretch, 1d, origin.X, 0d);
+
+                scaled = Moved(context, wider);
             }
 
             try
@@ -427,8 +499,8 @@ namespace Reactor.Sim.Simulation
             }
             finally
             {
-                if (scaled != null)
-                    scaled.Dispose();
+                if (scaled.HasValue)
+                    scaled.Value.Dispose();
             }
         }
 
@@ -449,7 +521,7 @@ namespace Reactor.Sim.Simulation
             if (unit <= 0f)
                 return false;
 
-            Bitmap page = atlas.Tinted(command.Color.R, command.Color.G, command.Color.B);
+            BitmapSource page = atlas.Tinted(command.Color.R, command.Color.G, command.Color.B);
 
             double pen = command.Position.X;
             double top = command.Position.Y + metrics.CellTop * unit;
@@ -458,18 +530,9 @@ namespace Reactor.Sim.Simulation
             // The whole run's alpha at once, rather than a paler tint per colour: the page is already a
             // coverage mask, so tinting and fading are separate concerns and only one of them is worth
             // keeping a copy of.
-            IDisposable fade = command.Color.A < 255
-                ? context.PushOpacity(command.Color.A / 255d)
+            Pushed? fade = command.Color.A < 255
+                ? Faded(context, command.Color.A / 255d)
                 : null;
-
-            // Once for the whole run, for the reason spelled out on Shrink: a cell on the page is
-            // forty-five tall and a small line of text draws it at half that, and sampled cheaply a
-            // one-texel diagonal falls between the samples and disappears. It is why ON came out broken
-            // where OFF beside it did not - N is the only letter of the three with a diagonal in it.
-            IDisposable sampling = context.PushRenderOptions(new RenderOptions
-            {
-                BitmapInterpolationMode = BitmapInterpolationMode.HighQuality
-            });
 
             try
             {
@@ -489,11 +552,10 @@ namespace Reactor.Sim.Simulation
 
                     if (glyph.Width > 0 && glyph.Height > 0)
                     {
-                        var source = new Rect(glyph.X, glyph.Y, glyph.Width, glyph.Height);
                         var destination = new Rect(
                             pen + glyph.Bearing * unit, top, glyph.Width * unit, glyph.Height * unit);
 
-                        context.DrawImage(page, source, destination);
+                        Cell(context, page, glyph, destination);
                     }
 
                     pen += (glyph.Advance + SeFontMetrics.Spacing) * unit;
@@ -502,13 +564,30 @@ namespace Reactor.Sim.Simulation
             }
             finally
             {
-                sampling.Dispose();
-
-                if (fade != null)
-                    fade.Dispose();
+                if (fade.HasValue)
+                    fade.Value.Dispose();
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Draws one cell of a font page into a box.
+        /// </summary>
+        /// <remarks>
+        /// Through a brush because this canvas cannot draw part of a picture: <c>DrawImage</c> takes the
+        /// whole thing. A brush with an absolute viewbox says which part, and the reduction is averaged
+        /// rather than sampled, which is what keeps a one-texel diagonal from vanishing at half size.
+        /// </remarks>
+        static void Cell(DrawingContext context, BitmapSource page, SeFontMetrics.Glyph glyph,
+            Rect destination)
+        {
+            var brush = new ImageBrush(page);
+            brush.ViewboxUnits = BrushMappingMode.Absolute;
+            brush.Viewbox = new Rect(glyph.X, glyph.Y, glyph.Width, glyph.Height);
+            brush.Stretch = Stretch.Fill;
+
+            context.DrawRectangle(brush, null, destination);
         }
 
         /// <summary>
@@ -519,16 +598,16 @@ namespace Reactor.Sim.Simulation
         /// machine and does not change while the window is open, and a lookup that failed once would
         /// otherwise go back to the disk sixty times a second for the rest of the session.
         /// </remarks>
-        Bitmap ArtFor(string name)
+        BitmapSource ArtFor(string name)
         {
-            Bitmap art;
+            BitmapSource art;
             if (_art.TryGetValue(name, out art))
                 return art;
 
             string relative = BlockArt.PathFor(name);
             string png = relative == null ? null : SafeResolve(relative);
 
-            art = png == null ? null : new Bitmap(png);
+            art = png == null ? null : new BitmapImage(new Uri(png, UriKind.Absolute));
             _art.Add(name, art);
             return art;
         }
@@ -547,15 +626,31 @@ namespace Reactor.Sim.Simulation
             }
         }
 
-        IBrush BrushFor(Color color)
+        /// <summary>
+        /// A run of text to draw, in whatever face this canvas has.
+        /// </summary>
+        /// <remarks>
+        /// The canvas's own, not the metrics': what a run is measured at and what it is drawn with are
+        /// two questions, and only the first one decides a layout. The second is a stand-in until the
+        /// game's own page is behind it - see <see cref="GlyphAtlas" />.
+        /// </remarks>
+        FormattedText Letters(string text, double size, Brush ink)
+        {
+            // One pixel per unit, for the reason FallbackFonts gives: this canvas is in window pixels
+            // and a frame must not change with the monitor it was drawn on.
+            return new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+                _letters, size, ink, 1d);
+        }
+
+        Brush BrushFor(Color color)
         {
             string key = color.ToString();
 
-            IBrush brush;
+            Brush brush;
             if (_brushes.TryGetValue(key, out brush))
                 return brush;
 
-            brush = new SolidColorBrush(AvColor.FromArgb(color.A, color.R, color.G, color.B));
+            brush = new SolidColorBrush(Ink.FromArgb(color.A, color.R, color.G, color.B));
             _brushes.Add(key, brush);
             return brush;
         }

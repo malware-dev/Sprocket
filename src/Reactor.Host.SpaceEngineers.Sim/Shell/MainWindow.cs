@@ -1,16 +1,15 @@
 using System;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Threading;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
 using Reactor.Sim.Simulation;
 using VRageMath;
-using Color = Avalonia.Media.Color;
-using Point = Avalonia.Point;
-using Panel = Avalonia.Controls.Panel;
+using Color = System.Windows.Media.Color;
+using Point = System.Windows.Point;
 using TextBox = Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox;
 
 namespace Reactor.Sim.Shell
@@ -29,6 +28,15 @@ namespace Reactor.Sim.Shell
         /// three classes that have no other reason to know about it.
         /// </remarks>
         public static bool OpensQuietly;
+
+        /// <summary>What one notch of the wheel scrolls, in UI units.</summary>
+        /// <remarks>
+        /// About three rows, which is what a list this size wants. The framework counts a notch as 120,
+        /// and the editor clamps the result, so pushing past either end simply stops.
+        /// </remarks>
+        const float NotchUnits = 60f;
+
+        const float PerNotch = 120f;
 
         readonly Surface _surface = new Surface();
         readonly EditorScene _editor = new EditorScene();
@@ -60,7 +68,7 @@ namespace Reactor.Sim.Shell
             WindowPlace.Restore(this);
             Background = new SolidColorBrush(Color.FromRgb(28, 34, 40));
 
-            _status.Margin = new Thickness(10, 6);
+            _status.Margin = new Thickness(10, 6, 10, 6);
             _status.FontSize = 12;
             _status.Foreground = Brushes.Gainsboro;
             _status.HorizontalAlignment = HorizontalAlignment.Left;
@@ -69,51 +77,61 @@ namespace Reactor.Sim.Shell
             DockPanel.SetDock(_status, Dock.Bottom);
             root.Children.Add(_status);
 
-            Control strip = BuildSimulateStrip();
+            FrameworkElement strip = BuildSimulateStrip();
             DockPanel.SetDock(strip, Dock.Bottom);
             root.Children.Add(strip);
 
-            // The same stand-in for the world the headless shot draws on, and for the same reason: the
-            // veil the screen is drawn behind cannot be judged against a flat colour.
             // A window is resized, so the monitor it stands in for takes its shape. A shot names a
             // resolution instead and keeps it.
             _surface.ShapedByWindow = true;
+            _surface.Focusable = true;
 
-            var stage = new Panel();
+            // The same stand-in for the world the headless shot draws on, and for the same reason: the
+            // veil the screen is drawn behind cannot be judged against a flat colour.
+            var stage = new Grid();
             stage.Children.Add(new Backdrop());
             stage.Children.Add(_surface);
 
             root.Children.Add(stage);
             Content = root;
 
-            // Closing is the one moment a timer cannot cover.
-            Closing += (s, e) => _editor.Save();
+            // Closing is the one moment a timer cannot cover. On Closing rather than Closed for the
+            // position, because by the time it has closed its position is gone.
+            Closing += delegate
+            {
+                _editor.Save();
+                WindowPlace.Remember(this);
+            };
 
-            // After it exists, because there is no handle to push around until then. ShowActivated on
-            // its own keeps the keyboard; this also puts it behind whatever is being worked in.
-            Opened += (s, e) =>
+            // After the handle exists, because there is nothing to push around until then.
+            // ShowActivated on its own keeps the keyboard; this also puts it behind whatever is being
+            // worked in.
+            SourceInitialized += delegate
             {
                 if (!OpensQuietly)
                     return;
 
-                var handle = TryGetPlatformHandle();
-                if (handle != null)
-                    Attention.StandBack(handle.Handle);
+                IntPtr handle = new WindowInteropHelper(this).Handle;
+                if (handle != IntPtr.Zero)
+                    Attention.StandBack(handle);
             };
 
+            Loaded += delegate { _surface.Focus(); };
+
             _surface.Frame += OnFrame;
-            _surface.PointerMoved += OnPointerMoved;
-            _surface.PointerPressed += OnPointerPressed;
-            _surface.PointerWheelChanged += (s, e) =>
+            _surface.MouseMove += OnMouseMove;
+            _surface.MouseDown += OnMouseDown;
+            _surface.MouseWheel += delegate(object sender, MouseWheelEventArgs e)
             {
-                // A notch moves about three rows, which is what a list this size wants. The editor clamps
-                // it, so pushing past either end simply stops.
                 if (!_showProbe)
-                    _editor.ScrollBy(ToUi(e.GetPosition(_surface)), (float)-e.Delta.Y * 60f);
+                {
+                    _editor.ScrollBy(ToUi(e.GetPosition(_surface)),
+                        -e.Delta / PerNotch * NotchUnits);
+                }
 
                 _surface.InvalidateVisual();
             };
-            _surface.PointerReleased += (s, e) =>
+            _surface.MouseUp += delegate
             {
                 _probe.SetPressed(false);
                 _editor.Drop();
@@ -123,7 +141,7 @@ namespace Reactor.Sim.Shell
             // The ship's clock. Core counts no time for itself: the game passes its update counter, this
             // passes a timer, a test passes whatever it likes.
             var clock = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(33) };
-            clock.Tick += (s, e) =>
+            clock.Tick += delegate
             {
                 _editor.Tick();
                 _surface.InvalidateVisual();
@@ -133,17 +151,12 @@ namespace Reactor.Sim.Shell
             // The caret blinks on the window's clock too. The box has none of its own, on purpose: a widget
             // that knew what a tick was would be a widget that knew which target it was on.
             var blink = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(530) };
-            blink.Tick += (s, e) =>
+            blink.Tick += delegate
             {
                 _caretVisible = !_caretVisible;
                 _surface.InvalidateVisual();
             };
             blink.Start();
-
-            Opened += (s, e) => _surface.Focus();
-
-            // On Closing rather than Closed, because by the time it has closed its position is gone.
-            Closing += (s, e) => WindowPlace.Remember(this);
         }
 
         void OnFrame(ScreenSpaceGraphics g)
@@ -178,12 +191,12 @@ namespace Reactor.Sim.Shell
                 _surface.MetricsSource,
                 _showProbe ? "show Reactor" : "show the drawing probe");
 
-            // Posted rather than assigned. This runs inside the render pass, and touching another control's
-            // properties there invalidates a visual that has already been walked, which Avalonia refuses.
+            // Posted rather than assigned. This runs inside the render pass, and touching another
+            // control's properties there invalidates a visual that has already been walked.
             if (status != _lastStatus)
             {
                 _lastStatus = status;
-                Dispatcher.UIThread.Post(() => _status.Text = status);
+                Dispatcher.BeginInvoke(new Action(delegate { _status.Text = status; }));
             }
         }
 
@@ -191,24 +204,25 @@ namespace Reactor.Sim.Shell
         /// The controls that stand in for the world.
         /// </summary>
         /// <remarks>
-        /// Scaffolding, and emphatically not Reactor. Tripping a sensor or draining a tank is something
-        /// the world does, and in the game a ship actually flies up to the sensor - so none of this exists
-        /// in core, none of it exists in the screens the mod compiles, and it lives here in the window
-        /// rather than anywhere it could be mistaken for part of the product.
+        /// Scaffolding, and emphatically not Reactor. Pressing a button is something a person does to the
+        /// ship, and in the game they walk up to the panel - so none of this exists in core, none of it
+        /// exists in the screens the mod compiles, and it lives here in the window rather than anywhere
+        /// it could be mistaken for part of the product.
         /// <para>
         /// Drawn in ordinary desktop controls for the same reason. The screen above it is the thing being
         /// built; anything sitting underneath in the same clothes would read as part of it.
         /// </para>
         /// </remarks>
-        Control BuildSimulateStrip()
+        FrameworkElement BuildSimulateStrip()
         {
-            var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+            var row = new StackPanel { Orientation = Orientation.Horizontal };
 
             row.Children.Add(new TextBlock
             {
                 Text = "Prototype - stands in for the game:",
                 Foreground = Brushes.DimGray,
                 FontSize = 11,
+                Margin = new Thickness(0, 0, 8, 0),
                 VerticalAlignment = VerticalAlignment.Center
             });
 
@@ -224,14 +238,14 @@ namespace Reactor.Sim.Shell
                         ? "press " + panel.Name
                         : "press " + panel.Name + " " + (which + 1);
 
-                    row.Children.Add(Poke(name, () => panel.Press(which)));
+                    row.Children.Add(Poke(name, delegate { panel.Press(which); }));
                 }
             }
 
             return new Border
             {
                 Child = row,
-                Padding = new Thickness(12, 6),
+                Padding = new Thickness(12, 6, 12, 6),
                 BorderBrush = Brushes.DimGray,
                 BorderThickness = new Thickness(0, 1, 0, 0),
                 Opacity = 0.75
@@ -246,11 +260,12 @@ namespace Reactor.Sim.Shell
                 Background = Brushes.Transparent,
                 Foreground = Brushes.Gainsboro,
                 BorderThickness = new Thickness(0),
-                Padding = new Thickness(8, 3),
+                Padding = new Thickness(8, 3, 8, 3),
+                Margin = new Thickness(0, 0, 8, 0),
                 FontSize = 12
             };
 
-            button.Click += (s, e) =>
+            button.Click += delegate
             {
                 act();
                 _surface.InvalidateVisual();
@@ -269,8 +284,12 @@ namespace Reactor.Sim.Shell
             return new Vector2((float)at.X / _scale + _screen.X, (float)at.Y / _scale + _screen.Y);
         }
 
-        void OnPointerPressed(object sender, PointerPressedEventArgs e)
+        void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            // The keyboard follows the screen: a click on it is how somebody starts typing into a box
+            // the screen is showing.
+            _surface.Focus();
+
             if (_showProbe)
             {
                 _probe.SetPressed(true);
@@ -288,7 +307,7 @@ namespace Reactor.Sim.Shell
             _surface.InvalidateVisual();
         }
 
-        void OnPointerMoved(object sender, PointerEventArgs e)
+        void OnMouseMove(object sender, MouseEventArgs e)
         {
             _pointer = e.GetPosition(_surface);
             _editor.MoveTo(ToUi(_pointer));
@@ -306,7 +325,7 @@ namespace Reactor.Sim.Shell
             }
         }
 
-        protected override void OnTextInput(TextInputEventArgs e)
+        protected override void OnTextInput(TextCompositionEventArgs e)
         {
             base.OnTextInput(e);
 
@@ -342,8 +361,8 @@ namespace Reactor.Sim.Shell
             if (box == null)
                 return;
 
-            bool shift = (e.KeyModifiers & KeyModifiers.Shift) != 0;
-            bool control = (e.KeyModifiers & KeyModifiers.Control) != 0;
+            bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
+            bool control = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
 
             switch (e.Key)
             {

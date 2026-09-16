@@ -1,4 +1,3 @@
-using Avalonia.Headless.XUnit;
 using Xunit;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
@@ -16,7 +15,7 @@ public class ScrollTests
     /// <summary>From an empty construct to the block picker: name a system, then ask what starts it.</summary>
     const string OpenThePicker = "400 144 type Airlock enter 400 144";
 
-    [AvaloniaFact]
+    [Fact]
     public void TheBlocksListIsTallerThanTheColumnItSitsIn()
     {
         var picker = Screen.Fresh(OpenThePicker.Split(' '));
@@ -29,7 +28,7 @@ public class ScrollTests
             + "so nothing is out of reach and this test is no longer testing anything");
     }
 
-    [AvaloniaFact]
+    [Fact]
     public void ScrollingBringsTheEndOfTheListIntoReach()
     {
         var picker = Screen.Fresh(OpenThePicker.Split(' '));

@@ -1,4 +1,3 @@
-using Avalonia.Headless.XUnit;
 using Reactor.Ui;
 using Xunit;
 
@@ -14,7 +13,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ComponentSmokeTests
 {
-    [AvaloniaFact]
+    [Fact]
     public void EveryComponentDrawsAndLaysOut()
     {
         var screen = Screen.Fresh();

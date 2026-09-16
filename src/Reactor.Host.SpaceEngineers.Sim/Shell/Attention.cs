@@ -13,7 +13,7 @@ namespace Reactor.Sim.Shell
     /// at a screenshot instead. So it can be told to come up behind whatever is in front and stay there,
     /// and told separately, later, to come forward when there is actually something to see.
     /// <para>
-    /// Win32 rather than anything Avalonia offers, because "show without taking focus" is a thing the
+    /// Win32 rather than anything the framework offers, because "show without taking focus" is a thing the
     /// window manager decides and not the toolkit. This is Windows-only, which the simulator already is.
     /// </para>
     /// </remarks>

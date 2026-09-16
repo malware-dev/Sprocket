@@ -37,7 +37,7 @@ public static class StorageReport
     public static string Render()
     {
         var report = new StringBuilder();
-        report.AppendLine("Storage timing. Release-only figures; the game's runtime is not this one.");
+        report.AppendLine("Storage timing, Release only, on the framework the game runs.");
         report.AppendLine();
         report.AppendLine("shape        bytes  stmts   save ms   load ms    lex ms  parse ms  model ms"
             + "   x50 ms   KB/load   collections");

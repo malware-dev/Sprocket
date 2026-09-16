@@ -1,6 +1,4 @@
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Themes.Fluent;
+using System.Windows;
 
 namespace Reactor.Sim.Shell
 {
@@ -10,18 +8,13 @@ namespace Reactor.Sim.Shell
     /// </summary>
     public sealed class App : Application
     {
-        public override void Initialize()
+        protected override void OnStartup(StartupEventArgs e)
         {
-            Styles.Add(new FluentTheme());
-        }
+            base.OnStartup(e);
 
-        public override void OnFrameworkInitializationCompleted()
-        {
-            var desktop = ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
-            if (desktop != null)
-                desktop.MainWindow = new MainWindow();
-
-            base.OnFrameworkInitializationCompleted();
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
+            MainWindow = new MainWindow();
+            MainWindow.Show();
         }
     }
 }
