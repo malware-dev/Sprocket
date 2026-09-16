@@ -44,9 +44,13 @@ sealed class Grid
 
     public IReadOnlyList<Fitting> Fitted => _fitted;
 
+    /// <summary>What every block on this grid writes down, in the order it happened.</summary>
+    public List<string> Journal { get; } = new List<string>();
+
     public T Weld<T>(T fitting) where T : Fitting
     {
         fitting.Grid = Block;
+        fitting.Journal = Journal;
         _fitted.Add(fitting);
         _slim[fitting] = Pretend.To<IMySlimBlock>()
             .Gives("FatBlock", () => fitting.Block)

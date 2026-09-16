@@ -20,7 +20,11 @@ sealed class Vent : Fitting
             .Gives("Status", () => Status)
             .Gives("CanPressurize", () => true)
             .Gives("Depressurize", () => !_pressurizing)
-            .Takes("Depressurize", value => _pressurizing = !(bool)value)
+            .Takes("Depressurize", value =>
+            {
+                _pressurizing = !(bool)value;
+                Told(_pressurizing ? "pressurize" : "depressurize");
+            })
             .Does("GetOxygenLevel", () => (float)_progress / CycleTicks));
     }
 

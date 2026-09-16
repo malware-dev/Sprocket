@@ -205,8 +205,22 @@ namespace Reactor.Host.SpaceEngineers.World
             keys.Add(new EntityKey(ValueKind.Text, Values.Text(entity.Name)));
         }
 
+        /// <summary>
+        /// How many times a reference has been matched against the blocks here.
+        /// </summary>
+        /// <remarks>
+        /// <b>For measuring, and it is not idle curiosity.</b> Matching walks every key against every
+        /// block, and doing it per reference per tick inside the game's update loop is the failure
+        /// this design is shaped to avoid. The wrong version works perfectly and is invisible in every
+        /// screenshot, so the only honest proof is a count - which a test takes before and after six
+        /// hundred idle ticks.
+        /// </remarks>
+        internal int Matched { get; private set; }
+
         public IEntity Match(IList<EntityKey> keys, out int matched)
         {
+            Matched++;
+
             for (var i = 0; i < keys.Count; i++)
             {
                 var found = Matching(keys[i]);

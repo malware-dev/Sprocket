@@ -2,6 +2,7 @@ using Reactor.Host.SpaceEngineers.Core.Editing;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Reactor.Tests;
@@ -49,7 +50,7 @@ public class PaperTargetTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("turn on");
+        editor.PressChoice("switch on");
         editor.PressPrimary();
         Note(seen, ship);
 
@@ -119,10 +120,10 @@ public class PaperTargetTests
     static Ship Build()
     {
         var ship = new Ship();
-        ship.World.Add(new TestDoor(1, "Inner Door"));
-        ship.World.Add(new TestDoor(2, "Outer Door"));
-        ship.World.Add(new TestButton(3, "Airlock Button"));
-        ship.World.Add(new TestLamp(4, "Airlock Light"));
+        ship.Rig.Door(1, "Inner Door");
+        ship.Rig.Door(2, "Outer Door");
+        ship.Rig.Panel(3, "Airlock Button");
+        ship.Rig.Light(4, "Airlock Light");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
@@ -131,9 +132,11 @@ public class PaperTargetTests
 
     sealed class Ship
     {
-        public TestWorld World = new();
+        public Rigged Rig = new();
         public Automation Automation = new();
         public AutomationRunner Runner = null!;
         public ReactorEditor Editor = null!;
+
+        public GridWorld World => Rig.World;
     }
 }

@@ -15,7 +15,7 @@ namespace Reactor.Tests;
 /// </remarks>
 public class RefTests
 {
-    readonly TestWorld _world = new();
+    readonly Rigged _ship = new();
 
     [Fact]
     public void TheStrongestKeyFindingItIsABinding()
@@ -43,7 +43,7 @@ public class RefTests
         var door = Add(1, "Inner Door");
         var declared = Declare("inner", door);
 
-        _world.Remove(1);
+        _ship.Grind(1);
         var rebuilt = Add(2, "Inner Door");
 
         var bindings = Resolve(declared);
@@ -59,7 +59,7 @@ public class RefTests
         var door = Add(1, "Inner Door");
         var declared = Declare("inner", door);
 
-        _world.Remove(1);
+        _ship.Grind(1);
 
         var bindings = Resolve(declared);
 
@@ -80,8 +80,8 @@ public class RefTests
         var door = Add(1, "Inner Door");
         var declared = Declare("inner", door);
 
-        _world.Remove(1);
-        _world.Add(new TestLamp(2, "Inner Door"));
+        _ship.Grind(1);
+        _ship.Light(2, "Inner Door");
 
         var bindings = Resolve(declared);
 
@@ -117,8 +117,8 @@ public class RefTests
         var program = new Automation();
         var door = Add(1, "Inner Door");
 
-        var first = program.Declare(_world, door);
-        var again = program.Declare(_world, door);
+        var first = program.Declare(_ship.World, door);
+        var again = program.Declare(_ship.World, door);
 
         Assert.Same(first, again);
         Assert.Single(program.Refs);
@@ -129,8 +129,8 @@ public class RefTests
     {
         var program = new Automation();
 
-        program.Declare(_world, Add(1, "Inner Door"));
-        program.Declare(_world, Add(2, "Outer Door"));
+        program.Declare(_ship.World, Add(1, "Inner Door"));
+        program.Declare(_ship.World, Add(2, "Outer Door"));
 
         Assert.Equal(2, program.Refs.Count);
         Assert.NotEqual(program.Refs[0].Name, program.Refs[1].Name);
@@ -149,7 +149,7 @@ public class RefTests
         var program = new Automation();
         program.Restore(new EntityRef("entity7", ""));
 
-        var minted = program.Declare(_world, Add(1, "Inner Door"));
+        var minted = program.Declare(_ship.World, Add(1, "Inner Door"));
 
         Assert.NotEqual("entity7", minted.Name);
         Assert.Same(program.FindRef("entity7"), program.Refs[0]);
@@ -162,7 +162,7 @@ public class RefTests
         var program = new Automation();
         program.Restore(new EntityRef("inner", ""));
 
-        Assert.Equal("entity1", program.Declare(_world, Add(1, "Inner Door")).Name);
+        Assert.Equal("entity1", program.Declare(_ship.World, Add(1, "Inner Door")).Name);
     }
 
     /// <summary>
@@ -177,18 +177,18 @@ public class RefTests
     public void TenSecondsOfIdleTicksMatchNothing()
     {
         var program = new Automation();
-        program.Declare(_world, Add(1, "Inner Door"));
-        program.Declare(_world, Add(2, "Outer Door"));
+        program.Declare(_ship.World, Add(1, "Inner Door"));
+        program.Declare(_ship.World, Add(2, "Outer Door"));
 
         var bindings = new Bindings();
-        bindings.Refresh(_world, program);
+        bindings.Refresh(_ship.World, program);
 
-        var settled = _world.Matches;
+        var settled = _ship.World.Matched;
 
         for (var tick = 0; tick < 600; tick++)
-            bindings.Refresh(_world, program);
+            bindings.Refresh(_ship.World, program);
 
-        Assert.Equal(settled, _world.Matches);
+        Assert.Equal(settled, _ship.World.Matched);
     }
 
     /// <summary>Welding something on is what makes it look again.</summary>
@@ -196,19 +196,19 @@ public class RefTests
     public void ABlockArrivingMakesItResolveOnce()
     {
         var program = new Automation();
-        program.Declare(_world, Add(1, "Inner Door"));
+        program.Declare(_ship.World, Add(1, "Inner Door"));
 
         var bindings = new Bindings();
-        bindings.Refresh(_world, program);
+        bindings.Refresh(_ship.World, program);
         var settled = bindings.Revision;
 
         Add(2, "Outer Door");
 
-        bindings.Refresh(_world, program);
+        bindings.Refresh(_ship.World, program);
         Assert.NotEqual(settled, bindings.Revision);
 
         var after = bindings.Revision;
-        bindings.Refresh(_world, program);
+        bindings.Refresh(_ship.World, program);
         Assert.Equal(after, bindings.Revision);
     }
 
@@ -217,36 +217,36 @@ public class RefTests
     public void ANewDeclarationMakesItResolveOnce()
     {
         var program = new Automation();
-        program.Declare(_world, Add(1, "Inner Door"));
+        program.Declare(_ship.World, Add(1, "Inner Door"));
 
         var bindings = new Bindings();
-        bindings.Refresh(_world, program);
+        bindings.Refresh(_ship.World, program);
         var settled = bindings.Revision;
 
-        program.Declare(_world, Add(2, "Outer Door"));
+        program.Declare(_ship.World, Add(2, "Outer Door"));
 
-        bindings.Refresh(_world, program);
+        bindings.Refresh(_ship.World, program);
         Assert.NotEqual(settled, bindings.Revision);
     }
 
-    TestDoor Add(long id, string name)
+    /// <summary>A door welded on, as what Reactor sees of it.</summary>
+    IEntity Add(long id, string name)
     {
-        var door = new TestDoor(id, name);
-        _world.Add(door);
-        return door;
+        _ship.Door(id, name);
+        return _ship.Entity(id);
     }
 
     EntityRef Declare(string name, IEntity entity)
     {
         var declared = new EntityRef(name, entity.Kind.Id);
-        _world.Identify(entity, declared.Keys);
+        _ship.World.Identify(entity, declared.Keys);
         return declared;
     }
 
     Bindings Resolve(params EntityRef[] refs)
     {
         var bindings = new Bindings();
-        bindings.Resolve(_world, refs);
+        bindings.Resolve(_ship.World, refs);
         return bindings;
     }
 }

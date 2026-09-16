@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Reactor.Sim.Fakes;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
@@ -42,6 +43,23 @@ abstract class Fitting
 
     public IMyCubeGrid Grid { get; set; }
 
+    /// <summary>
+    /// Where what this block is told to do gets written down, which is the rig's own journal.
+    /// </summary>
+    /// <remarks>
+    /// One list for the whole construct, in the order things happened. Both halves are asked about:
+    /// which block got an action - the port airlock's inner door must shut and the front one must
+    /// not - and in what order, because a step that ran before the one above it finished is the
+    /// failure the whole model is shaped to prevent.
+    /// </remarks>
+    public List<string> Journal { get; set; }
+
+    protected void Told(string action)
+    {
+        if (Journal != null)
+            Journal.Add(Name + ":" + action);
+    }
+
     public MyModStorageComponentBase Storage { get; set; }
 
     /// <summary>A moment of the rig running, which for most blocks is nothing at all.</summary>
@@ -71,7 +89,11 @@ abstract class Fitting
             .Gives("IsFunctional", () => true)
             .Gives("IsWorking", () => Enabled)
             .Gives("Enabled", () => Enabled)
-            .Takes("Enabled", value => Enabled = (bool)value)
+            .Takes("Enabled", value =>
+            {
+                Enabled = (bool)value;
+                Told(Enabled ? "on" : "off");
+            })
             .Gives("CubeGrid", () => Grid)
             .Gives("Storage", () => Storage)
             .Takes("Storage", value => Storage = (MyModStorageComponentBase)value)

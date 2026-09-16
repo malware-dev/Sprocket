@@ -25,12 +25,26 @@ sealed class Door : Fitting
         Fit(Pretend.To<IMyDoor>()
             .Gives("Status", () => Status)
             .Gives("OpenRatio", () => (float)_progress / TravelTicks)
-            .Does("OpenDoor", () => { _opening = true; return null; })
-            .Does("CloseDoor", () => { _opening = false; return null; })
-            .Does("ToggleDoor", () => { _opening = !_opening; return null; }));
+            .Does("OpenDoor", () => { _opening = true; Told("open"); return null; })
+            .Does("CloseDoor", () => { _opening = false; Told("close"); return null; })
+            .Does("ToggleDoor", () => { _opening = !_opening; Told("toggle"); return null; }));
     }
 
-    DoorStatus Status
+    /// <summary>
+    /// Already open, without having been told to open.
+    /// </summary>
+    /// <remarks>
+    /// For setting a scene: a test about closing a door wants one that is open to begin with, and
+    /// forty-five ticks of it travelling is not what the test is about.
+    /// </remarks>
+    public void ForceOpen()
+    {
+        _progress = TravelTicks;
+        _opening = true;
+    }
+
+    /// <summary>What the game would report of this door, which is what the mod reads.</summary>
+    public DoorStatus Status
     {
         get
         {

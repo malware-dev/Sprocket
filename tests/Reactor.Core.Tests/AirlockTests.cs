@@ -2,6 +2,10 @@ using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.World;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Xunit;
+using System.Collections.Generic;
+using Reactor.Host.SpaceEngineers.World;
+using Reactor.Sim.Machine;
+using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;
 
 namespace Reactor.Tests;
 
@@ -21,19 +25,27 @@ public class AirlockTests
 {
     sealed class Airlock
     {
-        public TestWorld World = new();
+        public Rigged Ship = new();
         public Automation Automation = new();
         public AutomationRunner Runner = null!;
 
-        public TestDoor Inner = null!;
-        public TestDoor Outer = null!;
-        public TestVent Vent = null!;
-        public TestButton Inside = null!;
+        public Door Inner = null!;
+        public Door Outer = null!;
+        public Vent Vent = null!;
+        public Panel Inside = null!;
 
         public Sequence LetMeOut = null!;
 
+        public GridWorld World => Ship.World;
+
+        /// <summary>What the construct has been told to do, oldest first.</summary>
+        public List<string> Log => Ship.Rig.Log;
+
         /// <summary>Names a block, so a test builds sequences the way the editor does.</summary>
         public string Ref(IEntity entity) => Automation.Declare(World, entity).Name;
+
+        /// <summary>What Reactor sees of one of the rig's blocks.</summary>
+        public IEntity Seen(Fitting fitting) => Ship.Entity(fitting.Id);
 
         int _frame;
 
@@ -41,9 +53,21 @@ public class AirlockTests
         {
             for (var i = 0; i < ticks; i++)
             {
-                World.Tick();
+                Ship.Tick();
                 Runner.Tick(++_frame);
             }
+        }
+
+        /// <summary>
+        /// The button being pressed, which is the host calling this sequence.
+        /// </summary>
+        /// <remarks>
+        /// A button raises nothing a rule can sample: its slot carries which sequence to run and the
+        /// unit resolves that. Which slot carries which key is the harness's business - see RigTests.
+        /// </remarks>
+        public void Press()
+        {
+            Runner.Call(LetMeOut);
         }
 
         public SequenceRunner State => Runner.Get(LetMeOut)!;
@@ -74,20 +98,20 @@ public class AirlockTests
     static Airlock Build()
     {
         var a = new Airlock();
-        a.Inner = a.World.Add(new TestDoor(1, "Inner Door"));
-        a.Outer = a.World.Add(new TestDoor(2, "Outer Door"));
-        a.Vent = a.World.Add(new TestVent(3, "Airlock Vent"));
-        a.Inside = a.World.Add(new TestButton(4, "Inside Button"));
+        a.Inner = a.Ship.Door(1, "Inner Door");
+        a.Outer = a.Ship.Door(2, "Outer Door");
+        a.Vent = a.Ship.Vent(3, "Airlock Vent");
+        a.Inside = a.Ship.Panel(4, "Inside Button");
 
-        var trigger = new WhenTrigger("pressed");
-        trigger.Sources.Add(a.Ref(a.Inside));
+        var trigger = new WhenTrigger("pressed-1");
+        trigger.Sources.Add(a.Ref(a.Seen(a.Inside)));
 
         a.LetMeOut = a.Automation.AddSequence(trigger);
         a.LetMeOut.Name = "Let me out";
 
-        Then(a.LetMeOut, "close", a.Ref(a.Inner));
-        Then(a.LetMeOut, "depressurize", a.Ref(a.Vent));
-        Then(a.LetMeOut, "open", a.Ref(a.Outer));
+        Then(a.LetMeOut, "close", a.Ref(a.Seen(a.Inner)));
+        Then(a.LetMeOut, "depressurize", a.Ref(a.Seen(a.Vent)));
+        Then(a.LetMeOut, "open", a.Ref(a.Seen(a.Outer)));
 
         a.Runner = new AutomationRunner(a.Automation, a.World);
         return a;
@@ -99,27 +123,27 @@ public class AirlockTests
         var a = Build();
         a.Inner.ForceOpen();
         a.Tick(3);
-        a.World.Log.Clear();
+        a.Log.Clear();
 
-        a.Inside.Press();
+        a.Press();
         a.Tick();
-        Assert.Equal(["Inner Door:close"], a.World.Log);
+        Assert.Equal(["Inner Door:close"], a.Log);
 
         // The door takes time, and nothing else may happen while it travels. Nobody
         // wrote "once it is shut" - the list being a list is what says that.
         a.Tick(5);
-        Assert.Equal(["Inner Door:close"], a.World.Log);
+        Assert.Equal(["Inner Door:close"], a.Log);
         Assert.True(a.State.IsWaiting);
         Assert.Equal(1, a.State.CurrentStep);
 
-        a.Tick(10);
-        Assert.Contains("Airlock Vent:depressurize", a.World.Log);
-        Assert.DoesNotContain("Outer Door:open", a.World.Log);
+        a.Tick(50);
+        Assert.Contains("Airlock Vent:depressurize", a.Log);
+        Assert.DoesNotContain("Outer Door:open", a.Log);
 
-        a.Tick(15);
-        Assert.Equal(["Inner Door:close", "Airlock Vent:depressurize", "Outer Door:open"], a.World.Log);
+        a.Tick(100);
+        Assert.Equal(["Inner Door:close", "Airlock Vent:depressurize", "Outer Door:open"], a.Log);
 
-        a.Tick(15);
+        a.Tick(50);
         Assert.False(a.State.IsRunning);
     }
 
@@ -132,9 +156,9 @@ public class AirlockTests
         var a = Build();
         a.Inner.ForceOpen();
         a.Tick(3);
-        a.World.Log.Clear();
+        a.Log.Clear();
 
-        a.Inside.Press();
+        a.Press();
         a.Tick();
 
         for (var i = 0; i < 60; i++)
@@ -145,7 +169,7 @@ public class AirlockTests
 
         Assert.True(a.State.IsWaiting);
         Assert.Equal(1, a.State.CurrentStep);
-        Assert.Equal(["Inner Door:close"], a.World.Log);
+        Assert.Equal(["Inner Door:close"], a.Log);
     }
 
     [Fact]
@@ -154,14 +178,14 @@ public class AirlockTests
         // Only things that genuinely take time hold the sequence up. An action that
         // reaches for no particular state is finished the moment it is issued.
         var a = Build();
-        var beacon = a.World.Add(new TestLamp(5, "Beacon"));
+        var beacon = a.Ship.Light(5, "Beacon");
 
         var sequence = a.Automation.AddSequence(new EveryTrigger(1));
-        Then(sequence, "on", a.Ref(beacon));
-        Then(sequence, "close", a.Ref(a.Inner));
+        Then(sequence, BlockKinds.SwitchOn, a.Ref(a.Seen(beacon)));
+        Then(sequence, "close", a.Ref(a.Seen(a.Inner)));
 
         a.Tick();
-        Assert.Equal(["Beacon:on", "Inner Door:close"], a.World.Log);
+        Assert.Equal(["Beacon:on", "Inner Door:close"], a.Log);
     }
 
     [Fact]
@@ -171,19 +195,19 @@ public class AirlockTests
         a.Inner.ForceOpen();
         a.Outer.ForceOpen();
         a.Tick(3);
-        a.World.Log.Clear();
+        a.Log.Clear();
 
         var sequence = a.Automation.AddSequence(new EveryTrigger(1000));
-        sequence.Steps.Add(Do("close", a.Ref(a.Inner)));
-        Then(sequence, "close", a.Ref(a.Outer));
+        sequence.Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
+        Then(sequence, "close", a.Ref(a.Seen(a.Outer)));
 
         a.Tick();                       // lets the runner pick the new sequence up
-        a.World.Log.Clear();
+        a.Log.Clear();
 
         a.Runner.Call(sequence);
 
         // Both doors are moving together, which would not happen by default.
-        Assert.Equal(["Inner Door:close", "Outer Door:close"], a.World.Log);
+        Assert.Equal(["Inner Door:close", "Outer Door:close"], a.Log);
     }
 
     [Fact]
@@ -193,9 +217,9 @@ public class AirlockTests
         a.Inner.ForceOpen();
         a.Tick(3);
 
-        a.Inside.Press();
+        a.Press();
         a.Tick(2);
-        a.Inside.Press();
+        a.Press();
         a.Tick(2);
 
         Assert.Equal(1, a.State.FiredCount);
@@ -208,32 +232,42 @@ public class AirlockTests
     /// Two triggers on one sequence both start it, and each keeps its own reading.
     /// </summary>
     /// <remarks>
-    /// The inside button and the outside one. A trigger belonging to a sequence could not say this at
-    /// all, which is why they moved onto the system - and with one shared reading between them, the
-    /// second one fired nothing.
+    /// A trigger belonging to a sequence could not say this at all, which is why they moved onto the
+    /// system - and with one shared reading between them, the second one fired nothing.
+    ///
+    /// Two lamps rather than two buttons, because a button raises nothing to read: its slot carries
+    /// which sequence to run. A trigger has to watch something that changes.
     /// </remarks>
     [Fact]
     public void TwoTriggersOnOneSequenceBothStartIt()
     {
         var a = Build();
-        var outside = a.World.Add(new TestButton(6, "Outside Button"));
+        var one = a.Ship.Light(5, "Inside Lamp");
+        var other = a.Ship.Light(6, "Outside Lamp");
         var system = a.Automation.Systems[0];
 
-        var second = new WhenTrigger("pressed");
-        second.Sources.Add(a.Ref(outside));
-        second.Runs = a.LetMeOut.Number;
-        system.AddTrigger(second);
+        foreach (var lamp in new[] { one, other })
+        {
+            var trigger = new WhenTrigger("switched-on");
+            trigger.Sources.Add(a.Ref(a.Seen(lamp)));
+            trigger.Runs = a.LetMeOut.Number;
+            system.AddTrigger(trigger);
+        }
 
+        // Both off to begin with, so switching one on is an edge either trigger could miss.
+        a.World.Invoke(a.Seen(one), BlockKinds.SwitchOff);
+        a.World.Invoke(a.Seen(other), BlockKinds.SwitchOff);
         a.Tick(3);
 
-        // The one that was there from the start.
-        a.Inside.Press();
+        a.World.Invoke(a.Seen(one), BlockKinds.SwitchOn);
         a.Tick(2);
         Assert.Equal(1, a.State.FiredCount);
 
-        // And the one added beside it, which has its own edge to detect.
-        a.Tick(60);
-        outside.Press();
+        // Let the cycle finish, then the other one, which has its own edge to detect.
+        a.Tick(220);
+        Assert.False(a.State.IsRunning);
+
+        a.World.Invoke(a.Seen(other), BlockKinds.SwitchOn);
         a.Tick(2);
         Assert.Equal(2, a.State.FiredCount);
     }
@@ -253,22 +287,22 @@ public class AirlockTests
 
         var warn = a.Automation.AddSequence(system);
         warn.Name = "Warn";
-        Then(warn, "close", a.Ref(a.Outer));
+        Then(warn, "close", a.Ref(a.Seen(a.Outer)));
 
         var caller = a.Automation.AddSequence(system);
         caller.Steps.Add(new Run(warn.Number));
-        Then(caller, "close", a.Ref(a.Inner));
+        Then(caller, "close", a.Ref(a.Seen(a.Inner)));
 
         a.Inner.ForceOpen();
         a.Outer.ForceOpen();
         a.Tick(3);
-        a.World.Log.Clear();
+        a.Log.Clear();
 
         a.Runner.Call(caller);
         a.Tick();
 
         // Both doors closing: the called sequence started, and the caller did not wait for it.
-        Assert.Equal(["Outer Door:close", "Inner Door:close"], a.World.Log);
+        Assert.Equal(["Outer Door:close", "Inner Door:close"], a.Log);
     }
 
     /// <summary>
@@ -284,16 +318,19 @@ public class AirlockTests
     /// finishes instantly, so "make sure the outer door is shut" and "close the outer
     /// door" are the same sentence - and nobody ever has to write "if it is open,
     /// close it".
+    ///
+    /// Locking is switching off, because that is the only lock a block has: a disabled door
+    /// cannot be operated, by a sequence or by hand.
     /// </remarks>
-    static Sequence Cycle(Airlock a, string name, TestDoor leave, TestDoor enter, string pump)
+    static Sequence Cycle(Airlock a, string name, Door leave, Door enter, string pump)
     {
         var sequence = a.Automation.AddSequence(a.Automation.Systems[0]);
         sequence.Name = name;
-        Then(sequence, "close", a.Ref(leave));
-        Then(sequence, "lock", a.Ref(leave));
-        Then(sequence, pump, a.Ref(a.Vent));
-        Then(sequence, "unlock", a.Ref(enter));
-        Then(sequence, "open", a.Ref(enter));
+        Then(sequence, "close", a.Ref(a.Seen(leave)));
+        Then(sequence, BlockKinds.SwitchOff, a.Ref(a.Seen(leave)));
+        Then(sequence, pump, a.Ref(a.Seen(a.Vent)));
+        Then(sequence, BlockKinds.SwitchOn, a.Ref(a.Seen(enter)));
+        Then(sequence, "open", a.Ref(a.Seen(enter)));
         return sequence;
     }
 
@@ -308,15 +345,15 @@ public class AirlockTests
         a.Tick(3);
         a.Runner.Call(letMeOut);
 
-        for (var i = 0; i < 80; i++)
+        for (var i = 0; i < 200; i++)
         {
             a.Tick();
-            Assert.False(a.Inner.Status == "open" && a.Outer.Status == "open",
+            Assert.False(a.Inner.Status == DoorStatus.Open && a.Outer.Status == DoorStatus.Open,
                 $"both doors open at tick {i}");
         }
 
-        Assert.Equal("open", a.Outer.Status);
-        Assert.Equal("shut", a.Inner.Status);
+        Assert.Equal(DoorStatus.Open, a.Outer.Status);
+        Assert.Equal(DoorStatus.Closed, a.Inner.Status);
     }
 
     [Fact]
@@ -328,10 +365,10 @@ public class AirlockTests
         var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "depressurize");
 
         a.Tick(3);
-        a.World.Log.Clear();
+        a.Log.Clear();
         a.Runner.Call(letMeOut);
 
-        Assert.Equal(["Inner Door:close", "Inner Door:lock", "Airlock Vent:depressurize"], a.World.Log);
+        Assert.Equal(["Inner Door:close", "Inner Door:off", "Airlock Vent:depressurize"], a.Log);
     }
 
     [Fact]
@@ -349,13 +386,13 @@ public class AirlockTests
         a.Inner.ForceOpen();
         a.Tick(3);
         a.Runner.Call(letMeOut);
-        a.Tick(80);
+        a.Tick(200);
 
-        Assert.Equal("open", a.Inner.Status);
+        Assert.Equal(DoorStatus.Open, a.Inner.Status);
 
         // And the sequence is stuck on the await, waiting for a door that can no longer move -
         // which is the right failure, because the alternative is opening the outer door onto it.
-        Assert.Equal("shut", a.Outer.Status);
+        Assert.Equal(DoorStatus.Closed, a.Outer.Status);
         Assert.True(a.State.IsRunning || a.Runner.Get(letMeOut)!.IsWaiting);
     }
 
@@ -372,19 +409,19 @@ public class AirlockTests
     /// door raises "outer door finishes closing", which would then close the inner
     /// door the player had just walked through. Locking raises no such event.
     /// </remarks>
-    static void Mutex(Airlock a, TestDoor door, TestDoor other)
+    static void Mutex(Airlock a, Door door, Door other)
     {
         var opened = new WhenTrigger("opened");
-        opened.Sources.Add(a.Ref(door));
+        opened.Sources.Add(a.Ref(a.Seen(door)));
         var secure = a.Automation.AddSequence(opened);
         secure.Name = $"Secure the other door while {door.Name} is open";
-        Then(secure, "lock", a.Ref(other));
+        Then(secure, BlockKinds.SwitchOff, a.Ref(a.Seen(other)));
 
-        var shut = new WhenTrigger("shut");
-        shut.Sources.Add(a.Ref(door));
+        var shut = new WhenTrigger("closed");
+        shut.Sources.Add(a.Ref(a.Seen(door)));
         var release = a.Automation.AddSequence(shut);
         release.Name = $"Release the other door when {door.Name} shuts";
-        Then(release, "unlock", a.Ref(other));
+        Then(release, BlockKinds.SwitchOn, a.Ref(a.Seen(other)));
     }
 
     [Fact]
@@ -402,10 +439,10 @@ public class AirlockTests
 
         // Anything trying to open the outer door now gets nowhere.
         var careless = a.Automation.AddSequence(new EveryTrigger(1));
-        Then(careless, "open", a.Ref(a.Outer));
-        a.Tick(30);
+        Then(careless, "open", a.Ref(a.Seen(a.Outer)));
+        a.Tick(60);
 
-        Assert.NotEqual("open", a.Outer.Status);
+        Assert.NotEqual(DoorStatus.Open, a.Outer.Status);
     }
 
     [Fact]
@@ -419,14 +456,14 @@ public class AirlockTests
         a.Inner.ForceOpen();
         a.Tick(3);
 
-        a.World.Invoke(a.Inner, "close");
-        a.Tick(15);
+        a.World.Invoke(a.Seen(a.Inner), "close");
+        a.Tick(60);
 
         var opener = a.Automation.AddSequence(new EveryTrigger(1));
-        Then(opener, "open", a.Ref(a.Outer));
-        a.Tick(30);
+        Then(opener, "open", a.Ref(a.Seen(a.Outer)));
+        a.Tick(60);
 
-        Assert.Equal("open", a.Outer.Status);
+        Assert.Equal(DoorStatus.Open, a.Outer.Status);
     }
 
     [Fact]
@@ -438,10 +475,10 @@ public class AirlockTests
         a.Outer.ForceOpen();
         a.Tick(3);
         a.Runner.Call(letMeIn);
-        a.Tick(80);
+        a.Tick(200);
 
-        Assert.Equal("open", a.Inner.Status);
-        Assert.Equal("shut", a.Outer.Status);
+        Assert.Equal(DoorStatus.Open, a.Inner.Status);
+        Assert.Equal(DoorStatus.Closed, a.Outer.Status);
     }
 }
 
@@ -456,54 +493,63 @@ public class AirlockTests
 /// </remarks>
 public class PropertyTests
 {
-    static (TestWorld World, TestTank Tank) Build()
+    readonly Values _store = new Values();
+
+    /// <summary>
+    /// A kind with a reading of each sort, declared here rather than taken off a block.
+    /// </summary>
+    /// <remarks>
+    /// These tests are about the vocabulary and nothing else: what a state compares, and what it
+    /// answers. A ship would only be a way of getting hold of a kind, and the fixture that used to
+    /// supply one had to invent a tank the game does not offer.
+    /// </remarks>
+    EntityKind Tank()
     {
-        var world = new TestWorld();
-        var tank = world.Add(new TestTank(1, "Hydrogen Tank", world.Values));
-        return (world, tank);
+        return new EntityKind("tank", "Hydrogen Tank")
+            .WithProperty("fill", ValueKind.Real, "fill level")
+            .WithState("is-low", "fill", Relation.Below, EntityValue.Of(0.25), "is low")
+            .WithState("is-fine", "fill", Relation.AtLeast, EntityValue.Of(0.25), "has plenty")
+            .WithProperty("label", ValueKind.Text, "label")
+            .WithState("is-spare", "label", Relation.Is, _store.Text("spare"), "is the spare");
     }
 
     [Fact]
     public void AStateOverANumberComparesAgainstIt()
     {
-        var (world, tank) = Build();
-        var low = tank.Kind.FindState("is-low")!;
-        var fine = tank.Kind.FindState("is-fine")!;
+        EntityKind tank = Tank();
+        var low = tank.FindState("is-low")!;
+        var fine = tank.FindState("is-fine")!;
 
-        tank.SetFill(0.10);
-        Assert.True(low.Holds(world.Values, tank.GetValue("fill")));
-        Assert.False(fine.Holds(world.Values, tank.GetValue("fill")));
+        Assert.True(low.Holds(_store, EntityValue.Of(0.10)));
+        Assert.False(fine.Holds(_store, EntityValue.Of(0.10)));
 
         // The boundary belongs to "has plenty": is-low is Below, is-fine is AtLeast, so the
         // pair covers every reading exactly once and no level is both or neither.
-        tank.SetFill(0.25);
-        Assert.False(low.Holds(world.Values, tank.GetValue("fill")));
-        Assert.True(fine.Holds(world.Values, tank.GetValue("fill")));
+        Assert.False(low.Holds(_store, EntityValue.Of(0.25)));
+        Assert.True(fine.Holds(_store, EntityValue.Of(0.25)));
     }
 
     [Fact]
     public void AStateOverTextComparesAgainstIt()
     {
-        var (world, tank) = Build();
-        var spare = tank.Kind.FindState("is-spare")!;
+        var spare = Tank().FindState("is-spare")!;
 
-        tank.SetLabel("main");
-        Assert.False(spare.Holds(world.Values, tank.GetValue("label")));
-
-        tank.SetLabel("spare");
-        Assert.True(spare.Holds(world.Values, tank.GetValue("label")));
+        Assert.False(spare.Holds(_store, _store.Text("main")));
+        Assert.True(spare.Holds(_store, _store.Text("spare")));
     }
 
     [Fact]
     public void AFlagIsJustAPropertyWhoseReadingsAreTrueAndFalse()
     {
-        var world = new TestWorld();
-        var door = world.Add(new TestDoor(1, "Inner Door"));
-        var open = door.Kind.FindState("is-open")!;
+        EntityKind door = new EntityKind("door", "Door")
+            .WithProperty("open", "open")
+            .WithState("is-open", "open", true, "is open");
 
-        Assert.Equal(ValueKind.Flag, door.Kind.FindProperty("open")!.Kind);
+        var open = door.FindState("is-open")!;
+
+        Assert.Equal(ValueKind.Flag, door.FindProperty("open")!.Kind);
         Assert.Equal(Relation.Is, open.Relation);
-        Assert.True(world.Values.Flag(ValueKind.Flag, open.Operand));
+        Assert.True(_store.Flag(ValueKind.Flag, open.Operand));
     }
 
     /// <summary>Only a number can be above something; anything can equal something.</summary>

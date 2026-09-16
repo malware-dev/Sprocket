@@ -19,14 +19,15 @@ namespace Reactor.Tests;
 /// </remarks>
 public class UndoTests
 {
-    static (TestWorld World, Sequence Sequence) Build()
+    /// <summary>
+    /// A sequence to edit, and nothing else.
+    /// </summary>
+    /// <remarks>
+    /// No construct: an edit and its undo are about the program, and every one of these tests reads
+    /// the sequence back as text. What the blocks it names really are never comes into it.
+    /// </remarks>
+    static Sequence Build()
     {
-        var world = new TestWorld();
-        world.Add(new TestDoor(1, "Inner Door"));
-        world.Add(new TestDoor(2, "Outer Door"));
-        world.Add(new TestVent(3, "Airlock Vent"));
-        world.Add(new TestButton(4, "Airlock Button"));
-
         var trigger = new WhenTrigger("pressed");
         trigger.Sources.Add("call");
 
@@ -37,7 +38,7 @@ public class UndoTests
         sequence.Steps.Add(StepFor("depressurize", "vent"));
         sequence.Steps.Add(StepFor("open", "outer"));
 
-        return (world, sequence);
+        return sequence;
     }
 
     static Act StepFor(string actionId, params string[] targets)
@@ -86,7 +87,7 @@ public class UndoTests
 
     static void RoundTrip(SequenceEdit edit)
     {
-        var (_, sequence) = Build();
+        Sequence sequence = Build();
         var before = Shape(sequence);
 
         edit.Apply(sequence);
@@ -107,14 +108,14 @@ public class UndoTests
     [Fact]
     public void RemovingAStepReversesExactly()
     {
-        var (_, sequence) = Build();
+        Sequence sequence = Build();
         RoundTrip(new RemoveStep(1, sequence.Steps[1]));
     }
 
     [Fact]
     public void RemovingTheFirstStepReversesExactly()
     {
-        var (_, sequence) = Build();
+        Sequence sequence = Build();
         RoundTrip(new RemoveStep(0, sequence.Steps[0]));
     }
 
@@ -127,14 +128,14 @@ public class UndoTests
     [Fact]
     public void ChangingAStepReversesExactly()
     {
-        var (_, sequence) = Build();
+        Sequence sequence = Build();
         RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock"));
     }
 
     [Fact]
     public void ChangingAWaitReversesExactly()
     {
-        var (_, sequence) = Build();
+        Sequence sequence = Build();
         sequence.Steps[1] = new Wait(60);
         var edit = new SetWait(1, 60, 120);
 
@@ -166,7 +167,7 @@ public class UndoTests
     [Fact]
     public void ChangingTheTriggerReversesExactly()
     {
-        var (_, sequence) = Build();
+        Sequence sequence = Build();
         var when = (WhenTrigger)sequence.Trigger;
         RoundTrip(new ChangeTrigger(when, new[] { "inner", "outer" }, "opened", true));
     }
@@ -195,7 +196,7 @@ public class UndoTests
     [Fact]
     public void SettlingOnWhatWasAlreadyThereIsNotAnEdit()
     {
-        var (_, sequence) = Build();
+        Sequence sequence = Build();
         var when = (WhenTrigger)sequence.Trigger;
 
         Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close").Changes);

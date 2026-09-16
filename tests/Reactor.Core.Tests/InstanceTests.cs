@@ -1,6 +1,8 @@
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Xunit;
+using Reactor.Host.SpaceEngineers.World;
+using Reactor.Sim.Machine;
 
 namespace Reactor.Tests;
 
@@ -20,7 +22,7 @@ public class InstanceTests
 {
     sealed class Ship
     {
-        public TestWorld World = new();
+        public Rigged Rig = new();
         public Automation Program = new();
         public AutomationRunner Runner = null!;
         public AutomationSystem Airlock = null!;
@@ -28,15 +30,31 @@ public class InstanceTests
         /// <summary>Names a block, so a test builds sequences the way the editor does.</summary>
         public string Ref(long id) => Program.Declare(World, World.FindEntity(id)!).Name;
 
+        public GridWorld World => Rig.World;
+
         int _frame;
 
         public void Tick(int ticks = 1)
         {
             for (var i = 0; i < ticks; i++)
             {
-                World.Tick();
+                Rig.Tick();
                 Runner.Tick(++_frame);
             }
+        }
+
+        /// <summary>
+        /// The host starting one of a system, which is what pressing its own button does.
+        /// </summary>
+        /// <remarks>
+        /// A button raises nothing a rule can sample: its slot carries which system, which one of it
+        /// and which sequence, and the unit resolves that and calls. So a test that means "the port
+        /// button was pressed" says which one of the system ran, and the slot carrying the right key
+        /// is the harness's business - see RigTests.
+        /// </remarks>
+        public void Start(SystemInstance one)
+        {
+            Runner.Call(Program.Sequences[0], one);
         }
     }
 
@@ -47,13 +65,13 @@ public class InstanceTests
     {
         var ship = new Ship();
 
-        ship.World.Add(new TestButton(1, "Front Button"));
-        ship.World.Add(new TestDoor(2, "Front Inner"));
-        ship.World.Add(new TestDoor(3, "Front Outer"));
+        ship.Rig.Panel(1, "Front Button");
+        ship.Rig.Door(2, "Front Inner");
+        ship.Rig.Door(3, "Front Outer");
 
-        ship.World.Add(new TestButton(11, "Port Button"));
-        ship.World.Add(new TestDoor(12, "Port Inner"));
-        ship.World.Add(new TestDoor(13, "Port Outer"));
+        ship.Rig.Panel(11, "Port Button");
+        ship.Rig.Door(12, "Port Inner");
+        ship.Rig.Door(13, "Port Outer");
 
         ship.Airlock = ship.Program.AddSystem();
         ship.Airlock.Name = "Airlock";
@@ -92,11 +110,11 @@ public class InstanceTests
         instance.Fill(ship.Ref(3), new[] { ship.Ref(13) });
     }
 
-    static TestButton Button(Ship ship, string name) =>
-        ship.World.Entities.OfType<TestButton>().First(b => b.Name == name);
+    static Door Door(Ship ship, string name) =>
+        ship.Rig.Rig.Fitted.OfType<Door>().First(d => d.Name == name);
 
-    static TestDoor Door(Ship ship, string name) =>
-        ship.World.Entities.OfType<TestDoor>().First(d => d.Name == name);
+    /// <summary>The first of the system, which is the one it was written against.</summary>
+    static SystemInstance Front(Ship ship) => ship.Airlock.Instances[0];
 
     /// <summary>
     /// Calling a sequence names which one of its system to run it on.
@@ -117,14 +135,14 @@ public class InstanceTests
         Door(ship, "Front Inner").ForceOpen();
         Door(ship, "Port Inner").ForceOpen();
         ship.Tick(2);
-        ship.World.Log.Clear();
+        ship.Rig.Rig.Forget();
 
         ship.Runner.Call(ship.Program.Sequences[0], port);
         ship.Tick(3);
 
         // The port one ran, and the front one did not - no button was pressed at all.
-        Assert.Contains("Port Inner:close", ship.World.Log);
-        Assert.DoesNotContain("Front Inner:close", ship.World.Log);
+        Assert.Contains("Port Inner:close", ship.Rig.Rig.Log);
+        Assert.DoesNotContain("Front Inner:close", ship.Rig.Rig.Log);
     }
 
     [Fact]
@@ -136,14 +154,14 @@ public class InstanceTests
         Door(ship, "Front Inner").ForceOpen();
         Door(ship, "Port Inner").ForceOpen();
         ship.Tick(2);
-        ship.World.Log.Clear();
+        ship.Rig.Rig.Forget();
 
-        Button(ship, "Port Button").Press();
+        ship.Start(ship.Airlock.Instances[1]);
         ship.Tick(3);
 
         // The port button ran the port airlock, and only the port airlock.
-        Assert.Contains("Port Inner:close", ship.World.Log);
-        Assert.DoesNotContain("Front Inner:close", ship.World.Log);
+        Assert.Contains("Port Inner:close", ship.Rig.Rig.Log);
+        Assert.DoesNotContain("Front Inner:close", ship.Rig.Rig.Log);
     }
 
     [Fact]
@@ -154,13 +172,13 @@ public class InstanceTests
 
         Door(ship, "Front Inner").ForceOpen();
         ship.Tick(2);
-        ship.World.Log.Clear();
+        ship.Rig.Rig.Forget();
 
-        Button(ship, "Front Button").Press();
+        ship.Start(Front(ship));
         ship.Tick(3);
 
-        Assert.Contains("Front Inner:close", ship.World.Log);
-        Assert.DoesNotContain("Port Inner:close", ship.World.Log);
+        Assert.Contains("Front Inner:close", ship.Rig.Rig.Log);
+        Assert.DoesNotContain("Port Inner:close", ship.Rig.Rig.Log);
     }
 
     /// <summary>
@@ -177,19 +195,19 @@ public class InstanceTests
         var ship = Build();
         Fit(ship, ship.Airlock.AddInstance());
 
-        // The front inner door is shut; the port one is wedged open by a lock.
+        // The front inner door is shut; the port one is open and switched off, so it cannot move.
         Door(ship, "Port Inner").ForceOpen();
-        Door(ship, "Port Inner").Invoke("lock");
+        Door(ship, "Port Inner").Enabled = false;
         ship.Tick(2);
-        ship.World.Log.Clear();
+        ship.Rig.Rig.Forget();
 
-        Button(ship, "Port Button").Press();
+        ship.Start(ship.Airlock.Instances[1]);
         ship.Tick(20);
 
         // It tried to close its own door and is waiting on it, rather than reading the front
         // airlock's shut door and opening onto space.
-        Assert.Contains("Port Inner:close", ship.World.Log);
-        Assert.DoesNotContain("Port Outer:open", ship.World.Log);
+        Assert.Contains("Port Inner:close", ship.Rig.Rig.Log);
+        Assert.DoesNotContain("Port Outer:open", ship.Rig.Rig.Log);
     }
 
     [Fact]
@@ -206,7 +224,7 @@ public class InstanceTests
         Door(ship, "Port Inner").ForceOpen();
         ship.Tick(2);
 
-        Button(ship, "Front Button").Press();
+        ship.Start(Front(ship));
         ship.Tick(2);
 
         Assert.True(ship.Runner.Get(cycle, front)!.IsRunning);
@@ -232,14 +250,14 @@ public class InstanceTests
         ship.Tick(2);
 
         port.Enabled = false;
-        ship.World.Log.Clear();
+        ship.Rig.Rig.Forget();
 
-        Button(ship, "Port Button").Press();
-        Button(ship, "Front Button").Press();
+        ship.Start(ship.Airlock.Instances[1]);
+        ship.Start(Front(ship));
         ship.Tick(3);
 
-        Assert.Contains("Front Inner:close", ship.World.Log);
-        Assert.DoesNotContain("Port Inner:close", ship.World.Log);
+        Assert.Contains("Front Inner:close", ship.Rig.Rig.Log);
+        Assert.DoesNotContain("Port Inner:close", ship.Rig.Rig.Log);
     }
 
     /// <summary>
@@ -266,11 +284,11 @@ public class InstanceTests
 
         Door(ship, "Front Inner").ForceOpen();
         ship.Tick(2);
-        ship.World.Log.Clear();
+        ship.Rig.Rig.Forget();
 
-        Button(ship, "Front Button").Press();
+        ship.Start(Front(ship));
         ship.Tick(3);
-        Assert.Contains("Front Inner:close", ship.World.Log);
+        Assert.Contains("Front Inner:close", ship.Rig.Rig.Log);
     }
 
     /// <summary>
@@ -292,7 +310,7 @@ public class InstanceTests
     public void WhatAnAuthorWroteAboutAPartOutlivesTheStepThatMadeIt()
     {
         var ship = Build();
-        ship.World.Add(new TestLamp(4, "Front Light"));
+        ship.Rig.Light(4, "Front Light");
 
         var warn = new Act("on");
         warn.Targets.Add(ship.Ref(4));

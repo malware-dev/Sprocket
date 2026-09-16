@@ -20,6 +20,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Reactor.Host.SpaceEngineers\Reactor.Host.SpaceEngineers.csproj" />
+        <ProjectReference Include="..\..\src\Reactor.Host.SpaceEngineers.Sim\Reactor.Host.SpaceEngineers.Sim.csproj" />
     </ItemGroup>
 </Project>

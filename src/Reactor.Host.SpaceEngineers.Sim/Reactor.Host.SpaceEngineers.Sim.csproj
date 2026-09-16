@@ -43,6 +43,7 @@
         <!-- The harness is a tool, and its own behaviour is worth a test or two: that a rig's wiring
              survives a restart, for one, which is a thing only it can get wrong. -->
         <InternalsVisibleTo Include="Reactor.Host.SpaceEngineers.Presentation.Tests" />
+        <InternalsVisibleTo Include="Reactor.Core.Tests" />
     </ItemGroup>
 
     <ItemGroup>

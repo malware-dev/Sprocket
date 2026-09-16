@@ -2,6 +2,9 @@ using Reactor.Host.SpaceEngineers.Core.Editing;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
+using Reactor.Sim.Machine;
 using Xunit;
 
 namespace Reactor.Tests;
@@ -16,10 +19,15 @@ public class EditorTests
 
     sealed class Ship
     {
-        public TestWorld World = new();
+        public Rigged Rig = new();
         public Automation Automation = new();
         public AutomationRunner Runner = null!;
         public ReactorEditor Editor = null!;
+
+        public GridWorld World => Rig.World;
+
+        /// <summary>What the construct has been told to do, oldest first.</summary>
+        public List<string> Log => Rig.Rig.Log;
 
         int _frame;
 
@@ -27,19 +35,31 @@ public class EditorTests
         {
             for (var i = 0; i < ticks; i++)
             {
-                World.Tick();
+                Rig.Tick();
                 Editor.Tick(++_frame);
             }
+        }
+
+        /// <summary>
+        /// The host starting the sequence being edited, which is what pressing its button does.
+        /// </summary>
+        /// <remarks>
+        /// A button raises nothing a rule can sample: its slot carries which sequence to run and the
+        /// unit resolves that. Which slot carries which key is the harness's business - see RigTests.
+        /// </remarks>
+        public void Fire()
+        {
+            Runner.Call(Automation.Sequences[0]);
         }
     }
 
     static Ship Build()
     {
         var ship = new Ship();
-        ship.World.Add(new TestDoor(1, "Inner Door"));
-        ship.World.Add(new TestDoor(2, "Outer Door"));
-        ship.World.Add(new TestButton(3, "Airlock Button"));
-        ship.World.Add(new TestLamp(4, "Airlock Light"));
+        ship.Rig.Door(1, "Inner Door");
+        ship.Rig.Door(2, "Outer Door");
+        ship.Rig.Panel(3, "Airlock Button");
+        ship.Rig.Light(4, "Airlock Light");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
@@ -193,7 +213,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("turn on");
+        editor.PressChoice("switch on");
         editor.PressPrimary();
         ship.Tick();
 
@@ -241,7 +261,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("turn on");
+        editor.PressChoice("switch on");
         editor.PressPrimary();
         editor.Invoke(editor.Sentence().UndoCommand);
         ship.Tick();
@@ -360,9 +380,9 @@ public class EditorTests
         // The low word is what matters: a command number is twelve bits, so any id whose bottom
         // thirty-two bits exceed 4095 is clamped to the same slot as every other. Real ids land there
         // essentially always; picking round numbers here would test nothing.
-        ship.World.Add(new TestDoor(1152921504606946976, "Inner Door"));
-        ship.World.Add(new TestDoor(1152921504607046976, "Outer Door"));
-        ship.World.Add(new TestButton(1152921504607146976, "Airlock Button"));
+        ship.Rig.Door(1152921504606946976, "Inner Door");
+        ship.Rig.Door(1152921504607046976, "Outer Door");
+        ship.Rig.Panel(1152921504607146976, "Airlock Button");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
@@ -372,8 +392,10 @@ public class EditorTests
         // Throws before returning if two blocks claim one command.
         ship.Editor.PressStart("When…");
 
+        // Four rows for three blocks: the construct's own programmable block is a block on the
+        // grid like any other, and it has a switch, so it is offered like any other.
         var rows = ship.Editor.Component<PickComponent>().Stages[0].Entries;
-        Assert.Equal(3, rows.Count);
+        Assert.Equal(4, rows.Count);
 
         var seen = new HashSet<int>();
         for (var i = 0; i < rows.Count; i++)
@@ -754,7 +776,7 @@ public class EditorTests
     public void ABrokenSequenceIsNotOfferedToSwitchOn()
     {
         var ship = Built();
-        ship.World.Unstartable.Add(ship.Automation.Sequences[0].Id);
+        ship.Rig.CannotStart(ship.Automation.Sequences[0]);
 
         ship.Editor.Back();
         ship.Tick();
@@ -831,7 +853,7 @@ public class EditorTests
         Assert.True(ship.Editor.Screen.CanGoBack);
 
         ship.Editor.Back();
-        Assert.Equal("Automation for Hangar Bay Alpha", ship.Editor.Screen.Title());
+        Assert.Equal("Automation for Test Rig", ship.Editor.Screen.Title());
     }
 
     /// <summary>
@@ -856,11 +878,11 @@ public class EditorTests
 
         Assert.Equal(before, Listed(ship.Editor));
 
-        // The lamp is absent throughout, and that is the question talking rather than the
-        // selection: nothing can happen to it, so there is nothing to ask about it here.
+        // Everything with a switch is here, the light and the programmable block included, because
+        // every one of them can be switched on and off and so has something to be said about it.
         // Listed by name rather than in the order the ship handed them over, which on a real
         // construct is whatever walking the grid produced.
-        Assert.Equal("Airlock Button, Inner Door, Outer Door", before);
+        Assert.Equal("Airlock Button, Airlock Light, Automation, Inner Door, Outer Door", before);
     }
 
     /// <summary>
@@ -890,7 +912,7 @@ public class EditorTests
 
         // The same screen an established ship gets, with nothing in the list yet - not a
         // different screen that rearranges itself the moment anything is built.
-        Assert.Equal("Automation for Hangar Bay Alpha", ship.Editor.Screen.Title());
+        Assert.Equal("Automation for Test Rig", ship.Editor.Screen.Title());
         Assert.Empty(ship.Editor.Component<StatusListComponent>().Entries);
 
         // Both ways in are offered. How a target asks for the name is its own business, so
@@ -956,11 +978,8 @@ public class EditorTests
         Assert.True(targets.RequiresAll);
     }
 
-    static TestDoor Door(Ship ship, string name) =>
-        ship.World.Entities.OfType<TestDoor>().First(d => d.Name == name);
-
-    static TestButton Button(Ship ship, string name) =>
-        ship.World.Entities.OfType<TestButton>().First(b => b.Name == name);
+    static Door Door(Ship ship, string name) =>
+        ship.Rig.Rig.Fitted.OfType<Door>().First(d => d.Name == name);
 
     [Fact]
     public void AllOfThemTogether_IsItsOwnClaimAndFiresWhenTheLastArrives()
@@ -983,18 +1002,18 @@ public class EditorTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("turn on");
+        editor.PressChoice("switch on");
         editor.PressPrimary();
         editor.SwitchOn();
 
         ship.Tick(3);
         Door(ship, "Inner Door").ForceOpen();
         ship.Tick(3);
-        Assert.Empty(ship.World.Log);
+        Assert.Empty(ship.Log);
 
         Door(ship, "Outer Door").ForceOpen();
         ship.Tick(3);
-        Assert.Contains("Airlock Light:on", ship.World.Log);
+        Assert.Contains("Airlock Light:on", ship.Log);
     }
 
     [Fact]
@@ -1037,7 +1056,7 @@ public class EditorTests
 
         // And one more back off the system itself.
         editor.Back();
-        Assert.Equal("Automation for Hangar Bay Alpha", editor.Screen.Title());
+        Assert.Equal("Automation for Test Rig", editor.Screen.Title());
     }
 
     [Fact]
@@ -1059,7 +1078,7 @@ public class EditorTests
         Assert.Equal("Airlock", editor.Screen.Title());
 
         editor.Back();
-        Assert.Equal("Automation for Hangar Bay Alpha", editor.Screen.Title());
+        Assert.Equal("Automation for Test Rig", editor.Screen.Title());
     }
 
     /// <summary>
@@ -1210,7 +1229,7 @@ public class EditorTests
         ship.Tick();
         Assert.Equal("", editor.Sentence().LastRun);
 
-        Button(ship, "Airlock Button").Press();
+        ship.Fire();
         ship.Tick(2);
         var first = Ticks(editor.Sentence().LastRun);
 
@@ -1219,7 +1238,7 @@ public class EditorTests
         Assert.Equal(first + 180, Ticks(editor.Sentence().LastRun));
 
         // It fires again, so the count starts over rather than carrying on.
-        Button(ship, "Airlock Button").Press();
+        ship.Fire();
         ship.Tick(2);
         Assert.True(Ticks(editor.Sentence().LastRun) < first + 180);
     }

@@ -29,20 +29,20 @@ sealed class Simulation
     /// </remarks>
     const int SaveEvery = 60;
 
-    readonly Rig _rig = new Rig();
+    readonly Rig _rig;
     readonly Store _store;
     readonly ReactorUnit _unit;
 
     int _frame;
 
-    public Simulation() : this(new Store("prototype"))
+    public Simulation() : this(new Store("prototype"), Rig.Demo())
     {
     }
 
     /// <summary>A rig that remembers nothing, for tests and for captured frames.</summary>
     public static Simulation Fresh()
     {
-        return new Simulation(Store.Nowhere());
+        return new Simulation(Store.Nowhere(), Rig.Demo());
     }
 
     /// <summary>
@@ -55,12 +55,19 @@ sealed class Simulation
     /// </remarks>
     internal static Simulation On(Store store)
     {
-        return new Simulation(store);
+        return new Simulation(store, Rig.Demo());
     }
 
-    Simulation(Store store)
+    /// <summary>A rig somebody else fitted, for a test that is about particular blocks.</summary>
+    internal static Simulation On(Rig rig)
+    {
+        return new Simulation(Store.Nowhere(), rig);
+    }
+
+    Simulation(Store store, Rig rig)
     {
         _store = store;
+        _rig = rig;
 
         // Before the unit, which reads the program out of this the moment it is built.
         _rig.Install();

@@ -1,6 +1,7 @@
 using Reactor.Host.SpaceEngineers.Core.Editing;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.World;
 using Reactor.Sim.Machine;
 using Xunit;
 
@@ -90,6 +91,77 @@ public class RigTests
         // so there is nothing left to sample.
         SequenceRunner runner = rig.Runner.Get(sequence, sequence.System.Instances[0]);
         Assert.Equal(-1, runner.LastSkippedTick);
+    }
+
+    /// <summary>
+    /// Two of a system are two buttons, and each one starts its own.
+    /// </summary>
+    /// <remarks>
+    /// The other half of what a slot carries. A slot naming only a sequence could say "cycle the
+    /// airlock" and never which airlock, so the port button ran the front one - and on a ship with
+    /// two of anything that is the whole feature failing quietly.
+    /// <para>
+    /// Written as a program rather than through the screens because fitting a second one of a
+    /// system is a flow of its own; what is under test is that the unit wires a button per one of
+    /// it and that a press resolves back to the right one.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void EachOneOfASystemHasItsOwnButton()
+    {
+        var rig = new Rig();
+        Panel front = rig.Panel(1, "Front Button");
+        Door frontDoor = rig.Door(2, "Front Inner");
+        Panel port = rig.Panel(11, "Port Button");
+        Door portDoor = rig.Door(12, "Port Inner");
+
+        Simulation sim = Simulation.On(rig);
+        Automation program = sim.Editor.Program;
+
+        AutomationSystem system = program.AddSystem();
+        system.Name = "Airlock";
+
+        var when = new WhenTrigger("pressed-1");
+        when.Sources.Add(Named(sim, front));
+
+        Sequence cycle = program.AddSequence(system, when);
+        cycle.Name = "Cycle";
+
+        var close = new Act("close");
+        close.Targets.Add(Named(sim, frontDoor));
+        cycle.Steps.Add(close);
+
+        // The same system fitted to the port airlock: where it used those blocks, it uses these.
+        SystemInstance second = system.AddInstance();
+        second.Fill(Named(sim, front), new[] { Named(sim, port) });
+        second.Fill(Named(sim, frontDoor), new[] { Named(sim, portDoor) });
+
+        frontDoor.ForceOpen();
+        portDoor.ForceOpen();
+
+        // Long enough for both slots to be written and looked at again.
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        rig.Forget();
+
+        sim.Press("Port Button");
+        sim.Tick();
+
+        Assert.Equal(new[] { "Port Inner:close" }, rig.Log);
+
+        rig.Forget();
+        sim.Press("Front Button");
+        sim.Tick();
+
+        Assert.Equal(new[] { "Front Inner:close" }, rig.Log);
+    }
+
+    /// <summary>Names a block, which is what a program refers to.</summary>
+    static string Named(Simulation sim, Fitting fitting)
+    {
+        IEntity entity = sim.World.FindEntity(fitting.Id);
+        return sim.Editor.Program.Declare(sim.World, entity).Name;
     }
 
     static void Airlock(ReactorEditor editor)

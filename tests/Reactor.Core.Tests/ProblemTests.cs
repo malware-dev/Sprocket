@@ -1,6 +1,7 @@
 using Reactor.Host.SpaceEngineers.Core.Editing;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Reactor.Tests;
@@ -29,7 +30,7 @@ public class ProblemTests
         Assert.False(Fault(ship).Exists);
 
         // What a button that no longer starts this looks like from core's side.
-        ship.World.Unstartable.Add(ship.Sequence.Id);
+        ship.Rig.CannotStart(ship.Sequence);
 
         var fault = Fault(ship);
         Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
@@ -49,7 +50,7 @@ public class ProblemTests
         ((WhenTrigger)ship.Sequence.Trigger).Sources.Clear();
         ship.Sequence.Steps.Clear();
 
-        ship.World.Unstartable.Add(ship.Sequence.Id);
+        ship.Rig.CannotStart(ship.Sequence);
 
         Assert.False(Fault(ship).Exists);
     }
@@ -67,8 +68,8 @@ public class ProblemTests
     {
         var ship = Build();
 
-        ship.World.Unstartable.Add(ship.Sequence.Id);
-        ship.World.Remove(2);
+        ship.Rig.CannotStart(ship.Sequence);
+        ship.Rig.Grind(2);
 
         var fault = Fault(ship);
         Assert.Equal(SequenceProblem.MissingTarget, fault.Problem);
@@ -93,7 +94,7 @@ public class ProblemTests
 
         // Worked out on a cadence while the screen is open, so a tick is what picks up a change
         // made outside Reactor - answering can cost a toolbar read, so it is not asked per frame.
-        ship.World.Unstartable.Add(ship.Sequence.Id);
+        ship.Rig.CannotStart(ship.Sequence);
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
@@ -113,7 +114,7 @@ public class ProblemTests
     public void TheBrokenSequenceIsMarkedWhereItIsListed()
     {
         var ship = Build();
-        ship.World.Unstartable.Add(ship.Sequence.Id);
+        ship.Rig.CannotStart(ship.Sequence);
 
         ship.Editor.PressRow(1);
 
@@ -135,7 +136,7 @@ public class ProblemTests
     public void TheFailingLineIsMarkedInTheEditor()
     {
         var ship = Build();
-        ship.World.Unstartable.Add(ship.Sequence.Id);
+        ship.Rig.CannotStart(ship.Sequence);
 
         ship.Editor.PressRow(1);
         ship.Editor.PressRow(0);
@@ -180,13 +181,13 @@ public class ProblemTests
         var ship = Build();
         ship.Sequence.Enabled = true;
 
-        ship.World.Unstartable.Add(ship.Sequence.Id);
+        ship.Rig.CannotStart(ship.Sequence);
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
         Assert.False(ship.Sequence.Enabled);
 
-        ship.World.Unstartable.Remove(ship.Sequence.Id);
+        ship.Rig.CanStart(ship.Sequence);
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
@@ -202,7 +203,7 @@ public class ProblemTests
         ship.Editor.PressRow(1);
         ship.Editor.PressRow(0);
 
-        ship.World.Remove(2);
+        ship.Rig.Grind(2);
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
@@ -216,13 +217,13 @@ public class ProblemTests
     public void MendingItClearsTheMark()
     {
         var ship = Build();
-        ship.World.Unstartable.Add(ship.Sequence.Id);
+        ship.Rig.CannotStart(ship.Sequence);
 
         ship.Editor.PressRow(1);
         ship.Editor.PressRow(0);
         Assert.True(ship.Editor.Sentence().Trigger.HasProblem);
 
-        ship.World.Unstartable.Remove(ship.Sequence.Id);
+        ship.Rig.CanStart(ship.Sequence);
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
@@ -238,8 +239,8 @@ public class ProblemTests
     static Ship Build()
     {
         var ship = new Ship();
-        ship.World.Add(new TestButton(1, "Airlock Button"));
-        ship.World.Add(new TestDoor(2, "Inner Door"));
+        ship.Rig.Panel(1, "Airlock Button");
+        ship.Rig.Door(2, "Inner Door");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner,
@@ -263,7 +264,9 @@ public class ProblemTests
 
     sealed class Ship
     {
-        public TestWorld World = new();
+        public Rigged Rig = new();
+
+        public GridWorld World => Rig.World;
         public Automation Automation = new();
         public AutomationRunner Runner = null!;
         public ReactorEditor Editor = null!;
@@ -289,14 +292,14 @@ public class ProblemTests
         system.AddTrigger(needed);
 
         // Nothing on this construct claims it, which is what the host says by this.
-        ship.World.Unstartable.Add(sequence.Id);
+        ship.Rig.CannotStart(sequence);
 
         var fault = SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence, null);
         Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
 
         // And a sequence nothing is supposed to start is not scolded: it may be there to be run.
         var called = ship.Automation.AddSequence(system);
-        ship.World.Unstartable.Add(called.Id);
+        ship.Rig.CannotStart(called);
         Assert.False(SequenceSummary.Fault(ship.World, ship.Runner.Bindings, called, null).Exists);
     }
 }
