@@ -51,6 +51,7 @@ on screen     When Airlock Button is pressed > Sequence 1
 044  Text       at {X:768.0067 Y:59.521973} scale 0.64  #85A1A9FF  "p"
 045  ClearClip  
 046  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-047  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
-048  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-049  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+047  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+048  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
+049  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+050  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

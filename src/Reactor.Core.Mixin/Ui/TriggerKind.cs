@@ -7,6 +7,9 @@ namespace Reactor.Ui
         When,
 
         /// <summary>A length of time went by.</summary>
-        Every
+        Every,
+
+        /// <summary>Something on the construct says so: a button, a timer, a sensor.</summary>
+        Required
     }
 }

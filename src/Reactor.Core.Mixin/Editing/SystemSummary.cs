@@ -128,12 +128,9 @@ namespace Reactor.Editing
 
                 for (var s = 0; s < sequence.Steps.Count; s++)
                 {
-                    var step = sequence.Steps[s];
-                    AddNames(bindings, step.Targets, result);
-
-                    var gate = step.Gate as OnceGate;
-                    if (gate != null)
-                        AddNames(bindings, gate.Condition.Entities, result);
+                    var act = sequence.Steps[s] as Act;
+                    if (act != null)
+                        AddNames(bindings, act.Targets, result);
                 }
             }
         }

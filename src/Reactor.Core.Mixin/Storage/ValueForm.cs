@@ -22,6 +22,7 @@ namespace Reactor.Storage
 
         Integer,
         Real,
+        Duration,
         Color,
 
         /// <summary>

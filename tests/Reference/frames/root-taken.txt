@@ -43,21 +43,22 @@ on screen     Automation for Test Rig
 036  Text       at {X:536.5846 Y:59.521973} scale 0.64  #85A1A9FF  "p"
 037  ClearClip  
 038  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-039  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
-040  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-041  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
-042  Sprite     Reactor_Fill          {X:259 Y:172 W:512 H:88}  #3C4C52FF
-043  Sprite     Reactor_Fill          {X:259 Y:172 W:512 H:1}  #5B737BFF
-044  Sprite     Reactor_Fill          {X:259 Y:258 W:512 H:1}  #5B737BFF
-045  Sprite     Reactor_Fill          {X:259 Y:172 W:1 H:88}  #5B737BFF
-046  Sprite     Reactor_Fill          {X:770 Y:172 W:1 H:88}  #5B737BFF
-047  Text       at {X:275 Y:181.69199} scale 0.5  #E84A3AFF  "That name is taken"
-048  Sprite     Reactor_Fill          {X:275 Y:210 W:368 H:39}  #141B20FF
-049  Sprite     Reactor_Fill          {X:275 Y:210 W:368 H:1}  #5B737BFF
-050  Sprite     Reactor_Fill          {X:275 Y:248 W:368 H:1}  #5B737BFF
-051  Sprite     Reactor_Fill          {X:275 Y:210 W:1 H:39}  #5B737BFF
-052  Sprite     Reactor_Fill          {X:642 Y:210 W:1 H:39}  #5B737BFF
-053  Text       at {X:287.8 Y:217.99199} scale 0.64  #DCF5FDFF  "Airlock"
-054  Sprite     Reactor_Fill          {X:342 Y:218 W:2 H:24}  #DCF5FDFF
-055  Sprite     Reactor_Fill          {X:653 Y:211 W:102 H:37}  #374851FF
-056  Text       at {X:672.4668 Y:219.28699} scale 0.57  #85A1A9FF  "Continue"
+039  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+040  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
+041  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+042  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+043  Sprite     Reactor_Fill          {X:259 Y:172 W:512 H:88}  #3C4C52FF
+044  Sprite     Reactor_Fill          {X:259 Y:172 W:512 H:1}  #5B737BFF
+045  Sprite     Reactor_Fill          {X:259 Y:258 W:512 H:1}  #5B737BFF
+046  Sprite     Reactor_Fill          {X:259 Y:172 W:1 H:88}  #5B737BFF
+047  Sprite     Reactor_Fill          {X:770 Y:172 W:1 H:88}  #5B737BFF
+048  Text       at {X:275 Y:181.69199} scale 0.5  #E84A3AFF  "That name is taken"
+049  Sprite     Reactor_Fill          {X:275 Y:210 W:368 H:39}  #141B20FF
+050  Sprite     Reactor_Fill          {X:275 Y:210 W:368 H:1}  #5B737BFF
+051  Sprite     Reactor_Fill          {X:275 Y:248 W:368 H:1}  #5B737BFF
+052  Sprite     Reactor_Fill          {X:275 Y:210 W:1 H:39}  #5B737BFF
+053  Sprite     Reactor_Fill          {X:642 Y:210 W:1 H:39}  #5B737BFF
+054  Text       at {X:287.8 Y:217.99199} scale 0.64  #DCF5FDFF  "Airlock"
+055  Sprite     Reactor_Fill          {X:342 Y:218 W:2 H:24}  #DCF5FDFF
+056  Sprite     Reactor_Fill          {X:653 Y:211 W:102 H:37}  #374851FF
+057  Text       at {X:672.4668 Y:219.28699} scale 0.57  #85A1A9FF  "Continue"

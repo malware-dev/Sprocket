@@ -132,8 +132,9 @@ on screen     When something happens
 125  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "When something happens"
 126  ClearClip  
 127  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-128  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
-129  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-130  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
-131  Sprite     Reactor_Fill          {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
-132  Text       at {X:1596.7708 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
+128  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+129  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
+130  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+131  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+132  Sprite     Reactor_Fill          {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
+133  Text       at {X:1596.7708 Y:992.6081} scale 0.64  #1B242AFF  "DONE"

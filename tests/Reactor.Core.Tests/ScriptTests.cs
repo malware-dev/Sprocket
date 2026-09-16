@@ -19,7 +19,7 @@ public class ScriptTests
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
     /// <summary>A program's first line and the start of a system with <see cref="Identity" />.</summary>
-    const string Head = "reactor 3\n\nsystem \"" + Identity + "\" as ";
+    const string Head = "reactor 4\n\nsystem \"" + Identity + "\" as ";
 
     static readonly Values Store = new Values();
 
@@ -45,9 +45,9 @@ public class ScriptTests
         system.Changed = new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc);
         system.Annotation = "Cycles an airlock.\n\nNothing opens on both sides at once.";
 
-        var role = system.RoleFor("inner");
-        role.Name = "the inner door";
-        role.Instructions = "The door onto the ship.";
+        var part = system.PartFor("inner");
+        part.Annotation = "The door onto the ship.";
+        part.Expects.Add("Door");
 
         system.Instances[0].Fill("inner", new[] { "inner" });
 
@@ -56,22 +56,18 @@ public class ScriptTests
         var sequence = program.AddSequence(system, pressed);
         sequence.Name = "Let me out";
 
-        var close = new Step("close");
+        var close = new Act("close");
         close.Targets.Add("inner");
-        close.WaitsForCompletion = true;
         sequence.Steps.Add(close);
+        sequence.Steps.Add(new Await());
 
-        var pause = new Step("");
-        pause.Gate = new AfterGate(60);
-        sequence.Steps.Add(pause);
+        sequence.Steps.Add(new Wait(60));
 
-        var open = new Step("open");
+        var open = new Act("open");
         open.Targets.Add("inner");
         open.Annotation = "The vent needs the full cycle.";
-        var shut = new Condition("is-shut");
-        shut.Entities.Add("inner");
-        open.Gate = new OnlyIfGate(shut);
         sequence.Steps.Add(open);
+        sequence.Steps.Add(new Await());
 
         return program;
     }
@@ -98,29 +94,32 @@ public class ScriptTests
     public void AProgramReadsAsAScript()
     {
         Assert.Equal(
-            "reactor 3\n" +
+            "reactor 4\n" +
             "\n" +
             "block 'Door/LargeBlockDoor' inner [ 74857693847562934, \"Airlock Inner Door\" ]\n" +
             "\n" +
             "# Cycles an airlock.\n" +
             "#\n" +
             "# Nothing opens on both sides at once.\n" +
-            "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock is on, changed \"2026-09-14T19:02:11Z\" {\n" +
+            "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock changed \"2026-09-14T19:02:11Z\" {\n" +
             "    # The door onto the ship.\n" +
-            "    role inner required \"the inner door\"\n" +
+            "    required block inner expects Door\n" +
             "\n" +
-            "    instance 1 on {\n" +
-            "        fill inner [ inner ]\n" +
-            "    }\n" +
+            "    when any pressed [ inner ] then run 1\n" +
             "\n" +
-            "    sequence 1 as 'Let me out' is on {\n" +
-            "        when any pressed [ inner ]\n" +
-            "        close [ inner ] wait\n" +
-            "        step [] wait after 60\n" +
+            "    sequence 1 as 'Let me out' {\n" +
+            "        close [ inner ]\n" +
+            "        await\n" +
+            "        wait 60t\n" +
             "\n" +
             "        # The vent needs the full cycle.\n" +
-            "        open [ inner ] wait onlyif is-shut [ inner ]\n" +
+            "        open [ inner ]\n" +
+            "        await\n" +
             "    }\n" +
+            "}\n" +
+            "\n" +
+            "instance 1 of \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" {\n" +
+            "    inner = [ inner ]\n" +
             "}\n",
             Save(Airlock()));
     }
@@ -132,7 +131,7 @@ public class ScriptTests
     public void ASystemIsItsIdentityCalledByANamespaceAndName()
     {
         var text = Save(SystemCalled("MalTek Inc.", "Airlock System"));
-        Assert.Contains("system \"" + Identity + "\" as 'MalTek Inc.'.'Airlock System' is on {", text);
+        Assert.Contains("system \"" + Identity + "\" as 'MalTek Inc.'.'Airlock System' {", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
@@ -144,15 +143,35 @@ public class ScriptTests
     /// A system with no identity, or one that is not a GUID, is trouble and is not read.
     /// </summary>
     [Theory]
-    [InlineData("reactor 3\n\nsystem Airlock is on {\n}\n")]
-    [InlineData("reactor 3\n\nsystem \"airlock\" as Airlock is on {\n}\n")]
-    [InlineData("reactor 3\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock is on {\n}\n")]
+    [InlineData("reactor 4\n\nsystem Airlock {\n}\n")]
+    [InlineData("reactor 4\n\nsystem \"airlock\" as Airlock {\n}\n")]
+    [InlineData("reactor 4\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock {\n}\n")]
     public void ASystemWithoutAnIdentityIsTrouble(string text)
     {
         var after = new Automation();
         Assert.NotEqual("", Load(text, after));
         Assert.False(after.Intact);
         Assert.Empty(after.Systems);
+    }
+
+    /// <summary>
+    /// A length of time is a number and its unit as one word, and ticks are the only unit.
+    /// </summary>
+    /// <remarks>
+    /// Loud rather than lenient about the unit: <c>600s</c> is somebody meaning seconds, and reading it as
+    /// 600 ticks would run their airlock ten times too fast.
+    /// </remarks>
+    [Theory]
+    [InlineData("wait 60t", "")]
+    [InlineData("wait 60s", "line 5")]
+    [InlineData("wait 60", "line 5")]
+    public void ADurationIsANumberAndItsUnit(string written, string trouble)
+    {
+        var after = new Automation();
+        var said = Load(
+            Head + "Airlock {\n    sequence 1 {\n        " + written + "\n    }\n}\n", after);
+
+        Assert.StartsWith(trouble, said);
     }
 
     [Fact]
@@ -167,17 +186,397 @@ public class ScriptTests
     }
 
     /// <summary>
+    /// A part says what may fill it, as one block type or a list of them.
+    /// </summary>
+    /// <remarks>
+    /// A family spans type ids - a door is <c>Door</c>, <c>AirtightSlideDoor</c> and
+    /// <c>AirtightHangarDoor</c> - so a list is the ordinary case rather than the awkward one.
+    /// </remarks>
+    [Fact]
+    public void APartSaysWhatMayFillIt()
+    {
+        var program = SystemCalled("", "Airlock");
+        var system = program.Systems[0];
+
+        var inner = system.PartFor("inner");
+        inner.Annotation = "The inner door.";
+        inner.Expects.Add("Door");
+        inner.Expects.Add("AirtightSlideDoor");
+
+        system.PartFor("vent").Expects.Add("AirVent");
+        system.PartFor("anything");
+
+        var text = Save(program);
+        Assert.Contains("    # The inner door.\n    required block inner expects [ Door, AirtightSlideDoor ]\n", text);
+        Assert.Contains("    required block vent expects AirVent\n", text);
+        Assert.Contains("    required block anything\n", text);
+
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+
+        var read = after.Systems[0];
+        Assert.Equal(new[] { "Door", "AirtightSlideDoor" }, read.FindPart("inner")!.Expects);
+        Assert.Equal("The inner door.", read.FindPart("inner")!.Annotation);
+        Assert.Equal(new[] { "AirVent" }, read.FindPart("vent")!.Expects);
+        Assert.Empty(read.FindPart("anything")!.Expects);
+    }
+
+    /// <summary>
+    /// A subtype is quoted, because a `/` is not a bare name.
+    /// </summary>
+    [Fact]
+    public void AnExactBlockTypeIsQuoted()
+    {
+        var program = SystemCalled("", "Hangar");
+        program.Systems[0].PartFor("door").Expects.Add("AirtightHangarDoor/LargeBlockAirtightHangarDoor");
+
+        var text = Save(program);
+        Assert.Contains("required block door expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'\n", text);
+
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+        Assert.Equal(new[] { "AirtightHangarDoor/LargeBlockAirtightHangarDoor" },
+            after.Systems[0].FindPart("door")!.Expects);
+    }
+
+    [Theory]
+    [InlineData("required inner expects Door")]
+    [InlineData("required block inner expects")]
+    public void ARequiredLineThatSaysNothingUsefulIsTrouble(string line)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(Head + "Airlock {\n    " + line + "\n}\n", after));
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// One of a system says which system it is one of, by identity or by name.
+    /// </summary>
+    /// <remarks>
+    /// Reactor writes the identity, because a name changes. A person writing one by hand has the name
+    /// in front of them, so both read.
+    /// </remarks>
+    [Theory]
+    [InlineData("\"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\"")]
+    [InlineData("MalTek.Airlock")]
+    public void OneOfASystemNamesItsSystem(string named)
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(
+            Head + "MalTek.Airlock {\n}\n\ninstance 2 of " + named
+            + " as 'Port airlock' {\n    inner = [ door1 ]\n    outer = [ door2, door3 ]\n}\n",
+            after));
+
+        var one = Assert.Single(after.Systems).Instances[0];
+        Assert.Equal(2, one.Number);
+        Assert.Equal("Port airlock", one.Name);
+        Assert.Equal(new[] { "door1" }, one.FilledWith("inner"));
+        Assert.Equal(new[] { "door2", "door3" }, one.FilledWith("outer"));
+    }
+
+    [Theory]
+    [InlineData("instance 2 MalTek.Airlock {\n}\n")]
+    [InlineData("instance of MalTek.Airlock {\n}\n")]
+    [InlineData("instance 2 of MalTek.Hangar {\n}\n")]
+    public void OneOfASystemThatSaysNothingUsefulIsTrouble(string line)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(Head + "MalTek.Airlock {\n}\n\n" + line, after));
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A part is answered with <c>=</c>, and a line inside one of a system that says anything else is
+    /// trouble.
+    /// </summary>
+    [Fact]
+    public void AnInstanceSaysWhatAPartIs()
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(
+            Head + "MalTek.Airlock {\n}\n\ninstance 1 of MalTek.Airlock {\n    fill inner [ door1 ]\n}\n",
+            after));
+
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A trigger belongs to the system and says which sequence it runs.
+    /// </summary>
+    /// <remarks>
+    /// Which is what a trigger on a sequence could never say: two triggers running one sequence, the
+    /// inside button and the outside one.
+    /// </remarks>
+    [Fact]
+    public void ATriggerSaysWhatItRuns()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(
+            Head + "MalTek.Airlock {\n" +
+            "    when any pressed [ inside ] then run 1\n" +
+            "    when all closed [ inner, outer ] then run 1\n" +
+            "    every 600t run 2\n\n" +
+            "    sequence 1 {\n    }\n\n" +
+            "    sequence 2 {\n    }\n" +
+            "}\n", after));
+
+        var system = Assert.Single(after.Systems);
+        Assert.Equal(3, system.Triggers.Count);
+
+        var inside = Assert.IsType<WhenTrigger>(system.Triggers[0]);
+        Assert.Equal("pressed", inside.EventId);
+        Assert.False(inside.RequiresAll);
+        Assert.Equal(new[] { "inside" }, inside.Sources);
+        Assert.Equal(1, inside.Runs);
+
+        var shut = Assert.IsType<WhenTrigger>(system.Triggers[1]);
+        Assert.True(shut.RequiresAll);
+        Assert.Equal(new[] { "inner", "outer" }, shut.Sources);
+        Assert.Equal(1, shut.Runs);
+
+        var clock = Assert.IsType<EveryTrigger>(system.Triggers[2]);
+        Assert.Equal(600, clock.IntervalTicks);
+        Assert.Equal(2, clock.Runs);
+
+        // Both of the first two run sequence 1, and the sequence itself says nothing about either.
+        Assert.Same(system.Triggers[0], system.Sequences[0].Trigger);
+
+        // And it all comes back the same way.
+        var text = Save(after);
+        Assert.Contains("    when any pressed [ inside ] then run 1\n", text);
+        Assert.Contains("    when all closed [ inner, outer ] then run 1\n", text);
+        Assert.Contains("    every 600t run 2\n", text);
+    }
+
+    [Theory]
+    [InlineData("when any pressed [ inside ] run 1")]
+    [InlineData("when pressed [ inside ] then run 1")]
+    [InlineData("when any pressed [ inside ] then run")]
+    [InlineData("every 600 run 1")]
+    [InlineData("every 600t")]
+    public void ATriggerThatSaysNothingUsefulIsTrouble(string line)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(
+            Head + "MalTek.Airlock {\n    " + line + "\n\n    sequence 1 {\n    }\n}\n", after));
+
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A trigger the construct provides says only what it runs, and what it is for.
+    /// </summary>
+    /// <remarks>
+    /// Which button answers it is on the ship's toolbars, not here, so two of them running one
+    /// sequence is the ordinary way to say "the inside button and the outside one".
+    /// </remarks>
+    [Fact]
+    public void ATriggerTheConstructProvidesSaysWhatItRuns()
+    {
+        var program = SystemCalled("MalTek", "Airlock");
+        var system = program.Systems[0];
+        program.AddSequence(system);
+
+        var inside = new RequiredTrigger();
+        inside.Annotation = "The call button inside.";
+        inside.Runs = 1;
+        system.AddTrigger(inside);
+
+        var outside = new RequiredTrigger();
+        outside.Runs = 1;
+        system.AddTrigger(outside);
+
+        var text = Save(program);
+        Assert.Contains(
+            "    # The call button inside.\n    required trigger to run 1\n    required trigger to run 1\n",
+            text);
+
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+
+        var read = after.Systems[0];
+        Assert.Equal(2, read.Triggers.Count);
+        Assert.All(read.Triggers, t => Assert.IsType<RequiredTrigger>(t));
+        Assert.All(read.Triggers, t => Assert.Equal(1, t.Runs));
+        Assert.Equal("The call button inside.", read.Triggers[0].Annotation);
+        Assert.Equal("", read.Triggers[1].Annotation);
+    }
+
+    [Theory]
+    [InlineData("required trigger run 1")]
+    [InlineData("required trigger to run")]
+    [InlineData("required whatever to run 1")]
+    public void ARequiredTriggerThatSaysNothingUsefulIsTrouble(string line)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(
+            Head + "MalTek.Airlock {\n    " + line + "\n\n    sequence 1 {\n    }\n}\n", after));
+
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A step may run another sequence of the same system, by number or by name.
+    /// </summary>
+    /// <remarks>
+    /// By name because a person writing one by hand has the name in front of them, and the name may
+    /// belong to a sequence written below - so it is matched once the whole system has been read.
+    /// Reactor writes the number.
+    /// </remarks>
+    [Fact]
+    public void AStepMayRunAnotherSequence()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(
+            Head + "MalTek.Airlock {\n" +
+            "    sequence 1 {\n" +
+            "        run 'Tidy up'\n" +
+            "        run 2\n" +
+            "    }\n\n" +
+            "    sequence 2 as 'Tidy up' {\n" +
+            "    }\n" +
+            "}\n", after));
+
+        var steps = after.Sequences[0].Steps;
+        Assert.Equal(2, steps.Count);
+        Assert.Equal(2, Assert.IsType<Run>(steps[0]).Number);
+        Assert.Equal(2, Assert.IsType<Run>(steps[1]).Number);
+
+        // Written back as numbers, both of them.
+        Assert.Contains("        run 2\n        run 2\n", Save(after));
+    }
+
+    [Theory]
+    [InlineData("run 'Nothing like this'")]
+    [InlineData("run \"Tidy up\"")]
+    [InlineData("run")]
+    public void ARunThatNamesNothingIsTrouble(string line)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(
+            Head + "MalTek.Airlock {\n    sequence 1 {\n        " + line + "\n    }\n}\n", after));
+
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A statement that stops early is trouble, and never reads the next statement's words.
+    /// </summary>
+    /// <remarks>
+    /// A reader asking for a value past the end of a statement used to be handed a run of one pointing
+    /// into whatever was written next, so a system with nothing after its <c>as</c> either threw out of
+    /// the loader or quietly took its name from the statement below and saved that.
+    /// </remarks>
+    [Fact]
+    public void AStatementThatStopsEarlyDoesNotReadTheNextOne()
+    {
+        var alone = new Automation();
+        Assert.NotEqual("", Load(Head + "\n", alone));
+        Assert.False(alone.Intact);
+        Assert.Empty(alone.Systems);
+
+        var after = new Automation();
+        Assert.NotEqual("", Load(
+            Head + "\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock {\n}\n", after));
+
+        Assert.False(after.Intact);
+
+        // The one that did read is itself, and nothing borrowed its name.
+        var read = Assert.Single(after.Systems);
+        Assert.True(read.Is("MalTek", "Airlock"));
+    }
+
+    /// <summary>
+    /// A <c>run</c> that names a sequence the system has not got is trouble.
+    /// </summary>
+    /// <remarks>
+    /// Loud, because the alternative was a program that read cleanly and then threw out of the runner
+    /// on the tick that reached the step.
+    /// </remarks>
+    [Theory]
+    [InlineData("run 7")]
+    [InlineData("run 'Nothing like this'")]
+    public void ARunThatNamesNoSequenceOfTheSystemIsTrouble(string line)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(
+            Head + "MalTek.Airlock {\n    sequence 1 {\n        " + line + "\n    }\n}\n", after));
+
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A length of time no clock could keep is trouble, rather than the time it wraps onto.
+    /// </summary>
+    /// <remarks>
+    /// A duration is read into a whole number of ticks, and the number in the text is not bounded by
+    /// one: <c>every 4294967296t</c> came out as an interval of nothing and ran every tick, and
+    /// <c>wait -5t</c> as no wait at all.
+    /// </remarks>
+    [Theory]
+    [InlineData("    every 0t run 1\n    sequence 1 {\n    }\n")]
+    [InlineData("    every -600t run 1\n    sequence 1 {\n    }\n")]
+    [InlineData("    every 4294967296t run 1\n    sequence 1 {\n    }\n")]
+    [InlineData("    sequence 1 {\n        wait -5t\n    }\n")]
+    [InlineData("    sequence 1 {\n        wait 4294967296t\n    }\n")]
+    public void ALengthOfTimeThatIsNoLengthOfTimeIsTrouble(string body)
+    {
+        var program = new Automation();
+        Assert.NotEqual("", Load(Head + "MalTek.Airlock {\n" + body + "}\n", program));
+
+        Assert.False(program.Intact);
+    }
+
+    /// <summary>
+    /// The words above a trigger are the trigger's, and a save keeps them.
+    /// </summary>
+    /// <remarks>
+    /// The annotation is what the config panel shows a person about the button it is asking them for,
+    /// so losing it on save loses the only thing that says what the trigger is for.
+    /// </remarks>
+    [Fact]
+    public void AnAnnotationOnATriggerSurvivesASave()
+    {
+        var program = Airlock();
+        program.Systems[0].Triggers[0].Annotation = "The call button.";
+
+        var read = new Automation();
+        Assert.Equal("", Load(Save(program), read));
+
+        Assert.Equal("The call button.", read.Systems[0].Triggers[0].Annotation);
+    }
+
+    /// <summary>
+    /// Two of a system claiming the same number is trouble, and the second one is not read.
+    /// </summary>
+    /// <remarks>
+    /// One number is one of a system: it is what a switch names and what the runner ticks, so a
+    /// second one carrying it ran that one twice a tick.
+    /// </remarks>
+    [Fact]
+    public void TwoOfASystemWithTheSameNumberIsTrouble()
+    {
+        var program = new Automation();
+        Assert.NotEqual("", Load(
+            Head + "MalTek.Airlock {\n}\n\ninstance 1 of MalTek.Airlock {\n}\n"
+            + "\ninstance 1 of MalTek.Airlock {\n}\n", program));
+
+        Assert.False(program.Intact);
+        Assert.Single(program.Systems[0].Instances);
+    }
+
+    /// <summary>
     /// The dot is an operator, so the spaces around it are nothing and the name is always its parts.
     /// </summary>
     [Fact]
     public void SpacesAroundTheDotAreNothing()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Head + "'MalTek Inc.'  .  Airlock is on {\n}\n", after));
+        Assert.Equal("", Load(Head + "'MalTek Inc.'  .  Airlock {\n}\n", after));
         Assert.True(after.Systems[0].Is("MalTek Inc.", "Airlock"));
 
         // Written back tight, because the writer has one spelling for a name.
-        Assert.Contains(" as 'MalTek Inc.'.Airlock is on {", Save(after));
+        Assert.Contains(" as 'MalTek Inc.'.Airlock {", Save(after));
     }
 
     /// <summary>
@@ -190,8 +589,8 @@ public class ScriptTests
     [Fact]
     public void TwoDifferentNamesNeverSpellTheSame()
     {
-        Assert.Contains(" as 'a.b'.c is on {", Save(SystemCalled("a.b", "c")));
-        Assert.Contains(" as a.'b.c' is on {", Save(SystemCalled("a", "b.c")));
+        Assert.Contains(" as 'a.b'.c {", Save(SystemCalled("a.b", "c")));
+        Assert.Contains(" as a.'b.c' {", Save(SystemCalled("a", "b.c")));
     }
 
     /// <summary>
@@ -205,7 +604,7 @@ public class ScriptTests
     public void TextIsNeverAName()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load(Head + "\"Airlock\" is on {\n}\n", after));
+        Assert.NotEqual("", Load(Head + "\"Airlock\" {\n}\n", after));
         Assert.False(after.Intact);
     }
 
@@ -217,21 +616,20 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.Equal("", Load(
-            Head + "Airlock is on {\n" +
-            "    sequence 1 as 'Let me out' is on {\n" +
+            Head + "Airlock {\n" +
+            "    sequence 1 as 'Let me out' {\n" +
             "    }\n\n" +
-            "    sequence 2 is off {\n" +
+            "    sequence 2 {\n" +
             "    }\n" +
             "}\n", after));
 
         Assert.Equal("Let me out", after.Sequences[0].Name);
         Assert.Equal(2, after.Sequences[1].Number);
         Assert.False(after.Sequences[1].HasName);
-        Assert.False(after.Sequences[1].Enabled);
 
         var text = Save(after);
-        Assert.Contains("sequence 1 as 'Let me out' is on {", text);
-        Assert.Contains("sequence 2 is off {", text);
+        Assert.Contains("sequence 1 as 'Let me out' {", text);
+        Assert.Contains("sequence 2 {", text);
     }
 
     [Fact]
@@ -239,10 +637,10 @@ public class ScriptTests
     {
         var after = new Automation();
         var trouble = Load(
-            Head + "Airlock is on {\n" +
-            "    sequence 1 is on {\n" +
+            Head + "Airlock {\n" +
+            "    sequence 1 {\n" +
             "    }\n\n" +
-            "    sequence 1 is on {\n" +
+            "    sequence 1 {\n" +
             "    }\n" +
             "}\n", after);
 
@@ -255,7 +653,7 @@ public class ScriptTests
     public void TwoSystemsWithTheSameIdentityAreTrouble()
     {
         var after = new Automation();
-        var trouble = Load(Head + "MalTek.Airlock is on {\n}\n\nsystem \"" + Identity + "\" as MalTek.Hangar is off {\n}\n",
+        var trouble = Load(Head + "MalTek.Airlock {\n}\n\nsystem \"" + Identity + "\" as MalTek.Hangar {\n}\n",
             after);
 
         Assert.NotEqual("", trouble);
@@ -272,7 +670,7 @@ public class ScriptTests
         var after = new Automation();
         string warning;
         var trouble = ProgramText.Load(
-            Head + "MalTek.Airlock is on {\n}\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock is off {\n}\n",
+            Head + "MalTek.Airlock {\n}\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock {\n}\n",
             after, Store, out warning);
 
         Assert.Equal("", trouble);
@@ -281,26 +679,14 @@ public class ScriptTests
         Assert.Equal(2, after.Systems.Count);
     }
 
-    [Fact]
-    public void ASwitchSaysOnOrOff()
-    {
-        var after = new Automation();
-        Assert.NotEqual("", Load(Head + "Airlock is maybe {\n}\n", after));
-        Assert.False(after.Intact);
-
-        // Still there, because a reader never loses more than it has to.
-        Assert.Single(after.Systems);
-    }
-
     /// <summary>
-    /// Optional parts come after the comma, where a person looks for them.
+    /// A comma separates the items of a list, and appears nowhere else.
     /// </summary>
     [Fact]
-    public void AnOptionalPartComesAfterTheComma()
+    public void ACommaOutsideAListIsTrouble()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load(Head + "Airlock is on changed \"2026-09-14T19:02:11Z\" {\n}\n",
-            after));
+        Assert.NotEqual("", Load(Head + "Airlock, changed \"2026-09-14T19:02:11Z\" {\n}\n", after));
         Assert.False(after.Intact);
     }
 
@@ -311,30 +697,30 @@ public class ScriptTests
     public void AChangedTimeIsIsoAndComesBackAsUtc()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Head + "Airlock is on, changed \"2026-09-14T21:02:11+02:00\" {\n}\n",
+        Assert.Equal("", Load(Head + "Airlock changed \"2026-09-14T21:02:11+02:00\" {\n}\n",
             after));
-        Assert.Contains(" as Airlock is on, changed \"2026-09-14T19:02:11Z\" {", Save(after));
+        Assert.Contains(" as Airlock changed \"2026-09-14T19:02:11Z\" {", Save(after));
 
         var local = new Automation();
-        Assert.NotEqual("", Load(Head + "Airlock is on, changed \"14/09/2026\" {\n}\n", local));
+        Assert.NotEqual("", Load(Head + "Airlock changed \"14/09/2026\" {\n}\n", local));
         Assert.False(local.Intact);
     }
 
     /// <summary>
-    /// The optional parts are found by what they say, whatever order they come in.
+    /// The parts of a statement are found by what they say, whatever order they come in.
     /// </summary>
     [Fact]
-    public void OptionalPartsReadInAnyOrder()
+    public void ThePartsOfAStatementReadInAnyOrder()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Head + "Airlock is on, last sequence 4, changed \"2026-09-14T19:02:11Z\" {\n}\n",
+        Assert.Equal("", Load(Head + "Airlock last sequence 4 changed \"2026-09-14T19:02:11Z\" {\n}\n",
             after));
 
         Assert.Equal(new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc), after.Systems[0].Changed);
         Assert.Equal(4, after.Systems[0].LastSequenceNumber);
 
         // Written back in the writer's own order.
-        Assert.Contains(" as Airlock is on, changed \"2026-09-14T19:02:11Z\", last sequence 4 {", Save(after));
+        Assert.Contains(" as Airlock changed \"2026-09-14T19:02:11Z\" last sequence 4 {", Save(after));
     }
 
     /// <summary>
@@ -349,17 +735,17 @@ public class ScriptTests
     {
         var program = SystemCalled("", "Airlock");
         var system = program.Systems[0];
-        program.AddSequence(system, new CalledTrigger());
-        var two = program.AddSequence(system, new CalledTrigger());
+        program.AddSequence(system);
+        var two = program.AddSequence(system);
         Assert.DoesNotContain("last", Save(program));
 
         program.RemoveSequence(two);
         var text = Save(program);
-        Assert.Contains(" as Airlock is on, last sequence 2 {", text);
+        Assert.Contains(" as Airlock last sequence 2 {", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
-        Assert.Equal(3, after.AddSequence(after.Systems[0], new CalledTrigger()).Number);
+        Assert.Equal(3, after.AddSequence(after.Systems[0]).Number);
     }
 
     /// <summary>
@@ -369,7 +755,7 @@ public class ScriptTests
     public void ASequenceHigherThanTheLastNumberWins()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Head + "Airlock is on, last sequence 3 {\n    sequence 7 is on {\n    }\n}\n", after));
+        Assert.Equal("", Load(Head + "Airlock last sequence 3 {\n    sequence 7 {\n    }\n}\n", after));
 
         Assert.Equal(7, after.Systems[0].LastSequenceNumber);
         Assert.DoesNotContain("last", Save(after));
@@ -382,7 +768,7 @@ public class ScriptTests
     public void ALastSequenceThatDoesNotSayANumberIsTrouble(string part)
     {
         var after = new Automation();
-        Assert.NotEqual("", Load(Head + "Airlock is on, " + part + " {\n}\n", after));
+        Assert.NotEqual("", Load(Head + "Airlock " + part + " {\n}\n", after));
         Assert.False(after.Intact);
     }
 
@@ -397,18 +783,35 @@ public class ScriptTests
     public void AnActionNamedAfterAKeywordIsQuoted()
     {
         var program = SystemCalled("", "Airlock");
-        var sequence = program.AddSequence(program.Systems[0], new CalledTrigger());
+        var sequence = program.AddSequence(program.Systems[0]);
 
-        var odd = new Step("every");
+        var odd = new Act("every");
         odd.Targets.Add("thing");
         sequence.Steps.Add(odd);
 
         var text = Save(program);
-        Assert.Contains("'every' [ thing ] wait\n", text);
+        Assert.Contains("'every' [ thing ]\n", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
-        Assert.Equal("every", after.Sequences[0].Steps[0].ActionId);
+        Assert.Equal("every", Assert.IsType<Act>(after.Sequences[0].Steps[0]).ActionId);
+    }
+
+    /// <summary>
+    /// A block key no kind here can hold is trouble, rather than a key quietly fewer.
+    /// </summary>
+    /// <remarks>
+    /// The keys are how a block is found again, so one dropped on the way in is one missing from the
+    /// next save: the block matches less than it did, and nothing said so.
+    /// </remarks>
+    [Fact]
+    public void AKeyThisBuildCannotHoldIsTrouble()
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(
+            "reactor 4\n\nblock 'Door/LargeBlockDoor' door1 [ 74857693847562934, (3 0 -2) ]\n", after));
+
+        Assert.False(after.Intact);
     }
 
     /// <summary>
@@ -424,17 +827,19 @@ public class ScriptTests
     public void AConstructThisBuildDoesNotKnowIsSkippedAndTheRestSurvives()
     {
         var text = Save(Airlock())
-            .Replace("        close [ inner ] wait\n",
-                "        close [ inner ] wait\n" +
-                "        run \"Tidy up\"\n" +
-                "        future 3 {\n" +
-                "            whatever [ inner ] wait\n" +
+            .Replace("        close [ inner ]\n",
+                "        close [ inner ]\n" +
+                "        set 3 {\n" +
+                "            whatever [ inner ]\n" +
                 "        }\n");
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
         Assert.True(after.Intact);
-        Assert.Equal(3, after.Sequences[0].Steps.Count);
+
+        // Its five lines, and neither statement headed by a word the language reserves, nor the
+        // block under one of them.
+        Assert.Equal(5, after.Sequences[0].Steps.Count);
     }
 
     /// <summary>
@@ -448,16 +853,17 @@ public class ScriptTests
     public void EachQuoteEscapesOnlyItself()
     {
         var program = SystemCalled("", "Mal's \"big\" airlock");
-        program.Systems[0].RoleFor("inner").Name = "the \"inner\" door's";
+        var sequence = program.AddSequence(program.Systems[0]);
+        sequence.Name = "Mal's \"other\" sequence";
 
         var text = Save(program);
-        Assert.Contains(" as 'Mal''s \"big\" airlock' is on {", text);
-        Assert.Contains("\"the \"\"inner\"\" door's\"", text);
+        Assert.Contains(" as 'Mal''s \"big\" airlock' {", text);
+        Assert.Contains("sequence 1 as 'Mal''s \"other\" sequence' {", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
         Assert.Equal("Mal's \"big\" airlock", after.Systems[0].Name);
-        Assert.Equal("the \"inner\" door's", after.Systems[0].FindRole("inner")!.Name);
+        Assert.Equal("Mal's \"other\" sequence", after.Sequences[0].Name);
     }
 
     /// <summary>
@@ -526,12 +932,12 @@ public class ScriptTests
     /// copy there is.
     /// </remarks>
     [Theory]
-    [InlineData("        close [ inner wait\n")]
-    [InlineData("        close [ inner ] \"wait\n")]
-    [InlineData("        close [ inner ] wait !\n")]
+    [InlineData("        close [ inner\n")]
+    [InlineData("        close \"inner ]\n")]
+    [InlineData("        close [ inner ] !\n")]
     public void TroubleIsReportedAndTheProgramWillNotBeSavedOverTheSave(string line)
     {
-        var text = Save(Airlock()).Replace("        close [ inner ] wait\n", line);
+        var text = Save(Airlock()).Replace("        close [ inner ]\n", line);
 
         var after = new Automation();
         var trouble = Load(text, after);
@@ -542,14 +948,14 @@ public class ScriptTests
         // And the rest of it is still there, which is the other half of the promise.
         Assert.Single(after.Systems);
         Assert.Equal("Airlock", after.Systems[0].Name);
-        Assert.Equal(2, after.Sequences[0].Steps.Count);
+        Assert.Equal(4, after.Sequences[0].Steps.Count);
     }
 
     [Fact]
     public void AnAnnotationWithNothingUnderItIsTrouble()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("reactor 3\n\n# about nothing at all\n", after));
+        Assert.NotEqual("", Load("reactor 4\n\n# about nothing at all\n", after));
         Assert.False(after.Intact);
     }
 
@@ -564,7 +970,7 @@ public class ScriptTests
     public void ASaveFromAnotherVersionIsReadAsFarAsItGoesAndNotWrittenBack()
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("reactor 3", "reactor 2"), after);
+        var trouble = Load(Save(Airlock()).Replace("reactor 4", "reactor 2"), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);
@@ -575,7 +981,7 @@ public class ScriptTests
     public void SomethingThatIsNotAProgramIsNotReadAsOne()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("system \"" + Identity + "\" as Airlock is on {\n}\n", after));
+        Assert.NotEqual("", Load("system \"" + Identity + "\" as Airlock {\n}\n", after));
         Assert.False(after.Intact);
     }
 

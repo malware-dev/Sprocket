@@ -132,7 +132,8 @@ on screen     When something happens  |  Now pick what happens
 125  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "When something happens"
 126  ClearClip  
 127  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-128  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Now pick what happens"
-129  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
-130  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-131  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+128  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+129  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Now pick what happens"
+130  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
+131  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+132  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

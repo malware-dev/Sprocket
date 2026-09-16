@@ -21,10 +21,9 @@ namespace Reactor.Sequences
     {
         readonly List<Step> _steps = new List<Step>();
 
-        public Sequence(int id, Trigger trigger)
+        public Sequence(int id)
         {
             Id = id;
-            Trigger = trigger;
             Enabled = true;
             Annotation = "";
         }
@@ -66,7 +65,15 @@ namespace Reactor.Sequences
 
         public bool HasName => !string.IsNullOrEmpty(Name);
 
-        public Trigger Trigger { get; set; }
+        /// <summary>
+        /// The first thing that starts this sequence, or null where nothing does.
+        /// </summary>
+        /// <remarks>
+        /// Asked of the system, which is where triggers live. A sequence with nothing to start it is
+        /// ordinary rather than broken: somebody is halfway through building it, or it is only ever
+        /// reached from another sequence.
+        /// </remarks>
+        public Trigger Trigger => System == null ? null : System.TriggerFor(Number);
 
         public IList<Step> Steps => _steps;
 

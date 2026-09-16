@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Reactor.Sequences
 {
     /// <summary>
@@ -9,16 +7,13 @@ namespace Reactor.Sequences
     /// Flat and numbered. Nesting is what defeats novices, so there isn't any - every
     /// line sits at the same level and reads top to bottom.
     ///
-    /// A step with a gate and nothing to do is simply a wait.
+    /// A line either starts something (<see cref="Act"/>), waits for what has been started
+    /// (<see cref="Await"/>), or spends time (<see cref="Wait"/>).
     /// </remarks>
-    public sealed class Step
+    public abstract class Step
     {
-        readonly List<string> _targets = new List<string>();
-
-        public Step(string actionId)
+        protected Step()
         {
-            ActionId = actionId;
-            WaitsForCompletion = true;
             Annotation = "";
         }
 
@@ -31,42 +26,5 @@ namespace Reactor.Sequences
         /// anything, in any language - is the host's word and has no bearing on this one.
         /// </remarks>
         public string Annotation { get; set; }
-
-        /// <summary>When this step may start, or null to start immediately.</summary>
-        /// <remarks>
-        /// Usually null. Because steps wait for their own action to finish, a gate is
-        /// only needed to wait on something this sequence did <em>not</em> cause -
-        /// "once the tank is full" - or to guard a step with "only if".
-        /// </remarks>
-        public StepGate Gate { get; set; }
-
-        /// <summary>
-        /// Whether the sequence holds here until the action has actually taken effect.
-        /// </summary>
-        /// <remarks>
-        /// True by default, and this is the single most important default in the
-        /// language. A numbered list already means "and then" to anyone who has
-        /// followed a recipe: "close the inner door, depressurize, open the outer
-        /// door" needs no further explanation of the ordering, because the ordering
-        /// is what a list <em>is</em>.
-        ///
-        /// The alternative - stating "once the inner door is shut" on every step -
-        /// makes the user write down something the reader already assumed, and pushes
-        /// them towards guessing a duration instead, which is how an airlock ends up
-        /// venting a ship the day a door sticks.
-        ///
-        /// Doing several things at once is therefore the thing you have to ask for.
-        /// Note that acting on several entities in one step was always simultaneous,
-        /// so this is only needed for genuinely different actions overlapping.
-        /// </remarks>
-        public bool WaitsForCompletion { get; set; }
-
-        /// <summary>Entities affected. All of them, together, in this step.</summary>
-        public IList<string> Targets => _targets;
-
-        /// <summary>The <see cref="World.EntityAction"/> id to invoke.</summary>
-        public string ActionId { get; set; }
-
-        public bool HasAction => Targets.Count > 0 && !string.IsNullOrEmpty(ActionId);
     }
 }

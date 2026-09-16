@@ -13,7 +13,7 @@ namespace Reactor.Sequences
         readonly List<string> _nowTargets;
         readonly string _nowAction;
 
-        public ChangeStep(int index, Step step, IList<string> targets, string actionId)
+        public ChangeStep(int index, Act step, IList<string> targets, string actionId)
         {
             _index = index;
             _wasTargets = CopyOf(step.Targets);
@@ -38,7 +38,10 @@ namespace Reactor.Sequences
 
         void Put(Sequence sequence, IList<string> targets, string action)
         {
-            var step = sequence.Steps[_index];
+            var step = sequence.Steps[_index] as Act;
+            if (step == null)
+                return;
+
             Refill(step.Targets, targets);
             step.ActionId = action;
         }

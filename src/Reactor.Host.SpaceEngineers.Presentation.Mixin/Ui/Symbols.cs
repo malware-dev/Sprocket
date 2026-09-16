@@ -95,6 +95,9 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Ui
         /// </remarks>
         public const string Warning = "!";
 
+        /// <summary>A square loop with a break in it: read the ship again.</summary>
+        public const string Refresh = "s";
+
         /// <summary>
         /// Flat white, tinted to whatever colour is wanted. The only way to fill a rectangle, since the
         /// seam draws sprites and knows nothing of solid colours.

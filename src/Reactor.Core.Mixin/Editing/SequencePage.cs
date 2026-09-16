@@ -135,8 +135,19 @@ namespace Reactor.Editing
             _undoCommand = Change(Cmd.Undo, delegate { Editor.Undo(_sequence); });
             _redoCommand = Change(Cmd.Redo, delegate { Editor.Redo(_sequence); });
 
+            // An await is not a line on screen. Concurrency is not a feature yet, so a row saying
+            // "wait for it to finish" after every step would be noise about something nobody can
+            // change - and the editor writes one after every step anyway. Each row therefore stands
+            // for a step and the await that follows it, and the two are moved and deleted as one.
+            _shown.Clear();
             for (var i = 0; i < _sequence.Steps.Count; i++)
-                _sentence.Steps.Add(BuildStep(i, _sequence.Steps[i]));
+            {
+                if (_sequence.Steps[i] is Await)
+                    continue;
+
+                _shown.Add(i);
+                _sentence.Steps.Add(BuildStep(_shown.Count - 1, i, _sequence.Steps[i]));
+            }
 
             // Two kinds of step, so two ways to add one. Waiting a set time is not an
             // action on a block and pretending otherwise is what makes the flow
@@ -236,8 +247,15 @@ namespace Reactor.Editing
             _sentence.LastRun = Editor.TimeText.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
             _sentence.Trigger.IsLiveNow = state != null && state.TriggerSignalIsTrue;
 
-            for (var i = 0; i < _sentence.Steps.Count; i++)
-                _sentence.Steps[i].IsCurrent = state != null && state.IsRunning && state.CurrentStep == i;
+            // A row is lit while the sequence is anywhere inside it, so a step stays lit while the
+            // await after it is what is actually being waited on.
+            for (var i = 0; i < _sentence.Steps.Count && i < _shown.Count; i++)
+            {
+                var from = _shown[i];
+                var to = from + Spanned(from);
+                _sentence.Steps[i].IsCurrent = state != null && state.IsRunning
+                    && state.CurrentStep >= from && state.CurrentStep < to;
+            }
 
             // Read every tick rather than only when the screen is rebuilt, because renaming
             // changes what there is to walk back without changing the screen's shape.
@@ -275,8 +293,8 @@ namespace Reactor.Editing
             _sentence.Problem = Editor.SequenceText.Problem(fault.Problem);
             _sentence.Trigger.HasProblem = fault.Exists && fault.Step == SequenceFault.Trigger;
 
-            for (var i = 0; i < _sentence.Steps.Count; i++)
-                _sentence.Steps[i].HasProblem = fault.Exists && fault.Step == i;
+            for (var i = 0; i < _sentence.Steps.Count && i < _shown.Count; i++)
+                _sentence.Steps[i].HasProblem = fault.Exists && fault.Step == _shown[i];
         }
 
         SentenceTrigger BuildTrigger()
@@ -288,6 +306,11 @@ namespace Reactor.Editing
             var every = _sequence.Trigger as EveryTrigger;
             if (every != null)
                 return BuildEvery(every);
+
+            // A trigger the construct answers has nothing to choose here: which button runs it is
+            // said on the ship's own toolbars, and there is one line to say that it is.
+            if (_sequence.Trigger is RequiredTrigger)
+                return new SentenceTrigger(TriggerKind.Required);
 
             return new SentenceTrigger(TriggerKind.When);
         }
@@ -351,114 +374,73 @@ namespace Reactor.Editing
             return _sequence.CanRun ? 0 : Editor.Register(kind, which, part, action);
         }
 
-        SentenceStep BuildStep(int index, Step step)
+        /// <summary>Where each row's step sits among the sequence's lines.</summary>
+        readonly List<int> _shown = new List<int>();
+
+        SentenceStep BuildStep(int row, int index, Step step)
         {
-            var position = index;
+            var position = row;
+            var wait = step as Wait;
+            var act = step as Act;
 
-            // A pure wait has no blocks and no verb, just a duration.
-            var pause = step.Gate as AfterGate;
-            var waits = step.Targets.Count == 0 && pause != null;
-
-            var built = new SentenceStep(index + 1, waits ? StepKind.Wait : StepKind.Do);
+            var built = new SentenceStep(row + 1, Kind(step));
             built.Position = position;
             built.MoveToCommand = _sequence.CanRun
                 ? 0
                 : Editor.RegisterNumber(Cmd.MoveStep, position, delegate(int to) { Move(position, to); });
-            built.DeleteCommand = Change(Cmd.DeleteStep, position, delegate { RemoveStep(step); });
+            built.DeleteCommand = Change(Cmd.DeleteStep, position, delegate { RemoveStep(index); });
 
-            if (waits)
+            if (wait != null)
             {
-                built.Slots.Add(new DurationSlot(pause.Ticks,
-                    Change(Cmd.StepSlot, position, 0, delegate { EditWait(step); })));
+                built.Slots.Add(new DurationSlot(wait.Ticks,
+                    Change(Cmd.StepSlot, position, 0, delegate { EditWait(wait); })));
                 return built;
             }
 
-            // Ordinarily a step is just "close the inner door" - the ordering is
-            // carried by the list, so nothing here says when it happens. A gate reads
-            // as a lead-in, and only appears when one was deliberately added.
-            built.Gate = BuildGate(step.Gate);
+            var run = step as Run;
+            if (run != null)
+            {
+                // Read only, with no command on the slot: nothing in the editor makes one of these
+                // yet, and a slot that opens nothing must still show what the step does.
+                var called = _sequence.System == null ? null : _sequence.System.FindSequence(run.Number);
+                built.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name, 0));
+                return built;
+            }
 
-            var actions = Vocabulary.ActionsFor(Editor.Runner.Bindings, step.Targets);
-            var chosen = FindAction(actions, step.ActionId);
+            // An await has nothing to choose: it waits for whatever is above it, which is the sentence
+            // rather than anything on this line.
+            if (act == null)
+                return built;
+
+            var actions = Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets);
+            var chosen = FindAction(actions, act.ActionId);
             if (actions.Count > 0 && chosen == null)
             {
                 chosen = actions[0];
-                step.ActionId = chosen.Id;
+                act.ActionId = chosen.Id;
             }
 
             built.Slots.Add(new ActionSlot(chosen,
-                Change(Cmd.StepSlot, position, 0, delegate { EditStep(step); })));
+                Change(Cmd.StepSlot, position, 0, delegate { EditStep(act); })));
 
-            built.Slots.Add(new EntitiesSlot(Resolved(step.Targets), true,
-                Change(Cmd.StepSlot, position, 1, delegate { EditStep(step); })));
-
-            return built;
-        }
-
-        /// <summary>
-        /// What holds a step back, or null where nothing does.
-        /// </summary>
-        /// <remarks>
-        /// The slots carry no command, because a gate cannot yet be changed from the sentence. They
-        /// are slots all the same, so that the day it can be, a command number appears on one rather
-        /// than a second way of saying the same thing arriving beside them.
-        /// </remarks>
-        SentenceGate BuildGate(StepGate gate)
-        {
-            var once = gate as OnceGate;
-            if (once != null)
-                return Guard(GateKind.Once, once.Condition);
-
-            var only = gate as OnlyIfGate;
-            if (only != null)
-                return Guard(GateKind.OnlyIf, only.Condition);
-
-            var after = gate as AfterGate;
-            if (after != null)
-            {
-                var timed = new SentenceGate(GateKind.After);
-                timed.Slots.Add(new DurationSlot(after.Ticks, 0));
-                return timed;
-            }
-
-            return null;
-        }
-
-        SentenceGate Guard(GateKind kind, Condition condition)
-        {
-            var built = new SentenceGate(kind);
-            var entities = condition == null ? new List<string>() : condition.Entities;
-
-            built.Slots.Add(new EntitiesSlot(Resolved(entities), true, 0));
-            built.Slots.Add(new StateSlot(FindState(condition), 0));
+            built.Slots.Add(new EntitiesSlot(Resolved(act.Targets), true,
+                Change(Cmd.StepSlot, position, 1, delegate { EditStep(act); })));
 
             return built;
         }
 
-        /// <summary>
-        /// The state a condition reads, taken from the first entity that still declares it.
-        /// </summary>
-        /// <remarks>
-        /// A condition names one state id across several entities, and they need not all still be
-        /// here. The first that answers is enough to say what the condition is about.
-        /// </remarks>
-        EntityState FindState(Condition condition)
+        static StepKind Kind(Step step)
         {
-            if (condition == null)
-                return null;
+            if (step is Wait)
+                return StepKind.Wait;
 
-            for (var i = 0; i < condition.Entities.Count; i++)
-            {
-                var entity = Editor.Runner.Bindings.Entity(condition.Entities[i]);
-                if (entity == null)
-                    continue;
+            return step is Run ? StepKind.Run : StepKind.Do;
+        }
 
-                var state = entity.Kind.FindState(condition.StateId);
-                if (state != null)
-                    return state;
-            }
-
-            return null;
+        /// <summary>How many of the sequence's lines a row stands for: the step, and any await after it.</summary>
+        int Spanned(int index)
+        {
+            return index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await ? 2 : 1;
         }
 
         /// <summary>
@@ -504,7 +486,7 @@ namespace Reactor.Editing
             }));
         }
 
-        void EditStep(Step step)
+        void EditStep(Act step)
         {
             var index = _sequence.Steps.IndexOf(step);
 
@@ -539,13 +521,17 @@ namespace Reactor.Editing
                 {
                     // Only once both answers are in. Backing out of the questions adds no
                     // step, so there is nothing to take back.
-                    var step = new Step(answer.Chosen);
+                    var step = new Act(answer.Chosen);
                     var named = Declared(answer.Targets);
                     for (var i = 0; i < named.Count; i++)
                         step.Targets.Add(named[i]);
 
+                    // With an await after it, because a numbered list is read as one thing after
+                    // another. Overlapping steps means deleting the await, which is something
+                    // somebody does on purpose rather than a default they never asked for. One edit,
+                    // so one press takes the pair back.
                     Editor.Do(_sequence,
-                        new AddStep("adding a step", _sequence.Steps.Count, step));
+                        new AddStep("adding a step", _sequence.Steps.Count, step, new Await()));
                     Editor.UnwindTo(origin);
                 }));
         }
@@ -559,10 +545,8 @@ namespace Reactor.Editing
             var origin = Editor.Depth;
             Editor.Push(WaitPage(delegate(int ticks)
             {
-                var step = new Step("");
-                step.Gate = new AfterGate(ticks);
                 Editor.Do(_sequence,
-                    new AddStep("adding a wait", _sequence.Steps.Count, step));
+                    new AddStep("adding a wait", _sequence.Steps.Count, new Wait(ticks)));
                 Editor.UnwindTo(origin);
             }));
         }
@@ -578,29 +562,47 @@ namespace Reactor.Editing
             return page;
         }
 
-        void EditWait(Step step)
+        void EditWait(Wait step)
         {
             var origin = Editor.Depth;
             Editor.Push(WaitPage(delegate(int ticks)
             {
-                var after = step.Gate as AfterGate;
-                Editor.Do(_sequence,
-                    new SetWait(_sequence.Steps.IndexOf(step), after == null ? 0 : after.Ticks, ticks));
+                Editor.Do(_sequence, new SetWait(_sequence.Steps.IndexOf(step), step.Ticks, ticks));
                 Editor.UnwindTo(origin);
             }));
         }
 
-        void RemoveStep(Step step)
+        void RemoveStep(int index)
         {
-            Editor.Do(_sequence, new RemoveStep(_sequence.Steps.IndexOf(step), step));
+            var going = new List<Step>();
+            for (var i = 0; i < Spanned(index); i++)
+                going.Add(_sequence.Steps[index + i]);
+
+            Editor.Do(_sequence, new RemoveStep(index, going.ToArray()));
         }
 
+        /// <summary>
+        /// Moves the row somebody dragged to where they dropped it.
+        /// </summary>
+        /// <remarks>
+        /// Both ends arrive as rows on screen rather than as lines in the sequence, because a row is
+        /// what a person took hold of. A row is a step and the await after it.
+        /// </remarks>
         void Move(int from, int to)
         {
-            if (to < 0 || to >= _sequence.Steps.Count)
+            if (from < 0 || from >= _shown.Count || to < 0 || to >= _shown.Count || from == to)
                 return;
 
-            Editor.Do(_sequence, new MoveStep(from, to));
+            var start = _shown[from];
+            var count = Spanned(start);
+
+            // Where the run lands: the line the row it is going to starts on, less the run itself
+            // where it is moving down the list.
+            var landing = _shown[to];
+            if (to > from)
+                landing = landing + Spanned(landing) - count;
+
+            Editor.Do(_sequence, new MoveStep(start, landing, count));
         }
 
         /// <summary>

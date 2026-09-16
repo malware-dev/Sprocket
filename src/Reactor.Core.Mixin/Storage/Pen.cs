@@ -143,23 +143,19 @@ namespace Reactor.Storage
             return this;
         }
 
-        /// <summary>
-        /// The comma that starts a statement's optional parts.
-        /// </summary>
-        /// <remarks>
-        /// Written tight against what it follows, the way a person writes one, and the next part brings its
-        /// own space.
-        /// </remarks>
-        public Pen Comma()
-        {
-            _text.Append(',');
-            return this;
-        }
-
         public Pen Whole(long value)
         {
             Space();
             _text.Append(value.ToString(CultureInfo.InvariantCulture));
+            return this;
+        }
+
+        /// <summary>A length of time, written with its unit against it: <c>600t</c>.</summary>
+        public Pen Ticks(long ticks)
+        {
+            Space();
+            _text.Append(ticks.ToString(CultureInfo.InvariantCulture));
+            _text.Append('t');
             return this;
         }
 

@@ -355,9 +355,9 @@ public static class StorageReport
             system.Name = Named("Airlock") + " " + number;
             system.Annotation = _annotation;
 
-            var role = system.RoleFor(Entity(0));
-            role.Name = Named("the inner door");
-            role.Instructions = _annotation;
+            var part = system.PartFor(Entity(0));
+            part.Annotation = _annotation;
+            part.Expects.Add("Door");
 
             for (var i = 1; i < _instances; i++)
                 system.AddInstance().Name = Named("Forward " + i);
@@ -381,22 +381,18 @@ public static class StorageReport
 
             for (var i = 0; i < _steps; i++)
             {
-                var step = new Step(i % 3 == 0 ? "open" : "close");
+                var step = new Act(i % 3 == 0 ? "open" : "close");
                 step.Annotation = _annotation;
                 for (var t = 0; t < _targets; t++)
                     step.Targets.Add(Entity(t));
 
-                if (i % 3 == 1)
-                    step.Gate = new AfterGate(60 + i);
-
-                if (i % 3 == 2)
-                {
-                    var condition = new Condition("is-shut");
-                    condition.Entities.Add(Entity(0));
-                    step.Gate = new OnlyIfGate(condition);
-                }
-
                 sequence.Steps.Add(step);
+
+                // The shape a sequence written in the editor has: something started, then waited for,
+                // with the occasional deliberate pause.
+                sequence.Steps.Add(new Await());
+                if (i % 3 == 1)
+                    sequence.Steps.Add(new Wait(60 + i));
             }
         }
 

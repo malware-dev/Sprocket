@@ -132,6 +132,9 @@ namespace Reactor.Runtime
         /// <summary>Starts a named sequence, as a trigger or another sequence would.</summary>
         public void Call(Sequence sequence)
         {
+            if (sequence == null)
+                return;
+
             var runner = Get(sequence);
             if (runner != null)
                 runner.Call(_world, _bindings, CurrentTick);
@@ -177,8 +180,17 @@ namespace Reactor.Runtime
                         var key = Key(sequences[q].Id, instances[n].Number);
                         _live.Add(key);
 
-                        if (!_runners.ContainsKey(key))
-                            _runners.Add(key, new SequenceRunner(sequences[q], instances[n]));
+                        if (_runners.ContainsKey(key))
+                            continue;
+
+                        var runner = new SequenceRunner(sequences[q], instances[n]);
+
+                        // What a run step reaches: the same system, the same one of it, by number.
+                        var owner = system;
+                        var one = instances[n];
+                        runner.Calls = delegate(int number) { Call(owner.FindSequence(number), one); };
+
+                        _runners.Add(key, runner);
                     }
                 }
             }

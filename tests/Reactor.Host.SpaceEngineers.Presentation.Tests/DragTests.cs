@@ -139,19 +139,36 @@ public class DragTests
             .Where(d => !d.IsText && d.Where.Width == 3 && d.Where.Height == 3)
             .ToList();
 
+        // Clustered by how close together the dots are rather than by fixed bands, because a grip
+        // that happened to straddle a band boundary was counted as two rows.
         var rows = new List<Vector2>();
+        var band = new List<Drawn>();
 
-        foreach (var band in dots.GroupBy(d => d.Where.Y / 40).OrderBy(g => g.Key))
+        foreach (var dot in dots.OrderBy(d => d.Where.Y))
         {
-            var left = band.Min(d => d.Where.X);
-            var right = band.Max(d => d.Where.X + d.Where.Width);
-            var top = band.Min(d => d.Where.Y);
-            var bottom = band.Max(d => d.Where.Y + d.Where.Height);
+            if (band.Count > 0 && dot.Where.Y - band[0].Where.Y > GripHeight)
+            {
+                rows.Add(Middle(band));
+                band.Clear();
+            }
 
-            rows.Add(Screen.Ui((left + right) / 2f, (top + bottom) / 2f));
+            band.Add(dot);
         }
 
+        if (band.Count > 0)
+            rows.Add(Middle(band));
+
         return rows;
+    }
+
+    static Vector2 Middle(List<Drawn> band)
+    {
+        var left = band.Min(d => d.Where.X);
+        var right = band.Max(d => d.Where.X + d.Where.Width);
+        var top = band.Min(d => d.Where.Y);
+        var bottom = band.Max(d => d.Where.Y + d.Where.Height);
+
+        return Screen.Ui((left + right) / 2f, (top + bottom) / 2f);
     }
 
     static string Say(float value) =>

@@ -64,16 +64,15 @@ public class InstanceTests
         var cycle = ship.Program.AddSequence(ship.Airlock, when);
         cycle.Name = "Cycle";
 
-        var close = new Step("close");
+        var close = new Act("close");
         close.Targets.Add(ship.Ref(2));
         cycle.Steps.Add(close);
+        cycle.Steps.Add(new Await());
 
-        var open = new Step("open");
+        var open = new Act("open");
         open.Targets.Add(ship.Ref(3));
-        var onceShut = new Condition("is-shut");
-        onceShut.Entities.Add(ship.Ref(2));
-        open.Gate = new OnceGate(onceShut);
         cycle.Steps.Add(open);
+        cycle.Steps.Add(new Await());
 
         ship.Runner = new AutomationRunner(ship.Program, ship.World);
         return ship;
@@ -275,18 +274,17 @@ public class InstanceTests
     }
 
     /// <summary>
-    /// The parts a system needs are worked out from what it does, and asked once each.
+    /// Which parts a system acts on is worked out from what it does, and asked once each.
     /// </summary>
     [Fact]
-    public void ThePartsAreDerivedFromWhatTheSequencesUse()
+    public void WhatTheSequencesActOnIsWorkedOutFromThem()
     {
         var ship = Build();
 
         var parts = new List<string>();
-        ship.Airlock.Parts(parts);
+        ship.Airlock.Acted(parts);
 
-        // The button, the inner door, the outer door - and the inner door only once, though it
-        // appears in a step and in a gate.
+        // The button, the inner door and the outer door, each once however many steps name it.
         Assert.Equal(new[] { ship.Ref(1), ship.Ref(2), ship.Ref(3) }, parts);
     }
 
@@ -296,27 +294,46 @@ public class InstanceTests
         var ship = Build();
         ship.World.Add(new TestLamp(4, "Front Light"));
 
-        var warn = new Step("on");
+        var warn = new Act("on");
         warn.Targets.Add(ship.Ref(4));
         ship.Program.Sequences[0].Steps.Add(warn);
 
-        var role = ship.Airlock.RoleFor(ship.Ref(4));
-        role.Name = "the warning light";
-        role.Instructions = "Whatever you want flashing while the doors move.";
+        var part = ship.Airlock.PartFor(ship.Ref(4));
+        part.Annotation = "The warning light. Whatever you want flashing while the doors move.";
+        part.Expects.Add("InteriorLight");
 
         var parts = new List<string>();
-        ship.Airlock.Parts(parts);
+        ship.Airlock.Acted(parts);
         Assert.Contains(ship.Ref(4), parts);
 
-        // The only step that used it goes. The part goes with it - the list is derived, so it
-        // cannot disagree with what the system does - but what its author wrote does not.
+        // The only step that used it goes, so the system no longer acts on it - but the part it
+        // declared, and what its author wrote about it, stay.
         ship.Program.Sequences[0].Steps.Remove(warn);
 
-        ship.Airlock.Parts(parts);
+        ship.Airlock.Acted(parts);
         Assert.DoesNotContain(ship.Ref(4), parts);
 
-        Assert.Equal("the warning light", ship.Airlock.FindRole(ship.Ref(4))!.Name);
-        Assert.Equal("Whatever you want flashing while the doors move.",
-            ship.Airlock.FindRole(ship.Ref(4))!.Instructions);
+        Assert.Equal("The warning light. Whatever you want flashing while the doors move.",
+            ship.Airlock.FindPart(ship.Ref(4))!.Annotation);
+        Assert.Equal(new[] { "InteriorLight" }, ship.Airlock.FindPart(ship.Ref(4))!.Expects);
+    }
+
+    /// <summary>
+    /// Another one of a system gets a number no other one has had.
+    /// </summary>
+    /// <remarks>
+    /// Counting them handed out a number that was already in use as soon as one in the middle was
+    /// saved with a higher number than the count, and a number decides which one a switch is about.
+    /// </remarks>
+    [Fact]
+    public void AnotherOneOfASystemNeverTakesANumberInUse()
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+        system.Restore(4, "Airlock 4");
+
+        var added = system.AddInstance();
+
+        Assert.Equal(5, added.Number);
     }
 }

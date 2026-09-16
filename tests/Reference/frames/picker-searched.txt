@@ -59,7 +59,8 @@ on screen     When something happens  |  Start by picking one or more blocks
 052  Text       at {X:275.84695 Y:54.711975} scale 0.9  #DCF5FDFF  "When something happens"
 053  ClearClip  
 054  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-055  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Start by picking one or more blocks"
-056  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
-057  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-058  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+055  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+056  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Start by picking one or more blocks"
+057  Sprite     Reactor_Fill          {X:240 Y:122 W:1440 H:1}  #5B737BFF
+058  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+059  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

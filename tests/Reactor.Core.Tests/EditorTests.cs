@@ -198,7 +198,9 @@ public class EditorTests
         ship.Tick();
 
         var sequence = ship.Automation.Sequences[0];
-        Assert.Single(sequence.Steps);
+
+        // The step and the await after it, added as one edit.
+        Assert.Equal(2, sequence.Steps.Count);
 
         // Nothing has been walked back, so there is nothing to put back.
         Assert.NotEqual(0, editor.Sentence().UndoCommand);
@@ -212,8 +214,9 @@ public class EditorTests
 
         editor.Invoke(editor.Sentence().RedoCommand);
         ship.Tick();
-        Assert.Single(sequence.Steps);
-        Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(sequence.Steps[0].Targets[0])!.Name);
+        Assert.Equal(2, sequence.Steps.Count);
+        var acted = Assert.IsType<Act>(sequence.Steps[0]);
+        Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(acted.Targets[0])!.Name);
 
         // Walk back, then do something different: the road not taken is gone, because putting
         // a step back at an index that now means something else is worse than not offering.
@@ -1141,6 +1144,7 @@ public class EditorTests
         editor.PressChoice("close");
         editor.PressPrimary();
 
+        // One row, even though the sequence has the step and the await after it.
         Assert.Single(editor.Sentence().Steps);
         Assert.Equal("close", Assert.IsType<ActionSlot>(editor.Sentence().Steps[0].Slots[0]).Action.Text);
 

@@ -13,6 +13,9 @@ namespace Reactor.Ui
         Do,
 
         /// <summary>Passes time and nothing else.</summary>
-        Wait
+        Wait,
+
+        /// <summary>Starts another sequence of the same system.</summary>
+        Run
     }
 }

@@ -45,37 +45,45 @@ namespace Reactor.Editing
         }
 
         /// <summary>
-        /// Whether nothing can ever start this sequence.
+        /// Whether nothing can start this sequence.
         /// </summary>
         /// <remarks>
-        /// An unfinished trigger is not unreachable. Somebody half way through picking blocks has a
-        /// sequence that cannot fire yet, and saying so would be scolding them for not having
-        /// finished.
+        /// A sequence nothing starts at all is not judged: it may be there to be <c>run</c> by another
+        /// one, which is an ordinary way to build. What is judged is a sequence something is supposed
+        /// to start - a button that was cleared, or a trigger the construct never answered.
         /// <para>
-        /// A <c>CalledTrigger</c> sequence is not judged either, though today nothing can call one -
-        /// that waits for the language to have a way to say <c>run</c>, at which point "named and
-        /// never called" becomes the second thing this reports.
+        /// An unfinished trigger is not unreachable either. Somebody half way through picking blocks
+        /// has a sequence that cannot fire yet, and saying so would be scolding them for not having
+        /// finished - unless they have already built steps, in which case a trigger with nothing in
+        /// it is a sequence that cannot run however it got that way.
         /// </para>
         /// <para>
-        /// One question to the host rather than one per source. The host knows what it arranged and
-        /// for which sequence; core walking the sources and asking about each in turn was both dearer
-        /// and weaker, since it could only ask whether <i>something</i> was wired there.
+        /// One question to the host rather than one per source, for the rest. The host knows what it
+        /// arranged and for which sequence; core walking the sources and asking about each in turn was
+        /// both dearer and weaker, since it could only ask whether <i>something</i> was wired there.
         /// </para>
         /// </remarks>
         static bool NeverTriggered(IWorld world, Sequence sequence)
         {
-            var when = sequence.Trigger as WhenTrigger;
-            if (when == null)
+            var system = sequence.System;
+            if (system == null)
                 return false;
 
-            // Nothing left to start it, on something that has already been built. An empty trigger on
-            // a sequence with no steps is somebody half way through and is left alone; an empty one
-            // on a sequence that does something is a sequence that cannot run, however it got that
-            // way - abandoned mid-build, or a button taken away underneath it.
-            if (when.Sources.Count == 0 || string.IsNullOrEmpty(when.EventId))
-                return sequence.Steps.Count > 0;
+            var starts = 0;
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                if (triggers[i].Runs != sequence.Number)
+                    continue;
 
-            return !world.CanStart(sequence);
+                starts++;
+
+                var when = triggers[i] as WhenTrigger;
+                if (when != null && (when.Sources.Count == 0 || string.IsNullOrEmpty(when.EventId)))
+                    return sequence.Steps.Count > 0;
+            }
+
+            return starts > 0 && !world.CanStart(sequence);
         }
 
         /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
@@ -119,27 +127,16 @@ namespace Reactor.Editing
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
-                var step = sequence.Steps[i];
+                var act = sequence.Steps[i] as Act;
+                if (act == null)
+                    continue;
 
-                for (var t = 0; t < step.Targets.Count; t++)
+                for (var t = 0; t < act.Targets.Count; t++)
                 {
-                    var points = bindings.State(step.Targets[t]);
+                    var points = bindings.State(act.Targets[t]);
                     if (points == RefState.Lost)
                         return new SequenceFault(SequenceProblem.MissingTarget, i);
                     if (points == RefState.Adrift && !adrift.Exists)
-                        adrift = new SequenceFault(SequenceProblem.Adrift, i);
-                }
-
-                var condition = ConditionOf(step);
-                if (condition == null)
-                    continue;
-
-                for (var t = 0; t < condition.Entities.Count; t++)
-                {
-                    var held = bindings.State(condition.Entities[t]);
-                    if (held == RefState.Lost)
-                        return new SequenceFault(SequenceProblem.MissingGate, i);
-                    if (held == RefState.Adrift && !adrift.Exists)
                         adrift = new SequenceFault(SequenceProblem.Adrift, i);
                 }
             }
@@ -156,15 +153,5 @@ namespace Reactor.Editing
                 : SequenceFault.None;
         }
 
-        /// <summary>What a step waits on, whichever kind of gate holds it back, or null.</summary>
-        static Condition ConditionOf(Step step)
-        {
-            var once = step.Gate as OnceGate;
-            if (once != null)
-                return once.Condition;
-
-            var guard = step.Gate as OnlyIfGate;
-            return guard != null ? guard.Condition : null;
-        }
     }
 }

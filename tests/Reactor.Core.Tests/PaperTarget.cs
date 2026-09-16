@@ -189,8 +189,6 @@ static class PaperTarget
 
         if (step.Kind == StepKind.Wait)
             line.Append("wait");
-        else if (step.Gate != null)
-            line.Append(Say(world, step.Gate));
 
         foreach (var slot in step.Slots)
         {
@@ -199,23 +197,6 @@ static class PaperTarget
 
             line.Append(Say(world, slot));
         }
-
-        return line.ToString();
-    }
-
-    static string Say(IWorld world, SentenceGate gate)
-    {
-        var line = new StringBuilder();
-
-        if (gate.Kind == GateKind.Once)
-            line.Append("once");
-        else if (gate.Kind == GateKind.OnlyIf)
-            line.Append("only if");
-        else
-            line.Append("after");
-
-        foreach (var slot in gate.Slots)
-            line.Append(' ').Append(Say(world, slot));
 
         return line.ToString();
     }
@@ -250,9 +231,6 @@ static class PaperTarget
 
         if (slot is ActionSlot action)
             return action.Action.Text;
-
-        if (slot is StateSlot state)
-            return state.State.Text;
 
         if (slot is DurationSlot duration)
             return duration.Ticks + " ticks";

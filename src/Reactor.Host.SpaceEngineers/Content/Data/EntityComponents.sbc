@@ -10,8 +10,9 @@
         line in the log saying "not claimed". So the program is written, works for the whole session,
         survives being read back - and is gone the moment the world is saved and loaded.
 
-        The GUID must match ReactorUnit.ProgramKey exactly, and must never change. A different one reads
-        as a Reactor nobody has written a program on yet, which discards somebody's ship without saying so.
+        The first GUID must match ReactorUnit.ProgramKey exactly and the second ReactorUnit.StateKey, and
+        neither must ever change. A different one reads as a Reactor nobody has written a program on yet,
+        which discards somebody's ship without saying so.
         -->
         <EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
             <Id>
@@ -20,6 +21,7 @@
             </Id>
             <RegisteredStorageGuids>
                 <guid>9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7</guid>
+                <guid>C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3</guid>
             </RegisteredStorageGuids>
         </EntityComponent>
     </EntityComponents>

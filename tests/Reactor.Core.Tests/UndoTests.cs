@@ -30,7 +30,8 @@ public class UndoTests
         var trigger = new WhenTrigger("pressed");
         trigger.Sources.Add("call");
 
-        var sequence = new Sequence(1, trigger);
+        var program = new Automation();
+        var sequence = program.AddSequence(program.AddSystem(), trigger);
         sequence.Name = "Let me out";
         sequence.Steps.Add(StepFor("close", "inner"));
         sequence.Steps.Add(StepFor("depressurize", "vent"));
@@ -39,9 +40,9 @@ public class UndoTests
         return (world, sequence);
     }
 
-    static Step StepFor(string actionId, params string[] targets)
+    static Act StepFor(string actionId, params string[] targets)
     {
-        var step = new Step(actionId);
+        var step = new Act(actionId);
         foreach (var target in targets)
             step.Targets.Add(target);
         return step;
@@ -70,11 +71,14 @@ public class UndoTests
 
         foreach (var step in sequence.Steps)
         {
-            text.Append(" | ").Append(step.ActionId).Append(':')
-                .Append(string.Join("+", step.Targets));
+            if (step is Act act)
+            {
+                text.Append(" | ").Append(act.ActionId).Append(':')
+                    .Append(string.Join("+", act.Targets));
+                continue;
+            }
 
-            if (step.Gate is AfterGate after)
-                text.Append(" after ").Append(after.Ticks);
+            text.Append(step is Wait wait ? " | wait " + wait.Ticks : " | await");
         }
 
         return text.ToString();
@@ -124,14 +128,14 @@ public class UndoTests
     public void ChangingAStepReversesExactly()
     {
         var (_, sequence) = Build();
-        RoundTrip(new ChangeStep(0, sequence.Steps[0], new[] { "inner", "outer" }, "lock"));
+        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock"));
     }
 
     [Fact]
     public void ChangingAWaitReversesExactly()
     {
         var (_, sequence) = Build();
-        sequence.Steps[1].Gate = new AfterGate(60);
+        sequence.Steps[1] = new Wait(60);
         var edit = new SetWait(1, 60, 120);
 
         var before = Shape(sequence);
@@ -170,7 +174,8 @@ public class UndoTests
     [Fact]
     public void ChangingTheCadenceReversesExactly()
     {
-        var sequence = new Sequence(1, new EveryTrigger(60));
+        var program = new Automation();
+        var sequence = program.AddSequence(program.AddSystem(), new EveryTrigger(60));
         var edit = new SetCadence(60, 600);
 
         var before = Shape(sequence);
@@ -193,7 +198,7 @@ public class UndoTests
         var (_, sequence) = Build();
         var when = (WhenTrigger)sequence.Trigger;
 
-        Assert.False(new ChangeStep(0, sequence.Steps[0], new[] { "inner" }, "close").Changes);
+        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close").Changes);
         Assert.False(new ChangeTrigger(when, new[] { "call" }, "pressed", false).Changes);
         Assert.False(new Rename("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);

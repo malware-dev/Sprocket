@@ -44,12 +44,13 @@ on screen     Automation for Test Rig
 037  ClearClip  
 038  Sprite     Reactor_Fill          {X:259 Y:61 W:11 H:21}  #29363EFF
 039  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-040  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
-041  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-042  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
-043  Sprite     Reactor_Fill          {X:275 Y:78 W:58 H:33}  #1B242AFF
-044  Sprite     Reactor_Fill          {X:275 Y:78 W:58 H:1}  #5B737BFF
-045  Sprite     Reactor_Fill          {X:275 Y:110 W:58 H:1}  #5B737BFF
-046  Sprite     Reactor_Fill          {X:275 Y:78 W:1 H:33}  #5B737BFF
-047  Sprite     Reactor_Fill          {X:332 Y:78 W:1 H:33}  #5B737BFF
-048  Text       at {X:287.8 Y:84} scale 0.57  #DCF5FDFF  "Back"
+040  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+041  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
+042  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+043  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+044  Sprite     Reactor_Fill          {X:275 Y:78 W:58 H:33}  #1B242AFF
+045  Sprite     Reactor_Fill          {X:275 Y:78 W:58 H:1}  #5B737BFF
+046  Sprite     Reactor_Fill          {X:275 Y:110 W:58 H:1}  #5B737BFF
+047  Sprite     Reactor_Fill          {X:275 Y:78 W:1 H:33}  #5B737BFF
+048  Sprite     Reactor_Fill          {X:332 Y:78 W:1 H:33}  #5B737BFF
+049  Text       at {X:287.8 Y:84} scale 0.57  #DCF5FDFF  "Back"

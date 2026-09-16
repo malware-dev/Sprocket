@@ -32,7 +32,12 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// <summary>The word a trigger opens with.</summary>
         public static string Lead(SentenceTrigger trigger)
         {
-            return trigger.Kind == TriggerKind.Every ? "Every" : "When";
+            if (trigger.Kind == TriggerKind.Every)
+                return "Every";
+
+            return trigger.Kind == TriggerKind.Required
+                ? "When something on this ship says so"
+                : "When";
         }
 
 
@@ -45,10 +50,10 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// </remarks>
         public static string Lead(IWorld world, SentenceStep step)
         {
-            if (step.Kind == StepKind.Wait)
-                return "wait";
+            if (step.Kind == StepKind.Run)
+                return "run";
 
-            return step.Gate == null ? "" : Gate(world, step.Gate);
+            return step.Kind == StepKind.Wait ? "wait" : "";
         }
 
 
@@ -158,38 +163,18 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
             if (action != null)
                 return action.Action == null ? Empty : action.Action.Text;
 
-            var state = slot as StateSlot;
-            if (state != null)
-                return state.State == null ? Empty : state.State.Text;
-
             var duration = slot as DurationSlot;
             if (duration != null)
                 return TimeText.Duration(duration.Ticks);
+
+            var sequence = slot as SequenceSlot;
+            if (sequence != null)
+                return sequence.Name.Length > 0 ? sequence.Name : "sequence " + sequence.Number;
 
             // A slot kind core invented and nobody here has words for. Saying nothing would leave a
             // gap that reads exactly like a slot waiting to be filled, which is a thing that happens.
             return "(" + slot.GetType().Name + ")";
         }
 
-
-        static string Gate(IWorld world, SentenceGate gate)
-        {
-            var words = new StringBuilder();
-
-            if (gate.Kind == GateKind.Once)
-                words.Append("once");
-            else if (gate.Kind == GateKind.OnlyIf)
-                words.Append("only if");
-            else
-                words.Append("after");
-
-            for (var i = 0; i < gate.Slots.Count; i++)
-            {
-                var duration = gate.Slots[i] as DurationSlot;
-                words.Append(' ').Append(duration != null ? TimeText.Rate(duration.Ticks) : Of(world, gate.Slots[i]));
-            }
-
-            return words.ToString();
-        }
     }
 }

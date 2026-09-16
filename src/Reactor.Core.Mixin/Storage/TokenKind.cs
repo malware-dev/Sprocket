@@ -34,6 +34,9 @@ namespace Reactor.Storage
 
         Real,
 
+        /// <summary>A whole number of ticks and its unit, written as one word: <c>600t</c>.</summary>
+        Duration,
+
         /// <summary>Red, green, blue and alpha, packed in that order.</summary>
         Color,
 
@@ -56,6 +59,9 @@ namespace Reactor.Storage
         /// a name is always its parts. <c>'a.b'.'c'</c> and <c>'a'.'b.c'</c> are different names.
         /// </remarks>
         Dot,
+
+        /// <summary>The <c>=</c> of one of a system saying what one of its parts is.</summary>
+        Equals,
 
         /// <summary>
         /// Text that is not a token at all, carrying what is wrong with it.

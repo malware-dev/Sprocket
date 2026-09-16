@@ -48,6 +48,16 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </remarks>
         static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
 
+        /// <summary>
+        /// Where what is switched off sits, beside the program.
+        /// </summary>
+        /// <remarks>
+        /// A second key rather than part of the program, because the program is what somebody shares
+        /// and a switch is this construct's business. Claimed in <c>EntityComponents.sbc</c> the same
+        /// way, and for the same reason: an unclaimed key works all session and vanishes on save.
+        /// </remarks>
+        static readonly Guid StateKey = new Guid("C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3");
+
         readonly IMyTerminalBlock _block;
         readonly GridWorld _world;
         readonly Automation _program = new Automation();
@@ -109,11 +119,8 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <summary>Whether the panels have been looked at once, which is not the same as written to.</summary>
         bool _adopted;
 
-        /// <summary>Ticks in a second, at the rate the game runs at.</summary>
-        const int Second = 60;
-
-        /// <summary>When reachability was last worked out. A second behind, so the first tick does it.</summary>
-        int _reached = -Second;
+        /// <summary>Whether anything has asked for a reading yet. Nothing is read until something does.</summary>
+        bool _read;
 
         /// <summary>What a key names: a sequence, and which one of its system to run it on.</summary>
         struct Target
@@ -281,6 +288,12 @@ namespace Reactor.Host.SpaceEngineers.World
 
             _reconciled = _program.Wiring;
 
+            // Somebody has just said what a trigger is, so what is wired has changed under whatever a
+            // screen is showing - including by Reactor writing a slot itself a moment ago. Read it
+            // again, or a sequence the player has just mended goes on being reported as unstartable
+            // and parked a second later.
+            _world.LookAgain();
+
             Reindex();
             Wanted(_wanting);
 
@@ -418,11 +431,105 @@ namespace Reactor.Host.SpaceEngineers.World
         /// is the same "any of them" a trigger already means when it lists several blocks.
         /// </para>
         /// </remarks>
+        /// <summary>
+        /// How many slots on this construct claim each key.
+        /// </summary>
+        /// <remarks>
+        /// <b>Counted rather than remembered.</b> A system says it needs something to start a sequence;
+        /// which button, timer or sensor answers that is the construct's business and lives only in the
+        /// toolbars. So the answer is arrived at by looking, and two triggers running one sequence need
+        /// two slots running it.
+        /// </remarks>
+        readonly Dictionary<string, int> _claims = new Dictionary<string, int>(StringComparer.Ordinal);
+
+        void Claims()
+        {
+            _claims.Clear();
+
+            for (var i = 0; i < _world.Entities.Count; i++)
+            {
+                var grid = _world.Entities[i] as GridEntity;
+                if (grid == null)
+                    continue;
+
+                IMyToolbar toolbar = Toolbars.Of(grid.Block);
+                if (toolbar == null)
+                    continue;
+
+                for (var slot = 0; slot < toolbar.SlotCount; slot++)
+                {
+                    MyToolbarItemInfo present;
+                    if (!toolbar.TryGetItem(slot, out present) || !TriggerAction.IsOurs(present))
+                        continue;
+
+                    _arguments.Clear();
+                    toolbar.GetParameters(slot, _arguments);
+                    if (_arguments.Count == 0)
+                        continue;
+
+                    var key = _arguments[0].Value as string;
+                    if (string.IsNullOrEmpty(key))
+                        continue;
+
+                    int held;
+                    _claims[key] = _claims.TryGetValue(key, out held) ? held + 1 : 1;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Whether enough of this construct answers what a sequence says it needs.
+        /// </summary>
+        /// <remarks>
+        /// Nothing records which slot answers which declaration, so this is a count: three declared
+        /// triggers and two slots means one of them is unanswered, and which one is a question only the
+        /// person standing in front of it can settle.
+        /// </remarks>
+        bool Answered(AutomationSystem system, SystemInstance instance, Sequence sequence)
+        {
+            var needed = 0;
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                if (triggers[i] is RequiredTrigger && triggers[i].Runs == sequence.Number)
+                    needed++;
+            }
+
+            if (needed == 0)
+                return true;
+
+            int found;
+            _claims.TryGetValue(KeyOf(system, instance, sequence), out found);
+            return found >= needed;
+        }
+
         void Reach()
         {
             _unstartable.Clear();
             _reachable.Clear();
             _broken.Clear();
+            Claims();
+
+            // What the construct has to provide, counted. A sequence nothing answers is reported the
+            // same way one whose button was cleared is.
+            for (var s = 0; s < _program.Systems.Count; s++)
+            {
+                AutomationSystem system = _program.Systems[s];
+                var sequences = system.Sequences;
+                var instances = system.Instances;
+
+                for (var q = 0; q < sequences.Count; q++)
+                {
+                    for (var n = 0; n < instances.Count; n++)
+                    {
+                        if (Answered(system, instances[n], sequences[q]))
+                            continue;
+
+                        if (!_unstartable.Contains(sequences[q].Id))
+                            _unstartable.Add(sequences[q].Id);
+                    }
+                }
+            }
 
             for (var w = 0; w < _wanted.Count; w++)
             {
@@ -679,12 +786,16 @@ namespace Reactor.Host.SpaceEngineers.World
         {
             Reconcile();
 
-            // Once a second, whatever is happening. Somebody can clear a button from the game's own
-            // terminal at any moment and nothing tells us, so the only way to know is to look - and
-            // looking per screen per refresh is what this exists to avoid.
-            if (frame - _reached >= Second || frame < _reached)
+            // Only when something asks. Reading a toolbar is the expensive thing Reactor does, and what
+            // it is read for is what a screen says about a sequence - so a screen asks when it opens,
+            // and can ask again when somebody suspects another player has wired something. Nothing is
+            // read on a timer, and nothing is read while nobody is looking.
+            //
+            // Firing does not depend on any of it: a slot invokes Reactor's action itself and arrives
+            // carrying its key, so a button works whether or not anything has ever looked at it.
+            if (_world.TakeLook() || !_read)
             {
-                _reached = frame;
+                _read = true;
                 Reach();
             }
 
@@ -715,6 +826,19 @@ namespace Reactor.Host.SpaceEngineers.World
             var trouble = ProgramText.Load(text, _program, _world.Values, out warning);
             if (warning.Length > 0)
                 MyLog.Default.WriteLineAndConsole("[Reactor] " + _block.CustomName + " has a program with a warning: " + warning);
+
+            // What is switched off, read after the program, because it names what the program
+            // declared. A construct that has nothing parked has nothing here at all.
+            string state;
+            if (storage.TryGetValue(StateKey, out state) && !string.IsNullOrEmpty(state))
+            {
+                var wrong = StateText.Load(state, _program);
+                if (wrong.Length > 0)
+                {
+                    MyLog.Default.WriteLineAndConsole(
+                        "[Reactor] " + _block.CustomName + " has switches that would not read: " + wrong);
+                }
+            }
 
             if (trouble.Length == 0)
                 return;
@@ -764,6 +888,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 return;
 
             storage.SetValue(ProgramKey, ProgramText.Save(_program, _world.Values));
+            storage.SetValue(StateKey, StateText.Save(_program));
         }
 
         public void Dispose()

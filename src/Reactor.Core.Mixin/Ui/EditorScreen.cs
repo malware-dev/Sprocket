@@ -64,6 +64,16 @@ namespace Reactor.Ui
         }
 
         /// <summary>
+        /// Reads everything the host can only learn by looking, and says so on screen.
+        /// </summary>
+        /// <remarks>
+        /// Every screen has one, because everything a screen shows about what is wired was read at some
+        /// moment and nothing tells Reactor when a slot changes - least of all when the person who
+        /// changed it is another player on the same ship.
+        /// </remarks>
+        public int RefreshCommand { get; set; }
+
+        /// <summary>
         /// Switches this screen's subject on or off. Zero when it has no such switch.
         /// </summary>
         /// <remarks>

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Reactor.Sequences;
 using Reactor.World;
@@ -10,14 +11,10 @@ namespace Reactor.Runtime
     /// </summary>
     public sealed class SequenceRunner
     {
-        readonly Dictionary<string, bool> _lastSignal = new Dictionary<string, bool>();
         readonly Sequence _sequence;
 
         int _stepIndex = -1;
-        int _gateTicks;
-        int _everyCounter;
-        int _allState = -1;
-        bool _awaitingCompletion;
+        int _waitTicks;
 
         public SequenceRunner(Sequence sequence) : this(sequence, null)
         {
@@ -39,6 +36,15 @@ namespace Reactor.Runtime
             LastFiredTick = -1;
             LastSkippedTick = -1;
         }
+
+        /// <summary>
+        /// Starts another sequence of the same system, on the same one of it.
+        /// </summary>
+        /// <remarks>
+        /// Set by whatever owns the runners, because a sequence knows nothing about anything running
+        /// beside it. Null until then, which is what a sequence run on its own in a test has.
+        /// </remarks>
+        public Action<int> Calls { get; set; }
 
         readonly SystemInstance _instance;
 
@@ -90,29 +96,6 @@ namespace Reactor.Runtime
             return _actedOn;
         }
 
-        /// <summary>
-        /// A third buffer: a gate is asked while a step is already being acted on.
-        /// </summary>
-        readonly List<string> _guarding = new List<string>();
-
-        List<string> Guarding(Condition condition)
-        {
-            if (condition == null)
-                return null;
-
-            _guarding.Clear();
-            if (_instance == null)
-            {
-                for (var i = 0; i < condition.Entities.Count; i++)
-                    _guarding.Add(condition.Entities[i]);
-            }
-            else
-            {
-                _instance.Resolve(condition.Entities, _guarding);
-            }
-            return _guarding;
-        }
-
         List<string> Watched(IList<string> roles)
         {
             _watched.Clear();
@@ -135,7 +118,7 @@ namespace Reactor.Runtime
         /// <summary>Which step is executing or waiting, or -1 when idle.</summary>
         public int CurrentStep => _stepIndex;
 
-        /// <summary>True while the current step's gate has not opened.</summary>
+        /// <summary>True while the sequence is held at an await or a wait.</summary>
         public bool IsWaiting { get; private set; }
 
         public int LastFiredTick { get; private set; }
@@ -162,9 +145,6 @@ namespace Reactor.Runtime
         /// <summary>One or more listened-to entities are no longer on the construct.</summary>
         public bool HasMissingSources { get; private set; }
 
-        /// <summary>The most recent step passed over by its guard, or null.</summary>
-        public SkippedStep LastSkippedStep { get; private set; }
-
         public void Tick(IWorld world, Bindings bindings, int tick)
         {
             _bindings = bindings;
@@ -186,7 +166,7 @@ namespace Reactor.Runtime
                     SkippedCount++;
                     LastSkippedTick = tick;
                 }
-                Advance(world, tick);
+                Advance(world);
                 return;
             }
 
@@ -221,8 +201,8 @@ namespace Reactor.Runtime
             IsRunning = false;
             IsWaiting = false;
             _stepIndex = -1;
-            _gateTicks = 0;
-            _awaitingCompletion = false;
+            _waitTicks = 0;
+            _outstanding.Clear();
         }
 
         /// <summary>
@@ -239,7 +219,7 @@ namespace Reactor.Runtime
         /// ship. It does mean being visibly stuck has to be impossible to miss, which
         /// is why the step being waited on is reported rather than inferred.
         /// </remarks>
-        public bool Settled(IWorld world, Step step)
+        public bool Settled(IWorld world, Act step)
         {
             if (!step.HasAction)
                 return true;
@@ -289,102 +269,114 @@ namespace Reactor.Runtime
             IsRunning = true;
             _stepIndex = 0;
             EnterStep();
-            Advance(world, tick);
+            Advance(world);
         }
 
         void EnterStep()
         {
-            _gateTicks = 0;
+            _waitTicks = 0;
             if (_stepIndex < 0 || _stepIndex >= _sequence.Steps.Count)
                 return;
 
-            var after = _sequence.Steps[_stepIndex].Gate as AfterGate;
-            if (after != null)
-                _gateTicks = after.Ticks;
+            var wait = _sequence.Steps[_stepIndex] as Wait;
+            if (wait != null)
+                _waitTicks = wait.Ticks;
         }
 
-        void Advance(IWorld world, int tick)
+        /// <summary>
+        /// Walks the steps until something holds the sequence up.
+        /// </summary>
+        /// <remarks>
+        /// An act starts and the next line follows in the same tick, so several acts overlap by
+        /// default. <see cref="Await" /> is what stops that, and it is what makes a numbered list
+        /// mean what it looks like it means.
+        /// </remarks>
+        void Advance(IWorld world)
         {
-            // Ungated steps all run in the same tick, so "close the door" followed by
-            // "once it is shut, depressurize" behaves the way it reads.
             while (_stepIndex >= 0 && _stepIndex < _sequence.Steps.Count)
             {
                 var step = _sequence.Steps[_stepIndex];
 
-                // Holding here until the action has actually taken effect is what
-                // makes a numbered list mean what it looks like it means.
-                if (_awaitingCompletion)
+                var act = step as Act;
+                if (act != null)
                 {
-                    if (!Settled(world, step))
+                    IsWaiting = false;
+                    Execute(world, act);
+
+                    // Kept so an await below knows what it is waiting for. Nothing with a
+                    // destination is nothing to wait on, which is how an instant action stays
+                    // instant.
+                    if (!Settled(world, act))
+                        _outstanding.Add(act);
+
+                    Step();
+                    continue;
+                }
+
+                var run = step as Run;
+                if (run != null)
+                {
+                    IsWaiting = false;
+
+                    // Started and left to it. An await waits for actions this sequence began, not for
+                    // a sequence somebody called - waiting for one of those is the concurrency work.
+                    if (Calls != null)
+                        Calls(run.Number);
+
+                    Step();
+                    continue;
+                }
+
+                if (step is Await)
+                {
+                    if (!Finished(world))
                     {
                         IsWaiting = true;
                         return;
                     }
 
-                    _awaitingCompletion = false;
+                    _outstanding.Clear();
                     IsWaiting = false;
-                    _stepIndex++;
-                    EnterStep();
+                    Step();
                     continue;
                 }
 
-                var guard = step.Gate as OnlyIfGate;
-                if (guard != null && !Conditions.IsTrue(world, _bindings, guard.Condition, Guarding(guard.Condition)))
+                if (_waitTicks > 0)
                 {
-                    // Passed over rather than waited on, and recorded so the user can
-                    // be told which situation was not true.
-                    LastSkippedStep = new SkippedStep(_stepIndex, tick);
-                    IsWaiting = false;
-                    _stepIndex++;
-                    EnterStep();
-                    continue;
-                }
-
-                if (!GateOpen(world, step))
-                {
+                    _waitTicks--;
                     IsWaiting = true;
                     return;
                 }
 
                 IsWaiting = false;
-                Execute(world, step);
-
-                if (step.WaitsForCompletion && !Settled(world, step))
-                {
-                    _awaitingCompletion = true;
-                    IsWaiting = true;
-                    return;
-                }
-
-                _stepIndex++;
-                EnterStep();
+                Step();
             }
 
             Stop();
         }
 
-        bool GateOpen(IWorld world, Step step)
+        void Step()
         {
-            if (step.Gate == null)
-                return true;
+            _stepIndex++;
+            EnterStep();
+        }
 
-            var after = step.Gate as AfterGate;
-            if (after != null)
+        /// <summary>Whether everything started since the last await has got where it was going.</summary>
+        bool Finished(IWorld world)
+        {
+            for (var i = 0; i < _outstanding.Count; i++)
             {
-                if (_gateTicks <= 0)
-                    return true;
-                _gateTicks--;
-                return _gateTicks <= 0;
+                if (!Settled(world, _outstanding[i]))
+                    return false;
             }
-
-            var once = step.Gate as OnceGate;
-            if (once != null)
-                return Conditions.IsTrue(world, _bindings, once.Condition, Guarding(once.Condition));
 
             return true;
         }
 
-        void Execute(IWorld world, Step step)
+        /// <summary>What has been started and not yet waited for.</summary>
+        readonly List<Act> _outstanding = new List<Act>();
+
+        void Execute(IWorld world, Act step)
         {
             if (!step.HasAction)
                 return;
@@ -403,24 +395,88 @@ namespace Reactor.Runtime
             }
         }
 
+        /// <summary>
+        /// Samples everything that starts this sequence, and answers whether any of it fired.
+        /// </summary>
+        /// <remarks>
+        /// All of them, every tick, because edge detection is stateful: a trigger that is not sampled
+        /// has no previous reading, and the next sample it gets is wrong. Two triggers on one sequence
+        /// are the ordinary case - the inside button and the outside one - and each keeps its own
+        /// reading, so one firing never robs the other of its edge.
+        /// </remarks>
         bool SampleTrigger(IWorld world)
         {
-            var when = _sequence.Trigger as WhenTrigger;
+            var anySignal = false;
+            var anyMissing = false;
+            var fired = false;
+
+            var system = _sequence.System;
+            var triggers = system == null ? null : system.Triggers;
+            for (var i = 0; triggers != null && i < triggers.Count; i++)
+            {
+                var trigger = triggers[i];
+                if (trigger.Runs != _sequence.Number)
+                    continue;
+
+                if (Sampled(world, trigger, Watching(trigger)))
+                    fired = true;
+
+                anySignal = anySignal || TriggerSignalIsTrue;
+                anyMissing = anyMissing || HasMissingSources;
+            }
+
+            TriggerSignalIsTrue = anySignal;
+            HasMissingSources = anyMissing;
+            return fired;
+        }
+
+        bool Sampled(IWorld world, Trigger trigger, Watch watch)
+        {
+            var when = trigger as WhenTrigger;
             if (when != null)
-                return SampleWhen(world, when);
+                return when.RequiresAll ? SampleWhenAll(world, when, watch) : SampleWhen(world, when, watch);
 
-            var every = _sequence.Trigger as EveryTrigger;
+            var every = trigger as EveryTrigger;
             if (every != null)
-                return SampleEvery(every);
+                return SampleEvery(every, watch);
 
+            // A trigger the construct answers fires by being fired: a slot invokes Reactor's action
+            // and the host calls in. There is nothing here to sample.
             return false;
         }
 
-        bool SampleWhen(IWorld world, WhenTrigger when)
+        /// <summary>
+        /// What one trigger read last time, kept per trigger.
+        /// </summary>
+        /// <remarks>
+        /// Per trigger rather than per sequence, because an edge is a change since <em>this</em>
+        /// trigger last looked. Shared state made the second trigger on a sequence read the first
+        /// one's history, which fires nothing or fires twice.
+        /// </remarks>
+        sealed class Watch
         {
-            if (when.RequiresAll)
-                return SampleWhenAll(world, when);
+            public readonly Dictionary<string, bool> Signals = new Dictionary<string, bool>();
 
+            public int All = -1;
+
+            public int Counted;
+        }
+
+        readonly Dictionary<Trigger, Watch> _watching = new Dictionary<Trigger, Watch>();
+
+        Watch Watching(Trigger trigger)
+        {
+            Watch watch;
+            if (_watching.TryGetValue(trigger, out watch))
+                return watch;
+
+            watch = new Watch();
+            _watching.Add(trigger, watch);
+            return watch;
+        }
+
+        bool SampleWhen(IWorld world, WhenTrigger when, Watch watch)
+        {
             var sources = Watched(when.Sources);
             var fired = false;
             var anySignalTrue = false;
@@ -445,7 +501,7 @@ namespace Reactor.Runtime
                     anySignalTrue = true;
 
                 bool previous;
-                if (_lastSignal.TryGetValue(sourceId, out previous))
+                if (watch.Signals.TryGetValue(sourceId, out previous))
                 {
                     // No previous sample means the sequence has only just come into
                     // existence, and an edge needs two. Firing on the first tick
@@ -456,7 +512,7 @@ namespace Reactor.Runtime
                         fired = true;
                 }
 
-                _lastSignal[sourceId] = now;
+                watch.Signals[sourceId] = now;
             }
 
             TriggerSignalIsTrue = anySignalTrue;
@@ -474,7 +530,7 @@ namespace Reactor.Runtime
         /// sentence means is "the moment they are all there", so that is what is
         /// watched: one edge, on the whole condition.
         /// </remarks>
-        bool SampleWhenAll(IWorld world, WhenTrigger when)
+        bool SampleWhenAll(IWorld world, WhenTrigger when, Watch watch)
         {
             var sources = Watched(when.Sources);
             var all = sources.Count > 0;
@@ -508,19 +564,19 @@ namespace Reactor.Runtime
             // Unknown until the second sample, so a condition that is already true
             // when the sequence appears does not set it off.
             var now = all ? 1 : 0;
-            var fired = _allState == 0 && now == 1;
-            _allState = now;
+            var fired = watch.All == 0 && now == 1;
+            watch.All = now;
             return fired;
         }
 
-        bool SampleEvery(EveryTrigger every)
+        bool SampleEvery(EveryTrigger every, Watch watch)
         {
             var interval = every.IntervalTicks < 1 ? 1 : every.IntervalTicks;
-            _everyCounter++;
-            if (_everyCounter < interval)
+            watch.Counted++;
+            if (watch.Counted < interval)
                 return false;
 
-            _everyCounter = 0;
+            watch.Counted = 0;
             return true;
         }
     }

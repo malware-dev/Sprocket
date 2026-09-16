@@ -218,10 +218,17 @@ namespace Reactor.Sequences
         /// <summary>Puts back a sequence that was saved, keeping the id it had.</summary>
         public Sequence Restore(AutomationSystem system, int number, Trigger trigger)
         {
-            var sequence = new Sequence(_nextSequenceId++, trigger);
+            var sequence = new Sequence(_nextSequenceId++);
             sequence.Number = number;
             _sequences.Add(sequence);
             system.Add(sequence);
+
+            if (trigger != null)
+            {
+                trigger.Runs = number;
+                system.AddTrigger(trigger);
+            }
+
             return sequence;
         }
 
@@ -284,15 +291,28 @@ namespace Reactor.Sequences
             return AddSequence(null, trigger);
         }
 
+        /// <summary>A sequence nothing starts yet, which is what somebody halfway through building has.</summary>
+        public Sequence AddSequence(AutomationSystem system)
+        {
+            return AddSequence(system, null);
+        }
+
         public Sequence AddSequence(AutomationSystem system, Trigger trigger)
         {
             if (system == null)
                 system = _systems.Count > 0 ? _systems[_systems.Count - 1] : AddSystem();
 
-            var sequence = new Sequence(_nextSequenceId++, trigger);
+            var sequence = new Sequence(_nextSequenceId++);
             sequence.Number = system.NextSequenceNumber();
             _sequences.Add(sequence);
             system.Add(sequence);
+
+            if (trigger != null)
+            {
+                trigger.Runs = sequence.Number;
+                system.AddTrigger(trigger);
+            }
+
             Wiring++;
             return sequence;
         }
@@ -301,7 +321,10 @@ namespace Reactor.Sequences
         {
             _sequences.Remove(sequence);
             for (var i = 0; i < _systems.Count; i++)
-                _systems[i].Remove(sequence);
+            {
+                if (_systems[i].Remove(sequence))
+                    _systems[i].DropTriggersFor(sequence.Number);
+            }
 
             Wiring++;
         }
@@ -352,12 +375,8 @@ namespace Reactor.Sequences
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
-                var step = sequence.Steps[i];
-                if (step.Targets.Contains(name))
-                    return true;
-
-                var gate = step.Gate as OnceGate;
-                if (gate != null && gate.Condition.Entities.Contains(name))
+                var act = sequence.Steps[i] as Act;
+                if (act != null && act.Targets.Contains(name))
                     return true;
             }
             return false;

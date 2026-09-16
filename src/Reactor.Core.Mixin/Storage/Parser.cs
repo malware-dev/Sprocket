@@ -185,24 +185,14 @@ namespace Reactor.Storage
             var failures = _failures;
             var values = _reading.Values;
             var from = values.Count;
-            var optional = -1;
 
             Step();
             while (true)
             {
                 if (_token.Kind == TokenKind.Comma)
                 {
-                    if (optional < 0)
-                        optional = values.Count - from;
-
-                    Step();
-                    if (!Valuish())
-                    {
-                        Fail("a comma is followed by what it introduces");
-                        break;
-                    }
-
-                    continue;
+                    Fail("a comma separates the items of a list, and nothing else");
+                    break;
                 }
 
                 if (!Valuish())
@@ -221,8 +211,7 @@ namespace Reactor.Storage
 
             var body = _token.Kind == TokenKind.BlockOpen ? new List<Statement>() : null;
             var count = values.Count - from;
-            var statement = new Statement(_reading, at, key, head, from, count, optional < 0 ? count : optional,
-                body);
+            var statement = new Statement(_reading, at, key, head, from, count, body);
 
             statement.Annotation = Trim(note);
 
@@ -244,9 +233,11 @@ namespace Reactor.Storage
             {
                 case TokenKind.Identifier:
                 case TokenKind.Keyword:
+                case TokenKind.Equals:
                 case TokenKind.Text:
                 case TokenKind.Integer:
                 case TokenKind.Real:
+                case TokenKind.Duration:
                 case TokenKind.Color:
                 case TokenKind.ListOpen:
                 case TokenKind.VectorOpen:
@@ -270,6 +261,10 @@ namespace Reactor.Storage
                     Step();
                     return new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
 
+                case TokenKind.Equals:
+                    Step();
+                    return new Value(ValueForm.Keyword, null, 0, 0, Keyword.Equals);
+
                 case TokenKind.Text:
                     Step();
                     return new Value(ValueForm.Text, token.Text.ToString());
@@ -281,6 +276,10 @@ namespace Reactor.Storage
                 case TokenKind.Real:
                     Step();
                     return new Value(ValueForm.Real, null, 0, token.Real);
+
+                case TokenKind.Duration:
+                    Step();
+                    return new Value(ValueForm.Duration, null, token.Whole);
 
                 case TokenKind.Color:
                     Step();

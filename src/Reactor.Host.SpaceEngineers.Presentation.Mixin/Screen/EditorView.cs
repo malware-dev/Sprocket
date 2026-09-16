@@ -50,6 +50,9 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         readonly HeadingRow _title = new HeadingRow();
 
         readonly Switch _switch = new Switch(Lettering.Small);
+
+        /// <summary>The header's "look again".</summary>
+        readonly Glyph _refresh = Widgets.Symbol(Symbols.Refresh, Palette.Muted);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Lettering.Small);
 
         /// <summary>Whether the screen now up has written a subtitle at any point since it opened.</summary>
@@ -130,10 +133,16 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
             // No slot holding it to a width any more. A switch showing both of its positions is already
             // the width of the longer word twice over whichever way it is set, so the title cannot be
             // shifted sideways by somebody stopping a system.
+            // The switch and the refresh sit together on the right, in that order, so the switch stays
+            // where it has always been and the refresh reads as furniture rather than as part of it.
+            var rightLane = Widgets.RowOf(Space.Row);
+            rightLane.Children.Add(_switch);
+            rightLane.Children.Add(_refresh);
+
             _headerBar.Spacing = Space.Row;
             _headerBar.Left = _back;
             _headerBar.Fill = titleLane;
-            _headerBar.Right = _switch;
+            _headerBar.Right = rightLane;
 
             // The subtitle's line is held for as long as a screen that has ever had one is up, and not
             // at all on a screen that never does. Reserving it everywhere was the first answer and it was
@@ -1033,6 +1042,14 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
                 says.Hot = _title[_renaming];
                 says.Tip = wrong;
                 _hits.Add(says);
+            }
+
+            if (screen.RefreshCommand != 0)
+            {
+                Hit look = Hit.On(_refresh, screen.RefreshCommand);
+                look.Scrolled = false;
+                look.Tip = "Read the ship again, in case somebody has changed a button";
+                _hits.Add(look);
             }
 
             if (screen.HasSwitch)

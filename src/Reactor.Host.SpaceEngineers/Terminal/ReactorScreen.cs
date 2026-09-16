@@ -88,6 +88,10 @@ namespace Reactor.Host.SpaceEngineers.Terminal
             // are part of the construct without adding a block to any of them.
             _unit.World.Invalidate();
 
+            // And the toolbars, which nothing reads unless something asks: a slot may have been
+            // re-pointed since this screen was last open, by this player or another one.
+            _unit.World.LookAgain();
+
             _grabbed = false;
             _wasDown = false;
 

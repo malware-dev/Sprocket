@@ -66,6 +66,7 @@ namespace Reactor.Storage
                 case ')': return One(TokenKind.VectorClose);
                 case ',': return One(TokenKind.Comma);
                 case '.': return One(TokenKind.Dot);
+                case '=': return One(TokenKind.Equals);
                 case '#': return Hash();
                 case '"': return Quoted('"', TokenKind.Text);
                 case '\'': return Quoted('\'', TokenKind.Identifier);
@@ -151,16 +152,22 @@ namespace Reactor.Storage
         {
             long packed = 0;
             var digits = 0;
+
+            // Walked as a local. Stepping the cursor in its field pays a write barrier per digit,
+            // which is per digit of every colour in the file - see Run, which does the same.
+            var ptr = _ptr;
             while (digits < 8)
             {
-                var value = Hex(_ptr.Char);
+                var value = Hex(ptr.Char);
                 if (value < 0)
                     break;
 
                 packed = (packed << 4) | (uint)value;
                 digits++;
-                _ptr++;
+                ptr++;
             }
+
+            _ptr = ptr;
 
             if (digits == 6)
                 return new Token(TokenKind.Color, start.Index, default(StringSegment), (packed << 8) | 0xFF);
@@ -286,7 +293,35 @@ namespace Reactor.Storage
             if (!long.TryParse(body, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
                 return Bad(start, "'" + body + "' does not fit in a whole number");
 
-            return new Token(TokenKind.Integer, start.Index, default(StringSegment), whole);
+            return Letter(_ptr.Char)
+                ? Duration(start, whole)
+                : new Token(TokenKind.Integer, start.Index, default(StringSegment), whole);
+        }
+
+        /// <summary>
+        /// A number that had a unit written against it, as ticks.
+        /// </summary>
+        /// <remarks>
+        /// Ticks are the only unit, so anything else is trouble rather than a number followed by a word:
+        /// <c>600s</c> is somebody meaning seconds, and reading it as 600 would run their airlock ten times
+        /// too fast.
+        /// </remarks>
+        Token Duration(TextPtr start, long ticks)
+        {
+            var from = _ptr;
+
+            // A local for the walk, like Run and Colour: the field is what a write barrier watches.
+            var ptr = _ptr;
+            while (Letter(ptr.Char))
+                ptr++;
+
+            _ptr = ptr;
+
+            var unit = Since(from);
+            if (unit.Length != 1 || unit[0] != 't')
+                return Bad(start, "'" + Since(start) + "' is not a duration; ticks are written like 600t");
+
+            return new Token(TokenKind.Duration, start.Index, default(StringSegment), ticks);
         }
 
         int Run()

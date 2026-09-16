@@ -42,6 +42,11 @@ sealed class SimWorld : IWorld
     /// <summary>Nothing here has to be arranged outside the program, so anything can start.</summary>
     public bool CanStart(Sequence sequence) => true;
 
+    /// <summary>Nothing here is learnt by looking: the simulator has no toolbars.</summary>
+    public void LookAgain()
+    {
+    }
+
     /// <summary>
     /// An id and a name, in that order.
     /// </summary>

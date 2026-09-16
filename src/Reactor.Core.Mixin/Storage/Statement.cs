@@ -25,7 +25,7 @@ namespace Reactor.Storage
         readonly int _from;
         readonly List<Statement> _body;
 
-        public Statement(Reading reading, int at, Keyword key, string head, int from, int count, int optional,
+        public Statement(Reading reading, int at, Keyword key, string head, int from, int count,
             List<Statement> body)
         {
             _reading = reading;
@@ -35,23 +35,11 @@ namespace Reactor.Storage
             Key = key;
             Head = head ?? "";
             Count = count;
-            Optional = optional;
             Annotation = "";
         }
 
         /// <summary>Where in the script it starts, so trouble about it can say which line.</summary>
         public int At { get; private set; }
-
-        /// <summary>
-        /// Where its optional parts begin: the first value after a comma, or <see cref="Count" /> if there is
-        /// no comma.
-        /// </summary>
-        /// <remarks>
-        /// <c>system MalTek.Airlock is on, changed "..."</c>. The comma is there for whoever reads the line -
-        /// every optional part carries its own keyword, so nothing needs it to parse - and this is what lets a
-        /// reader insist optional parts stay behind it, where a person looks for them.
-        /// </remarks>
-        public int Optional { get; private set; }
 
         /// <summary>
         /// The format's word the statement starts with, or <see cref="Keyword.None" /> when it starts with an id.
@@ -152,6 +140,12 @@ namespace Reactor.Storage
         /// </remarks>
         public ValueRange Parts(int index)
         {
+            // Bounded first. A name written alone is answered out of this statement's own run, so an
+            // index past the end would otherwise hand back a value belonging to the statement below -
+            // and a statement that stops early is exactly when a reader asks.
+            if (index < 0 || index >= Count)
+                return new ValueRange();
+
             var value = ValueAt(index);
             if (value.Form == ValueForm.Qualified)
                 return new ValueRange(_reading.Parts, value.From, value.Count);

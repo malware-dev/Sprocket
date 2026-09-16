@@ -21,12 +21,19 @@ namespace Reactor.Sequences
 
         public override void Apply(Sequence sequence)
         {
-            sequence.Steps[_index].Gate = new AfterGate(_now);
+            Put(sequence, _now);
         }
 
         public override void Undo(Sequence sequence)
         {
-            sequence.Steps[_index].Gate = new AfterGate(_was);
+            Put(sequence, _was);
+        }
+
+        void Put(Sequence sequence, int ticks)
+        {
+            var wait = sequence.Steps[_index] as Wait;
+            if (wait != null)
+                wait.Ticks = ticks;
         }
     }
 }

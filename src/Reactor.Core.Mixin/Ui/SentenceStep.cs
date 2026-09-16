@@ -23,9 +23,6 @@ namespace Reactor.Ui
         /// <summary>Which sort of line this is, which decides how a target opens it.</summary>
         public StepKind Kind { get; private set; }
 
-        /// <summary>What holds this step back, or null for the ordinary case.</summary>
-        public SentenceGate Gate { get; set; }
-
         public List<SentenceSlot> Slots { get; private set; }
 
         /// <summary>

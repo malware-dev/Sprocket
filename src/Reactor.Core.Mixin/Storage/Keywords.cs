@@ -20,9 +20,9 @@ namespace Reactor.Storage
         static readonly string[] Names =
         {
             "",
-            "reactor", "block", "system", "role", "instance", "fill", "sequence", "step",
-            "when", "every", "called", "after", "once", "onlyif", "run", "set",
-            "on", "off", "all", "any", "wait", "now", "optional", "required", "is", "changed", "as", "last"
+            "reactor", "block", "system", "instance", "of", "sequence",
+            "when", "every", "then", "trigger", "to", "run", "set",
+            "on", "off", "all", "any", "wait", "await", "required", "expects", "=", "changed", "as", "last"
         };
 
         /// <summary>

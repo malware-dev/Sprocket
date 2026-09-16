@@ -149,6 +149,16 @@ namespace Reactor.World
         /// </remarks>
         bool CanStart(Sequence sequence);
 
+        /// <summary>
+        /// Asks the host to look again at whatever it can only learn by looking.
+        /// </summary>
+        /// <remarks>
+        /// Which buttons are wired, above all: nothing tells Reactor when somebody re-points a slot, and
+        /// on a server that somebody may be another player. So a screen that is showing an answer of
+        /// that sort asks for it when it opens, and offers a way to ask again.
+        /// </remarks>
+        void LookAgain();
+
 
         /// <summary>Tells an entity to do something.</summary>
         void Invoke(IEntity entity, string actionId);

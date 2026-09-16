@@ -109,6 +109,37 @@ first.
 **This does not mean removing Avalonia from the simulator.** The simulator uses Avalonia to rasterise
 and to measure text, and it keeps it. Only the prototype host goes.
 
+## The language's spec is `docs/Language.md`
+
+**It holds the current truth of the script language and nothing else.** What the language is right
+now: its shape, its values, its constructs, with an example of each. No history, no rationale, no
+alternatives that were considered, no roadmap, and nothing about what is undecided.
+
+**Any change to a rule, keyword, construct or spelling updates it in the same change as the code.**
+The spec is never left trailing, and the old wording is deleted rather than kept beside the new.
+`docs/Script.md` is the history of how the language got there and is not maintained as truth.
+
+Six rules, each of which the document has already been wrong about:
+
+- **Only the language.** How Reactor or an editor happens to behave is not a rule of the language.
+  "Reactor writes the id" and "a name can be changed, an id cannot" were both wrong for that reason:
+  the second is true of a visual editor and says nothing about a script, where renaming is merely
+  likelier than renumbering.
+- **A limit of the parser is not a rule.** Where something is unsupported because nothing needs it
+  yet - a list inside a list - it is not mentioned at all. Writing it down as a rule only obstructs
+  the build that adds it.
+- **Say what the language is, not what it is not.** A sentence stating an absence earns its place
+  only where a reader would otherwise assume the opposite: somebody arriving from another language
+  assumes statements continue across lines, so "no continuations" is worth saying, while "no comma
+  between a statement's parts" is not, because none is ever shown.
+- **A recommendation for whatever writes scripts belongs beside the thing it is about**, not in a
+  section of its own. Where `last sequence` is defined is where somebody looks to find out when it is
+  worth writing.
+- **A recommendation is offered, not demanded.** It reads as what the choice buys, never as an
+  obligation.
+- **Every sentence carries something.** A lead-in explaining the difference between a person and a
+  tool, or a heading restated as prose, is cut rather than reworded.
+
 ## Documentation
 
 `docs/` holds only what is not code yet: open questions, decisions taken but not implemented, and

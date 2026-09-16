@@ -6,25 +6,35 @@ namespace Reactor.Sequences
     {
         readonly string _label;
         readonly int _index;
-        readonly Step _step;
+        readonly List<Step> _steps = new List<Step>();
 
-        public AddStep(string label, int index, Step step)
+        /// <summary>
+        /// One or more lines added as one edit.
+        /// </summary>
+        /// <remarks>
+        /// Several, because a step and the await after it are one thing somebody did and have to be
+        /// one thing they can take back. Undoing half of it would leave an await waiting for nothing.
+        /// </remarks>
+        public AddStep(string label, int index, params Step[] steps)
         {
             _label = label;
             _index = index;
-            _step = step;
+            for (var i = 0; i < steps.Length; i++)
+                _steps.Add(steps[i]);
         }
 
         public override string Label => _label;
 
         public override void Apply(Sequence sequence)
         {
-            sequence.Steps.Insert(_index, _step);
+            for (var i = 0; i < _steps.Count; i++)
+                sequence.Steps.Insert(_index + i, _steps[i]);
         }
 
         public override void Undo(Sequence sequence)
         {
-            sequence.Steps.RemoveAt(_index);
+            for (var i = _steps.Count - 1; i >= 0; i--)
+                sequence.Steps.RemoveAt(_index + i);
         }
     }
 }

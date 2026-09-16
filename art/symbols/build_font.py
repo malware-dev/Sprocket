@@ -127,6 +127,26 @@ def uturn(mirrored):
     return shapes
 
 
+def cycle():
+    """
+    Refresh: a square loop, open at the top right, with the head running into the gap.
+
+    A loop rather than a u-turn, because this is the same thing again rather than a step back, and
+    the break is what makes it read as going round rather than as a box. Square for the same reason
+    undo is: the face beside it has no curves.
+    """
+    left, right = 0.24, 0.76
+    top, bottom = 0.30, 0.72
+
+    return [
+        stroke((left, top), (right - 0.30, top)),
+        stroke((left, top), (left, bottom)),
+        stroke((left, bottom), (right, bottom)),
+        stroke((right, bottom), (right, top + 0.16)),
+        head((right - 0.02, top), (right - 0.32, top), 0.30),
+    ]
+
+
 def arrow():
     """
     A shaft with a head on it: "leads to".
@@ -306,6 +326,7 @@ GLYPHS = [
     ("p", "pencil", pencil()),
     ("x", "cross", solid(cross())),
     ("!", "warning", solid(bang())),
+    ("s", "refresh", solid(cycle())),
 ]
 
 

@@ -269,4 +269,34 @@ public class ProblemTests
         public ReactorEditor Editor = null!;
         public Sequence Sequence = null!;
     }
+
+    /// <summary>
+    /// A trigger the construct has to answer, and has not, is reported on the sequence.
+    /// </summary>
+    /// <remarks>
+    /// Which slot answers which declaration is nowhere recorded - the host counts them - so what core
+    /// asks is whether anything can start this sequence at all, whatever sort of trigger it declares.
+    /// </remarks>
+    [Fact]
+    public void ATriggerNothingAnsweredIsReported()
+    {
+        var ship = Build();
+        var system = ship.Automation.Systems[0];
+        var sequence = ship.Automation.AddSequence(system);
+
+        var needed = new RequiredTrigger();
+        needed.Runs = sequence.Number;
+        system.AddTrigger(needed);
+
+        // Nothing on this construct claims it, which is what the host says by this.
+        ship.World.Unstartable.Add(sequence.Id);
+
+        var fault = SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence, null);
+        Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
+
+        // And a sequence nothing is supposed to start is not scolded: it may be there to be run.
+        var called = ship.Automation.AddSequence(system);
+        ship.World.Unstartable.Add(called.Id);
+        Assert.False(SequenceSummary.Fault(ship.World, ship.Runner.Bindings, called, null).Exists);
+    }
 }

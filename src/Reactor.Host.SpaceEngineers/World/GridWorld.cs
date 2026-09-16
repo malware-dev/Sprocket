@@ -180,6 +180,25 @@ namespace Reactor.Host.SpaceEngineers.World
             return _unstartable.Count == 0 || !_unstartable.Contains(sequence.Id);
         }
 
+        bool _asked;
+
+        public void LookAgain()
+        {
+            _asked = true;
+        }
+
+        /// <summary>Whether something has asked to be looked at again since this was last called.</summary>
+        /// <remarks>
+        /// A flag the unit clears rather than an event, because the unit is already ticking and one
+        /// boolean read a frame is cheaper than anything that has to be subscribed to and unsubscribed.
+        /// </remarks>
+        public bool TakeLook()
+        {
+            var asked = _asked;
+            _asked = false;
+            return asked;
+        }
+
         public void Identify(IEntity entity, List<EntityKey> keys)
         {
             keys.Clear();

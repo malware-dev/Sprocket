@@ -23,12 +23,15 @@ namespace Reactor.Sim.Machine;
 sealed class Store
 {
     readonly string _path;
+    readonly string _switches;
 
     string _lastWritten = "";
+    string _lastSwitches = "";
 
     Store()
     {
         _path = "";
+        _switches = "";
     }
 
     /// <summary>
@@ -52,6 +55,10 @@ sealed class Store
 
         Directory.CreateDirectory(folder);
         _path = Path.Combine(folder, construct + ".reactor");
+
+        // Beside the program, and separate from it, the way the mod keeps them in two keys of the
+        // block's storage.
+        _switches = Path.Combine(folder, construct + ".switches");
     }
 
     public string Path_ => _path;
@@ -68,6 +75,14 @@ sealed class Store
 
             _lastWritten = File.ReadAllText(_path);
             Trouble = ProgramText.Load(_lastWritten, program, values);
+
+            if (!File.Exists(_switches))
+                return;
+
+            _lastSwitches = File.ReadAllText(_switches);
+            var wrong = StateText.Load(_lastSwitches, program);
+            if (Trouble.Length == 0)
+                Trouble = wrong;
         }
         catch (Exception error)
         {
@@ -103,13 +118,20 @@ sealed class Store
             return;
         }
 
-        if (text == _lastWritten || _path.Length == 0)
+        if (_path.Length == 0)
+            return;
+
+        var switches = StateText.Save(program);
+        if (text == _lastWritten && switches == _lastSwitches)
             return;
 
         try
         {
             File.WriteAllText(_path, text);
             _lastWritten = text;
+
+            File.WriteAllText(_switches, switches);
+            _lastSwitches = switches;
             Trouble = "";
         }
         catch (Exception error)

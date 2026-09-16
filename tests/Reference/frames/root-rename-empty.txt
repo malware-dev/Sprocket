@@ -21,6 +21,7 @@ on screen     Automation for Test Rig
 014  Sprite     Reactor_Fill          {X:451 Y:86 W:86 H:2}  #E84A3AFF
 015  ClearClip  
 016  Text       at {X:259 Y:60.816975} scale 0.57  #A2C3CDFF  "<"
-017  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
-018  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-019  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+017  Text       at {X:1654.272 Y:60.816975} scale 0.57  #A2C3CDFF  "s"
+018  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
+019  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+020  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

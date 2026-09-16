@@ -41,7 +41,7 @@ namespace Reactor.Storage
         /// saying any other number is read as far as it goes and marked not to be written back, so nothing
         /// on disk is lost - it simply does not load cleanly.
         /// </remarks>
-        const int Version = 3;
+        const int Version = 4;
 
         /// <summary>
         /// How a <c>changed</c> time may be written: ISO 8601, and nothing else.
@@ -81,6 +81,15 @@ namespace Reactor.Storage
             for (var i = 0; i < systems.Count; i++)
                 WriteSystem(pen, systems[i]);
 
+            // After every system, because an instance names the system it is one of and a reader
+            // should have met it by then.
+            for (var i = 0; i < systems.Count; i++)
+            {
+                var instances = systems[i].Instances;
+                for (var n = 0; n < instances.Count; n++)
+                    WriteInstance(pen, systems[i], instances[n]);
+            }
+
             return pen.ToString();
         }
 
@@ -108,9 +117,11 @@ namespace Reactor.Storage
         /// </remarks>
         public static string Load(string saved, Automation program, Values values, out string warning)
         {
-            warning = "";
             if (string.IsNullOrEmpty(saved))
+            {
+                warning = "";
                 return "";
+            }
 
             var parser = new Parser(saved);
             var constructs = parser.Read();
@@ -125,9 +136,11 @@ namespace Reactor.Storage
             {
                 var construct = constructs[i];
                 if (construct.Key == Keyword.Block)
-                    ReadRef(construct, program, values);
+                    ReadRef(construct, program, values, trouble);
                 else if (construct.Key == Keyword.System)
                     ReadSystem(construct, program, trouble);
+                else if (construct.Key == Keyword.Instance)
+                    ReadInstance(construct, program, trouble);
             }
 
             if (trouble.What.Length > 0)
@@ -196,25 +209,28 @@ namespace Reactor.Storage
             pen.Real(real);
         }
 
-        static void ReadRef(Statement statement, Automation program, Values values)
+        static void ReadRef(Statement statement, Automation program, Values values, Trouble trouble)
         {
             var declared = new EntityRef(statement.Word(1), statement.Word(0));
             var keys = statement.Items(2);
             for (var i = 0; i < keys.Count; i++)
-                ReadKey(values, keys[i], declared.Keys);
+                ReadKey(values, keys[i], declared.Keys, statement, trouble);
 
             program.Restore(declared);
         }
 
         /// <summary>
-        /// A key, or nothing where this build has no kind that could hold it.
+        /// A key, or trouble where this build has no kind that could hold it.
         /// </summary>
         /// <remarks>
-        /// A vector is the one the language has and the model does not, which is why it is named here
-        /// rather than falling through: a position survives blueprinting where an id does not, so it is
-        /// the key worth having, and it is waiting on a kind wide enough to hold it.
+        /// A vector is the one the language has and the model does not - a position survives
+        /// blueprinting where an id does not, so it is the key worth having, and it is waiting on a
+        /// kind wide enough to hold it. Said rather than dropped, because a key is how a block is
+        /// found again: dropping one quietly leaves the next save writing a block that matches less
+        /// than the one it replaces.
         /// </remarks>
-        static void ReadKey(Values values, Value key, IList<EntityKey> into)
+        static void ReadKey(Values values, Value key, IList<EntityKey> into, Statement statement,
+            Trouble trouble)
         {
             switch (key.Form)
             {
@@ -238,9 +254,15 @@ namespace Reactor.Storage
 
                 case ValueForm.Keyword:
                     if (key.Keyword == Keyword.On || key.Keyword == Keyword.Off)
+                    {
                         into.Add(new EntityKey(ValueKind.Flag, EntityValue.Of(key.Keyword == Keyword.On)));
-                    return;
+                        return;
+                    }
+
+                    break;
             }
+
+            trouble.Say(statement, "this build cannot keep one of this block's keys");
         }
 
         static void WriteSystem(Pen pen, AutomationSystem system)
@@ -248,29 +270,28 @@ namespace Reactor.Storage
             pen.Blank();
             pen.Note(system.Annotation);
             pen.Start(Keyword.System).Text(system.Identity.ToString("D"))
-                .Says(Keyword.As).Qualified(system.Namespace, system.Name)
-                .Says(Keyword.Is).Says(OnOff(system.Enabled));
+                .Says(Keyword.As).Qualified(system.Namespace, system.Name);
 
             if (system.Changed.HasValue)
             {
-                pen.Comma().Says(Keyword.Changed)
+                pen.Says(Keyword.Changed)
                     .Text(system.Changed.Value.ToString(Times[0], CultureInfo.InvariantCulture));
             }
 
             if (system.LastSequenceNumber > system.HighestSequenceNumber())
-                pen.Comma().Says(Keyword.Last).Says(Keyword.Sequence).Whole(system.LastSequenceNumber);
+                pen.Says(Keyword.Last).Says(Keyword.Sequence).Whole(system.LastSequenceNumber);
 
             pen.Body();
 
-            // What the author wrote about the parts, before the ones that fill them in, so a reader
-            // meets the vocabulary before the answers.
-            var roles = system.Roles;
-            for (var i = 0; i < roles.Count; i++)
-                WriteRole(pen, roles[i]);
+            // The parts before the ones that fill them in, so a reader meets the vocabulary before
+            // the answers.
+            var parts = system.Parts;
+            for (var i = 0; i < parts.Count; i++)
+                WritePart(pen, parts[i]);
 
-            var instances = system.Instances;
-            for (var i = 0; i < instances.Count; i++)
-                WriteInstance(pen, instances[i]);
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+                WriteTrigger(pen, triggers[i]);
 
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
@@ -280,16 +301,14 @@ namespace Reactor.Storage
         }
 
         /// <summary>
-        /// <c>system "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43" as MalTek.Airlock is on, changed "…", last sequence 4 { … }</c>
+        /// <c>system "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43" as MalTek.Airlock changed "…" last sequence 4 { … }</c>
         /// </summary>
         /// <remarks>
         /// Strict where it matters. A system is its identity, so one without a readable identity, or a second
         /// with the same one, is trouble and not read; so is one with no name, which the editor never makes. A
-        /// switch that says neither on nor off is trouble but the system still loads, switched on, because the
-        /// parser never loses more than it has to - and trouble already stops the program being saved over
-        /// what is on disk. A second system with the same name loads, with a warning, because the name
-        /// decides nothing but a person still has to tell the two apart. The parts after the comma are found
-        /// by their keywords, in any order.
+        /// second system with the same name loads, with a warning, because the name decides nothing but a
+        /// person still has to tell the two apart. Whether it is switched on is not here at all - that is
+        /// state, and <see cref="StateText" /> holds it.
         /// </remarks>
         static void ReadSystem(Statement statement, Automation program, Trouble trouble)
         {
@@ -322,19 +341,11 @@ namespace Reactor.Storage
             var system = program.Restore(identity, space, called);
             system.Annotation = statement.Annotation;
 
-            if (!statement.Says(3, Keyword.Is) || !(statement.Says(4, Keyword.On) || statement.Says(4, Keyword.Off)))
-                trouble.Say(statement, "a system says whether it is on or off: is on, is off");
-
-            system.Enabled = !statement.Says(4, Keyword.Off);
-
-            if (statement.Optional > 5)
-                trouble.Say(statement, "what follows 'is on' or 'is off' comes after a comma");
-
-            var changed = statement.Find(Keyword.Changed, statement.Optional);
+            var changed = statement.Find(Keyword.Changed);
             if (changed >= 0)
                 system.Changed = Time(statement, changed + 1, trouble);
 
-            var last = statement.Find(Keyword.Last, statement.Optional);
+            var last = statement.Find(Keyword.Last);
             if (last >= 0)
                 LastSequence(statement, last, system, trouble);
 
@@ -342,13 +353,17 @@ namespace Reactor.Storage
             for (var i = 0; i < body.Count; i++)
             {
                 var inner = body[i];
-                if (inner.Key == Keyword.Role)
-                    ReadRole(inner, system);
-                else if (inner.Key == Keyword.Instance)
-                    ReadInstance(inner, system);
+                if (inner.Key == Keyword.Required && inner.Says(0, Keyword.Trigger))
+                    ReadTrigger(inner, system, trouble);
+                else if (inner.Key == Keyword.Required)
+                    ReadPart(inner, system, trouble);
+                else if (inner.Key == Keyword.When || inner.Key == Keyword.Every)
+                    ReadTrigger(inner, system, trouble);
                 else if (inner.Key == Keyword.Sequence)
                     ReadSequence(inner, system, program, trouble);
             }
+
+            Resolve(system, statement, trouble);
         }
 
         /// <summary>
@@ -383,30 +398,70 @@ namespace Reactor.Storage
             return null;
         }
 
-        static void WriteRole(Pen pen, SystemRole role)
+        /// <summary>
+        /// <c>required block inner expects Door</c>: something the construct has to provide.
+        /// </summary>
+        /// <remarks>
+        /// <c>required</c> heads it, so every line that starts with that word is something the ship
+        /// answers rather than something Reactor does. What a part expects is written only when the
+        /// author said it; nothing means anything may fill it.
+        /// </remarks>
+        static void WritePart(Pen pen, Part part)
         {
-            if (role.Instructions.Length > 0)
+            if (part.Annotation.Length > 0)
                 pen.Blank();
 
-            pen.Note(role.Instructions);
-            pen.Start(Keyword.Role).Word(role.Id).Says(role.Optional ? Keyword.Optional : Keyword.Required);
-            Named(pen, role.Name);
+            pen.Note(part.Annotation);
+            pen.Start(Keyword.Required).Says(Keyword.Block).Word(part.Id);
+
+            if (part.Expects.Count == 1)
+                pen.Says(Keyword.Expects).Word(part.Expects[0]);
+            else if (part.Expects.Count > 1)
+                Names(pen.Says(Keyword.Expects), part.Expects);
+
             pen.End();
         }
 
-        static void ReadRole(Statement statement, AutomationSystem system)
+        static void ReadPart(Statement statement, AutomationSystem system, Trouble trouble)
         {
-            var role = system.RoleFor(statement.Word(0));
-            role.Optional = statement.Says(1, Keyword.Optional);
-            role.Name = statement.Text(2);
-            role.Instructions = statement.Annotation;
+            if (!statement.Says(0, Keyword.Block))
+            {
+                trouble.Say(statement,
+                    "'required' is followed by what sort of thing is required: block, trigger");
+                return;
+            }
+
+            var part = system.PartFor(statement.Word(1));
+            part.Annotation = statement.Annotation;
+
+            var expects = statement.Find(Keyword.Expects);
+            if (expects < 0)
+                return;
+
+            var one = statement.ValueAt(expects + 1);
+            if (one.Form == ValueForm.List)
+                Words(statement.Items(expects + 1), part.Expects);
+            else if (one.IsWord && one.Word.Length > 0)
+                part.Expects.Add(one.Word);
+            else
+                trouble.Say(statement, "'expects' is followed by a block type, or a list of them");
         }
 
-        static void WriteInstance(Pen pen, SystemInstance instance)
+        /// <summary>
+        /// <c>instance 1 of "3f2a…" as 'Port airlock' { inner = [ door1 ] }</c>
+        /// </summary>
+        /// <remarks>
+        /// One of a system, on this construct. It sits outside the system rather than inside it, because
+        /// the system is what is shared and which of somebody's blocks answer its parts is not.
+        /// </remarks>
+        static void WriteInstance(Pen pen, AutomationSystem system, SystemInstance instance)
         {
             pen.Blank();
-            pen.Start(Keyword.Instance).Whole(instance.Number).Says(OnOff(instance.Enabled));
-            Named(pen, instance.Name);
+            pen.Start(Keyword.Instance).Whole(instance.Number)
+                .Says(Keyword.Of).Text(system.Identity.ToString("D"));
+
+            if (instance.HasName)
+                pen.Says(Keyword.As).Word(instance.Name);
 
             var parts = Sorted(instance);
             if (parts.Count == 0)
@@ -418,7 +473,7 @@ namespace Reactor.Storage
             pen.Body();
             for (var i = 0; i < parts.Count; i++)
             {
-                pen.Start(Keyword.Fill).Word(parts[i]);
+                pen.Head(parts[i]).Says(Keyword.Equals);
                 Names(pen, instance.FilledWith(parts[i]));
                 pen.End();
             }
@@ -444,22 +499,67 @@ namespace Reactor.Storage
             return parts;
         }
 
-        static void ReadInstance(Statement statement, AutomationSystem system)
+        /// <summary>
+        /// One of a system, or nothing where it does not say which system it is one of.
+        /// </summary>
+        /// <remarks>
+        /// The system may be named by its identity or by its name, because a person writing one by hand
+        /// has the name in front of them and Reactor always writes the identity.
+        /// </remarks>
+        static void ReadInstance(Statement statement, Automation program, Trouble trouble)
         {
-            var instance = system.Restore(statement.Whole(0), statement.Text(2));
-            instance.Enabled = !statement.Says(1, Keyword.Off);
+            var number = statement.ValueAt(0);
+            if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue
+                || !statement.Says(1, Keyword.Of))
+            {
+                trouble.Say(statement, "one of a system is written like instance 1 of MalTek.Airlock");
+                return;
+            }
+
+            var system = Named(program, statement, 2);
+            if (system == null)
+            {
+                trouble.Say(statement, "there is no system for this one to be one of");
+                return;
+            }
+
+            if (system.FindInstance((int)number.Whole) != null)
+            {
+                trouble.Say(statement, "this system already has a number " + number.Whole);
+                return;
+            }
+
+            var name = statement.Says(3, Keyword.As) ? statement.Word(4) : "";
+            var instance = system.Restore((int)number.Whole, name);
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
             {
                 var inner = body[i];
-                if (inner.Key != Keyword.Fill)
+                if (inner.Key != Keyword.None || !inner.Says(0, Keyword.Equals))
+                {
+                    trouble.Say(inner, "one of a system says what a part is, like inner = [ door1 ]");
                     continue;
+                }
 
                 var filled = new List<string>();
                 Words(inner.Items(1), filled);
-                instance.Fill(inner.Word(0), filled);
+                instance.Fill(inner.Head, filled);
             }
+        }
+
+        /// <summary>The system a statement names by identity or by name, or null.</summary>
+        static AutomationSystem Named(Automation program, Statement statement, int at)
+        {
+            Guid identity;
+            if (Guid.TryParseExact(statement.Text(at), "D", out identity))
+                return program.FindSystem(identity);
+
+            var name = statement.Parts(at);
+            if (name.Count == 0 || name.Count > 2)
+                return null;
+
+            return program.FindSystem(name.Count == 2 ? name[0].Word : "", name[name.Count - 1].Word);
         }
 
         static void WriteSequence(Pen pen, Sequence sequence)
@@ -470,10 +570,7 @@ namespace Reactor.Storage
             if (sequence.HasName)
                 pen.Says(Keyword.As).Word(sequence.Name);
 
-            pen.Says(Keyword.Is).Says(OnOff(sequence.Enabled));
             pen.Body();
-
-            WriteTrigger(pen, sequence.Trigger);
 
             var steps = sequence.Steps;
             for (var i = 0; i < steps.Count; i++)
@@ -483,11 +580,11 @@ namespace Reactor.Storage
         }
 
         /// <summary>
-        /// <c>sequence 3 as 'Let me out' is on { … }</c>
+        /// <c>sequence 3 as 'Let me out' { … }</c>
         /// </summary>
         /// <remarks>
         /// The number is what the sequence is, within its system, so one without a number or with a number its
-        /// system already has is trouble and not read. The name is optional and comes before the switch.
+        /// system already has is trouble and not read. The name is optional.
         /// </remarks>
         static void ReadSequence(Statement statement, AutomationSystem system, Automation program, Trouble trouble)
         {
@@ -504,47 +601,56 @@ namespace Reactor.Storage
                 return;
             }
 
-            var sequence = program.Restore(system, (int)number.Whole, new CalledTrigger());
+            var sequence = program.Restore(system, (int)number.Whole, null);
             sequence.Annotation = statement.Annotation;
 
-            var at = 1;
-            if (statement.Says(at, Keyword.As))
+            if (statement.Says(1, Keyword.As))
             {
-                sequence.Name = statement.Word(at + 1);
+                sequence.Name = statement.Word(2);
                 if (sequence.Name.Length == 0)
                     trouble.Say(statement, "'as' is followed by the sequence's name");
-
-                at += 2;
             }
-
-            if (!statement.Says(at, Keyword.Is) || !(statement.Says(at + 1, Keyword.On) || statement.Says(at + 1, Keyword.Off)))
-                trouble.Say(statement, "a sequence says whether it is on or off: is on, is off");
-
-            sequence.Enabled = !statement.Says(at + 1, Keyword.Off);
-
-            if (statement.Optional > at + 2)
-                trouble.Say(statement, "what follows 'is on' or 'is off' comes after a comma");
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
             {
-                var inner = body[i];
-                if (ReadTrigger(inner, sequence))
-                    continue;
-
-                var step = ReadStep(inner);
+                var step = ReadStep(body[i], trouble);
                 if (step != null)
                     sequence.Steps.Add(step);
             }
         }
 
+        /// <summary>
+        /// <c>when any pressed [ call ] then run 1</c>, or <c>every 600t run 2</c>.
+        /// </summary>
+        /// <remarks>
+        /// A trigger says what it runs, because it belongs to the system rather than to one sequence. The
+        /// condition a <c>when</c> takes is as much as the language can say today: an event, and the parts
+        /// to watch for it.
+        /// </remarks>
         static void WriteTrigger(Pen pen, Trigger trigger)
         {
+            // The ones a construct answers sit in a list of their own and only break it up where one
+            // carries words; the rest each start a paragraph.
+            if (!(trigger is RequiredTrigger) || trigger.Annotation.Length > 0)
+                pen.Blank();
+
+            pen.Note(trigger.Annotation);
+
+            if (trigger is RequiredTrigger)
+            {
+                pen.Start(Keyword.Required).Says(Keyword.Trigger)
+                    .Says(Keyword.To).Says(Keyword.Run).Whole(trigger.Runs);
+                pen.End();
+                return;
+            }
+
             var when = trigger as WhenTrigger;
             if (when != null)
             {
                 pen.Start(Keyword.When).Says(when.RequiresAll ? Keyword.All : Keyword.Any).Word(when.EventId);
                 Names(pen, when.Sources);
+                pen.Says(Keyword.Then).Says(Keyword.Run).Whole(trigger.Runs);
                 pen.End();
                 return;
             }
@@ -552,52 +658,105 @@ namespace Reactor.Storage
             var every = trigger as EveryTrigger;
             if (every != null)
             {
-                pen.Start(Keyword.Every).Whole(every.IntervalTicks);
+                pen.Start(Keyword.Every).Ticks(every.IntervalTicks).Says(Keyword.Run).Whole(trigger.Runs);
                 pen.End();
+            }
+        }
+
+        static void ReadTrigger(Statement statement, AutomationSystem system, Trouble trouble)
+        {
+            var trigger = Kind(statement, trouble);
+            if (trigger == null)
+                return;
+
+            trigger.Annotation = statement.Annotation;
+
+            var at = statement.Find(Keyword.Run);
+            var number = statement.ValueAt(at + 1);
+            if (at < 0 || number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
+            {
+                trouble.Say(statement, "a trigger says which sequence it runs, like run 1");
                 return;
             }
 
-            if (trigger is CalledTrigger)
-            {
-                pen.Start(Keyword.Called);
-                pen.End();
-            }
+            trigger.Runs = (int)number.Whole;
+            system.AddTrigger(trigger);
         }
 
-        /// <summary>Whether the statement was a trigger, which is what tells a step from one.</summary>
-        static bool ReadTrigger(Statement statement, Sequence sequence)
+        static Trigger Kind(Statement statement, Trouble trouble)
         {
             if (statement.Key == Keyword.When)
-            {
-                var when = new WhenTrigger(statement.Word(1));
-                when.RequiresAll = statement.Says(0, Keyword.All);
-                Words(statement.Items(2), when.Sources);
-                sequence.Trigger = when;
-                return true;
-            }
+                return When(statement, trouble);
 
             if (statement.Key == Keyword.Every)
+                return Every(statement, trouble);
+
+            // required trigger to run 1: the construct answers it, so there is nothing else to read.
+            if (!statement.Says(1, Keyword.To))
             {
-                sequence.Trigger = new EveryTrigger(statement.Whole(0));
-                return true;
+                trouble.Say(statement, "a required trigger says what it runs, like required trigger to run 1");
+                return null;
             }
 
-            if (statement.Key == Keyword.Called)
+            return new RequiredTrigger();
+        }
+
+        static Trigger When(Statement statement, Trouble trouble)
+        {
+            if (!statement.Says(0, Keyword.All) && !statement.Says(0, Keyword.Any))
             {
-                sequence.Trigger = new CalledTrigger();
-                return true;
+                trouble.Say(statement, "'when' says whether it watches any of the parts or all of them");
+                return null;
             }
 
-            return false;
+            if (!statement.Says(statement.Find(Keyword.Then), Keyword.Then))
+            {
+                trouble.Say(statement, "what a 'when' watches for is followed by 'then'");
+                return null;
+            }
+
+            var when = new WhenTrigger(statement.Word(1));
+            when.RequiresAll = statement.Says(0, Keyword.All);
+            Words(statement.Items(2), when.Sources);
+            return when;
+        }
+
+        static Trigger Every(Statement statement, Trouble trouble)
+        {
+            int ticks;
+            if (!Ticks(statement.ValueAt(0), 1, out ticks))
+            {
+                trouble.Say(statement, "'every' is followed by how often, like every 600t");
+                return null;
+            }
+
+            return new EveryTrigger(ticks);
         }
 
         /// <summary>
-        /// A step: what it does, to what, and whether anything holds it up.
+        /// A duration as a count of ticks, or false where it was no length of time that can be kept.
         /// </summary>
         /// <remarks>
-        /// The action id is the head, so a step reads as what it does. A step with no action yet - one
-        /// somebody is halfway through building, or a bare wait - says <c>step</c> instead, and an
-        /// action that collides with one of the format's words is quoted.
+        /// The text reads into a long and ticks are counted in an int, so the bound is the language's
+        /// as much as the reader's: <c>every 4294967296t</c> is not an interval, it is a number that
+        /// wraps onto one, and <c>every -600t</c> is not a rate at all.
+        /// </remarks>
+        static bool Ticks(Value value, long least, out int ticks)
+        {
+            ticks = 0;
+            if (value.Form != ValueForm.Duration || value.Whole < least || value.Whole > int.MaxValue)
+                return false;
+
+            ticks = (int)value.Whole;
+            return true;
+        }
+
+        /// <summary>
+        /// A step: an action on some parts, an await, or a length of time.
+        /// </summary>
+        /// <remarks>
+        /// An action's id is the head, so a step reads as what it does, and an id that collides with one
+        /// of the language's words is quoted.
         /// </remarks>
         static void WriteStep(Pen pen, Step step)
         {
@@ -606,14 +765,32 @@ namespace Reactor.Storage
 
             pen.Note(step.Annotation);
 
-            if (step.ActionId.Length == 0)
-                pen.Start(Keyword.Step);
-            else
-                pen.Head(step.ActionId);
+            var act = step as Act;
+            if (act != null)
+            {
+                pen.Head(act.ActionId);
+                Names(pen, act.Targets);
+                pen.End();
+                return;
+            }
 
-            Names(pen, step.Targets);
-            pen.Says(step.WaitsForCompletion ? Keyword.Wait : Keyword.Now);
-            WriteGate(pen, step.Gate);
+            var wait = step as Wait;
+            if (wait != null)
+            {
+                pen.Start(Keyword.Wait).Ticks(wait.Ticks);
+                pen.End();
+                return;
+            }
+
+            var run = step as Run;
+            if (run != null)
+            {
+                pen.Start(Keyword.Run).Whole(run.Number);
+                pen.End();
+                return;
+            }
+
+            pen.Start(Keyword.Await);
             pen.End();
         }
 
@@ -621,122 +798,131 @@ namespace Reactor.Storage
         /// A step, or nothing where the statement was not one.
         /// </summary>
         /// <remarks>
-        /// <b>A step always says <c>wait</c> or <c>now</c>, and that is what makes the reading safe.</b>
-        /// Any bare word can be an action id, so a construct a later build adds - <c>run</c>, <c>set</c>
-        /// - would otherwise be read as a step doing something called "run". Requiring the word means an
-        /// unknown statement is dropped whole instead, which is the promise the format makes.
+        /// Only <c>await</c> and <c>wait</c> are the language speaking here; any other bare head is an
+        /// action id, which is why a statement a later build adds has to carry a word of its own to be
+        /// dropped whole rather than read as a step.
         /// </remarks>
-        static Step ReadStep(Statement statement)
+        static Step ReadStep(Statement statement, Trouble trouble)
         {
-            var waits = statement.Find(Keyword.Wait);
-            var now = statement.Find(Keyword.Now);
-            if (waits < 0 && now < 0)
+            if (statement.Key == Keyword.Await)
+                return Noted(new Await(), statement);
+
+            if (statement.Key == Keyword.Run)
+                return Called(statement, trouble);
+
+            if (statement.Key == Keyword.Wait)
+            {
+                int ticks;
+                if (Ticks(statement.ValueAt(0), 0, out ticks))
+                    return Noted(new Wait(ticks), statement);
+
+                // Said rather than dropped, because a wait without its unit is somebody writing a
+                // length of time and Reactor is the only thing that can tell them it read as nothing.
+                trouble.Say(statement, "a wait is written with its unit, like wait 60t");
+                return null;
+            }
+
+            if (statement.Key != Keyword.None)
                 return null;
 
-            // A keyword head is the format speaking, so the only one a step may start with is the word
-            // for a step with no action yet. Anything else is data: an id, quoted or not.
-            if (statement.Key != Keyword.None && statement.Key != Keyword.Step)
-                return null;
-
-            var action = statement.Head;
-
-            var step = new Step(action);
-            step.Annotation = statement.Annotation;
-            step.WaitsForCompletion = now < 0;
-            ReadGate(statement, step);
-
-            // The targets are the list before whatever holds the step up, because a gate brings a list
-            // of its own and both are plain lists of declaration names.
-            var gate = Gate(statement);
-            for (var i = 0; i < gate; i++)
+            var act = new Act(statement.Head);
+            for (var i = 0; i < statement.Count; i++)
             {
                 if (statement.ValueAt(i).Form != ValueForm.List)
                     continue;
 
-                Words(statement.Items(i), step.Targets);
+                Words(statement.Items(i), act.Targets);
                 break;
             }
 
+            return Noted(act, statement);
+        }
+
+        static Step Noted(Step step, Statement statement)
+        {
+            step.Annotation = statement.Annotation;
             return step;
         }
 
-        static void WriteGate(Pen pen, StepGate gate)
+        /// <summary>
+        /// <c>run 2</c>, or <c>run 'Let me out'</c>: another sequence of the same system.
+        /// </summary>
+        static Step Called(Statement statement, Trouble trouble)
         {
-            var after = gate as AfterGate;
-            if (after != null)
+            var named = statement.ValueAt(0);
+            if (named.Form == ValueForm.Integer && named.Whole >= 1 && named.Whole <= int.MaxValue)
+                return Noted(new Run((int)named.Whole), statement);
+
+            if (named.IsWord && named.Word.Length > 0)
             {
-                pen.Says(Keyword.After).Whole(after.Ticks);
-                return;
+                var run = new Run(0);
+                run.Named = named.Word;
+                return Noted(run, statement);
             }
 
-            var once = gate as OnceGate;
-            if (once != null)
+            trouble.Say(statement, "'run' is followed by a sequence's number or its name");
+            return null;
+        }
+
+        /// <summary>
+        /// Matches what the system's <c>run</c> steps and triggers name, now the whole system is read.
+        /// </summary>
+        /// <remarks>
+        /// Late, because a sequence may be named or numbered before it is written. Anything naming a
+        /// sequence the system has not got is trouble: it can never run, nothing else would say so, and
+        /// a number that is not there used to take the runner down on the tick that reached it.
+        /// <para>
+        /// Reported against the system's own line rather than the step's, because a step does not keep
+        /// where it was written and the system is what the name was looked for in.
+        /// </para>
+        /// </remarks>
+        static void Resolve(AutomationSystem system, Statement statement, Trouble trouble)
+        {
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
             {
-                WriteCondition(pen, Keyword.Once, once.Condition);
-                return;
+                var steps = sequences[i].Steps;
+                for (var s = 0; s < steps.Count; s++)
+                {
+                    var run = steps[s] as Run;
+                    if (run == null)
+                        continue;
+
+                    if (!string.IsNullOrEmpty(run.Named))
+                    {
+                        var named = Called(system, run.Named);
+                        if (named == null)
+                            trouble.Say(statement, "no sequence of this system is called " + run.Named);
+                        else
+                            run.Number = named.Number;
+
+                        run.Named = "";
+                        continue;
+                    }
+
+                    if (system.FindSequence(run.Number) == null)
+                        trouble.Say(statement, "this system has no sequence " + run.Number + " to run");
+                }
             }
 
-            var onlyIf = gate as OnlyIfGate;
-            if (onlyIf != null)
-                WriteCondition(pen, Keyword.OnlyIf, onlyIf.Condition);
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                if (system.FindSequence(triggers[i].Runs) == null)
+                    trouble.Say(statement, "this system has no sequence " + triggers[i].Runs + " to run");
+            }
         }
 
-        static void ReadGate(Statement statement, Step step)
+        static Sequence Called(AutomationSystem system, string name)
         {
-            var after = statement.Find(Keyword.After);
-            if (after >= 0)
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
             {
-                step.Gate = new AfterGate(statement.Whole(after + 1));
-                return;
+                if (string.Equals(sequences[i].Name, name, StringComparison.Ordinal))
+                    return sequences[i];
             }
 
-            var once = statement.Find(Keyword.Once);
-            if (once >= 0)
-            {
-                step.Gate = new OnceGate(ReadCondition(statement, once));
-                return;
-            }
-
-            var onlyIf = statement.Find(Keyword.OnlyIf);
-            if (onlyIf >= 0)
-                step.Gate = new OnlyIfGate(ReadCondition(statement, onlyIf));
-        }
-
-        /// <summary>Where a gate starts among a step's values, or past the end when it has none.</summary>
-        static int Gate(Statement statement)
-        {
-            var at = statement.Count;
-            at = Earlier(at, statement.Find(Keyword.After));
-            at = Earlier(at, statement.Find(Keyword.Once));
-            return Earlier(at, statement.Find(Keyword.OnlyIf));
-        }
-
-        static int Earlier(int at, int found)
-        {
-            return found >= 0 && found < at ? found : at;
-        }
-
-        static void WriteCondition(Pen pen, Keyword keyword, Condition condition)
-        {
-            if (condition == null)
-                return;
-
-            pen.Says(keyword).Word(condition.StateId);
-            Names(pen, condition.Entities);
-        }
-
-        static Condition ReadCondition(Statement statement, int at)
-        {
-            var condition = new Condition(statement.Word(at + 1));
-            Words(statement.Items(at + 2), condition.Entities);
-            return condition;
-        }
-
-        /// <summary>A name, written only when there is one, because a trailing empty value reads the same.</summary>
-        static void Named(Pen pen, string name)
-        {
-            if (!string.IsNullOrEmpty(name))
-                pen.Text(name);
+            return null;
         }
 
         static void Names(Pen pen, IList<string> names)
@@ -759,9 +945,5 @@ namespace Reactor.Storage
             }
         }
 
-        static Keyword OnOff(bool on)
-        {
-            return on ? Keyword.On : Keyword.Off;
-        }
     }
 }

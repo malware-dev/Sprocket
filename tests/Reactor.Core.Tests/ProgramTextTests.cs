@@ -26,6 +26,19 @@ public class ProgramTextTests
         Assert.Equal("", ProgramText.Load(text, program, Store));
     }
 
+    /// <summary>
+    /// The program and the switches beside it, which is how a host keeps them.
+    /// </summary>
+    /// <remarks>
+    /// Two documents, because what is switched off is state and must not travel with a system
+    /// somebody copies out. A round trip therefore has to carry both to be a round trip at all.
+    /// </remarks>
+    static void LoadAll(Automation before, Automation after)
+    {
+        Load(Save(before), after);
+        Assert.Equal("", StateText.Load(StateText.Save(before), after));
+    }
+
     /// <summary>A declaration with the keys a world would have minted for it.</summary>
     static EntityRef Declared(string name, string kindId, Values values, long id, string blockName)
     {
@@ -64,33 +77,27 @@ public class ProgramTextTests
         out1.Enabled = false;
         out1.Annotation = "Inside to outside.";
 
-        var close = new Step("close");
+        var close = new Act("close");
         close.Targets.Add("inner");
-        close.WaitsForCompletion = true;
         close.Annotation = "the vent needs the full sixty seconds";
         out1.Steps.Add(close);
+        out1.Steps.Add(new Await());
 
-        var pause = new Step("");
-        pause.Gate = new AfterGate(90);
-        out1.Steps.Add(pause);
+        out1.Steps.Add(new Wait(90));
 
-        var vent = new Step("depressurize");
+        var vent = new Act("depressurize");
         vent.Targets.Add("vent");
-        var only = new Condition("is-shut");
-        only.Entities.Add("inner");
-        vent.Gate = new OnlyIfGate(only);
         out1.Steps.Add(vent);
 
         // What the author wrote about a part, and a second one of the system that fills the
         // parts with its own doors.
-        var inner = airlock.RoleFor("inner");
-        inner.Name = "the door onto the ship";
-        inner.Instructions = "The one you walk through to get inside.";
-        inner.Optional = false;
+        var inner = airlock.PartFor("inner");
+        inner.Annotation = "The door onto the ship.\n\nThe one you walk through to get inside.";
+        inner.Expects.Add("Door");
+        inner.Expects.Add("AirtightSlideDoor");
 
-        var spare = airlock.RoleFor("vent");
-        spare.Name = "the vent";
-        spare.Optional = true;
+        var spare = airlock.PartFor("vent");
+        spare.Annotation = "The vent.";
 
         var port = airlock.Instances[1];
         port.Enabled = false;
@@ -104,11 +111,8 @@ public class ProgramTextTests
         var timed = program.AddSequence(rig, new EveryTrigger(600));
         timed.Name = "Top up";
 
-        var lower = new Step("open");
+        var lower = new Act("open");
         lower.Targets.Add("outer");
-        var once = new Condition("is-low");
-        once.Entities.Add("inner");
-        lower.Gate = new OnceGate(once);
         timed.Steps.Add(lower);
 
         return program;
@@ -144,7 +148,7 @@ public class ProgramTextTests
         Assert.Equal(1, after.Sequences[1].Number);
 
         // And a new one takes the next number its own system has free, whatever the other system holds.
-        var fresh = after.AddSequence(after.Systems[0], new CalledTrigger());
+        var fresh = after.AddSequence(after.Systems[0]);
         Assert.Equal(2, fresh.Number);
     }
 
@@ -158,24 +162,24 @@ public class ProgramTextTests
         var system = program.AddSystem();
         system.Name = "Airlock";
 
-        var one = program.AddSequence(system, new CalledTrigger());
-        var two = program.AddSequence(system, new CalledTrigger());
-        var three = program.AddSequence(system, new CalledTrigger());
+        var one = program.AddSequence(system);
+        var two = program.AddSequence(system);
+        var three = program.AddSequence(system);
         Assert.Equal(new[] { 1, 2, 3 }, new[] { one.Number, two.Number, three.Number });
 
         program.RemoveSequence(two);
-        Assert.Equal(4, program.AddSequence(system, new CalledTrigger()).Number);
+        Assert.Equal(4, program.AddSequence(system).Number);
 
         // Including the highest, which is the case a count of what exists would get wrong.
         program.RemoveSequence(program.Sequences[program.Sequences.Count - 1]);
-        Assert.Equal(5, program.AddSequence(system, new CalledTrigger()).Number);
+        Assert.Equal(5, program.AddSequence(system).Number);
     }
 
     [Fact]
     public void EverySavedDetailComesBack()
     {
         var after = new Automation();
-        Load(Save(Build()), after);
+        LoadAll(Build(), after);
 
         var airlock = after.Systems[0];
         Assert.Equal("Airlock", airlock.Name);
@@ -188,11 +192,12 @@ public class ProgramTextTests
         Assert.True(airlock.Instances[0].Enabled);
         Assert.False(airlock.Instances[1].Enabled);
 
-        // What the author wrote about the parts.
-        Assert.Equal("the door onto the ship", airlock.FindRole("inner")!.Name);
-        Assert.Equal("The one you walk through to get inside.", airlock.FindRole("inner")!.Instructions);
-        Assert.False(airlock.FindRole("inner")!.Optional);
-        Assert.True(airlock.FindRole("vent")!.Optional);
+        // The parts, what they expect, and what the author wrote about them.
+        Assert.Equal("The door onto the ship.\n\nThe one you walk through to get inside.",
+            airlock.FindPart("inner")!.Annotation);
+        Assert.Equal(new[] { "Door", "AirtightSlideDoor" }, airlock.FindPart("inner")!.Expects);
+        Assert.Equal("The vent.", airlock.FindPart("vent")!.Annotation);
+        Assert.Empty(airlock.FindPart("vent")!.Expects);
 
         // And which of its own things the second one uses for them, including a part filled
         // with more than one.
@@ -212,18 +217,15 @@ public class ProgramTextTests
         Assert.True(when.RequiresAll);
         Assert.Equal(new[] { "call", "spare" }, when.Sources);
 
-        Assert.Equal(3, letMeOut.Steps.Count);
-        Assert.Equal("close", letMeOut.Steps[0].ActionId);
-        Assert.True(letMeOut.Steps[0].WaitsForCompletion);
-        Assert.Equal(90, Assert.IsType<AfterGate>(letMeOut.Steps[1].Gate).Ticks);
-
-        var only = Assert.IsType<OnlyIfGate>(letMeOut.Steps[2].Gate);
-        Assert.Equal("is-shut", only.Condition.StateId);
-        Assert.Equal(new[] { "inner" }, only.Condition.Entities);
+        Assert.Equal(4, letMeOut.Steps.Count);
+        Assert.Equal("close", Assert.IsType<Act>(letMeOut.Steps[0]).ActionId);
+        Assert.IsType<Await>(letMeOut.Steps[1]);
+        Assert.Equal(90, Assert.IsType<Wait>(letMeOut.Steps[2]).Ticks);
+        Assert.Equal("depressurize", Assert.IsType<Act>(letMeOut.Steps[3]).ActionId);
 
         var timed = after.Sequences[1];
         Assert.Equal(600, Assert.IsType<EveryTrigger>(timed.Trigger).IntervalTicks);
-        Assert.Equal("is-low", Assert.IsType<OnceGate>(timed.Steps[0].Gate).Condition.StateId);
+        Assert.Equal("open", Assert.IsType<Act>(timed.Steps[0]).ActionId);
     }
 
     /// <summary>
@@ -241,7 +243,7 @@ public class ProgramTextTests
         system.Name = @"Air\lock ""2""";
         system.Annotation = "line one\nline two";
 
-        var sequence = program.AddSequence(system, new CalledTrigger());
+        var sequence = program.AddSequence(system);
         sequence.Name = @"\\\";
 
         var after = new Automation();

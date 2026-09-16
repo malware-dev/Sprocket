@@ -49,20 +49,26 @@ public class AirlockTests
         public SequenceRunner State => Runner.Get(LetMeOut)!;
     }
 
-    static Condition Is(string stateId, params string[] entities)
+    /// <summary>One thing done to some blocks, on its own, with nothing waiting for it.</summary>
+    static Act Do(string actionId, params string[] targets)
     {
-        var condition = new Condition(stateId);
-        foreach (var entity in entities)
-            condition.Entities.Add(entity);
-        return condition;
-    }
-
-    static Step Do(string actionId, params string[] targets)
-    {
-        var step = new Step(actionId);
+        var step = new Act(actionId);
         foreach (var target in targets)
             step.Targets.Add(target);
         return step;
+    }
+
+    /// <summary>
+    /// A step and the await after it, which is how the editor writes one.
+    /// </summary>
+    /// <remarks>
+    /// So a test reads as the procedure it is about, and so that leaving the await out - which is what
+    /// makes two steps overlap - is visible where a test means it.
+    /// </remarks>
+    static void Then(Sequence sequence, string actionId, params string[] targets)
+    {
+        sequence.Steps.Add(Do(actionId, targets));
+        sequence.Steps.Add(new Await());
     }
 
     static Airlock Build()
@@ -79,9 +85,9 @@ public class AirlockTests
         a.LetMeOut = a.Automation.AddSequence(trigger);
         a.LetMeOut.Name = "Let me out";
 
-        a.LetMeOut.Steps.Add(Do("close", a.Ref(a.Inner)));
-        a.LetMeOut.Steps.Add(Do("depressurize", a.Ref(a.Vent)));
-        a.LetMeOut.Steps.Add(Do("open", a.Ref(a.Outer)));
+        Then(a.LetMeOut, "close", a.Ref(a.Inner));
+        Then(a.LetMeOut, "depressurize", a.Ref(a.Vent));
+        Then(a.LetMeOut, "open", a.Ref(a.Outer));
 
         a.Runner = new AutomationRunner(a.Automation, a.World);
         return a;
@@ -104,7 +110,7 @@ public class AirlockTests
         a.Tick(5);
         Assert.Equal(["Inner Door:close"], a.World.Log);
         Assert.True(a.State.IsWaiting);
-        Assert.Equal(0, a.State.CurrentStep);
+        Assert.Equal(1, a.State.CurrentStep);
 
         a.Tick(10);
         Assert.Contains("Airlock Vent:depressurize", a.World.Log);
@@ -138,7 +144,7 @@ public class AirlockTests
         }
 
         Assert.True(a.State.IsWaiting);
-        Assert.Equal(0, a.State.CurrentStep);
+        Assert.Equal(1, a.State.CurrentStep);
         Assert.Equal(["Inner Door:close"], a.World.Log);
     }
 
@@ -151,8 +157,8 @@ public class AirlockTests
         var beacon = a.World.Add(new TestLamp(5, "Beacon"));
 
         var sequence = a.Automation.AddSequence(new EveryTrigger(1));
-        sequence.Steps.Add(Do("on", a.Ref(beacon)));
-        sequence.Steps.Add(Do("close", a.Ref(a.Inner)));
+        Then(sequence, "on", a.Ref(beacon));
+        Then(sequence, "close", a.Ref(a.Inner));
 
         a.Tick();
         Assert.Equal(["Beacon:on", "Inner Door:close"], a.World.Log);
@@ -168,10 +174,8 @@ public class AirlockTests
         a.World.Log.Clear();
 
         var sequence = a.Automation.AddSequence(new EveryTrigger(1000));
-        var first = Do("close", a.Ref(a.Inner));
-        first.WaitsForCompletion = false;
-        sequence.Steps.Add(first);
-        sequence.Steps.Add(Do("close", a.Ref(a.Outer)));
+        sequence.Steps.Add(Do("close", a.Ref(a.Inner)));
+        Then(sequence, "close", a.Ref(a.Outer));
 
         a.Tick();                       // lets the runner pick the new sequence up
         a.World.Log.Clear();
@@ -197,32 +201,74 @@ public class AirlockTests
         Assert.Equal(1, a.State.FiredCount);
         Assert.Equal(1, a.State.SkippedCount);
         Assert.True(a.State.IsWaiting);
-        Assert.Equal(0, a.State.CurrentStep);
+        Assert.Equal(1, a.State.CurrentStep);
     }
 
+    /// <summary>
+    /// Two triggers on one sequence both start it, and each keeps its own reading.
+    /// </summary>
+    /// <remarks>
+    /// The inside button and the outside one. A trigger belonging to a sequence could not say this at
+    /// all, which is why they moved onto the system - and with one shared reading between them, the
+    /// second one fired nothing.
+    /// </remarks>
     [Fact]
-    public void AGuardSkipsTheDangerousStep_AndRecordsWhy()
+    public void TwoTriggersOnOneSequenceBothStartIt()
     {
-        // "only if the inner door is shut - open the outer door". Unlike a wait, a
-        // guard passes the step over and the sequence carries on.
         var a = Build();
-        a.LetMeOut.Steps[0].WaitsForCompletion = false;
-        a.LetMeOut.Steps[2].Gate = new OnlyIfGate(Is("is-shut", a.Ref(a.Inner)));
+        var outside = a.World.Add(new TestButton(6, "Outside Button"));
+        var system = a.Automation.Systems[0];
+
+        var second = new WhenTrigger("pressed");
+        second.Sources.Add(a.Ref(outside));
+        second.Runs = a.LetMeOut.Number;
+        system.AddTrigger(second);
+
+        a.Tick(3);
+
+        // The one that was there from the start.
+        a.Inside.Press();
+        a.Tick(2);
+        Assert.Equal(1, a.State.FiredCount);
+
+        // And the one added beside it, which has its own edge to detect.
+        a.Tick(60);
+        outside.Press();
+        a.Tick(2);
+        Assert.Equal(2, a.State.FiredCount);
+    }
+
+    /// <summary>
+    /// A sequence can start another one of its own system.
+    /// </summary>
+    /// <remarks>
+    /// Started and left to it: the calling sequence carries on, because an await waits for what it
+    /// did itself rather than for a sequence somebody called.
+    /// </remarks>
+    [Fact]
+    public void ASequenceCanRunAnother()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var warn = a.Automation.AddSequence(system);
+        warn.Name = "Warn";
+        Then(warn, "close", a.Ref(a.Outer));
+
+        var caller = a.Automation.AddSequence(system);
+        caller.Steps.Add(new Run(warn.Number));
+        Then(caller, "close", a.Ref(a.Inner));
 
         a.Inner.ForceOpen();
+        a.Outer.ForceOpen();
         a.Tick(3);
         a.World.Log.Clear();
 
-        a.Inside.Press();
-        for (var i = 0; i < 30; i++)
-        {
-            a.Inner.ForceOpen();
-            a.Tick();
-        }
+        a.Runner.Call(caller);
+        a.Tick();
 
-        Assert.DoesNotContain("Outer Door:open", a.World.Log);
-        Assert.NotNull(a.State.LastSkippedStep);
-        Assert.Equal(2, a.State.LastSkippedStep!.StepIndex);
+        // Both doors closing: the called sequence started, and the caller did not wait for it.
+        Assert.Equal(["Outer Door:close", "Inner Door:close"], a.World.Log);
     }
 
     /// <summary>
@@ -241,13 +287,13 @@ public class AirlockTests
     /// </remarks>
     static Sequence Cycle(Airlock a, string name, TestDoor leave, TestDoor enter, string pump)
     {
-        var sequence = a.Automation.AddSequence(new CalledTrigger());
+        var sequence = a.Automation.AddSequence(a.Automation.Systems[0]);
         sequence.Name = name;
-        sequence.Steps.Add(Do("close", a.Ref(leave)));
-        sequence.Steps.Add(Do("lock", a.Ref(leave)));
-        sequence.Steps.Add(Do(pump, a.Ref(a.Vent)));
-        sequence.Steps.Add(Do("unlock", a.Ref(enter)));
-        sequence.Steps.Add(Do("open", a.Ref(enter)));
+        Then(sequence, "close", a.Ref(leave));
+        Then(sequence, "lock", a.Ref(leave));
+        Then(sequence, pump, a.Ref(a.Vent));
+        Then(sequence, "unlock", a.Ref(enter));
+        Then(sequence, "open", a.Ref(enter));
         return sequence;
     }
 
@@ -291,12 +337,14 @@ public class AirlockTests
     [Fact]
     public void LockingBeforeTheDoorHasShutPinsItOpen()
     {
-        // Why waiting is the default. Locking is disabling, and a disabled door stops
-        // where it is - so skipping the wait leaves the door the sequence was trying
-        // to secure standing open.
+        // Why the await is written after every step. Locking is disabling, and a disabled door
+        // stops where it is, so overlapping the two leaves the door the sequence was securing
+        // standing open.
         var a = Build();
         var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "depressurize");
-        letMeOut.Steps[0].WaitsForCompletion = false;
+
+        // The await after the first step taken out, which is what makes it overlap the next one.
+        letMeOut.Steps.RemoveAt(1);
 
         a.Inner.ForceOpen();
         a.Tick(3);
@@ -304,7 +352,11 @@ public class AirlockTests
         a.Tick(80);
 
         Assert.Equal("open", a.Inner.Status);
-        Assert.Equal("open", a.Outer.Status);
+
+        // And the sequence is stuck on the await, waiting for a door that can no longer move -
+        // which is the right failure, because the alternative is opening the outer door onto it.
+        Assert.Equal("shut", a.Outer.Status);
+        Assert.True(a.State.IsRunning || a.Runner.Get(letMeOut)!.IsWaiting);
     }
 
     /// <summary>
@@ -326,13 +378,13 @@ public class AirlockTests
         opened.Sources.Add(a.Ref(door));
         var secure = a.Automation.AddSequence(opened);
         secure.Name = $"Secure the other door while {door.Name} is open";
-        secure.Steps.Add(Do("lock", a.Ref(other)));
+        Then(secure, "lock", a.Ref(other));
 
         var shut = new WhenTrigger("shut");
         shut.Sources.Add(a.Ref(door));
         var release = a.Automation.AddSequence(shut);
         release.Name = $"Release the other door when {door.Name} shuts";
-        release.Steps.Add(Do("unlock", a.Ref(other)));
+        Then(release, "unlock", a.Ref(other));
     }
 
     [Fact]
@@ -350,7 +402,7 @@ public class AirlockTests
 
         // Anything trying to open the outer door now gets nowhere.
         var careless = a.Automation.AddSequence(new EveryTrigger(1));
-        careless.Steps.Add(Do("open", a.Ref(a.Outer)));
+        Then(careless, "open", a.Ref(a.Outer));
         a.Tick(30);
 
         Assert.NotEqual("open", a.Outer.Status);
@@ -371,7 +423,7 @@ public class AirlockTests
         a.Tick(15);
 
         var opener = a.Automation.AddSequence(new EveryTrigger(1));
-        opener.Steps.Add(Do("open", a.Ref(a.Outer)));
+        Then(opener, "open", a.Ref(a.Outer));
         a.Tick(30);
 
         Assert.Equal("open", a.Outer.Status);

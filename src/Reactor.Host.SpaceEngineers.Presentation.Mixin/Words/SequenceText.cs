@@ -55,7 +55,9 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
             if (every != null)
                 return "Every " + TimeText.Rate(every.IntervalTicks);
 
-            return SentenceText.Empty;
+            // What answers it is on the ship's toolbars rather than in the system, so there is
+            // nothing to name: the line says that something does.
+            return trigger is RequiredTrigger ? "When something on this ship says so" : SentenceText.Empty;
         }
 
 
@@ -82,7 +84,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
             if (sequence.Steps.Count == 0)
                 return "nothing yet";
 
-            var first = Step(bindings, sequence.Steps[0]);
+            var first = Step(bindings, sequence, sequence.Steps[0]);
             return sequence.Steps.Count == 1
                 ? first
                 : first + " (+" + (sequence.Steps.Count - 1) + " more)";
@@ -121,28 +123,31 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// One numbered line of the sequence.
         /// </summary>
         /// <remarks>
-        /// Ordinarily just "close the inner door". Nothing says when it happens, because the list
-        /// being a list already does - a step waits for its own action to finish before the next one
-        /// starts. A gate only appears when the step waits on something this sequence did not cause.
+        /// Three sorts of line, because a sequence has three: something done to some blocks, waiting
+        /// for what has been started, and spending time.
         /// </remarks>
-        static string Step(Bindings bindings, Step step)
+        string Step(Bindings bindings, Sequence sequence, Step step)
         {
-            // A step with a duration and nothing to do is simply a wait, and reads better as one than
-            // as "after 5 seconds - nothing".
-            if (!step.HasAction)
+            var wait = step as Wait;
+            if (wait != null)
+                return "wait " + TimeText.Duration(wait.Ticks);
+
+            var run = step as Run;
+            if (run != null)
             {
-                var pause = step.Gate as AfterGate;
-                if (pause != null)
-                    return "wait " + TimeText.Duration(pause.Ticks);
+                var system = sequence.System;
+                var called = system == null ? null : system.FindSequence(run.Number);
+                return "run " + (called == null || !called.HasName
+                    ? DefaultName(run.Number)
+                    : called.Name);
             }
 
-            var body = Action(bindings, step);
-            var gate = Gate(bindings, step.Gate);
-            return gate.Length == 0 ? body : gate + " - " + body;
+            var act = step as Act;
+            return act == null ? "wait for it to finish" : Action(bindings, act);
         }
 
 
-        static string Action(Bindings bindings, Step step)
+        static string Action(Bindings bindings, Act step)
         {
             if (step.Targets.Count == 0)
                 return SentenceText.Empty;
@@ -159,49 +164,6 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
             }
 
             return text + " " + SentenceText.Named(bindings, step.Targets, true);
-        }
-
-
-        /// <summary>The "once ..." or "only if ..." prefix, or empty for the usual case.</summary>
-        static string Gate(Bindings bindings, StepGate gate)
-        {
-            var once = gate as OnceGate;
-            if (once != null)
-                return "once " + Condition(bindings, once.Condition);
-
-            var only = gate as OnlyIfGate;
-            if (only != null)
-                return "only if " + Condition(bindings, only.Condition);
-
-            var after = gate as AfterGate;
-            if (after != null)
-                return "after " + TimeText.Rate(after.Ticks);
-
-            return "";
-        }
-
-
-        static string Condition(Bindings bindings, Condition condition)
-        {
-            if (condition == null)
-                return SentenceText.Empty;
-
-            var text = SentenceText.Empty;
-            for (var i = 0; i < condition.Entities.Count; i++)
-            {
-                var entity = bindings.Entity(condition.Entities[i]);
-                if (entity == null)
-                    continue;
-
-                var state = entity.Kind.FindState(condition.StateId);
-                if (state == null)
-                    continue;
-
-                text = state.Text;
-                break;
-            }
-
-            return SentenceText.Named(bindings, condition.Entities, true) + " " + text;
         }
     }
 }

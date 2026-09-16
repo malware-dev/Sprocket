@@ -39,7 +39,10 @@ sealed class PaperSequenceText : ISequenceText
             return "when " + Names(bindings, when.Sources, when.RequiresAll) + " " + text;
         }
 
-        return trigger is EveryTrigger every ? "every " + every.IntervalTicks + " ticks" : "____";
+        if (trigger is EveryTrigger every)
+            return "every " + every.IntervalTicks + " ticks";
+
+        return trigger is RequiredTrigger ? "when told" : "____";
     }
 
     public string Doing(Bindings bindings, Sequence sequence)
@@ -63,24 +66,30 @@ sealed class PaperSequenceText : ISequenceText
 
     static string Step(Bindings bindings, Step step)
     {
-        if (!step.HasAction && step.Gate is AfterGate pause)
+        if (step is Wait pause)
             return "wait " + pause.Ticks;
 
-        if (step.Targets.Count == 0)
+        if (step is Run run)
+            return "run " + run.Number;
+
+        if (!(step is Act act))
+            return "await";
+
+        if (act.Targets.Count == 0)
             return "____";
 
-        var actions = Vocabulary.ActionsFor(bindings, step.Targets);
+        var actions = Vocabulary.ActionsFor(bindings, act.Targets);
         var text = "____";
         foreach (var action in actions)
         {
-            if (action.Id == step.ActionId)
+            if (action.Id == act.ActionId)
             {
                 text = action.Text;
                 break;
             }
         }
 
-        return text + " " + Names(bindings, step.Targets, true);
+        return text + " " + Names(bindings, act.Targets, true);
     }
 
     static string Names(Bindings bindings, IList<string> refs, bool all)

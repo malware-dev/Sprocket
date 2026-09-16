@@ -718,6 +718,7 @@ namespace Reactor.Editing
 
             _screen.CanGoBack = _stack.Count > 1;
             _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Leave) : 0;
+            _screen.RefreshCommand = Register(Cmd.Refresh, Look);
             _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(Cmd.Switch, page.Switch) : 0;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryCommand = _screen.HasPrimary ? Register(Cmd.Primary, page.Primary) : 0;
@@ -747,6 +748,20 @@ namespace Reactor.Editing
                     return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Everything the host learns by looking, read again.
+        /// </summary>
+        /// <remarks>
+        /// What a screen says about which buttons are wired is a reading, taken when the screen opened.
+        /// On a server somebody else may have re-pointed a slot since, and nothing tells Reactor, so
+        /// this is how a person says "look again".
+        /// </remarks>
+        void Look()
+        {
+            World.LookAgain();
+            Invalidate();
         }
 
         /// <summary>

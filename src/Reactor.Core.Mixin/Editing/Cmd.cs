@@ -20,6 +20,7 @@ namespace Reactor.Editing
         Answer,
         Primary,
         Rename,
+        Refresh,
         Switch,
 
         // The list screens.

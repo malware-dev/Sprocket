@@ -58,6 +58,11 @@ sealed class TestWorld : IWorld
 
     public bool CanStart(Sequence sequence) => !Unstartable.Contains(sequence.Id);
 
+    /// <summary>How many times something asked for a fresh reading.</summary>
+    public int Looks { get; private set; }
+
+    public void LookAgain() => Looks++;
+
     /// <summary>An id and a name, in that order, which is enough to tell bound from adrift.</summary>
     public void Identify(IEntity entity, List<EntityKey> keys)
     {

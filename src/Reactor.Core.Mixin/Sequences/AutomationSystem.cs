@@ -22,7 +22,8 @@ namespace Reactor.Sequences
     {
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<SystemInstance> _instances = new List<SystemInstance>();
-        readonly List<SystemRole> _roles = new List<SystemRole>();
+        readonly List<Part> _parts = new List<Part>();
+        readonly List<Trigger> _triggers = new List<Trigger>();
         DateTime? _changed;
         int _lastSequence;
 
@@ -130,72 +131,102 @@ namespace Reactor.Sequences
         public IReadOnlyList<Sequence> Sequences => _sequences;
 
         /// <summary>
-        /// What the author wrote about the parts this system needs.
+        /// What starts this system's sequences.
         /// </summary>
         /// <remarks>
-        /// Not the list of parts - that is derived by asking the sequences what they act on,
-        /// so it cannot drift from what the system does. This is only what somebody chose to
-        /// say about them, and it is kept whether or not a part is currently used: deleting
-        /// the last step that mentioned a door must not quietly discard the name and the note
-        /// its author wrote for it.
+        /// Held here rather than on the sequences, because more than one trigger may run one sequence and
+        /// a sequence is a procedure rather than a reason.
         /// </remarks>
-        public IReadOnlyList<SystemRole> Roles => _roles;
+        public IReadOnlyList<Trigger> Triggers => _triggers;
 
-        public SystemRole FindRole(string name)
+        public void AddTrigger(Trigger trigger)
         {
-            for (var i = 0; i < _roles.Count; i++)
+            if (trigger != null)
+                _triggers.Add(trigger);
+        }
+
+        /// <summary>The first thing that starts that sequence, or null where nothing does.</summary>
+        public Trigger TriggerFor(int number)
+        {
+            for (var i = 0; i < _triggers.Count; i++)
             {
-                if (_roles[i].Id == name)
-                    return _roles[i];
+                if (_triggers[i].Runs == number)
+                    return _triggers[i];
+            }
+
+            return null;
+        }
+
+        /// <summary>Forgets everything that started a sequence, for when the sequence itself goes.</summary>
+        internal void DropTriggersFor(int number)
+        {
+            for (var i = _triggers.Count - 1; i >= 0; i--)
+            {
+                if (_triggers[i].Runs == number)
+                    _triggers.RemoveAt(i);
+            }
+        }
+
+        /// <summary>
+        /// What this system needs a construct to provide.
+        /// </summary>
+        /// <remarks>
+        /// Declared rather than derived. Which parts the sequences happen to act on can be worked out
+        /// from the sequences, but what a part expects and what its author said about it cannot, and
+        /// both have to survive deleting the last step that mentioned it.
+        /// </remarks>
+        public IReadOnlyList<Part> Parts => _parts;
+
+        public Part FindPart(string name)
+        {
+            for (var i = 0; i < _parts.Count; i++)
+            {
+                if (_parts[i].Id == name)
+                    return _parts[i];
             }
             return null;
         }
 
-        /// <summary>What the author said about a part, making a blank record if they said nothing.</summary>
-        public SystemRole RoleFor(string name)
+        /// <summary>The part by that name, declaring a blank one where the system has none.</summary>
+        public Part PartFor(string name)
         {
-            var role = FindRole(name);
-            if (role != null)
-                return role;
+            var part = FindPart(name);
+            if (part != null)
+                return part;
 
-            role = new SystemRole(name);
-            _roles.Add(role);
-            return role;
+            part = new Part(name);
+            _parts.Add(part);
+            return part;
         }
 
         /// <summary>
-        /// The parts this system needs, worked out from what its sequences act on.
+        /// Which of the system's parts its sequences actually act on.
         /// </summary>
         /// <remarks>
-        /// Derived on the spot rather than kept, because a kept list is a second thing to
-        /// maintain and goes stale the moment somebody adds a step. The same thing acted on in
-        /// five places is one part, listed once, so whoever sets this up answers "which is the
-        /// inner door" exactly once.
+        /// Worked out on the spot rather than kept, because a kept list goes stale the moment
+        /// somebody adds a step. The same thing acted on in five places is one part, listed once, so
+        /// whoever fits this system answers "which is the inner door" exactly once.
         /// </remarks>
-        public void Parts(List<string> into)
+        public void Acted(List<string> into)
         {
             into.Clear();
+
+            for (var i = 0; i < _triggers.Count; i++)
+            {
+                var when = _triggers[i] as WhenTrigger;
+                if (when != null)
+                    Gather(when.Sources, into);
+            }
 
             for (var i = 0; i < _sequences.Count; i++)
             {
                 var sequence = _sequences[i];
 
-                var when = sequence.Trigger as WhenTrigger;
-                if (when != null)
-                    Gather(when.Sources, into);
-
                 for (var s = 0; s < sequence.Steps.Count; s++)
                 {
-                    var step = sequence.Steps[s];
-                    Gather(step.Targets, into);
-
-                    var once = step.Gate as OnceGate;
-                    if (once != null && once.Condition != null)
-                        Gather(once.Condition.Entities, into);
-
-                    var onlyIf = step.Gate as OnlyIfGate;
-                    if (onlyIf != null && onlyIf.Condition != null)
-                        Gather(onlyIf.Condition.Entities, into);
+                    var act = sequence.Steps[s] as Act;
+                    if (act != null)
+                        Gather(act.Targets, into);
                 }
             }
         }
@@ -209,7 +240,7 @@ namespace Reactor.Sequences
             }
         }
 
-        /// <summary>The ones on this ship. Never empty.</summary>
+        /// <summary>The ones on this ship, which is none until it is fitted to something.</summary>
         public IReadOnlyList<SystemInstance> Instances => _instances;
 
         /// <summary>
@@ -222,9 +253,28 @@ namespace Reactor.Sequences
         /// </remarks>
         public SystemInstance AddInstance()
         {
-            var instance = new SystemInstance(_instances.Count + 1);
+            var highest = 0;
+            for (var i = 0; i < _instances.Count; i++)
+            {
+                if (_instances[i].Number > highest)
+                    highest = _instances[i].Number;
+            }
+
+            var instance = new SystemInstance(highest + 1);
             _instances.Add(instance);
             return instance;
+        }
+
+        /// <summary>The one of this system carrying a number, or null.</summary>
+        public SystemInstance FindInstance(int number)
+        {
+            for (var i = 0; i < _instances.Count; i++)
+            {
+                if (_instances[i].Number == number)
+                    return _instances[i];
+            }
+
+            return null;
         }
 
         /// <summary>Puts back one of this system that was saved, number and name intact.</summary>
