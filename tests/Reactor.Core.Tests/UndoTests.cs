@@ -65,6 +65,10 @@ public class UndoTests
                     .Append(onEvent.RequiresAll ? " all of " : " any of ")
                     .Append(string.Join("+", onEvent.Sources));
                 break;
+            case RequiredTrigger needed:
+                text.Append(" required ").Append(needed.EventId)
+                    .Append(" of ").Append(string.Join("+", needed.Sources));
+                break;
             case EveryTrigger every:
                 text.Append(" every ").Append(every.IntervalTicks);
                 break;
@@ -87,7 +91,12 @@ public class UndoTests
 
     static void RoundTrip(SequenceEdit edit)
     {
-        Sequence sequence = Build();
+        RoundTrip(Build(), edit);
+    }
+
+    /// <summary>The same, where the edit had to be built against the sequence it is about.</summary>
+    static void RoundTrip(Sequence sequence, SequenceEdit edit)
+    {
         var before = Shape(sequence);
 
         edit.Apply(sequence);
@@ -168,8 +177,35 @@ public class UndoTests
     public void ChangingTheTriggerReversesExactly()
     {
         Sequence sequence = Build();
-        var when = (WhenTrigger)sequence.Trigger;
-        RoundTrip(new ChangeTrigger(when, new[] { "inner", "outer" }, "opened", true));
+        var was = (MomentTrigger)sequence.Trigger;
+
+        var now = new WhenTrigger("opened");
+        now.RequiresAll = true;
+        now.Sources.Add("inner");
+        now.Sources.Add("outer");
+
+        RoundTrip(sequence, new ChangeTrigger(was, now));
+    }
+
+    /// <summary>
+    /// Changing what starts a sequence can change how it is started, and that reverses too.
+    /// </summary>
+    /// <remarks>
+    /// One trip to the picker, and pointing at a button instead of a door means the construct
+    /// announces the moment rather than Reactor watching for it. That is a different trigger, not
+    /// a different field on the same one, so undo has to put the whole thing back.
+    /// </remarks>
+    [Fact]
+    public void ChangingToAMomentTheConstructAnnouncesReversesExactly()
+    {
+        Sequence sequence = Build();
+        var was = (MomentTrigger)sequence.Trigger;
+
+        var now = new RequiredTrigger("pressed-1");
+        now.Sources.Add("call");
+
+        RoundTrip(sequence, new ChangeTrigger(was, now));
+        Assert.IsType<WhenTrigger>(sequence.Trigger);
     }
 
     [Fact]
@@ -199,8 +235,11 @@ public class UndoTests
         Sequence sequence = Build();
         var when = (WhenTrigger)sequence.Trigger;
 
+        var same = new WhenTrigger("pressed");
+        same.Sources.Add("call");
+
         Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close").Changes);
-        Assert.False(new ChangeTrigger(when, new[] { "call" }, "pressed", false).Changes);
+        Assert.False(new ChangeTrigger(when, same).Changes);
         Assert.False(new Rename("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
         Assert.False(new SetCadence(60, 60).Changes);

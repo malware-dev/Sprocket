@@ -1,4 +1,4 @@
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Reactor.Tests;

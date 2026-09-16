@@ -8,24 +8,20 @@ using Xunit;
 namespace Reactor.Tests;
 
 /// <summary>
-/// Core can be rendered by something that is not this game.
+/// Everything the editor puts on a screen can be shown.
 /// </summary>
 /// <remarks>
-/// The claim core is built on is that it states capabilities and decides nothing about
-/// presentation. Only a second implementation can keep that claim honest, and the second
-/// implementation has to be one that cannot quietly agree with the first - so it is text, in the
-/// test project, with no drawing, no layout and no game anywhere near it.
+/// The editor states what is on screen as components and decides nothing about how they look. The
+/// risk in that is a component that nothing shows: the screens lay out what they know and pass
+/// silently over what they do not, so the failure is invisible exactly where it matters.
 /// <para>
-/// The pressure is in <see cref="PaperTarget" /> refusing to render a component it has
-/// not been told about. These tests walk the editor through every component type there is, so a new
-/// one arrives here before it arrives in front of anybody.
+/// The pressure is in <see cref="PaperTarget" /> refusing to write down a component it has not been
+/// told about. These tests walk the editor through every component type there is, so a new one
+/// arrives here before it arrives in front of anybody.
 /// </para>
 /// </remarks>
 public class PaperTargetTests
 {
-    static readonly PaperSequenceText SequenceWords = new PaperSequenceText();
-    static readonly PaperTimeText TimeWords = new PaperTimeText();
-
     [Fact]
     public void EveryComponentCoreProducesCanBeWrittenDown()
     {
@@ -126,7 +122,7 @@ public class PaperTargetTests
         ship.Rig.Light(4, "Airlock Light");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
+        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner);
         return ship;
     }
 

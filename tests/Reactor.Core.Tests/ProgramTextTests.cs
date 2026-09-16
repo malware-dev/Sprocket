@@ -1,6 +1,6 @@
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Storage;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Reactor.Tests;
@@ -259,7 +259,7 @@ public class ProgramTextTests
     {
         var after = new Automation();
         Load("", after);
-        Load(null, after);
+        Load(null!, after);
 
         Assert.Empty(after.Systems);
         Assert.Empty(after.Sequences);

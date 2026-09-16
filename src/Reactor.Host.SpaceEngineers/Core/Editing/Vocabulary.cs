@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
@@ -35,12 +36,12 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// A picker has blocks and no declarations yet - it is the thing that turns one into the
         /// other. Everything else asks the first form.
         /// </remarks>
-        public static List<EntityEvent> EventsOf(IWorld world, IList<long> entityIds)
+        public static List<EntityEvent> EventsOf(GridWorld world, IList<long> entityIds)
         {
             return EventsOf(Blocks(world, entityIds));
         }
 
-        static List<EntityEvent> EventsOf(List<IEntity> entities)
+        static List<EntityEvent> EventsOf(List<GridEntity> entities)
         {
             var result = new List<EntityEvent>();
             if (entities.Count == 0)
@@ -55,6 +56,35 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             return result;
         }
 
+        /// <summary>
+        /// What starts a sequence when somebody picks these blocks and this moment.
+        /// </summary>
+        /// <remarks>
+        /// <b>The player is never asked this.</b> "When the airlock button is pressed" and "when the
+        /// inner door finishes closing" are one sentence to write and two different arrangements
+        /// underneath: the game already starts things from a button, through a toolbar slot, and it
+        /// announces nothing at all about a door finishing. Which of those it is belongs to the
+        /// block, so it is read off the block rather than put to the person at the screen.
+        /// <para>
+        /// Asked of the whole selection, because the moment has to arrive the same way for all of
+        /// them: a trigger that was half watched and half answered would fire twice for some of its
+        /// blocks and not at all for the rest. A mixed selection is treated as watched, which is the
+        /// one that reports itself honestly - see <c>RequiredTrigger</c>.
+        /// </para>
+        /// </remarks>
+        public static MomentTrigger Starter(List<EntityEvent> events, string eventId, bool all)
+        {
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (events[i].Id == eventId && events[i].Answered)
+                    return new RequiredTrigger(eventId);
+            }
+
+            var when = new WhenTrigger(eventId);
+            when.RequiresAll = all;
+            return when;
+        }
+
         /// <summary>Actions every one of the given entities accepts.</summary>
         public static List<EntityAction> ActionsFor(Bindings bindings, IList<string> names)
         {
@@ -62,12 +92,12 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         }
 
         /// <summary>The same, asked about blocks somebody is holding.</summary>
-        public static List<EntityAction> ActionsOf(IWorld world, IList<long> entityIds)
+        public static List<EntityAction> ActionsOf(GridWorld world, IList<long> entityIds)
         {
             return ActionsOf(Blocks(world, entityIds));
         }
 
-        static List<EntityAction> ActionsOf(List<IEntity> entities)
+        static List<EntityAction> ActionsOf(List<GridEntity> entities)
         {
             var result = new List<EntityAction>();
             if (entities.Count == 0)
@@ -101,9 +131,9 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// is not the selection talking, it is the question: there is nothing to ask
         /// about a block that nothing can happen to.
         /// </remarks>
-        public static List<IEntity> Capable(IWorld world, bool forEvents)
+        public static List<GridEntity> Capable(GridWorld world, bool forEvents)
         {
-            var result = new List<IEntity>();
+            var result = new List<GridEntity>();
             var entities = world.Entities;
             for (var i = 0; i < entities.Count; i++)
             {
@@ -124,9 +154,9 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// selection rather than what may be done to it. Refusing to offer "open" for a door whose
         /// id died would leave somebody unable to describe the thing they are about to re-point.
         /// </remarks>
-        static List<IEntity> Held(Bindings bindings, IList<string> names)
+        static List<GridEntity> Held(Bindings bindings, IList<string> names)
         {
-            var result = new List<IEntity>();
+            var result = new List<GridEntity>();
             for (var i = 0; i < names.Count; i++)
             {
                 var entity = bindings.Entity(names[i]);
@@ -136,9 +166,9 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             return result;
         }
 
-        static List<IEntity> Blocks(IWorld world, IList<long> entityIds)
+        static List<GridEntity> Blocks(GridWorld world, IList<long> entityIds)
         {
-            var result = new List<IEntity>();
+            var result = new List<GridEntity>();
             for (var i = 0; i < entityIds.Count; i++)
             {
                 var entity = world.FindEntity(entityIds[i]);
@@ -148,7 +178,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             return result;
         }
 
-        static bool AllHaveEvent(List<IEntity> entities, string eventId)
+        static bool AllHaveEvent(List<GridEntity> entities, string eventId)
         {
             for (var i = 1; i < entities.Count; i++)
             {
@@ -158,7 +188,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             return true;
         }
 
-        static bool AllHaveAction(List<IEntity> entities, string actionId)
+        static bool AllHaveAction(List<GridEntity> entities, string actionId)
         {
             for (var i = 1; i < entities.Count; i++)
             {

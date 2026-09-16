@@ -1,4 +1,4 @@
-namespace Reactor.Host.SpaceEngineers.Core.World
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// Which change in a reading counts as the event.

@@ -2,7 +2,6 @@ using VRage.Game.ModAPI;
 using System;
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Terminal;
-using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 

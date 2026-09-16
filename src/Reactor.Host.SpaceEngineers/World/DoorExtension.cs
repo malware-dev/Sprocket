@@ -1,4 +1,3 @@
-using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends

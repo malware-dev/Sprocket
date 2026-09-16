@@ -1,5 +1,5 @@
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Host.SpaceEngineers.Core.Storage;
 using Xunit;
 

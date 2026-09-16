@@ -1,6 +1,6 @@
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Reactor.Tests;
@@ -230,13 +230,13 @@ public class RefTests
     }
 
     /// <summary>A door welded on, as what Reactor sees of it.</summary>
-    IEntity Add(long id, string name)
+    GridEntity Add(long id, string name)
     {
         _ship.Door(id, name);
         return _ship.Entity(id);
     }
 
-    EntityRef Declare(string name, IEntity entity)
+    EntityRef Declare(string name, GridEntity entity)
     {
         var declared = new EntityRef(name, entity.Kind.Id);
         _ship.World.Identify(entity, declared.Keys);

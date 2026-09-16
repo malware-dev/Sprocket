@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
+using Reactor.Host.SpaceEngineers.Words;
 
 namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
@@ -41,7 +42,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// the switch that changes it - repeating it up here reads as two different things saying the
         /// same words.
         /// </remarks>
-        public override string Title => Editor.SequenceText.Sequence(Editor.Runner.Bindings, _sequence);
+        public override string Title => SequenceText.Sequence(Editor.Runner.Bindings, _sequence);
 
         /// <summary>
         /// Naming happens on the heading, because the heading is what the name is for.
@@ -103,13 +104,13 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             if (parts.Count < 2)
                 return;
 
-            parts[0].Text = Editor.SequenceText.Trigger(Editor.Runner.Bindings, _sequence.Trigger);
+            parts[0].Text = SequenceText.Trigger(Editor.Runner.Bindings, _sequence.Trigger);
 
             // The name where there is one, and what it actually does where there is not - so an unnamed
             // sequence still reads as a whole sentence and naming one is a choice rather than a chore.
             // The same call a list row makes, so the two cannot come to disagree.
             parts[1].Name = CustomName;
-            parts[1].Text = Editor.SequenceText.Doing(Editor.Runner.Bindings, _sequence);
+            parts[1].Text = SequenceText.Doing(Editor.Runner.Bindings, _sequence);
         }
 
         public override void Build(List<EditorComponent> components)
@@ -239,12 +240,12 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             var state = Editor.Runner.Get(_sequence);
 
             _sentence.Enabled = _sequence.Enabled;
-            _sentence.Status = Editor.SequenceText.Status(SequenceSummary.Status(_sequence, state));
+            _sentence.Status = SequenceText.Status(SequenceSummary.Status(_sequence, state));
             _sentence.JustRan = state != null && state.LastFiredTick >= 0
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
 
-            _sentence.LastRun = Editor.TimeText.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
+            _sentence.LastRun = TimeText.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
             _sentence.Trigger.IsLiveNow = state != null && state.TriggerSignalIsTrue;
 
             // A row is lit while the sequence is anywhere inside it, so a step stays lit while the
@@ -290,7 +291,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
                 Editor.Runner.Get(_sequence));
 
-            _sentence.Problem = Editor.SequenceText.Problem(fault.Problem);
+            _sentence.Problem = SequenceText.Problem(fault.Problem);
             _sentence.Trigger.HasProblem = fault.Exists && fault.Step == SequenceFault.Trigger;
 
             for (var i = 0; i < _sentence.Steps.Count && i < _shown.Count; i++)
@@ -299,26 +300,35 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
 
         SentenceTrigger BuildTrigger()
         {
-            var when = _sequence.Trigger as WhenTrigger;
-            if (when != null)
-                return BuildWhen(when);
+            var moment = _sequence.Trigger as MomentTrigger;
+            if (moment != null && moment.Sources.Count > 0)
+                return BuildMoment(moment);
 
             var every = _sequence.Trigger as EveryTrigger;
             if (every != null)
                 return BuildEvery(every);
 
-            // A trigger the construct answers has nothing to choose here: which button runs it is
-            // said on the ship's own toolbars, and there is one line to say that it is.
+            // A required trigger naming nothing says only that something has to start this, and
+            // there is one line to say that. The editor never writes one - it always says which
+            // block it meant - so this is a program somebody wrote or was sent.
             if (_sequence.Trigger is RequiredTrigger)
                 return new SentenceTrigger(TriggerKind.Required);
 
             return new SentenceTrigger(TriggerKind.When);
         }
 
-        SentenceTrigger BuildWhen(WhenTrigger when)
+        /// <summary>
+        /// The sentence for a moment on some blocks, whichever way it reaches Reactor.
+        /// </summary>
+        /// <remarks>
+        /// One sentence for both, because "when the button is pressed" and "when the door finishes
+        /// closing" are the same thought, and the difference underneath is not the player's. The
+        /// kind goes through so a screen can say which it is without asking again.
+        /// </remarks>
+        SentenceTrigger BuildMoment(MomentTrigger moment)
         {
-            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, when.Sources);
-            var chosen = FindEvent(events, when.EventId);
+            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, moment.Sources);
+            var chosen = FindEvent(events, moment.EventId);
 
             // Changing the blocks can invalidate the chosen event. Moving to a valid
             // one keeps the sentence honest; leaving it would show something that
@@ -326,14 +336,16 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             if (events.Count > 0 && chosen == null)
             {
                 chosen = events[0];
-                when.EventId = chosen.Id;
+                moment.EventId = chosen.Id;
             }
+
+            var when = moment as WhenTrigger;
 
             // Both slots open the same trip - which blocks and what happens to them are one
             // question - but they are two controls and must be two identities.
-            var trigger = new SentenceTrigger(TriggerKind.When);
-            trigger.Slots.Add(new EntitiesSlot(Resolved(when.Sources), when.RequiresAll,
-                Change(Cmd.TriggerSlot, 0, EditTrigger)));
+            var trigger = new SentenceTrigger(when == null ? TriggerKind.Required : TriggerKind.When);
+            trigger.Slots.Add(new EntitiesSlot(Resolved(moment.Sources),
+                when != null && when.RequiresAll, Change(Cmd.TriggerSlot, 0, EditTrigger)));
 
             trigger.Slots.Add(new EventSlot(chosen, Change(Cmd.TriggerSlot, 1, EditTrigger)));
 
@@ -452,20 +464,20 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// </remarks>
         void EditTrigger()
         {
-            var when = _sequence.Trigger as WhenTrigger;
-            if (when == null)
+            var moment = _sequence.Trigger as MomentTrigger;
+            if (moment == null)
                 return;
 
+            var was = moment as WhenTrigger;
+
             Editor.Push(new PickPage(Editor, "When something happens", true,
-                Resolved(when.Sources), when.EventId,
+                Resolved(moment.Sources), moment.EventId,
                 delegate(PickAnswer answer)
                 {
-                    Editor.Do(_sequence,
-                        new ChangeTrigger(when, Declared(answer.Targets), answer.Chosen, answer.All));
-
+                    Editor.Do(_sequence, new ChangeTrigger(moment, Editor.Starter(answer)));
                     Editor.Pop();
                 },
-                true, when.RequiresAll));
+                true, was != null && was.RequiresAll));
         }
 
         void EditCadence()
@@ -557,7 +569,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             for (var i = 0; i < WaitPresets.Length; i++)
             {
                 var ticks = WaitPresets[i];
-                page.Add(Editor.TimeText.WaitChoice(ticks), false, delegate { chosen(ticks); });
+                page.Add(TimeText.WaitChoice(ticks), false, delegate { chosen(ticks); });
             }
             return page;
         }
@@ -660,7 +672,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         void Delete()
         {
             var page = new ChoicePage(Editor, "Delete this sequence?");
-            page.Caption = Editor.SequenceText.Sequence(Editor.Runner.Bindings, _sequence);
+            page.Caption = SequenceText.Sequence(Editor.Runner.Bindings, _sequence);
 
             page.Add("Keep it", false, delegate { Editor.Pop(); });
 

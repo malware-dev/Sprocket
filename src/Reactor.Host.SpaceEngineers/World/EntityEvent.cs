@@ -1,4 +1,4 @@
-namespace Reactor.Host.SpaceEngineers.Core.World
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// Something that can happen to an entity, and which a rule can listen for.

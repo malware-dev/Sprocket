@@ -1,28 +1,18 @@
-using System.Collections.Generic;
-
 namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
-    /// "When any of these entities ___".
+    /// A moment Reactor watches for itself: "when any of these doors finishes opening".
     /// </summary>
     /// <remarks>
-    /// Sources are picked inline and belong to this sequence alone - no named sets,
-    /// no saved groups, nothing to maintain. Selecting several entities is the
-    /// ordinary case rather than an advanced one, which is what lets the whole
-    /// concept of iterating over a collection stay out of the language.
-    ///
-    /// Several sources means "any of them", which is how the sentence reads out loud.
+    /// For the moments the game announces to nobody. Reactor reads the blocks every tick and fires
+    /// on the edge, which is the expensive way and the only way there is - so it is what a moment
+    /// gets when the construct cannot raise it. See <see cref="RequiredTrigger" /> for the rest.
     /// </remarks>
-    public sealed class WhenTrigger : Trigger
+    public sealed class WhenTrigger : MomentTrigger
     {
-        readonly List<string> _sources = new List<string>();
-
-        public WhenTrigger(string eventId)
+        public WhenTrigger(string eventId) : base(eventId)
         {
-            EventId = eventId;
         }
-
-        public IList<string> Sources => _sources;
 
         /// <summary>
         /// Whether every source has to be in the event's state, rather than any one
@@ -39,8 +29,5 @@ namespace Reactor.Host.SpaceEngineers.Core.Sequences
         /// several edges at once - they would almost never land on the same tick.
         /// </remarks>
         public bool RequiresAll { get; set; }
-
-        /// <summary>The <see cref="World.EntityEvent"/> id being listened for.</summary>
-        public string EventId { get; set; }
     }
 }

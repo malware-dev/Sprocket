@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Storage;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Sim.Measuring;
 

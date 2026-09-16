@@ -1,10 +1,9 @@
-using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 
 namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>One block, answering the small set of questions every block can answer.</summary>
-    sealed class GridEntity : IEntity
+    public sealed class GridEntity
     {
         internal const string OnProperty = "on";
         internal const string WorkingProperty = "working";
@@ -13,7 +12,7 @@ namespace Reactor.Host.SpaceEngineers.World
         readonly EntityKind _kind;
         readonly IBlockExtension _extension;
 
-        public GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension)
+        internal GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension)
         {
             _block = block;
             _kind = kind;
@@ -22,8 +21,9 @@ namespace Reactor.Host.SpaceEngineers.World
 
         /// <summary>The block behind this, for the few things that need the game's own object.</summary>
         /// <remarks>
-        /// Reactor works through <see cref="IEntity" /> everywhere else. Writing a toolbar is the
-        /// exception: it is the game's own structure and there is nothing to abstract about it.
+        /// Almost nothing needs it: what a block reads and what it can be told to do are answered
+        /// here. Writing a toolbar is the exception, because a toolbar is the game's own structure and
+        /// there is nothing to say about it in any other terms.
         /// </remarks>
         public IMyTerminalBlock Block => _block;
 

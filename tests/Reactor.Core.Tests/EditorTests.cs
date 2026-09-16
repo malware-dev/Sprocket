@@ -2,7 +2,6 @@ using Reactor.Host.SpaceEngineers.Core.Editing;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
 using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Machine;
 using Xunit;
@@ -14,9 +13,6 @@ namespace Reactor.Tests;
 /// </summary>
 public class EditorTests
 {
-    static readonly PaperSequenceText SequenceWords = new PaperSequenceText();
-    static readonly PaperTimeText TimeWords = new PaperTimeText();
-
     sealed class Ship
     {
         public Rigged Rig = new();
@@ -62,8 +58,78 @@ public class EditorTests
         ship.Rig.Light(4, "Airlock Light");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
+        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner);
         return ship;
+    }
+
+    /// <summary>
+    /// What somebody asks for and what the program says are not the same thing.
+    /// </summary>
+    /// <remarks>
+    /// One sentence at the screen - "when the airlock button is pressed" - and two arrangements
+    /// underneath. The game already starts things from a button, through a toolbar slot, so Reactor
+    /// puts its action in the slot and declares that the construct starts this. A door finishing
+    /// closing is announced to nobody, so that one Reactor has to watch for itself.
+    /// <para>
+    /// Nobody is asked which. The block knows, so the editor reads it off the block - which is why
+    /// the same question can be asked about anything on the ship.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AMomentTheShipAnnouncesIsWiredRatherThanWatchedFor()
+    {
+        var ship = Build();
+        StartOnTheButton(ship.Editor);
+
+        var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
+        Assert.Equal("pressed-1", pressed.EventId);
+        Assert.Single(pressed.Sources);
+
+        // And the same question about a door, which the game announces nothing about.
+        ship.Editor.GoToRoot();
+        ship.Tick();
+        ship.Editor.PressRow(1);
+        ship.Editor.PressStart("When…");
+        ship.Editor.PressBlock("Inner Door");
+        ship.Editor.PressChoice("finishes closing");
+        ship.Editor.PressPrimary();
+
+        var closed = Assert.IsType<WhenTrigger>(ship.Automation.Sequences[1].Trigger);
+        Assert.Equal("closed", closed.EventId);
+    }
+
+    /// <summary>
+    /// Changing the trigger can change how it arrives, and the sentence never mentions it.
+    /// </summary>
+    [Fact]
+    public void PointingATriggerAtAButtonInsteadOfADoorChangesHowItArrives()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        editor.NewSystem("Airlock");
+        editor.PressStart("When…");
+        editor.PressBlock("Inner Door");
+        editor.PressChoice("finishes closing");
+        editor.PressPrimary();
+        ship.Tick();
+
+        Assert.IsType<WhenTrigger>(ship.Automation.Sequences[0].Trigger);
+
+        // The trigger's own slot, which opens the same picker the wizard used.
+        editor.Invoke(editor.Sentence().Trigger.Slots[0].Command);
+        editor.PressBlock("Inner Door");
+        editor.PressBlock("Airlock Button");
+        editor.PressChoice("is pressed");
+        editor.PressPrimary();
+        ship.Tick();
+
+        var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
+        Assert.Equal("pressed-1", pressed.EventId);
+        Assert.Equal("When Airlock Button is pressed", editor.Screen.Heading[0].Text);
+
+        // One trigger for the sequence, not the old one left beside the new.
+        Assert.Single(ship.Automation.Systems[0].Triggers);
     }
 
     static void StartOnTheButton(ReactorEditor editor)
@@ -385,7 +451,7 @@ public class EditorTests
         ship.Rig.Panel(1152921504607146976, "Airlock Button");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner, SequenceWords, TimeWords);
+        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner);
 
         ship.Editor.NewSystem("Airlock");
 
@@ -529,7 +595,7 @@ public class EditorTests
         // Nothing has gone yet, and the question names what it is about.
         Assert.Single(ship.Automation.Sequences);
         Assert.Equal("Delete this sequence?", ship.Editor.Screen.Title());
-        Assert.StartsWith("when Airlock Button is pressed", ship.Editor.Screen.Subtitle);
+        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Subtitle);
 
         // The safe answer comes first, so a reflex press lands on it.
         var options = ship.Editor.Component<ChoiceListComponent>().Entries;
@@ -538,7 +604,7 @@ public class EditorTests
         ship.Editor.PressChoice("Keep it");
         ship.Tick();
         Assert.Single(ship.Automation.Sequences);
-        Assert.StartsWith("when Airlock Button is pressed", ship.Editor.Screen.Title());
+        Assert.StartsWith("When Airlock Button is pressed", ship.Editor.Screen.Title());
 
         ship.Editor.Invoke(ship.Editor.Sentence().DeleteCommand);
         ship.Tick();
@@ -578,8 +644,8 @@ public class EditorTests
         // Already named, the way a new block is. So a target opening a box to rename it has
         // something to prefill, and this is always overtyping rather than filling in a blank.
         Assert.Equal(2, heading.Count);
-        Assert.Equal("when Airlock Button is pressed", heading[0].Text);
-        Assert.Equal("sequence 1", heading[1].Name);
+        Assert.Equal("When Airlock Button is pressed", heading[0].Text);
+        Assert.Equal("Sequence 1", heading[1].Name);
 
         // The trigger is not somebody's to name. It is already the best possible name for itself.
         Assert.False(heading[0].CanRename);
@@ -589,7 +655,7 @@ public class EditorTests
         ship.Tick();
 
         // The name takes the half it belongs to. The trigger is still there, and still generated.
-        Assert.Equal("when Airlock Button is pressed", heading[0].Text);
+        Assert.Equal("When Airlock Button is pressed", heading[0].Text);
         Assert.Equal("Let me out", heading[1].Text);
         Assert.Equal("Let me out", heading[1].Name);
 
@@ -605,7 +671,7 @@ public class EditorTests
     /// A new sequence takes the first free number in its system, not a running count.
     /// </summary>
     /// <remarks>
-    /// So deleting the second of three and adding another gives "sequence 2" back, rather than a
+    /// So deleting the second of three and adding another gives "Sequence 2" back, rather than a
     /// fourth number for a third sequence. The numbering is per system because that is the list it
     /// has to be told apart in.
     /// </remarks>
@@ -615,17 +681,17 @@ public class EditorTests
         var ship = Build();
         StartOnTheButton(ship.Editor);
         ship.Tick();
-        Assert.Equal("sequence 1", ship.Editor.Screen.CustomName());
+        Assert.Equal("Sequence 1", ship.Editor.Screen.CustomName());
 
         AnotherOnTheButton(ship);
-        Assert.Equal("sequence 2", ship.Editor.Screen.CustomName());
+        Assert.Equal("Sequence 2", ship.Editor.Screen.CustomName());
 
         // The first one goes, so its number is free again.
         var system = ship.Automation.Systems[0];
         ship.Automation.RemoveSequence(system.Sequences[0]);
 
         AnotherOnTheButton(ship);
-        Assert.Equal("sequence 1", ship.Editor.Screen.CustomName());
+        Assert.Equal("Sequence 1", ship.Editor.Screen.CustomName());
     }
 
     /// <summary>
@@ -1107,14 +1173,14 @@ public class EditorTests
         editor.PressPrimary();
 
         ship.Tick();
-        Assert.StartsWith("when Airlock Button is pressed", editor.Screen.Title());
+        Assert.StartsWith("When Airlock Button is pressed", editor.Screen.Title());
 
         editor.Name("Let me out");
         ship.Tick();
 
         // On the sequence's own screen the name takes the half it is for and the trigger stays.
         Assert.Equal("Let me out", editor.Screen.Heading[1].Text);
-        Assert.Equal("when Airlock Button is pressed", editor.Screen.Heading[0].Text);
+        Assert.Equal("When Airlock Button is pressed", editor.Screen.Heading[0].Text);
 
         // And the same in the list, which is where the two used to disagree. A row is one line, so
         // it joins them - but it joins the same two halves, and the trigger survives being named.
@@ -1123,7 +1189,7 @@ public class EditorTests
 
         Assert.Equal("Airlock", editor.Screen.Title());
         Assert.Equal(
-            "when Airlock Button is pressed -> Let me out",
+            "When Airlock Button is pressed » Let me out",
             editor.Component<StatusListComponent>().Entries[0].Summary);
     }
 
@@ -1197,7 +1263,7 @@ public class EditorTests
         editor.PressAdd("wait");
         Assert.Equal("How long should it wait?", editor.Screen.Title());
 
-        editor.PressChoice("300 ticks");
+        editor.PressChoice("5 seconds - 300 ticks");
 
         var step = Assert.Single(editor.Sentence().Steps);
         Assert.Equal(StepKind.Wait, step.Kind);
@@ -1205,13 +1271,12 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Core keeps the reading up to date. What it reads as is the target's.
+    /// The reading follows the clock, and says nothing before there is anything to say.
     /// </summary>
     /// <remarks>
-    /// This used to assert "just now" and "3 seconds ago", and that the same string came back
-    /// unallocated on the next tick. Both are the target's business since the words moved out - see
-    /// <c>TimeTextTests</c> beside the shipped words, which asserts them against the real thing
-    /// rather than against a stand-in.
+    /// How the number reads is <c>TimeText</c>'s, and asserted against it in <c>TimeTextTests</c>.
+    /// What this is about is the editor keeping the reading current: the same sequence, untouched,
+    /// reads differently a few seconds later, and starts over when it runs again.
     /// </remarks>
     [Fact]
     public void LastRunIsKeptUpToDate()
@@ -1231,23 +1296,16 @@ public class EditorTests
 
         ship.Fire();
         ship.Tick(2);
-        var first = Ticks(editor.Sentence().LastRun);
+        Assert.Equal("just now", editor.Sentence().LastRun);
 
-        // Time passes, and the reading follows it exactly.
-        ship.Tick(180);
-        Assert.Equal(first + 180, Ticks(editor.Sentence().LastRun));
+        // Time passes and nothing else happens, but the reading has moved on.
+        ship.Tick(300);
+        Assert.Equal("5 seconds ago", editor.Sentence().LastRun);
 
         // It fires again, so the count starts over rather than carrying on.
         ship.Fire();
         ship.Tick(2);
-        Assert.True(Ticks(editor.Sentence().LastRun) < first + 180);
-    }
-
-    /// <summary>The number out of whatever this target chose to say around it.</summary>
-    static int Ticks(string words)
-    {
-        Assert.EndsWith(" ticks ago", words);
-        return int.Parse(words.Substring(0, words.Length - " ticks ago".Length));
+        Assert.Equal("just now", editor.Sentence().LastRun);
     }
 
     /// <summary>

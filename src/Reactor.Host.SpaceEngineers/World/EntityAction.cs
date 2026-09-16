@@ -1,4 +1,4 @@
-namespace Reactor.Host.SpaceEngineers.Core.World
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// Something a sequence can tell an entity to do.

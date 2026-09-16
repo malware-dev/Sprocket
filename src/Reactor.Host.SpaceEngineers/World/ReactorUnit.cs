@@ -10,7 +10,6 @@ using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Utils;
-using Reactor.Host.SpaceEngineers.Presentation.Words;
 using Reactor.Host.SpaceEngineers.Terminal;
 
 // The Ingame one, which is where action arguments live. Aliased rather than imported whole, the
@@ -31,8 +30,6 @@ namespace Reactor.Host.SpaceEngineers.World
     public sealed class ReactorUnit : IDisposable
     {
         /// <summary>One object answering two interfaces: how a sequence reads, and how a time reads.</summary>
-        readonly SequenceText _sequenceWords = new SequenceText();
-        readonly TimeText _timeWords = new TimeText();
 
         /// <summary>
         /// Where the program sits in the block's mod storage.
@@ -46,7 +43,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// with a line in the log, so an unclaimed key works perfectly all session and vanishes on save.
         /// </para>
         /// </remarks>
-        static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
+        internal static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
 
         /// <summary>
         /// Where what is switched off sits, beside the program.
@@ -90,7 +87,7 @@ namespace Reactor.Host.SpaceEngineers.World
             // Before the editor, which builds its first screen out of whatever the program already says.
             Load();
 
-            _editor = new ReactorEditor(_world, _program, _runner, _sequenceWords, _timeWords);
+            _editor = new ReactorEditor(_world, _program, _runner);
 
             // The player's own name is only where a namespace starts; choosing another is theirs to do.
             if (MyAPIGateway.Multiplayer != null)
@@ -358,11 +355,11 @@ namespace Reactor.Host.SpaceEngineers.World
         void WantedFor(List<Want> into, AutomationSystem system, SystemInstance instance,
             Sequence sequence)
         {
-            var when = sequence.Trigger as WhenTrigger;
-            if (when == null)
+            var needed = sequence.Trigger as RequiredTrigger;
+            if (needed == null)
                 return;
 
-            var slot = ButtonPanelExtension.ButtonOf(when.EventId);
+            var slot = ButtonPanelExtension.ButtonOf(needed.EventId);
             if (slot < 0)
                 return;
 
@@ -371,12 +368,12 @@ namespace Reactor.Host.SpaceEngineers.World
             _sources.Clear();
             if (instance == null)
             {
-                for (var i = 0; i < when.Sources.Count; i++)
-                    _sources.Add(when.Sources[i]);
+                for (var i = 0; i < needed.Sources.Count; i++)
+                    _sources.Add(needed.Sources[i]);
             }
             else
             {
-                instance.Resolve(when.Sources, _sources);
+                instance.Resolve(needed.Sources, _sources);
             }
 
             for (var source = 0; source < _sources.Count; source++)
@@ -390,7 +387,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 want.Slot = slot;
                 want.Key = KeyOf(system, instance, sequence);
                 want.Reference = _sources[source];
-                want.EventId = when.EventId;
+                want.EventId = needed.EventId;
                 want.SequenceId = sequence.Id;
                 into.Add(want);
             }
@@ -412,7 +409,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <summary>Whether the block this want names is arranged to start exactly this.</summary>
         bool Wired(Want want)
         {
-            var grid = _runner.Bindings.Entity(want.Reference) as GridEntity;
+            GridEntity grid = _runner.Bindings.Entity(want.Reference);
             if (grid == null)
                 return true;
 
@@ -450,10 +447,7 @@ namespace Reactor.Host.SpaceEngineers.World
 
             for (var i = 0; i < _world.Entities.Count; i++)
             {
-                var grid = _world.Entities[i] as GridEntity;
-                if (grid == null)
-                    continue;
-
+                GridEntity grid = _world.Entities[i];
                 IMyToolbar toolbar = Toolbars.Of(grid.Block);
                 if (toolbar == null)
                     continue;
@@ -592,8 +586,8 @@ namespace Reactor.Host.SpaceEngineers.World
                 if (sequence.Id != want.SequenceId)
                     continue;
 
-                var when = sequence.Trigger as WhenTrigger;
-                if (when == null || !when.Sources.Remove(want.Reference))
+                var needed = sequence.Trigger as RequiredTrigger;
+                if (needed == null || !needed.Sources.Remove(want.Reference))
                     return;
 
                 Trace("dropped " + want.Reference + " from sequence " + want.SequenceId
@@ -747,13 +741,13 @@ namespace Reactor.Host.SpaceEngineers.World
 
         long PanelId(string reference)
         {
-            var grid = _runner.Bindings.Entity(reference) as GridEntity;
+            GridEntity grid = _runner.Bindings.Entity(reference);
             return grid == null ? 0 : grid.Block.EntityId;
         }
 
         IMyToolbar ToolbarOf(string reference)
         {
-            var grid = _runner.Bindings.Entity(reference) as GridEntity;
+            GridEntity grid = _runner.Bindings.Entity(reference);
             return grid == null ? null : ToolbarOfBlock(grid.Block);
         }
 
@@ -761,8 +755,8 @@ namespace Reactor.Host.SpaceEngineers.World
         {
             for (var i = 0; i < _world.Entities.Count; i++)
             {
-                var grid = _world.Entities[i] as GridEntity;
-                if (grid != null && grid.Block.EntityId == panelId)
+                GridEntity grid = _world.Entities[i];
+                if (grid.Block.EntityId == panelId)
                     return ToolbarOfBlock(grid.Block);
             }
 

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
@@ -80,7 +80,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Sequences
         /// Bumped whenever a declaration is added, removed or re-pointed.
         /// </summary>
         /// <remarks>
-        /// The other half of <see cref="World.IWorld.Revision" />. Between them they say whether
+        /// The other half of <see cref="World.GridWorld.Revision" />. Between them they say whether
         /// what a name points at could possibly have moved, which is what lets the runtime look at
         /// nothing at all on an ordinary tick.
         /// </remarks>
@@ -118,7 +118,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Sequences
         /// what is already declared rather than to remember an id, because an id is exactly the thing
         /// that stops being true.
         /// </remarks>
-        public EntityRef Declare(IWorld world, IEntity entity)
+        public EntityRef Declare(GridWorld world, GridEntity entity)
         {
             for (var i = 0; i < _refs.Count; i++)
             {
@@ -369,8 +369,8 @@ namespace Reactor.Host.SpaceEngineers.Core.Sequences
 
         public static bool References(Sequence sequence, string name)
         {
-            var when = sequence.Trigger as WhenTrigger;
-            if (when != null && when.Sources.Contains(name))
+            var moment = sequence.Trigger as MomentTrigger;
+            if (moment != null && moment.Sources.Contains(name))
                 return true;
 
             for (var i = 0; i < sequence.Steps.Count; i++)

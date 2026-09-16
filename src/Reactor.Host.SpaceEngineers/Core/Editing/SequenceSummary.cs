@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
+using Reactor.Host.SpaceEngineers.Words;
 
 namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
@@ -11,8 +12,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
     /// </summary>
     /// <remarks>
     /// Facts only. This works out which state a sequence is in and what is wrong with it; what those
-    /// read as belongs to <see cref="ISequenceText" />, so a sequence reads identically wherever it is
-    /// seen without core deciding what it says.
+    /// read as belongs to <see cref="SequenceText" />, so the words for one thing live in one place.
     /// </remarks>
     static class SequenceSummary
     {
@@ -26,7 +26,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
 
         /// <summary>Updates one entry per sequence, in place.</summary>
         public static void Fill(ObservableList<StatusEntry> entries, List<Sequence> sequences, Bindings bindings,
-            AutomationRunner runner, int tick, ISequenceText wording, ITimeText time)
+            AutomationRunner runner, int tick)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
             for (var i = 0; i < count; i++)
@@ -35,12 +35,12 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
                 var entry = entries[i];
                 var running = runner.Get(sequence);
 
-                entry.Summary = wording.Sequence(bindings, sequence);
-                entry.Status = wording.Status(Status(sequence, running));
+                entry.Summary = SequenceText.Sequence(bindings, sequence);
+                entry.Status = SequenceText.Status(Status(sequence, running));
                 entry.JustRan = running != null && running.LastFiredTick >= 0
                     && tick - running.LastFiredTick < JustRanTicks;
 
-                entry.LastRun = time.Ago(TicksSinceRun(running, tick));
+                entry.LastRun = TimeText.Ago(TicksSinceRun(running, tick));
             }
         }
 
@@ -63,7 +63,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// both dearer and weaker, since it could only ask whether <i>something</i> was wired there.
         /// </para>
         /// </remarks>
-        static bool NeverTriggered(IWorld world, Sequence sequence)
+        static bool NeverTriggered(GridWorld world, Sequence sequence)
         {
             var system = sequence.System;
             if (system == null)
@@ -78,8 +78,16 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
 
                 starts++;
 
-                var when = triggers[i] as WhenTrigger;
-                if (when != null && (when.Sources.Count == 0 || string.IsNullOrEmpty(when.EventId)))
+                var moment = triggers[i] as MomentTrigger;
+                if (moment == null)
+                    continue;
+
+                // Nothing named and no moment either is a whole sentence: something on this ship
+                // starts this, and which is the host's to answer rather than a hole in the trigger.
+                if (moment.Sources.Count == 0 && string.IsNullOrEmpty(moment.EventId))
+                    continue;
+
+                if (moment.Sources.Count == 0 || string.IsNullOrEmpty(moment.EventId))
                     return sequence.Steps.Count > 0;
             }
 
@@ -117,7 +125,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// is what <see cref="EditorPage.SecondPassed" /> is for. Nothing that breaks a sequence
         /// breaks it faster than a person can do it by hand, so a second is soon enough.
         /// </remarks>
-        public static SequenceFault Fault(IWorld world, Bindings bindings, Sequence sequence,
+        public static SequenceFault Fault(GridWorld world, Bindings bindings, Sequence sequence,
             SequenceRunner state)
         {
             if (state != null && state.HasMissingSources)

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Host.SpaceEngineers.Core.World
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// A class of entity and the whole vocabulary it brings with it - what can happen

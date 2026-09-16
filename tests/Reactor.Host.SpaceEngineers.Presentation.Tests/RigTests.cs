@@ -1,7 +1,7 @@
 using Reactor.Host.SpaceEngineers.Core.Editing;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Machine;
 using Xunit;
 
@@ -41,11 +41,19 @@ public class RigTests
         // that used to be lost.
         Assert.Contains("Reactor_Trigger", store.GetValue(Wiring.Key));
 
+        // And what the program says about it: the construct starts this, which is what the game's
+        // own arrangement is. A "when" here would be Reactor claiming it watches the button.
+        var program = store.GetValue(ReactorUnit.ProgramKey);
+        Assert.Contains("required trigger pressed-1", program);
+        Assert.DoesNotContain("when ", program);
+
         Simulation reopened = Simulation.On(store);
         reopened.Tick();
 
-        var when = Assert.IsType<WhenTrigger>(reopened.Editor.Program.Sequences[0].Trigger);
-        Assert.Single(when.Sources);
+        // A button is a moment the construct announces, so what the editor wrote is a required
+        // trigger naming that button - and that is the half the toolbars have to keep.
+        var pressed = Assert.IsType<RequiredTrigger>(reopened.Editor.Program.Sequences[0].Trigger);
+        Assert.Single(pressed.Sources);
     }
 
     /// <summary>
@@ -121,10 +129,10 @@ public class RigTests
         AutomationSystem system = program.AddSystem();
         system.Name = "Airlock";
 
-        var when = new WhenTrigger("pressed-1");
-        when.Sources.Add(Named(sim, front));
+        var pressed = new RequiredTrigger("pressed-1");
+        pressed.Sources.Add(Named(sim, front));
 
-        Sequence cycle = program.AddSequence(system, when);
+        Sequence cycle = program.AddSequence(system, pressed);
         cycle.Name = "Cycle";
 
         var close = new Act("close");
@@ -160,7 +168,7 @@ public class RigTests
     /// <summary>Names a block, which is what a program refers to.</summary>
     static string Named(Simulation sim, Fitting fitting)
     {
-        IEntity entity = sim.World.FindEntity(fitting.Id);
+        GridEntity entity = sim.World.FindEntity(fitting.Id);
         return sim.Editor.Program.Declare(sim.World, entity).Name;
     }
 

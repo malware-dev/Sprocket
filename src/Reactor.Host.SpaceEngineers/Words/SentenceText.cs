@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Text;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
-namespace Reactor.Host.SpaceEngineers.Presentation.Words
+namespace Reactor.Host.SpaceEngineers.Words
 {
     /// <summary>
     /// The words a sentence reads as.
@@ -35,7 +35,10 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
             if (trigger.Kind == TriggerKind.Every)
                 return "Every";
 
-            return trigger.Kind == TriggerKind.Required
+            // A required trigger with slots names its block, so it reads like any other moment: how
+            // it reaches Reactor is not what the sentence is about. Only one naming nothing has to
+            // say that out loud, because it has nothing else to show.
+            return trigger.Kind == TriggerKind.Required && trigger.Slots.Count == 0
                 ? "When something on this ship says so"
                 : "When";
         }
@@ -48,7 +51,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// Ordinarily nothing. A step reads as "close the inner door" and the list being a list is
         /// what says when it happens.
         /// </remarks>
-        public static string Lead(IWorld world, SentenceStep step)
+        public static string Lead(GridWorld world, SentenceStep step)
         {
             if (step.Kind == StepKind.Run)
                 return "run";
@@ -63,7 +66,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// the simulation does not keep - it sags under load, and a repeat that claimed seconds would
         /// drift exactly when the machine matters most.
         /// </remarks>
-        public static string InTrigger(IWorld world, SentenceSlot slot)
+        public static string InTrigger(GridWorld world, SentenceSlot slot)
         {
             var duration = slot as DurationSlot;
             if (duration != null)
@@ -78,7 +81,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// A duration in a step is a length of time somebody chose, and is said in the units they
         /// chose it in - nobody thinks "wait three hundred ticks".
         /// </remarks>
-        public static string InStep(IWorld world, SentenceSlot slot)
+        public static string InStep(GridWorld world, SentenceSlot slot)
         {
             var duration = slot as DurationSlot;
             if (duration != null)
@@ -95,7 +98,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// Collapsing straight to "4 blocks" would turn the thing somebody picked back into an
         /// abstraction. Names are what keep a sequence about doors instead of about identifiers.
         /// </remarks>
-        public static string Entities(IWorld world, IList<long> entityIds, bool requiresAll)
+        public static string Entities(GridWorld world, IList<long> entityIds, bool requiresAll)
         {
             if (entityIds.Count == 0)
                 return Empty;
@@ -149,7 +152,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         }
 
 
-        static string Of(IWorld world, SentenceSlot slot)
+        static string Of(GridWorld world, SentenceSlot slot)
         {
             var entities = slot as EntitiesSlot;
             if (entities != null)

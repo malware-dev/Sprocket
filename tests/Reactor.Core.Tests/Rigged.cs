@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
 using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Machine;
 
@@ -56,7 +54,7 @@ sealed class Rigged
     }
 
     /// <summary>What Reactor sees of a block, which is what a program refers to.</summary>
-    public IEntity Entity(long id)
+    public GridEntity Entity(long id)
     {
         return World.FindEntity(id);
     }
@@ -79,7 +77,8 @@ sealed class Rigged
     /// <summary>What a tick does: ask the world what is on the construct.</summary>
     public void Looked()
     {
-        var ignored = World.Entities.Count;
+        // The reading is the point - asking is what makes the world notice the grid changed.
+        Xunit.Assert.NotNull(World.Entities);
     }
 
     /// <summary>The same, for a test that only kept the block's id.</summary>

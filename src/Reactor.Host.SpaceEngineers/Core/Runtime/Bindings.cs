@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Runtime
 {
@@ -19,7 +19,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
     /// </remarks>
     public sealed class Bindings
     {
-        readonly Dictionary<string, IEntity> _bound = new Dictionary<string, IEntity>();
+        readonly Dictionary<string, GridEntity> _bound = new Dictionary<string, GridEntity>();
         readonly Dictionary<string, RefState> _states = new Dictionary<string, RefState>();
 
         int _world = -1;
@@ -45,7 +45,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// and that cost belongs at the moment a block is welded on rather than sixty times a second
         /// forever after.
         /// </remarks>
-        public void Refresh(IWorld world, Automation program)
+        public void Refresh(GridWorld world, Automation program)
         {
             if (world.Revision == _world && program.Revision == _program)
                 return;
@@ -56,7 +56,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         }
 
         /// <summary>Resolves every declaration against the world as it is now, unconditionally.</summary>
-        public void Resolve(IWorld world, IReadOnlyList<EntityRef> refs)
+        public void Resolve(GridWorld world, IReadOnlyList<EntityRef> refs)
         {
             Revision++;
             _bound.Clear();
@@ -92,9 +92,9 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// Answers for an adrift reference too, because the editor has to show the candidate it is
         /// proposing. Whether it may be <i>acted</i> on is <see cref="Holds" />.
         /// </remarks>
-        public IEntity Entity(string name)
+        public GridEntity Entity(string name)
         {
-            IEntity entity;
+            GridEntity entity;
             return _bound.TryGetValue(name, out entity) ? entity : null;
         }
 

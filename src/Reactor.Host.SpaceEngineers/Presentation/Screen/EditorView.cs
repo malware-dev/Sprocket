@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Editing;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using VRageMath;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
@@ -35,7 +35,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         readonly ReactorEditor _editor;
 
         /// <summary>What the editor is editing, for the views that turn ids into words.</summary>
-        public IWorld World
+        public GridWorld World
         {
             get { return _editor.World; }
         }

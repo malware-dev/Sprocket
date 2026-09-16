@@ -1,9 +1,7 @@
 using Reactor.Host.SpaceEngineers.Core.Runtime;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Xunit;
-using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Machine;
 using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;
 
@@ -42,10 +40,10 @@ public class AirlockTests
         public List<string> Log => Ship.Rig.Log;
 
         /// <summary>Names a block, so a test builds sequences the way the editor does.</summary>
-        public string Ref(IEntity entity) => Automation.Declare(World, entity).Name;
+        public string Ref(GridEntity entity) => Automation.Declare(World, entity).Name;
 
         /// <summary>What Reactor sees of one of the rig's blocks.</summary>
-        public IEntity Seen(Fitting fitting) => Ship.Entity(fitting.Id);
+        public GridEntity Seen(Fitting fitting) => Ship.Entity(fitting.Id);
 
         int _frame;
 

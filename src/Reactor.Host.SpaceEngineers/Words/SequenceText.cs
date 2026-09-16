@@ -2,7 +2,7 @@ using Reactor.Host.SpaceEngineers.Core.Editing;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 
-namespace Reactor.Host.SpaceEngineers.Presentation.Words
+namespace Reactor.Host.SpaceEngineers.Words
 {
     /// <summary>
     /// The words for a sequence where a person can only read it: a list row, a heading, a caption.
@@ -12,7 +12,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
     /// is somebody's to change; these are labels, so they are one string each and this decides all
     /// of it - including the word order, which is the part core must never own.
     /// </remarks>
-    public sealed class SequenceText : ISequenceText
+    public static class SequenceText
     {
 
 
@@ -24,38 +24,47 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// is a label: there is nothing on it to press, no part of it is somebody's to edit, and one
         /// line has to stand for the whole sequence.
         /// </remarks>
-        public string Sequence(Bindings bindings, Sequence sequence)
+        public static string Sequence(Bindings bindings, Sequence sequence)
         {
             return Trigger(bindings, sequence.Trigger) + " » " + Doing(bindings, sequence);
         }
 
 
-        /// <summary>The whole first line: "When the hangar door finishes opening".</summary>
-        public string Trigger(Bindings bindings, Trigger trigger)
+        /// <summary>
+        /// The whole first line: "When the hangar door finishes opening".
+        /// </summary>
+        /// <remarks>
+        /// The same line whether Reactor watches for the moment or the construct announces it. That
+        /// difference is real and it is not a difference in what somebody asked for, so it is not
+        /// something to read about on every row.
+        /// </remarks>
+        public static string Trigger(Bindings bindings, Trigger trigger)
         {
-            var when = trigger as WhenTrigger;
-            if (when != null)
+            var moment = trigger as MomentTrigger;
+            if (moment != null && moment.Sources.Count > 0)
             {
-                var events = Vocabulary.EventsFor(bindings, when.Sources);
+                var events = Vocabulary.EventsFor(bindings, moment.Sources);
                 var text = SentenceText.Empty;
                 for (var i = 0; i < events.Count; i++)
                 {
-                    if (events[i].Id == when.EventId)
+                    if (events[i].Id == moment.EventId)
                     {
                         text = events[i].Text;
                         break;
                     }
                 }
 
-                return "When " + SentenceText.Named(bindings, when.Sources, when.RequiresAll) + " " + text;
+                var when = moment as WhenTrigger;
+                return "When " + SentenceText.Named(bindings, moment.Sources,
+                    when != null && when.RequiresAll) + " " + text;
             }
 
             var every = trigger as EveryTrigger;
             if (every != null)
                 return "Every " + TimeText.Rate(every.IntervalTicks);
 
-            // What answers it is on the ship's toolbars rather than in the system, so there is
-            // nothing to name: the line says that something does.
+            // A required trigger that names nothing: whatever answers it is on the ship's toolbars
+            // and not in the system, so there is nothing to name and the line says that.
             return trigger is RequiredTrigger ? "When something on this ship says so" : SentenceText.Empty;
         }
 
@@ -66,13 +75,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// read well and made a row's identity change as somebody edited it. The game names a block
         /// and lets you overtype it, and everybody already knows that.
         /// </remarks>
-        public string DefaultName(int number)
+        public static string DefaultName(int number)
         {
             return "Sequence " + number;
         }
 
 
-        public string Doing(Bindings bindings, Sequence sequence)
+        public static string Doing(Bindings bindings, Sequence sequence)
         {
             if (sequence.HasName)
                 return sequence.Name;
@@ -90,7 +99,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         }
 
 
-        public string Status(SequenceStatus status)
+        public static string Status(SequenceStatus status)
         {
             if (status == SequenceStatus.Off)
                 return "switched off";
@@ -103,7 +112,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         }
 
 
-        public string Problem(SequenceProblem problem)
+        public static string Problem(SequenceProblem problem)
         {
             if (problem == SequenceProblem.MissingSource)
                 return "This listens to something that isn't here any more.";
@@ -125,7 +134,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// Three sorts of line, because a sequence has three: something done to some blocks, waiting
         /// for what has been started, and spending time.
         /// </remarks>
-        string Step(Bindings bindings, Sequence sequence, Step step)
+        static string Step(Bindings bindings, Sequence sequence, Step step)
         {
             var wait = step as Wait;
             if (wait != null)

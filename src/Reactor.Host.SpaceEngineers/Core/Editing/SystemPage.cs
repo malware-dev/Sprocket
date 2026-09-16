@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Words;
 
 namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
@@ -152,8 +153,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
                 return;
             }
 
-            SequenceSummary.Fill(_list.Entries, _sequences, Editor.Runner.Bindings, Editor.Runner, Editor.CurrentTick,
-                Editor.SequenceText, Editor.TimeText);
+            SequenceSummary.Fill(_list.Entries, _sequences, Editor.Runner.Bindings, Editor.Runner, Editor.CurrentTick);
 
             for (var i = 0; i < _list.Entries.Count && i < _sequences.Count; i++)
                 _list.Entries[i].SwitchIsOn = _sequences[i].Enabled;
@@ -184,7 +184,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
                 var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, sequence,
                     Editor.Runner.Get(sequence));
 
-                entries[i].Problem = Editor.SequenceText.Problem(fault.Problem);
+                entries[i].Problem = SequenceText.Problem(fault.Problem);
                 entries[i].Problems = fault.Exists ? 1 : 0;
             }
         }

@@ -99,15 +99,31 @@ required block inner expects Door
 required block hangar expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'
 
 # The call button
-required trigger to run 1
+required trigger pressed-1 [ call ] to run 1
+
+# Something on the ship, and the program does not say what
+required trigger to run 2
 ```
 
 `expects` names what may fill a part: a game type id with the `MyObjectBuilder_` prefix dropped, a
 quoted `'Type/Subtype'` for one exact block, or a list of either.
 
-`required trigger to run <sequence>` says something on the construct starts that sequence. A button, a
-timer, a sensor and an event controller all answer it, because each is a toolbar slot. The construct's
-toolbars hold that wiring. Two triggers running one sequence need two slots running it.
+`required trigger <moment> [ <parts> ] to run <sequence>` says the construct announces that moment
+and starts that sequence. A button, a timer, a sensor and an event controller all answer it, because
+each is a toolbar slot: the slot holds Reactor's own action and the construct invokes it. The slot is
+the wiring and the only record of it, so it lives in the save beside the program rather than in the
+program.
+
+The parts and the moment may be left out - `required trigger to run <sequence>` - which says only
+that something starts it. That is a whole sentence, not an unfinished one, and then which slot
+answers it is whatever somebody points at Reactor by hand.
+
+**Which of the two a moment gets is the block's to say, never the author's.** A button press is
+announced by the construct, so it is a `required trigger`; a door finishing closing is announced to
+nobody, so it is a `when`. Writing the first as a `when` would claim Reactor watches a property the
+game does not have, and Reactor would be inventing a signal rather than reading one.
+
+Two triggers running one sequence need two slots running it.
 
 ## Triggers the system runs itself
 

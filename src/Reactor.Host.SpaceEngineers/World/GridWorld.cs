@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 
@@ -21,18 +20,12 @@ namespace Reactor.Host.SpaceEngineers.World
     /// actions, and the extensions above it.
     /// </para>
     /// </remarks>
-    public sealed class GridWorld : IWorld, IDisposable
+    public sealed class GridWorld : IDisposable
     {
-        /// <summary>
-        /// What Space Engineers calls these. Core never writes a player's noun into a sentence itself, so
-        /// this is the only place the word lives.
-        /// </summary>
-        static readonly EntityNoun Blocks = new EntityNoun("block", "blocks", "Blocks");
-
         readonly IMyTerminalBlock _anchor;
         readonly BlockKinds _kinds = new BlockKinds();
 
-        readonly List<IEntity> _entities = new List<IEntity>();
+        readonly List<GridEntity> _entities = new List<GridEntity>();
         readonly Dictionary<long, GridEntity> _byId = new Dictionary<long, GridEntity>();
 
         readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
@@ -47,17 +40,14 @@ namespace Reactor.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Everything on this construct, rebuilt when the grid says it changed rather than every time it is
-        /// asked for.
+        /// Makes and reads the values this construct deals in, and the lists behind the wide ones.
         /// </summary>
         /// <remarks>
-        /// <see cref="IWorld.Entities" /> asks for this to be re-read rather than cached, because blocks get
-        /// welded on and shot off while a program runs. Walking every grid in the group on every access
-        /// would do that honestly and be far too expensive on a server, so the grid's own
-        /// <c>OnBlockAdded</c> and <c>OnBlockRemoved</c> mark it stale instead. Same answer, paid for once
-        /// per change rather than once per look.
+        /// One store, because a comparison meets a reading its entities produced and an operand declared
+        /// on one of their kinds, and a slot only means anything against the lists it was taken from.
+        /// Anything that fits in eight bytes needs none of this - see <see cref="EntityValue.Of(bool)" /> -
+        /// so this is only reached for to carry something wider, which today means text.
         /// </remarks>
-        /// <summary>The values this world deals in, and the lists behind the wide ones.</summary>
         public Values Values { get; } = new Values();
 
         /// <summary>
@@ -76,7 +66,24 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </remarks>
         public int Revision { get; private set; }
 
-        public IReadOnlyList<IEntity> Entities
+        /// <summary>
+        /// Everything on this construct right now, rebuilt when the grid says it changed rather than
+        /// every time it is asked for.
+        /// </summary>
+        /// <remarks>
+        /// Blocks get welded on and shot off while a program runs, so this cannot be read once and
+        /// kept. Walking every grid in the group on every access would be honest and far too expensive
+        /// on a server, so the grid's own <c>OnBlockAdded</c> and <c>OnBlockRemoved</c> mark it stale
+        /// instead. Same answer, paid for once per change rather than once per look.
+        /// <para>
+        /// <b>This construct only</b>: the grid the Reactor unit sits on plus anything mechanically
+        /// connected to it by rotors, pistons and hinges. Connectors, landing gear and magplates are
+        /// docking rather than construction, so whatever is on the other side of one is somebody else's
+        /// machine and never appears here. That rule is what stops a rule's meaning from changing
+        /// underneath somebody when they dock, which in this game is routine rather than an edge case.
+        /// </para>
+        /// </remarks>
+        public IReadOnlyList<GridEntity> Entities
         {
             get
             {
@@ -86,8 +93,6 @@ namespace Reactor.Host.SpaceEngineers.World
                 return _entities;
             }
         }
-
-        public EntityNoun Noun => Blocks;
 
         /// <summary>
         /// The construct's name, which in this game is the block's own grid's.
@@ -198,7 +203,7 @@ namespace Reactor.Host.SpaceEngineers.World
             return asked;
         }
 
-        public void Identify(IEntity entity, List<EntityKey> keys)
+        public void Identify(GridEntity entity, List<EntityKey> keys)
         {
             keys.Clear();
             keys.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id)));
@@ -217,7 +222,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </remarks>
         internal int Matched { get; private set; }
 
-        public IEntity Match(IList<EntityKey> keys, out int matched)
+        public GridEntity Match(IList<EntityKey> keys, out int matched)
         {
             Matched++;
 
@@ -235,7 +240,7 @@ namespace Reactor.Host.SpaceEngineers.World
             return null;
         }
 
-        IEntity Matching(EntityKey key)
+        GridEntity Matching(EntityKey key)
         {
             if (key.Kind == ValueKind.Integer)
             {
@@ -264,7 +269,7 @@ namespace Reactor.Host.SpaceEngineers.World
             return null;
         }
 
-        public IEntity FindEntity(long entityId)
+        public GridEntity FindEntity(long entityId)
         {
             if (_stale)
                 Rebuild();
@@ -273,13 +278,11 @@ namespace Reactor.Host.SpaceEngineers.World
             return _byId.TryGetValue(entityId, out entity) ? entity : null;
         }
 
-        public void Invoke(IEntity entity, string actionId)
+        /// <summary>Tells a block to do something.</summary>
+        public void Invoke(GridEntity entity, string actionId)
         {
-            GridEntity target = entity as GridEntity;
-            if (target == null)
-                return;
-
-            target.Invoke(actionId);
+            if (entity != null)
+                entity.Invoke(actionId);
         }
 
         /// <summary>
@@ -287,9 +290,9 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </summary>
         /// <remarks>
         /// <c>GridLinkTypeEnum.Mechanical</c> and not <c>Logical</c>, because that is exactly the rule
-        /// <see cref="IWorld" /> states: rotors, pistons and hinges are this machine, and a connector is
-        /// somebody else's parked next to it. The game supplies the predicate; we only have to pick the
-        /// right one.
+        /// <see cref="Entities" /> states: rotors, pistons and hinges are this machine, and a connector
+        /// is somebody else's parked next to it. The game supplies the predicate; we only have to pick
+        /// the right one.
         /// </remarks>
         void Rebuild()
         {

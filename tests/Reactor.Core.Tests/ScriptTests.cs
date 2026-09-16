@@ -1,6 +1,6 @@
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Storage;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Reactor.Tests;
@@ -402,8 +402,42 @@ public class ScriptTests
         Assert.Equal("", read.Triggers[1].Annotation);
     }
 
+    /// <summary>
+    /// A required trigger says which block and which of its moments, where somebody said.
+    /// </summary>
+    /// <remarks>
+    /// The other half of what "the construct provides this" means. The arrangement is a toolbar
+    /// slot and stays one, but a person reading their own program has to see the button they
+    /// picked - and one of a system fitted elsewhere has to have something to remap, which a line
+    /// naming nothing could never give it.
+    /// </remarks>
+    [Fact]
+    public void ATriggerTheConstructProvidesSaysWhichBlockAndWhichMoment()
+    {
+        var program = SystemCalled("MalTek", "Airlock");
+        var system = program.Systems[0];
+        program.AddSequence(system);
+
+        var pressed = new RequiredTrigger("pressed-1");
+        pressed.Sources.Add("call");
+        pressed.Runs = 1;
+        system.AddTrigger(pressed);
+
+        var text = Save(program);
+        Assert.Contains("    required trigger pressed-1 [ call ] to run 1\n", text);
+
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+
+        var read = Assert.IsType<RequiredTrigger>(after.Systems[0].Triggers[0]);
+        Assert.Equal("pressed-1", read.EventId);
+        Assert.Equal("call", Assert.Single(read.Sources));
+        Assert.Equal(1, read.Runs);
+    }
+
     [Theory]
     [InlineData("required trigger run 1")]
+    [InlineData("required trigger pressed-1 [call] run 1")]
     [InlineData("required trigger to run")]
     [InlineData("required whatever to run 1")]
     public void ARequiredTriggerThatSaysNothingUsefulIsTrouble(string line)

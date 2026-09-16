@@ -1,4 +1,4 @@
-using Reactor.Host.SpaceEngineers.Presentation.Words;
+using Reactor.Host.SpaceEngineers.Words;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Xunit;
 
@@ -14,12 +14,10 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class SequenceWordsTests
 {
-    readonly SequenceText _words = new SequenceText();
-
     [Fact]
     public void ATriggerTheShipAnswersSaysThatItIsOne()
     {
-        Assert.Equal("When something on this ship says so", _words.Trigger(null!, new RequiredTrigger()));
+        Assert.Equal("When something on this ship says so", SequenceText.Trigger(null!, new RequiredTrigger()));
     }
 
     [Fact]
@@ -34,7 +32,7 @@ public class SequenceWordsTests
         var caller = program.AddSequence(system);
         caller.Steps.Add(new Run(called.Number));
 
-        Assert.Equal("run Let me out", _words.Doing(null!, caller));
+        Assert.Equal("run Let me out", SequenceText.Doing(null!, caller));
     }
 
     [Fact]
@@ -47,6 +45,6 @@ public class SequenceWordsTests
         var caller = program.AddSequence(system);
         caller.Steps.Add(new Run(called.Number));
 
-        Assert.Equal("run Sequence " + called.Number, _words.Doing(null!, caller));
+        Assert.Equal("run Sequence " + called.Number, SequenceText.Doing(null!, caller));
     }
 }

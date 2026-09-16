@@ -1,4 +1,4 @@
-namespace Reactor.Host.SpaceEngineers.Core.World
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// Something that can be read off an entity: whether a door is open, how full a tank is.

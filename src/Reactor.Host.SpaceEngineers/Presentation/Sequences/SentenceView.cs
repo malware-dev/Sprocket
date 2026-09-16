@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
 using Reactor.Host.SpaceEngineers.Presentation.Controls;
 using Reactor.Host.SpaceEngineers.Presentation.Screen;
 using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Words;
+using Reactor.Host.SpaceEngineers.Words;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
 {
@@ -72,7 +72,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Sequences
             return _slots.Count == slots;
         }
 
-        public void Update(IWorld world, SentenceStep step)
+        public void Update(GridWorld world, SentenceStep step)
         {
             if (!ReferenceEquals(_shownStep, step))
             {

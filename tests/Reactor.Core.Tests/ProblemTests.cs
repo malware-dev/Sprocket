@@ -47,7 +47,7 @@ public class ProblemTests
     public void AnUnfinishedTriggerIsNotReported()
     {
         var ship = Build();
-        ((WhenTrigger)ship.Sequence.Trigger).Sources.Clear();
+        ((MomentTrigger)ship.Sequence.Trigger).Sources.Clear();
         ship.Sequence.Steps.Clear();
 
         ship.Rig.CannotStart(ship.Sequence);
@@ -120,7 +120,7 @@ public class ProblemTests
 
         var rows = ship.Editor.Rows();
         Assert.Equal(1, rows[0].Problems);
-        Assert.Equal("nevertriggered", rows[0].Problem);
+        Assert.Equal("Nothing can start this.", rows[0].Problem);
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public class ProblemTests
         ship.Editor.PressRow(0);
 
         var sentence = ship.Editor.Sentence();
-        Assert.Equal("nevertriggered", sentence.Problem);
+        Assert.Equal("Nothing can start this.", sentence.Problem);
         Assert.True(sentence.Trigger.HasProblem);
         Assert.All(sentence.Steps, step => Assert.False(step.HasProblem));
     }
@@ -160,7 +160,7 @@ public class ProblemTests
     public void ABuiltSequenceWithNothingToStartItSaysSo()
     {
         var ship = Build();
-        ((WhenTrigger)ship.Sequence.Trigger).Sources.Clear();
+        ((MomentTrigger)ship.Sequence.Trigger).Sources.Clear();
 
         var fault = Fault(ship);
         Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
@@ -243,8 +243,7 @@ public class ProblemTests
         ship.Rig.Door(2, "Inner Door");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner,
-            new PaperSequenceText(), new PaperTimeText());
+        ship.Editor = new ReactorEditor(ship.World, ship.Automation, ship.Runner);
 
         ship.Editor.NewSystem("Airlock");
         ship.Editor.PressStart("When…");

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 
 namespace Reactor.Host.SpaceEngineers.World

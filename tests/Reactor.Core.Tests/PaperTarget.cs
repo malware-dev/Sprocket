@@ -1,28 +1,26 @@
 using System.Text;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Tests;
 
 /// <summary>
-/// A target made of nothing but text.
+/// A screen written down as text.
 /// </summary>
 /// <remarks>
-/// Core states capabilities and leaves presentation alone, and the only way to know that claim is
-/// still true is for something other than the game to be able to act on it. The Avalonia prototype
-/// used to be that second implementation; it was three and a half thousand lines and it drifted, and
-/// a lagging second implementation gives confidence rather than pressure - it stops pushing back and
-/// starts agreeing with whatever core does.
+/// <b>A completeness check on the component surface, not a second product.</b> The editor says what
+/// is on screen as components; the screens draw them. A component nothing draws is a component
+/// nobody sees, and the drawing code is a long way from saying so - it lays out what it knows and
+/// passes silently over what it does not.
 /// <para>
-/// This is the honest cheap version. It knows nothing of the screens, of Space Engineers, or of any
-/// drawing at all: it is handed a screen and writes down what is on it. What it cannot render, it
-/// refuses to render - see the component-drawing method - so a new component type breaks it
-/// until somebody has said what a target is meant to do with one.
+/// So this is handed a screen and writes down what is on it, knowing nothing of layout or drawing,
+/// and refuses anything it has not been told about - see the component-drawing method. A new
+/// component type stops the tests until somebody has said what is shown for one.
 /// </para>
 /// </remarks>
 static class PaperTarget
 {
-    public static string Draw(IWorld world, EditorScreen screen)
+    public static string Draw(GridWorld world, EditorScreen screen)
     {
         var paper = new StringBuilder();
 
@@ -58,7 +56,7 @@ static class PaperTarget
     /// forgetting to say how a target shows it is silent everywhere else; here it stops the build's
     /// tests until somebody has answered.
     /// </remarks>
-    static string Draw(IWorld world, EditorComponent component)
+    static string Draw(GridWorld world, EditorComponent component)
     {
         var paper = new StringBuilder();
 
@@ -165,7 +163,7 @@ static class PaperTarget
     /// so a second target writing the same English as the first proves nothing - the point is that it
     /// could write something else and core would not know.
     /// </remarks>
-    static string Say(IWorld world, SentenceTrigger trigger)
+    static string Say(GridWorld world, SentenceTrigger trigger)
     {
         var line = new StringBuilder();
         line.Append(trigger.Kind == TriggerKind.Every ? "Every" : "When");
@@ -183,7 +181,7 @@ static class PaperTarget
     /// A step usually opens straight at its verb, so the space goes between words rather than in
     /// front of them.
     /// </remarks>
-    static string Say(IWorld world, SentenceStep step)
+    static string Say(GridWorld world, SentenceStep step)
     {
         var line = new StringBuilder();
 
@@ -209,7 +207,7 @@ static class PaperTarget
     /// invented and nobody has words for is a gap in a sentence, and a gap in a sentence reads
     /// exactly like a slot somebody has not filled in yet.
     /// </remarks>
-    static string Say(IWorld world, SentenceSlot slot)
+    static string Say(GridWorld world, SentenceSlot slot)
     {
         if (slot.IsEmpty)
             return "____";

@@ -1,6 +1,6 @@
 using System;
 
-namespace Reactor.Host.SpaceEngineers.Core.World
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// One reading off an entity, or one literal written in a script.

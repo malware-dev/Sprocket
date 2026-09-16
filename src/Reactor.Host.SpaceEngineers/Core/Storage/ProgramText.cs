@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
@@ -637,10 +637,20 @@ namespace Reactor.Host.SpaceEngineers.Core.Storage
 
             pen.Note(trigger.Annotation);
 
-            if (trigger is RequiredTrigger)
+            var needed = trigger as RequiredTrigger;
+            if (needed != null)
             {
-                pen.Start(Keyword.Required).Says(Keyword.Trigger)
-                    .Says(Keyword.To).Says(Keyword.Run).Whole(trigger.Runs);
+                pen.Start(Keyword.Required).Says(Keyword.Trigger);
+
+                // Which block and which moment, where the editor said: a person reading their own
+                // program should see the button they picked, not just that something has to press.
+                if (needed.Sources.Count > 0)
+                {
+                    pen.Word(needed.EventId);
+                    Names(pen, needed.Sources);
+                }
+
+                pen.Says(Keyword.To).Says(Keyword.Run).Whole(trigger.Runs);
                 pen.End();
                 return;
             }
@@ -691,14 +701,22 @@ namespace Reactor.Host.SpaceEngineers.Core.Storage
             if (statement.Key == Keyword.Every)
                 return Every(statement, trouble);
 
-            // required trigger to run 1: the construct answers it, so there is nothing else to read.
-            if (!statement.Says(1, Keyword.To))
+            // required trigger to run 1: something on the construct answers it, and nothing here
+            // says which. Legal, and what a hand-written program or an imported system may say.
+            if (statement.Says(1, Keyword.To))
+                return new RequiredTrigger();
+
+            // required trigger pressed-1 [Airlock Button] to run 1: the same, saying which block
+            // and which of its moments, which is what the editor always writes.
+            if (!statement.Says(3, Keyword.To))
             {
                 trouble.Say(statement, "a required trigger says what it runs, like required trigger to run 1");
                 return null;
             }
 
-            return new RequiredTrigger();
+            var needed = new RequiredTrigger(statement.Word(1));
+            Words(statement.Items(2), needed.Sources);
+            return needed;
         }
 
         static Trigger When(Statement statement, Trouble trouble)

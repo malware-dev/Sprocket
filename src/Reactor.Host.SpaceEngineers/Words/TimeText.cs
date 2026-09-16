@@ -1,6 +1,5 @@
-using Reactor.Host.SpaceEngineers.Core.Editing;
 
-namespace Reactor.Host.SpaceEngineers.Presentation.Words
+namespace Reactor.Host.SpaceEngineers.Words
 {
     /// <summary>
     /// How long, and how long ago, in the units a person would say them in.
@@ -12,7 +11,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
     /// which is the right trade for "recently, or ages ago" and the wrong one for deciding when to
     /// act - and nothing decides when to act from these.
     /// </remarks>
-    public sealed class TimeText : ITimeText
+    public static class TimeText
     {
         const int TicksPerSecond = 60;
 
@@ -50,7 +49,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         /// to answer "recently, or ages ago", and nothing decides when to act from it.
         /// </para>
         /// </remarks>
-        public string Ago(int ticksAgo)
+        public static string Ago(int ticksAgo)
         {
             if (ticksAgo < 0)
                 return "";
@@ -71,7 +70,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Words
         }
 
 
-        public string WaitChoice(int ticks)
+        public static string WaitChoice(int ticks)
         {
             return Duration(ticks) + " - " + ticks + " ticks";
         }

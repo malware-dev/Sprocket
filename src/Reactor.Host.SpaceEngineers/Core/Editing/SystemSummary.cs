@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
@@ -61,10 +61,9 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// How many of this system are fitted.
         /// </summary>
         /// <remarks>
-        /// Without naming what they are fitted to. Saying "on this ship" is the same mistake
-        /// <see cref="EntityNoun"/> exists to prevent one level up - not every construct is a ship, and
-        /// no game but this one has ships at all. Nowhere needs the word: the screen is already showing
-        /// the thing.
+        /// Without naming what they are fitted to. "On this ship" would be wrong on most of what
+        /// people build - a station, a rover, a drone - and nowhere needs the word anyway, because
+        /// the screen is already showing the thing.
         /// </remarks>
         public static string Count(AutomationSystem system)
         {
@@ -96,7 +95,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// On a cadence rather than on a tick: <see cref="SequenceSummary.Fault" /> may send a host
         /// off to read something expensive.
         /// </remarks>
-        public static int Problems(IWorld world, Bindings bindings, AutomationRunner runner,
+        public static int Problems(GridWorld world, Bindings bindings, AutomationRunner runner,
             AutomationSystem system, SystemInstance instance)
         {
             var count = 0;
@@ -122,9 +121,9 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             {
                 var sequence = sequences[i];
 
-                var when = sequence.Trigger as WhenTrigger;
-                if (when != null)
-                    AddNames(bindings, when.Sources, result);
+                var moment = sequence.Trigger as MomentTrigger;
+                if (moment != null)
+                    AddNames(bindings, moment.Sources, result);
 
                 for (var s = 0; s < sequence.Steps.Count; s++)
                 {

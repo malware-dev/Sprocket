@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Runtime
 {
@@ -145,7 +145,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// <summary>One or more listened-to entities are no longer on the construct.</summary>
         public bool HasMissingSources { get; private set; }
 
-        public void Tick(IWorld world, Bindings bindings, int tick)
+        public void Tick(GridWorld world, Bindings bindings, int tick)
         {
             _bindings = bindings;
 
@@ -179,7 +179,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// The switch holds here. A parked sequence is parked for everything, including being
         /// called by another one.
         /// </remarks>
-        public void Call(IWorld world, Bindings bindings, int tick)
+        public void Call(GridWorld world, Bindings bindings, int tick)
         {
             _bindings = bindings;
 
@@ -219,7 +219,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// ship. It does mean being visibly stuck has to be impossible to miss, which
         /// is why the step being waited on is reported rather than inferred.
         /// </remarks>
-        public bool Settled(IWorld world, Act step)
+        public bool Settled(GridWorld world, Act step)
         {
             if (!step.HasAction)
                 return true;
@@ -254,7 +254,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// is declared against a property whose reading is a flag in every case that matters, and
         /// anything else answers the same question - is there anything there.
         /// </remarks>
-        static bool Reads(IWorld world, IEntity entity, string propertyId)
+        static bool Reads(GridWorld world, GridEntity entity, string propertyId)
         {
             var property = entity.Kind.FindProperty(propertyId);
             var kind = property == null ? ValueKind.Flag : property.Kind;
@@ -262,7 +262,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
             return world.Values.Flag(kind, entity.GetValue(propertyId));
         }
 
-        void Start(IWorld world, int tick)
+        void Start(GridWorld world, int tick)
         {
             LastFiredTick = tick;
             FiredCount++;
@@ -291,7 +291,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// default. <see cref="Await" /> is what stops that, and it is what makes a numbered list
         /// mean what it looks like it means.
         /// </remarks>
-        void Advance(IWorld world)
+        void Advance(GridWorld world)
         {
             while (_stepIndex >= 0 && _stepIndex < _sequence.Steps.Count)
             {
@@ -362,7 +362,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         }
 
         /// <summary>Whether everything started since the last await has got where it was going.</summary>
-        bool Finished(IWorld world)
+        bool Finished(GridWorld world)
         {
             for (var i = 0; i < _outstanding.Count; i++)
             {
@@ -376,7 +376,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// <summary>What has been started and not yet waited for.</summary>
         readonly List<Act> _outstanding = new List<Act>();
 
-        void Execute(IWorld world, Act step)
+        void Execute(GridWorld world, Act step)
         {
             if (!step.HasAction)
                 return;
@@ -404,11 +404,12 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// are the ordinary case - the inside button and the outside one - and each keeps its own
         /// reading, so one firing never robs the other of its edge.
         /// </remarks>
-        bool SampleTrigger(IWorld world)
+        bool SampleTrigger(GridWorld world)
         {
             var anySignal = false;
             var anyMissing = false;
             var fired = false;
+            var watched = 0;
 
             var system = _sequence.System;
             var triggers = system == null ? null : system.Triggers;
@@ -423,14 +424,21 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
 
                 anySignal = anySignal || TriggerSignalIsTrue;
                 anyMissing = anyMissing || HasMissingSources;
+                watched++;
             }
+
+            // A trigger somebody has changed or deleted is still in here holding an edge nothing
+            // will ever read again. Swept only when there is something to sweep, which is after an
+            // edit and never on an ordinary tick.
+            if (_watching.Count > watched)
+                Forget(triggers);
 
             TriggerSignalIsTrue = anySignal;
             HasMissingSources = anyMissing;
             return fired;
         }
 
-        bool Sampled(IWorld world, Trigger trigger, Watch watch)
+        bool Sampled(GridWorld world, Trigger trigger, Watch watch)
         {
             var when = trigger as WhenTrigger;
             if (when != null)
@@ -464,6 +472,27 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
 
         readonly Dictionary<Trigger, Watch> _watching = new Dictionary<Trigger, Watch>();
 
+        /// <summary>Forgets what a trigger read, for every trigger this sequence no longer has.</summary>
+        void Forget(IReadOnlyList<Trigger> triggers)
+        {
+            _forgotten.Clear();
+
+            foreach (Trigger held in _watching.Keys)
+            {
+                var kept = false;
+                for (var i = 0; triggers != null && i < triggers.Count; i++)
+                    kept = kept || (triggers[i] == held && triggers[i].Runs == _sequence.Number);
+
+                if (!kept)
+                    _forgotten.Add(held);
+            }
+
+            for (var i = 0; i < _forgotten.Count; i++)
+                _watching.Remove(_forgotten[i]);
+        }
+
+        readonly List<Trigger> _forgotten = new List<Trigger>();
+
         Watch Watching(Trigger trigger)
         {
             Watch watch;
@@ -475,7 +504,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
             return watch;
         }
 
-        bool SampleWhen(IWorld world, WhenTrigger when, Watch watch)
+        bool SampleWhen(GridWorld world, WhenTrigger when, Watch watch)
         {
             var sources = Watched(when.Sources);
             var fired = false;
@@ -493,7 +522,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
                 }
 
                 var definition = entity.Kind.FindEvent(when.EventId);
-                if (definition == null || definition.Answered)
+                if (definition == null)
                     continue;
 
                 var now = Reads(world, entity, definition.PropertyId);
@@ -530,7 +559,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         /// sentence means is "the moment they are all there", so that is what is
         /// watched: one edge, on the whole condition.
         /// </remarks>
-        bool SampleWhenAll(IWorld world, WhenTrigger when, Watch watch)
+        bool SampleWhenAll(GridWorld world, WhenTrigger when, Watch watch)
         {
             var sources = Watched(when.Sources);
             var all = sources.Count > 0;
@@ -547,10 +576,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
                 }
 
                 var definition = entity.Kind.FindEvent(when.EventId);
-
-                // An answered one has nothing to read, so "all of them" cannot include it: what
-                // would make it true arrives by being invoked, not by being watched.
-                if (definition == null || definition.Answered)
+                if (definition == null)
                 {
                     all = false;
                     continue;

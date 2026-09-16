@@ -145,6 +145,33 @@ namespace Reactor.Host.SpaceEngineers.Core.Sequences
                 _triggers.Add(trigger);
         }
 
+        /// <summary>
+        /// Swaps what starts a sequence, keeping its place among the others.
+        /// </summary>
+        /// <remarks>
+        /// Because one trip to the picker can change which sort of trigger it is: pointing at a
+        /// door means Reactor watches it, and pointing at a button means the construct starts it.
+        /// Those are different triggers, and an edit that could only change fields could not
+        /// answer the question the player was asked.
+        /// </remarks>
+        internal void ReplaceTrigger(Trigger was, Trigger now)
+        {
+            for (var i = 0; i < _triggers.Count; i++)
+            {
+                if (_triggers[i] != was)
+                    continue;
+
+                if (now == null)
+                    _triggers.RemoveAt(i);
+                else
+                    _triggers[i] = now;
+
+                return;
+            }
+
+            AddTrigger(now);
+        }
+
         /// <summary>The first thing that starts that sequence, or null where nothing does.</summary>
         public Trigger TriggerFor(int number)
         {
@@ -213,9 +240,9 @@ namespace Reactor.Host.SpaceEngineers.Core.Sequences
 
             for (var i = 0; i < _triggers.Count; i++)
             {
-                var when = _triggers[i] as WhenTrigger;
-                if (when != null)
-                    Gather(when.Sources, into);
+                var moment = _triggers[i] as MomentTrigger;
+                if (moment != null)
+                    Gather(moment.Sources, into);
             }
 
             for (var i = 0; i < _sequences.Count; i++)

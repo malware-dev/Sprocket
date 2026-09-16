@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Runtime
 {
@@ -31,10 +31,10 @@ namespace Reactor.Host.SpaceEngineers.Core.Runtime
         readonly List<long> _stale = new List<long>();
         readonly List<long> _live = new List<long>();
         readonly Automation _automation;
-        readonly IWorld _world;
+        readonly GridWorld _world;
         readonly Bindings _bindings = new Bindings();
 
-        public AutomationRunner(Automation automation, IWorld world)
+        public AutomationRunner(Automation automation, GridWorld world)
         {
             _automation = automation;
             _world = world;

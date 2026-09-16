@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
@@ -28,8 +28,8 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         string _chosen;
         bool _all;
 
-        readonly List<IEntity> _candidates = new List<IEntity>();
-        readonly List<IEntity> _filtered = new List<IEntity>();
+        readonly List<GridEntity> _candidates = new List<GridEntity>();
+        readonly List<GridEntity> _filtered = new List<GridEntity>();
 
         /// <summary>
         /// A small number per entity, handed out in the order they are first seen and kept for the life of
@@ -61,9 +61,9 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// A comparer object rather than a <c>Comparison</c> delegate, which Space Engineers does not
         /// whitelist.
         /// </remarks>
-        sealed class NameOrder : IComparer<IEntity>
+        sealed class NameOrder : IComparer<GridEntity>
         {
-            public int Compare(IEntity a, IEntity b)
+            public int Compare(GridEntity a, GridEntity b)
             {
                 // Neither can be null: the only lists sorted with this are the world's own entities,
                 // and nothing ever puts a null in one. The interface allows it; this codebase does not.
@@ -123,7 +123,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             get
             {
                 if (_selection.Count == 0)
-                    return "Start by picking one or more " + Editor.World.Noun.Many;
+                    return "Start by picking one or more blocks";
                 return IsComplete ? "" : "Now pick what happens";
             }
         }
@@ -146,7 +146,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
                 _pick = new PickComponent();
                 _pick.Fills = true;
 
-                _blocks = new PickStage(Editor.World.Noun.Heading);
+                _blocks = new PickStage("Blocks");
                 _blocks.AllowsMany = true;
                 _blocks.EmptyText = _forEvents
                     ? "Nothing here has anything that can happen to it."
@@ -160,11 +160,10 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             var wanted = _selection.Count > 0;
             if (wanted && _what == null)
             {
-                var noun = Editor.World.Noun.Many;
                 _what = new PickStage(_forEvents ? "What happens" : "What to do");
                 _what.EmptyText = _forEvents
-                    ? "Those " + noun + " have nothing in common that can happen to them."
-                    : "Those " + noun + " have nothing in common that can be done to them.";
+                    ? "Those blocks have nothing in common that can happen to them."
+                    : "Those blocks have nothing in common that can be done to them.";
                 _pick.Add(_what);
             }
             else if (!wanted && _what != null)

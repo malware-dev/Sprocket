@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.Core.Ui;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
+using Reactor.Host.SpaceEngineers.Words;
 
 namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
@@ -11,22 +12,19 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
     /// The editor. All of it.
     /// </summary>
     /// <remarks>
-    /// Navigation, page contents, slot filling, search, the wording of every
-    /// sentence and every status line live here rather than in a target. A target
-    /// renders <see cref="Screen"/> and sends back command ids; it decides nothing
-    /// about what the editor means or does.
+    /// Navigation, page contents, slot filling and search live here rather than in the screens.
+    /// What is drawn renders <see cref="Screen" /> and sends back command ids; it decides nothing
+    /// about what the editor means or does, and nothing it draws has to be worked out twice.
     ///
-    /// That split is the whole architecture. Anything a target has to re-derive is a
-    /// thing that will drift between targets, and the second implementation is where
-    /// you find out.
+    /// The wording is the one thing this does not own - see <see cref="Words.SequenceText" />, which
+    /// decides word order, capitals and every other thing that is a language's business rather than
+    /// automation's.
     /// </remarks>
     public sealed class ReactorEditor
     {
-        readonly IWorld _world;
+        readonly GridWorld _world;
         readonly Automation _program;
         readonly AutomationRunner _runner;
-        readonly ISequenceText _sequenceText;
-        readonly ITimeText _timeText;
         string _author = "";
         readonly List<EditorPage> _stack = new List<EditorPage>();
         readonly Dictionary<int, Action> _actions = new Dictionary<int, Action>();
@@ -43,31 +41,17 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
 
         bool _structureDirty;
 
-        public ReactorEditor(IWorld world, Automation program, AutomationRunner runner,
-            ISequenceText sequenceText, ITimeText timeText)
+        public ReactorEditor(GridWorld world, Automation program, AutomationRunner runner)
         {
             _world = world;
             _program = program;
             _runner = runner;
-            _sequenceText = sequenceText;
-            _timeText = timeText;
             _stack.Add(new SystemsPage(this));
             Rebuild();
         }
 
         /// <summary>What to show right now.</summary>
         public EditorScreen Screen => _screen;
-
-        /// <summary>How a sequence reads, supplied by whoever renders this.</summary>
-        /// <remarks>
-        /// No default, here or on <see cref="TimeText" />: a target that renders the editor is a target
-        /// that has decided how it reads, and core shipping a fallback English would be a default
-        /// nobody overrides.
-        /// </remarks>
-        public ISequenceText SequenceText => _sequenceText;
-
-        /// <summary>How a length of time reads.</summary>
-        public ITimeText TimeText => _timeText;
 
         /// <summary>
         /// Who the systems made here are by: the namespace a new system gets.
@@ -318,7 +302,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// read off here and what to say about one that is gone is the target's to phrase. So the
         /// target needs this to render one.
         /// </remarks>
-        public IWorld World => _world;
+        public GridWorld World => _world;
 
         internal Automation Program => _program;
 
@@ -792,8 +776,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         internal void OfferAnother(AutomationSystem system)
         {
             var page = new ChoicePage(this, "Add another");
-            page.EmptyText = "Not built yet. This would ask which of your " + _world.Noun.Many
-                + " this one uses, "
+            page.EmptyText = "Not built yet. This would ask which of your blocks this one uses, "
                 + "and everything it does would stay the same as the others.";
             Push(page);
         }
@@ -810,7 +793,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         {
             var page = new ChoicePage(this, "Load system");
             page.EmptyText = "Not built yet. A system somebody sent you would be set up here, "
-                + "asking which of your " + _world.Noun.Many + " fill each part of it.";
+                + "asking which of your blocks fill each part of it.";
             Push(page);
         }
 
@@ -869,35 +852,48 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             // pushed is dropped and the finished sequence lands directly on it.
             var origin = _stack.Count;
 
-            var when = trigger as WhenTrigger;
-            if (when != null)
+            var moment = trigger as MomentTrigger;
+            if (moment != null)
             {
                 // Nothing picked yet: the sequence is being made, so there is nothing to resolve.
                 Push(new PickPage(this, "When something happens", true,
-                    new List<long>(), when.EventId,
+                    new List<long>(), moment.EventId,
                     delegate(PickAnswer answer)
                     {
                         // Nothing to record: the sequence does not exist yet, so there is no
                         // history for it and nothing to take back to.
-                        when.Sources.Clear();
-                        for (var i = 0; i < answer.Targets.Count; i++)
-                        {
-                            var entity = _world.FindEntity(answer.Targets[i]);
-                            if (entity != null)
-                                when.Sources.Add(_program.Declare(_world, entity).Name);
-                        }
-
-                        when.EventId = answer.Chosen;
-                        when.RequiresAll = answer.All;
-                        FinishSequence(when, origin);
+                        FinishSequence(Starter(answer), origin);
                     },
-                    true, when.RequiresAll));
+                    true));
                 return;
             }
 
             var every = trigger as EveryTrigger;
             if (every != null)
                 Push(RatePage(every, delegate { FinishSequence(every, origin); }));
+        }
+
+        /// <summary>
+        /// What somebody has just described, as the trigger that makes it happen.
+        /// </summary>
+        /// <remarks>
+        /// The one place the two arrangements are told apart, and nobody is asked: picking a button
+        /// means the construct already announces it and Reactor wires a slot, picking a door means
+        /// Reactor watches for it. See <see cref="Vocabulary.Starter" />.
+        /// </remarks>
+        internal MomentTrigger Starter(PickAnswer answer)
+        {
+            MomentTrigger made = Vocabulary.Starter(
+                Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.All);
+
+            for (var i = 0; i < answer.Targets.Count; i++)
+            {
+                GridEntity entity = _world.FindEntity(answer.Targets[i]);
+                if (entity != null)
+                    made.Sources.Add(_program.Declare(_world, entity).Name);
+            }
+
+            return made;
         }
 
         /// <summary>The repeat rates, shared by the wizard and by editing a sequence.</summary>

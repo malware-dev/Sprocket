@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
@@ -21,7 +21,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// Appends every entity matching both filters to <paramref name="result"/>.
         /// An empty search or a null kind means "no opinion", not "match nothing".
         /// </summary>
-        public static void Filter(IList<IEntity> candidates, string search, string kindId, List<IEntity> result)
+        public static void Filter(IList<GridEntity> candidates, string search, string kindId, List<GridEntity> result)
         {
             for (var i = 0; i < candidates.Count; i++)
             {
@@ -36,7 +36,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
             return string.IsNullOrEmpty(search) || ContainsIgnoreCase(text, search);
         }
 
-        public static bool Matches(IEntity entity, string search, string kindId)
+        public static bool Matches(GridEntity entity, string search, string kindId)
         {
             if (entity == null)
                 return false;
@@ -55,7 +55,7 @@ namespace Reactor.Host.SpaceEngineers.Core.Editing
         /// The distinct kinds present among the candidates, so the kind filter offers
         /// only what is actually on this construct rather than a fixed catalogue.
         /// </summary>
-        public static void KindsPresent(IList<IEntity> candidates, List<EntityKind> result)
+        public static void KindsPresent(IList<GridEntity> candidates, List<EntityKind> result)
         {
             for (var i = 0; i < candidates.Count; i++)
             {

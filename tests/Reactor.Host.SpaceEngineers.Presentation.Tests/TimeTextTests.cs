@@ -1,4 +1,4 @@
-using Reactor.Host.SpaceEngineers.Presentation.Words;
+using Reactor.Host.SpaceEngineers.Words;
 using Xunit;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
@@ -14,18 +14,16 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class TimeTextTests
 {
-    readonly TimeText _time = new TimeText();
-
     [Fact]
     public void HowLongAgoReadsInTheUnitsAPersonWouldUse()
     {
-        Assert.Equal("", _time.Ago(-1));
-        Assert.Equal("just now", _time.Ago(0));
-        Assert.Equal("just now", _time.Ago(119));
-        Assert.Equal("3 seconds ago", _time.Ago(180));
-        Assert.Equal("a minute ago", _time.Ago(60 * 60));
-        Assert.Equal("5 minutes ago", _time.Ago(60 * 60 * 5));
-        Assert.Equal("over an hour ago", _time.Ago(60 * 60 * 60));
+        Assert.Equal("", TimeText.Ago(-1));
+        Assert.Equal("just now", TimeText.Ago(0));
+        Assert.Equal("just now", TimeText.Ago(119));
+        Assert.Equal("3 seconds ago", TimeText.Ago(180));
+        Assert.Equal("a minute ago", TimeText.Ago(60 * 60));
+        Assert.Equal("5 minutes ago", TimeText.Ago(60 * 60 * 5));
+        Assert.Equal("over an hour ago", TimeText.Ago(60 * 60 * 60));
     }
 
     /// <summary>
@@ -39,17 +37,17 @@ public class TimeTextTests
     [Fact]
     public void SayingItAgainAllocatesNothing()
     {
-        Assert.Same(_time.Ago(180), _time.Ago(180));
-        Assert.Same(_time.Ago(181), _time.Ago(200));
-        Assert.Same(_time.Ago(60 * 60 * 5), _time.Ago(60 * 60 * 5 + 59));
-        Assert.Same(_time.Ago(0), _time.Ago(60));
+        Assert.Same(TimeText.Ago(180), TimeText.Ago(180));
+        Assert.Same(TimeText.Ago(181), TimeText.Ago(200));
+        Assert.Same(TimeText.Ago(60 * 60 * 5), TimeText.Ago(60 * 60 * 5 + 59));
+        Assert.Same(TimeText.Ago(0), TimeText.Ago(60));
     }
 
     /// <summary>Choosing a wait is where the two vocabularies have to meet.</summary>
     [Fact]
     public void AWaitIsOfferedInBothUnitsAtOnce()
     {
-        Assert.Equal("5 seconds - 300 ticks", _time.WaitChoice(300));
-        Assert.Equal("a minute - 3600 ticks", _time.WaitChoice(3600));
+        Assert.Equal("5 seconds - 300 ticks", TimeText.WaitChoice(300));
+        Assert.Equal("a minute - 3600 ticks", TimeText.WaitChoice(3600));
     }
 }

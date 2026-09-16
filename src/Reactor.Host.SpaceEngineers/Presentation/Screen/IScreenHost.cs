@@ -1,4 +1,4 @@
-using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Screen
@@ -14,7 +14,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Screen
         /// about one that is no longer here is this target's to phrase. So a view that renders a
         /// sentence needs the world the sentence is about.
         /// </remarks>
-        IWorld World { get; }
+        GridWorld World { get; }
 
         /// <summary>Hangs <paramref name="content" /> over the screen, under <paramref name="anchor" />.</summary>
         void ShowOverlay(Element content, Element anchor);

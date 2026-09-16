@@ -1,4 +1,4 @@
-namespace Reactor.Host.SpaceEngineers.Core.World
+namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
     /// One way of saying which entity was meant.
