@@ -68,14 +68,5 @@ namespace Reactor.Host.SpaceEngineers.World
         /// the ship and the light stops meaning anything. Only a thing in motion is busy.
         /// </remarks>
         bool IsBusy(IMyTerminalBlock block);
-
-        /// <summary>
-        /// Starts listening to a block, for anything the game will tell us rather than make us look.
-        /// </summary>
-        /// <remarks>
-        /// Returns something to drop when the block goes, or null when there was nothing to hook. An event
-        /// has to become an edge on a reading before core can use it, so what a listener does is hold a
-        /// latch that the next tick reads and then clears.
-        /// </remarks>
     }
 }

@@ -10,19 +10,29 @@ of Reactor and would be wrong anywhere else.
 
 Two projects, and the first one is the mod:
 
-- **`src/Reactor.Host.SpaceEngineers`** is everything that runs in the game, in one tree.
-  `Core/` is Reactor itself - the model, the runtime, the editor's decisions. `Presentation/` is what
-  a person sees and touches. The rest, at the root, is the game: the world, the toolbars, the session,
-  the screen host. Files are globbed, so a new file is in the build by being in the folder.
-- **`src/Reactor.Host.SpaceEngineers.Sim`** is the harness. It compiles the mod's sources a second
-  time and drives them over blocks it makes up, through the game's own interfaces.
+- **`src/Reactor.Host.SpaceEngineers`** is everything that runs in the game, in one tree, one folder
+  per capability and each holding the whole of it: a sequence's model, the slots a screen is asked to
+  show for it and the views that draw them all sit in `Sequences/`. `Words/` is the only English in
+  the repository. `Layout/`, `Drawing/` and `Look/` know nothing of Reactor and sit beside the
+  features that use them. Files are globbed, so a new file is in the build by being in the folder.
+
+  **What a screen is asked to show carries structure and never words** - stated on
+  `Screen/EditorComponent` and proved by `PaperTarget` in the tests. That rule used to be a folder
+  boundary and is now a rule about types, which is the one thing flattening the tree gave up.
+- **`src/Reactor.Host.SpaceEngineers.Sim`** is the harness. It references the mod and drives it over
+  blocks it makes up, answering the game's own interfaces.
 
 The three test projects reference the mod, or the harness where they need a screen.
 
-**The harness compiles the mod's sources rather than referencing its assembly, and that is not a
-preference.** What the game declares in Sandbox.Game - the screen-space drawing, the screen host's
-base, mod storage, the toolbar conveniences - the harness declares itself, so a frame can be recorded
-rather than drawn. A declaration like that only wins inside the assembly that makes it.
+**Two things only the game can do, and each is an interface the mod asks through.**
+`Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers
+both, which is how a frame is recorded rather than drawn and how a toolbar slot is read without one.
+Everything else - mod storage, the grid's events, the block interfaces - the harness uses for real,
+through Castle proxies over the game's own types. See `Fakes/Pretend.cs`.
+
+**Shadowing a game type does not work across an assembly, so nothing tries.** A declaration that
+replaces one of Keen's only wins inside the assembly making it, and the harness is not that
+assembly. Anything the mod needs the harness to answer differently is an interface or it is nothing.
 
 **A `.debug.cs` file is compiled locally, left out of what is packed and ignored by the analysers.**
 That is the only way the mod grants its internals to the tests: the whitelist bans
@@ -96,7 +106,7 @@ afterwards as the UI regression tests.
 
 ## Values that are transcriptions, not choices
 
-The palette in `Presentation/Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
+The palette in `Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
 taken from the game's own textures and constants. **They are never adjusted by eye and never
 "improved".** Each carries a citation saying where it came from; that citation is the reason it may
 not be touched, and it is why the values need no further comment.
@@ -113,15 +123,6 @@ on every element on every tick.
 
 A cleanup that touches a property setter checks which of the three it is. Getting this wrong breaks
 scrolling in a way every test still passes, which has happened.
-
-## Removing the Avalonia host
-
-`Reactor.Host.Avalonia` is the prototype the screens were designed against and is being deleted. Its
-loss must not take the tests with it, so it needs a replacement paper target in the test project
-first.
-
-**This does not mean removing Avalonia from the simulator.** The simulator uses Avalonia to rasterise
-and to measure text, and it keeps it. Only the prototype host goes.
 
 ## The language's spec is `docs/Language.md`
 

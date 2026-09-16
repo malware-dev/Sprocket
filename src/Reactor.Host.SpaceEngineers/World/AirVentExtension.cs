@@ -20,7 +20,7 @@ namespace Reactor.Host.SpaceEngineers.World
         public const string Air = "air";
         public const string Empty = "empty";
         public const string Level = "level";
-        public const string Sealed_ = "sealed";
+        public const string Sealed = "sealed";
 
         public bool Claims(IMyTerminalBlock block)
         {
@@ -38,13 +38,13 @@ namespace Reactor.Host.SpaceEngineers.World
             kind.WithProperty(Air, "has air")
                 .WithProperty(Empty, "is empty")
                 .WithProperty(Level, ValueKind.Real, "oxygen level")
-                .WithProperty(Sealed_, "airtight")
+                .WithProperty(Sealed, "airtight")
                 .WithEvent("filled", Air, Edge.Rising, "finishes filling")
                 .WithEvent("emptied", Empty, Edge.Rising, "finishes emptying")
                 .WithState("has-air", Air, true, "has air")
                 .WithState("is-empty", Empty, true, "is empty")
-                .WithState("is-sealed", Sealed_, true, "is airtight")
-                .WithState("is-leaking", Sealed_, false, "is not airtight")
+                .WithState("is-sealed", Sealed, true, "is airtight")
+                .WithState("is-leaking", Sealed, false, "is not airtight")
                 .WithAction("pressurize", "pressurize", "has-air")
                 .WithAction("depressurize", "depressurize", "is-empty");
         }
@@ -68,7 +68,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 case Level:
                     value = EntityValue.Of(vent.GetOxygenLevel());
                     return true;
-                case Sealed_:
+                case Sealed:
                     value = EntityValue.Of(vent.CanPressurize);
                     return true;
             }

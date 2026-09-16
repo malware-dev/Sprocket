@@ -1,11 +1,11 @@
 <Project>
     <!--
-        The game's own assemblies, for every project that compiles core or runs it outside the game.
+        The game's own assemblies, for every project that runs the mod outside the game.
 
-        Core is the mod's code first, and uses what the game already gives a mod - TextPtr and
-        StringSegment for reading scripts, to begin with - rather than rebuilding it. So anything that runs
-        core outside the game needs the real assemblies: core itself, the tests, and the simulator. The mod
-        project references the game on its own and does not import this.
+        The mod uses what the game already gives it - TextPtr and StringSegment for reading scripts, to
+        begin with - rather than rebuilding any of it. So anything that runs the mod outside the game
+        needs the real assemblies: the tests and the harness. The mod project references the game on its
+        own and does not import this.
 
         The package finds the game from an mdk.local.ini beside each project (gitignored, one line:
         binarypath=...), and copies the assemblies into bin because nothing here runs inside the game.
@@ -28,11 +28,10 @@
         <b>Sandbox.Graphics and the render assemblies stay out</b>, because nothing outside the game has
         any business drawing.
 
-        Sandbox.Game is in, now that the screens draw through an interface rather than through its
+        Sandbox.Game is in, because the screens draw through an interface rather than through its
         statics: where a call lands is decided by which IScreenSpace was handed over, not by which
-        assembly happens to be in scope. A few of its types are still declared by the harness itself -
-        see Fakes - and a declaration in the assembly being compiled wins over one from a reference,
-        which is what keeps those working.
+        assembly happens to be in scope. The same for toolbars, through ISlots. Those two are the
+        whole of what the harness has to answer for; everything else it uses for real.
 
         This set grows by name, one assembly at a time, as the code starts using something from it.
     -->

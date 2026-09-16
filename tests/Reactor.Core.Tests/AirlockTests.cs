@@ -1,6 +1,6 @@
-using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Runtime;
 using Reactor.Host.SpaceEngineers.World;
-using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Xunit;
 using Reactor.Sim.Machine;
 using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;

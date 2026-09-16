@@ -150,8 +150,7 @@ namespace Reactor.Sim
                 || bare == "type" || bare == "enter" || bare == "escape" || bare == "clear")
                 return true;
 
-            float ignored;
-            return float.TryParse(bare, NumberStyles.Float, CultureInfo.InvariantCulture, out ignored);
+            return float.TryParse(bare, NumberStyles.Float, CultureInfo.InvariantCulture, out _);
         }
     }
 }

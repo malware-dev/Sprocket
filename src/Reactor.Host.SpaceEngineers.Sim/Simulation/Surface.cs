@@ -13,9 +13,9 @@ using Matrix = System.Windows.Media.Matrix;
 using Point = System.Windows.Point;
 using Rect = System.Windows.Rect;
 using Ink = System.Windows.Media.Color;
-using Reactor.Host.SpaceEngineers.Presentation.Graphics;
-using Reactor.Host.SpaceEngineers.Presentation.Look;
-using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Drawing;
+using Reactor.Host.SpaceEngineers.Look;
+using Reactor.Host.SpaceEngineers.Layout;
 
 namespace Reactor.Sim.Simulation
 {

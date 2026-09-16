@@ -1,4 +1,6 @@
-using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Lists;
+using Reactor.Host.SpaceEngineers.Picking;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Xunit;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;

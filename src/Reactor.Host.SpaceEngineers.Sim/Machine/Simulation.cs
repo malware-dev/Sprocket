@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Core.Editing;
-using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Editing;
+using Reactor.Host.SpaceEngineers.Runtime;
 using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Sim.Machine;

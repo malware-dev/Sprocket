@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
-using Reactor.Host.SpaceEngineers.Core.Runtime;
-using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Runtime;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Words

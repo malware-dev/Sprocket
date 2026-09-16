@@ -1,7 +1,8 @@
-using Reactor.Host.SpaceEngineers.Core.Editing;
-using Reactor.Host.SpaceEngineers.Core.Runtime;
-using Reactor.Host.SpaceEngineers.Core.Sequences;
-using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Editing;
+using Reactor.Host.SpaceEngineers.Runtime;
+using Reactor.Host.SpaceEngineers.Sequences;
+using Reactor.Host.SpaceEngineers.Lists;
+using Reactor.Host.SpaceEngineers.Picking;
 using Reactor.Host.SpaceEngineers.World;
 using Xunit;
 

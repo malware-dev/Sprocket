@@ -1,5 +1,8 @@
 using System.Text;
-using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Lists;
+using Reactor.Host.SpaceEngineers.Picking;
+using Reactor.Host.SpaceEngineers.Screen;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Tests;

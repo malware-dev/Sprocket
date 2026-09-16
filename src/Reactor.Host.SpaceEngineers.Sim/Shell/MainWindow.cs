@@ -5,12 +5,12 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Reactor.Host.SpaceEngineers.Presentation.Graphics;
+using Reactor.Host.SpaceEngineers.Drawing;
 using Reactor.Sim.Simulation;
 using VRageMath;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;
-using TextBox = Reactor.Host.SpaceEngineers.Presentation.Ui.TextBox;
+using TextBox = Reactor.Host.SpaceEngineers.Layout.TextBox;
 
 namespace Reactor.Sim.Shell
 {

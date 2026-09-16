@@ -1,11 +1,10 @@
-using Reactor.Host.SpaceEngineers.Core.Editing;
-using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Editing;
+using Reactor.Host.SpaceEngineers.Screen;
 using Sandbox.ModAPI;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
-using Reactor.Host.SpaceEngineers.Presentation.Graphics;
-using Reactor.Host.SpaceEngineers.Presentation.Ui;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
+using Reactor.Host.SpaceEngineers.Drawing;
+using Reactor.Host.SpaceEngineers.Layout;
 using Reactor.Host.SpaceEngineers.World;
 using Reactor.Host.SpaceEngineers.Input;
 

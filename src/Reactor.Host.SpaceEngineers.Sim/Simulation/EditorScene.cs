@@ -1,12 +1,11 @@
 using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Editing;
 using Ship = Reactor.Sim.Machine.Simulation;
 using VRageMath;
-using Reactor.Host.SpaceEngineers.Presentation.Graphics;
-using Reactor.Host.SpaceEngineers.Presentation.Screen;
-using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Drawing;
+using Reactor.Host.SpaceEngineers.Screen;
+using Reactor.Host.SpaceEngineers.Layout;
 using Reactor.Sim.Machine;
-using Reactor.Host.SpaceEngineers.Core.Ui;
 
 namespace Reactor.Sim.Simulation
 {

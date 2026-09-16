@@ -4,28 +4,43 @@ The mod: all of it, in one project. Space Engineers compiles a mod from loose `.
 loading an assembly, so this project's sources *are* the mod, and the packer copies them into a folder
 the game will load.
 
-Three layers, three places:
+One folder per capability, each holding the whole of it - what a screen is asked to show and how it
+is drawn together, because a change to how a sentence works should be a change in one place:
 
 | | |
 |---|---|
-| `Core/` | Reactor itself: the model, the runtime, the language, the editor's decisions |
-| `Presentation/` | what a person sees and touches: layout, drawing, controls, and every word on screen |
-| the rest | the game. `World/` turns blocks into what Reactor works with, `Terminal/` is the control that opens the editor and the screen it opens, `Input/` turns the game's keyboard into edits, `ReactorSession` and `ReactorBlock` are the game's lifetime, `Content/` is materials, fonts and the mod's metadata |
+| `Sequences/` | what a sequence is, and the sentence somebody reads and presses |
+| `Editing/` | moving through the editor: pages, commands, undo, what may go in a slot |
+| `Picking/` | choosing blocks and what happens to them |
+| `Lists/` | rows of things to choose or watch |
+| `Runtime/` | running a sequence, and waiting for what it started |
+| `Storage/` | the script: the language, read and written |
+| `World/` | the game's blocks, what they can do, and their toolbars |
+| `Words/` | every word on screen, and the only English in the repository |
+| `Screen/` | the editor's surface, and the screen that draws it |
+| `Layout/` | elements, containers, text - laying out, knowing nothing of Reactor |
+| `Drawing/` | what everything draws through, and the game's own backend |
+| `Look/` | palette, type scale, spacing, sizes, icons |
+| `Controls/` | the pieces a screen is built from |
+| `Input/` | pointers, held keys, copied text, and the game's keyboard as edits |
+| `Terminal/` | the control that opens the editor, and the screen it opens |
+| `Content/` | materials, fonts, and the mod's own metadata |
 
-`Core/` and `Presentation/` each have a README saying what belongs in them.
+`ReactorSession` and `ReactorBlock`, at the root, are the game's lifetime.
 
-## The layout is not the end state
-
-The three folders are there because the namespaces still differ and two of them own a `World` and a
-`Ui`. What everything is called is the rename sweep's business, and the internal seams between them -
-`IWorld`, `IEntity`, the wrapper around `IMyTerminalBlock` - are on their way out: an abstraction over
-*the game's* API earns its place, a pretence that this code could run on another game does not.
+**The one rule the folders no longer enforce**: what a screen is asked to show carries structure and
+never words. It is stated on `Screen/EditorComponent`, which is where it binds, and proved by
+`PaperTarget` in the tests, which can write a screen down without drawing one.
 
 ## What proves it
 
-The harness, `../Reactor.Host.SpaceEngineers.Sim`, compiles these sources and drives them over blocks
-it makes up, through the game's own interfaces - so the world layer, the toolbars and mod storage are
-exercised outside the game, and the reference frames in `tests/Reference/` see them.
+The harness, `../Reactor.Host.SpaceEngineers.Sim`, references this project and drives the mod over
+blocks it makes up, through the game's own interfaces - so the world layer, the toolbars and mod
+storage are exercised outside the game, and the reference frames in `tests/Reference/` see them.
+
+Two things only the game can do, so each is an interface here and the harness answers it:
+`Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars. Everything else the
+harness uses for real.
 
 What the harness cannot answer is whether Keen's API still means what it meant. That is answered by
 loading the game, and by nothing else.

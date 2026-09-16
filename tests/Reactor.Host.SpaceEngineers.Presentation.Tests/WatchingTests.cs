@@ -1,6 +1,6 @@
-using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Editing;
 using Xunit;
-using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Layout;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 

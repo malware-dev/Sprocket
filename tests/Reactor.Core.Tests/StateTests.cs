@@ -1,6 +1,6 @@
-using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Reactor.Host.SpaceEngineers.World;
-using Reactor.Host.SpaceEngineers.Core.Storage;
+using Reactor.Host.SpaceEngineers.Storage;
 using Xunit;
 
 namespace Reactor.Tests;

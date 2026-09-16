@@ -71,10 +71,9 @@ surviving a paste rests entirely on it, and nothing has tested it.
 
 **Must be answered before release. It is a correctness hole, not a question of polish.**
 
-`IWorld` promises that `Entities` is this construct only - the grid the Reactor sits on plus
-whatever is mechanically connected to it by rotors, pistons and hinges. `GridWorld` keeps that
-promise by marking itself stale on the grids' own `OnBlockAdded` and `OnBlockRemoved`, and
-rebuilding when somebody looks.
+`GridWorld.Entities` is this construct only - the grid the Reactor sits on plus whatever is
+mechanically connected to it by rotors, pistons and hinges. It keeps that promise by marking itself
+stale on the grids' own `OnBlockAdded` and `OnBlockRemoved`, and rebuilding when somebody looks.
 
 **That signal does not cover every way membership changes**, and at least three ways are ordinary
 play rather than edge cases:
@@ -86,8 +85,8 @@ play rather than edge cases:
 - **Two grids merging**, which is the same problem arriving rather than leaving.
 
 Until this is answered, a sequence can go on cycling a door that floated away five minutes ago, and
-the editor will list it as present. It is also what `IWorld.Revision` rests on, so a reference now
-resolves against a construct that may quietly be wrong.
+the editor will list it as present. It is also what `GridWorld.Revision` rests on, so a reference
+now resolves against a construct that may quietly be wrong.
 
 **This is not an unknown; it is deferred work.** The game does say enough - `OnGridSplit`,
 `OnGridMerge` and the mechanical connection blocks' attach and detach between them cover it. It sits

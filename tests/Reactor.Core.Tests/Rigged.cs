@@ -1,4 +1,4 @@
-using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Machine;
 

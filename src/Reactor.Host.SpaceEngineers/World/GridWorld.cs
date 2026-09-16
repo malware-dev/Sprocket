@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 

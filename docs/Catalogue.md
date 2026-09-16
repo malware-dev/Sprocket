@@ -331,7 +331,7 @@ deciding what a split *means* for a system whose parts are now on two grids.
 
 **Construct scope is a predicate the game supplies.**
 `IMyTerminalBlock.IsSameConstructAs` is documented as "mechanically connected with rotors
-or pistons, but not connectors", which is `IWorld`'s scope rule nearly word for word.
+or pistons, but not connectors", which is `GridWorld.Entities`' scope rule nearly word for word.
 
 ## Where the extensions go first
 

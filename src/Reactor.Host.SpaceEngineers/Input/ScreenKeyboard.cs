@@ -6,8 +6,7 @@ using VRage.Input;
 // one is what MyAPIGateway.Input hands back. Saying which removes an ambiguity that otherwise resolves to
 // the wrong one and fails only at the whitelist gate.
 using IMyInput = VRage.ModAPI.IMyInput;
-using Reactor.Host.SpaceEngineers.Presentation.Input;
-using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Layout;
 
 namespace Reactor.Host.SpaceEngineers.Input
 {

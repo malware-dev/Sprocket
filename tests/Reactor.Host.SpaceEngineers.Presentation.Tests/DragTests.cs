@@ -1,6 +1,6 @@
 using System.Globalization;
-using Reactor.Host.SpaceEngineers.Core.Editing;
-using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Editing;
+using Reactor.Host.SpaceEngineers.Sequences;
 using VRageMath;
 using Xunit;
 

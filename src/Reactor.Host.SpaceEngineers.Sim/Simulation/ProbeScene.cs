@@ -1,9 +1,9 @@
 using VRage.Game;
 using VRage.Utils;
 using VRageMath;
-using Reactor.Host.SpaceEngineers.Presentation.Graphics;
-using Reactor.Host.SpaceEngineers.Presentation.Input;
-using Reactor.Host.SpaceEngineers.Presentation.Ui;
+using Reactor.Host.SpaceEngineers.Drawing;
+using Reactor.Host.SpaceEngineers.Input;
+using Reactor.Host.SpaceEngineers.Layout;
 
 namespace Reactor.Sim.Simulation
 {

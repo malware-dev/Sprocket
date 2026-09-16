@@ -1,5 +1,5 @@
 using System.Text;
-using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Xunit;
 
 namespace Reactor.Tests;

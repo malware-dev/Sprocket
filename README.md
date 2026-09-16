@@ -95,27 +95,21 @@ multiples, so a self-counted clock would drift with server load.
 build/     Where the game's own assemblies are found
 src/
   Reactor.Host.SpaceEngineers        The mod. All of it, in one project.
-    Core/                            Reactor itself. No pixels.
-      Sequences/                     The model: systems, sequences, steps, triggers
-      Runtime/                       Execution, waiting for what was started
-      Storage/                       The script: the language, read and written
-      World/                         What the game has to supply: blocks, kinds, signals
-      Editing/                       The editor itself - navigation, pages, decisions
-      Ui/                            What a screen is asked to show. Start here; it is small.
-    Presentation/                    Reactor as a person sees it
-      Graphics/                      What the screens draw through, and the game's backend
-      Input/                         Pointers, held keys, copied text
-      Ui/                            Elements, containers, text - layout knowing nothing of Reactor
-      Look/                          Palette, type scale, spacing, sizes, icons
-      Controls/                      The pieces a screen is built from
-      Screen/                        The screen itself, and its furniture
-      Lists/                         Rows of things to choose or watch
-      Picking/                       Choosing blocks and what happens to them
-      Sequences/                     Drawing a sentence
-      Words/                         Every word on screen, and the only English in the repository
-    World/                           The game's blocks, toolbars and mod storage
+    Sequences/                       What a sequence is, and the sentence somebody reads and presses
+    Editing/                         Navigation, pages, decisions, undo, what may go in a slot
+    Picking/                         Choosing blocks and what happens to them
+    Lists/                           Rows of things to choose or watch
+    Runtime/                         Execution, waiting for what was started
+    Storage/                         The script: the language, read and written
+    World/                           The game's blocks, what they can do, and their toolbars
+    Words/                           Every word on screen, and the only English in the repository
+    Screen/                          The editor's surface, and the screen that draws it
+    Layout/                          Elements, containers, text - laying out, knowing nothing of Reactor
+    Drawing/                         What the screens draw through, and the game's backend
+    Look/                            Palette, type scale, spacing, sizes, icons
+    Controls/                        The pieces a screen is built from
+    Input/                           Pointers, held keys, copied text, and the game's keyboard
     Terminal/                        The control that opens the editor, and the screen it opens
-    Input/                           The game's keyboard, as edits to a box
     Content/                         Materials, fonts, and the mod's own metadata
   Reactor.Host.SpaceEngineers.Sim    The harness: the mod, run without the game
     Machine/                         The rig it runs on, as blocks the game would recognise
@@ -129,10 +123,15 @@ tests/
   Reference/                         The screens held still, one frame per state, as committed text
 ```
 
-`Core/` holds the model, the runtime **and the whole editor**: what a sequence says, what can go in a
-slot, and where pressing something leads are all decided there, and `Presentation/` decides how that
-looks. The folders are three because the namespaces still differ and two of them own a `World` and a
-`Ui`; what everything is called is a rename sweep's business.
+One folder per capability, each holding the whole of it. A sequence's model, the slots a screen is
+asked to show for it and the views that draw them all sit in `Sequences/`, so a change to how a
+sentence works is a change in one place. `Editing/` decides where pressing something leads, `Words/`
+decides what any of it says, and the folders that know nothing of Reactor - `Layout/`, `Drawing/`,
+`Look/` - sit beside the features that use them rather than under a layer of their own.
+
+The one thing the folders no longer keep apart is words: what a screen is asked to show carries
+structure and never English, which is stated on `Screen/EditorComponent` and proved by the paper
+target in the tests.
 
 ## The Space Engineers constraint
 
@@ -141,9 +140,11 @@ whitelist. So the mod project's sources *are* the mod, and the packer lays them 
 for the game to compile. There is no copy step that can quietly fall behind, and nothing that can be
 in the build without being in the folder.
 
-The harness compiles those same sources a second time and drives them over blocks it makes up, so
-what is seen there is what ships rather than a preview of it - down to the sprites, because it runs
-the mod's own screen backend against a substitute screen-space API rather than drawing its own way.
+The harness references that project and drives the mod over blocks it makes up, so what is seen
+there is what ships rather than a preview of it - down to the sprites, because it runs the mod's own
+screen code against its own screen space rather than drawing its own way. Drawing and toolbars are
+the two things the game alone can do, so each is an interface the mod asks through and the harness
+answers: `IScreenSpace` and `ISlots`.
 
 The mod also ships **content**: a symbol font for the things a screen needs and Space
 Engineers has no artwork for - undo, redo, delete. It is drawn rather than borrowed, and it

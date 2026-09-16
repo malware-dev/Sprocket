@@ -1,5 +1,5 @@
-using Reactor.Host.SpaceEngineers.Core.Runtime;
-using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Runtime;
+using Reactor.Host.SpaceEngineers.Sequences;
 using Reactor.Host.SpaceEngineers.World;
 using Xunit;
 
