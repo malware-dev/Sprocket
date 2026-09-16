@@ -1,6 +1,6 @@
 ---
 name: reactor-standards
-description: How the Reactor repository is built, constrained and verified - shared mixin projects and their .projitems, the Space Engineers compiler ceiling and whitelist, the simulator as the behavioural guard, and the values that are transcriptions rather than choices. Use alongside the general csharp-standards skill whenever writing, reviewing or cleaning up code in this repository.
+description: How the Reactor repository is built, constrained and verified - one mod project and the harness that drives it, the Space Engineers compiler ceiling and whitelist, the simulator as the behavioural guard, and the values that are transcriptions rather than choices. Use alongside the general csharp-standards skill whenever writing, reviewing or cleaning up code in this repository.
 ---
 
 The general rules live in the user-level **csharp-standards** skill. This one holds only what is true
@@ -8,31 +8,45 @@ of Reactor and would be wrong anywhere else.
 
 ## How this repository is put together
 
-Four **shared projects** hold the code that has to run in the game: `Phosphor.Mixin`,
-`Reactor.Core.Mixin`, `Reactor.Screens.Mixin`, `Reactor.Machine.Mixin`. They are `.shproj`/`.projitems`
-pairs, not assemblies, because Space Engineers does not load assemblies - it compiles a mod's loose
-`.cs` files in-game with its own bundled Roslyn.
+Two projects, and the first one is the mod:
 
-**Every file in a shared project is listed by hand in its `.projitems`.** Adding a file without adding
-its `<Compile Include>` line leaves it out of the build; removing a line while leaving the file drops
-working code silently. Any pass that creates, moves, renames or deletes a file in a mixin edits the
-`.projitems` in the same breath, and the entry's path has to match the file's new folder.
+- **`src/Reactor.Host.SpaceEngineers`** is everything that runs in the game, in one tree.
+  `Core/` is Reactor itself - the model, the runtime, the editor's decisions. `Presentation/` is what
+  a person sees and touches. The rest, at the root, is the game: the world, the toolbars, the session,
+  the screen host. Files are globbed, so a new file is in the build by being in the folder.
+- **`src/Reactor.Host.SpaceEngineers.Sim`** is the harness. It compiles the mod's sources a second
+  time and drives them over blocks it makes up, through the game's own interfaces.
+
+The three test projects reference the mod, or the harness where they need a screen.
+
+**The harness compiles the mod's sources rather than referencing its assembly, and that is not a
+preference.** What the game declares in Sandbox.Game - the screen-space drawing, the screen host's
+base, mod storage, the toolbar conveniences - the harness declares itself, so a frame can be recorded
+rather than drawn. A declaration like that only wins inside the assembly that makes it.
+
+**A `.debug.cs` file is compiled locally, left out of what is packed and ignored by the analysers.**
+That is the only way the mod grants its internals to the tests: the whitelist bans
+`InternalsVisibleTo` outright, so a mod that shipped it would refuse to load.
 
 ## The compiler ceiling
 
-`build/Reactor.SharedSources.props` pins mixin code to **C# 6**, no nullable reference types, no
-implicit usings. `build/BannedSymbols.txt` bans what the game's whitelist rejects: reflection,
-`System.Type`, `System.IO`, threading, `Environment`, `Activator`. Both files explain themselves and
-are the authority; do not restate their contents elsewhere.
+The mod's own project pins it to **C# 6**, no nullable reference types, no implicit usings, and
+says why.
 
-The practical consequence for a cleanup: **a refactor that would be natural in modern C# is often
-illegal here.** No expression-bodied members beyond what C# 6 allows, no pattern matching, no tuples,
+**MDK's own analysers are the authority on what the game will load.** They fail the build with
+`MDK01`, naming the member, and they know the real mod whitelist. There was a hand-written list
+beside them for a while, stricter and guessed at, enforced on core alone by a project that has since
+been merged away - it is gone, and it was wrong: it rejected `GetType().Name`, which a mod may
+use.
+
+The harness and the tests are `net48` - the same framework MDK spells `netframework48` - and are not
+held to the ceiling: they are never compiled by the game.
+
+The practical consequence, for the mod's own tree: **a refactor that would be natural in modern C#
+is often illegal here.** No expression-bodied members beyond what C# 6 allows, no pattern matching, no tuples,
 no `record`, no string interpolation into `FormattableString`, no `nameof` beyond C# 6's, no LINQ
 where it allocates in a per-frame path. When in doubt the build says so, which is why the build runs
 after every file rather than at the end.
-
-`Reactor.Core` is an ordinary assembly consumed by the tests. It is not the same thing as
-`Reactor.Core.Mixin` and the two are not interchangeable.
 
 ## Building and running
 
@@ -82,7 +96,7 @@ afterwards as the UI regression tests.
 
 ## Values that are transcriptions, not choices
 
-The palette in `Reactor.Screens.Mixin` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
+The palette in `Presentation/Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
 taken from the game's own textures and constants. **They are never adjusted by eye and never
 "improved".** Each carries a citation saying where it came from; that citation is the reason it may
 not be touched, and it is why the values need no further comment.

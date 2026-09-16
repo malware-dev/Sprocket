@@ -54,10 +54,6 @@
         <PackageReference Include="DirectXTexNet" Version="1.0.1" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Reactor.Core\Reactor.Core.csproj" />
-    </ItemGroup>
-
     <!--
         The mod's own code, compiled here as well as into the mod, on the same framework the mod builds
         against.
@@ -75,12 +71,9 @@
     -->
     <ItemGroup>
         <Compile Include="..\Reactor.Host.SpaceEngineers\**\*.cs"
-                 Exclude="..\Reactor.Host.SpaceEngineers\obj\**\*.cs;..\Reactor.Host.SpaceEngineers\bin\**\*.cs">
+                 Exclude="..\Reactor.Host.SpaceEngineers\obj\**\*.cs;..\Reactor.Host.SpaceEngineers\bin\**\*.cs;..\Reactor.Host.SpaceEngineers\**\*.debug.cs">
             <Link>Mod\%(RecursiveDir)%(Filename)%(Extension)</Link>
         </Compile>
     </ItemGroup>
 
-    <!-- This target's editor. Shared rather than owned, because these are the files the mod will ship:
-         what is seen in this window is what a player sees, not a preview of it. -->
-    <Import Project="..\Reactor.Host.SpaceEngineers.Presentation.Mixin\Reactor.Host.SpaceEngineers.Presentation.Mixin.projitems" Label="Shared" />
 </Project>

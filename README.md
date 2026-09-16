@@ -92,79 +92,77 @@ multiples, so a self-counted clock would drift with server load.
 ## Layout
 
 ```
-build/     Shared build settings and the Space Engineers whitelist gate
+build/     Where the game's own assemblies are found
 src/
-  Reactor.Core.Mixin      Everything that matters. No pixels, no platform.
-    Sequences/            The model: sequences, steps, gates, triggers
-    Runtime/              Execution, completion waiting, guards
-    World/                What a host must supply: entities, kinds, signals
-    Editing/              The editor itself - navigation, pages, wording
-    Ui/                   The contract a target renders. Start here; it is small.
-  Reactor.Core            The same sources as an assembly, for the hosts that load one
-  Reactor.Host.SpaceEngineers.Presentation.Mixin  Reactor as a person sees it. Knows the game's screen, not its world.
-    Graphics/             The seam a target draws through, and the screen's backend
-    Input/                Pointers, held keys, copied text
-    Ui/                   Elements, containers, text - the layout, knowing nothing of Reactor
-    Look/                 Palette, type scale, spacing, sizes, icons
-    Controls/             The pieces a screen is built from
-    Screen/               The screen itself, and its furniture
-    Lists/                Rows of things to choose or watch
-    Picking/              Choosing blocks and what happens to them
-    Sequences/            Drawing a sentence, and the only English in the repository
-  Reactor.Host.SpaceEngineers      The mod: the game's half - blocks, session, screen, input
-  Reactor.Host.SpaceEngineers.Sim  Those screens, run without the game
-    Machine/              The made-up machine they run against
-    Fakes/                Substitutes for the game types the screens draw through
-    Content/              The game's own fonts and block art, read off disk
-    Simulation/           A frame with nobody watching, and the scripts that drive one
+  Reactor.Host.SpaceEngineers        The mod. All of it, in one project.
+    Core/                            Reactor itself. No pixels.
+      Sequences/                     The model: systems, sequences, steps, triggers
+      Runtime/                       Execution, waiting for what was started
+      Storage/                       The script: the language, read and written
+      World/                         What the game has to supply: blocks, kinds, signals
+      Editing/                       The editor itself - navigation, pages, decisions
+      Ui/                            What a screen is asked to show. Start here; it is small.
+    Presentation/                    Reactor as a person sees it
+      Graphics/                      What the screens draw through, and the game's backend
+      Input/                         Pointers, held keys, copied text
+      Ui/                            Elements, containers, text - layout knowing nothing of Reactor
+      Look/                          Palette, type scale, spacing, sizes, icons
+      Controls/                      The pieces a screen is built from
+      Screen/                        The screen itself, and its furniture
+      Lists/                         Rows of things to choose or watch
+      Picking/                       Choosing blocks and what happens to them
+      Sequences/                     Drawing a sentence
+      Words/                         Every word on screen, and the only English in the repository
+    World/                           The game's blocks, toolbars and mod storage
+    Terminal/                        The control that opens the editor, and the screen it opens
+    Input/                           The game's keyboard, as edits to a box
+    Content/                         Materials, fonts, and the mod's own metadata
+  Reactor.Host.SpaceEngineers.Sim    The harness: the mod, run without the game
+    Machine/                         The rig it runs on, as blocks the game would recognise
+    Fakes/                           What the game declares and the harness has to answer for
+    Content/                         The game's own fonts and block art, read off disk
+    Simulation/                       A frame with nobody watching, and the scripts that drive one
 tests/
-  Reactor.Core.Tests      The model, the runtime, and the editor
-  Reactor.Host.SpaceEngineers.Presentation.Tests   The screens, driven and read through the simulator
-  Reactor.Host.SpaceEngineers.Tests   What the mod says it does about each conformance point
-  Reference/              The screens held still, one frame per state, as committed text
+  Reactor.Core.Tests                 The model, the runtime, and the editor
+  Reactor.Host.SpaceEngineers.Presentation.Tests   The screens, driven and read through the harness
+  Reactor.Host.SpaceEngineers.Tests  What the mod says it does about each conformance point
+  Reference/                         The screens held still, one frame per state, as committed text
 ```
 
-The split is the point: Core holds the model, the runtime **and the whole editor**. A
-target implements a renderer per component and nothing else - it decides nothing about
-what a sequence says, what can go in a slot, or where pressing something leads.
+`Core/` holds the model, the runtime **and the whole editor**: what a sequence says, what can go in a
+slot, and where pressing something leads are all decided there, and `Presentation/` decides how that
+looks. The folders are three because the namespaces still differ and two of them own a `World` and a
+`Ui`; what everything is called is a rename sweep's business.
 
 ## The Space Engineers constraint
 
-SE does not load assemblies - it compiles a mod's `.cs` files in-game with its own
-Roslyn, under a whitelist. The core is therefore consumed **two ways**: as a normal
-assembly reference here, and as loose source files there.
+SE does not load assemblies - it compiles a mod's `.cs` files in-game with its own Roslyn, under a
+whitelist. So the mod project's sources *are* the mod, and the packer lays them out as loose files
+for the game to compile. There is no copy step that can quietly fall behind, and nothing that can be
+in the build without being in the folder.
 
-That is why the sources live in `Reactor.Core.Mixin`, an MDK2 mixin - a shared project
-rather than a library. `Reactor.Core` imports it to produce the assembly the tests and
-the simulator reference; `Reactor.Host.SpaceEngineers` imports the same sources so
-the packer lays them out as loose files for SE to compile. One set of files, and no
-copy step that can quietly fall behind.
-
-The same reasoning made one more: `Reactor.Host.SpaceEngineers.Presentation.Mixin`, holding the layout, the drawing
-and the views the mod ships. The simulator imports it, so what is seen there is what ships
-rather than a preview of it - down to the sprites, because the simulator runs the mod's own
-screen backend against a substitute screen-space API rather than drawing its own way.
+The harness compiles those same sources a second time and drives them over blocks it makes up, so
+what is seen there is what ships rather than a preview of it - down to the sprites, because it runs
+the mod's own screen backend against a substitute screen-space API rather than drawing its own way.
 
 The mod also ships **content**: a symbol font for the things a screen needs and Space
 Engineers has no artwork for - undo, redo, delete. It is drawn rather than borrowed, and it
 is built by `art/symbols` rather than committed by hand. It is meant to become a mod of its
 own that any display mod can depend on, so nothing about it is named for Reactor.
 
-That constraint fails silently, so it is enforced by the compiler instead:
+That constraint fails silently, so it is enforced at build time instead:
 
-- `netstandard2.0` shrinks the API surface to roughly .NET Framework shape.
-- `LangVersion 6` pins the language to SE's assumed ceiling.
-- `build/BannedSymbols.txt` blocks what survives both: reflection, IO, threading,
-  LINQ, wall-clock time. A banned call is a build error, not a warning.
+- `LangVersion 6` pins the language to SE's assumed ceiling. It is a one-line change in the
+  mod's own project once the real ceiling has been verified in-game.
+- MDK's analysers fail the build on anything the game's whitelist rejects, naming the member.
 
-`LangVersion` is a one-line change in `build/Reactor.SharedSources.props` once SE's
-real ceiling has been verified in-game. **Host code is exempt** - the simulator and the
-tests use whatever C# they like.
+**The harness and the tests are exempt** - they are never compiled by the game, and they use
+whatever C# they like.
 
 ## Running it
 
 ```
-dotnet test                                          # 94 tests
+dotnet test                                          # 236 tests
 dotnet build src/Reactor.Host.SpaceEngineers         # builds AND deploys the mod
 dotnet run --project src/Reactor.Host.SpaceEngineers.Sim   # the screens, without the game
 ```
@@ -180,10 +178,9 @@ finding.
 
 ### The simulator
 
-`Reactor.Host.SpaceEngineers.Sim` runs the mod's own screens without launching the game.
-It compiles the same `Reactor.Host.SpaceEngineers.Presentation.Mixin` sources the mod does, so
-what is seen there is what ships. Coordinates are UI units rather than window pixels;
-`--dump` prints both, so a point can be converted.
+`Reactor.Host.SpaceEngineers.Sim` runs the mod without launching the game: the same sources, the
+same screens, over blocks it makes up. What is seen there is what ships. Coordinates are UI units
+rather than window pixels; `--dump` prints both, so a point can be converted.
 
 ```
 Sim.exe                    # the window
@@ -218,10 +215,7 @@ mips draws a ring as a dotted circle.
 - **Every build of the mod deploys it**, Debug included. MDK2 packs it to wherever the local
   MDK settings point rather than to the default mods folder, and the build output says where it
   went. `mdk.local.ini` is per-machine and gitignored.
-- **`Reactor.Core.Mixin` is in the solution but marked not to build.** The dotnet CLI cannot
-  build a shared project and would fail the whole solution over it. Rider builds it either
-  way, which is why the arrangement differs from the other repos.
-- **The running simulator locks `Reactor.Core.dll`.** Close it before rebuilding.
+- **The running simulator locks the mod's assembly.** Close it before rebuilding.
 - **`%LOCALAPPDATA%\Reactor\SimContent` is not in the repository**, because it is Keen's
   content and not ours to redistribute. Run `--extract` once. Without it the simulator still
   runs and fails loudly: block artwork becomes magenta crossed boxes and text falls back to a

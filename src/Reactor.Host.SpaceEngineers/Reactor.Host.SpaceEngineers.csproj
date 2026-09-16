@@ -3,11 +3,25 @@
   <PropertyGroup>
     <TargetFramework>netframework48</TargetFramework>
     <RootNamespace>Reactor.Host.SpaceEngineers</RootNamespace>
+    <!--
+        C# 6, and it is not a preference.
+
+        Space Engineers does not load assemblies: it compiles a mod's loose .cs files in-game with its
+        own bundled Roslyn, under a whitelist. That path fails silently - write a tuple on a Tuesday
+        and find out in-game weeks later - so the ceiling is enforced by the compiler here instead, on
+        every build. C# 6 is the conservative assumption for the in-game compiler; raising it is a
+        one-line change once the real ceiling has been verified in the game.
+
+        Nullable reference types are C# 8 and the directive is a hard error on an older compiler, and
+        implicit usings need one too. Both off for the same reason.
+    -->
     <LangVersion>6</LangVersion>
-    <!-- The repo root sets both of these; each needs a compiler newer than SE's.
-         Reactor.SharedSources.props turns them off for core for the same reason. -->
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
+
+    <!-- This runs inside a 60Hz game loop. Unused and unreachable code, and accidental allocations,
+         are worth hearing about. -->
+    <WarningLevel>5</WarningLevel>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Release;Debug</Configurations>
     <Platforms>x64</Platforms>
@@ -36,6 +50,4 @@
     <AdditionalFiles Remove="Content\*\**\*.cs" />
     <None Remove="thumb.png" />
   </ItemGroup>
-  <Import Project="..\Reactor.Core.Mixin\Reactor.Core.Mixin.projitems" Label="Shared" />
-  <Import Project="..\Reactor.Host.SpaceEngineers.Presentation.Mixin\Reactor.Host.SpaceEngineers.Presentation.Mixin.projitems" Label="Shared" />
 </Project>
