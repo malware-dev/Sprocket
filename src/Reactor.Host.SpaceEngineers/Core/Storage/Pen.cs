@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// Writes script text: statements, blocks, lists and annotations.

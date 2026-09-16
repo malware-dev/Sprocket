@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Sequences;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Runtime
+namespace Reactor.Host.SpaceEngineers.Core.Runtime
 {
     /// <summary>
     /// Runs one sequence, and carries everything the editor needs to show what it is
@@ -493,7 +493,7 @@ namespace Reactor.Runtime
                 }
 
                 var definition = entity.Kind.FindEvent(when.EventId);
-                if (definition == null)
+                if (definition == null || definition.Answered)
                     continue;
 
                 var now = Reads(world, entity, definition.PropertyId);
@@ -547,7 +547,10 @@ namespace Reactor.Runtime
                 }
 
                 var definition = entity.Kind.FindEvent(when.EventId);
-                if (definition == null)
+
+                // An answered one has nothing to read, so "all of them" cannot include it: what
+                // would make it true arrives by being invoked, not by being watched.
+                if (definition == null || definition.Answered)
                 {
                     all = false;
                     continue;

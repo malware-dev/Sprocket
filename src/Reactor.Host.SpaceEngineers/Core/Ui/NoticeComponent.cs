@@ -1,4 +1,4 @@
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>
     /// Something the user needs told.

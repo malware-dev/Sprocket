@@ -1,4 +1,3 @@
-using VRage.Game;
 using VRageMath;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;

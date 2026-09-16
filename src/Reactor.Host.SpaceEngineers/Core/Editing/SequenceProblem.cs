@@ -1,4 +1,4 @@
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// Why a sequence cannot work.

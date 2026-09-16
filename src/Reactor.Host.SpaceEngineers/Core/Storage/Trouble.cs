@@ -1,6 +1,6 @@
 using VRage.Game.ModAPI.Ingame.Utilities;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// What was wrong with a script, and what was only worth a warning, first thing first.

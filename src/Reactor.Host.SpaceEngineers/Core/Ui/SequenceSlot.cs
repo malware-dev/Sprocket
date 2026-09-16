@@ -1,4 +1,4 @@
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>
     /// A sequence of the same system, as the thing a <c>run</c> starts.

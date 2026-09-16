@@ -2,10 +2,10 @@ using SpaceEngineers.Game.ModAPI;
 using VRage.Game.ModAPI;
 using System.Collections.Generic;
 using System;
-using Reactor.Editing;
-using Reactor.Runtime;
-using Reactor.Sequences;
-using Reactor.Storage;
+using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Storage;
 using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
@@ -100,6 +100,8 @@ namespace Reactor.Host.SpaceEngineers.World
         public ReactorEditor Editor => _editor;
 
         public GridWorld World => _world;
+
+        public AutomationRunner Runner => _runner;
 
         /// <summary>
         /// Advances everything by one frame.
@@ -463,7 +465,7 @@ namespace Reactor.Host.SpaceEngineers.World
                         continue;
 
                     _arguments.Clear();
-                    toolbar.GetParameters(slot, _arguments);
+                    Toolbars.Parameters(toolbar, slot, _arguments);
                     if (_arguments.Count == 0)
                         continue;
 
@@ -644,12 +646,10 @@ namespace Reactor.Host.SpaceEngineers.World
                 if (Understood(toolbar, want.Slot))
                     continue;
 
-                if (!toolbar.BeginChanges()
-                        .Set(want.Slot, TriggerAction.Slot(_block.EntityId),
-                            TriggerAction.Argument(want.Key))
-                        .Apply())
+                if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId),
+                        TriggerAction.Argument(want.Key)))
                 {
-                    Trace("Apply refused mending slot " + want.Slot);
+                    Trace("the write was refused mending slot " + want.Slot);
                     continue;
                 }
 
@@ -666,7 +666,7 @@ namespace Reactor.Host.SpaceEngineers.World
         bool Understood(IMyToolbar toolbar, int slot)
         {
             _arguments.Clear();
-            toolbar.GetParameters(slot, _arguments);
+            Toolbars.Parameters(toolbar, slot, _arguments);
 
             if (_arguments.Count == 0)
                 return false;
@@ -703,7 +703,7 @@ namespace Reactor.Host.SpaceEngineers.World
                     continue;
                 }
 
-                toolbar.BeginChanges().Clear(had.Slot).Apply();
+                Toolbars.Clear(toolbar, had.Slot);
                 Trace("released slot " + had.Slot + " on panel " + had.PanelId);
             }
         }
@@ -734,12 +734,10 @@ namespace Reactor.Host.SpaceEngineers.World
                     continue;
                 }
 
-                if (!toolbar.BeginChanges()
-                        .Set(want.Slot, TriggerAction.Slot(_block.EntityId),
-                            TriggerAction.Argument(want.Key))
-                        .Apply())
+                if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId),
+                        TriggerAction.Argument(want.Key)))
                 {
-                    Trace("Apply refused for slot " + want.Slot);
+                    Trace("the write was refused for slot " + want.Slot);
                     continue;
                 }
 
@@ -807,9 +805,6 @@ namespace Reactor.Host.SpaceEngineers.World
             }
 
             _editor.Tick(frame);
-
-            // After, never before: a press is held only until the tick that samples it has seen it.
-            _world.ClearMoments();
         }
 
         /// <summary>

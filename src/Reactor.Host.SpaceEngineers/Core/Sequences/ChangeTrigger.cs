@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// What starts a sequence: the things watched, what has to happen to them, and whether it

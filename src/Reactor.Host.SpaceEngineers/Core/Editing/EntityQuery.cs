@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// Narrows a list of entities by free text and kind.

@@ -1,6 +1,5 @@
-using System.Collections.Generic;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// A named repeat rate, so the user dials a rhythm instead of typing a number.

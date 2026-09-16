@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Text;
-using Reactor.Runtime;
-using Reactor.Ui;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Core.World;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Words
 {

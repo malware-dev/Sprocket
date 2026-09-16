@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-using Reactor.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
 
-namespace Reactor.World
+namespace Reactor.Host.SpaceEngineers.Core.World
 {
     /// <summary>
     /// The machine Reactor is attached to, as seen from the Reactor unit.

@@ -1,4 +1,4 @@
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
@@ -114,13 +114,6 @@ namespace Reactor.Host.SpaceEngineers.World
             var door = block as IMyDoor;
             return door != null
                 && (door.Status == DoorStatus.Opening || door.Status == DoorStatus.Closing);
-        }
-
-        public IBlockListener Listen(IMyTerminalBlock block)
-        {
-            // A door does raise events, and using them would spare the sampling. It is not done here
-            // because the status is read every tick regardless, so the events would save nothing yet.
-            return null;
         }
     }
 }

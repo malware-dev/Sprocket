@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// What a step points at and what it does, which are chosen on one trip and land together.

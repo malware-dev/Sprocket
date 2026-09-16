@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>
     /// Picking several things in an order, where each one narrows what the next can be.

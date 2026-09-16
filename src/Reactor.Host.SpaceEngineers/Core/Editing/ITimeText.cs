@@ -1,4 +1,4 @@
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// The words for a length of time.

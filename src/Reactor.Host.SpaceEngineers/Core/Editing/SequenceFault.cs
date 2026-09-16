@@ -1,4 +1,4 @@
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// What is wrong with a sequence, and which line of it is wrong.

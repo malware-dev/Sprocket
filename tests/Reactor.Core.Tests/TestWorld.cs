@@ -1,5 +1,5 @@
-using Reactor.Sequences;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.World;
 
 namespace Reactor.Tests;
 

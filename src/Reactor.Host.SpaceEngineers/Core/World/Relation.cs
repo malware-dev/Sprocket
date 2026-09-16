@@ -1,4 +1,4 @@
-namespace Reactor.World
+namespace Reactor.Host.SpaceEngineers.Core.World
 {
     /// <summary>
     /// How a reading is measured against something.

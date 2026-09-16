@@ -1,4 +1,4 @@
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>
     /// A length of time, in ticks.

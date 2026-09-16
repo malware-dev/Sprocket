@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>
     /// Something whose values a target can watch rather than poll.

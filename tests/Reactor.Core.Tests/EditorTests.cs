@@ -1,7 +1,7 @@
-using Reactor.Editing;
-using Reactor.Runtime;
-using Reactor.Sequences;
-using Reactor.Ui;
+using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Ui;
 using Xunit;
 
 namespace Reactor.Tests;

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// What somebody settled on: the things to act on, and what should happen to them.

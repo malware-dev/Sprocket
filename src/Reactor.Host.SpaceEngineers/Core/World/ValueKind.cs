@@ -1,4 +1,4 @@
-namespace Reactor.World
+namespace Reactor.Host.SpaceEngineers.Core.World
 {
     /// <summary>What sort of reading a property gives.</summary>
     /// <remarks>

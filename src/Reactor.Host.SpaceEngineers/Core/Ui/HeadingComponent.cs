@@ -1,4 +1,4 @@
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>A label introducing the section under it.</summary>
     public sealed class HeadingComponent : EditorComponent

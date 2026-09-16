@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Reactor.Sequences;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Runtime
+namespace Reactor.Host.SpaceEngineers.Core.Runtime
 {
     /// <summary>
     /// What each declared reference currently points at, and how well.

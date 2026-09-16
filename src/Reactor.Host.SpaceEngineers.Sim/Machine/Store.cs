@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Sandbox.Game.EntityComponents;
+using VRage.Game.Components;
 
 namespace Reactor.Sim.Machine;
 
@@ -13,13 +13,18 @@ namespace Reactor.Sim.Machine;
 /// save. Here the same storage writes through to a file per key, which is what makes the windowed
 /// simulator a playground somebody can come back to.
 /// <para>
+/// Derived from the game's own abstract rather than from its concrete storage: what the mod holds is
+/// the real type either way, and only the keeping of it is the harness's.
+/// </para>
+/// <para>
 /// A key names its own file, so the program is a text file a person can read and repair - the same
 /// property the script has in the save, and the reason a broken one is worth keeping rather than
 /// refusing to start over.
 /// </para>
 /// </remarks>
-sealed class Store : MyModStorageComponent
+sealed class Store : MyModStorageComponentBase
 {
+    readonly Dictionary<Guid, string> _held = new Dictionary<Guid, string>();
     readonly string _folder;
     readonly string _construct;
 
@@ -55,7 +60,29 @@ sealed class Store : MyModStorageComponent
     /// <summary>Where this is being kept, for the line at the bottom of the window.</summary>
     public string Where => _folder.Length == 0 ? "nowhere - nothing is being saved" : _folder;
 
-    protected override void Wrote(Guid key, string value)
+    public override string GetValue(Guid key)
+    {
+        string held;
+        return _held.TryGetValue(key, out held) ? held : null;
+    }
+
+    public override void SetValue(Guid key, string value)
+    {
+        _held[key] = value;
+        Wrote(key, value);
+    }
+
+    public override bool RemoveValue(Guid key)
+    {
+        return _held.Remove(key);
+    }
+
+    public override bool TryGetValue(Guid key, out string value)
+    {
+        return _held.TryGetValue(key, out value);
+    }
+
+    void Wrote(Guid key, string value)
     {
         if (_folder.Length == 0)
             return;
@@ -74,7 +101,7 @@ sealed class Store : MyModStorageComponent
                 continue;
 
             foreach (var pair in Known(parts[1], file))
-                Put(pair.Key, pair.Value);
+                _held[pair.Key] = pair.Value;
         }
     }
 

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Sequences;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 
@@ -38,7 +38,6 @@ namespace Reactor.Host.SpaceEngineers.World
         readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
         readonly List<IMyCubeGrid> _watched = new List<IMyCubeGrid>();
         readonly List<IMySlimBlock> _slim = new List<IMySlimBlock>();
-        readonly List<IBlockListener> _listeners = new List<IBlockListener>();
 
         bool _stale = true;
 
@@ -284,8 +283,6 @@ namespace Reactor.Host.SpaceEngineers.World
             Revision++;
             _entities.Clear();
             _byId.Clear();
-            DropListeners();
-
             if (_anchor == null || _anchor.CubeGrid == null || MyAPIGateway.GridGroups == null)
                 return;
 
@@ -305,11 +302,7 @@ namespace Reactor.Host.SpaceEngineers.World
                         continue;
 
                     IBlockExtension extension = BlockExtensions.For(block);
-                    IBlockListener listener = extension == null ? null : extension.Listen(block);
-                    if (listener != null)
-                        _listeners.Add(listener);
-
-                    GridEntity entity = new GridEntity(block, _kinds.For(block), extension, listener);
+                    GridEntity entity = new GridEntity(block, _kinds.For(block), extension);
                     _byId.Add(block.EntityId, entity);
                     _entities.Add(entity);
                 }
@@ -350,30 +343,9 @@ namespace Reactor.Host.SpaceEngineers.World
             _stale = true;
         }
 
-        /// <summary>
-        /// Forgets every moment a block reported, now that a tick has had its chance to see one.
-        /// </summary>
-        /// <remarks>
-        /// Called after the tick rather than before it. A button press is a moment the game reports and
-        /// then forgets, so it is held exactly long enough for core to sample it once and no longer.
-        /// </remarks>
-        public void ClearMoments()
-        {
-            for (int i = 0; i < _listeners.Count; i++)
-                _listeners[i].Clear();
-        }
-
-        void DropListeners()
-        {
-            for (int i = 0; i < _listeners.Count; i++)
-                _listeners[i].Dispose();
-
-            _listeners.Clear();
-        }
-
+        /// <summary>Stops listening to the grids this was watching.</summary>
         public void Dispose()
         {
-            DropListeners();
             Watch(new List<IMyCubeGrid>());
         }
     }

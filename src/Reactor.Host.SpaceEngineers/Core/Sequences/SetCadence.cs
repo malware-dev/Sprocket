@@ -1,6 +1,5 @@
-using System.Collections.Generic;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     sealed class SetCadence : SequenceEdit
     {

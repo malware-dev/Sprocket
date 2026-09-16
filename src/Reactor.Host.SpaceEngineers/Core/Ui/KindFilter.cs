@@ -1,4 +1,4 @@
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>One kind filter offered beside a search box.</summary>
     public sealed class KindFilter

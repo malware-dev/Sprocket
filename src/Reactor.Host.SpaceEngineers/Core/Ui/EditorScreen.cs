@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>
     /// Everything on screen right now.

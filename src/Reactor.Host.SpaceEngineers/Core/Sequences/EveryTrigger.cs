@@ -1,6 +1,5 @@
-using System.Collections.Generic;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// "Every ___" - a recurring trigger.

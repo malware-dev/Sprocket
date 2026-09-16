@@ -1,4 +1,4 @@
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 
@@ -120,11 +120,6 @@ namespace Reactor.Host.SpaceEngineers.World
             var vent = block as IMyAirVent;
             return vent != null
                 && (vent.Status == VentStatus.Pressurizing || vent.Status == VentStatus.Depressurizing);
-        }
-
-        public IBlockListener Listen(IMyTerminalBlock block)
-        {
-            return null;
         }
     }
 }

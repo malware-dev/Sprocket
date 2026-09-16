@@ -1,42 +1,64 @@
-using VRage.Game.ModAPI;
+using System.Collections.Generic;
 using Sandbox.ModAPI;
+using VRage.Game.ModAPI;
+using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
-    /// How a block's toolbar is reached, said once.
+    /// How a toolbar is reached, said once.
     /// </summary>
     /// <remarks>
-    /// <b>A block does not implement <see cref="IMyToolbarProvider" />, it carries one.</b> So
-    /// <c>block as IMyToolbarProvider</c> compiles, returns null on every block in the game, and
-    /// takes every toolbar read and write quietly with it - nothing throws, buttons simply never
-    /// wire up. Reactor had that cast written out in three places and got it wrong in all three
-    /// when the API moved the provider onto the component container.
+    /// One statement of how Reactor's wiring is found, read and written, so the next change to that
+    /// answer is one edit rather than a hunt. What does the work is <see cref="ISlots" />.
     /// <para>
-    /// Which is the reason this exists at all: one statement of how a toolbar is found, so the next
-    /// change to that answer is one edit rather than a hunt.
+    /// <b>Static because the block vocabulary is.</b> An extension describing a button panel is
+    /// reached through a static registry with no instance to hand anything to, so a toolbar is found
+    /// the same way. The game's own API is a static for the same reason, and this holds a reference to
+    /// an ordinary object rather than being one.
     /// </para>
     /// </remarks>
-    static class Toolbars
+    public static class Toolbars
     {
+        static ISlots _slots = new GameSlots();
+
         /// <summary>
-        /// The toolbar a block's own actions live on, or null where it has none.
+        /// Puts something else behind every toolbar read and write.
         /// </summary>
         /// <remarks>
-        /// Index 0 is the primary one, which for a button panel is the buttons. A block with no
-        /// toolbars does not carry the component at all, so failing to get it is the ordinary
-        /// answer rather than a fault.
+        /// For the harness, which answers these calls over toolbars it makes up. The game's own
+        /// conveniences cannot be answered by anything but the game - they reach past
+        /// <see cref="IMyToolbar" /> into its concrete item classes - so this is what lets a fitted
+        /// button be tested at all.
         /// </remarks>
+        public static void Use(ISlots slots)
+        {
+            _slots = slots ?? new GameSlots();
+        }
+
+        /// <summary>The toolbar a block's own actions live on, or null where it has none.</summary>
         public static IMyToolbar Of(IMyTerminalBlock block)
         {
-            if (block == null)
-                return null;
+            return _slots.Of(block);
+        }
 
-            IMyToolbarProvider provider;
-            if (!block.Components.TryGet(out provider) || provider.ToolbarCount == 0)
-                return null;
+        /// <summary>What a slot's item was given to run with, appended to <paramref name="into" />.</summary>
+        public static void Parameters(IMyToolbar toolbar, int slot, List<TerminalActionParameter> into)
+        {
+            _slots.Parameters(toolbar, slot, into);
+        }
 
-            return provider.GetToolbar(0);
+        /// <summary>Puts an item in a slot, and answers whether the write took.</summary>
+        public static bool Write(IMyToolbar toolbar, int slot, MyToolbarItemInfo item,
+            List<TerminalActionParameter> parameters)
+        {
+            return _slots.Write(toolbar, slot, item, parameters);
+        }
+
+        /// <summary>Empties a slot, and answers whether that took.</summary>
+        public static bool Clear(IMyToolbar toolbar, int slot)
+        {
+            return _slots.Clear(toolbar, slot);
         }
     }
 }

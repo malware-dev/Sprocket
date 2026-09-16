@@ -1,4 +1,4 @@
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
@@ -78,6 +78,5 @@ namespace Reactor.Host.SpaceEngineers.World
         /// has to become an edge on a reading before core can use it, so what a listener does is hold a
         /// latch that the next tick reads and then clears.
         /// </remarks>
-        IBlockListener Listen(IMyTerminalBlock block);
     }
 }

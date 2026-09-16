@@ -1,4 +1,4 @@
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>What a piece of script text is, before anything knows what it means.</summary>
     enum TokenKind

@@ -76,7 +76,7 @@ namespace Reactor.Sim.Simulation
         /// </summary>
         public float EffectiveScale(float scale)
         {
-            float height = _device.SafeGuiArea.Height;
+            float height = _device.SafeArea.Height;
             float gameScale = height > 0f ? height / GameReferenceHeight : 1f;
             return scale * gameScale;
         }

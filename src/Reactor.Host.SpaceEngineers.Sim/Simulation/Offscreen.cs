@@ -33,10 +33,10 @@ namespace Reactor.Sim.Simulation
             _device.Install();
 
             float safeWidth = windowHeight * 4f / 3f;
-            _device.SafeGuiArea = new RectangleF((windowWidth - safeWidth) / 2f, 0f, safeWidth, windowHeight);
+            _device.SafeArea = new RectangleF((windowWidth - safeWidth) / 2f, 0f, safeWidth, windowHeight);
             _device.ViewportSize = new Vector2(windowWidth, windowHeight);
 
-            _graphics = new ScreenSpaceGraphics(MyScreenSpaceLayer.AboveHud);
+            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud);
             _scene = EditorScene.Nowhere();
         }
 
@@ -72,7 +72,7 @@ namespace Reactor.Sim.Simulation
         {
             var text = new StringBuilder();
             text.AppendLine("window        " + Shown.Say(_width) + " x " + Shown.Say(_height));
-            text.AppendLine("safe gui area " + Shown.Say(_device.SafeGuiArea));
+            text.AppendLine("safe gui area " + Shown.Say(_device.SafeArea));
             text.AppendLine("UI size       " + Shown.Say(_graphics.Size));
             text.AppendLine("screen bounds " + Shown.Say(_graphics.ScreenBounds));
             text.AppendLine("on screen     " + _scene.OnScreen);

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// Everything one Reactor unit is running.

@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using VRage.Game.ModAPI.Ingame.Utilities;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// Turns script text into tokens, one at a time.

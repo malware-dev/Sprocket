@@ -1,6 +1,6 @@
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>What happens to the things the trigger watches.</summary>
     public sealed class EventSlot : SentenceSlot

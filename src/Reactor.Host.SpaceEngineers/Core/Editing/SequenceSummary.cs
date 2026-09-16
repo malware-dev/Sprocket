@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Reactor.Sequences;
-using Reactor.Runtime;
-using Reactor.Ui;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// What is true of a sequence right now, for every place one is listed.

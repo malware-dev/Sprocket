@@ -40,6 +40,12 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- The harness is a tool, and its own behaviour is worth a test or two: that a rig's wiring
+             survives a restart, for one, which is a thing only it can get wrong. -->
+        <InternalsVisibleTo Include="Reactor.Host.SpaceEngineers.Presentation.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <!-- Impersonates the game's interfaces at runtime, so the harness answers the dozen members
              the mod reads instead of implementing the several hundred it does not. Harness only. -->
         <PackageReference Include="Castle.Core" Version="5.1.1" />
@@ -55,25 +61,21 @@
     </ItemGroup>
 
     <!--
-        The mod's own code, compiled here as well as into the mod, on the same framework the mod builds
-        against.
+        The mod itself: core, the screens, the world layer and the session, as one assembly.
 
-        Not a port and not a stand-in: the harness drives the same GridWorld and ReactorUnit the game
-        drives, over blocks it makes up, which is what puts the toolbar and storage layer - the fiddliest
-        code in the repo - under the reference frames.
+        Not a port and not a stand-in. The harness drives the same GridWorld, ReactorUnit and screens
+        the game drives, over blocks it makes up, which is what puts the toolbar and storage layer -
+        the fiddliest code in the repo - under the reference frames.
 
-        <b>Compiled rather than referenced, and that is not a preference.</b> What the game declares in
-        Sandbox.Game - the screen-space drawing the editor renders through, the screen host's base, mod
-        storage, the toolbar conveniences - the harness declares itself, so that a frame can be recorded
-        rather than drawn. A declaration like that only wins inside the assembly that makes it: reference
-        the mod's own assembly instead and its drawing binds to the real thing, which outside the game
-        draws nothing and then throws. See Fakes, and build/Reactor.GameReferences.props.
+        A reference rather than a second compilation of the sources, which is what this was until the
+        mod stopped reaching for the game's statics directly. What it asks of the game now arrives
+        through two interfaces - IScreenSpace for the screen, ISlots for the toolbars - and the harness
+        answers both. A recorded frame is what it writes down instead of drawing.
+
+        Internals come with it: Visibility.debug.cs in the mod names this assembly, which is a file the
+        game never sees.
     -->
     <ItemGroup>
-        <Compile Include="..\Reactor.Host.SpaceEngineers\**\*.cs"
-                 Exclude="..\Reactor.Host.SpaceEngineers\obj\**\*.cs;..\Reactor.Host.SpaceEngineers\bin\**\*.cs;..\Reactor.Host.SpaceEngineers\**\*.debug.cs">
-            <Link>Mod\%(RecursiveDir)%(Filename)%(Extension)</Link>
-        </Compile>
+        <ProjectReference Include="..\Reactor.Host.SpaceEngineers\Reactor.Host.SpaceEngineers.csproj" />
     </ItemGroup>
-
 </Project>

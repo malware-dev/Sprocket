@@ -41,11 +41,13 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
         /// </summary>
         public const float NativePixels = 0f;
 
+        private readonly IScreenSpace _screenSpace;
         private readonly MyScreenSpaceLayer _layer;
         private readonly ClipStack _clip = new ClipStack();
-        private readonly List<MyScreenSpace.MyScissorScope> _scissors =
-            new List<MyScreenSpace.MyScissorScope>();
         private readonly float _referenceHeight;
+
+        /// <summary>How many clips are in force, so one is only ever popped if it was pushed.</summary>
+        private int _clips;
 
         private Vector2 _origin;
         private Vector2 _size;
@@ -61,8 +63,8 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
         private float _fontScale = 1f;
 
         /// <summary>Scales the way the game's own HUD does.</summary>
-        public ScreenSpaceGraphics(MyScreenSpaceLayer layer)
-            : this(layer, GameReferenceHeight)
+        public ScreenSpaceGraphics(IScreenSpace screenSpace, MyScreenSpaceLayer layer)
+            : this(screenSpace, layer, GameReferenceHeight)
         {
         }
 
@@ -73,8 +75,10 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
         /// <paramref name="referenceHeight" /> is stretched to the screen.
         /// <see cref="NativePixels" /> for no scaling at all.
         /// </remarks>
-        public ScreenSpaceGraphics(MyScreenSpaceLayer layer, float referenceHeight)
+        public ScreenSpaceGraphics(IScreenSpace screenSpace, MyScreenSpaceLayer layer,
+            float referenceHeight)
         {
+            _screenSpace = screenSpace;
             _layer = layer;
             _referenceHeight = referenceHeight;
             Begin();
@@ -90,7 +94,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
         /// </remarks>
         public void Begin()
         {
-            RectangleF area = MyScreenSpace.GetSafeGuiArea();
+            RectangleF area = _screenSpace.SafeArea;
 
             // What the game is already applying to every font scale it is handed.
             float gameScale = area.Height > 0f ? area.Height / GameReferenceHeight : 1f;
@@ -103,9 +107,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
             // The whole window, in the same units, which is a larger rectangle than the safe area on
             // anything wider than 4:3 and starts at a negative X. A pointer belongs in this one: the game
             // lets its own cursor reach the physical edges of the screen, not the edges of its HUD.
-            Vector2 viewport = MyAPIGateway.Session != null && MyAPIGateway.Session.Camera != null
-                ? MyAPIGateway.Session.Camera.ViewportSize
-                : new Vector2(area.Width, area.Height);
+            Vector2 viewport = _screenSpace.ViewportSize;
 
             _screen = new RectangleF(
                 -_origin.X / _scale,
@@ -130,32 +132,21 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
         /// Narrows drawing to <paramref name="bounds" />, intersected with whatever is already in force.
         /// </summary>
         /// <remarks>
-        /// The scissor arrived as a scope rather than as the two ordered calls this used to guess at.
-        /// <c>MyScreenSpace.UsingScissorRectanglePixels</c> hands back something to dispose, and nested
-        /// scopes intersect, so the game does for free what <see cref="ClipStack" /> does. It is still
-        /// <see cref="ClipStack.Current" /> that gets handed over rather than the raw bounds: narrowing an
-        /// already-narrowed rectangle by its parent gives the same rectangle back, and it keeps the promise
-        /// the seam makes to both targets, that a backend only ever honours one rectangle.
+        /// Nested clips intersect, and the screen does that for free - but it is still
+        /// <see cref="ClipStack.Current" /> that gets handed over rather than the raw bounds. Narrowing
+        /// an already-narrowed rectangle by its parent gives the same rectangle back, and it keeps the
+        /// promise the seam makes to both targets: that a screen only ever honours one rectangle.
         /// <para>
-        /// <b>The layer is not optional.</b> It defaults to <c>BelowHud</c>, and everything here draws on
-        /// whichever layer this instance was built for, so leaving it out would push a scissor onto a layer
-        /// nothing is drawn to and quietly clip nothing at all.
-        /// </para>
-        /// <para>
-        /// The scopes are kept in a typed list rather than as <c>IDisposable</c> because
-        /// <c>MyScissorScope</c> is a struct, and one box per clipped element per frame is not a thing to
-        /// pay for. Disposing a copy of one is safe: it reads its two fields and pops.
-        /// </para>
-        /// <para>
-        /// <b>Not verified in the game yet:</b> whether a scope is recorded into a buffered layer's queue or
-        /// applied when that queue replays. The simulator honours it either way, and the demo mod only
-        /// exercises it inside a screen's own draw.
+        /// <b>The layer is not optional.</b> Everything here draws on whichever layer this instance was
+        /// built for, so leaving it out would push a scissor onto a layer nothing is drawn to and
+        /// quietly clip nothing at all.
         /// </para>
         /// </remarks>
         public void PushClip(RectangleF bounds)
         {
             _clip.Push(bounds);
-            _scissors.Add(MyScreenSpace.UsingScissorRectanglePixels(ToPixels(_clip.Current), _layer));
+            _screenSpace.PushScissor(ToPixels(_clip.Current), _layer);
+            _clips++;
         }
 
         /// <summary>Drops the innermost clip, leaving its parent's standing.</summary>
@@ -165,11 +156,10 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
         /// </remarks>
         public void PopClip()
         {
-            int last = _scissors.Count - 1;
-            if (last >= 0)
+            if (_clips > 0)
             {
-                _scissors[last].Dispose();
-                _scissors.RemoveAt(last);
+                _screenSpace.PopScissor(_layer);
+                _clips--;
             }
 
             _clip.Pop();
@@ -184,7 +174,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
             if (target.Width <= 0 || target.Height <= 0)
                 return;
 
-            MyScreenSpaceSprite.DrawPixels(material, target, null, color, rotation, _layer);
+            _screenSpace.DrawSprite(material, target, color, rotation, _layer);
         }
 
         public void DrawText(string font, string text, Vector2 position, float scale, Color color)
@@ -192,20 +182,19 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
             if (string.IsNullOrEmpty(text))
                 return;
 
-            MyScreenSpaceText.DrawPixels(font, text, position * _scale + _origin, scale * _fontScale, color,
+            _screenSpace.DrawText(font, text, position * _scale + _origin, scale * _fontScale, color,
                 MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP, float.PositiveInfinity, _layer);
         }
 
         public Vector2 MeasureText(string font, StringBuilder text, float scale)
         {
-            return MyScreenSpaceText.MeasurePixels(font, text, scale * _fontScale) / _scale;
+            return _screenSpace.MeasureText(font, text, scale * _fontScale) / _scale;
         }
 
         public float LineHeight(string font, float scale)
         {
-            // GetLineHeight answers in normalized units; everything above this line is in UI units.
-            return MyScreenSpace.NormalizedSizeToPixels(
-                new Vector2(0f, MyScreenSpaceText.GetLineHeight(font, scale * _fontScale))).Y / _scale;
+            // The screen answers in pixels; everything above this line is in UI units.
+            return _screenSpace.LineHeight(font, scale * _fontScale) / _scale;
         }
 
         /// <summary>
@@ -214,10 +203,11 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Graphics
         /// </summary>
         private void CloseScissors()
         {
-            for (int i = _scissors.Count - 1; i >= 0; i--)
-                _scissors[i].Dispose();
-
-            _scissors.Clear();
+            while (_clips > 0)
+            {
+                _screenSpace.PopScissor(_layer);
+                _clips--;
+            }
         }
 
         /// <summary>

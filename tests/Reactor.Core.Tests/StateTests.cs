@@ -1,5 +1,6 @@
-using Reactor.Sequences;
-using Reactor.Storage;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.World;
+using Reactor.Host.SpaceEngineers.Core.Storage;
 using Xunit;
 
 namespace Reactor.Tests;
@@ -148,14 +149,14 @@ public class StateTests
         program.Systems[0].Sequences[0].Enabled = false;
         program.Systems[0].Instances[0].Enabled = false;
 
-        var text = ProgramText.Save(program, new World.Values());
+        var text = ProgramText.Save(program, new Values());
 
         Assert.DoesNotContain(" is on", text);
         Assert.DoesNotContain(" is off", text);
 
         // And a program read without its switches is a construct with everything running.
         var after = new Automation();
-        Assert.Equal("", ProgramText.Load(text, after, new World.Values()));
+        Assert.Equal("", ProgramText.Load(text, after, new Values()));
         Assert.True(after.Systems[0].Enabled);
         Assert.True(after.Systems[0].Sequences[0].Enabled);
         Assert.True(after.Systems[0].Instances[0].Enabled);

@@ -202,7 +202,7 @@ namespace Reactor.Sim.Simulation
             // does exactly this: the full height, four by three wide, centred - and never wider than the
             // screen, which is the case a monitor taller than it is wide would otherwise get wrong.
             double safeWidth = Math.Min(width, height * 4d / 3d);
-            _device.SafeGuiArea = new RectangleF(
+            _device.SafeArea = new RectangleF(
                 (float)((width - safeWidth) / 2d), 0f, (float)safeWidth, (float)height);
             _device.ViewportSize = new Vector2((float)width, (float)height);
 
@@ -211,7 +211,7 @@ namespace Reactor.Sim.Simulation
             // Held across frames, as the mod holds one. Begin re-samples the area, so a resized window is
             // picked up without building another.
             if (_graphics == null)
-                _graphics = new ScreenSpaceGraphics(MyScreenSpaceLayer.AboveHud);
+                _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud);
 
             _graphics.Begin();
 

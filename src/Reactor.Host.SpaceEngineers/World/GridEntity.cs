@@ -1,4 +1,4 @@
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 
 namespace Reactor.Host.SpaceEngineers.World
@@ -12,15 +12,12 @@ namespace Reactor.Host.SpaceEngineers.World
         readonly IMyTerminalBlock _block;
         readonly EntityKind _kind;
         readonly IBlockExtension _extension;
-        readonly IBlockListener _listener;
 
-        public GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension,
-            IBlockListener listener)
+        public GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension)
         {
             _block = block;
             _kind = kind;
             _extension = extension;
-            _listener = listener;
         }
 
         /// <summary>The block behind this, for the few things that need the game's own object.</summary>
@@ -82,10 +79,7 @@ namespace Reactor.Host.SpaceEngineers.World
         {
             EntityValue told;
 
-            // What the block told us, then what it can be asked, then the floor every block stands on.
-            if (_listener != null && _listener.TryRead(propertyId, out told))
-                return told;
-
+            // What this sort of block can be asked, then the floor every block stands on.
             if (_extension != null && _extension.TryRead(_block, propertyId, out told))
                 return told;
 

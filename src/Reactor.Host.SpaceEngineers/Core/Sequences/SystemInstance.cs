@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// One of a system, actually fitted to the ship.

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using Reactor.Host.SpaceEngineers.Presentation.Graphics;
 using Reactor.Sim.Fakes;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
@@ -10,23 +11,21 @@ using VRageMath;
 namespace Reactor.Sim.Simulation
 {
     /// <summary>
-    /// Stands in for the game's screen-space drawing. The substitute statics in <c>Sandbox.ModAPI</c> do
-    /// nothing but forward here, so what runs above this line is the real backend, arithmetic and all.
+    /// The screen, as somewhere to write down what was drawn on it.
     /// </summary>
-    public sealed class ScreenSpaceDevice
+    /// <remarks>
+    /// The mod's own drawing runs above this line - the arithmetic, the clipping, the letterboxing -
+    /// and every call it makes to the game's screen lands here as an ordered command instead. That
+    /// list is what a reference frame is.
+    /// </remarks>
+    public sealed class ScreenSpaceDevice : IScreenSpace
     {
-        /// <summary>
-        /// Where the substitute statics send their calls. Static because the game's are, and the shape of
-        /// the thing being simulated is not ours to improve.
-        /// </summary>
-        public static ScreenSpaceDevice Current = new ScreenSpaceDevice();
-
         readonly List<DrawCommand> _commands = new List<DrawCommand>();
         readonly List<Rectangle> _scissors = new List<Rectangle>();
 
         public ScreenSpaceDevice()
         {
-            SafeGuiArea = new RectangleF(0f, 0f, 1440f, 1080f);
+            SafeArea = new RectangleF(0f, 0f, 1440f, 1080f);
             ViewportSize = new Vector2(1920f, 1080f);
         }
 
@@ -34,7 +33,7 @@ namespace Reactor.Sim.Simulation
         /// The 4:3 box at full screen height that the game lays its own UI out in. Set once per frame by
         /// whoever owns the window.
         /// </summary>
-        public RectangleF SafeGuiArea { get; set; }
+        public RectangleF SafeArea { get; set; }
 
         /// <summary>The whole window, which is wider than the safe area on anything but a 4:3 monitor.</summary>
         public Vector2 ViewportSize { get; set; }
@@ -51,14 +50,14 @@ namespace Reactor.Sim.Simulation
         }
 
         /// <summary>
-        /// Puts this device behind the substitute statics, and behind the two members of the gateway the
-        /// backend reads. Everything that pretends to be the game is set up from here, so a headless frame
-        /// and a drawn one start from the same state rather than from two copies of it.
+        /// Puts the harness behind the two members of the gateway a screen reads.
         /// </summary>
+        /// <remarks>
+        /// Nothing about drawing any more - that arrives through <see cref="IScreenSpace" /> now. What
+        /// is left is the game's session, which the mod asks for a frame counter and a viewport.
+        /// </remarks>
         public void Install()
         {
-            Current = this;
-
             var camera = Pretend.To<IMyCamera>()
                 .Gives("ViewportSize", () => ViewportSize)
                 .Done();
@@ -66,11 +65,6 @@ namespace Reactor.Sim.Simulation
             MyAPIGateway.Session = Pretend.To<IMySession>()
                 .Gives("Camera", () => camera)
                 .Done();
-        }
-
-        public Vector2 NormalizedSizeToPixels(Vector2 size)
-        {
-            return new Vector2(size.X * ViewportSize.X, size.Y * ViewportSize.Y);
         }
 
         public Vector2 MeasureText(string font, StringBuilder text, float scale)
@@ -83,21 +77,37 @@ namespace Reactor.Sim.Simulation
             return Fonts.MeasurePixels(font, text.ToString(), scale);
         }
 
-        /// <summary>
-        /// The height of a line, normalized, because that is the unit the game answers in and the backend
-        /// converts it back through <see cref="NormalizedSizeToPixels" />. Kept in the same units on purpose
-        /// so that round trip is genuinely exercised rather than quietly bypassed.
-        /// </summary>
+        /// <summary>The height of a line in pixels, which is what the screen answers in.</summary>
         public float LineHeight(string font, float scale)
         {
-            if (Fonts == null || ViewportSize.Y <= 0f)
-                return 0f;
-
-            return Fonts.LineHeightPixels(font, scale) / ViewportSize.Y;
+            return Fonts == null ? 0f : Fonts.LineHeightPixels(font, scale);
         }
 
-        public void DrawSprite(MyStringId material, Rectangle destination, Rectangle? source, Color color,
-            float rotation, MyScreenSpaceLayer layer)
+        /// <summary>
+        /// Always no.
+        /// </summary>
+        /// <remarks>
+        /// The harness drives the editor through its own window and its own recorded frames, and the
+        /// only thing that reads this is the game's screen host, which the harness does not run.
+        /// </remarks>
+        public bool TryCursorPixels(out Vector2 pixels)
+        {
+            pixels = Vector2.Zero;
+            return false;
+        }
+
+        public Vector2 NormalizedToPixels(Vector2 position)
+        {
+            return new Vector2(position.X * ViewportSize.X, position.Y * ViewportSize.Y);
+        }
+
+        public Vector2 NormalizedSizeToPixels(Vector2 size)
+        {
+            return new Vector2(size.X * ViewportSize.X, size.Y * ViewportSize.Y);
+        }
+
+        public void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,
+            MyScreenSpaceLayer layer)
         {
             _commands.Add(new DrawCommand
             {
@@ -105,7 +115,6 @@ namespace Reactor.Sim.Simulation
                 Layer = layer,
                 Material = material,
                 Destination = destination,
-                Source = source,
                 Color = color,
                 Rotation = rotation
             });
@@ -129,18 +138,17 @@ namespace Reactor.Sim.Simulation
         }
 
         /// <summary>
-        /// Starts a scissor, and answers whether it took, as the game's does.
+        /// Starts a scissor.
         /// </summary>
         /// <remarks>
-        /// The stack lives here rather than in the caller because that is where the game keeps its own, and
-        /// because a clip still has to reach the frame as an ordered command: the renderer replays a list
-        /// and <c>--dump</c> reads one, and neither should have to know a stack exists.
+        /// The stack lives here because that is where the game keeps its own, and because a clip still
+        /// has to reach the frame as an ordered command: the renderer replays a list and <c>--dump</c>
+        /// reads one, and neither should have to know a stack exists.
         /// </remarks>
-        public bool PushScissor(Rectangle rect, MyScreenSpaceLayer layer)
+        public void PushScissor(Rectangle pixels, MyScreenSpaceLayer layer)
         {
-            _scissors.Add(rect);
-            SetClip(rect, layer);
-            return true;
+            _scissors.Add(pixels);
+            SetClip(pixels, layer);
         }
 
         /// <summary>Ends the innermost scissor, putting its parent's back rather than clearing outright.</summary>

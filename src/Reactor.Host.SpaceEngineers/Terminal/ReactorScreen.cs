@@ -1,5 +1,5 @@
-using Reactor.Editing;
-using Reactor.Ui;
+using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Core.Ui;
 using Sandbox.ModAPI;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
@@ -39,6 +39,7 @@ namespace Reactor.Host.SpaceEngineers.Terminal
         readonly ReactorUnit _unit;
         readonly ReactorEditor _editor;
         readonly EditorView _view;
+        readonly IScreenSpace _screen;
         readonly ScreenSpaceGraphics _graphics;
         readonly ScreenKeyboard _keyboard = new ScreenKeyboard();
 
@@ -61,7 +62,8 @@ namespace Reactor.Host.SpaceEngineers.Terminal
             // BelowHud because that is where a mod screen's own content goes; the demo mod draws its screen
             // on the same layer. The scissor is pushed onto whatever layer this names, so the two must agree
             // or clipping silently does nothing.
-            _graphics = new ScreenSpaceGraphics(MyScreenSpaceLayer.BelowHud);
+            _screen = new GameScreenSpace();
+            _graphics = new ScreenSpaceGraphics(_screen, MyScreenSpaceLayer.BelowHud);
 
             // Off, and the view draws its own cross instead. The harness lays its controls down before it
             // calls the mod - MyGuiScreenModHost.Draw is base.Draw then OnDraw - so the first opaque thing
@@ -177,7 +179,7 @@ namespace Reactor.Host.SpaceEngineers.Terminal
                 return;
 
             Vector2 pixels;
-            if (MyScreenSpace.TryGetCursorPositionPixels(out pixels))
+            if (_screen.TryCursorPixels(out pixels))
                 _pointer = _graphics.FromPixels(pixels);
 
             _view.Pointer = _pointer;
@@ -288,8 +290,8 @@ namespace Reactor.Host.SpaceEngineers.Terminal
             Vector2 size = Size ?? new Vector2(EditorView.ScreenWidth, EditorView.ScreenHeight);
             Vector2 topLeft = Position - size * 0.5f;
 
-            Vector2 origin = _graphics.FromPixels(MyScreenSpace.NormalizedToPixels(topLeft));
-            Vector2 extent = _graphics.FromPixelSize(MyScreenSpace.NormalizedSizeToPixels(size));
+            Vector2 origin = _graphics.FromPixels(_screen.NormalizedToPixels(topLeft));
+            Vector2 extent = _graphics.FromPixelSize(_screen.NormalizedSizeToPixels(size));
 
             return new RectangleF(origin.X, origin.Y, extent.X, extent.Y);
         }

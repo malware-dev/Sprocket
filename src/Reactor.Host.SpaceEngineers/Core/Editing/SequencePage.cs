@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Sequences;
-using Reactor.Ui;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// One sequence, with room for the whole sentence.

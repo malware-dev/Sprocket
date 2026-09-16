@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>
     /// The ways to start something new on this screen.

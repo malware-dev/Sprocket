@@ -1,4 +1,4 @@
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>One thing that is doing something, summarised to a line.</summary>
     public sealed class StatusEntry : Observable

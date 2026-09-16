@@ -88,6 +88,12 @@ sealed class Toolbar : IMyToolbar
 
     public IMyToolbarChangeBuilder BeginChanges()
     {
+        return Changing();
+    }
+
+    /// <summary>The same, typed, so a write can carry what the item is to run with.</summary>
+    public Changes Changing()
+    {
         return new Changes(this);
     }
 

@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-using Reactor.Editing;
-using Reactor.Runtime;
-using Reactor.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Words
 {

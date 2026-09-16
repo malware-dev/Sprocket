@@ -1,7 +1,7 @@
 using System;
-using Reactor.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// Writes down what is switched off, and reads it back.

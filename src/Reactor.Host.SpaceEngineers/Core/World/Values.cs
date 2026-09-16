@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Reactor.World
+namespace Reactor.Host.SpaceEngineers.Core.World
 {
     /// <summary>
     /// Makes values and reads them back, and holds the ones too wide to fit in one.

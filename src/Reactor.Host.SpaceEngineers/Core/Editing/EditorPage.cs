@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Reactor.Ui;
+using Reactor.Host.SpaceEngineers.Core.Ui;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// One screen's worth of editor.

@@ -1,4 +1,4 @@
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// Every value one read of a script produced.

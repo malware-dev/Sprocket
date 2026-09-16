@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.World
+namespace Reactor.Host.SpaceEngineers.Core.World
 {
     /// <summary>
     /// A class of entity and the whole vocabulary it brings with it - what can happen
@@ -89,6 +89,19 @@ namespace Reactor.World
         public EntityKind WithEvent(string id, string propertyId, Edge edge, string text)
         {
             _events.Add(new EntityEvent(id, propertyId, edge, text));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a moment the construct answers - see <see cref="EntityEvent.Answered" />.
+        /// </summary>
+        /// <remarks>
+        /// No property, because there is nothing to read: what makes it happen is a slot on this
+        /// block's own toolbar, and what it runs is what that slot was given.
+        /// </remarks>
+        public EntityKind WithAnsweredEvent(string id, string text)
+        {
+            _events.Add(new EntityEvent(id, text));
             return this;
         }
 

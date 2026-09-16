@@ -1,4 +1,4 @@
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// What a name may be, in one place.

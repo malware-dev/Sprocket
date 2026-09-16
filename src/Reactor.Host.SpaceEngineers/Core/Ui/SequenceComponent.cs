@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>
     /// One sequence, written out as a sentence, with its live state.

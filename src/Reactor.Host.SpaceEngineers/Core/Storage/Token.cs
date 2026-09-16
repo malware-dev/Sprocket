@@ -1,6 +1,6 @@
 using VRage.Game.ModAPI.Ingame.Utilities;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>One piece of script text, with whatever it carries.</summary>
     struct Token

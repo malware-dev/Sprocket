@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using VRageMath;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
 

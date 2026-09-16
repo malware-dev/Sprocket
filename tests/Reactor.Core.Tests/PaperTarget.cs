@@ -1,6 +1,6 @@
 using System.Text;
-using Reactor.Ui;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Core.World;
 
 namespace Reactor.Tests;
 

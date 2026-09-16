@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using VRage.Game.ModAPI.Ingame.Utilities;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// Reads tokens into statements.

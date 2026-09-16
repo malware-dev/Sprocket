@@ -1,4 +1,4 @@
-using Reactor.Ui;
+using Reactor.Host.SpaceEngineers.Core.Ui;
 using Xunit;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;

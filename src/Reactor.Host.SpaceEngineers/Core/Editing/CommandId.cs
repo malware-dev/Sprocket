@@ -1,4 +1,4 @@
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// Turns what a command is for, and which one it is, into an id.

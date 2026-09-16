@@ -1,4 +1,3 @@
-using VRage.Game;
 using VRageMath;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Look

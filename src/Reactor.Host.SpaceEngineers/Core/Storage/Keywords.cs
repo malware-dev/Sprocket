@@ -1,6 +1,6 @@
 using VRage.Game.ModAPI.Ingame.Utilities;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// Every bare word the format gives a meaning to, and how to recognise one without making a string.

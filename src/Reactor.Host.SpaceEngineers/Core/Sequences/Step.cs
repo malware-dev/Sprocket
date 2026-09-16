@@ -1,4 +1,4 @@
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// One numbered line of a sequence.

@@ -9,12 +9,8 @@ root = true
 # Sarif rather than Xml: the Xml report omits the line for some inspections, which silently hides
 # them from anything reading the file.
 #
-# **Reading a RedundantUsingDirective report takes counting.** The two .Mixin projects are shared
-# source, compiled once into the mod and once into the simulator, so each of their files is analysed
-# twice. A using needed by one consumer and not the other is reported once and is not redundant; one
-# reported twice is unused everywhere and can go. That is a property of how the run is done, so it
-# cannot be configured here - and the inspection is deliberately left on, because turning it off to
-# silence the survivors would hide the real ones too.
+# Each file is analysed once now. The mod is one project and the harness references its assembly,
+# so a RedundantUsingDirective report means what it says.
 
 # Cleanup is run through the one profile the repository ships, in Reactor.slnx.DotSettings:
 #
@@ -32,14 +28,13 @@ root = true
 [*.cs]
 
 # ---------------------------------------------------------------------------------------------------
-# The mod and the two shared projects it is built from compile as C# 6, because that is the ceiling
-# for code Space Engineers will load. C# 6 has no nullable reference annotations - there is no way to
+# The mod compiles as C# 6, because that is the ceiling for code Space Engineers will load. C# 6 has no nullable reference annotations - there is no way to
 # write `Element?` - so the analyser assumes every reference is non-null and then reports every null
 # check as pointless and every uninitialised field as a fault.
 #
 # All three of these come from that one fact. They are not defects, and there are 131 of them.
 #
-# **Revisit if the mixins ever get annotations.** Until then these inspections cannot tell a real
+# **Revisit if the mod ever gets annotations.** Until then these inspections cannot tell a real
 # mistake from the language's own limits, and an inspection that cannot be trusted is worse than one
 # that is off: it buries the ones that can.
 # ---------------------------------------------------------------------------------------------------

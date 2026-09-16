@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Reactor.Editing;
-using Reactor.Ui;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Core.World;
 using VRageMath;
 using Reactor.Host.SpaceEngineers.Presentation.Graphics;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;

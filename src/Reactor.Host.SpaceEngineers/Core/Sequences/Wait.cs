@@ -1,4 +1,4 @@
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// A step that spends time and does nothing else.

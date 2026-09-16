@@ -1,4 +1,4 @@
-namespace Reactor.World
+namespace Reactor.Host.SpaceEngineers.Core.World
 {
     /// <summary>
     /// Something that can happen to an entity, and which a rule can listen for.
@@ -23,8 +23,32 @@ namespace Reactor.World
             Text = text;
         }
 
+        /// <summary>One the construct answers, which has no reading behind it at all.</summary>
+        public EntityEvent(string id, string text)
+        {
+            Id = id;
+            PropertyId = "";
+            Text = text;
+            Answered = true;
+        }
+
         /// <summary>Stable identifier, referenced by saved rules.</summary>
         public string Id { get; private set; }
+
+        /// <summary>
+        /// Whether something on the construct answers this rather than the block reporting it.
+        /// </summary>
+        /// <remarks>
+        /// A button is the case: it raises nothing until a slot on its toolbar holds something, and
+        /// what it then runs is decided by that slot rather than by anything a rule could sample. A
+        /// timer, a sensor and an event controller are the same, because each is a toolbar.
+        /// <para>
+        /// So there is nothing to watch, and watching anyway is worse than useless: the press arrives
+        /// by the slot invoking Reactor's action, and a rule sampling for it as well starts the same
+        /// sequence twice on one press.
+        /// </para>
+        /// </remarks>
+        public bool Answered { get; private set; }
 
         /// <summary>The property on the entity this event watches.</summary>
         public string PropertyId { get; private set; }

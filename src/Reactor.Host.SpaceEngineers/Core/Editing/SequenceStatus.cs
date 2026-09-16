@@ -1,4 +1,4 @@
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>What a sequence is doing right now.</summary>
     /// <remarks>

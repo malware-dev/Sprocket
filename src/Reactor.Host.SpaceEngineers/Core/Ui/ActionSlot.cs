@@ -1,6 +1,6 @@
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>What the step does to the things it names.</summary>
     public sealed class ActionSlot : SentenceSlot

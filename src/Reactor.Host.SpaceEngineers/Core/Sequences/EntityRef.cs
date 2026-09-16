@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// A claim about which thing in the world was meant.

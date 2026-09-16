@@ -1,4 +1,4 @@
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// How well a reference is holding.

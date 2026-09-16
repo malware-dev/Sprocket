@@ -1,4 +1,4 @@
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// A trigger the construct has to provide: something on the ship starts the sequence.

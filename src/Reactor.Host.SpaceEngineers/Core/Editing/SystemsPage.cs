@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Sequences;
-using Reactor.Ui;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Ui;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// The systems on this ship, and the ones of each that are actually fitted. The front

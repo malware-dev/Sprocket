@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// An append-only run of values, kept in fixed chunks rather than one growing array.

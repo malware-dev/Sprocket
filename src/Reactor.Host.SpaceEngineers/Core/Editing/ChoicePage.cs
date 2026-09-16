@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Ui;
+using Reactor.Host.SpaceEngineers.Core.Ui;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// Picks a single value for a slot - an event, an action, a repeat rate.

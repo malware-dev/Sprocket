@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Fakes;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
@@ -72,6 +73,9 @@ sealed class Rig
     /// </remarks>
     public void Install()
     {
+        // Every toolbar read and write the mod makes, answered over this rig's own slots.
+        Toolbars.Use(new RigSlots(this));
+
         IMyCubeGrid grid = _grid.Block;
 
         MyAPIGateway.GridGroups = Pretend.To<IMyGridGroups>()

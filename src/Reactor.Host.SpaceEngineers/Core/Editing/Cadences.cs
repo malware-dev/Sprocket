@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// The rates offered for "Every ___".

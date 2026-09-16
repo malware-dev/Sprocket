@@ -2,7 +2,7 @@ using VRage.Game.ModAPI;
 using System;
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Terminal;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.World;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 
@@ -88,7 +88,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 return false;
 
             _read.Clear();
-            toolbar.GetParameters(button, _read);
+            Toolbars.Parameters(toolbar, button, _read);
 
             return _read.Count > 0
                 && string.Equals(_read[0].Value as string, key, StringComparison.Ordinal);
@@ -106,8 +106,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 // "button 2 is pressed" on a panel with several, and plain "is pressed" on a panel
                 // with one, where saying which would be saying something nobody needs to know.
                 var words = buttons == 1 ? "is pressed" : "button " + i + " is pressed";
-                kind.WithProperty(Pressed(i), words)
-                    .WithEvent(Pressed(i), Pressed(i), Edge.Rising, words);
+                kind.WithAnsweredEvent(Pressed(i), words);
             }
         }
 
@@ -152,52 +151,5 @@ namespace Reactor.Host.SpaceEngineers.World
             return false;
         }
 
-        public IBlockListener Listen(IMyTerminalBlock block)
-        {
-            var panel = block as IMyButtonPanel;
-            return panel == null ? null : new ButtonListener(panel);
-        }
-
-        /// <summary>Holds a press until a tick has read it.</summary>
-        sealed class ButtonListener : IBlockListener
-        {
-            readonly IMyButtonPanel _panel;
-
-            /// <summary>Which buttons were pressed since a tick last looked, by index.</summary>
-            readonly HashSet<int> _pressed = new HashSet<int>();
-
-            public ButtonListener(IMyButtonPanel panel)
-            {
-                _panel = panel;
-                _panel.ButtonPressed += OnPressed;
-            }
-
-            void OnPressed(int index)
-            {
-                _pressed.Add(index);
-            }
-
-            public bool TryRead(string propertyId, out EntityValue value)
-            {
-                value = default(EntityValue);
-
-                var button = ButtonOf(propertyId);
-                if (button < 0)
-                    return false;
-
-                value = EntityValue.Of(_pressed.Contains(button));
-                return true;
-            }
-
-            public void Clear()
-            {
-                _pressed.Clear();
-            }
-
-            public void Dispose()
-            {
-                _panel.ButtonPressed -= OnPressed;
-            }
-        }
     }
 }

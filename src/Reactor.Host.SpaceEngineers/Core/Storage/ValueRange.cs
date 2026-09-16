@@ -1,4 +1,4 @@
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// The items of one list, as a run of the reading's items rather than a list of their own.

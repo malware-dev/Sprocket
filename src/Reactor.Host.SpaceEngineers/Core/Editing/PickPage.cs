@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Ui;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Ui;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// Picks blocks and then what happens to them, with both stages on screen at once.

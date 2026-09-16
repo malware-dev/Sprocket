@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Reactor.Runtime;
-using Reactor.Sequences;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// Words a system's name and what it is doing.

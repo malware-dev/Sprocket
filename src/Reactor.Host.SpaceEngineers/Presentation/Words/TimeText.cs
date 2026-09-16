@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using Reactor.Editing;
+using Reactor.Host.SpaceEngineers.Core.Editing;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Words
 {

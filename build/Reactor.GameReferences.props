@@ -25,18 +25,20 @@
     <!--
         Only the assemblies this code uses, and not the rest the package brings.
 
-        <b>Sandbox.Graphics, Sandbox.Game and the render assemblies stay out.</b> The screen-space drawing
-        the editor renders through is declared in Sandbox.Game, and the harness declares those few types
-        itself so a frame can be recorded rather than drawn. A type in the assembly being compiled wins
-        over one from a reference, so referencing that assembly would not break the build - it would
-        quietly make the harness draw into the game's own types and record nothing.
+        <b>Sandbox.Graphics and the render assemblies stay out</b>, because nothing outside the game has
+        any business drawing.
 
-        Everything else is the real thing. This set grows by name, one assembly at a time, as the code
-        starts using something from it.
+        Sandbox.Game is in, now that the screens draw through an interface rather than through its
+        statics: where a call lands is decided by which IScreenSpace was handed over, not by which
+        assembly happens to be in scope. A few of its types are still declared by the harness itself -
+        see Fakes - and a declaration in the assembly being compiled wins over one from a reference,
+        which is what keeps those working.
+
+        This set grows by name, one assembly at a time, as the code starts using something from it.
     -->
     <Target Name="ReferenceOnlyWhatCoreUses" AfterTargets="SpaceEngineers">
         <ItemGroup>
-            <Reference Remove="System.Collections.Immutable;Sandbox.Game;Sandbox.Graphics;VRage.Audio;VRage.Render;VRage.Render11;VRage.Scripting;ProtoBuf.Net.Core" />
+            <Reference Remove="System.Collections.Immutable;Sandbox.Graphics;VRage.Audio;VRage.Render;VRage.Render11;VRage.Scripting;ProtoBuf.Net.Core" />
         </ItemGroup>
     </Target>
 </Project>

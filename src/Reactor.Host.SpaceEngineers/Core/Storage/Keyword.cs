@@ -1,4 +1,4 @@
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// One of the format's own words, as a number rather than as text.

@@ -1,5 +1,5 @@
 using Reactor.Host.SpaceEngineers.Presentation.Words;
-using Reactor.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
 using Xunit;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;

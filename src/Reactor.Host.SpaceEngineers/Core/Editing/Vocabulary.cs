@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Reactor.Runtime;
-using Reactor.World;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Core.World;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// Works out what a slot is allowed to contain, given what is already in the

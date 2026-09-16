@@ -1,5 +1,5 @@
-using Reactor.Editing;
-using Reactor.Ui;
+using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Core.Ui;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 

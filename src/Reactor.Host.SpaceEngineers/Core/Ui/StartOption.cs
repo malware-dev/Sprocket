@@ -1,6 +1,5 @@
-using System.Collections.Generic;
 
-namespace Reactor.Ui
+namespace Reactor.Host.SpaceEngineers.Core.Ui
 {
     /// <summary>One way of starting something.</summary>
     public sealed class StartOption

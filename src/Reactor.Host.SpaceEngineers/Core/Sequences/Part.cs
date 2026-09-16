@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// Something a system needs a construct to provide, and what may answer it.

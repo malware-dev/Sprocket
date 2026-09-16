@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Sequences
+namespace Reactor.Host.SpaceEngineers.Core.Sequences
 {
     /// <summary>
     /// One change to a sequence, and how to take it back.

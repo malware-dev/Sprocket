@@ -1,4 +1,4 @@
-namespace Reactor.World
+namespace Reactor.Host.SpaceEngineers.Core.World
 {
     /// <summary>
     /// What the host's things are called, in the words of the people playing.

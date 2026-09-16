@@ -1,5 +1,5 @@
 using System.Globalization;
-using Reactor.Editing;
+using Reactor.Host.SpaceEngineers.Core.Editing;
 using Xunit;
 using Reactor.Host.SpaceEngineers.Presentation.Ui;
 

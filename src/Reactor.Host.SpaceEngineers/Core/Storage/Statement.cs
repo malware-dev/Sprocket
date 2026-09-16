@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Reactor.Storage
+namespace Reactor.Host.SpaceEngineers.Core.Storage
 {
     /// <summary>
     /// A word, the values after it, and the block under it if it has one.

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Reactor.Editing;
+using Reactor.Host.SpaceEngineers.Core.Editing;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
 using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Sim.Machine;
@@ -44,6 +45,19 @@ sealed class Simulation
         return new Simulation(Store.Nowhere());
     }
 
+    /// <summary>
+    /// A rig on storage somebody else holds.
+    /// </summary>
+    /// <remarks>
+    /// So a test can close a construct and open it again: the same storage, a new rig, a new unit -
+    /// which is what a restart is, and the only way to catch the harness losing something the game
+    /// would have kept.
+    /// </remarks>
+    internal static Simulation On(Store store)
+    {
+        return new Simulation(store);
+    }
+
     Simulation(Store store)
     {
         _store = store;
@@ -52,7 +66,19 @@ sealed class Simulation
         _rig.Install();
         _rig.Reactor.Storage = store;
 
+        // And before that again, because the unit's first look at the toolbars decides whether the
+        // program's buttons are still wired. In the game those slots are in the save beside the
+        // program; here they are a key beside it.
+        string wired;
+        if (store.TryGetValue(Wiring.Key, out wired))
+            Wiring.Load(wired, _rig);
+
         _unit = new ReactorUnit(_rig.Reactor.Block);
+
+        // A press invokes what the slot holds, and what that means is the unit's to say - which is
+        // the game's arrangement exactly: the slot carries a key and Reactor resolves it.
+        foreach (Panel panel in Panels())
+            panel.Invokes = _unit.Fire;
 
         // One tick before anybody can press anything, because that is the order in the game: the
         // session adopts a block as it comes alive, long before a screen is opened on it. Without it
@@ -65,13 +91,16 @@ sealed class Simulation
 
     public GridWorld World => _unit.World;
 
+    public AutomationRunner Runner => _unit.Runner;
+
     /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
     public string Where => _store.Where;
 
-    /// <summary>Writes the program out now, whatever the clock says.</summary>
+    /// <summary>Writes the program and the wiring out now, whatever the clock says.</summary>
     public void Save()
     {
         _unit.Persist();
+        _store.SetValue(Wiring.Key, Wiring.Save(_rig));
     }
 
     /// <summary>
@@ -90,7 +119,26 @@ sealed class Simulation
         _unit.Tick(_frame);
 
         if (_frame % SaveEvery == 0)
-            _unit.Persist();
+            Save();
+    }
+
+    /// <summary>
+    /// Somebody pressing the first button of a named panel.
+    /// </summary>
+    /// <remarks>
+    /// By name, because that is what a person looking at the ship has. A panel nobody wired raises
+    /// nothing, which is the game's rule and worth testing rather than working around.
+    /// </remarks>
+    public void Press(string panel)
+    {
+        foreach (Panel found in Panels())
+        {
+            if (found.Name == panel)
+            {
+                found.Press(0);
+                return;
+            }
+        }
     }
 
     /// <summary>The buttons on the rig, for the row of pokes along the bottom of the window.</summary>

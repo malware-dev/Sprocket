@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using VRage.Utils;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Look

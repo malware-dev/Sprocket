@@ -1,7 +1,7 @@
-using Reactor.Runtime;
-using Reactor.Sequences;
+using Reactor.Host.SpaceEngineers.Core.Runtime;
+using Reactor.Host.SpaceEngineers.Core.Sequences;
 
-namespace Reactor.Editing
+namespace Reactor.Host.SpaceEngineers.Core.Editing
 {
     /// <summary>
     /// The words for a sequence, where a person can only read it.
