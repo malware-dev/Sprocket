@@ -131,7 +131,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// The id is exact and dies with a blueprint; the name survives one and is the thing a player
         /// edits casually. Grid position belongs between them, because a pasted copy keeps every
         /// position and changes every id - it is not here yet because there is no value kind wide
-        /// enough to write one down. See "Still to prove" in <c>docs/Script.md</c>.
+        /// enough to write one down. See "Still open about the script" in <c>docs/Design.md</c>.
         /// </remarks>
         /// <summary>
         /// Sequences nothing can currently start, by id.

@@ -12,8 +12,8 @@ Two projects, and the first one is the mod:
 
 - **`src/Reactor.Host.SpaceEngineers`** is everything that runs in the game, in one tree, one folder
   per capability and each holding the whole of it: a sequence's model, the slots a screen is asked to
-  show for it and the views that draw them all sit in `Sequences/`. `Words/` is the only English in
-  the repository. `Layout/`, `Drawing/` and `Look/` know nothing of Reactor and sit beside the
+  show for it and the views that draw them all sit in `Sequences/`. `Words/` decides how a sentence is
+  composed, which is not the same as holding the English - see below. `Layout/`, `Drawing/` and `Look/` know nothing of Reactor and sit beside the
   features that use them. Files are globbed, so a new file is in the build by being in the folder.
 
   **What a screen is asked to show carries structure and never words** - stated on
@@ -132,7 +132,6 @@ alternatives that were considered, no roadmap, and nothing about what is undecid
 
 **Any change to a rule, keyword, construct or spelling updates it in the same change as the code.**
 The spec is never left trailing, and the old wording is deleted rather than kept beside the new.
-`docs/Script.md` is the history of how the language got there and is not maintained as truth.
 
 Six rules, each of which the document has already been wrong about:
 

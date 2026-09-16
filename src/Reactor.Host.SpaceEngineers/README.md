@@ -16,7 +16,7 @@ is drawn together, because a change to how a sentence works should be a change i
 | `Runtime/` | running a sequence, and waiting for what it started |
 | `Storage/` | the script: the language, read and written |
 | `World/` | the game's blocks, what they can do, and their toolbars |
-| `Words/` | every word on screen, and the only English in the repository |
+| `Words/` | how a sentence is composed: word order, capitals, and the words that join phrases |
 | `Screen/` | the editor's surface, and the screen that draws it |
 | `Layout/` | elements, containers, text - laying out, knowing nothing of Reactor |
 | `Drawing/` | what everything draws through, and the game's own backend |

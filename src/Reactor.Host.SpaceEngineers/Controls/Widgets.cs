@@ -50,23 +50,6 @@ namespace Reactor.Host.SpaceEngineers.Controls
         }
 
         /// <summary>
-        /// One of a set of narrowings, lit when it is the one in force.
-        /// </summary>
-        /// <remarks>
-        /// Dark words on the lit one. The game's focus colour is a pale ice blue that it fills a control
-        /// with rather than outlines, so anything wearing it has to put dark text on top - pale on pale
-        /// is the trap a saturated accent hides and this one does not.
-        /// </remarks>
-        public static Label Chip(string text, bool on)
-        {
-            Label chip = Label(text, on ? Palette.Chrome : Palette.Muted, Lettering.Small);
-            chip.Background = on ? Palette.Accent : Palette.Panel;
-            chip.Padding = new Thickness(Space.ChipX, Space.ChipY);
-            chip.Wraps = false;
-            return chip;
-        }
-
-        /// <summary>
         /// Somewhere to type.
         /// </summary>
         /// <remarks>

@@ -130,6 +130,30 @@ the game. Registering per type across that list was never tested and is not rule
 
 ---
 
+### 5. Whether a mod can read its own localisation table
+
+Not blocking anything yet - see decision 11 in `Design.md` and issue #17 - and the first thing
+that decision needs, because it decides whether there is a mechanism to design against or one to invent.
+
+Space Engineers localises its own strings from `.sbc` resource files, and a mod ships `.sbc` files.
+What is not known is whether a **mod script** can ask for a string by id at runtime, in the same way
+the game's own code does, or whether `.sbc` localisation only reaches the parts of a mod that are
+data rather than code - block definitions, categories, control labels.
+
+**How to answer it:** look for the game's own string lookup on the mod-facing surface, and try one.
+A mod that can read its own table has a translation mechanism for free. A mod that cannot has to
+carry its own, which changes the answer to decision 11 completely - and is worth knowing before
+anything is designed rather than after.
+
+**The drawing half is already answered, and it is the half that could have been a wall.** The game's
+own font, `Fonts/white/FontDataPA.xml`, declares 496 glyphs: ASCII, Latin-1, Latin Extended-A and B,
+Cyrillic, some punctuation, and the game's own private-use symbols. Checked character by character
+against samples, German, French, Spanish, Polish, Czech, Turkish and Russian are all fully drawable
+as things stand. **Chinese and Japanese have no glyphs at all**, so no mechanism on our side could
+show them - that is the game's limit and not one a mod can lift with this font.
+
+---
+
 ## Answered, and where the answers went
 
 Kept listed so nobody re-opens them: how events reach us, whether levels are readable,

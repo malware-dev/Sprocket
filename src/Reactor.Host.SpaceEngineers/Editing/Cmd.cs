@@ -40,7 +40,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
         Redo,
         AddAction,
         AddWait,
-        EditTrigger,
         EditCadence,
         TriggerSlot,
         StepSlot,

@@ -10,9 +10,10 @@ namespace Reactor.Host.SpaceEngineers.Words
     /// The words a sentence reads as.
     /// </summary>
     /// <remarks>
-    /// Core says what a slot refers to and nothing about what it says. Every word in a sentence on
-    /// this screen is decided here, which is what lets another target say it differently - or in
-    /// another language - without core knowing.
+    /// A slot says what it refers to and nothing about what it says. What it reads as is decided
+    /// here, out of phrases the blocks themselves supply: a door says "finishes opening", and this
+    /// decides that the sentence is "When the inner door finishes opening", in that order, with that
+    /// capital. Order and capitals are the parts no block could know and nothing can derive.
     /// <para>
     /// Static, because a sentence is worded from what it is handed and nothing else, and because the
     /// views ask for a slot's words while laying out rather than through anything they were given.

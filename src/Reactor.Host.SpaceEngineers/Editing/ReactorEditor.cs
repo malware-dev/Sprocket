@@ -451,13 +451,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 Pop();
         }
 
-        internal void Reset(EditorPage page)
-        {
-            _stack.Clear();
-            _stack.Add(page);
-            _structureDirty = true;
-        }
-
         /// <summary>The shape of the screen has changed and must be rebuilt.</summary>
         internal void Invalidate()
         {
@@ -663,11 +656,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _structureDirty = true;
         }
 
-        internal bool IsRootPage<T>() where T : EditorPage
-        {
-            return _stack.Count > 0 && _stack[0] is T;
-        }
-
         void Settle()
         {
             if (_structureDirty)
@@ -836,14 +824,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// action, so somebody who genuinely wants to retreat still has somewhere to
         /// press.
         /// </remarks>
-        internal void StartSequence(Trigger trigger)
-        {
-            StartSequence(null, trigger);
-        }
-
-        /// <summary>
-        /// The same, for a sequence that belongs to a system somebody is already looking at.
-        /// </summary>
         internal void StartSequence(AutomationSystem system, Trigger trigger)
         {
             _pendingSystem = system;

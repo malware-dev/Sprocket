@@ -42,23 +42,5 @@ namespace Reactor.Host.SpaceEngineers.Editing
         };
 
         public static IList<Cadence> All => _all;
-
-        /// <summary>The offered rate nearest a raw tick count, for display.</summary>
-        public static Cadence Nearest(int ticks)
-        {
-            var best = _all[0];
-            var bestDistance = int.MaxValue;
-            for (var i = 0; i < _all.Length; i++)
-            {
-                var distance = _all[i].Ticks - ticks;
-                if (distance < 0)
-                    distance = -distance;
-                if (distance >= bestDistance)
-                    continue;
-                bestDistance = distance;
-                best = _all[i];
-            }
-            return best;
-        }
     }
 }

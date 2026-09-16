@@ -102,7 +102,7 @@ src/
     Runtime/                         Execution, waiting for what was started
     Storage/                         The script: the language, read and written
     World/                           The game's blocks, what they can do, and their toolbars
-    Words/                           Every word on screen, and the only English in the repository
+    Words/                           How a sentence is composed: word order, capitals, joining words
     Screen/                          The editor's surface, and the screen that draws it
     Layout/                          Elements, containers, text - laying out, knowing nothing of Reactor
     Drawing/                         What the screens draw through, and the game's backend

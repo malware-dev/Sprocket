@@ -17,19 +17,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
     /// </remarks>
     public static class EntityQuery
     {
-        /// <summary>
-        /// Appends every entity matching both filters to <paramref name="result"/>.
-        /// An empty search or a null kind means "no opinion", not "match nothing".
-        /// </summary>
-        public static void Filter(IList<GridEntity> candidates, string search, string kindId, List<GridEntity> result)
-        {
-            for (var i = 0; i < candidates.Count; i++)
-            {
-                if (Matches(candidates[i], search, kindId))
-                    result.Add(candidates[i]);
-            }
-        }
-
         /// <summary>Whether a plain label matches a search, just as forgivingly.</summary>
         public static bool MatchesText(string text, string search)
         {

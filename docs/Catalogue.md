@@ -116,7 +116,7 @@ every tick they are worse than the problem.
 **What that leaves:** a discriminated value is a kind tag, one 64-bit field for anything that fits,
 and a reference for anything that does not. `BitConverter` is what lets a `double` and a `long` share
 the one field. There is no payload width that would hold everything - `MatrixD` is sixteen doubles -
-so the reference is not a fallback, it is the design. See `EntityValue` and `docs/Script.md`.
+so the reference is not a fallback, it is the design. See `EntityValue`.
 
 ### What the direct layer reaches
 

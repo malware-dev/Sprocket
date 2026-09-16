@@ -770,58 +770,49 @@ H is the constraint nobody would guess. Reactor can only explain what it can see
 every case somebody sets up in the game's own terminal instead is a hole in the
 explanation. Losing the easy cases is how the hard ones become unanswerable.
 
-### 11. Who owns the words
+### 11. Localisation, if the mod is ever popular enough to need it
 
-*Raised by tooltips. Load-bearing on anything translated.*
+*Issue #17, a stretch goal. Not blocking anything. Worth knowing the shape of before more strings
+are written, which is why the reasoning is here and not only in the issue.*
 
-Core hands the host a lot of finished English: `Title`, `Subtitle`, a step's `Text` and
-`Lead`, `Status`, `LastRun`, `Problem`, `LockedText`, and `UndoText` - which today reads
-"deleting a step". The host writes the rest: Back, the switch, `+ do something`, Delete.
+The English is not gathered and never was. Counted by folder, the strings a player reads sit in
+seven places at once: the block vocabulary in `World/` - "finishes opening", "is shut", "has air" -
+the page titles, prompts and cadence descriptions in `Editing/`, the parser's messages in
+`Storage/`, the undo labels in `Sequences/`, fragments in `Lists/` and `Picking/`, and the sentence
+composition in `Words/`, which is the smallest of them.
 
-There is a line that fits what exists, and it is tidy: **core says what a thing is, the host
-says what a control does.** Only core knows what the last edit was; only the host knows there
-is an arrow drawn for it. By that reading a tooltip is composed rather than owned - the host
-supplies the verb, core supplies the object - and it needs no change to core at all.
+`Words/` was once described as the only English in the repository. It is not, and the description
+was inherited from a design whose premise was a second host that no longer exists. What `Words/`
+actually decides is how a sentence is *assembled* from phrases the blocks supply - word order,
+capitals, whether the joining word is "and" or "or" - which is the part nothing can derive and the
+part that has to be decided once. That is worth keeping and is not a localisation seam.
 
-**The objection is sharper than the rule.** Granting that every host wants to know what would
-be undone does not grant that core owns the *sentence* describing it. Core could publish the
-fact - an edit of this kind, on that step - and leave the wording to whoever is drawing. That
-reading puts the same boundary one level lower, and it is not obvious which is right.
+**Two things are already settled and stay settled.** A phrasebook keyed by string id was rejected
+because it needs an id per string and sprawls. English defaults behind ids were rejected because a
+default nobody overrides is the current situation wearing a label. Neither rejection depended on
+there being a second host, so neither is reopened by there not being one.
 
-What tips it, and is worth deciding before more strings are added rather than after: **a mod
-gets translated.** If core owns the wording then translating means changing core, in a project
-whose whole point is that core is the part that does not change per target. If core owns the
-facts, a language is a host concern and core never learns what a language is. Against that,
-facts are more API to keep stable, and "deleting a step" written once beats the same sentence
-assembled in three hosts that drift.
+**What a real answer has to deal with**, in the order of how awkward each is:
 
-`PrimaryText` is the anomaly either way. It is core naming a button caption, which is the one
-place core is already doing the host's job under any reading of the rule.
+- **The block vocabulary is declared at the site, as an argument.** `WithState("is-shut", Shut,
+  true, "is shut")` is a phrase written where the block is described, which is the right place for
+  it to be written and the wrong place for it to be translated from. Whatever the mechanism, this is
+  where most of the words are.
+- **Space Engineers has `.sbc` localisation**, so the mechanism exists without inventing one. What
+  is not known is whether a mod can read its own resource table from a mod script at all, and that
+  is a question for `ApiUnknowns.md` before it is a design question here.
+- **Word order is not a table lookup.** German puts the verb last. Anything that translates phrase
+  by phrase and leaves `Words/` composing them in English word order produces sentences no German
+  speaker would write. A language is not a set of strings; it is a set of strings plus an
+  arrangement, and the arrangement is code.
+- **A string the parser shows is not the same problem as a string a screen shows.** A script is
+  written in the language's own keywords and those do not translate - the trouble messages around
+  them do.
 
-Parked deliberately. Tooltips are not blocked on it - they can be built from what exists and
-reworded later - but adding *new* core strings before it is settled is how the answer gets
-decided by accident.
+Nothing to do now. The one thing to avoid is a mechanism adopted halfway: ids for some strings and
+literals for the rest is worse than literals everywhere, because it reads as finished.
 
-## Where the editor stands
-
-The editor works, and the abstraction has held up under a lot of pushing. Core hands a
-target a small set of domain-shaped components - a `StartComponent`, a `StatusListComponent`,
-a `PickComponent` of stages, a `SequenceComponent` - and decides nothing about layout. Even
-the noun is the host's: core says *entity* and Space Engineers says *block*, because the two
-are not the same claim and only one of them belongs to a game.
-
-Of the ten questions above, quantities is now half answered - see decision 2 - and none of
-the rest contradicts what is built. Reading a block's properties well enough to put them back
-is the one still reaching past the language into the world model, so it is the one to design
-most carefully before writing any of it.
-
-**A system is a template now, not a label.** Its roles are derived from what its sequences
-act on, one of it is a substitution saying which of your own things stand in for the author's,
-and the runtime runs each sequence once per one of them. That was the centre of gravity of the
-whole project - four unrelated stories wanted it - and the half that remains is a screen to
-fill the roles in from, not a model question.
-
-### Text sits a little high, and one number is why
+## Text sits a little high, and one number is why
 
 Every line of text in the editor draws a touch above where it should. It appeared when `Label`
 started reporting a line rather than a glyph cell, which is the correct answer to what a label
@@ -838,51 +829,44 @@ Pin it from the game rather than deriving it again. Left alone deliberately for 
 single number, it is wrong by a small amount, and guessing at it a third time is how the last
 two attempts went.
 
-### Core has a presentation layer it should not have
-
-Worked out in conversation and written up in `Script.md`. In short: there is the script - ids and
-nodes, what the runtime sees - and there is the presentation, what a person reads. Core owns only
-the first, and today it does not hold to that: `SentenceSlot` carries rendered English text, so
-`SequenceComponent` hands a target a finished sentence rather than the script.
-
-That is also the answer to localisation, which is where the conversation started. Core holds no text
-at all, each host localises by whatever its own platform offers, and the Space Engineers host
-hardcodes English for V1. It is why there is no phrasebook interface and no string table anywhere in
-core, and why proposals for either should be read against `Script.md` before being taken up again.
-
-The same document carries the design for the stored script as an actual script language, and for
-block references, which are the one part that cannot look like a normal language.
-
-### The Avalonia host has been removed
-
-It was the only *independent* consumer of core's component surface - the simulator is not a second
-target, it shares `Presentation.Mixin` with the game and swaps only the backend -
-and for a while that was worth something. Two implementations is the classic minimum for an
-abstraction to be real, and it earned its keep as recently as the heading work, where having to
-write the flattening in its own file is what made the cost of a flattened heading visible.
-
-But it stopped being that. It rendered all seven component types and it compiled, and it could no
-longer draw a heading properly - it joined the parts into a line and offered the rename of whichever
-came first. **A lagging second implementation gives confidence rather than pressure**: it stops
-pushing back on core and starts agreeing with whatever core does, while still costing a port on
-every change. Three and a half thousand lines for that, in a repository whose product is a mod.
-
-What went with it has been replaced deliberately, because the thing it provided was real: nothing
-else tested that core can be rendered by something that is not this game. That is now
-`PaperTarget` in `Reactor.Core.Tests` - a target made of text, with no drawing, no layout and no
-game near it, which refuses to render a component type nobody has told it about. A new component
-therefore stops the tests until somebody has said what a target should show for one. A hundred and
-seventy lines, and it cannot drift into agreement because it cannot draw at all.
-
-Its eighteen tests moved onto the simulator, where they test what ships rather than what was
-sketched. The move paid for itself immediately: two of them had been passing against whatever the
-developer last built by hand, because the simulator's fixture is persisted between runs.
-
-`Reactor.Machine.Mixin` went with it, for a duller reason: it used `System.IO` and file-scoped
-namespaces, so it could never have been a mixin despite the name. The simulator was its only
-consumer, so it is now the simulator's `Machine/` folder.
-
 *The editor's own interface has been worked over hard, and `docs/Editor.md` is where that
 lives rather than here. The load-bearing conclusions: narrowing runs one way only, one trip
 through a picker is one edit, a system cannot be rewired while it runs, and a running
 sequence is shown as a thing being watched rather than as an editor with its hands tied.*
+
+## Still open about the script
+
+None of these is an argument still running. Each says what would settle it.
+
+**What a kind means as a constraint.** `Door/LargeBlockDoor` is a definition, right for finding the
+same block again. A premade airlock does not need that exact door - it needs *something that opens
+and closes*. Both levels exist already: `EntityKind` is per definition, `BlockExtensions` decides a
+block behaves like a door. Whether the constraint is the definition, the capability, or both, is a
+configurator question.
+
+**The instance configuration system is deliberately undesigned.** There is a lot to do before we
+know what must be configured; we only know the blocks. So the format claims only that it binds
+blocks, and must be able to grow without a break. Designing the configurator by implication through
+the file format would be worse than designing it deliberately, because a format is a promise.
+
+**What `set` looks like.** Reserved, not designed. One thing to avoid while nothing depends on it:
+every statement so far is `verb [targets] modifiers`, and `set Open false [inner]` would put the
+targets last.
+
+**Whether property-derived action pairs are collapsed into the property.** Answerable by looking at
+the game's real action titles, not by argument.
+
+**Grid-relative position as a key.** It survives blueprinting, where an id does not - paste a copy
+of a ship and every id changes while every position is identical. Not written yet because no value
+kind is wide enough to hold one.
+
+**Only text uses a value slot today.** The machinery is right but has not carried anything genuinely
+wide, so the shape of a matrix list - and whether a screen can reasonably show one - is untested.
+
+**Holding a reading is not the same as holding a value.** A reading rewrites its own slot, so
+anything that keeps one and reads again finds the contents changed underneath it. Fine for a
+comparison, which happens immediately; a rule to state properly before anything stores one.
+
+**The operator table is half of one.** `Relation` is comparison. Arithmetic is a second axis and
+does not exist yet - and it will, because a scripting language that cannot do maths is a poor one.
+When it arrives, *which operators apply to which kinds* has to answer for both.

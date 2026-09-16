@@ -264,21 +264,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             return null;
         }
 
-        /// <summary>The system a sequence belongs to, or null if it somehow belongs to none.</summary>
-        public AutomationSystem SystemOf(Sequence sequence)
-        {
-            for (var i = 0; i < _systems.Count; i++)
-            {
-                var sequences = _systems[i].Sequences;
-                for (var s = 0; s < sequences.Count; s++)
-                {
-                    if (ReferenceEquals(sequences[s], sequence))
-                        return _systems[i];
-                }
-            }
-            return null;
-        }
-
         /// <summary>
         /// Adds a sequence to a system, making one if none was given.
         /// </summary>
@@ -337,34 +322,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                     return _sequences[i];
             }
             return null;
-        }
-
-        /// <summary>Named sequences, which are the ones another trigger can start.</summary>
-        public void NamedSequences(List<Sequence> result)
-        {
-            for (var i = 0; i < _sequences.Count; i++)
-            {
-                if (_sequences[i].HasName)
-                    result.Add(_sequences[i]);
-            }
-        }
-
-        /// <summary>
-        /// How many sequences name this declaration, without allocating.
-        /// </summary>
-        /// <remarks>
-        /// Asked once per listed block on every tick, so it must not produce garbage
-        /// - core runs inside the game's update loop.
-        /// </remarks>
-        public int CountReferencing(string name)
-        {
-            var count = 0;
-            for (var i = 0; i < _sequences.Count; i++)
-            {
-                if (References(_sequences[i], name))
-                    count++;
-            }
-            return count;
         }
 
         public static bool References(Sequence sequence, string name)

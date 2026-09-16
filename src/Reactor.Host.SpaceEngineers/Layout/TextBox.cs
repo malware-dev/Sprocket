@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using VRage.Game;
 using VRageMath;
@@ -39,9 +38,6 @@ namespace Reactor.Host.SpaceEngineers.Layout
             CaretColor = Color.White;
             CaretVisible = true;
         }
-
-        /// <summary>Raised when an edit is committed, never while one is in progress.</summary>
-        public event Action<TextBox> Committed;
 
         public string Font
         {
@@ -222,14 +218,6 @@ namespace Reactor.Host.SpaceEngineers.Layout
                 return string.Empty;
 
             return _text.ToString(SelectionStart, SelectionEnd - SelectionStart);
-        }
-
-        /// <summary>Announces the current text as final. Called by the editor, never by an edit.</summary>
-        internal void RaiseCommitted()
-        {
-            var handler = Committed;
-            if (handler != null)
-                handler(this);
         }
 
         private void MoveCaretTo(int index, bool select)

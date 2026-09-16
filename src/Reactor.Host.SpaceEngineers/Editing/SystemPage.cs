@@ -28,8 +28,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _system = system;
         }
 
-        public int SystemId => _system.Id;
-
         public override string Title => SystemSummary.Describe(Editor.Runner.Bindings, _system);
 
         /// <summary>
