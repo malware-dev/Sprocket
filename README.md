@@ -104,6 +104,7 @@ src/
     World/                           The game's blocks, what they can do, and their toolbars
     Words/                           How a sentence is composed: word order, capitals, joining words
     Screen/                          The editor's surface, and the screen that draws it
+    Display/                         The status panel: the ship at a glance, nothing to press
     Layout/                          Elements, containers, text - laying out, knowing nothing of Reactor
     Drawing/                         What the screens draw through, and the game's backend
     Look/                            Palette, type scale, spacing, sizes, icons

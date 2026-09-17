@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
+using VRage.Game.ModAPI;
 using Reactor.Host.SpaceEngineers.Terminal;
 using Reactor.Host.SpaceEngineers.World;
 
@@ -37,6 +38,49 @@ namespace Reactor.Host.SpaceEngineers
             return _current != null && block != null
                 && _current._units.TryGetValue(block.EntityId, out unit) ? unit : null;
         }
+
+        /// <summary>
+        /// Whether this machine is the one running programs.
+        /// </summary>
+        /// <remarks>
+        /// For anything that has to tell "there is no Reactor here" from "this machine is not the one
+        /// keeping it": a display drawn on a client has no program to read, and saying the construct has
+        /// no automation would be a lie in the one place a person would believe it.
+        /// </remarks>
+        internal static bool Runs => IsServer;
+
+        /// <summary>
+        /// Every Reactor mechanically connected to this block, in no particular order.
+        /// </summary>
+        /// <remarks>
+        /// The same reach a Reactor itself has - <c>GridGroups</c> on the mechanical group, which is
+        /// what a player means by "this ship" - so a display on a rotor head lists the Reactor in the
+        /// hull. Filled into a list the caller owns, because this is asked on a cadence forever.
+        /// </remarks>
+        internal static void OnConstruct(IMyCubeBlock block, List<ReactorUnit> into)
+        {
+            into.Clear();
+
+            IMyCubeGrid grid = block == null ? null : block.CubeGrid;
+            if (_current == null || grid == null || MyAPIGateway.GridGroups == null)
+                return;
+
+            _current._group.Clear();
+            MyAPIGateway.GridGroups.GetGroup(grid, GridLinkTypeEnum.Mechanical, _current._group);
+
+            foreach (ReactorUnit unit in _current._units.Values)
+            {
+                IMyTerminalBlock owner = unit.Block;
+                if (owner == null || owner.CubeGrid == null)
+                    continue;
+
+                if (_current._group.Contains(owner.CubeGrid))
+                    into.Add(unit);
+            }
+        }
+
+        /// <summary>Scratch for the construct walk. Reused, because a display asks on a cadence.</summary>
+        readonly List<IMyCubeGrid> _group = new List<IMyCubeGrid>();
 
         /// <summary>
         /// Registers the trigger action, on every machine.

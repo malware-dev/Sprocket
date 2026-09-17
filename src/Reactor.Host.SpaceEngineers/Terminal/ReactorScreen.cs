@@ -7,6 +7,10 @@ using Reactor.Host.SpaceEngineers.Drawing;
 using Reactor.Host.SpaceEngineers.Layout;
 using Reactor.Host.SpaceEngineers.World;
 using Reactor.Host.SpaceEngineers.Input;
+using Reactor.Host.SpaceEngineers.Display;
+using VRage.Game.GUI.TextPanel;
+using IngameSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
+using IngameSurfaces = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 
 namespace Reactor.Host.SpaceEngineers.Terminal
 {
@@ -169,6 +173,43 @@ namespace Reactor.Host.SpaceEngineers.Terminal
         protected override void OnClosed(bool isUnloading)
         {
             _unit.Persist();
+
+            if (!isUnloading)
+                Offer();
+        }
+
+        /// <summary>
+        /// Puts the status app on the Reactor's own screen, where the screen is showing nothing.
+        /// </summary>
+        /// <remarks>
+        /// Somebody who has just built their first rule has a block with automation in it and a blank
+        /// panel on the front of it, and the connection between the two is not obvious from either. So
+        /// the way out of the editor is where it is offered, once, by doing it.
+        /// <para>
+        /// <b>Only a surface set to nothing at all.</b> Anything else is a choice somebody made - a
+        /// clock, an image, their own text - and taking that over would be the mod deciding it matters
+        /// more than they do. A block with nothing built in it is left alone too: a status panel that
+        /// says "nothing built yet" is worse than the blank screen it replaced.
+        /// </para>
+        /// </remarks>
+        void Offer()
+        {
+            if (_unit.Editor.Program.Systems.Count == 0)
+                return;
+
+            var provider = _unit.Block as IngameSurfaces;
+            if (provider == null)
+                return;
+
+            if (provider.SurfaceCount == 0)
+                return;
+
+            IngameSurface screen = provider.GetSurface(0);
+            if (screen == null || screen.ContentType != ContentType.NONE)
+                return;
+
+            screen.ContentType = ContentType.SCRIPT;
+            screen.Script = StatusApp.Id;
         }
 
         protected override void OnHandleInput()
