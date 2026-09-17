@@ -42,7 +42,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public bool Fills
         {
             get { return _fills; }
-            set { Set(ref _fills, value, "Fills"); }
+            set { Set(ref _fills, value, nameof(Fills)); }
         }
     }
 }

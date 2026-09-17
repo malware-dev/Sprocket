@@ -33,6 +33,9 @@ namespace Reactor.Host.SpaceEngineers.Lists
 
         int _revision = -1;
 
+        /// <summary>What is said while there is nothing to choose from, held so it can be said again.</summary>
+        Label _empty;
+
         public ChoiceListView(ChoiceListComponent component)
         {
             _component = component;
@@ -54,6 +57,9 @@ namespace Reactor.Host.SpaceEngineers.Lists
 
         protected override void Refresh()
         {
+            if (_empty != null)
+                _empty.Text = _component.EmptyText;
+
             if (_revision != _component.Entries.Revision)
             {
                 _revision = _component.Entries.Revision;
@@ -107,10 +113,12 @@ namespace Reactor.Host.SpaceEngineers.Lists
         {
             _rows.Clear();
             _stack.Children.Clear();
+            _empty = null;
 
             if (_component.Entries.Count == 0)
             {
-                Label empty = Widgets.Label(_component.EmptyText, Palette.Muted, Lettering.Small);
+                _empty = Widgets.Label(_component.EmptyText, Palette.Muted, Lettering.Small);
+                Label empty = _empty;
                 empty.Padding = new Thickness(Space.Row, Space.Row, 0f, 0f);
                 _stack.Children.Add(empty);
                 return;

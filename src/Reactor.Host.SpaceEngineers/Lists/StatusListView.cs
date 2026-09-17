@@ -34,6 +34,16 @@ namespace Reactor.Host.SpaceEngineers.Lists
             get { return _stack; }
         }
 
+        /// <summary>
+        /// What is said when there is nothing on the list, while there is nothing on it.
+        /// </summary>
+        /// <remarks>
+        /// Held, because the words are a value core can change like any other and this view is told
+        /// rather than asked - and it is written where the rows are written rather than only where
+        /// they are built.
+        /// </remarks>
+        Label _empty;
+
         protected override void Refresh()
         {
             if (_revision != _component.Entries.Revision)
@@ -42,6 +52,9 @@ namespace Reactor.Host.SpaceEngineers.Lists
                 Rebuild();
             }
 
+            if (_empty != null)
+                _empty.Text = _component.EmptyText;
+
             for (int i = 0; i < _rows.Count && i < _component.Entries.Count; i++)
                 _rows[i].Update(_component.Entries[i]);
         }
@@ -49,13 +62,17 @@ namespace Reactor.Host.SpaceEngineers.Lists
         void Rebuild()
         {
             _rows.Clear();
+
+            // Let go of with the rest: a held label that is no longer in the layout is a thing being
+            // written to that nobody can see.
+            _empty = null;
             _stack.Children.Clear();
 
             if (_component.Entries.Count == 0)
             {
-                Label empty = Widgets.Label(_component.EmptyText, Palette.Muted, Lettering.Small);
-                empty.Padding = new Thickness(Space.Row, Space.Row, 0f, 0f);
-                _stack.Children.Add(empty);
+                _empty = Widgets.Label(_component.EmptyText, Palette.Muted, Lettering.Small);
+                _empty.Padding = new Thickness(Space.Row, Space.Row, 0f, 0f);
+                _stack.Children.Add(_empty);
                 return;
             }
 

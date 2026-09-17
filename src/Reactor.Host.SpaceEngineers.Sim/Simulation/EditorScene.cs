@@ -243,6 +243,21 @@ namespace Reactor.Sim.Simulation
         /// <summary>How many views are listening to a component right now.</summary>
         public int Watching => _view.Watching;
 
+        /// <summary>How many questions the mod has asked the game, in total.</summary>
+        public int Asked => Fakes.Pretend.Asked;
+
+        /// <summary>Puts the screen away, as a host closing it does.</summary>
+        public void PutAway()
+        {
+            _view.Release();
+        }
+
+        /// <summary>Shows it again, as a host reopening the same one does.</summary>
+        public void ShowAgain()
+        {
+            _view.Attach();
+        }
+
         /// <summary>
         /// What a press or a hover at <paramref name="point" /> would reach, without touching it.
         /// </summary>

@@ -85,11 +85,8 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             // Once a second, and whether or not anybody has a screen open, because a sequence that
             // cannot work is not made safer by nobody looking at it.
-            if (tick - _parked >= Second || tick < _parked)
-            {
-                _parked = tick;
+            if (_parked.Due(tick))
                 ParkBroken();
-            }
 
             if (_structureDirty)
             {
@@ -99,10 +96,18 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             Current.Refresh();
 
-            // Read every tick rather than only when the screen is rebuilt, so naming something shows up
-            // in the heading straight away. The heading's words only - its shape was settled when the
-            // screen was made and the target has already built controls to match it.
-            Current.RefreshHeading(_screen.Heading);
+            // The heading's words are made of things that can change without anything saying so: the
+            // grid's own name, and the name of a block inside a sentence. Nothing in the game's own
+            // interface announces either, so they are read again on a cadence - a second, the same
+            // cadence the rest of this class already keeps time by. A name changed here shows at once,
+            // because SetText reads them back the moment it lands; somebody else's shows within a
+            // second, which nobody can tell from at once.
+            //
+            // Its words only. The heading's shape was settled when the screen was made, and the target
+            // has already built controls to match it.
+            if (_worded.Due(tick))
+                Current.RefreshHeading(_screen.Heading);
+
             _screen.Subtitle = Current.Subtitle;
             _screen.SwitchIsOn = Current.SwitchIsOn;
         }
@@ -150,7 +155,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
         const int Second = 60;
 
         /// <summary>A second behind the start, so the first tick looks rather than waiting.</summary>
-        int _parked = -Second;
+        /// <summary>Switching off what cannot work, which is worth doing whether or not anybody looks.</summary>
+        Interval _parked = new Interval(Second);
+
+        /// <summary>Reading the words in the heading again, which nothing announces.</summary>
+        Interval _worded = new Interval(Second);
 
         /// <summary>
         /// Puts a short question on the screen, to be answered before anything else.
@@ -259,10 +268,13 @@ namespace Reactor.Host.SpaceEngineers.Editing
             // read what it costs should not then have to go and find an edit to make: the press that
             // says "yes, replace it" is the same decision the question asks for, and this is the same
             // answer given a step earlier.
-            if (_notice.Actions.Count == 0)
-                _notice.Actions.Add(new ChoiceEntry("Replace it", false, 0));
-
-            _notice.Actions[0].Command = Register(Cmd.Resolve, Replace);
+            // Replaced rather than reached into. This banner is deliberately kept between builds, and
+            // the command it carries is issued again on every one of them - so writing the id into the
+            // entry that is already there would change what the button does while saying nothing, and
+            // the view showing it is told rather than asked.
+            _mending.Clear();
+            _mending.Add(new ChoiceEntry("Replace it", false, Register(Cmd.Resolve, Replace)));
+            _notice.Actions.Reset(_mending);
 
             components.Insert(0, _notice);
         }
@@ -276,6 +288,9 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// part way through would be thrown away with it.
         /// </remarks>
         NoticeComponent _notice;
+
+        /// <summary>Held so that saying what mends a fault allocates nothing on a build.</summary>
+        readonly List<ChoiceEntry> _mending = new List<ChoiceEntry>();
 
         /// <summary>Whether the banner is open, which is the person's choice and outlives a rebuild.</summary>
         bool _open;
@@ -446,6 +461,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
             }
 
             action(value ?? "");
+
+            // What was just typed may be a name the heading is showing, and a rename that took a
+            // moment to appear would read as one that had not worked.
+            Current.RefreshHeading(_screen.Heading);
             Settle();
         }
 
@@ -914,6 +933,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _gathered.Clear();
             page.Build(_gathered);
             Said(_gathered);
+
+            // Everything, not just what the cadence is due to say: the components above were made from
+            // nothing a moment ago and hold nothing yet.
+            page.Resay();
             page.Refresh();
 
             if (!SameComponents(_gathered))

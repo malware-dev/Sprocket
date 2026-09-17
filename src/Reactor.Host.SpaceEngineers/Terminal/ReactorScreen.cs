@@ -89,6 +89,10 @@ namespace Reactor.Host.SpaceEngineers.Terminal
 
         protected override void OnOpened()
         {
+            // Shown again, which is not the same as made again: this screen and its view are kept per
+            // Reactor and reopened. Whatever it was told while it was away, it was not listening.
+            _view.Attach();
+
             // A piston or rotor may have attached since this was last looked at, which changes which grids
             // are part of the construct without adding a block to any of them.
             _unit.World.Invalidate();

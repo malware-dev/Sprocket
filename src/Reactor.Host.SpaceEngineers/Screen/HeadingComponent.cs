@@ -13,7 +13,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public string Text
         {
             get { return _text; }
-            set { Set(ref _text, value, "Text"); }
+            set { Set(ref _text, value, nameof(Text)); }
         }
     }
 }

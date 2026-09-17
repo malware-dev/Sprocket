@@ -37,17 +37,13 @@ namespace Reactor.Host.SpaceEngineers.Controls
         /// it is rather than what it happens to be built from - a row is a <see cref="Bar" /> here, a
         /// <see cref="Stack" /> in the picker and a <see cref="Label" /> in a list of choices.
         /// </remarks>
-        public static T Row<T>(T line) where T : Element
+        public static void Row(Element line)
         {
             line.Highlight = Palette.PanelHot;
-            return line;
         }
 
         /// <summary>What a button holds clear inside itself, whichever kind of button it is.</summary>
-        static Thickness Inside
-        {
-            get { return new Thickness(Space.PadX, Space.ChipY * 1.3f); }
-        }
+        static readonly Thickness Inside = new Thickness(Space.PadX, Space.ChipY * 1.3f);
 
         /// <summary>A word that answers a question, or runs an operation: a panel, and it lights.</summary>
         public static Label Chip(string text)

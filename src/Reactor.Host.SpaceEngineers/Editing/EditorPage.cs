@@ -18,14 +18,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// When <see cref="SecondPassed" /> last said yes.
         /// </summary>
         /// <remarks>
-        /// A whole second behind the start of the world, so the first ask is answered rather than
-        /// held back - a page is refreshed the instant it is built, and that is when it most needs
-        /// to know. Zero would have made the first second of a new world the one second in which
-        /// nothing is checked; <c>int.MinValue</c> was worse, because subtracting it from a tick
-        /// overflows to a negative number, so "long ago" reads as "just now" and the answer is
-        /// never yes again.
+        /// A page is refreshed the instant it is built, and that is when it most needs to know, so the
+        /// first ask is answered rather than held back - see <see cref="Interval" />, which keeps the
+        /// clock and the reasoning about where it starts.
         /// </remarks>
-        int _asked = -Second;
+        Interval _asked = new Interval(Second);
 
         /// <summary>Ticks in a second, at the rate the game runs at.</summary>
         const int Second = 60;
@@ -125,9 +122,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// Brings the words in the heading up to date, without touching its shape.
         /// </summary>
         /// <remarks>
-        /// Every tick, so that naming something shows up in the heading straight away rather than at the
-        /// next rebuild. It must not add, remove or renumber anything - the target is holding these and has
-        /// already decided what to draw for each one.
+        /// On a cadence, and again the moment a name is typed here, because what these words are made
+        /// of - a grid's name, a block's name inside a sentence - is nothing the game announces. It must
+        /// not add, remove or renumber anything: the target is holding these and has already decided
+        /// what to draw for each one.
         /// </remarks>
         public virtual void RefreshHeading(List<HeadingPart> parts)
         {
@@ -237,14 +235,23 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// same tick is told no and whatever depended on it silently does not happen.
         /// </para>
         /// </remarks>
+        /// <summary>
+        /// Says this page has just been built and has told nobody anything yet.
+        /// </summary>
+        /// <remarks>
+        /// A page's components are made afresh when the screen is rebuilt, so everything it only says
+        /// on a cadence has to be said again at once - a row whose words arrive a second after it
+        /// appears is a row that appears blank.
+        /// </remarks>
+        internal virtual void Resay()
+        {
+            _asked.Restart();
+        }
+
         protected bool SecondPassed()
         {
             var now = Editor.CurrentTick;
-            if (now - _asked < Second && now >= _asked)
-                return false;
-
-            _asked = now;
-            return true;
+            return _asked.Due(now);
         }
 
         /// <summary>

@@ -109,13 +109,22 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// A question that opened half off the bottom would be one nobody could answer, which is worse
         /// than one sitting above its anchor instead.
         /// </remarks>
-        public void Draw(IGraphics g, RectangleF bounds, float width)
+        /// <summary>
+        /// Puts this tick's words and state on the question.
+        /// </summary>
+        /// <remarks>
+        /// Before anything is drawn, rather than while: a control armed in the draw path is armed
+        /// after the pointer has already been asked what it is resting on, so Continue lit a frame
+        /// late. It is also before the measure, because how a button is dressed decides how much room
+        /// it holds clear inside itself.
+        /// </remarks>
+        public void Dress()
         {
-            if (!_up || _anchor == null)
+            if (!_up)
                 return;
 
-            // The question gives way to the reason while there is one, so the words sit where somebody is
-            // already reading, and come back as soon as the answer is one that can be sent.
+            // The question gives way to the reason while there is one, so the words sit where somebody
+            // is already reading, and come back as soon as the answer is one that can be sent.
             bool refused = !string.IsNullOrEmpty(Refused);
             _label.Text = refused ? Refused : _question;
             _label.Color = refused ? Palette.Problem : Palette.Muted;
@@ -123,11 +132,8 @@ namespace Reactor.Host.SpaceEngineers.Screen
             // Dead until there is something to send, because an empty answer here is not a meaningful
             // one. Renaming is the opposite case and allows it, which is why the two are told apart.
             //
-            // Before the measure, not after: how a button is dressed decides how much room it holds
-            // clear inside itself, and a button dressed after being measured is drawn at the size it
-            // was last frame.
-            // Dressed and armed together, so a button drawn as a dead well cannot still answer a
-            // press. That rule was being kept in two halves and only one of them said so.
+            // Dressed and armed together, so a button drawn as a dead well cannot still answer a press.
+            // That rule was being kept in two halves and only one of them said so.
             if (!string.IsNullOrEmpty(_box.Text) && !refused)
             {
                 Widgets.Go(_confirm);
@@ -138,6 +144,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 Widgets.Waiting(_confirm);
                 _confirm.Press = Deed.Nothing;
             }
+        }
+
+        public void Draw(IGraphics g, RectangleF bounds, float width)
+        {
+            if (!_up || _anchor == null)
+                return;
 
             _popup.Measure(g, new Vector2(width, bounds.Height));
 

@@ -18,7 +18,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
     /// </remarks>
     public sealed class NoticeComponent : EditorComponent
     {
-        readonly List<ChoiceEntry> _actions = new List<ChoiceEntry>();
+        readonly ObservableList<ChoiceEntry> _actions = new ObservableList<ChoiceEntry>();
 
         string _text;
         string _detail = "";
@@ -37,34 +37,34 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public string Text
         {
             get { return _text; }
-            set { Set(ref _text, value, "Text"); }
+            set { Set(ref _text, value, nameof(Text)); }
         }
 
         /// <summary>The rest of it, shown only while <see cref="Expanded" />. Empty where there is none.</summary>
         public string Detail
         {
             get { return _detail; }
-            set { Set(ref _detail, value ?? "", "Detail"); }
+            set { Set(ref _detail, value ?? "", nameof(Detail)); }
         }
 
         public NoticeLevel Level
         {
             get { return _level; }
-            set { Set(ref _level, value, "Level"); }
+            set { Set(ref _level, value, nameof(Level)); }
         }
 
         /// <summary>Whether the detail and the operations are on show.</summary>
         public bool Expanded
         {
             get { return _expanded; }
-            set { Set(ref _expanded, value, "Expanded"); }
+            set { Set(ref _expanded, value, nameof(Expanded)); }
         }
 
         /// <summary>What to invoke to open or close it, or nothing where there is nothing to open.</summary>
         public int ExpandCommand
         {
             get { return _expandCommand; }
-            set { Set(ref _expandCommand, value, "ExpandCommand"); }
+            set { Set(ref _expandCommand, value, nameof(ExpandCommand)); }
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public string Diagnostic
         {
             get { return _diagnostic; }
-            set { Set(ref _diagnostic, value ?? "", "Diagnostic"); }
+            set { Set(ref _diagnostic, value ?? "", nameof(Diagnostic)); }
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// A notice about something a person can mend should carry the mending, because the alternative
         /// is a sentence telling them to go and find a screen. Empty for anything that is only news.
         /// </remarks>
-        public IList<ChoiceEntry> Actions => _actions;
+        public ObservableList<ChoiceEntry> Actions => _actions;
 
         /// <summary>
         /// Whether this has said what it came to say and should slide out.
@@ -103,7 +103,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public bool Leaving
         {
             get { return _leaving; }
-            set { Set(ref _leaving, value, "Leaving"); }
+            set { Set(ref _leaving, value, nameof(Leaving)); }
         }
 
         /// <summary>

@@ -49,6 +49,17 @@ sealed class Screen
     /// <summary>How many of its views are listening to a component.</summary>
     public int Watching => _frame.Scene.Watching;
 
+    /// <summary>How many questions the mod has asked the game.</summary>
+    public int Asked => _frame.Scene.Asked;
+
+    /// <summary>Closes this screen and opens the same one again, as a host does.</summary>
+    public Screen Reopen()
+    {
+        _frame.Scene.PutAway();
+        _frame.Scene.ShowAgain();
+        return this;
+    }
+
     /// <summary>The editor, for tests about what it does rather than where this target draws it.</summary>
     public ReactorEditor Editor => _frame.Scene.Editor;
 

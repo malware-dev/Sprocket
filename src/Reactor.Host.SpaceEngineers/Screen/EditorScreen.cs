@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using Reactor.Host.SpaceEngineers.Lists;
 
 namespace Reactor.Host.SpaceEngineers.Screen
@@ -15,20 +16,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
     /// </remarks>
     public sealed class EditorScreen : Observable
     {
-        /// <summary>
-        /// Says the heading has been built again, which is the one thing here that cannot say so
-        /// itself.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="Heading" /> is a plain list, rebuilt in place so that a target holding it keeps
-        /// hold of it. A list rebuilt in place announces nothing, and every value beside it here does,
-        /// so this is the one place the screen has to be told out loud.
-        /// </remarks>
-        internal void Renamed()
-        {
-            Raise(nameof(Heading));
-        }
-
         public EditorScreen()
         {
             Components = new ObservableList<EditorComponent>();
@@ -210,5 +197,44 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// <remarks>The first is the one a reflex press should land on, so it is the safe one.</remarks>
         public ObservableList<ChoiceEntry> Answers { get; private set; }
 
+        /// <summary>The parts this is repeating for, so each one can be let go of again.</summary>
+        readonly List<HeadingPart> _heard = new List<HeadingPart>();
+
+        /// <summary>
+        /// Says the heading has been built again, and repeats what its parts say from now on.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Heading" /> is a plain list, rebuilt in place so that a target holding it keeps
+        /// hold of it - and a list rebuilt in place announces nothing, so this is the one place the
+        /// screen has to be told out loud. Core calls it where it rebuilds the heading.
+        /// <para>
+        /// The parts themselves change afterwards: a page reads the grid's name and the words of a
+        /// sentence on a cadence, and writes them here. So they are listened to, and let go of when the
+        /// list is built again - a part still listened to after it has gone would keep this screen
+        /// hearing about a heading nobody is showing.
+        /// </para>
+        /// </remarks>
+        internal void Renamed()
+        {
+            for (int i = 0; i < _heard.Count; i++)
+                _heard[i].PropertyChanged -= Said;
+
+            _heard.Clear();
+
+            for (int i = 0; i < Heading.Count; i++)
+            {
+                Heading[i].PropertyChanged += Said;
+                _heard.Add(Heading[i]);
+            }
+
+            Raise(nameof(Heading));
+        }
+
+        void Said(object sender, PropertyChangedEventArgs e)
+        {
+            // Coarsely: the heading is different now. Which part and which word is detail nothing
+            // here would do anything with.
+            Raise(nameof(Heading));
+        }
     }
 }

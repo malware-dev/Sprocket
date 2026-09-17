@@ -73,7 +73,7 @@ namespace Reactor.Host.SpaceEngineers.Lists
         public string EmptyText
         {
             get { return _emptyText; }
-            set { Set(ref _emptyText, value, "EmptyText"); }
+            set { Set(ref _emptyText, value, nameof(EmptyText)); }
         }
     }
 }

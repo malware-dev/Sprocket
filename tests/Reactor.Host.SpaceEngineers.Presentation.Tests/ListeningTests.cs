@@ -54,6 +54,51 @@ public class ListeningTests
     }
 
     /// <summary>
+    /// A screen closed and opened again still hears core.
+    /// </summary>
+    /// <remarks>
+    /// Closed is not destroyed. A session keeps one screen per Reactor and shows the same one again, so
+    /// a view that let go on the way out and never took hold on the way back in is a screen that draws
+    /// the first thing it ever saw: controls that light and do nothing, a primary button that says DONE
+    /// and is not pressable, and nothing about it looking wrong.
+    /// </remarks>
+    [Fact]
+    public void AScreenClosedAndOpenedAgainStillHearsCore()
+    {
+        var screen = Screen.Fresh();
+        var editor = screen.Editor;
+
+        // Into the picker with a block chosen, and then put away and shown again from there. The
+        // order matters: walking about after a reopening builds new components, and building them
+        // writes the chrome by another route, which would hide exactly what this is about.
+        editor.NewSystem("Airlock");
+        editor.PressStart("When…");
+        editor.PressBlock("Airlock Button");
+        screen.Run(2);
+
+        screen.Reopen();
+        screen.Run(2);
+
+        // A change to the chrome alone: choosing the event gives the screen something to move on to,
+        // and the picker's own components are the ones it already had.
+        editor.PressChoice("is pressed");
+        screen.Run(2);
+
+        var says = editor.Screen.PrimaryText.ToUpperInvariant();
+        var button = screen.Text(says);
+        var was = screen.Ended;
+
+        // Pressed where it is drawn, rather than invoked through core: what the reopening breaks is
+        // the button's own meaning, and a test that went through core would not touch it.
+        screen.Do(((int)Screen.Ui(button.At.X, button.At.Y).X).ToString(),
+            ((int)Screen.Ui(button.At.X, button.At.Y).Y).ToString());
+
+        Assert.NotEqual(was, screen.Ended);
+
+        AssertListening(screen, "a screen opened for the second time");
+    }
+
+    /// <summary>
     /// A view lets go of what it was showing, and the component knows it has been let go.
     /// </summary>
     /// <remarks>

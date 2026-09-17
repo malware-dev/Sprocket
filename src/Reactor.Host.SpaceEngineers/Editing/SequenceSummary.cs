@@ -26,7 +26,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>Updates one entry per sequence, in place.</summary>
-        public static void Fill(ObservableList<StatusEntry> entries, List<Sequence> sequences, Bindings bindings,
+        public static void Fill(ObservableList<StatusEntry> entries, List<Sequence> sequences,
             AutomationRunner runner, int tick)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
@@ -36,13 +36,30 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 var entry = entries[i];
                 var running = runner.Get(sequence);
 
-                entry.Summary = SequenceText.Sequence(bindings, sequence);
                 entry.Status = SequenceText.Status(Status(sequence, running));
                 entry.JustRan = running != null && running.LastFiredTick >= 0
                     && tick - running.LastFiredTick < JustRanTicks;
 
+                // Every tick, and it costs nothing: every answer comes out of a table built once -
+                // see TimeText.Ago, which was written to be called exactly like this.
                 entry.LastRun = TimeText.Ago(TicksSinceRun(running, tick));
             }
+        }
+
+        /// <summary>
+        /// What each row calls its sequence.
+        /// </summary>
+        /// <remarks>
+        /// Separate from <see cref="Fill" /> because it is made of words rather than read off a state:
+        /// joining a sentence out of a sequence's blocks and actions allocates, and the sentence changes
+        /// when somebody edits it or renames a block it names - never on its own, and never per tick.
+        /// </remarks>
+        public static void Word(ObservableList<StatusEntry> entries, List<Sequence> sequences,
+            Bindings bindings)
+        {
+            var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
+            for (var i = 0; i < count; i++)
+                entries[i].Summary = SequenceText.Sequence(bindings, sequences[i]);
         }
 
         /// <summary>

@@ -285,7 +285,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                         ? Palette.ProblemWash
                         : (step.IsCurrent ? Palette.LiveWash : Palette.None);
             }
-
         }
 
         /// <summary>A row being carried, and the ones getting out of its way.</summary>

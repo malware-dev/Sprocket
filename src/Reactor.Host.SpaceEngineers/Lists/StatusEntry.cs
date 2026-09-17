@@ -93,28 +93,28 @@ namespace Reactor.Host.SpaceEngineers.Lists
         public bool SwitchIsOn
         {
             get { return _switchIsOn; }
-            set { Set(ref _switchIsOn, value, "SwitchIsOn"); }
+            set { Set(ref _switchIsOn, value, nameof(SwitchIsOn)); }
         }
 
         /// <summary>Read as one line - a name, or a whole sentence.</summary>
         public string Summary
         {
             get { return _summary; }
-            set { Set(ref _summary, value, "Summary"); }
+            set { Set(ref _summary, value, nameof(Summary)); }
         }
 
         /// <summary>Live: waiting, running, switched off.</summary>
         public string Status
         {
             get { return _status; }
-            set { Set(ref _status, value, "Status"); }
+            set { Set(ref _status, value, nameof(Status)); }
         }
 
         /// <summary>When it last ran, in words. Empty if it never has.</summary>
         public string LastRun
         {
             get { return _lastRun; }
-            set { Set(ref _lastRun, value, "LastRun"); }
+            set { Set(ref _lastRun, value, nameof(LastRun)); }
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Reactor.Host.SpaceEngineers.Lists
         public bool JustRan
         {
             get { return _ranLight; }
-            set { Set(ref _ranLight, value, "JustRan"); }
+            set { Set(ref _ranLight, value, nameof(JustRan)); }
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace Reactor.Host.SpaceEngineers.Lists
         public bool ProblemIsWarning
         {
             get { return _problemIsWarning; }
-            set { Set(ref _problemIsWarning, value, "ProblemIsWarning"); }
+            set { Set(ref _problemIsWarning, value, nameof(ProblemIsWarning)); }
         }
 
         bool _problemIsWarning;
@@ -156,13 +156,13 @@ namespace Reactor.Host.SpaceEngineers.Lists
         public int Problems
         {
             get { return _problems; }
-            set { Set(ref _problems, value, "Problems"); }
+            set { Set(ref _problems, value, nameof(Problems)); }
         }
 
         public string Problem
         {
             get { return _problem; }
-            set { Set(ref _problem, value, "Problem"); }
+            set { Set(ref _problem, value, nameof(Problem)); }
         }
     }
 }

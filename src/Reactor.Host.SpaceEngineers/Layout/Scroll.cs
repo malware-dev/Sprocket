@@ -329,19 +329,32 @@ namespace Reactor.Host.SpaceEngineers.Layout
             return _content != null ? _content.Under(point) : null;
         }
 
-        /// <summary>Whether a point is anywhere on the bar, thumb or empty track alike.</summary>
-        /// <remarks>False when there is no bar, so a caller has one question to ask rather than two.</remarks>
+        /// <summary>
+        /// Whether a point is anywhere on the bar, thumb and empty track alike.
+        /// </summary>
+        /// <remarks>
+        /// False when there is no bar, so a caller has one question to ask rather than two - and false
+        /// where this scroller is not itself on show, because a bar cut away by something above it is
+        /// still a rectangle, and dragging one scrolls a list nobody can see.
+        /// </remarks>
         public bool OnBar(Vector2 point)
         {
-            return HasBar && Inside(Track, point);
+            return HasBar && Reaches(point) && Inside(Track, point);
         }
 
         /// <summary>Whether a point is on the thumb itself.</summary>
         public bool OnThumb(Vector2 point)
         {
-            return HasBar && Inside(Thumb, point);
+            return HasBar && Reaches(point) && Inside(Thumb, point);
         }
 
+        /// <summary>
+        /// Whether a point is inside one of the bar's own rectangles.
+        /// </summary>
+        /// <remarks>
+        /// Not <see cref="Element.Holds" />, which asks about this element's own bounds. The track and
+        /// the thumb are worked out rather than arranged, so they are not any element's bounds.
+        /// </remarks>
         static bool Inside(RectangleF bounds, Vector2 point)
         {
             return point.X >= bounds.X && point.X <= bounds.X + bounds.Width

@@ -1,4 +1,3 @@
-using VRageMath;
 using Reactor.Host.SpaceEngineers.Layout;
 using Reactor.Host.SpaceEngineers.Look;
 

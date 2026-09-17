@@ -33,12 +33,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
             get { return _content; }
         }
 
-        /// <summary>Whether this particular thing is the one showing.</summary>
-        public bool Is(Element content)
-        {
-            return _content == content;
-        }
-
         public void Show(Element content, Element anchor)
         {
             _content = content;

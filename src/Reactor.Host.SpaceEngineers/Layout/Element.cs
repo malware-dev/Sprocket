@@ -375,14 +375,21 @@ namespace Reactor.Host.SpaceEngineers.Layout
         }
 
         /// <summary>
-        /// Whether this can be reached at <paramref name="point" />: it holds it, and nothing above it
-        /// has folded it away or cut it off.
+        /// Whether this is on show at <paramref name="point" />: it holds it, and nothing above it has
+        /// folded it away, cut it off, or not finished bringing it into view.
         /// </summary>
         /// <remarks>
-        /// The same question <see cref="Under" /> answers, asked from the other end, for the things
-        /// that are taken hold of rather than pressed: a grip carries no <see cref="Press" />, so the
-        /// walk never offers it, and testing its rectangle alone would let somebody drag a row that
-        /// has been scrolled out of sight behind a header.
+        /// For the things that are taken hold of rather than pressed: a grip and a scrollbar carry no
+        /// <see cref="Press" />, so the walk in <see cref="Under" /> never offers them, and testing a
+        /// rectangle alone would let somebody drag a row that has been scrolled out of sight behind a
+        /// header.
+        /// <para>
+        /// <b>It is not the same question as <see cref="Under" />.</b> That one answers what is on top
+        /// at a point, walking down from the root; this answers whether one particular thing is on
+        /// show, walking up from it - so it knows nothing about a sibling drawn over it, and nothing
+        /// about the popups that hang outside the layout. Whoever asks this has to have settled that
+        /// already, which is what <c>Owner</c> on the screen is for.
+        /// </para>
         /// </remarks>
         public bool Reaches(Vector2 point)
         {
@@ -391,7 +398,7 @@ namespace Reactor.Host.SpaceEngineers.Layout
 
             for (Element above = Parent; above != null; above = above.Parent)
             {
-                if (above.Collapsed)
+                if (above.Collapsed || !above.Passes)
                     return false;
 
                 if (above.ClipsContent && !above.Holds(point))
@@ -399,6 +406,18 @@ namespace Reactor.Host.SpaceEngineers.Layout
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Whether anything inside this may be reached at all.
+        /// </summary>
+        /// <remarks>
+        /// True for everything that simply holds its children. A container that is part way through
+        /// bringing them into view says no, and says it once for both the press path and the grab.
+        /// </remarks>
+        internal virtual bool Passes
+        {
+            get { return true; }
         }
 
         /// <summary>Draws a hairline just inside <paramref name="bounds" />, as four thin rectangles.</summary>

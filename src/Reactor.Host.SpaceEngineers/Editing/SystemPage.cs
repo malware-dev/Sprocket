@@ -21,6 +21,9 @@ namespace Reactor.Host.SpaceEngineers.Editing
         readonly AutomationSystem _system;
         readonly List<Sequence> _sequences = new List<Sequence>();
 
+        /// <summary>The rows being built, before they are published in one go.</summary>
+        readonly List<StatusEntry> _gathered = new List<StatusEntry>();
+
         StatusListComponent _list;
 
         public SystemPage(ReactorEditor editor, AutomationSystem system) : base(editor)
@@ -116,6 +119,8 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _list.Fills = true;
             _list.EmptyText = "No sequences yet.";
 
+            _gathered.Clear();
+
             for (var i = 0; i < _sequences.Count; i++)
             {
                 var sequence = _sequences[i];
@@ -131,9 +136,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     Switch(sequence));
                 entry.SwitchIsOn = sequence.Enabled;
 
-                _list.Entries.Add(entry);
+                _gathered.Add(entry);
             }
 
+            // In one go, for the reason the ship's own list does it: a list that says when it changes
+            // should say so once, about a list that is finished.
+            _list.Entries.Reset(_gathered);
             components.Add(_list);
         }
 
@@ -152,13 +160,20 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 return;
             }
 
-            SequenceSummary.Fill(_list.Entries, _sequences, Editor.Runner.Bindings, Editor.Runner, Editor.CurrentTick);
+            SequenceSummary.Fill(_list.Entries, _sequences, Editor.Runner, Editor.CurrentTick);
 
             for (var i = 0; i < _list.Entries.Count && i < _sequences.Count; i++)
                 _list.Entries[i].SwitchIsOn = _sequences[i].Enabled;
 
+            // What a row is doing, and how long ago it ran, are read every tick because neither
+            // costs anything. What it is called is a sentence joined out of its blocks and actions,
+            // and that changes when somebody edits it or renames a block it names - so it is said
+            // again on a cadence rather than sixty times a second.
             if (SecondPassed())
+            {
+                SequenceSummary.Word(_list.Entries, _sequences, Editor.Runner.Bindings);
                 Mark();
+            }
         }
 
         /// <summary>

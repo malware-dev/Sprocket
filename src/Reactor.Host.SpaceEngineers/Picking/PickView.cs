@@ -77,7 +77,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
         {
             // Core says when it has changed something and says nothing the rest of the time, so an
             // ordinary tick costs one comparison.
-            if (_revision == _component.Revision && _built == _component.Stages.Count)
+            if (!Stale)
                 return;
 
             _revision = _component.Revision;

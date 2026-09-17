@@ -243,6 +243,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             var state = Editor.Runner.Get(_sequence);
 
+            // Asked once and held, because asking moves its own clock: two callers in one pass would
+            // leave the second one told that no time had gone by, ever.
+            var second = SecondPassed();
+
             _sentence.Enabled = _sequence.Enabled;
             _sentence.Status = SequenceText.Status(SequenceSummary.Status(_sequence, state));
             _sentence.JustRan = state != null && state.LastFiredTick >= 0
@@ -250,7 +254,9 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
             _sentence.RefusedCount = state == null ? 0 : state.RefusedCount;
 
+            // Every tick, and it costs nothing: every answer comes out of a table built once.
             _sentence.LastRun = TimeText.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
+
             _sentence.Trigger.IsLiveNow = state != null && state.TriggerSignalIsTrue;
 
             // A row is lit while the sequence is anywhere inside it, so a step stays lit while the
@@ -273,7 +279,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _sentence.RedoCommand = canRedo ? _redoCommand : 0;
             _sentence.RedoText = canRedo ? Editor.RedoLabel(_sequence) : "";
 
-            if (SecondPassed())
+            if (second)
                 Mark();
         }
 

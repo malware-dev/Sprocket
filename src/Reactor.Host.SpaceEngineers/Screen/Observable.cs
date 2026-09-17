@@ -44,7 +44,11 @@ namespace Reactor.Host.SpaceEngineers.Screen
             remove
             {
                 _changed -= value;
-                Listeners--;
+
+                // Never below none. A handler removed twice would otherwise take the count negative,
+                // and a test asserting "no more than one listener" would read that as spotless.
+                if (Listeners > 0)
+                    Listeners--;
             }
         }
 

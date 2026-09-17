@@ -51,8 +51,8 @@ sequence-ticked     60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 t
 # The words on a step are the host's, not core's: core says which blocks and which action, and this
 # target says "open" and joins them. A step that read right before the words moved out and wrong
 # after would show up nowhere else, because nothing else in the suite gets as far as a step.
-sequence-step       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 70 278 200 375 560 272 1380 1000
-sequence-wait       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 212 278 100 255
+sequence-step       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 70 254 200 375 560 272 1380 1000
+sequence-wait       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 212 254 100 255
 
 # --- swapping a choice, which nothing else here covers ------------------------------------------
 #

@@ -23,6 +23,11 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             AddOptions = new ObservableList<ChoiceEntry>();
 
             Steps.Changed += Listed;
+
+            // Both lists, because the view reads both and is told rather than asking. The steps carry
+            // things that announce for themselves and so are also listened to one by one; the adders
+            // are plain choices, and their list changing shape is the whole of what can happen to them.
+            AddOptions.Changed += Said;
             Trigger = trigger;
         }
 
@@ -61,6 +66,11 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         void Said(object sender, PropertyChangedEventArgs e)
         {
             Raise(nameof(Steps));
+        }
+
+        void Said()
+        {
+            Raise(nameof(AddOptions));
         }
 
         public int SequenceId { get; private set; }

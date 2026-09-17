@@ -25,6 +25,18 @@ namespace Reactor.Host.SpaceEngineers.Editing
         readonly List<AutomationSystem> _rowOwners = new List<AutomationSystem>();
         readonly List<SystemInstance> _rowInstances = new List<SystemInstance>();
 
+        /// <summary>
+        /// How many of each system were fitted when its row was last told so.
+        /// </summary>
+        /// <remarks>
+        /// Saying it takes joining three strings and formatting a number, and this runs every tick for
+        /// every row on the screen. The count changes when somebody builds or grinds something.
+        /// </remarks>
+        readonly List<int> _rowFitted = new List<int>();
+
+        /// <summary>The rows being built, before they are published in one go.</summary>
+        readonly List<StatusEntry> _gathered = new List<StatusEntry>();
+
         StatusListComponent _list;
 
         public SystemsPage(ReactorEditor editor) : base(editor)
@@ -92,6 +104,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             _rowOwners.Clear();
             _rowInstances.Clear();
+            _rowFitted.Clear();
+
+            // Gathered and published in one go. This list says when it changes, and anything listening
+            // re-reads the whole of it when it does - so adding row by row announced a half-built list
+            // once per row, and had every listener walk every row each time.
+            _gathered.Clear();
 
             for (var i = 0; i < _systems.Count; i++)
             {
@@ -105,9 +123,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 heading.SwitchCommand = Editor.RegisterToggle(Cmd.Enable, system.Id, Switch(system));
                 heading.SwitchIsOn = system.Enabled;
                 heading.SwitchGovernsAll = true;
-                _list.Entries.Add(heading);
+                _gathered.Add(heading);
                 _rowOwners.Add(system);
                 _rowInstances.Add(null);
+                _rowFitted.Add(-1);
 
                 var instances = system.Instances;
                 for (var n = 0; n < instances.Count; n++)
@@ -125,9 +144,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
                         Cmd.EnableInstance, system.Id, instance.Number, Switch(instance));
                     entry.SwitchIsOn = instance.Enabled;
 
-                    _list.Entries.Add(entry);
+                    _gathered.Add(entry);
                     _rowOwners.Add(system);
                     _rowInstances.Add(instance);
+                    _rowFitted.Add(-1);
                 }
 
                 var another = new StatusEntry("add",
@@ -135,11 +155,13 @@ namespace Reactor.Host.SpaceEngineers.Editing
                         delegate { Editor.OfferAnother(system); }));
                 another.Depth = 1;
                 another.IsAction = true;
-                _list.Entries.Add(another);
+                _gathered.Add(another);
                 _rowOwners.Add(system);
                 _rowInstances.Add(null);
+                _rowFitted.Add(-1);
             }
 
+            _list.Entries.Reset(_gathered);
             components.Add(_list);
         }
 
@@ -230,7 +252,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
                 if (_rowInstances[i] == null)
                 {
-                    entry.Status = SystemSummary.Count(system);
+                    if (_rowFitted[i] != system.Instances.Count)
+                    {
+                        _rowFitted[i] = system.Instances.Count;
+                        entry.Status = SystemSummary.Count(system);
+                    }
+
                     entry.SwitchIsOn = system.Enabled;
                     continue;
                 }

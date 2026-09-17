@@ -184,16 +184,40 @@ namespace Reactor.Host.SpaceEngineers.Editing
             components.Add(_pick);
         }
 
+        /// <summary>How often the ship is asked what its blocks are doing, in ticks.</summary>
+        /// <remarks>
+        /// Four times a second. A door opening is worth showing promptly and is not worth asking the
+        /// game about sixty times a second: on a construct of forty blocks that is a hundred and sixty
+        /// questions a tick, for a list whose fastest row takes the better part of a second to change.
+        /// </remarks>
+        const int Looked = 15;
+
+        Interval _looked = new Interval(Looked);
+
+        internal override void Resay()
+        {
+            base.Resay();
+
+            // This page's own clock, which the base knows nothing about. A picker arriving on screen
+            // reads what the blocks are doing now rather than carrying over what they were doing when
+            // it was last looked at.
+            _looked.Restart();
+        }
+
         /// <summary>
         /// Brings live state up to date, and says nothing when there is nothing to say.
         /// </summary>
         /// <remarks>
-        /// Runs on every tick, so it compares before it writes and only speaks up when
-        /// something actually moved. A target then does one relation of its own and stops.
+        /// On a cadence, because nothing in the game announces a door opening or a vent filling - this
+        /// is the one thing here that has to be asked for. It compares before it writes, so a tick
+        /// where nothing moved says nothing and the screen does no work at all.
         /// </remarks>
         public override void Refresh()
         {
             if (_blocks == null)
+                return;
+
+            if (!_looked.Due(Editor.CurrentTick))
                 return;
 
             var changed = false;

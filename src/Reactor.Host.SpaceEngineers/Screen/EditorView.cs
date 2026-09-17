@@ -82,13 +82,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
             new Dictionary<EditorComponent, ComponentView>();
 
         /// <summary>
-        /// How many times the chrome and every view on it have written what their controls mean.
+        /// How many views are listening, which is one per component on screen and no more.
         /// </summary>
         /// <remarks>
-        /// For a test to hold still. See <see cref="ComponentView.Wires" /> for why it is counted at
-        /// all rather than reasoned about.
+        /// For a test that a view lets go of what it stops showing. <see cref="Observable" /> counts
+        /// the other end of the same subscriptions, which is where one left behind piles up.
         /// </remarks>
-        /// <summary>How many views are listening, which is one per component on screen and no more.</summary>
         internal int Watching
         {
             get
@@ -105,6 +104,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
             }
         }
 
+        /// <summary>
+        /// How many times the chrome and every view on it have written what their controls mean.
+        /// </summary>
+        /// <remarks>
+        /// For a test to hold still. See <see cref="ComponentView.Wires" /> for why it is counted at
+        /// all rather than reasoned about.
+        /// </remarks>
         internal int Wires
         {
             get
@@ -158,15 +164,26 @@ namespace Reactor.Host.SpaceEngineers.Screen
         {
             _editor = editor;
 
-            // The screen core keeps is one object for the life of the editor, rewritten as somebody
-            // walks about. So this is told when its values change rather than reading them on every
-            // frame, and lets go in Release - the screen outlives this, and a screen host closes.
-            _editor.Screen.PropertyChanged += Said;
-            _editor.Screen.Actions.Changed += Listed;
+            Attach();
 
             // Inside a stack that takes the slack, because Fill stretches whatever it is given and a
             // heading lit across the whole header would be a highlight the size of the screen. A
             // horizontal stack hands each child its own width, which is exactly the hug wanted here.
+            // Lit on every screen, the root included, where it leaves the editor rather than
+            // retreating a page. Not two controls: a chevron means "leave what I am looking at", and on
+            // the front door what you are looking at is the editor. That is the rule Escape has always
+            // followed here, and nobody has ever found Escape confusing.
+            //
+            // Set once. Neither of these has ever depended on anything, and writing them on every frame
+            // was the same reading habit this whole arrangement is here to break.
+            _back.Tint = Palette.Muted;
+            _back.Highlight = Palette.Panel;
+
+            // The other glyph in the header, and it answers a press, so it lights like the first one. A
+            // control that can be pressed and cannot be lit is the pair of rules in Highlight and Press
+            // disagreeing with each other.
+            _refresh.Highlight = Palette.Panel;
+
             var titleLane = Widgets.RowOf(0f);
             titleLane.Children.Add(_title.Root);
 
@@ -229,20 +246,60 @@ namespace Reactor.Host.SpaceEngineers.Screen
         }
 
         /// <summary>
-        /// Stops listening to core, and lets every view go with it.
+        /// Starts listening to core, so this is told when what it shows changes.
         /// </summary>
         /// <remarks>
-        /// For a host putting a screen away. Core's screen lives as long as the editor and would
-        /// otherwise keep this, its elements and every view on it for the rest of the session.
+        /// Paired with <see cref="Release" />, and called again whenever a host shows this after
+        /// putting it away: <b>closed is not destroyed.</b> A session keeps one screen per Reactor and
+        /// opens the same one again, so a view that let go and never took hold again is a screen
+        /// showing whatever it happened to be showing the first time.
+        /// <para>
+        /// The screen core keeps is one object for the life of the editor, rewritten as somebody walks
+        /// about, so it outlives this and has to be let go of rather than merely forgotten.
+        /// </para>
+        /// </remarks>
+        public void Attach()
+        {
+            if (_listening)
+                return;
+
+            _listening = true;
+            _editor.Screen.PropertyChanged += Said;
+            _editor.Screen.Actions.Changed += Listed;
+
+            // Nothing has been told to this since it last looked, whatever it may have been told
+            // while it was not listening.
+            _chromeStale = true;
+        }
+
+        /// <summary>
+        /// Stops listening to core, and lets go of every view with it.
+        /// </summary>
+        /// <remarks>
+        /// For a host putting a screen away. The views go entirely rather than merely falling silent:
+        /// one kept in hand after it has let go of its component is a view nothing will ever tell
+        /// anything again, and <see cref="Attach" /> has no way to find it. Dropping them means the
+        /// next frame builds them afresh and takes hold properly.
         /// </remarks>
         public void Release()
         {
+            if (!_listening)
+                return;
+
+            _listening = false;
             _editor.Screen.PropertyChanged -= Said;
             _editor.Screen.Actions.Changed -= Listed;
 
             foreach (KeyValuePair<EditorComponent, ComponentView> pair in _byComponent)
                 pair.Value.Release();
+
+            _byComponent.Clear();
+            _views.Clear();
+            _shown.Clear();
         }
+
+        /// <summary>Whether this is listening to core right now.</summary>
+        bool _listening;
 
         void Said(object sender, PropertyChangedEventArgs e)
         {
@@ -379,45 +436,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
             else if (!screen.HasQuestion && _question.IsUp)
                 _question.Close();
 
-            _title.Update(screen.Heading, _renaming);
-
-            // Latched rather than read straight off, so the line does not come and go inside one screen.
-            // Cleared in Rebuild, which is where one screen becomes another.
-            if (!string.IsNullOrEmpty(screen.Subtitle))
-                _hadSubtitle = true;
-
-            _subtitle.Text = screen.Subtitle;
-            _subtitle.Collapsed = !_hadSubtitle;
-
-
-            // Lit on every screen, the root included, where it leaves the editor rather than retreating
-            // a page. Not two controls: a chevron means "leave what I am looking at", and on the front
-            // door what you are looking at is the editor. That is the rule Escape has always followed
-            // here, and nobody has ever found Escape confusing.
-            _back.Tint = Palette.Muted;
-            _back.Highlight = Palette.Panel;
-
-            // The other glyph in the header, and it answers a press, so it lights like the first one.
-            // A control that can be pressed and cannot be lit is the pair of rules in Highlight and
-            // Press disagreeing with each other.
-            _refresh.Highlight = Palette.Panel;
-            // Which part wears the pencil is the row's business now, because it is a per-part answer.
-            if (_renaming >= 0)
-                _title[_renaming].Wrong = Blocked.Length > 0;
-
-            // Governs everything on the screen under it, which is what a switch in the header means.
-            if (screen.HasSwitch)
-                _switch.Show(screen.SwitchIsOn, true);
-            else
-                _switch.Hide();
-
-            _primary.Text = screen.HasPrimary ? Widgets.Caps(screen.PrimaryText) : "";
-
-            if (screen.HasPrimary)
-                Widgets.Go(_primary);
-            else
-                Widgets.Absent(_primary);
-
             // A screen that cannot be renamed while the box is open takes the box away with it.
             if (_renaming >= 0 && !screen.CanRename)
                 CancelAsk();
@@ -434,25 +452,73 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 RebuildActions(screen);
             }
 
-            if (_chromeStale)
+            // The question hanging over the screen. What it shows depends on what has been typed into
+            // it, which core knows nothing about, so it is dressed here rather than announced.
+            if (_ask.IsUp && _renaming < 0)
             {
-                _chromeStale = false;
-                _wires++;
-                Wire(screen);
+                _ask.Refused = Taken(_ask.Command, _ask.Answer) ? TakenSays : "";
+                _ask.Dress();
             }
+
+            if (!_chromeStale)
+                return;
+
+            _chromeStale = false;
+            _wires++;
+            Dress(screen);
+            Wire(screen);
+        }
+
+        /// <summary>
+        /// Puts this tick's words and states on the chrome.
+        /// </summary>
+        /// <remarks>
+        /// Behind the same gate as <see cref="Wire" />, and counted with it, because both are the same
+        /// act: taking what core says and putting it on the controls. It used to sit above the gate,
+        /// where it wrote a heading's four values and made a fresh capitalised string on every frame -
+        /// and the count said zero, which is the way an instrument placed to flatter always reads.
+        /// </remarks>
+        void Dress(EditorScreen screen)
+        {
+            _title.Update(screen.Heading, _renaming);
+
+            // Latched rather than read straight off, so the line does not come and go inside one screen.
+            // Cleared in Rebuild, which is where one screen becomes another.
+            if (!string.IsNullOrEmpty(screen.Subtitle))
+                _hadSubtitle = true;
+
+            _subtitle.Text = screen.Subtitle;
+            _subtitle.Collapsed = !_hadSubtitle;
+
+            // Which part wears the pencil is the row's business now, because it is a per-part answer.
+            if (_renaming >= 0)
+                _title[_renaming].Wrong = Blocked.Length > 0;
+
+            // Governs everything on the screen under it, which is what a switch in the header means.
+            if (screen.HasSwitch)
+                _switch.Show(screen.SwitchIsOn, true);
+            else
+                _switch.Hide();
+
+            _primary.Text = screen.HasPrimary ? Widgets.Caps(screen.PrimaryText) : "";
+
+            if (screen.HasPrimary)
+                Widgets.Go(_primary);
+            else
+                Widgets.Absent(_primary);
         }
 
         /// <summary>
         /// Tells each control in the chrome what pressing it does.
         /// </summary>
         /// <remarks>
-        /// Every tick rather than once, because core re-issues its command ids whenever it rebuilds a
-        /// screen: what the back arrow sends now is not what it sent a page ago. A control with nothing
-        /// to send this tick is handed nothing, which is also what stops it answering the pointer.
+        /// Whenever what the chrome shows has changed. An id never moves - <c>ReactorEditor.Register</c>
+        /// says why - but which command a control carries does: the back arrow carries none on the front
+        /// page, a refresh carries none where there is nothing to read again, and a control handed
+        /// nothing is a control that does not answer the pointer either.
         /// </remarks>
         void Wire(EditorScreen screen)
         {
-
             // One control, two acts: a command while there is somewhere to retreat to, and the door once
             // there is not. Which of the two it is gets said in the note rather than in the picture - a
             // symbol that changed as somebody walked back up the pages would be a control moving under
@@ -746,11 +812,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _overlay.Hide();
         }
 
-        bool IsOverlay(Element content)
-        {
-            return _overlay.Is(content);
-        }
-
         public void SetNumber(int command, int value)
         {
             if (command != 0)
@@ -774,8 +835,8 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// </summary>
         /// <remarks>
         /// Asked for afresh on every keystroke rather than on finishing, because a search that only
-        /// narrowed when you stopped typing would feel broken, and because the command id is re-issued on
-        /// every rebuild - one captured earlier would be dead by the time the typing ended.
+        /// narrowed when you stopped typing would feel broken. The box is asked for its own text rather
+        /// than the text being captured, so what is sent is always what is in it.
         /// </remarks>
         public void Typed()
         {
@@ -812,7 +873,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
             if (_renaming >= 0)
                 return;
 
-            _ask.Refused = _ask.IsUp && Taken(_ask.Command, _ask.Answer) ? TakenSays : "";
             _ask.Draw(g, bounds, PopupWidth);
             _question.Draw(g, bounds, PopupWidth);
         }
@@ -827,6 +887,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// </remarks>
         public void ScrollBy(Vector2 point, float amount)
         {
+            // Nothing behind a popup is moved, for the same reason nothing behind one is pressed. A
+            // wheel that reached through took the rows out from under a pointer that was on the list
+            // hanging over them, and left somebody somewhere else when it closed.
+            if (Owner != null || IsAsking)
+                return;
+
             for (int i = 0; i < _views.Count; i++)
             {
                 if (_views[i].ScrollBy(point, amount))
@@ -979,14 +1045,10 @@ namespace Reactor.Host.SpaceEngineers.Screen
             {
                 Unfocus();
 
-                // Pressing the line a second time puts the list away, which is what a thing that opens
-                // downward is expected to do. It hangs under whatever was pressed, which is why nothing
-                // has to be told where to put it.
-                if (IsOverlay(deed.Overlay))
-                    HideOverlay();
-                else
-                    ShowOverlay(deed.Overlay, target);
-
+                // Hung under whatever was pressed, which is why nothing has to be told where to put it.
+                // Pressing that line a second time is a press outside the list - it hangs below its
+                // anchor, never over it - so putting it away is already settled above.
+                ShowOverlay(deed.Overlay, target);
                 return true;
             }
 

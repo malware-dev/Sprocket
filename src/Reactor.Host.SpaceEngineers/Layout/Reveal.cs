@@ -76,6 +76,20 @@ namespace Reactor.Host.SpaceEngineers.Layout
         /// <summary>Whether none of the child is in view, which is when it may be taken away.</summary>
         public bool Shut => _openness <= 0f;
 
+        /// <summary>
+        /// Nothing inside this can be reached until all of it is in view.
+        /// </summary>
+        /// <remarks>
+        /// A control that answers before it has arrived is a control somebody hits by accident on the
+        /// way to whatever was underneath it, and the banner this exists for slides in over a list
+        /// somebody is already pressing. Said here rather than in the walk, so that the walk and
+        /// <see cref="Element.Reaches" /> - a press and a grab - cannot come to disagree about it.
+        /// </remarks>
+        internal override bool Passes
+        {
+            get { return _openness >= 1f; }
+        }
+
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             if (_child == null || _child.Collapsed)
@@ -100,20 +114,9 @@ namespace Reactor.Host.SpaceEngineers.Layout
                 bounds.Width, height));
         }
 
-        /// <summary>
-        /// What is under a point, once all of the child is in view.
-        /// </summary>
-        /// <remarks>
-        /// Nothing at all while it is moving. A control that answers before it has arrived is a control
-        /// somebody hits by accident on the way to whatever was underneath it, and the banner this exists
-        /// for slides in over a list somebody is already pressing.
-        /// </remarks>
         protected override Element UnderContent(Vector2 point)
         {
-            if (_openness < 1f || _child == null)
-                return null;
-
-            return _child.Under(point);
+            return Passes && _child != null ? _child.Under(point) : null;
         }
 
         protected override void DrawContent(IGraphics g)

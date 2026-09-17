@@ -129,6 +129,64 @@ public class RepeatedTickTests
         AssertIdle(screen, "the construct with a system on it");
     }
 
+    /// <summary>
+    /// A screen nobody is touching barely asks the game anything.
+    /// </summary>
+    /// <remarks>
+    /// The other half of the same rule, one layer down. Core cannot be told when a door opens or a
+    /// block is renamed - nothing in the game's own interface announces either - so those it has to
+    /// ask for, and the only honest way to do that is on a cadence rather than on every tick. The
+    /// picker is the screen that asks at all, because it is the one showing what forty blocks are
+    /// doing; it used to ask about every one of them sixty times a second.
+    /// <para>
+    /// Counted in the harness, which answers every one of these calls and so is the one place that can
+    /// count them. What a call costs there is the proxy's and says nothing about the game; how many
+    /// are made is exactly what the game would see.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AnIdleScreenBarelyAsksTheGameAnything()
+    {
+        var screen = Screen.Fresh();
+        var editor = screen.Editor;
+
+        AssertQuiet(screen, "the construct");
+
+        editor.NewSystem("Airlock");
+        AssertQuiet(screen, "a system");
+
+        editor.PressStart("When…");
+        AssertQuiet(screen, "the picker, showing what every block is doing");
+
+        editor.PressBlock("Airlock Button");
+        editor.PressChoice("is pressed");
+        editor.PressPrimary();
+        AssertQuiet(screen, "a sequence");
+    }
+
+    /// <summary>How many questions a screen may ask the game on an idle tick.</summary>
+    /// <remarks>
+    /// The picker, the only screen that asks at all, averages three - twelve blocks every fifteen
+    /// ticks. Five leaves room for a block or two more on the rig without leaving room for the fault:
+    /// asking on every tick again is forty-six.
+    /// </remarks>
+    const int Asks = 5;
+
+    static void AssertQuiet(Screen screen, string what)
+    {
+        screen.Run(5);
+
+        var before = screen.Asked;
+        screen.Run(Frames);
+
+        var each = (screen.Asked - before) / (float)Frames;
+
+        Assert.True(each <= Asks,
+            $"{what} asked the game {each:0.#} questions on an average tick where nothing happened, "
+            + $"which is more than {Asks}. Something is being asked for that could be asked on a "
+            + "cadence, or told.");
+    }
+
     static void AssertIdle(Screen screen, string what)
     {
         // Settled first: arriving at a screen is a change, and writing the controls then is the point.

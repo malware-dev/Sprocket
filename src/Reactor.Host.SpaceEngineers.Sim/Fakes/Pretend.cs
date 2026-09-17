@@ -19,6 +19,22 @@ namespace Reactor.Sim.Fakes
     /// </remarks>
     static class Pretend
     {
+        /// <summary>
+        /// How many questions the mod has asked the game, in total.
+        /// </summary>
+        /// <remarks>
+        /// Every call to the game's interfaces comes through here, so this is the one place that can
+        /// count them. The bytes a call costs in this harness are the proxy's and say nothing about the
+        /// game, but the number of calls is exactly what the game would see - and a mod that asks its
+        /// host a hundred questions on a frame where nothing has happened is the same fault as one
+        /// that builds a hundred strings.
+        /// <para>
+        /// A static, which is banned in the mod and fine here: the harness runs one screen at a time
+        /// (see Serially) and this is never shipped.
+        /// </para>
+        /// </remarks>
+        internal static int Asked;
+
         /// <summary>One generator, because each one keeps a cache of the types it has made.</summary>
         internal static readonly ProxyGenerator Generator = new ProxyGenerator();
 
@@ -127,6 +143,8 @@ namespace Reactor.Sim.Fakes
 
             public void Intercept(IInvocation invocation)
             {
+                Pretend.Asked++;
+
                 Func<IInvocation, object> everything;
                 if (_whole.TryGetValue(invocation.Method.Name, out everything))
                 {

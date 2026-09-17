@@ -118,6 +118,37 @@ public class ReachTests
     }
 
     /// <summary>
+    /// The wheel does not reach through what is hanging over the screen.
+    /// </summary>
+    /// <remarks>
+    /// A press, a hover and a grab all ask who owns the screen; turning the wheel used to ask nobody.
+    /// With a list hanging open, the rows behind it moved out from under a pointer that was resting on
+    /// the list, and closing it left somebody somewhere else entirely.
+    /// </remarks>
+    [Fact]
+    public void TheWheelDoesNotReachThroughAnOpenList()
+    {
+        var picker = Screen.Fresh(OpenThePicker.Split(' '));
+
+        var first = Blocks(picker).Filters[0].Label;
+        var line = picker.Text(first);
+
+        // The list hangs open, and the pointer rests on the line that opened it.
+        picker.Do(At(Screen.Ui(line.At.X, line.At.Y)));
+
+        var was = picker.Text("Airlock Button").At.Y;
+        picker.Do("scroll", "250", "600", "300");
+
+        Assert.Equal(was, picker.Text("Airlock Button").At.Y);
+
+        // And the wheel works again the moment the list is out of the way.
+        picker.Do(At(Screen.Ui(line.At.X, line.At.Y)));
+        picker.Do("scroll", "250", "600", "300");
+
+        Assert.NotEqual(was, picker.Text("Airlock Button").At.Y);
+    }
+
+    /// <summary>
     /// Nothing in a banner answers a press while the banner is still arriving.
     /// </summary>
     /// <remarks>
@@ -160,45 +191,85 @@ public class ReachTests
     /// whole screen rather than by anybody remembering to look: every point on it, on every screen the
     /// editor has, and whatever answers has to say so under the pointer. A control that cannot be lit is
     /// one a person has no way to find.
-    /// <para>
-    /// A box to type in is the one exception, and deliberately: it says "words go here" with its own
-    /// well, its edge and a caret, and a field that lit up like a button would be promising a press.
-    /// </para>
     /// </remarks>
     [Fact]
     public void EverythingAPressCanReachLightsUp()
     {
-        var screens = new[]
+        // Every screen, and every thing that hangs over one. A sweep that only ever walked the
+        // ordinary screens said nothing about the popups, and the banner's whole strip answered a
+        // press and could not be lit for as long as it existed.
+        AssertEverythingLights("the construct", screen => { });
+
+        AssertEverythingLights("the name box open", screen => screen.Do("60", "130"));
+
+        AssertEverythingLights("a system", screen => screen.Editor.NewSystem("Airlock"));
+
+        AssertEverythingLights("the picker", screen =>
         {
-            "",
-            "60 130 type Airlock enter",
-            "60 130 type Airlock enter 25 62",
-            "60 130 type Airlock enter 60 130",
-            "60 130 type Airlock enter 60 130 200 375 560 272 1380 1000",
-        };
+            screen.Editor.NewSystem("Airlock");
+            screen.Editor.PressStart("When…");
+        });
 
-        foreach (var walk in screens)
+        AssertEverythingLights("the picker with its kinds open", screen =>
         {
-            var screen = Screen.Fresh(walk.Length == 0 ? new string[0] : walk.Split(' '));
-            var dark = new List<string>();
+            screen.Editor.NewSystem("Airlock");
+            screen.Editor.PressStart("When…");
+            screen.Run(2);
 
-            foreach (var found in Everything(screen))
-            {
-                if (found.Press.Means == Means.Nothing || found.Press.Means == Means.Type)
-                    continue;
+            var line = screen.Text(Blocks(screen).Filters[0].Label);
+            screen.Do(At(Screen.Ui(line.At.X, line.At.Y)));
+        });
 
-                if (found.Highlight.A > 0 || found.HighlightEdge.A > 0)
-                    continue;
+        AssertEverythingLights("a sequence", screen =>
+        {
+            screen.Editor.NewSystem("Airlock");
+            screen.Editor.PressStart("When…");
+            screen.Editor.PressBlock("Airlock Button");
+            screen.Editor.PressChoice("is pressed");
+            screen.Editor.PressPrimary();
+        });
 
-                var said = found.GetType().Name + " " + found.Press.Means + " at " + found.Bounds;
-                if (!dark.Contains(said))
-                    dark.Add(said);
-            }
+        AssertEverythingLights("a banner that has arrived", screen =>
+        {
+            screen.Scene.Load(Older);
+            screen.Run(20);
+        });
 
-            Assert.True(dark.Count == 0,
-                $"on the screen reached by '{walk}', these answer a press and cannot be lit: "
-                + string.Join(", ", dark));
+        AssertEverythingLights("a banner opened", screen =>
+        {
+            screen.Scene.Load(Older);
+            screen.Run(20);
+            screen.Editor.Invoke(Notice(screen).ExpandCommand);
+            screen.Run(20);
+        });
+    }
+
+    static void AssertEverythingLights(string where, Action<Screen> reach)
+    {
+        var screen = Screen.Fresh();
+        reach(screen);
+        screen.Run(2);
+
+        var dark = new List<string>();
+
+        foreach (var found in Everything(screen))
+        {
+            // A box to type in is the one exception, and deliberately: it says "words go here" with
+            // its own well, its edge and a caret, and a field that lit like a button would be
+            // promising a press.
+            if (found.Press.Means == Means.Nothing || found.Press.Means == Means.Type)
+                continue;
+
+            if (found.Highlight.A > 0 || found.HighlightEdge.A > 0)
+                continue;
+
+            var said = found.GetType().Name + " " + found.Press.Means + " at " + found.Bounds;
+            if (!dark.Contains(said))
+                dark.Add(said);
         }
+
+        Assert.True(dark.Count == 0,
+            $"at {where}, these answer a press and cannot be lit: " + string.Join(", ", dark));
     }
 
     /// <summary>Everything the pointer can reach, by asking at every point on the screen.</summary>
