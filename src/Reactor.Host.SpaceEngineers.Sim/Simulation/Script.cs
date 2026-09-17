@@ -49,6 +49,13 @@ namespace Reactor.Sim.Simulation
                     continue;
                 }
 
+                if (word == "load" && i + 1 < args.Length)
+                {
+                    script.Add(Step.Load).Text = args[i + 1];
+                    i += 1;
+                    continue;
+                }
+
                 if (word == "type" && i + 1 < args.Length)
                 {
                     script.Add(Step.Type).Text = args[i + 1];
@@ -137,6 +144,18 @@ namespace Reactor.Sim.Simulation
             if (step.Kind == Step.Move)
             {
                 scene.MoveTo(step.At);
+                drawn();
+                return;
+            }
+
+            if (step.Kind == Step.Load)
+            {
+                // Said out loud, because a program that will not read is the thing worth looking at and
+                // a picture of a construct that silently loaded nothing looks like a working empty ship.
+                string trouble = scene.Load(System.IO.File.ReadAllText(step.Text));
+                if (!string.IsNullOrEmpty(trouble))
+                    Console.Error.Write(trouble);
+
                 drawn();
                 return;
             }

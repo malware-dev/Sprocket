@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Editing;
+using Reactor.Host.SpaceEngineers.Storage;
 using Ship = Reactor.Sim.Machine.Simulation;
 using VRageMath;
 using Reactor.Host.SpaceEngineers.Drawing;
@@ -54,6 +55,23 @@ namespace Reactor.Sim.Simulation
         /// says so by coming through here instead of pressing coordinates.
         /// </remarks>
         public ReactorEditor Editor => _ship.Editor;
+
+        /// <summary>
+        /// Reads a program into the construct, the way loading a save does.
+        /// </summary>
+        /// <remarks>
+        /// So a shot can show a state that pressing cannot reach. A script a person wrote by hand is a
+        /// supported way in - the language is readable and repairable on purpose - and some of what it
+        /// can say has no button in the editor yet.
+        /// <para>
+        /// Whatever would not read is handed back rather than thrown, because a program that will not
+        /// load is itself worth looking at.
+        /// </para>
+        /// </remarks>
+        public string Load(string program)
+        {
+            return ProgramText.Load(program, _ship.Editor.Program, _ship.World.Values);
+        }
 
         /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
         public string Where => _ship.Where;

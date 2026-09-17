@@ -15,6 +15,9 @@ namespace Reactor.Sim.Simulation
         public const int Move = 7;
         public const int Clear = 8;
 
+        /// <summary>Reads a program into the construct, as loading a save does.</summary>
+        public const int Load = 9;
+
         public int Kind;
         public Vector2 At;
         public Vector2 To;

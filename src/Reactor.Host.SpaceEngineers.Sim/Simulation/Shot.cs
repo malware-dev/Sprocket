@@ -27,7 +27,10 @@ namespace Reactor.Sim.Simulation
             // than a picture of it scaled to fit something else.
             var surface = new Surface();
             surface.Target = new PixelSize(width, height);
-            var scene = new EditorScene();
+            // A construct that remembers nothing, the same as the suite uses. A shot that ran on the
+            // playground both depended on what somebody last built by hand and wrote its own script
+            // into it, so taking a picture quietly edited the thing being photographed.
+            var scene = EditorScene.Nowhere();
             surface.Frame += scene.Draw;
 
             // Something behind it, or the bitmap is transparent - which reads as white and makes every
