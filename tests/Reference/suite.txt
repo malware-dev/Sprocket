@@ -16,45 +16,45 @@
 
 # --- the root, which is the automation on this construct ---------------------------------------
 root
-root-hover          move 400 144
+root-hover          move 60 130
 root-ticked         tick 120
 root-rename         240 70
 root-rename-empty   240 70 clear
-root-naming         400 144
+root-naming         60 130
 
 # --- one system, made from nothing --------------------------------------------------------------
-system              400 144 type Airlock enter
-system-rename       400 144 type Airlock enter 80 68
-system-back         400 144 type Airlock enter 25 62
+system              60 130 type Airlock enter
+system-rename       60 130 type Airlock enter 80 68
+system-back         60 130 type Airlock enter 25 62
 
 # --- a name another system has, refused where it is typed -----------------------------------------
-root-taken          400 144 type Airlock enter 25 62 400 144 type Airlock enter
-system-rename-taken 400 144 type Airlock enter 25 62 400 144 type Hangar enter 80 68 clear type Airlock enter
+root-taken          60 130 type Airlock enter 25 62 60 130 type Airlock enter
+system-rename-taken 60 130 type Airlock enter 25 62 60 130 type Hangar enter 80 68 clear type Airlock enter
 
 # --- picking blocks, which is the longest list in the editor ------------------------------------
-picker              400 144 type Airlock enter 400 144
-picker-hover        400 144 type Airlock enter 400 144 move 300 375
-picker-scrolled     400 144 type Airlock enter 400 144 scroll 250 600 300
-picker-searched     400 144 type Airlock enter 400 144 150 224 type door
-picker-picked       400 144 type Airlock enter 400 144 200 375
-picker-chosen       400 144 type Airlock enter 400 144 200 375 560 272
+picker              60 130 type Airlock enter 60 130
+picker-hover        60 130 type Airlock enter 60 130 move 300 375
+picker-scrolled     60 130 type Airlock enter 60 130 scroll 250 600 300
+picker-searched     60 130 type Airlock enter 60 130 150 224 type door
+picker-picked       60 130 type Airlock enter 60 130 200 375
+picker-chosen       60 130 type Airlock enter 60 130 200 375 560 272
 
 # --- the sequence that walk arrives at ----------------------------------------------------------
-sequence            400 144 type Airlock enter 400 144 200 375 560 272 1380 1000
-sequence-hover      400 144 type Airlock enter 400 144 200 375 560 272 1380 1000 move 400 170
-sequence-ticked     400 144 type Airlock enter 400 144 200 375 560 272 1380 1000 tick 120
+sequence            60 130 type Airlock enter 60 130 200 375 560 272 1380 1000
+sequence-hover      60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 move 400 170
+sequence-ticked     60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 tick 120
 
 # --- and the two kinds of line it can be given ---------------------------------------------------
 #
 # The words on a step are the host's, not core's: core says which blocks and which action, and this
 # target says "open" and joins them. A step that read right before the words moved out and wrong
 # after would show up nowhere else, because nothing else in the suite gets as far as a step.
-sequence-step       400 144 type Airlock enter 400 144 200 375 560 272 1380 1000 70 278 200 375 560 272 1380 1000
-sequence-wait       400 144 type Airlock enter 400 144 200 375 560 272 1380 1000 212 278 100 255
+sequence-step       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 70 278 200 375 560 272 1380 1000
+sequence-wait       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 212 278 100 255
 
 # --- swapping a choice, which nothing else here covers ------------------------------------------
 #
 # The mark beside a chosen row is a ring or a disc, and which one it is gets decided when the row is
 # measured. A change that did not ask for a new measure left the old glyph on screen: the model said
 # one thing and the picker drew another. Pressing a second choice is the whole of what catches that.
-picker-swapped      400 144 type Airlock enter 400 144 200 375 560 272 560 306
+picker-swapped      60 130 type Airlock enter 60 130 200 375 560 272 560 306

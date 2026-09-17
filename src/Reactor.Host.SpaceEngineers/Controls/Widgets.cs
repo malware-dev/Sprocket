@@ -40,7 +40,21 @@ namespace Reactor.Host.SpaceEngineers.Controls
         /// <summary>Quiet, for something that is available without being the point.</summary>
         public static Label Ghost(string text)
         {
-            Label ghost = Label(text, Palette.Muted, Lettering.Small);
+            return Ghost(text, Lettering.Small);
+        }
+
+        /// <summary>
+        /// The same control at a size the screen chooses.
+        /// </summary>
+        /// <remarks>
+        /// Everything that adds something is drawn this way, and a screen where the thing being added is
+        /// the main act says so with size rather than with a different control: the ways to start a
+        /// system are the largest thing on the ship's screen, and still the same button as the one that
+        /// adds a step to a sentence.
+        /// </remarks>
+        public static Label Ghost(string text, float lettering)
+        {
+            Label ghost = Label(text, Palette.Muted, lettering);
             ghost.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
 
             // A control rather than a sentence. One that broke onto two lines would change the height of

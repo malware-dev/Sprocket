@@ -5,22 +5,21 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Automation for Test Rig
 
 000  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:254 W:1402 H:699}
-002  Text       at {X:265 Y:260.372} scale 0.57  #A2C3CDFF  "Nothing automated here yet."
+001  SetClip    {X:259 Y:178 W:1402 H:775}
+002  Text       at {X:265 Y:184.292} scale 0.57  #A2C3CDFF  "Nothing automated here yet."
 003  ClearClip  
-004  Sprite     Reactor_Fill          {X:259 Y:118 W:1402 H:52}  #3C4C52FF
-005  Text       at {X:278 Y:132.012} scale 0.64  #DCF5FDFF  "+ New system…"
-006  Sprite     Reactor_Fill          {X:259 Y:176 W:1402 H:52}  #29363EFF
-007  Text       at {X:278 Y:189.692} scale 0.64  #DCF5FDFF  "+ Load system"
-008  Sprite     Reactor_Fill          {X:259 Y:243 W:1402 H:1}  #5B737BFF
-009  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
-010  Text       at {X:275.8467 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
-011  SetClip    {X:451 Y:55 W:96 H:33}
-012  Text       at {X:451.0733 Y:54.71198} scale 0.9  #DCF5FDFF  "Test Rig"
-013  Text       at {X:536.5867 Y:59.52197} scale 0.64  #85A1A9FF  "p"
-014  ClearClip  
-015  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
-016  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
-017  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
-018  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-019  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+004  Sprite     Reactor_Fill          {X:259 Y:118 W:150 H:33}  #29363EFF
+005  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ New system…"
+006  Text       at {X:432.2733 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load system"
+007  Sprite     Reactor_Fill          {X:259 Y:167 W:1402 H:1}  #5B737BFF
+008  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
+009  Text       at {X:275.8467 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
+010  SetClip    {X:451 Y:55 W:96 H:33}
+011  Text       at {X:451.0733 Y:54.71198} scale 0.9  #DCF5FDFF  "Test Rig"
+012  Text       at {X:536.5867 Y:59.52197} scale 0.64  #85A1A9FF  "p"
+013  ClearClip  
+014  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
+015  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
+016  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
+017  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+018  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

@@ -88,15 +88,19 @@ namespace Reactor.Host.SpaceEngineers.Lists
             // be seen by somebody who does not yet know to look.
             var wrong = entry.Problems > 0;
 
+            // A row that adds something is the same button as the one under a sentence, because it is
+            // the same act: no fill, quiet words, and a highlight that says it answers to a press.
             _line.Background = wrong
                 ? Palette.ProblemWash
-                : (pressable ? Palette.Panel : Palette.None);
-            _line.Highlight = pressable ? Palette.PanelHot : Palette.None;
+                : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
+            _line.Highlight = pressable ? (entry.IsAction ? Palette.Panel : Palette.PanelHot)
+                : Palette.None;
 
             // The same plus the start block uses, for the same reason: this row adds something. Core marks
             // it as an action and leaves the drawing to us.
             _summary.Text = entry.IsAction ? StartView.Plus + entry.Summary : entry.Summary;
             _summary.Color = entry.IsAction ? Palette.Muted : Palette.Ink;
+            _summary.Scale = entry.IsAction ? Lettering.Small : Lettering.Body;
 
             // A row that does something has no state to show, so it gets no light - only the space where
             // one would be, which keeps its text lined up with its neighbours.

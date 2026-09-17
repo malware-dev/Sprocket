@@ -24,6 +24,16 @@ namespace Reactor.Host.SpaceEngineers.Lists
 
         readonly StartComponent _component;
         readonly Stack _stack = Widgets.Column(Space.Row);
+
+        /// <summary>
+        /// The buttons themselves, in a row of their own.
+        /// </summary>
+        /// <remarks>
+        /// A row rather than a column, so each one is as wide as its words: the same button that adds a
+        /// step to a sentence, laid out the same way. Full-width rows read as a list of places to go,
+        /// which is what the things underneath the line are.
+        /// </remarks>
+        readonly Stack _buttons = Widgets.RowOf(Space.Item);
         readonly List<Label> _rows = new List<Label>();
         readonly Rule _line = Widgets.Line();
 
@@ -53,15 +63,23 @@ namespace Reactor.Host.SpaceEngineers.Lists
 
                 // An ellipsis on the ones that will ask something, which is the convention every desktop
                 // already uses for "this opens a question rather than doing it".
-                _rows.Add(Widgets.Row(Plus + option.Label + (option.Asks ? "…" : ""), Palette.Ink));
+                //
+                // The same button that adds a step to a sentence, at this screen's size: adding a system
+                // and adding a step are one act, and a filled panel here said they were two.
+                Label row = Widgets.Ghost(Plus + option.Label + (option.Asks ? "…" : ""),
+                    Lettering.Body);
+                row.Highlight = Palette.Panel;
+                _rows.Add(row);
             }
 
             _line.Padding = new Thickness(0f, Space.Item);
 
-            _stack.Children.Clear();
+            _buttons.Children.Clear();
             for (int i = 0; i < _rows.Count; i++)
-                _stack.Children.Add(_rows[i]);
+                _buttons.Children.Add(_rows[i]);
 
+            _stack.Children.Clear();
+            _stack.Children.Add(_buttons);
             _stack.Children.Add(_line);
         }
 
