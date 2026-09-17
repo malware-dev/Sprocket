@@ -39,6 +39,8 @@ namespace Reactor.Sim
             if (args.Length > 0 && args[0] == "--profile")
             {
                 Console.Write(StorageReport.Render());
+                Console.WriteLine();
+                Console.Write(BindingReport.Render());
                 return;
             }
 

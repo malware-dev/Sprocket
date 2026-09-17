@@ -59,3 +59,21 @@ multiplier is terse in a way nothing else on the screen is.
 
 What a required trigger naming no block reads as. Longer than every other trigger lead, and it
 is the one a hand-written program or an imported system is most likely to produce.
+
+### 8. "fitted 2 times"
+
+The subtitle under a system on the ship's list, from `SystemSummary`, saying
+how many of that system this construct has.
+
+The word has to go: "fitting" lands one letter from a crude Norwegian word, which a mod with Norwegian
+players will meet and which no Norwegian player will need telling twice.
+
+What replaces it is not settled, and there is a constraint on the answer that is easy to miss.
+[Editor.md](Editor.md)'s sketch of this screen says `on this ship: 2`, but `SystemSummary.Count` says
+in as many words why it does not: "on this ship" is wrong on most of what people build - a station, a
+rover, a drone - and the screen is already showing the thing, so nothing there needs naming. Whatever
+is chosen has to say how many without saying what they are in.
+
+The same word is the harness's name for a block welded onto the rig, which is a different idea and a
+separate rename. It is not on screen, so it is not this pass's business, but it goes for the same
+reason.
