@@ -139,6 +139,20 @@ namespace Reactor.Host.SpaceEngineers.Runtime
 
         public int LastSkippedTick { get; private set; }
 
+        /// <summary>
+        /// How often something called this sequence while it was switched off.
+        /// </summary>
+        /// <remarks>
+        /// Counted separately from being busy because it is a different piece of news, and counted at
+        /// all because the alternative is silence: a step saying <c>run</c> that meets a parked sequence
+        /// would otherwise evaporate, which is the one thing Reactor does nowhere else.
+        /// <para>
+        /// Calls only. Its own trigger firing while it is off is not news - that is what off means, and
+        /// counting it would report a door somebody opened ten times as ten refusals.
+        /// </para>
+        /// </remarks>
+        public int RefusedCount { get; private set; }
+
         /// <summary>Whether the watched signal is true right now.</summary>
         public bool TriggerSignalIsTrue { get; private set; }
 
@@ -176,15 +190,23 @@ namespace Reactor.Host.SpaceEngineers.Runtime
 
         /// <summary>Starts the sequence by name, from another sequence or a trigger.</summary>
         /// <remarks>
-        /// The switch holds here. A parked sequence is parked for everything, including being
-        /// called by another one.
+        /// The switch holds here. A parked sequence is parked for everything, including being called by
+        /// another one - what a person switched off must not run because something else asked.
+        /// <para>
+        /// So the call is refused rather than dropped. Off is a legitimate answer and silence is not:
+        /// the refusal is counted and shown, the way a switched-off block refuses an action whoever
+        /// asks.
+        /// </para>
         /// </remarks>
         public void Call(GridWorld world, Bindings bindings, int tick)
         {
             _bindings = bindings;
 
             if (!CanRun)
+            {
+                RefusedCount++;
                 return;
+            }
 
             if (IsRunning)
             {

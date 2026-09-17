@@ -107,7 +107,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     ? runner.Get(sequences[i])
                     : runner.Get(sequences[i], instance);
 
-                if (SequenceSummary.Fault(world, bindings, sequences[i], state).Exists)
+                // Warnings are not counted. A ship's screen saying a system has something wrong sends
+                // somebody looking for a fault, and "nothing starts this yet" is not one.
+                var fault = SequenceSummary.Fault(world, bindings, sequences[i], state);
+                if (fault.Exists && !fault.IsWarning)
                     count++;
             }
 

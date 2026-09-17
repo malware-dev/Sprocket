@@ -36,5 +36,15 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
         /// <summary>Whether there is anything wrong at all.</summary>
         public bool Exists => Problem != SequenceProblem.None;
+
+        /// <summary>
+        /// Whether this is worth saying quietly rather than marking as broken.
+        /// </summary>
+        /// <remarks>
+        /// Decided by what it is rather than by whoever is showing it, so every screen agrees about how
+        /// loud to be. A warning still says its words; what it does not do is wash a row red, add to
+        /// what is counted as wrong, or get the sequence parked.
+        /// </remarks>
+        public bool IsWarning => Problem == SequenceProblem.NothingStarts;
     }
 }

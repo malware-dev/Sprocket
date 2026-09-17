@@ -197,11 +197,14 @@ namespace Reactor.Host.SpaceEngineers.Editing
             // Never offer to start something that cannot run. Reactor parked it in the first place
             // because it is broken, and asking would be the screen offering to undo its own
             // judgement one press after making it.
-            if (SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
-                    Editor.Runner.Get(_sequence)).Exists)
-            {
+            //
+            // A warning is not that. Nothing starts this one yet, which is exactly the state somebody
+            // walks away from thinking they have finished, so it earns the offer like any other.
+            var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
+                Editor.Runner.Get(_sequence));
+
+            if (fault.Exists && !fault.IsWarning)
                 return true;
-            }
 
             Editor.Ask("Switch this sequence on?");
 
@@ -245,6 +248,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _sentence.JustRan = state != null && state.LastFiredTick >= 0
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
+            _sentence.RefusedCount = state == null ? 0 : state.RefusedCount;
 
             _sentence.LastRun = TimeText.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
             _sentence.Trigger.IsLiveNow = state != null && state.TriggerSignalIsTrue;
@@ -293,7 +297,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 Editor.Runner.Get(_sequence));
 
             _sentence.Problem = SequenceText.Problem(fault.Problem);
-            _sentence.Trigger.HasProblem = fault.Exists && fault.Step == SequenceFault.Trigger;
+            _sentence.ProblemIsWarning = fault.IsWarning;
+
+            // The mark on a line is what says "this is broken, look here", so a warning does not put
+            // one anywhere. Its words are the whole of what it has to say.
+            _sentence.Trigger.HasProblem = fault.Exists && !fault.IsWarning
+                && fault.Step == SequenceFault.Trigger;
 
             for (var i = 0; i < _sentence.Steps.Count && i < _shown.Count; i++)
                 _sentence.Steps[i].HasProblem = fault.Exists && fault.Step == _shown[i];

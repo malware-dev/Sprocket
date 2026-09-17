@@ -165,6 +165,56 @@ public class RigTests
         Assert.Equal(new[] { "Front Inner:close" }, rig.Log);
     }
 
+    /// <summary>
+    /// A press on a button whose sequence is parked does nothing, and the same press works once it is
+    /// switched on.
+    /// </summary>
+    /// <remarks>
+    /// The button is Reactor's while the sequence is parked - the slot is written and the panel reads
+    /// as what it does - because what the program wants wired is not a question about a switch. What
+    /// the switch answers is whether anything runs.
+    /// <para>
+    /// Which is also the state a new rule is in: the editor parks the one it has just built, so
+    /// pressing the button before switching it on is the ordinary first thing somebody does.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void APressOnAParkedSequenceStartsNothing()
+    {
+        Simulation rig = Simulation.On(Store.Nowhere());
+
+        Airlock(rig.Editor);
+
+        rig.Editor.PressAdd("do something");
+        rig.Editor.PressBlock("Airlock Inner Door");
+        rig.Editor.PressChoice("open");
+        rig.Editor.PressPrimary();
+
+        // Long enough for the slot to be written and looked at again. Left parked, which is where the
+        // editor leaves a rule somebody has just finished describing.
+        for (var i = 0; i < 5; i++)
+            rig.Tick();
+
+        Sequence sequence = rig.Editor.Program.Sequences[0];
+        Assert.False(sequence.Enabled);
+
+        rig.Press("Airlock Button");
+        rig.Tick();
+
+        Assert.False(Running(rig, sequence), "a parked sequence ran");
+
+        // Refused rather than dropped, which is what the sequence's own screen shows.
+        Assert.Equal(1, rig.Runner.Get(sequence, sequence.System.Instances[0]).RefusedCount);
+
+        rig.Editor.SwitchOn();
+        rig.Tick();
+
+        rig.Press("Airlock Button");
+        rig.Tick();
+
+        Assert.True(Running(rig, sequence), "the press did not reach the sequence");
+    }
+
     /// <summary>Names a block, which is what a program refers to.</summary>
     static string Named(Simulation sim, Fitting fitting)
     {

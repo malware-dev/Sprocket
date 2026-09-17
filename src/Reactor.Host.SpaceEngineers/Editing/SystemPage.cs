@@ -184,7 +184,8 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     Editor.Runner.Get(sequence));
 
                 entries[i].Problem = SequenceText.Problem(fault.Problem);
-                entries[i].Problems = fault.Exists ? 1 : 0;
+                entries[i].ProblemIsWarning = fault.IsWarning;
+                entries[i].Problems = fault.Exists && !fault.IsWarning ? 1 : 0;
             }
         }
 

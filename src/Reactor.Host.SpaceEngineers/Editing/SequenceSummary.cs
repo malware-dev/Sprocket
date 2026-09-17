@@ -46,12 +46,13 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Whether nothing can start this sequence.
+        /// What is wrong with what starts this sequence, if anything.
         /// </summary>
         /// <remarks>
-        /// A sequence nothing starts at all is not judged: it may be there to be <c>run</c> by another
-        /// one, which is an ordinary way to build. What is judged is a sequence something is supposed
-        /// to start - a button that was cleared, or a trigger the construct never answered.
+        /// Two ways for nothing to start it. A trigger that is supposed to - a button whose slot was
+        /// cleared, or a moment the construct never answered - and no trigger at all, which is a fault
+        /// only once nothing calls it either. A sequence another one runs is an ordinary way to build,
+        /// and until <c>run</c> existed that possibility meant this case could not be judged.
         /// <para>
         /// An unfinished trigger is not unreachable either. Somebody half way through picking blocks
         /// has a sequence that cannot fire yet, and saying so would be scolding them for not having
@@ -64,11 +65,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// both dearer and weaker, since it could only ask whether <i>something</i> was wired there.
         /// </para>
         /// </remarks>
-        static bool NeverTriggered(GridWorld world, Sequence sequence)
+        static SequenceProblem StartTrouble(GridWorld world, Sequence sequence)
         {
             var system = sequence.System;
             if (system == null)
-                return false;
+                return SequenceProblem.None;
 
             var starts = 0;
             var triggers = system.Triggers;
@@ -89,10 +90,19 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     continue;
 
                 if (moment.Sources.Count == 0 || string.IsNullOrEmpty(moment.EventId))
-                    return sequence.Steps.Count > 0;
+                    return sequence.Steps.Count > 0 ? SequenceProblem.NeverTriggered : SequenceProblem.None;
             }
 
-            return starts > 0 && !world.CanStart(sequence);
+            // Nothing starts it at all, which is a warning rather than a fault - and nothing to say
+            // while it has no steps either, because somebody who has just made one has not finished.
+            if (starts == 0)
+            {
+                return sequence.Steps.Count > 0 && !system.Called(sequence.Number)
+                    ? SequenceProblem.NothingStarts
+                    : SequenceProblem.None;
+            }
+
+            return world.CanStart(sequence) ? SequenceProblem.None : SequenceProblem.NeverTriggered;
         }
 
         /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
@@ -157,9 +167,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             // Last, because it is the only one that is about the sequence as a whole rather than
             // about something it names, and anything missing is the more useful thing to say.
-            return NeverTriggered(world, sequence)
-                ? new SequenceFault(SequenceProblem.NeverTriggered, SequenceFault.Trigger)
-                : SequenceFault.None;
+            var trouble = StartTrouble(world, sequence);
+            return trouble == SequenceProblem.None
+                ? SequenceFault.None
+                : new SequenceFault(trouble, SequenceFault.Trigger);
         }
 
     }

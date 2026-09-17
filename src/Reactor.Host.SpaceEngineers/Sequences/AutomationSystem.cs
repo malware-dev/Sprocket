@@ -184,6 +184,28 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             return null;
         }
 
+        /// <summary>Whether any sequence of this system has a step that runs that one.</summary>
+        /// <remarks>
+        /// Asked of the whole system rather than of one sequence, because what is wanted is whether
+        /// anybody at all calls it: a sequence with no trigger and no caller is one nothing can ever
+        /// start, which is a fault rather than a way of building.
+        /// </remarks>
+        public bool Called(int number)
+        {
+            for (var i = 0; i < _sequences.Count; i++)
+            {
+                var steps = _sequences[i].Steps;
+                for (var q = 0; q < steps.Count; q++)
+                {
+                    var run = steps[q] as Run;
+                    if (run != null && run.Number == number)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>Forgets everything that started a sequence, for when the sequence itself goes.</summary>
         internal void DropTriggersFor(int number)
         {

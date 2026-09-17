@@ -119,9 +119,15 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _problem.Text = entry.Problem;
             _problem.Collapsed = string.IsNullOrEmpty(entry.Problem);
 
+            // A warning reads as a remark, not as an alarm. Same line, same place, quieter colour - the
+            // difference between "nothing starts this yet" and "this affects a block that is gone".
+            _problem.Color = entry.ProblemIsWarning ? Palette.Notice : Palette.Problem;
+
             // Nothing wrong is the ordinary case, so it takes no room rather than drawing blank - a
-            // column of rows each reserving space for a mark reads as a column of marks.
-            _below.Collapsed = entry.Problems == 0;
+            // column of rows each reserving space for a mark reads as a column of marks. Keyed on there
+            // being words rather than on the count, because a warning has words and is not counted.
+            _below.Collapsed = string.IsNullOrEmpty(entry.Problem);
+            _below.Tint = entry.ProblemIsWarning ? Palette.Notice : Palette.Problem;
 
             // Says what state it is in, the way the game's own on/off control does. The light on the
             // left of this row says whether the thing is doing something right now; this says whether it

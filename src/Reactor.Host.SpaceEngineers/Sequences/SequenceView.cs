@@ -170,14 +170,18 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                 ? Palette.Problem
                 : (_component.JustRan ? Palette.Live : Palette.Dim);
 
-            bool skipping = _component.SkippedCount > 0;
+            bool skipping = _component.SkippedCount > 0 || _component.RefusedCount > 0;
             _skipped.Collapsed = !skipping;
             if (skipping)
-                _skipped.Text = "skipped " + _component.SkippedCount + "x while busy";
+                _skipped.Text = Skips(_component.SkippedCount, _component.RefusedCount);
 
             // Absent rather than blank. A banner with nothing to say still holds a line, and a strip of
             // empty chrome above the sentence is worse than the jump of one appearing when it has news.
             Banner(_locked, _component.Editable ? "" : _component.LockedText, 1);
+            // The banner is the same line either way; what changes is how loud it is. A warning in
+            // problem colours would have somebody hunting for a broken block that is not there.
+            _problem.Color = _component.ProblemIsWarning ? Palette.Notice : Palette.Problem;
+            _problem.Background = _component.ProblemIsWarning ? Palette.NoticeWash : Palette.ProblemWash;
             Banner(_problem, _component.Problem, 2);
 
             // Idle while the signal reads true is not a contradiction. It is the difference between a
@@ -604,6 +608,23 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>Shows a banner when it has something to say, and takes it out of the layout when not.</summary>
+        /// <summary>What was asked for and did not happen, and why not.</summary>
+        /// <remarks>
+        /// Both reasons in one line when both happened, because they are one piece of news - this was
+        /// asked for and did not run - and a second banner for the rarer half would cost a line of the
+        /// screen on every sequence that has ever been busy.
+        /// </remarks>
+        static string Skips(int busy, int off)
+        {
+            if (busy == 0)
+                return "skipped " + off + "x while off";
+
+            if (off == 0)
+                return "skipped " + busy + "x while busy";
+
+            return "skipped " + busy + "x while busy, " + off + "x while off";
+        }
+
         void Banner(Label banner, string text, int at)
         {
             bool wanted = !string.IsNullOrEmpty(text);

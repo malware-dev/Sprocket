@@ -1080,8 +1080,9 @@ Until then this half of the requirement is blocked on the configurator, not on t
 `Sequence.CanRun` exist, the runner honours them, and both are visible controls - a sequence's
 on its sentence, a system's on both its own screen and its row in the ship's list. The two
 switches are deliberately separate rather than one setting the other, so parking a whole
-system and restoring it leaves a deliberately-parked sequence still parked. Not built:
-either of them being programmable.*
+system and restoring it leaves a deliberately-parked sequence still parked. A step saying `run`
+that meets a parked sequence is refused and the refusal is counted and shown, which is what keeps
+"no step runs" from being silent. Not built: either of them being programmable.*
 
 ## From story T - when my miner docks
 

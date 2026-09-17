@@ -120,6 +120,8 @@ namespace Reactor.Host.SpaceEngineers.Words
                 return "This affects something that isn't here any more.";
             if (problem == SequenceProblem.NeverTriggered)
                 return "Nothing can start this.";
+            if (problem == SequenceProblem.NothingStarts)
+                return "Nothing starts this yet.";
             if (problem == SequenceProblem.MissingGate)
                 return "This waits on something that isn't here any more.";
 

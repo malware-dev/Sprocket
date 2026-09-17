@@ -56,6 +56,84 @@ public class ProblemTests
     }
 
     /// <summary>
+    /// A sequence nothing starts and nothing calls is remarked on, not marked broken.
+    /// </summary>
+    /// <remarks>
+    /// The case that could not be judged until a step could call one: a sequence with no trigger was
+    /// always allowed, because it might be there to be <c>run</c> by another. Now that the calling is
+    /// written down, "no trigger and no caller" is worth saying - and it is a warning, because nothing
+    /// is broken and nothing is wired wrongly. There is simply nobody to start it yet.
+    /// </remarks>
+    [Fact]
+    public void ASequenceNothingStartsOrCallsIsWarnedAbout()
+    {
+        var ship = Build();
+
+        var warn = ship.Automation.AddSequence(ship.Automation.Systems[0]);
+        warn.Name = "Warn";
+
+        // Nothing starts it and it does nothing yet: somebody mid-build, which is not worth a word.
+        Assert.False(Fault(ship, warn).Exists);
+
+        var shut = new Act("close");
+        shut.Targets.Add(ship.Automation.Declare(ship.World, ship.World.FindEntity(2)!).Name);
+        warn.Steps.Add(shut);
+
+        var fault = Fault(ship, warn);
+        Assert.Equal(SequenceProblem.NothingStarts, fault.Problem);
+        Assert.True(fault.IsWarning);
+
+        // A step that runs it is what it was missing, and it needs no trigger of its own.
+        ship.Sequence.Steps.Add(new Run(warn.Number));
+
+        Assert.False(Fault(ship, warn).Exists);
+    }
+
+    /// <summary>
+    /// A warning says its words and nothing else: no count, no mark, and it is not switched off.
+    /// </summary>
+    /// <remarks>
+    /// The difference from a fault, at the screen. A row washed red sends somebody hunting for a
+    /// broken block, the count on a ship's screen is a promise that something is wrong, and parking
+    /// it would make the step somebody is about to point at it fail for a second reason.
+    /// </remarks>
+    [Fact]
+    public void AWarningIsNotCountedMarkedOrSwitchedOff()
+    {
+        var ship = Build();
+
+        var warn = ship.Automation.AddSequence(ship.Automation.Systems[0]);
+        warn.Name = "Warn";
+        var shut = new Act("close");
+        shut.Targets.Add(ship.Automation.Declare(ship.World, ship.World.FindEntity(2)!).Name);
+        warn.Steps.Add(shut);
+
+        // Long enough for the screens to have marked what they mark, and for Reactor to have parked
+        // anything it parks.
+        ship.Runner.Tick(600);
+        ship.Editor.Tick(600);
+
+        Assert.True(warn.Enabled);
+
+        ship.Editor.PressRow(1);
+        ship.Editor.Tick(1200);
+
+        var row = ship.Editor.Rows()[1];
+        Assert.Equal("Nothing starts this yet.", row.Problem);
+        Assert.True(row.ProblemIsWarning);
+        Assert.Equal(0, row.Problems);
+
+        // And the sequence's own screen says it without marking the line that starts it.
+        ship.Editor.PressRow(1);
+        ship.Editor.Tick(1800);
+
+        var sentence = ship.Editor.Sentence();
+        Assert.Equal("Nothing starts this yet.", sentence.Problem);
+        Assert.True(sentence.ProblemIsWarning);
+        Assert.False(sentence.Trigger.HasProblem);
+    }
+
+    /// <summary>
     /// Something missing is said before something unreachable, and it is said about its own step.
     /// </summary>
     /// <remarks>
@@ -232,9 +310,11 @@ public class ProblemTests
         Assert.False(sentence.Trigger.HasProblem);
     }
 
-    static SequenceFault Fault(Ship ship) =>
-        SequenceSummary.Fault(ship.World, ship.Runner.Bindings, ship.Sequence,
-            ship.Runner.Get(ship.Sequence));
+    static SequenceFault Fault(Ship ship) => Fault(ship, ship.Sequence);
+
+    static SequenceFault Fault(Ship ship, Sequence sequence) =>
+        SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence,
+            ship.Runner.Get(sequence));
 
     static Ship Build()
     {

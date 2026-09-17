@@ -29,13 +29,29 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// sequence names is gone; this one says the sequence is complete, correct, and unreachable -
         /// so the fix is not to mend a reference but to give it something that fires it.
         /// <para>
-        /// Two ways in so far. A button whose toolbar slot is no longer Reactor's, because somebody
-        /// cleared it from the terminal - which is a legitimate way to say "stop doing that", so it
-        /// is reported rather than undone. And a named sequence nothing calls, which has been
-        /// possible since sequences could be named and has never been reported.
+        /// A button whose toolbar slot is no longer Reactor's, because somebody cleared it from the
+        /// terminal - which is a legitimate way to say "stop doing that", so it is reported rather than
+        /// undone. Or a trigger left with nothing in it on a sequence that has steps, which cannot run
+        /// however it got that way.
         /// </para>
         /// </remarks>
         NeverTriggered,
+
+        /// <summary>
+        /// Nothing has been given the job of starting it: no trigger, and no sequence that calls it.
+        /// </summary>
+        /// <remarks>
+        /// <b>A warning rather than a fault.</b> Nothing is broken and nothing is wired wrongly - there
+        /// is simply nobody to start this yet, which is an ordinary state for work in progress. So it is
+        /// said quietly: a line of words, no red, and Reactor does not park it, because parking
+        /// something somebody is about to call would make the call fail for a second reason.
+        /// <para>
+        /// It could not be judged at all until a step could say <c>run</c>. Before that, a sequence with
+        /// no trigger might have been waiting to be called by something the model had no way to write
+        /// down, so saying "nothing starts this" would have been a guess.
+        /// </para>
+        /// </remarks>
+        NothingStarts,
 
         /// <summary>
         /// Everything it names is here, but at least one of them was found by a weaker key.

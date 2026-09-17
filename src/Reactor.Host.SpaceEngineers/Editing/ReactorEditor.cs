@@ -136,11 +136,13 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 if (!sequence.Enabled)
                     continue;
 
-                if (SequenceSummary.Fault(_world, _runner.Bindings, sequence, _runner.Get(sequence))
-                    .Exists)
-                {
+                // Faults only. A sequence nothing starts yet is not broken, and parking it would make
+                // the step somebody is about to point at it fail for a second reason.
+                var fault = SequenceSummary.Fault(_world, _runner.Bindings, sequence,
+                    _runner.Get(sequence));
+
+                if (fault.Exists && !fault.IsWarning)
                     sequence.Enabled = false;
-                }
             }
         }
 

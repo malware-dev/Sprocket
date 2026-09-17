@@ -104,8 +104,17 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// </summary>
         public int SkippedCount { get; set; }
 
+        /// <summary>
+        /// How often something asked for this sequence while it was switched off. Surfaced for the same
+        /// reason: a rule that ignored a request is otherwise indistinguishable from one nothing asked.
+        /// </summary>
+        public int RefusedCount { get; set; }
+
         /// <summary>Set when the sequence refers to something no longer on the construct.</summary>
         public string Problem { get; set; }
+
+        /// <summary>Whether <see cref="Problem" /> is a warning rather than something broken.</summary>
+        public bool ProblemIsWarning { get; set; }
 
         /// <summary>
         /// Whether the sequence may fire. Switching a sequence off to see what changes is a

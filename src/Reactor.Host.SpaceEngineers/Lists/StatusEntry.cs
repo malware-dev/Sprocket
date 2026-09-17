@@ -120,6 +120,15 @@ namespace Reactor.Host.SpaceEngineers.Lists
         /// row among forty.
         /// </para>
         /// </remarks>
+        /// <summary>Whether <see cref="Problem" /> is a warning rather than something broken.</summary>
+        public bool ProblemIsWarning
+        {
+            get { return _problemIsWarning; }
+            set { Set(ref _problemIsWarning, value, "ProblemIsWarning"); }
+        }
+
+        bool _problemIsWarning;
+
         public int Problems
         {
             get { return _problems; }
