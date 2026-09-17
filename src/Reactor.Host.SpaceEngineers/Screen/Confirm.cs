@@ -55,20 +55,25 @@ namespace Reactor.Host.SpaceEngineers.Screen
         }
 
         /// <summary>The command under a point, or zero where no answer is.</summary>
-        public int CommandAt(Vector2 point)
+        /// <summary>
+        /// Puts the answers in the screen's hit list, like anything else that can be pressed.
+        /// </summary>
+        /// <remarks>
+        /// Rather than hit-testing itself, which is what this did before. Answering a question is not a
+        /// special sort of press, and the second path drifted from the first: pressing worked and
+        /// hovering never did, because lighting a control is something the hit list does and these were
+        /// not in it.
+        /// <para>
+        /// Fixed hits, because a question stands in the chrome rather than in the scrolling body.
+        /// </para>
+        /// </remarks>
+        public void Collect(List<Hit> hits)
         {
+            if (!_up)
+                return;
+
             for (var i = 0; i < _answers.Count && i < _commands.Count; i++)
-            {
-                RectangleF at = _answers[i].Bounds;
-
-                if (point.X >= at.X && point.X <= at.X + at.Width
-                    && point.Y >= at.Y && point.Y <= at.Y + at.Height)
-                {
-                    return _commands[i];
-                }
-            }
-
-            return 0;
+                hits.Add(Hit.OnFixed(_answers[i], _commands[i]));
         }
 
         /// <summary>

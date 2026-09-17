@@ -40,6 +40,9 @@ sealed class Screen
 
     public EditorScene Scene => _frame.Scene;
 
+    /// <summary>How much text this screen has measured since it was made.</summary>
+    public int Measured => _frame.Measured;
+
     /// <summary>The editor, for tests about what it does rather than where this target draws it.</summary>
     public ReactorEditor Editor => _frame.Scene.Editor;
 

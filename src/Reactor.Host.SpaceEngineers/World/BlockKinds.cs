@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
 
@@ -15,6 +16,9 @@ namespace Reactor.Host.SpaceEngineers.World
     {
         internal const string SwitchOn = "on";
         internal const string SwitchOff = "off";
+
+        /// <summary>What the game puts in front of every type id, and a program never writes.</summary>
+        const string GamePrefix = "MyObjectBuilder_";
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
 
@@ -60,6 +64,41 @@ namespace Reactor.Host.SpaceEngineers.World
 
             _kinds.Add(id, kind);
             return kind;
+        }
+
+        /// <summary>
+        /// The sort of block a program writes: a definition id without the game's prefix.
+        /// </summary>
+        /// <remarks>
+        /// <b>For a script and nothing else.</b> Everything in memory holds the definition id whole,
+        /// because that is what the game's own names are and what anything asking the game about a
+        /// block has to hand it. The prefix is the game's noise, it says nothing to a person, and the
+        /// language leaves it out - the same spelling a part's <c>expects</c> has always used.
+        /// </remarks>
+        internal static string Sort(string definition)
+        {
+            if (definition == null)
+                return "";
+
+            return definition.StartsWith(GamePrefix, StringComparison.Ordinal)
+                ? definition.Substring(GamePrefix.Length)
+                : definition;
+        }
+
+        /// <summary>
+        /// The definition id a sort means, which is <see cref="Sort" /> read backwards.
+        /// </summary>
+        /// <remarks>
+        /// A definition id is a type and a subtype, so a sort with no <c>/</c> in it is not one: it is
+        /// a kind some other world invented, and it is left exactly as it was found. One that already
+        /// carries the prefix is left alone too, so a program saved with it still finds its blocks.
+        /// </remarks>
+        internal static string Definition(string sort)
+        {
+            if (string.IsNullOrEmpty(sort) || sort.IndexOf('/') < 0)
+                return sort ?? "";
+
+            return sort.StartsWith(GamePrefix, StringComparison.Ordinal) ? sort : GamePrefix + sort;
         }
     }
 }

@@ -60,10 +60,46 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// </remarks>
         public bool Intact { get; private set; } = true;
 
+        /// <summary>
+        /// What would not read, in the words of whatever read it, or empty.
+        /// </summary>
+        /// <remarks>
+        /// Kept so a screen can say it. A program that was read from something unreadable has to be
+        /// able to tell the person in front of it, because the alternative is what happened before this
+        /// existed: they build for an hour on a block that was never going to keep any of it.
+        /// <para>
+        /// The first one only. A save with ten bad lines is one thing that went wrong to the person
+        /// reading it, and a screen that listed all ten would bury the sentence that matters.
+        /// </para>
+        /// </remarks>
+        public string Trouble { get; private set; } = "";
+
         /// <summary>Says this program is not all of what was saved, and cannot be saved over it.</summary>
-        public void Damaged()
+        public void Damaged(string what)
         {
             Intact = false;
+
+            if (Trouble.Length == 0)
+                Trouble = what ?? "";
+        }
+
+        /// <summary>
+        /// Says the unreadable original is safe somewhere else, so this may be saved after all.
+        /// </summary>
+        /// <remarks>
+        /// The protection exists so that a half-read load cannot be written over the only copy. Once
+        /// the person has replaced it, refusing to write costs them everything they do from then on,
+        /// silently, which is far the worse of the two. Whoever replaced it says so here.
+        /// <para>
+        /// <see cref="Trouble" /> goes with it. What was wrong was wrong with a program this one has
+        /// taken the place of, so a screen still saying it would be describing something that is no
+        /// longer there.
+        /// </para>
+        /// </remarks>
+        public void Kept()
+        {
+            Intact = true;
+            Trouble = "";
         }
 
         /// <summary>

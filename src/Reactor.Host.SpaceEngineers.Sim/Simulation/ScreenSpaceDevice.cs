@@ -67,10 +67,23 @@ namespace Reactor.Sim.Simulation
                 .Done();
         }
 
+        /// <summary>
+        /// How many times anything has asked for the width of a string.
+        /// </summary>
+        /// <remarks>
+        /// <b>For measuring, and it is not idle curiosity.</b> Measuring text is the dearest thing the
+        /// layout does and the one whose cost no screenshot can show: a layout that re-measures every
+        /// label on every frame draws exactly the right picture. The only honest proof is a count, so
+        /// the harness keeps one.
+        /// </remarks>
+        public int Measured { get; private set; }
+
         public Vector2 MeasureText(string font, StringBuilder text, float scale)
         {
             if (Fonts == null || text == null)
                 return Vector2.Zero;
+
+            Measured++;
 
             // The real one measures the builder without unpacking it, which is the reason a builder is held
             // at all. Here the string is fine: nothing in this process is running inside a game's frame.

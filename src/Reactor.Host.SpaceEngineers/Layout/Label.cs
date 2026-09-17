@@ -37,6 +37,11 @@ namespace Reactor.Host.SpaceEngineers.Layout
         private string _lineIn;
 
         private bool _dirty = true;
+
+        private float _flat;
+        private float _flatAt = -1f;
+        private string _flatIn;
+        private bool _flatDirty = true;
         private Vector2 _wrapped;
 
         /// <summary>The width of the line last centred, kept so that centring does not cost a measurement.</summary>
@@ -70,6 +75,7 @@ namespace Reactor.Host.SpaceEngineers.Layout
                 _measured.Clear();
                 _measured.Append(incoming);
                 _dirty = true;
+                _flatDirty = true;
                 InvalidateMeasure();
             }
         }
@@ -163,7 +169,7 @@ namespace Reactor.Host.SpaceEngineers.Layout
             // that way reports a size it does not draw at. Only the width is worth asking the letters
             // about.
             if (!Wraps && !Trims)
-                return new Vector2(g.MeasureText(Font, _measured, Scale).X, g.LineHeight(Font, Scale));
+                return new Vector2(Flat(g), LineOf(g));
 
             if (!Wraps)
             {
@@ -173,6 +179,28 @@ namespace Reactor.Host.SpaceEngineers.Layout
 
             Rewrap(g, available.X);
             return _wrapped;
+        }
+
+        /// <summary>
+        /// The width of one unwrapped run, kept between frames.
+        /// </summary>
+        /// <remarks>
+        /// For the same reason the line height is kept: a control that does not wrap - a button, a
+        /// switch, a chip - is measured again whenever anything above it changes size, and the width of
+        /// words that have not changed is a number already known. Text measurement is the dearest call
+        /// in the layout and the one no picture can show being made.
+        /// </remarks>
+        private float Flat(IGraphics g)
+        {
+            if (!_flatDirty && _flatAt == Scale && _flatIn == Font)
+                return _flat;
+
+            _flatDirty = false;
+            _flatAt = Scale;
+            _flatIn = Font;
+            _flat = g.MeasureText(Font, _measured, Scale).X;
+
+            return _flat;
         }
 
         /// <summary>The line height, kept between frames.</summary>
@@ -264,6 +292,17 @@ namespace Reactor.Host.SpaceEngineers.Layout
             int i = 0;
             while (i < _text.Length)
             {
+                // A newline ends the line wherever it falls, which is what somebody typing one meant.
+                // An empty line between two of them is a paragraph break and is kept as one: the
+                // annotations people write have them, and squeezing them out runs two thoughts together.
+                if (_text[i] == '\n')
+                {
+                    Commit(ref widest, committed);
+                    committed = 0f;
+                    i++;
+                    continue;
+                }
+
                 int end = NextBreak(i);
                 int length = end - i;
 
@@ -349,7 +388,7 @@ namespace Reactor.Host.SpaceEngineers.Layout
             while (i < _text.Length && _text[i] == ' ')
                 i++;
 
-            while (i < _text.Length && _text[i] != ' ')
+            while (i < _text.Length && _text[i] != ' ' && _text[i] != '\n')
                 i++;
 
             return i > from ? i : from + 1;

@@ -22,6 +22,8 @@ namespace Reactor.Host.SpaceEngineers.Editing
         Rename,
         Refresh,
         Switch,
+        Expand,
+        Resolve,
 
         // The list screens.
         NewSystem,

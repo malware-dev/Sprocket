@@ -70,7 +70,12 @@ namespace Reactor.Sim.Simulation
         /// </remarks>
         public string Load(string program)
         {
-            return ProgramText.Load(program, _ship.Editor.Program, _ship.World.Values);
+            var trouble = ProgramText.Load(program, _ship.Editor.Program, _ship.World.Values);
+
+            // The editor built its screen from an empty program, so it has to be told: in the game
+            // the program is read before the editor exists and this is the moment that stands in.
+            _ship.Editor.Invalidate();
+            return trouble;
         }
 
         /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>

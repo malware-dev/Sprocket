@@ -55,6 +55,7 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </remarks>
         static readonly Guid StateKey = new Guid("C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3");
 
+
         readonly IMyTerminalBlock _block;
         readonly GridWorld _world;
         readonly Automation _program = new Automation();
@@ -93,6 +94,9 @@ namespace Reactor.Host.SpaceEngineers.World
             if (MyAPIGateway.Multiplayer != null)
                 _editor.Author = MyAPIGateway.Multiplayer.MyName;
         }
+
+        /// <summary>The block this belongs to, for anything asking which construct it is on.</summary>
+        internal IMyTerminalBlock Block => _block;
 
         public ReactorEditor Editor => _editor;
 
@@ -820,6 +824,7 @@ namespace Reactor.Host.SpaceEngineers.World
 
             string warning;
             var trouble = ProgramText.Load(text, _program, _world.Values, out warning);
+
             if (warning.Length > 0)
                 Trace(_block.CustomName + " has a program with a warning: " + warning);
 
@@ -873,8 +878,9 @@ namespace Reactor.Host.SpaceEngineers.World
                 return;
             }
 
-            // Never over a program that did not read cleanly. Persist runs whenever the program might
-            // have changed, so one edit after a half-read load would write the damage into the save.
+            // A failed load is failed, and nothing is written over it. What lifts that is the person
+            // answering the question their first edit raises - see ReactorEditor - so by the time
+            // anything reaches here the decision has been taken, one way or the other.
             if (!_program.Intact)
                 return;
 

@@ -144,7 +144,7 @@ namespace Reactor.Host.SpaceEngineers.Storage
             }
 
             if (trouble.What.Length > 0)
-                program.Damaged();
+                program.Damaged(trouble.What);
 
             warning = trouble.Warning;
             return trouble.What;
@@ -152,7 +152,7 @@ namespace Reactor.Host.SpaceEngineers.Storage
 
         static void WriteRef(Pen pen, Values values, EntityRef declared)
         {
-            pen.Start(Keyword.Block).Word(declared.KindId).Word(declared.Name);
+            pen.Start(Keyword.Block).Word(BlockKinds.Sort(declared.KindId)).Word(declared.Name);
             pen.OpenList();
 
             var keys = declared.Keys;
@@ -211,7 +211,7 @@ namespace Reactor.Host.SpaceEngineers.Storage
 
         static void ReadRef(Statement statement, Automation program, Values values, Trouble trouble)
         {
-            var declared = new EntityRef(statement.Word(1), statement.Word(0));
+            var declared = new EntityRef(statement.Word(1), BlockKinds.Definition(statement.Word(0)));
             var keys = statement.Items(2);
             for (var i = 0; i < keys.Count; i++)
                 ReadKey(values, keys[i], declared.Keys, statement, trouble);

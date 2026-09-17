@@ -48,5 +48,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             return ((int)kind << 24) | (which << 12) | part;
         }
+
+        /// <summary>What sort of command an id is, which is the byte it was built from.</summary>
+        public static Cmd Kind(int id)
+        {
+            return (Cmd)(id >> 24);
+        }
     }
 }

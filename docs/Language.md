@@ -129,28 +129,25 @@ Two triggers running one sequence need two slots running it.
 
 ```
 # The inner door has shut
-when inner.shut sampled every 10t then run 2
+when any closed [ inner ] then run 2
 
-when a and b and not c then {
-    open [ outer ]
-    await
-}
+# Whichever of the two shuts first
+when any closed [ inner, outer ] then run 2
+
+# Not until both of them are shut
+when all closed [ inner, outer ] then run 3
 
 every 600t run 3
-
-every 600t {
-    open [ outer ]
-    await
-}
 ```
 
-`when <condition> then` runs when the condition becomes true. `then` ends the condition and leads
-either to `run <sequence>` or to a block of steps belonging to that trigger alone.
+`when <any|all> <moment> [ <parts> ] then run <sequence>` watches those parts for that moment
+itself, which is what a moment the construct announces to nobody needs.
 
-`sampled every <duration>` is how often the condition is checked. Without it, it is checked every
-tick.
+`any` is each part's own moment, so two doors shutting at different times is two firings. `all` is
+one moment on the whole sentence: the instant the last of them is there, and not again until one of
+them leaves that state.
 
-`every <duration>` is a clock, and takes no `then`.
+`every <duration> run <sequence>` is a clock.
 
 A trigger has no name. Its label is its annotation.
 

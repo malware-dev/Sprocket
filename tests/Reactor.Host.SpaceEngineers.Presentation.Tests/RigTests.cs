@@ -1,6 +1,7 @@
 using Reactor.Host.SpaceEngineers.Editing;
 using Reactor.Host.SpaceEngineers.Runtime;
 using Reactor.Host.SpaceEngineers.Sequences;
+using Reactor.Host.SpaceEngineers.Storage;
 using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Machine;
 using Xunit;
@@ -213,6 +214,42 @@ public class RigTests
         rig.Tick();
 
         Assert.True(Running(rig, sequence), "the press did not reach the sequence");
+    }
+
+    /// <summary>
+    /// A declaration finds its block whether or not it carries the game's type prefix.
+    /// </summary>
+    /// <remarks>
+    /// The language spells a block's sort without <c>MyObjectBuilder_</c>, the same way a part's
+    /// <c>expects</c> does, and a declaration says which sort it points at so that a block of another
+    /// sort cannot answer it. The kind minted from a real block kept the game's prefix, so a program
+    /// written by hand against the spec found nothing at all: every reference read as something that
+    /// is not here any more. The prefixed spelling still reads, because saves already carry it.
+    /// </remarks>
+    [Theory]
+    [InlineData("Door/LargeBlockDoor")]
+    [InlineData("MyObjectBuilder_Door/LargeBlockDoor")]
+    public void ADeclarationFindsItsBlockWithOrWithoutTheGamesPrefix(string sort)
+    {
+        Simulation rig = Simulation.On(Store.Nowhere());
+        rig.Tick();
+
+        var program = "reactor 4\n\nblock '" + sort + "' door1 [ 2, \"Airlock Inner Door\" ]\n";
+        Assert.Equal("", ProgramText.Load(program, rig.Editor.Program, rig.World.Values));
+
+        rig.Tick();
+
+        GridEntity found = rig.Runner.Bindings.Entity("door1");
+        Assert.NotNull(found);
+        Assert.Equal("Airlock Inner Door", found.Name);
+
+        // In memory it is the definition id, whole, because that is the name the game answers to.
+        Assert.Equal("MyObjectBuilder_Door/LargeBlockDoor", found.Kind.Id);
+
+        // Written back the way the language spells it, which is where the prefix comes off.
+        var saved = ProgramText.Save(rig.Editor.Program, rig.World.Values);
+        Assert.Contains("block 'Door/LargeBlockDoor' door1", saved);
+        Assert.DoesNotContain("MyObjectBuilder_", saved);
     }
 
     /// <summary>Names a block, which is what a program refers to.</summary>

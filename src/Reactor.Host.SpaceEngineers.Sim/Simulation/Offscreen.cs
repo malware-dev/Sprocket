@@ -45,6 +45,9 @@ namespace Reactor.Sim.Simulation
         /// <summary>The last frame's calls. Beginning a frame empties it, so this is never a history.</summary>
         public IList<DrawCommand> Commands => _device.Commands;
 
+        /// <summary>How many times anything has asked for the width of a string. See the device.</summary>
+        public int Measured => _device.Measured;
+
         /// <summary>How tall a line of this font stands, in the units the screen lays out in.</summary>
         public float LineHeight(string font, float scale)
         {

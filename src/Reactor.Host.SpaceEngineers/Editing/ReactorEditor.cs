@@ -197,6 +197,194 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// it can be raised, dismissed and raised again without the screen ever being rebuilt, so its
         /// numbers have to be handed back rather than held.
         /// </remarks>
+        /// <summary>
+        /// Says it on every screen where the block holds a program that would not read.
+        /// </summary>
+        /// <remarks>
+        /// <b>Every screen, not the front one.</b> What it says is that this is not what the block
+        /// holds, and that is as true three pages deep as it is on arrival - somebody who walked
+        /// straight into a system and started building is exactly the person it is for.
+        /// <para>
+        /// Two things to say, and which one depends on whether they have decided yet. Until the edit
+        /// that replaces it, the block still holds the old program and this is a warning about what is
+        /// in front of them. Afterwards it is the answer to "what happened to the old one".
+        /// </para>
+        /// <para>
+        /// First in the list, because a notice below the thing it is about is a footnote.
+        /// </para>
+        /// </remarks>
+        void Said(List<EditorComponent> components)
+        {
+            if (_program.Trouble.Length == 0)
+            {
+                if (_notice == null)
+                    return;
+
+                // Told to go rather than dropped, and kept in the list until it says it has gone: a
+                // banner taken away between two frames is the jump this whole arrangement avoids.
+                _notice.Leaving = true;
+
+                if (_notice.Closed)
+                {
+                    _notice = null;
+                    return;
+                }
+
+                components.Insert(0, _notice);
+                return;
+            }
+
+            if (_notice == null)
+                _notice = new NoticeComponent("", NoticeLevel.Problem);
+
+            _notice.Leaving = false;
+            _notice.Level = NoticeLevel.Problem;
+
+            // One line, and the rest when they ask for it. The line says what is wrong; opening it
+            // says what happened and what it will cost, which is what somebody needs to decide.
+            _notice.Text = "This block holds a program Reactor cannot read.";
+
+            _notice.Detail = "It was written by a different version of Reactor, or it is damaged. "
+                + "None of it could be used, which is why this screen is empty. The block still holds "
+                + "it until you change something here - and that replaces it for good.";
+
+            // The reader's own words, kept because somebody has to be able to say what happened to
+            // whoever mends it, and because a person who can read it is better off than one who cannot.
+            _notice.Diagnostic = "Reactor read it as: " + _program.Trouble;
+
+            _notice.Expanded = _open;
+            _notice.ExpandCommand = Register(Cmd.Expand, delegate { _open = !_open; Invalidate(); });
+
+            // The mending, on the thing that reports the fault. Somebody who has opened the banner and
+            // read what it costs should not then have to go and find an edit to make: the press that
+            // says "yes, replace it" is the same decision the question asks for, and this is the same
+            // answer given a step earlier.
+            if (_notice.Actions.Count == 0)
+                _notice.Actions.Add(new ChoiceEntry("Replace it", false, 0));
+
+            _notice.Actions[0].Command = Register(Cmd.Resolve, Replace);
+
+            components.Insert(0, _notice);
+        }
+
+        /// <summary>
+        /// The one banner, kept between builds.
+        /// </summary>
+        /// <remarks>
+        /// Held rather than made on every build, because a fresh one every tick is a fresh view every
+        /// tick: the slide would start over before a frame of it had been seen, and the openness it was
+        /// part way through would be thrown away with it.
+        /// </remarks>
+        NoticeComponent _notice;
+
+        /// <summary>Whether the banner is open, which is the person's choice and outlives a rebuild.</summary>
+        bool _open;
+
+        /// <summary>Whether somebody has been told what their first edit would cost, and said go on.</summary>
+        bool _told;
+
+        /// <summary>
+        /// Whether this command would be the edit that replaces a program Reactor could not read.
+        /// </summary>
+        /// <remarks>
+        /// Only ever true on a block whose program failed to load, and only until it is answered once.
+        /// A failed load leaves what the block holds untouched, so the first edit is the moment that
+        /// stops being reversible, and it is the moment to say so.
+        /// </remarks>
+        bool Replacing(int command)
+        {
+            return !_program.Intact && !_told && !_screen.HasQuestion && Changes(CommandId.Kind(command));
+        }
+
+        /// <summary>
+        /// Whether a command changes the program rather than where somebody is looking.
+        /// </summary>
+        /// <remarks>
+        /// <b>Anything not listed here changes something.</b> The list is the navigating half because
+        /// that is the half that can be enumerated safely: a command added later and forgotten about is
+        /// then treated as an edit, which costs one question, where the other default would cost
+        /// somebody the only copy of what their block held.
+        /// <para>
+        /// Picking is navigation. Choosing a block or narrowing a list changes what the picker is
+        /// showing and nothing in the program; the trip ends at <see cref="Cmd.Primary" />, which is
+        /// where the edit is, and that is not listed.
+        /// </para>
+        /// </remarks>
+        static bool Changes(Cmd kind)
+        {
+            switch (kind)
+            {
+                case Cmd.None:
+                case Cmd.Back:
+                case Cmd.Answer:
+                case Cmd.Refresh:
+                case Cmd.Expand:
+                case Cmd.Resolve:
+                case Cmd.Choice:
+                case Cmd.OpenSystem:
+                case Cmd.OpenSequence:
+                case Cmd.StartWhen:
+                case Cmd.StartEvery:
+                case Cmd.AddAction:
+                case Cmd.AddWait:
+                case Cmd.EditCadence:
+                case Cmd.TriggerSlot:
+                case Cmd.StepSlot:
+                case Cmd.PickEntity:
+                case Cmd.PickChoice:
+                case Cmd.NarrowEntities:
+                case Cmd.NarrowChoices:
+                case Cmd.AnyKind:
+                case Cmd.OneKind:
+                case Cmd.RequireAny:
+                case Cmd.RequireAll:
+                    return false;
+
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Takes the decision the banner and the question both ask for.
+        /// </summary>
+        /// <remarks>
+        /// One place, two ways in: the question the first edit raises, and the operation on the banner.
+        /// Both mean "the program on this block is not coming back", and after it every edit saves like
+        /// any other - so the warning has nothing left to say and leaves.
+        /// </remarks>
+        void Replace()
+        {
+            _told = true;
+            _program.Kept();
+            Invalidate();
+        }
+
+        /// <summary>
+        /// Says what the first edit costs, and does it only if they say so.
+        /// </summary>
+        /// <remarks>
+        /// The screen has been saying all along that what it shows is not what the block holds. This is
+        /// the other half: the press that makes it so, held until somebody has been told that the one
+        /// that would not read goes with it. There is no undo for that - it is not an edit to a program,
+        /// it is which program the block has.
+        /// </remarks>
+        void AskBeforeReplacing(Action go)
+        {
+            Ask("Replace the program this block holds? The one Reactor could not read will be gone.");
+
+            // The safe answer first, so the reflex press lands on it.
+            Answer("Leave it alone", delegate { });
+            // Said here rather than at the save, because this press is the decision and everything
+            // after it is ordinary editing. It also settles the banner: what it was warning about has
+            // just stopped being true, and nothing else would have told it.
+            Answer("Replace it", delegate
+            {
+                Replace();
+                go();
+            });
+        }
+
         bool IsAnswer(int command)
         {
             foreach (ChoiceEntry answer in _screen.Answers)
@@ -223,6 +411,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
             if (!_actions.TryGetValue(command, out action))
                 return;
 
+            if (Replacing(command))
+            {
+                AskBeforeReplacing(delegate { Invoke(command); });
+                return;
+            }
+
             // While a question stands, only its own answers are honoured. Anything else dismisses it
             // and goes no further - the press that puts a question away is not also a press on
             // whatever was behind it, and back in particular must not raise the same question again.
@@ -244,6 +438,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
             Action<string> action;
             if (!_textActions.TryGetValue(command, out action) || !Accepts(command, value))
                 return;
+
+            if (Replacing(command))
+            {
+                AskBeforeReplacing(delegate { SetText(command, value); });
+                return;
+            }
 
             action(value ?? "");
             Settle();
@@ -282,6 +482,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
             if (!_numberActions.TryGetValue(command, out action))
                 return;
 
+            if (Replacing(command))
+            {
+                AskBeforeReplacing(delegate { SetNumber(command, value); });
+                return;
+            }
+
             action(value);
             Settle();
         }
@@ -292,6 +498,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
             Action<bool> action;
             if (!_toggleActions.TryGetValue(command, out action))
                 return;
+
+            if (Replacing(command))
+            {
+                AskBeforeReplacing(delegate { SetToggle(command, on); });
+                return;
+            }
 
             action(on);
             Settle();
@@ -700,6 +912,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             _gathered.Clear();
             page.Build(_gathered);
+            Said(_gathered);
             page.Refresh();
 
             if (!SameComponents(_gathered))

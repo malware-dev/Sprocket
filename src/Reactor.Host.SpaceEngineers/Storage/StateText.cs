@@ -93,7 +93,7 @@ namespace Reactor.Host.SpaceEngineers.Storage
             }
 
             if (trouble.What.Length > 0)
-                program.Damaged();
+                program.Damaged(trouble.What);
 
             return trouble.What;
         }

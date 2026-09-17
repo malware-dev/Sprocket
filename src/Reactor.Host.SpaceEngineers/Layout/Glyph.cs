@@ -21,6 +21,10 @@ namespace Reactor.Host.SpaceEngineers.Layout
         private string _symbol;
         private Vector2 _size;
 
+        /// <summary>What the held size was measured from, so it is only measured again when it moves.</summary>
+        private string _sizedFor;
+        private float _sizedAt = -1f;
+
         public Glyph(string symbol, float scale, Color tint)
         {
             Symbol = symbol;
@@ -71,8 +75,22 @@ namespace Reactor.Host.SpaceEngineers.Layout
         /// </remarks>
         public Color Tint { get; set; }
 
+        /// <summary>
+        /// How much room the symbol wants, measured once per symbol and scale.
+        /// </summary>
+        /// <remarks>
+        /// Held rather than asked for every time. A measure is invalidated by anything above it moving -
+        /// a banner sliding, a row growing - and the answer for a character that has not changed is the
+        /// answer it gave before, at the dearest call the layout makes.
+        /// </remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
+            if (_sizedFor == _symbol && _sizedAt == Scale)
+                return _size;
+
+            _sizedFor = _symbol;
+            _sizedAt = Scale;
+
             _size = _measuring.Length == 0
                 ? Vector2.Zero
                 : g.MeasureText(Symbols.Font, _measuring, Scale);

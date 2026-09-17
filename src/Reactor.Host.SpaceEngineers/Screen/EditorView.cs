@@ -490,6 +490,11 @@ namespace Reactor.Host.SpaceEngineers.Screen
             if (hit.Scrolled && !Contains(_bodyDock.Bounds, point))
                 return false;
 
+            // A question owns the screen, so only what stands inside it answers. The same shape as the
+            // overlay rule below it, in the same place, so pressing and lighting cannot disagree.
+            if (_question.IsUp && !_question.Covers(Middle(hit.Bounds)))
+                return false;
+
             return !overlaid || _overlay.Covers(Middle(hit.Bounds));
         }
 
@@ -758,14 +763,9 @@ namespace Reactor.Host.SpaceEngineers.Screen
             // A question with answers owns the screen absolutely: nothing outside it responds, and
             // pressing away does not dismiss it. Every answer leads somewhere, so there is nothing to
             // escape from, and a question that can be shrugged off is one that gets shrugged off.
-            if (_question.IsUp)
+            if (_question.IsUp && !_question.Covers(point))
             {
-                var answered = _question.CommandAt(point);
-                if (answered != 0)
-                    _editor.Invoke(answered);
-                else if (!_question.Covers(point))
-                    _editor.Unask();
-
+                _editor.Unask();
                 return true;
             }
 
@@ -1065,6 +1065,10 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
             for (int i = 0; i < _views.Count; i++)
                 _views[i].Collect(_hits);
+
+            // Last, so it sits on top of what it is drawn over. What answers while it is up is settled
+            // by Answers, which knows a question narrows the screen to itself.
+            _question.Collect(_hits);
 
             for (int i = 0; i < _actionHits.Count && i < _actions.Children.Count; i++)
                 _hits.Add(Hit.OnFixed(_actions.Children[i], _actionHits[i].Command));
