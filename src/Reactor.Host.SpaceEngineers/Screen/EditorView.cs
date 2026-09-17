@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using Reactor.Host.SpaceEngineers.Editing;
 using Reactor.Host.SpaceEngineers.Lists;
 using Reactor.Host.SpaceEngineers.World;
@@ -80,6 +81,45 @@ namespace Reactor.Host.SpaceEngineers.Screen
         readonly Dictionary<EditorComponent, ComponentView> _byComponent =
             new Dictionary<EditorComponent, ComponentView>();
 
+        /// <summary>
+        /// How many times the chrome and every view on it have written what their controls mean.
+        /// </summary>
+        /// <remarks>
+        /// For a test to hold still. See <see cref="ComponentView.Wires" /> for why it is counted at
+        /// all rather than reasoned about.
+        /// </remarks>
+        /// <summary>How many views are listening, which is one per component on screen and no more.</summary>
+        internal int Watching
+        {
+            get
+            {
+                int watching = 0;
+
+                foreach (KeyValuePair<EditorComponent, ComponentView> pair in _byComponent)
+                {
+                    if (pair.Value.Watching)
+                        watching++;
+                }
+
+                return watching;
+            }
+        }
+
+        internal int Wires
+        {
+            get
+            {
+                int wires = _wires;
+
+                for (int i = 0; i < _views.Count; i++)
+                    wires += _views[i].Wires;
+
+                return wires;
+            }
+        }
+
+        int _wires;
+
         /// <summary>What is lit right now, so it can be put out without searching for it.</summary>
         Element _lit;
 
@@ -117,6 +157,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public EditorView(ReactorEditor editor)
         {
             _editor = editor;
+
+            // The screen core keeps is one object for the life of the editor, rewritten as somebody
+            // walks about. So this is told when its values change rather than reading them on every
+            // frame, and lets go in Release - the screen outlives this, and a screen host closes.
+            _editor.Screen.PropertyChanged += Said;
+            _editor.Screen.Actions.Changed += Listed;
 
             // Inside a stack that takes the slack, because Fill stretches whatever it is given and a
             // heading lit across the whole header would be a highlight the size of the screen. A
@@ -181,6 +227,43 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _root.Fill = _bodyDock;
             _root.Bottom = footer;
         }
+
+        /// <summary>
+        /// Stops listening to core, and lets every view go with it.
+        /// </summary>
+        /// <remarks>
+        /// For a host putting a screen away. Core's screen lives as long as the editor and would
+        /// otherwise keep this, its elements and every view on it for the rest of the session.
+        /// </remarks>
+        public void Release()
+        {
+            _editor.Screen.PropertyChanged -= Said;
+            _editor.Screen.Actions.Changed -= Listed;
+
+            foreach (KeyValuePair<EditorComponent, ComponentView> pair in _byComponent)
+                pair.Value.Release();
+        }
+
+        void Said(object sender, PropertyChangedEventArgs e)
+        {
+            // A flag only. The event arrives while core is still writing its screen.
+            _chromeStale = true;
+        }
+
+        void Listed()
+        {
+            _chromeStale = true;
+        }
+
+        /// <summary>
+        /// Whether anything the chrome shows has changed since it was last written.
+        /// </summary>
+        /// <remarks>
+        /// Core's own values announce themselves. What does not is this target's own state - which part
+        /// of the heading is being typed into, and whether what is typed can be given - so the places
+        /// that change it say so.
+        /// </remarks>
+        bool _chromeStale = true;
 
         /// <summary>
         /// Whether somebody has just asked to leave, answered once and then forgotten.
@@ -343,7 +426,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 Rebuild(screen);
 
             for (int i = 0; i < _views.Count; i++)
-                _views[i].Update(_editor.CurrentTick);
+                _views[i].Tick(_editor.CurrentTick);
 
             if (_actionRevision != screen.Actions.Revision)
             {
@@ -351,7 +434,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 RebuildActions(screen);
             }
 
-            Wire(screen);
+            if (_chromeStale)
+            {
+                _chromeStale = false;
+                _wires++;
+                Wire(screen);
+            }
         }
 
         /// <summary>
@@ -364,6 +452,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// </remarks>
         void Wire(EditorScreen screen)
         {
+
             // One control, two acts: a command while there is somewhere to retreat to, and the door once
             // there is not. Which of the two it is gets said in the note rather than in the picture - a
             // symbol that changed as somebody walked back up the pages would be a control moving under
@@ -543,7 +632,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// from where they last landed, which is the same frame of lag the highlight has always had.
         /// </para>
         /// </remarks>
-        Element Under(Vector2 point)
+        internal Element Under(Vector2 point)
         {
             // An unfinishable edit owns the screen as firmly as a popup does: the press path answers
             // nothing but the box being typed into, so nothing else may light up either.
@@ -690,6 +779,11 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// </remarks>
         public void Typed()
         {
+            // What is typed decides whether the name in hand can be given, which is what the heading
+            // says while somebody is typing it. Core knows nothing about the box, so nothing else
+            // will say this has changed.
+            _chromeStale = true;
+
             if (_focus != null && _focusCommand != 0)
                 _editor.SetText(_focusCommand, _focus.Text);
         }
@@ -1037,6 +1131,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         {
             Deed deed = control.Press;
             Close();
+            _chromeStale = true;
 
             // Which part of the heading this was, if it was one at all. Matched on the command rather
             // than on the element, because the command is the one thing that already identifies a part
@@ -1062,6 +1157,8 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
         void Close()
         {
+            _chromeStale = true;
+
             if (_renaming >= 0)
             {
                 _title[_renaming].End();
@@ -1097,6 +1194,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
         void Rebuild(EditorScreen screen)
         {
+            _chromeStale = true;
             Close();
             HideOverlay();
             Unfocus();
@@ -1114,6 +1212,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 {
                     view = ComponentView.For(component);
                     view.Host = this;
+                    view.Watch(component);
                     _byComponent.Add(component, view);
                 }
 
@@ -1134,7 +1233,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 }
 
                 for (int i = 0; i < stale.Count; i++)
+                {
+                    // Let go before letting fall. The component is core's and outlives this, so a view
+                    // dropped while still listening would be kept alive by the thing it was showing.
+                    _byComponent[stale[i]].Release();
                     _byComponent.Remove(stale[i]);
+                }
             }
 
             Arrange(screen);

@@ -98,7 +98,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
             _title.Trims = true;
 
             _narrow.Hint = "Search";
-            _kindLine.Highlight = Palette.PanelHot;
+            Widgets.Row(_kindLine);
 
             _empty.Padding = new Thickness(Space.Line, Space.Item, 0f, 0f);
 
@@ -309,7 +309,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
                 option.Row.Children.Add(option.Mark);
                 option.Row.Children.Add(option.Text);
                 option.Row.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
-                option.Row.Highlight = Palette.PanelHot;
+                Widgets.Row(option.Row);
 
                 _optionRows.Add(option);
                 _options.Children.Add(option.Row);
@@ -461,7 +461,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
             row.Line = new Bar();
             row.Line.Spacing = Space.Item;
             row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f);
-            row.Line.Highlight = Palette.PanelHot;
+            Widgets.Row(row.Line);
             row.Line.Left = left;
             row.Line.Fill = text;
             row.Line.Right = right;

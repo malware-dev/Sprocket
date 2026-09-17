@@ -20,7 +20,33 @@ namespace Reactor.Host.SpaceEngineers.Screen
     /// </remarks>
     public abstract class Observable : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        PropertyChangedEventHandler _changed;
+
+        /// <summary>
+        /// Counted as they come and go, so that letting go can be tested rather than trusted.
+        /// </summary>
+        /// <remarks>
+        /// A component outlives the views that show it, so one that keeps a listener it no longer has
+        /// any business with keeps that listener's whole screen alive with it. There is no way to see
+        /// that from the outside, and no way to see it from the target either - by the time a view is
+        /// dropped the target has already forgotten it. Here is where it accumulates, so here is where
+        /// it is counted.
+        /// </remarks>
+        internal int Listeners { get; private set; }
+
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            add
+            {
+                _changed += value;
+                Listeners++;
+            }
+            remove
+            {
+                _changed -= value;
+                Listeners--;
+            }
+        }
 
         /// <summary>
         /// Stores a value and announces it, or does nothing if it has not changed.
@@ -42,7 +68,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
         protected void Raise(string name)
         {
-            var handler = PropertyChanged;
+            var handler = _changed;
             if (handler != null)
                 handler(this, new PropertyChangedEventArgs(name));
         }

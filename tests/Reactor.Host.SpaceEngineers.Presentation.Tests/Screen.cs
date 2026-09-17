@@ -43,6 +43,12 @@ sealed class Screen
     /// <summary>How much text this screen has measured since it was made.</summary>
     public int Measured => _frame.Measured;
 
+    /// <summary>How many times it has written what its controls mean onto them.</summary>
+    public int Wires => _frame.Scene.Wires;
+
+    /// <summary>How many of its views are listening to a component.</summary>
+    public int Watching => _frame.Scene.Watching;
+
     /// <summary>The editor, for tests about what it does rather than where this target draws it.</summary>
     public ReactorEditor Editor => _frame.Scene.Editor;
 

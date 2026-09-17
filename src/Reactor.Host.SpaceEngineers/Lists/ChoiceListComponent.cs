@@ -15,9 +15,22 @@ namespace Reactor.Host.SpaceEngineers.Lists
         public ChoiceListComponent()
         {
             Entries = new ObservableList<ChoiceEntry>();
+            Entries.Changed += Listed;
         }
 
         public ObservableList<ChoiceEntry> Entries { get; private set; }
+
+        /// <summary>
+        /// Says the list is different now, so a target listens to this rather than to every row.
+        /// </summary>
+        /// <remarks>
+        /// A choice's own values are written when the page builds them and not after, so there is
+        /// nothing here to repeat for each one - only the list's own shape to pass on.
+        /// </remarks>
+        void Listed()
+        {
+            Raise(nameof(Entries));
+        }
 
         public string EmptyText
         {

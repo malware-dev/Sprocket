@@ -38,12 +38,21 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _component = component;
         }
 
+        /// <summary>
+        /// Told rather than asked. The list says when it changes, a choice's values are written once
+        /// when the page builds them, and the light that blinks is not a value at all.
+        /// </summary>
+        protected override bool Stale
+        {
+            get { return false; }
+        }
+
         public override Element Root
         {
             get { return _stack; }
         }
 
-        public override void Update(int tick)
+        protected override void Refresh()
         {
             if (_revision != _component.Entries.Revision)
             {
@@ -65,6 +74,21 @@ namespace Reactor.Host.SpaceEngineers.Lists
                 // a step further again or it would look like nothing happened.
                 row.Line.Background = entry.IsCurrent ? Palette.PanelHot : Palette.Panel;
                 row.Line.Highlight = entry.IsCurrent ? Palette.Line : Palette.PanelHot;
+            }
+        }
+
+        /// <summary>
+        /// Blinks the light on a row that stands for something that repeats, at that thing's own rate.
+        /// </summary>
+        /// <remarks>
+        /// The one thing on this list that changes without anybody doing anything, so the one thing
+        /// here that belongs on every tick.
+        /// </remarks>
+        protected override void Moved(int tick)
+        {
+            for (int i = 0; i < _rows.Count; i++)
+            {
+                Row row = _rows[i];
 
                 if (row.Blink == null)
                     continue;

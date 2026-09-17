@@ -77,6 +77,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _heading.Spacing = Space.Item;
             _heading.Padding = new Thickness(Space.ChipX, Space.ChipY * 1.6f);
 
+            // A hairline round the strip while the pointer is on it, rather than a brighter wash. The
+            // game's own highlights differ from their ordinary state by the edge far more than by the
+            // middle, which is the only way to say "this is a control" on something that is already a
+            // coloured panel - and the palette holds no lit wash for either of the two colours a
+            // banner comes in.
+            _heading.EdgeThickness = Space.Hair;
+
             _detail.Padding = new Thickness(Space.ChipX, 0f, Space.ChipX, Space.ChipY * 1.6f);
 
             _diagnostic.Padding = new Thickness(Space.ChipX, 0f, Space.ChipX, Space.ChipY * 1.6f);
@@ -92,12 +99,21 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _reveal.Child = _column;
         }
 
+        /// <summary>
+        /// Told rather than asked. Everything a banner says announces itself, and the one thing that
+        /// changes on its own - the slide - is not a value at all.
+        /// </summary>
+        protected override bool Stale
+        {
+            get { return false; }
+        }
+
         public override Element Root
         {
             get { return _reveal; }
         }
 
-        public override void Update(int tick)
+        protected override void Refresh()
         {
             bool problem = _component.Level == NoticeLevel.Problem;
             Color ink = problem ? Palette.Problem : Palette.Notice;
@@ -126,7 +142,16 @@ namespace Reactor.Host.SpaceEngineers.Screen
             // still arriving is a button pressed by accident on the way to what was underneath it.
             _heading.Press = Deed.Sends(_component.ExpandCommand);
 
+            // Lit in its own colour, and only while there is something to open. A strip that lights
+            // and then does nothing is the promise every other control here keeps.
+            _heading.HighlightEdge = _component.ExpandCommand != 0 ? ink : Palette.None;
+
             Buttons(ink);
+        }
+
+        /// <summary>The slide, which is the one thing here that happens without anybody doing it.</summary>
+        protected override void Moved(int tick)
+        {
             Slide(tick);
         }
 

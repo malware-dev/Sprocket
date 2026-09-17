@@ -21,7 +21,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
     /// command, which is the same mechanism rather than a second one.
     /// </para>
     /// </remarks>
-    public sealed class HeadingPart
+    public sealed class HeadingPart : Observable
     {
         public HeadingPart(string text)
         {
@@ -45,7 +45,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// connective are one connective too many.
         /// </para>
         /// </remarks>
-        public string Lead { get; set; }
+        public string Lead
+        {
+            get { return _lead; }
+            set { Set(ref _lead, value, nameof(Lead)); }
+        }
+
+        string _lead;
 
         /// <summary>
         /// What this part reads as. Never empty.
@@ -55,7 +61,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// A part always has something to read, which is what makes naming optional rather than a step
         /// somebody is quietly expected to complete.
         /// </remarks>
-        public string Text { get; set; }
+        public string Text
+        {
+            get { return _text; }
+            set { Set(ref _text, value, nameof(Text)); }
+        }
+
+        string _text;
 
         /// <summary>
         /// What somebody actually typed, or empty where nobody has.
@@ -65,15 +77,33 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// its rename box on this; opening it on the text would hand somebody a generated sentence and
         /// call it their name, which they then have to delete before they can answer.
         /// </remarks>
-        public string Name { get; set; }
+        public string Name
+        {
+            get { return _name; }
+            set { Set(ref _name, value, nameof(Name)); }
+        }
+
+        string _name;
 
         /// <summary>Where a new name for this part is sent, or zero when it cannot be renamed.</summary>
-        public int RenameCommand { get; set; }
+        public int RenameCommand
+        {
+            get { return _renameCommand; }
+            set { Set(ref _renameCommand, value, nameof(RenameCommand)); }
+        }
+
+        int _renameCommand;
 
         public bool CanRename => RenameCommand != 0;
 
         /// <summary>What to ask when offering the rename.</summary>
-        public string Prompt { get; set; }
+        public string Prompt
+        {
+            get { return _prompt; }
+            set { Set(ref _prompt, value, nameof(Prompt)); }
+        }
+
+        string _prompt;
 
         /// <summary>
         /// Whether an empty name is an answer here, or is not allowed to be given.
@@ -84,6 +114,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// refused instead - and a target has to be told which of the two it is, or it offers a commit that
         /// core will silently ignore.
         /// </remarks>
-        public bool NameRequired { get; set; }
+        public bool NameRequired
+        {
+            get { return _nameRequired; }
+            set { Set(ref _nameRequired, value, nameof(NameRequired)); }
+        }
+
+        bool _nameRequired;
     }
 }

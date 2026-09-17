@@ -20,12 +20,21 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _component = component;
         }
 
+        /// <summary>
+        /// Told rather than asked. The rows announce their own values and the list announces its shape,
+        /// so there is nothing here to read on a frame where nothing has happened.
+        /// </summary>
+        protected override bool Stale
+        {
+            get { return false; }
+        }
+
         public override Element Root
         {
             get { return _stack; }
         }
 
-        public override void Update(int tick)
+        protected override void Refresh()
         {
             if (_revision != _component.Entries.Revision)
             {

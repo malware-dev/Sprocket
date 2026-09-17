@@ -902,6 +902,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
             // compares what is in it to decide whether its own controls need making again.
             _screen.Heading.Clear();
             page.Heading(_screen.Heading);
+            _screen.Renamed();
 
             _screen.CanGoBack = _stack.Count > 1;
             _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Leave) : 0;

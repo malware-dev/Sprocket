@@ -22,7 +22,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
             get { return _label; }
         }
 
-        public override void Update(int tick)
+        protected override void Refresh()
         {
         }
     }

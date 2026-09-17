@@ -100,8 +100,15 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _line.Background = wrong
                 ? Palette.ProblemWash
                 : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
-            _line.Highlight = pressable ? (entry.IsAction ? Palette.Panel : Palette.PanelHot)
-                : Palette.None;
+
+            if (!pressable)
+                _line.Highlight = Palette.None;
+            else if (entry.IsAction)
+                // The quiet step, because this row has no fill to brighten. The same step the button
+                // under a sentence takes, since it is the same act.
+                _line.Highlight = Palette.Panel;
+            else
+                Widgets.Row(_line);
 
             // The same plus the start block uses, for the same reason: this row adds something. Core marks
             // it as an action and leaves the drawing to us.

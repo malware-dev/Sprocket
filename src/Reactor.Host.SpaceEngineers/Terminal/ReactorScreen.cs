@@ -172,6 +172,9 @@ namespace Reactor.Host.SpaceEngineers.Terminal
         /// </remarks>
         protected override void OnClosed(bool isUnloading)
         {
+            // Let go of core before anything else. This screen is going away and core's is not.
+            _view.Release();
+
             _unit.Persist();
 
             if (!isUnloading)

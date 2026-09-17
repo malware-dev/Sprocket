@@ -84,6 +84,65 @@ public class RepeatedTickTests
     }
 
     /// <summary>
+    /// A screen nobody is touching writes nothing onto its controls.
+    /// </summary>
+    /// <remarks>
+    /// The whole of what "the values are pushed rather than polled" means, as a number. Core announces
+    /// a value when it actually changes - <c>Observable.Set</c> is silent when it does not - so a frame
+    /// where nothing happened has nothing to tell anybody, and a view that reads anyway is a view that
+    /// would have to be read every frame for the life of the session.
+    /// <para>
+    /// Every screen the editor has, because one view left reading is one screen that pays for it.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AnIdleScreenWritesNothingOntoItsControls()
+    {
+        var screen = Screen.Fresh();
+        var editor = screen.Editor;
+
+        AssertIdle(screen, "the construct");
+
+        editor.NewSystem("Airlock");
+        AssertIdle(screen, "a system");
+
+        editor.PressStart("When…");
+        AssertIdle(screen, "the picker");
+
+        editor.PressBlock("Airlock Button");
+        AssertIdle(screen, "the picker, with a block chosen");
+
+        editor.PressChoice("is pressed");
+        AssertIdle(screen, "the picker, with an event chosen");
+
+        editor.PressPrimary();
+        AssertIdle(screen, "a sequence");
+
+        editor.PressAdd("do something");
+        AssertIdle(screen, "picking what happens");
+
+        editor.Back();
+        editor.Back();
+        AssertIdle(screen, "a system with a sequence in it");
+
+        editor.Back();
+        AssertIdle(screen, "the construct with a system on it");
+    }
+
+    static void AssertIdle(Screen screen, string what)
+    {
+        // Settled first: arriving at a screen is a change, and writing the controls then is the point.
+        screen.Run(5);
+
+        var before = screen.Wires;
+        screen.Run(Frames);
+
+        Assert.True(screen.Wires == before,
+            $"{what} wrote its controls {screen.Wires - before} times over {Frames} frames where "
+            + "nothing happened. Something it shows is being read rather than announced.");
+    }
+
+    /// <summary>
     /// What a screen costs while nobody is touching it does not grow with what is on it.
     /// </summary>
     /// <remarks>

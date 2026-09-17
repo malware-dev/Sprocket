@@ -25,7 +25,13 @@ namespace Reactor.Host.SpaceEngineers.Lists
         /// ship is the whole of the nesting this language has, so a target can indent by a
         /// fixed amount rather than reinventing a tree.
         /// </remarks>
-        public int Depth { get; set; }
+        public int Depth
+        {
+            get { return _depth; }
+            set { Set(ref _depth, value, nameof(Depth)); }
+        }
+
+        int _depth;
 
         /// <summary>
         /// Whether this row does something rather than being something.
@@ -36,7 +42,13 @@ namespace Reactor.Host.SpaceEngineers.Lists
         /// system it meant. It is not a thing with a state, so a target should draw it
         /// quieter than its neighbours.
         /// </remarks>
-        public bool IsAction { get; set; }
+        public bool IsAction
+        {
+            get { return _isAction; }
+            set { Set(ref _isAction, value, nameof(IsAction)); }
+        }
+
+        bool _isAction;
 
         public int Command { get; private set; }
 
@@ -48,7 +60,13 @@ namespace Reactor.Host.SpaceEngineers.Lists
         /// welding on a hangar wants that hangar left alone, and making them walk into it to
         /// say so is a step that buys nothing - the list is where they are already looking.
         /// </remarks>
-        public int SwitchCommand { get; set; }
+        public int SwitchCommand
+        {
+            get { return _switchCommand; }
+            set { Set(ref _switchCommand, value, nameof(SwitchCommand)); }
+        }
+
+        int _switchCommand;
 
         public bool CanSwitch => SwitchCommand != 0;
 
@@ -61,7 +79,13 @@ namespace Reactor.Host.SpaceEngineers.Lists
         /// apart, and only core knows which is which - a target reading the indent would be
         /// guessing from a layout it chose itself.
         /// </remarks>
-        public bool SwitchGovernsAll { get; set; }
+        public bool SwitchGovernsAll
+        {
+            get { return _switchGovernsAll; }
+            set { Set(ref _switchGovernsAll, value, nameof(SwitchGovernsAll)); }
+        }
+
+        bool _switchGovernsAll;
 
         bool _switchIsOn;
 

@@ -27,6 +27,22 @@ namespace Reactor.Host.SpaceEngineers.Controls
             return label;
         }
 
+        /// <summary>
+        /// A line that drills into something, whatever it is made of.
+        /// </summary>
+        /// <remarks>
+        /// The look is one step of the panel ramp: a row lights to the hot panel where a control that
+        /// adds something lights to the panel itself, because a row has a fill to brighten and a button
+        /// made of words does not. Two loudnesses, and which one a thing takes says what sort of thing
+        /// it is rather than what it happens to be built from - a row is a <see cref="Bar" /> here, a
+        /// <see cref="Stack" /> in the picker and a <see cref="Label" /> in a list of choices.
+        /// </remarks>
+        public static T Row<T>(T line) where T : Element
+        {
+            line.Highlight = Palette.PanelHot;
+            return line;
+        }
+
         /// <summary>What a button holds clear inside itself, whichever kind of button it is.</summary>
         static Thickness Inside
         {

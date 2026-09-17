@@ -10,7 +10,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
     /// Flat and numbered. Nesting is what defeats novices, so there isn't any -
     /// every line sits at the same level and reads top to bottom.
     /// </remarks>
-    public sealed class SentenceStep
+    public sealed class SentenceStep : Observable
     {
         public SentenceStep(int number, StepKind kind)
         {
@@ -19,7 +19,13 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             Slots = new List<SentenceSlot>();
         }
 
-        public int Number { get; set; }
+        public int Number
+        {
+            get { return _number; }
+            set { Set(ref _number, value, nameof(Number)); }
+        }
+
+        int _number;
 
         /// <summary>Which sort of line this is, which decides how a target opens it.</summary>
         public StepKind Kind { get; private set; }
@@ -30,7 +36,13 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// The sequence is sitting on this step right now. Seeing execution move down the
         /// list is what makes a sequence readable instead of imaginable.
         /// </summary>
-        public bool IsCurrent { get; set; }
+        public bool IsCurrent
+        {
+            get { return _isCurrent; }
+            set { Set(ref _isCurrent, value, nameof(IsCurrent)); }
+        }
+
+        bool _isCurrent;
 
         /// <summary>
         /// Where this step sits, counting from zero.
@@ -41,7 +53,13 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// somebody reading "step 3" and a target computing an index should not have to agree
         /// about which one they mean.
         /// </remarks>
-        public int Position { get; set; }
+        public int Position
+        {
+            get { return _position; }
+            set { Set(ref _position, value, nameof(Position)); }
+        }
+
+        int _position;
 
         /// <summary>
         /// Whether the reason the sequence cannot work is this step.
@@ -50,7 +68,13 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// At most one line of a sentence carries this at a time - see <c>SequenceFault</c>, which
         /// reports one fault so that a screen says one thing.
         /// </remarks>
-        public bool HasProblem { get; set; }
+        public bool HasProblem
+        {
+            get { return _hasProblem; }
+            set { Set(ref _hasProblem, value, nameof(HasProblem)); }
+        }
+
+        bool _hasProblem;
 
         /// <summary>
         /// Send a position here to move this step there.
@@ -68,8 +92,20 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         ///
         /// Out of range is ignored, so a drop past either end costs nothing.
         /// </remarks>
-        public int MoveToCommand { get; set; }
+        public int MoveToCommand
+        {
+            get { return _moveToCommand; }
+            set { Set(ref _moveToCommand, value, nameof(MoveToCommand)); }
+        }
 
-        public int DeleteCommand { get; set; }
+        int _moveToCommand;
+
+        public int DeleteCommand
+        {
+            get { return _deleteCommand; }
+            set { Set(ref _deleteCommand, value, nameof(DeleteCommand)); }
+        }
+
+        int _deleteCommand;
     }
 }

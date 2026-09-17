@@ -52,6 +52,16 @@ namespace Reactor.Host.SpaceEngineers.Picking
             _strip.Content = _columns;
         }
 
+        /// <summary>
+        /// Answered with the revision this view already keeps. The picker's stages are rebuilt whole
+        /// rather than changed in place - a search narrows them, a choice re-derives them - so one
+        /// number says everything a screenful of reading would have.
+        /// </summary>
+        protected override bool Stale
+        {
+            get { return _revision != _component.Revision || _built != _component.Stages.Count; }
+        }
+
         public override Element Root
         {
             get { return _strip; }
@@ -63,7 +73,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
             get { return true; }
         }
 
-        public override void Update(int tick)
+        protected override void Refresh()
         {
             // Core says when it has changed something and says nothing the rest of the time, so an
             // ordinary tick costs one comparison.

@@ -13,8 +13,22 @@ namespace Reactor.Host.SpaceEngineers.Screen
     /// assumption the smallest target cannot honor. A roomy target is free to render
     /// two levels of the stack side by side - nothing in core depends on it.
     /// </remarks>
-    public sealed class EditorScreen
+    public sealed class EditorScreen : Observable
     {
+        /// <summary>
+        /// Says the heading has been built again, which is the one thing here that cannot say so
+        /// itself.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Heading" /> is a plain list, rebuilt in place so that a target holding it keeps
+        /// hold of it. A list rebuilt in place announces nothing, and every value beside it here does,
+        /// so this is the one place the screen has to be told out loud.
+        /// </remarks>
+        internal void Renamed()
+        {
+            Raise(nameof(Heading));
+        }
+
         public EditorScreen()
         {
             Components = new ObservableList<EditorComponent>();
@@ -41,7 +55,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public List<HeadingPart> Heading { get; private set; }
 
         /// <summary>Context the title cannot carry - a count, a live status.</summary>
-        public string Subtitle { get; set; }
+        public string Subtitle
+        {
+            get { return _subtitle; }
+            set { Set(ref _subtitle, value, nameof(Subtitle)); }
+        }
+
+        string _subtitle;
 
         /// <summary>Whether any part of the heading is somebody's to change.</summary>
         /// <remarks>
@@ -72,7 +92,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// moment and nothing tells Reactor when a slot changes - least of all when the person who
         /// changed it is another player on the same ship.
         /// </remarks>
-        public int RefreshCommand { get; set; }
+        public int RefreshCommand
+        {
+            get { return _refreshCommand; }
+            set { Set(ref _refreshCommand, value, nameof(RefreshCommand)); }
+        }
+
+        int _refreshCommand;
 
         /// <summary>
         /// Switches this screen's subject on or off. Zero when it has no such switch.
@@ -83,16 +109,40 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// sequences one at a time - and a half-stopped one, with the inner door's rule off
         /// and the outer door's rule still live, is worse than either state.
         /// </remarks>
-        public int SwitchCommand { get; set; }
+        public int SwitchCommand
+        {
+            get { return _switchCommand; }
+            set { Set(ref _switchCommand, value, nameof(SwitchCommand)); }
+        }
+
+        int _switchCommand;
 
         public bool HasSwitch => SwitchCommand != 0;
 
         /// <summary>Whether it is currently allowed to run.</summary>
-        public bool SwitchIsOn { get; set; }
+        public bool SwitchIsOn
+        {
+            get { return _switchIsOn; }
+            set { Set(ref _switchIsOn, value, nameof(SwitchIsOn)); }
+        }
 
-        public bool CanGoBack { get; set; }
+        bool _switchIsOn;
 
-        public int BackCommand { get; set; }
+        public bool CanGoBack
+        {
+            get { return _canGoBack; }
+            set { Set(ref _canGoBack, value, nameof(CanGoBack)); }
+        }
+
+        bool _canGoBack;
+
+        public int BackCommand
+        {
+            get { return _backCommand; }
+            set { Set(ref _backCommand, value, nameof(BackCommand)); }
+        }
+
+        int _backCommand;
 
         /// <summary>
         /// The obvious next move, if this screen has one - "Next", "Done".
@@ -106,9 +156,21 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// Empty when there is nothing to move on to - which on a picker also means
         /// "you have not chosen anything yet".
         /// </remarks>
-        public string PrimaryText { get; set; }
+        public string PrimaryText
+        {
+            get { return _primaryText; }
+            set { Set(ref _primaryText, value, nameof(PrimaryText)); }
+        }
 
-        public int PrimaryCommand { get; set; }
+        string _primaryText;
+
+        public int PrimaryCommand
+        {
+            get { return _primaryCommand; }
+            set { Set(ref _primaryCommand, value, nameof(PrimaryCommand)); }
+        }
+
+        int _primaryCommand;
 
         public bool HasPrimary => !string.IsNullOrEmpty(PrimaryText);
 
@@ -134,7 +196,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// accident.
         /// </para>
         /// </remarks>
-        public string Question { get; set; }
+        public string Question
+        {
+            get { return _question; }
+            set { Set(ref _question, value, nameof(Question)); }
+        }
+
+        string _question;
 
         public bool HasQuestion => !string.IsNullOrEmpty(Question);
 

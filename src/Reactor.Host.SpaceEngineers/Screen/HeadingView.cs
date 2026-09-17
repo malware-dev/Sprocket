@@ -15,12 +15,18 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _label.Padding = new Thickness(Space.Line, Space.Item, 0f, Space.Row);
         }
 
+        /// <summary>Told rather than asked: the one thing it shows announces itself.</summary>
+        protected override bool Stale
+        {
+            get { return false; }
+        }
+
         public override Element Root
         {
             get { return _label; }
         }
 
-        public override void Update(int tick)
+        protected override void Refresh()
         {
             _label.Text = _component.Text;
         }

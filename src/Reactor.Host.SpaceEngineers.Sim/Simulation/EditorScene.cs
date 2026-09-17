@@ -237,6 +237,24 @@ namespace Reactor.Sim.Simulation
             _view.ScrollBy(point, amount);
         }
 
+        /// <summary>How many times the screen has written what its controls mean onto them.</summary>
+        public int Wires => _view.Wires;
+
+        /// <summary>How many views are listening to a component right now.</summary>
+        public int Watching => _view.Watching;
+
+        /// <summary>
+        /// What a press or a hover at <paramref name="point" /> would reach, without touching it.
+        /// </summary>
+        /// <remarks>
+        /// For asking the screen about itself rather than driving it: what a test can then do is sweep
+        /// every point and hold the rules that are true of everything a person can reach.
+        /// </remarks>
+        public Element Under(Vector2 point)
+        {
+            return _view.Under(point);
+        }
+
         /// <summary>Presses whatever is at <paramref name="point" />, in UI units.</summary>
         public bool Press(Vector2 point, int clicks)
         {

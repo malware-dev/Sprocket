@@ -1,3 +1,4 @@
+using Reactor.Host.SpaceEngineers.Layout;
 using Reactor.Host.SpaceEngineers.Lists;
 using Reactor.Host.SpaceEngineers.Look;
 using Reactor.Host.SpaceEngineers.Picking;
@@ -149,6 +150,81 @@ public class ReachTests
         screen.Do(at);
 
         Assert.True(Notice(screen).Expanded, "the banner would not open once it had arrived");
+    }
+
+    /// <summary>
+    /// Everything a press can reach lights up when the pointer rests on it.
+    /// </summary>
+    /// <remarks>
+    /// The rule stated on <c>Element.Highlight</c>, read the other way round, and held by sweeping the
+    /// whole screen rather than by anybody remembering to look: every point on it, on every screen the
+    /// editor has, and whatever answers has to say so under the pointer. A control that cannot be lit is
+    /// one a person has no way to find.
+    /// <para>
+    /// A box to type in is the one exception, and deliberately: it says "words go here" with its own
+    /// well, its edge and a caret, and a field that lit up like a button would be promising a press.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void EverythingAPressCanReachLightsUp()
+    {
+        var screens = new[]
+        {
+            "",
+            "60 130 type Airlock enter",
+            "60 130 type Airlock enter 25 62",
+            "60 130 type Airlock enter 60 130",
+            "60 130 type Airlock enter 60 130 200 375 560 272 1380 1000",
+        };
+
+        foreach (var walk in screens)
+        {
+            var screen = Screen.Fresh(walk.Length == 0 ? new string[0] : walk.Split(' '));
+            var dark = new List<string>();
+
+            foreach (var found in Everything(screen))
+            {
+                if (found.Press.Means == Means.Nothing || found.Press.Means == Means.Type)
+                    continue;
+
+                if (found.Highlight.A > 0 || found.HighlightEdge.A > 0)
+                    continue;
+
+                var said = found.GetType().Name + " " + found.Press.Means + " at " + found.Bounds;
+                if (!dark.Contains(said))
+                    dark.Add(said);
+            }
+
+            Assert.True(dark.Count == 0,
+                $"on the screen reached by '{walk}', these answer a press and cannot be lit: "
+                + string.Join(", ", dark));
+        }
+    }
+
+    /// <summary>Everything the pointer can reach, by asking at every point on the screen.</summary>
+    /// <remarks>
+    /// A sweep rather than a walk of the tree, because what a person can reach is the question, and the
+    /// walk is the thing under test. Twenty units is finer than the smallest control on any screen.
+    /// </remarks>
+    static IEnumerable<Element> Everything(Screen screen)
+    {
+        var seen = new List<Element>();
+
+        // The editor's own area, in the units a press arrives in: a screen is the full width of the
+        // game's safe rectangle and about nine tenths of its height, which is where it draws itself.
+        for (var y = 0f; y < 1080f; y += 20f)
+        {
+            for (var x = 0f; x < 1440f; x += 20f)
+            {
+                var found = screen.Scene.Under(new Vector2(x, y));
+
+                if (found != null && !seen.Contains(found))
+                {
+                    seen.Add(found);
+                    yield return found;
+                }
+            }
+        }
     }
 
     static NoticeComponent Notice(Screen screen) =>

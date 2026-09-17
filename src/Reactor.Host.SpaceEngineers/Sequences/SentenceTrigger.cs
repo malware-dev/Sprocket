@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+using Reactor.Host.SpaceEngineers.Screen;
+
 namespace Reactor.Host.SpaceEngineers.Sequences
 {
     /// <summary>
@@ -11,7 +13,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
     /// like the same sentence when they behave completely differently, so only the
     /// first kind exists.
     /// </remarks>
-    public sealed class SentenceTrigger
+    public sealed class SentenceTrigger : Observable
     {
         public SentenceTrigger(TriggerKind kind)
         {
@@ -32,7 +34,13 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// contradiction, and that apparent contradiction is exactly the
         /// event-versus-state distinction the user has to end up understanding.
         /// </remarks>
-        public bool IsLiveNow { get; set; }
+        public bool IsLiveNow
+        {
+            get { return _isLiveNow; }
+            set { Set(ref _isLiveNow, value, nameof(IsLiveNow)); }
+        }
+
+        bool _isLiveNow;
 
         /// <summary>
         /// Whether the reason this sequence cannot work is here, on this line.
@@ -42,6 +50,12 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// says where, and a target has to draw it: somebody led down two screens to get here came
         /// to be shown the thing to fix.
         /// </remarks>
-        public bool HasProblem { get; set; }
+        public bool HasProblem
+        {
+            get { return _hasProblem; }
+            set { Set(ref _hasProblem, value, nameof(HasProblem)); }
+        }
+
+        bool _hasProblem;
     }
 }

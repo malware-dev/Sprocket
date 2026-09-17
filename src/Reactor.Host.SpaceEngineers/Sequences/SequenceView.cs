@@ -150,12 +150,21 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             _adders.Padding = new Thickness(32f, Space.Item, 0f, 0f);
         }
 
+        /// <summary>
+        /// Told rather than asked. The sentence announces its own values, repeats what its steps and
+        /// its trigger say, and its lists say when they change shape.
+        /// </summary>
+        protected override bool Stale
+        {
+            get { return false; }
+        }
+
         public override Element Root
         {
             get { return _root; }
         }
 
-        public override void Update(int tick)
+        protected override void Refresh()
         {
             if (!_built || _builtEditable != _component.Editable || !SameShape())
                 Build();
@@ -277,6 +286,11 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                         : (step.IsCurrent ? Palette.LiveWash : Palette.None);
             }
 
+        }
+
+        /// <summary>A row being carried, and the ones getting out of its way.</summary>
+        protected override void Moved(int tick)
+        {
             Slide();
         }
 

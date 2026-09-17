@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Reactor.Host.SpaceEngineers.Lists;
 using Reactor.Host.SpaceEngineers.Picking;
 using Reactor.Host.SpaceEngineers.Sequences;
@@ -12,14 +13,111 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// <summary>What to put in the layout.</summary>
         public abstract Element Root { get; }
 
+        /// <summary>What this view is showing, so it can hear when the values change.</summary>
+        EditorComponent _watched;
+
+        /// <summary>Whether something has announced a change since this view last wrote its controls.</summary>
+        bool _told = true;
+
         /// <summary>
-        /// Copies this tick's values onto the elements.
+        /// Starts listening to the component this view is showing.
+        /// </summary>
+        /// <remarks>
+        /// Paired with <see cref="Release" /> and called from the one place a view is made, so the two
+        /// cannot come apart. A component outlives the views that show it - a page makes it once and
+        /// thereafter changes its values - so a subscription left behind keeps a dead view alive for the
+        /// rest of the session, writing to elements nobody can see.
+        /// </remarks>
+        internal void Watch(EditorComponent component)
+        {
+            if (_watched != null)
+                Release();
+
+            _watched = component;
+            _watched.PropertyChanged += Changed;
+        }
+
+        /// <summary>Stops listening. Called from the one place a view is dropped.</summary>
+        internal void Release()
+        {
+            if (_watched == null)
+                return;
+
+            _watched.PropertyChanged -= Changed;
+            _watched = null;
+        }
+
+        /// <summary>Whether this view is still holding a subscription, for a test that counts them.</summary>
+        internal bool Watching
+        {
+            get { return _watched != null; }
+        }
+
+        void Changed(object sender, PropertyChangedEventArgs e)
+        {
+            // A flag and nothing else. The event arrives while core is still writing its screen, so
+            // anything read here would be half of one - ObservableList says the same about its own.
+            _told = true;
+        }
+
+        /// <summary>
+        /// Brings this view into line with what it is showing, and moves whatever moves on its own.
+        /// </summary>
+        /// <remarks>
+        /// Not virtual, because the gate is the point: a view writes its values when something has
+        /// changed and not otherwise, and the base class holding that is what stops the next view being
+        /// written to read everything on every frame.
+        /// </remarks>
+        internal void Tick(int tick)
+        {
+            if (_told || Stale)
+            {
+                _told = false;
+                Wires++;
+                Refresh();
+            }
+
+            Moved(tick);
+        }
+
+        /// <summary>
+        /// Whether this view has a reason to write its values that nothing announced.
+        /// </summary>
+        /// <remarks>
+        /// True until what it shows announces its changes, because a view whose component has not been
+        /// carried over would otherwise stop updating. A view whose component keeps a revision of its
+        /// own can answer with that instead, which is a single comparison rather than a screenful of
+        /// reading. <see cref="Wires" /> counts what is left to do, and zero on an idle frame is done.
+        /// </remarks>
+        protected virtual bool Stale
+        {
+            get { return true; }
+        }
+
+        /// <summary>Writes what this view shows onto its elements.</summary>
+        protected abstract void Refresh();
+
+        /// <summary>
+        /// Moves whatever moves on its own, every tick.
         /// </summary>
         /// <param name="tick">
         /// The editor's own count. Passed rather than fetched, because an indicator that blinks at a rate
         /// needs to know what time it is and core is the only thing that knows what a tick means here.
         /// </param>
-        public abstract void Update(int tick);
+        protected virtual void Moved(int tick)
+        {
+        }
+
+        /// <summary>
+        /// How many times this view has written what it shows onto its elements.
+        /// </summary>
+        /// <remarks>
+        /// Counted, because "the values are pushed rather than polled" is a claim about a path that runs
+        /// sixty times a second, and the only honest form of that claim is a number that stands still
+        /// while nothing is happening. The text measurements in the layout are counted for the same
+        /// reason and by the same method.
+        /// </remarks>
+        internal int Wires { get; private set; }
 
         /// <summary>
         /// Offers this view the chance to take hold of something at <paramref name="point" />.

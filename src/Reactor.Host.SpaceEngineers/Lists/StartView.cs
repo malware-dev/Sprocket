@@ -44,18 +44,26 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _component = component;
         }
 
+        /// <summary>
+        /// Told rather than asked. A page writes these once, when it builds the block, and a screen
+        /// that offers different ways to start something is a different screen with a new component.
+        /// </summary>
+        protected override bool Stale
+        {
+            get { return false; }
+        }
+
         public override Element Root
         {
             get { return _stack; }
         }
 
-        public override void Update(int tick)
+        protected override void Refresh()
         {
             Rebuild();
 
-            // Every tick rather than with the buttons, because core re-issues the ids whenever it
-            // rebuilds a screen and the buttons themselves outlive that. The row is what the question
-            // hangs under, which is why nothing here has to be told where to put one.
+            // The row is what the question hangs under, which is why nothing here has to be told
+            // where to put one.
             for (int i = 0; i < _rows.Count && i < _component.Options.Count; i++)
             {
                 StartOption option = _component.Options[i];
