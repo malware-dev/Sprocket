@@ -23,3 +23,9 @@ on screen     Automation for Test Rig
 016  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
 017  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
 018  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+019  Sprite     Reactor_Fill          {X:490 Y:86 W:156 H:33}  #1B242AFF
+020  Sprite     Reactor_Fill          {X:490 Y:86 W:156 H:1}  #5B737BFF
+021  Sprite     Reactor_Fill          {X:490 Y:118 W:156 H:1}  #5B737BFF
+022  Sprite     Reactor_Fill          {X:490 Y:86 W:1 H:33}  #5B737BFF
+023  Sprite     Reactor_Fill          {X:645 Y:86 W:1 H:33}  #5B737BFF
+024  Text       at {X:502.8 Y:92} scale 0.57  #DCF5FDFF  "Give it a name first"

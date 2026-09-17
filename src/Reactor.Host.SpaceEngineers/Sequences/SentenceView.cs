@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Screen;
 using Reactor.Host.SpaceEngineers.World;
 using Reactor.Host.SpaceEngineers.Layout;
 using Reactor.Host.SpaceEngineers.Controls;
@@ -81,18 +80,16 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
             for (int i = 0; i < _slots.Count && i < step.Slots.Count; i++)
             {
+                // Every tick, unlike the words: a slot core handed back unchanged can still have
+                // stopped being something to press, which is how a sequence locks itself while it runs.
+                _slots[i].Press = Deed.Sends(step.Slots[i].Command);
+
                 if (ReferenceEquals(_shown[i], step.Slots[i]))
                     continue;
 
                 _shown[i] = step.Slots[i];
                 Apply(_slots[i], step.Slots[i], SentenceText.InStep(world, step.Slots[i]));
             }
-        }
-
-        public void Collect(List<Hit> hits, List<SentenceSlot> slots)
-        {
-            for (int i = 0; i < _slots.Count && i < slots.Count; i++)
-                hits.Add(Hit.On(_slots[i], slots[i].Command));
         }
 
         /// <summary>

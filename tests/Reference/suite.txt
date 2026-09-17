@@ -20,7 +20,9 @@ root-hover          move 60 130
 root-ticked         tick 120
 root-rename         240 70
 root-rename-empty   240 70 clear
+root-blocked-hover  240 70 clear move 60 130
 root-naming         60 130
+root-naming-ready   60 130 type Airlock move 460 210
 
 # --- one system, made from nothing --------------------------------------------------------------
 system              60 130 type Airlock enter

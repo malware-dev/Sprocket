@@ -51,6 +51,20 @@ namespace Reactor.Host.SpaceEngineers.Lists
 
         public override void Update(int tick)
         {
+            Rebuild();
+
+            // Every tick rather than with the buttons, because core re-issues the ids whenever it
+            // rebuilds a screen and the buttons themselves outlive that. The row is what the question
+            // hangs under, which is why nothing here has to be told where to put one.
+            for (int i = 0; i < _rows.Count && i < _component.Options.Count; i++)
+            {
+                StartOption option = _component.Options[i];
+                _rows[i].Press = Deed.Asks(option.Command, option.Question);
+            }
+        }
+
+        void Rebuild()
+        {
             if (_count == _component.Options.Count)
                 return;
 
@@ -66,10 +80,7 @@ namespace Reactor.Host.SpaceEngineers.Lists
                 //
                 // The same button that adds a step to a sentence, at this screen's size: adding a system
                 // and adding a step are one act, and a filled panel here said they were two.
-                Label row = Widgets.Ghost(Plus + option.Label + (option.Asks ? "…" : ""),
-                    Lettering.Body);
-                row.Highlight = Palette.Panel;
-                _rows.Add(row);
+                _rows.Add(Widgets.Way(Plus + option.Label + (option.Asks ? "…" : "")));
             }
 
             _line.Padding = new Thickness(0f, Space.Item);
@@ -81,20 +92,6 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _stack.Children.Clear();
             _stack.Children.Add(_buttons);
             _stack.Children.Add(_line);
-        }
-
-        public override void Collect(List<Hit> hits)
-        {
-            for (int i = 0; i < _rows.Count && i < _component.Options.Count; i++)
-            {
-                StartOption option = _component.Options[i];
-
-                // The row is what the question hangs under, so it is handed over with the hit. Nothing
-                // here opens anything: the row does not know a popup exists, only that pressing it asks.
-                var ask = new Hit(_rows[i].Bounds, option.Command, option.Question, _rows[i]);
-                ask.Hot = _rows[i];
-                hits.Add(ask);
-            }
         }
     }
 }

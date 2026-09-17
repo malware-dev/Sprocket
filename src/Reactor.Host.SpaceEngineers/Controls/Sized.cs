@@ -70,6 +70,11 @@ namespace Reactor.Host.SpaceEngineers.Controls
                 _content.Arrange(new RectangleF(bounds.X, bounds.Y, Width, bounds.Height));
         }
 
+        protected override Element UnderContent(Vector2 point)
+        {
+            return _content != null ? _content.Under(point) : null;
+        }
+
         protected override void DrawContent(IGraphics g)
         {
             if (_content != null)

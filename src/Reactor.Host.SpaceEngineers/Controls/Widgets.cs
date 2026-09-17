@@ -27,40 +27,139 @@ namespace Reactor.Host.SpaceEngineers.Controls
             return label;
         }
 
-        /// <summary>A row that drills into something. The workhorse of every list on every screen.</summary>
-        public static Label Row(string text, Color color)
+        /// <summary>What a button holds clear inside itself, whichever kind of button it is.</summary>
+        static Thickness Inside
         {
-            Label row = Label(text, color, Lettering.Body);
-            row.Background = Palette.Panel;
-            row.Highlight = Palette.PanelHot;
-            row.Padding = new Thickness(Space.PadX, Space.PadY);
-            return row;
+            get { return new Thickness(Space.PadX, Space.ChipY * 1.3f); }
         }
 
-        /// <summary>Quiet, for something that is available without being the point.</summary>
-        public static Label Ghost(string text)
+        /// <summary>A word that answers a question, or runs an operation: a panel, and it lights.</summary>
+        public static Label Chip(string text)
         {
-            return Ghost(text, Lettering.Small);
+            Label chip = Label(text, Palette.Ink, Lettering.Small);
+            chip.Padding = Inside;
+
+            // A control rather than a sentence, for the reason a ghost is one: a word that broke onto
+            // two lines would change the height of the row of them.
+            chip.Wraps = false;
+            return Filled(chip);
         }
 
         /// <summary>
-        /// The same control at a size the screen chooses.
+        /// Puts a panel under a control, so it reads as one wherever it is standing.
         /// </summary>
         /// <remarks>
-        /// Everything that adds something is drawn this way, and a screen where the thing being added is
-        /// the main act says so with size rather than with a different control: the ways to start a
-        /// system are the largest thing on the ship's screen, and still the same button as the one that
-        /// adds a step to a sentence.
+        /// What a quiet control needs when it sits on something other than the page: a highlight the
+        /// same colour as the ground behind it is a control that never lights.
         /// </remarks>
-        public static Label Ghost(string text, float lettering)
+        public static Label Filled(Label control)
         {
-            Label ghost = Label(text, Palette.Muted, lettering);
-            ghost.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
+            control.Background = Palette.Panel;
+            control.Highlight = Palette.PanelHot;
+            return control;
+        }
+
+        /// <summary>
+        /// Dresses the one button that moves somebody on, ready to be pressed.
+        /// </summary>
+        /// <remarks>
+        /// Dark words on the lit fill, the way the game does it: its focus colour is pale, so a control
+        /// wearing it reads as lit only if what it says goes dark.
+        /// <para>
+        /// Applied rather than made, because the same control is dressed again whenever what it can do
+        /// changes - and it is the screen's primary and the one in the box that asks for a name, which
+        /// are the same button and must not drift apart.
+        /// </para>
+        /// </remarks>
+        public static void Go(Label button)
+        {
+            button.Padding = Inside;
+            button.Background = Palette.Accent;
+            button.Color = Palette.Chrome;
+            button.Highlight = Palette.Ink;
+        }
+
+        /// <summary>
+        /// The same button with nothing to send yet: a well, and it does not light.
+        /// </summary>
+        /// <remarks>
+        /// A well rather than a fill, because a fill is what says a control is live. Nothing lights,
+        /// because a control that lights and then refuses the press is worse than one that never lit.
+        /// </remarks>
+        public static void Waiting(Label button)
+        {
+            button.Padding = Inside;
+            button.Background = Palette.SlotFill;
+            button.Color = Palette.Faint;
+            button.Highlight = Palette.None;
+        }
+
+        /// <summary>
+        /// The same button on a screen that has nowhere to go on to: gone, but its place kept.
+        /// </summary>
+        /// <remarks>
+        /// Not collapsed. The footer stands the same height on every screen, and one that changed
+        /// height as somebody walked through the editor would move the list above it.
+        /// </remarks>
+        public static void Absent(Label button)
+        {
+            button.Padding = Inside;
+            button.Background = Palette.None;
+            button.Color = Palette.None;
+            button.Highlight = Palette.None;
+        }
+
+        /// <summary>
+        /// Quiet words, sized and spaced as part of a control rather than as a sentence.
+        /// </summary>
+        /// <remarks>
+        /// Not a control itself: it has no highlight, so it says nothing about being pressable. What
+        /// wears this is the word inside something larger - the kind line's word stands beside its
+        /// arrow, and the line is what gets pressed.
+        /// </remarks>
+        public static Label Quiet(string text, float lettering)
+        {
+            Label quiet = Label(text, Palette.Muted, lettering);
+            quiet.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
 
             // A control rather than a sentence. One that broke onto two lines would change the height of
             // whatever row it sits in, which is the fidgeting this screen is trying not to do.
-            ghost.Wraps = false;
+            quiet.Wraps = false;
+            return quiet;
+        }
+
+        /// <summary>
+        /// A button offered in place: quiet words, no panel, and it lights.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Quiet" /> wearing a highlight, which is the whole of the difference between words
+        /// and a button: a thing that lights up had better do something when it is pressed.
+        /// <para>
+        /// The one under a sentence, the one under an instance, and the verbs in the footer. Something
+        /// available without being the point, which is what the size says.
+        /// </para>
+        /// </remarks>
+        public static Label Ghost(string text)
+        {
+            Label ghost = Quiet(text, Lettering.Small);
+            ghost.Highlight = Palette.Panel;
             return ghost;
+        }
+
+        /// <summary>
+        /// The same button where adding something is the main act of the screen.
+        /// </summary>
+        /// <remarks>
+        /// The ways to start a system are the largest thing on a construct's front page, and still the
+        /// same button as the one that adds a step to a sentence. A style of its own rather than a size
+        /// passed in, because how loud a control is on a screen is not a decision for the screen's own
+        /// builder to take one call at a time.
+        /// </remarks>
+        public static Label Way(string text)
+        {
+            Label way = Quiet(text, Lettering.Body);
+            way.Highlight = Palette.Panel;
+            return way;
         }
 
         /// <summary>

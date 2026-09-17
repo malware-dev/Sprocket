@@ -82,6 +82,12 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// <summary>What each trigger slot was last given, so an unchanged one is not worded again.</summary>
         readonly List<SentenceSlot> _shownTrigger = new List<SentenceSlot>();
 
+        /// <summary>What the two arrows were last told to say, and the words they were made from.</summary>
+        string _undone;
+        string _undoSays;
+        string _redone;
+        string _redoSays;
+
         readonly Stack _steps = Widgets.Column(Space.Row * 0.8f);
         readonly List<StepRow> _stepRows = new List<StepRow>();
         readonly Stack _adders = Widgets.RowOf(Space.Item);
@@ -192,8 +198,44 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             // stops the whole of what the screen is showing.
             _enable.Show(_component.Enabled, true);
 
-            Waiting(_undo, _component.UndoCommand);
-            Waiting(_redo, _component.RedoCommand);
+            // Nothing on this screen needs asking whether the sequence can be edited. Core hands a
+            // running one a command of zero for every act it cannot do - see SequencePage.Change - and a
+            // control with no command is not a control, so the whole screen locks itself.
+            //
+            // The verb is this screen's word and the thing it acts on is core's, which already publishes
+            // it: UndoText exists because "Undo" alone asks somebody to remember what they just did, and
+            // somebody who has made a mistake is worst at exactly that.
+            //
+            // Built only when those words change. Joining two strings is cheap and this runs sixty times
+            // a second, for a note that is read when the pointer happens to rest on the arrow.
+            if (!ReferenceEquals(_undone, _component.UndoText))
+            {
+                _undone = _component.UndoText;
+                _undoSays = "Undo " + _component.UndoText;
+            }
+
+            if (!ReferenceEquals(_redone, _component.RedoText))
+            {
+                _redone = _component.RedoText;
+                _redoSays = "Redo " + _component.RedoText;
+            }
+
+            Waiting(_undo, _component.UndoCommand, _undoSays);
+            Waiting(_redo, _component.RedoCommand, _redoSays);
+            Waiting(_delete, _component.DeleteCommand, "Delete this sequence");
+
+            // Says the act, where the switch itself says the state. The two together are the whole reason
+            // a state switch is safe for an audience who have never programmed: the control cannot be read
+            // the wrong way round, and the note says what pressing it would do.
+            //
+            // The one control here that a running sequence keeps, because stopping it is the act.
+            _enable.Press = Deed.Switches(_component.ToggleCommand, !_component.Enabled);
+            _enable.Tip = _component.ToggleCommand == 0 ? null : _component.Enabled
+                ? "Switch this sequence off"
+                : "Switch this sequence on";
+
+            for (int i = 0; i < _adderRows.Count && i < _component.AddOptions.Count; i++)
+                _adderRows[i].Press = Deed.Sends(_component.AddOptions[i].Command);
 
             _triggerLead.Text = SentenceText.Lead(_component.Trigger);
 
@@ -202,6 +244,8 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             for (int i = 0; i < _triggerSlots.Count && i < _component.Trigger.Slots.Count; i++)
             {
                 SentenceSlot slot = _component.Trigger.Slots[i];
+                _triggerSlots[i].Press = Deed.Sends(slot.Command);
+
                 if (ReferenceEquals(_shownTrigger[i], slot))
                     continue;
 
@@ -220,6 +264,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                     row.Number.Text = step.Number.ToString();
                 }
                 row.Sentence.Update(Host.World, step);
+                row.Delete.Press = Deed.Sends(step.DeleteCommand);
 
                 // Left alone while it is being carried. This runs every tick, and it would otherwise
                 // repaint the row being dragged in the colour it is not, sixty times a second.
@@ -235,47 +280,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             Slide();
         }
 
-        public override void Collect(List<Hit> hits)
-        {
-            if (_component.Editable)
-            {
-                // The verb is this screen's word and the thing it acts on is core's, which already
-                // publishes it - UndoText exists because "Undo" alone asks somebody to remember what they
-                // just did, and somebody who has made a mistake is worst at exactly that.
-                if (_component.UndoCommand != 0)
-                    hits.Add(Says(Hit.On(_undo, _component.UndoCommand), "Undo " + _component.UndoText));
-
-                if (_component.RedoCommand != 0)
-                    hits.Add(Says(Hit.On(_redo, _component.RedoCommand), "Redo " + _component.RedoText));
-
-                hits.Add(Says(Hit.On(_delete, _component.DeleteCommand), "Delete this sequence"));
-
-                for (int i = 0; i < _triggerSlots.Count && i < _component.Trigger.Slots.Count; i++)
-                    hits.Add(Hit.On(_triggerSlots[i], _component.Trigger.Slots[i].Command));
-
-                for (int i = 0; i < _stepRows.Count && i < _component.Steps.Count; i++)
-                {
-                    SentenceStep step = _component.Steps[i];
-                    StepRow row = _stepRows[i];
-
-                    row.Sentence.Collect(hits, step.Slots);
-                    hits.Add(Says(Hit.On(row.Delete, step.DeleteCommand), "Delete step " + row.Position));
-                }
-
-                for (int i = 0; i < _adderRows.Count && i < _component.AddOptions.Count; i++)
-                    hits.Add(Hit.On(_adderRows[i], _component.AddOptions[i].Command));
-            }
-
-            // Says the act, where the switch itself says the state. The two together are the whole
-            // reason a state switch is safe for an audience who have never programmed: the control cannot
-            // be read the wrong way round, and the note says what pressing it would do.
-            Hit enable = Hit.Switch(_enable.Bounds, _component.ToggleCommand, !_component.Enabled);
-            enable.Hot = _enable;
-            hits.Add(Says(enable, _component.Enabled
-                ? "Switch this sequence off"
-                : "Switch this sequence on"));
-        }
-
         public override bool TryGrab(Vector2 point)
         {
             if (!_component.Editable)
@@ -285,7 +289,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             {
                 StepRow row = _stepRows[i];
 
-                if (!EditorView.Contains(row.Grip.Bounds, point))
+                if (!row.Grip.Reaches(point))
                     continue;
 
                 _carrying = i;
@@ -568,6 +572,10 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                 row.Delete.Highlight = Palette.ProblemWash;
                 row.Delete.Collapsed = !_component.Editable;
 
+                // Said here rather than per tick: a row's position is settled when the row is made,
+                // and the alternative is building this string sixty times a second for every step.
+                row.Delete.Tip = "Delete step " + row.Position;
+
                 row.Line = new Bar();
                 row.Line.Spacing = Space.Item;
                 row.Line.Padding = new Thickness(Space.Item, Space.ChipY * 1.3f);
@@ -588,7 +596,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             for (int i = 0; i < _component.AddOptions.Count; i++)
             {
                 Label adder = Widgets.Ghost("+ " + _component.AddOptions[i].Text);
-                adder.Highlight = Palette.Panel;
                 _adderRows.Add(adder);
                 _adders.Children.Add(adder);
             }
@@ -670,27 +677,26 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             return 0;
         }
 
-        /// <summary>Quiet when there is nothing to walk back, and in place either way.</summary>
         /// <summary>
-        /// Dims an arrow that has nothing to walk back, and stops it answering the pointer.
+        /// Dresses one of the header's glyph buttons, and says what it would do.
         /// </summary>
         /// <remarks>
-        /// Both halves matter. It keeps its place either way - hiding it would move Delete sideways under
-        /// the pointer somebody was about to use - so the only thing left to say "there is nothing here"
-        /// is that it is dim and does not light up.
+        /// It keeps its place whether or not there is anything to do - hiding it would move the next one
+        /// sideways under the pointer somebody was about to use - so the only thing left to say "there is
+        /// nothing here" is that it is dim, does not light up, and says nothing.
+        /// <para>
+        /// One call, because the dimming, the light, the press and the note are four statements of a
+        /// single fact, and four statements drift. A dim control that still answered the pointer would be
+        /// one somebody reaches for twice.
+        /// </para>
         /// </remarks>
-        /// <summary>Gives a hit something to say while the pointer rests on it.</summary>
-        static Hit Says(Hit hit, string tip)
-        {
-            hit.Tip = tip;
-            return hit;
-        }
-
-        static void Waiting(Glyph button, int command)
+        static void Waiting(Glyph button, int command, string says)
         {
             bool ready = command != 0;
             button.Tint = ready ? Palette.Muted : Palette.Dim;
             button.Highlight = ready ? Palette.Panel : Palette.None;
+            button.Press = Deed.Sends(command);
+            button.Tip = ready ? says : null;
         }
     }
 }

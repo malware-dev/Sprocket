@@ -134,6 +134,19 @@ namespace Reactor.Host.SpaceEngineers.Layout
                 _right.Draw(g);
         }
 
+        protected override Element UnderContent(Vector2 point)
+        {
+            Element found = _right != null ? _right.Under(point) : null;
+
+            if (found == null && _left != null)
+                found = _left.Under(point);
+
+            if (found == null && _fill != null)
+                found = _fill.Under(point);
+
+            return found;
+        }
+
         /// <summary>Whether a part is there at all and is asking to be seen.</summary>
         private static bool Shows(Element part)
         {

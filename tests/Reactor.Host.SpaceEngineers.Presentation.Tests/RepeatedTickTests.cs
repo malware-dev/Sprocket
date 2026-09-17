@@ -83,6 +83,56 @@ public class RepeatedTickTests
         AssertStill(screen, "the construct");
     }
 
+    /// <summary>
+    /// What a screen costs while nobody is touching it does not grow with what is on it.
+    /// </summary>
+    /// <remarks>
+    /// Measured rather than believed, and measured as growth rather than as a total: a constant cost
+    /// is the frame drawing what is on screen, where a cost per row is something being worked out
+    /// again for every row on every frame. That is the fault this catches, and it is one nothing else
+    /// here can see - the picture is right either way.
+    /// <para>
+    /// Every hover note used to be built on every frame, of which at most one is ever read. That was
+    /// 364 bytes per system per frame; the notes are now built when their words change, and it is 127.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AnIdleScreenCostsNoMoreForBeingFullerOfThings()
+    {
+        var one = Idle(1);
+        var four = Idle(4);
+
+        var each = (four - one) / 3 / Frames;
+
+        Assert.True(each < 250,
+            $"an idle frame costs {each} bytes for every system on the construct, which is the shape "
+            + "of something being worked out per row per frame rather than when it changed. "
+            + $"({one} bytes over {Frames} frames at one system, {four} at four.)");
+    }
+
+    const int Frames = 60;
+
+    /// <summary>What a construct with this many systems allocates over a second of nothing happening.</summary>
+    static long Idle(int systems)
+    {
+        var screen = Screen.Fresh();
+
+        for (var i = 0; i < systems; i++)
+        {
+            screen.Editor.NewSystem("System " + i);
+            screen.Editor.Back();
+        }
+
+        // Settled first. The frames that arrive at a screen for the first time measure its text and
+        // build its rows, which is work that happens once and is not what this is about.
+        screen.Run(20);
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        screen.Run(Frames);
+
+        return GC.GetAllocatedBytesForCurrentThread() - before;
+    }
+
     static void AssertStill(Screen screen, string what)
     {
         screen.Run(5);

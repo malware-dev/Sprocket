@@ -56,6 +56,7 @@ namespace Reactor.Host.SpaceEngineers.Lists
                 ChoiceEntry entry = _component.Entries[i];
                 Row row = _rows[i];
 
+                row.Line.Press = Deed.Sends(entry.Command);
                 row.Text.Text = entry.Text;
                 row.Warning.Text = entry.Warning;
                 row.Warning.Collapsed = string.IsNullOrEmpty(entry.Warning);
@@ -76,12 +77,6 @@ namespace Reactor.Host.SpaceEngineers.Lists
 
                 row.Blink.IsLit = row.Ticks <= 1 || tick % row.Ticks < flash;
             }
-        }
-
-        public override void Collect(List<Hit> hits)
-        {
-            for (int i = 0; i < _rows.Count && i < _component.Entries.Count; i++)
-                hits.Add(Hit.On(_rows[i].Line, _component.Entries[i].Command));
         }
 
         void Rebuild()

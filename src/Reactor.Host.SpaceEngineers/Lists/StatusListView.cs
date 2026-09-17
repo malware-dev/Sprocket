@@ -37,15 +37,6 @@ namespace Reactor.Host.SpaceEngineers.Lists
                 _rows[i].Update(_component.Entries[i]);
         }
 
-        public override void Collect(List<Hit> hits)
-        {
-            for (int i = 0; i < _rows.Count && i < _component.Entries.Count; i++)
-            {
-                StatusEntry entry = _component.Entries[i];
-                _rows[i].Collect(hits, entry);
-            }
-        }
-
         void Rebuild()
         {
             _rows.Clear();

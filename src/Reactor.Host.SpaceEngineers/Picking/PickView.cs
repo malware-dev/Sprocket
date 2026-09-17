@@ -82,12 +82,6 @@ namespace Reactor.Host.SpaceEngineers.Picking
                 _stages[i].Update(_component.Stages[i], Host);
         }
 
-        public override void Collect(List<Hit> hits)
-        {
-            for (int i = 0; i < _stages.Count && i < _component.Stages.Count; i++)
-                _stages[i].Collect(hits, _component.Stages[i], i, Host);
-        }
-
         /// <summary>
         /// Moves the column being pointed at, or the whole strip when that column has nowhere to go.
         /// </summary>
@@ -98,7 +92,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
         /// </remarks>
         public override bool ScrollBy(Vector2 point, float amount)
         {
-            if (!EditorView.Contains(_strip.Bounds, point))
+            if (!_strip.Reaches(point))
                 return false;
 
             for (int i = 0; i < _stages.Count; i++)
@@ -133,10 +127,10 @@ namespace Reactor.Host.SpaceEngineers.Picking
                 return true;
             }
 
-            if (!_strip.HasBar || !EditorView.Contains(_strip.Track, point))
+            if (!_strip.OnBar(point))
                 return false;
 
-            if (!EditorView.Contains(_strip.Thumb, point))
+            if (!_strip.OnThumb(point))
                 _strip.ThumbTo(point.X);
 
             _strip.BarHeld = true;

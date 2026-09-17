@@ -55,7 +55,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
         readonly Label _title = Widgets.Label("", Palette.Ink, Lettering.Body);
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Lettering.Tiny);
         readonly TextBox _narrow = Widgets.Box(Lettering.Small, Palette.Page);
-        readonly Signpost _kindLine = new Signpost("", Symbols.Down, false);
+        readonly Signpost _kindLine = new Signpost("", Symbols.Down);
         readonly Label _showing = Widgets.Label("", Palette.Faint, Lettering.Tiny);
         readonly Stack _options = Widgets.RowOf(Space.Region);
         readonly List<OptionRow> _optionRows = new List<OptionRow>();
@@ -150,7 +150,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
         /// <summary>Moves this column's rows, if the point is in it and there is anything out of sight.</summary>
         public bool ScrollBy(Vector2 point, float amount)
         {
-            if (!EditorView.Contains(_root.Bounds, point) || !_scroll.CanScroll)
+            if (!_root.Reaches(point) || !_scroll.CanScroll)
                 return false;
 
             _scroll.ScrollBy(amount);
@@ -165,10 +165,10 @@ namespace Reactor.Host.SpaceEngineers.Picking
         /// </remarks>
         public bool TryGrabBar(Vector2 point)
         {
-            if (!_scroll.HasBar || !EditorView.Contains(_scroll.Track, point))
+            if (!_scroll.OnBar(point))
                 return false;
 
-            if (!EditorView.Contains(_scroll.Thumb, point))
+            if (!_scroll.OnThumb(point))
                 _scroll.ThumbTo(point.Y);
 
             _scroll.BarHeld = true;
@@ -200,8 +200,19 @@ namespace Reactor.Host.SpaceEngineers.Picking
             if (_hasNarrow && !IsTyping(host))
                 _narrow.Text = stage.NarrowText;
 
+            // The box takes the keyboard rather than sending anything at once, and then every keystroke
+            // goes to the same command.
+            if (_hasNarrow)
+                _narrow.Press = Deed.Types(stage.NarrowCommand, _narrow);
+
             if (_hasKinds)
+            {
                 UpdateKinds(stage);
+
+                // The list hangs off this line, and is reachable only while it is hanging there - a
+                // closed one is not in the layout at all, so its rows cannot be pressed through it.
+                _kindLine.Press = Deed.Opens(_kindList);
+            }
 
             if (stage.Filters.Count > 0)
             {
@@ -213,40 +224,6 @@ namespace Reactor.Host.SpaceEngineers.Picking
 
             UpdateOptions(stage);
             UpdateRows(stage);
-        }
-
-        public void Collect(List<Hit> hits, PickStage stage, int index, IScreenHost host)
-        {
-            if (_hasNarrow)
-                hits.Add(Hit.Typing(_narrow.Bounds, stage.NarrowCommand, _narrow));
-
-            if (_hasKinds)
-            {
-                Hit opener = Hit.Opens(_kindLine.Bounds, _kindList);
-                opener.Anchor = _kindLine;
-                opener.Hot = _kindLine;
-                hits.Add(opener);
-            }
-
-            for (int i = 0; i < _optionRows.Count && i < stage.Options.Count; i++)
-                hits.Add(Hit.On(_optionRows[i].Row, stage.Options[i].Command));
-
-            for (int i = 0; i < _visible.Count && i < stage.Entries.Count; i++)
-            {
-                Hit row = Hit.On(_visible[i].Line, stage.Entries[i].Command);
-                row.Confirms = !stage.AllowsMany;
-                hits.Add(row);
-            }
-
-            // Only while the list is actually hanging over the screen. A closed list is not measured, so
-            // its rows keep the rectangles they had when it was last open - and those rows are collected
-            // last and therefore tested first, so leaving them in would make a press anywhere near where
-            // the list was last open change the filter instead of doing what it looks like it does.
-            if (!_hasKinds || host == null || !host.IsOverlay(_kindList))
-                return;
-
-            for (int i = 0; i < _kindRows.Count && i < stage.Filters.Count; i++)
-                hits.Add(Hit.On(_kindRows[i].Line, stage.Filters[i].Command));
         }
 
         /// <summary>The list of kinds, for the screen to hang over everything when this line is pressed.</summary>
@@ -308,6 +285,7 @@ namespace Reactor.Host.SpaceEngineers.Picking
             {
                 KindFilter filter = stage.Filters[i];
 
+                _kindRows[i].Line.Press = Deed.Sends(filter.Command);
                 _kindRows[i].Label.Text = filter.Label;
                 _kindRows[i].Label.Color = filter.IsCurrent ? Palette.Ink : Palette.Muted;
 
@@ -354,6 +332,8 @@ namespace Reactor.Host.SpaceEngineers.Picking
                 row.Mark.Many = false;
                 row.Mark.Chosen = option.IsCurrent;
                 row.Mark.Color = option.IsCurrent ? Palette.Live : Palette.Faint;
+
+                row.Row.Press = Deed.Sends(option.Command);
 
                 row.Text.Text = option.Text;
                 row.Text.Color = option.IsCurrent ? Palette.Ink : Palette.Muted;
@@ -402,6 +382,12 @@ namespace Reactor.Host.SpaceEngineers.Picking
             {
                 PickOption entry = stage.Entries[i];
                 RowVisual row = _visible[i];
+
+                // Taking a choice and moving on in one gesture, where one thing is being chosen. Where
+                // several can be, a second press means un-choosing it instead.
+                Deed deed = Deed.Sends(entry.Command);
+                deed.Confirms = !many;
+                row.Line.Press = deed;
 
                 // A tick for things you collect, a dot for things you settle on.
                 row.Mark.Many = many;

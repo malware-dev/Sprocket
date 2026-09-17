@@ -62,11 +62,58 @@ namespace Reactor.Host.SpaceEngineers.Layout
 
         /// <summary>Whether the pointer is on this right now. Set by whatever owns the screen, once a frame.</summary>
         /// <remarks>
-        /// Not worked out here: an element knows its own rectangle and nothing else - not whether
-        /// something is drawn over it, not whether it has been scrolled out of sight, and not whether a
-        /// popup has taken the screen.
+        /// Not worked out here. <see cref="Under" /> answers what the pointer reaches, but only one thing
+        /// on a screen is ever lit and only the screen knows which tree the pointer is in - a popup owns
+        /// it while it is up, whatever is underneath.
         /// </remarks>
         public bool IsHot { get; set; }
+
+        /// <summary>
+        /// What pressing this means. <see cref="Means.Nothing" /> for anything only there to be read.
+        /// </summary>
+        /// <remarks>
+        /// <b>What makes an element a target for the pointer at all.</b> Whoever builds a screen says
+        /// here what each control does, and the walk in <see cref="Under" /> is then the whole of
+        /// finding it - there is no second list of rectangles to be kept in step with the layout.
+        /// <para>
+        /// Neither this nor <see cref="Tip" /> moves anything, so setting one invalidates nothing -
+        /// which is what lets a view hand its controls their meaning again on every tick, as one does
+        /// whenever what a control means can change under it.
+        /// </para>
+        /// </remarks>
+        public Deed Press
+        {
+            get { return _press; }
+            set { _press = value; }
+        }
+
+        /// <summary>
+        /// What to say while the pointer rests on this. Null for most things.
+        /// </summary>
+        /// <remarks>
+        /// <b>Only for a control that cannot say what it is.</b> A row reading "Airlock 1" needs no note
+        /// telling you it is Airlock 1, and a screen that explained every word on it would be one nobody
+        /// could scan. What earns one is a picture: a bin, an arrow that turns back on itself, a switch
+        /// whose two words say the state rather than the act.
+        /// <para>
+        /// A note without a press is how something says what is wrong with it while it is being typed
+        /// into, so this stands on its own rather than sitting inside <see cref="Deed" />.
+        /// </para>
+        /// </remarks>
+        public string Tip { get; set; }
+
+        /// <summary>
+        /// Whether the pointer has any business here: something to do, or something to say.
+        /// </summary>
+        /// <remarks>
+        /// Reads the field rather than the property. <see cref="Under" /> asks this of every element it
+        /// visits on every frame, and asking a property for one field of a struct copies the whole
+        /// struct to get at it.
+        /// </remarks>
+        private bool Answers
+        {
+            get { return _press.Means != Means.Nothing || !string.IsNullOrEmpty(Tip); }
+        }
 
         /// <summary>How thick <see cref="Edge" /> is drawn.</summary>
         public float EdgeThickness { get; set; }
@@ -134,6 +181,7 @@ namespace Reactor.Host.SpaceEngineers.Layout
             }
         }
 
+        private Deed _press;
         private Thickness _padding;
         private Vector2 _offset;
         private bool _collapsed;
@@ -282,6 +330,77 @@ namespace Reactor.Host.SpaceEngineers.Layout
             g.PopClip();
         }
 
+        /// <summary>
+        /// The element a press or a hover at <paramref name="point" /> reaches, or null for none.
+        /// </summary>
+        /// <remarks>
+        /// The reverse of the way it was drawn, so what is on top is what answers: children before the
+        /// parent that holds them, and the last child drawn before the ones it covers. An element with
+        /// something to do answers only once nothing inside it has, which is what lets the switch in a
+        /// row be pressed without pressing the row.
+        /// <para>
+        /// <b>Clipping is the authority on what can be reached.</b> A row scrolled up behind a header
+        /// keeps the rectangle it was arranged at, and only the clip knows it is out of sight - so a
+        /// clipped element that does not hold the point answers nothing and neither does anything
+        /// inside it. An unclipped one asks its children anyway, because a child moved by
+        /// <see cref="Offset" /> is drawn outside its parent and can be pressed there too.
+        /// </para>
+        /// </remarks>
+        public Element Under(Vector2 point)
+        {
+            if (Collapsed)
+                return null;
+
+            if (ClipsContent && !Holds(point))
+                return null;
+
+            Element inner = UnderContent(point);
+            if (inner != null)
+                return inner;
+
+            return Answers && Holds(point) ? this : null;
+        }
+
+        /// <summary>
+        /// Whether <paramref name="point" /> is inside <see cref="Bounds" />.
+        /// </summary>
+        /// <remarks>
+        /// A rectangle and nothing else. Whether the thing in that rectangle can actually be reached
+        /// there is a different question, and <see cref="Reaches" /> is the one that answers it.
+        /// </remarks>
+        public bool Holds(Vector2 point)
+        {
+            return point.X >= Bounds.X && point.X <= Bounds.X + Bounds.Width
+                && point.Y >= Bounds.Y && point.Y <= Bounds.Y + Bounds.Height;
+        }
+
+        /// <summary>
+        /// Whether this can be reached at <paramref name="point" />: it holds it, and nothing above it
+        /// has folded it away or cut it off.
+        /// </summary>
+        /// <remarks>
+        /// The same question <see cref="Under" /> answers, asked from the other end, for the things
+        /// that are taken hold of rather than pressed: a grip carries no <see cref="Press" />, so the
+        /// walk never offers it, and testing its rectangle alone would let somebody drag a row that
+        /// has been scrolled out of sight behind a header.
+        /// </remarks>
+        public bool Reaches(Vector2 point)
+        {
+            if (Collapsed || !Holds(point))
+                return false;
+
+            for (Element above = Parent; above != null; above = above.Parent)
+            {
+                if (above.Collapsed)
+                    return false;
+
+                if (above.ClipsContent && !above.Holds(point))
+                    return false;
+            }
+
+            return true;
+        }
+
         /// <summary>Draws a hairline just inside <paramref name="bounds" />, as four thin rectangles.</summary>
         protected static void Outline(IGraphics g, RectangleF bounds, Color color, float thickness)
         {
@@ -303,5 +422,39 @@ namespace Reactor.Host.SpaceEngineers.Layout
 
         /// <summary>Draws whatever is inside, background already painted and any clip already pushed.</summary>
         protected abstract void DrawContent(IGraphics g);
+
+        /// <summary>
+        /// Whatever inside this answers a press at <paramref name="point" />, or null. Nothing to do for
+        /// an element with no children.
+        /// </summary>
+        /// <remarks>
+        /// Asked in the reverse of the order <see cref="DrawContent" /> draws in, so the thing on top is
+        /// the thing that answers. A control made of parts nobody presses separately - a switch, a
+        /// nameplate - leaves this alone and is pressed as one thing.
+        /// </remarks>
+        protected virtual Element UnderContent(Vector2 point)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// The last of <paramref name="children" /> that answers, which is the one drawn over the rest.
+        /// </summary>
+        /// <remarks>
+        /// For a container that draws its children in order and stacks nothing on purpose. A container
+        /// whose parts have an order of their own - a bar, a dock - walks them itself, in the reverse of
+        /// the order it draws them.
+        /// </remarks>
+        protected static Element OnTop(ElementCollection children, Vector2 point)
+        {
+            for (int i = children.Count - 1; i >= 0; i--)
+            {
+                Element found = children[i].Under(point);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
+        }
     }
 }

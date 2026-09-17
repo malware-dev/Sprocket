@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Screen;
 using Reactor.Host.SpaceEngineers.Layout;
 using Reactor.Host.SpaceEngineers.Controls;
 using Reactor.Host.SpaceEngineers.Look;
@@ -47,6 +45,12 @@ namespace Reactor.Host.SpaceEngineers.Lists
 
         readonly Stack _heading = Widgets.RowOf(Space.Item);
 
+        /// <summary>What the switch was last told to say, and the three things that decide it.</summary>
+        string _switched;
+        string _switchSays;
+        bool _switchedOn;
+        bool _switchedAll;
+
         public StatusRow()
         {
             _detail.Children.Add(_status);
@@ -82,7 +86,10 @@ namespace Reactor.Host.SpaceEngineers.Lists
             // heading that answered to a press would be a promise it cannot keep. So it is not drawn as
             // a panel either: a panel says "press me", and the only way to find out it was inert would be
             // to press it. The light and the switch stay, because those are real.
+            _line.Press = Deed.Sends(entry.Command);
+
             bool pressable = entry.Command != 0;
+
             // A row leading to something wrong is washed rather than merely marked. A small glyph
             // beside a name is something you find when you already suspect; the point of this is to
             // be seen by somebody who does not yet know to look.
@@ -140,6 +147,34 @@ namespace Reactor.Host.SpaceEngineers.Lists
                 _switch.Show(entry.SwitchIsOn, entry.SwitchGovernsAll);
             else
                 _switch.Hide();
+
+            _switch.Press = entry.CanSwitch
+                ? Deed.Switches(entry.SwitchCommand, !entry.SwitchIsOn)
+                : Deed.Nothing;
+
+            // Named, and told apart, because a column of these all say ON and OFF and nothing else
+            // separates the one governing a whole system from the one governing a single sequence under
+            // it. SwitchGovernsAll is core's answer to exactly that question - reading the indent instead
+            // would be guessing from a layout this target chose itself.
+            //
+            // Only the off direction carries the consequence. Switching a system on does not start
+            // anything by itself, where switching it off stops everything in it at once, and a note that
+            // warned about both equally would be a note nobody finished reading.
+            //
+            // Built when one of the three things it is made of changes. This runs for every row on the
+            // screen sixty times a second, and joining these strings for twenty rows a frame is the
+            // dearest thing on a screen where nothing is happening.
+            if (!ReferenceEquals(_switched, entry.Summary)
+                || _switchedOn != entry.SwitchIsOn
+                || _switchedAll != entry.SwitchGovernsAll)
+            {
+                _switched = entry.Summary;
+                _switchedOn = entry.SwitchIsOn;
+                _switchedAll = entry.SwitchGovernsAll;
+                _switchSays = Switching(entry.Summary, entry.SwitchGovernsAll, entry.SwitchIsOn);
+            }
+
+            _switch.Tip = entry.CanSwitch ? _switchSays : null;
         }
 
         /// <summary>What pressing a switch would do, said in full.</summary>
@@ -151,37 +186,6 @@ namespace Reactor.Host.SpaceEngineers.Lists
             return isOn
                 ? "Switch the whole " + name + " system off, stopping every sequence in it"
                 : "Switch the whole " + name + " system on";
-        }
-
-        public void Collect(List<Hit> hits, StatusEntry entry)
-        {
-            // No command means there is nothing to press. A system's own row is a heading over the ones of
-            // it, and a heading that answers to a press is a promise it cannot keep.
-            if (entry.Command != 0)
-            {
-                var line = new Hit(_line.Bounds, entry.Command);
-                line.Hot = _line;
-                hits.Add(line);
-            }
-
-            // Added after the row, so the switch wins where the two overlap.
-            if (entry.CanSwitch)
-            {
-                Hit toggle = Hit.Switch(_switch.Bounds, entry.SwitchCommand, !entry.SwitchIsOn);
-                toggle.Hot = _switch;
-
-                // Named, and told apart, because a column of these all say ON and OFF and nothing else
-                // separates the one governing a whole system from the one governing a single sequence
-                // under it. SwitchGovernsAll is core's answer to exactly that question - reading the
-                // indent instead would be guessing from a layout this target chose itself.
-                //
-                // Only the off direction carries the consequence. Switching a system on does not start
-                // anything by itself, where switching it off stops everything in it at once, and a note
-                // that warned about both equally would be a note nobody finished reading.
-                toggle.Tip = Switching(entry.Summary, entry.SwitchGovernsAll, entry.SwitchIsOn);
-
-                hits.Add(toggle);
-            }
         }
     }
 }

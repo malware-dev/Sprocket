@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Lists;
 using VRageMath;
 using Reactor.Host.SpaceEngineers.Drawing;
@@ -26,10 +25,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         private readonly Stack _popup = Widgets.Column(Space.Item);
         private readonly Label _label = Widgets.Label("", Palette.Ink, Lettering.Body);
         private readonly Stack _row = Widgets.RowOf(Space.Item);
-        private readonly List<Label> _answers = new List<Label>();
-        private readonly List<int> _commands = new List<int>();
-
-        private RectangleF _bounds;
         private bool _up;
 
         public Confirm()
@@ -46,34 +41,16 @@ namespace Reactor.Host.SpaceEngineers.Screen
             get { return _up; }
         }
 
+        /// <summary>The question itself, for the screen to walk while it owns it.</summary>
+        public Element Root
+        {
+            get { return _popup; }
+        }
+
         /// <summary>Whether a point is on the question. False while none is up.</summary>
         public bool Covers(Vector2 point)
         {
-            return _up
-                && point.X >= _bounds.X && point.X <= _bounds.X + _bounds.Width
-                && point.Y >= _bounds.Y && point.Y <= _bounds.Y + _bounds.Height;
-        }
-
-        /// <summary>The command under a point, or zero where no answer is.</summary>
-        /// <summary>
-        /// Puts the answers in the screen's hit list, like anything else that can be pressed.
-        /// </summary>
-        /// <remarks>
-        /// Rather than hit-testing itself, which is what this did before. Answering a question is not a
-        /// special sort of press, and the second path drifted from the first: pressing worked and
-        /// hovering never did, because lighting a control is something the hit list does and these were
-        /// not in it.
-        /// <para>
-        /// Fixed hits, because a question stands in the chrome rather than in the scrolling body.
-        /// </para>
-        /// </remarks>
-        public void Collect(List<Hit> hits)
-        {
-            if (!_up)
-                return;
-
-            for (var i = 0; i < _answers.Count && i < _commands.Count; i++)
-                hits.Add(Hit.OnFixed(_answers[i], _commands[i]));
+            return _up && _popup.Holds(point);
         }
 
         /// <summary>
@@ -89,20 +66,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _label.Text = question;
 
             _row.Children.Clear();
-            _answers.Clear();
-            _commands.Clear();
 
             foreach (ChoiceEntry answer in answers)
             {
-                Label word = Widgets.Label(answer.Text, Palette.Ink, Lettering.Small);
-                word.Wraps = false;
-                word.Padding = new Thickness(Space.PadX, Space.ChipY * 1.3f);
-                word.Background = Palette.Panel;
-                word.Highlight = Palette.PanelHot;
+                Label word = Widgets.Chip(answer.Text);
+                word.Press = Deed.Sends(answer.Command);
 
                 _row.Children.Add(word);
-                _answers.Add(word);
-                _commands.Add(answer.Command);
             }
         }
 
@@ -111,18 +81,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _up = false;
             _label.Text = "";
             _row.Children.Clear();
-            _answers.Clear();
-            _commands.Clear();
         }
 
         /// <summary>Draws it across the middle of the screen.</summary>
         public void Draw(IGraphics g, RectangleF bounds, float width)
         {
             if (!_up)
-            {
-                _bounds = new RectangleF();
                 return;
-            }
 
             _popup.Measure(g, new Vector2(width, bounds.Height));
 
@@ -130,8 +95,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
             float x = bounds.X + (bounds.Width - wanted.X) * 0.5f;
             float y = bounds.Y + (bounds.Height - wanted.Y) * 0.5f;
 
-            _bounds = new RectangleF(x, y, wanted.X, wanted.Y);
-            _popup.Arrange(_bounds);
+            _popup.Arrange(new RectangleF(x, y, wanted.X, wanted.Y));
             _popup.Draw(g);
         }
     }

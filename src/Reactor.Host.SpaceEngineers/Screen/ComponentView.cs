@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Lists;
 using Reactor.Host.SpaceEngineers.Picking;
 using Reactor.Host.SpaceEngineers.Sequences;
@@ -21,11 +20,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// needs to know what time it is and core is the only thing that knows what a tick means here.
         /// </param>
         public abstract void Update(int tick);
-
-        /// <summary>Adds whatever in here can be pressed. Called after the layout, never before.</summary>
-        public virtual void Collect(List<Hit> hits)
-        {
-        }
 
         /// <summary>
         /// Offers this view the chance to take hold of something at <paramref name="point" />.

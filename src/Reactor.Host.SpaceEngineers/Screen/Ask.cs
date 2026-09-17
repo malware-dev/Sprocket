@@ -25,7 +25,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         private readonly Label _confirm = Widgets.Label("Continue", Palette.Ink, Lettering.Small);
 
         private Element _anchor;
-        private RectangleF _bounds;
         private int _command;
         private string _question = "";
         private bool _up;
@@ -33,7 +32,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public Ask()
         {
             _box.IsEditing = true;
-            _confirm.Padding = new Thickness(Space.PadX, Space.ChipY * 1.3f);
 
             var entry = new Bar();
             entry.Spacing = Space.Item;
@@ -51,6 +49,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public bool IsUp
         {
             get { return _up; }
+        }
+
+        /// <summary>The question itself, for the screen to walk while it owns the screen.</summary>
+        public Element Root
+        {
+            get { return _popup; }
         }
 
         /// <summary>The box the answer is typed into.</summary>
@@ -79,19 +83,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// <summary>Whether a point is on the question. False while none is open.</summary>
         public bool Covers(Vector2 point)
         {
-            return _up
-                && point.X >= _bounds.X && point.X <= _bounds.X + _bounds.Width
-                && point.Y >= _bounds.Y && point.Y <= _bounds.Y + _bounds.Height;
-        }
-
-        /// <summary>Whether a point is on the button that sends the answer.</summary>
-        public bool OnConfirm(Vector2 point)
-        {
-            RectangleF at = _confirm.Bounds;
-
-            return _up
-                && point.X >= at.X && point.X <= at.X + at.Width
-                && point.Y >= at.Y && point.Y <= at.Y + at.Height;
+            return _up && _popup.Holds(point);
         }
 
         public void Open(string question, Element anchor, int command)
@@ -120,16 +112,32 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public void Draw(IGraphics g, RectangleF bounds, float width)
         {
             if (!_up || _anchor == null)
-            {
-                _bounds = new RectangleF();
                 return;
-            }
 
             // The question gives way to the reason while there is one, so the words sit where somebody is
             // already reading, and come back as soon as the answer is one that can be sent.
             bool refused = !string.IsNullOrEmpty(Refused);
             _label.Text = refused ? Refused : _question;
             _label.Color = refused ? Palette.Problem : Palette.Muted;
+
+            // Dead until there is something to send, because an empty answer here is not a meaningful
+            // one. Renaming is the opposite case and allows it, which is why the two are told apart.
+            //
+            // Before the measure, not after: how a button is dressed decides how much room it holds
+            // clear inside itself, and a button dressed after being measured is drawn at the size it
+            // was last frame.
+            // Dressed and armed together, so a button drawn as a dead well cannot still answer a
+            // press. That rule was being kept in two halves and only one of them said so.
+            if (!string.IsNullOrEmpty(_box.Text) && !refused)
+            {
+                Widgets.Go(_confirm);
+                _confirm.Press = Deed.Commits();
+            }
+            else
+            {
+                Widgets.Waiting(_confirm);
+                _confirm.Press = Deed.Nothing;
+            }
 
             _popup.Measure(g, new Vector2(width, bounds.Height));
 
@@ -145,18 +153,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
             if (x < bounds.X)
                 x = bounds.X;
 
-            _bounds = new RectangleF(x, y, width, height);
-            _popup.Arrange(_bounds);
-
-            // Dead until there is something to send, because an empty answer here is not a meaningful
-            // one. Renaming is the opposite case and allows it, which is why the two are told apart.
-            bool ready = !string.IsNullOrEmpty(_box.Text) && !refused;
-
-            // A well rather than a light fill when it is not ready. Dim is what an unlit thing is drawn
-            // in, and a button wearing it with quiet text on top was two near-identical greys.
-            _confirm.Background = ready ? Palette.Accent : Palette.SlotFill;
-            _confirm.Color = ready ? Palette.Chrome : Palette.Faint;
-
+            _popup.Arrange(new RectangleF(x, y, width, height));
             _popup.Draw(g);
         }
     }

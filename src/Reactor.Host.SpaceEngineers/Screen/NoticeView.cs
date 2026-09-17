@@ -122,6 +122,10 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _chevron.Tint = ink;
             _chevron.Collapsed = _component.ExpandCommand == 0;
 
+            // Both of these sit inside the reveal, which answers nothing while it is moving - a button
+            // still arriving is a button pressed by accident on the way to what was underneath it.
+            _heading.Press = Deed.Sends(_component.ExpandCommand);
+
             Buttons(ink);
             Slide(tick);
         }
@@ -166,6 +170,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 {
                     _buttons[i].Text = _component.Actions[i].Text;
                     _buttons[i].Color = ink;
+                    _buttons[i].Press = Deed.Sends(_component.Actions[i].Command);
                 }
 
                 return;
@@ -178,39 +183,14 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
             for (int i = 0; i < _component.Actions.Count; i++)
             {
-                Label button = Widgets.Ghost(_component.Actions[i].Text);
+                // Filled, because it is standing on the banner's wash rather than on the page. At the
+                // size everything else in here is: a banner is a line and a half, not a dialog.
+                Label button = Widgets.Filled(Widgets.Ghost(_component.Actions[i].Text));
                 button.Color = ink;
-
-                // Not the banner's own wash, which is what it is sitting on: a highlight the same
-                // colour as the background behind it is a control that never lights.
-                button.Background = Palette.Panel;
-                button.Highlight = Palette.PanelHot;
+                button.Press = Deed.Sends(_component.Actions[i].Command);
                 _buttons.Add(button);
                 _actions.Children.Add(button);
             }
-        }
-
-        public override void Collect(List<Hit> hits)
-        {
-            // Nothing is pressable while it is still moving. A control that answers before it has
-            // arrived is a control somebody hits by accident on the way to what was underneath it.
-            if (_reveal.Openness < 1f)
-                return;
-
-            if (_component.ExpandCommand != 0)
-            {
-                var open = new Hit(_heading.Bounds, _component.ExpandCommand);
-                open.Hot = _heading;
-                hits.Add(open);
-            }
-
-            // The operations only once the opening has finished, for the reason the banner itself is
-            // not pressable while it arrives: a button still moving is a button pressed by accident.
-            if (_more.Openness < 1f)
-                return;
-
-            for (int i = 0; i < _buttons.Count && i < _component.Actions.Count; i++)
-                hits.Add(Hit.On(_buttons[i], _component.Actions[i].Command));
         }
 
         static float Towards(float value, float wanted, float step)

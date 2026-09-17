@@ -100,6 +100,22 @@ namespace Reactor.Host.SpaceEngineers.Layout
                 bounds.Width, height));
         }
 
+        /// <summary>
+        /// What is under a point, once all of the child is in view.
+        /// </summary>
+        /// <remarks>
+        /// Nothing at all while it is moving. A control that answers before it has arrived is a control
+        /// somebody hits by accident on the way to whatever was underneath it, and the banner this exists
+        /// for slides in over a list somebody is already pressing.
+        /// </remarks>
+        protected override Element UnderContent(Vector2 point)
+        {
+            if (_openness < 1f || _child == null)
+                return null;
+
+            return _child.Under(point);
+        }
+
         protected override void DrawContent(IGraphics g)
         {
             // Nothing at all while it is shut. The clip would hide it either way, but the calls

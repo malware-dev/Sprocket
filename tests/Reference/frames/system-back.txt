@@ -45,9 +45,9 @@ on screen     Automation for Test Rig
 038  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
 039  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
 040  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
-041  Sprite     Reactor_Fill          {X:275 Y:78 W:58 H:33}  #1B242AFF
-042  Sprite     Reactor_Fill          {X:275 Y:78 W:58 H:1}  #5B737BFF
-043  Sprite     Reactor_Fill          {X:275 Y:110 W:58 H:1}  #5B737BFF
+041  Sprite     Reactor_Fill          {X:275 Y:78 W:137 H:33}  #1B242AFF
+042  Sprite     Reactor_Fill          {X:275 Y:78 W:137 H:1}  #5B737BFF
+043  Sprite     Reactor_Fill          {X:275 Y:110 W:137 H:1}  #5B737BFF
 044  Sprite     Reactor_Fill          {X:275 Y:78 W:1 H:33}  #5B737BFF
-045  Sprite     Reactor_Fill          {X:332 Y:78 W:1 H:33}  #5B737BFF
-046  Text       at {X:287.8 Y:84} scale 0.57  #DCF5FDFF  "Back"
+045  Sprite     Reactor_Fill          {X:411 Y:78 W:1 H:33}  #5B737BFF
+046  Text       at {X:287.8 Y:84} scale 0.57  #DCF5FDFF  "Close the editor"

@@ -80,8 +80,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         readonly Dictionary<EditorComponent, ComponentView> _byComponent =
             new Dictionary<EditorComponent, ComponentView>();
 
-        readonly List<Hit> _hits = new List<Hit>();
-
         /// <summary>What is lit right now, so it can be put out without searching for it.</summary>
         Element _lit;
 
@@ -89,9 +87,13 @@ namespace Reactor.Host.SpaceEngineers.Screen
         string _saying;
 
         readonly Label _tip = Widgets.Tip();
-        readonly List<Hit> _actionHits = new List<Hit>();
 
         int _actionRevision = -1;
+        /// <summary>What the header's switch was last told to say, and what decides it.</summary>
+        string _switched;
+        string _switchSays;
+        bool _switchedOn;
+
         /// <summary>What an open rename will send its answer to.</summary>
         int _renameCommand;
 
@@ -106,8 +108,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// <summary>Which part of the heading is being typed into, or -1 when none is.</summary>
         int _renaming = -1;
 
-        readonly Pin _pin = new Pin();
-
         readonly Overlay _overlay = new Overlay();
 
         TextBox _focus;
@@ -117,11 +117,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public EditorView(ReactorEditor editor)
         {
             _editor = editor;
-
-            // The heading, its pencil and the box that replaces it are one control, so the plate is what
-            // lights up and what gets pressed. A pencil somebody could see and not press is worse than no
-            // pencil: it names the act and then refuses it.
-
 
             // Inside a stack that takes the slack, because Fill stretches whatever it is given and a
             // heading lit across the whole header would be a highlight the size of the screen. A
@@ -163,11 +158,9 @@ namespace Reactor.Host.SpaceEngineers.Screen
             header.Children.Add(headerBlock);
             header.Children.Add(Widgets.Line());
 
-                        Widgets.Barred(_scroll);
+            Widgets.Barred(_scroll);
             _scroll.Content = _body;
             _bodyDock.Padding = new Thickness(Space.PadX);
-
-            _primary.Padding = new Thickness(Space.PadX, Space.ChipY * 1.3f);
 
             var footerBar = new Bar();
             footerBar.Spacing = Space.Region;
@@ -314,15 +307,17 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _subtitle.Collapsed = !_hadSubtitle;
 
 
-
-            // Lit on every screen, the root included, where it leaves the editor rather than retreating a
-            // page. Not two controls: a chevron means "leave what I am looking at", and on the front door
-            // what you are looking at is the editor. That is the rule Escape has always followed here and
-            // nobody has ever found Escape confusing.
-            // Lit on every screen including the root, which would otherwise be the one screen everybody
-            // arrives on and the one with no visible way off it.
+            // Lit on every screen, the root included, where it leaves the editor rather than retreating
+            // a page. Not two controls: a chevron means "leave what I am looking at", and on the front
+            // door what you are looking at is the editor. That is the rule Escape has always followed
+            // here, and nobody has ever found Escape confusing.
             _back.Tint = Palette.Muted;
             _back.Highlight = Palette.Panel;
+
+            // The other glyph in the header, and it answers a press, so it lights like the first one.
+            // A control that can be pressed and cannot be lit is the pair of rules in Highlight and
+            // Press disagreeing with each other.
+            _refresh.Highlight = Palette.Panel;
             // Which part wears the pencil is the row's business now, because it is a per-part answer.
             if (_renaming >= 0)
                 _title[_renaming].Wrong = Blocked.Length > 0;
@@ -333,12 +328,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
             else
                 _switch.Hide();
 
-            // Dark words on the lit fill, the way the game does it: its focus colour is pale, so a
-            // control wearing it reads as lit only if what it says goes dark.
             _primary.Text = screen.HasPrimary ? Widgets.Caps(screen.PrimaryText) : "";
-            _primary.Background = screen.HasPrimary ? Palette.Accent : Palette.None;
-            _primary.Color = screen.HasPrimary ? Palette.Chrome : Palette.None;
-            _primary.Highlight = screen.HasPrimary ? Palette.Ink : Palette.None;
+
+            if (screen.HasPrimary)
+                Widgets.Go(_primary);
+            else
+                Widgets.Absent(_primary);
 
             // A screen that cannot be renamed while the box is open takes the box away with it.
             if (_renaming >= 0 && !screen.CanRename)
@@ -355,6 +350,79 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 _actionRevision = screen.Actions.Revision;
                 RebuildActions(screen);
             }
+
+            Wire(screen);
+        }
+
+        /// <summary>
+        /// Tells each control in the chrome what pressing it does.
+        /// </summary>
+        /// <remarks>
+        /// Every tick rather than once, because core re-issues its command ids whenever it rebuilds a
+        /// screen: what the back arrow sends now is not what it sent a page ago. A control with nothing
+        /// to send this tick is handed nothing, which is also what stops it answering the pointer.
+        /// </remarks>
+        void Wire(EditorScreen screen)
+        {
+            // One control, two acts: a command while there is somewhere to retreat to, and the door once
+            // there is not. Which of the two it is gets said in the note rather than in the picture - a
+            // symbol that changed as somebody walked back up the pages would be a control moving under
+            // the pointer without moving.
+            //
+            // It earns a note at all because it has no word beside it any more, which is the case the
+            // note exists for exactly. The wording is this target's own: core publishes none for Back,
+            // and putting one there is Design decision 11.
+            _back.Press = screen.CanGoBack ? Deed.Sends(screen.BackCommand) : Deed.Leaves();
+            _back.Tip = screen.CanGoBack ? "Back" : "Close the editor";
+
+            string wrong = Blocked;
+
+            // Renaming hangs off the heading, because the heading is what the name is for - and off the
+            // part of it that the name belongs to, which is the whole reason a heading is several things.
+            // Not the part being typed into: that box is not a control to be pressed while it is open.
+            for (int i = 0; i < _title.Count; i++)
+            {
+                bool named = i < screen.Heading.Count;
+
+                _title[i].Press = named && screen.Heading[i].CanRename && i != _renaming
+                    ? Deed.Asks(screen.Heading[i].RenameCommand, screen.Heading[i].Prompt)
+                    : Deed.Nothing;
+
+                // While the name in hand is one that cannot be given, that part says so instead of
+                // saying what it usually says. Not a timer and not a thing of its own: the ordinary
+                // note, on the ordinary control, carrying different words for exactly as long as they
+                // are true. Nothing else on the screen has to know that an error can exist.
+                _title[i].Tip = i == _renaming && wrong.Length > 0 ? wrong : null;
+            }
+
+            _refresh.Press = Deed.Sends(screen.RefreshCommand);
+            _refresh.Tip = screen.RefreshCommand != 0
+                ? "Read the ship again, in case somebody has changed a button"
+                : null;
+
+            _switch.Press = screen.HasSwitch
+                ? Deed.Switches(screen.SwitchCommand, !screen.SwitchIsOn)
+                : Deed.Nothing;
+
+            // A system's, always - core says so where it declares the command, and a sequence's switch
+            // lives on the sentence rather than up here.
+            //
+            // Built when the name or the state changes rather than on every tick, for the reason a row's
+            // switch is: the words are the same words until one of them moves.
+            if (screen.HasSwitch
+                && (!ReferenceEquals(_switched, screen.Heading[0].Text) || _switchedOn != screen.SwitchIsOn))
+            {
+                _switched = screen.Heading[0].Text;
+                _switchedOn = screen.SwitchIsOn;
+                _switchSays = StatusRow.Switching(_switched, true, screen.SwitchIsOn);
+            }
+
+            _switch.Tip = screen.HasSwitch ? _switchSays : null;
+
+            for (int i = 0; i < _actions.Children.Count && i < screen.Actions.Count; i++)
+                _actions.Children[i].Press = Deed.Sends(screen.Actions[i].Command);
+
+            _primary.Press = screen.HasPrimary ? Deed.Sends(screen.PrimaryCommand) : Deed.Nothing;
         }
 
         /// <summary>How wide a question's popup is, whatever it is hanging under.</summary>
@@ -417,7 +485,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
             DrawPopup(g, bounds);
             DrawOverlay(g, bounds);
             DrawTip(g, bounds);
-            CollectHits();
         }
 
         /// <summary>
@@ -434,28 +501,15 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// Lights the one thing the pointer is resting on, and puts out whatever was lit before.
         /// </summary>
         /// <remarks>
-        /// Worked out from <b>the previous frame's</b> hits, which is why this can run before anything is
-        /// drawn. Hits are gathered after a layout because that is when rectangles exist, so the only
-        /// alternative was arranging everything, gathering, and then drawing everything - two passes over
-        /// the popup and the overlay to save one frame of lag on a highlight nobody can perceive.
-        /// <para>
-        /// Only one thing is ever lit. Hits are walked last first, the same order a press walks them, so
-        /// the thing that would be pressed is the thing that lights - and a row under a popup cannot light
-        /// up through it.
-        /// </para>
+        /// Only one thing is ever lit, and it is found the same way a press finds what it acts on, so the
+        /// thing that would be pressed is the thing that lights - a row under a popup cannot light up
+        /// through it, and a control that lights can always be pressed.
         /// </remarks>
         void LightWhatIsUnderThePointer()
         {
-            Element wanted = null;
-            string says = null;
+            Element wanted = Under(Pointer);
 
-            // A popup owns the screen and nothing behind it should answer the pointer. A rename does not:
-            // it happens in place, on a screen that is otherwise ordinary, and it is the one state where
-            // something on that screen has a reason to say what is wrong with it.
-            if (!_ask.IsUp || _renaming >= 0)
-                wanted = Under(Pointer, out says);
-
-            _saying = says;
+            _saying = wanted != null ? wanted.Tip : null;
 
             if (wanted == _lit)
                 return;
@@ -470,55 +524,62 @@ namespace Reactor.Host.SpaceEngineers.Screen
         }
 
         /// <summary>
-        /// Whether a hit is the one a press or a hover at <paramref name="point" /> should reach.
+        /// What a press or a hover at <paramref name="point" /> reaches, or null for nothing at all.
         /// </summary>
         /// <remarks>
-        /// Three conditions, in one place, because pressing and lighting have to agree about them
-        /// exactly: a thing you can see light up and then cannot press is worse than one that never lit.
+        /// Four trees, in the order they are drawn over one another: the question with answers, the
+        /// question with a box, then whatever a control has hung over the screen, then the screen
+        /// itself. Each of the first three owns the screen while it is up, so nothing behind it is
+        /// asked - which is the whole of a rule that was once spread across the press path and the
+        /// highlight and had to be kept in step by hand.
         /// <para>
-        /// The scroll test is against the body rather than the row, because a row scrolled past the top
-        /// of its column keeps its rectangle and would otherwise still answer. The overlay test is
-        /// against the row's middle rather than the point, because an overlay narrows what the body will
-        /// answer without taking the press itself.
+        /// A rename is not one of them. It happens in place, on a screen that is otherwise ordinary,
+        /// and it is the one state where something on that screen has a reason to say what is wrong
+        /// with it.
+        /// </para>
+        /// <para>
+        /// The question popup and the overlay stand outside the layout: they are measured and placed as
+        /// they are drawn, against an anchor whose position is only settled then. So they are walked
+        /// from where they last landed, which is the same frame of lag the highlight has always had.
         /// </para>
         /// </remarks>
-        bool Answers(Hit hit, Vector2 point, bool overlaid)
+        Element Under(Vector2 point)
         {
-            if (!Contains(hit.Bounds, point))
-                return false;
+            // An unfinishable edit owns the screen as firmly as a popup does: the press path answers
+            // nothing but the box being typed into, so nothing else may light up either.
+            if (Blocked.Length > 0)
+                return _title[_renaming].Under(point);
 
-            if (hit.Scrolled && !Contains(_bodyDock.Bounds, point))
-                return false;
+            Element owner = Owner;
 
-            // A question owns the screen, so only what stands inside it answers. The same shape as the
-            // overlay rule below it, in the same place, so pressing and lighting cannot disagree.
-            if (_question.IsUp && !_question.Covers(Middle(hit.Bounds)))
-                return false;
-
-            return !overlaid || _overlay.Covers(Middle(hit.Bounds));
+            return owner != null ? owner.Under(point) : _root.Under(point);
         }
 
-        /// <summary>What would be lit if the pointer were at <paramref name="point" />, or null.</summary>
-        Element Under(Vector2 point, out string says)
+        /// <summary>
+        /// What owns the screen right now, or null when the screen owns itself.
+        /// </summary>
+        /// <remarks>
+        /// One answer, for everything that has to respect it: what the pointer reaches, what a press
+        /// acts on, and whether a gesture may take hold of anything at all. Three separate lists of
+        /// owners is what let a question be dragged through - the drag path had two of the three, and
+        /// nothing said the lists were the same list.
+        /// <para>
+        /// In the order they are drawn over one another. A rename is not here: it happens in place, on
+        /// a screen that is otherwise ordinary.
+        /// </para>
+        /// </remarks>
+        Element Owner
         {
-            says = null;
-
-            bool overlaid = _overlay.IsUp;
-            if (overlaid && !_overlay.Covers(point))
-                return null;
-
-            for (int i = _hits.Count - 1; i >= 0; i--)
+            get
             {
-                Hit hit = _hits[i];
+                if (_question.IsUp)
+                    return _question.Root;
 
-                if (hit.Hot == null || !Answers(hit, point, overlaid))
-                    continue;
+                if (_ask.IsUp && _renaming < 0)
+                    return _ask.Root;
 
-                says = hit.Tip;
-                return hit.Hot;
+                return _overlay.IsUp ? _overlay.Content : null;
             }
-
-            return null;
         }
 
         /// <summary>
@@ -578,17 +639,25 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _overlay.Draw(g, bounds, PopupWidth);
         }
 
-        public void ShowOverlay(Element content, Element anchor)
+        /// <summary>
+        /// Hangs something over the screen, under whatever was pressed to open it.
+        /// </summary>
+        /// <remarks>
+        /// This screen's own business, not anything a view has to ask for. A control that opens a list
+        /// says so on itself - see <see cref="Deed.Opens" /> - and the press path does the rest, which
+        /// is why nothing here is on <see cref="IScreenHost" /> any more.
+        /// </remarks>
+        void ShowOverlay(Element content, Element anchor)
         {
             _overlay.Show(content, anchor);
         }
 
-        public void HideOverlay()
+        void HideOverlay()
         {
             _overlay.Hide();
         }
 
-        public bool IsOverlay(Element content)
+        bool IsOverlay(Element content)
         {
             return _overlay.Is(content);
         }
@@ -679,7 +748,9 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// </summary>
         public bool Grab(Vector2 point)
         {
-            if (_overlay.IsUp || IsAsking)
+            // Nothing is carried out from under a popup, and nothing at all while a name is being
+            // typed. The same owner a press respects, asked the same way.
+            if (Owner != null || IsAsking)
                 return false;
 
             for (int i = 0; i < _views.Count; i++)
@@ -693,10 +764,10 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
             // After the views, not before. A picker fills the body with its own columns and their bars sit
             // inside this one's track; offering the screen's bar first would take every one of them.
-            if (_scroll.Parent == null || !_scroll.HasBar || !Contains(_scroll.Track, point))
+            if (_scroll.Parent == null || !_scroll.OnBar(point))
                 return false;
 
-            if (!Contains(_scroll.Thumb, point))
+            if (!_scroll.OnThumb(point))
                 _scroll.ThumbTo(point.Y);
 
             _scroll.BarHeld = true;
@@ -740,10 +811,8 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// Acts on whatever is under <paramref name="point" />, and answers whether anything was.
         /// </summary>
         /// <remarks>
-        /// Hit rectangles are gathered after the layout rather than kept alongside it, because arranging is
-        /// the only thing that knows where anything ended up. Anything inside the scrolling region is only
-        /// pressable where it is actually on show, so a row scrolled up behind the header cannot be hit
-        /// through it.
+        /// What a press reaches is settled by <see cref="Under" />, walking the elements themselves.
+        /// What happens then is settled here, by what the element says pressing it means.
         /// </remarks>
         public bool Press(Vector2 point)
         {
@@ -769,9 +838,9 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 return true;
             }
 
-            // While a question is open it owns the screen. Pressing inside it is the only thing that can
-            // reach anything, and pressing anywhere else puts it away and goes no further - the press that
-            // dismisses is not also a press on whatever happened to be underneath.
+            // While a typed question is open it owns the screen. Pressing inside it is the only thing
+            // that can reach anything, and pressing anywhere else puts it away and goes no further - the
+            // press that dismisses is not also a press on whatever happened to be underneath.
             if (_ask.IsUp && _renaming < 0)
             {
                 if (!_ask.Covers(point))
@@ -780,7 +849,10 @@ namespace Reactor.Host.SpaceEngineers.Screen
                     return true;
                 }
 
-                if (_ask.OnConfirm(point) && !string.IsNullOrEmpty(_ask.Answer))
+                // The one control in there sends what has been typed. Everything else inside it is the
+                // box, which already has the keyboard.
+                Element inside = Under(point);
+                if (inside != null && inside.Press.Means == Means.Commit)
                     CommitAsk();
 
                 return true;
@@ -793,101 +865,109 @@ namespace Reactor.Host.SpaceEngineers.Screen
             //
             // Blunt, and the screen is already saying why in the box itself. Escape is the way out.
             if (Blocked.Length > 0)
-                return Contains(_title[_renaming].Bounds, point);
+                return _title[_renaming].Reaches(point);
 
             // An overlay owns the screen the same way a question does, except that what is inside it is
-            // ordinary and can be pressed through the usual list.
-            bool overlaid = _overlay.IsUp;
-            if (overlaid && !_overlay.Covers(point))
+            // ordinary and is pressed the ordinary way.
+            if (_overlay.IsUp && !_overlay.Covers(point))
             {
                 HideOverlay();
                 return true;
             }
 
-            // Last first, so a thing drawn over another is the one that gets pressed.
-            for (int i = _hits.Count - 1; i >= 0; i--)
+            Element target = Under(point);
+            if (target == null)
+                return PressedNothing(point);
+
+            Deed deed = target.Press;
+
+            if (deed.Means == Means.Open)
             {
-                Hit hit = _hits[i];
-
-                if (!Answers(hit, point, overlaid))
-                    continue;
-
-                if (hit.Overlay != null)
-                {
-                    Unfocus();
-
-                    // Pressing the line a second time puts the list away, which is what a thing that
-                    // opens downward is expected to do.
-                    if (IsOverlay(hit.Overlay))
-                        HideOverlay();
-                    else
-                        ShowOverlay(hit.Overlay, _hits[i].Anchor ?? Anchored(hit.Bounds));
-
-                    return true;
-                }
-
-                if (hit.Box != null)
-                {
-                    Unfocus();
-                    _focus = hit.Box;
-                    _focusCommand = hit.Command;
-                    _focus.IsEditing = true;
-                    _focus.SelectAll();
-                    return true;
-                }
-
                 Unfocus();
 
-                // Before anything the press might do, and not only before an ordinary command. Pressing
-                // a switch, or the way out, or a control that asks its own question, is pressing away from
-                // the rename just as much as pressing a row is - and three of the branches below return
-                // without reaching the end of this method, so anything placed there would be skipped and
-                // the typing thrown away in silence.
-                if (_renaming >= 0)
-                    CommitAsk();
-
-                if (hit.Closes)
-                {
-                    _wantsClose = true;
-                    return true;
-                }
-
-                if (hit.Toggles)
-                {
-                    SetToggle(hit.Command, hit.ToggleTo);
-                    return true;
-                }
-
-                if (!string.IsNullOrEmpty(hit.Question))
-                {
-                    BeginAsk(hit);
-                    return true;
-                }
-
-                _editor.Invoke(hit.Command);
-
-                // Taking a choice and moving on in one gesture, where one thing is being chosen. Where
-                // several can be, a second press means un-choosing, and moving on from that would be
-                // taking away what somebody had just done.
-                if (clicks > 1 && hit.Confirms && _editor.Screen.HasPrimary)
-                    _editor.Invoke(_editor.Screen.PrimaryCommand);
+                // Pressing the line a second time puts the list away, which is what a thing that opens
+                // downward is expected to do. It hangs under whatever was pressed, which is why nothing
+                // has to be told where to put it.
+                if (IsOverlay(deed.Overlay))
+                    HideOverlay();
+                else
+                    ShowOverlay(deed.Overlay, target);
 
                 return true;
             }
 
-            // Nothing under the pointer, which is still an act rather than a miss. A caret left blinking
-            // in a search box goes on taking every key typed after it, wherever somebody thought they were
-            // typing; and a heading left standing as a box is one nobody asked to go on editing. Pressing
-            // away from either is how they are put down, and it is the only way to put the first down at
-            // all - there is nothing else to press that means "stop typing".
-            //
-            // A press inside the box being typed in is not away. Nothing collects a hit for it while it is
-            // up, so without this it would fall through here and commit the very edit it was aiming into.
-            //
-            // Everywhere else, pressing away from a rename keeps what was typed. Enter and pressing
-            // elsewhere mean the same thing - the name is whatever the box says - because there is no
-            // confirm button to press and never was.
-            if (_renaming >= 0 && Contains(_title[_renaming].Bounds, point))
+            if (deed.Means == Means.Type)
+            {
+                Unfocus();
+                _focus = deed.Box;
+                _focusCommand = deed.Command;
+                _focus.IsEditing = true;
+                _focus.SelectAll();
+                return true;
+            }
+
+            Unfocus();
+
+            // Before anything the press might do, and not only before an ordinary command. Pressing a
+            // switch, or the way out, or a control that asks its own question, is pressing away from the
+            // rename just as much as pressing a row is - and most of what follows returns without
+            // reaching the end of this method, so anything placed there would be skipped and the typing
+            // thrown away in silence.
+            if (_renaming >= 0)
+                CommitAsk();
+
+            if (deed.Means == Means.Leave)
+            {
+                _wantsClose = true;
+                return true;
+            }
+
+            if (deed.Means == Means.Switch)
+            {
+                SetToggle(deed.Command, deed.ToggleTo);
+                return true;
+            }
+
+            if (deed.Means == Means.Ask)
+            {
+                BeginAsk(target);
+                return true;
+            }
+
+            _editor.Invoke(deed.Command);
+
+            // Taking a choice and moving on in one gesture, where one thing is being chosen. Where
+            // several can be, a second press means un-choosing, and moving on from that would be
+            // taking away what somebody had just done.
+            if (clicks > 1 && deed.Confirms && _editor.Screen.HasPrimary)
+                _editor.Invoke(_editor.Screen.PrimaryCommand);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Puts down whatever was being typed into, and answers whether the press meant anything.
+        /// </summary>
+        /// <remarks>
+        /// Nothing under the pointer is still an act rather than a miss. A caret left blinking in a
+        /// search box goes on taking every key typed after it, wherever somebody thought they were
+        /// typing; and a heading left standing as a box is one nobody asked to go on editing. Pressing
+        /// away from either is how they are put down, and it is the only way to put the first down at
+        /// all - there is nothing else to press that means "stop typing".
+        /// <para>
+        /// A press inside the box being typed into is not away. The plate holding it is not a control
+        /// while it is open, so without this the press would fall through here and commit the very edit
+        /// it was aiming into.
+        /// </para>
+        /// <para>
+        /// Everywhere else, pressing away from a rename keeps what was typed. Enter and pressing
+        /// elsewhere mean the same thing - the name is whatever the box says - because there is no
+        /// confirm button to press and never was.
+        /// </para>
+        /// </remarks>
+        bool PressedNothing(Vector2 point)
+        {
+            if (_renaming >= 0 && _title[_renaming].Reaches(point))
                 return true;
 
             if (_renaming >= 0)
@@ -953,31 +1033,31 @@ namespace Reactor.Host.SpaceEngineers.Screen
             get { return _question.IsUp; }
         }
 
-        void BeginAsk(Hit hit)
+        void BeginAsk(Element control)
         {
+            Deed deed = control.Press;
             Close();
 
-
             // Which part of the heading this was, if it was one at all. Matched on the command rather
-            // than carried on the hit, because the command is the one thing that already identifies a
-            // part and a second way of saying it is a second way of being wrong.
+            // than on the element, because the command is the one thing that already identifies a part
+            // and a second way of saying it is a second way of being wrong.
             List<HeadingPart> parts = _editor.Screen.Heading;
             for (int i = 0; i < parts.Count && i < _title.Count; i++)
             {
-                if (parts[i].RenameCommand != hit.Command || hit.Command == 0)
+                if (parts[i].RenameCommand != deed.Command || deed.Command == 0)
                     continue;
 
                 // The words become the box, in the words' own place. What that takes is the plate's
                 // business, not this one's.
                 _renaming = i;
-                _renameCommand = hit.Command;
+                _renameCommand = deed.Command;
                 _title[i].Text = parts[i].Name;
                 _title[i].Begin();
                 return;
             }
 
             // Everything else hangs over the screen, under whatever was pressed.
-            _ask.Open(hit.Question, hit.Anchor, hit.Command);
+            _ask.Open(deed.Question, control, deed.Command);
         }
 
         void Close()
@@ -991,90 +1071,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
             _renameCommand = 0;
             _ask.Close();
-        }
-
-        void CollectHits()
-        {
-            _hits.Clear();
-
-            EditorScreen screen = _editor.Screen;
-
-            // One control, two acts: a command while there is somewhere to retreat to, and the door once
-            // there is not. Which of the two it is gets said in the tip rather than in the picture - a
-            // symbol that changed as somebody walked back up the pages would be a control moving under the
-            // pointer without moving.
-            //
-            // It earns a tip at all because it has no word beside it any more, which is the case the tip
-            // exists for exactly. The wording is this target's own: core publishes none for Back, and
-            // putting one there is Design decision 11.
-            Hit back = screen.CanGoBack
-                ? Hit.OnFixed(_back, screen.BackCommand)
-                : Hit.Leaves(_back);
-
-            back.Tip = screen.CanGoBack ? "Back" : "Close the editor";
-            _hits.Add(back);
-
-            // While the name is one that cannot be given, the heading's note says so instead of saying
-            // what the heading usually says. Not a timer and not a thing of its own: it is the ordinary
-            // note, on the ordinary control, carrying different words for exactly as long as they are
-            // true. Nothing else on the screen has to know that an error can exist.
-            // Renaming hangs off the heading, because the heading is what the name is for - and off the
-            // part of it that the name belongs to, which is the whole reason a heading is several things.
-            for (int i = 0; i < screen.Heading.Count && i < _title.Count; i++)
-            {
-                HeadingPart part = screen.Heading[i];
-                if (!part.CanRename || i == _renaming)
-                    continue;
-
-                Hit rename = Hit.Fixed(_title[i].Bounds, part.RenameCommand, part.Prompt);
-                rename.Hot = _title[i];
-                _hits.Add(rename);
-            }
-
-            // While the name in hand is one that cannot be given, that part's note says so instead of
-            // saying what it usually says. Not a timer and not a thing of its own: the ordinary note, on
-            // the ordinary control, carrying different words for exactly as long as they are true.
-            string wrong = Blocked;
-            if (wrong.Length > 0)
-            {
-                Hit says = Hit.Fixed(_title[_renaming].Bounds, 0);
-                says.Hot = _title[_renaming];
-                says.Tip = wrong;
-                _hits.Add(says);
-            }
-
-            if (screen.RefreshCommand != 0)
-            {
-                Hit look = Hit.On(_refresh, screen.RefreshCommand);
-                look.Scrolled = false;
-                look.Tip = "Read the ship again, in case somebody has changed a button";
-                _hits.Add(look);
-            }
-
-            if (screen.HasSwitch)
-            {
-                Hit toggle = Hit.Switch(_switch.Bounds, screen.SwitchCommand, !screen.SwitchIsOn);
-                toggle.Scrolled = false;
-                toggle.Hot = _switch;
-                // A system's, always - core says so where it declares the command, and a sequence's
-                // switch lives on the sentence rather than up here.
-                toggle.Tip = StatusRow.Switching(screen.Heading[0].Text, true, screen.SwitchIsOn);
-
-                _hits.Add(toggle);
-            }
-
-            for (int i = 0; i < _views.Count; i++)
-                _views[i].Collect(_hits);
-
-            // Last, so it sits on top of what it is drawn over. What answers while it is up is settled
-            // by Answers, which knows a question narrows the screen to itself.
-            _question.Collect(_hits);
-
-            for (int i = 0; i < _actionHits.Count && i < _actions.Children.Count; i++)
-                _hits.Add(Hit.OnFixed(_actions.Children[i], _actionHits[i].Command));
-
-            if (screen.HasPrimary)
-                _hits.Add(Hit.OnFixed(_primary, screen.PrimaryCommand));
         }
 
         /// <summary>
@@ -1205,46 +1201,17 @@ namespace Reactor.Host.SpaceEngineers.Screen
         void RebuildActions(EditorScreen screen)
         {
             _actions.Children.Clear();
-            _actionHits.Clear();
 
             for (int i = 0; i < screen.Actions.Count; i++)
             {
                 ChoiceEntry entry = screen.Actions[i];
 
                 Label action = Widgets.Ghost(Widgets.Caps(entry.Text));
-                action.Highlight = Palette.Panel;
                 if (entry.IsCurrent)
                     action.Color = Palette.Ink;
 
                 _actions.Children.Add(action);
-                _actionHits.Add(new Hit(new RectangleF(), entry.Command));
             }
-        }
-
-        /// <summary>
-        /// A stand-in for an anchor element, when all that is known is where the press landed.
-        /// </summary>
-        /// <remarks>
-        /// Overlays follow their anchor every frame so that scrolling carries them along. A hit that
-        /// names no element gets one that never moves, which is right for something in the chrome and
-        /// merely acceptable for anything else.
-        /// </remarks>
-        Element Anchored(RectangleF bounds)
-        {
-            _pin.Arrange(bounds);
-            return _pin;
-        }
-
-        /// <summary>The centre of a rectangle, for asking which region something belongs to.</summary>
-        static Vector2 Middle(RectangleF bounds)
-        {
-            return new Vector2(bounds.X + bounds.Width * 0.5f, bounds.Y + bounds.Height * 0.5f);
-        }
-
-        internal static bool Contains(RectangleF bounds, Vector2 point)
-        {
-            return point.X >= bounds.X && point.X <= bounds.X + bounds.Width
-                && point.Y >= bounds.Y && point.Y <= bounds.Y + bounds.Height;
         }
     }
 }

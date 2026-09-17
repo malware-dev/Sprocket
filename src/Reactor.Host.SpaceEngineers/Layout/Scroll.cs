@@ -147,16 +147,16 @@ namespace Reactor.Host.SpaceEngineers.Layout
         public bool CanScroll => MaxOffset > 0f;
 
         /// <summary>Whether a thumb is being drawn: one was asked for, and there is something to scroll.</summary>
-        public bool HasBar => BarWidth > 0f && BarColor.A > 0 && CanScroll;
+        private bool HasBar => BarWidth > 0f && BarColor.A > 0 && CanScroll;
 
         /// <summary>
         /// The whole of the bar, thumb and empty part alike. Where a press counts as being on it.
         /// </summary>
         /// <remarks>
-        /// Answered even when there is nothing to scroll, so a caller testing it does not also have to
-        /// test <see cref="HasBar" /> before asking a question about a rectangle.
+        /// Answered even when there is nothing to scroll, which is what lets
+        /// <see cref="OnBar" /> be the one question a caller has to ask.
         /// </remarks>
-        public RectangleF Track
+        private RectangleF Track
         {
             get
             {
@@ -175,7 +175,7 @@ namespace Reactor.Host.SpaceEngineers.Layout
         }
 
         /// <summary>The part of the track that stands for what is on show.</summary>
-        public RectangleF Thumb
+        private RectangleF Thumb
         {
             get
             {
@@ -315,6 +315,37 @@ namespace Reactor.Host.SpaceEngineers.Layout
             // and a track under ours would be a line down every list saying nothing the thumb does not.
             Color thumb = BarHeld && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
             g.DrawSprite(Solid, Thumb, thumb, 0f);
+        }
+
+        /// <summary>
+        /// What is under a point in the content, or null.
+        /// </summary>
+        /// <remarks>
+        /// The thumb is not offered here. A bar is taken hold of rather than pressed, which happens
+        /// before a press is a press at all - see <c>Grab</c> on the screen.
+        /// </remarks>
+        protected override Element UnderContent(Vector2 point)
+        {
+            return _content != null ? _content.Under(point) : null;
+        }
+
+        /// <summary>Whether a point is anywhere on the bar, thumb or empty track alike.</summary>
+        /// <remarks>False when there is no bar, so a caller has one question to ask rather than two.</remarks>
+        public bool OnBar(Vector2 point)
+        {
+            return HasBar && Inside(Track, point);
+        }
+
+        /// <summary>Whether a point is on the thumb itself.</summary>
+        public bool OnThumb(Vector2 point)
+        {
+            return HasBar && Inside(Thumb, point);
+        }
+
+        static bool Inside(RectangleF bounds, Vector2 point)
+        {
+            return point.X >= bounds.X && point.X <= bounds.X + bounds.Width
+                && point.Y >= bounds.Y && point.Y <= bounds.Y + bounds.Height;
         }
 
         /// <summary>Whatever is left of a side once the bar has had its share.</summary>

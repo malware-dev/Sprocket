@@ -20,7 +20,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
     {
         private Element _content;
         private Element _anchor;
-        private RectangleF _bounds;
 
         /// <summary>Whether anything is up.</summary>
         public bool IsUp
@@ -28,10 +27,10 @@ namespace Reactor.Host.SpaceEngineers.Screen
             get { return _content != null; }
         }
 
-        /// <summary>Where it was last drawn. Empty while nothing is up.</summary>
-        public RectangleF Bounds
+        /// <summary>What is hanging there, for the screen to walk while it owns the screen.</summary>
+        public Element Content
         {
-            get { return _bounds; }
+            get { return _content; }
         }
 
         /// <summary>Whether this particular thing is the one showing.</summary>
@@ -50,15 +49,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
         {
             _content = null;
             _anchor = null;
-            _bounds = new RectangleF();
         }
 
         /// <summary>Whether a point is on it. False while nothing is up.</summary>
         public bool Covers(Vector2 point)
         {
-            return IsUp
-                && point.X >= _bounds.X && point.X <= _bounds.X + _bounds.Width
-                && point.Y >= _bounds.Y && point.Y <= _bounds.Y + _bounds.Height;
+            return IsUp && _content.Holds(point);
         }
 
         /// <summary>
@@ -71,10 +67,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
         public void Draw(IGraphics g, RectangleF bounds, float width)
         {
             if (_content == null || _anchor == null)
-            {
-                _bounds = new RectangleF();
                 return;
-            }
 
             _content.Measure(g, new Vector2(width, bounds.Height));
 
@@ -93,8 +86,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
             if (x < bounds.X)
                 x = bounds.X;
 
-            _bounds = new RectangleF(x, y, wide, height);
-            _content.Arrange(_bounds);
+            _content.Arrange(new RectangleF(x, y, wide, height));
             _content.Draw(g);
         }
     }

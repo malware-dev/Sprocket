@@ -170,6 +170,11 @@ namespace Reactor.Host.SpaceEngineers.Layout
             }
         }
 
+        protected override Element UnderContent(Vector2 point)
+        {
+            return OnTop(_children, point);
+        }
+
         protected override void DrawContent(IGraphics g)
         {
             for (int i = 0; i < _children.Count; i++)

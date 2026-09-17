@@ -114,6 +114,19 @@ namespace Reactor.Host.SpaceEngineers.Layout
                 _bottom.Draw(g);
         }
 
+        protected override Element UnderContent(Vector2 point)
+        {
+            Element found = _bottom != null ? _bottom.Under(point) : null;
+
+            if (found == null && _top != null)
+                found = _top.Under(point);
+
+            if (found == null && _fill != null)
+                found = _fill.Under(point);
+
+            return found;
+        }
+
         private static float Wider(float a, float b)
         {
             return a > b ? a : b;

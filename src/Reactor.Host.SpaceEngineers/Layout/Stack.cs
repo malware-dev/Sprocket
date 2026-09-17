@@ -143,5 +143,10 @@ namespace Reactor.Host.SpaceEngineers.Layout
             for (int i = 0; i < _children.Count; i++)
                 _children[i].Draw(g);
         }
+
+        protected override Element UnderContent(Vector2 point)
+        {
+            return OnTop(_children, point);
+        }
     }
 }

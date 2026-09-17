@@ -1,5 +1,4 @@
 using Reactor.Host.SpaceEngineers.World;
-using Reactor.Host.SpaceEngineers.Layout;
 
 namespace Reactor.Host.SpaceEngineers.Screen
 {
@@ -15,15 +14,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// sentence needs the world the sentence is about.
         /// </remarks>
         GridWorld World { get; }
-
-        /// <summary>Hangs <paramref name="content" /> over the screen, under <paramref name="anchor" />.</summary>
-        void ShowOverlay(Element content, Element anchor);
-
-        /// <summary>Takes away whatever is hanging over the screen.</summary>
-        void HideOverlay();
-
-        /// <summary>Whether <paramref name="content" /> is the thing currently hanging over the screen.</summary>
-        bool IsOverlay(Element content);
 
         /// <summary>Sends a number to core. Reordering is the one thing a view answers with a position.</summary>
         void SetNumber(int command, int value);
