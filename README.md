@@ -250,7 +250,9 @@ answer to *"why didn't it happen?"*, which is deliberately not built yet.
 | `docs/Requirements.md` | What Reactor must do, derived one story at a time. |
 | `docs/Design.md` | The model, what is excluded, and the open decisions. |
 | `docs/Editor.md` | The interface: what each screen is and what core states about it. |
+| `docs/Language.md` | The script language as it is right now, with an example of each construct. |
+| `docs/Wording.md` | Words on screen that read wrong, gathered for one pass over them. |
 | `docs/ApiUnknowns.md` | What we still do not know about the game. |
 | `docs/Catalogue.md` | What the game offers a mod, and what Reactor needs to use it. |
 
-Nothing from the internal six belongs in the public one.
+Nothing from the internal ones belongs in the public one.
