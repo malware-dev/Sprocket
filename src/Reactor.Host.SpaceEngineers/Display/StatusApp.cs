@@ -27,7 +27,13 @@ namespace Reactor.Host.SpaceEngineers.Display
     /// same reason the editor's screens do it on a cadence.
     /// </para>
     /// </remarks>
-    [MyTextSurfaceScript(Id, "Reactor Status")]
+    /// <remarks>
+    /// The words are what a player picks from the list of apps a screen can show, and they are the
+    /// only part of this a person ever reads. They name what it shows rather than what wrote it: a
+    /// screen showing the state of the ship's automation is "Automation", and whose mod it is has
+    /// nothing to do with the choice being made.
+    /// </remarks>
+    [MyTextSurfaceScript(Id, "Automation")]
     public class StatusApp : MyTextSurfaceScriptBase
     {
         /// <summary>

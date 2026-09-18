@@ -51,20 +51,9 @@ namespace Reactor.Host.SpaceEngineers.Words
             var moment = trigger as MomentTrigger;
             if (moment != null && moment.Sources.Count > 0)
             {
-                var events = Vocabulary.EventsFor(bindings, moment.Sources);
-                var text = SentenceText.Empty;
-                for (var i = 0; i < events.Count; i++)
-                {
-                    if (events[i].Id == moment.EventId)
-                    {
-                        text = events[i].Text;
-                        break;
-                    }
-                }
-
                 var when = moment as WhenTrigger;
                 return "When " + SentenceText.Named(bindings, moment.Sources,
-                    when != null && when.RequiresAll) + " " + text;
+                    when != null && when.RequiresAll) + " " + Happening(bindings, moment);
             }
 
             var every = trigger as EveryTrigger;
@@ -74,6 +63,45 @@ namespace Reactor.Host.SpaceEngineers.Words
             // A required trigger that names nothing: whatever answers it is on the ship's toolbars
             // and not in the system, so there is nothing to name and the line says that.
             return trigger is RequiredTrigger ? "When something on this ship says so" : SentenceText.Empty;
+        }
+
+
+        /// <summary>
+        /// That the blocks a trigger names are spoken for: "Airlock Button is already in use".
+        /// </summary>
+        /// <remarks>
+        /// The blocks rather than what holds them, because what holds them may be a system on the
+        /// other side of the construct, and the fact somebody needs is the one in front of them: the
+        /// button they just picked is not free.
+        /// <para>
+        /// The moment is left out of the words although it is part of what clashes - a panel's third
+        /// button is free while its first is not. It cannot be said without the sentence coming
+        /// apart, because a moment reads as a verb: "button 3 is pressed is already in use". What is
+        /// on screen behind this question is the choice it is about.
+        /// </para>
+        /// </remarks>
+        public static string Taken(Bindings bindings, Trigger trigger)
+        {
+            var moment = trigger as MomentTrigger;
+            if (moment == null || moment.Sources.Count == 0)
+                return "That is already in use";
+
+            var when = moment as WhenTrigger;
+            return SentenceText.Named(bindings, moment.Sources, when != null && when.RequiresAll)
+                + " is already in use";
+        }
+
+        /// <summary>The words for the moment a trigger watches for, or an unfilled gap.</summary>
+        static string Happening(Bindings bindings, MomentTrigger moment)
+        {
+            var events = Vocabulary.EventsFor(bindings, moment.Sources);
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (events[i].Id == moment.EventId)
+                    return events[i].Text;
+            }
+
+            return SentenceText.Empty;
         }
 
 

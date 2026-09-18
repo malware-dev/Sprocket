@@ -48,6 +48,65 @@ public class DuplicatingTests
     }
 
     /// <summary>
+    /// A sequence is thrown away from its row as well as from its own screen.
+    /// </summary>
+    /// <remarks>
+    /// The row has the switch that parks it and the button that copies it; the one thing it did not
+    /// have was the way to be rid of it, which left the bin on the sequence's own screen as
+    /// something to be found rather than seen. It asks first, wherever it is pressed from: a
+    /// sequence is work, and this is the one act in the editor that cannot be walked back.
+    /// </remarks>
+    [Fact]
+    public void ASequenceIsDeletedFromItsRow()
+    {
+        var screen = AtTheList();
+
+        var row = Row(screen, 0);
+        Assert.NotEqual(0, row.DeleteCommand);
+
+        screen.Editor.Invoke(row.DeleteCommand);
+        screen.Run(2);
+
+        Assert.Equal("Delete this sequence?", screen.Editor.Screen.Title());
+
+        // The safe answer first, and taking it leaves the sequence where it was.
+        screen.Editor.PressChoice("Keep it");
+        screen.Run(2);
+
+        Assert.Single(screen.Editor.Program.Sequences);
+
+        screen.Editor.Invoke(Row(screen, 0).DeleteCommand);
+        screen.Editor.PressChoice("Delete it");
+        screen.Run(2);
+
+        Assert.Empty(screen.Editor.Program.Sequences);
+    }
+
+    /// <summary>
+    /// Running or not, which is unlike everything that rewires one.
+    /// </summary>
+    /// <remarks>
+    /// Throwing a sequence away is not editing it: nothing half-written can result, the question
+    /// asks first, and a machine somebody wants rid of while it is running is exactly when they
+    /// want rid of it. Parking it first was an errand on the way to the same place.
+    /// </remarks>
+    [Fact]
+    public void ARunningSequenceIsStillDeletedFromItsRow()
+    {
+        var screen = AtTheList();
+
+        var row = Row(screen, 0);
+        screen.Editor.SetToggle(row.SwitchCommand, true);
+        screen.Run(2);
+
+        screen.Editor.Invoke(Row(screen, 0).DeleteCommand);
+        screen.Editor.PressChoice("Delete it");
+        screen.Run(2);
+
+        Assert.Empty(screen.Editor.Program.Sequences);
+    }
+
+    /// <summary>
     /// The button is on the row, and only on a row there can be another of.
     /// </summary>
     /// <remarks>

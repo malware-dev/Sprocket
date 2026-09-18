@@ -3,6 +3,7 @@ using Reactor.Host.SpaceEngineers.Lists;
 using Reactor.Host.SpaceEngineers.Picking;
 using Reactor.Host.SpaceEngineers.Screen;
 using Reactor.Host.SpaceEngineers.Sequences;
+using Reactor.Host.SpaceEngineers.Words;
 
 namespace Reactor.Tests;
 
@@ -79,6 +80,15 @@ static class Screen
 
     public static void PressChoice(this ReactorEditor editor, string text)
     {
+        // A question hanging over the screen is answered by pressing its words, which is the same
+        // act from where a test stands: something on screen said this, and it was pressed.
+        var answer = editor.Screen.Answers.FirstOrDefault(e => e.Text == text);
+        if (answer != null)
+        {
+            editor.Invoke(answer.Command);
+            return;
+        }
+
         foreach (var list in editor.Screen.Components.OfType<ChoiceListComponent>())
         {
             var entry = list.Entries.FirstOrDefault(e => e.Text == text);
@@ -124,24 +134,67 @@ static class Screen
     public static ObservableList<StatusEntry> Rows(this ReactorEditor editor) =>
         editor.Screen.Components.OfType<StatusListComponent>().Last().Entries;
 
-    /// <summary>The rows of what starts things, where the screen has such a list.</summary>
-    public static ObservableList<StatusEntry> Triggers(this ReactorEditor editor) =>
-        editor.Screen.Components.OfType<StatusListComponent>().First().Entries;
+
+    /// <summary>The sentences of what starts things, where the screen has them.</summary>
+    public static ObservableList<SentenceTrigger> Triggers(this ReactorEditor editor) =>
+        editor.Component<TriggerListComponent>().Triggers;
+
+    /// <summary>
+    /// What a trigger's row reads as, joined the way a target draws it.
+    /// </summary>
+    /// <remarks>
+    /// Out of the same parts and the same words a screen uses, because what is being asserted is
+    /// that the parts say the right thing - not that a test can spell a sentence.
+    /// </remarks>
+    public static string Says(this ReactorEditor editor, int which)
+    {
+        SentenceTrigger trigger = editor.Triggers()[which];
+        var line = SentenceText.Lead(trigger);
+
+        foreach (SentenceSlot slot in trigger.Slots)
+            line += " " + SentenceText.InTrigger(editor.World, slot);
+
+        return line;
+    }
+
+    /// <summary>And what the second half of it reads as.</summary>
+    public static string Doing(this ReactorEditor editor, int which)
+    {
+        SentenceTrigger trigger = editor.Triggers()[which];
+        var line = trigger.DoesLead;
+
+        foreach (SentenceSlot slot in trigger.Does)
+            line += (line.Length > 0 ? " " : "") + SentenceText.InTrigger(editor.World, slot);
+
+        return line;
+    }
+
+    /// <summary>
+    /// Presses the cross beside what a trigger does, which asks the whole question again.
+    /// </summary>
+    /// <remarks>
+    /// Found rather than counted: which part of the sentence carries it is core's decision, and a
+    /// test holding a number would be asserting that decision on its way somewhere else.
+    /// </remarks>
+    public static void PressClear(this ReactorEditor editor, int which)
+    {
+        SentenceTrigger trigger = editor.Triggers()[which];
+        SentenceSlot slot = trigger.Does.First(s => s.ClearCommand != 0);
+
+        editor.Invoke(slot.ClearCommand);
+    }
+
+    /// <summary>Presses the part of a trigger that says when it happens.</summary>
+    public static void PressWhen(this ReactorEditor editor, int which) =>
+        editor.Invoke(editor.Triggers()[which].Slots[0].Command);
+
+    /// <summary>And the part that says what it does.</summary>
+    public static void PressDoes(this ReactorEditor editor, int which) =>
+        editor.Invoke(editor.Triggers()[which].Does[0].Command);
 
     /// <summary>The way back on a screen that carries one, which is screen furniture.</summary>
     public static EditorScreen Steps(this ReactorEditor editor) => editor.Screen;
 
-    /// <summary>Presses a row of what starts things, which asks which half to change.</summary>
-    public static void PressTrigger(this ReactorEditor editor, int which) =>
-        editor.Invoke(editor.Triggers()[which].Command);
-
-    /// <summary>The same thing said plainly: the row's first line asks when it happens.</summary>
-    public static void PressWhen(this ReactorEditor editor, int which) =>
-        editor.PressTrigger(which);
-
-    /// <summary>And its second line asks what it does.</summary>
-    public static void PressDoes(this ReactorEditor editor, int which) =>
-        editor.Invoke(editor.Triggers()[which].StatusCommand);
 
     /// <summary>Opens a row of that list, by where it sits.</summary>
     /// <remarks>

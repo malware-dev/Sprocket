@@ -30,7 +30,7 @@ public class WatchingTests
 
         // Parked, which is how a new sequence starts: the whole toolkit is there.
         Assert.True(HasGrip(screen), "no drag grip while parked");
-        Assert.True(screen.HasMark(Symbols.Delete), "no remove mark while parked");
+        Assert.Equal(2, screen.Marks(Symbols.Delete).Count);
         Assert.True(screen.Shows("+ do something"), "no add button while parked");
 
         editor.SwitchOn();
@@ -40,8 +40,11 @@ public class WatchingTests
         // there is nothing left drawn - grey says "broken, or not yours to touch", and neither is
         // true of a system that is simply running.
         Assert.False(HasGrip(screen), "drag grip still drawn while running");
-        Assert.False(screen.HasMark(Symbols.Delete), "remove mark still drawn while running");
         Assert.False(screen.Shows("+ do something"), "add button still drawn while running");
+
+        // All but the bin on the sentence itself, which is not an edit: the crosses that take a step
+        // out are gone, and the one that takes the whole sequence away stays.
+        Assert.Single(screen.Marks(Symbols.Delete));
 
         editor.SetToggle(editor.Sentence().ToggleCommand, false);
         screen.Run(5);

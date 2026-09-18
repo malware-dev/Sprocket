@@ -117,7 +117,18 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _sentence.Editable = !_sequence.CanRun;
             _sentence.LockedText = "Running. Stop it to make changes - whatever it has already "
                 + "done stays done.";
-            _sentence.DeleteCommand = Change(Cmd.DeleteSequence, Delete);
+            // Not held back by the switch, unlike everything that changes what this does. Throwing
+            // it away is not editing it, and a sequence somebody wants rid of while it is running is
+            // exactly when they want rid of it.
+            _sentence.DeleteCommand = Editor.Register(Cmd.DeleteSequence,
+                delegate { Editor.DeleteSequence(_sequence); });
+
+            // Whatever the switch says, and that is the point of it. What starts a sequence is
+            // usually a door or a button somewhere else on the ship, and somebody working on one
+            // parks it first so its triggers leave it alone - which is exactly when they want to
+            // see it work.
+            _sentence.RunCommand = Editor.Register(Cmd.RunNow,
+                delegate { Editor.RunNow(_sequence); });
 
             // Both are edits, so both wait for the switch. Registered here whether or not
             // there is anything to walk back, because issuing a command needs the numbering
@@ -548,44 +559,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
         {
             _sequence.Enabled = on;
             Editor.Invalidate();
-        }
-
-        /// <summary>
-        /// Asks first. There is no undo, and this throws away everything somebody built.
-        /// </summary>
-        /// <remarks>
-        /// The one place in the editor where a mistake cannot be walked back: every other action is
-        /// live and reversible by doing the opposite, and this one is not reversible at all.
-        /// <para>
-        /// The safe answer is listed first, so the reflex press lands on it, and it is spelt out rather
-        /// than left to back. Back does mean keep - it always means return to where you came from - but
-        /// a screen whose only row is the destructive one is a screen where a stray press destroys
-        /// something.
-        /// </para>
-        /// <para>
-        /// How the question gets asked is the target's business as usual. Core says there is a question,
-        /// what it is about, and what the answers do.
-        /// </para>
-        /// </remarks>
-        void Delete()
-        {
-            var page = new ChoicePage(Editor, "Delete this sequence?");
-            page.Caption = SequenceText.Doing(Editor.Runner.Bindings, _sequence);
-
-            page.Add("Keep it", false, delegate { Editor.Pop(); });
-
-            page.Add("Delete it", false, delegate
-            {
-                // The question goes first. Forgetting the sequence drops the page showing it,
-                // but not this one on top of it, which would leave somebody standing on a
-                // question about something that no longer exists.
-                Editor.Pop();
-                Editor.Program.RemoveSequence(_sequence);
-                Editor.ForgetSequence(_sequence);
-            });
-            page.WarnOnLast("This cannot be undone.");
-
-            Editor.Push(page);
         }
 
         static EntityAction FindAction(List<EntityAction> actions, string id)

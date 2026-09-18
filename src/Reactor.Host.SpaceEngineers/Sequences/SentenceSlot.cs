@@ -23,5 +23,21 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         public abstract bool IsEmpty { get; }
 
         public int Command { get; private set; }
+
+        /// <summary>
+        /// Empties this part, where emptying it is a thing to offer. Zero where it is not.
+        /// </summary>
+        /// <remarks>
+        /// Pressing a slot changes what is in it; this takes what is in it away, and the two are
+        /// different intentions. A trigger that runs a sequence is asked "which one" when its slot is
+        /// pressed, because that is what somebody changing it almost always means - and being asked
+        /// the whole question of what a trigger is for, every time, to change one door is three
+        /// answers where one would do. Clearing it is how they ask for that whole question back.
+        /// <para>
+        /// The slot, not the things named in it. Taking one block out of three is an answer to the
+        /// picker, which is where that choice was made.
+        /// </para>
+        /// </remarks>
+        public int ClearCommand { get; set; }
     }
 }

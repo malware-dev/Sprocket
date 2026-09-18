@@ -342,6 +342,23 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
+        /// Whether the choice between any one of the blocks and all of them is put on screen.
+        /// </summary>
+        /// <remarks>
+        /// <b>Off on purpose, and not because nothing is behind it.</b> A trigger that waits for all
+        /// of its blocks is built, sampled and tested - it fires as the last one arrives, and its
+        /// sentence joins the blocks with "and" rather than "or". What is not there is the rest of
+        /// what makes it usable: it is offered on every trigger, including the ones it cannot mean
+        /// anything for, and nothing on the way in explains the difference it is asking about.
+        /// <para>
+        /// One line here rather than at the four places that open a picker, so it comes back in one
+        /// line too. Nothing else changes: a trigger that already says "all of them" keeps saying it
+        /// and keeps firing that way.
+        /// </para>
+        /// </remarks>
+        const bool AsksAll = false;
+
+        /// <summary>
         /// Offered wherever the distinction means anything - a step always acts on all its blocks, so
         /// only some stages ask at all.
         /// </summary>
@@ -355,8 +372,9 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// </remarks>
         bool FillOptions()
         {
-            var changed = Resize(_blocks.Options, _asksAll ? 2 : 0);
-            if (!_asksAll)
+            var asks = _asksAll && AsksAll;
+            var changed = Resize(_blocks.Options, asks ? 2 : 0);
+            if (!asks)
                 return changed;
 
             changed |= Apply(_blocks.Options[0], "any one", !_all,

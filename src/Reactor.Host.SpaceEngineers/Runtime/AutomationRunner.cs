@@ -158,11 +158,11 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         /// The runners are already held per sequence and per one-of-a-system, so this is the same
         /// lookup the editor makes, used to fire rather than to read.
         /// </remarks>
-        public void Call(Sequence sequence, SystemInstance instance)
+        public void Call(Sequence sequence, SystemInstance instance, bool byHand = false)
         {
             var runner = Get(sequence, instance);
             if (runner != null)
-                runner.Call(_world, _bindings, CurrentTick, Live);
+                runner.Call(_world, _bindings, CurrentTick, Live, byHand);
         }
 
         /// <summary>

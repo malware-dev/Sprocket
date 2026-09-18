@@ -68,6 +68,18 @@ namespace Reactor.Host.SpaceEngineers.Layout
         /// </remarks>
         public const string Check = "c";
 
+        /// <summary>
+        /// A triangle pointing the way a thing runs. Doing now, by hand, what something else would
+        /// do.
+        /// </summary>
+        /// <remarks>
+        /// The one symbol in this set that everybody already knows, which is why it is worth a glyph
+        /// rather than two words: it is on every machine that has ever played anything. What it does
+        /// still has to be said in the note on it, because "run" and "play" are not the same promise
+        /// - a sequence started this way is started as its trigger would start it, not previewed.
+        /// </remarks>
+        public const string Play = "g";
+
         /// <summary>A pencil. Changing what something is called, as opposed to what it does.</summary>
         public const string Pencil = "p";
 
@@ -80,8 +92,8 @@ namespace Reactor.Host.SpaceEngineers.Layout
         /// harness draws its controls before handing over to the mod, so the first opaque thing a mod
         /// paints buries it. Anything drawing its own panel has to carry its own way off it.
         /// <para>
-        /// Nothing draws this yet. The chevron in the header leaves every screen, so there is no use
-        /// for a second way out until there are dialogs.
+        /// It sits inside the part of a trigger that says what it does, where it empties that part
+        /// rather than taking the trigger away: the bin at the end of that row is the other one.
         /// </para>
         /// </remarks>
         public const string Close = "x";

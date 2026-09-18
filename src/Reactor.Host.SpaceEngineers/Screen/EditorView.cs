@@ -87,6 +87,9 @@ namespace Reactor.Host.SpaceEngineers.Screen
         readonly Ask _ask = new Ask();
         readonly Confirm _question = new Confirm();
 
+        /// <summary>What was last pressed, so a question that press raises hangs under it.</summary>
+        Element _raisedBy;
+
         readonly List<ComponentView> _views = new List<ComponentView>();
         readonly List<EditorComponent> _shown = new List<EditorComponent>();
         readonly Dictionary<EditorComponent, ComponentView> _byComponent =
@@ -447,7 +450,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
             // Opened and closed from what the screen says, rather than remembered here. Core raises a
             // question and clears it when it is answered, so there is one place that knows.
             if (screen.HasQuestion && !_question.IsUp)
-                _question.Open(screen.Question, screen.Answers);
+                _question.Open(screen.Question, screen.Answers, _raisedBy);
             else if (!screen.HasQuestion && _question.IsUp)
                 _question.Close();
 
@@ -1115,6 +1118,11 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 return true;
             }
 
+            // What a question raised by this press will hang under. Held rather than worked out
+            // afterwards, because by then the press is over and nothing remembers what it was on -
+            // and a question about a row belongs under that row rather than over the middle of the
+            // screen saying which row it was about.
+            _raisedBy = target;
             _editor.Invoke(deed.Command);
 
             // Taking a choice and moving on in one gesture, where one thing is being chosen. Where

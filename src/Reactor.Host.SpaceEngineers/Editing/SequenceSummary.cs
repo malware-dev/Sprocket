@@ -163,14 +163,17 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
         public static SequenceStatus Status(Sequence sequence, SequenceRunner state)
         {
+            // What is happening outranks what is allowed to happen. A parked sequence somebody has
+            // run by hand is running, and a screen saying "switched off" while its steps light up
+            // one after another would be the screen arguing with itself.
+            if (state != null && state.IsRunning)
+                return state.IsWaiting ? SequenceStatus.RunningWaiting : SequenceStatus.Running;
+
             if (!sequence.Enabled)
                 return SequenceStatus.Off;
 
             if (state == null)
                 return SequenceStatus.NeverRun;
-
-            if (state.IsRunning)
-                return state.IsWaiting ? SequenceStatus.RunningWaiting : SequenceStatus.Running;
 
             return state.LastFiredTick < 0 ? SequenceStatus.NeverRun : SequenceStatus.Waiting;
         }

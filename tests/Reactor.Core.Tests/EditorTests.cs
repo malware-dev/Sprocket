@@ -133,7 +133,7 @@ public class EditorTests
 
         var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal("pressed-1", pressed.EventId);
-        Assert.Equal("When Airlock Button is pressed", editor.Triggers()[0].Summary);
+        Assert.Equal("When Airlock Button is pressed", editor.Says(0));
 
         // One trigger for the sequence, not the old one left beside the new.
         Assert.Single(ship.Automation.Systems[0].Triggers);
@@ -221,7 +221,10 @@ public class EditorTests
         Assert.NotEmpty(sentence.LockedText);
         Assert.Equal(2, sentence.AddOptions.Count);
         Assert.Equal(0, sentence.AddOptions[0].Command);
-        Assert.Equal(0, sentence.DeleteCommand);
+
+        // The bin is the exception, and deliberately: throwing a sequence away is not editing it,
+        // and wanting rid of one while it runs is exactly when somebody wants rid of it.
+        Assert.NotEqual(0, sentence.DeleteCommand);
 
         // Renaming is exempt: it changes nothing about what the system does.
         Assert.True(editor.Screen.CanRename);
@@ -708,6 +711,10 @@ public class EditorTests
         ship.Editor.PressBlock("Airlock Button");
         ship.Editor.PressChoice("is pressed");
         ship.Editor.PressPrimary();
+
+        // That button is already spoken for, which is asked about before anything else - and here
+        // two on one button is the point of the walk.
+        ship.Editor.PressChoice("Use it anyway");
         ship.Editor.PressChoice("Run a new sequence");
         ship.Tick();
     }
@@ -1009,9 +1016,11 @@ public class EditorTests
 
         editor.PressPrimary();
 
-        // And then the last question of all: what the trigger should do. The sentence is what
-        // answering it with a new sequence lands on.
-        Assert.Equal("What should it do?", editor.Screen.Title());
+        // And then the last question of all: what the trigger should do. It hangs over the screen
+        // rather than taking one of its own, because four short answers are not a screenful. The
+        // sentence is what answering it with a new sequence lands on.
+        Assert.Equal("What should it do?", editor.Question());
+        Assert.True(editor.HasAnswer("Run a new sequence"));
 
         editor.PressChoice("Run a new sequence");
         Assert.NotNull(editor.Sentence());
@@ -1052,11 +1061,169 @@ public class EditorTests
     static Door Door(Ship ship, string name) =>
         ship.Rig.Rig.Fitted.OfType<Door>().First(d => d.Name == name);
 
+    /// <summary>
+    /// And from its row on the system, which is the list somebody is looking at.
+    /// </summary>
+    /// <remarks>
+    /// The same act in both places and the same words for it, because what somebody wants when they
+    /// want to see a sequence work is not "open it first".
+    /// </remarks>
+    [Fact]
+    public void ASequenceCanBeRunFromItsRow()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("switch on");
+        editor.PressPrimary();
+        editor.SwitchOn();
+
+        // Back to the system, where the sequence has a row of its own.
+        editor.Back();
+        ship.Tick();
+
+        var row = editor.Rows()[0];
+        Assert.NotEqual(0, row.RunCommand);
+
+        editor.Invoke(row.RunCommand);
+        ship.Tick(3);
+
+        Assert.Contains("Airlock Light:on", ship.Log);
+    }
+
+    /// <summary>
+    /// A sequence can be run by hand, from its own screen, switched off.
+    /// </summary>
+    /// <remarks>
+    /// What starts a sequence is usually a door or a button somewhere else on the ship, so watching
+    /// one work meant going and pressing it. This is the same call a trigger makes.
+    /// <para>
+    /// Parked is the state somebody working on one is in: the switch is what keeps its triggers off
+    /// it while they poke at it, so refusing to run it then would take away the one way left to see
+    /// it work. The switch holds against everything else, including another sequence calling it.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AParkedSequenceCanBeRunByHand()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("switch on");
+        editor.PressPrimary();
+        ship.Tick();
+
+        Assert.False(ship.Automation.Sequences[0].Enabled);
+
+        var run = editor.Sentence().RunCommand;
+        Assert.NotEqual(0, run);
+
+        editor.Invoke(run);
+        ship.Tick(3);
+
+        Assert.Contains("Airlock Light:on", ship.Log);
+
+        // And it says what is happening rather than what is allowed to: the switch is still off.
+        Assert.False(ship.Automation.Sequences[0].Enabled);
+    }
+
+    /// <summary>
+    /// A run by hand is not stopped by the switch it was started under.
+    /// </summary>
+    /// <remarks>
+    /// The tick that follows would otherwise throw it away - a parked sequence is stopped, which is
+    /// what makes the switch mean anything - so a parked run would light its first step and vanish.
+    /// </remarks>
+    [Fact]
+    public void AParkedRunCarriesOnToItsEnd()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+
+        editor.PressAdd("wait");
+        editor.PressChoice("2 seconds - 120 ticks");
+
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("switch on");
+        editor.PressPrimary();
+        ship.Tick();
+
+        editor.Invoke(editor.Sentence().RunCommand);
+        ship.Tick(3);
+
+        // Still going, on the wait, with the switch off throughout.
+        var running = ship.Runner.Get(ship.Automation.Sequences[0]);
+        Assert.True(running.IsRunning);
+        Assert.DoesNotContain("Airlock Light:on", ship.Log);
+
+        ship.Tick(400);
+
+        Assert.Contains("Airlock Light:on", ship.Log);
+    }
+
+    /// <summary>
+    /// Each trigger says what its own signal reads, and only its own.
+    /// </summary>
+    /// <remarks>
+    /// A sequence that is idle while its signal reads true looks like a contradiction, and that
+    /// apparent contradiction is the difference between a moment and a situation - which is the one
+    /// thing about triggers somebody has to end up understanding. Two triggers on one system each
+    /// keep their own reading, so one being true never lights the other.
+    /// </remarks>
+    [Fact]
+    public void EachTriggerSaysWhatItIsReading()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        editor.NewSystem("Airlock");
+
+        editor.PressStart("When…");
+        editor.PressBlock("Inner Door");
+        editor.PressChoice("finishes opening");
+        editor.PressPrimary();
+        editor.PressChoice("Run a new sequence");
+        editor.Back();
+
+        editor.PressStart("When…");
+        editor.PressBlock("Outer Door");
+        editor.PressChoice("finishes opening");
+        editor.PressPrimary();
+        editor.PressChoice("Run a new sequence");
+        editor.Back();
+
+        // Sampled only while they may run, which is what the switch on each row is for.
+        foreach (var sequence in ship.Automation.Sequences)
+            sequence.Enabled = true;
+
+        Door(ship, "Inner Door").ForceOpen();
+        ship.Tick(3);
+
+        Assert.True(editor.Triggers()[0].IsLiveNow);
+        Assert.False(editor.Triggers()[1].IsLiveNow);
+    }
+
+    /// <summary>
+    /// "When tank A and tank B are empty" is a different sentence from "either of them", and fires
+    /// at a different moment - when the last one gets there.
+    /// </summary>
+    /// <remarks>
+    /// Said to the model rather than pressed, because the control that says it is hidden for now -
+    /// see <c>PickPage.AsksAll</c>. What it claims is still true of every trigger that says it,
+    /// including the ones already written down in somebody's program, which is why this stays.
+    /// </remarks>
     [Fact]
     public void AllOfThemTogether_IsItsOwnClaimAndFiresWhenTheLastArrives()
     {
-        // "When tank A and tank B are empty" is a different sentence from "either of
-        // them", and fires at a different moment - when the last one gets there.
         var ship = Build();
         var editor = ship.Editor;
 
@@ -1064,14 +1231,14 @@ public class EditorTests
         editor.PressStart("When…");
         editor.PressBlock("Inner Door");
         editor.PressBlock("Outer Door");
-        editor.PressChoice("all of them");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
         editor.PressChoice("Run a new sequence");
 
         var starts = Assert.IsType<WhenTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal(2, starts.Sources.Count);
-        Assert.True(starts.RequiresAll);
+
+        starts.RequiresAll = true;
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
@@ -1089,27 +1256,30 @@ public class EditorTests
         Assert.Contains("Airlock Light:on", ship.Log);
     }
 
+    /// <summary>
+    /// The choice between any one of the blocks and all of them is not on screen.
+    /// </summary>
+    /// <remarks>
+    /// Hidden rather than removed - see <c>PickPage.AsksAll</c> for what is behind it and what it is
+    /// waiting for. Here so that turning it back on is a decision somebody makes rather than
+    /// something that happens quietly: this test is what fails then, and it names the reason.
+    /// </remarks>
     [Fact]
-    public void TheAnyOrAllChoiceIsThereBeforeItMatters()
+    public void TheAnyOrAllChoiceIsNotOfferedYet()
     {
-        // It used to arrive on the second block, which put it on screen underneath the pointer at
-        // the moment somebody was reaching for a third. Holding room for it was no better - a hole
-        // sitting open whenever it was not needed. So it is simply always there on a stage that can
-        // ask, which also means it can be set before it matters rather than only after.
         var ship = Build();
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
         editor.PressStart("When…");
 
-        Assert.True(editor.HasChoice("any one"));
-        Assert.True(editor.HasChoice("all of them"));
+        Assert.False(editor.HasChoice("any one"));
+        Assert.False(editor.HasChoice("all of them"));
 
         editor.PressBlock("Inner Door");
-        Assert.True(editor.HasChoice("all of them"));
-
         editor.PressBlock("Outer Door");
-        Assert.True(editor.HasChoice("all of them"));
+
+        Assert.False(editor.HasChoice("all of them"));
     }
 
     [Fact]
@@ -1197,8 +1367,8 @@ public class EditorTests
 
         Assert.Equal("Airlock", editor.Screen.Title());
         Assert.Equal("Let me out", editor.Rows()[0].Summary);
-        Assert.Equal("When Airlock Button is pressed", editor.Triggers()[0].Summary);
-        Assert.Equal("runs Let me out", editor.Triggers()[0].Status);
+        Assert.Equal("When Airlock Button is pressed", editor.Says(0));
+        Assert.Equal("runs Let me out", editor.Doing(0));
     }
 
     [Fact]

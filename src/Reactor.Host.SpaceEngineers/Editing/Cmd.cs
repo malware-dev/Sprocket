@@ -38,6 +38,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
         // Triggers.
         OpenTrigger,
         TriggerTarget,
+        ClearTarget,
         DeleteTrigger,
 
         // A sequence.
@@ -45,6 +46,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
         EnableInstance,
         DeleteSequence,
         DuplicateSequence,
+        RunNow,
         Undo,
         Redo,
         AddAction,

@@ -63,6 +63,10 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
         readonly Sized _undoSlot;
         readonly Sized _redoSlot;
+
+        // The one mark anybody already knows, and the note on it says what it promises: started as
+        // its trigger would start it, rather than tried out.
+        readonly Glyph _run = Widgets.Symbol(Symbols.Play, Palette.Muted);
         readonly Switch _enable = new Switch(Lettering.Small);
         // The same bin the step rows use. Deleting a sequence and deleting a step out of one are the
         // same act at two sizes, and drawing them as a word and a picture said they were different kinds
@@ -129,6 +133,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             // that is always here, and it is also the one being pressed when the others leave. Putting it
             // anywhere but last meant pressing it slid it out from under the pointer that pressed it.
             Stack tools = Widgets.RowOf(Space.Item);
+            tools.Children.Add(_run);
             tools.Children.Add(_undoSlot);
             tools.Children.Add(_redoSlot);
             tools.Children.Add(_delete);
@@ -205,6 +210,11 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                 _redone = _component.RedoText;
                 _redoSays = "Redo " + _component.RedoText;
             }
+
+            // Absent rather than dead while it may not run, like everything else on this screen that
+            // cannot answer: the switch beside it is what brings it back.
+            _run.Collapsed = _component.RunCommand == 0;
+            Widgets.Waiting(_run, _component.RunCommand, "Run it now, as its trigger would");
 
             Widgets.Waiting(_undo, _component.UndoCommand, _undoSays);
             Widgets.Waiting(_redo, _component.RedoCommand, _redoSays);
@@ -470,12 +480,14 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                 _root.Children.Add(_adders);
             }
 
-            // Gone rather than greyed, so what is on screen while it runs is a view of a system working.
-            // Walking a change back is not something a running sequence can offer at all, and neither is
-            // deleting it, so all three go rather than sitting there dimmed as if they might yet answer.
-            // Safe to take away only because the switch stands to the right of them - see the order they
-            // were added in.
-            _delete.Collapsed = !_component.Editable;
+            // Gone rather than greyed, so what is on screen while it runs is a view of a system
+            // working. Walking a change back is not something a running sequence can offer at all,
+            // so the two arrows go rather than sitting there dimmed as if they might yet answer.
+            // Safe to take away only because the switch stands to the right of them - see the order
+            // they were added in.
+            //
+            // The bin stays. Throwing a sequence away is not editing it, and wanting rid of one
+            // while it runs is exactly when somebody wants rid of it.
             _undoSlot.Collapsed = !_component.Editable;
             _redoSlot.Collapsed = !_component.Editable;
         }

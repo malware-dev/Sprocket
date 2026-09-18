@@ -37,6 +37,12 @@ public class ListeningTests
             editor.PressBlock("Airlock Button");
             editor.PressChoice("is pressed");
             editor.PressPrimary();
+
+            // After the first round that button is spoken for, and being asked about it is part of
+            // what this counts: a question is on screen and listened to like anything else.
+            if (editor.HasAnswer("Use it anyway"))
+                editor.PressChoice("Use it anyway");
+
             editor.PressChoice("Run a new sequence");
             AssertListening(screen, "a sequence");
 

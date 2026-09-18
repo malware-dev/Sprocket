@@ -261,6 +261,27 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
         int _toggleCommand;
 
+        /// <summary>
+        /// Runs it now, by hand.
+        /// </summary>
+        /// <remarks>
+        /// What a trigger would do, done by the person instead - because the trigger is often a door
+        /// or a button somewhere else on the ship, and watching a sequence work is most of what this
+        /// screen is for.
+        /// <para>
+        /// Offered whether or not it is switched on. The switch is what keeps triggers off a
+        /// sequence, and somebody working on one parks it for exactly that reason - so refusing them
+        /// the one way left to see it work would be the editor holding the door shut from inside.
+        /// </para>
+        /// </remarks>
+        public int RunCommand
+        {
+            get { return _runCommand; }
+            set { Set(ref _runCommand, value, nameof(RunCommand)); }
+        }
+
+        int _runCommand;
+
         public int DeleteCommand
         {
             get { return _deleteCommand; }

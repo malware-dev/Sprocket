@@ -328,6 +328,19 @@ def plus():
     return [stroke((0.24, 0.5), (0.76, 0.5)), stroke((0.5, 0.24), (0.5, 0.76))]
 
 
+def play():
+    """
+    A triangle pointing the way a thing runs. Doing now, by hand, what something else would do.
+
+    The one symbol here that everybody already knows, which is the whole reason to spend a glyph
+    on it rather than two words: it is on every machine that has ever played anything. Squared
+    off like the rest of the set, and sitting a little left of centre so the mass of it reads as
+    centred - a triangle's weight is not where its bounding box is.
+    """
+    left, right, half = 0.32, 0.70, 0.24
+    return [poly((left, 0.5 - half), (right, 0.5), (left, 0.5 + half))]
+
+
 def solid(shapes):
     """Most glyphs are just filled shapes with nothing taken back out."""
     return shapes, []
@@ -354,6 +367,7 @@ GLYPHS = [
     ("!", "warning", solid(bang())),
     ("s", "refresh", solid(cycle())),
     ("2", "duplicate", sheets()),
+    ("g", "play", solid(play())),
 ]
 
 

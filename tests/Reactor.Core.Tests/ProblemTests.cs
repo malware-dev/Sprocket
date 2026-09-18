@@ -219,9 +219,7 @@ public class ProblemTests
         ship.Editor.PressRow(1);
         ship.Editor.Tick(1200);
 
-        var trigger = ship.Editor.Triggers()[0];
-        Assert.Equal("Nothing can start this.", trigger.Problem);
-        Assert.Equal(1, trigger.Problems);
+        Assert.Equal("Nothing can start this.", ship.Editor.Triggers()[0].Problem);
 
         Assert.Equal("", ship.Editor.Rows()[0].Problem);
         Assert.Equal(0, ship.Editor.Rows()[0].Problems);
@@ -323,15 +321,13 @@ public class ProblemTests
 
         ship.Editor.PressRow(1);
         ship.Editor.Tick(1200);
-        Assert.Equal(1, ship.Editor.Triggers()[0].Problems);
+        Assert.Equal("Nothing can start this.", ship.Editor.Triggers()[0].Problem);
 
         ship.Rig.CanStart(ship.Sequence);
         ship.Runner.Tick(1800);
         ship.Editor.Tick(1800);
 
-        var trigger = ship.Editor.Triggers()[0];
-        Assert.True(string.IsNullOrEmpty(trigger.Problem));
-        Assert.Equal(0, trigger.Problems);
+        Assert.True(string.IsNullOrEmpty(ship.Editor.Triggers()[0].Problem));
     }
 
     static SequenceFault Fault(Ship ship) => Fault(ship, ship.Sequence);

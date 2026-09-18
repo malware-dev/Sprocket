@@ -68,10 +68,9 @@ public class TargetTests
         // One sequence, two ways in, and the list of triggers says so.
         Assert.Single(screen.Editor.Program.Sequences);
 
-        var triggers = screen.Editor.Triggers().Entries;
-        Assert.Equal(2, triggers.Count);
-        Assert.Equal("runs Cycle", triggers[0].Status);
-        Assert.Equal("runs Cycle", triggers[1].Status);
+        Assert.Equal(2, screen.Editor.Triggers().Count);
+        Assert.Equal("runs Cycle", screen.Editor.Doing(0));
+        Assert.Equal("runs Cycle", screen.Editor.Doing(1));
     }
 
     [Fact]
@@ -84,9 +83,8 @@ public class TargetTests
         screen.Editor.PressChoice("Cycle");
         screen.Run(2);
 
-        var triggers = screen.Editor.Triggers().Entries;
-        Assert.Equal(2, triggers.Count);
-        Assert.Contains(triggers, row => row.Status == "stops Cycle");
+        Assert.Equal(2, screen.Editor.Triggers().Count);
+        Assert.Equal("stops Cycle", screen.Editor.Doing(1));
     }
 
     /// <summary>
@@ -109,9 +107,8 @@ public class TargetTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        var triggers = screen.Editor.Triggers().Entries;
-        Assert.Equal(2, triggers.Count);
-        Assert.Contains(triggers, row => row.Status == "close Airlock Outer Door");
+        Assert.Equal(2, screen.Editor.Triggers().Count);
+        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
 
         // Two sequences exist, but only the named one is a row in the list of them.
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
@@ -131,17 +128,12 @@ public class TargetTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        StatusEntry plain = null;
-        foreach (StatusEntry row in screen.Editor.Triggers().Entries)
-            if (row.Status == "close Airlock Outer Door")
-                plain = row;
+        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
 
-        Assert.NotNull(plain);
-
-        screen.Editor.Invoke(plain.DeleteCommand);
+        screen.Editor.Invoke(screen.Editor.Triggers()[1].DeleteCommand);
         screen.Run(2);
 
-        Assert.Single(screen.Editor.Triggers().Entries);
+        Assert.Single(screen.Editor.Triggers());
         Assert.Single(screen.Editor.Program.Sequences);
     }
 
@@ -151,11 +143,10 @@ public class TargetTests
     {
         var screen = WithOne();
 
-        StatusEntry row = screen.Editor.Triggers().Entries[0];
-        screen.Editor.Invoke(row.DeleteCommand);
+        screen.Editor.Invoke(screen.Editor.Triggers()[0].DeleteCommand);
         screen.Run(2);
 
-        Assert.Empty(screen.Editor.Triggers().Entries);
+        Assert.Empty(screen.Editor.Triggers());
         Assert.Single(screen.Editor.Program.Sequences);
         Assert.Single(screen.Editor.Rows().Entries);
     }

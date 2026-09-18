@@ -28,6 +28,10 @@ namespace Reactor.Host.SpaceEngineers.Lists
         readonly Label _summary = Widgets.Label("", Palette.Ink, Lettering.Body);
         readonly Label _status = Widgets.Label("", Palette.Faint, Lettering.Tiny);
 
+        // The same mark the sequence's own screen uses for the same act, so one look is learnt
+        // once.
+        readonly Glyph _run = Widgets.Symbol(Symbols.Play, Palette.Faint);
+
         /// <summary>What the second line was last told it opens, so a note is made when it changes.</summary>
         string _opens;
         string _opensSays;
@@ -76,12 +80,18 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _line.Background = Palette.Panel;
             _line.Left = _light;
             _line.Fill = _text;
-            // The switch stays last, so it is the one control whose place nothing can move: this row
-            // lays out leftwards from its right edge, and the switch is what somebody is pressing when
-            // the copy button beside it appears or goes.
+
+            // The bin last, where it is on every other row that has one - a trigger's row has it at
+            // the right edge, and two lists on one screen must not put the same mark in two places.
+            // Nothing here comes and goes with a switch, so nothing moves out from under the pointer
+            // that is pressing it.
+            //
+            // Running it by hand is first, at the far end from the bin: it is the one thing here
+            // that acts on the machine rather than on the program.
+            _tools.Children.Add(_run);
             _tools.Children.Add(_duplicate);
-            _tools.Children.Add(_delete);
             _tools.Children.Add(_switch);
+            _tools.Children.Add(_delete);
 
             // The red the per-step crosses use, because it is the same act: what this is on is gone
             // when it is pressed, and nothing else on a row is.
@@ -156,6 +166,10 @@ namespace Reactor.Host.SpaceEngineers.Lists
             // Its own press where there is something of its own behind it, so changing what a trigger
             // does is the words that say what it does. It lights like any other control, which is
             // what says it is one at all.
+            // Absent rather than dead while it may not run, which is the switch on this same row.
+            _run.Collapsed = entry.RunCommand == 0;
+            Widgets.Waiting(_run, entry.RunCommand, "Run it now, as its trigger would");
+
             _status.Press = Deed.Sends(entry.StatusCommand);
             _status.Highlight = entry.StatusCommand != 0 ? Palette.Panel : Palette.None;
 

@@ -26,6 +26,22 @@ namespace Reactor.Host.SpaceEngineers.Lists
         /// and asks first.
         /// </remarks>
         /// <summary>
+        /// Runs what this row is about, now, by hand. Zero where it may not run.
+        /// </summary>
+        /// <remarks>
+        /// The same act as its own screen offers, on the row, because this is the list somebody is
+        /// looking at when they want to see what a sequence does - and what starts it is usually a
+        /// button somewhere else on the ship.
+        /// </remarks>
+        public int RunCommand
+        {
+            get { return _runCommand; }
+            set { Set(ref _runCommand, value, nameof(RunCommand)); }
+        }
+
+        int _runCommand;
+
+        /// <summary>
         /// Opens what the row's second line says, where that is a thing of its own to change.
         /// </summary>
         /// <remarks>

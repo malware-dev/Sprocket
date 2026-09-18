@@ -207,6 +207,10 @@ namespace Reactor.Host.SpaceEngineers.Screen
             if (sequence != null)
                 return new SequenceView(sequence);
 
+            var triggers = component as TriggerListComponent;
+            if (triggers != null)
+                return new TriggerListView(triggers);
+
             // Everything else, drawn loudly. A component this target has not learned to draw must not be
             // silently absent: a screen missing its picker looks exactly like a screen with nothing to
             // pick, and the second is a thing that legitimately happens.

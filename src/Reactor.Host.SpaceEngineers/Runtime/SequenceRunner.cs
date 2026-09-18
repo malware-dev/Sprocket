@@ -198,9 +198,16 @@ namespace Reactor.Host.SpaceEngineers.Runtime
             if (!live)
                 return;
 
-            if (!CanRun)
+            // A run somebody started by hand is theirs, and the switch is not about them: they are
+            // standing at the screen watching it. Everything else a switched-off sequence refuses.
+            if (!CanRun && !_byHand)
             {
-                Stop();
+                // Only when there is a run to abandon. This is the tick path, and a parked sequence
+                // sits here for as long as it stays parked: stopping one that is not running costs
+                // the same as stopping one that is, and nothing outside can tell either way.
+                if (IsRunning)
+                    Stop();
+
                 return;
             }
 
@@ -233,11 +240,23 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         /// whoever asks.
         /// </para>
         /// </remarks>
-        public void Call(GridWorld world, Bindings bindings, int tick, bool live = true)
+        public void Call(GridWorld world, Bindings bindings, int tick, bool live = true,
+            bool byHand = false)
         {
             _bindings = bindings;
 
-            if (!live || !CanRun)
+            // Power is refused whoever asks: a machine with none does nothing, and a person at the
+            // screen of a dead block is not an exception to that.
+            if (!live)
+            {
+                RefusedCount++;
+                return;
+            }
+
+            // The switch is not. Somebody who parks a sequence so its triggers leave it alone, and
+            // then presses run, has said exactly what they want - and that is the state anybody
+            // debugging one is in.
+            if (!CanRun && !byHand)
             {
                 RefusedCount++;
                 return;
@@ -250,8 +269,18 @@ namespace Reactor.Host.SpaceEngineers.Runtime
                 return;
             }
 
+            _byHand = byHand;
             Start(world, tick);
         }
+
+        /// <summary>
+        /// Whether the run going on now was asked for by a person rather than by a trigger.
+        /// </summary>
+        /// <remarks>
+        /// It decides one thing: that the switch does not stop it on the next tick. Cleared when the
+        /// run ends however it ends, so the next one is judged on its own.
+        /// </remarks>
+        bool _byHand;
 
         /// <summary>
         /// Puts a run back where a reload interrupted it.
@@ -302,6 +331,7 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         {
             IsRunning = false;
             IsWaiting = false;
+            _byHand = false;
             _stepIndex = -1;
             _waitTicks = 0;
             _outstanding.Clear();
@@ -557,8 +587,12 @@ namespace Reactor.Host.SpaceEngineers.Runtime
                 if (trigger.Runs != _sequence.Number)
                     continue;
 
-                if (Sampled(world, trigger, Watching(trigger)))
+                Watch watch = Watching(trigger);
+                if (Sampled(world, trigger, watch))
                     fired = true;
+
+                // What the sample just read is this trigger's, until the next one overwrites it.
+                watch.Live = TriggerSignalIsTrue;
 
                 anySignal = anySignal || TriggerSignalIsTrue;
                 anyMissing = anyMissing || HasMissingSources;
@@ -606,6 +640,16 @@ namespace Reactor.Host.SpaceEngineers.Runtime
             public int All = -1;
 
             public int Counted;
+
+            /// <summary>
+            /// What this one trigger's signal read at the last sample.
+            /// </summary>
+            /// <remarks>
+            /// Kept per trigger as well as gathered into one, because a screen listing triggers
+            /// shows each of them saying what it is reading - and two triggers on one sequence
+            /// would otherwise both light because one of them was true.
+            /// </remarks>
+            public bool Live;
         }
 
         readonly Dictionary<Trigger, Watch> _watching = new Dictionary<Trigger, Watch>();
@@ -630,6 +674,17 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         }
 
         readonly List<Trigger> _forgotten = new List<Trigger>();
+
+        /// <summary>Whether that trigger's own signal reads true at this instant.</summary>
+        /// <remarks>
+        /// Nothing where it has not been sampled yet, which is the honest answer: a trigger that
+        /// has never been read has no reading.
+        /// </remarks>
+        public bool LiveNow(Trigger trigger)
+        {
+            Watch watch;
+            return _watching.TryGetValue(trigger, out watch) && watch.Live;
+        }
 
         Watch Watching(Trigger trigger)
         {

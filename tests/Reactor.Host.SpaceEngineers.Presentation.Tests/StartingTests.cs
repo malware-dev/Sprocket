@@ -93,7 +93,7 @@ public class StartingTests
         screen.Run(120);
 
         Assert.NotNull(screen.Editor.Program.Sequences[0].Trigger);
-        Assert.Equal("runs Sequence 1", screen.Editor.Triggers().Entries[0].Status);
+        Assert.Equal("runs Sequence 1", screen.Editor.Doing(0));
         Assert.Equal("", screen.Editor.Rows().Entries[0].Problem);
     }
 }

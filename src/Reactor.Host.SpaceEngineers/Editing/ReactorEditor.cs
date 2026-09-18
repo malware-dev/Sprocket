@@ -200,7 +200,47 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// <summary>Adds a way to answer, in the order they are offered.</summary>
         internal void Answer(string text, Action chosen)
         {
-            _screen.Answers.Add(new ChoiceEntry(text, false, Register(Cmd.Answer, _screen.Answers.Count, chosen)));
+            _answering.Add(new Answering(text, chosen));
+            _screen.Answers.Add(new ChoiceEntry(text, false,
+                Register(Cmd.Answer, _screen.Answers.Count, chosen)));
+        }
+
+        /// <summary>
+        /// What the standing question's answers do, apart from the numbers they are offered under.
+        /// </summary>
+        /// <remarks>
+        /// A question can be raised by something that changed the screen - "what should this do" is
+        /// asked with the picker already unwound - and a rebuild hands back every command number the
+        /// screen was using. Without this the answers would still be on screen, pointing at numbers
+        /// nothing knows any more, which is a press that silently does nothing.
+        /// </remarks>
+        readonly List<Answering> _answering = new List<Answering>();
+
+        struct Answering
+        {
+            public readonly string Text;
+            public readonly Action Chosen;
+
+            public Answering(string text, Action chosen)
+            {
+                Text = text;
+                Chosen = chosen;
+            }
+        }
+
+        /// <summary>Offers the standing question's answers again, under this screen's numbers.</summary>
+        void Reask()
+        {
+            if (!_screen.HasQuestion || _answering.Count == 0)
+                return;
+
+            _screen.Answers.Clear();
+
+            for (var i = 0; i < _answering.Count; i++)
+            {
+                _screen.Answers.Add(new ChoiceEntry(_answering[i].Text, false,
+                    Register(Cmd.Answer, i, _answering[i].Chosen)));
+            }
         }
 
         /// <summary>
@@ -218,6 +258,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             _screen.Question = "";
             Release();
+        }
+
+        void Released()
+        {
+            _answering.Clear();
         }
 
         /// <summary>
@@ -362,7 +407,9 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 case Cmd.OpenSystem:
                 case Cmd.OpenSequence:
                 case Cmd.OpenTrigger:
+                case Cmd.RunNow:
                 case Cmd.TriggerTarget:
+                case Cmd.ClearTarget:
                 case Cmd.StartWhen:
                 case Cmd.StartEvery:
                 case Cmd.AddAction:
@@ -440,6 +487,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 _actions.Remove(answer.Command);
 
             _screen.Answers.Clear();
+            Released();
         }
 
         /// <summary>Acts on a button, a row, or anything else that was pressed.</summary>
@@ -933,6 +981,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _screen.SwitchIsOn = page.SwitchIsOn;
             Walking();
             BuildActions();
+            Reask();
 
             _structureDirty = false;
         }
@@ -1070,7 +1119,8 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     {
                         // Nothing to record: the sequence does not exist yet, so there is no
                         // history for it and nothing to take back to.
-                        FinishTrigger(Starter(answer), origin);
+                        MomentTrigger made = Starter(answer);
+                        Unless(made, null, delegate { FinishTrigger(made, origin); });
                     },
                     true));
                 return;
@@ -1108,6 +1158,80 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// means the construct already announces it and Reactor wires a slot, picking a door means
         /// Reactor watches for it. See <see cref="Vocabulary.Starter" />.
         /// </remarks>
+        /// <summary>
+        /// Does it, unless something on the construct is already answering that moment.
+        /// </summary>
+        /// <remarks>
+        /// A toolbar slot holds one thing. Two triggers on the same button and the same press are
+        /// two claims on that one slot, and only one of them can have it - so the other stops
+        /// working, which is a thing to be told before it happens rather than found afterwards on a
+        /// row that has quietly gone quiet.
+        /// <para>
+        /// Only where the construct is what announces the moment. Two sequences both watching the
+        /// inner door close is an ordinary way to build and costs nothing: Reactor does that
+        /// watching, and it can watch for two.
+        /// </para>
+        /// <para>
+        /// Its own trigger never counts, so settling on what was already there is not a clash with
+        /// itself.
+        /// </para>
+        /// </remarks>
+        void Unless(MomentTrigger made, Trigger except, Action then)
+        {
+            Trigger taken = Holding(made, except);
+            if (taken == null)
+            {
+                then();
+                return;
+            }
+
+            Ask(SequenceText.Taken(_runner.Bindings, taken));
+            Answer("Leave it alone", delegate { });
+            Answer("Use it anyway", then);
+        }
+
+        /// <summary>What already answers that moment, or null.</summary>
+        Trigger Holding(MomentTrigger made, Trigger except)
+        {
+            if (!(made is RequiredTrigger))
+                return null;
+
+            for (var s = 0; s < _program.Systems.Count; s++)
+            {
+                var triggers = _program.Systems[s].Triggers;
+                for (var i = 0; i < triggers.Count; i++)
+                {
+                    var moment = triggers[i] as RequiredTrigger;
+                    if (moment == null || triggers[i] == except)
+                        continue;
+
+                    if (moment.EventId == made.EventId && Same(moment.Sources, made.Sources))
+                        return moment;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>Whether two triggers name the same blocks, in whatever order they were picked.</summary>
+        static bool Same(IList<string> left, IList<string> right)
+        {
+            if (left.Count != right.Count)
+                return false;
+
+            for (var i = 0; i < left.Count; i++)
+            {
+                var found = false;
+                for (var q = 0; q < right.Count && !found; q++)
+                    found = left[i] == right[q];
+
+                if (!found)
+                    return false;
+            }
+
+            return true;
+        }
+
         internal MomentTrigger Starter(PickAnswer answer)
         {
             MomentTrigger made = Vocabulary.Starter(
@@ -1166,30 +1290,32 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// The same question, for a trigger that already exists.
         /// </summary>
         /// <remarks>
-        /// One question and one list, because "what should this do" is one thought whether the
-        /// trigger is being made or mended - and a second list that read differently would be two
+        /// One question and one set of answers, because "what should this do" is one thought whether
+        /// the trigger is being made or mended - and a second list that read differently would be two
         /// things to learn about one act.
+        /// <para>
+        /// Hung over the screen rather than shown as a page of its own. Four short answers is not a
+        /// screenful, and a whole screen for them put the row somebody was working on out of sight
+        /// behind the question about it. Dismissing it is a third outcome: the trigger is left as it
+        /// was, which for one being made means there is nothing to leave behind.
+        /// </para>
         /// </remarks>
         void AskWhatItDoes(AutomationSystem system, Trigger trigger, int origin, bool fresh)
         {
-            var page = new ChoicePage(this, "What should it do?");
+            Ask("What should it do?");
 
-            page.Add("Run a new sequence", false,
-                delegate { RunNew(system, trigger, origin, fresh); });
+            Answer("Run a new sequence", delegate { RunNew(system, trigger, origin, fresh); });
 
             if (Standing(system))
             {
-                page.Add("Run an existing sequence", false,
+                Answer("Run an existing sequence",
                     delegate { PickSequence(system, trigger, false, origin, fresh); });
 
-                page.Add("Stop a sequence", false,
+                Answer("Stop a sequence",
                     delegate { PickSequence(system, trigger, true, origin, fresh); });
             }
 
-            page.Add("Do something", false,
-                delegate { DoOneThing(system, trigger, origin, fresh); });
-
-            Push(page);
+            Answer("Do something", delegate { DoOneThing(system, trigger, origin, fresh); });
         }
 
         /// <summary>
@@ -1264,7 +1390,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
         void PickSequence(AutomationSystem system, Trigger trigger, bool stops, int origin,
             bool fresh)
         {
-            var page = new ChoicePage(this, stops ? "Stop which one?" : "Run which one?");
+            var page = new ChoicePage(this, stops ? "Stop which sequence?" : "Run which sequence?");
 
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
@@ -1337,15 +1463,76 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Asks what the trigger should do instead, from the words on its row that say what it does.
+        /// Asks what a trigger should do, which is what an empty slot is waiting to be told.
         /// </summary>
         /// <remarks>
-        /// The row's second line rather than a question asking which half was meant: the answer to
-        /// that question is already on the row, in the words somebody is looking at when they press.
+        /// The whole question - run a new sequence, run an existing one, stop one, do something -
+        /// because an empty slot is one nobody has answered yet rather than one to be changed.
         /// </remarks>
         internal void ChangeTarget(AutomationSystem system, Trigger trigger)
         {
             AskWhatItDoes(system, trigger, _stack.Count, false);
+        }
+
+        /// <summary>
+        /// Empties what a trigger does, so it is waiting to be told again.
+        /// </summary>
+        /// <remarks>
+        /// What the cross on that part of the row does, and it does exactly that: the slot goes
+        /// empty, the trigger stops doing anything, and pressing the empty slot asks the whole
+        /// question. A cross that opened a question instead would be a mark saying one thing and
+        /// doing another.
+        /// <para>
+        /// A sequence nobody named goes with it, because it existed only to be the thing this
+        /// trigger did - and comes back if this is walked back, which is the same machinery that
+        /// carries one when a trigger is pointed somewhere else.
+        /// </para>
+        /// </remarks>
+        internal void ClearTarget(AutomationSystem system, Trigger trigger)
+        {
+            Do(system, new PointTrigger(_program, trigger, 0, false, null));
+        }
+
+        /// <summary>
+        /// Asks which sequence a trigger is about, keeping what it does with it.
+        /// </summary>
+        /// <remarks>
+        /// One that stops a sequence goes on stopping the one it is pointed at next. Changing that is
+        /// the whole question, which is what the cross on the slot asks.
+        /// </remarks>
+        internal void PointTriggerAt(AutomationSystem system, Trigger trigger)
+        {
+            PickSequence(system, trigger, trigger.Stops, _stack.Count, false);
+        }
+
+        /// <summary>
+        /// Changes the one act a trigger does, in the picker it was chosen in.
+        /// </summary>
+        /// <remarks>
+        /// The act belongs to a sequence nobody named - what the trigger does rather than a thing in
+        /// its own right - so it has no screen to be changed on, and the way back is the system's
+        /// rather than that sequence's own unreachable history.
+        /// </remarks>
+        internal void ChangeDoing(AutomationSystem system, Sequence sequence, Act act)
+        {
+            var origin = _stack.Count;
+            var index = sequence.Steps.IndexOf(act);
+
+            Push(new PickPage(this, "Do something", false, Blocks(act.Targets), act.ActionId,
+                delegate(PickAnswer answer)
+                {
+                    UnwindTo(origin);
+
+                    var named = new List<string>();
+                    for (var i = 0; i < answer.Targets.Count; i++)
+                    {
+                        GridEntity entity = _world.FindEntity(answer.Targets[i]);
+                        if (entity != null)
+                            named.Add(_program.Declare(_world, entity).Name);
+                    }
+
+                    Do(system, new Rewrite(sequence, new ChangeStep(index, act, named, answer.Chosen)));
+                }));
         }
 
         /// <summary>
@@ -1394,7 +1581,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 delegate(PickAnswer answer)
                 {
                     UnwindTo(origin);
-                    Do(system, new ChangeTrigger(moment, Starter(answer)));
+
+                    MomentTrigger made = Starter(answer);
+                    Unless(made, moment, delegate
+                    {
+                        Do(system, new ChangeTrigger(moment, made));
+                    });
                 },
                 true, was != null && was.RequiresAll));
         }
@@ -1434,6 +1626,72 @@ namespace Reactor.Host.SpaceEngineers.Editing
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Runs a sequence now, as whatever starts it would.
+        /// </summary>
+        /// <remarks>
+        /// What starts a sequence is usually a door or a button somewhere else on the ship, so
+        /// watching one work meant going and pressing it. This is the same call a trigger makes, on
+        /// the one of its system there is - which is the only one until more than one can be made.
+        /// <para>
+        /// A sequence already running is not started twice. The runner counts that as a skip, the
+        /// same as a button pressed twice, and the row says so.
+        /// </para>
+        /// </remarks>
+        internal void RunNow(Sequence sequence)
+        {
+            AutomationSystem system = sequence.System;
+            SystemInstance instance = system == null || system.Instances.Count == 0
+                ? null
+                : system.Instances[0];
+
+            // By hand, which is what lets a parked sequence run at all: the switch keeps triggers
+            // off it, and a person at the screen is not a trigger.
+            _runner.Call(sequence, instance, true);
+        }
+
+        /// <summary>
+        /// Asks before throwing a sequence away, and throws it away if they say so.
+        /// </summary>
+        /// <remarks>
+        /// The one place in the editor where a mistake cannot be walked back: every other act is
+        /// live and reversible by doing the opposite, and this one is not reversible at all. So it
+        /// asks, where deleting a trigger does not - a trigger is one line and three presses to make
+        /// again, and a sequence is work.
+        /// <para>
+        /// The safe answer is listed first, so the reflex press lands on it, and it is spelt out
+        /// rather than left to back. Back does mean keep - it always means return to where you came
+        /// from - but a screen whose only row is the destructive one is a screen where a stray press
+        /// destroys something.
+        /// </para>
+        /// <para>
+        /// Here rather than on the sequence's own screen, because it is asked for from two places:
+        /// that screen, and the row for it in the list on its system's. Whatever is showing the
+        /// sequence goes when it does, which is what <see cref="ForgetSequence" /> is for.
+        /// </para>
+        /// </remarks>
+        internal void DeleteSequence(Sequence sequence)
+        {
+            var page = new ChoicePage(this, "Delete this sequence?");
+            page.Caption = SequenceText.Doing(_runner.Bindings, sequence);
+
+            page.Add("Keep it", false, delegate { Pop(); });
+
+            page.Add("Delete it", false, delegate
+            {
+                // The question goes first. Forgetting the sequence drops any page showing it, but
+                // not this one on top of it, which would leave somebody standing on a question about
+                // something that no longer exists.
+                Pop();
+                _program.RemoveSequence(sequence);
+                ForgetSequence(sequence);
+            });
+
+            page.WarnOnLast("This cannot be undone.");
+
+            Push(page);
         }
 
         /// <summary>

@@ -127,19 +127,36 @@ may be started from three buttons and stopped by a fourth, so a line on its own 
 ever show one of them or grow into the list the system already keeps. Its screen is what the
 sequence is called and what it does; the rows above the list are the reasons it happens.
 
-**A trigger's row is two sentences and each is pressed.** *When Airlock Button is pressed* asks
-again when it happens - the picker for a moment, the rates for a repeat, the questions it was made
-with. *runs Cycle* asks again what it does. Nothing asks which half was meant, because the words
-somebody pressed are the answer, and a screen of its own to ask that would be a screen holding one
-question whose answer was already on the row behind it.
+**A trigger is written out as a sentence, and every part of it is a control.** *When* **Airlock
+Button** **is pressed** *runs* **Cycle** - the same chips a step of a sequence is made of, at the
+same size, because it is the same act: words with the parts somebody chose sitting in them, each
+one opening the question it was answered with. The blocks and the moment lead to the picker; what
+it does leads to the list the wizard asks with.
+
+It was a card for a while, and a card can only be pressed as a whole - which meant asking which
+half was meant, on a screen of its own, for a question whose answer was already on the row behind
+it. A trigger that is reading true right now says so on its own row, where the sequence's screen
+used to say it for whichever trigger came first.
 
 Changing **when** it happens carries everything else through: the sequence it runs, whether it
-stops that sequence instead, and whatever was written about it. Changing **what it does** is the
-same list the wizard asks with - *run a new sequence*, *run an existing one*, *stop one*, *do
-something* - because that is one thought whether a trigger is being made or mended. The trigger
-itself is kept rather than remade, since what starts it has not changed and the toolbar slot the
-construct holds names that trigger. Pointing away from a sequence nobody named takes that sequence
-with it: it existed only to be the one thing this trigger did.
+stops that sequence instead, and whatever was written about it.
+
+**Pressing what it does changes what is in it**, and nothing more: the sequence it runs opens the
+list of sequences, and the one act it does opens the picker that act was chosen in. Being asked
+what a trigger is for - *run a new sequence*, *run an existing one*, *stop one*, *do something* -
+to change which door a button closes is three answers where one would do.
+
+**That whole question is behind the cross inside the slot.** It empties what the trigger does, so
+it is asked again, and it is drawn inside the chip because what it empties is that chip - beside it
+the same mark read as belonging to the whole sentence, which already has one at the end of the row
+that destroys the trigger rather than emptying part of it. The trigger itself is kept through any
+of this, since what starts it has not changed and the toolbar slot the construct holds names that
+trigger. Pointing away from a sequence nobody named takes that sequence with it: it existed only to
+be the one thing this trigger did.
+
+The four answers hang under whatever was pressed, as a menu rather than a page: four short answers
+are not a screenful, and a screen of its own put the row somebody was working on out of sight
+behind the question about it.
 
 Both are **walked back from the system's screen** - see *Taking it back*.
 
