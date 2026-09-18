@@ -42,9 +42,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// </summary>
         /// <remarks>
         /// Decided by what it is rather than by whoever is showing it, so every screen agrees about how
-        /// loud to be. A warning still says its words; what it does not do is wash a row red, add to
-        /// what is counted as wrong, or get the sequence parked.
+        /// loud to be. A warning says its words and washes its row amber; what it does not do is read
+        /// as broken, add to what is counted as wrong, or get the sequence parked.
         /// </remarks>
-        public bool IsWarning => Problem == SequenceProblem.NothingStarts;
+        public bool IsWarning => Problem == SequenceProblem.NothingStarts
+            || Problem == SequenceProblem.SwitchedOff;
     }
 }

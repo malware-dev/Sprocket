@@ -359,6 +359,10 @@ public class ProblemTests
 
         ship.Editor.GoToRoot();
         ship.Sequence = ship.Automation.Sequences[0];
+
+        // Switched on, because these are about a sequence that would work: one left parked says so
+        // itself, and that would be the answer to every question below rather than the one asked.
+        ship.Sequence.Enabled = true;
         return ship;
     }
 

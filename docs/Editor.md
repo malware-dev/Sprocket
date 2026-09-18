@@ -194,6 +194,27 @@ gives it a trigger afterwards.
 is the trigger's trouble and the sequence is fine. The words are the same ones the sequence's own
 screen says, and pressing the row is the mend.
 
+**A sequence that is switched off wears the amber ground**, because it is the commonest reason a
+button does nothing and the only one where everything else reads as working: the trigger is right,
+the blocks are there, and the row said so in the column where every row says something, which is
+where nobody finds it. A ground is what somebody scanning a list for the odd one out actually
+reads. Not red: switching a sequence off is deliberate, so it is not counted as wrong and does not
+send anybody hunting for a block that is not missing. And nothing is said about a sequence with no
+steps yet, on the same rule the trigger's warning follows - somebody who has not finished is not
+told they are wrong.
+
+**And the words go in the line that was saying "switched off", rather than on a line of their own.**
+Beside a switch that says off, that was a word spent on nothing; what somebody needs is what follows
+from it - *This is switched off, so nothing starts it on its own*, which is true of the trigger and
+of a sequence that calls this one, and leaves the play mark on the same row as the exception it is.
+Said in a line the row always has, because a line that exists only while the fault does changes the
+row's height when the switch on that row is pressed, and a control that moves as it is used is the
+one thing a screen must never do. The sequence's own screen says it in its header for the same
+reason, the switch being in that same bar.
+
+The construct's screen counts it as a warning, where before a system with one sequence running and
+another parked read as running and said nothing about the second.
+
 ### A sequence nothing starts
 
 Four ways to arrive at one: make it from the row above the list, copy one, be sent a program

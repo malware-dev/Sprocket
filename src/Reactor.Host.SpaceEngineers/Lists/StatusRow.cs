@@ -129,13 +129,20 @@ namespace Reactor.Host.SpaceEngineers.Lists
             // Broken outranks running, which the two can only be at once for the instant between a
             // block going away and the run abandoning the step that named it.
             //
+            // A sequence somebody switched off washes too, in the third colour and under both of
+            // those, because it is the commonest reason a button does nothing and the one where
+            // everything else on the row reads as working. The ground is the whole of how it is said:
+            // it costs no room, so pressing the switch changes a colour and not a height.
+            //
             // A row that adds something is the same button as the one under a sentence, because it is
             // the same act: no fill, quiet words, and a highlight that says it answers to a press.
             _line.Background = wrong
                 ? Palette.ProblemWash
                 : entry.Running
                     ? Palette.LiveWash
-                    : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
+                    : entry.Parked
+                        ? Palette.NoticeWash
+                        : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
 
             if (!pressable)
                 _line.Highlight = Palette.None;

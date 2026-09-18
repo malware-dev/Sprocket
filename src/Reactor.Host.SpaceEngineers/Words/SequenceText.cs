@@ -176,6 +176,8 @@ namespace Reactor.Host.SpaceEngineers.Words
                 return "Nothing can start this.";
             if (problem == SequenceProblem.NothingStarts)
                 return "Nothing starts this yet.";
+            if (problem == SequenceProblem.SwitchedOff)
+                return "This is switched off, so nothing starts it on its own.";
             if (problem == SequenceProblem.MissingGate)
                 return "This waits on something that isn't here any more.";
 

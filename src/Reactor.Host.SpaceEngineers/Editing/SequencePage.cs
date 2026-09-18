@@ -249,7 +249,13 @@ namespace Reactor.Host.SpaceEngineers.Editing
             var second = SecondPassed();
 
             _sentence.Enabled = _sequence.Enabled;
-            _sentence.Status = SequenceText.Status(SequenceSummary.Status(_sequence, state));
+            // Being switched off is said here rather than in the banner below, because the switch
+            // that says it is in this same bar: a banner would be a second copy of it appearing and
+            // vanishing as that switch is pressed, which moves the whole sentence under it.
+            var showing = SequenceSummary.Status(_sequence, state);
+            _sentence.Status = showing == SequenceStatus.Off && _sequence.Steps.Count > 0
+                ? SequenceText.Problem(SequenceProblem.SwitchedOff)
+                : SequenceText.Status(showing);
             _sentence.JustRan = state != null && state.LastFiredTick >= 0
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
@@ -306,7 +312,9 @@ namespace Reactor.Host.SpaceEngineers.Editing
             var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
                 Editor.Runner.Get(_sequence));
 
-            _sentence.Problem = SequenceText.Problem(fault.Problem);
+            var parked = fault.Problem == SequenceProblem.SwitchedOff;
+
+            _sentence.Problem = parked ? "" : SequenceText.Problem(fault.Problem);
             _sentence.ProblemIsWarning = fault.IsWarning;
 
             for (var i = 0; i < _sentence.Steps.Count && i < _shown.Count; i++)

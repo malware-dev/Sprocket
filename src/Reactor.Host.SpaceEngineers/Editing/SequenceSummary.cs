@@ -36,7 +36,15 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 var entry = entries[i];
                 var running = Live(runner, sequence);
 
-                entry.Status = SequenceText.Status(Status(sequence, running));
+                // Said in the place the row already has for what it is doing, rather than on a line
+                // of its own. The switch beside it is the fact and "switched off" beside a switch
+                // that says off is a word spent on nothing; what follows from it is the thing
+                // somebody looking for why their button did nothing needs to read. And a line that
+                // is always there cannot move the row when the switch on it is pressed.
+                var state = Status(sequence, running);
+                entry.Status = state == SequenceStatus.Off && sequence.Steps.Count > 0
+                    ? SequenceText.Problem(SequenceProblem.SwitchedOff)
+                    : SequenceText.Status(state);
                 entry.Running = running != null && running.IsRunning;
                 entry.JustRan = running != null && running.LastFiredTick >= 0
                     && tick - running.LastFiredTick < JustRanTicks;
@@ -216,12 +224,20 @@ namespace Reactor.Host.SpaceEngineers.Editing
             if (adrift.Exists)
                 return adrift;
 
-            // Last, because it is the only one that is about the sequence as a whole rather than
-            // about something it names, and anything missing is the more useful thing to say.
+            // These last, because they are the ones about the sequence as a whole rather than about
+            // something it names, and anything missing is the more useful thing to say.
             var trouble = StartTrouble(world, sequence);
-            return trouble == SequenceProblem.None
-                ? SequenceFault.None
-                : new SequenceFault(trouble, SequenceFault.Trigger);
+            if (trouble != SequenceProblem.None)
+                return new SequenceFault(trouble, SequenceFault.Trigger);
+
+            // Reported even while something starts it perfectly well, because that is the case it is
+            // for: the button works, the trigger is right, and the sequence sits there. Not while it
+            // is actually going, since somebody has run it by hand and can see that it ran, and not
+            // before it does anything, because one nobody has written yet is not one to switch on.
+            if (!sequence.Enabled && sequence.Steps.Count > 0 && (state == null || !state.IsRunning))
+                return new SequenceFault(SequenceProblem.SwitchedOff, SequenceFault.Trigger);
+
+            return SequenceFault.None;
         }
 
     }

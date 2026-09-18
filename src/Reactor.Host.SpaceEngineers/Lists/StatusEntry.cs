@@ -98,6 +98,24 @@ namespace Reactor.Host.SpaceEngineers.Lists
         bool _running;
 
         /// <summary>
+        /// Whether this has been switched off, which is what the ground says.
+        /// </summary>
+        /// <remarks>
+        /// The commonest reason a button does nothing, and the one where everything else about the
+        /// row reads as working. The words for it are in <see cref="Status" />, which is the line
+        /// the row already has for what it is doing and is the same fact - so nothing appears or
+        /// vanishes as the switch beside it is pressed, and the row cannot move out from under the
+        /// press that moved it.
+        /// </remarks>
+        public bool Parked
+        {
+            get { return _parked; }
+            set { Set(ref _parked, value, nameof(Parked)); }
+        }
+
+        bool _parked;
+
+        /// <summary>
         /// What copying this would do, in words, for the note on the button.
         /// </summary>
         /// <remarks>

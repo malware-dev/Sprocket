@@ -368,9 +368,14 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 var fault = Fault(_sequences[i]);
                 var starting = IsStarting(fault);
 
-                entries[i].Problem = starting ? "" : SequenceText.Problem(fault.Problem);
+                // Being switched off is not put here: it is said where the row says what it is
+                // doing, because it is that same fact - see SequenceSummary.Fill.
+                var parked = fault.Problem == SequenceProblem.SwitchedOff;
+
+                entries[i].Problem = starting || parked ? "" : SequenceText.Problem(fault.Problem);
                 entries[i].ProblemIsWarning = fault.IsWarning;
                 entries[i].Problems = !starting && fault.Exists && !fault.IsWarning ? 1 : 0;
+                entries[i].Parked = parked;
             }
 
             var starts = _starts.Triggers;
