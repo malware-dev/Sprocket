@@ -302,9 +302,50 @@ Two further sources both carry a value:
 - **`Increase` and `Decrease` terminal actions**, which are relative rather than absolute,
   and which no amount of value-passing turns into the same thing.
 
-**Needed:** actions that take a value, which is Design decision 3, and which the settable
-count makes considerably more valuable than it looked. Separately, a decision on relative
-adjustment.
+**Built**: an action that declares values is offered, asks for that many, and is performed with
+them. What remains of Design decision 3 is setting a property, which is a surface Reactor does not
+have at all yet, and a decision on relative adjustment - increase and decrease are not setting a
+value, and no amount of value-passing makes them so.
+
+**What the API will tell us about a value**, established rather than assumed, so nobody has to
+find it out twice:
+
+- **How many.** Not on the interface a block hands out. The same object also implements the one
+  mods are given for declaring actions of their own, and the parameter list is on that face, so it
+  is reached by casting. The list holds one entry per value, so its count is the arity. Reactor
+  leaves an action with any at all out of the vocabulary, which is what keeps a step that would do
+  nothing off the screen.
+- **What type - and the declaration does not say.** Each entry is built from a default, but that
+  default is a placeholder for the count: the game's own colour setter declares three *strings* and
+  then refuses anything whose type code is not an integer. Their own dialog supplies the values, so
+  the declared type never had to be right. Reactor therefore passes each value as the kind somebody
+  wrote and lets the action decide.
+  It is not one stray action either: the radius and blink setters declare strings and then insist
+  on `Single` or `Double`. Every one of the twenty-three string declarations is a placeholder, so
+  the type is knowable only from how somebody wrote the value.
+- **Which leaves a whole number ambiguous, and it lands on the player.** The colour setter refuses
+  anything but an integer; the radius setter refuses anything but a float. Both are "a whole number
+  somebody typed", and no single written form satisfies the two - so a radius has to be written
+  `5.0` rather than `5`. Nothing in the API can settle it. An extension can, because an extension
+  knows what it is dealing with.
+- **A whole number goes as a 32-bit one wherever it fits, and a real always as `Single`.** Both
+  handlers accept the wider kind in their type check and then cast the boxed value to the narrower
+  one, which throws. Read rather than run, but it is what the code says, so the wide kinds are
+  never sent.
+- **`System.TypeCode` is rejected by MDK** today, pending a whitelist change that is not public
+  yet, which rules out `Deserialize` and reading a parameter's type back. Nothing needs it: a value
+  is boxed from what was written.
+- **In practice, text.** Across the vanilla blocks the declarations are twenty-three strings and a
+  single byte. Even the action that wants three numbers takes three strings and parses them. So the
+  common case needs a typed answer and nothing more.
+- **Not what it may be one of.** Nothing about a parameter lists permitted values. A set of them
+  exists on a combobox *control*, whose contents are exposed to mods as a delegate that fills a
+  list of keys and labels - so need 1 below is answerable, through controls and properties rather
+  than through action parameters.
+
+Which is why the values are asked for as values and not as a choice: what a person types is read
+with the language's own spellings, and the kind they wrote is what the program keeps. The block is
+asked to turn each one into whatever it declared, against the default it declared it with.
 
 `ITerminalAction.IsEnabled(block)` answers whether an action is available on this
 particular block right now. **Needed:** somewhere to put that, because it is a free
@@ -318,9 +359,9 @@ contribution to story M.
   `CustomNameChanged`, `OwnershipChanged`, `PropertiesChanged`, `VisibilityChanged`
 - `IMyCubeGrid` - `OnBlockAdded`, `OnBlockRemoved`, `OnGridSplit`, `OnGridMerge`
 
-**Needed:** these treated as the floor every block stands on, so that a block nobody has
-written an extension for still has a switch, a working state, a name and a place on the
-grid.
+**Built**: these are the floor every block stands on, so a block nobody has written an
+extension for has a switch, a working state, a name and a place on the grid - and, since the
+block is asked, everything else it declares it can be told to do.
 
 ## Two things the survey corrected
 
@@ -334,6 +375,17 @@ deciding what a split *means* for a system whose parts are now on two grids.
 or pistons, but not connectors", which is `GridWorld.Entities`' scope rule nearly word for word.
 
 ## Where the extensions go first
+
+**An extension is not how a block is supported.** Every block offers what it declares it can
+do, asked of the block itself, so a piston extends and a modded block nobody has heard of
+works the day it is installed. What an extension adds is what a block *is* - its readings,
+its moments, the situations it can be in - and better words for an act than the terminal's
+own. It also suppresses what it has said better, which needs no list: a switch called `X`
+offers `X_On`, `X_Off` and a bare `X`, so a kind that has written both halves does not offer
+the toggle a third time.
+
+The consequence for this section is that nothing below is a block Reactor cannot use. It is
+a list of blocks Reactor cannot *ask about*, which is a smaller and more interesting problem.
 
 Not every block needs one, and the ones that need one most are not the ones people
 automate most. **An extension earns its place where a block is watched, not where it is

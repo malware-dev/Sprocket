@@ -13,5 +13,14 @@ namespace Reactor.Host.SpaceEngineers.Input
 
         /// <summary>Enter was pressed. What that means is the caller's business.</summary>
         public bool Commit;
+
+        /// <summary>
+        /// Move to the next field of a form.
+        /// </summary>
+        /// <remarks>
+        /// A form with three fields and no way off the first but the mouse is a form most people
+        /// will fill in one field and finish, which is exactly what happened.
+        /// </remarks>
+        public bool Onward;
     }
 }

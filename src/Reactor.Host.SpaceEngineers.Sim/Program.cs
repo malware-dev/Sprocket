@@ -149,7 +149,8 @@ namespace Reactor.Sim
             string bare = word.TrimStart('-');
 
             if (bare == "at" || bare == "tick" || bare == "drag" || bare == "move" || bare == "scroll"
-                || bare == "type" || bare == "enter" || bare == "escape" || bare == "clear")
+                || bare == "type" || bare == "enter" || bare == "escape" || bare == "clear"
+                || bare == "double" || bare == "tab")
                 return true;
 
             return float.TryParse(bare, NumberStyles.Float, CultureInfo.InvariantCulture, out _);

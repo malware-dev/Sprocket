@@ -75,6 +75,26 @@ static class Driving
         editor.SetText(start.Options.First(o => o.Asks).Command, name);
     }
 
+    /// <summary>Answers the question this screen is asking, wherever it sits.</summary>
+    /// <remarks>
+    /// How a target asks is its own business, the same as naming a system: what a test says is
+    /// what somebody typed.
+    /// </remarks>
+    public static void Typed(this ReactorEditor editor, string said)
+    {
+        if (editor.Screen.PrimaryAsks)
+        {
+            editor.SetText(editor.Screen.PrimaryCommand, said);
+            return;
+        }
+
+        var option = editor.Screen.Components.OfType<StartComponent>()
+            .SelectMany(s => s.Options)
+            .First(o => o.Asks);
+
+        editor.SetText(option.Command, said);
+    }
+
     /// <summary>Presses one of the ways to start something on this screen, wherever it sits.</summary>
     public static void PressStart(this ReactorEditor editor, string label)
     {

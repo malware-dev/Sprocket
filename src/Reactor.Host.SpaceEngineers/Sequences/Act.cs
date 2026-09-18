@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Sequences
 {
@@ -24,6 +25,21 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
         /// <summary>The parts affected. All of them, together, in this step.</summary>
         public IList<string> Targets => _targets;
+
+        /// <summary>
+        /// The values the action has to be given, in the order it declares them.
+        /// </summary>
+        /// <remarks>
+        /// Each carries its own kind, because nothing else does: an action declares how many values
+        /// it wants and not one thing about what they are, so the program is the only record of
+        /// whether somebody wrote a number, a flag or a colour.
+        /// <para>
+        /// Empty for every action of Reactor's own, and for the great majority of the game's.
+        /// </para>
+        /// </remarks>
+        public IList<Literal> Values => _values;
+
+        readonly List<Literal> _values = new List<Literal>();
 
         public bool HasAction => Targets.Count > 0 && !string.IsNullOrEmpty(ActionId);
     }

@@ -153,6 +153,26 @@ namespace Reactor.Host.SpaceEngineers.Words
         }
 
 
+        /// <summary>
+        /// The values an action was given, in the order it wanted them.
+        /// </summary>
+        /// <remarks>
+        /// Spelled the way they are written down, so the line on the screen and the line in the
+        /// program say the same thing - and so somebody who types a value into this slot sees back
+        /// exactly what they typed.
+        /// </remarks>
+        static string Given(ValuesSlot slot)
+        {
+            if (slot.IsEmpty)
+                return Empty;
+
+            var said = slot.Values[0].Said;
+            for (var i = 1; i < slot.Values.Count; i++)
+                said += " " + slot.Values[i].Said;
+
+            return said;
+        }
+
         static string Of(GridWorld world, SentenceSlot slot)
         {
             var entities = slot as EntitiesSlot;
@@ -170,6 +190,10 @@ namespace Reactor.Host.SpaceEngineers.Words
             var duration = slot as DurationSlot;
             if (duration != null)
                 return TimeText.Duration(duration.Ticks);
+
+            var given = slot as ValuesSlot;
+            if (given != null)
+                return Given(given);
 
             var sequence = slot as SequenceSlot;
             if (sequence != null)

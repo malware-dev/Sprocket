@@ -53,6 +53,12 @@ namespace Reactor.Host.SpaceEngineers.Storage
         Step,
 
         /// <summary>What a trigger does instead of running, which is to abandon a run.</summary>
-        Stop
+        Stop,
+
+        /// <summary>A step naming one of the game's own actions by the game's own id.</summary>
+        Action,
+
+        /// <summary>The values such an action has to be given.</summary>
+        With
     }
 }

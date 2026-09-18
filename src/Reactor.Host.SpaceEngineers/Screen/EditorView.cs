@@ -450,7 +450,8 @@ namespace Reactor.Host.SpaceEngineers.Screen
             // Opened and closed from what the screen says, rather than remembered here. Core raises a
             // question and clears it when it is answered, so there is one place that knows.
             if (screen.HasQuestion && !_question.IsUp)
-                _question.Open(screen.Question, screen.Answers, _raisedBy);
+                _question.Open(screen.Question, screen.Answers,
+                    screen.QuestionIsHere ? _raisedBy : null);
             else if (!screen.HasQuestion && _question.IsUp)
                 _question.Close();
 
@@ -605,7 +606,14 @@ namespace Reactor.Host.SpaceEngineers.Screen
             for (int i = 0; i < _actions.Children.Count && i < screen.Actions.Count; i++)
                 _actions.Children[i].Press = Deed.Sends(screen.Actions[i].Command);
 
-            _primary.Press = screen.HasPrimary ? Deed.Sends(screen.PrimaryCommand) : Deed.Nothing;
+            // Asking rather than sending where the screen cannot finish without a value: the field
+            // opens under this button, which is the one somebody just pressed to finish.
+            _primary.Press = !screen.HasPrimary
+                ? Deed.Nothing
+                : screen.PrimaryAsks
+                    ? Deed.Values(screen.PrimaryCommand, screen.PrimaryQuestion,
+                        screen.PrimaryFields)
+                    : Deed.Sends(screen.PrimaryCommand);
         }
 
         /// <summary>How wide a question's popup is, whatever it is hanging under.</summary>
@@ -1037,7 +1045,12 @@ namespace Reactor.Host.SpaceEngineers.Screen
                     return true;
                 }
 
-                // The one control in there sends what has been typed. Everything else inside it is the
+                // A press on one of the fields moves the caret to it, so several values can be
+                // filled in any order.
+                if (_ask.Touch(point))
+                    return true;
+
+                // The one control in there sends what has been typed. Everything else inside it is a
                 // box, which already has the keyboard.
                 Element inside = Under(point);
                 if (inside != null && inside.Press.Means == Means.Commit)
@@ -1128,8 +1141,14 @@ namespace Reactor.Host.SpaceEngineers.Screen
             // Taking a choice and moving on in one gesture, where one thing is being chosen. Where
             // several can be, a second press means un-choosing, and moving on from that would be
             // taking away what somebody had just done.
+            //
+            // Moving on can mean asking rather than finishing - an action that will not do anything
+            // until it is given values. Then the question opens under the row that was double
+            // pressed, because that is where the gesture happened and the button was never touched.
+            // Sending the command instead would reach a command that takes text with none to give
+            // it, which is nothing happening at all.
             if (clicks > 1 && deed.Confirms && _editor.Screen.HasPrimary)
-                _editor.Invoke(_editor.Screen.PrimaryCommand);
+                Moving(target);
 
             return true;
         }
@@ -1171,12 +1190,30 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// rather than refusing it, and deciding here that empty means cancel would be this target
         /// inventing a rule core deliberately did not make.
         /// </summary>
+        /// <summary>
+        /// Moves the caret to the next field of the form, and round to the first after the last.
+        /// </summary>
+        /// <remarks>
+        /// So a form can be filled without the mouse. Nothing to do while a name is being typed:
+        /// there is one field and going onward from it means finishing, which Enter already does.
+        /// </remarks>
+        public void NextField()
+        {
+            if (_renaming >= 0)
+                return;
+
+            _ask.Next();
+        }
+
         public void CommitAsk()
         {
             if (!IsAsking)
                 return;
 
-            string answer = AskBox.Text;
+            // The whole answer, not the field the caret happens to be in. A form of three fields
+            // sent one of them, which is how three values became one - and it looked like the other
+            // two had been thrown away, because they had.
+            string answer = _renaming >= 0 ? AskBox.Text : _ask.Answer;
 
             // Carried from when the box opened, which is safe: an id is derived from what a command is
             // for rather than counted out, so a rebuild between opening the box and answering it hands
@@ -1222,6 +1259,32 @@ namespace Reactor.Host.SpaceEngineers.Screen
             get { return _question.IsUp; }
         }
 
+        /// <summary>
+        /// Finishes a screen, or opens the question it cannot finish without.
+        /// </summary>
+        /// <remarks>
+        /// The screen decides which, so a double press and the button it stands in for behave the
+        /// same way. What differs is where a question hangs: under the row somebody pressed twice,
+        /// which is what they were looking at.
+        /// </remarks>
+        void Moving(Element target)
+        {
+            EditorScreen screen = _editor.Screen;
+            if (!screen.PrimaryAsks)
+            {
+                _editor.Invoke(screen.PrimaryCommand);
+                return;
+            }
+
+            // Whatever was open goes first, because closing is what puts a name being typed away -
+            // and it closes the form as well, so opening before it would open and shut in one press.
+            Close();
+
+            _raisedBy = target;
+            _ask.Values(screen.PrimaryQuestion, screen.PrimaryCommand, screen.PrimaryFields);
+            _chromeStale = true;
+        }
+
         void BeginAsk(Element control)
         {
             Deed deed = control.Press;
@@ -1247,7 +1310,10 @@ namespace Reactor.Host.SpaceEngineers.Screen
             }
 
             // Everything else hangs over the screen, under whatever was pressed.
-            _ask.Open(deed.Question, control, deed.Command);
+            if (deed.Fields > 0)
+                _ask.Values(deed.Question, deed.Command, deed.Fields, deed.Filled);
+            else
+                _ask.Open(deed.Question, control, deed.Command);
         }
 
         void Close()

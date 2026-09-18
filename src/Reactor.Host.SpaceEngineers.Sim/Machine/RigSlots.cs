@@ -72,6 +72,32 @@ sealed class RigSlots : ISlots
         return false;
     }
 
+    public void Offered(IMyTerminalBlock block, List<Offer> into)
+    {
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block != block)
+                continue;
+
+            fitting.Offered(into);
+            return;
+        }
+    }
+
+    public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
+    {
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block != block || !fitting.Offers(actionId))
+                continue;
+
+            fitting.Perform(actionId, values);
+            return true;
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Whether the rig still has the block a slot names.
     /// </summary>

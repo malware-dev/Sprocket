@@ -179,8 +179,20 @@ A step starts something and the next statement follows immediately.
 The head of a step is an action from the host's own vocabulary - `open`, `close`, `depressurize` - and
 the list is the parts it acts on. An action whose id is one of the language's words is quoted.
 
-`action '<id>' on [ <parts> ]` runs a terminal action of the game by its own id, which is how a
-sequence reaches anything a mod has added. `with` carries the values that action takes.
+`action '<id>' on [ <parts> ]` runs a terminal action of the game by its own id, and `with` carries
+the values that action takes. Every value is written as the kind it is, in order, because an action
+declares how many values it wants and nothing else about them - no names, and no set of what a value
+may be one of. A value left out is the default the action declared.
+
+The two forms reach the same actions, so the longer one is what a value hangs off: a bare head has
+nowhere to put one. An action given no values is written as a head, whether it is the host's own word
+or the game's id.
+
+```
+action 'SetColor' on [ light ] with 255 136 0
+action 'SetRadius' on [ light ] with 4.5
+action 'Run' on [ pb ] with "doors open"
+```
 
 `run <sequence>` starts another sequence of the same system and carries on. A sequence already
 running is not started again.

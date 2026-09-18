@@ -162,6 +162,12 @@ namespace Reactor.Sim.Simulation
             _view.CancelAsk();
         }
 
+        /// <summary>Moves the caret to the next field of a form, which Tab does in the game.</summary>
+        public void NextField()
+        {
+            _view.NextField();
+        }
+
         /// <summary>The box the keyboard is in, when something on the screen has taken it.</summary>
         public TextBox Focus => _view.Focus;
 

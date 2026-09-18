@@ -4,18 +4,24 @@ namespace Reactor.Host.SpaceEngineers.World
     /// Something a sequence can tell an entity to do.
     /// </summary>
     /// <remarks>
-    /// Actions carry no parameters. That is a scope decision, not an oversight:
-    /// parameters bring value pickers, types and unit formatting with them, and none
-    /// of that is needed to find out whether people can build a working airlock.
+    /// Most carry no values at all. The ones that do are the game's own, which declare how many they
+    /// want and nothing else about them: no names, and no set of what a value may be one of.
     /// </remarks>
     public sealed class EntityAction
     {
         public EntityAction(string id, string text, string leadsToStateId, string gameActionId)
+            : this(id, text, leadsToStateId, gameActionId, 0)
+        {
+        }
+
+        public EntityAction(string id, string text, string leadsToStateId, string gameActionId,
+            int wants)
         {
             Id = id;
             Text = text;
             LeadsToStateId = leadsToStateId;
             GameActionId = gameActionId;
+            Wants = wants;
         }
 
         /// <summary>Stable identifier, referenced by saved sequences.</summary>
@@ -56,5 +62,15 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </para>
         /// </remarks>
         public string GameActionId { get; private set; }
+
+        /// <summary>
+        /// How many values it has to be given before it will do anything.
+        /// </summary>
+        /// <remarks>
+        /// Zero for everything of Reactor's own. The game declares one default per value it wants, so
+        /// this is the count of those - which is all it declares: what each one is for is not said,
+        /// and the type of each is the runtime type of the default it was declared with.
+        /// </remarks>
+        public int Wants { get; private set; }
     }
 }

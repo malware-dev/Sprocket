@@ -798,8 +798,24 @@ namespace Reactor.Host.SpaceEngineers.Storage
             var act = step as Act;
             if (act != null)
             {
-                pen.Head(act.ActionId);
-                Names(pen, act.Targets);
+                // One that has to be given values says so in the language's own words, because the
+                // values have to hang off something and a bare head has nowhere to put them. One
+                // that needs none is written as what it is: a verb and the things it acts on.
+                if (act.Values.Count > 0)
+                {
+                    pen.Start(Keyword.Action).Word(act.ActionId).Says(Keyword.On);
+                    Names(pen, act.Targets);
+                    pen.Says(Keyword.With);
+
+                    for (var i = 0; i < act.Values.Count; i++)
+                        Written(pen, act.Values[i]);
+                }
+                else
+                {
+                    pen.Head(act.ActionId);
+                    Names(pen, act.Targets);
+                }
+
                 pen.End();
                 return;
             }
@@ -852,6 +868,9 @@ namespace Reactor.Host.SpaceEngineers.Storage
                 return null;
             }
 
+            if (statement.Key == Keyword.Action)
+                return Given(statement);
+
             if (statement.Key != Keyword.None)
                 return null;
 
@@ -866,6 +885,106 @@ namespace Reactor.Host.SpaceEngineers.Storage
             }
 
             return Noted(act, statement);
+        }
+
+        /// <summary>
+        /// <c>action 'SetColor' on [ light ] with 255 0 0</c>: one of the game's own, given what it
+        /// asked for.
+        /// </summary>
+        /// <remarks>
+        /// Everything after <c>with</c> is a value, in the order it lies, because order is all the
+        /// game says about them - there are no names to match and nothing is optional. Taken by
+        /// position rather than by what it looks like, so a flag written <c>on</c> is a value and
+        /// not mistaken for one of the language's own words.
+        /// </remarks>
+        static Step Given(Statement statement)
+        {
+            var act = new Act(statement.Word(0));
+
+            for (var at = 1; at < statement.Count; at++)
+            {
+                if (statement.ValueAt(at).Form != ValueForm.List)
+                    continue;
+
+                Words(statement.Items(at), act.Targets);
+                break;
+            }
+
+            var from = -1;
+            for (var at = 1; at < statement.Count; at++)
+            {
+                if (!statement.Says(at, Keyword.With))
+                    continue;
+
+                from = at + 1;
+                break;
+            }
+
+            for (var at = from; at >= 0 && at < statement.Count; at++)
+                act.Values.Add(Given(statement.ValueAt(at)));
+
+            return Noted(act, statement);
+        }
+
+        /// <summary>One value of an action, as whatever kind it was written as.</summary>
+        /// <remarks>
+        /// A bare word that is not a flag is kept as text. Nothing else could be done with it, and
+        /// losing it would turn a step somebody wrote into one that quietly does something else.
+        /// </remarks>
+        static Literal Given(Value value)
+        {
+            if (value.Form == ValueForm.Text)
+                return Literal.Of(value.Word);
+
+            if (value.Form == ValueForm.Integer || value.Form == ValueForm.Duration)
+                return Literal.Of(value.Whole);
+
+            if (value.Form == ValueForm.Real)
+                return Literal.Of(value.Real);
+
+            if (value.Form == ValueForm.Color)
+            {
+                return Literal.Colour((byte)(value.Whole >> 24), (byte)(value.Whole >> 16),
+                    (byte)(value.Whole >> 8), (byte)value.Whole);
+            }
+
+            if (value.Says(Keyword.On))
+                return Literal.Of(true);
+
+            if (value.Says(Keyword.Off))
+                return Literal.Of(false);
+
+            return Literal.Of(value.Word);
+        }
+
+        /// <summary>The same, written back as the kind it is.</summary>
+        static void Written(Pen pen, Literal value)
+        {
+            if (value.Kind == ValueKind.Text)
+            {
+                pen.Text(value.Text);
+                return;
+            }
+
+            if (value.Kind == ValueKind.Flag)
+            {
+                pen.Says(value.Flag ? Keyword.On : Keyword.Off);
+                return;
+            }
+
+            if (value.Kind == ValueKind.Integer)
+            {
+                pen.Whole(value.Whole);
+                return;
+            }
+
+            if (value.Kind == ValueKind.Real)
+            {
+                pen.Real(value.Real);
+                return;
+            }
+
+            pen.Colour(value.Red, value.Green, value.Blue, value.Alpha);
         }
 
         static Step Noted(Step step, Statement statement)

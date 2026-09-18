@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Fakes;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
@@ -139,16 +140,101 @@ abstract class Fitting
     /// </remarks>
     public virtual bool Offers(string actionId)
     {
-        return actionId == "OnOff_On" || actionId == "OnOff_Off";
+        return actionId == "OnOff" || actionId == "OnOff_On" || actionId == "OnOff_Off"
+            || Named(actionId);
     }
 
+    /// <summary>
+    /// Everything this block declares it can be told to do, as the terminal lists them.
+    /// </summary>
+    /// <remarks>
+    /// Including the bare toggle, which is what makes it worth having on the rig: Reactor says open
+    /// and close in its own words and must not then offer the toggle they came from a third time.
+    /// </remarks>
+    public virtual void Offered(List<Offer> into)
+    {
+        into.Add(new Offer("OnOff", "Toggle block On/Off"));
+        into.Add(new Offer("OnOff_On", "Turn block On"));
+        into.Add(new Offer("OnOff_Off", "Turn block Off"));
+
+        for (var i = 0; i < _offers.Count; i++)
+            into.Add(_offers[i]);
+    }
+
+    /// <summary>
+    /// Gives this block one more of the game's own actions, which Reactor knows nothing about.
+    /// </summary>
+    /// <remarks>
+    /// Most of a ship is blocks like this: a piston that extends, a connector that connects, a tank
+    /// that stockpiles. Nobody has written an extension for any of them and nobody ever will write
+    /// one for a block a mod adds next year, so what Reactor can say about them is whatever they
+    /// declare - and the rig has to be able to declare something for that to be tested at all.
+    /// </remarks>
+    public Fitting Offering(string id, string text)
+    {
+        return Offering(id, text, 0);
+    }
+
+    /// <summary>The same, for one that has to be given values before it can do anything.</summary>
+    /// <remarks>
+    /// Most of the game's value-taking actions want text and parse it themselves - a radius, a
+    /// colour as three numbers. Reactor leaves them out until a step can carry a value, and the
+    /// rig has to be able to declare one for that to be tested.
+    /// </remarks>
+    public Fitting Offering(string id, string text, int wants)
+    {
+        _offers.Add(new Offer(id, text, wants));
+        return this;
+    }
+
+    bool Named(string actionId)
+    {
+        for (var i = 0; i < _offers.Count; i++)
+        {
+            if (_offers[i].Id == actionId)
+                return true;
+        }
+
+        return false;
+    }
+
+    readonly List<Offer> _offers = new List<Offer>();
+
     /// <summary>Does what one of those actions does, as the game would when a slot invokes it.</summary>
-    public virtual void Perform(string actionId)
+    public void Perform(string actionId)
+    {
+        Perform(actionId, null);
+    }
+
+    /// <summary>
+    /// Does one of the game's own actions, with whatever values it was given.
+    /// </summary>
+    /// <remarks>
+    /// An action the rig declares but does not model writes itself down instead, with its values,
+    /// because what a test about values needs to know is which values arrived and in what order.
+    /// </remarks>
+    public virtual void Perform(string actionId, IList<Literal> values)
     {
         if (actionId == "OnOff_On")
             Enabled = true;
         else if (actionId == "OnOff_Off")
             Enabled = false;
+        else if (actionId == "OnOff")
+            Enabled = !Enabled;
+        else if (Named(actionId))
+            Told(Said(actionId, values));
+    }
+
+    static string Said(string actionId, IList<Literal> values)
+    {
+        if (values == null || values.Count == 0)
+            return actionId;
+
+        var said = actionId;
+        for (var i = 0; i < values.Count; i++)
+            said += " " + values[i].Said;
+
+        return said;
     }
 
     /// <summary>Takes a listener on or off, answering nothing, as an event accessor does.</summary>

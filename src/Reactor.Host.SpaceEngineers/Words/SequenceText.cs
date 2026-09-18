@@ -1,3 +1,4 @@
+using System.Globalization;
 using Reactor.Host.SpaceEngineers.Editing;
 using Reactor.Host.SpaceEngineers.Runtime;
 using Reactor.Host.SpaceEngineers.Sequences;
@@ -166,6 +167,41 @@ namespace Reactor.Host.SpaceEngineers.Words
         }
 
 
+        /// <summary>
+        /// How many values an action is waiting for, said as a sentence.
+        /// </summary>
+        /// <remarks>
+        /// The count and nothing else, because the count is all the game declares: an action says
+        /// how many values it wants and never what they are for. Saying more would be Reactor
+        /// inventing knowledge it does not have, on the screen where somebody is deciding what to
+        /// type.
+        /// </remarks>
+        public static string Wants(int values)
+        {
+            if (values <= 1)
+                return "This needs one value.";
+
+            return "This needs " + Counted(values) + " values.";
+        }
+
+        /// <summary>The row that opens the field, which says what pressing it is for.</summary>
+        public static string Giving()
+        {
+            return "Say what to give it";
+        }
+
+        static string Counted(int values)
+        {
+            if (values == 2)
+                return "two";
+            if (values == 3)
+                return "three";
+            if (values == 4)
+                return "four";
+
+            return values.ToString(CultureInfo.InvariantCulture);
+        }
+
         public static string Problem(SequenceProblem problem)
         {
             if (problem == SequenceProblem.MissingSource)
@@ -229,7 +265,17 @@ namespace Reactor.Host.SpaceEngineers.Words
                 }
             }
 
-            return text + " " + SentenceText.Named(bindings, step.Targets, true);
+            var said = text + " " + SentenceText.Named(bindings, step.Targets, true);
+            if (step.Values.Count == 0)
+                return said;
+
+            // After what it acts on, because the blocks are what somebody is looking for in a list
+            // of steps and the values are the detail. Spelled as they are written down, so the line
+            // on screen and the line in the program say the same thing.
+            for (var i = 0; i < step.Values.Count; i++)
+                said += " " + step.Values[i].Said;
+
+            return said;
         }
     }
 }

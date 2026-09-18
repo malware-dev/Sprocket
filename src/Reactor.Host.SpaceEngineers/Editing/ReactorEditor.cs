@@ -195,6 +195,23 @@ namespace Reactor.Host.SpaceEngineers.Editing
         {
             Release();
             _screen.Question = question;
+            _screen.QuestionIsHere = false;
+        }
+
+        /// <summary>
+        /// The same, for a question that belongs to the control somebody just pressed.
+        /// </summary>
+        /// <remarks>
+        /// A menu rather than a dialog: it hangs under what was pressed, because the answers are
+        /// about that thing and the row it is on has to stay in sight. A question about the screen -
+        /// whether to switch a sequence on, whether to replace a program - belongs to no control
+        /// and goes in the middle, which is <see cref="Ask" />.
+        /// </remarks>
+        internal void AskHere(string question)
+        {
+            Release();
+            _screen.Question = question;
+            _screen.QuestionIsHere = true;
         }
 
         /// <summary>Adds a way to answer, in the order they are offered.</summary>
@@ -518,6 +535,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
             Settle();
         }
 
+        /// <summary>How many values an action wants, asked of the blocks it would act on.</summary>
+        internal int Wants(IList<long> entityIds, string actionId)
+        {
+            return Vocabulary.Wants(_world, entityIds, actionId);
+        }
+
         /// <summary>Reports new text for a search box or any other field, unless the field refuses it.</summary>
         public void SetText(int command, string value)
         {
@@ -667,7 +690,13 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
         internal int RegisterText(Cmd kind, int which, Action<string> action)
         {
-            var id = CommandId.Of(kind, which);
+            return RegisterText(kind, which, 0, action);
+        }
+
+        /// <summary>The same, for one part of a numbered thing - one slot of a sentence.</summary>
+        internal int RegisterText(Cmd kind, int which, int part, Action<string> action)
+        {
+            var id = CommandId.Of(kind, which, part);
             Claim(id, kind);
             _textActions.Add(id, action);
             return id;
@@ -963,7 +992,13 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _undoCommand = page.HasHistory ? Register(Cmd.Undo, page.Undo) : 0;
             _redoCommand = page.HasHistory ? Register(Cmd.Redo, page.Redo) : 0;
             _screen.PrimaryText = page.PrimaryText;
-            _screen.PrimaryCommand = _screen.HasPrimary ? Register(Cmd.Primary, page.Primary) : 0;
+            _screen.PrimaryQuestion = page.PrimaryQuestion;
+            _screen.PrimaryFields = page.PrimaryFields;
+            _screen.PrimaryCommand = !_screen.HasPrimary
+                ? 0
+                : _screen.PrimaryAsks
+                    ? RegisterText(Cmd.Primary, page.Primary)
+                    : Register(Cmd.Primary, page.Primary);
 
             _gathered.Clear();
             page.Build(_gathered);
@@ -1194,7 +1229,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 return;
             }
 
-            Ask(SequenceText.Taken(_runner.Bindings, taken));
+            AskHere(SequenceText.Taken(_runner.Bindings, taken));
             Answer("Leave it alone", delegate { });
             Answer("Take it over", delegate { then(taken); });
         }
@@ -1311,7 +1346,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// </remarks>
         void AskWhatItDoes(AutomationSystem system, Trigger trigger, int origin, bool fresh)
         {
-            Ask("What should it do?");
+            AskHere("What should it do?");
 
             Answer("Run a new sequence", delegate { RunNew(system, trigger, origin, fresh); });
 

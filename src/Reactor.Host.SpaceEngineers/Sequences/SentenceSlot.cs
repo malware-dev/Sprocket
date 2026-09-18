@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Reactor.Host.SpaceEngineers.Sequences
 {
     /// <summary>
@@ -23,6 +25,31 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         public abstract bool IsEmpty { get; }
 
         public int Command { get; private set; }
+
+        /// <summary>
+        /// What pressing it asks for, or empty when pressing it opens a list instead.
+        /// </summary>
+        /// <remarks>
+        /// A slot whose contents are typed rather than chosen from something. The field hangs under
+        /// the chip that was pressed, which is where somebody is already looking, and what they
+        /// typed goes to the same command.
+        /// </remarks>
+        public string Question { get; set; }
+
+        public bool Asks => !string.IsNullOrEmpty(Question);
+
+        /// <summary>How many values it asks for, one field each. One unless a slot says otherwise.</summary>
+        public virtual int Fields => 1;
+
+        /// <summary>
+        /// What those fields open holding, or null for empty ones.
+        /// </summary>
+        /// <remarks>
+        /// What is already in the slot. Changing one value of three should not mean typing all three
+        /// again, and a form that opened empty over values somebody had given would read as having
+        /// thrown them away.
+        /// </remarks>
+        public virtual IList<string> Filled => null;
 
         /// <summary>
         /// Empties this part, where emptying it is a thing to offer. Zero where it is not.

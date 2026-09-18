@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Fakes;
 using Sandbox.ModAPI;
 using VRage.ObjectBuilders;
@@ -33,10 +35,19 @@ sealed class Door : Fitting
     /// <summary>The game's own pair for a door's switch, which is called Open.</summary>
     public override bool Offers(string actionId)
     {
-        return actionId == "Open_On" || actionId == "Open_Off" || base.Offers(actionId);
+        return actionId == "Open" || actionId == "Open_On" || actionId == "Open_Off"
+            || base.Offers(actionId);
     }
 
-    public override void Perform(string actionId)
+    public override void Offered(List<Offer> into)
+    {
+        into.Add(new Offer("Open", "Open/Closed"));
+        into.Add(new Offer("Open_On", "Open"));
+        into.Add(new Offer("Open_Off", "Closed"));
+        base.Offered(into);
+    }
+
+    public override void Perform(string actionId, IList<Literal> values)
     {
         if (actionId == "Open_On")
         {
@@ -52,7 +63,7 @@ sealed class Door : Fitting
             return;
         }
 
-        base.Perform(actionId);
+        base.Perform(actionId, values);
     }
 
     /// <summary>

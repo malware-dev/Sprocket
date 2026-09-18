@@ -80,5 +80,19 @@ namespace Reactor.Host.SpaceEngineers.World
         {
             return entityId != 0 && _slots.Exists(entityId);
         }
+
+        /// <summary>Everything a block declares it can be told to do.</summary>
+        public static void Offered(IMyTerminalBlock block, List<Offer> into)
+        {
+            if (block != null)
+                _slots.Offered(block, into);
+        }
+
+        /// <summary>Performs one of a block's own actions, if it has one by that name.</summary>
+        public static bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        {
+            return block != null && !string.IsNullOrEmpty(actionId)
+                && _slots.Perform(block, actionId, values);
+        }
     }
 }

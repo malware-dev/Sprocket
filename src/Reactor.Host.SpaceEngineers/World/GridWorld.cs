@@ -281,8 +281,14 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <summary>Tells a block to do something.</summary>
         public void Invoke(GridEntity entity, string actionId)
         {
+            Invoke(entity, actionId, null);
+        }
+
+        /// <summary>The same, with the values the action asked for.</summary>
+        public void Invoke(GridEntity entity, string actionId, IList<Literal> values)
+        {
             if (entity != null)
-                entity.Invoke(actionId);
+                entity.Invoke(actionId, values);
         }
 
         /// <summary>

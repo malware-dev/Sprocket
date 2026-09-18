@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Reactor.Host.SpaceEngineers.Lists;
 using Reactor.Host.SpaceEngineers.Picking;
 using Reactor.Host.SpaceEngineers.Screen;
+using Reactor.Host.SpaceEngineers.Storage;
+using Reactor.Host.SpaceEngineers.Words;
 using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Editing
@@ -133,9 +135,48 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
         public override string PrimaryText => IsComplete ? "Done" : "";
 
+        /// <summary>
+        /// What the chosen action will not do anything without, asked here rather than on a screen
+        /// of its own.
+        /// </summary>
+        /// <remarks>
+        /// Nearly nothing wants values, so this is empty nearly always. When it is not, the count is
+        /// the whole of what can honestly be asked: the game declares how many values an action
+        /// takes and nothing about what any of them is for.
+        /// </remarks>
+        public override string PrimaryQuestion
+        {
+            get
+            {
+                var wants = Wants();
+                return wants > 0 ? SequenceText.Wants(wants) : "";
+            }
+        }
+
+        public override int PrimaryFields
+        {
+            get
+            {
+                var wants = Wants();
+                return wants > 0 ? wants : 1;
+            }
+        }
+
         public override void Primary()
         {
             _done(new PickAnswer(_selection, _chosen, _all));
+        }
+
+        public override void Primary(string said)
+        {
+            var values = new List<Literal>();
+            ValueLine.Read(said, values);
+            _done(new PickAnswer(_selection, _chosen, _all, values));
+        }
+
+        int Wants()
+        {
+            return IsComplete ? Editor.Wants(_selection, _chosen) : 0;
         }
 
         bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen);

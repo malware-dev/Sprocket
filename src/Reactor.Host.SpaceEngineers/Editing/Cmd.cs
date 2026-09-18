@@ -66,6 +66,9 @@ namespace Reactor.Host.SpaceEngineers.Editing
         RequireAll,
 
         // A list of answers.
-        Choice
+        Choice,
+
+        /// <summary>Where the values an action asked for are typed.</summary>
+        GiveValues
     }
 }

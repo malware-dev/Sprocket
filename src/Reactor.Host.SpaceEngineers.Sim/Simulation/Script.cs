@@ -43,6 +43,12 @@ namespace Reactor.Sim.Simulation
                     continue;
                 }
 
+                if (word == "tab")
+                {
+                    script.Add(Step.Onward);
+                    continue;
+                }
+
                 if (word == "enter" || word == "escape" || word == "clear")
                 {
                     script.Add(word == "enter" ? Step.Enter : word == "escape" ? Step.Escape : Step.Clear);
@@ -60,6 +66,13 @@ namespace Reactor.Sim.Simulation
                 {
                     script.Add(Step.Type).Text = args[i + 1];
                     i += 1;
+                    continue;
+                }
+
+                if (word == "double" && i + 2 < args.Length)
+                {
+                    script.Add(Step.Double).At = Point(args, i + 1);
+                    i += 2;
                     continue;
                 }
 
@@ -137,6 +150,24 @@ namespace Reactor.Sim.Simulation
                 // whatever it was last over, which is a state no player can produce.
                 scene.MoveTo(step.At);
                 scene.Press(step.At, 1);
+                drawn();
+                return;
+            }
+
+            // Two presses in one gesture, which the game reports as a count rather than as two
+            // presses - and which the editor treats as choosing a thing and moving on in one move.
+            // Not the same as pressing twice, so a script cannot say it any other way.
+            if (step.Kind == Step.Onward)
+            {
+                scene.NextField();
+                drawn();
+                return;
+            }
+
+            if (step.Kind == Step.Double)
+            {
+                scene.MoveTo(step.At);
+                scene.Press(step.At, 2);
                 drawn();
                 return;
             }

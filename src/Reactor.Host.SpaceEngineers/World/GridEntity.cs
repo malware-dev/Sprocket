@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sandbox.ModAPI;
 
 namespace Reactor.Host.SpaceEngineers.World
@@ -99,17 +100,41 @@ namespace Reactor.Host.SpaceEngineers.World
 
         public void Invoke(string actionId)
         {
+            Invoke(actionId, null);
+        }
+
+        /// <summary>
+        /// The same, with the values the action declared it wanted.
+        /// </summary>
+        /// <remarks>
+        /// Nothing of Reactor's own takes any, so values only ever reach the game's own actions -
+        /// which is also the only place anything knows what to turn them into.
+        /// </remarks>
+        public void Invoke(string actionId, IList<Literal> values)
+        {
             if (_extension != null && _extension.TryInvoke(_block, actionId))
                 return;
 
             IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
-            if (functional == null)
-                return;
+            if (functional != null)
+            {
+                if (actionId == BlockKinds.SwitchOn)
+                {
+                    functional.Enabled = true;
+                    return;
+                }
 
-            if (actionId == BlockKinds.SwitchOn)
-                functional.Enabled = true;
-            else if (actionId == BlockKinds.SwitchOff)
-                functional.Enabled = false;
+                if (actionId == BlockKinds.SwitchOff)
+                {
+                    functional.Enabled = false;
+                    return;
+                }
+            }
+
+            // Anything the block declares for itself, performed by the game. An id it does not have
+            // is a sequence written against a vocabulary this block no longer offers, and it does
+            // nothing rather than throwing - the same answer a reading gives.
+            Toolbars.Perform(_block, actionId, values);
         }
     }
 }

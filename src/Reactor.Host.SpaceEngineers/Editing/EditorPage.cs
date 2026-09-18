@@ -230,7 +230,22 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
         public virtual string PrimaryText => "";
 
+        /// <summary>
+        /// What pressing the primary asks for first, or empty when it asks nothing.
+        /// </summary>
+        /// <remarks>
+        /// A page that needs a value to finish gets it on the button that finishes it. What is typed
+        /// arrives at <see cref="Primary(string)" />, and <see cref="Primary()" /> is never called.
+        /// </remarks>
+        public virtual string PrimaryQuestion => "";
+
+        /// <summary>How many values it asks for, one field each. One unless a page says otherwise.</summary>
+        public virtual int PrimaryFields => 1;
+
         public virtual void Primary() { }
+
+        /// <summary>The same, with what was typed into the question the button asked.</summary>
+        public virtual void Primary(string said) { }
 
         /// <summary>
         /// Adds this page's components, in order, and registers their commands.

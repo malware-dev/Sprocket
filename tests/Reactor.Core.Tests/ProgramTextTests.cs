@@ -229,6 +229,104 @@ public class ProgramTextTests
     }
 
     /// <summary>
+    /// A step carrying values comes back with them, each as the kind it was written as.
+    /// </summary>
+    /// <remarks>
+    /// The program is the only record of what kind a value is. An action declares how many it wants
+    /// and not one thing about them, and the block it is for may not be present when the program is
+    /// read - so a colour that came back as a number would be a step that quietly does something
+    /// else.
+    /// <para>
+    /// Written in the words the language already has for it, which is how a value gets somewhere to
+    /// hang: a bare head has nowhere to put one.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void TheValuesAnActionWasGivenSurvive()
+    {
+        var program = new Automation();
+        var values = new Values();
+        program.Restore(Declared("light", "light", values, 1, "Airlock Light"));
+
+        var lights = program.AddSystem();
+        lights.Name = "Lights";
+
+        var sequence = program.AddSequence(lights, null);
+
+        var colour = new Act("SetColor");
+        colour.Targets.Add("light");
+        colour.Values.Add(Literal.Of(255));
+        colour.Values.Add(Literal.Of(136));
+        colour.Values.Add(Literal.Of(0));
+        sequence.Steps.Add(colour);
+
+        var each = new Act("SetEverything");
+        each.Targets.Add("light");
+        each.Values.Add(Literal.Of("four and a half"));
+        each.Values.Add(Literal.Of(4.5));
+        each.Values.Add(Literal.Of(true));
+        each.Values.Add(Literal.Colour(255, 136, 0, 255));
+        sequence.Steps.Add(each);
+
+        // The language's own words for it, rather than a spelling invented here.
+        Assert.Contains("action SetColor on [ light ] with 255 136 0", Save(program));
+
+        var after = new Automation();
+        LoadAll(program, after);
+
+        var back = Assert.IsType<Act>(after.Sequences[0].Steps[0]);
+        Assert.Equal("SetColor", back.ActionId);
+        Assert.Equal(new[] { "light" }, back.Targets);
+        Assert.Equal(3, back.Values.Count);
+        Assert.Equal(ValueKind.Integer, back.Values[0].Kind);
+        Assert.Equal(255, back.Values[0].Whole);
+        Assert.Equal(136, back.Values[1].Whole);
+        Assert.Equal(0, back.Values[2].Whole);
+
+        var kinds = Assert.IsType<Act>(after.Sequences[0].Steps[1]);
+        Assert.Equal(4, kinds.Values.Count);
+
+        Assert.Equal(ValueKind.Text, kinds.Values[0].Kind);
+        Assert.Equal("four and a half", kinds.Values[0].Text);
+
+        Assert.Equal(ValueKind.Real, kinds.Values[1].Kind);
+        Assert.Equal(4.5, kinds.Values[1].Real);
+
+        Assert.Equal(ValueKind.Flag, kinds.Values[2].Kind);
+        Assert.True(kinds.Values[2].Flag);
+
+        Assert.Equal(ValueKind.Color, kinds.Values[3].Kind);
+        Assert.Equal(255, kinds.Values[3].Red);
+        Assert.Equal(136, kinds.Values[3].Green);
+        Assert.Equal(0, kinds.Values[3].Blue);
+    }
+
+    /// <summary>An action that asked for nothing is still written as a verb and its targets.</summary>
+    /// <remarks>
+    /// Every program ever saved spells a step that way, and most steps have no values at all - so
+    /// the longer form is what a value hangs off, not a new way of writing everything.
+    /// </remarks>
+    [Fact]
+    public void AStepWithNoValuesIsWrittenAsItAlwaysWas()
+    {
+        var program = new Automation();
+        var values = new Values();
+        program.Restore(Declared("inner", "door", values, 1, "Inner Door"));
+
+        var airlock = program.AddSystem();
+        airlock.Name = "Airlock";
+
+        var sequence = program.AddSequence(airlock, null);
+        var shut = new Act("close");
+        shut.Targets.Add("inner");
+        sequence.Steps.Add(shut);
+
+        var written = Save(program);
+        Assert.Contains("close [ inner ]", written);
+        Assert.DoesNotContain("action", written);
+    }
+
+    /// <summary>
     /// Names are whatever somebody typed, and a backslash is an ordinary character.
     /// </summary>
     /// <remarks>

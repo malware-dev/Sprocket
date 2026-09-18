@@ -24,7 +24,7 @@ namespace Reactor.Host.SpaceEngineers.World
     /// </remarks>
     public struct EntityValue
     {
-        internal EntityValue(long bits) : this()
+        public EntityValue(long bits) : this()
         {
             Bits = bits;
         }
@@ -58,7 +58,7 @@ namespace Reactor.Host.SpaceEngineers.World
             return new EntityValue(((long)r << 24) | ((long)g << 16) | ((long)b << 8) | a);
         }
 
-        /// <summary>Meaningless without the kind. See <see cref="Values" />.</summary>
+        /// <summary>Meaningless without the kind. See <see cref="Values" /> and <see cref="Literal" />.</summary>
         internal long Bits { get; private set; }
     }
 }

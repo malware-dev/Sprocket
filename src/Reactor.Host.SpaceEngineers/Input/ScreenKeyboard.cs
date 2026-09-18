@@ -94,6 +94,12 @@ namespace Reactor.Host.SpaceEngineers.Input
                 }
             }
 
+            if (input.IsNewKeyPressed(MyKeys.Tab))
+            {
+                outcome.Onward = true;
+                return outcome;
+            }
+
             if (input.IsNewKeyPressed(MyKeys.Enter))
             {
                 outcome.Commit = true;

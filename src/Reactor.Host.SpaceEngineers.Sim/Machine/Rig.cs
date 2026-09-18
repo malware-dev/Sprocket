@@ -81,12 +81,9 @@ sealed class Rig
         rig.Weld(new Vent(4, "Airlock Vent", Type<MyObjectBuilder_AirVent>(),
             "SmallAirVent", "Air Vent"));
 
-        rig.Weld(new Plain(10, "Landing Lights", Type<MyObjectBuilder_InteriorLight>(),
-            "LargeBlockLight_1corner", "Interior Light"));
-        rig.Weld(new Plain(11, "Airlock Light", Type<MyObjectBuilder_InteriorLight>(),
-            "LargeBlockLight_1corner", "Interior Light"));
-        rig.Weld(new Plain(12, "Cockpit Light", Type<MyObjectBuilder_InteriorLight>(),
-            "LargeBlockLight_1corner", "Interior Light"));
+        Light(rig, 10, "Landing Lights");
+        Light(rig, 11, "Airlock Light");
+        Light(rig, 12, "Cockpit Light");
         rig.Weld(new Plain(13, "Warning Beacon", Type<MyObjectBuilder_Beacon>(),
             "LargeBlockBeacon", "Beacon"));
 
@@ -94,8 +91,14 @@ sealed class Rig
             "LargeBlockSensor", "Sensor"));
         rig.Weld(new Panel(21, "Airlock Button", Type<MyObjectBuilder_ButtonPanel>(),
             "ButtonPanelLarge", "Button Panel", 1));
+        // A block Reactor knows nothing about beyond its switch, which is most of a ship. What it
+        // can be told to do is whatever it declares, and the tank declares the game's own stockpile
+        // pair - so this is the floor the whole vocabulary stands on, on the rig.
         rig.Weld(new Plain(22, "Hydrogen Tank", Type<MyObjectBuilder_OxygenTank>(),
-            "LargeHydrogenTank", "Hydrogen Tank"));
+                "LargeHydrogenTank", "Hydrogen Tank"))
+            .Offering("Stockpile", "Stockpile On/Off")
+            .Offering("Stockpile_On", "Stockpile On")
+            .Offering("Stockpile_Off", "Stockpile Off");
 
         return rig;
     }
@@ -127,6 +130,27 @@ sealed class Rig
     public void Grind(Fitting fitting)
     {
         _grid.Grind(fitting);
+    }
+
+    /// <summary>
+    /// A light, which is the block the value work is proved against.
+    /// </summary>
+    /// <remarks>
+    /// A light declares its colour setter as three values, each of them text, with nothing saying
+    /// they are a colour's channels - which is what compatibility with the game's own actions
+    /// actually looks like.
+    /// <para>
+    /// Every light and not one of them, because a definition declares the same actions whichever
+    /// block of it is asked, and Reactor builds a kind from the first one it sees. One light that
+    /// knew more than its siblings would be a rig telling Reactor something the game never does.
+    /// </para>
+    /// </remarks>
+    static void Light(Rig rig, long id, string name)
+    {
+        rig.Weld(new Plain(id, name, Type<MyObjectBuilder_InteriorLight>(),
+                "LargeBlockLight_1corner", "Interior Light"))
+            .Offering("SetRadius", "Set Radius", 1)
+            .Offering("SetColor", "Set Color", 3);
     }
 
     /// <summary>A door, named, with the game's own type behind it.</summary>

@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Reactor.Host.SpaceEngineers.Sequences;
 using Reactor.Host.SpaceEngineers.Lists;
 using Reactor.Host.SpaceEngineers.Screen;
-using Reactor.Host.SpaceEngineers.World;
+using Reactor.Host.SpaceEngineers.Sequences;
+using Reactor.Host.SpaceEngineers.Storage;
 using Reactor.Host.SpaceEngineers.Words;
+using Reactor.Host.SpaceEngineers.World;
 
 namespace Reactor.Host.SpaceEngineers.Editing
 {
@@ -346,6 +347,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
             return _sequence.CanRun ? 0 : Editor.Register(kind, which, part, action);
         }
 
+        /// <summary>The same, for a slot whose contents are typed rather than chosen.</summary>
+        int Typing(Cmd kind, int which, int part, Action<string> action)
+        {
+            return _sequence.CanRun ? 0 : Editor.RegisterText(kind, which, part, action);
+        }
+
         /// <summary>Where each row's step sits among the sequence's lines.</summary>
         readonly List<int> _shown = new List<int>();
 
@@ -398,6 +405,18 @@ namespace Reactor.Host.SpaceEngineers.Editing
             built.Slots.Add(new EntitiesSlot(Resolved(act.Targets), true,
                 Change(Cmd.StepSlot, position, 1, delegate { EditStep(act); })));
 
+            // Last, because the blocks are what somebody scanning a list of steps is looking for
+            // and the values are the detail. Its own slot, so pressing it changes the values and
+            // nothing else - the same rule every other part of a sentence follows.
+            if (chosen != null && chosen.Wants > 0)
+            {
+                var given = new ValuesSlot(act.Values, chosen.Wants, Typing(Cmd.StepSlot, position, 2,
+                    delegate(string said) { Gave(act, said); }));
+
+                given.Question = SequenceText.Wants(chosen.Wants);
+                built.Slots.Add(given);
+            }
+
             return built;
         }
 
@@ -413,6 +432,22 @@ namespace Reactor.Host.SpaceEngineers.Editing
         int Spanned(int index)
         {
             return index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await ? 2 : 1;
+        }
+
+        /// <summary>
+        /// Replaces the values a step was given with what was typed into its slot.
+        /// </summary>
+        /// <remarks>
+        /// All of them at once, because that is how they were asked for: an action declares how many
+        /// values it wants and nothing about what each one is, so there is no such thing as changing
+        /// the second one.
+        /// </remarks>
+        void Gave(Act step, string said)
+        {
+            var given = new List<Literal>();
+            ValueLine.Read(said, given);
+
+            Editor.Do(_sequence, new SetValues(_sequence.Steps.IndexOf(step), step.Values, given));
         }
 
         void EditStep(Act step)
@@ -455,14 +490,28 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     for (var i = 0; i < named.Count; i++)
                         step.Targets.Add(named[i]);
 
-                    // With an await after it, because a numbered list is read as one thing after
-                    // another. Overlapping steps means deleting the await, which is something
-                    // somebody does on purpose rather than a default they never asked for. One edit,
-                    // so one press takes the pair back.
-                    Editor.Do(_sequence,
-                        new AddStep("adding a step", _sequence.Steps.Count, step, new Await()));
-                    Editor.UnwindTo(origin);
+                    // Whatever the action was given, which the picker asked for on the button that
+                    // finished it. Empty for everything that takes none, which is nearly everything.
+                    for (var i = 0; i < answer.Values.Count; i++)
+                        step.Values.Add(answer.Values[i]);
+
+                    Added(step, origin);
                 }));
+        }
+
+        /// <summary>
+        /// Puts the step in, with an await after it.
+        /// </summary>
+        /// <remarks>
+        /// Because a numbered list is read as one thing after another. Overlapping steps means
+        /// deleting the await, which is something somebody does on purpose rather than a default
+        /// they never asked for. One edit, so one press takes the pair back.
+        /// </remarks>
+        void Added(Act step, int origin)
+        {
+            Editor.Do(_sequence,
+                new AddStep("adding a step", _sequence.Steps.Count, step, new Await()));
+            Editor.UnwindTo(origin);
         }
 
         /// <summary>

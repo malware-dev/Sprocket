@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Reactor.Host.SpaceEngineers.Layout
 {
     /// <summary>What a press on one element does.</summary>
@@ -89,6 +90,45 @@ namespace Reactor.Host.SpaceEngineers.Layout
         /// With nothing to ask it is an ordinary control, which is what lets a view hand the same call
         /// a question core may or may not have given it.
         /// </remarks>
+        /// <summary>
+        /// Asks for the values something takes, as a dialog with one field each.
+        /// </summary>
+        /// <remarks>
+        /// The sibling of <see cref="Asks" /> and deliberately not the same thing. A name is asked
+        /// for under the control it belongs to, because it is that control's name. Values are a form
+        /// to fill in: several fields, in the middle of the screen, the same way however many there
+        /// are and whatever raised them - a button, a chip in a sentence, or a double press.
+        /// </remarks>
+        public static Deed Values(int command, string question, int fields)
+        {
+            return Values(command, question, fields, null);
+        }
+
+        /// <summary>The same, opening with what is already there.</summary>
+        /// <remarks>
+        /// So changing one value of three does not mean typing all three again. A form that opened
+        /// empty over values somebody had already given would read as having lost them.
+        /// </remarks>
+        public static Deed Values(int command, string question, int fields, IList<string> filled)
+        {
+            Deed asks = Asks(command, question);
+            asks.Fields = fields < 1 ? 1 : fields;
+            asks.Filled = filled;
+            return asks;
+        }
+
+        /// <summary>What the fields open with, or null for empty ones.</summary>
+        public IList<string> Filled { get; private set; }
+
+        /// <summary>
+        /// How many fields the question has, and zero where it is not a form at all.
+        /// </summary>
+        /// <remarks>
+        /// One field each, because one box holding three things is a separator for somebody to get
+        /// wrong. Zero is <see cref="Asks" />: one field, under what was pressed.
+        /// </remarks>
+        public int Fields { get; private set; }
+
         public static Deed Asks(int command, string question)
         {
             if (command == 0)

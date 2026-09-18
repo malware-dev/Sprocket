@@ -18,6 +18,12 @@ namespace Reactor.Sim.Simulation
         /// <summary>Reads a program into the construct, as loading a save does.</summary>
         public const int Load = 9;
 
+        /// <summary>Two presses in one gesture, which is not the same as two presses.</summary>
+        public const int Double = 10;
+
+        /// <summary>Onward to the next field of a form, which is Tab.</summary>
+        public const int Onward = 11;
+
         public int Kind;
         public Vector2 At;
         public Vector2 To;

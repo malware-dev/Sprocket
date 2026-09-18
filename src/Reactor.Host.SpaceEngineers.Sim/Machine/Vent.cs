@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Fakes;
 using SpaceEngineers.Game.ModAPI;
 using VRage.ObjectBuilders;
@@ -58,10 +60,19 @@ sealed class Vent : Fitting
     /// <summary>The game's own pair for a vent's switch, which is called Depressurize.</summary>
     public override bool Offers(string actionId)
     {
-        return actionId == "Depressurize_On" || actionId == "Depressurize_Off" || base.Offers(actionId);
+        return actionId == "Depressurize" || actionId == "Depressurize_On"
+            || actionId == "Depressurize_Off" || base.Offers(actionId);
     }
 
-    public override void Perform(string actionId)
+    public override void Offered(List<Offer> into)
+    {
+        into.Add(new Offer("Depressurize", "Depressurize On/Off"));
+        into.Add(new Offer("Depressurize_On", "Depressurize On"));
+        into.Add(new Offer("Depressurize_Off", "Depressurize Off"));
+        base.Offered(into);
+    }
+
+    public override void Perform(string actionId, IList<Literal> values)
     {
         if (actionId == "Depressurize_On")
         {
@@ -77,7 +88,7 @@ sealed class Vent : Fitting
             return;
         }
 
-        base.Perform(actionId);
+        base.Perform(actionId, values);
     }
 
     public override void Tick()

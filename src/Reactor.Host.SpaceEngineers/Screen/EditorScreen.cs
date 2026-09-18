@@ -226,6 +226,57 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
         public bool HasPrimary => !string.IsNullOrEmpty(PrimaryText);
 
+        /// <summary>
+        /// What pressing it asks for, or empty when pressing it just does the thing.
+        /// </summary>
+        /// <remarks>
+        /// A screen that needs a value before it can finish asks for it on the button that finishes
+        /// it, rather than moving somebody to a screen with a field on it. One press, the field
+        /// hangs under what they pressed, and the row they were working on stays in sight - which is
+        /// the same rule every other question on these screens follows.
+        /// </remarks>
+        public string PrimaryQuestion
+        {
+            get { return _primaryQuestion; }
+            set { Set(ref _primaryQuestion, value, nameof(PrimaryQuestion)); }
+        }
+
+        string _primaryQuestion;
+
+        public bool PrimaryAsks => !string.IsNullOrEmpty(PrimaryQuestion);
+
+        /// <summary>
+        /// Whether the question belongs to whatever was pressed, rather than to the screen.
+        /// </summary>
+        /// <remarks>
+        /// One hangs under the control it is about and reads as that control opening; the other sits
+        /// in the middle and reads as the screen asking. Which it is belongs to whoever raised it,
+        /// because only they know what the answers are about.
+        /// </remarks>
+        public bool QuestionIsHere
+        {
+            get { return _questionIsHere; }
+            set { Set(ref _questionIsHere, value, nameof(QuestionIsHere)); }
+        }
+
+        bool _questionIsHere;
+
+        /// <summary>
+        /// How many values pressing it asks for, one field each.
+        /// </summary>
+        /// <remarks>
+        /// One unless the screen says otherwise. It is the count the thing being answered declared,
+        /// so nothing here decides it - an action that wants three values is asked with three
+        /// fields, because one box holding three things is a separator to get wrong.
+        /// </remarks>
+        public int PrimaryFields
+        {
+            get { return _primaryFields; }
+            set { Set(ref _primaryFields, value, nameof(PrimaryFields)); }
+        }
+
+        int _primaryFields = 1;
+
         /// <summary>What to show, in order.</summary>
         public ObservableList<EditorComponent> Components { get; private set; }
 

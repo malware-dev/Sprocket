@@ -559,7 +559,7 @@ namespace Reactor.Host.SpaceEngineers.Runtime
                 if (entity.Kind.FindAction(step.ActionId) == null)
                     continue;
 
-                world.Invoke(entity, step.ActionId);
+                world.Invoke(entity, step.ActionId, step.Values);
             }
         }
 

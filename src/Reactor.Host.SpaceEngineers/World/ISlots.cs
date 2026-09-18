@@ -6,12 +6,13 @@ using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
-    /// A construct's toolbar slots: where Reactor's own wiring is kept.
+    /// What only the game can say about a block: what it can be told to do, and what its slots hold.
     /// </summary>
     /// <remarks>
     /// The only record of which button runs which sequence lives in the game's toolbars, so this is
     /// the surface that whole story rests on: find a block's toolbar, read what a slot holds, write a
-    /// slot, clear one.
+    /// slot, clear one. A block's own actions are here for the same reason - they are the game's to
+    /// declare, and a slot is written with one.
     /// <para>
     /// Said once, behind an interface, for two reasons. The game's conveniences for this reach past
     /// <c>IMyToolbar</c> into its own concrete item classes, so nothing but the game can answer them -
@@ -43,6 +44,30 @@ namespace Reactor.Host.SpaceEngineers.World
 
         /// <summary>Whether a block has an action of the game's own by that name.</summary>
         bool Offers(IMyTerminalBlock block, string actionId);
+
+        /// <summary>
+        /// Everything this block declares it can be told to do, appended to <paramref name="into" />.
+        /// </summary>
+        /// <remarks>
+        /// The whole of what Reactor knows about most blocks. Asked once per block type rather than
+        /// per block - see <see cref="BlockKinds" /> - because a definition declares the same actions
+        /// whichever one of it you ask.
+        /// </remarks>
+        void Offered(IMyTerminalBlock block, List<Offer> into);
+
+        /// <summary>
+        /// Performs one of the block's own actions, and answers whether there was one to perform.
+        /// </summary>
+        /// <remarks>
+        /// The block is the authority on what it offers, so an id it does not have is answered with
+        /// no rather than an error: a saved sequence can outlive the vocabulary it was written
+        /// against, which is a thing to report calmly and not to throw over.
+        /// <para>
+        /// Turning each value into what the action wanted happens here, against the default it was
+        /// declared with, because that is the only place the game's own types are known at all.
+        /// </para>
+        /// </remarks>
+        bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values);
 
         /// <summary>
         /// Whether the block a slot names is still anywhere in the world.

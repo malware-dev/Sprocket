@@ -9,8 +9,9 @@ namespace Reactor.Host.SpaceEngineers.World
     /// </summary>
     /// <remarks>
     /// Per definition rather than one kind for everything, because the ship list groups by kind and a list
-    /// where every row says "Block" is not a list anybody can use. The vocabulary is identical across all of
-    /// them for now; what differs is the name the game gives the type.
+    /// where every row says "Block" is not a list anybody can use. It is also what makes asking the block
+    /// what it can do affordable: a definition declares the same actions whichever one of it is asked, so
+    /// the question is put once however many of them are on the ship.
     /// </remarks>
     sealed class BlockKinds
     {
@@ -49,6 +50,7 @@ namespace Reactor.Host.SpaceEngineers.World
                 .WithState("is-working", GridEntity.WorkingProperty, true, "is working")
                 .WithState("is-not-working", GridEntity.WorkingProperty, false, "is not working");
 
+
             // Only a block with a switch gets the words for one. A cargo container has no on and off, and
             // offering them would be offering a sentence that cannot come true.
             if (block is IMyFunctionalBlock)
@@ -62,8 +64,82 @@ namespace Reactor.Host.SpaceEngineers.World
                     .WithAction(SwitchOff, "switch off", "is-off", "OnOff_Off");
             }
 
+            // And then everything the block says it can do, which is most of what Reactor can offer
+            // about most blocks. Last, so the words chosen for a sentence come first where there are
+            // any: a door reads "open" above "Open/Closed".
+            Rest(kind, block);
+
             _kinds.Add(id, kind);
             return kind;
+        }
+
+        /// <summary>
+        /// Adds everything the block declares and nothing has said better.
+        /// </summary>
+        /// <remarks>
+        /// <b>The floor under the whole vocabulary.</b> Without it Reactor can tell a piston nothing,
+        /// because nobody has written a piston extension - and it can tell a modded block nothing
+        /// ever, because nobody can write an extension for a block that does not exist yet. Asking
+        /// the block instead means every block in the game works, and so does every block anybody
+        /// adds to it afterwards.
+        /// <para>
+        /// The words are the game's own, which are written for a button in the terminal rather than
+        /// for the middle of a sentence. They are what the player has already read, which is worth
+        /// more than a guess at a better phrasing - and where a better one exists, an extension has
+        /// said it and this adds nothing.
+        /// </para>
+        /// <para>
+        /// No state is claimed: an action here says nothing about what it is trying to bring about,
+        /// so nothing generic can be waited for or interlocked. That is a real limit and not an
+        /// oversight - see the extensions, which are where that knowledge lives.
+        /// </para>
+        /// </remarks>
+        void Rest(EntityKind kind, IMyTerminalBlock block)
+        {
+            _offered.Clear();
+            Toolbars.Offered(block, _offered);
+
+            for (var i = 0; i < _offered.Count; i++)
+            {
+                Offer offer = _offered[i];
+                if (string.IsNullOrEmpty(offer.Id) || Said(kind, offer.Id))
+                    continue;
+
+                var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
+
+                if (offer.Wants > 0)
+                    kind.WithAction(offer.Id, said, offer.Id, offer.Wants);
+                else
+                    kind.WithAction(offer.Id, said, null, offer.Id);
+            }
+        }
+
+        readonly List<Offer> _offered = new List<Offer>();
+
+        /// <summary>Whether something in this kind already covers the game's action by that name.</summary>
+        /// <remarks>
+        /// Either an action of Reactor's own is written as that one, or both halves of it are: the
+        /// game's convention is that a switch called <c>X</c> offers <c>X_On</c>, <c>X_Off</c> and a
+        /// bare <c>X</c> that flips whichever way it is, and "open or close the door depending" is
+        /// not a thing anybody writing a procedure means. So a door offers open and close, and the
+        /// toggle they came from is not offered a third time.
+        /// </remarks>
+        static bool Said(EntityKind kind, string gameActionId)
+        {
+            return Written(kind, gameActionId)
+                || (Written(kind, gameActionId + "_On") && Written(kind, gameActionId + "_Off"));
+        }
+
+        static bool Written(EntityKind kind, string gameActionId)
+        {
+            var actions = kind.Actions;
+            for (var i = 0; i < actions.Count; i++)
+            {
+                if (actions[i].GameActionId == gameActionId)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>

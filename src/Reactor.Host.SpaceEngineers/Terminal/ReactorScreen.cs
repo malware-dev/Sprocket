@@ -302,6 +302,13 @@ namespace Reactor.Host.SpaceEngineers.Terminal
                 return;
             }
 
+            if (outcome.Onward && _view.IsAsking)
+            {
+                _view.NextField();
+                _blinkFrom = Now();
+                return;
+            }
+
             if (!outcome.Changed)
                 return;
 

@@ -97,6 +97,25 @@ namespace Reactor.Host.SpaceEngineers.Editing
             return ActionsOf(Blocks(world, entityIds));
         }
 
+        /// <summary>
+        /// How many values one of those actions will not do anything without.
+        /// </summary>
+        /// <remarks>
+        /// Asked of the blocks somebody has just picked, because that is where the answer is: the
+        /// action is the block's own and the block is what declared how many values it wants.
+        /// </remarks>
+        public static int Wants(GridWorld world, IList<long> entityIds, string actionId)
+        {
+            var actions = ActionsOf(world, entityIds);
+            for (var i = 0; i < actions.Count; i++)
+            {
+                if (actions[i].Id == actionId)
+                    return actions[i].Wants;
+            }
+
+            return 0;
+        }
+
         static List<EntityAction> ActionsOf(List<GridEntity> entities)
         {
             var result = new List<EntityAction>();
