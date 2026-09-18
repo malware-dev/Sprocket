@@ -218,18 +218,49 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>
-        /// A new system, with one of it already on the ship.
+        /// A new system, named, with one of it already on the ship.
         /// </summary>
         /// <remarks>
         /// Making a system and then being asked to place one would be two steps for one
         /// thought. Somebody who builds a thing has one of that thing.
+        /// <para>
+        /// <b>Named from birth, because a name is not optional.</b> The format has no spelling for a
+        /// system without one, so an unnamed system is a program that cannot be written down: it
+        /// saves as an empty name and refuses to read back. Whoever made it says what it is called
+        /// straight afterwards - the editor asks before it gets here - and this is what the ones
+        /// nobody names are left with.
+        /// </para>
         /// </remarks>
         public AutomationSystem AddSystem()
         {
             var system = new AutomationSystem(_nextSystemId++, Guid.NewGuid());
+            system.Name = FreeName();
             system.AddInstance();
             _systems.Add(system);
             return system;
+        }
+
+        /// <summary>
+        /// The first <c>System n</c> nobody is using.
+        /// </summary>
+        /// <remarks>
+        /// The first free number rather than a running count, so deleting the second of three and
+        /// adding another gives "System 2" back - the same rule a new sequence is named by, and the
+        /// same rule the game names a block by.
+        /// </remarks>
+        string FreeName()
+        {
+            for (var number = 1; ; number++)
+            {
+                var wanted = "System " + number;
+
+                var taken = false;
+                for (var i = 0; i < _systems.Count && !taken; i++)
+                    taken = _systems[i].Name == wanted;
+
+                if (!taken)
+                    return wanted;
+            }
         }
 
         /// <summary>
@@ -336,6 +367,72 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
             Wiring++;
             return sequence;
+        }
+
+        /// <summary>
+        /// Another sequence in the same system with the same steps, waiting to be told what starts it.
+        /// </summary>
+        /// <remarks>
+        /// A direct copy and nothing cleverer. The steps point at the same blocks, and whoever asked
+        /// for it changes whatever they wanted different from there.
+        /// <para>
+        /// No trigger, and switched off. A toolbar slot holds one claim on Reactor's action, so a copy
+        /// arriving with the trigger it was copied from would be a second claim on a slot that is
+        /// already taken - and two live sequences on one button cycle an airlock twice with nothing on
+        /// screen saying why.
+        /// </para>
+        /// </remarks>
+        public Sequence Duplicate(Sequence sequence)
+        {
+            var copy = AddSequence(sequence.System);
+            copy.Annotation = sequence.Annotation;
+            copy.Enabled = false;
+
+            var steps = sequence.Steps;
+            for (var i = 0; i < steps.Count; i++)
+            {
+                var step = Copied(steps[i]);
+
+                // A kind nothing here knows how to copy is left out rather than shared, because two
+                // sequences holding one step object would edit each other. EveryKindOfStepIsCopied
+                // fails the moment a fifth kind exists, which is where that is caught.
+                if (step != null)
+                    copy.Steps.Add(step);
+            }
+
+            return copy;
+        }
+
+        /// <summary>One step again, deep enough that editing the copy cannot reach the original.</summary>
+        static Step Copied(Step step)
+        {
+            var act = step as Act;
+            if (act != null)
+            {
+                var copy = new Act(act.ActionId);
+                for (var i = 0; i < act.Targets.Count; i++)
+                    copy.Targets.Add(act.Targets[i]);
+                return Annotated(copy, step);
+            }
+
+            var wait = step as Wait;
+            if (wait != null)
+                return Annotated(new Wait(wait.Ticks), step);
+
+            var run = step as Run;
+            if (run != null)
+                return Annotated(new Run(run.Number), step);
+
+            if (step is Await)
+                return Annotated(new Await(), step);
+
+            return null;
+        }
+
+        static Step Annotated(Step made, Step from)
+        {
+            made.Annotation = from.Annotation;
+            return made;
         }
 
         public void RemoveSequence(Sequence sequence)

@@ -25,18 +25,31 @@ sealed class Vent : Fitting
                 _pressurizing = !(bool)value;
                 Told(_pressurizing ? "pressurize" : "depressurize");
             })
-            .Does("GetOxygenLevel", () => (float)_progress / CycleTicks));
+            // Nothing, rather than what the room holds, when the vent is not working - which is what
+            // the game answers, and the reason Reactor cannot read a level without asking whether the
+            // vent is working first. A rig that answered anyway would hide exactly that.
+            .Does("GetOxygenLevel", () => Enabled ? (float)_progress / CycleTicks : 0f));
     }
 
+    /// <summary>
+    /// What the game would report for a vent in a sealed room.
+    /// </summary>
+    /// <remarks>
+    /// <b>Depressurized is not one of them.</b> The game works its status out from the room, and an
+    /// airtight one only ever reads Pressurized, Pressurizing or Depressurizing - a sealed airlock
+    /// emptied to nothing still says Depressurizing. Only an unsealed room, or none at all, reads
+    /// Depressurized, which is a vent hanging in space rather than one doing its job.
+    /// <para>
+    /// This said Depressurized at empty, and Reactor waited on that state - so an airlock cycle that
+    /// could never finish in the game finished here, in every test.
+    /// </para>
+    /// </remarks>
     VentStatus Status
     {
         get
         {
             if (_progress >= CycleTicks)
                 return VentStatus.Pressurized;
-
-            if (_progress <= 0)
-                return VentStatus.Depressurized;
 
             return _pressurizing ? VentStatus.Pressurizing : VentStatus.Depressurizing;
         }

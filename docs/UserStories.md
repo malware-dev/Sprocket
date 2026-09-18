@@ -175,7 +175,7 @@ one on a ship with different blocks and different names.
 **So that** good automation can be shared the way blueprints are, instead of being
 rebuilt from a screenshot.
 
-**Done when** the recipient is asked which blocks fill each role - inner door, outer
+**Done when** the recipient is asked which blocks fill each slot - inner door, outer
 door, vent, button - and nothing else, and it works.
 
 ## L. Add a condition to something I already built

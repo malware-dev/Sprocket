@@ -38,6 +38,7 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         {
             _automation = automation;
             _world = world;
+            Live = true;
         }
 
         /// <summary>
@@ -79,6 +80,15 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Advances everything to the given frame.</summary>
+        /// <summary>
+        /// Whether the machine Reactor runs on can run anything: its block powered and switched on.
+        /// </summary>
+        /// <remarks>
+        /// Set by whatever owns the block, every tick. True by default, which is what a test and a
+        /// paper target have - neither has a block to be unpowered.
+        /// </remarks>
+        public bool Live { get; set; }
+
         public void Tick(int tick)
         {
             CurrentTick = tick;
@@ -92,7 +102,7 @@ namespace Reactor.Host.SpaceEngineers.Runtime
             {
                 SequenceRunner runner;
                 if (_runners.TryGetValue(_live[i], out runner))
-                    runner.Tick(_world, _bindings, CurrentTick);
+                    runner.Tick(_world, _bindings, CurrentTick, Live);
             }
         }
 
@@ -137,7 +147,7 @@ namespace Reactor.Host.SpaceEngineers.Runtime
 
             var runner = Get(sequence);
             if (runner != null)
-                runner.Call(_world, _bindings, CurrentTick);
+                runner.Call(_world, _bindings, CurrentTick, Live);
         }
 
         /// <summary>
@@ -152,7 +162,63 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         {
             var runner = Get(sequence, instance);
             if (runner != null)
-                runner.Call(_world, _bindings, CurrentTick);
+                runner.Call(_world, _bindings, CurrentTick, Live);
+        }
+
+        /// <summary>
+        /// Puts a saved run back, as soon as there is a runner to put it in.
+        /// </summary>
+        /// <remarks>
+        /// Held rather than applied where the runner does not exist yet, which is the ordinary case:
+        /// state is read as a world loads, and the runners are made on the first tick after that. A
+        /// run held for a sequence that never appears is simply never applied, and costs one entry.
+        /// </remarks>
+        public void Resume(Sequence sequence, SystemInstance instance, int step, bool waiting, int waitTicks)
+        {
+            if (sequence == null)
+                return;
+
+            var key = Key(sequence.Id, instance == null ? 0 : instance.Number);
+
+            SequenceRunner runner;
+            if (_runners.TryGetValue(key, out runner))
+            {
+                runner.Resume(step, waiting, waitTicks);
+                return;
+            }
+
+            var held = new Held();
+            held.Key = key;
+            held.Step = step;
+            held.Waiting = waiting;
+            held.WaitTicks = waitTicks;
+            _resuming.Add(held);
+        }
+
+        /// <summary>One run read out of storage, waiting for its runner to be made.</summary>
+        struct Held
+        {
+            public long Key;
+            public int Step;
+            public bool Waiting;
+            public int WaitTicks;
+        }
+
+        readonly List<Held> _resuming = new List<Held>();
+
+        /// <summary>Gives a freshly made runner whatever was read for it, if anything.</summary>
+        void Resumed(long key, SequenceRunner runner)
+        {
+            for (var i = 0; i < _resuming.Count; i++)
+            {
+                if (_resuming[i].Key != key)
+                    continue;
+
+                var held = _resuming[i];
+                _resuming.RemoveAt(i);
+                runner.Resume(held.Step, held.Waiting, held.WaitTicks);
+                return;
+            }
         }
 
         /// <summary>
@@ -191,6 +257,7 @@ namespace Reactor.Host.SpaceEngineers.Runtime
                         runner.Calls = delegate(int number) { Call(owner.FindSequence(number), one); };
 
                         _runners.Add(key, runner);
+                        Resumed(key, runner);
                     }
                 }
             }

@@ -7,8 +7,7 @@ using Reactor.Host.SpaceEngineers.Screen;
 namespace Reactor.Host.SpaceEngineers.Editing
 {
     /// <summary>
-    /// The systems on this ship, and the ones of each that are actually fitted. The front
-    /// door.
+    /// The systems on this ship, and the instances of each. The front door.
     /// </summary>
     /// <remarks>
     /// Not a list of sequences. Nobody built a procedure - they built an airlock, and that is
@@ -24,15 +23,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
         readonly List<AutomationSystem> _rowOwners = new List<AutomationSystem>();
         readonly List<SystemInstance> _rowInstances = new List<SystemInstance>();
-
-        /// <summary>
-        /// How many of each system were fitted when its row was last told so.
-        /// </summary>
-        /// <remarks>
-        /// Saying it takes joining three strings and formatting a number, and this runs every tick for
-        /// every row on the screen. The count changes when somebody builds or grinds something.
-        /// </remarks>
-        readonly List<int> _rowFitted = new List<int>();
 
         /// <summary>The rows being built, before they are published in one go.</summary>
         readonly List<StatusEntry> _gathered = new List<StatusEntry>();
@@ -104,7 +94,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             _rowOwners.Clear();
             _rowInstances.Clear();
-            _rowFitted.Clear();
 
             // Gathered and published in one go. This list says when it changes, and anything listening
             // re-reads the whole of it when it does - so adding row by row announced a half-built list
@@ -116,9 +105,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 var system = _systems[i];
 
                 // The system's own row does not open the editor. Editing happens through one
-                // of them, where there are real blocks to point at rather than roles to
+                // of them, where there are real blocks to point at rather than empty slots to
                 // imagine. What this row should open - what the system is, its description,
                 // giving it away - is not decided.
+                // No status: the ones of this system are the rows directly under it, each saying
+                // what it is doing, so anything here counts what the reader is already looking at.
                 var heading = new StatusEntry(SystemSummary.Describe(Editor.Runner.Bindings, system), 0);
                 heading.SwitchCommand = Editor.RegisterToggle(Cmd.Enable, system.Id, Switch(system));
                 heading.SwitchIsOn = system.Enabled;
@@ -126,7 +117,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 _gathered.Add(heading);
                 _rowOwners.Add(system);
                 _rowInstances.Add(null);
-                _rowFitted.Add(-1);
 
                 var instances = system.Instances;
                 for (var n = 0; n < instances.Count; n++)
@@ -147,7 +137,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     _gathered.Add(entry);
                     _rowOwners.Add(system);
                     _rowInstances.Add(instance);
-                    _rowFitted.Add(-1);
                 }
 
                 var another = new StatusEntry("add",
@@ -158,7 +147,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 _gathered.Add(another);
                 _rowOwners.Add(system);
                 _rowInstances.Add(null);
-                _rowFitted.Add(-1);
             }
 
             _list.Entries.Reset(_gathered);
@@ -252,18 +240,18 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
                 if (_rowInstances[i] == null)
                 {
-                    if (_rowFitted[i] != system.Instances.Count)
-                    {
-                        _rowFitted[i] = system.Instances.Count;
-                        entry.Status = SystemSummary.Count(system);
-                    }
-
                     entry.SwitchIsOn = system.Enabled;
                     continue;
                 }
 
                 entry.SwitchIsOn = _rowInstances[i].Enabled;
-                entry.Status = SystemSummary.RunningText(SystemSummary.IsRunning(system, Editor.Runner));
+
+                // This one of the system, not the system: with two airlocks, the port one cycling is
+                // not the front one cycling. The ground says it as well as the word, the same way a
+                // row leading to something broken is washed rather than only marked.
+                var going = SystemSummary.IsRunning(system, Editor.Runner, _rowInstances[i]);
+                entry.Status = SystemSummary.RunningText(going);
+                entry.Running = going;
             }
         }
 

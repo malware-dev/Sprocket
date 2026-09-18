@@ -34,9 +34,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
             {
                 var sequence = sequences[i];
                 var entry = entries[i];
-                var running = runner.Get(sequence);
+                var running = Live(runner, sequence);
 
                 entry.Status = SequenceText.Status(Status(sequence, running));
+                entry.Running = running != null && running.IsRunning;
                 entry.JustRan = running != null && running.LastFiredTick >= 0
                     && tick - running.LastFiredTick < JustRanTicks;
 
@@ -44,6 +45,32 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 // see TimeText.Ago, which was written to be called exactly like this.
                 entry.LastRun = TimeText.Ago(TicksSinceRun(running, tick));
             }
+        }
+
+        /// <summary>
+        /// The state to show for a sequence on a screen that is not about one of its system.
+        /// </summary>
+        /// <remarks>
+        /// Whichever one of the system is going, and the first otherwise. A system's sequences belong
+        /// to the system and run once for each one of it, so a list of them is about none of them in
+        /// particular - and a row that only ever read the first would sit still while the port airlock
+        /// cycled.
+        /// </remarks>
+        static SequenceRunner Live(AutomationRunner runner, Sequence sequence)
+        {
+            var system = sequence.System;
+            if (system == null)
+                return runner.Get(sequence);
+
+            var instances = system.Instances;
+            for (var i = 0; i < instances.Count; i++)
+            {
+                var one = runner.Get(sequence, instances[i]);
+                if (one != null && one.IsRunning)
+                    return one;
+            }
+
+            return runner.Get(sequence);
         }
 
         /// <summary>

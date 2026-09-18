@@ -220,6 +220,16 @@ public class ReachTests
             screen.Do(At(Screen.Ui(line.At.X, line.At.Y)));
         });
 
+        AssertEverythingLights("a system with a sequence in it", screen =>
+        {
+            screen.Editor.NewSystem("Airlock");
+            screen.Editor.PressStart("When…");
+            screen.Editor.PressBlock("Airlock Button");
+            screen.Editor.PressChoice("is pressed");
+            screen.Editor.PressPrimary();
+            screen.Editor.Back();
+        });
+
         AssertEverythingLights("a sequence", screen =>
         {
             screen.Editor.NewSystem("Airlock");

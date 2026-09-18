@@ -18,11 +18,58 @@ namespace Reactor.Host.SpaceEngineers.Lists
         }
 
         /// <summary>
+        /// Making another of what this row is, or zero where that is not offered.
+        /// </summary>
+        /// <remarks>
+        /// On the row rather than inside the thing, because wanting another one like this is
+        /// something somebody decides while reading the list.
+        /// </remarks>
+        public int DuplicateCommand
+        {
+            get { return _duplicateCommand; }
+            set { Set(ref _duplicateCommand, value, nameof(DuplicateCommand)); }
+        }
+
+        int _duplicateCommand;
+
+        /// <summary>
+        /// Whether this is running at this instant.
+        /// </summary>
+        /// <remarks>
+        /// Not <see cref="JustRan" />, which is a flash saying something happened a moment ago. This
+        /// is a situation and lasts as long as it lasts, which is why it is worth a ground of its own
+        /// rather than a light: a row somebody is looking for is the one that is going now.
+        /// </remarks>
+        public bool Running
+        {
+            get { return _running; }
+            set { Set(ref _running, value, nameof(Running)); }
+        }
+
+        bool _running;
+
+        /// <summary>
+        /// What copying this would do, in words, for the note on the button.
+        /// </summary>
+        /// <remarks>
+        /// Core's words rather than the target's, the same as <c>LockedText</c> on a sentence: what a
+        /// copy arrives with is a decision of the model, and the consequence of it - that the copy has
+        /// to be told what starts it - is not something a target could work out.
+        /// </remarks>
+        public string DuplicateText
+        {
+            get { return _duplicateText; }
+            set { Set(ref _duplicateText, value ?? "", nameof(DuplicateText)); }
+        }
+
+        string _duplicateText = "";
+
+        /// <summary>
         /// How far in this row sits: 0 for a thing, 1 for one of that thing.
         /// </summary>
         /// <remarks>
-        /// One level, and there will never be more. A system and the ones of it fitted to a
-        /// ship is the whole of the nesting this language has, so a target can indent by a
+        /// One level, and there will never be more. A system and its instances is the whole of
+        /// the nesting this language has, so a target can indent by a
         /// fixed amount rather than reinventing a tree.
         /// </remarks>
         public int Depth

@@ -18,7 +18,7 @@ A system is what a system *is*. The ones on the ship are what they *have*.
    + New system
    + Load system
    ---------------------------------------------
-Airlock                        on this ship: 2
+Airlock
    Airlock 1                   cycling - waiting for the inner door
    Port Airlock                idle
    + add
@@ -39,8 +39,10 @@ it makes no assumption about how somebody pluralises their own words. Front and 
 when the player decides they care.
 
 **No word is needed for "one of them".** *Instance* is programmer vocabulary and is not
-used. Where a heading is genuinely needed, *on this ship* does the work. Internally these
-notes say "a use of the system", which never has to reach a screen.
+used, and a system's own row says nothing about how many there are, because they are the rows
+directly beneath it. Where a count has to stand alone - a glanced-at display with one line per
+system and no room to list them - it is `x2` after the name. Setting one up again is the words
+for the act: *add another*, on the row that does it.
 
 ## Getting started
 
@@ -76,12 +78,12 @@ Filling in which blocks a system uses. Reached from two directions and identical
 - **loading a system somebody sent**, where it makes the first one on your ship;
 - **+ another**, where it makes the next.
 
-Derived from the system's roles with no effort from its author (R12), and improvable by an
+Derived from the system's slots with no effort from its author (R12), and improvable by an
 author who wants to name things in their own words, order the questions, or explain the one
 that always catches people out. The derived version has to be good enough to use, because
 most systems will never be polished by anybody.
 
-Optional roles are shown as optional (R24), so somebody who has no vents skips them
+Optional slots are shown as optional (R24), so somebody who has no vents skips them
 knowingly rather than wondering what they have broken.
 
 ## Copying, and not copying
@@ -95,6 +97,44 @@ system with its own life. Rarer, deliberate, and named for what it does.
 *This replaces an earlier design where copying asked "does this follow the original, or is it
 its own?" at the moment of copying. The structure answers it, so the question does not need
 asking.*
+
+**A sequence duplicates the same way, and it is built.** The button is on the sequence's row in
+the list, not inside the sequence: wanting another one like this is something somebody decides
+while reading what they have, and the row is where they are. The copy has the same steps pointing
+at the same blocks and is its own from then on.
+
+It arrives with **no trigger** and **switched off**. A toolbar slot holds one claim on Reactor's
+action, so a copy carrying the trigger it came from would be a second claim on a slot that is
+already taken - and two live sequences on one button would cycle an airlock twice with nothing on
+screen saying why. It is named like any other new sequence, because a name is what makes one
+callable and a copied name would either collide or quietly take over what called the original.
+Pressing it opens the copy, which is both what somebody wanted to change and the screen where it
+is told what starts it. It is offered whether or not the sequence is running, unlike
+every control on the sequence's own screen, because the copy cannot run and so cannot disturb
+anything. Not undoable: undo is a sequence's own history and a new one has none, so the way back
+is the bin.
+
+*What this is not is reuse. One sequence with several filled sets of its slots - one Cycle serving
+cycling in and cycling out, edited once - is the better answer and is not ruled out by this, since
+a sequence with one use is what every sequence is now. What decides whether it is worth building
+is watching whether people duplicate a sequence and then hand-edit both when one turns out to be
+wrong.*
+
+### Saying what starts a sequence that nothing starts
+
+**The first line of a sequence with no trigger is the offer to give it one**, drawn as the same
+`+` row the steps are added with, because it is the same act one line further up. Pressing it asks
+the two questions a system's starters ask - *when something happens* or *every so often* - and then
+runs the same pages, so choosing a trigger reads identically whether a sequence is being made or
+mended.
+
+Three ways to arrive at a sequence nothing starts: copy one, be sent a program somebody wrote by
+hand, or have the block your trigger named ground off. Before this line existed all three were dead
+ends. The screen said what was missing, with an ellipsis where the trigger goes, and nothing on it
+could fill that in.
+
+Unlike making a sequence, this is a change to one that already exists, so **it is an edit and walks
+back.** Arming something by accident is exactly what undo is for.
 
 ## A system's own screen
 
@@ -110,7 +150,7 @@ loaded, and it travels with the system when it is shared.
 rather than a coincidence:
 
 - a **system** exists because somebody built something, not because they made a container;
-- a **role** exists because a sequence refers to a block (R23), not because anybody listed
+- a **slot** exists because a sequence refers to a block (R23), not because anybody listed
   what the system needs;
 - a **state** exists because a step sets it, not because anybody created a state first.
 
@@ -256,7 +296,7 @@ under them, then what is already there.**
    + When...          + New system
    + Every...                  + Load system
    -----------------------------     -----------------------------
-When Airlock Button is pressed     Airlock          on this ship: 2
+When Airlock Button is pressed     Airlock
 Every 30 seconds                      Airlock 1     cycling
                                       + add
 ```
@@ -349,6 +389,25 @@ than a consequence that falls out of naming for free.
 *running* - used to be repeated there as well as on the sentence, and two lines saying the
 same words read as two different claims. State belongs on the sentence, beside the switch and
 the run button that change it.
+
+## What a note on a control says
+
+**The act, and how far it reaches. Never the identity of the thing the pointer is already on.**
+A note reading *"Switch When Airlock Button is pressed > Sequence 1 off"* spends its whole length
+telling somebody which row their pointer is resting on. It says *"Switch off"*, and the switch that
+governs a whole system says *"Switch the whole system off, stopping every sequence in it"* - because
+scope is the part a column of identical switches cannot show, and the consequence is the part
+nobody can see coming.
+
+Where the note earns more than the act, it says what cannot be seen: undo names the change it
+would walk back, a copy says what the copy arrives with, and refresh says what reading the ship
+again is for. A step's bin says *"Delete this step"* rather than *"Delete step 3"*, because the
+number is under the pointer and the distinction worth drawing is against the bin in the tools
+above, which takes the whole sequence.
+
+**One line, however long.** A note that wrapped would change shape as the pointer moved along a
+row of controls, and a note long enough to need two lines is a note saying more than a note
+should.
 
 ## Taking it back
 

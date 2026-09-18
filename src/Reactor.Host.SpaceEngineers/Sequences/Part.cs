@@ -37,7 +37,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// What somebody wrote about this part, in their own words, or empty.
         /// </summary>
         /// <remarks>
-        /// Data somebody typed, not a comment: it is what a player fitting the system reads to know
+        /// Data somebody typed, not a comment: it is what a player setting the system up reads to know
         /// which of their blocks to point at, so it is part of the model and round-trips like a name.
         /// </remarks>
         public string Annotation { get; set; }

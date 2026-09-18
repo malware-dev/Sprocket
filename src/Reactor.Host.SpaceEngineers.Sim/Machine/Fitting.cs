@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Reactor.Sim.Fakes;
 using Sandbox.ModAPI;
@@ -33,7 +34,33 @@ abstract class Fitting
 
     public string Name { get; set; }
 
-    public bool Enabled { get; set; } = true;
+    /// <summary>
+    /// Whether this block is switched on, and working, which the rig treats as one thing.
+    /// </summary>
+    /// <remarks>
+    /// Setting it raises <c>IsWorkingChanged</c>, as the game does when a block loses power or is
+    /// switched off. Reactor listens for that rather than asking every tick, so a rig that changed
+    /// quietly would leave the listening untested.
+    /// </remarks>
+    public bool Enabled
+    {
+        get { return _enabled; }
+        set
+        {
+            if (_enabled == value)
+                return;
+
+            _enabled = value;
+
+            for (var i = 0; i < _watching.Count; i++)
+                _watching[i](Block);
+        }
+    }
+
+    bool _enabled = true;
+
+    /// <summary>Whoever is listening for this block starting or stopping working.</summary>
+    readonly List<Action<IMyCubeBlock>> _watching = new List<Action<IMyCubeBlock>>();
 
     /// <summary>What the mod holds: the block, as the game's own interface.</summary>
     public IMyTerminalBlock Block { get; private set; }
@@ -88,6 +115,8 @@ abstract class Fitting
             .Gives("DefinitionDisplayNameText", () => _display)
             .Gives("IsFunctional", () => true)
             .Gives("IsWorking", () => Enabled)
+            .Does("add_IsWorkingChanged", args => Watch((Action<IMyCubeBlock>)args[0], true))
+            .Does("remove_IsWorkingChanged", args => Watch((Action<IMyCubeBlock>)args[0], false))
             .Gives("Enabled", () => Enabled)
             .Takes("Enabled", value =>
             {
@@ -98,6 +127,17 @@ abstract class Fitting
             .Gives("Storage", () => Storage)
             .Takes("Storage", value => Storage = (MyModStorageComponentBase)value)
             .Gives("Components", () => container);
+    }
+
+    /// <summary>Takes a listener on or off, answering nothing, as an event accessor does.</summary>
+    object Watch(Action<IMyCubeBlock> listener, bool on)
+    {
+        if (on)
+            _watching.Add(listener);
+        else
+            _watching.Remove(listener);
+
+        return null;
     }
 
     /// <summary>

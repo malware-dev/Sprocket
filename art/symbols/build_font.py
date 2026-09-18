@@ -210,6 +210,32 @@ def bin_():
     ]
 
 
+def sheets():
+    """
+    Duplicate: two sheets, the one behind showing only the edges the one in front does not cover.
+
+    Everything here is one flat colour, so nothing can be drawn as being behind anything - an
+    occluded edge has to simply not be drawn. The sheet behind is therefore its left and top edges
+    in full and the two stubs of its other sides that stand clear of the sheet in front, each
+    stopping exactly on that sheet's outline so the two read as joined.
+
+    Two complete outlines overlapping was the first attempt at this and it loses the gap between
+    them first, which at twenty pixels is the whole of what makes it read as two.
+    """
+    near, far = 0.34, 0.82
+    back, over = 0.18, 0.66
+    return [
+        poly((near, near), (far, near), (far, far), (near, far)),
+        stroke((back, back), (back, over)),
+        stroke((back, back), (over, back)),
+        stroke((over, back), (over, near)),
+        stroke((back, over), (near, over)),
+    ], [
+        poly((near + WEIGHT, near + WEIGHT), (far - WEIGHT, near + WEIGHT),
+             (far - WEIGHT, far - WEIGHT), (near + WEIGHT, far - WEIGHT)),
+    ]
+
+
 def chevron(turns):
     """An open arrowhead pointing left, turned a quarter at a time clockwise."""
     tip, back, half = 0.30, 0.64, 0.22
@@ -327,6 +353,7 @@ GLYPHS = [
     ("x", "cross", solid(cross())),
     ("!", "warning", solid(bang())),
     ("s", "refresh", solid(cycle())),
+    ("2", "duplicate", sheets()),
 ]
 
 

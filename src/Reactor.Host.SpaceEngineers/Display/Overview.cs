@@ -28,7 +28,7 @@ namespace Reactor.Host.SpaceEngineers.Display
             /// <summary>What the player called the system.</summary>
             public string Name;
 
-            /// <summary>How many of it this construct has fitted.</summary>
+            /// <summary>How many instances of it this construct has.</summary>
             public int Instances;
 
             /// <summary>The most telling of its sequences' states.</summary>

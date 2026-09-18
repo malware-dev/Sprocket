@@ -152,7 +152,7 @@ Squeezing a whole system into a thousand characters is the tempting third option
 resisting: simple systems would fit and complicated ones would not, with no rule anybody could
 predict, which is the worst kind of limit to explain.
 
-**K - give it to a friend.** Nothing is exportable, and a role is not yet something a
+**K - give it to a friend.** Nothing is exportable, and a slot is not yet something a
 sequence has. The auto-derived resource set idea lives or dies here.
 
 **L - add a condition.** A distinct want from A: A is somebody who knows the condition
@@ -195,10 +195,10 @@ entity is referenced by `long Id`, and a rebuilt block in Space Engineers is a n
 entity with a new id and usually a default name, so nothing re-binds on its own. One
 door used by six steps across two sequences is six repairs today.
 
-This converges with K. K wanted named roles so a shared system could be pointed at
+This converges with K. K wanted named slots so a shared system could be pointed at
 somebody else's blocks; P wants the same structure so a rebuilt block can be pointed at
 once. Two unrelated stories arriving at one mechanism is the strongest signal in the
-set so far, and it moves roles out of "deferred with export" and into its own right.
+set so far, and it moves slots out of "deferred with export" and into its own right.
 
 The comparison that makes this urgent: vanilla automation keeps the behaviour inside
 the event controller or timer block, so destroying that block destroys the program and
@@ -247,7 +247,7 @@ then gets rebuilt badly by every user with a spare button.
 **T - when my miner docks.** Nothing, and it is the largest new idea in the set. Every
 other story references blocks the player picked while authoring. This one cannot: the
 ship is not there yet, and it is a different ship each time. That means a reference
-resolved when the sequence runs rather than when it is written, by role and kind rather
+resolved when the sequence runs rather than when it is written, by slot and kind rather
 than identity - which is decision 8 again, arriving from a third direction and now
 carrying a requirement the other two did not have.
 
@@ -345,7 +345,7 @@ Findings that came out of writing the stories rather than from arguing about des
 - **Telling a person is one capability with two faces** (G, O), and building half of it
   will read as arbitrary.
 - **Remembered state cannot be only player-authored** (D against I).
-- **Roles are wanted three times over.** K for sharing, P for repair, T for blocks
+- **Slots are wanted three times over.** K for sharing, P for repair, T for blocks
   that are not there yet. Three unrelated stories, one mechanism.
 - **Diagnosis is one feature, not three.** Q wants "it is already running", R wants
   "these two disagree", V wants "which step is it on", M wants "why didn't it happen".

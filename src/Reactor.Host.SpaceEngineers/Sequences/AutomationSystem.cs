@@ -12,8 +12,8 @@ namespace Reactor.Host.SpaceEngineers.Sequences
     /// in the project depends on - so the name is longer here and nowhere else.
     ///
     /// A system is what a system <em>is</em>; a <see cref="SystemInstance"/> is one somebody
-    /// actually has. Every system has at least one, made with it, because a system nobody has
-    /// fitted anywhere is not a thing this editor can show.
+    /// actually has. Every system has at least one, made with it, because a system with no
+    /// instances is not a thing this editor can show.
     ///
     /// Nothing is declared before it is used. A system exists because somebody built
     /// something, never because they made an empty one first.
@@ -289,7 +289,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             }
         }
 
-        /// <summary>The ones on this ship, which is none until it is fitted to something.</summary>
+        /// <summary>The instances on this ship, which is none until the first one is made.</summary>
         public IReadOnlyList<SystemInstance> Instances => _instances;
 
         /// <summary>

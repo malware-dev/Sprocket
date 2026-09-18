@@ -38,6 +38,8 @@ namespace Reactor.Host.SpaceEngineers.Editing
         Enable,
         EnableInstance,
         DeleteSequence,
+        DuplicateSequence,
+        StartThis,
         Undo,
         Redo,
         AddAction,

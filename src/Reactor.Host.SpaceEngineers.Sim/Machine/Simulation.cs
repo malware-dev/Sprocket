@@ -100,6 +100,9 @@ sealed class Simulation
 
     public AutomationRunner Runner => _unit.Runner;
 
+    /// <summary>The construct itself, for a test that has to weld, grind or cut the power.</summary>
+    internal Rig Machine => _rig;
+
     /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
     public string Where => _store.Where;
 

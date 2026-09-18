@@ -44,6 +44,12 @@ namespace Reactor.Host.SpaceEngineers.Storage
         Equals,
         Changed,
         As,
-        Last
+        Last,
+
+        /// <summary>A run that was under way when the world was written out.</summary>
+        Running,
+
+        /// <summary>Which step of it, in the same line.</summary>
+        Step
     }
 }

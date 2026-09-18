@@ -4,6 +4,8 @@ using Reactor.Host.SpaceEngineers.Sequences;
 using Xunit;
 using Reactor.Sim.Machine;
 using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;
+using SpaceEngineers.Game.ModAPI;
+using VentStatus = SpaceEngineers.Game.ModAPI.Ingame.VentStatus;
 
 namespace Reactor.Tests;
 
@@ -143,6 +145,132 @@ public class AirlockTests
 
         a.Tick(50);
         Assert.False(a.State.IsRunning);
+    }
+
+    /// <summary>
+    /// An emptied airlock counts as empty, although the vent never says so.
+    /// </summary>
+    /// <remarks>
+    /// The game works a vent's status out from its room, and an airtight room never reads
+    /// Depressurized - emptied to nothing it still says Depressurizing, because Depressurized is
+    /// what a room that cannot hold air reports. So Reactor reads the oxygen left instead.
+    /// <para>
+    /// Worth its own test rather than leaving it to the cycle above, because the harness used to
+    /// report a state the game does not produce, and every airlock test passed on it while a real
+    /// airlock cycle waited for ever at the vent.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AnEmptiedAirlockIsEmptyThoughTheVentStillSaysItIsEmptying()
+    {
+        var a = Build();
+
+        // A tick before the press, so the trigger is bound: nothing is wired until the runner has
+        // seen the world once.
+        a.Tick(3);
+        a.Press();
+        a.Tick(200);
+
+        var vent = a.Seen(a.Vent);
+        Assert.Contains("Airlock Vent:depressurize", a.Log);
+        Assert.Equal(VentStatus.Depressurizing, ((IMyAirVent)a.Vent.Block).Status);
+
+        var empty = vent.Kind.FindState("is-empty");
+        Assert.True(empty.Holds(a.World.Values, vent.GetValue(empty.PropertyId)),
+            "the airlock has no air left and does not read as empty");
+    }
+
+    /// <summary>
+    /// A door destroyed while it is being waited for does not finish the wait.
+    /// </summary>
+    /// <remarks>
+    /// Nothing to ask is not nothing to wait for. The inner door has not shut - it has gone - and
+    /// the next step opens the outer one, so treating the absence as "arrived" vents the ship on
+    /// behalf of somebody whose door was shot off.
+    /// <para>
+    /// It holds here, and being at fault is what switches the sequence off - within the second, by
+    /// the same machinery that parks a sequence whose step cannot act at all. See ProblemTests.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void ADoorLostWhileWaitingDoesNotOpenTheOtherOne()
+    {
+        var a = Build();
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        a.Tick();
+        Assert.Equal(["Inner Door:close"], a.Log);
+
+        a.Ship.Grind(a.Inner);
+        a.Tick(300);
+
+        Assert.DoesNotContain("Outer Door:open", a.Log);
+        Assert.True(a.State.IsWaiting, "it stopped waiting for a door that is not there");
+    }
+
+    /// <summary>
+    /// A cycle holds while the machine has no power, and carries on when it comes back.
+    /// </summary>
+    /// <remarks>
+    /// Held rather than abandoned, which is the difference between a blackout and somebody pressing
+    /// the switch: switching a sequence off is a decision and drops what it was doing, where losing
+    /// power is something that happened to it. The same promise as surviving a reload, and the same
+    /// rule the programmable block follows when it refuses to run a script on a block that is not
+    /// working.
+    /// </remarks>
+    [Fact]
+    public void ACycleHoldsWhileThereIsNoPower()
+    {
+        var a = Build();
+        a.Tick(3);
+        a.Press();
+        a.Tick(20);
+
+        var step = a.State.CurrentStep;
+        Assert.True(a.State.IsRunning);
+
+        a.Runner.Live = false;
+        a.Log.Clear();
+        a.Tick(200);
+
+        Assert.True(a.State.IsRunning, "the run was dropped rather than held");
+        Assert.Equal(step, a.State.CurrentStep);
+        Assert.Empty(a.Log);
+
+        a.Runner.Live = true;
+        a.Tick(300);
+
+        Assert.Contains("Outer Door:open", a.Log);
+    }
+
+    /// <summary>
+    /// A vent that cannot answer is not saying the room is empty.
+    /// </summary>
+    /// <remarks>
+    /// An unpowered vent reports nothing left whatever the room holds, and so does one whose room
+    /// the game has not worked out yet - which is what the first ticks of a loading world look
+    /// like. Reading that as "empty" would open the outer door on a room full of air.
+    /// <para>
+    /// So anything unreadable is "not yet" and never "done". A sequence held at a wait can be
+    /// recovered from by switching the vent on; the other way round cannot.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AVentWithNoPowerDoesNotSayTheRoomIsEmpty()
+    {
+        var a = Build();
+        a.Tick(3);
+
+        var vent = a.Seen(a.Vent);
+        var empty = vent.Kind.FindState("is-empty");
+
+        a.Vent.Enabled = false;
+        a.Tick();
+
+        Assert.False(empty.Holds(a.World.Values, vent.GetValue(empty.PropertyId)),
+            "a vent that cannot be read is saying the room is empty");
     }
 
     [Fact]

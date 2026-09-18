@@ -93,6 +93,28 @@ namespace Reactor.Host.SpaceEngineers.World
             // The player's own name is only where a namespace starts; choosing another is theirs to do.
             if (MyAPIGateway.Multiplayer != null)
                 _editor.Author = MyAPIGateway.Multiplayer.MyName;
+
+            // Asked once and then listened for. Whether this machine is working decides whether the
+            // automation runs at all, and it changes when the lights go out rather than on a tick -
+            // so asking the block sixty times a second would be two questions for one answer that
+            // hardly ever moves. Released in Dispose, because a listener left on a block the game has
+            // let go of is a leak that holds the whole unit alive.
+            _runner.Live = _block.IsWorking;
+            _block.IsWorkingChanged += Working;
+        }
+
+        /// <summary>
+        /// The machine losing or regaining power, or being switched off.
+        /// </summary>
+        /// <remarks>
+        /// The automation holds while it is not working, rather than stopping: a cycle interrupted by
+        /// a blackout carries on when the lights come back, which is the same promise as one
+        /// interrupted by a reload. The programmable block refuses to instantiate a script on a block
+        /// that is not working, and this is the same rule for a machine that is already running one.
+        /// </remarks>
+        void Working(IMyCubeBlock block)
+        {
+            _runner.Live = _block.IsWorking;
         }
 
         /// <summary>The block this belongs to, for anything asking which construct it is on.</summary>
@@ -326,10 +348,10 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <remarks>
         /// Per one of a system rather than per sequence, because a button belongs to one of them:
         /// the panel by the front airlock starts the front airlock, and the panel by the port one
-        /// starts the port one. <see cref="SystemInstance.Resolve" /> is what turns the roles a
-        /// sequence names into the blocks this particular one uses, and a part nobody filled in
-        /// resolves to what the system was built with - which is right for the first of them and
-        /// an honest failure for a later one.
+        /// starts the port one. <see cref="SystemInstance.Resolve" /> is what turns the block
+        /// slots a sequence names into the blocks this particular one uses, and a slot nobody
+        /// filled resolves to what the system was built with - which is right for the first of
+        /// them and an honest failure for a later one.
         /// </remarks>
         void Wanted(List<Want> into)
         {
@@ -833,7 +855,7 @@ namespace Reactor.Host.SpaceEngineers.World
             string state;
             if (storage.TryGetValue(StateKey, out state) && !string.IsNullOrEmpty(state))
             {
-                var wrong = StateText.Load(state, _program);
+                var wrong = StateText.Load(state, _program, _runner);
                 if (wrong.Length > 0)
                     Trace(_block.CustomName + " has switches that would not read: " + wrong);
             }
@@ -885,11 +907,12 @@ namespace Reactor.Host.SpaceEngineers.World
                 return;
 
             storage.SetValue(ProgramKey, ProgramText.Save(_program, _world.Values));
-            storage.SetValue(StateKey, StateText.Save(_program));
+            storage.SetValue(StateKey, StateText.Save(_program, _runner));
         }
 
         public void Dispose()
         {
+            _block.IsWorkingChanged -= Working;
             _world.Dispose();
         }
     }

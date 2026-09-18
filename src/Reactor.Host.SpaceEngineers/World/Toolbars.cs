@@ -28,8 +28,8 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <remarks>
         /// For the harness, which answers these calls over toolbars it makes up. The game's own
         /// conveniences cannot be answered by anything but the game - they reach past
-        /// <see cref="IMyToolbar" /> into its concrete item classes - so this is what lets a fitted
-        /// button be tested at all.
+        /// <see cref="IMyToolbar" /> into its concrete item classes - so this is what lets a button
+        /// on a made-up rig be tested at all.
         /// </remarks>
         public static void Use(ISlots slots)
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Reactor.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// One of a system, actually fitted to the ship.
+    /// One instance of a system, pointed at real blocks.
     /// </summary>
     /// <remarks>
     /// A system is what a system is; this is one somebody has. The front airlock and the port
@@ -14,9 +14,9 @@ namespace Reactor.Host.SpaceEngineers.Sequences
     /// invite a better name without a dialog asking for one, and it never collides with the
     /// name of the system it belongs to.
     ///
-    /// What it is for is the blocks: each of these points the system's roles at its own doors
-    /// and its own vent, which is why one system can run two airlocks at opposite ends of a
-    /// ship. See <see cref="Fill" /> and <see cref="Resolve" /> - the runtime goes through them
+    /// What it is for is the blocks: each of these slots its own doors and its own vent into
+    /// the system's block slots, which is why one system can run two airlocks at opposite ends
+    /// of a ship. See <see cref="Fill" /> and <see cref="Resolve" /> - the runtime goes through them
     /// on every step of every running sequence.
     /// </remarks>
     public sealed class SystemInstance
@@ -58,32 +58,32 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         public bool Enabled { get; set; }
 
         /// <summary>
-        /// Which of this one's own things stand in for the parts the system was built with.
+        /// What this one has slotted into each of the system's block slots.
         /// </summary>
         /// <remarks>
         /// The whole of what makes one of a system different from another. The system's
         /// sequences all point at the blocks its author used; this says "where they used that
-        /// door, I use this one". The first one of a system fills in nothing at all, because
+        /// door, I use this one". The first one of a system slots in nothing at all, because
         /// the blocks the author built with are its blocks - which is why every system built
-        /// before roles existed keeps working untouched.
+        /// before block slots existed keeps working untouched.
         ///
-        /// A part may be filled with several things, and needs no new rule to read correctly:
-        /// several blocks on a trigger already means <em>any of them</em> and several in a
-        /// condition already means <em>all of them</em>, so a wide airlock with two inner doors
-        /// says the right thing in both places without anybody deciding it should.
+        /// A slot may hold several blocks, and needs no new rule to read correctly: several
+        /// blocks on a trigger already means <em>any of them</em> and several in a condition
+        /// already means <em>all of them</em>, so a wide airlock with two inner doors says the
+        /// right thing in both places without anybody deciding it should.
         /// </remarks>
         readonly Dictionary<string, List<string>> _fills = new Dictionary<string, List<string>>();
 
         public IEnumerable<string> Filled => _fills.Keys;
 
-        /// <summary>Points a part of the system at the things this one uses for it.</summary>
-        public void Fill(string role, IList<string> entities)
+        /// <summary>Slots this one's own blocks into one of the system's block slots.</summary>
+        public void Fill(string slot, IList<string> entities)
         {
             List<string> chosen;
-            if (!_fills.TryGetValue(role, out chosen))
+            if (!_fills.TryGetValue(slot, out chosen))
             {
                 chosen = new List<string>();
-                _fills[role] = chosen;
+                _fills[slot] = chosen;
             }
 
             chosen.Clear();
@@ -91,15 +91,15 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                 chosen.Add(entities[i]);
         }
 
-        public void Clear(string role)
+        public void Clear(string slot)
         {
-            _fills.Remove(role);
+            _fills.Remove(slot);
         }
 
-        public IList<string> FilledWith(string role)
+        public IList<string> FilledWith(string slot)
         {
             List<string> chosen;
-            return _fills.TryGetValue(role, out chosen) ? chosen : null;
+            return _fills.TryGetValue(slot, out chosen) ? chosen : null;
         }
 
         /// <summary>
@@ -110,19 +110,19 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// for every step of every running sequence on every tick. Handing back a fresh list
         /// each time would be a steady drip of garbage into the game's update loop.
         ///
-        /// A part nobody filled in resolves to what the system was built with. For the first
+        /// A slot nobody filled resolves to what the system was built with. For the first
         /// one of a system that is exactly right, and for a later one it is the honest failure:
         /// it goes on pointing at somebody else's door until it is told better, which is
         /// visible, rather than silently doing nothing.
         /// </remarks>
-        public void Resolve(IList<string> roles, List<string> into)
+        public void Resolve(IList<string> slots, List<string> into)
         {
-            for (var i = 0; i < roles.Count; i++)
+            for (var i = 0; i < slots.Count; i++)
             {
                 List<string> chosen;
-                if (!_fills.TryGetValue(roles[i], out chosen))
+                if (!_fills.TryGetValue(slots[i], out chosen))
                 {
-                    into.Add(roles[i]);
+                    into.Add(slots[i]);
                     continue;
                 }
 

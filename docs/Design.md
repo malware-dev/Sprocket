@@ -348,6 +348,26 @@ work as a justification for them.
 Every sequence belongs to exactly one system. Creating one must never stand between
 somebody and their first sequence: one is provided, and named after the fact.
 
+### Instance
+
+One system, set up on real blocks. Two airlocks at opposite ends of a ship are two
+instances of one airlock system: they share every sequence, and fixing the system fixes
+both. Every system has at least one, made with it.
+
+The player never meets the word. On screen an instance is called *Airlock 1* until they
+rename it, and making another one is *add another*.
+
+### Slot
+
+What a system needs from the construct, filled in per instance: the inner door, the outer
+door, the vent, and values as well as blocks. A slot may hold one block, several, or a
+value, and the list of them is worked out from what the sequences use rather than declared
+(R23).
+
+Blocks are slotted into slots, and a sequence's sentence shows them as the places to press.
+The game's toolbar has slots of its own; those are said in full as *toolbar slots*, and
+where both could be meant a system's is a *block slot*.
+
 ### Sequence
 
 A trigger and an ordered list of steps. Optionally named; the name is what makes it
@@ -526,10 +546,10 @@ duplication can satisfy. That brings the hardest idea in the language with it - 
 this changes that - and the cost belongs to E rather than to our preference.
 
 **And E is larger than calling.** A system used more than once is a template with
-instances, its roles are what an instance fills in, and roles are wanted by four stories
+instances, its slots are what an instance fills in, and slots are wanted by four stories
 independently. Two questions inside it are not settled: where a template lives when it
 came from somebody else and is used on several constructs, and whether an instance's
-roles are filled once when it is placed or supplied by whoever calls into it. The first
+slots are filled once when it is placed or supplied by whoever calls into it. The first
 is closer to how blueprints already work and is probably right; the second is closer to
 passing arguments and is probably too programmer-shaped, but neither is decided.
 
@@ -613,7 +633,7 @@ a programmable-block script.
 - Whatever separator is chosen, **the script language uses the same one for the same job.** A `run`
   naming a sequence in another system and a hand-written toolbar address are one thing spelt twice.
 
-**What this rests on.** An imported system arrives *unbound* - it carries roles, not instances - so
+**What this rests on.** An imported system arrives *unbound* - it carries slots, not instances - so
 every slot Reactor ever writes is written against local ids after any import that could have
 disturbed them. That single fact is what makes per-program ids sufficient and removes the need for a
 durable cross-world key. It also means import may renumber arrivals and **must never re-key what was
@@ -692,18 +712,18 @@ repaired separately. A door used by six steps across two sequences is six repair
 
 Two things are wanted here and they are not the same thing.
 
-**Repair in one place.** A block reference becomes a named role on the system - "the
+**Repair in one place.** A block reference becomes a named slot on the system - "the
 inner door" - which every sequence that needs it points at, so re-pointing happens
 once. This is exactly the mechanism K needs for sharing, arrived at from a completely
 unrelated direction, and two independent stories asking for one structure is the
-strongest signal the set has produced. It also promotes roles out of "part of export,
+strongest signal the set has produced. It also promotes slots out of "part of export,
 defer them together with it" and into their own right.
 
 **References that cannot be bound at all when written.** T asks for a station sequence
 that acts on whichever ship is docked, which is not the same problem wearing a hat: the
 blocks do not exist yet, and are different ones each time. That forces a reference
-resolved when the sequence runs, by role and kind, against whatever is currently
-attached. It subsumes the other two - a role that can be filled at run time can
+resolved when the sequence runs, by slot and kind, against whatever is currently
+attached. It subsumes the other two - a slot that can be filled at run time can
 certainly be re-pointed by hand - so if this is built, it is built first and the rest
 falls out.
 

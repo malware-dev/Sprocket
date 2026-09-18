@@ -36,7 +36,7 @@ public class ProgramTextTests
     static void LoadAll(Automation before, Automation after)
     {
         Load(Save(before), after);
-        Assert.Equal("", StateText.Load(StateText.Save(before), after));
+        Assert.Equal("", StateText.Load(StateText.Save(before, null), after, null));
     }
 
     /// <summary>A declaration with the keys a world would have minted for it.</summary>
@@ -252,6 +252,39 @@ public class ProgramTextTests
         Assert.Equal(@"Air\lock ""2""", after.Systems[0].Name);
         Assert.Equal("line one\nline two", after.Systems[0].Annotation);
         Assert.Equal(@"\\\", after.Sequences[0].Name);
+    }
+
+    /// <summary>
+    /// A system nobody named still writes down, and reads back.
+    /// </summary>
+    /// <remarks>
+    /// The format has no spelling for a system with no name: it wrote an empty one and then refused
+    /// to read it, so a program built by anything that did not name its system was lost on the next
+    /// load. Named from birth now - see <see cref="Automation.AddSystem" />.
+    /// </remarks>
+    [Fact]
+    public void ASystemNobodyNamedSurvivesBeingSaved()
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+        program.AddSequence(system);
+
+        Assert.True(system.HasName);
+
+        var after = new Automation();
+        Load(Save(program), after);
+
+        Assert.Single(after.Systems);
+        Assert.Equal(system.Name, after.Systems[0].Name);
+    }
+
+    /// <summary>Two of them are not both called the same thing.</summary>
+    [Fact]
+    public void SystemsNobodyNamedAreNamedApart()
+    {
+        var program = new Automation();
+
+        Assert.NotEqual(program.AddSystem().Name, program.AddSystem().Name);
     }
 
     [Fact]

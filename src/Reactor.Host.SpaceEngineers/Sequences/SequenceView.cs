@@ -91,6 +91,9 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         readonly Stack _steps = Widgets.Column(Space.Row * 0.8f);
         readonly List<StepRow> _stepRows = new List<StepRow>();
         readonly Stack _adders = Widgets.RowOf(Space.Item);
+
+        /// <summary>Stands in for the first line while nothing starts this sequence.</summary>
+        readonly Label _starter = Widgets.Ghost("+ say what starts this");
         readonly List<Label> _adderRows = new List<Label>();
 
         bool _builtEditable;
@@ -240,12 +243,13 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             // The one control here that a running sequence keeps, because stopping it is the act.
             _enable.Press = Deed.Switches(_component.ToggleCommand, !_component.Enabled);
             _enable.Tip = _component.ToggleCommand == 0 ? null : _component.Enabled
-                ? "Switch this sequence off"
-                : "Switch this sequence on";
+                ? "Switch off"
+                : "Switch on";
 
             for (int i = 0; i < _adderRows.Count && i < _component.AddOptions.Count; i++)
                 _adderRows[i].Press = Deed.Sends(_component.AddOptions[i].Command);
 
+            _starter.Press = Deed.Sends(_component.StartCommand);
             _triggerLead.Text = SentenceText.Lead(_component.Trigger);
 
             // Only when it changes. Wording a slot builds strings, and this runs on every tick - see
@@ -532,6 +536,16 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             _shownTrigger.Clear();
 
             _trigger.Children.Add(_ranLight);
+
+            // Nothing starts it, so the line is the way to say what does - the same row the steps are
+            // added with, because it is the same act one line further up. There is no sentence to show
+            // and no slot to press: a trigger has to exist before it can have parts.
+            if (_component.StartCommand != 0)
+            {
+                _trigger.Children.Add(_starter);
+                return;
+            }
+
             _trigger.Children.Add(_triggerLead);
 
             for (int i = 0; i < _component.Trigger.Slots.Count; i++)
@@ -587,7 +601,9 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
                 // Said here rather than per tick: a row's position is settled when the row is made,
                 // and the alternative is building this string sixty times a second for every step.
-                row.Delete.Tip = "Delete step " + row.Position;
+                // Which step it is takes no saying - the pointer is on its line. What the note is for
+                // is the difference between this and the bin in the tools above, which takes the lot.
+                row.Delete.Tip = "Delete this step";
 
                 row.Line = new Bar();
                 row.Line.Spacing = Space.Item;

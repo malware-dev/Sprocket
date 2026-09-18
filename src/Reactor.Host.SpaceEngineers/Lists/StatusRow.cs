@@ -30,6 +30,12 @@ namespace Reactor.Host.SpaceEngineers.Lists
         readonly Label _lastRun = Widgets.Label("", Palette.Faint, Lettering.Tiny);
         readonly Label _problem = Widgets.Label("", Palette.Problem, Lettering.Tiny);
         readonly Switch _switch = new Switch(Lettering.Small);
+
+        /// <summary>Another of what this row is. Absent on rows where that means nothing.</summary>
+        readonly Glyph _duplicate = Widgets.Symbol(Symbols.Duplicate, Palette.Faint);
+
+        /// <summary>The controls at the right edge, laid out leftwards from the switch.</summary>
+        readonly Stack _tools = Widgets.RowOf(Space.Item);
         readonly Stack _text = Widgets.Column(Space.Line * 0.6f);
         readonly Stack _detail = Widgets.RowOf(Space.Item);
 
@@ -44,12 +50,6 @@ namespace Reactor.Host.SpaceEngineers.Lists
         readonly Glyph _below = Widgets.Symbol(Symbols.Warning, Palette.Problem);
 
         readonly Stack _heading = Widgets.RowOf(Space.Item);
-
-        /// <summary>What the switch was last told to say, and the three things that decide it.</summary>
-        string _switched;
-        string _switchSays;
-        bool _switchedOn;
-        bool _switchedAll;
 
         public StatusRow()
         {
@@ -69,7 +69,12 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _line.Background = Palette.Panel;
             _line.Left = _light;
             _line.Fill = _text;
-            _line.Right = _switch;
+            // The switch stays last, so it is the one control whose place nothing can move: this row
+            // lays out leftwards from its right edge, and the switch is what somebody is pressing when
+            // the copy button beside it appears or goes.
+            _tools.Children.Add(_duplicate);
+            _tools.Children.Add(_switch);
+            _line.Right = _tools;
         }
 
         public Element Root
@@ -95,11 +100,20 @@ namespace Reactor.Host.SpaceEngineers.Lists
             // be seen by somebody who does not yet know to look.
             var wrong = entry.Problems > 0;
 
+            // And a row that is going right now is washed the same way, in the other colour, for the
+            // same reason: it is the row somebody scanning a list is looking for. The same green the
+            // step being run wears one screen in, so the two agree about what live looks like.
+            //
+            // Broken outranks running, which the two can only be at once for the instant between a
+            // block going away and the run abandoning the step that named it.
+            //
             // A row that adds something is the same button as the one under a sentence, because it is
             // the same act: no fill, quiet words, and a highlight that says it answers to a press.
             _line.Background = wrong
                 ? Palette.ProblemWash
-                : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
+                : entry.Running
+                    ? Palette.LiveWash
+                    : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
 
             if (!pressable)
                 _line.Highlight = Palette.None;
@@ -159,40 +173,44 @@ namespace Reactor.Host.SpaceEngineers.Lists
                 ? Deed.Switches(entry.SwitchCommand, !entry.SwitchIsOn)
                 : Deed.Nothing;
 
-            // Named, and told apart, because a column of these all say ON and OFF and nothing else
-            // separates the one governing a whole system from the one governing a single sequence under
-            // it. SwitchGovernsAll is core's answer to exactly that question - reading the indent instead
-            // would be guessing from a layout this target chose itself.
+            // Says the act and how far it reaches, and never which row it is on - the pointer is on
+            // that row. Scope is what a column of identical switches does not show: SwitchGovernsAll is
+            // core's answer to which of them stops a whole system, and reading the indent instead would
+            // be guessing from a layout this target chose itself.
             //
             // Only the off direction carries the consequence. Switching a system on does not start
             // anything by itself, where switching it off stops everything in it at once, and a note that
             // warned about both equally would be a note nobody finished reading.
-            //
-            // Built when one of the three things it is made of changes. This runs for every row on the
-            // screen sixty times a second, and joining these strings for twenty rows a frame is the
-            // dearest thing on a screen where nothing is happening.
-            if (!ReferenceEquals(_switched, entry.Summary)
-                || _switchedOn != entry.SwitchIsOn
-                || _switchedAll != entry.SwitchGovernsAll)
-            {
-                _switched = entry.Summary;
-                _switchedOn = entry.SwitchIsOn;
-                _switchedAll = entry.SwitchGovernsAll;
-                _switchSays = Switching(entry.Summary, entry.SwitchGovernsAll, entry.SwitchIsOn);
-            }
+            _switch.Tip = entry.CanSwitch
+                ? Switching(entry.SwitchGovernsAll, entry.SwitchIsOn)
+                : null;
 
-            _switch.Tip = entry.CanSwitch ? _switchSays : null;
+            // Out of the layout where it is not offered, rather than dimmed. A system's heading row and
+            // a row that adds something are not things there can be another of, and a column of greyed
+            // controls beside the ones that work reads as a screen half broken.
+            bool copies = entry.DuplicateCommand != 0;
+            _duplicate.Collapsed = !copies;
+            _duplicate.Press = Deed.Sends(entry.DuplicateCommand);
+            _duplicate.Highlight = copies ? Palette.PanelHot : Palette.None;
+            _duplicate.Tip = copies ? entry.DuplicateText : null;
         }
 
-        /// <summary>What pressing a switch would do, said in full.</summary>
-        internal static string Switching(string name, bool governsAll, bool isOn)
+        /// <summary>
+        /// What pressing a switch would do.
+        /// </summary>
+        /// <remarks>
+        /// Two bools and nothing else, so these are constants rather than strings joined per row per
+        /// frame. That is a consequence of the note no longer naming what it is on: the name was the
+        /// only part that varied.
+        /// </remarks>
+        internal static string Switching(bool governsAll, bool isOn)
         {
             if (!governsAll)
-                return isOn ? "Switch " + name + " off" : "Switch " + name + " on";
+                return isOn ? "Switch off" : "Switch on";
 
             return isOn
-                ? "Switch the whole " + name + " system off, stopping every sequence in it"
-                : "Switch the whole " + name + " system on";
+                ? "Switch the whole system off, stopping every sequence in it"
+                : "Switch the whole system on";
         }
     }
 }

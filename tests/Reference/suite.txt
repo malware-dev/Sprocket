@@ -54,6 +54,29 @@ sequence-ticked     60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 t
 sequence-step       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 70 254 200 375 560 272 1380 1000
 sequence-wait       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 212 254 100 255
 
+# --- the list with something in it, which is where a copy is made from ---------------------------
+#
+# Every other look at this screen in here is of an empty one, so a sequence's row and the controls
+# on it - its switch, and the copy button beside it - are drawn nowhere else in the suite. The
+# second entry holds the button's own note, which names the row it belongs to.
+system-filled       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62
+system-copying      60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62 move 1261 214
+
+# --- a copy of it, which arrives saying the same thing and starting nothing ----------------------
+#
+# Made from the list, where the button is, and the state worth holding still is the one the copy
+# lands in: the same steps, the switch off, and an ellipsis where its trigger will go. A copy that
+# arrived live, or with the trigger it came from, would claim a toolbar slot that is already taken.
+sequence-copied     60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62 1261 214
+
+# --- and the way out of a sequence nothing starts ------------------------------------------------
+#
+# The copy's first line is the offer, in place of the sentence it has not got, and pressing it asks
+# the two questions a system's starters ask. Both frames exist because the offer is the only line
+# on any screen that stands in for a sentence rather than filling one in.
+sequence-unstarted  60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62 1261 214 move 65 184
+sequence-starting   60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62 1261 214 65 184
+
 # --- swapping a choice, which nothing else here covers ------------------------------------------
 #
 # The mark beside a chosen row is a ring or a disc, and which one it is gets decided when the row is

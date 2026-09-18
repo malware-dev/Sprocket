@@ -230,14 +230,14 @@ A system must be usable more than once on the same construct, each use pointed a
 blocks. Changing the system changes every use of it, which is E's done-when and is what
 duplication cannot give.
 
-What a system needs from the construct is a named list of **roles** - the inner door, the
+What a system needs from the construct is a named list of **slots** - the inner door, the
 outer door, the vent, and values as well as blocks, such as how full counts as full. A
-role may be one block, several, or a value. Configuring a use of a system is filling its
-roles, and nothing else about it is exposed.
+slot may be one block, several, or a value. Configuring a use of a system is filling its
+slots, and nothing else about it is exposed.
 
-Roles are wanted by four unrelated stories now: E for reuse, K for sharing, P for repair
+Slots are wanted by four unrelated stories now: E for reuse, K for sharing, P for repair
 after damage, T for blocks that are not there when the sequence is written. That is the
-strongest signal in the set, and it means roles are not part of export - export is one
+strongest signal in the set, and it means slots are not part of export - export is one
 thing that uses them.
 
 *Waits on Design.md decision 4 and 8. The largest single piece of work identified so
@@ -246,7 +246,7 @@ far.*
 ### R11 - using a system requires no authoring skill
 
 Somebody who has never built a sequence must be able to take a system made by somebody
-else, put it on their construct, fill in its roles and have it work. Using must not
+else, put it on their construct, fill in its slots and have it work. Using must not
 require understanding how it was made, and must not be a lesser path than authoring.
 
 *Why this is separate from R10.* R10 is the mechanism; this is the audience. A template
@@ -258,11 +258,11 @@ most people who use a blueprint never designed one.
 
 ### R12 - setup is derived, and may be improved
 
-Reactor must derive a workable setup from the roles a system uses, with no effort from
+Reactor must derive a workable setup from the slots a system uses, with no effort from
 its author. A system whose author did nothing beyond building it must still be
 configurable by somebody who has never seen it.
 
-The author may then improve on that: name a role in their own words, put the questions in
+The author may then improve on that: name a slot in their own words, put the questions in
 an order that makes sense, add an explanation where one helps, note the thing that always
 catches people out. That is an option and never a prerequisite.
 
@@ -507,7 +507,7 @@ the person it costs most is the one who has never done this before.
 
 ## From story K - give it to a friend
 
-Much of K was served in advance: R10 makes a system a template with roles, R11 puts the
+Much of K was served in advance: R10 makes a system a template with slots, R11 puts the
 bar at somebody who has never authored anything, R12 makes its setup derived and
 improvable. Two things are K's own.
 
@@ -517,11 +517,11 @@ A system must be able to leave the construct it was built on as a thing that can
 handed to somebody else, and be put on a different construct with different blocks and
 different names.
 
-What travels: the sequences, the states, the list of roles, and whatever the author wrote
+What travels: the sequences, the states, the list of slots, and whatever the author wrote
 to explain them. What does not travel: the blocks. A system arriving on a new ship knows
 what it needs and nothing about what it used to have.
 
-**Not being able to satisfy a required role is said plainly, and said early.** If the
+**Not being able to satisfy a required slot is said plainly, and said early.** If the
 receiving construct has nothing that could fill one - no air vent anywhere on it - the
 person is told that before they start filling in the rest, not after it half works. A
 system that cannot run must not look like one that does.
@@ -532,13 +532,13 @@ portable at all.
 
 *Serves K. Waits on R10.*
 
-### R23 - roles are worked out from what the system uses
+### R23 - slots are worked out from what the system uses
 
-The list of roles a system needs is derived from the system itself rather than maintained
+The list of slots a system needs is derived from the system itself rather than maintained
 by hand. If a sequence acts on a block, that block is something the system needs, and it
-appears as a role without anybody having declared it.
+appears as a slot without anybody having declared it.
 
-**The same block used in five places is one role, asked once.** An airlock's inner door
+**The same block used in five places is one slot, asked once.** An airlock's inner door
 appears in the cycle, in the interlock and in the recovery sequence, and the person
 setting it up answers "which is the inner door" a single time.
 
@@ -546,25 +546,25 @@ setting it up answers "which is the inner door" a single time.
 step with the first, and it goes stale the moment somebody adds a step. Deriving it means
 a system's needs cannot disagree with what it actually does.
 
-**A role may be filled with more than one block**, and needs no new rule to read
+**A slot may be filled with more than one block**, and needs no new rule to read
 correctly. A wide airlock's "inner door" filled with two doors gives *when any inner door
 opens* and *once all inner doors are shut*, because several blocks in a trigger already
 means any and several in a condition already means all. The asymmetry the language settled
-long ago turns out to be exactly what a multi-block role needs.
+long ago turns out to be exactly what a multi-block slot needs.
 
-A role that supplies a value needs no special treatment either. *Any of the far side's
-vents is above a fifth* and *all of them are* both mean something, so a role can hold as
+A slot that supplies a value needs no special treatment either. *Any of the far side's
+vents is above a fifth* and *all of them are* both mean something, so a slot can hold as
 many blocks as the player has, whatever it is used for. What is needed is that the
 condition says which it means, which is R25.
 
-*This is also what P and T need, from the other side: a role that can be re-pointed after
+*This is also what P and T need, from the other side: a slot that can be re-pointed after
 damage, or filled by whatever ship is currently docked.*
 
 *Serves K, E, P, T. Waits on R10.*
 
-### R24 - roles may be optional
+### R24 - slots may be optional
 
-The author of a system may mark a role as optional. A use of the system that leaves it
+The author of a system may mark a slot as optional. A use of the system that leaves it
 empty is a working use, not a broken one.
 
 That is what lets a system be more than one size. An airlock that supports vents, lights
@@ -572,22 +572,22 @@ and a warning horn can still be an airlock built from two doors and nothing else
 somebody who does not have the rest or does not want it, and the parts they did fill in
 simply work.
 
-**Anything depending on an unfilled optional role is not part of that use.** The steps
+**Anything depending on an unfilled optional slot is not part of that use.** The steps
 that act on it, the sequences triggered by it, the conditions that ask about it: absent,
 as though never written. Not skipped at runtime with a complaint - absent.
 
 **And it must never be reported as a missing block.** This is where it goes badly wrong if
 we are careless. Deliberately empty and destroyed by cannonfire look identical from
 underneath and mean opposite things, and only one of them is a problem. R2 says a lost
-block is reported and never silently skipped; R24 says an unfilled optional role is
+block is reported and never silently skipped; R24 says an unfilled optional slot is
 silently skipped and never reported. The system has to be able to tell them apart, or one
 of the two requirements is a lie.
 
 **Optionality is the author's, not derived.** Whether an airlock still makes sense without
 its lights is a judgement only the person who built it can make. R23 derives what the
-roles *are*; this is the one thing about them that has to be said.
+slots *are*; this is the one thing about them that has to be said.
 
-The setup shows which roles are optional, so somebody skips them knowingly rather than
+The setup shows which slots are optional, so somebody skips them knowingly rather than
 guessing whether they have broken it.
 
 *Serves K, E, and R11 - a system that degrades gracefully is one a stranger can succeed
@@ -606,9 +606,9 @@ shut" - but they are not always what is meant. *Any tank below a fifth* warns ea
 
 A trigger can already say it. A condition cannot, and that is the gap.
 
-**This is what makes roles simple.** Without it, a role that supplies a reading would have
+**This is what makes slots simple.** Without it, a slot that supplies a reading would have
 to be limited to a single block, because "is the far side above a fifth" has no answer
-when the far side is two vents. With it, a role holds however many blocks the player has
+when the far side is two vents. With it, a slot holds however many blocks the player has
 and the condition says what that means - and no arity constraint has to exist anywhere.
 
 *Serves K. Also removes a constraint that would otherwise have landed on R23. Waits on
@@ -790,7 +790,7 @@ decided.
 ### R38 - a screen is attached to panels
 
 A screen says which panel or panels it appears on, and blocks that carry several surfaces
-can carry different screens on each. That attachment is a role like any other, so a screen
+can carry different screens on each. That attachment is a slot like any other, so a screen
 travels with its system and is pointed at the recipient's panels on arrival.
 
 *Serves O, K. Waits on R23.*
@@ -866,7 +866,7 @@ a door should cost the airlock, not the lights, the hangar and the drills.
 **There are three different meanings of "there is no block here", and only one is a
 problem.**
 
-- **Deliberately empty.** An optional role nobody filled. Silently skipped, never reported -
+- **Deliberately empty.** An optional slot nobody filled. Silently skipped, never reported -
   R24.
 - **Gone.** A block that existed and was destroyed. Reported loudly - this requirement.
 - **Not yet built.** A construct being welded up from a projection arrives block by block,
@@ -882,15 +882,15 @@ Telling the three apart is something the system has to be able to do, not someth
 leave to context.
 
 *Already true for the reporting half - a missing entity reads as gone and flags the
-sequence. Untested, and the R24 distinction does not exist yet because roles do not.*
+sequence. Untested, and the R24 distinction does not exist yet because slots do not.*
 
 ### R40 - repairing is one action, not one per use
 
-When a block is replaced, getting everything working again is pointing the role at the new
+When a block is replaced, getting everything working again is pointing the slot at the new
 block once. Not once per sequence, and not once per step.
 
-A door used by six steps across two sequences is one role, so it is one repair. That is
-the whole of P's *done when*, and it is R23's roles doing the work rather than anything
+A door used by six steps across two sequences is one slot, so it is one repair. That is
+the whole of P's *done when*, and it is R23's slots doing the work rather than anything
 new - which is worth noticing, because P looked like it needed a repair feature and needs a
 consequence of something already wanted.
 
@@ -1062,7 +1062,7 @@ pressure drops.
 *Sequences are the tractable half.* One sequence switching another within the same system is
 a plain reference by identity, which is R47. Naming a **system** is not: a system has more
 than one of it on a ship, so "switch off the airlock" has to say which airlock, and that is
-the roles-and-instances work that nothing has yet solved. Crossing a system boundary at all
+the slots-and-instances work that nothing has yet solved. Crossing a system boundary at all
 runs into the same thing sharing does - a reference to a system the recipient does not have.
 Sequences first, systems when instances are understood.
 
@@ -1072,7 +1072,7 @@ Sequences first, systems when instances are understood.
 sequences once, over the same blocks, and the second changes nothing. A switch on it today
 would be a label that lies whichever way it was thrown.
 
-It becomes meaningful with roles - when a sequence runs once per one-of-a-system against that
+It becomes meaningful with slots - when a sequence runs once per one-of-a-system against that
 one's own doors, which also means a runner per instance-and-sequence rather than per sequence.
 Until then this half of the requirement is blocked on the configurator, not on the editor.
 

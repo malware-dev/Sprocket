@@ -135,10 +135,6 @@ namespace Reactor.Host.SpaceEngineers.Screen
         readonly Label _tip = Widgets.Tip();
 
         int _actionRevision = -1;
-        /// <summary>What the header's switch was last told to say, and what decides it.</summary>
-        string _switched;
-        string _switchSays;
-        bool _switchedOn;
 
         /// <summary>What an open rename will send its answer to.</summary>
         int _renameCommand;
@@ -560,19 +556,9 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 : Deed.Nothing;
 
             // A system's, always - core says so where it declares the command, and a sequence's switch
-            // lives on the sentence rather than up here.
-            //
-            // Built when the name or the state changes rather than on every tick, for the reason a row's
-            // switch is: the words are the same words until one of them moves.
-            if (screen.HasSwitch
-                && (!ReferenceEquals(_switched, screen.Heading[0].Text) || _switchedOn != screen.SwitchIsOn))
-            {
-                _switched = screen.Heading[0].Text;
-                _switchedOn = screen.SwitchIsOn;
-                _switchSays = StatusRow.Switching(_switched, true, screen.SwitchIsOn);
-            }
-
-            _switch.Tip = screen.HasSwitch ? _switchSays : null;
+            // lives on the sentence rather than up here. The words say the act and its reach, not what
+            // it is on: the heading directly above says that.
+            _switch.Tip = screen.HasSwitch ? StatusRow.Switching(true, screen.SwitchIsOn) : null;
 
             for (int i = 0; i < _actions.Children.Count && i < screen.Actions.Count; i++)
                 _actions.Children[i].Press = Deed.Sends(screen.Actions[i].Command);

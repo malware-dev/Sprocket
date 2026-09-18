@@ -136,6 +136,20 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     Switch(sequence));
                 entry.SwitchIsOn = sequence.Enabled;
 
+                // Offered whether or not this one is running, unlike everything on the sequence's own
+                // screen: a copy is switched off and started by nothing, so making one cannot disturb
+                // what is running, and a button that came and went with a switch would be one more
+                // rule to hold.
+                var copied = sequence;
+                entry.DuplicateCommand = Editor.Register(Cmd.DuplicateSequence, sequence.Id,
+                    delegate { Editor.Duplicate(copied); });
+
+                // Said before it is done rather than discovered after: the copy having no trigger is
+                // the part somebody would otherwise read as a fault.
+                entry.DuplicateText = sequence.Trigger != null
+                    ? "Creates a copy of this sequence, switched off and with no trigger of its own"
+                    : "Creates a copy of this sequence, switched off";
+
                 _gathered.Add(entry);
             }
 

@@ -173,6 +173,39 @@ public class UndoTests
             t => t.Name == "SetEnabled");
     }
 
+    /// <summary>
+    /// Giving a sequence that nothing starts a trigger reverses too.
+    /// </summary>
+    /// <remarks>
+    /// The one edit with nothing to put back, so undoing it means taking the trigger away rather
+    /// than restoring the old one - and a trigger left behind would start a sequence somebody has
+    /// just said they did not mean to arm.
+    /// </remarks>
+    [Fact]
+    public void ChoosingWhatStartsItReversesExactly()
+    {
+        var program = new Automation();
+        var sequence = program.AddSequence(program.AddSystem());
+        sequence.Name = "Let me out";
+        sequence.Steps.Add(StepFor("close", "inner"));
+
+        var made = new WhenTrigger("pressed");
+        made.Sources.Add("call");
+
+        RoundTrip(sequence, new GiveTrigger(made));
+    }
+
+    /// <summary>A repeat is given the same way, and taken back the same way.</summary>
+    [Fact]
+    public void ChoosingARepeatReversesExactly()
+    {
+        var program = new Automation();
+        var sequence = program.AddSequence(program.AddSystem());
+        sequence.Steps.Add(StepFor("open", "outer"));
+
+        RoundTrip(sequence, new GiveTrigger(new EveryTrigger(600)));
+    }
+
     [Fact]
     public void ChangingTheTriggerReversesExactly()
     {

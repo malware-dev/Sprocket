@@ -292,5 +292,21 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         }
 
         int _deleteCommand;
+
+        /// <summary>
+        /// Saying what starts this, where nothing does yet, or zero.
+        /// </summary>
+        /// <remarks>
+        /// Not a slot of the trigger, because there is no trigger to hold one. It stands in place of
+        /// the whole first line, which is the one thing on the screen that cannot be said yet.
+        /// </remarks>
+        public int StartCommand
+        {
+            get { return _startCommand; }
+            set { Set(ref _startCommand, value, nameof(StartCommand)); }
+        }
+
+        int _startCommand;
+
     }
 }

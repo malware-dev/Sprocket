@@ -36,7 +36,7 @@ public class StateTests
     [Fact]
     public void NothingParkedWritesNothing()
     {
-        Assert.Equal("", StateText.Save(Ship()));
+        Assert.Equal("", StateText.Save(Ship(), null));
     }
 
     [Fact]
@@ -46,14 +46,14 @@ public class StateTests
         before.Systems[0].Sequences[1].Enabled = false;
         before.Systems[0].Instances[1].Enabled = false;
 
-        var text = StateText.Save(before);
+        var text = StateText.Save(before, null);
         Assert.Equal(
             "off \"" + Airlock + "\" sequence 2\n" +
             "off \"" + Airlock + "\" instance 2\n",
             text);
 
         var after = Ship();
-        Assert.Equal("", StateText.Load(text, after));
+        Assert.Equal("", StateText.Load(text, after, null));
 
         Assert.True(after.Systems[0].Enabled);
         Assert.True(after.Systems[0].Sequences[0].Enabled);
@@ -68,10 +68,10 @@ public class StateTests
         var before = Ship();
         before.Systems[0].Enabled = false;
 
-        Assert.Equal("off \"" + Airlock + "\"\n", StateText.Save(before));
+        Assert.Equal("off \"" + Airlock + "\"\n", StateText.Save(before, null));
 
         var after = Ship();
-        Assert.Equal("", StateText.Load(StateText.Save(before), after));
+        Assert.Equal("", StateText.Load(StateText.Save(before, null), after, null));
         Assert.False(after.Systems[0].Enabled);
     }
 
@@ -89,7 +89,7 @@ public class StateTests
     public void ALineAboutSomethingGoneIsDropped(string line)
     {
         var after = Ship();
-        Assert.Equal("", StateText.Load(line + "\n", after));
+        Assert.Equal("", StateText.Load(line + "\n", after, null));
 
         Assert.True(after.Systems[0].Enabled);
         Assert.True(after.Systems[0].Sequences[1].Enabled);
@@ -103,7 +103,7 @@ public class StateTests
     [InlineData("on \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\"")]
     public void ALineThatSaysSomethingElseIsTrouble(string line)
     {
-        Assert.NotEqual("", StateText.Load(line + "\n", Ship()));
+        Assert.NotEqual("", StateText.Load(line + "\n", Ship(), null));
     }
 
     /// <summary>
@@ -117,7 +117,7 @@ public class StateTests
     public void SwitchesThatWouldNotReadStopTheProgramBeingSaved()
     {
         var program = Ship();
-        Assert.NotEqual("", StateText.Load("off MalTek.Airlock\n", program));
+        Assert.NotEqual("", StateText.Load("off MalTek.Airlock\n", program, null));
 
         Assert.False(program.Intact);
     }
@@ -132,7 +132,7 @@ public class StateTests
     public void ANumberThatIsNotASequenceOrInstanceNumberIsTrouble(string tail)
     {
         var program = Ship();
-        Assert.NotEqual("", StateText.Load("off \"" + Airlock + "\" " + tail + "\n", program));
+        Assert.NotEqual("", StateText.Load("off \"" + Airlock + "\" " + tail + "\n", program, null));
 
         Assert.True(program.Systems[0].Sequences[0].Enabled);
         Assert.True(program.Systems[0].Instances[0].Enabled);

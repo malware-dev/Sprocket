@@ -259,6 +259,54 @@ public class RigTests
         return sim.Editor.Program.Declare(sim.World, entity).Name;
     }
 
+    /// <summary>
+    /// Cutting the power to the machine itself holds its automation, and restoring it lets it go on.
+    /// </summary>
+    /// <remarks>
+    /// The rule is in the core tests; what this one holds is the wiring. The unit asks the block
+    /// whether it is working once and then listens for the block saying so, rather than asking sixty
+    /// times a second - so if the listening were dropped, nothing else would notice.
+    /// </remarks>
+    [Fact]
+    public void CuttingThePowerToTheMachineHoldsItsAutomation()
+    {
+        Simulation rig = Simulation.Fresh();
+
+        rig.Editor.NewSystem("Airlock");
+        rig.Editor.PressStart("When…");
+        rig.Editor.PressBlock("Airlock Button");
+        rig.Editor.PressChoice("is pressed");
+        rig.Editor.PressPrimary();
+        rig.Editor.PressAdd("do something");
+        rig.Editor.PressBlock("Airlock Inner Door");
+        rig.Editor.PressChoice("open");
+        rig.Editor.PressPrimary();
+        rig.Editor.SwitchOn();
+
+        for (var i = 0; i < 5; i++)
+            rig.Tick();
+
+        Assert.True(rig.Runner.Live, "a working machine is not live");
+
+        rig.Machine.Reactor.Enabled = false;
+        rig.Tick();
+
+        Assert.False(rig.Runner.Live, "the machine lost power and the automation did not hear");
+
+        Sequence sequence = rig.Editor.Program.Sequences[0];
+        rig.Press("Airlock Button");
+        rig.Tick();
+
+        Assert.False(Running(rig, sequence), "it ran on a machine with no power");
+
+        rig.Machine.Reactor.Enabled = true;
+        rig.Press("Airlock Button");
+        rig.Tick();
+
+        Assert.True(rig.Runner.Live);
+        Assert.True(Running(rig, sequence), "the power came back and the press did nothing");
+    }
+
     static void Airlock(ReactorEditor editor)
     {
         editor.NewSystem("Airlock");

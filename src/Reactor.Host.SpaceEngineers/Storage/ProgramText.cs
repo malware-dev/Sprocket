@@ -492,8 +492,8 @@ namespace Reactor.Host.SpaceEngineers.Storage
         static List<string> Sorted(SystemInstance instance)
         {
             var parts = new List<string>();
-            foreach (var role in instance.Filled)
-                parts.Add(role);
+            foreach (var slot in instance.Filled)
+                parts.Add(slot);
 
             parts.Sort(StringComparer.Ordinal);
             return parts;

@@ -129,6 +129,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 + "done stays done.";
             _sentence.DeleteCommand = Change(Cmd.DeleteSequence, Delete);
 
+            // Nothing starts this one, so the first line is how to say what does. A copy arrives this
+            // way, and so does a sequence whose trigger named a block that has since been ground off.
+            _sentence.StartCommand = _sequence.Trigger == null
+                ? Change(Cmd.StartThis, delegate { Editor.AskWhatStarts(_sequence); })
+                : 0;
+
             // Both are edits, so both wait for the switch. Registered here whether or not
             // there is anything to walk back, because issuing a command needs the numbering
             // only a rebuild does - and whether there is anything to walk back changes without

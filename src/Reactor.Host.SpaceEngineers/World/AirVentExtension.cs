@@ -17,6 +17,23 @@ namespace Reactor.Host.SpaceEngineers.World
     /// </remarks>
     sealed class AirVentExtension : IBlockExtension
     {
+        /// <summary>
+        /// The oxygen left at which a room counts as empty, and the amount at which it counts as full.
+        /// </summary>
+        /// <remarks>
+        /// A tolerance at both ends, because a room's oxygen is a float that is pumped towards a
+        /// figure rather than set to it: it may never read exactly zero even in vacuum, and never
+        /// exactly one when it is as full as it is going to get.
+        /// <para>
+        /// Empty is the game's own number for the same judgement - it calls an unsealed room empty
+        /// below this. Full is its mirror, because the game has no tolerance there at all and
+        /// compares against one exactly.
+        /// </para>
+        /// </remarks>
+        const float Emptied = 0.01f;
+
+        const float Filled = 0.99f;
+
         public const string Air = "air";
         public const string Empty = "empty";
         public const string Level = "level";
@@ -59,11 +76,23 @@ namespace Reactor.Host.SpaceEngineers.World
 
             switch (propertyId)
             {
+                // <b>Neither of these reads the reported status, and that is deliberate.</b> The
+                // game cannot answer either question with it: an airtight room never reports
+                // Depressurized, because that value is reserved for a room that is not airtight or
+                // is not there, and it only reports Pressurized once the level has reached exactly
+                // one. Both are raised with the game as a bug; neither is waitable meanwhile.
+                //
+                // So both come from the oxygen in the room, and the vent has to be working for the
+                // reading to mean anything. That last part is what keeps a loading world safe: a
+                // vent with no power, or with no room worked out yet, reports nothing left whatever
+                // the room actually holds. Anything Reactor cannot read is "not yet" and never
+                // "done" - a sequence held at a wait can be recovered from, and one that opened a
+                // door on a room it could not read cannot.
                 case Air:
-                    value = EntityValue.Of(vent.Status == VentStatus.Pressurized);
+                    value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() >= Filled);
                     return true;
                 case Empty:
-                    value = EntityValue.Of(vent.Status == VentStatus.Depressurized);
+                    value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() <= Emptied);
                     return true;
                 case Level:
                     value = EntityValue.Of(vent.GetOxygenLevel());

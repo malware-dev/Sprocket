@@ -25,9 +25,9 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         /// </summary>
         /// <remarks>
         /// The same sequence runs once for each of a system on the ship, each resolving the
-        /// parts the author built with into its own doors. Null means the parts are the
+        /// block slots the author built with into its own doors. Null means the slots are the
         /// blocks themselves, which is what the first one of a system does and what every
-        /// system built before roles existed keeps doing.
+        /// system built before block slots existed keeps doing.
         /// </remarks>
         public SequenceRunner(Sequence sequence, SystemInstance instance)
         {
@@ -81,32 +81,32 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         readonly List<string> _actedOn = new List<string>();
         readonly List<string> _watched = new List<string>();
 
-        List<string> ActedOn(IList<string> roles)
+        List<string> ActedOn(IList<string> slots)
         {
             _actedOn.Clear();
             if (_instance == null)
             {
-                for (var i = 0; i < roles.Count; i++)
-                    _actedOn.Add(roles[i]);
+                for (var i = 0; i < slots.Count; i++)
+                    _actedOn.Add(slots[i]);
             }
             else
             {
-                _instance.Resolve(roles, _actedOn);
+                _instance.Resolve(slots, _actedOn);
             }
             return _actedOn;
         }
 
-        List<string> Watched(IList<string> roles)
+        List<string> Watched(IList<string> slots)
         {
             _watched.Clear();
             if (_instance == null)
             {
-                for (var i = 0; i < roles.Count; i++)
-                    _watched.Add(roles[i]);
+                for (var i = 0; i < slots.Count; i++)
+                    _watched.Add(slots[i]);
             }
             else
             {
-                _instance.Resolve(roles, _watched);
+                _instance.Resolve(slots, _watched);
             }
             return _watched;
         }
@@ -120,6 +120,13 @@ namespace Reactor.Host.SpaceEngineers.Runtime
 
         /// <summary>True while the sequence is held at an await or a wait.</summary>
         public bool IsWaiting { get; private set; }
+
+        /// <summary>How much of a wait is left to spend, in ticks.</summary>
+        /// <remarks>Written down when a world is saved, so a pause survives being reloaded.</remarks>
+        public int WaitTicks
+        {
+            get { return _waitTicks; }
+        }
 
         public int LastFiredTick { get; private set; }
 
@@ -159,13 +166,37 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         /// <summary>One or more listened-to entities are no longer on the construct.</summary>
         public bool HasMissingSources { get; private set; }
 
-        public void Tick(GridWorld world, Bindings bindings, int tick)
+        /// <summary>
+        /// One tick of this sequence.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="live" /> is whether the machine Reactor runs on can do anything at all:
+        /// its own block powered and switched on. Nothing starts and nothing moves on while it is
+        /// false, and what was already running is <b>kept</b> rather than stopped - a power cut is
+        /// not somebody pressing a switch, and coming back up part way through a cycle is the whole
+        /// point of remembering the run at all.
+        /// <para>
+        /// The trigger is still sampled. Edge detection is stateful, so a skipped sample makes the
+        /// next one wrong, and a door opened during a blackout must not read as having just opened
+        /// when the lights come back.
+        /// </para>
+        /// <para>
+        /// The same rule the programmable block follows: it will not instantiate a script until its
+        /// block is powered and enabled, and it asks for updates again when power arrives. On a world
+        /// still loading, that deferral is also what keeps a resumed run from judging a half-built
+        /// construct.
+        /// </para>
+        /// </remarks>
+        public void Tick(GridWorld world, Bindings bindings, int tick, bool live = true)
         {
             _bindings = bindings;
 
             // Sample every tick, even while running or switched off. Edge detection
             // is stateful, so a skipped sample makes the next one wrong.
             var triggered = SampleTrigger(world);
+
+            if (!live)
+                return;
 
             if (!CanRun)
             {
@@ -188,21 +219,25 @@ namespace Reactor.Host.SpaceEngineers.Runtime
                 Start(world, tick);
         }
 
-        /// <summary>Starts the sequence by name, from another sequence or a trigger.</summary>
+        /// <summary>Starts the sequence by name, from another sequence, a trigger or a button.</summary>
         /// <remarks>
         /// The switch holds here. A parked sequence is parked for everything, including being called by
         /// another one - what a person switched off must not run because something else asked.
         /// <para>
-        /// So the call is refused rather than dropped. Off is a legitimate answer and silence is not:
-        /// the refusal is counted and shown, the way a switched-off block refuses an action whoever
-        /// asks.
+        /// So is the machine's own power. A press arrives as a call rather than as a tick, so a slot
+        /// on somebody's panel would otherwise start a cycle on a Reactor that has no power at all.
+        /// </para>
+        /// <para>
+        /// Either way the call is refused rather than dropped. Off is a legitimate answer and silence
+        /// is not: the refusal is counted and shown, the way a switched-off block refuses an action
+        /// whoever asks.
         /// </para>
         /// </remarks>
-        public void Call(GridWorld world, Bindings bindings, int tick)
+        public void Call(GridWorld world, Bindings bindings, int tick, bool live = true)
         {
             _bindings = bindings;
 
-            if (!CanRun)
+            if (!live || !CanRun)
             {
                 RefusedCount++;
                 return;
@@ -216,6 +251,51 @@ namespace Reactor.Host.SpaceEngineers.Runtime
             }
 
             Start(world, tick);
+        }
+
+        /// <summary>
+        /// Puts a run back where a reload interrupted it.
+        /// </summary>
+        /// <remarks>
+        /// A world saved mid-cycle has to carry on when it is loaded: the doors are where they were
+        /// and the room is as empty as it was, so forgetting the run would leave an airlock with its
+        /// inner door shut, its outer door closed, and nobody left to open either.
+        /// <para>
+        /// The step and the clock are restored; what was started is not. Whatever was invoked before
+        /// the save has either arrived by now or has not, and an await asks the world rather than
+        /// anything written down - so the acts between the previous await and this step are put back
+        /// as what it is waiting on, and the answer comes from the doors themselves.
+        /// </para>
+        /// <para>
+        /// Nothing is restored where the sequence cannot run or the step is no longer there. Both
+        /// happen when a program is edited between saving and loading, and a run resumed into a
+        /// sequence that has since changed is a machine doing something nobody asked for.
+        /// </para>
+        /// </remarks>
+        public void Resume(int step, bool waiting, int waitTicks)
+        {
+            if (!CanRun || step < 0 || step >= _sequence.Steps.Count)
+                return;
+
+            IsRunning = true;
+            IsWaiting = waiting;
+            _stepIndex = step;
+            _waitTicks = waitTicks < 0 ? 0 : waitTicks;
+
+            _outstanding.Clear();
+
+            // Backwards to the await before this step, because that is the span an await covers. An
+            // act that has already arrived is no burden: Settled says so at once.
+            for (var i = step - 1; i >= 0; i--)
+            {
+                var earlier = _sequence.Steps[i];
+                if (earlier is Await)
+                    break;
+
+                var act = earlier as Act;
+                if (act != null)
+                    _outstanding.Add(act);
+            }
         }
 
         public void Stop()
@@ -351,7 +431,16 @@ namespace Reactor.Host.SpaceEngineers.Runtime
 
                 if (step is Await)
                 {
-                    if (!Finished(world))
+                    // Nothing to ask is not nothing to wait for. The half of the job that was
+                    // asked for has not happened, and walking on would act on the rest of the ship
+                    // as though it had - which for an airlock means opening the outer door because
+                    // the inner one is no longer there to be shut.
+                    //
+                    // Holding is all this does. A missing block is a fault, and a sequence at fault
+                    // is switched off within the second by ReactorEditor.ParkBroken, which is what
+                    // stops the run and marks it. The same road a step that cannot act at all
+                    // already travels.
+                    if (Missing() || !Finished(world))
                     {
                         IsWaiting = true;
                         return;
@@ -381,6 +470,33 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         {
             _stepIndex++;
             EnterStep();
+        }
+
+        /// <summary>
+        /// Whether anything still being waited for names a block that is not there.
+        /// </summary>
+        /// <remarks>
+        /// Unbound rather than unsettled: the question is not whether the door has shut, it is
+        /// whether there is still a door. A block that has not loaded yet counts too, and holding is
+        /// the right answer for both - one of them arrives, and the other gets the sequence switched
+        /// off for being at fault.
+        /// </remarks>
+        bool Missing()
+        {
+            for (var i = 0; i < _outstanding.Count; i++)
+            {
+                if (!_outstanding[i].HasAction)
+                    continue;
+
+                var waiting = ActedOn(_outstanding[i].Targets);
+                for (var q = 0; q < waiting.Count; q++)
+                {
+                    if (_bindings.Entity(waiting[q]) == null)
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>Whether everything started since the last await has got where it was going.</summary>

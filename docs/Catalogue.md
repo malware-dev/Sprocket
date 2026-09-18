@@ -181,7 +181,7 @@ the whole of a door's vocabulary falls out of that single reading.
 
 - **A reading whose possible values are known and finite**, so the editor can offer them
   rather than an author writing each state out by hand. A hand-kept list goes stale the
-  first time the game adds a value, which is the argument R23 already makes about roles.
+  first time the game adds a value, which is the argument R23 already makes about slots.
 - **A way to ask whether a reading is one of several.** *"While the door is moving"* means
   Opening or Closing. Without it, a four-valued reading can only be compared to one value
   at a time, and the most natural sentence about a door is unsayable.

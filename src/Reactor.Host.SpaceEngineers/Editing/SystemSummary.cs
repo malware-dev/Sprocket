@@ -58,28 +58,39 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// How many of this system are fitted.
+        /// Whether anything in this system is doing something, on one of it or on any.
         /// </summary>
         /// <remarks>
-        /// Without naming what they are fitted to. "On this ship" would be wrong on most of what
-        /// people build - a station, a rover, a drone - and nowhere needs the word anyway, because
-        /// the screen is already showing the thing.
+        /// The sequences belong to the system and run once for each one of it, so which one is asked
+        /// about is the whole question: the port airlock cycling is not the front one cycling, and a
+        /// row that said otherwise would be pointing at the wrong doors. A null instance asks about
+        /// any of them, which is the honest answer where the screen is showing the system rather than
+        /// one of it.
         /// </remarks>
-        public static string Count(AutomationSystem system)
-        {
-            return "fitted " + system.Instances.Count + (system.Instances.Count == 1 ? " time" : " times");
-        }
-
-        /// <summary>Whether anything in this system is doing something.</summary>
-        public static bool IsRunning(AutomationSystem system, AutomationRunner runner)
+        public static bool IsRunning(AutomationSystem system, AutomationRunner runner,
+            SystemInstance instance)
         {
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
             {
-                var state = runner.Get(sequences[i]);
-                if (state != null && state.IsRunning)
-                    return true;
+                if (instance != null)
+                {
+                    var one = runner.Get(sequences[i], instance);
+                    if (one != null && one.IsRunning)
+                        return true;
+
+                    continue;
+                }
+
+                var instances = system.Instances;
+                for (var n = 0; n < instances.Count; n++)
+                {
+                    var any = runner.Get(sequences[i], instances[n]);
+                    if (any != null && any.IsRunning)
+                        return true;
+                }
             }
+
             return false;
         }
 

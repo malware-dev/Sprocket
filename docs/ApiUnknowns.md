@@ -45,7 +45,7 @@ it, arrives fresh alongside the new grid, or has to be reconstructed.
 
 **Projector building is the sharper case, and it is not an edge case at all.** A projected
 construct is welded up block by block, so a system can be running before the blocks it needs
-exist. That is not damage, and it is not a role deliberately left empty. It is a third
+exist. That is not damage, and it is not a slot deliberately left empty. It is a third
 thing, and it makes R40's healing part of ordinary construction rather than only of repair.
 
 **Toolbar preservation across a copy is imperfect, period** - Mal, 2026-09-12, from experience of

@@ -995,11 +995,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Another one of a system already fitted. Not built yet, and says so.
+        /// Another instance of a system. Not built yet, and says so.
         /// </summary>
         /// <remarks>
         /// It opens the same configurator loading does, because they are the same act: point a
-        /// system at the blocks it should use here. Neither exists until roles do.
+        /// system at the blocks it should use here. Neither exists until block slots do.
         /// </remarks>
         internal void OfferAnother(AutomationSystem system)
         {
@@ -1015,7 +1015,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// <remarks>
         /// Present rather than hidden because it is half of what the front door offers, and a
         /// screen that grows an option later teaches itself twice. What it needs is the
-        /// configurator, which needs roles.
+        /// configurator, which needs block slots.
         /// </remarks>
         internal void OfferLoading()
         {
@@ -1094,6 +1094,53 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
+        /// Asks what should start a sequence that nothing starts yet.
+        /// </summary>
+        /// <remarks>
+        /// The same two questions the starters on a system's screen ask, and then the same pages, so
+        /// choosing a trigger reads identically whether the sequence is being made or mended. The
+        /// difference is only where the answer goes: there it makes a sequence, here it is an edit on
+        /// one that exists, which is why this one can be undone.
+        /// <para>
+        /// A sequence gets here by being copied, by being sent in a program somebody wrote by hand, or
+        /// by having had its trigger's block ground off. Before this there was no way back from any of
+        /// them: the line said what was missing and nothing on the screen could fill it in.
+        /// </para>
+        /// </remarks>
+        internal void AskWhatStarts(Sequence sequence)
+        {
+            // Where to come back to. Both branches push at least one more page, and the answer lands
+            // on the sequence rather than on the question that was just answered.
+            var origin = _stack.Count;
+
+            var page = new ChoicePage(this, "What starts this?");
+
+            page.Add("When something happens", false, delegate
+            {
+                Push(new PickPage(this, "When something happens", true,
+                    new List<long>(), "",
+                    delegate(PickAnswer answer)
+                    {
+                        UnwindTo(origin);
+                        Do(sequence, new GiveTrigger(Starter(answer)));
+                    },
+                    true));
+            });
+
+            page.Add("Every so often", false, delegate
+            {
+                var every = new EveryTrigger(Cadences.Default);
+                Push(RatePage(every, delegate
+                {
+                    UnwindTo(origin);
+                    Do(sequence, new GiveTrigger(every));
+                }));
+            });
+
+            Push(page);
+        }
+
+        /// <summary>
         /// What somebody has just described, as the trigger that makes it happen.
         /// </summary>
         /// <remarks>
@@ -1163,6 +1210,22 @@ namespace Reactor.Host.SpaceEngineers.Editing
             sequence.Name = Name(sequence);
 
             Push(new SequencePage(this, sequence));
+        }
+
+        /// <summary>
+        /// Another sequence saying what this one says, opened for whatever is to be different.
+        /// </summary>
+        /// <remarks>
+        /// Named like any other new sequence rather than after the one it came from: a name is what
+        /// makes a sequence callable, so a copied name would either collide or quietly take over what
+        /// called the original.
+        /// </remarks>
+        internal void Duplicate(Sequence sequence)
+        {
+            var copy = _program.Duplicate(sequence);
+            copy.Name = Name(copy);
+
+            Push(new SequencePage(this, copy));
         }
 
         /// <summary>

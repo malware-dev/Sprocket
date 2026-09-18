@@ -22,7 +22,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// What somebody wrote about this trigger, in their own words, or empty.
         /// </summary>
         /// <remarks>
-        /// A trigger has no name, so this is what a player fitting the system reads to know which of
+        /// A trigger has no name, so this is what a player setting the system up reads to know which of
         /// their buttons it means: "the call button, by the inner door".
         /// </remarks>
         public string Annotation { get; set; }

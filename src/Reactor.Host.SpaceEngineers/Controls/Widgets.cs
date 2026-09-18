@@ -328,7 +328,8 @@ namespace Reactor.Host.SpaceEngineers.Controls
             tip.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY);
 
             // One line however long it is. A note that wrapped would change shape as the pointer moved
-            // along a row of controls, which is the fidgeting this screen keeps being pulled back from.
+            // along a row of controls, which is the fidgeting this screen keeps being pulled back from -
+            // and a note long enough to need two lines is a note saying more than a note should.
             tip.Wraps = false;
             return tip;
         }
