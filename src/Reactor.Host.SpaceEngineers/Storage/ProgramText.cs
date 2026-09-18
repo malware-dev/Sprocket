@@ -650,7 +650,7 @@ namespace Reactor.Host.SpaceEngineers.Storage
                     Names(pen, needed.Sources);
                 }
 
-                pen.Says(Keyword.To).Says(Keyword.Run).Whole(trigger.Runs);
+                pen.Says(Keyword.To).Says(Doing(trigger)).Whole(trigger.Runs);
                 pen.End();
                 return;
             }
@@ -660,7 +660,7 @@ namespace Reactor.Host.SpaceEngineers.Storage
             {
                 pen.Start(Keyword.When).Says(when.RequiresAll ? Keyword.All : Keyword.Any).Word(when.EventId);
                 Names(pen, when.Sources);
-                pen.Says(Keyword.Then).Says(Keyword.Run).Whole(trigger.Runs);
+                pen.Says(Keyword.Then).Says(Doing(trigger)).Whole(trigger.Runs);
                 pen.End();
                 return;
             }
@@ -673,6 +673,12 @@ namespace Reactor.Host.SpaceEngineers.Storage
             }
         }
 
+        /// <summary>Which word says what a trigger does with its sequence.</summary>
+        static Keyword Doing(Trigger trigger)
+        {
+            return trigger.Stops ? Keyword.Stop : Keyword.Run;
+        }
+
         static void ReadTrigger(Statement statement, AutomationSystem system, Trouble trouble)
         {
             var trigger = Kind(statement, trouble);
@@ -682,10 +688,16 @@ namespace Reactor.Host.SpaceEngineers.Storage
             trigger.Annotation = statement.Annotation;
 
             var at = statement.Find(Keyword.Run);
+            if (at < 0)
+            {
+                at = statement.Find(Keyword.Stop);
+                trigger.Stops = at >= 0;
+            }
+
             var number = statement.ValueAt(at + 1);
             if (at < 0 || number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
             {
-                trouble.Say(statement, "a trigger says which sequence it runs, like run 1");
+                trouble.Say(statement, "a trigger says which sequence it runs or stops, like run 1");
                 return;
             }
 

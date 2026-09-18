@@ -110,7 +110,30 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             _screen.Subtitle = Current.Subtitle;
             _screen.SwitchIsOn = Current.SwitchIsOn;
+
+            Walking();
         }
+
+        /// <summary>The screen's own arrows, in the words of whatever they would take back.</summary>
+        /// <remarks>
+        /// Read every tick rather than only when the screen is rebuilt, because an edit made from a
+        /// row changes what there is to walk back without changing the screen's shape.
+        /// </remarks>
+        void Walking()
+        {
+            var page = Current;
+
+            var canUndo = page.CanUndo;
+            _screen.UndoCommand = canUndo ? _undoCommand : 0;
+            _screen.UndoText = canUndo ? page.UndoText : "";
+
+            var canRedo = page.CanRedo;
+            _screen.RedoCommand = canRedo ? _redoCommand : 0;
+            _screen.RedoText = canRedo ? page.RedoText : "";
+        }
+
+        int _undoCommand;
+        int _redoCommand;
 
         /// <summary>
         /// Switches off anything that cannot work.
@@ -338,12 +361,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 case Cmd.Choice:
                 case Cmd.OpenSystem:
                 case Cmd.OpenSequence:
+                case Cmd.OpenTrigger:
+                case Cmd.TriggerTarget:
                 case Cmd.StartWhen:
                 case Cmd.StartEvery:
                 case Cmd.AddAction:
                 case Cmd.AddWait:
-                case Cmd.EditCadence:
-                case Cmd.TriggerSlot:
                 case Cmd.StepSlot:
                 case Cmd.PickEntity:
                 case Cmd.PickChoice:
@@ -690,53 +713,22 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _structureDirty = true;
         }
 
-        /// <summary>
-        /// Drops any page showing the given sequence, so deleting one never leaves the
-        /// user staring at something that no longer exists.
-        /// </summary>
-        /// <summary>
-        /// What has been done to each sequence, so it can be taken back.
-        /// </summary>
-        /// <remarks>
-        /// Here rather than on the sequence itself, because it is a fact about somebody's
-        /// editing session and not about the system. A sequence that is exported, shared or
-        /// saved should carry what it is, never how its author got there.
-        ///
-        /// Kept per sequence and across navigation, so backing out to look at something and
-        /// coming back does not silently throw the safety net away.
-        /// </remarks>
-        readonly Dictionary<int, List<SequenceEdit>> _history =
-            new Dictionary<int, List<SequenceEdit>>();
+        /// <summary>What has been done to each sequence, so it can be taken back.</summary>
+        readonly History<Sequence> _sequenceHistory = new History<Sequence>();
 
         /// <summary>
-        /// What has been taken back and could be put back again.
+        /// And one for its system, because a trigger is not a sequence's to hold.
         /// </summary>
         /// <remarks>
-        /// Emptied by the next edit, which is the standard behaviour and the right one: once
-        /// somebody has walked back three steps and then done something different, the three
-        /// they walked back are a road not taken. Offering to redo into a sequence that has
-        /// moved on since would put back a step at an index that means something else now.
+        /// Two stacks rather than one, so undo takes back the last thing done to the thing being
+        /// looked at. Somebody on a system's screen who has just repointed a button did not do the
+        /// last thing to any sequence in it, and a sequence's arrows offering to take that back
+        /// would be a control acting on something not on the screen.
         /// </remarks>
-        readonly Dictionary<int, List<SequenceEdit>> _redo =
-            new Dictionary<int, List<SequenceEdit>>();
+        readonly History<AutomationSystem> _systemHistory = new History<AutomationSystem>();
 
-        /// <summary>
-        /// How far back one sequence can be walked.
-        /// </summary>
-        /// <remarks>
-        /// Deep enough that nobody reaches the end of it while fixing a mistake, shallow
-        /// enough that a long session cannot grow without bound. Reactor runs inside a game.
-        /// </remarks>
-        const int HistoryDepth = 50;
-
-        /// <summary>
-        /// Makes a change and remembers how to take it back.
-        /// </summary>
-        /// <remarks>
-        /// The only way anything changes a sequence. Applying and recording are one call so
-        /// they cannot come apart - an edit that is applied without being recorded is a hole
-        /// in the way back, and one recorded without being applied is worse.
-        /// </remarks>
+        /// <summary>Makes a change to a sequence and remembers how to take it back.</summary>
+        /// <remarks>The only way anything changes a sequence.</remarks>
         internal void Do(Sequence sequence, SequenceEdit edit)
         {
             Do(sequence, edit, false);
@@ -751,26 +743,34 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// </remarks>
         internal void Do(Sequence sequence, SequenceEdit edit, bool coalesce)
         {
-            if (!edit.Changes)
+            if (!_sequenceHistory.Did(sequence, edit, coalesce))
                 return;
 
-            edit.Apply(sequence);
+            Settled(edit);
+        }
 
-            // Any deliberate change may have moved what a trigger points at, and whatever arranges
-            // triggers outside the program has no other way to know.
+        /// <summary>Makes a change to a system and remembers how to take it back.</summary>
+        /// <remarks>The only way anything changes a trigger.</remarks>
+        internal void Do(AutomationSystem system, SystemEdit edit)
+        {
+            if (!_systemHistory.Did(system, edit, false))
+                return;
+
+            Settled(edit);
+        }
+
+        /// <summary>
+        /// What every edit costs whatever level it was at.
+        /// </summary>
+        /// <remarks>
+        /// Rewiring because any deliberate change may have moved what a trigger points at, and
+        /// whatever arranges triggers outside the program has no other way to know. Undoing one
+        /// pays the same, which it did not before triggers could be walked back: a slot left
+        /// pointing at the arrangement that was taken away is a button that does nothing.
+        /// </remarks>
+        void Settled<T>(Edit<T> edit)
+        {
             _program.Rewire();
-
-            // A new edit is a new branch, so whatever was walked back is gone.
-            _redo.Remove(sequence.Id);
-
-            var stack = HistoryFor(sequence);
-            if (!coalesce || stack.Count == 0 || stack[stack.Count - 1].Label != edit.Label)
-            {
-                stack.Add(edit);
-
-                if (stack.Count > HistoryDepth)
-                    stack.RemoveAt(0);
-            }
 
             if (edit.ChangesShape)
                 Invalidate();
@@ -778,112 +778,91 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
         internal bool CanUndo(Sequence sequence)
         {
-            List<SequenceEdit> stack;
-            return _history.TryGetValue(sequence.Id, out stack) && stack.Count > 0;
+            return _sequenceHistory.CanUndo(sequence);
         }
 
-        /// <summary>What undoing would undo, in the words it happened in.</summary>
         internal string UndoLabel(Sequence sequence)
         {
-            List<SequenceEdit> stack;
-            if (!_history.TryGetValue(sequence.Id, out stack) || stack.Count == 0)
-                return "";
-
-            return stack[stack.Count - 1].Label;
+            return _sequenceHistory.UndoLabel(sequence);
         }
 
         internal void Undo(Sequence sequence)
         {
-            List<SequenceEdit> stack;
-            if (!_history.TryGetValue(sequence.Id, out stack) || stack.Count == 0)
-                return;
-
-            var last = stack.Count - 1;
-            var edit = stack[last];
-            stack.RemoveAt(last);
-
-            edit.Undo(sequence);
-            Waiting(sequence).Add(edit);
-
-            Invalidate();
+            Walked(_sequenceHistory.Undo(sequence));
         }
 
         internal bool CanRedo(Sequence sequence)
         {
-            List<SequenceEdit> stack;
-            return _redo.TryGetValue(sequence.Id, out stack) && stack.Count > 0;
+            return _sequenceHistory.CanRedo(sequence);
         }
 
-        /// <summary>What redoing would put back, in the words it happened in.</summary>
         internal string RedoLabel(Sequence sequence)
         {
-            List<SequenceEdit> stack;
-            if (!_redo.TryGetValue(sequence.Id, out stack) || stack.Count == 0)
-                return "";
-
-            return stack[stack.Count - 1].Label;
+            return _sequenceHistory.RedoLabel(sequence);
         }
 
-        /// <summary>
-        /// Puts back the last thing undone.
-        /// </summary>
-        /// <remarks>
-        /// The same <c>Apply</c> the original edit ran, not a third code path. An edit that
-        /// could be applied, reversed, and then not applied again the same way would be a
-        /// stranger bug than either half alone.
-        /// </remarks>
         internal void Redo(Sequence sequence)
         {
-            List<SequenceEdit> stack;
-            if (!_redo.TryGetValue(sequence.Id, out stack) || stack.Count == 0)
+            Walked(_sequenceHistory.Redo(sequence));
+        }
+
+        internal bool CanUndo(AutomationSystem system)
+        {
+            return _systemHistory.CanUndo(system);
+        }
+
+        internal string UndoLabel(AutomationSystem system)
+        {
+            return _systemHistory.UndoLabel(system);
+        }
+
+        internal void Undo(AutomationSystem system)
+        {
+            Walked(_systemHistory.Undo(system));
+        }
+
+        internal bool CanRedo(AutomationSystem system)
+        {
+            return _systemHistory.CanRedo(system);
+        }
+
+        internal string RedoLabel(AutomationSystem system)
+        {
+            return _systemHistory.RedoLabel(system);
+        }
+
+        internal void Redo(AutomationSystem system)
+        {
+            Walked(_systemHistory.Redo(system));
+        }
+
+        /// <summary>Whatever a step back or forward changed, once it has changed it.</summary>
+        /// <remarks>
+        /// Always a rebuild, unlike making the edit in the first place: somebody walking back is
+        /// looking for what they had, and a screen that only re-worded itself would leave a step
+        /// they have just put back missing from the list.
+        /// </remarks>
+        void Walked<T>(Edit<T> edit)
+        {
+            if (edit == null)
                 return;
 
-            var last = stack.Count - 1;
-            var edit = stack[last];
-            stack.RemoveAt(last);
-
-            edit.Apply(sequence);
-            HistoryFor(sequence).Add(edit);
-
+            _program.Rewire();
             Invalidate();
         }
 
-        List<SequenceEdit> Waiting(Sequence sequence)
+        /// <summary>
+        /// Forgets a sequence: its way back, and any page showing it, so deleting one never
+        /// leaves somebody staring at something that no longer exists.
+        /// </summary>
+        internal void ForgetSequence(Sequence sequence)
         {
-            List<SequenceEdit> stack;
-            if (!_redo.TryGetValue(sequence.Id, out stack))
-            {
-                stack = new List<SequenceEdit>();
-                _redo[sequence.Id] = stack;
-            }
-            return stack;
-        }
-
-        List<SequenceEdit> HistoryFor(Sequence sequence)
-        {
-            List<SequenceEdit> stack;
-            if (!_history.TryGetValue(sequence.Id, out stack))
-            {
-                stack = new List<SequenceEdit>();
-                _history[sequence.Id] = stack;
-            }
-            return stack;
-        }
-
-        void ForgetHistory(int sequenceId)
-        {
-            _history.Remove(sequenceId);
-            _redo.Remove(sequenceId);
-        }
-
-        internal void ForgetSequence(int sequenceId)
-        {
-            ForgetHistory(sequenceId);
+            _sequenceHistory.Forget(sequence);
 
             for (var i = _stack.Count - 1; i > 0; i--)
             {
                 var page = _stack[i] as SequencePage;
-                if (page != null && page.SequenceId == sequenceId)
+                if (page != null && page.SequenceId == sequence.Id)
                     _stack.RemoveAt(i);
             }
             _structureDirty = true;
@@ -927,6 +906,14 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Leave) : 0;
             _screen.RefreshCommand = Register(Cmd.Refresh, Look);
             _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(Cmd.Switch, page.Switch) : 0;
+
+            // Registered whether or not there is anything to walk back, because issuing a command
+            // needs the numbering only a rebuild does - and what there is to walk back changes
+            // without one. So this decides whether the command may exist at all, and the tick
+            // decides whether it is offered.
+            _screen.HasHistory = page.HasHistory;
+            _undoCommand = page.HasHistory ? Register(Cmd.Undo, page.Undo) : 0;
+            _redoCommand = page.HasHistory ? Register(Cmd.Redo, page.Redo) : 0;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryCommand = _screen.HasPrimary ? Register(Cmd.Primary, page.Primary) : 0;
 
@@ -944,6 +931,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             _screen.Subtitle = page.Subtitle;
             _screen.SwitchIsOn = page.SwitchIsOn;
+            Walking();
             BuildActions();
 
             _structureDirty = false;
@@ -1082,7 +1070,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     {
                         // Nothing to record: the sequence does not exist yet, so there is no
                         // history for it and nothing to take back to.
-                        FinishSequence(Starter(answer), origin);
+                        FinishTrigger(Starter(answer), origin);
                     },
                     true));
                 return;
@@ -1090,54 +1078,26 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                Push(RatePage(every, delegate { FinishSequence(every, origin); }));
+                Push(RatePage(every, delegate { FinishTrigger(every, origin); }));
         }
 
         /// <summary>
-        /// Asks what should start a sequence that nothing starts yet.
+        /// A sequence made on its own, with nothing starting it yet.
         /// </summary>
         /// <remarks>
-        /// The same two questions the starters on a system's screen ask, and then the same pages, so
-        /// choosing a trigger reads identically whether the sequence is being made or mended. The
-        /// difference is only where the answer goes: there it makes a sequence, here it is an edit on
-        /// one that exists, which is why this one can be undone.
-        /// <para>
-        /// A sequence gets here by being copied, by being sent in a program somebody wrote by hand, or
-        /// by having had its trigger's block ground off. Before this there was no way back from any of
-        /// them: the line said what was missing and nothing on the screen could fill it in.
-        /// </para>
+        /// The other way round from the wizard, and both are ordinary. Somebody who knows what the
+        /// machine should do writes it and says what starts it afterwards; somebody who knows which
+        /// button they want starts there. A sequence made this way is what the copy button makes
+        /// too, which is why the way to say what starts it is already on its screen.
         /// </remarks>
-        internal void AskWhatStarts(Sequence sequence)
+        internal void NewSequence(AutomationSystem system)
         {
-            // Where to come back to. Both branches push at least one more page, and the answer lands
-            // on the sequence rather than on the question that was just answered.
-            var origin = _stack.Count;
+            var sequence = _program.AddSequence(system);
+            sequence.Enabled = false;
+            sequence.Name = Name(sequence);
 
-            var page = new ChoicePage(this, "What starts this?");
-
-            page.Add("When something happens", false, delegate
-            {
-                Push(new PickPage(this, "When something happens", true,
-                    new List<long>(), "",
-                    delegate(PickAnswer answer)
-                    {
-                        UnwindTo(origin);
-                        Do(sequence, new GiveTrigger(Starter(answer)));
-                    },
-                    true));
-            });
-
-            page.Add("Every so often", false, delegate
-            {
-                var every = new EveryTrigger(Cadences.Default);
-                Push(RatePage(every, delegate
-                {
-                    UnwindTo(origin);
-                    Do(sequence, new GiveTrigger(every));
-                }));
-            });
-
-            Push(page);
+            Invalidate();
+            Push(new SequencePage(this, sequence));
         }
 
         /// <summary>
@@ -1186,30 +1146,294 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Adds the sequence and opens it, dropping the questions behind it.
+        /// Asks what the trigger should do, now that it is known what starts it.
         /// </summary>
         /// <remarks>
-        /// The sequence does not exist until here, so backing out of the questions
-        /// leaves nothing behind. Creating it up front and tidying up afterwards
-        /// would mean an abandoned run littered the list with an empty sequence.
+        /// Nothing exists until one of these is answered, so backing out of the questions leaves
+        /// nothing behind. The order is the teaching: a trigger does one thing, and the way to have
+        /// several things happen is the first row on the list rather than a rule to explain.
         /// </remarks>
-        void FinishSequence(Trigger trigger, int origin)
+        void FinishTrigger(Trigger trigger, int origin)
         {
             var system = _pendingSystem;
             _pendingSystem = null;
 
             UnwindTo(origin);
+            AskWhatItDoes(system, trigger, origin, true);
+        }
 
-            // Parked until somebody says otherwise. Enabled by default, a sequence with a trigger and
-            // no steps would already be live, and would get progressively more so as each step was
-            // added - a system half-doing something nobody has finished describing. It is also the only
-            // way the switch can gate editing without a new sequence being unbuildable the moment it
-            // exists.
-            var sequence = _program.AddSequence(system, trigger);
+        /// <summary>
+        /// The same question, for a trigger that already exists.
+        /// </summary>
+        /// <remarks>
+        /// One question and one list, because "what should this do" is one thought whether the
+        /// trigger is being made or mended - and a second list that read differently would be two
+        /// things to learn about one act.
+        /// </remarks>
+        void AskWhatItDoes(AutomationSystem system, Trigger trigger, int origin, bool fresh)
+        {
+            var page = new ChoicePage(this, "What should it do?");
+
+            page.Add("Run a new sequence", false,
+                delegate { RunNew(system, trigger, origin, fresh); });
+
+            if (Standing(system))
+            {
+                page.Add("Run an existing sequence", false,
+                    delegate { PickSequence(system, trigger, false, origin, fresh); });
+
+                page.Add("Stop a sequence", false,
+                    delegate { PickSequence(system, trigger, true, origin, fresh); });
+            }
+
+            page.Add("Do something", false,
+                delegate { DoOneThing(system, trigger, origin, fresh); });
+
+            Push(page);
+        }
+
+        /// <summary>
+        /// Where every answer to that question lands.
+        /// </summary>
+        /// <remarks>
+        /// A trigger being made is not yet in the system, and nothing has been done that could be
+        /// taken back - the way back from making one is the bin on its row. A trigger being changed
+        /// is already there, so this is an edit, and it is the system's to walk back.
+        /// </remarks>
+        void Points(AutomationSystem system, Trigger trigger, Sequence sequence, bool stops,
+            bool fresh, Sequence made)
+        {
+            if (fresh)
+            {
+                trigger.Runs = sequence.Number;
+                trigger.Stops = stops;
+                system.AddTrigger(trigger);
+                _program.Rewire();
+                Invalidate();
+                return;
+            }
+
+            Do(system, new PointTrigger(_program, trigger, sequence.Number, stops, made));
+        }
+
+        /// <summary>Whether this system has a sequence that stands on its own and can be named.</summary>
+        static bool Standing(AutomationSystem system)
+        {
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                if (sequences[i].HasName)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Makes the sequence this trigger runs, and opens it.
+        /// </summary>
+        /// <remarks>
+        /// Parked until somebody says otherwise. Enabled by default, a sequence with a trigger and no
+        /// steps would already be live, and would get progressively more so as each step was added -
+        /// a system half-doing something nobody has finished describing. It is also the only way the
+        /// switch can gate editing without a new sequence being unbuildable the moment it exists.
+        /// </remarks>
+        void RunNew(AutomationSystem system, Trigger trigger, int origin, bool fresh)
+        {
+            // The question goes with the answer. Left on the stack, backing out of the sequence would
+            // land on "what should it do?" for a trigger that already does something.
+            UnwindTo(origin);
+
+            var sequence = _program.AddSequence(system);
             sequence.Enabled = false;
             sequence.Name = Name(sequence);
 
+            Points(system, trigger, sequence, false, fresh, sequence);
+
             Push(new SequencePage(this, sequence));
+        }
+
+        /// <summary>
+        /// Points the trigger at a sequence that already exists, to run or to stop.
+        /// </summary>
+        /// <remarks>
+        /// Only the ones that stand on their own. A sequence nobody named is the one thing its own
+        /// trigger does and is not a thing to point a second one at - it has no name to offer, and
+        /// pointing at it would be sharing something the person never made separately.
+        /// </remarks>
+        void PickSequence(AutomationSystem system, Trigger trigger, bool stops, int origin,
+            bool fresh)
+        {
+            var page = new ChoicePage(this, stops ? "Stop which one?" : "Run which one?");
+
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                if (!sequences[i].HasName)
+                    continue;
+
+                var chosen = sequences[i];
+                page.Add(chosen.Name, false, delegate
+                {
+                    UnwindTo(origin);
+                    Points(system, trigger, chosen, stops, fresh, null);
+                });
+            }
+
+            Push(page);
+        }
+
+        /// <summary>
+        /// Asks what one thing the trigger should do, and makes it do exactly that.
+        /// </summary>
+        /// <remarks>
+        /// What it holds is a sequence of one act that nobody named, which is what "one thing" is in
+        /// the model. Where the block has an action of the game's own for it, the host writes that
+        /// into the button and Reactor is not part of the press - see <c>ReactorUnit</c>, which
+        /// decides that by looking at the sequence rather than by being told.
+        /// </remarks>
+        void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh)
+        {
+            Push(new PickPage(this, "Do something", false, new List<long>(), "",
+                delegate(PickAnswer answer)
+                {
+                    var act = new Act(answer.Chosen);
+                    for (var i = 0; i < answer.Targets.Count; i++)
+                    {
+                        GridEntity entity = _world.FindEntity(answer.Targets[i]);
+                        if (entity != null)
+                            act.Targets.Add(_program.Declare(_world, entity).Name);
+                    }
+
+                    var sequence = _program.AddSequence(system);
+                    sequence.Steps.Add(act);
+                    sequence.Steps.Add(new Await());
+
+                    UnwindTo(origin);
+                    Points(system, trigger, sequence, false, fresh, sequence);
+                }));
+        }
+
+        /// <summary>
+        /// Takes a trigger out of a system, and the sequence it was the only reason for.
+        /// </summary>
+        /// <remarks>
+        /// No question asked, because the system's arrows are the answer to a deletion nobody meant -
+        /// and a question in front of every one of them is how people learn to press through
+        /// questions. A sequence deleted from its own screen still asks: that is work somebody can
+        /// see, and its way back would be on a screen that went with it.
+        /// </remarks>
+        internal void Forget(AutomationSystem system, Trigger trigger)
+        {
+            Sequence sequence = system.FindSequence(trigger.Runs);
+            var only = sequence != null && !sequence.HasName && !Started(system, sequence, trigger)
+                ? sequence
+                : null;
+
+            if (only != null)
+                ForgetSequence(only);
+
+            Do(system, new ForgetTrigger(_program, trigger, only));
+        }
+
+        /// <summary>
+        /// Asks what the trigger should do instead, from the words on its row that say what it does.
+        /// </summary>
+        /// <remarks>
+        /// The row's second line rather than a question asking which half was meant: the answer to
+        /// that question is already on the row, in the words somebody is looking at when they press.
+        /// </remarks>
+        internal void ChangeTarget(AutomationSystem system, Trigger trigger)
+        {
+            AskWhatItDoes(system, trigger, _stack.Count, false);
+        }
+
+        /// <summary>
+        /// Asks again what starts a trigger, and puts the answer in its place.
+        /// </summary>
+        /// <remarks>
+        /// Straight to the question it was made with rather than to the top of the wizard. A trigger
+        /// that listens for a moment stays one: what somebody came to change is which block, or which
+        /// moment of it. Turning a repeat into a moment is deleting it and making the one you meant.
+        /// <para>
+        /// Everything the trigger is for is carried over, because this question was only ever about
+        /// what starts it - the sequence it runs, whether it stops that sequence instead, and
+        /// whatever somebody wrote about it.
+        /// </para>
+        /// </remarks>
+        internal void ChangeTrigger(AutomationSystem system, Trigger trigger)
+        {
+            // Back to the screen the row is on, which is where the answer lands.
+            var origin = _stack.Count;
+
+            var every = trigger as EveryTrigger;
+            if (every != null)
+            {
+                // The page the wizard uses, so a rate reads the same wherever it is met. It sets the
+                // interval itself, which is why the edit is handed what it was before that.
+                var rate = every.IntervalTicks;
+                Push(RatePage(every, delegate
+                {
+                    var chosen = every.IntervalTicks;
+                    every.IntervalTicks = rate;
+
+                    UnwindTo(origin);
+                    Do(system, new SetCadence(every, rate, chosen));
+                }));
+                return;
+            }
+
+            var moment = trigger as MomentTrigger;
+            if (moment == null)
+                return;
+
+            var was = moment as WhenTrigger;
+
+            Push(new PickPage(this, "When something happens", true,
+                Blocks(moment.Sources), moment.EventId,
+                delegate(PickAnswer answer)
+                {
+                    UnwindTo(origin);
+                    Do(system, new ChangeTrigger(moment, Starter(answer)));
+                },
+                true, was != null && was.RequiresAll));
+        }
+
+        /// <summary>What these declarations point at, as blocks, for a picker that shows blocks.</summary>
+        /// <remarks>
+        /// A reference that points at nothing is left out rather than stood in for by a zero: the
+        /// picker shows what is on the ship, and what is gone is not.
+        /// </remarks>
+        List<long> Blocks(IList<string> names)
+        {
+            var found = new List<long>();
+            for (var i = 0; i < names.Count; i++)
+            {
+                GridEntity entity = _runner.Bindings.Entity(names[i]);
+                if (entity != null)
+                    found.Add(entity.Id);
+            }
+
+            return found;
+        }
+
+        /// <summary>
+        /// Whether anything but that trigger still starts or stops the sequence.
+        /// </summary>
+        /// <remarks>
+        /// Asked while the one being deleted is still in the list, because what is being decided is
+        /// whether to delete it - so it cannot be allowed to answer for itself.
+        /// </remarks>
+        static bool Started(AutomationSystem system, Sequence sequence, Trigger apart)
+        {
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                if (triggers[i] != apart && triggers[i].Runs == sequence.Number)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>

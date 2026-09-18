@@ -172,6 +172,36 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             AddTrigger(now);
         }
 
+        /// <summary>Where a trigger sits among the others, or -1.</summary>
+        internal int IndexOfTrigger(Trigger trigger)
+        {
+            for (var i = 0; i < _triggers.Count; i++)
+            {
+                if (_triggers[i] == trigger)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Puts a trigger back where it was.
+        /// </summary>
+        /// <remarks>
+        /// For undo. One that came back on the end would reorder the list somebody is looking at,
+        /// which reads as a second change rather than as the first one being taken back.
+        /// </remarks>
+        internal void PutTriggerBack(int at, Trigger trigger)
+        {
+            if (trigger == null)
+                return;
+
+            if (at < 0 || at > _triggers.Count)
+                _triggers.Add(trigger);
+            else
+                _triggers.Insert(at, trigger);
+        }
+
         /// <summary>The first thing that starts that sequence, or null where nothing does.</summary>
         public Trigger TriggerFor(int number)
         {

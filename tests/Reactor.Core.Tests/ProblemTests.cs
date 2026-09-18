@@ -123,14 +123,13 @@ public class ProblemTests
         Assert.True(row.ProblemIsWarning);
         Assert.Equal(0, row.Problems);
 
-        // And the sequence's own screen says it without marking the line that starts it.
+        // And the sequence's own screen says it too, quietly.
         ship.Editor.PressRow(1);
         ship.Editor.Tick(1800);
 
         var sentence = ship.Editor.Sentence();
         Assert.Equal("Nothing starts this yet.", sentence.Problem);
         Assert.True(sentence.ProblemIsWarning);
-        Assert.False(sentence.Trigger.HasProblem);
     }
 
     /// <summary>
@@ -192,26 +191,52 @@ public class ProblemTests
     public void TheBrokenSequenceIsMarkedWhereItIsListed()
     {
         var ship = Build();
-        ship.Rig.CannotStart(ship.Sequence);
+        ship.Rig.Grind(2);
 
         ship.Editor.PressRow(1);
+        ship.Editor.Tick(1200);
 
         var rows = ship.Editor.Rows();
         Assert.Equal(1, rows[0].Problems);
-        Assert.Equal("Nothing can start this.", rows[0].Problem);
+        Assert.Equal("This affects something that isn't here any more.", rows[0].Problem);
     }
 
     /// <summary>
-    /// The end of the trail: the line at fault is marked, and no other line is.
+    /// The end of the trail: a trigger that cannot fire is marked on its own row.
     /// </summary>
     /// <remarks>
-    /// What is wrong is said once, in words, on the sentence. Which line it is about is said by the
-    /// mark, because words alone in front of a multi-step sequence are an accusation without an
-    /// address - and somebody arrived here from two screens away precisely so they would not have to
-    /// read all of it to work out where to press.
+    /// What is wrong is said once, and it is said where it can be mended - pressing that row asks
+    /// again which block starts this. The sequence's row says nothing, because the sequence is not
+    /// what is broken, and a screen saying it twice would send somebody to the wrong place half
+    /// the time.
     /// </remarks>
     [Fact]
-    public void TheFailingLineIsMarkedInTheEditor()
+    public void TheTriggerAtFaultIsMarkedOnItsOwnRow()
+    {
+        var ship = Build();
+        ship.Rig.CannotStart(ship.Sequence);
+
+        ship.Editor.PressRow(1);
+        ship.Editor.Tick(1200);
+
+        var trigger = ship.Editor.Triggers()[0];
+        Assert.Equal("Nothing can start this.", trigger.Problem);
+        Assert.Equal(1, trigger.Problems);
+
+        Assert.Equal("", ship.Editor.Rows()[0].Problem);
+        Assert.Equal(0, ship.Editor.Rows()[0].Problems);
+    }
+
+    /// <summary>
+    /// And the sequence's own screen still says what is wrong, without a line to mark.
+    /// </summary>
+    /// <remarks>
+    /// Somebody standing on the sequence wondering why it never runs is owed the reason. What
+    /// starts it is not on this screen, so there is nothing here to point at - the words are the
+    /// whole of what it has to say, and no step is accused of it.
+    /// </remarks>
+    [Fact]
+    public void TheSequenceSaysItWithoutMarkingAStep()
     {
         var ship = Build();
         ship.Rig.CannotStart(ship.Sequence);
@@ -221,7 +246,6 @@ public class ProblemTests
 
         var sentence = ship.Editor.Sentence();
         Assert.Equal("Nothing can start this.", sentence.Problem);
-        Assert.True(sentence.Trigger.HasProblem);
         Assert.All(sentence.Steps, step => Assert.False(step.HasProblem));
     }
 
@@ -272,7 +296,7 @@ public class ProblemTests
         Assert.False(ship.Sequence.Enabled);
     }
 
-    /// <summary>A step's own trouble marks the step, and leaves the trigger alone.</summary>
+    /// <summary>A step's own trouble marks the step, and only the step.</summary>
     [Fact]
     public void AStepAtFaultIsMarkedRatherThanTheWholeSentence()
     {
@@ -286,11 +310,11 @@ public class ProblemTests
         ship.Editor.Tick(600);
 
         var sentence = ship.Editor.Sentence();
-        Assert.False(sentence.Trigger.HasProblem);
         Assert.True(sentence.Steps[0].HasProblem);
+        Assert.NotEmpty(sentence.Problem);
     }
 
-    /// <summary>A mended sequence stops being marked, which is the half that is easy to forget.</summary>
+    /// <summary>A mended trigger stops being marked, which is the half that is easy to forget.</summary>
     [Fact]
     public void MendingItClearsTheMark()
     {
@@ -298,16 +322,16 @@ public class ProblemTests
         ship.Rig.CannotStart(ship.Sequence);
 
         ship.Editor.PressRow(1);
-        ship.Editor.PressRow(0);
-        Assert.True(ship.Editor.Sentence().Trigger.HasProblem);
+        ship.Editor.Tick(1200);
+        Assert.Equal(1, ship.Editor.Triggers()[0].Problems);
 
         ship.Rig.CanStart(ship.Sequence);
-        ship.Runner.Tick(600);
-        ship.Editor.Tick(600);
+        ship.Runner.Tick(1800);
+        ship.Editor.Tick(1800);
 
-        var sentence = ship.Editor.Sentence();
-        Assert.True(string.IsNullOrEmpty(sentence.Problem));
-        Assert.False(sentence.Trigger.HasProblem);
+        var trigger = ship.Editor.Triggers()[0];
+        Assert.True(string.IsNullOrEmpty(trigger.Problem));
+        Assert.Equal(0, trigger.Problems);
     }
 
     static SequenceFault Fault(Ship ship) => Fault(ship, ship.Sequence);
@@ -330,6 +354,7 @@ public class ProblemTests
         ship.Editor.PressBlock("Airlock Button");
         ship.Editor.PressChoice("is pressed");
         ship.Editor.PressPrimary();
+        ship.Editor.PressChoice("Run a new sequence");
 
         ship.Editor.PressAdd("do something");
         ship.Editor.PressBlock("Inner Door");

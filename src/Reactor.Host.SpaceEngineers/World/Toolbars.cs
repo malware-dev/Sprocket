@@ -60,5 +60,19 @@ namespace Reactor.Host.SpaceEngineers.World
         {
             return _slots.Clear(toolbar, slot);
         }
+
+        /// <summary>
+        /// Whether a block has an action of the game's own by that name.
+        /// </summary>
+        /// <remarks>
+        /// Asked before a slot is written with one, because the name Reactor holds is data and the
+        /// block is the authority on what it offers. A subtype that does not have it costs a Reactor
+        /// trigger rather than a slot that looks wired and does nothing.
+        /// </remarks>
+        public static bool Offers(IMyTerminalBlock block, string actionId)
+        {
+            return block != null && !string.IsNullOrEmpty(actionId)
+                && _slots.Offers(block, actionId);
+        }
     }
 }

@@ -106,6 +106,26 @@ public class UndoTests
         Assert.Equal(before, Shape(sequence));
     }
 
+    /// <summary>
+    /// And for a change to the system, read back through the sequence it is about.
+    /// </summary>
+    /// <remarks>
+    /// What starts a sequence belongs to its system, and is still part of what that sequence is -
+    /// so the same flattened shape catches it, and an undo that put back something that merely read
+    /// the same would show up as a difference here.
+    /// </remarks>
+    static void RoundTrip(Sequence sequence, SystemEdit edit)
+    {
+        var system = sequence.System;
+        var before = Shape(sequence);
+
+        edit.Apply(system);
+        Assert.NotEqual(before, Shape(sequence));
+
+        edit.Undo(system);
+        Assert.Equal(before, Shape(sequence));
+    }
+
     [Fact]
     public void AddingAStepReversesExactly() =>
         RoundTrip(new AddStep("adding a step", 3, StepFor("close", "outer")));
@@ -173,39 +193,6 @@ public class UndoTests
             t => t.Name == "SetEnabled");
     }
 
-    /// <summary>
-    /// Giving a sequence that nothing starts a trigger reverses too.
-    /// </summary>
-    /// <remarks>
-    /// The one edit with nothing to put back, so undoing it means taking the trigger away rather
-    /// than restoring the old one - and a trigger left behind would start a sequence somebody has
-    /// just said they did not mean to arm.
-    /// </remarks>
-    [Fact]
-    public void ChoosingWhatStartsItReversesExactly()
-    {
-        var program = new Automation();
-        var sequence = program.AddSequence(program.AddSystem());
-        sequence.Name = "Let me out";
-        sequence.Steps.Add(StepFor("close", "inner"));
-
-        var made = new WhenTrigger("pressed");
-        made.Sources.Add("call");
-
-        RoundTrip(sequence, new GiveTrigger(made));
-    }
-
-    /// <summary>A repeat is given the same way, and taken back the same way.</summary>
-    [Fact]
-    public void ChoosingARepeatReversesExactly()
-    {
-        var program = new Automation();
-        var sequence = program.AddSequence(program.AddSystem());
-        sequence.Steps.Add(StepFor("open", "outer"));
-
-        RoundTrip(sequence, new GiveTrigger(new EveryTrigger(600)));
-    }
-
     [Fact]
     public void ChangingTheTriggerReversesExactly()
     {
@@ -245,14 +232,56 @@ public class UndoTests
     public void ChangingTheCadenceReversesExactly()
     {
         var program = new Automation();
-        var sequence = program.AddSequence(program.AddSystem(), new EveryTrigger(60));
-        var edit = new SetCadence(60, 600);
+        var every = new EveryTrigger(60);
+        var sequence = program.AddSequence(program.AddSystem(), every);
 
-        var before = Shape(sequence);
-        edit.Apply(sequence);
-        Assert.NotEqual(before, Shape(sequence));
-        edit.Undo(sequence);
-        Assert.Equal(before, Shape(sequence));
+        RoundTrip(sequence, new SetCadence(every, 60, 600));
+    }
+
+    /// <summary>
+    /// Deleting a trigger reverses, which is what makes deleting one safe to do without asking.
+    /// </summary>
+    [Fact]
+    public void DeletingATriggerReversesExactly()
+    {
+        var program = new Automation();
+        Sequence sequence = Build();
+
+        RoundTrip(sequence, new ForgetTrigger(program, sequence.Trigger, null));
+    }
+
+    /// <summary>
+    /// And it brings back the sequence it took with it, as the sequence it was.
+    /// </summary>
+    /// <remarks>
+    /// A trigger that does one plain thing owns the sequence holding that act, so deleting the
+    /// trigger deletes it. Everything that pointed at that sequence named it by number, so one that
+    /// came back as a new sequence would come back as a different thing.
+    /// </remarks>
+    [Fact]
+    public void DeletingATriggerBringsBackTheSequenceItTook()
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+
+        var trigger = new WhenTrigger("pressed");
+        trigger.Sources.Add("call");
+
+        var sequence = program.AddSequence(system, trigger);
+        sequence.Steps.Add(StepFor("open", "outer"));
+
+        var edit = new ForgetTrigger(program, trigger, sequence);
+        var number = sequence.Number;
+
+        edit.Apply(system);
+        Assert.Empty(program.Sequences);
+        Assert.Empty(system.Triggers);
+
+        edit.Undo(system);
+        Assert.Single(program.Sequences);
+        Assert.Same(sequence, program.Sequences[0]);
+        Assert.Equal(number, program.Sequences[0].Number);
+        Assert.Same(trigger, system.Triggers[0]);
     }
 
     /// <summary>
@@ -266,15 +295,9 @@ public class UndoTests
     public void SettlingOnWhatWasAlreadyThereIsNotAnEdit()
     {
         Sequence sequence = Build();
-        var when = (WhenTrigger)sequence.Trigger;
-
-        var same = new WhenTrigger("pressed");
-        same.Sources.Add("call");
 
         Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close").Changes);
-        Assert.False(new ChangeTrigger(when, same).Changes);
         Assert.False(new Rename("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
-        Assert.False(new SetCadence(60, 60).Changes);
     }
 }

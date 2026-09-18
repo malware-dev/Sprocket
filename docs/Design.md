@@ -370,8 +370,8 @@ where both could be meant a system's is a *block slot*.
 
 ### Sequence
 
-A trigger and an ordered list of steps. Optionally named; the name is what makes it
-callable, and what makes a diagnosis readable.
+An ordered list of steps. Optionally named; the name is what makes it callable, and what
+makes a diagnosis readable.
 
 ### Trigger
 
@@ -381,12 +381,23 @@ What starts a sequence. Always a moment, never a situation.
   available where the sentence genuinely differs: "when tank A **and** tank B are
   empty" fires as the last one empties, not the first.
 - **Every** - a recurring interval. This is what replaces the loop.
-- **Called** - started by name from elsewhere, which is what lets two buttons run the
-  same sequence.
+
+A trigger belongs to the system rather than to the sequence, and says which sequence it
+runs or stops. Any number of them may point at one sequence, which is what lets two
+buttons cycle the same airlock, and a sequence may have none - one another sequence runs,
+or one somebody is half way through building.
 
 Intervals come from the game's frame counter and are never counted by Reactor. Space
 Engineers offers update rates of 1, 10 and 100 only, and the slower two do not land on
 exact multiples, so anything self-counted drifts with server load.
+
+**A trigger that does one plain thing is written as the game's own action.** A block event
+whose target is a single action goes into the toolbar slot as that action, not as Reactor's
+carrying a key, so it costs nothing at runtime and keeps working when the mod is removed.
+Only sequences stop. This is possible for the toolbar kinds and for actions the game has:
+Reactor's own vocabulary is performed by setting properties, so each declared action needs
+the game's action name to place, and one an extension invents out of several writes has
+none. Where a block does not offer the name, the trigger runs through Reactor instead.
 
 ### Step
 

@@ -41,9 +41,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// <remarks>
         /// No subtitle. What the sequence is doing right now belongs on the sentence itself, beside
         /// the switch that changes it - repeating it up here reads as two different things saying the
-        /// same words.
+        /// same words. What starts it is not here either: that is a row on its system's screen, and
+        /// a sequence three triggers start has no one line to say so.
         /// </remarks>
-        public override string Title => SequenceText.Sequence(Editor.Runner.Bindings, _sequence);
+        public override string Title => SequenceText.Doing(Editor.Runner.Bindings, _sequence);
 
         /// <summary>
         /// Naming happens on the heading, because the heading is what the name is for.
@@ -73,24 +74,15 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Two parts: what starts it, and what it then does. Only the second takes a name.
+        /// One part: what this sequence is called.
         /// </summary>
         /// <remarks>
-        /// This is the whole reason a heading is a list. One line with a name replacing all of it would
-        /// mean that wanting a better word for what a sequence <b>does</b> cost you the trigger that
-        /// starts it, with no way to keep both but to type the trigger into the name and hold the two
-        /// in step by hand forever after.
-        /// <para>
-        /// The trigger half is not nameable, and that is a decision rather than an omission. "When the
-        /// airlock button is pressed" is already the best possible name for itself; replacing it with
-        /// "Entry request" trades legibility for reuse, and reuse only pays once a trigger is a thing you
-        /// can point at from somewhere else. The shape here carries a name for it the day that arrives.
-        /// </para>
+        /// What starts it is not here. A sequence may be started from several places, and its own
+        /// screen cannot say so without becoming a second list of the triggers its system already
+        /// lists - so this screen is what the sequence is and what it does, and nothing about why.
         /// </remarks>
         public override void Heading(List<HeadingPart> parts)
         {
-            parts.Add(new HeadingPart(""));
-
             var does = new HeadingPart("");
             does.Prompt = RenamePrompt;
             does.NameRequired = NameRequired;
@@ -102,21 +94,19 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
         public override void RefreshHeading(List<HeadingPart> parts)
         {
-            if (parts.Count < 2)
+            if (parts.Count < 1)
                 return;
-
-            parts[0].Text = SequenceText.Trigger(Editor.Runner.Bindings, _sequence.Trigger);
 
             // The name where there is one, and what it actually does where there is not - so an unnamed
             // sequence still reads as a whole sentence and naming one is a choice rather than a chore.
             // The same call a list row makes, so the two cannot come to disagree.
-            parts[1].Name = CustomName;
-            parts[1].Text = SequenceText.Doing(Editor.Runner.Bindings, _sequence);
+            parts[0].Name = CustomName;
+            parts[0].Text = SequenceText.Doing(Editor.Runner.Bindings, _sequence);
         }
 
         public override void Build(List<EditorComponent> components)
         {
-            _sentence = new SequenceComponent(_sequence.Id, BuildTrigger());
+            _sentence = new SequenceComponent(_sequence.Id);
             _sentence.Enabled = _sequence.Enabled;
             _sentence.ToggleCommand = Editor.RegisterToggle(Cmd.Enable, SetEnabled);
 
@@ -128,12 +118,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _sentence.LockedText = "Running. Stop it to make changes - whatever it has already "
                 + "done stays done.";
             _sentence.DeleteCommand = Change(Cmd.DeleteSequence, Delete);
-
-            // Nothing starts this one, so the first line is how to say what does. A copy arrives this
-            // way, and so does a sequence whose trigger named a block that has since been ground off.
-            _sentence.StartCommand = _sequence.Trigger == null
-                ? Change(Cmd.StartThis, delegate { Editor.AskWhatStarts(_sequence); })
-                : 0;
 
             // Both are edits, so both wait for the switch. Registered here whether or not
             // there is anything to walk back, because issuing a command needs the numbering
@@ -263,8 +247,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
             // Every tick, and it costs nothing: every answer comes out of a table built once.
             _sentence.LastRun = TimeText.Ago(SequenceSummary.TicksSinceRun(state, Editor.CurrentTick));
 
-            _sentence.Trigger.IsLiveNow = state != null && state.TriggerSignalIsTrue;
-
             // A row is lit while the sequence is anywhere inside it, so a step stays lit while the
             // await after it is what is actually being waited on.
             for (var i = 0; i < _sentence.Steps.Count && i < _shown.Count; i++)
@@ -298,6 +280,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// which part is being complained about, and they were led here from two screens away
         /// precisely so they would not have to look.
         /// <para>
+        /// A fault in what starts it has no line here to mark, because what starts it is not on this
+        /// screen. The words still say it, and the row that can be marked is the trigger's own, on
+        /// the system's screen.
+        /// </para>
+        /// <para>
         /// Every line is cleared and one is set, rather than the marks being left where they were.
         /// A fault that has been mended has to stop showing, and the line that was wrong is
         /// frequently the line that was just changed.
@@ -311,76 +298,8 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _sentence.Problem = SequenceText.Problem(fault.Problem);
             _sentence.ProblemIsWarning = fault.IsWarning;
 
-            // The mark on a line is what says "this is broken, look here", so a warning does not put
-            // one anywhere. Its words are the whole of what it has to say.
-            _sentence.Trigger.HasProblem = fault.Exists && !fault.IsWarning
-                && fault.Step == SequenceFault.Trigger;
-
             for (var i = 0; i < _sentence.Steps.Count && i < _shown.Count; i++)
                 _sentence.Steps[i].HasProblem = fault.Exists && fault.Step == _shown[i];
-        }
-
-        SentenceTrigger BuildTrigger()
-        {
-            var moment = _sequence.Trigger as MomentTrigger;
-            if (moment != null && moment.Sources.Count > 0)
-                return BuildMoment(moment);
-
-            var every = _sequence.Trigger as EveryTrigger;
-            if (every != null)
-                return BuildEvery(every);
-
-            // A required trigger naming nothing says only that something has to start this, and
-            // there is one line to say that. The editor never writes one - it always says which
-            // block it meant - so this is a program somebody wrote or was sent.
-            if (_sequence.Trigger is RequiredTrigger)
-                return new SentenceTrigger(TriggerKind.Required);
-
-            return new SentenceTrigger(TriggerKind.When);
-        }
-
-        /// <summary>
-        /// The sentence for a moment on some blocks, whichever way it reaches Reactor.
-        /// </summary>
-        /// <remarks>
-        /// One sentence for both, because "when the button is pressed" and "when the door finishes
-        /// closing" are the same thought, and the difference underneath is not the player's. The
-        /// kind goes through so a screen can say which it is without asking again.
-        /// </remarks>
-        SentenceTrigger BuildMoment(MomentTrigger moment)
-        {
-            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, moment.Sources);
-            var chosen = FindEvent(events, moment.EventId);
-
-            // Changing the blocks can invalidate the chosen event. Moving to a valid
-            // one keeps the sentence honest; leaving it would show something that
-            // reads fine but could never fire.
-            if (events.Count > 0 && chosen == null)
-            {
-                chosen = events[0];
-                moment.EventId = chosen.Id;
-            }
-
-            var when = moment as WhenTrigger;
-
-            // Both slots open the same trip - which blocks and what happens to them are one
-            // question - but they are two controls and must be two identities.
-            var trigger = new SentenceTrigger(when == null ? TriggerKind.Required : TriggerKind.When);
-            trigger.Slots.Add(new EntitiesSlot(Resolved(moment.Sources),
-                when != null && when.RequiresAll, Change(Cmd.TriggerSlot, 0, EditTrigger)));
-
-            trigger.Slots.Add(new EventSlot(chosen, Change(Cmd.TriggerSlot, 1, EditTrigger)));
-
-            return trigger;
-        }
-
-        SentenceTrigger BuildEvery(EveryTrigger every)
-        {
-            var trigger = new SentenceTrigger(TriggerKind.Every);
-            trigger.Slots.Add(new DurationSlot(every.IntervalTicks,
-                Change(Cmd.EditCadence, EditCadence)));
-
-            return trigger;
         }
 
         /// <summary>
@@ -475,49 +394,6 @@ namespace Reactor.Host.SpaceEngineers.Editing
         int Spanned(int index)
         {
             return index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await ? 2 : 1;
-        }
-
-        /// <summary>
-        /// Opens the whole trigger - blocks and what happens - as one path.
-        /// </summary>
-        /// <remarks>
-        /// Both slots lead here rather than each opening half of it. Which half you
-        /// pressed is not really a different intent: you are looking at the trigger.
-        /// </remarks>
-        void EditTrigger()
-        {
-            var moment = _sequence.Trigger as MomentTrigger;
-            if (moment == null)
-                return;
-
-            var was = moment as WhenTrigger;
-
-            Editor.Push(new PickPage(Editor, "When something happens", true,
-                Resolved(moment.Sources), moment.EventId,
-                delegate(PickAnswer answer)
-                {
-                    Editor.Do(_sequence, new ChangeTrigger(moment, Editor.Starter(answer)));
-                    Editor.Pop();
-                },
-                true, was != null && was.RequiresAll));
-        }
-
-        void EditCadence()
-        {
-            var every = _sequence.Trigger as EveryTrigger;
-            if (every == null)
-                return;
-
-            // Same page the wizard uses, so the rates read identically wherever they
-            // are met. Choosing one here simply returns.
-            var was = every.IntervalTicks;
-            Editor.Push(Editor.RatePage(every, delegate
-            {
-                var now = every.IntervalTicks;
-                every.IntervalTicks = was;
-                Editor.Do(_sequence, new SetCadence(was, now));
-                Editor.Pop();
-            }));
         }
 
         void EditStep(Act step)
@@ -694,7 +570,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
         void Delete()
         {
             var page = new ChoicePage(Editor, "Delete this sequence?");
-            page.Caption = SequenceText.Sequence(Editor.Runner.Bindings, _sequence);
+            page.Caption = SequenceText.Doing(Editor.Runner.Bindings, _sequence);
 
             page.Add("Keep it", false, delegate { Editor.Pop(); });
 
@@ -705,21 +581,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
                 // question about something that no longer exists.
                 Editor.Pop();
                 Editor.Program.RemoveSequence(_sequence);
-                Editor.ForgetSequence(_sequence.Id);
+                Editor.ForgetSequence(_sequence);
             });
             page.WarnOnLast("This cannot be undone.");
 
             Editor.Push(page);
-        }
-
-        static EntityEvent FindEvent(List<EntityEvent> events, string id)
-        {
-            for (var i = 0; i < events.Count; i++)
-            {
-                if (events[i].Id == id)
-                    return events[i];
-            }
-            return null;
         }
 
         static EntityAction FindAction(List<EntityAction> actions, string id)

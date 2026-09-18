@@ -5,33 +5,33 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Automation for Test Rig
 
 000  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:178 W:1402 H:775}
-002  Text       at {X:310 Y:196.997} scale 0.64  #DCF5FDFF  "Airlock"
-003  Sprite     Reactor_Fill          {X:278 Y:202 W:13 H:13}  #5F7278FF
-004  Sprite     Reactor_Fill          {X:1511 Y:192 W:119 H:1}  #85A1A9FF
-005  Sprite     Reactor_Fill          {X:1511 Y:224 W:119 H:1}  #85A1A9FF
-006  Sprite     Reactor_Fill          {X:1511 Y:192 W:1 H:33}  #85A1A9FF
-007  Sprite     Reactor_Fill          {X:1629 Y:192 W:1 H:33}  #85A1A9FF
-008  Sprite     Reactor_Fill          {X:1512 Y:193 W:117 H:31}  #060A0CFF
-009  Sprite     Reactor_Fill          {X:1512 Y:193 W:58 H:31}  #1B2C33FF
-010  Text       at {X:1528.933 Y:198.292} scale 0.57  #DCF5FDFF  "ON"
-011  Text       at {X:1586.56 Y:198.292} scale 0.57  #85A1A9FF  "OFF"
-012  Sprite     Reactor_Fill          {X:259 Y:245 W:1390 H:61}  #29363EFF
-013  Text       at {X:345 Y:264.0869} scale 0.64  #DCF5FDFF  "Airlock 1"
-014  Sprite     Reactor_Fill          {X:313 Y:269 W:13 H:13}  #5F7278FF
-015  Sprite     Reactor_Fill          {X:1476 Y:259 W:119 H:1}  #5F7278FF
-016  Sprite     Reactor_Fill          {X:1476 Y:291 W:119 H:1}  #5F7278FF
-017  Sprite     Reactor_Fill          {X:1476 Y:259 W:1 H:33}  #5F7278FF
-018  Sprite     Reactor_Fill          {X:1594 Y:259 W:1 H:33}  #5F7278FF
-019  Sprite     Reactor_Fill          {X:1477 Y:260 W:117 H:31}  #060A0CFF
-020  Sprite     Reactor_Fill          {X:1477 Y:260 W:58 H:31}  #1B2C33FF
-021  Text       at {X:1493.933 Y:265.382} scale 0.57  #DCF5FDFF  "ON"
-022  Text       at {X:1551.56 Y:265.382} scale 0.57  #85A1A9FF  "OFF"
-023  Text       at {X:345 Y:326.472} scale 0.57  #A2C3CDFF  "+ add"
+001  SetClip    {X:259 Y:171 W:1402 H:782}
+002  Text       at {X:310 Y:189.997} scale 0.64  #DCF5FDFF  "Airlock"
+003  Sprite     Reactor_Fill          {X:278 Y:195 W:13 H:13}  #5F7278FF
+004  Sprite     Reactor_Fill          {X:1511 Y:185 W:119 H:1}  #85A1A9FF
+005  Sprite     Reactor_Fill          {X:1511 Y:217 W:119 H:1}  #85A1A9FF
+006  Sprite     Reactor_Fill          {X:1511 Y:185 W:1 H:33}  #85A1A9FF
+007  Sprite     Reactor_Fill          {X:1629 Y:185 W:1 H:33}  #85A1A9FF
+008  Sprite     Reactor_Fill          {X:1512 Y:186 W:117 H:31}  #060A0CFF
+009  Sprite     Reactor_Fill          {X:1512 Y:186 W:58 H:31}  #1B2C33FF
+010  Text       at {X:1528.933 Y:191.292} scale 0.57  #DCF5FDFF  "ON"
+011  Text       at {X:1586.56 Y:191.292} scale 0.57  #85A1A9FF  "OFF"
+012  Sprite     Reactor_Fill          {X:259 Y:238 W:1390 H:61}  #29363EFF
+013  Text       at {X:345 Y:257.087} scale 0.64  #DCF5FDFF  "Airlock 1"
+014  Sprite     Reactor_Fill          {X:313 Y:262 W:13 H:13}  #5F7278FF
+015  Sprite     Reactor_Fill          {X:1476 Y:252 W:119 H:1}  #5F7278FF
+016  Sprite     Reactor_Fill          {X:1476 Y:284 W:119 H:1}  #5F7278FF
+017  Sprite     Reactor_Fill          {X:1476 Y:252 W:1 H:33}  #5F7278FF
+018  Sprite     Reactor_Fill          {X:1594 Y:252 W:1 H:33}  #5F7278FF
+019  Sprite     Reactor_Fill          {X:1477 Y:253 W:117 H:31}  #060A0CFF
+020  Sprite     Reactor_Fill          {X:1477 Y:253 W:58 H:31}  #1B2C33FF
+021  Text       at {X:1493.933 Y:258.382} scale 0.57  #DCF5FDFF  "ON"
+022  Text       at {X:1551.56 Y:258.382} scale 0.57  #85A1A9FF  "OFF"
+023  Text       at {X:345 Y:319.472} scale 0.57  #A2C3CDFF  "+ add"
 024  ClearClip  
 025  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ New system…"
 026  Text       at {X:432.2733 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load system"
-027  Sprite     Reactor_Fill          {X:259 Y:167 W:1402 H:1}  #5B737BFF
+027  Sprite     Reactor_Fill          {X:259 Y:160 W:1402 H:1}  #5B737BFF
 028  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
 029  Text       at {X:275.8467 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
 030  SetClip    {X:451 Y:55 W:96 H:33}

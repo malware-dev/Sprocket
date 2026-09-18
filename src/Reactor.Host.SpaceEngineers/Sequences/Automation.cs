@@ -447,6 +447,26 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             Wiring++;
         }
 
+        /// <summary>
+        /// Puts a removed sequence back, as the sequence it was.
+        /// </summary>
+        /// <remarks>
+        /// For undo. Everything that pointed at it named it by number - a toolbar slot, a step that
+        /// runs it - so one that came back as a new sequence would come back as a different thing.
+        /// </remarks>
+        public void PutBack(Sequence sequence)
+        {
+            if (sequence == null || _sequences.Contains(sequence))
+                return;
+
+            _sequences.Add(sequence);
+
+            if (sequence.System != null)
+                sequence.System.Add(sequence);
+
+            Wiring++;
+        }
+
         public Sequence FindSequence(int id)
         {
             for (var i = 0; i < _sequences.Count; i++)

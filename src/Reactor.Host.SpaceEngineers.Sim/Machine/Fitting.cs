@@ -129,6 +129,28 @@ abstract class Fitting
             .Gives("Components", () => container);
     }
 
+    /// <summary>
+    /// Whether this block has an action of the game's own by that name.
+    /// </summary>
+    /// <remarks>
+    /// Every functional block has the on/off pair; a block with a switch of its own adds that pair,
+    /// which is the game's convention - a switch called <c>X</c> offers <c>X_On</c> and <c>X_Off</c>.
+    /// The rig answers this because Reactor asks it before writing one into a slot.
+    /// </remarks>
+    public virtual bool Offers(string actionId)
+    {
+        return actionId == "OnOff_On" || actionId == "OnOff_Off";
+    }
+
+    /// <summary>Does what one of those actions does, as the game would when a slot invokes it.</summary>
+    public virtual void Perform(string actionId)
+    {
+        if (actionId == "OnOff_On")
+            Enabled = true;
+        else if (actionId == "OnOff_Off")
+            Enabled = false;
+    }
+
     /// <summary>Takes a listener on or off, answering nothing, as an event accessor does.</summary>
     object Watch(Action<IMyCubeBlock> listener, bool on)
     {

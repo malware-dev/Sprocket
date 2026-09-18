@@ -1,118 +1,99 @@
-using Reactor.Host.SpaceEngineers.Lists;
 using Xunit;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// A sequence nothing starts can be told what starts it, from its own screen.
+/// A sequence nothing starts: how one is made, what it says, and where it is mended.
 /// </summary>
 /// <remarks>
-/// There was no way to. The first line said what was missing - an ellipsis where the trigger goes -
-/// and nothing on the screen could fill it in, so a copied sequence, one sent in a hand-written
-/// program, or one whose trigger block had been ground off was a dead end.
+/// Ordinary rather than broken. Somebody who knows what the machine should do writes it first and
+/// gives it a trigger afterwards, and a copy arrives the same way. What it is not is something the
+/// sequence's own screen can mend: what starts a sequence is a row on its system's screen, and a
+/// sequence nothing starts has no such row - so its screen says the reason and the way to it is one
+/// press back.
 /// </remarks>
 public class StartingTests
 {
-    /// <summary>A copy, which is the easiest way to arrive at a sequence with no trigger.</summary>
-    static Screen AtASequenceNothingStarts()
+    /// <summary>A sequence made on its own, with a step, so it is work rather than a start.</summary>
+    static Screen WithOne()
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Airlock");
+        screen.Run(2);
+
+        screen.Editor.PressStart("New sequence");
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("close");
+        screen.Editor.PressPrimary();
+
+        return screen.Run(120);
+    }
+
+    [Fact]
+    public void ASequenceCanBeMadeOnItsOwn()
+    {
+        var screen = WithOne();
+
+        Assert.Single(screen.Editor.Program.Sequences);
+        Assert.Equal("Sequence 1", screen.Ended);
+        Assert.False(screen.Editor.Program.Sequences[0].Enabled);
+        Assert.Null(screen.Editor.Program.Sequences[0].Trigger);
+    }
+
+    /// <summary>
+    /// It says so, and says it quietly.
+    /// </summary>
+    /// <remarks>
+    /// A warning rather than a fault: nothing is wrong with the sequence, and somebody halfway
+    /// through building is not being told off. It is the reason it never runs, said on the screen
+    /// they are standing on when they wonder why.
+    /// </remarks>
+    [Fact]
+    public void ItSaysNothingStartsIt()
+    {
+        var screen = WithOne();
+
+        var sentence = screen.Editor.Sentence();
+        Assert.Equal("Nothing starts this yet.", sentence.Problem);
+        Assert.True(sentence.ProblemIsWarning);
+
+        // And nothing on this screen offers to mend it, because what starts a sequence is not here.
+        Assert.False(screen.Shows("+ say what starts this"));
+    }
+
+    /// <summary>
+    /// The mend is a trigger on the system, pointed at it by name.
+    /// </summary>
+    /// <remarks>
+    /// The same presses as making any other trigger, which is the point of there being one way to
+    /// make one. A name is what lets a trigger be pointed at a sequence, and a sequence made this
+    /// way has one from birth.
+    /// </remarks>
+    [Fact]
+    public void ATriggerOnTheSystemIsWhereItIsMended()
+    {
+        var screen = WithOne();
+
+        // Leaving a sequence with steps offers to switch it on. Not now: what it is missing is
+        // something to start it.
+        screen.Editor.Back();
+        screen.Editor.PressAnswer("Leave it off");
+        screen.Run(120);
+
+        // The row for it says the same thing, one screen out.
+        Assert.Equal("Nothing starts this yet.", screen.Editor.Rows().Entries[0].Problem);
+
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.Back();
-        screen.Run(2);
+        screen.Editor.PressChoice("Run an existing sequence");
+        screen.Editor.PressChoice("Sequence 1");
+        screen.Run(120);
 
-        var row = screen.Editor.Component<StatusListComponent>().Entries[0];
-        screen.Editor.Invoke(row.DuplicateCommand);
-        return screen.Run(2);
-    }
-
-    [Fact]
-    public void TheFirstLineOffersToSayWhatStartsIt()
-    {
-        var screen = AtASequenceNothingStarts();
-
-        Assert.NotEqual(0, screen.Editor.Sentence().StartCommand);
-        Assert.True(screen.Shows("+ say what starts this"));
-    }
-
-    [Fact]
-    public void ASequenceSomethingStartsDoesNotOfferIt()
-    {
-        var screen = AtASequenceNothingStarts();
-        screen.Editor.Back();
-        screen.Run(2);
-
-        // The original, which has a trigger: its first line is the sentence, not the offer.
-        var row = screen.Editor.Component<StatusListComponent>().Entries[0];
-        screen.Editor.Invoke(row.Command);
-        screen.Run(2);
-
-        Assert.Equal(0, screen.Editor.Sentence().StartCommand);
-        Assert.False(screen.Shows("+ say what starts this"));
-    }
-
-    [Fact]
-    public void ChoosingAMomentStartsIt()
-    {
-        var screen = AtASequenceNothingStarts();
-
-        screen.Editor.Invoke(screen.Editor.Sentence().StartCommand);
-        screen.Editor.PressChoice("When something happens");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
-        screen.Run(2);
-
-        Assert.Equal("When Airlock Button is pressed > Sequence 2", screen.Ended);
-        Assert.Equal(0, screen.Editor.Sentence().StartCommand);
-    }
-
-    /// <summary>
-    /// And a repeat, which is the other way a sequence can begin.
-    /// </summary>
-    /// <remarks>
-    /// The same two questions the starters on a system's screen ask. A path that only offered the
-    /// moment would leave a copied sequence unable to become a repeat at all.
-    /// </remarks>
-    [Fact]
-    public void ChoosingARepeatStartsIt()
-    {
-        var screen = AtASequenceNothingStarts();
-
-        screen.Editor.Invoke(screen.Editor.Sentence().StartCommand);
-        screen.Editor.PressChoice("Every so often");
-        screen.Editor.PressChoice("slow - every 300 ticks");
-        screen.Run(2);
-
-        Assert.Equal("Every 300 ticks > Sequence 2", screen.Ended);
-        Assert.Equal(0, screen.Editor.Sentence().StartCommand);
-    }
-
-    /// <summary>
-    /// It is an edit, so it walks back.
-    /// </summary>
-    /// <remarks>
-    /// Unlike making a sequence, which has no history to record into - this one is a change to a
-    /// sequence that already exists, and arming something by accident is exactly what undo is for.
-    /// </remarks>
-    [Fact]
-    public void ItCanBeUndone()
-    {
-        var screen = AtASequenceNothingStarts();
-
-        screen.Editor.Invoke(screen.Editor.Sentence().StartCommand);
-        screen.Editor.PressChoice("Every so often");
-        screen.Editor.PressChoice("slow - every 300 ticks");
-        screen.Run(2);
-
-        screen.Editor.Invoke(screen.Editor.Sentence().UndoCommand);
-        screen.Run(2);
-
-        Assert.NotEqual(0, screen.Editor.Sentence().StartCommand);
-        Assert.True(screen.Shows("+ say what starts this"));
+        Assert.NotNull(screen.Editor.Program.Sequences[0].Trigger);
+        Assert.Equal("runs Sequence 1", screen.Editor.Triggers().Entries[0].Status);
+        Assert.Equal("", screen.Editor.Rows().Entries[0].Problem);
     }
 }

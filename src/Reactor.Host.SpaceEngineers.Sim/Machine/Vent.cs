@@ -55,6 +55,31 @@ sealed class Vent : Fitting
         }
     }
 
+    /// <summary>The game's own pair for a vent's switch, which is called Depressurize.</summary>
+    public override bool Offers(string actionId)
+    {
+        return actionId == "Depressurize_On" || actionId == "Depressurize_Off" || base.Offers(actionId);
+    }
+
+    public override void Perform(string actionId)
+    {
+        if (actionId == "Depressurize_On")
+        {
+            _pressurizing = false;
+            Told("depressurize");
+            return;
+        }
+
+        if (actionId == "Depressurize_Off")
+        {
+            _pressurizing = true;
+            Told("pressurize");
+            return;
+        }
+
+        base.Perform(actionId);
+    }
+
     public override void Tick()
     {
         if (!Enabled)

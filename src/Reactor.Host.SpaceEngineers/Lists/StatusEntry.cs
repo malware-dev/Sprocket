@@ -18,6 +18,39 @@ namespace Reactor.Host.SpaceEngineers.Lists
         }
 
         /// <summary>
+        /// Throwing away what this row is, or zero where that is not offered.
+        /// </summary>
+        /// <remarks>
+        /// For rows whose loss is nothing: a trigger is one line and three presses to make again, so
+        /// it goes without a question. A sequence is work, which is why its bin is on its own screen
+        /// and asks first.
+        /// </remarks>
+        /// <summary>
+        /// Opens what the row's second line says, where that is a thing of its own to change.
+        /// </summary>
+        /// <remarks>
+        /// A trigger's row reads as two sentences - when it happens, and what it then does - and
+        /// either may be what somebody came to change. Two presses on one row rather than a question
+        /// asking which they meant: the answer to that question is already on the row, in the words
+        /// they are looking at.
+        /// </remarks>
+        public int StatusCommand
+        {
+            get { return _statusCommand; }
+            set { Set(ref _statusCommand, value, nameof(StatusCommand)); }
+        }
+
+        int _statusCommand;
+
+        public int DeleteCommand
+        {
+            get { return _deleteCommand; }
+            set { Set(ref _deleteCommand, value, nameof(DeleteCommand)); }
+        }
+
+        int _deleteCommand;
+
+        /// <summary>
         /// Making another of what this row is, or zero where that is not offered.
         /// </summary>
         /// <remarks>

@@ -85,7 +85,10 @@ sealed class Simulation
         // A press invokes what the slot holds, and what that means is the unit's to say - which is
         // the game's arrangement exactly: the slot carries a key and Reactor resolves it.
         foreach (Panel panel in Panels())
+        {
             panel.Invokes = _unit.Fire;
+            panel.Performs = _rig.Perform;
+        }
 
         // One tick before anybody can press anything, because that is the order in the game: the
         // session adopts a block as it comes alive, long before a screen is opened on it. Without it
@@ -124,6 +127,18 @@ sealed class Simulation
         // slower update rates do not land on exact multiples and a self-counted tick would drift
         // with server load.
         _frame++;
+
+        // A panel welded after the rig was made is wired here rather than only in the constructor,
+        // because the game wires one as it is built. Without this a button added later is a button
+        // nobody hears, which looks exactly like Reactor failing to claim the slot.
+        foreach (Panel panel in Panels())
+        {
+            if (panel.Invokes != null)
+                continue;
+
+            panel.Invokes = _unit.Fire;
+            panel.Performs = _rig.Perform;
+        }
 
         _rig.Tick();
         _unit.Tick(_frame);

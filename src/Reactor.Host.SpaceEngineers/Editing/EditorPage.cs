@@ -206,6 +206,28 @@ namespace Reactor.Host.SpaceEngineers.Editing
 
         public virtual void Switch(bool on) { }
 
+        /// <summary>
+        /// Whether this screen offers a way back from what is done on it.
+        /// </summary>
+        /// <remarks>
+        /// A screen with a history of its own. Which things are in it is the page's business: a
+        /// system's covers what starts its sequences, and a sequence's own is on its sentence rather
+        /// than here, because there it sits among the bin and the switch that act on the same thing.
+        /// </remarks>
+        public virtual bool HasHistory => false;
+
+        public virtual bool CanUndo => false;
+
+        public virtual string UndoText => "";
+
+        public virtual void Undo() { }
+
+        public virtual bool CanRedo => false;
+
+        public virtual string RedoText => "";
+
+        public virtual void Redo() { }
+
         public virtual string PrimaryText => "";
 
         public virtual void Primary() { }

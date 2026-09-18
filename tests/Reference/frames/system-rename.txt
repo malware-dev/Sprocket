@@ -5,29 +5,35 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Airlock
 
 000  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:178 W:1402 H:775}
-002  Text       at {X:265 Y:184.292} scale 0.57  #A2C3CDFF  "No sequences yet."
-003  ClearClip  
-004  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ When…"
-005  Text       at {X:383.6 Y:122.812} scale 0.64  #A2C3CDFF  "+ Every…"
-006  Sprite     Reactor_Fill          {X:259 Y:167 W:1402 H:1}  #5B737BFF
-007  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
-008  SetClip    {X:276 Y:55 W:86 H:33}
-009  Sprite     Reactor_Fill          {X:276 Y:55 W:76 H:33}  #3C4C52FF
-010  Sprite     Reactor_Fill          {X:276 Y:55 W:76 H:33}  #5B737BFF
-011  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Airlock"
-012  Sprite     Reactor_Fill          {X:352 Y:55 W:2 H:33}  #DCF5FDFF
-013  ClearClip  
-014  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
-015  Sprite     Reactor_Fill          {X:1529 Y:55 W:119 H:1}  #85A1A9FF
-016  Sprite     Reactor_Fill          {X:1529 Y:87 W:119 H:1}  #85A1A9FF
-017  Sprite     Reactor_Fill          {X:1529 Y:55 W:1 H:33}  #85A1A9FF
-018  Sprite     Reactor_Fill          {X:1647 Y:55 W:1 H:33}  #85A1A9FF
-019  Sprite     Reactor_Fill          {X:1530 Y:56 W:117 H:31}  #060A0CFF
-020  Sprite     Reactor_Fill          {X:1530 Y:56 W:58 H:31}  #1B2C33FF
-021  Text       at {X:1547.207 Y:60.81697} scale 0.57  #DCF5FDFF  "ON"
-022  Text       at {X:1604.833 Y:60.81697} scale 0.57  #85A1A9FF  "OFF"
-023  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
-024  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
-025  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
-026  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF
+001  SetClip    {X:259 Y:118 W:1402 H:836}
+002  Text       at {X:262 Y:128.012} scale 0.57  #85A1A9FF  "TRIGGERS"
+003  Text       at {X:271.8 Y:153.902} scale 0.64  #A2C3CDFF  "+ When…"
+004  Text       at {X:383.6 Y:153.902} scale 0.64  #A2C3CDFF  "+ Every…"
+005  Sprite     Reactor_Fill          {X:259 Y:191 W:1390 H:1}  #5B737BFF
+006  Text       at {X:262 Y:234.382} scale 0.57  #85A1A9FF  "SEQUENCES"
+007  Text       at {X:271.8 Y:260.272} scale 0.64  #A2C3CDFF  "+ New sequence"
+008  Sprite     Reactor_Fill          {X:259 Y:298 W:1390 H:1}  #5B737BFF
+009  Text       at {X:265 Y:314.752} scale 0.57  #A2C3CDFF  "No sequences yet."
+010  ClearClip  
+011  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
+012  SetClip    {X:276 Y:55 W:86 H:33}
+013  Sprite     Reactor_Fill          {X:276 Y:55 W:76 H:33}  #3C4C52FF
+014  Sprite     Reactor_Fill          {X:276 Y:55 W:76 H:33}  #5B737BFF
+015  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Airlock"
+016  Sprite     Reactor_Fill          {X:352 Y:55 W:2 H:33}  #DCF5FDFF
+017  ClearClip  
+018  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
+019  Text       at {X:1502.907 Y:60.81697} scale 0.57  #5F7278FF  "u"
+020  Text       at {X:1517.88 Y:60.81697} scale 0.57  #5F7278FF  "r"
+021  Sprite     Reactor_Fill          {X:1529 Y:55 W:119 H:1}  #85A1A9FF
+022  Sprite     Reactor_Fill          {X:1529 Y:87 W:119 H:1}  #85A1A9FF
+023  Sprite     Reactor_Fill          {X:1529 Y:55 W:1 H:33}  #85A1A9FF
+024  Sprite     Reactor_Fill          {X:1647 Y:55 W:1 H:33}  #85A1A9FF
+025  Sprite     Reactor_Fill          {X:1530 Y:56 W:117 H:31}  #060A0CFF
+026  Sprite     Reactor_Fill          {X:1530 Y:56 W:58 H:31}  #1B2C33FF
+027  Text       at {X:1547.207 Y:60.81697} scale 0.57  #DCF5FDFF  "ON"
+028  Text       at {X:1604.833 Y:60.81697} scale 0.57  #85A1A9FF  "OFF"
+029  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
+030  Sprite     Reactor_Fill          {X:240 Y:98 W:1440 H:1}  #5B737BFF
+031  Sprite     Reactor_Fill          {X:240 Y:973 W:1440 H:1}  #5B737BFF
+032  Sprite     Reactor_Fill          {X:240 Y:974 W:1440 H:62}  #1B242AFF

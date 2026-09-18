@@ -147,11 +147,12 @@ namespace Reactor.Host.SpaceEngineers.World
         /// <summary>Whether anything has asked for a reading yet. Nothing is read until something does.</summary>
         bool _read;
 
-        /// <summary>What a key names: a sequence, and which one of its system to run it on.</summary>
+        /// <summary>What a key names: a sequence, which one of its system, and what to do to it.</summary>
         struct Target
         {
             public Sequence Sequence;
             public SystemInstance Instance;
+            public bool Stops;
         }
 
         /// <summary>
@@ -190,6 +191,21 @@ namespace Reactor.Host.SpaceEngineers.World
             return system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Number;
         }
 
+        /// <summary>
+        /// The same, for a button that stops the sequence rather than starting it.
+        /// </summary>
+        /// <remarks>
+        /// The verb is on the end rather than the front, so every key written before stopping existed
+        /// still says what it always said. A slot is never rewritten, so that is not a courtesy - it
+        /// is the only way the old ones keep working.
+        /// </remarks>
+        static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence,
+            bool stops)
+        {
+            var key = KeyOf(system, instance, sequence);
+            return stops ? key + "/stop" : key;
+        }
+
         /// <summary>A block fired one of the actions Reactor put in it.</summary>
         public void Fire(string key)
         {
@@ -197,7 +213,10 @@ namespace Reactor.Host.SpaceEngineers.World
             if (!_byKey.TryGetValue(key, out target))
                 return;
 
-            _runner.Call(target.Sequence, target.Instance);
+            if (target.Stops)
+                _runner.Halt(target.Sequence, target.Instance);
+            else
+                _runner.Call(target.Sequence, target.Instance);
         }
 
         /// <summary>
@@ -232,13 +251,26 @@ namespace Reactor.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>
+        /// Both names a sequence answers to: the one that runs it and the one that stops it.
+        /// </summary>
+        /// <remarks>
+        /// Both always, rather than only the ones some trigger asks for, because a key is a name and
+        /// not a permission - a slot naming one is a slot somebody made, whatever the program has
+        /// since become.
+        /// </remarks>
         void Register(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
             var target = new Target();
             target.Sequence = sequence;
             target.Instance = instance;
-
             _byKey[KeyOf(system, instance, sequence)] = target;
+
+            var halting = new Target();
+            halting.Sequence = sequence;
+            halting.Instance = instance;
+            halting.Stops = true;
+            _byKey[KeyOf(system, instance, sequence, true)] = halting;
         }
 
         /// <summary>
@@ -259,9 +291,23 @@ namespace Reactor.Host.SpaceEngineers.World
             /// <summary>Which sequence this is for, so reachability can be reported per sequence.</summary>
             public int SequenceId;
 
+            /// <summary>
+            /// The block whose own action goes in the slot, or zero where Reactor's action does.
+            /// </summary>
+            /// <remarks>
+            /// A trigger that does one plain thing is written as the game's action on the block that
+            /// act names, so the button keeps working with the mod removed.
+            /// </remarks>
+            public long ActionBlockId;
+
+            /// <summary>The game's name for that action, or null where Reactor's action goes in.</summary>
+            public string GameActionId;
+
             public bool Same(Want other)
             {
                 return PanelId == other.PanelId && Slot == other.Slot
+                    && ActionBlockId == other.ActionBlockId
+                    && string.Equals(GameActionId, other.GameActionId, StringComparison.Ordinal)
                     && string.Equals(Key, other.Key, StringComparison.Ordinal);
             }
         }
@@ -377,14 +423,32 @@ namespace Reactor.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>The buttons one sequence asks for on one of its system.</summary>
+        /// <summary>
+        /// The buttons one sequence asks for on one of its system.
+        /// </summary>
+        /// <remarks>
+        /// Every trigger that runs the sequence, not the first of them. Two buttons starting one
+        /// sequence is the ordinary case - the one inside the airlock and the one outside - and a
+        /// slot is wanted for each, on its own panel.
+        /// </remarks>
         void WantedFor(List<Want> into, AutomationSystem system, SystemInstance instance,
             Sequence sequence)
         {
-            var needed = sequence.Trigger as RequiredTrigger;
-            if (needed == null)
-                return;
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                if (triggers[i].Runs != sequence.Number)
+                    continue;
 
+                var needed = triggers[i] as RequiredTrigger;
+                if (needed != null)
+                    WantedForTrigger(into, system, instance, sequence, needed);
+            }
+        }
+
+        void WantedForTrigger(List<Want> into, AutomationSystem system, SystemInstance instance,
+            Sequence sequence, RequiredTrigger needed)
+        {
             var slot = ButtonPanelExtension.ButtonOf(needed.EventId);
             if (slot < 0)
                 return;
@@ -411,15 +475,108 @@ namespace Reactor.Host.SpaceEngineers.World
                 var want = new Want();
                 want.PanelId = PanelId(_sources[source]);
                 want.Slot = slot;
-                want.Key = KeyOf(system, instance, sequence);
+                want.Key = KeyOf(system, instance, sequence, needed.Stops);
                 want.Reference = _sources[source];
                 want.EventId = needed.EventId;
                 want.SequenceId = sequence.Id;
+
+                long acts;
+                string named;
+                if (Plain(instance, sequence, out acts, out named))
+                {
+                    want.ActionBlockId = acts;
+                    want.GameActionId = named;
+                }
+
                 into.Add(want);
             }
         }
 
         readonly List<string> _sources = new List<string>();
+
+        /// <summary>
+        /// The game's own action a sequence amounts to, where it amounts to exactly one.
+        /// </summary>
+        /// <remarks>
+        /// An unnamed sequence of one act, on one block, whose kind knows the game's name for that
+        /// act. Then the slot holds the game's action rather than Reactor's, and the button works
+        /// with the mod removed - which is the point of it.
+        /// <para>
+        /// Only a sequence nobody named. A named one is a thing on screen with a switch of its own,
+        /// and switching it off has to stop its buttons, which the game's action in a slot would sail
+        /// straight past. Anything else - several steps, several blocks, or an action Reactor performs
+        /// out of property writes - is Reactor's to run.
+        /// </para>
+        /// <para>
+        /// Asked of the block as well as of the kind, because a name is data and the block is the
+        /// authority: a subtype that does not offer it costs a Reactor trigger rather than a slot
+        /// that silently does nothing.
+        /// </para>
+        /// </remarks>
+        bool Plain(SystemInstance instance, Sequence sequence, out long blockId, out string actionId)
+        {
+            blockId = 0;
+            actionId = null;
+
+            if (sequence.HasName)
+                return false;
+
+            // One act, and nothing else that does anything. Awaits are allowed because the editor
+            // writes one after every step, so a sequence of one action is an act and an await.
+            Act act = null;
+            var steps = sequence.Steps;
+            for (var i = 0; i < steps.Count; i++)
+            {
+                if (steps[i] is Await)
+                    continue;
+
+                var one = steps[i] as Act;
+                if (one == null || act != null)
+                    return false;
+
+                act = one;
+            }
+
+            if (act == null || !act.HasAction)
+                return false;
+
+            _acting.Clear();
+            if (instance == null)
+            {
+                for (var i = 0; i < act.Targets.Count; i++)
+                    _acting.Add(act.Targets[i]);
+            }
+            else
+            {
+                instance.Resolve(act.Targets, _acting);
+            }
+
+            if (_acting.Count != 1)
+                return false;
+
+            GridEntity entity = _runner.Bindings.Entity(_acting[0]);
+            if (entity == null)
+                return false;
+
+            EntityAction action = entity.Kind.FindAction(act.ActionId);
+            if (action == null || string.IsNullOrEmpty(action.GameActionId))
+                return false;
+
+            if (!Toolbars.Offers(entity.Block, action.GameActionId))
+                return false;
+
+            blockId = entity.Block.EntityId;
+            actionId = action.GameActionId;
+            return true;
+        }
+
+        readonly List<string> _acting = new List<string>();
+
+        /// <summary>What a slot holding the game's own action is counted under.</summary>
+        static string PlainKey(long blockId, string actionId)
+        {
+            return "do/" + blockId + "/" + actionId;
+        }
 
         static bool Holds(List<Want> wants, Want one)
         {
@@ -432,12 +589,27 @@ namespace Reactor.Host.SpaceEngineers.World
             return false;
         }
 
-        /// <summary>Whether the block this want names is arranged to start exactly this.</summary>
+        /// <summary>
+        /// Whether the block this want names is arranged to start exactly this.
+        /// </summary>
+        /// <remarks>
+        /// A want written as the game's own action is checked here rather than by the block's
+        /// extension: what is in the slot is not Reactor's, so there is no key to compare. A slot
+        /// somebody has since changed answers no, and the trigger then stops claiming that button,
+        /// which is the same rule Reactor's own slots follow.
+        /// </remarks>
         bool Wired(Want want)
         {
             GridEntity grid = _runner.Bindings.Entity(want.Reference);
             if (grid == null)
                 return true;
+
+            if (want.GameActionId != null)
+            {
+                IMyToolbar held = Toolbars.Of(grid.Block);
+                MyToolbarItemInfo present;
+                return held != null && held.TryGetItem(want.Slot, out present) && Asked(present, want);
+            }
 
             IBlockExtension extension = BlockExtensions.For(grid.Block);
             return extension == null || extension.Raises(grid.Block, want.EventId, want.Key);
@@ -467,6 +639,23 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </remarks>
         readonly Dictionary<string, int> _claims = new Dictionary<string, int>(StringComparer.Ordinal);
 
+        /// <summary>How many slots each key is asked for, while one sequence is being judged.</summary>
+        readonly Dictionary<string, int> _needed = new Dictionary<string, int>(StringComparer.Ordinal);
+
+        /// <summary>Which key a trigger's slot holds: Reactor's, the stopping one, or the game's.</summary>
+        string Wanting(AutomationSystem system, SystemInstance instance, Sequence sequence,
+            Trigger trigger)
+        {
+            if (trigger.Stops)
+                return KeyOf(system, instance, sequence, true);
+
+            long acts;
+            string named;
+            return Plain(instance, sequence, out acts, out named)
+                ? PlainKey(acts, named)
+                : KeyOf(system, instance, sequence);
+        }
+
         void Claims()
         {
             _claims.Clear();
@@ -481,8 +670,22 @@ namespace Reactor.Host.SpaceEngineers.World
                 for (var slot = 0; slot < toolbar.SlotCount; slot++)
                 {
                     MyToolbarItemInfo present;
-                    if (!toolbar.TryGetItem(slot, out present) || !TriggerAction.IsOurs(present))
+                    if (!toolbar.TryGetItem(slot, out present))
                         continue;
+
+                    // A slot holding the game's own action on a block is a claim as well. It is how
+                    // a trigger that does one plain thing is wired, and without counting it such a
+                    // trigger reads as a sequence nothing starts and is parked a second later.
+                    if (!TriggerAction.IsOurs(present))
+                    {
+                        if (present.Kind == MyToolbarItemKind.BlockAction
+                            && !string.IsNullOrEmpty(present.ActionId))
+                        {
+                            Claimed(PlainKey(present.BlockEntityId, present.ActionId));
+                        }
+
+                        continue;
+                    }
 
                     _arguments.Clear();
                     Toolbars.Parameters(toolbar, slot, _arguments);
@@ -493,10 +696,15 @@ namespace Reactor.Host.SpaceEngineers.World
                     if (string.IsNullOrEmpty(key))
                         continue;
 
-                    int held;
-                    _claims[key] = _claims.TryGetValue(key, out held) ? held + 1 : 1;
+                    Claimed(key);
                 }
             }
+        }
+
+        void Claimed(string key)
+        {
+            int held;
+            _claims[key] = _claims.TryGetValue(key, out held) ? held + 1 : 1;
         }
 
         /// <summary>
@@ -509,20 +717,34 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </remarks>
         bool Answered(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
-            var needed = 0;
+            // Counted per key rather than per sequence: a button that stops this sequence names it
+            // by a different key from one that runs it, and one slot cannot answer for both.
+            _needed.Clear();
+
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                if (triggers[i] is RequiredTrigger && triggers[i].Runs == sequence.Number)
-                    needed++;
+                if (!(triggers[i] is RequiredTrigger) || triggers[i].Runs != sequence.Number)
+                    continue;
+
+                var wanted = Wanting(system, instance, sequence, triggers[i]);
+
+                int asked;
+                _needed[wanted] = _needed.TryGetValue(wanted, out asked) ? asked + 1 : 1;
             }
 
-            if (needed == 0)
+            if (_needed.Count == 0)
                 return true;
 
-            int found;
-            _claims.TryGetValue(KeyOf(system, instance, sequence), out found);
-            return found >= needed;
+            foreach (var pair in _needed)
+            {
+                int found;
+                _claims.TryGetValue(pair.Key, out found);
+                if (found < pair.Value)
+                    return false;
+            }
+
+            return true;
         }
 
         void Reach()
@@ -716,10 +938,11 @@ namespace Reactor.Host.SpaceEngineers.World
                 MyToolbarItemInfo present;
 
                 if (toolbar == null || !toolbar.TryGetItem(had.Slot, out present)
-                    || !TriggerAction.IsOurs(present))
+                    || !Asked(present, had))
                 {
-                    // Already empty, or already somebody else's. Either way it is not Reactor's to
-                    // clear, and the person who changed it has said what they wanted it to do.
+                    // Already empty, already somebody else's, or no longer what this want asked for.
+                    // None of those is Reactor's to clear, and whoever changed it has said what they
+                    // wanted it to do.
                     continue;
                 }
 
@@ -746,7 +969,15 @@ namespace Reactor.Host.SpaceEngineers.World
                     continue;
 
                 MyToolbarItemInfo present;
-                if (toolbar.TryGetItem(want.Slot, out present) && !TriggerAction.IsOurs(present))
+                var filled = toolbar.TryGetItem(want.Slot, out present);
+
+                // Already exactly this. The ordinary case for a trigger written as the game's own
+                // action, where what is in the slot is not Reactor's - so the test below would read
+                // Reactor's own writing as somebody else's work.
+                if (filled && Asked(present, want))
+                    continue;
+
+                if (filled && !TriggerAction.IsOurs(present))
                 {
                     // Somebody's panel already does something. Overwriting it would configure
                     // Reactor by breaking their ship, which is worse than not working.
@@ -754,15 +985,56 @@ namespace Reactor.Host.SpaceEngineers.World
                     continue;
                 }
 
-                if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId),
-                        TriggerAction.Argument(want.Key)))
+                if (!Toolbars.Write(toolbar, want.Slot, Item(want), Arguments(want)))
                 {
                     Trace("the write was refused for slot " + want.Slot);
                     continue;
                 }
 
-                Trace("wired slot " + want.Slot + " to " + want.Key);
+                Trace("wired slot " + want.Slot + " to " + Said(want));
             }
+        }
+
+        /// <summary>What goes in the slot: the game's own action, or Reactor's carrying a key.</summary>
+        MyToolbarItemInfo Item(Want want)
+        {
+            return want.GameActionId == null
+                ? TriggerAction.Slot(_block.EntityId)
+                : MyToolbarItemInfo.BlockAction(want.ActionBlockId, want.GameActionId);
+        }
+
+        /// <summary>
+        /// What the item is given to run with: the key, or nothing.
+        /// </summary>
+        /// <remarks>
+        /// The game's own action takes no argument. Reactor's takes the key saying which sequence of
+        /// which one of which system, because its action is the same action on every construct.
+        /// </remarks>
+        List<TerminalActionParameter> Arguments(Want want)
+        {
+            return want.GameActionId == null ? TriggerAction.Argument(want.Key) : _nothing;
+        }
+
+        readonly List<TerminalActionParameter> _nothing = new List<TerminalActionParameter>();
+
+        /// <summary>Whether a slot already holds exactly what a want asks for.</summary>
+        static bool Asked(MyToolbarItemInfo present, Want want)
+        {
+            if (want.GameActionId != null)
+            {
+                return present.BlockEntityId == want.ActionBlockId
+                    && string.Equals(present.ActionId, want.GameActionId, StringComparison.Ordinal);
+            }
+
+            return TriggerAction.IsOurs(present);
+        }
+
+        /// <summary>What a want reads as in the log.</summary>
+        static string Said(Want want)
+        {
+            return want.GameActionId == null
+                ? want.Key
+                : want.GameActionId + " on " + want.ActionBlockId;
         }
 
         long PanelId(string reference)

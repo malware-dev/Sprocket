@@ -16,7 +16,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class SequenceComponent : EditorComponent
     {
-        public SequenceComponent(int sequenceId, SentenceTrigger trigger)
+        public SequenceComponent(int sequenceId)
         {
             SequenceId = sequenceId;
             Steps = new ObservableList<SentenceStep>();
@@ -28,14 +28,13 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             // things that announce for themselves and so are also listened to one by one; the adders
             // are plain choices, and their list changing shape is the whole of what can happen to them.
             AddOptions.Changed += Said;
-            Trigger = trigger;
         }
 
         /// <summary>The steps this is repeating for, so each one can be let go of again.</summary>
         readonly List<SentenceStep> _heard = new List<SentenceStep>();
 
         /// <summary>
-        /// Repeats what a step or the trigger says as something this sentence said.
+        /// Repeats what a step says as something this sentence said.
         /// </summary>
         /// <remarks>
         /// A page writes a step's state every tick from what is running - which one is current, which
@@ -167,29 +166,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
         string _lockedText;
 
-        public SentenceTrigger Trigger
-        {
-            get { return _trigger; }
-            set
-            {
-                if (_trigger == value)
-                    return;
-
-                // Hooked and unhooked here, because this is the one place it changes. A page builds a
-                // fresh trigger whenever the sentence is rebuilt, and the old one would otherwise keep
-                // saying things to a sentence that has stopped showing it.
-                if (_trigger != null)
-                    _trigger.PropertyChanged -= Said;
-
-                if (value != null)
-                    value.PropertyChanged += Said;
-
-                Set(ref _trigger, value, nameof(Trigger));
-            }
-        }
-
-        SentenceTrigger _trigger;
-
         public ObservableList<SentenceStep> Steps { get; private set; }
 
         /// <summary>Ways to extend the sequence: "do something", "wait".</summary>
@@ -292,21 +268,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         }
 
         int _deleteCommand;
-
-        /// <summary>
-        /// Saying what starts this, where nothing does yet, or zero.
-        /// </summary>
-        /// <remarks>
-        /// Not a slot of the trigger, because there is no trigger to hold one. It stands in place of
-        /// the whole first line, which is the one thing on the screen that cannot be said yet.
-        /// </remarks>
-        public int StartCommand
-        {
-            get { return _startCommand; }
-            set { Set(ref _startCommand, value, nameof(StartCommand)); }
-        }
-
-        int _startCommand;
 
     }
 }

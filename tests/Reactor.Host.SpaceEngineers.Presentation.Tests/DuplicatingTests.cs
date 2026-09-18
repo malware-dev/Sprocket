@@ -22,12 +22,13 @@ public class DuplicatingTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
+        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.Back();
         return screen.Run(2);
     }
 
     static StatusEntry Row(Screen screen, int which) =>
-        screen.Editor.Component<StatusListComponent>().Entries[which];
+        screen.Editor.Rows().Entries[which];
 
     static void Duplicate(Screen screen, int which)
     {
@@ -42,7 +43,7 @@ public class DuplicatingTests
 
         Duplicate(screen, 0);
 
-        Assert.Equal("… > Sequence 2", screen.Ended);
+        Assert.Equal("Sequence 2", screen.Ended);
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
     }
 
@@ -57,7 +58,7 @@ public class DuplicatingTests
     public void OnlyASequenceRowOffersACopy()
     {
         var screen = AtTheList();
-        var rows = screen.Editor.Component<StatusListComponent>().Entries;
+        var rows = screen.Editor.Rows().Entries;
 
         Assert.NotEqual(0, rows[0].DuplicateCommand);
         for (var i = 1; i < rows.Count; i++)
@@ -65,11 +66,12 @@ public class DuplicatingTests
     }
 
     /// <summary>
-    /// The copy is waiting to be told what starts it, and says so where the trigger goes.
+    /// The copy is started by nothing, and switched off.
     /// </summary>
     /// <remarks>
-    /// The ellipsis is the same one an unfilled slot uses anywhere else, so nothing here is a word
-    /// only this screen knows.
+    /// A toolbar slot holds one claim on Reactor's action, so a copy carrying the trigger it came
+    /// from would be a second claim on a slot that is already taken - and two live sequences on one
+    /// button would cycle an airlock twice with nothing on screen saying why.
     /// </remarks>
     [Fact]
     public void ACopyIsStartedByNothingAndIsSwitchedOff()
@@ -80,10 +82,11 @@ public class DuplicatingTests
 
         var copy = screen.Editor.Sentence();
         Assert.False(copy.Enabled);
-        // Asked for rather than read back through the clip: the heading's first part is clipped to
-        // its own box, and the ellipsis is drawn a fraction of a pixel left of it.
-        Assert.Contains("…", screen.Words);
         Assert.True(screen.Shows("switched off"));
+
+        var made = screen.Editor.Program.Sequences[1];
+        Assert.Equal(copy.SequenceId, made.Id);
+        Assert.Null(made.Trigger);
     }
 
     /// <summary>

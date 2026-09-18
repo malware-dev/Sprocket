@@ -33,19 +33,22 @@ namespace Reactor.Host.SpaceEngineers.Editing
         StartWhen,
         StartEvery,
         OpenSequence,
+        NewSequence,
+
+        // Triggers.
+        OpenTrigger,
+        TriggerTarget,
+        DeleteTrigger,
 
         // A sequence.
         Enable,
         EnableInstance,
         DeleteSequence,
         DuplicateSequence,
-        StartThis,
         Undo,
         Redo,
         AddAction,
         AddWait,
-        EditCadence,
-        TriggerSlot,
         StepSlot,
         MoveStep,
         DeleteStep,

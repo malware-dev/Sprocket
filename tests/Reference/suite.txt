@@ -34,52 +34,52 @@ root-taken          60 130 type Airlock enter 25 62 60 130 type Airlock enter
 system-rename-taken 60 130 type Airlock enter 25 62 60 130 type Hangar enter 80 68 clear type Airlock enter
 
 # --- picking blocks, which is the longest list in the editor ------------------------------------
-picker              60 130 type Airlock enter 60 130
-picker-hover        60 130 type Airlock enter 60 130 move 300 375
-picker-scrolled     60 130 type Airlock enter 60 130 scroll 250 600 300
-picker-searched     60 130 type Airlock enter 60 130 150 224 type door
-picker-picked       60 130 type Airlock enter 60 130 200 375
-picker-chosen       60 130 type Airlock enter 60 130 200 375 560 272
+picker              60 130 type Airlock enter 60 161
+picker-hover        60 130 type Airlock enter 60 161 move 300 375
+picker-scrolled     60 130 type Airlock enter 60 161 scroll 250 600 300
+picker-searched     60 130 type Airlock enter 60 161 150 224 type door
+picker-picked       60 130 type Airlock enter 60 161 200 375
+picker-chosen       60 130 type Airlock enter 60 161 200 375 560 272
+
+# --- the last question of the wizard: what the trigger should do --------------------------------
+#
+# The list a trigger's target is chosen from. It opens with the way to have several things happen,
+# so nobody has to be told that a trigger does one thing - and what it offers depends on what the
+# system already has, which is why both states are held: nothing to point at, and something.
+trigger-target      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000
+trigger-target-full 60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145 25 62 60 161 200 375 560 272 1380 1000
 
 # --- the sequence that walk arrives at ----------------------------------------------------------
-sequence            60 130 type Airlock enter 60 130 200 375 560 272 1380 1000
-sequence-hover      60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 move 400 170
-sequence-ticked     60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 tick 120
+sequence            60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145
+sequence-hover      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145 move 100 193
+sequence-ticked     60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145 tick 120
 
 # --- and the two kinds of line it can be given ---------------------------------------------------
 #
 # The words on a step are the host's, not core's: core says which blocks and which action, and this
 # target says "open" and joins them. A step that read right before the words moved out and wrong
 # after would show up nowhere else, because nothing else in the suite gets as far as a step.
-sequence-step       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 70 254 200 375 560 272 1380 1000
-sequence-wait       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 212 254 100 255
+sequence-step       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145 70 193 200 375 560 272 1380 1000 60 145
+sequence-wait       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145 212 193 100 255
 
 # --- the list with something in it, which is where a copy is made from ---------------------------
 #
 # Every other look at this screen in here is of an empty one, so a sequence's row and the controls
 # on it - its switch, and the copy button beside it - are drawn nowhere else in the suite. The
 # second entry holds the button's own note, which names the row it belongs to.
-system-filled       60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62
-system-copying      60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62 move 1261 214
+system-filled       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145 25 62
+system-copying      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145 25 62 move 1261 416
 
 # --- a copy of it, which arrives saying the same thing and starting nothing ----------------------
 #
 # Made from the list, where the button is, and the state worth holding still is the one the copy
 # lands in: the same steps, the switch off, and an ellipsis where its trigger will go. A copy that
 # arrived live, or with the trigger it came from, would claim a toolbar slot that is already taken.
-sequence-copied     60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62 1261 214
-
-# --- and the way out of a sequence nothing starts ------------------------------------------------
-#
-# The copy's first line is the offer, in place of the sentence it has not got, and pressing it asks
-# the two questions a system's starters ask. Both frames exist because the offer is the only line
-# on any screen that stands in for a sentence rather than filling one in.
-sequence-unstarted  60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62 1261 214 move 65 184
-sequence-starting   60 130 type Airlock enter 60 130 200 375 560 272 1380 1000 25 62 1261 214 65 184
+sequence-copied     60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 60 145 25 62 1261 416
 
 # --- swapping a choice, which nothing else here covers ------------------------------------------
 #
 # The mark beside a chosen row is a ring or a disc, and which one it is gets decided when the row is
 # measured. A change that did not ask for a new measure left the old glyph on screen: the model said
 # one thing and the picker drew another. Pressing a second choice is the whole of what catches that.
-picker-swapped      60 130 type Airlock enter 60 130 200 375 560 272 560 306
+picker-swapped      60 130 type Airlock enter 60 161 200 375 560 272 560 306

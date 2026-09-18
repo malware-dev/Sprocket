@@ -293,6 +293,24 @@ namespace Reactor.Host.SpaceEngineers.Controls
             return text == null ? "" : text.ToUpperInvariant();
         }
 
+        /// <summary>
+        /// Readies a control that only sometimes has anything to do.
+        /// </summary>
+        /// <remarks>
+        /// A command of zero is how core says "not now", so a control with none is not a control: it
+        /// goes quiet, stops lighting under the pointer, and has nothing to say about itself. Greying
+        /// is right for these and wrong for a sentence - these are controls that will become
+        /// available, where a sentence is not a control at all.
+        /// </remarks>
+        public static void Waiting(Glyph button, int command, string says)
+        {
+            bool ready = command != 0;
+            button.Tint = ready ? Palette.Muted : Palette.Dim;
+            button.Highlight = ready ? Palette.Panel : Palette.None;
+            button.Press = Deed.Sends(command);
+            button.Tip = ready ? says : null;
+        }
+
         public static Rule Line()
         {
             return new Rule(Space.Hair, Palette.Line);

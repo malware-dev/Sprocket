@@ -141,7 +141,6 @@ static class PaperTarget
         if (component is SequenceComponent sequence)
         {
             paper.Append("sequence ").Append(sequence.SequenceId).AppendLine(":");
-            paper.Append("  ").AppendLine(Say(world, sequence.Trigger));
 
             foreach (var step in sequence.Steps)
                 paper.Append("  ").Append(step.Number).Append(". ").AppendLine(Say(world, step));
@@ -159,30 +158,16 @@ static class PaperTarget
     }
 
     /// <summary>
-    /// The first line, in this target's own words.
+    /// One numbered line, in this target's own words.
     /// </summary>
     /// <remarks>
     /// Its own words on purpose. Core hands over what the sentence refers to and never what it says,
     /// so a second target writing the same English as the first proves nothing - the point is that it
     /// could write something else and core would not know.
-    /// </remarks>
-    static string Say(GridWorld world, SentenceTrigger trigger)
-    {
-        var line = new StringBuilder();
-        line.Append(trigger.Kind == TriggerKind.Every ? "Every" : "When");
-
-        foreach (var slot in trigger.Slots)
-            line.Append(' ').Append(Say(world, slot));
-
-        return line.ToString();
-    }
-
-    /// <summary>
-    /// One numbered line.
-    /// </summary>
-    /// <remarks>
+    /// <para>
     /// A step usually opens straight at its verb, so the space goes between words rather than in
     /// front of them.
+    /// </para>
     /// </remarks>
     static string Say(GridWorld world, SentenceStep step)
     {
@@ -226,9 +211,6 @@ static class PaperTarget
 
             return string.Join(entities.RequiresAll ? " and " : " or ", names);
         }
-
-        if (slot is EventSlot happening)
-            return happening.Event.Text;
 
         if (slot is ActionSlot action)
             return action.Action.Text;

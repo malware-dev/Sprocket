@@ -37,6 +37,7 @@ public class ComponentSmokeTests
 
         editor.PressChoice("is switched on");
         editor.PressPrimary();
+        editor.PressChoice("Run a new sequence");
         Record(seen, screen);
 
         editor.PressAdd("do something");

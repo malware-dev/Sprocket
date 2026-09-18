@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Reactor.Host.SpaceEngineers.Sequences
 {
     /// <summary>
@@ -9,18 +11,35 @@ namespace Reactor.Host.SpaceEngineers.Sequences
     /// door means Reactor watches for the moment, a button means the construct announces it. Both
     /// objects are kept, so undo puts back the one that was there rather than rebuilding something
     /// that reads the same.
+    /// <para>
+    /// Everything the trigger was for comes across: the sequence it runs, whether it stops that
+    /// sequence instead, and whatever was written about it. The question was only ever about what
+    /// starts it.
+    /// </para>
     /// </remarks>
-    sealed class ChangeTrigger : SequenceEdit
+    sealed class ChangeTrigger : SystemEdit
     {
         readonly MomentTrigger _was;
         readonly MomentTrigger _now;
+
+        /// <summary>What each of the two said when this was made, to know it still says it.</summary>
+        readonly List<string> _wasSources;
+        readonly List<string> _nowSources;
+        readonly string _wasEvent;
+        readonly string _nowEvent;
 
         public ChangeTrigger(MomentTrigger was, MomentTrigger now)
         {
             _was = was;
             _now = now;
             _now.Runs = was.Runs;
+            _now.Stops = was.Stops;
             _now.Annotation = was.Annotation;
+
+            _wasSources = CopyOf(was.Sources);
+            _wasEvent = was.EventId;
+            _nowSources = CopyOf(now.Sources);
+            _nowEvent = now.EventId;
         }
 
         public override string Label => "changing when it runs";
@@ -41,20 +60,24 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             }
         }
 
-        public override void Apply(Sequence sequence)
+        public override bool Undoable(AutomationSystem system)
         {
-            Put(sequence, _was, _now);
+            return Holds(system, _now, _nowSources, _nowEvent);
         }
 
-        public override void Undo(Sequence sequence)
+        public override bool Redoable(AutomationSystem system)
         {
-            Put(sequence, _now, _was);
+            return Holds(system, _was, _wasSources, _wasEvent);
         }
 
-        static void Put(Sequence sequence, Trigger was, Trigger now)
+        public override void Apply(AutomationSystem system)
         {
-            if (sequence.System != null)
-                sequence.System.ReplaceTrigger(was, now);
+            system.ReplaceTrigger(_was, _now);
+        }
+
+        public override void Undo(AutomationSystem system)
+        {
+            system.ReplaceTrigger(_now, _was);
         }
     }
 }

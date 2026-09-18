@@ -132,9 +132,10 @@ namespace Reactor.Host.SpaceEngineers.World
         /// Adds an action. <paramref name="leadsToStateId"/> names the state the
         /// action is trying to reach, which is what allows an interlock to stop it.
         /// </summary>
-        public EntityKind WithAction(string id, string text, string leadsToStateId = null)
+        public EntityKind WithAction(string id, string text, string leadsToStateId = null,
+            string gameActionId = null)
         {
-            _actions.Add(new EntityAction(id, text, leadsToStateId));
+            _actions.Add(new EntityAction(id, text, leadsToStateId, gameActionId));
             return this;
         }
 

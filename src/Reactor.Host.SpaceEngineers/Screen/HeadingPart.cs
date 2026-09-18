@@ -35,9 +35,8 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// Words that come before this part and belong to it, or empty for none.
         /// </summary>
         /// <remarks>
-        /// The same idea a sentence's <see cref="SentenceTrigger.Kind" /> already carries, and here for the
-        /// same reason: <i>Automation for</i> <b>Hangar Bay Alpha</b> is one named thing with a phrase in
-        /// front of it, not two things. The phrase is core's because it says what the screen is about; the
+        /// <i>Automation for</i> <b>Hangar Bay Alpha</b> is one named thing with a phrase in front of
+        /// it, not two things. The phrase is core's because it says what the screen is about; the
         /// name is somebody's to change and the phrase is not, so they cannot be the same part.
         /// <para>
         /// It also settles the punctuation. A target puts its own mark between parts - an arrow, a dot -

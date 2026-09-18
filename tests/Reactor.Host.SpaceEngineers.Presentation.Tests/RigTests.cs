@@ -4,6 +4,7 @@ using Reactor.Host.SpaceEngineers.Sequences;
 using Reactor.Host.SpaceEngineers.Storage;
 using Reactor.Host.SpaceEngineers.World;
 using Reactor.Sim.Machine;
+using VRage.Game.ModAPI;
 using Xunit;
 
 namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
@@ -259,6 +260,212 @@ public class RigTests
         return sim.Editor.Program.Declare(sim.World, entity).Name;
     }
 
+    /// <summary>A trigger of one plain thing, on a system, the way the picker will make one.</summary>
+    static Sequence PlainTrigger(Simulation rig)
+    {
+        Automation program = rig.Editor.Program;
+        AutomationSystem system = program.AddSystem();
+        system.Name = "Airlock";
+
+        var open = new Act("open");
+        open.Targets.Add(program.Declare(rig.World, rig.World.FindEntity(2)).Name);
+
+        Sequence sequence = program.AddSequence(system);
+        sequence.Steps.Add(open);
+        sequence.Steps.Add(new Await());
+
+        var pressed = new RequiredTrigger("pressed-1");
+        pressed.Runs = sequence.Number;
+        pressed.Sources.Add(program.Declare(rig.World, rig.World.FindEntity(21)).Name);
+        system.AddTrigger(pressed);
+        program.Rewire();
+
+        return sequence;
+    }
+
+    static Panel Named(Simulation rig, string name)
+    {
+        foreach (Panel found in rig.Panels())
+            if (found.Name == name)
+                return found;
+
+        return null;
+    }
+
+    /// <summary>
+    /// A trigger that does one plain thing is written as the game's own action.
+    /// </summary>
+    /// <remarks>
+    /// The slot holds the door's own action on the door rather than Reactor's carrying a key, so the
+    /// button works with the mod removed. Reactor is not part of the press at all - which is also
+    /// why the sequence must not be reported as one nothing starts: the slot answers for it.
+    /// </remarks>
+    [Fact]
+    public void ATriggerThatDoesOneThingIsTheGamesOwnAction()
+    {
+        Simulation rig = Simulation.Fresh();
+        rig.Tick();
+
+        Sequence sequence = PlainTrigger(rig);
+
+        for (var i = 0; i < 5; i++)
+            rig.Tick();
+
+        Panel panel = Named(rig, "Airlock Button");
+        Assert.NotNull(panel);
+
+        MyToolbarItemInfo held;
+        Assert.True(panel.Toolbar.TryGetItem(0, out held), "the button holds nothing");
+        Assert.Equal("Open_On", held.ActionId);
+        Assert.Equal(2L, held.BlockEntityId);
+
+        rig.Machine.Log.Clear();
+        rig.Press("Airlock Button");
+        rig.Tick();
+
+        Assert.Contains("Airlock Inner Door:open", rig.Machine.Log);
+        Assert.False(Running(rig, sequence), "Reactor ran a sequence the game was doing itself");
+
+        // Long enough for the pass that parks what cannot work. A slot holding the game's action
+        // answers for the sequence, so nothing here is broken.
+        for (var i = 0; i < 70; i++)
+            rig.Tick();
+
+        Assert.True(sequence.Enabled, "the sequence was parked although its button is wired");
+    }
+
+    /// <summary>
+    /// A slot somebody has changed stops being claimed.
+    /// </summary>
+    /// <remarks>
+    /// The same rule Reactor's own slots follow: clearing a button or pointing it elsewhere is a
+    /// decision, and honouring it means the trigger stops saying that button starts this. Without it
+    /// the screen would go on naming a button that does something else now.
+    /// </remarks>
+    [Fact]
+    public void ASlotSomebodyChangedStopsBeingClaimed()
+    {
+        Simulation rig = Simulation.Fresh();
+        rig.Tick();
+
+        Sequence sequence = PlainTrigger(rig);
+
+        for (var i = 0; i < 5; i++)
+            rig.Tick();
+
+        Trigger trigger = sequence.System.Triggers[0];
+        Assert.Single(((RequiredTrigger)trigger).Sources);
+
+        // Somebody points the button at the other door instead.
+        Panel panel = Named(rig, "Airlock Button");
+        Toolbar.Changes changes = panel.Toolbar.Changing();
+        changes.Set(0, MyToolbarItemInfo.BlockAction(3, "Open_On"), null);
+        Assert.True(changes.Apply());
+
+        // Reactor looks again when the program changes, which is when a screen is doing anything.
+        rig.Editor.Program.Rewire();
+        for (var i = 0; i < 3; i++)
+            rig.Tick();
+
+        Assert.Empty(((RequiredTrigger)trigger).Sources);
+    }
+
+    /// <summary>
+    /// A button can stop a sequence, and its slot says so.
+    /// </summary>
+    /// <remarks>
+    /// The one thing a sequence cannot do for itself: a cycle half way through has no line in it
+    /// that says "unless somebody says otherwise". The slot names the sequence with the stopping
+    /// verb on the end, so a button written before stopping existed still means what it meant.
+    /// </remarks>
+    [Fact]
+    public void AButtonCanStopASequence()
+    {
+        Simulation rig = Simulation.Fresh();
+        rig.Machine.Panel(31, "Stop Button");
+        rig.Tick();
+
+        rig.Editor.NewSystem("Airlock");
+        rig.Editor.PressStart("When…");
+        rig.Editor.PressBlock("Airlock Button");
+        rig.Editor.PressChoice("is pressed");
+        rig.Editor.PressPrimary();
+        rig.Editor.PressChoice("Run a new sequence");
+        // A wait, so the run lasts long enough to be stopped.
+        rig.Editor.PressAdd("wait");
+        rig.Editor.PressChoice(Reactor.Host.SpaceEngineers.Words.TimeText.WaitChoice(600));
+        rig.Editor.SwitchOn();
+
+        Sequence sequence = rig.Editor.Program.Sequences[0];
+
+        var halt = new RequiredTrigger();
+        halt.EventId = "pressed-1";
+        halt.Runs = sequence.Number;
+        halt.Stops = true;
+        halt.Sources.Add(rig.Editor.Program.Declare(rig.World, rig.World.FindEntity(31)).Name);
+        sequence.System.AddTrigger(halt);
+        rig.Editor.Program.Rewire();
+
+        for (var i = 0; i < 5; i++)
+            rig.Tick();
+
+        rig.Press("Airlock Button");
+        rig.Tick();
+        Assert.True(Running(rig, sequence), "the sequence never started");
+
+        rig.Press("Stop Button");
+        rig.Tick();
+
+        Assert.False(Running(rig, sequence), "the button did not stop it");
+    }
+
+    /// <summary>
+    /// Two buttons can start one sequence, and both get their slot written.
+    /// </summary>
+    /// <remarks>
+    /// The inside button and the outside one, which is the case that made somebody duplicate a
+    /// sequence instead. The runtime always sampled every trigger of a sequence; what only ever
+    /// reached a toolbar was the first of them, so the second button held nothing and did nothing.
+    /// </remarks>
+    [Fact]
+    public void TwoButtonsCanStartOneSequence()
+    {
+        Simulation rig = Simulation.Fresh();
+        rig.Machine.Panel(30, "Inside Button");
+
+        // A tick, so the world has seen the panel: a reference declared against a block the world
+        // does not know yet binds to nothing, and nothing is what would then be wired.
+        rig.Tick();
+
+        Airlock(rig.Editor);
+        rig.Editor.PressAdd("do something");
+        rig.Editor.PressBlock("Airlock Inner Door");
+        rig.Editor.PressChoice("open");
+        rig.Editor.PressPrimary();
+        rig.Editor.SwitchOn();
+
+        Sequence sequence = rig.Editor.Program.Sequences[0];
+
+        // The second way in, written into the program rather than through the screens: the editor
+        // has no way to add one yet, which is what #14 is for.
+        var inside = new RequiredTrigger();
+        inside.EventId = "pressed-1";
+        inside.Runs = sequence.Number;
+        GridEntity button = rig.World.FindEntity(30);
+        Assert.NotNull(button);
+        inside.Sources.Add(rig.Editor.Program.Declare(rig.World, button).Name);
+        sequence.System.AddTrigger(inside);
+        rig.Editor.Program.Rewire();
+
+        for (var i = 0; i < 5; i++)
+            rig.Tick();
+
+        rig.Press("Inside Button");
+        rig.Tick();
+
+        Assert.True(Running(rig, sequence), "the second button did not reach the sequence");
+    }
+
     /// <summary>
     /// Cutting the power to the machine itself holds its automation, and restoring it lets it go on.
     /// </summary>
@@ -277,6 +484,7 @@ public class RigTests
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
+        rig.Editor.PressChoice("Run a new sequence");
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("open");
@@ -314,6 +522,7 @@ public class RigTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
+        editor.PressChoice("Run a new sequence");
     }
 
     static bool Running(Simulation rig, Sequence sequence)

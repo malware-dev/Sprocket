@@ -58,8 +58,8 @@ namespace Reactor.Host.SpaceEngineers.World
                     .WithEvent("switched-off", GridEntity.OnProperty, Edge.Falling, "is switched off")
                     .WithState("is-on", GridEntity.OnProperty, true, "is on")
                     .WithState("is-off", GridEntity.OnProperty, false, "is off")
-                    .WithAction(SwitchOn, "switch on", "is-on")
-                    .WithAction(SwitchOff, "switch off", "is-off");
+                    .WithAction(SwitchOn, "switch on", "is-on", "OnOff_On")
+                    .WithAction(SwitchOff, "switch off", "is-off", "OnOff_Off");
             }
 
             _kinds.Add(id, kind);

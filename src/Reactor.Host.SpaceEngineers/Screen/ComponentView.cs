@@ -4,6 +4,8 @@ using Reactor.Host.SpaceEngineers.Picking;
 using Reactor.Host.SpaceEngineers.Sequences;
 using VRageMath;
 using Reactor.Host.SpaceEngineers.Layout;
+using Reactor.Host.SpaceEngineers.Look;
+using Reactor.Host.SpaceEngineers.Controls;
 
 namespace Reactor.Host.SpaceEngineers.Screen
 {

@@ -30,21 +30,6 @@ namespace Reactor.Host.SpaceEngineers.Words
         public const string Missing = "something that's gone";
 
 
-        /// <summary>The word a trigger opens with.</summary>
-        public static string Lead(SentenceTrigger trigger)
-        {
-            if (trigger.Kind == TriggerKind.Every)
-                return "Every";
-
-            // A required trigger with slots names its block, so it reads like any other moment: how
-            // it reaches Reactor is not what the sentence is about. Only one naming nothing has to
-            // say that out loud, because it has nothing else to show.
-            return trigger.Kind == TriggerKind.Required && trigger.Slots.Count == 0
-                ? "When something on this ship says so"
-                : "When";
-        }
-
-
         /// <summary>
         /// What comes before a step's slots: the word "wait", a gate, or nothing at all.
         /// </summary>
@@ -58,22 +43,6 @@ namespace Reactor.Host.SpaceEngineers.Words
                 return "run";
 
             return step.Kind == StepKind.Wait ? "wait" : "";
-        }
-
-
-        /// <summary>What a slot of a trigger reads as.</summary>
-        /// <remarks>
-        /// A duration in a trigger is a rate, and rates are said in ticks. Seconds would be a promise
-        /// the simulation does not keep - it sags under load, and a repeat that claimed seconds would
-        /// drift exactly when the machine matters most.
-        /// </remarks>
-        public static string InTrigger(GridWorld world, SentenceSlot slot)
-        {
-            var duration = slot as DurationSlot;
-            if (duration != null)
-                return TimeText.Rate(duration.Ticks);
-
-            return Of(world, slot);
         }
 
 
@@ -158,10 +127,6 @@ namespace Reactor.Host.SpaceEngineers.Words
             var entities = slot as EntitiesSlot;
             if (entities != null)
                 return Entities(world, entities.Entities, entities.RequiresAll);
-
-            var happening = slot as EventSlot;
-            if (happening != null)
-                return happening.Event == null ? Empty : happening.Event.Text;
 
             var action = slot as ActionSlot;
             if (action != null)

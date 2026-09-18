@@ -70,6 +70,12 @@ namespace Reactor.Host.SpaceEngineers.Lists
 
             if (_component.Entries.Count == 0)
             {
+                // A list with nothing to say about being empty takes no room at all. Two lists on one
+                // screen means one of them is often empty and not worth a line - see SystemPage, where
+                // the list below says the one thing there is to say.
+                if (_component.EmptyText.Length == 0)
+                    return;
+
                 _empty = Widgets.Label(_component.EmptyText, Palette.Muted, Lettering.Small);
                 _empty.Padding = new Thickness(Space.Row, Space.Row, 0f, 0f);
                 _stack.Children.Add(_empty);

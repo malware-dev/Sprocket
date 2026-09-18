@@ -73,14 +73,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         readonly Label _locked = Widgets.Wash("", Palette.Muted, Palette.SlotFill);
         readonly Label _problem = Widgets.Wash("", Palette.Problem, Palette.ProblemWash);
 
-        readonly Wrap _trigger = new Wrap();
         readonly Dot _ranLight = new Dot();
-        readonly Label _triggerLead = Widgets.Label("", Palette.Muted, Lettering.Body);
-        readonly Label _liveBadge = Widgets.Wash("true right now", Palette.Live, Palette.LiveWash);
-        readonly List<Element> _triggerSlots = new List<Element>();
-
-        /// <summary>What each trigger slot was last given, so an unchanged one is not worded again.</summary>
-        readonly List<SentenceSlot> _shownTrigger = new List<SentenceSlot>();
 
         /// <summary>What the two arrows were last told to say, and the words they were made from.</summary>
         string _undone;
@@ -92,8 +85,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         readonly List<StepRow> _stepRows = new List<StepRow>();
         readonly Stack _adders = Widgets.RowOf(Space.Item);
 
-        /// <summary>Stands in for the first line while nothing starts this sequence.</summary>
-        readonly Label _starter = Widgets.Ghost("+ say what starts this");
         readonly List<Label> _adderRows = new List<Label>();
 
         bool _builtEditable;
@@ -112,7 +103,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             _status.Wraps = false;
             _lastRun.Wraps = false;
             _skipped.Wraps = false;
-            _liveBadge.Wraps = false;
             // Deleting the whole sequence, so the same red warning the per-step crosses use.
             _delete.Highlight = Palette.ProblemWash;
 
@@ -125,7 +115,10 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             _redoSlot = new Sized(48f);
             _redoSlot.Content = _redo;
 
+            // The light leads the state, because it is the same fact said faster: "Waiting" with a
+            // green flash is what a sequence firing looks like from across the room.
             Stack state = Widgets.RowOf(Space.Item);
+            state.Children.Add(_ranLight);
             state.Children.Add(_status);
             state.Children.Add(_lastRun);
 
@@ -146,16 +139,12 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             _header.Fill = _skipped;
             _header.Right = tools;
 
-            _trigger.ItemSpacing = Space.Item;
-            _trigger.LineSpacing = Space.Row;
-            _trigger.Padding = new Thickness(Space.Item, Space.ChipY * 1.3f);
-
             _adders.Padding = new Thickness(32f, Space.Item, 0f, 0f);
         }
 
         /// <summary>
-        /// Told rather than asked. The sentence announces its own values, repeats what its steps and
-        /// its trigger say, and its lists say when they change shape.
+        /// Told rather than asked. The sentence announces its own values, repeats what its steps say,
+        /// and its lists say when they change shape.
         /// </summary>
         protected override bool Stale
         {
@@ -175,18 +164,7 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             _status.Text = _component.Status;
             _lastRun.Text = _component.LastRun;
 
-            // The same wash and the same red light a broken row in a list gets, so arriving here
-            // from one arrives at something already recognised. Core says which line; this says so
-            // loudly, because being led two screens deep and then having to hunt is worse than not
-            // being led at all.
-            bool triggerWrong = _component.Trigger.HasProblem;
-            _trigger.Background = triggerWrong ? Palette.ProblemWash : Palette.None;
-
-            // Broken outranks recently-run. A green light on a line that cannot fire is the screen
-            // contradicting itself, and the light is the first thing the eye lands on.
-            _ranLight.Background = triggerWrong
-                ? Palette.Problem
-                : (_component.JustRan ? Palette.Live : Palette.Dim);
+            _ranLight.Background = _component.JustRan ? Palette.Live : Palette.Dim;
 
             bool skipping = _component.SkippedCount > 0 || _component.RefusedCount > 0;
             _skipped.Collapsed = !skipping;
@@ -201,10 +179,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             _problem.Color = _component.ProblemIsWarning ? Palette.Notice : Palette.Problem;
             _problem.Background = _component.ProblemIsWarning ? Palette.NoticeWash : Palette.ProblemWash;
             Banner(_problem, _component.Problem, 2);
-
-            // Idle while the signal reads true is not a contradiction. It is the difference between a
-            // moment and a situation, shown rather than explained.
-            _liveBadge.Collapsed = !_component.Trigger.IsLiveNow;
 
             // Governs, because a sequence's switch is the only one on this screen and switching it off
             // stops the whole of what the screen is showing.
@@ -232,9 +206,9 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                 _redoSays = "Redo " + _component.RedoText;
             }
 
-            Waiting(_undo, _component.UndoCommand, _undoSays);
-            Waiting(_redo, _component.RedoCommand, _redoSays);
-            Waiting(_delete, _component.DeleteCommand, "Delete this sequence");
+            Widgets.Waiting(_undo, _component.UndoCommand, _undoSays);
+            Widgets.Waiting(_redo, _component.RedoCommand, _redoSays);
+            Widgets.Waiting(_delete, _component.DeleteCommand, "Delete this sequence");
 
             // Says the act, where the switch itself says the state. The two together are the whole reason
             // a state switch is safe for an audience who have never programmed: the control cannot be read
@@ -248,23 +222,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
             for (int i = 0; i < _adderRows.Count && i < _component.AddOptions.Count; i++)
                 _adderRows[i].Press = Deed.Sends(_component.AddOptions[i].Command);
-
-            _starter.Press = Deed.Sends(_component.StartCommand);
-            _triggerLead.Text = SentenceText.Lead(_component.Trigger);
-
-            // Only when it changes. Wording a slot builds strings, and this runs on every tick - see
-            // SentenceView, which remembers the same way for the same reason.
-            for (int i = 0; i < _triggerSlots.Count && i < _component.Trigger.Slots.Count; i++)
-            {
-                SentenceSlot slot = _component.Trigger.Slots[i];
-                _triggerSlots[i].Press = Deed.Sends(slot.Command);
-
-                if (ReferenceEquals(_shownTrigger[i], slot))
-                    continue;
-
-                _shownTrigger[i] = slot;
-                SentenceView.Apply(_triggerSlots[i], slot, SentenceText.InTrigger(Host.World, slot));
-            }
 
             for (int i = 0; i < _stepRows.Count && i < _component.Steps.Count; i++)
             {
@@ -487,9 +444,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             if (_stepRows.Count != _component.Steps.Count)
                 return false;
 
-            if (_triggerSlots.Count != _component.Trigger.Slots.Count)
-                return false;
-
             for (int i = 0; i < _stepRows.Count; i++)
             {
                 if (!_stepRows[i].Sentence.Fits(_component.Steps[i].Slots.Count))
@@ -506,9 +460,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
             _root.Children.Clear();
             _root.Children.Add(_header);
-
-            BuildTrigger();
-            _root.Children.Add(_trigger);
 
             BuildSteps();
             _root.Children.Add(_steps);
@@ -527,36 +478,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             _delete.Collapsed = !_component.Editable;
             _undoSlot.Collapsed = !_component.Editable;
             _redoSlot.Collapsed = !_component.Editable;
-        }
-
-        void BuildTrigger()
-        {
-            _trigger.Children.Clear();
-            _triggerSlots.Clear();
-            _shownTrigger.Clear();
-
-            _trigger.Children.Add(_ranLight);
-
-            // Nothing starts it, so the line is the way to say what does - the same row the steps are
-            // added with, because it is the same act one line further up. There is no sentence to show
-            // and no slot to press: a trigger has to exist before it can have parts.
-            if (_component.StartCommand != 0)
-            {
-                _trigger.Children.Add(_starter);
-                return;
-            }
-
-            _trigger.Children.Add(_triggerLead);
-
-            for (int i = 0; i < _component.Trigger.Slots.Count; i++)
-            {
-                Element slot = NewSlot();
-                _triggerSlots.Add(slot);
-                _shownTrigger.Add(null);
-                _trigger.Children.Add(slot);
-            }
-
-            _trigger.Children.Add(_liveBadge);
         }
 
         void BuildSteps()
@@ -628,19 +549,6 @@ namespace Reactor.Host.SpaceEngineers.Sequences
                 _adderRows.Add(adder);
                 _adders.Children.Add(adder);
             }
-        }
-
-        Element NewSlot()
-        {
-            if (!_component.Editable)
-            {
-                // Reading, not editing: a slot becomes a word in a sentence rather than something to press.
-                Label word = Widgets.Label("", Palette.Ink, Lettering.Body);
-                word.Wraps = false;
-                return word;
-            }
-
-            return new Slot();
         }
 
         /// <summary>Shows a banner when it has something to say, and takes it out of the layout when not.</summary>
@@ -719,13 +627,5 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// one somebody reaches for twice.
         /// </para>
         /// </remarks>
-        static void Waiting(Glyph button, int command, string says)
-        {
-            bool ready = command != 0;
-            button.Tint = ready ? Palette.Muted : Palette.Dim;
-            button.Highlight = ready ? Palette.Panel : Palette.None;
-            button.Press = Deed.Sends(command);
-            button.Tip = ready ? says : null;
-        }
     }
 }

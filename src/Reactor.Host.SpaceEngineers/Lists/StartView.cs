@@ -91,7 +91,10 @@ namespace Reactor.Host.SpaceEngineers.Lists
                 _rows.Add(Widgets.Way(Plus + option.Label + (option.Asks ? "…" : "")));
             }
 
-            _line.Padding = new Thickness(0f, Space.Item);
+            // Closer to the buttons than to what is under it, because the line is what ends them.
+            // Even air on both sides put the line further below the buttons than the first row was
+            // below the line, which reads as the buttons sitting in a box of their own.
+            _line.Padding = new Thickness(0f, Space.Line, 0f, Space.Item);
 
             _buttons.Children.Clear();
             for (int i = 0; i < _rows.Count; i++)

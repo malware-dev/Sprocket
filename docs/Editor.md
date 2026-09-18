@@ -120,21 +120,55 @@ a sequence with one use is what every sequence is now. What decides whether it i
 is watching whether people duplicate a sequence and then hand-edit both when one turns out to be
 wrong.*
 
-### Saying what starts a sequence that nothing starts
+### What starts a sequence is not on the sequence's screen
 
-**The first line of a sequence with no trigger is the offer to give it one**, drawn as the same
-`+` row the steps are added with, because it is the same act one line further up. Pressing it asks
-the two questions a system's starters ask - *when something happens* or *every so often* - and then
-runs the same pages, so choosing a trigger reads identically whether a sequence is being made or
-mended.
+**Triggers are listed on the system's screen, above the sequences, and changed there.** A sequence
+may be started from three buttons and stopped by a fourth, so a line on its own screen could only
+ever show one of them or grow into the list the system already keeps. Its screen is what the
+sequence is called and what it does; the rows above the list are the reasons it happens.
 
-Three ways to arrive at a sequence nothing starts: copy one, be sent a program somebody wrote by
-hand, or have the block your trigger named ground off. Before this line existed all three were dead
-ends. The screen said what was missing, with an ellipsis where the trigger goes, and nothing on it
-could fill that in.
+**A trigger's row is two sentences and each is pressed.** *When Airlock Button is pressed* asks
+again when it happens - the picker for a moment, the rates for a repeat, the questions it was made
+with. *runs Cycle* asks again what it does. Nothing asks which half was meant, because the words
+somebody pressed are the answer, and a screen of its own to ask that would be a screen holding one
+question whose answer was already on the row behind it.
 
-Unlike making a sequence, this is a change to one that already exists, so **it is an edit and walks
-back.** Arming something by accident is exactly what undo is for.
+Changing **when** it happens carries everything else through: the sequence it runs, whether it
+stops that sequence instead, and whatever was written about it. Changing **what it does** is the
+same list the wizard asks with - *run a new sequence*, *run an existing one*, *stop one*, *do
+something* - because that is one thought whether a trigger is being made or mended. The trigger
+itself is kept rather than remade, since what starts it has not changed and the toolbar slot the
+construct holds names that trigger. Pointing away from a sequence nobody named takes that sequence
+with it: it existed only to be the one thing this trigger did.
+
+Both are **walked back from the system's screen** - see *Taking it back*.
+
+**Each list is named and carries its own ways to add to it**: *Triggers*, then *+ When…* and
+*+ Every…*; *Sequences*, then *+ New sequence*. Reactor's own nouns rather than a phrase talking
+round them - a screen holding two lists of things that read alike has to say which is which, and
+*what starts things* is longer, has to be re-invented at every site, and is wrong the moment a row
+stops a sequence instead.
+
+A sequence made from that second row is one nothing starts, which is the other way round from the
+wizard and equally ordinary: somebody who knows what the machine should do writes it first and
+gives it a trigger afterwards.
+
+**A fault in what starts a sequence marks the trigger's row**, not the sequence's: a cleared button
+is the trigger's trouble and the sequence is fine. The words are the same ones the sequence's own
+screen says, and pressing the row is the mend.
+
+### A sequence nothing starts
+
+Four ways to arrive at one: make it from the row above the list, copy one, be sent a program
+somebody wrote by hand, or have the block your trigger named ground off. It is an ordinary state
+rather than a broken one - somebody who knows what the machine should do writes it first - and what
+says so is a warning on its own screen and on its row, *Nothing starts this yet.*
+
+**The mend is a trigger on the system, and not an offer on the sequence.** There was a `+ say what
+starts this` on the sentence for a while, and it was the last thing about triggers left on that
+screen: a second way to make one, with its own question, for the one case the system's own screen
+could not reach. One way to make a trigger is worth more than a shortcut to it, and the way there
+is a single press back.
 
 ## A system's own screen
 
@@ -342,18 +376,18 @@ where a form would nag.
 *This also means any screen can be renameable now, not just a sequence. Systems are the
 obvious next one.*
 
-### A heading is several things, and only some of them are yours to name
+### A heading is a list of parts, and only some of them are yours to name
 
-It was a single string plus one name, and that cost something real. A sequence's sentence is
-*when this happens* and *then this runs*, and naming it replaced the whole line - so anybody
-who wanted a better word for what a sequence **does** lost the trigger that starts it, and
-got it back only by typing the trigger into the name by hand, exactly as it already read, and
-keeping it in step by hand forever after. The model was making the person do its job.
+`EditorScreen.Heading` is a list of parts, each one answering for itself whether it can be
+renamed and carrying any words that lead it - *Automation for* **Hangar Bay Alpha** is one named
+thing with a phrase in front of it, not two things. Pages get a single part for free:
+`EditorPage.Heading` builds one from the page's own title.
 
-So `EditorScreen.Heading` is a list of parts, each one answering for itself whether it can be
-renamed. A sequence has two: the trigger, which is generated and not nameable, and what it
-then does, which is where a name lands. Every other screen has one, and pages get that for
-free - `EditorPage.Heading` defaults to a single part built from the page's own title.
+Nothing needs two parts now that what starts a sequence is a row on its system's screen rather
+than half of its heading. The shape stays because the alternative is a string plus a name, which
+is what it was: naming a sequence then replaced the whole line, so anybody who wanted a better
+word for what it **does** lost the trigger that started it and got it back only by typing the
+trigger into the name by hand and keeping it in step there forever after.
 
 **There is deliberately no joined-up string of the whole heading on `EditorScreen`.** One was
 easy to add and every target would have drawn it, because drawing one string is easier than
@@ -365,9 +399,6 @@ Words between the parts are the target's. This one draws the arrow it already us
 and its consequence; a narrow one could break the line instead. A heading that ever needs a
 connective word can carry it as a part with no rename command, which is the same mechanism
 rather than a second one.
-
-*Deliberately not settled: whether the trigger half takes a name of its own as well. The shape
-carries one the day referencing a sequence from elsewhere earns it, which is the next section.*
 
 ### Naming as publishing, and why that cannot be silent
 
@@ -411,11 +442,40 @@ should.
 
 ## Taking it back
 
-Every change to a sequence is an operation that knows how to reverse itself: the step it
-removed, the name it replaced. Undo is offered on the heading and **says what it would take
-back** - *Undo deleting a step*, not a bare *Undo*. Asking somebody to remember what they last
-did is asking it of the one person least able to answer, because they have just made a
-mistake.
+Every change is an operation that knows how to reverse itself: the step it removed, the name it
+replaced, the trigger it swapped out. Undo **says what it would take back** - *Undo deleting a
+step*, not a bare *Undo*. Asking somebody to remember what they last did is asking it of the one
+person least able to answer, because they have just made a mistake.
+
+**There is a history per level, not one for the program.** Undo means "take back the last thing I
+did to the thing I am looking at", and somebody standing on a system who has just repointed a
+button did not do the last thing to any sequence inside it. So a sequence's arrows are for what a
+sequence is - its steps, its name, what it does - and the system's are for what starts those
+sequences: making a trigger, changing one, pointing it somewhere else, deleting one.
+
+**A system's pair is screen furniture**, in the header beside Back and the switch, because that is
+what it is: the way back from what you did to the thing you are looking at. It costs no room there,
+where a strip of its own was most of a line spent on two arrows. A sequence's pair stays on its
+sentence, among the bin and the switch that act on that same sentence.
+
+**A change made outside the editor is not walked back over.** The host takes a block out of a
+trigger when somebody clears that button in the game, and that is a decision rather than a mistake;
+putting the old trigger back would undo what they meant and claim a slot they had just taken away.
+So every edit is asked whether what it did is still what is there - the same blocks and the same
+moment is enough - and the way back quietly stops at the point where somebody else's decision
+begins. Nothing fails and nothing is lost: the arrows simply say what they can still do.
+
+*This is also the answer to a question that came up as triggers moved off the sequence's screen:
+whether a trigger change could be recorded against the sequence it runs. It could, and it would be
+wrong twice - the way back would sit on a screen that no longer shows what was changed, and a
+trigger that does one plain thing runs a sequence with no screen at all.*
+
+**Deleting a trigger asks nothing and walks back instead.** It can take a sequence with it - the
+one that exists only to be the thing that trigger does - and those steps are on no other screen, so
+a bin with no way back would be the one control in the editor that loses work silently. A question
+in front of every deletion is how people learn to press through questions; the arrows are the
+better answer, and the sequence comes back as the sequence it was, with the number everything
+pointing at it named it by.
 
 Two designs were weighed and the second was wrong for a specific reason worth keeping.
 Snapshot-and-restore, or replaying a log of forward operations from a base, both avoid writing
@@ -443,11 +503,12 @@ where they are and go quiet.
 are controls that will become available, so grey means "not just now" and is honest. The
 sentence is not a control at all, and greying it said "broken, or not yours to touch".*
 
-**Both wait for the switch**, because both are edits. Which produced the one genuinely awkward
-detail in here: the commands are registered whether or not there is anything to walk back,
-because issuing a command needs the numbering only a rebuild does, while *whether there is
-anything to walk back* changes without one - renaming deliberately does not rebuild. So the
-build decides whether the command may exist and the tick decides whether it is offered.
+**On a sequence both wait for the switch**, because both are edits and a running sequence is not
+edited. Which produced the one genuinely awkward detail in here: the commands are registered
+whether or not there is anything to walk back, because issuing a command needs the numbering only
+a rebuild does, while *whether there is anything to walk back* changes without one - renaming
+deliberately does not rebuild. So the build decides whether the command may exist and the tick
+decides whether it is offered.
 
 *Deleting a whole sequence is not undoable and asks instead.*
 

@@ -254,6 +254,71 @@ public class ProgramTextTests
         Assert.Equal(@"\\\", after.Sequences[0].Name);
     }
 
+    /// <summary>A trigger that stops a sequence writes down, and reads back as stopping it.</summary>
+    [Fact]
+    public void ATriggerThatStopsASequenceSurvivesBeingSaved()
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+        system.Name = "Airlock";
+
+        var sequence = program.AddSequence(system);
+        sequence.Name = "Cycle";
+
+        var halt = new RequiredTrigger("pressed-1");
+        halt.Runs = sequence.Number;
+        halt.Stops = true;
+        halt.Sources.Add("entity1");
+        system.AddTrigger(halt);
+
+        var text = Save(program);
+        Assert.Contains("to stop 1", text);
+
+        var after = new Automation();
+        Load(text, after);
+
+        Assert.True(after.Systems[0].Triggers[0].Stops);
+        Assert.Equal(1, after.Systems[0].Triggers[0].Runs);
+    }
+
+    /// <summary>
+    /// A sequence nobody named writes down, and reads back, with the trigger that runs it.
+    /// </summary>
+    /// <remarks>
+    /// What a trigger holds when it does one thing Reactor has to perform itself: nothing stands
+    /// alone on screen, and there is no name to show. The format needs no spelling of its own for it
+    /// - a sequence's name is optional - and that is worth a test, because the one thing that would
+    /// break it is the writer deciding to name everything.
+    /// </remarks>
+    [Fact]
+    public void AnUnnamedSequenceAndItsTriggerSurviveBeingSaved()
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+        system.Name = "Airlock";
+
+        var open = new Act("open");
+        open.Targets.Add("entity1");
+
+        var sequence = program.AddSequence(system);
+        sequence.Steps.Add(open);
+
+        var pressed = new RequiredTrigger();
+        pressed.EventId = "pressed-1";
+        pressed.Runs = sequence.Number;
+        pressed.Sources.Add("entity2");
+        system.AddTrigger(pressed);
+
+        var after = new Automation();
+        Load(Save(program), after);
+
+        var read = after.Systems[0].Sequences[0];
+        Assert.False(read.HasName, "the writer named a sequence nobody named");
+        Assert.Single(read.Steps);
+        Assert.Single(after.Systems[0].Triggers);
+        Assert.Equal(read.Number, after.Systems[0].Triggers[0].Runs);
+    }
+
     /// <summary>
     /// A system nobody named still writes down, and reads back.
     /// </summary>

@@ -1,13 +1,21 @@
-
 namespace Reactor.Host.SpaceEngineers.Sequences
 {
-    sealed class SetCadence : SequenceEdit
+    /// <summary>
+    /// How often a repeat comes round.
+    /// </summary>
+    /// <remarks>
+    /// The trigger itself rather than the sequence it runs, because a system has several and the
+    /// one being changed is the one whose row was pressed.
+    /// </remarks>
+    sealed class SetCadence : SystemEdit
     {
+        readonly EveryTrigger _trigger;
         readonly int _was;
         readonly int _now;
 
-        public SetCadence(int was, int now)
+        public SetCadence(EveryTrigger trigger, int was, int now)
         {
+            _trigger = trigger;
             _was = was;
             _now = now;
         }
@@ -16,21 +24,24 @@ namespace Reactor.Host.SpaceEngineers.Sequences
 
         public override bool Changes => _was != _now;
 
-        public override void Apply(Sequence sequence)
+        public override bool Undoable(AutomationSystem system)
         {
-            Put(sequence, _now);
+            return _trigger.IntervalTicks == _now && Holds(system, _trigger, null, null);
         }
 
-        public override void Undo(Sequence sequence)
+        public override bool Redoable(AutomationSystem system)
         {
-            Put(sequence, _was);
+            return _trigger.IntervalTicks == _was && Holds(system, _trigger, null, null);
         }
 
-        static void Put(Sequence sequence, int ticks)
+        public override void Apply(AutomationSystem system)
         {
-            var every = sequence.Trigger as EveryTrigger;
-            if (every != null)
-                every.IntervalTicks = ticks;
+            _trigger.IntervalTicks = _now;
+        }
+
+        public override void Undo(AutomationSystem system)
+        {
+            _trigger.IntervalTicks = _was;
         }
     }
 }

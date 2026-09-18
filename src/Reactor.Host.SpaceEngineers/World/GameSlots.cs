@@ -45,5 +45,18 @@ namespace Reactor.Host.SpaceEngineers.World
         {
             return toolbar != null && toolbar.BeginChanges().Clear(slot).Apply();
         }
+
+        /// <summary>
+        /// Whether a block has an action of the game's own by that name.
+        /// </summary>
+        /// <remarks>
+        /// The block is asked rather than a list being kept, because which actions a block offers
+        /// depends on its subtype and on what the game has done to it since - and a name that is
+        /// wrong here would write a slot that looks wired and does nothing.
+        /// </remarks>
+        public bool Offers(IMyTerminalBlock block, string actionId)
+        {
+            return block != null && block.GetActionWithName(actionId) != null;
+        }
     }
 }

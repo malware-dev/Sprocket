@@ -85,6 +85,23 @@ sealed class Rig
         return _grid.Weld(fitting);
     }
 
+    /// <summary>
+    /// Performs a block's own action on it, by id, as the game does when a slot invokes one.
+    /// </summary>
+    public void Perform(long blockId, string actionId)
+    {
+        foreach (Fitting fitting in Fitted)
+        {
+            if (fitting.Id != blockId)
+                continue;
+
+            if (fitting.Offers(actionId))
+                fitting.Perform(actionId);
+
+            return;
+        }
+    }
+
     /// <summary>Grinds one off, which leaves whatever named it pointing at nothing.</summary>
     public void Grind(Fitting fitting)
     {

@@ -14,6 +14,20 @@ static class Driving
     public static T Component<T>(this ReactorEditor editor) where T : EditorComponent =>
         editor.Screen.Components.OfType<T>().First();
 
+    /// <summary>
+    /// The list of what starts things, on a screen that has one above the list of things.
+    /// </summary>
+    /// <remarks>
+    /// A system's screen holds two: triggers first, then sequences. Positional because the screen is
+    /// positional - a test reading a screen is allowed to know what is on it.
+    /// </remarks>
+    public static StatusListComponent Triggers(this ReactorEditor editor) =>
+        editor.Screen.Components.OfType<StatusListComponent>().First();
+
+    /// <summary>The list of the things themselves, below whatever starts them.</summary>
+    public static StatusListComponent Rows(this ReactorEditor editor) =>
+        editor.Screen.Components.OfType<StatusListComponent>().Last();
+
     static IEnumerable<PickStage> Stages(this ReactorEditor editor) =>
         editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages);
 
@@ -36,11 +50,14 @@ static class Driving
         editor.SetText(start.Options.First(o => o.Asks).Command, name);
     }
 
-    /// <summary>Presses one of the ways to start something on this screen.</summary>
+    /// <summary>Presses one of the ways to start something on this screen, wherever it sits.</summary>
     public static void PressStart(this ReactorEditor editor, string label)
     {
-        var start = editor.Screen.Components.OfType<StartComponent>().First();
-        editor.Invoke(start.Options.First(o => o.Label == label).Command);
+        var option = editor.Screen.Components.OfType<StartComponent>()
+            .SelectMany(s => s.Options)
+            .First(o => o.Label == label);
+
+        editor.Invoke(option.Command);
     }
 
     public static SequenceComponent Sentence(this ReactorEditor editor) =>
@@ -93,8 +110,24 @@ static class Driving
         editor.Invoke(sentence.Steps[step].Slots[slot].Command);
     }
 
-    public static void PressTriggerSlot(this ReactorEditor editor, int slot) =>
-        editor.Invoke(editor.Component<SequenceComponent>().Trigger.Slots[slot].Command);
+    /// <summary>The way back on a screen that carries one, which is screen furniture.</summary>
+    public static EditorScreen Steps(this ReactorEditor editor) => editor.Screen;
+
+    /// <summary>Presses a row of what starts things, which asks which half to change.</summary>
+    public static void PressTrigger(this ReactorEditor editor, int which) =>
+        editor.Invoke(editor.Triggers().Entries[which].Command);
+
+    /// <summary>The same thing said plainly: the row's first line asks when it happens.</summary>
+    public static void PressWhen(this ReactorEditor editor, int which) =>
+        editor.PressTrigger(which);
+
+    /// <summary>And its second line asks what it does.</summary>
+    public static void PressDoes(this ReactorEditor editor, int which) =>
+        editor.Invoke(editor.Triggers().Entries[which].StatusCommand);
+
+    /// <summary>Answers the question hanging over the screen.</summary>
+    public static void PressAnswer(this ReactorEditor editor, string text) =>
+        editor.Invoke(editor.Screen.Answers.First(a => a.Text == text).Command);
 
     /// <summary>Back out to the front door, however deep we are.</summary>
     /// <remarks>

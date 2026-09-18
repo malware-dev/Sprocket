@@ -20,7 +20,7 @@ namespace Reactor.Host.SpaceEngineers.Presentation.Tests;
 public class ReachTests
 {
     /// <summary>From an empty construct to the block picker: name a system, then ask what starts it.</summary>
-    const string OpenThePicker = "60 130 type Airlock enter 60 130";
+    const string OpenThePicker = "60 130 type Airlock enter 60 161";
 
     /// <summary>A program from before the script language, which will not read.</summary>
     const string Older = "reactor 1\nblock|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:21,t:B\n";
@@ -227,6 +227,7 @@ public class ReachTests
             screen.Editor.PressBlock("Airlock Button");
             screen.Editor.PressChoice("is pressed");
             screen.Editor.PressPrimary();
+            screen.Editor.PressChoice("Run a new sequence");
             screen.Editor.Back();
         });
 
@@ -237,6 +238,7 @@ public class ReachTests
             screen.Editor.PressBlock("Airlock Button");
             screen.Editor.PressChoice("is pressed");
             screen.Editor.PressPrimary();
+            screen.Editor.PressChoice("Run a new sequence");
         });
 
         AssertEverythingLights("a banner that has arrived", screen =>

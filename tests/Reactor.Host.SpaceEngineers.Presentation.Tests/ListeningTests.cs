@@ -37,6 +37,7 @@ public class ListeningTests
             editor.PressBlock("Airlock Button");
             editor.PressChoice("is pressed");
             editor.PressPrimary();
+            editor.PressChoice("Run a new sequence");
             AssertListening(screen, "a sequence");
 
             editor.PressAdd("do something");

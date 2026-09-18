@@ -53,6 +53,17 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
         /// <summary>The header's "look again".</summary>
         readonly Glyph _refresh = Widgets.Symbol(Symbols.Refresh, Palette.Muted);
+
+        // Not chevrons. An arrow that turns back on itself is what undo is; a chevron is where a
+        // press goes, and Back already owns that shape in this very row.
+        readonly Glyph _undo = Widgets.Symbol(Symbols.Undo, Palette.Muted);
+        readonly Glyph _redo = Widgets.Symbol(Symbols.Redo, Palette.Muted);
+
+        /// <summary>What the two arrows were last told to say, and the words they were made from.</summary>
+        string _undone;
+        string _undoSays;
+        string _redone;
+        string _redoSays;
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Lettering.Small);
 
         /// <summary>Whether the screen now up has written a subtitle at any point since it opened.</summary>
@@ -188,7 +199,15 @@ namespace Reactor.Host.SpaceEngineers.Screen
             // shifted sideways by somebody stopping a system.
             // The switch and the refresh sit together on the right, in that order, so the switch stays
             // where it has always been and the refresh reads as furniture rather than as part of it.
+            // The way back sits with the rest of the furniture rather than in a row of its own: it
+            // is what you do to the screen you are on, like Back and the switch, and a strip holding
+            // nothing but two arrows was most of a line spent on them.
+            //
+            // Left of the switch, and both hold their place on a screen that has a history at all, so
+            // the switch cannot be moved sideways by somebody making their first edit.
             var rightLane = Widgets.RowOf(Space.Row);
+            rightLane.Children.Add(_undo);
+            rightLane.Children.Add(_redo);
             rightLane.Children.Add(_switch);
             rightLane.Children.Add(_refresh);
 
@@ -545,6 +564,26 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 // are true. Nothing else on the screen has to know that an error can exist.
                 _title[i].Tip = i == _renaming && wrong.Length > 0 ? wrong : null;
             }
+
+            // Built only when those words change. Joining two strings is cheap and this runs sixty
+            // times a second, for a note that is read when the pointer happens to rest on an arrow.
+            if (!ReferenceEquals(_undone, screen.UndoText))
+            {
+                _undone = screen.UndoText;
+                _undoSays = "Undo " + screen.UndoText;
+            }
+
+            if (!ReferenceEquals(_redone, screen.RedoText))
+            {
+                _redone = screen.RedoText;
+                _redoSays = "Redo " + screen.RedoText;
+            }
+
+            _undo.Collapsed = !screen.HasHistory;
+            _redo.Collapsed = !screen.HasHistory;
+
+            Widgets.Waiting(_undo, screen.UndoCommand, _undoSays);
+            Widgets.Waiting(_redo, screen.RedoCommand, _redoSays);
 
             _refresh.Press = Deed.Sends(screen.RefreshCommand);
             _refresh.Tip = screen.RefreshCommand != 0

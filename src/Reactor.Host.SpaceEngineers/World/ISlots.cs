@@ -40,5 +40,8 @@ namespace Reactor.Host.SpaceEngineers.World
 
         /// <summary>Empties a slot, and answers whether that took.</summary>
         bool Clear(IMyToolbar toolbar, int slot);
+
+        /// <summary>Whether a block has an action of the game's own by that name.</summary>
+        bool Offers(IMyTerminalBlock block, string actionId);
     }
 }

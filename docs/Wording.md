@@ -60,3 +60,15 @@ multiplier is terse in a way nothing else on the screen is.
 What a required trigger naming no block reads as. Longer than every other trigger lead, and it
 is the one a hand-written program or an imported system is most likely to produce.
 
+
+### 8. The screens talk round their own nouns
+
+Reactor has three words for the things it is made of - system, sequence, trigger - and the
+screens say the first two and avoid the third, reaching for a phrase instead: *what should it
+do*, *nothing starts this yet*, *runs Cycle*. The phrases are longer than the word, they have
+to be re-invented at every site, and some of them are wrong for a trigger that stops a
+sequence rather than starting one.
+The audience is people who have not programmed, which is not the same as people who cannot
+learn a noun; talking round a word they will meet anyway reads as explaining a thing to a
+child. The pass decides where the noun is said plainly and where a phrase genuinely reads
+better.

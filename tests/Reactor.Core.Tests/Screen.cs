@@ -59,8 +59,11 @@ static class Screen
     /// <summary>Presses one of the ways to start something on this screen.</summary>
     public static void PressStart(this ReactorEditor editor, string label)
     {
-        var start = editor.Screen.Components.OfType<StartComponent>().First();
-        editor.Invoke(start.Options.First(o => o.Label == label).Command);
+        var option = editor.Screen.Components.OfType<StartComponent>()
+            .SelectMany(s => s.Options)
+            .First(o => o.Label == label);
+
+        editor.Invoke(option.Command);
     }
 
     /// <summary>
@@ -110,9 +113,35 @@ static class Screen
         || editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
             .Any(p => p.Options.Any(e => e.Text == text) || p.Entries.Any(e => e.Text == text));
 
-    /// <summary>The rows of the one status list on this screen.</summary>
+    /// <summary>
+    /// The rows of the things on this screen, below whatever starts them.
+    /// </summary>
+    /// <remarks>
+    /// The last list, because a system's screen holds two: what starts things above, and the things
+    /// themselves below. Positional because the screen is - a test reading a screen is allowed to
+    /// know what is on it.
+    /// </remarks>
     public static ObservableList<StatusEntry> Rows(this ReactorEditor editor) =>
-        editor.Component<StatusListComponent>().Entries;
+        editor.Screen.Components.OfType<StatusListComponent>().Last().Entries;
+
+    /// <summary>The rows of what starts things, where the screen has such a list.</summary>
+    public static ObservableList<StatusEntry> Triggers(this ReactorEditor editor) =>
+        editor.Screen.Components.OfType<StatusListComponent>().First().Entries;
+
+    /// <summary>The way back on a screen that carries one, which is screen furniture.</summary>
+    public static EditorScreen Steps(this ReactorEditor editor) => editor.Screen;
+
+    /// <summary>Presses a row of what starts things, which asks which half to change.</summary>
+    public static void PressTrigger(this ReactorEditor editor, int which) =>
+        editor.Invoke(editor.Triggers()[which].Command);
+
+    /// <summary>The same thing said plainly: the row's first line asks when it happens.</summary>
+    public static void PressWhen(this ReactorEditor editor, int which) =>
+        editor.PressTrigger(which);
+
+    /// <summary>And its second line asks what it does.</summary>
+    public static void PressDoes(this ReactorEditor editor, int which) =>
+        editor.Invoke(editor.Triggers()[which].StatusCommand);
 
     /// <summary>Opens a row of that list, by where it sits.</summary>
     /// <remarks>

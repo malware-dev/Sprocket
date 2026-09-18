@@ -50,6 +50,9 @@ namespace Reactor.Host.SpaceEngineers.Storage
         Running,
 
         /// <summary>Which step of it, in the same line.</summary>
-        Step
+        Step,
+
+        /// <summary>What a trigger does instead of running, which is to abandon a run.</summary>
+        Stop
     }
 }

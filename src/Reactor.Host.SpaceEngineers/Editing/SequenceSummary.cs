@@ -74,19 +74,23 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// What each row calls its sequence.
+        /// What each row calls its sequence: its name, or what it does where it has none.
         /// </summary>
         /// <remarks>
+        /// Not what starts it. That is a row of its own now, directly above this list, and a row
+        /// saying both would say the trigger twice on the one screen where both are shown.
+        /// <para>
         /// Separate from <see cref="Fill" /> because it is made of words rather than read off a state:
         /// joining a sentence out of a sequence's blocks and actions allocates, and the sentence changes
         /// when somebody edits it or renames a block it names - never on its own, and never per tick.
+        /// </para>
         /// </remarks>
         public static void Word(ObservableList<StatusEntry> entries, List<Sequence> sequences,
             Bindings bindings)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
             for (var i = 0; i < count; i++)
-                entries[i].Summary = SequenceText.Sequence(bindings, sequences[i]);
+                entries[i].Summary = SequenceText.Doing(bindings, sequences[i]);
         }
 
         /// <summary>

@@ -62,8 +62,8 @@ namespace Reactor.Host.SpaceEngineers.World
                 .WithState("is-empty", Empty, true, "is empty")
                 .WithState("is-sealed", Sealed, true, "is airtight")
                 .WithState("is-leaking", Sealed, false, "is not airtight")
-                .WithAction("pressurize", "pressurize", "has-air")
-                .WithAction("depressurize", "depressurize", "is-empty");
+                .WithAction("pressurize", "pressurize", "has-air", "Depressurize_Off")
+                .WithAction("depressurize", "depressurize", "is-empty", "Depressurize_On");
         }
 
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)

@@ -2,18 +2,18 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     What starts this?
+on screen     What should it do?
 
 000  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:118 W:1402 H:836}
 002  Sprite     Reactor_Fill          {X:259 Y:118 W:1390 H:52}  #29363EFF
-003  Text       at {X:278 Y:132.012} scale 0.64  #DCF5FDFF  "When something happens"
-004  Sprite     Reactor_Fill          {X:259 Y:176 W:1390 H:52}  #3C4C52FF
-005  Text       at {X:278 Y:189.692} scale 0.64  #DCF5FDFF  "Every so often"
+003  Text       at {X:278 Y:132.012} scale 0.64  #DCF5FDFF  "Run a new sequence"
+004  Sprite     Reactor_Fill          {X:259 Y:176 W:1390 H:52}  #29363EFF
+005  Text       at {X:278 Y:189.692} scale 0.64  #DCF5FDFF  "Do something"
 006  ClearClip  
 007  Sprite     Reactor_Fill          {X:240 Y:45 W:1440 H:53}  #1B242AFF
-008  SetClip    {X:276 Y:55 W:183 H:33}
-009  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "What starts this?"
+008  SetClip    {X:276 Y:55 W:209 H:33}
+009  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "What should it do?"
 010  ClearClip  
 011  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
 012  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"

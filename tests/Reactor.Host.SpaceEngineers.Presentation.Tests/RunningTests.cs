@@ -26,6 +26,7 @@ public class RunningTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
+        screen.Editor.PressChoice("Run a new sequence");
 
         // Written into the model rather than through the screens: what this is about is the row, and
         // a wait is the shortest step that leaves a sequence running for longer than an instant.
@@ -48,7 +49,7 @@ public class RunningTests
     {
         var screen = WithOneRunning();
 
-        Assert.True(screen.Editor.Component<StatusListComponent>().Entries[0].Running);
+        Assert.True(screen.Editor.Rows().Entries[0].Running);
         Assert.True(Washed(screen, Palette.LiveWash), "a running sequence's row has no ground");
     }
 
@@ -67,7 +68,7 @@ public class RunningTests
         screen.Editor.GoToRoot();
         screen.Run(2);
 
-        var rows = screen.Editor.Component<StatusListComponent>().Entries;
+        var rows = screen.Editor.Rows().Entries;
 
         // The system's own row is a heading over the ones of it and is never marked - the same rule
         // the problem mark follows, for the same reason.
@@ -85,10 +86,11 @@ public class RunningTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
+        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.Back();
         screen.Run(2);
 
-        Assert.False(screen.Editor.Component<StatusListComponent>().Entries[0].Running);
+        Assert.False(screen.Editor.Rows().Entries[0].Running);
         Assert.False(Washed(screen, Palette.LiveWash), "an idle sequence's row is wearing the live ground");
     }
 }

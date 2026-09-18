@@ -61,6 +61,17 @@ sealed class RigSlots : ISlots
         return changes.Apply();
     }
 
+    public bool Offers(IMyTerminalBlock block, string actionId)
+    {
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block == block)
+                return fitting.Offers(actionId);
+        }
+
+        return false;
+    }
+
     public bool Clear(IMyToolbar toolbar, int slot)
     {
         var rigs = toolbar as Toolbar;

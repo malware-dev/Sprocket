@@ -41,8 +41,8 @@ namespace Reactor.Host.SpaceEngineers.World
                 .WithState("is-open", Open, true, "is open")
                 .WithState("is-shut", Shut, true, "is shut")
                 .WithState("is-moving", Moving, true, "is moving")
-                .WithAction("open", "open", "is-open")
-                .WithAction("close", "close", "is-shut");
+                .WithAction("open", "open", "is-open", "Open_On")
+                .WithAction("close", "close", "is-shut", "Open_Off");
         }
 
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)

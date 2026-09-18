@@ -17,16 +17,24 @@ namespace Reactor.Host.SpaceEngineers.Words
 
 
         /// <summary>
-        /// What starts it, then what it does or is called.
+        /// What a trigger does: run a sequence, stop one, or the one thing it does itself.
         /// </summary>
         /// <remarks>
-        /// A joined string rather than parts, unlike the heading, and that is not an oversight. A row
-        /// is a label: there is nothing on it to press, no part of it is somebody's to edit, and one
-        /// line has to stand for the whole sequence.
+        /// A named sequence is said by name, because the name is what somebody chose for it and a
+        /// list of triggers is a list of what they set up. A trigger that does one thing has nothing
+        /// to name, so its own sentence is the answer - "open Airlock Inner Door" - which is also
+        /// what it reads as in the construct's own wiring, where it ends up.
         /// </remarks>
-        public static string Sequence(Bindings bindings, Sequence sequence)
+        public static string Runs(Bindings bindings, AutomationSystem system, Trigger trigger)
         {
-            return Trigger(bindings, sequence.Trigger) + " » " + Doing(bindings, sequence);
+            Sequence sequence = system == null ? null : system.FindSequence(trigger.Runs);
+            if (sequence == null)
+                return trigger.Stops ? "stops a sequence that is gone" : "runs a sequence that is gone";
+
+            if (sequence.HasName)
+                return (trigger.Stops ? "stops " : "runs ") + sequence.Name;
+
+            return trigger.Stops ? "stops " + Doing(bindings, sequence) : Doing(bindings, sequence);
         }
 
 
@@ -92,10 +100,28 @@ namespace Reactor.Host.SpaceEngineers.Words
             if (sequence.Steps.Count == 0)
                 return "nothing yet";
 
-            var first = Step(bindings, sequence, sequence.Steps[0]);
-            return sequence.Steps.Count == 1
-                ? first
-                : first + " (+" + (sequence.Steps.Count - 1) + " more)";
+            // Awaits are not counted. The editor writes one after every step, so counting them would
+            // say a sequence of one action has two lines - and an await is not a line on any screen:
+            // a step and the await that follows it are one row, moved and deleted together.
+            Step told = null;
+            var lines = 0;
+            var steps = sequence.Steps;
+            for (var i = 0; i < steps.Count; i++)
+            {
+                if (steps[i] is Await)
+                    continue;
+
+                if (told == null)
+                    told = steps[i];
+
+                lines++;
+            }
+
+            if (told == null)
+                return "nothing yet";
+
+            var first = Step(bindings, sequence, told);
+            return lines == 1 ? first : first + " (+" + (lines - 1) + " more)";
         }
 
 

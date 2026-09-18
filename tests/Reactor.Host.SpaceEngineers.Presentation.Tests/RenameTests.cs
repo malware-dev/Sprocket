@@ -138,5 +138,6 @@ public class RenameTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
+        editor.PressChoice("Run a new sequence");
     }
 }

@@ -115,6 +115,71 @@ namespace Reactor.Host.SpaceEngineers.Screen
 
         bool _switchIsOn;
 
+        /// <summary>
+        /// Whether this screen has a way back from what was done on it.
+        /// </summary>
+        /// <remarks>
+        /// Separate from having anything to walk back right now, because the pair holds its place
+        /// either way: arrows that appeared with the first edit would shift the switch beside them
+        /// out from under the pointer that had just made it.
+        /// </remarks>
+        public bool HasHistory
+        {
+            get { return _hasHistory; }
+            set { Set(ref _hasHistory, value, nameof(HasHistory)); }
+        }
+
+        bool _hasHistory;
+
+        /// <summary>
+        /// Takes back the last change made on this screen. Zero when there is nothing to take back.
+        /// </summary>
+        /// <remarks>
+        /// Screen furniture, beside Back and the switch, because that is what it is: the way back
+        /// from what you did to the thing you are looking at. A sequence's own pair sits on its
+        /// sentence instead, among the bin and the switch that belong to that sentence.
+        /// </remarks>
+        public int UndoCommand
+        {
+            get { return _undoCommand; }
+            set { Set(ref _undoCommand, value, nameof(UndoCommand)); }
+        }
+
+        int _undoCommand;
+
+        /// <summary>
+        /// What undoing would undo, e.g. "deleting a trigger".
+        /// </summary>
+        /// <remarks>
+        /// "Undo" alone asks somebody to remember what they last did, which is exactly what a person
+        /// who has just made a mistake is worst at.
+        /// </remarks>
+        public string UndoText
+        {
+            get { return _undoText; }
+            set { Set(ref _undoText, value, nameof(UndoText)); }
+        }
+
+        string _undoText;
+
+        /// <summary>Puts back the last thing undone. Zero when there is nothing waiting.</summary>
+        public int RedoCommand
+        {
+            get { return _redoCommand; }
+            set { Set(ref _redoCommand, value, nameof(RedoCommand)); }
+        }
+
+        int _redoCommand;
+
+        /// <summary>What redoing would put back, in the words it happened in.</summary>
+        public string RedoText
+        {
+            get { return _redoText; }
+            set { Set(ref _redoText, value, nameof(RedoText)); }
+        }
+
+        string _redoText;
+
         public bool CanGoBack
         {
             get { return _canGoBack; }

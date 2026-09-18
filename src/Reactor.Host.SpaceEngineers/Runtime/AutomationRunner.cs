@@ -166,6 +166,25 @@ namespace Reactor.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
+        /// Abandons a run, as a button that stops a sequence does.
+        /// </summary>
+        /// <remarks>
+        /// What was started stays started: a door told to open goes on opening, because Reactor
+        /// cannot un-invoke an action and pretending otherwise would be a promise the game does not
+        /// keep. What stops is the sequence's own progress through its steps.
+        /// <para>
+        /// Nothing is refused here. Stopping a sequence that is not running is nothing happening, and
+        /// a machine with no power is a machine whose sequences are held anyway.
+        /// </para>
+        /// </remarks>
+        public void Halt(Sequence sequence, SystemInstance instance)
+        {
+            var runner = Get(sequence, instance);
+            if (runner != null)
+                runner.Stop();
+        }
+
+        /// <summary>
         /// Puts a saved run back, as soon as there is a runner to put it in.
         /// </summary>
         /// <remarks>

@@ -59,18 +59,22 @@ public class WatchingTests
         var editor = screen.Editor;
 
         Sequence(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("switch on");
+        editor.PressPrimary();
         screen.Run(5);
 
-        var parked = screen.Text("Airlock Button").Ink;
+        var parked = screen.Text("Airlock Light").Ink;
 
         editor.SwitchOn();
         screen.Run(5);
 
-        Assert.True(screen.Shows("Airlock Button"), "the sentence stopped being drawn while running");
+        Assert.True(screen.Shows("Airlock Light"), "the sentence stopped being drawn while running");
 
         // Not dimmed - the same ink as when it was editable. It is simply not pressable, because
         // there is nothing there to press.
-        Assert.Equal(parked, screen.Text("Airlock Button").Ink);
+        Assert.Equal(parked, screen.Text("Airlock Light").Ink);
     }
 
     /// <summary>
@@ -134,5 +138,6 @@ public class WatchingTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
+        editor.PressChoice("Run a new sequence");
     }
 }

@@ -30,6 +30,31 @@ sealed class Door : Fitting
             .Does("ToggleDoor", () => { _opening = !_opening; Told("toggle"); return null; }));
     }
 
+    /// <summary>The game's own pair for a door's switch, which is called Open.</summary>
+    public override bool Offers(string actionId)
+    {
+        return actionId == "Open_On" || actionId == "Open_Off" || base.Offers(actionId);
+    }
+
+    public override void Perform(string actionId)
+    {
+        if (actionId == "Open_On")
+        {
+            _opening = true;
+            Told("open");
+            return;
+        }
+
+        if (actionId == "Open_Off")
+        {
+            _opening = false;
+            Told("close");
+            return;
+        }
+
+        base.Perform(actionId);
+    }
+
     /// <summary>
     /// Already open, without having been told to open.
     /// </summary>

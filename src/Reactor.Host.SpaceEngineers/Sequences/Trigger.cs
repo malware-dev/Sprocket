@@ -15,8 +15,19 @@ namespace Reactor.Host.SpaceEngineers.Sequences
             Annotation = "";
         }
 
-        /// <summary>The number, within the system, of the sequence this starts.</summary>
+        /// <summary>The number, within the system, of the sequence this is about.</summary>
         public int Runs { get; set; }
+
+        /// <summary>
+        /// Whether this stops that sequence rather than starting it.
+        /// </summary>
+        /// <remarks>
+        /// The other thing a person wants a button for, and the one a sequence cannot do for itself:
+        /// a cycle half way through has no line in it that says "unless somebody says otherwise".
+        /// Stopping abandons what it was doing, which is what the switch already does - a button is
+        /// simply the reachable version of it.
+        /// </remarks>
+        public bool Stops { get; set; }
 
         /// <summary>
         /// What somebody wrote about this trigger, in their own words, or empty.

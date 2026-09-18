@@ -27,12 +27,19 @@ namespace Reactor.Host.SpaceEngineers.Lists
         readonly Dot _light = new Dot();
         readonly Label _summary = Widgets.Label("", Palette.Ink, Lettering.Body);
         readonly Label _status = Widgets.Label("", Palette.Faint, Lettering.Tiny);
+
+        /// <summary>What the second line was last told it opens, so a note is made when it changes.</summary>
+        string _opens;
+        string _opensSays;
         readonly Label _lastRun = Widgets.Label("", Palette.Faint, Lettering.Tiny);
         readonly Label _problem = Widgets.Label("", Palette.Problem, Lettering.Tiny);
         readonly Switch _switch = new Switch(Lettering.Small);
 
         /// <summary>Another of what this row is. Absent on rows where that means nothing.</summary>
         readonly Glyph _duplicate = Widgets.Symbol(Symbols.Duplicate, Palette.Faint);
+
+        /// <summary>Throwing this row away. Absent where the row is not somebody's to throw away.</summary>
+        readonly Glyph _delete = Widgets.Symbol(Symbols.Delete, Palette.Faint);
 
         /// <summary>The controls at the right edge, laid out leftwards from the switch.</summary>
         readonly Stack _tools = Widgets.RowOf(Space.Item);
@@ -73,7 +80,12 @@ namespace Reactor.Host.SpaceEngineers.Lists
             // lays out leftwards from its right edge, and the switch is what somebody is pressing when
             // the copy button beside it appears or goes.
             _tools.Children.Add(_duplicate);
+            _tools.Children.Add(_delete);
             _tools.Children.Add(_switch);
+
+            // The red the per-step crosses use, because it is the same act: what this is on is gone
+            // when it is pressed, and nothing else on a row is.
+            _delete.Highlight = Palette.ProblemWash;
             _line.Right = _tools;
         }
 
@@ -141,6 +153,20 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _status.Text = entry.Status;
             _lastRun.Text = entry.LastRun;
 
+            // Its own press where there is something of its own behind it, so changing what a trigger
+            // does is the words that say what it does. It lights like any other control, which is
+            // what says it is one at all.
+            _status.Press = Deed.Sends(entry.StatusCommand);
+            _status.Highlight = entry.StatusCommand != 0 ? Palette.Panel : Palette.None;
+
+            if (entry.StatusCommand != 0 && !ReferenceEquals(_opens, entry.Status))
+            {
+                _opens = entry.Status;
+                _opensSays = "Change what this does";
+            }
+
+            _status.Tip = entry.StatusCommand != 0 ? _opensSays : null;
+
             // Out of the layout when there is nothing to say, not merely blank. A row that always
             // reserved both of these would be three lines tall to show one, and a list of them would be
             // a column of mostly empty panel.
@@ -193,6 +219,11 @@ namespace Reactor.Host.SpaceEngineers.Lists
             _duplicate.Press = Deed.Sends(entry.DuplicateCommand);
             _duplicate.Highlight = copies ? Palette.PanelHot : Palette.None;
             _duplicate.Tip = copies ? entry.DuplicateText : null;
+
+            var bins = entry.DeleteCommand != 0;
+            _delete.Collapsed = !bins;
+            _delete.Press = Deed.Sends(entry.DeleteCommand);
+            _delete.Tip = bins ? "Delete" : null;
         }
 
         /// <summary>

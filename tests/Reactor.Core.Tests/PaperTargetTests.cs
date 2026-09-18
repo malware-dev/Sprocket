@@ -43,6 +43,7 @@ public class PaperTargetTests
 
         editor.PressChoice("is pressed");
         editor.PressPrimary();
+        editor.PressChoice("Run a new sequence");
         Note(seen, ship);
 
         editor.PressAdd("do something");
@@ -76,6 +77,7 @@ public class PaperTargetTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
+        editor.PressChoice("Run a new sequence");
 
         editor.PressAdd("do something");
         editor.PressBlock("Inner Door");
@@ -84,7 +86,6 @@ public class PaperTargetTests
 
         var paper = PaperTarget.Draw(ship.World, editor.Screen);
 
-        Assert.Contains("When Airlock Button is pressed", paper);
         Assert.Contains("1. close Inner Door", paper);
     }
 
