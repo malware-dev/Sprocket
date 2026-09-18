@@ -157,4 +157,4 @@ on screen     When something happens
 150  Sprite     Reactor_Fill          {X:1679 Y:872 W:1 H:111}  #5B737BFF
 151  Text       at {X:1475.513 Y:883.9481} scale 0.5  #A2C3CDFF  "Airlock Button is already in use"
 152  Text       at {X:1475.513 Y:911.4481} scale 0.64  #A2C3CDFF  "Leave it alone"
-153  Text       at {X:1475.513 Y:947.1281} scale 0.64  #A2C3CDFF  "Use it anyway"
+153  Text       at {X:1475.513 Y:947.1281} scale 0.64  #A2C3CDFF  "Take it over"

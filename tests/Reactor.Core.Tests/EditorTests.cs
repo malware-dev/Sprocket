@@ -714,7 +714,7 @@ public class EditorTests
 
         // That button is already spoken for, which is asked about before anything else - and here
         // two on one button is the point of the walk.
-        ship.Editor.PressChoice("Use it anyway");
+        ship.Editor.PressChoice("Take it over");
         ship.Editor.PressChoice("Run a new sequence");
         ship.Tick();
     }

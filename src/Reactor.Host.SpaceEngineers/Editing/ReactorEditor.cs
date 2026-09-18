@@ -1118,9 +1118,17 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     delegate(PickAnswer answer)
                     {
                         // Nothing to record: the sequence does not exist yet, so there is no
-                        // history for it and nothing to take back to.
+                        // history for it and nothing to take back to - which is why the trigger
+                        // losing the button here loses it outright, the way the bin on its row is
+                        // the way back from making one at all.
                         MomentTrigger made = Starter(answer);
-                        Unless(made, null, delegate { FinishTrigger(made, origin); });
+                        Unless(made, null, delegate(MomentTrigger taken)
+                        {
+                            if (taken != null)
+                                taken.Sources.Clear();
+
+                            FinishTrigger(made, origin);
+                        });
                     },
                     true));
                 return;
@@ -1163,9 +1171,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// </summary>
         /// <remarks>
         /// A toolbar slot holds one thing. Two triggers on the same button and the same press are
-        /// two claims on that one slot, and only one of them can have it - so the other stops
-        /// working, which is a thing to be told before it happens rather than found afterwards on a
-        /// row that has quietly gone quiet.
+        /// two claims on that one slot, which is a state the construct cannot be put into: asked to
+        /// arrange both, Reactor arranges neither, and the button is left answering nothing at all.
+        /// So it is asked before it happens rather than found afterwards on a row that has quietly
+        /// gone quiet - and the answer decides which trigger keeps the button.
         /// <para>
         /// Only where the construct is what announces the moment. Two sequences both watching the
         /// inner door close is an ordinary way to build and costs nothing: Reactor does that
@@ -1176,18 +1185,18 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// itself.
         /// </para>
         /// </remarks>
-        void Unless(MomentTrigger made, Trigger except, Action then)
+        void Unless(MomentTrigger made, Trigger except, Action<MomentTrigger> then)
         {
-            Trigger taken = Holding(made, except);
+            var taken = Holding(made, except) as MomentTrigger;
             if (taken == null)
             {
-                then();
+                then(null);
                 return;
             }
 
             Ask(SequenceText.Taken(_runner.Bindings, taken));
             Answer("Leave it alone", delegate { });
-            Answer("Use it anyway", then);
+            Answer("Take it over", delegate { then(taken); });
         }
 
         /// <summary>What already answers that moment, or null.</summary>
@@ -1583,9 +1592,14 @@ namespace Reactor.Host.SpaceEngineers.Editing
                     UnwindTo(origin);
 
                     MomentTrigger made = Starter(answer);
-                    Unless(made, moment, delegate
+                    Unless(made, moment, delegate(MomentTrigger taken)
                     {
-                        Do(system, new ChangeTrigger(moment, made));
+                        var change = new ChangeTrigger(moment, made);
+
+                        // One edit either way, because it is one answer to one question.
+                        Do(system, taken == null
+                            ? (SystemEdit)change
+                            : new TakeOver(change, taken));
                     });
                 },
                 true, was != null && was.RequiresAll));

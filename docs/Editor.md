@@ -105,8 +105,8 @@ at the same blocks and is its own from then on.
 
 It arrives with **no trigger** and **switched off**. A toolbar slot holds one claim on Reactor's
 action, so a copy carrying the trigger it came from would be a second claim on a slot that is
-already taken - and two live sequences on one button would cycle an airlock twice with nothing on
-screen saying why. It is named like any other new sequence, because a name is what makes one
+already taken - and what that costs is not an airlock cycling twice but an airlock that stops
+cycling at all, with nothing on screen saying why. See *Two triggers on one button*. It is named like any other new sequence, because a name is what makes one
 callable and a copied name would either collide or quietly take over what called the original.
 Pressing it opens the copy, which is both what somebody wanted to change and the screen where it
 is told what starts it. It is offered whether or not the sequence is running, unlike
@@ -157,6 +157,26 @@ be the one thing this trigger did.
 The four answers hang under whatever was pressed, as a menu rather than a page: four short answers
 are not a screenful, and a screen of its own put the row somebody was working on out of sight
 behind the question about it.
+
+### Two triggers on one button
+
+**A slot holds one thing, so the second trigger is a question and the answer decides it.** Asked to
+arrange both, Reactor arranges neither: the slot is left empty, both triggers stand there naming a
+button that answers nothing, and the host then takes the block out of one of them because the
+button it names is no longer its own. Which was how a trigger ended up with nothing on its row to
+press - the failure that asked for the warning in the first place, and the reason the warning
+cannot be the whole answer.
+
+So *Airlock Button is already in use* offers **Leave it alone** or **Take it over**, and taking it
+over means what it says: the new trigger gets the button and the old one is left without one, in
+the same state the host leaves behind when somebody clears that button in the game. Its row says
+nothing can start this, its parts are still there, and pressing them is the mend.
+
+It is one edit, because it was one answer to one question: one press of the way back puts the
+button where it was and the blocks back in the trigger that lost them. Both ways in ask - making a
+trigger and pointing an existing one - and a trigger never clashes with itself, so settling on what
+was already there asks nothing. Only for the moments the construct announces, since Reactor can
+watch one door for two sequences without a slot being involved at all.
 
 Both are **walked back from the system's screen** - see *Taking it back*.
 

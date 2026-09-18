@@ -483,7 +483,7 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Use it anyway");
+        screen.Editor.PressChoice("Take it over");
         screen.Editor.PressChoice("Run a new sequence");
         screen.Run(2);
 
@@ -523,6 +523,49 @@ public class ChangingTests
         screen.Run(2);
 
         // Untouched: it still waits for the door it was given.
+        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(1));
+    }
+
+    /// <summary>
+    /// Taking the button over leaves the trigger that had it without one, and walks back.
+    /// </summary>
+    /// <remarks>
+    /// The answer decides which trigger keeps the button, because the construct cannot hold both and
+    /// arranges neither when asked to: the slot ends up empty and neither sequence starts. So the
+    /// one that lost it is left in the state anybody can mend, and one press of the way back puts
+    /// both of them where they were, since it was one answer to one question.
+    /// </remarks>
+    [Fact]
+    public void TakingAButtonOverEmptiesTheTriggerThatHadIt()
+    {
+        var screen = WithOne();
+
+        screen.Editor.PressStart("When…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressPrimary();
+        screen.Editor.PressChoice("Run a new sequence");
+        screen.Editor.Back();
+        screen.Run(2);
+
+        screen.Editor.PressWhen(1);
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressBlock("Airlock Button");
+        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressPrimary();
+        screen.Editor.PressChoice("Take it over");
+        screen.Run(2);
+
+        var had = (MomentTrigger)System(screen).Triggers[0];
+
+        Assert.Empty(had.Sources);
+        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(1));
+        Assert.Equal("taking a button over", screen.Editor.Steps().UndoText);
+
+        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Run(2);
+
+        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(1));
     }
 

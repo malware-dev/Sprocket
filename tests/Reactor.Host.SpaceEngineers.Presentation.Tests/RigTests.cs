@@ -515,6 +515,62 @@ public class RigTests
         Assert.True(Running(rig, sequence), "the power came back and the press did nothing");
     }
 
+    /// <summary>
+    /// Taking a button over leaves it wired to the trigger that took it.
+    /// </summary>
+    /// <remarks>
+    /// Two triggers naming one button is a state the construct cannot be put into, and Reactor asked
+    /// to arrange both arranges neither: the slot ends up empty, both triggers name a button that
+    /// answers nothing, and the host then takes the block out of one of them because the button it
+    /// names is not its own. That is a trigger with nothing left on its row to press.
+    /// <para>
+    /// So the answer decides it. What is asserted here is the construct rather than the program: the
+    /// slot holds Reactor's action, the sequence that took it can be started, and the one that lost
+    /// it cannot.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void TakingAButtonOverRewiresIt()
+    {
+        Simulation rig = Simulation.On(Store.Nowhere());
+        Airlock(rig.Editor);
+
+        for (var i = 0; i < 20; i++)
+            rig.Tick();
+
+        rig.Editor.Back();
+        rig.Editor.PressStart("When…");
+        rig.Editor.PressBlock("Airlock Button");
+        rig.Editor.PressChoice("is pressed");
+        rig.Editor.PressPrimary();
+        rig.Editor.PressChoice("Take it over");
+        rig.Editor.PressChoice("Run a new sequence");
+
+        for (var i = 0; i < 60; i++)
+            rig.Tick();
+
+        Panel panel = null;
+        foreach (Panel found in rig.Panels())
+            if (found.Name == "Airlock Button")
+                panel = found;
+
+        Assert.NotNull(panel);
+
+        MyToolbarItemInfo held;
+        Assert.True(panel.Toolbar.TryGetItem(0, out held), "the button ended up wired to nothing");
+
+        Sequence had = rig.Editor.Program.Sequences[0];
+        Sequence took = rig.Editor.Program.Sequences[1];
+
+        Assert.True(rig.World.CanStart(took), "the trigger that took the button cannot start");
+        Assert.False(rig.World.CanStart(had), "the trigger that lost it still holds the button");
+
+        // And the one that lost it is in the state anybody can mend: no blocks, and a row that says
+        // so with its parts still there.
+        var lost = (MomentTrigger)rig.Editor.Program.Systems[0].Triggers[0];
+        Assert.Empty(lost.Sources);
+    }
+
     static void Airlock(ReactorEditor editor)
     {
         editor.NewSystem("Airlock");
