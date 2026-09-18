@@ -43,5 +43,21 @@ namespace Reactor.Host.SpaceEngineers.World
 
         /// <summary>Whether a block has an action of the game's own by that name.</summary>
         bool Offers(IMyTerminalBlock block, string actionId);
+
+        /// <summary>
+        /// Whether the block a slot names is still anywhere in the world.
+        /// </summary>
+        /// <remarks>
+        /// A slot holds an id whether or not there is still a block behind it, and the difference
+        /// decides whether Reactor may write over it: a slot naming a block that is gone is wiring
+        /// that nothing can honour, while one naming a live block is somebody's, even when that
+        /// somebody is another Reactor.
+        /// <para>
+        /// The whole world rather than this construct, because a slot may legitimately name a block
+        /// on a grid that has since undocked - and taking that for gone would be Reactor helping
+        /// itself to somebody else's button.
+        /// </para>
+        /// </remarks>
+        bool Exists(long entityId);
     }
 }

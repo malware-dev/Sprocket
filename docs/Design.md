@@ -665,7 +665,9 @@ rewrite every slot, and that rewrite silently undid a button somebody had cleare
 globally unique 64-bit key - unguaranteeable, and unnecessary once imports arrive unbound. Qualified
 *user* names as the only reference - that forces naming every conditional. A slot naming the block
 that owns the toolbar, so wiring would survive a paste or a projector print - it needs the action
-present on arbitrary blocks, and it is not, see ApiUnknowns 4.
+present on arbitrary blocks, and it is not, see ApiUnknowns 4. Cutting and pasting the block Reactor
+runs in is answered without it, by the id Reactor writes into its own action; a projector print is
+not, and is still open.
 
 ### 5. Named state
 

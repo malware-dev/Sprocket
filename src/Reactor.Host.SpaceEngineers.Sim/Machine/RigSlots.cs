@@ -72,6 +72,24 @@ sealed class RigSlots : ISlots
         return false;
     }
 
+    /// <summary>
+    /// Whether the rig still has the block a slot names.
+    /// </summary>
+    /// <remarks>
+    /// The rig is the whole world here, so removing a fitting is what the game does when a block is
+    /// ground off, cut, or left behind on a grid that undocked - which is the case this answers.
+    /// </remarks>
+    public bool Exists(long entityId)
+    {
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block.EntityId == entityId)
+                return true;
+        }
+
+        return false;
+    }
+
     public bool Clear(IMyToolbar toolbar, int slot)
     {
         var rigs = toolbar as Toolbar;

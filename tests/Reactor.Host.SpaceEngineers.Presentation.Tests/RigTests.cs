@@ -571,6 +571,111 @@ public class RigTests
         Assert.Empty(lost.Sources);
     }
 
+    /// <summary>
+    /// Cutting the block Reactor runs in and pasting it back keeps the buttons working.
+    /// </summary>
+    /// <remarks>
+    /// The arrival is a different block as far as the game is concerned, so every slot on the
+    /// construct names one that is gone. Reactor wrote those slots and puts its own block into the
+    /// action it writes, so it can see that for itself and say the id again.
+    /// <para>
+    /// What it did instead was ask whether the action in the slot was its own <em>by name</em>, find
+    /// that it was in every one of them, and report the whole construct as wired while not one
+    /// button did anything. A report that says everything is fine is worse than no report.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void CuttingAndPastingTheBlockKeepsTheButtons()
+    {
+        Store store = Store.Nowhere();
+
+        Simulation built = Simulation.On(store);
+        Airlock(built.Editor);
+
+        built.Editor.PressAdd("do something");
+        built.Editor.PressBlock("Airlock Inner Door");
+        built.Editor.PressChoice("open");
+        built.Editor.PressPrimary();
+        built.Editor.SwitchOn();
+
+        for (var i = 0; i < 5; i++)
+            built.Tick();
+
+        built.Save();
+
+        Simulation pasted = Simulation.Pasted(store);
+        for (var i = 0; i < 120; i++)
+            pasted.Tick();
+
+        Sequence sequence = pasted.Editor.Program.Sequences[0];
+
+        // Still says what starts it, and the construct agrees that something does.
+        var pressed = Assert.IsType<RequiredTrigger>(sequence.Trigger);
+        Assert.Single(pressed.Sources);
+        Assert.True(pasted.World.CanStart(sequence), "the trigger was reported as unstartable");
+
+        // And the button does it, which is the half that was being reported without being true.
+        pasted.Press("Airlock Button");
+        pasted.Tick();
+
+        Assert.True(Running(pasted, sequence), "the press did not reach the sequence");
+    }
+
+    /// <summary>
+    /// A button held by a Reactor that is still there is left alone.
+    /// </summary>
+    /// <remarks>
+    /// The other half, and the reason the mend cannot simply take every slot that carries Reactor's
+    /// action: a second programmable block holding the same systems is a legitimate thing to build,
+    /// as redundancy, and the copy helping itself to the original's buttons would be two Reactors
+    /// trading one slot back and forth forever.
+    /// <para>
+    /// What decides it is whether the block the slot names is still in the world. Here it is - and
+    /// it is not this Reactor - so the slot stays as it is and the sequence reports that nothing
+    /// starts it, which is true and is mended by choosing a button.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AButtonHeldBySomeoneStillThereIsLeftAlone()
+    {
+        Store store = Store.Nowhere();
+
+        Simulation built = Simulation.On(store);
+        Airlock(built.Editor);
+
+        built.Editor.PressAdd("do something");
+        built.Editor.PressBlock("Airlock Inner Door");
+        built.Editor.PressChoice("open");
+        built.Editor.PressPrimary();
+        built.Editor.SwitchOn();
+
+        for (var i = 0; i < 5; i++)
+            built.Tick();
+
+        built.Save();
+
+        // Reactor's own action, on a block that is alive and is not the Reactor opening this
+        // construct - which is what a slot written by the other holder of these systems looks like.
+        string wired = store.GetValue(Wiring.Key);
+        store.SetValue(Wiring.Key, wired.Replace(" 100 ", " 2 "));
+
+        Simulation pasted = Simulation.Pasted(store);
+        for (var i = 0; i < 120; i++)
+            pasted.Tick();
+
+        Sequence sequence = pasted.Editor.Program.Sequences[0];
+        Assert.False(pasted.World.CanStart(sequence), "it claimed a button somebody else holds");
+
+        Panel panel = null;
+        foreach (Panel found in pasted.Panels())
+            if (found.Name == "Airlock Button")
+                panel = found;
+
+        MyToolbarItemInfo held;
+        Assert.True(panel.Toolbar.TryGetItem(0, out held), "the slot was emptied");
+        Assert.Equal(2, held.BlockEntityId);
+    }
+
     static void Airlock(ReactorEditor editor)
     {
         editor.NewSystem("Airlock");

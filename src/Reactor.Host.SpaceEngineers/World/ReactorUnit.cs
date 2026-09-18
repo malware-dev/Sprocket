@@ -676,7 +676,12 @@ namespace Reactor.Host.SpaceEngineers.World
                     // A slot holding the game's own action on a block is a claim as well. It is how
                     // a trigger that does one plain thing is wired, and without counting it such a
                     // trigger reads as a sequence nothing starts and is parked a second later.
-                    if (!TriggerAction.IsOurs(present))
+                    //
+                    // Reactor's action counts only where it points here. One pointed at another
+                    // Reactor runs that one's program, and one pointed at a block that is gone runs
+                    // nothing at all, so counting either would be this program reporting a button
+                    // that answers somebody else - or nobody - as its own.
+                    if (!Mine(present))
                     {
                         if (present.Kind == MyToolbarItemKind.BlockAction
                             && !string.IsNullOrEmpty(present.ActionId))
@@ -880,12 +885,15 @@ namespace Reactor.Host.SpaceEngineers.World
                 MyToolbarItemInfo present;
 
                 if (toolbar == null || !toolbar.TryGetItem(want.Slot, out present)
-                    || !TriggerAction.IsOurs(present))
+                    || (!Mine(present) && !Orphaned(present)))
                 {
                     continue;
                 }
 
-                if (Understood(toolbar, want.Slot))
+                // One of ours that already says something this program can resolve is left alone.
+                // An orphan is rewritten whatever its key says, because the id is the broken part:
+                // the block it names is gone, so nothing it says can be honoured by anybody.
+                if (Mine(present) && Understood(toolbar, want.Slot))
                     continue;
 
                 if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId),
@@ -977,10 +985,11 @@ namespace Reactor.Host.SpaceEngineers.World
                 if (filled && Asked(present, want))
                     continue;
 
-                if (filled && !TriggerAction.IsOurs(present))
+                if (filled && !Mine(present) && !Orphaned(present))
                 {
                     // Somebody's panel already does something. Overwriting it would configure
-                    // Reactor by breaking their ship, which is worse than not working.
+                    // Reactor by breaking their ship, which is worse than not working - and another
+                    // Reactor holding it is somebody, whose program that button belongs to.
                     Trace("slot " + want.Slot + " in use by " + present.Kind + " " + present.ActionId);
                     continue;
                 }
@@ -1018,7 +1027,7 @@ namespace Reactor.Host.SpaceEngineers.World
         readonly List<TerminalActionParameter> _nothing = new List<TerminalActionParameter>();
 
         /// <summary>Whether a slot already holds exactly what a want asks for.</summary>
-        static bool Asked(MyToolbarItemInfo present, Want want)
+        bool Asked(MyToolbarItemInfo present, Want want)
         {
             if (want.GameActionId != null)
             {
@@ -1026,7 +1035,45 @@ namespace Reactor.Host.SpaceEngineers.World
                     && string.Equals(present.ActionId, want.GameActionId, StringComparison.Ordinal);
             }
 
-            return TriggerAction.IsOurs(present);
+            return Mine(present);
+        }
+
+        /// <summary>
+        /// Whether a slot holds Reactor's action pointed at <em>this</em> Reactor.
+        /// </summary>
+        /// <remarks>
+        /// The action's name alone is not enough, and answering with it was a real fault: cut the
+        /// programmable block and paste it back and the game gives it a new id, so every slot on the
+        /// construct names a block that is gone. Reading only the name, Reactor found its own action
+        /// in each of them and reported every button as wired while none of them did anything.
+        /// <para>
+        /// The id it needs was in the slot the whole time, because Reactor writes its own block into
+        /// the action it puts there - see <see cref="Item" />.
+        /// </para>
+        /// </remarks>
+        bool Mine(MyToolbarItemInfo present)
+        {
+            return TriggerAction.IsOurs(present) && present.BlockEntityId == _block.EntityId;
+        }
+
+        /// <summary>
+        /// Whether a slot holds Reactor's action pointed at a block that is no longer there.
+        /// </summary>
+        /// <remarks>
+        /// Wiring nothing can honour, and nobody decided on: the block it names is gone, so there is
+        /// no Reactor left for that button to reach and no owner to argue with. It is adopted rather
+        /// than reported, which is what makes a programmable block survive being cut and pasted, or
+        /// ground down while another holds the same systems.
+        /// <para>
+        /// A live block is somebody's, even when that somebody is another Reactor, and a slot that is
+        /// simply empty is somebody having cleared it - which is an instruction. Neither is touched.
+        /// </para>
+        /// </remarks>
+        bool Orphaned(MyToolbarItemInfo present)
+        {
+            return TriggerAction.IsOurs(present)
+                && present.BlockEntityId != _block.EntityId
+                && !Toolbars.Exists(present.BlockEntityId);
         }
 
         /// <summary>What a want reads as in the log.</summary>

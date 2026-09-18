@@ -41,6 +41,11 @@ namespace Reactor.Host.SpaceEngineers.World
             return toolbar != null && toolbar.BeginChanges().Set(slot, item, parameters).Apply();
         }
 
+        public bool Exists(long entityId)
+        {
+            return MyAPIGateway.Entities != null && MyAPIGateway.Entities.EntityExists(entityId);
+        }
+
         public bool Clear(IMyToolbar toolbar, int slot)
         {
             return toolbar != null && toolbar.BeginChanges().Clear(slot).Apply();

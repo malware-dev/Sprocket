@@ -33,9 +33,20 @@ sealed class Rig
     /// What a test wants: exactly the blocks it is about, welded on by name, so what it asserts is
     /// not mixed in with a demonstration ship.
     /// </remarks>
-    public Rig()
+    public Rig() : this(100)
     {
-        Reactor = _grid.Weld(new Programmable(100, "Automation",
+    }
+
+    /// <summary>
+    /// The same, with the block Reactor runs in given a particular id.
+    /// </summary>
+    /// <remarks>
+    /// So a test can cut that block and paste it back: the game gives the arrival a new id, and
+    /// every toolbar slot on the construct goes on naming the one that left.
+    /// </remarks>
+    public Rig(long reactor)
+    {
+        Reactor = _grid.Weld(new Programmable(reactor, "Automation",
             Type<MyObjectBuilder_MyProgrammableBlock>(), "LargeProgrammableBlock",
             "Programmable Block"));
     }
@@ -49,7 +60,17 @@ sealed class Rig
     /// </remarks>
     public static Rig Demo()
     {
-        var rig = new Rig();
+        return Demo(new Rig());
+    }
+
+    /// <summary>The same ship, with the block Reactor runs in given a particular id.</summary>
+    public static Rig Demo(long reactor)
+    {
+        return Demo(new Rig(reactor));
+    }
+
+    static Rig Demo(Rig rig)
+    {
 
         rig.Weld(new Door(1, "Hangar Door", Type<MyObjectBuilder_AirtightHangarDoor>(),
             "AirtightHangarDoor", "Hangar Door"));

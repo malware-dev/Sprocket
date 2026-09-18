@@ -64,6 +64,18 @@ sealed class Simulation
         return new Simulation(Store.Nowhere(), rig);
     }
 
+    /// <summary>
+    /// The same storage and the same toolbars, and the block Reactor runs in is a different block.
+    /// </summary>
+    /// <remarks>
+    /// What cut and paste does: the program travels in the block's own storage, the construct keeps
+    /// its slots, and the arrival is given a new id - so every slot names a block that is gone.
+    /// </remarks>
+    internal static Simulation Pasted(Store store)
+    {
+        return new Simulation(store, Rig.Demo(101));
+    }
+
     Simulation(Store store, Rig rig)
     {
         _store = store;
@@ -86,7 +98,7 @@ sealed class Simulation
         // the game's arrangement exactly: the slot carries a key and Reactor resolves it.
         foreach (Panel panel in Panels())
         {
-            panel.Invokes = _unit.Fire;
+            panel.Invokes = Fire;
             panel.Performs = _rig.Perform;
         }
 
@@ -136,7 +148,7 @@ sealed class Simulation
             if (panel.Invokes != null)
                 continue;
 
-            panel.Invokes = _unit.Fire;
+            panel.Invokes = Fire;
             panel.Performs = _rig.Perform;
         }
 
@@ -145,6 +157,20 @@ sealed class Simulation
 
         if (_frame % SaveEvery == 0)
             Save();
+    }
+
+    /// <summary>
+    /// A slot of Reactor's being invoked, on the block it names.
+    /// </summary>
+    /// <remarks>
+    /// The game runs a toolbar action on a block, so a slot naming a block that is not here reaches
+    /// nobody - and one naming a different Reactor reaches that one's program, not this one. Both
+    /// are what a construct looks like after somebody cut and pasted the block Reactor runs in.
+    /// </remarks>
+    void Fire(long block, string key)
+    {
+        if (block == _rig.Reactor.Block.EntityId)
+            _unit.Fire(key);
     }
 
     /// <summary>

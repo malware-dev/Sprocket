@@ -51,8 +51,14 @@ sealed class Panel : Fitting
     /// <remarks>
     /// Installed by whoever is running the rig, because what a slot's payload means is Reactor's
     /// business and not a button's.
+    /// <para>
+    /// Handed the block the slot names as well as the payload, because the game runs an action
+    /// <em>on a block</em>: a slot naming one that is gone does nothing at all. Without that, a
+    /// press here reached Reactor however broken the wiring was, and the rig answered a button the
+    /// game would have left silent.
+    /// </para>
     /// </remarks>
-    public Action<string> Invokes;
+    public Action<long, string> Invokes;
 
     /// <summary>
     /// What the game does when a slot holds a block's own action: perform it on that block.
@@ -108,7 +114,7 @@ sealed class Panel : Fitting
         {
             var key = _held[0].Value as string;
             if (!string.IsNullOrEmpty(key))
-                Invokes(key);
+                Invokes(held.BlockEntityId, key);
         }
     }
 

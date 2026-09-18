@@ -74,5 +74,11 @@ namespace Reactor.Host.SpaceEngineers.World
             return block != null && !string.IsNullOrEmpty(actionId)
                 && _slots.Offers(block, actionId);
         }
+
+        /// <summary>Whether the block a slot names is still anywhere in the world.</summary>
+        public static bool Exists(long entityId)
+        {
+            return entityId != 0 && _slots.Exists(entityId);
+        }
     }
 }
