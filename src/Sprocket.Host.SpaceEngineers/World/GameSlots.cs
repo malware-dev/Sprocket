@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 ITerminalProperty property = _properties[i];
 
                 ValueKind kind;
-                if (!Holds(property, out kind))
+                if (!Holds(property, out kind) || !Shown(property, block))
                     continue;
 
                 into.Add(new Offer(property.Id, Called(property), kind,
@@ -168,6 +168,28 @@ namespace Sprocket.Host.SpaceEngineers.World
         static string Said(float edge)
         {
             return edge.ToString("R", CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Whether the game itself would show this value on this block's own screen.
+        /// </summary>
+        /// <remarks>
+        /// <b>The game answers this and nothing else has to.</b> Every functional block carries the
+        /// whole text surface apparatus whether or not it has a screen - font, alignment, padding,
+        /// four colours, image lists - and a light would otherwise offer twenty-five values of which
+        /// six are the light. The controls that do not apply carry a test saying so: the script's
+        /// colours are shown only where the surface is running a script, the rotation only where
+        /// there are four panels.
+        /// <para>
+        /// Asked of the control rather than matched against a list of ids, so a block from a mod is
+        /// filtered by its author's own answer, and nothing here has to be kept in step with the
+        /// game.
+        /// </para>
+        /// </remarks>
+        static bool Shown(ITerminalProperty property, IMyTerminalBlock block)
+        {
+            var control = property as IMyTerminalControl;
+            return control == null || control.Visible == null || control.Visible(block);
         }
 
         /// <summary>

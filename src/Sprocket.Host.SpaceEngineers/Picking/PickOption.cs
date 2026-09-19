@@ -43,5 +43,15 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         public bool IsChosen { get; set; }
 
         public int Command { get; set; }
+
+        /// <summary>
+        /// Whether this names the group under it rather than being one of the things in it.
+        /// </summary>
+        /// <remarks>
+        /// A row in the same list rather than a list of lists, because this list scrolls, narrows
+        /// to a search and is matched against what is drawn by position. A heading kept outside it
+        /// would sit still while the things it names scrolled past.
+        /// </remarks>
+        public bool IsHeading { get; set; }
     }
 }

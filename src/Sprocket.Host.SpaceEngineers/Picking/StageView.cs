@@ -383,11 +383,12 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 PickOption entry = stage.Entries[i];
                 RowVisual row = _visible[i];
 
-                // Taking a choice and moving on in one gesture, where one thing is being chosen. Where
-                // several can be, a second press means un-choosing it instead.
-                Deed deed = Deed.Sends(entry.Command);
-                deed.Confirms = !many;
-                row.Line.Press = deed;
+                // A heading is words and nothing else: no mark, because there is nothing to choose,
+                // and no press, because a row that answers the pointer and then does nothing is a
+                // row somebody presses twice before believing it.
+                row.Line.Press = entry.IsHeading ? Deed.Nothing : Moving(entry, many);
+                row.Line.Highlight = entry.IsHeading ? Palette.None : Palette.PanelHot;
+                row.Mark.Collapsed = entry.IsHeading;
 
                 // A tick for things you collect, a dot for things you settle on.
                 row.Mark.Many = many;
@@ -397,7 +398,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 if (row.Icon != null)
                     row.Icon.Art = entry.Icon;
 
-                row.Name.Text = entry.Text;
+                row.Name.Text = entry.IsHeading ? Widgets.Caps(entry.Text) : entry.Text;
+                row.Name.Color = entry.IsHeading ? Palette.Faint : Palette.Ink;
 
                 string detail = DetailOf(entry);
                 row.Detail.Text = detail;
@@ -467,6 +469,14 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             row.Line.Right = right;
 
             return row;
+        }
+
+        /// <summary>Taking a choice, and moving on with it where only one is being chosen.</summary>
+        static Deed Moving(PickOption entry, bool many)
+        {
+            Deed deed = Deed.Sends(entry.Command);
+            deed.Confirms = !many;
+            return deed;
         }
 
         static string DetailOf(PickOption entry)

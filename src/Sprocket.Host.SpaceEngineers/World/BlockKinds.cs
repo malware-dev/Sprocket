@@ -133,9 +133,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// do; the values are the large half, and they describe themselves - a name in the player's
         /// own language, a kind, and the bounds the block itself will accept.
         /// <para>
-        /// A value whose id is already claimed is passed over, which is how the generated actions
-        /// win: a switch called <c>OnOff</c> produces <c>OnOff_On</c> and <c>OnOff_Off</c>, and
-        /// those read better in a sentence than telling a value to be true.
+        /// Not held to the rule that hides a bare toggle. That rule is about an <em>action</em> -
+        /// "toggle it" settles on a state whoever stored it could not see - and the explicit form
+        /// it pushes people towards is this one. A switch is offered as a value it can be set to.
+        /// </para>
+        /// <para>
+        /// A value is passed over only where an act already has that id, because the id is what a
+        /// saved program holds and it has to resolve to one thing.
         /// </para>
         /// </remarks>
         void Values(EntityKind kind, IMyTerminalBlock block)
@@ -146,12 +150,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < _offered.Count; i++)
             {
                 Offer offer = _offered[i];
-                if (string.IsNullOrEmpty(offer.Id) || Said(kind, offer.Id))
+
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id) != null)
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
 
-                kind.WithValue(offer.Id, "set " + said, offer.Id, Asks(offer, said));
+                kind.WithValue(offer.Id, said, offer.Id, Asks(offer, said));
             }
         }
 

@@ -151,9 +151,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
-        public EntityKind WithValue(string id, string text, string propertyId, Field field)
+        public EntityKind WithValue(string id, string named, string propertyId, Field field)
         {
-            _actions.Add(new EntityAction(id, text, null, null, 1).Writes(propertyId, field));
+            _actions.Add(new EntityAction(id, "set " + named, null, null, 1)
+                .Writes(propertyId, field, named));
+
             return this;
         }
 

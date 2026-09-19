@@ -189,6 +189,14 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             return deed;
         }
 
+        /// <summary>The control that abandons the question already open.</summary>
+        public static Deed Cancels()
+        {
+            var deed = new Deed();
+            deed.Means = Means.Cancel;
+            return deed;
+        }
+
         /// <summary>The control that puts the editor away.</summary>
         public static Deed Leaves()
         {

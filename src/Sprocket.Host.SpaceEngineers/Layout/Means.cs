@@ -30,6 +30,17 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         Commit,
 
         /// <summary>
+        /// Abandons the question standing over the screen, answering nothing.
+        /// </summary>
+        /// <remarks>
+        /// The other half of <see cref="Commit" />. A question owns the screen while it is up, so
+        /// the only controls that can reach anything are the two that end it, and both have to say
+        /// which they are - a control inside a question meaning anything else is one whose press
+        /// goes nowhere at all.
+        /// </remarks>
+        Cancel,
+
+        /// <summary>
         /// Asks to leave the editor rather than to do anything inside it.
         /// </summary>
         /// <remarks>

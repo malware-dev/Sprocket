@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -30,8 +29,12 @@ public class SettingTests
 
         // The game hands out an action for a light's radius and none at all for its falloff, which
         // is the arbitrariness this exists to end.
-        Assert.True(screen.Shows("set Falloff"), "the light does not offer its falloff");
-        Assert.True(screen.Shows("set Color"), "the light does not offer its colour");
+        Assert.True(screen.Shows("Falloff"), "the light does not offer its falloff");
+        Assert.True(screen.Shows("Color"), "the light does not offer its colour");
+
+        // Under a heading that says what they are, which is why they do not each say "set".
+        Assert.True(screen.Shows("VALUES"), "the values are not grouped");
+        Assert.True(screen.Shows("TOOLBAR ACTIONS"), "the actions are not grouped");
     }
 
     /// <summary>And what it will accept comes from the block, with nobody authoring it.</summary>
@@ -42,7 +45,7 @@ public class SettingTests
 
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("set Falloff");
+        screen.Editor.PressChoice("Falloff");
         screen.Run(2);
 
         Assert.True(screen.Editor.Screen.PrimaryAsks, "finishing does not ask for the value");
@@ -61,7 +64,7 @@ public class SettingTests
 
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("set Falloff");
+        screen.Editor.PressChoice("Falloff");
         screen.Editor.Typed("2");
         screen.Run(2);
 

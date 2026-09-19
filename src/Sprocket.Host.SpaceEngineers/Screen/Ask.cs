@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             ways.Children.Add(_confirm);
 
             _cancel.Padding = new Thickness(Space.ChipX, Space.ChipY);
-            _cancel.Press = Deed.Leaves();
+            _cancel.Press = Deed.Cancels();
 
             // Lit, because everything a press reaches has to be - and quietly, because it is the way
             // out rather than the way on.

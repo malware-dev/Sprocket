@@ -426,6 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             _names.Clear();
             _ids.Clear();
+            _values.Clear();
 
             if (_forEvents)
             {
@@ -438,12 +439,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
             else
             {
-                var actions = Vocabulary.ActionsOf(Editor.World, _selection);
-                for (var i = 0; i < actions.Count; i++)
-                {
-                    _names.Add(actions[i].Text);
-                    _ids.Add(actions[i].Id);
-                }
+                Grouped(Vocabulary.ActionsOf(Editor.World, _selection));
             }
 
             // A choice the blocks can no longer honour is dropped rather than left showing, so
@@ -476,10 +472,39 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     _matched.Add(i);
             }
 
-            changed |= Resize(_what.Entries, _matched.Count);
+            // A heading before the first of each group that survived the search. Worked out here
+            // rather than held in the list, because which groups have anything left in them is
+            // decided by what somebody has just typed.
+            _rows.Clear();
+            var group = -1;
             for (var i = 0; i < _matched.Count; i++)
             {
                 var at = _matched[i];
+                var mine = _values.Count > at && _values[at] ? 1 : 0;
+                if (_forEvents)
+                    mine = group;
+
+                if (mine != group)
+                {
+                    group = mine;
+                    _rows.Add(-1 - mine);
+                }
+
+                _rows.Add(at);
+            }
+
+            changed |= Resize(_what.Entries, _rows.Count);
+            for (var i = 0; i < _rows.Count; i++)
+            {
+                var at = _rows[i];
+                if (at < 0)
+                {
+                    changed |= Apply(_what.Entries[i], at == -2 ? ValuesSaid : ActionsSaid,
+                        "", "", false, false, 0, "", true);
+
+                    continue;
+                }
+
                 var id = _ids[at];
                 changed |= Apply(_what.Entries[i], _names[at], "", "", false, id == chosen,
                     Editor.Register(Cmd.PickChoice, at, delegate { Choose(id); }));
@@ -488,10 +513,84 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return changed;
         }
 
+        /// <summary>The heading over the block's own values, and the one over its actions.</summary>
+        /// <remarks>
+        /// Named for where somebody has already met them. Almost nobody arrives here without having
+        /// assigned a toolbar action by hand, so that is the half of the list that needs no
+        /// introduction - which is why it is the half that sits lower down.
+        /// </remarks>
+        const string ValuesSaid = "Values";
+        const string ActionsSaid = "Toolbar Actions";
+
+        /// <summary>
+        /// Everything the blocks offer, values first and each group in its own order.
+        /// </summary>
+        /// <remarks>
+        /// Sorted by the words rather than left in the order the game declared them, because a
+        /// block hands its actions out in the order its code happens to create them and a person
+        /// reading twenty of them is looking one up.
+        /// <para>
+        /// The headings are not in here. Only things somebody can choose are, so a search matches
+        /// against those alone - a heading is put in front of a group at the moment the list is
+        /// drawn, and only where that group still has something in it.
+        /// </para>
+        /// </remarks>
+        void Grouped(List<EntityAction> actions)
+        {
+            actions.Sort(BySaid);
+
+            Listed(actions, true);
+            Listed(actions, false);
+        }
+
+        void Listed(List<EntityAction> actions, bool values)
+        {
+            for (var i = 0; i < actions.Count; i++)
+            {
+                EntityAction one = actions[i];
+                if (one.GamePropertyId != null != values)
+                    continue;
+
+                _names.Add(one.Named);
+                _ids.Add(one.Id);
+                _values.Add(values);
+            }
+        }
+
+        /// <summary>Which group each thing on offer belongs to, one per entry in <c>_names</c>.</summary>
+        readonly List<bool> _values = new List<bool>();
+
+        /// <summary>
+        /// What to draw, in order: an index into the things on offer, or a heading.
+        /// </summary>
+        /// <remarks>
+        /// A heading is a negative, which is the cheapest way to say "not one of them" in a list of
+        /// positions - minus two for the values, minus one for the actions.
+        /// </remarks>
+        readonly List<int> _rows = new List<int>();
+
+        /// <summary>By the words, because that is what somebody is scanning the list for.</summary>
+        static readonly SaidOrder BySaid = new SaidOrder();
+
+        sealed class SaidOrder : IComparer<EntityAction>
+        {
+            public int Compare(EntityAction left, EntityAction right)
+            {
+                return string.Compare(Said(left), Said(right), StringComparison.OrdinalIgnoreCase);
+            }
+
+            static string Said(EntityAction one)
+            {
+                return one == null ? "" : one.Named;
+            }
+        }
+
         static bool Apply(PickOption entry, string text, string secondary, string status,
-            bool active, bool chosen, int command, string icon = "")
+            bool active, bool chosen, int command, string icon = "", bool heading = false)
         {
             var changed = false;
+
+            if (entry.IsHeading != heading) { entry.IsHeading = heading; changed = true; }
 
             if (entry.Icon != icon) { entry.Icon = icon; changed = true; }
 

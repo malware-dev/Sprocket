@@ -1052,11 +1052,16 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 if (_ask.Touch(point))
                     return true;
 
-                // The one control in there sends what has been typed. Everything else inside it is a
-                // box, which already has the keyboard.
+                // Two controls in there end it: one sends what has been typed and one abandons it.
+                // Everything else inside is a box, which already has the keyboard.
                 Element inside = Under(point);
-                if (inside != null && inside.Press.Means == Means.Commit)
-                    CommitAsk();
+                if (inside != null)
+                {
+                    if (inside.Press.Means == Means.Commit)
+                        CommitAsk();
+                    else if (inside.Press.Means == Means.Cancel)
+                        CancelAsk();
+                }
 
                 return true;
             }

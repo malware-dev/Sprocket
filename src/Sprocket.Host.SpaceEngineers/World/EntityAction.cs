@@ -27,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Text = text;
             LeadsToStateId = leadsToStateId;
             GameActionId = gameActionId;
+            Named = text;
             Wants = wants;
         }
 
@@ -38,6 +39,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// completes "___ the hangar door".
         /// </summary>
         public string Text { get; private set; }
+
+        /// <summary>
+        /// What it is called in a list of things to choose from.
+        /// </summary>
+        /// <remarks>
+        /// The same words for nearly everything, and not for a value: a sentence needs the verb -
+        /// "set Falloff" - where a list under a heading that already says Values needs the name on
+        /// its own, so the names sort as themselves rather than all under S.
+        /// </remarks>
+        public string Named { get; private set; }
 
         /// <summary>
         /// The <see cref="EntityState"/> this action is trying to bring about, or
@@ -79,9 +90,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public string GamePropertyId { get; private set; }
 
-        public EntityAction Writes(string propertyId, Field field)
+        public EntityAction Writes(string propertyId, Field field, string named)
         {
             GamePropertyId = propertyId;
+            Named = named;
             _writes = field;
             return this;
         }
