@@ -118,10 +118,41 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     ? runner.Get(sequences[i])
                     : runner.Get(sequences[i], instance);
 
-                // Warnings are not counted. A ship's screen saying a system has something wrong sends
-                // somebody looking for a fault, and "nothing starts this yet" is not one.
                 var fault = SequenceSummary.Fault(world, bindings, sequences[i], state);
                 if (fault.Exists && !fault.IsWarning)
+                    count++;
+            }
+
+            return count;
+        }
+
+        /// <summary>
+        /// How many of a system's sequences have something to remark on rather than something broken.
+        /// </summary>
+        /// <remarks>
+        /// Not every warning. A system nobody has finished wiring says "nothing starts this yet"
+        /// about half its sequences, and a ship's screen marking that sends somebody looking for a
+        /// fault that is not there - which is why warnings went uncounted here to begin with.
+        /// <para>
+        /// What is counted is a warning about something that <em>happened</em>: a run that gave up
+        /// because another sequence took one of its blocks. Nobody can see that from the overview
+        /// otherwise, and it is the case where not saying is worse than saying too much.
+        /// </para>
+        /// </remarks>
+        public static int Remarks(GridWorld world, Bindings bindings, AutomationRunner runner,
+            AutomationSystem system, SystemInstance instance)
+        {
+            var count = 0;
+            var sequences = system.Sequences;
+
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                SequenceRunner state = instance == null
+                    ? runner.Get(sequences[i])
+                    : runner.Get(sequences[i], instance);
+
+                var fault = SequenceSummary.Fault(world, bindings, sequences[i], state);
+                if (fault.Problem == SequenceProblem.Conflicted)
                     count++;
             }
 

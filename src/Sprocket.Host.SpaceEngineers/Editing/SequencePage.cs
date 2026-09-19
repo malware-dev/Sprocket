@@ -132,6 +132,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _sentence.RunCommand = Editor.Register(Cmd.RunNow,
                 delegate { Editor.RunNow(_sequence); });
 
+            // Its other half, registered beside it. Which of the two the button carries is decided
+            // every tick by whether the sequence is going; both ids have to exist for either to.
+            _sentence.StopCommand = Editor.Register(Cmd.StopNow,
+                delegate { Editor.StopNow(_sequence); });
+
             // Both are edits, so both wait for the switch. Registered here whether or not
             // there is anything to walk back, because issuing a command needs the numbering
             // only a rebuild does - and whether there is anything to walk back changes without
@@ -254,10 +259,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // Being switched off is said here rather than in the banner below, because the switch
             // that says it is in this same bar: a banner would be a second copy of it appearing and
             // vanishing as that switch is pressed, which moves the whole sentence under it.
-            var showing = SequenceSummary.Status(_sequence, state);
-            _sentence.Status = showing == SequenceStatus.Off && _sequence.Steps.Count > 0
-                ? SequenceText.Problem(SequenceProblem.SwitchedOff)
-                : SequenceText.Status(showing);
+            // What it is doing, plainly. What is wrong with it is said by Mark, in the same place
+            // and in its own colour, and the two never show at once.
+            _sentence.Status = SequenceText.Status(SequenceSummary.Status(_sequence, state));
+
+            // Which way the button faces. A sequence that is going is one to stop, and one that is
+            // not is one to start - never both, because the other would do nothing.
+            _sentence.Running = state != null && state.IsRunning;
             _sentence.JustRan = state != null && state.LastFiredTick >= 0
                 && Editor.CurrentTick - state.LastFiredTick < 10;
             _sentence.SkippedCount = state == null ? 0 : state.SkippedCount;
@@ -314,9 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
                 Editor.Runner.Get(_sequence));
 
-            var parked = fault.Problem == SequenceProblem.SwitchedOff;
-
-            _sentence.Problem = parked ? "" : SequenceText.Problem(fault.Problem);
+            _sentence.Problem = fault.Exists ? SequenceText.Problem(fault) : "";
             _sentence.ProblemIsWarning = fault.IsWarning;
 
             for (var i = 0; i < _sentence.Steps.Count && i < _shown.Count; i++)

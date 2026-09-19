@@ -170,7 +170,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 var fault = SequenceSummary.Fault(_world, _runner.Bindings, sequence,
                     _runner.Get(sequence));
 
-                if (fault.Exists && !fault.IsWarning)
+                if (fault.Parks)
                     sequence.Enabled = false;
             }
         }
@@ -426,6 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 case Cmd.OpenSequence:
                 case Cmd.OpenTrigger:
                 case Cmd.RunNow:
+                case Cmd.StopNow:
                 case Cmd.TriggerTarget:
                 case Cmd.ClearTarget:
                 case Cmd.StartWhen:
@@ -1690,16 +1691,38 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// same as a button pressed twice, and the row says so.
         /// </para>
         /// </remarks>
+        /// <summary>
+        /// Ends a run that is going, by hand.
+        /// </summary>
+        /// <remarks>
+        /// The way out of a wait that will not end on its own: a room that will not fill leaves a
+        /// sequence holding for as long as the world stays that way, and somebody watching it has
+        /// to be able to call it off without switching the whole sequence off.
+        /// <para>
+        /// It stops the run and nothing else. What the sequence already did stands - Sprocket never
+        /// moves anything back that nobody asked it to move - so an airlock stopped halfway is left
+        /// where it is, which is the honest result and the one a person can see.
+        /// </para>
+        /// </remarks>
+        internal void StopNow(Sequence sequence)
+        {
+            SequenceRunner state = _runner.Get(sequence, Only(sequence));
+            if (state != null)
+                state.Stop();
+        }
+
         internal void RunNow(Sequence sequence)
         {
-            AutomationSystem system = sequence.System;
-            SystemInstance instance = system == null || system.Instances.Count == 0
-                ? null
-                : system.Instances[0];
-
             // By hand, which is what lets a parked sequence run at all: the switch keeps triggers
             // off it, and a person at the screen is not a trigger.
-            _runner.Call(sequence, instance, true);
+            _runner.Call(sequence, Only(sequence), true);
+        }
+
+        /// <summary>The one of the system this screen is about, which is the first of them.</summary>
+        static SystemInstance Only(Sequence sequence)
+        {
+            AutomationSystem system = sequence.System;
+            return system == null || system.Instances.Count == 0 ? null : system.Instances[0];
         }
 
         /// <summary>

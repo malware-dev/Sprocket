@@ -33,6 +33,30 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         /// looking at when they want to see what a sequence does - and what starts it is usually a
         /// button somewhere else on the ship.
         /// </remarks>
+        /// <summary>
+        /// How many of the things below this row have something to remark on.
+        /// </summary>
+        /// <remarks>
+        /// Separate from <see cref="Problems" /> because it is said in a different colour and must
+        /// not be mistaken for one. A row with both says the louder of the two.
+        /// </remarks>
+        public int Remarks
+        {
+            get { return _remarks; }
+            set { Set(ref _remarks, value, nameof(Remarks)); }
+        }
+
+        int _remarks;
+
+        /// <summary>Ending the run that is going, which takes the place of starting one.</summary>
+        public int StopCommand
+        {
+            get { return _stopCommand; }
+            set { Set(ref _stopCommand, value, nameof(StopCommand)); }
+        }
+
+        int _stopCommand;
+
         public int RunCommand
         {
             get { return _runCommand; }

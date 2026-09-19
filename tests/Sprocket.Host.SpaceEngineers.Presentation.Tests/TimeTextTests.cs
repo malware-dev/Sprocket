@@ -20,7 +20,8 @@ public class TimeTextTests
         Assert.Equal("", TimeText.Ago(-1));
         Assert.Equal("just now", TimeText.Ago(0));
         Assert.Equal("just now", TimeText.Ago(119));
-        Assert.Equal("3 seconds ago", TimeText.Ago(180));
+        Assert.Equal("less than a minute ago", TimeText.Ago(180));
+        Assert.Equal("less than a minute ago", TimeText.Ago(59 * 60));
         Assert.Equal("a minute ago", TimeText.Ago(60 * 60));
         Assert.Equal("5 minutes ago", TimeText.Ago(60 * 60 * 5));
         Assert.Equal("over an hour ago", TimeText.Ago(60 * 60 * 60));

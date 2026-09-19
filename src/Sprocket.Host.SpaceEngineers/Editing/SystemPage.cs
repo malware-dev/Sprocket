@@ -227,6 +227,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 entry.RunCommand = Editor.Register(Cmd.RunNow, sequence.Id,
                     delegate { Editor.RunNow(run); });
 
+                entry.StopCommand = Editor.Register(Cmd.StopNow, sequence.Id,
+                    delegate { Editor.StopNow(run); });
+
                 // Whether or not it is running, unlike everything that rewires one. Throwing a
                 // sequence away is not editing it: nothing half-written can result, the question
                 // asks first, and a machine somebody wants rid of while it is running is exactly
@@ -368,11 +371,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 var fault = Fault(_sequences[i]);
                 var starting = IsStarting(fault);
 
-                // Being switched off is not put here: it is said where the row says what it is
-                // doing, because it is that same fact - see SequenceSummary.Fill.
                 var parked = fault.Problem == SequenceProblem.SwitchedOff;
 
-                entries[i].Problem = starting || parked ? "" : SequenceText.Problem(fault.Problem);
+                entries[i].Problem = starting ? "" : SequenceText.Problem(fault);
                 entries[i].ProblemIsWarning = fault.IsWarning;
                 entries[i].Problems = !starting && fault.Exists && !fault.IsWarning ? 1 : 0;
                 entries[i].Parked = parked;
@@ -384,7 +385,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 Sequence runs = _system.FindSequence(_triggers[i].Runs);
                 var fault = runs == null ? SequenceFault.None : Fault(runs);
 
-                starts[i].Problem = IsStarting(fault) ? SequenceText.Problem(fault.Problem) : "";
+                starts[i].Problem = IsStarting(fault) ? SequenceText.Problem(fault) : "";
             }
         }
 

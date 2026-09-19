@@ -1121,7 +1121,7 @@ Two things push towards each side running its own, and one thing is simply unkno
 
 - **Reaching into somebody else's ship is a griefing vector.** If station automation can
   operate whatever docks, then tying up at a stranger's station hands them your thrusters,
-  your sprockets and your cargo. Ownership might mitigate that; needing mitigation is the
+  your reactors and your cargo. Ownership might mitigate that; needing mitigation is the
   tell.
 - **The useful actions turn out to be one-sided anyway.** Draining a miner is a sorter on
   the station. Shutting a ship down is that ship's own blocks. Gas moves itself.

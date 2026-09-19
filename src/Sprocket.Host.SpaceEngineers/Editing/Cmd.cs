@@ -47,6 +47,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         DeleteSequence,
         DuplicateSequence,
         RunNow,
+
+        StopNow,
         Undo,
         Redo,
         AddAction,

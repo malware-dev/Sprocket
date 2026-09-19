@@ -84,6 +84,29 @@ sealed class RigSlots : ISlots
         }
     }
 
+    public void Settable(IMyTerminalBlock block, List<Offer> into)
+    {
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block != block)
+                continue;
+
+            fitting.Carried(into);
+            return;
+        }
+    }
+
+    public bool Set(IMyTerminalBlock block, string propertyId, Literal value)
+    {
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block == block)
+                return fitting.Set(propertyId, value);
+        }
+
+        return false;
+    }
+
     public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
     {
         foreach (Fitting fitting in _rig.Fitted)

@@ -217,7 +217,7 @@ operating any of it. The limit to one construct is ours, chosen for reasons that
 writing down because the constraint will otherwise look like ignorance of what is possible.
 
 - **Operating other people's property.** If automation reaches past its own construct, then
-  tying up at a stranger's station hands them your thrusters, your sprockets and your cargo.
+  tying up at a stranger's station hands them your thrusters, your reactors and your cargo.
   Ownership might police that; needing policing is the tell.
 - **Cost.** T1 says the total price is what is happening, not what exists. World scope means
   every construct is potentially watching every other, and the arithmetic stops being

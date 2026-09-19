@@ -36,15 +36,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 var entry = entries[i];
                 var running = Live(runner, sequence);
 
-                // Said in the place the row already has for what it is doing, rather than on a line
-                // of its own. The switch beside it is the fact and "switched off" beside a switch
-                // that says off is a word spent on nothing; what follows from it is the thing
-                // somebody looking for why their button did nothing needs to read. And a line that
-                // is always there cannot move the row when the switch on it is pressed.
-                var state = Status(sequence, running);
-                entry.Status = state == SequenceStatus.Off && sequence.Steps.Count > 0
-                    ? SequenceText.Problem(SequenceProblem.SwitchedOff)
-                    : SequenceText.Status(state);
+                // What it is doing, plainly. Being switched off is said as the warning it is, in
+                // the same place and in its own colour - the row shows one or the other, never both.
+                entry.Status = SequenceText.Status(Status(sequence, running));
                 entry.Running = running != null && running.IsRunning;
                 entry.JustRan = running != null && running.LastFiredTick >= 0
                     && tick - running.LastFiredTick < JustRanTicks;
@@ -195,6 +189,53 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// is what <see cref="EditorPage.SecondPassed" /> is for. Nothing that breaks a sequence
         /// breaks it faster than a person can do it by hand, so a second is soon enough.
         /// </remarks>
+        static SequenceFault Stuck(Bindings bindings, Sequence sequence, SequenceRunner state)
+        {
+            if (state == null)
+                return SequenceFault.None;
+
+            // What ended the last run, which outlives the run itself: a sequence that gave up is
+            // not running and has nothing outstanding to be asked, so this is the only record of
+            // it. It stands until the sequence runs again.
+            if (!string.IsNullOrEmpty(state.Quit))
+                return new SequenceFault(SequenceProblem.Conflicted, SequenceFault.Trigger,
+                    state.Quit);
+
+            if (!state.IsWaiting)
+                return SequenceFault.None;
+
+            IList<Act> outstanding = state.Outstanding;
+
+
+            for (var i = 0; i < outstanding.Count; i++)
+            {
+                Act act = outstanding[i];
+                for (var t = 0; t < act.Targets.Count; t++)
+                {
+                    GridEntity entity = bindings.Entity(act.Targets[t]);
+                    if (entity == null)
+                        continue;
+
+                    // About the state this step is waiting for, not about the block. One vent
+                    // serves the cycle out and the cycle in, and they are waiting for opposite
+                    // things of it - so "what is wrong with the vent" has two answers and only the
+                    // step knows which one it is owed.
+                    EntityAction doing = entity.Kind.FindAction(act.ActionId);
+                    if (doing == null || string.IsNullOrEmpty(doing.LeadsToStateId))
+                        continue;
+
+                    Trouble said = entity.Trouble(doing.LeadsToStateId);
+                    if (!said.Exists)
+                        continue;
+
+                    return new SequenceFault(SequenceProblem.Stuck, sequence.Steps.IndexOf(act),
+                        said.Said);
+                }
+            }
+
+            return SequenceFault.None;
+        }
+
         public static SequenceFault Fault(GridWorld world, Bindings bindings, Sequence sequence,
             SequenceRunner state)
         {
@@ -223,6 +264,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // and a line can only say one thing.
             if (adrift.Exists)
                 return adrift;
+
+            // A step that is being waited on and cannot finish. Only the block knows - a vent with
+            // nowhere to put the air looks exactly like one that is merely slow - so it is asked,
+            // and what it says is what gets shown.
+            SequenceFault stuck = Stuck(bindings, sequence, state);
+            if (stuck.Exists)
+                return stuck;
 
             // These last, because they are the ones about the sequence as a whole rather than about
             // something it names, and anything missing is the more useful thing to say.

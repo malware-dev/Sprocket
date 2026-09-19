@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             for (var i = 0; i < count; i++)
             {
                 _boxes[i].Text = "";
-                _fields.Children.Add(Line(i, count > 1));
+                _fields.Children.Add(Line(i, count));
             }
 
             _entry.Fill = form ? null : _boxes[0];
@@ -154,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// a field, so it is put there quietly and nothing else is invented.
         /// </para>
         /// </remarks>
-        Bar Line(int at, bool numbered)
+        Bar Line(int at, int count)
         {
             while (_lines.Count <= at)
             {
@@ -162,24 +162,26 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _numbers.Add(Widgets.Label("", Palette.Faint, Lettering.Small));
             }
 
+            // What it is called and what it will take, where anybody has said, and its place in
+            // the order otherwise. A value nobody has described has only its place to say, and that
+            // is worth saying where there are several and worth nothing where there is one.
+            _numbers[at].Text = Label(at, count);
+
             Bar line = _lines[at];
             line.Spacing = Space.Item;
-            line.Left = numbered ? Numbered(at) : null;
+            line.Left = _numbers[at].Text.Length > 0 ? Numbered(at) : null;
             line.Fill = _boxes[at];
-
-            // What it is called and what it will take, where anybody has said, and its place in
-            // the order otherwise. The number is the only thing that can be said about a value
-            // nobody has described: an action declares how many it takes and not one word about
-            // any of them.
-            _numbers[at].Text = !numbered ? "" : Label(at);
 
             return line;
         }
 
-        string Label(int at)
+        string Label(int at, int count)
         {
             string said = at < _wanted.Count ? _wanted[at].Label : "";
-            return said.Length > 0 ? said : Ordinal(at);
+            if (said.Length > 0)
+                return said;
+
+            return count > 1 ? Ordinal(at) : "";
         }
 
         /// <summary>
@@ -446,7 +448,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         /// <remarks>
         /// A name, and names belong to the control that carries them - so the box opens where the
-        /// words are. See <see cref="Values" /> for the form, which does not belong to a control.
+        /// words are. See <see cref="Values(string,int,IEnumerable{Field})" /> for the form, which
+        /// does not belong to a control.
         /// </remarks>
         public void Open(string question, Element anchor, int command)
         {

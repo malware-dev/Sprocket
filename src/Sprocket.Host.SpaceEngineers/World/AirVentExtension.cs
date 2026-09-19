@@ -18,21 +18,28 @@ namespace Sprocket.Host.SpaceEngineers.World
     sealed class AirVentExtension : IBlockExtension
     {
         /// <summary>
-        /// The oxygen left at which a room counts as empty, and the amount at which it counts as full.
+        /// How close to empty and to full a room has to get before the vent has finished with it.
         /// </summary>
         /// <remarks>
-        /// A tolerance at both ends, because a room's oxygen is a float that is pumped towards a
-        /// figure rather than set to it: it may never read exactly zero even in vacuum, and never
-        /// exactly one when it is as full as it is going to get.
+        /// <b>A bet on how near a real room gets, and not a reading of anything.</b> A sealed room
+        /// with gas to spare settles below full and stays there - 95.4% on an airlock, measured in
+        /// game - because a room's capacity counts space the game will not fill. No constant
+        /// anywhere says where a given room stops, so this is a band rather than a limit.
         /// <para>
-        /// Empty is the game's own number for the same judgement - it calls an unsealed room empty
-        /// below this. Full is its mirror, because the game has no tolerance there at all and
-        /// compares against one exactly.
+        /// Five percent. Too generous costs a door opening on a room five percent thinner than
+        /// ideal, which is nothing to a person: the game's own bar for standing somewhere without a
+        /// helmet is half, and it only calls oxygen low at a fifth. Too strict costs a sequence
+        /// that waits for a level the room will never reach.
+        /// </para>
+        /// <para>
+        /// The game's own status cannot replace this. It calls a room pressurized only at a level of
+        /// one or more, and an airtight room that is empty reports as depressurizing rather than
+        /// depressurized, so it is stricter than this in one direction and silent in the other.
         /// </para>
         /// </remarks>
-        const float Emptied = 0.01f;
+        const float Emptied = 0.05f;
 
-        const float Filled = 0.99f;
+        const float Filled = 0.95f;
 
         public const string Air = "air";
         public const string Empty = "empty";
@@ -88,11 +95,16 @@ namespace Sprocket.Host.SpaceEngineers.World
                 // the room actually holds. Anything Sprocket cannot read is "not yet" and never
                 // "done" - a sequence held at a wait can be recovered from, and one that opened a
                 // door on a room it could not read cannot.
+                // Inside the band and no longer moving gas. Both halves are needed: the level
+                // alone finishes a room the vent is still taking to full, and the gas alone would
+                // finish one it gave up on at a tenth.
                 case Air:
-                    value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() >= Filled);
+                    value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() >= Filled
+                        && !VentGas.Working(vent, false));
                     return true;
                 case Empty:
-                    value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() <= Emptied);
+                    value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() <= Emptied
+                        && !VentGas.Working(vent, true));
                     return true;
                 case Level:
                     value = EntityValue.Of(vent.GetOxygenLevel());
@@ -132,6 +144,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (vent == null)
                 return null;
 
+            // What it cannot do comes before what it says it is doing, asked about the thing it is
+            // currently set to do. A vent that has stopped moving gas short of where it was going
+            // goes on reporting Pressurizing for as long as the world exists, so the game's own
+            // word for it is the one thing that never says so.
+            Trouble stuck = Said(vent);
+            if (stuck.Exists)
+                return stuck.Said;
+
             switch (vent.Status)
             {
                 case VentStatus.Pressurized: return "pressurized";
@@ -141,6 +161,90 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Why this vent will not finish what it was told to do, or null while it might.
+        /// </summary>
+        /// <remarks>
+        /// Stopped short: it is not moving gas and the room is nowhere near where it was sent. The
+        /// two directions fail for different reasons and a person can act on either one, so they
+        /// are said apart rather than as one word.
+        /// </remarks>
+        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        {
+            var vent = block as IMyAirVent;
+            if (vent == null || !vent.IsWorking)
+                return Trouble.None;
+
+            if (stateId == "is-empty")
+                return Emptying(vent);
+
+            return stateId == "has-air" ? Filling(vent) : Trouble.None;
+        }
+
+        /// <summary>
+        /// Why the room will not empty, or null while it still might.
+        /// </summary>
+        /// <remarks>
+        /// Told to fill instead is its own answer and not a silence. Two sequences share one vent -
+        /// a cycle out and a cycle in - and the one that has been overruled is left waiting for a
+        /// state nothing is heading towards any more.
+        /// </remarks>
+        /// <summary>
+        /// The same, for a screen rather than for a step.
+        /// </summary>
+        /// <remarks>
+        /// Reads the gas without keeping a clock on it. Drawing a status must not move the timing
+        /// the runtime settles a step by, and it has no use for it: what is on screen is about this
+        /// moment and is drawn again a moment later.
+        /// </remarks>
+        static Trouble Said(IMyAirVent vent)
+        {
+            if (vent.Depressurize)
+                return vent.GetOxygenLevel() > Emptied && !VentGas.Moving(vent, true)
+                    ? Trouble.Waiting("cannot empty - nowhere to put the air")
+                    : Trouble.None;
+
+            if (vent.GetOxygenLevel() >= Filled)
+                return Trouble.None;
+
+            if (!vent.CanPressurize)
+                return Trouble.Waiting("cannot fill - the room is not airtight");
+
+            return VentGas.Moving(vent, false)
+                ? Trouble.None
+                : Trouble.Waiting("cannot fill - no oxygen to fill it with");
+        }
+
+        static Trouble Emptying(IMyAirVent vent)
+        {
+            if (vent.GetOxygenLevel() <= Emptied)
+                return Trouble.None;
+
+            if (!vent.Depressurize)
+                return Trouble.Fatal("stopped - something else told this vent to fill the room");
+
+            return VentGas.Working(vent, true)
+                ? Trouble.None
+                : Trouble.Waiting("cannot empty - nowhere to put the air");
+        }
+
+        /// <summary>Why the room will not fill, or null while it still might.</summary>
+        static Trouble Filling(IMyAirVent vent)
+        {
+            if (vent.GetOxygenLevel() >= Filled)
+                return Trouble.None;
+
+            if (vent.Depressurize)
+                return Trouble.Fatal("stopped - something else told this vent to empty the room");
+
+            if (!vent.CanPressurize)
+                return Trouble.Waiting("cannot fill - the room is not airtight");
+
+            return VentGas.Working(vent, false)
+                ? Trouble.None
+                : Trouble.Waiting("cannot fill - no oxygen to fill it with");
         }
 
         public bool IsBusy(IMyTerminalBlock block)

@@ -129,6 +129,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// never fire. A panel's buttons only raise anything when their toolbar slot holds an item, and no
         /// mod can fill a slot.
         /// </remarks>
+
+        /// <summary>Nothing: nothing known about this block says why it would not finish.</summary>
+        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        {
+            return Trouble.None;
+        }
         public string StatusOf(IMyTerminalBlock block)
         {
             var panel = block as IMyButtonPanel;

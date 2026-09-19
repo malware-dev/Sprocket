@@ -136,52 +136,58 @@ on screen     Do something
 129  Text       at {X:761.655 Y:357.627} scale 0.57  #85A1A9FF  "o"
 130  Text       at {X:784.8 Y:402.212} scale 0.64  #DCF5FDFF  "Set Color"
 131  Text       at {X:762.0267 Y:403.507} scale 0.57  #3ACC00FF  "0"
-132  SetClip    {X:259 Y:142 W:1402 H:812}
-133  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
-134  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
-135  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
-136  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
-137  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
-138  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
-139  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
-140  ClearClip  
-141  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
-142  SetClip    {X:276 Y:55 W:157 H:33}
-143  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
-144  ClearClip  
-145  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
-146  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
-147  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
-148  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-149  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-150  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
-151  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
-152  Sprite     Sprocket_Fill         {X:684 Y:423 W:552 H:233}  #3C4C52FF
-153  Sprite     Sprocket_Fill         {X:684 Y:423 W:552 H:1}  #5B737BFF
-154  Sprite     Sprocket_Fill         {X:684 Y:656 W:552 H:1}  #5B737BFF
-155  Sprite     Sprocket_Fill         {X:684 Y:423 W:1 H:233}  #5B737BFF
-156  Sprite     Sprocket_Fill         {X:1235 Y:423 W:1 H:233}  #5B737BFF
-157  Text       at {X:700 Y:433.485} scale 0.5  #E84A3AFF  "Red has to be between 0 and 255."
-158  Sprite     Sprocket_Fill         {X:797 Y:462 W:423 H:39}  #141B20FF
-159  Sprite     Sprocket_Fill         {X:797 Y:462 W:423 H:1}  #5B737BFF
-160  Sprite     Sprocket_Fill         {X:797 Y:500 W:423 H:1}  #5B737BFF
-161  Sprite     Sprocket_Fill         {X:797 Y:462 W:1 H:39}  #5B737BFF
-162  Sprite     Sprocket_Fill         {X:1219 Y:462 W:1 H:39}  #5B737BFF
-163  Text       at {X:809.62 Y:469.785} scale 0.64  #DCF5FDFF  "300"
-164  Sprite     Sprocket_Fill         {X:838 Y:470 W:2 H:24}  #DCF5FDFF
-165  Text       at {X:700 Y:471.08} scale 0.57  #85A1A9FF  "Red 0-255"
-166  Sprite     Sprocket_Fill         {X:797 Y:511 W:423 H:39}  #141B20FF
-167  Sprite     Sprocket_Fill         {X:797 Y:511 W:423 H:1}  #5B737BFF
-168  Sprite     Sprocket_Fill         {X:797 Y:550 W:423 H:1}  #5B737BFF
-169  Sprite     Sprocket_Fill         {X:797 Y:511 W:1 H:39}  #5B737BFF
-170  Sprite     Sprocket_Fill         {X:1219 Y:511 W:1 H:39}  #5B737BFF
-171  Text       at {X:700 Y:520.36} scale 0.57  #85A1A9FF  "Green 0-255"
-172  Sprite     Sprocket_Fill         {X:797 Y:561 W:423 H:39}  #141B20FF
-173  Sprite     Sprocket_Fill         {X:797 Y:561 W:423 H:1}  #5B737BFF
-174  Sprite     Sprocket_Fill         {X:797 Y:599 W:423 H:1}  #5B737BFF
-175  Sprite     Sprocket_Fill         {X:797 Y:561 W:1 H:39}  #5B737BFF
-176  Sprite     Sprocket_Fill         {X:1219 Y:561 W:1 H:39}  #5B737BFF
-177  Text       at {X:700 Y:569.64} scale 0.57  #85A1A9FF  "Blue 0-255"
-178  Text       at {X:1046.153 Y:617.6249} scale 0.57  #A2C3CDFF  "Cancel"
-179  Sprite     Sprocket_Fill         {X:1118 Y:610 W:102 H:37}  #374851FF
-180  Text       at {X:1137.467 Y:617.6249} scale 0.57  #85A1A9FF  "Continue"
+132  Text       at {X:784.8 Y:448.092} scale 0.64  #DCF5FDFF  "set Radius"
+133  Text       at {X:761.655 Y:449.387} scale 0.57  #85A1A9FF  "o"
+134  Text       at {X:784.8 Y:493.972} scale 0.64  #DCF5FDFF  "set Falloff"
+135  Text       at {X:761.655 Y:495.267} scale 0.57  #85A1A9FF  "o"
+136  Text       at {X:784.8 Y:539.852} scale 0.64  #DCF5FDFF  "set Color"
+137  Text       at {X:761.655 Y:541.147} scale 0.57  #85A1A9FF  "o"
+138  SetClip    {X:259 Y:142 W:1402 H:812}
+139  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
+140  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
+141  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
+142  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
+143  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
+144  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
+145  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
+146  ClearClip  
+147  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+148  SetClip    {X:276 Y:55 W:157 H:33}
+149  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+150  ClearClip  
+151  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
+152  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
+153  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+154  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+155  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+156  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
+157  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
+158  Sprite     Sprocket_Fill         {X:684 Y:423 W:552 H:233}  #3C4C52FF
+159  Sprite     Sprocket_Fill         {X:684 Y:423 W:552 H:1}  #5B737BFF
+160  Sprite     Sprocket_Fill         {X:684 Y:656 W:552 H:1}  #5B737BFF
+161  Sprite     Sprocket_Fill         {X:684 Y:423 W:1 H:233}  #5B737BFF
+162  Sprite     Sprocket_Fill         {X:1235 Y:423 W:1 H:233}  #5B737BFF
+163  Text       at {X:700 Y:433.485} scale 0.5  #E84A3AFF  "Red has to be between 0 and 255."
+164  Sprite     Sprocket_Fill         {X:797 Y:462 W:423 H:39}  #141B20FF
+165  Sprite     Sprocket_Fill         {X:797 Y:462 W:423 H:1}  #5B737BFF
+166  Sprite     Sprocket_Fill         {X:797 Y:500 W:423 H:1}  #5B737BFF
+167  Sprite     Sprocket_Fill         {X:797 Y:462 W:1 H:39}  #5B737BFF
+168  Sprite     Sprocket_Fill         {X:1219 Y:462 W:1 H:39}  #5B737BFF
+169  Text       at {X:809.62 Y:469.785} scale 0.64  #DCF5FDFF  "300"
+170  Sprite     Sprocket_Fill         {X:838 Y:470 W:2 H:24}  #DCF5FDFF
+171  Text       at {X:700 Y:471.08} scale 0.57  #85A1A9FF  "Red 0-255"
+172  Sprite     Sprocket_Fill         {X:797 Y:511 W:423 H:39}  #141B20FF
+173  Sprite     Sprocket_Fill         {X:797 Y:511 W:423 H:1}  #5B737BFF
+174  Sprite     Sprocket_Fill         {X:797 Y:550 W:423 H:1}  #5B737BFF
+175  Sprite     Sprocket_Fill         {X:797 Y:511 W:1 H:39}  #5B737BFF
+176  Sprite     Sprocket_Fill         {X:1219 Y:511 W:1 H:39}  #5B737BFF
+177  Text       at {X:700 Y:520.36} scale 0.57  #85A1A9FF  "Green 0-255"
+178  Sprite     Sprocket_Fill         {X:797 Y:561 W:423 H:39}  #141B20FF
+179  Sprite     Sprocket_Fill         {X:797 Y:561 W:423 H:1}  #5B737BFF
+180  Sprite     Sprocket_Fill         {X:797 Y:599 W:423 H:1}  #5B737BFF
+181  Sprite     Sprocket_Fill         {X:797 Y:561 W:1 H:39}  #5B737BFF
+182  Sprite     Sprocket_Fill         {X:1219 Y:561 W:1 H:39}  #5B737BFF
+183  Text       at {X:700 Y:569.64} scale 0.57  #85A1A9FF  "Blue 0-255"
+184  Text       at {X:1046.153 Y:617.6249} scale 0.57  #A2C3CDFF  "Cancel"
+185  Sprite     Sprocket_Fill         {X:1118 Y:610 W:102 H:37}  #374851FF
+186  Text       at {X:1137.467 Y:617.6249} scale 0.57  #85A1A9FF  "Continue"

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -146,6 +147,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             _actions.Add(new EntityAction(id, text, null, gameActionId, wants)
                 .Described(described));
 
+            return this;
+        }
+
+        /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
+        public EntityKind WithValue(string id, string text, string propertyId, Field field)
+        {
+            _actions.Add(new EntityAction(id, text, null, null, 1).Writes(propertyId, field));
             return this;
         }
 

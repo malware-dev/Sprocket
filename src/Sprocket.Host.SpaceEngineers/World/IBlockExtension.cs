@@ -61,6 +61,22 @@ namespace Sprocket.Host.SpaceEngineers.World
         string StatusOf(IMyTerminalBlock block);
 
         /// <summary>
+        /// Why this block will not finish what it was told to do, or null while it might.
+        /// </summary>
+        /// <remarks>
+        /// Asked of a block a sequence is held waiting on, so what it answers is read by somebody
+        /// looking at a sequence that has stopped. Nothing generic can say this: the reason a block
+        /// cannot finish is knowledge about that kind of block and lives with the rest of it.
+        /// <para>
+        /// <paramref name="stateId" /> is the state the step is waiting for, and the question is
+        /// about that rather than about the block. One block serves several sequences and they do
+        /// not want the same thing of it: an airlock's vent is asked to empty a room by one and to
+        /// fill it by another, and what is wrong is a different answer for each of them.
+        /// </para>
+        /// </remarks>
+        Trouble TroubleWith(IMyTerminalBlock block, string stateId);
+
+        /// <summary>
         /// Whether this block is doing something <em>right now</em>, which is not whether it works.
         /// </summary>
         /// <remarks>

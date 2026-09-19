@@ -55,6 +55,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         void Offered(IMyTerminalBlock block, List<Offer> into);
 
+        void Settable(IMyTerminalBlock block, List<Offer> into);
+
+        bool Set(IMyTerminalBlock block, string propertyId, Literal value);
+
         /// <summary>
         /// Performs one of the block's own actions, and answers whether there was one to perform.
         /// </summary>

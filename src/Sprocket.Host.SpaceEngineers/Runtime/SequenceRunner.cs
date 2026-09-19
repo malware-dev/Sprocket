@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -121,6 +122,68 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>True while the sequence is held at an await or a wait.</summary>
         public bool IsWaiting { get; private set; }
 
+        /// <summary>
+        /// Why the last run ended before its last step, or null where it did not.
+        /// </summary>
+        /// <remarks>
+        /// Kept after the run has stopped, because that is the only moment somebody can be told: the
+        /// sequence is no longer running and nothing is outstanding to be asked. Cleared when the
+        /// sequence next runs, so it says what happened last time and never what happened once.
+        /// </remarks>
+        public string Quit { get; private set; }
+
+        /// <summary>How often a held run asks whether it has been overruled.</summary>
+        Interval _conflicts = new Interval(60);
+
+        /// <summary>The tick this runner last saw, for the things it does on a cadence.</summary>
+        int _tick;
+
+        /// <summary>
+        /// What a block being waited on says has taken it out of this sequence's hands, or null.
+        /// </summary>
+        /// <remarks>
+        /// Asked of a run that is already held, and only of the blocks of the steps holding it -
+        /// which for an airlock is one vent. Each answer costs the block a component lookup and a
+        /// comparison, which is why it is asked on a cadence rather than on the tick.
+        /// </remarks>
+        string Conflicted()
+        {
+            for (var i = 0; i < _outstanding.Count; i++)
+            {
+                Act act = _outstanding[i];
+                for (var t = 0; t < act.Targets.Count; t++)
+                {
+                    GridEntity entity = _bindings.Entity(act.Targets[t]);
+                    if (entity == null)
+                        continue;
+
+                    EntityAction doing = entity.Kind.FindAction(act.ActionId);
+                    if (doing == null || string.IsNullOrEmpty(doing.LeadsToStateId))
+                        continue;
+
+                    Trouble said = entity.Trouble(doing.LeadsToStateId);
+                    if (said.Ends)
+                        return said.Said;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// The acts this is held waiting on, empty unless it is waiting.
+        /// </summary>
+        /// <remarks>
+        /// Read by <c>SequenceSummary.Fault</c>, which asks the blocks of these steps whether they
+        /// can finish at all. The runner does not ask: what is wrong with a sequence is one
+        /// question with one answer, and it already has somewhere to live.
+        /// </remarks>
+        public IList<Act> Outstanding
+        {
+            get { return _outstanding; }
+        }
+
+
         /// <summary>How much of a wait is left to spend, in ticks.</summary>
         /// <remarks>Written down when a world is saved, so a pause survives being reloaded.</remarks>
         public int WaitTicks
@@ -190,6 +253,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public void Tick(GridWorld world, Bindings bindings, int tick, bool live = true)
         {
             _bindings = bindings;
+            _tick = tick;
 
             // Sample every tick, even while running or switched off. Edge detection
             // is stateful, so a skipped sample makes the next one wrong.
@@ -399,6 +463,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             LastFiredTick = tick;
             FiredCount++;
             IsRunning = true;
+
+            // What stopped the last run is about the last run. Somebody starting this one has
+            // either mended it or is about to find out again.
+            Quit = null;
             _stepIndex = 0;
             EnterStep();
             Advance(world);
@@ -472,6 +540,22 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     // already travels.
                     if (Missing() || !Finished(world))
                     {
+                        // A block that has been sent the other way by something else is not worth
+                        // waiting for: nothing is heading towards the state this step wants, and
+                        // no amount of waiting changes that. The run ends where it stands.
+                        //
+                        // Once a second, not every tick. A conflict is made by a person pressing
+                        // something or a trigger firing, so it cannot arrive faster than that, and
+                        // giving up a second later than it could have is a second nobody can
+                        // measure against a machine that has already stopped moving.
+                        string quit = _conflicts.Due(_tick) ? Conflicted() : null;
+                        if (quit != null)
+                        {
+                            Stop();
+                            Quit = quit;
+                            return;
+                        }
+
                         IsWaiting = true;
                         return;
                     }

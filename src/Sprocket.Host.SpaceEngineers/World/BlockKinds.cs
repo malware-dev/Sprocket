@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Layout;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -75,6 +76,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             // any: a door reads "open" above "Open/Closed".
             Rest(kind, block);
 
+            // And last of all the values it carries, because an act reads better than telling a
+            // value what to be wherever there is one that does the same thing.
+            Values(kind, block);
+
             _kinds.Add(id, kind);
             return kind;
         }
@@ -118,6 +123,53 @@ namespace Sprocket.Host.SpaceEngineers.World
                 else
                     kind.WithAction(offer.Id, said, null, offer.Id);
             }
+        }
+
+        /// <summary>
+        /// Adds every value the block carries that nothing else already covers.
+        /// </summary>
+        /// <remarks>
+        /// The other half of the floor. Actions are the small hand-picked half of what a block can
+        /// do; the values are the large half, and they describe themselves - a name in the player's
+        /// own language, a kind, and the bounds the block itself will accept.
+        /// <para>
+        /// A value whose id is already claimed is passed over, which is how the generated actions
+        /// win: a switch called <c>OnOff</c> produces <c>OnOff_On</c> and <c>OnOff_Off</c>, and
+        /// those read better in a sentence than telling a value to be true.
+        /// </para>
+        /// </remarks>
+        void Values(EntityKind kind, IMyTerminalBlock block)
+        {
+            _offered.Clear();
+            Toolbars.Settable(block, _offered);
+
+            for (var i = 0; i < _offered.Count; i++)
+            {
+                Offer offer = _offered[i];
+                if (string.IsNullOrEmpty(offer.Id) || Said(kind, offer.Id))
+                    continue;
+
+                var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
+
+                kind.WithValue(offer.Id, "set " + said, offer.Id, Asks(offer, said));
+            }
+        }
+
+        /// <summary>
+        /// What the form asks for one of a block's values, from what the block said about it.
+        /// </summary>
+        /// <remarks>
+        /// The kind matters here and nowhere else. A switch takes two words and a slider takes a
+        /// number between two others, and a form told neither accepts whatever is typed - which the
+        /// block then refuses when the step runs, silently, because a value of the wrong kind is
+        /// simply not written.
+        /// </remarks>
+        static Field Asks(Offer offer, string said)
+        {
+            if (offer.Sets == ValueKind.Flag)
+                return Field.OneOf(said, Literal.Of(true).Said, Literal.Of(false).Said);
+
+            return Field.Between(said, offer.Least, offer.Most);
         }
 
         readonly List<Offer> _offered = new List<Offer>();

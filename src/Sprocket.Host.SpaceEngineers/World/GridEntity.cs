@@ -110,6 +110,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Nothing of Sprocket's own takes any, so values only ever reach the game's own actions -
         /// which is also the only place anything knows what to turn them into.
         /// </remarks>
+        /// <summary>
+        /// Why this block cannot reach <paramref name="stateId" />, or null while it might.
+        /// </summary>
+        public Trouble Trouble(string stateId)
+        {
+            return _extension == null ? World.Trouble.None : _extension.TroubleWith(_block, stateId);
+        }
+
         public void Invoke(string actionId, IList<Literal> values)
         {
             if (_extension != null && _extension.TryInvoke(_block, actionId))
@@ -134,7 +142,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Anything the block declares for itself, performed by the game. An id it does not have
             // is a sequence written against a vocabulary this block no longer offers, and it does
             // nothing rather than throwing - the same answer a reading gives.
-            Toolbars.Perform(_block, actionId, values);
+            if (Toolbars.Perform(_block, actionId, values))
+                return;
+
+            // Or one of the values it carries, which is the other way a block is told something.
+            // Second, because an id that is both is an action: a name that has been in saved
+            // programs since before values were written has to go on meaning what it meant.
+            if (values != null && values.Count > 0)
+                Toolbars.Set(_block, actionId, values[0]);
         }
     }
 }

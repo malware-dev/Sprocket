@@ -2,8 +2,12 @@ using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
 using Sandbox.ModAPI.Interfaces.Terminal;
+using System.Globalization;
+using System.Text;
+using VRage;
 using VRage.Collections;
 using VRage.Game.ModAPI;
+using VRageMath;
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -94,6 +98,138 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<ITerminalAction> _actions = new List<ITerminalAction>();
 
         /// <summary>
+        /// Every value a block carries that can be told what to be.
+        /// </summary>
+        /// <remarks>
+        /// The other half of <see cref="Offered" />, and the half that describes itself. A block
+        /// declares a handful of actions and carries far more values than that, and each value says
+        /// what it is called and what kind of thing it holds without anybody writing it down.
+        /// </remarks>
+        public void Settable(IMyTerminalBlock block, List<Offer> into)
+        {
+            if (block == null)
+                return;
+
+            _properties.Clear();
+            block.GetProperties(_properties);
+
+            for (var i = 0; i < _properties.Count; i++)
+            {
+                ITerminalProperty property = _properties[i];
+
+                ValueKind kind;
+                if (!Holds(property, out kind))
+                    continue;
+
+                into.Add(new Offer(property.Id, Called(property), kind,
+                    Least(block, property, kind), Most(block, property, kind)));
+            }
+        }
+
+        readonly List<ITerminalProperty> _properties = new List<ITerminalProperty>();
+
+        /// <summary>
+        /// The least a numeric value will accept, or empty where the block says nothing useful.
+        /// </summary>
+        /// <remarks>
+        /// The block's own limits, which is what the game's own dialog for setting one of these
+        /// puts a slider between. Nobody writes them down and they are right for each block: a
+        /// spotlight reaches further than a corner light and says so itself.
+        /// <para>
+        /// A property with no limits answers with the whole range its type can hold. Those are
+        /// passed over, because "between -340282350000000000000000000000000000000 and" is not a
+        /// thing to put beside a box.
+        /// </para>
+        /// </remarks>
+        static string Least(IMyTerminalBlock block, ITerminalProperty property, ValueKind kind)
+        {
+            if (kind != ValueKind.Real)
+                return "";
+
+            float least = property.AsFloat().GetMinimum(block);
+            return Bounded(least) ? Said(least) : "";
+        }
+
+        static string Most(IMyTerminalBlock block, ITerminalProperty property, ValueKind kind)
+        {
+            if (kind != ValueKind.Real)
+                return "";
+
+            float most = property.AsFloat().GetMaximum(block);
+            return Bounded(most) ? Said(most) : "";
+        }
+
+        static bool Bounded(float edge)
+        {
+            return !float.IsNaN(edge) && !float.IsInfinity(edge)
+                && edge > float.MinValue && edge < float.MaxValue;
+        }
+
+        static string Said(float edge)
+        {
+            return edge.ToString("R", CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// What kind of value a property holds, and whether it is one Sprocket has.
+        /// </summary>
+        /// <remarks>
+        /// The five type names the terminal reports are the five kinds the language has, which is
+        /// not a coincidence worth relying on: anything else a future block reports is passed over
+        /// rather than guessed at, because a value nobody can write is worse than one nobody is
+        /// offered.
+        /// </remarks>
+        static bool Holds(ITerminalProperty property, out ValueKind kind)
+        {
+            kind = ValueKind.Text;
+
+            string type = property == null ? null : property.TypeName;
+            if (string.IsNullOrEmpty(type))
+                return false;
+
+            if (type == "Boolean")
+                kind = ValueKind.Flag;
+            else if (type == "Int64")
+                kind = ValueKind.Integer;
+            else if (type == "Single")
+                kind = ValueKind.Real;
+            else if (type == "Color")
+                kind = ValueKind.Color;
+            else if (type != "StringBuilder")
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// What the terminal calls a value, in the player's own language.
+        /// </summary>
+        /// <remarks>
+        /// <b>The property and the control are the same object.</b> What a block hands out as a
+        /// property is the control that draws it, so the title is reached by asking for the other
+        /// face of it - the same trick <see cref="Wants" /> uses to reach an action's parameters.
+        /// <para>
+        /// The title arrives as an interned id rather than as words, and reading it as a string
+        /// gives the key it was computed from. <c>MyTexts</c> is what turns that into the sentence
+        /// the player already read on the terminal screen.
+        /// </para>
+        /// <para>
+        /// Falls back to the id, which is not presentable - the interior light carries
+        /// <c>Blink Interval</c> with a space and <c>Blink Lenght</c> with the game's own
+        /// misspelling - but a name nobody can read beats a blank.
+        /// </para>
+        /// </remarks>
+        static string Called(ITerminalProperty property)
+        {
+            var titled = property as IMyTerminalControlTitleTooltip;
+            if (titled == null)
+                return property.Id;
+
+            string said = MyTexts.GetString(titled.Title);
+            return string.IsNullOrEmpty(said) ? property.Id : said;
+        }
+
+        /// <summary>
         /// How many values an action has to be given.
         /// </summary>
         /// <remarks>
@@ -109,6 +245,66 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             List<TerminalActionParameter> wanted = declared.ParameterDefinitions;
             return wanted == null ? 0 : wanted.Count;
+        }
+
+        /// <summary>
+        /// Tells one of a block's own values what to be.
+        /// </summary>
+        /// <remarks>
+        /// Written as the kind the property says it holds, which is the whole difference between
+        /// this and handing values to an action: a property declares its type honestly, where an
+        /// action's declaration is a placeholder that says string and means something else.
+        /// <para>
+        /// A value written as the wrong kind is refused rather than guessed at. Turning a number
+        /// into the text of that number, or text into a number, would be Sprocket deciding what
+        /// somebody meant, and the answer would be silently wrong on a block nobody is watching.
+        /// </para>
+        /// </remarks>
+        public bool Set(IMyTerminalBlock block, string propertyId, Literal value)
+        {
+            if (block == null)
+                return false;
+
+            ITerminalProperty property = block.GetProperty(propertyId);
+            if (property == null)
+                return false;
+
+            if (property.TypeName == "Boolean" && value.Kind == ValueKind.Flag)
+            {
+                property.AsBool().SetValue(block, value.Flag);
+                return true;
+            }
+
+            if (property.TypeName == "Single" && (value.Kind == ValueKind.Real
+                || value.Kind == ValueKind.Integer))
+            {
+                property.AsFloat().SetValue(block,
+                    value.Kind == ValueKind.Real ? (float)value.Real : value.Whole);
+
+                return true;
+            }
+
+            if (property.TypeName == "Int64" && value.Kind == ValueKind.Integer)
+            {
+                property.As<long>().SetValue(block, value.Whole);
+                return true;
+            }
+
+            if (property.TypeName == "Color" && value.Kind == ValueKind.Color)
+            {
+                property.AsColor().SetValue(block,
+                    new Color(value.Red, value.Green, value.Blue, value.Alpha));
+
+                return true;
+            }
+
+            if (property.TypeName == "StringBuilder" && value.Kind == ValueKind.Text)
+            {
+                property.As<StringBuilder>().SetValue(block, new StringBuilder(value.Said));
+                return true;
+            }
+
+            return false;
         }
 
         public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)

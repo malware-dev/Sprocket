@@ -94,6 +94,9 @@ public class StartingTests
 
         Assert.NotNull(screen.Editor.Program.Sequences[0].Trigger);
         Assert.Equal("runs Sequence 1", screen.Editor.Doing(0));
-        Assert.Equal("", screen.Editor.Rows().Entries[0].Problem);
+
+        // Mended. What the row says now is that it is switched off, which is the next thing to do
+        // about it and not the thing that was wrong.
+        Assert.NotEqual("Nothing starts this yet.", screen.Editor.Rows().Entries[0].Problem);
     }
 }

@@ -274,6 +274,24 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// the one way left to see it work would be the editor holding the door shut from inside.
         /// </para>
         /// </remarks>
+        /// <summary>Whether a run is going right now, which decides what the button does.</summary>
+        public bool Running
+        {
+            get { return _running; }
+            set { Set(ref _running, value, nameof(Running)); }
+        }
+
+        bool _running;
+
+        /// <summary>Ending the run that is going, which takes the place of starting one.</summary>
+        public int StopCommand
+        {
+            get { return _stopCommand; }
+            set { Set(ref _stopCommand, value, nameof(StopCommand)); }
+        }
+
+        int _stopCommand;
+
         public int RunCommand
         {
             get { return _runCommand; }

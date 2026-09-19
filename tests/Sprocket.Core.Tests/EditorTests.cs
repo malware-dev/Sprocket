@@ -1480,7 +1480,7 @@ public class EditorTests
 
         // Time passes and nothing else happens, but the reading has moved on.
         ship.Tick(300);
-        Assert.Equal("5 seconds ago", editor.Sentence().LastRun);
+        Assert.Equal("less than a minute ago", editor.Sentence().LastRun);
 
         // It fires again, so the count starts over rather than carrying on.
         ship.Fire();

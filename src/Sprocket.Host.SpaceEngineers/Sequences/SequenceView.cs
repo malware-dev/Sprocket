@@ -30,7 +30,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             public Label Number;
             public SentenceView Sentence;
             public Glyph Delete;
-            public int Position;
 
             /// <summary>What the number label was last written from.</summary>
             /// <remarks>
@@ -75,7 +74,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Glyph _delete = Widgets.Symbol(Symbols.Delete, Palette.Muted);
 
         readonly Label _locked = Widgets.Wash("", Palette.Muted, Palette.SlotFill);
-        readonly Label _problem = Widgets.Wash("", Palette.Problem, Palette.ProblemWash);
+        /// <summary>
+        /// What is wrong, where the state would otherwise be.
+        /// </summary>
+        /// <remarks>
+        /// The same line rather than a line of its own: a banner appearing pushes the whole sentence
+        /// down, and a card that changes height as a machine runs is a card nobody can read.
+        /// <para>
+        /// Its own label rather than the state's words in problem colours, because the two are not
+        /// the same thing and only one of them is ever true. What a sequence is doing is not news;
+        /// what is stopping it is, and it is said in the colour of news.
+        /// </para>
+        /// </remarks>
+        readonly Label _problem = Widgets.Label("", Palette.Problem, Lettering.Small);
 
         readonly Dot _ranLight = new Dot();
 
@@ -105,6 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _component = component;
 
             _status.Wraps = false;
+            _problem.Wraps = false;
             _lastRun.Wraps = false;
             _skipped.Wraps = false;
             // Deleting the whole sequence, so the same red warning the per-step crosses use.
@@ -124,6 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Stack state = Widgets.RowOf(Space.Item);
             state.Children.Add(_ranLight);
             state.Children.Add(_status);
+            state.Children.Add(_problem);
             state.Children.Add(_lastRun);
 
             // The switch is last, and that is the whole point of the order. This row is anchored to the
@@ -166,6 +179,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (!_built || _builtEditable != _component.Editable || !SameShape())
                 Build();
 
+            // One of the two, never both and never neither, so the row is the same height whatever
+            // is happening.
+            bool wrong = !string.IsNullOrEmpty(_component.Problem);
+            _status.Collapsed = wrong;
+            _problem.Collapsed = !wrong;
+
             _status.Text = _component.Status;
             _lastRun.Text = _component.LastRun;
 
@@ -179,11 +198,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             // Absent rather than blank. A banner with nothing to say still holds a line, and a strip of
             // empty chrome above the sentence is worse than the jump of one appearing when it has news.
             Banner(_locked, _component.Editable ? "" : _component.LockedText, 1);
-            // The banner is the same line either way; what changes is how loud it is. A warning in
-            // problem colours would have somebody hunting for a broken block that is not there.
-            _problem.Color = _component.ProblemIsWarning ? Palette.Notice : Palette.Problem;
-            _problem.Background = _component.ProblemIsWarning ? Palette.NoticeWash : Palette.ProblemWash;
-            Banner(_problem, _component.Problem, 2);
+            // The same line either way; what changes is how loud it is. A warning in problem colours
+            // would have somebody hunting for a broken block that is not there.
+            if (wrong)
+            {
+                _problem.Text = _component.Problem;
+                _problem.Color = _component.ProblemIsWarning ? Palette.Notice : Palette.Problem;
+            }
 
             // Governs, because a sequence's switch is the only one on this screen and switching it off
             // stops the whole of what the screen is showing.
@@ -211,10 +232,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _redoSays = "Redo " + _component.RedoText;
             }
 
-            // Absent rather than dead while it may not run, like everything else on this screen that
-            // cannot answer: the switch beside it is what brings it back.
-            _run.Collapsed = _component.RunCommand == 0;
-            Widgets.Waiting(_run, _component.RunCommand, "Run it now, as its trigger would");
+            // One control, two acts, and never both at once: a sequence that is going is one to
+            // stop and one that is not is one to start. The same button in the same place, because
+            // a second glyph appearing beside it would move everything else in the row.
+            //
+            // Absent rather than dead while it may not run, like everything else on this screen
+            // that cannot answer: the switch beside it is what brings it back.
+            bool going = _component.Running;
+            int command = going ? _component.StopCommand : _component.RunCommand;
+
+            _run.Symbol = going ? Symbols.Stop : Symbols.Play;
+            _run.Collapsed = command == 0;
+            Widgets.Waiting(_run, command, going ? SequenceText.Stops() : SequenceText.Starts());
 
             Widgets.Waiting(_undo, _component.UndoCommand, _undoSays);
             Widgets.Waiting(_redo, _component.RedoCommand, _redoSays);
@@ -502,7 +531,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 SentenceStep step = _component.Steps[i];
 
                 var row = new StepRow();
-                row.Position = step.Position;
 
                 // A grip rather than the whole line, because the line is full of chips and "press
                 // anywhere that is not one" is a rule nobody can see. A handle says where to grab, and
@@ -626,18 +654,5 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return 0;
         }
 
-        /// <summary>
-        /// Dresses one of the header's glyph buttons, and says what it would do.
-        /// </summary>
-        /// <remarks>
-        /// It keeps its place whether or not there is anything to do - hiding it would move the next one
-        /// sideways under the pointer somebody was about to use - so the only thing left to say "there is
-        /// nothing here" is that it is dim, does not light up, and says nothing.
-        /// <para>
-        /// One call, because the dimming, the light, the press and the note are four statements of a
-        /// single fact, and four statements drift. A dim control that still answered the pointer would be
-        /// one somebody reaches for twice.
-        /// </para>
-        /// </remarks>
     }
 }

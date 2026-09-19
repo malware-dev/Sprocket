@@ -17,6 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
         }
 
+        /// <summary>What the value it writes is called, and what it will take.</summary>
+        Field _writes;
+
         public EntityAction(string id, string text, string leadsToStateId, string gameActionId,
             int wants)
         {
@@ -67,6 +70,23 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string GameActionId { get; private set; }
 
         /// <summary>
+        /// The block's own value this writes, or null where it is an act rather than a value.
+        /// </summary>
+        /// <remarks>
+        /// The second of the two ways an act is carried out. A block declares a handful of actions
+        /// and carries far more values than that, and a value says what it is and what it will take
+        /// where an action says only how many values it wants.
+        /// </remarks>
+        public string GamePropertyId { get; private set; }
+
+        public EntityAction Writes(string propertyId, Field field)
+        {
+            GamePropertyId = propertyId;
+            _writes = field;
+            return this;
+        }
+
+        /// <summary>
         /// What somebody has said its parameters are, or null where nobody has.
         /// </summary>
         /// <remarks>
@@ -94,6 +114,13 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public void Fields(IList<Field> into)
         {
+            // A value describes itself, so nothing has to have been written about it.
+            if (GamePropertyId != null)
+            {
+                into.Add(_writes);
+                return;
+            }
+
             for (var i = 0; i < Wants; i++)
                 into.Add(Field.Unnamed());
 

@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
@@ -65,6 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         public StatusRow()
         {
             _detail.Children.Add(_status);
+            _detail.Children.Add(_problem);
             _detail.Children.Add(_lastRun);
 
             // Hugging the name, not filling the row. A mark at the far right lands beside the
@@ -74,7 +76,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             _text.Children.Add(_heading);
             _text.Children.Add(_detail);
-            _text.Children.Add(_problem);
 
             _line.Spacing = Space.PadX;
             _line.Background = Palette.Panel;
@@ -174,8 +175,13 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             // does is the words that say what it does. It lights like any other control, which is
             // what says it is one at all.
             // Absent rather than dead while it may not run, which is the switch on this same row.
-            _run.Collapsed = entry.RunCommand == 0;
-            Widgets.Waiting(_run, entry.RunCommand, "Run it now, as its trigger would");
+            // One control, two acts, the same as the sequence's own screen: a row that is going
+            // offers the way to stop it, and one that is not offers the way to start it.
+            int doing = entry.Running ? entry.StopCommand : entry.RunCommand;
+
+            _run.Symbol = entry.Running ? Symbols.Stop : Symbols.Play;
+            _run.Collapsed = doing == 0;
+            Widgets.Waiting(_run, doing, entry.Running ? SequenceText.Stops() : SequenceText.Starts());
 
             _status.Press = Deed.Sends(entry.StatusCommand);
             _status.Highlight = entry.StatusCommand != 0 ? Palette.Panel : Palette.None;
@@ -188,15 +194,26 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             _status.Tip = entry.StatusCommand != 0 ? _opensSays : null;
 
+            // In place of what it is doing rather than under it, so a row is the same height whether
+            // anything is wrong. A line that arrives pushes every row below it down the screen, which
+            // is a list rearranging itself while somebody reads it.
+            //
+            // What it is doing is the lesser reading of the two. A sequence held at a step it cannot
+            // finish is still waiting, so the state is true and says nothing anybody needs.
+            bool saying = !string.IsNullOrEmpty(entry.Problem);
+
             // Out of the layout when there is nothing to say, not merely blank. A row that always
             // reserved both of these would be three lines tall to show one, and a list of them would be
             // a column of mostly empty panel.
-            _detail.Collapsed = string.IsNullOrEmpty(entry.Status) && string.IsNullOrEmpty(entry.LastRun);
+            _detail.Collapsed = !saying
+                && string.IsNullOrEmpty(entry.Status) && string.IsNullOrEmpty(entry.LastRun);
 
-            // Its own line rather than a replacement for the status. What went wrong and what it is doing
-            // are two different readings, and losing one to show the other is how a diagnosis screen lies.
+            // What it is doing gives way; when it last ran does not. That is still worth knowing
+            // while something is wrong, and it is the answer to "has this ever worked".
+            _status.Collapsed = saying;
+
             _problem.Text = entry.Problem;
-            _problem.Collapsed = string.IsNullOrEmpty(entry.Problem);
+            _problem.Collapsed = !saying;
 
             // A warning reads as a remark, not as an alarm. Same line, same place, quieter colour - the
             // difference between "nothing starts this yet" and "this affects a block that is gone".
@@ -205,8 +222,17 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             // Nothing wrong is the ordinary case, so it takes no room rather than drawing blank - a
             // column of rows each reserving space for a mark reads as a column of marks. Keyed on there
             // being words rather than on the count, because a warning has words and is not counted.
-            _below.Collapsed = string.IsNullOrEmpty(entry.Problem);
-            _below.Tint = entry.ProblemIsWarning ? Palette.Notice : Palette.Problem;
+            // Or something below it worth remarking on, which is how a system says one of its
+            // sequences gave up without claiming anything is broken.
+            bool marked = !string.IsNullOrEmpty(entry.Problem) || entry.Problems > 0
+                || entry.Remarks > 0;
+
+            bool quietly = string.IsNullOrEmpty(entry.Problem)
+                ? entry.Problems == 0
+                : entry.ProblemIsWarning;
+
+            _below.Collapsed = !marked;
+            _below.Tint = quietly ? Palette.Notice : Palette.Problem;
 
             // Says what state it is in, the way the game's own on/off control does. The light on the
             // left of this row says whether the thing is doing something right now; this says whether it

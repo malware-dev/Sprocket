@@ -19,7 +19,44 @@ namespace Sprocket.Host.SpaceEngineers.World
             Id = id;
             Text = text;
             Wants = wants;
+            Sets = ValueKind.Flag;
+            Least = "";
+            Most = "";
         }
+
+        /// <summary>
+        /// One value a block carries, which it can be told to be.
+        /// </summary>
+        /// <remarks>
+        /// The other half of what a block declares. An action is a thing to do; this is a thing to
+        /// be, and the block says everything about it - what it is called, what kind of value it
+        /// holds, and what it will accept - where an action says only how many values it takes.
+        /// </remarks>
+        public Offer(string id, string text, ValueKind sets) : this(id, text, sets, "", "")
+        {
+        }
+
+        /// <summary>The same, for a value the block says it will only accept within bounds.</summary>
+        public Offer(string id, string text, ValueKind sets, string least, string most)
+        {
+            Id = id;
+            Text = text;
+
+            // One. A property holds a value, so telling it something is telling it one thing.
+            Wants = 1;
+
+            Sets = sets;
+            Least = least ?? "";
+            Most = most ?? "";
+        }
+
+        /// <summary>The least it will accept, and the most, or empty where it says nothing.</summary>
+        public string Least { get; private set; }
+
+        public string Most { get; private set; }
+
+        /// <summary>What kind of value it holds, where it is one.</summary>
+        public ValueKind Sets { get; private set; }
 
         /// <summary>The game's own name for it, which is what a slot and a saved program hold.</summary>
         public string Id { get; private set; }

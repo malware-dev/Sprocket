@@ -80,6 +80,17 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         public const string Play = "g";
 
+        /// <summary>
+        /// A square. Stopping by hand what is running.
+        /// </summary>
+        /// <remarks>
+        /// The other half of <see cref="Play" />, and as widely known as it is: the two have shared
+        /// a pair of buttons on every machine that plays anything for fifty years. It takes the
+        /// place of the triangle rather than sitting beside it, because a sequence is either
+        /// running or it is not and offering both would be offering one that does nothing.
+        /// </remarks>
+        public const string Stop = "t";
+
         /// <summary>A pencil. Changing what something is called, as opposed to what it does.</summary>
         public const string Pencil = "p";
 

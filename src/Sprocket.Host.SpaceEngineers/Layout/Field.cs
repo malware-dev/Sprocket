@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Sprocket.Host.SpaceEngineers.Layout
@@ -30,6 +31,17 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <summary>The most it may be, or empty where nobody has said.</summary>
         public string Most;
 
+        /// <summary>
+        /// The only words it will take, or null where anything goes.
+        /// </summary>
+        /// <remarks>
+        /// What a bound is for a number, this is for a value that is one of a few things. A block's
+        /// switch takes on or off and nothing else, and a form that does not know that accepts
+        /// whatever is typed, writes it into the program, and leaves the block to refuse it in
+        /// silence at the moment it runs.
+        /// </remarks>
+        public IList<string> Words;
+
         /// <summary>A field nobody has described, which is a box that takes anything.</summary>
         public static Field Unnamed()
         {
@@ -51,6 +63,14 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             Field field = Called(name);
             field.Least = least ?? "";
             field.Most = most ?? "";
+            return field;
+        }
+
+        /// <summary>One that will only take one of <paramref name="words" />.</summary>
+        public static Field OneOf(string name, params string[] words)
+        {
+            Field field = Called(name);
+            field.Words = words;
             return field;
         }
 
@@ -86,6 +106,9 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         {
             get
             {
+                if (Words != null && Words.Count > 0)
+                    return Listed();
+
                 string least = Least ?? "";
                 string most = Most ?? "";
 
@@ -112,6 +135,21 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// for a value nobody named is its place in the order.
         /// </para>
         /// </remarks>
+        /// <summary>The words it takes, said the way somebody would say them aloud.</summary>
+        string Listed()
+        {
+            var said = "";
+            for (var i = 0; i < Words.Count; i++)
+            {
+                if (said.Length > 0)
+                    said += i == Words.Count - 1 ? " or " : ", ";
+
+                said += Words[i];
+            }
+
+            return said;
+        }
+
         public string Refuses(string called, string said)
         {
             // An empty field is a value not given, and the action then does what it declared it does
@@ -119,6 +157,9 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             // thing and a worse one.
             if (string.IsNullOrEmpty(said))
                 return "";
+
+            if (Words != null && Words.Count > 0)
+                return Knows(said) ? "" : called + " has to be " + Listed() + ".";
 
             double low, high;
             bool hasLow = Reads(Least, out low);
@@ -144,6 +185,17 @@ namespace Sprocket.Host.SpaceEngineers.Layout
                 return "between " + Least + " and " + Most;
 
             return hasLow ? Least + " or more" : Most + " or less";
+        }
+
+        bool Knows(string said)
+        {
+            for (var i = 0; i < Words.Count; i++)
+            {
+                if (Words[i] == said)
+                    return true;
+            }
+
+            return false;
         }
 
         static bool Reads(string said, out double value)

@@ -1,4 +1,3 @@
-using System.Linq;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Look;
 using Xunit;
@@ -53,12 +52,17 @@ public class ParkedTests
     }
 
     /// <summary>
-    /// The words are in the line the row already had, and replace what it said there.
+    /// The words take the place of the line the row already had, rather than adding one.
     /// </summary>
     /// <remarks>
-    /// "Switched off" beside a switch that says off is a word spent on nothing, so the line says
-    /// what follows from it instead. Nothing is added, so nothing moves when the switch is pressed -
-    /// and a control that moves as it is used is the one thing a screen must never do.
+    /// "Switched off" beside a switch that says off is a word spent on nothing, so what follows
+    /// from it is shown there instead. The row is the same height either way, so nothing moves when
+    /// the switch is pressed - and a control that moves as it is used is the one thing a screen must
+    /// never do.
+    /// <para>
+    /// The two are separate readings and only one of them is ever shown, which is what lets the
+    /// warning be drawn as a warning rather than in the colour of an ordinary state.
+    /// </para>
     /// </remarks>
     [Fact]
     public void TheWordsReplaceWhatTheRowSaidThere()
@@ -66,8 +70,12 @@ public class ParkedTests
         var screen = WithOneParked();
 
         Assert.Equal("This is switched off, so nothing starts it on its own.",
-            screen.Editor.Rows().Entries[0].Status);
-        Assert.Equal("", screen.Editor.Rows().Entries[0].Problem);
+            screen.Editor.Rows().Entries[0].Problem);
+        Assert.Equal("switched off", screen.Editor.Rows().Entries[0].Status);
+
+        Assert.True(screen.Shows("This is switched off, so nothing starts it on its own."),
+            "the row does not say what being switched off costs");
+        Assert.False(screen.Shows("switched off"), "the row says it twice");
     }
 
     /// <summary>
@@ -96,7 +104,7 @@ public class ParkedTests
         screen.Run(120);
 
         Assert.False(screen.Editor.Rows().Entries[0].Parked);
-        Assert.Equal("waiting to happen", screen.Editor.Rows().Entries[0].Status);
+        Assert.Equal("ready", screen.Editor.Rows().Entries[0].Status);
         Assert.False(Washed(screen, Palette.NoticeWash), "a live sequence's row is wearing the parked ground");
     }
 

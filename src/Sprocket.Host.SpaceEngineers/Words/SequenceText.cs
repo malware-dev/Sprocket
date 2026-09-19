@@ -163,7 +163,18 @@ namespace Sprocket.Host.SpaceEngineers.Words
             if (status == SequenceStatus.RunningWaiting)
                 return "running - waiting for this step";
 
-            return status == SequenceStatus.NeverRun ? "waiting to happen" : "waiting";
+            // Not "waiting", which is what a sequence held mid-run says two lines above. The same
+            // word for a sequence doing nothing and for one stopped part-way through is the one
+            // reading somebody most needs to tell apart.
+            //
+            // Ready rather than idle, because a sequence with a trigger is not merely doing
+            // nothing: it is loaded and pointed at a button, and whether that button will work is
+            // what somebody who has just built one is asking.
+            // Both, and the same word, because the difference between them is not known. Having
+            // never run is worth saying and would be said here - but only a run in progress is
+            // written to the save, so after a world is loaded every sequence looks like one that
+            // has never fired, including the one that has cycled an airlock every day for a month.
+            return "ready";
         }
 
 
@@ -184,6 +195,25 @@ namespace Sprocket.Host.SpaceEngineers.Words
             return "This needs " + Counted(values) + " values.";
         }
 
+        /// <summary>
+        /// What the one button that starts and stops a sequence promises, whichever way it faces.
+        /// </summary>
+        /// <remarks>
+        /// Two screens carry that button and it is the same button on both, so the words are here
+        /// rather than written out in each view. Starting says what it is <em>not</em> - a preview -
+        /// because "run" and "play" are not the same promise; stopping says what it leaves behind,
+        /// because a machine halfway through a cycle stays halfway through it.
+        /// </remarks>
+        public static string Starts()
+        {
+            return "Run it now, as its trigger would";
+        }
+
+        public static string Stops()
+        {
+            return "Stop it, leaving everything where it is";
+        }
+
         /// <summary>The row that opens the field, which says what pressing it is for.</summary>
         public static string Giving()
         {
@@ -202,6 +232,12 @@ namespace Sprocket.Host.SpaceEngineers.Words
             return values.ToString(CultureInfo.InvariantCulture);
         }
 
+        /// <summary>The same, letting whatever is at fault speak for itself where it can.</summary>
+        internal static string Problem(SequenceFault fault)
+        {
+            return string.IsNullOrEmpty(fault.Because) ? Problem(fault.Problem) : fault.Because;
+        }
+
         public static string Problem(SequenceProblem problem)
         {
             if (problem == SequenceProblem.MissingSource)
@@ -216,6 +252,10 @@ namespace Sprocket.Host.SpaceEngineers.Words
                 return "This is switched off, so nothing starts it on its own.";
             if (problem == SequenceProblem.MissingGate)
                 return "This waits on something that isn't here any more.";
+            if (problem == SequenceProblem.Stuck)
+                return "This is waiting for something that cannot finish.";
+            if (problem == SequenceProblem.Conflicted)
+                return "This stopped: something else took over one of its blocks.";
 
             return "";
         }

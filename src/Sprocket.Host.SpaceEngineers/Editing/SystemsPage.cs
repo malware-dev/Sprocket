@@ -234,9 +234,15 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 // what is broken and not what somebody opens to mend it, and marking both says
                 // there are two problems.
                 if (recount && _rowInstances[i] != null)
+                {
                     entry.Problems = SystemSummary.Problems(
                         Editor.World, Editor.Runner.Bindings, Editor.Runner, system,
                         _rowInstances[i]);
+
+                    entry.Remarks = SystemSummary.Remarks(
+                        Editor.World, Editor.Runner.Bindings, Editor.Runner, system,
+                        _rowInstances[i]);
+                }
 
                 if (_rowInstances[i] == null)
                 {

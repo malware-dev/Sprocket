@@ -150,7 +150,13 @@ sealed class Rig
         rig.Weld(new Plain(id, name, Type<MyObjectBuilder_InteriorLight>(),
                 "LargeBlockLight_1corner", "Interior Light"))
             .Offering("SetRadius", "Set Radius", 1)
-            .Offering("SetColor", "Set Color", 3);
+            .Offering("SetColor", "Set Color", 3)
+
+            // The values it carries, which is where most of what a light can be told lives: the
+            // game hands out an action for three of these and none at all for the rest.
+            .Carrying("Radius", "Radius", ValueKind.Real, "1", "12")
+            .Carrying("Falloff", "Falloff", ValueKind.Real, "0", "3")
+            .Carrying("Color", "Color", ValueKind.Color);
     }
 
     /// <summary>A door, named, with the game's own type behind it.</summary>

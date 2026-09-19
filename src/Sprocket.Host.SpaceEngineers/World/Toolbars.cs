@@ -88,6 +88,20 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _slots.Offered(block, into);
         }
 
+        /// <summary>Every value a block carries that can be told what to be.</summary>
+        public static void Settable(IMyTerminalBlock block, List<Offer> into)
+        {
+            if (block != null)
+                _slots.Settable(block, into);
+        }
+
+        /// <summary>Tells one of a block's own values what to be, if it has one by that name.</summary>
+        public static bool Set(IMyTerminalBlock block, string propertyId, Literal value)
+        {
+            return block != null && !string.IsNullOrEmpty(propertyId)
+                && _slots.Set(block, propertyId, value);
+        }
+
         /// <summary>Performs one of a block's own actions, if it has one by that name.</summary>
         public static bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {

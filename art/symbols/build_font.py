@@ -341,6 +341,19 @@ def play():
     return [poly((left, 0.5 - half), (right, 0.5), (left, 0.5 + half))]
 
 
+def stop():
+    """
+    A square. Stopping by hand what is running, which is the other half of play.
+
+    Smaller than the triangle it stands beside, and centred where that one sits left: a filled
+    square reads heavier than a triangle of the same height, so matching their boxes would make
+    this one look like the louder of the two. They are the same act at the same weight.
+    """
+    half = 0.21
+    return [poly((0.5 - half, 0.5 - half), (0.5 + half, 0.5 - half),
+                 (0.5 + half, 0.5 + half), (0.5 - half, 0.5 + half))]
+
+
 def solid(shapes):
     """Most glyphs are just filled shapes with nothing taken back out."""
     return shapes, []
@@ -368,6 +381,8 @@ GLYPHS = [
     ("s", "refresh", solid(cycle())),
     ("2", "duplicate", sheets()),
     ("g", "play", solid(play())),
+    # Not "s", which refresh already has. The letter is in the word and nothing else wanted it.
+    ("t", "stop", solid(stop())),
 ]
 
 

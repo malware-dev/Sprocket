@@ -73,6 +73,26 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// is not accepted, because accepting it silently is how the wrong door gets cycled. The
         /// sequence does not run until somebody says that is the right one.
         /// </remarks>
-        Adrift
+        Adrift,
+
+        /// <summary>
+        /// A step the sequence is waiting on that the blocks say will never finish.
+        /// </summary>
+        /// <remarks>
+        /// Waiting is not a fault - an airlock waits for a room every time it cycles. This is the
+        /// case where waiting can no longer end: a vent with nowhere to put the air, a room with no
+        /// oxygen to fill it with. Only the block knows, so the words come from the block.
+        /// </remarks>
+        Stuck,
+
+        /// <summary>
+        /// The last run gave up because something else took a block out of its hands.
+        /// </summary>
+        /// <remarks>
+        /// A warning rather than a fault: nothing is broken, two things wanted opposite things of
+        /// one block and the later one won. It says what happened last time and is cleared the next
+        /// time the sequence runs.
+        /// </remarks>
+        Conflicted
     }
 }

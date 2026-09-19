@@ -103,8 +103,12 @@ abstract class Fitting
     /// <summary>What every block answers, whatever else it is.</summary>
     Stand<T> Shared<T>(Stand<T> stand) where T : class, IMyTerminalBlock
     {
+        // Nothing, rather than a refusal. A block on the rig carries no resource components, and
+        // the mod reads "no components to ask" as "not moving anything" - which is what a block
+        // that models no gas at all should look like.
         var container = Pretend.To<IMyEntityComponentContainer>()
             .Answers("TryGet", Component)
+            .Answers("Get", _ => null)
             .Done();
 
         return stand
@@ -186,6 +190,62 @@ abstract class Fitting
         _offers.Add(new Offer(id, text, wants));
         return this;
     }
+
+    /// <summary>
+    /// Every value this block carries that can be told what to be.
+    /// </summary>
+    /// <remarks>
+    /// The other half of <see cref="Offered" />. A real block answers this out of its own terminal
+    /// controls, which describe themselves; the rig says what it carries so a test can watch a value
+    /// being told something.
+    /// </remarks>
+    public virtual void Carried(List<Offer> into)
+    {
+        for (var i = 0; i < _carries.Count; i++)
+            into.Add(_carries[i]);
+    }
+
+    /// <summary>Gives this block one of the block's own values, with what it will accept.</summary>
+    public Fitting Carrying(string id, string text, ValueKind kind, string least, string most)
+    {
+        _carries.Add(new Offer(id, text, kind, least, most));
+        return this;
+    }
+
+    /// <summary>Gives it one with no bounds, which is what a value that is not a number has.</summary>
+    public Fitting Carrying(string id, string text, ValueKind kind)
+    {
+        return Carrying(id, text, kind, "", "");
+    }
+
+    /// <summary>
+    /// Tells one of those values what to be, and writes down that it was told.
+    /// </summary>
+    /// <remarks>
+    /// Written down rather than modelled, because what a test about values needs to know is which
+    /// value arrived and how it was written.
+    /// </remarks>
+    public virtual bool Set(string propertyId, Literal value)
+    {
+        if (!Carries(propertyId))
+            return false;
+
+        Told(propertyId + " " + value.Said);
+        return true;
+    }
+
+    bool Carries(string propertyId)
+    {
+        for (var i = 0; i < _carries.Count; i++)
+        {
+            if (_carries[i].Id == propertyId)
+                return true;
+        }
+
+        return false;
+    }
+
+    readonly List<Offer> _carries = new List<Offer>();
 
     bool Named(string actionId)
     {

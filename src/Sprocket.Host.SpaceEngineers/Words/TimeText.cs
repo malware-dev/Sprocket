@@ -57,14 +57,23 @@ namespace Sprocket.Host.SpaceEngineers.Words
             var seconds = ticksAgo / TicksPerSecond;
             if (seconds < 2)
                 return "just now";
+
+            // One answer for the whole first minute, rather than a new one every second. Counting
+            // seconds changes what every row says once a second for as long as a screen is open,
+            // and wakes everything downstream of it to be told a number nobody is reading - a
+            // construct with fifty sequences pays that fifty times a second, for ever.
+            //
+            // Nothing is lost with it. What second-level words were good for is saying that
+            // something has just happened, and the light on the row says that faster and without
+            // being read.
             if (seconds < 60)
-                return _seconds[seconds];
+                return "less than a minute ago";
             if (seconds < 120)
                 return "a minute ago";
 
             var minutes = seconds / 60;
             if (minutes < 60)
-                return _minutes[minutes];
+                return Minutes[minutes];
 
             return "over an hour ago";
         }
@@ -73,15 +82,6 @@ namespace Sprocket.Host.SpaceEngineers.Words
         public static string WaitChoice(int ticks)
         {
             return Duration(ticks) + " - " + ticks + " ticks";
-        }
-
-
-        static string[] BuildSeconds()
-        {
-            var words = new string[60];
-            for (var i = 2; i < 60; i++)
-                words[i] = i + " seconds ago";
-            return words;
         }
 
 
@@ -94,9 +94,8 @@ namespace Sprocket.Host.SpaceEngineers.Words
         }
 
 
-        static readonly string[] _seconds = BuildSeconds();
 
-        static readonly string[] _minutes = BuildMinutes();
+        static readonly string[] Minutes = BuildMinutes();
 
 
         public static string Rate(int ticks)
