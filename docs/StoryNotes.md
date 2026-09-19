@@ -105,12 +105,12 @@ half" is missing, which is B's groundwork. Kept in the set precisely because it 
 like a feature and is not.
 
 **G - tell me.** Two questions, and only one is about levels. The other is *tell me
-how*: Reactor can operate blocks and nothing else, so "warn me" can only mean "switch
+how*: Sprocket can operate blocks and nothing else, so "warn me" can only mean "switch
 on a lamp somebody has to be looking at", which is not a warning. Telling a person
 something is a capability the system has never had.
 
 **H - one place.** The point to take home is one sentence: *just because it can be
-done in vanilla automation does not mean Reactor should not be able to do it as well.*
+done in vanilla automation does not mean Sprocket should not be able to do it as well.*
 The sensor is the example, not the subject.
 
 It is the only story whose done-when is a usability bar rather than a capability, and the only one where the game's own terminal is a serious rival. A
@@ -119,12 +119,12 @@ of the set it makes hard or impossible - which is exactly what makes H the faire
 test available: no capability advantage to hide behind, so it has to win on being
 pleasant.
 
-It matters that it does. Every easy case set up outside Reactor is automation Reactor
+It matters that it does. Every easy case set up outside Sprocket is automation Sprocket
 cannot see, cannot show on a screen, and cannot account for when the player asks why
 nothing happened. H is load-bearing for M.
 
 **To measure, before H can produce a requirement.** Count the interactions to build H in
-Reactor, and count them for the same thing through the game's terminal. Two numbers, one
+Sprocket, and count them for the same thing through the game's terminal. Two numbers, one
 of which needs somebody in the game. Until both exist, H's done-when is an aspiration
 rather than a bar, and two attempts at writing it as a requirement have been withdrawn.
 
@@ -181,14 +181,14 @@ displays. A system that can do one and not the other will look arbitrary.
 Ladders, and prioritisation will want to cut it somewhere. A heading and live text
 needs values readable and writable as text. A progress bar needs quantities, so it
 waits on B, F and G. A graph needs **history** - samples kept over time - which would
-be the first thing Reactor stores that is not a fact about right now.
+be the first thing Sprocket stores that is not a fact about right now.
 
 Probably not a sequence at all. A screen is a standing arrangement that is always
 true, not a series of steps, and driving it from steps ("set line 2 to the tank
 level") is the programmer's shape of the problem. Whether that means a second kind of
 thing alongside sequences is a design question.
 
-**P - one door gone.** Half, and the half that exists is the good half. Reactor
+**P - one door gone.** Half, and the half that exists is the good half. Sprocket
 already notices: a lost block reads as "something's gone" in the sentence, and the
 sequence is flagged rather than quietly doing nothing. What is missing is repair. A
 entity is referenced by `long Id`, and a rebuilt block in Space Engineers is a new
@@ -202,7 +202,7 @@ set so far, and it moves slots out of "deferred with export" and into its own ri
 
 The comparison that makes this urgent: vanilla automation keeps the behaviour inside
 the event controller or timer block, so destroying that block destroys the program and
-the player rebuilds from scratch. Reactor only beats that if its own program does not
+the player rebuilds from scratch. Sprocket only beats that if its own program does not
 live in a destructible block either, which is a constraint on where we store things
 rather than on the language. It is written into Design.md rather than left implied.
 
@@ -285,7 +285,7 @@ guess.
 **The shape of the input is known.** Controls are readable as vectors, positional and
 rotational, so magnitude exists and proportional control is on the table. The vocabulary
 presents them as named readings on the cockpit - forward, right, up, turn, roll - because
-nobody using Reactor should ever meet a vector.
+nobody using Sprocket should ever meet a vector.
 
 What is left is narrower than it was. A keyboard's positional controls are held or not held
 and carry no magnitude; a stick's do. Rotational input is a rate rather than a position,
@@ -310,15 +310,15 @@ Kept so they are not proposed again as if new.
 - **Doors that open for friends and not for strangers.** Not a want, and not a
   judgement about scope either. Friend-or-foe is a setting on the sensor, like its
   range: part of configuring the block, which players already know how to do and do
-  without thinking about it. The story was really asking Reactor to take over a block's
+  without thinking about it. The story was really asking Sprocket to take over a block's
   own settings panel.
 
   The line is not that block settings are out of bounds - D wants to set a light's
   colour, which is a block setting. It is that *configuring a block once and leaving it*
   belongs to the game, while *changing it because something happened* belongs to
-  Reactor. A sensor's filter is set when the sensor is built and never touched again.
+  Sprocket. A sensor's filter is set when the sensor is built and never touched again.
 
-  Nor does it conflict with H. H is about behaviour between blocks, which is Reactor's
+  Nor does it conflict with H. H is about behaviour between blocks, which is Sprocket's
   subject; the sensor's filter is not behaviour at all.
 
   Written up because it also killed a design decision: "events that carry what set them

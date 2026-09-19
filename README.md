@@ -1,4 +1,4 @@
-# Reactor
+# Sprocket
 
 Starting fresh, or on a different machine? Read [`HANDOVER.md`](HANDOVER.md) as well - it holds where
 things stand, what comes next, and the things a clean checkout gets wrong. This file holds what the
@@ -13,7 +13,7 @@ Removing syntax is not what makes programming approachable - Scratch removed syn
 and it is still hard. What remains is **mental simulation**: to know what a program
 does, you have to run it in your head. That is the wall.
 
-So Reactor bets on something else: a machine's behavior should be something you *read
+So Sprocket bets on something else: a machine's behavior should be something you *read
 like a dashboard*, not something you *execute in your head*.
 
 ## The language
@@ -55,7 +55,7 @@ Nobody writes `if it is open, close it`.
 **There is no interlock feature.** "Both doors must never be open" is two ordinary
 sequences - lock the other door when one opens, unlock when it shuts - and that is
 *stronger* than a built-in rule would be, because locking is a real action on the real
-world, so it stops a player operating the door by hand too. Reactor is an automation
+world, so it stops a player operating the door by hand too. Sprocket is an automation
 system, not a collection of finished automations: anything expressible as trigger plus
 steps does not get to be a primitive.
 
@@ -65,7 +65,7 @@ reliably conflate "when the door opens" with "while the door is open", and the
 resulting bug is invisible because the sentence still reads correctly.
 
 **Authoring starts with the verb.** The front door is what the machine does, not a list
-of blocks. An empty Reactor asks *"what should set something off?"* and offers `When
+of blocks. An empty Sprocket asks *"what should set something off?"* and offers `When
 something happens` / `Every so often`; answering leads straight into the next question
 rather than parking you on a half-empty form. The ship browser is still there, as a
 way to look things up rather than as the only way in.
@@ -85,7 +85,7 @@ drift exactly when the user's machine matters most.
 The word is never explained in the UI. A repeating sequence shows an indicator
 pulsing at its true rate, so you learn what a tick is by watching one.
 
-Reactor never counts ticks for itself - it is told the frame number. Space Engineers
+Sprocket never counts ticks for itself - it is told the frame number. Space Engineers
 only wakes a mod every 1, 10 or 100 frames, and the slower two do not land on exact
 multiples, so a self-counted clock would drift with server load.
 
@@ -94,7 +94,7 @@ multiples, so a self-counted clock would drift with server load.
 ```
 build/     Where the game's own assemblies are found
 src/
-  Reactor.Host.SpaceEngineers        The mod. All of it, in one project.
+  Sprocket.Host.SpaceEngineers        The mod. All of it, in one project.
     Sequences/                       What a sequence is, and the sentence somebody reads and presses
     Editing/                         Navigation, pages, decisions, undo, what may go in a slot
     Picking/                         Choosing blocks and what happens to them
@@ -105,29 +105,29 @@ src/
     Words/                           How a sentence is composed: word order, capitals, joining words
     Screen/                          The editor's surface, and the screen that draws it
     Display/                         The status panel: the ship at a glance, nothing to press
-    Layout/                          Elements, containers, text - laying out, knowing nothing of Reactor
+    Layout/                          Elements, containers, text - laying out, knowing nothing of Sprocket
     Drawing/                         What the screens draw through, and the game's backend
     Look/                            Palette, type scale, spacing, sizes, icons
     Controls/                        The pieces a screen is built from
     Input/                           Pointers, held keys, copied text, and the game's keyboard
     Terminal/                        The control that opens the editor, and the screen it opens
     Content/                         Materials, fonts, and the mod's own metadata
-  Reactor.Host.SpaceEngineers.Sim    The harness: the mod, run without the game
+  Sprocket.Host.SpaceEngineers.Sim    The harness: the mod, run without the game
     Machine/                         The rig it runs on, as blocks the game would recognise
     Fakes/                           What the game declares and the harness has to answer for
     Content/                         The game's own fonts and block art, read off disk
     Simulation/                       A frame with nobody watching, and the scripts that drive one
 tests/
-  Reactor.Core.Tests                 The model, the runtime, and the editor
-  Reactor.Host.SpaceEngineers.Presentation.Tests   The screens, driven and read through the harness
-  Reactor.Host.SpaceEngineers.Tests  What the mod says it does about each conformance point
+  Sprocket.Core.Tests                 The model, the runtime, and the editor
+  Sprocket.Host.SpaceEngineers.Presentation.Tests   The screens, driven and read through the harness
+  Sprocket.Host.SpaceEngineers.Tests  What the mod says it does about each conformance point
   Reference/                         The screens held still, one frame per state, as committed text
 ```
 
 One folder per capability, each holding the whole of it. A sequence's model, the slots a screen is
 asked to show for it and the views that draw them all sit in `Sequences/`, so a change to how a
 sentence works is a change in one place. `Editing/` decides where pressing something leads, `Words/`
-decides what any of it says, and the folders that know nothing of Reactor - `Layout/`, `Drawing/`,
+decides what any of it says, and the folders that know nothing of Sprocket - `Layout/`, `Drawing/`,
 `Look/` - sit beside the features that use them rather than under a layer of their own.
 
 The one thing the folders no longer keep apart is words: what a screen is asked to show carries
@@ -150,7 +150,7 @@ answers: `IScreenSpace` and `ISlots`.
 The mod also ships **content**: a symbol font for the things a screen needs and Space
 Engineers has no artwork for - undo, redo, delete. It is drawn rather than borrowed, and it
 is built by `art/symbols` rather than committed by hand. It is meant to become a mod of its
-own that any display mod can depend on, so nothing about it is named for Reactor.
+own that any display mod can depend on, so nothing about it is named for Sprocket.
 
 That constraint fails silently, so it is enforced at build time instead:
 
@@ -165,14 +165,14 @@ whatever C# they like.
 
 ```
 dotnet test                                          # 236 tests
-dotnet build src/Reactor.Host.SpaceEngineers         # builds AND deploys the mod
-dotnet run --project src/Reactor.Host.SpaceEngineers.Sim   # the screens, without the game
+dotnet build src/Sprocket.Host.SpaceEngineers         # builds AND deploys the mod
+dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim   # the screens, without the game
 ```
 
-In the game, a programmable block's terminal grows a **Reactor** button, which opens the
+In the game, a programmable block's terminal grows a **Sprocket** button, which opens the
 editor as a screen the game owns.
 
-The simulator opens on an empty Reactor asking what should set something off. The
+The simulator opens on an empty Sprocket asking what should set something off. The
 simulated ship has a hangar door, an airlock, lights, a sensor, a button and a
 hydrogen tank; the strip along the bottom pokes the world so you can watch sequences
 react. Doors travel and vents cycle, because instant entities hide every problem worth
@@ -180,7 +180,7 @@ finding.
 
 ### The simulator
 
-`Reactor.Host.SpaceEngineers.Sim` runs the mod without launching the game: the same sources, the
+`Sprocket.Host.SpaceEngineers.Sim` runs the mod without launching the game: the same sources, the
 same screens, over blocks it makes up. What is seen there is what ships. Coordinates are UI units
 rather than window pixels; `--dump` prints both, so a point can be converted.
 
@@ -218,7 +218,7 @@ mips draws a ring as a dotted circle.
   MDK settings point rather than to the default mods folder, and the build output says where it
   went. `mdk.local.ini` is per-machine and gitignored.
 - **The running simulator locks the mod's assembly.** Close it before rebuilding.
-- **`%LOCALAPPDATA%\Reactor\SimContent` is not in the repository**, because it is Keen's
+- **`%LOCALAPPDATA%\Sprocket\SimContent` is not in the repository**, because it is Keen's
   content and not ours to redistribute. Run `--extract` once. Without it the simulator still
   runs and fails loudly: block artwork becomes magenta crossed boxes and text falls back to a
   desktop face whose widths run 9 to 17 percent narrow, so any layout judgement made in that
@@ -248,12 +248,12 @@ answer to *"why didn't it happen?"*, which is deliberately not built yet.
 |---|---|
 | `docs/UserStories.md` | **Public.** Twenty-three wants in players' own words. |
 | `docs/StoryNotes.md` | Our judgement on each story. |
-| `docs/Requirements.md` | What Reactor must do, derived one story at a time. |
+| `docs/Requirements.md` | What Sprocket must do, derived one story at a time. |
 | `docs/Design.md` | The model, what is excluded, and the open decisions. |
 | `docs/Editor.md` | The interface: what each screen is and what core states about it. |
 | `docs/Language.md` | The script language as it is right now, with an example of each construct. |
 | `docs/Wording.md` | Words on screen that read wrong, gathered for one pass over them. |
 | `docs/ApiUnknowns.md` | What we still do not know about the game. |
-| `docs/Catalogue.md` | What the game offers a mod, and what Reactor needs to use it. |
+| `docs/Catalogue.md` | What the game offers a mod, and what Sprocket needs to use it. |
 
 Nothing from the internal ones belongs in the public one.

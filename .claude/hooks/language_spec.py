@@ -11,8 +11,8 @@ import sys
 # The files a language rule can change in: the lexer's tokens, the grammar, the keyword table, what
 # the writer spells, and what the reader accepts.
 WATCHED = (
-    "reactor.host.spaceengineers/core/storage/",
-    "reactor.host.spaceengineers/core/sequences/naming.cs",
+    "sprocket.host.spaceengineers/core/storage/",
+    "sprocket.host.spaceengineers/core/sequences/naming.cs",
 )
 
 REMINDER = (

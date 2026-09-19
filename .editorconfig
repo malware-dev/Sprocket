@@ -1,10 +1,10 @@
 root = true
 
-# Reactor's inspection settings. Only suppressions live here, and every one says why - an inspection
+# Sprocket's inspection settings. Only suppressions live here, and every one says why - an inspection
 # turned off without a reason is one nobody can ever turn back on with confidence.
 #
 # Run the inspections with:
-#   jb inspectcode Reactor.slnx --swea --format=Sarif --output=<file> --severity=WARNING
+#   jb inspectcode Sprocket.slnx --swea --format=Sarif --output=<file> --severity=WARNING
 #
 # Sarif rather than Xml: the Xml report omits the line for some inspections, which silently hides
 # them from anything reading the file.
@@ -12,9 +12,9 @@ root = true
 # Each file is analysed once now. The mod is one project and the harness references its assembly,
 # so a RedundantUsingDirective report means what it says.
 
-# Cleanup is run through the one profile the repository ships, in Reactor.slnx.DotSettings:
+# Cleanup is run through the one profile the repository ships, in Sprocket.slnx.DotSettings:
 #
-#   jb cleanupcode Reactor.slnx --profile=Narrow
+#   jb cleanupcode Sprocket.slnx --profile=Narrow
 #
 # It removes redundancies and shortens qualified references, and nothing else. Do not run the default
 # profile: full cleanup reformats all 258 files, and brace, spacing and line-break style here is left
@@ -79,6 +79,6 @@ resharper_csharp_naming_rule.constant_field = AaBb + _aaBb
 # would stop the fakes standing in for anything.
 # ---------------------------------------------------------------------------------------------------
 
-[src/Reactor.Host.SpaceEngineers.Sim/Fakes/*.cs]
+[src/Sprocket.Host.SpaceEngineers.Sim/Fakes/*.cs]
 resharper_check_namespace_highlighting = none
 resharper_inconsistent_naming_highlighting = none

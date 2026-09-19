@@ -1,6 +1,6 @@
 # The editor
 
-Internal, and in progress. What Reactor presents and how somebody moves through it.
+Internal, and in progress. What Sprocket presents and how somebody moves through it.
 [Design.md](Design.md) holds the model; this holds the interface. Where they disagree, the
 model is right and this is out of date.
 
@@ -8,7 +8,7 @@ Requirements are referred to by number, from [Requirements.md](Requirements.md).
 
 ## The root
 
-What you see when you open Reactor is **the systems on this ship**, not a list of
+What you see when you open Sprocket is **the systems on this ship**, not a list of
 sequences. A player did not build a procedure, they built an airlock, and that is the thing
 they came looking for.
 
@@ -47,7 +47,7 @@ for the act: *add another*, on the row that does it.
 ## Getting started
 
 Both root actions are equally prominent. Most people will never author anything, and for
-them Reactor is the thing where you load somebody's airlock and tell it which doors are
+them Sprocket is the thing where you load somebody's airlock and tell it which doors are
 yours - so **Load system** is not a secondary path.
 
 **New system asks what the system is, and then puts you on it.** It does not open an empty
@@ -103,7 +103,7 @@ the list, not inside the sequence: wanting another one like this is something so
 while reading what they have, and the row is where they are. The copy has the same steps pointing
 at the same blocks and is its own from then on.
 
-It arrives with **no trigger** and **switched off**. A toolbar slot holds one claim on Reactor's
+It arrives with **no trigger** and **switched off**. A toolbar slot holds one claim on Sprocket's
 action, so a copy carrying the trigger it came from would be a second claim on a slot that is
 already taken - and what that costs is not an airlock cycling twice but an airlock that stops
 cycling at all, with nothing on screen saying why. See *Two triggers on one button*. It is named like any other new sequence, because a name is what makes one
@@ -161,7 +161,7 @@ behind the question about it.
 ### Two triggers on one button
 
 **A slot holds one thing, so the second trigger is a question and the answer decides it.** Asked to
-arrange both, Reactor arranges neither: the slot is left empty, both triggers stand there naming a
+arrange both, Sprocket arranges neither: the slot is left empty, both triggers stand there naming a
 button that answers nothing, and the host then takes the block out of one of them because the
 button it names is no longer its own. Which was how a trigger ended up with nothing on its row to
 press - the failure that asked for the warning in the first place, and the reason the warning
@@ -175,13 +175,13 @@ nothing can start this, its parts are still there, and pressing them is the mend
 It is one edit, because it was one answer to one question: one press of the way back puts the
 button where it was and the blocks back in the trigger that lost them. Both ways in ask - making a
 trigger and pointing an existing one - and a trigger never clashes with itself, so settling on what
-was already there asks nothing. Only for the moments the construct announces, since Reactor can
+was already there asks nothing. Only for the moments the construct announces, since Sprocket can
 watch one door for two sequences without a slot being involved at all.
 
 Both are **walked back from the system's screen** - see *Taking it back*.
 
 **Each list is named and carries its own ways to add to it**: *Triggers*, then *+ When…* and
-*+ Every…*; *Sequences*, then *+ New sequence*. Reactor's own nouns rather than a phrase talking
+*+ Every…*; *Sequences*, then *+ New sequence*. Sprocket's own nouns rather than a phrase talking
 round them - a screen holding two lists of things that read alike has to say which is which, and
 *what starts things* is longer, has to be re-invented at every site, and is wrong the moment a row
 stops a sequence instead.
@@ -538,7 +538,7 @@ pointing at it named it by.
 Two designs were weighed and the second was wrong for a specific reason worth keeping.
 Snapshot-and-restore, or replaying a log of forward operations from a base, both avoid writing
 a reverse for each edit - which matters, because a reverse only ever runs on the unhappy path.
-But **Reactor is live.** Sequences run while they are edited, and the runner and the open pages
+But **Sprocket is live.** Sequences run while they are edited, and the runner and the open pages
 hold references to the very objects involved. Both of those approaches rebuild the sequence,
 leaving every one of those references pointing at an orphan. Operations mutate in place, so
 identity survives.
@@ -578,7 +578,7 @@ turns out to buy something nobody was aiming for.
 
 **A window small enough to sit off to one side leaves the world visible and usable.** The
 player can keep flying, keep walking, keep looking at the airlock they are describing, while
-the editor is open beside it. Everything Reactor is about is a thing in the world, and an
+the editor is open beside it. Everything Sprocket is about is a thing in the world, and an
 editor that covers the world makes somebody hold it in their head instead.
 
 Which opens a stronger possibility: **picking a block by pointing at it.** Core already says
@@ -597,7 +597,7 @@ Core states capabilities and leaves presentation alone. That is the right split 
 a hole: nothing stops a host simply never drawing one of them, and the omission looks like a
 design choice rather than a gap.
 
-`Reactor.Ui.Conformance` is a list of the things a target has to answer for - a way to reorder
+`Sprocket.Ui.Conformance` is a list of the things a target has to answer for - a way to reorder
 a step, a way to narrow a long list, a way back, and saying why a running sequence cannot be
 edited. Each host carries one test that walks the list and writes down what it does about
 every entry. **Adding a point breaks every host until a person has looked at it.**

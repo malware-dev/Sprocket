@@ -1,4 +1,4 @@
-# Reactor
+# Sprocket
 
 Automation that someone with no programming knowledge can build, read, and fix.
 The target is a Space Engineers mod; the editor is abstract, and this host is one
@@ -37,14 +37,14 @@ jargon, or taking away the truth? The first earns its keep. The second is how a 
 acquires the tone that makes people put it down.
 
 That gives a test which has already killed several features: **if a concept only earns
-its keep by being general, it does not earn its keep.** Reactor is for building
+its keep by being general, it does not earn its keep.** Sprocket is for building
 automation, not a set of shipped automations - but the difference between the two is
 expressiveness, not abstraction.
 
 One thing that is *not* a reason to leave something out: **just because it can be done
-in vanilla automation does not mean Reactor should not be able to do it as well.** The
+in vanilla automation does not mean Sprocket should not be able to do it as well.** The
 easy cases are not beneath the system - they are what keeps a ship's automation in one
-place, and Reactor can only explain behaviour it can see. Every case somebody sets up
+place, and Sprocket can only explain behaviour it can see. Every case somebody sets up
 in the game's own terminal instead is a hole in every answer we later try to give them.
 
 That is not a licence to import every vanilla feature as a want. It says vanilla
@@ -52,8 +52,8 @@ capability never disqualifies a story; there still has to be a story.
 
 **Where the boundary actually falls: setting a block up is not automation.** A sensor's
 friend-or-foe filter, its range, a door's speed - these are configured on the block
-once, the player already knows where they live, and Reactor has no business
-reimplementing the terminal. What Reactor owns is what happens *between* blocks, and
+once, the player already knows where they live, and Sprocket has no business
+reimplementing the terminal. What Sprocket owns is what happens *between* blocks, and
 over time: this happened, so do that.
 
 The line is not that block settings are out of bounds, because changing one is a
@@ -61,7 +61,7 @@ perfectly good action - a step that turns the lights red is setting a block's co
 It is that *configuring a block once and leaving it* belongs to the game, while
 *changing it because something happened* belongs here.
 
-**And a second principle, about motion.** Reactor never moves anything the player did not
+**And a second principle, about motion.** Sprocket never moves anything the player did not
 ask it to move. That is what rules out reversal: inferring "back" means moving things
 nobody asked to have moved.
 
@@ -75,13 +75,13 @@ an opt-in, an ordering the player controls, or something else, depends on how it
 built. Unresolved, and low priority.
 
 The quick test, when a want sounds like this one: would serving it mean rebuilding a
-block's terminal screen inside Reactor? Fifty-odd block types, every setting on each of
+block's terminal screen inside Sprocket? Fifty-odd block types, every setting on each of
 them, duplicated, and re-checked against the game every update. The answer is no, and
 it is not close.
 
 **The game's own words are used for the game's own things.** A merge block welds two
 constructs into one and is indistinguishable from a repair; it is not a docking block,
-however many people use it as one, and Reactor must not describe it as one. Borrowing a
+however many people use it as one, and Sprocket must not describe it as one. Borrowing a
 convenient word for a thing that does not work that way teaches the player something false
 and then relies on them not finding out.
 
@@ -138,7 +138,7 @@ Two things came with the fix. Registering the same identity twice now **throws**
 equivalent mistake under a counter could not be detected at all. And a command no longer has
 to be born during a rebuild, because withholding one does not renumber its neighbours.
 
-It is the same answer as everywhere else in Reactor: references are by identity, never by
+It is the same answer as everywhere else in Sprocket: references are by identity, never by
 position. R47 says it for blocks, the edit operations say it for what they point at, and this
 was the last place still asking which slot something was in.
 
@@ -191,7 +191,7 @@ Three consequences worth stating outright, because they are what make the rest c
 ### Ship and blocks
 
 Given, not ours. A block has a kind, a name, some signals, and some things that can be
-done to it. Reactor reads and writes; it does not model the world.
+done to it. Sprocket reads and writes; it does not model the world.
 
 Two things about the target constrain the design more than they look. A mod can add
 subtypes but not block types, so the vocabulary is bounded by what the game already
@@ -203,7 +203,7 @@ abstractions built from them.
 
 Not in a block. Vanilla automation keeps the behaviour inside the event controller or
 timer that runs it, so a cannon round through that one block takes the automation with
-it and the player starts again from nothing. Reactor's program belongs to the
+it and the player starts again from nothing. Sprocket's program belongs to the
 construct, and losing any single block may cost the reference to that block and
 nothing else.
 
@@ -212,19 +212,19 @@ answerable at all rather than being the same defeat in a nicer editor.
 
 ### One construct, by choice
 
-A mod can see the entire world. Nothing stops Reactor watching every grid on the server and
+A mod can see the entire world. Nothing stops Sprocket watching every grid on the server and
 operating any of it. The limit to one construct is ours, chosen for reasons that are worth
 writing down because the constraint will otherwise look like ignorance of what is possible.
 
 - **Operating other people's property.** If automation reaches past its own construct, then
-  tying up at a stranger's station hands them your thrusters, your reactors and your cargo.
+  tying up at a stranger's station hands them your thrusters, your sprockets and your cargo.
   Ownership might police that; needing policing is the tell.
 - **Cost.** T1 says the total price is what is happening, not what exists. World scope means
   every construct is potentially watching every other, and the arithmetic stops being
   bounded by anything the player can see.
 - **Where the program lives.** It belongs to the construct, which is what makes it
   survivable and shareable. Automation with no home is neither.
-- **Being able to answer for itself.** M rests on Reactor knowing what is going on. Its
+- **Being able to answer for itself.** M rests on Sprocket knowing what is going on. Its
   chance of explaining anything drops sharply once the answer might be on a different ship.
 
 Story T is the first thing to push back on this, and it does not push hard enough to move
@@ -235,7 +235,7 @@ this is the argument it has to beat, not a technical wall.
 ### Behaviour of our own, where the game makes something impossible
 
 Open, and worth keeping open. A mod can attach behaviour to blocks that already exist, and
-can add subtypes of its own, so Reactor is not limited to automating what the game already
+can add subtypes of its own, so Sprocket is not limited to automating what the game already
 provides - it can make an automatable thing possible at all.
 
 **The cheap form is a setting on a stock block**, alongside the ones already there. No
@@ -267,7 +267,7 @@ otherwise be blamed on us:
   *Name undecided.* "Rejecting" describes what it does not do, which is a poor label for a
   toggle somebody has to find and understand.
 
-**Sharing does not suffer.** Anyone running a shared system has Reactor, so a Reactor block
+**Sharing does not suffer.** Anyone running a shared system has Sprocket, so a Sprocket block
 is always available where a third-party dependency would not be.
 
 **What would have to be true before doing it.** A setting on an existing block is cheap; a
@@ -277,14 +277,14 @@ argument with everybody who thinks it is overpowered. Either way the bar is that
 thing the game's own version cannot, and that it is not a way of avoiding a design problem
 we should be solving in the language.
 
-**And they may not belong to Reactor at all.** Both are fixes to the game rather than
-automation, and they are useful to people who have no interest in Reactor whatsoever. Making
-them one or two small mods in their own right, which Reactor depends on, costs little and
+**And they may not belong to Sprocket at all.** Both are fixes to the game rather than
+automation, and they are useful to people who have no interest in Sprocket whatsoever. Making
+them one or two small mods in their own right, which Sprocket depends on, costs little and
 buys several things: they stand or fall on their own merit rather than as riders on
 something larger, somebody who only wants a connector that pushes onward can have exactly
-that, and Reactor's own scope stays what it says on the tin.
+that, and Sprocket's own scope stays what it says on the tin.
 
-It costs nothing to sharing either. Anyone running Reactor has the dependency, so a system
+It costs nothing to sharing either. Anyone running Sprocket has the dependency, so a system
 that relies on one of these behaviours works for whoever receives it.
 
 Nothing is decided. It is written down because "we could add behaviour to the game" is an
@@ -316,7 +316,7 @@ asked out loud.
 - **Constructs merging and splitting is entirely our problem.** The game does nothing for
   us. We detect it, and we decide what it means.
 
-**And a preference that shapes several of these.** Where Reactor tells somebody something,
+**And a preference that shapes several of these.** Where Sprocket tells somebody something,
 prefer doing it *in the world* - a light, a sound, a screen on a wall - over the game's own
 interface. Endemic where possible. A warning that arrives as a chat line is a message from a
 mod; a warning that arrives as a red light in the corridor is the base telling you something,
@@ -387,17 +387,17 @@ runs or stops. Any number of them may point at one sequence, which is what lets 
 buttons cycle the same airlock, and a sequence may have none - one another sequence runs,
 or one somebody is half way through building.
 
-Intervals come from the game's frame counter and are never counted by Reactor. Space
+Intervals come from the game's frame counter and are never counted by Sprocket. Space
 Engineers offers update rates of 1, 10 and 100 only, and the slower two do not land on
 exact multiples, so anything self-counted drifts with server load.
 
 **A trigger that does one plain thing is written as the game's own action.** A block event
-whose target is a single action goes into the toolbar slot as that action, not as Reactor's
+whose target is a single action goes into the toolbar slot as that action, not as Sprocket's
 carrying a key, so it costs nothing at runtime and keeps working when the mod is removed.
 Only sequences stop. This is possible for the toolbar kinds and for actions the game has:
-Reactor's own vocabulary is performed by setting properties, so each declared action needs
+Sprocket's own vocabulary is performed by setting properties, so each declared action needs
 the game's action name to place, and one an extension invents out of several writes has
-none. Where a block does not offer the name, the trigger runs through Reactor instead.
+none. Where a block does not offer the name, the trigger runs through Sprocket instead.
 
 ### Step
 
@@ -499,7 +499,7 @@ level or the name somebody gave a block. Every attempt to keep "state" and "prop
 separate ideas ran into the fact that they are the same idea.
 
 What is **not** built is the authoring. Only a host can declare a state today; nobody using
-Reactor can write "below a fifth" for themselves, which is what F and G actually ask for.
+Sprocket can write "below a fifth" for themselves, which is what F and G actually ask for.
 
 The stories split this cleanly in two, and the split is the decision:
 
@@ -564,7 +564,7 @@ slots are filled once when it is placed or supplied by whoever calls into it. Th
 is closer to how blueprints already work and is probably right; the second is closer to
 passing arguments and is probably too programmer-shaped, but neither is decided.
 
-### 4b. How a block outside Reactor names a sequence
+### 4b. How a block outside Sprocket names a sequence
 
 *Worked out 2026-09-12. The scheme is settled. The naming rules are not, and no longer block
 anything - see "the separator became reversible" below.*
@@ -577,30 +577,30 @@ an instruction and gets reported, never repaired.
 That rule is what decides everything else, because it means whatever the slot carries can never be
 corrected afterwards.
 
-**The slot carries two halves.** The Reactor block's entity id, which is the game's own unique long
-and makes "which Reactor" unambiguous, and an argument that names the target inside that program:
+**The slot carries two halves.** The Sprocket block's entity id, which is the game's own unique long
+and makes "which Sprocket" unambiguous, and an argument that names the target inside that program:
 `system`, `instance`, `sequence`. The instance being in it is the part today's design cannot express
 at all - the slot names only a sequence, so nothing chooses which airlock it runs on.
 
-**The argument is an opaque string and is never parsed.** Reactor builds one dictionary per
+**The argument is an opaque string and is never parsed.** Sprocket builds one dictionary per
 construct, ordinal-keyed, whose value already holds the sequence and the resolved instance. A key
-Reactor did not build has nothing behind it to parse, so a stale or copied slot finds nothing and
+Sprocket did not build has nothing behind it to parse, so a stale or copied slot finds nothing and
 stays silent. The cost on the firing path is one hash of a string the game hands us and one
 compare - no allocation, nothing split or concatenated. **That last part is the whole of why it is
 affordable**, and the reason to fear "string lookup" was always the parsing rather than the lookup.
 
 **One string parameter, and only ever one.** Not three parameters for the three parts, tempting as
 that looks. A parameter list's arity, order and types are frozen by every slot in every saved world,
-and Reactor may not rewrite slots - so growing the key later would mean relying on the game
+and Sprocket may not rewrite slots - so growing the key later would mean relying on the game
 tolerating a saved item with three parameters against a definition declaring four. A string's
-*content* is Reactor's business and nobody else's: add a part, keep registering the old spelling
+*content* is Sprocket's business and nobody else's: add a part, keep registering the old spelling
 alongside the new one, and every slot already out there goes on resolving with no migration.
 
-**Two spellings of the same key.** The form Reactor writes uses ids, which are immutable, so
+**Two spellings of the same key.** The form Sprocket writes uses ids, which are immutable, so
 renaming cannot break wiring. The name form is registered against the same entry as an alias, so a
 person or a script can write one by hand.
 
-**Why the separator became reversible.** Nothing *stored* has to contain a name. The key Reactor
+**Why the separator became reversible.** Nothing *stored* has to contain a name. The key Sprocket
 writes is ids - `12/3/47` - so the only characters in a stored key are digits and whatever joins
 them, and **no name ever enters one.** The forbidden-separator problem was created by putting names
 in the stored form and it disappears when we don't. The name spelling is then an alias that is
@@ -615,15 +615,15 @@ Candidates argued over for that spelling: `::`, `/`, `->`, `{}` bracketing. `[]`
 are XML and U+001F is not legal in XML 1.0 text, so it would break writing the world rather than
 fail where somebody could see it.
 
-**The sequence selector.** When a player drags Reactor's trigger action onto a slot themselves,
-Reactor answers with **its own chooser** - pick the system, pick which one of it, pick the sequence -
+**The sequence selector.** When a player drags Sprocket's trigger action onto a slot themselves,
+Sprocket answers with **its own chooser** - pick the system, pick which one of it, pick the sequence -
 rather than asking anybody to type a key. `IMyTerminalAction.DoUserParameterRequestWithItem` is
 mod-facing, and the game has no parameter dialog of its own: without that callback it silently
 applies the definitions' defaults. So supplying one is not an extra, it is the only way a
 hand-assigned slot gets a meaningful argument at all.
 
 `IUserCustomizableTerminalAction` also carries `SetCustomIconTitle`, so the slot can be labelled with
-what it does - a wired button reading "Cycle inner" on the panel instead of the flat "Reactor" that
+what it does - a wired button reading "Cycle inner" on the panel instead of the flat "Sprocket" that
 `TriggerAction.Writer` paints today. `MyMotorStator` does exactly this for its rotate-to-angle
 action.
 
@@ -645,28 +645,28 @@ a programmable-block script.
   naming a sequence in another system and a hand-written toolbar address are one thing spelt twice.
 
 **What this rests on.** An imported system arrives *unbound* - it carries slots, not instances - so
-every slot Reactor ever writes is written against local ids after any import that could have
+every slot Sprocket ever writes is written against local ids after any import that could have
 disturbed them. That single fact is what makes per-program ids sufficient and removes the need for a
 durable cross-world key. It also means import may renumber arrivals and **must never re-key what was
 already on the construct**, because bound slots depend on it.
 
-**Blocked on one thing.** "Which Reactor" is only well defined if Reactor is per-construct. It is
-not today: `ReactorSession` keys units by block entity id, `HasProgram` is asked of every
-programmable block, and a program lives in that block's own mod storage, so two Reactor blocks on
+**Blocked on one thing.** "Which Sprocket" is only well defined if Sprocket is per-construct. It is
+not today: `SprocketSession` keys units by block entity id, `HasProgram` is asked of every
+programmable block, and a program lives in that block's own mod storage, so two Sprocket blocks on
 one construct are two programs. Per-construct, with a programmable block as an entry point that
 opens the same view whichever one you enter from, is the intended model and is unbuilt.
 
 *Still to prove in the game*, the way the global action was: that a mod's parameter dialog actually
 opens when a player drags the action to a slot, and that what it sets survives a save and reload.
 
-*Rejected on the way, with the reasons, so they are not re-proposed.* A Reactor-minted dense trigger
+*Rejected on the way, with the reasons, so they are not re-proposed.* A Sprocket-minted dense trigger
 index - it lived only in memory, so the only way to recover the numbering after a load was to
 rewrite every slot, and that rewrite silently undid a button somebody had cleared by hand. A
 globally unique 64-bit key - unguaranteeable, and unnecessary once imports arrive unbound. Qualified
 *user* names as the only reference - that forces naming every conditional. A slot naming the block
 that owns the toolbar, so wiring would survive a paste or a projector print - it needs the action
-present on arbitrary blocks, and it is not, see ApiUnknowns 4. Cutting and pasting the block Reactor
-runs in is answered without it, by the id Reactor writes into its own action; a projector print is
+present on arbitrary blocks, and it is not, see ApiUnknowns 4. Cutting and pasting the block Sprocket
+runs in is answered without it, by the id Sprocket writes into its own action; a projector print is
 not, and is still open.
 
 ### 5. Named state
@@ -701,14 +701,14 @@ it before calling exists would deliver the useless half.
 
 *Wanted by: G, O.*
 
-Reactor can operate blocks and nothing else. It has never been able to tell anybody
+Sprocket can operate blocks and nothing else. It has never been able to tell anybody
 anything, so "warn me" can only be built today as "switch on a lamp somebody has to be
 looking at".
 
 One capability with two faces: G interrupts, O displays. Building one without the other
 will read as arbitrary. O then ladders - a heading and live text, then a progress bar
 which waits on 2, then a graph which needs **history**, samples kept over time, and
-would be the first thing Reactor stores that is not a fact about right now.
+would be the first thing Sprocket stores that is not a fact about right now.
 
 O also raises a structural question rather than a feature one. A screen is a standing
 arrangement that is always true, not a series of steps, and driving it from steps is the
@@ -749,7 +749,7 @@ the wrong block is worse than asking - and it is worth nothing without the first
 **Open inside this: what watching actually looks like.** R27 and R28 say what must be
 knowable; they say nothing about where somebody stands while knowing it. The useful version
 is probably not a step list read in isolation - it is watching the doors themselves with
-something beside you saying what Reactor thinks is going on, because the failure being
+something beside you saying what Sprocket thinks is going on, because the failure being
 diagnosed is usually a disagreement between those two. That implies the editor is legible
 while a person is looking at the machine, which is a different demand from being legible
 while they are sat in a terminal.
@@ -799,7 +799,7 @@ was right, and it guarantees that several sequences will act on one block by des
 conflict is a designed-in condition rather than a fault. The honest answer is probably
 to show the disagreement rather than resolve it quietly.
 
-H is the constraint nobody would guess. Reactor can only explain what it can see, so
+H is the constraint nobody would guess. Sprocket can only explain what it can see, so
 every case somebody sets up in the game's own terminal instead is a hole in the
 explanation. Losing the easy cases is how the hard ones become unanswerable.
 

@@ -25,7 +25,7 @@ which of the common ones - a button pressed, a door finishing, a sensor tripping
 connector locking - are told to us.
 
 **Mostly answered, by the toolbar ModAPI.** Every block that has a toolbar can be made to *tell* us,
-by putting a Reactor action in a slot, rather than being sampled - so the catalogue below shrinks to
+by putting a Sprocket action in a slot, rather than being sampled - so the catalogue below shrinks to
 the blocks that have no toolbar. That API is unreleased and unmerged; see `HANDOVER.md`.
 
 **What can be missed is bounded, and the bound is comfortable.** A level that is held
@@ -55,9 +55,9 @@ through `IMyRemapHelper` while `MyObjectBuilder_Toolbar.Remap` walks every slot.
 point a slot at the pasted copy of the block. In practice it does not reliably survive, and a
 projector print is the worse case.
 
-*What that settles for Reactor.* Wiring surviving a copy can never be relied on, so the bind-once
+*What that settles for Sprocket.* Wiring surviving a copy can never be relied on, so the bind-once
 rule stands and the reporting carries the weight: a pasted construct arrives with some buttons wired
-and some not, Reactor adopts what is there and writes nothing - it cannot tell a lost slot from a
+and some not, Sprocket adopts what is there and writes nothing - it cannot tell a lost slot from a
 deliberately cleared one - and the sequences whose buttons are gone report as unreachable. Which
 makes a repair control load-bearing rather than a nicety; see Design.md 4b.
 
@@ -71,7 +71,7 @@ surviving a paste rests entirely on it, and nothing has tested it.
 
 **Must be answered before release. It is a correctness hole, not a question of polish.**
 
-`GridWorld.Entities` is this construct only - the grid the Reactor sits on plus whatever is
+`GridWorld.Entities` is this construct only - the grid the Sprocket sits on plus whatever is
 mechanically connected to it by rotors, pistons and hinges. It keeps that promise by marking itself
 stale on the grids' own `OnBlockAdded` and `OnBlockRemoved`, and rebuilding when somebody looks.
 
@@ -118,8 +118,8 @@ rest is what makes the approach unusable. `MyTerminalControlFactory.Unload()` cl
 session unload, so staleness between world loads is not it either.
 
 *What it closes off.* A toolbar slot that names **the block owning the toolbar** rather than
-Reactor's own block. That would have let wiring survive a paste or a projector print, since the
-paste remaps a self-reference and cannot remap a pointer to a Reactor on another ship. It needs the
+Sprocket's own block. That would have let wiring survive a paste or a projector print, since the
+paste remaps a self-reference and cannot remap a pointer to a Sprocket on another ship. It needs the
 action present on arbitrary blocks, so it is off the table in that form.
 
 *What it leaves open.* Only blocks that own a toolbar ever need the action - button panels, timers,

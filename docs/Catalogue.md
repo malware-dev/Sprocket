@@ -1,14 +1,14 @@
 # The catalogue
 
 Internal. What Space Engineers offers a mod, surveyed rather than sampled, and **what
-Reactor needs in order to use it**.
+Sprocket needs in order to use it**.
 
 [UserStories.md](UserStories.md) says what people want to be able to *say*, and the
 language that comes out of it is the grammar. This says what there is to talk about, and
 what the grammar therefore has to be capable of.
 
 **This document is about what is needed, not about what exists.** It does not describe
-what Reactor does today, and it does not propose how anything should be built. Each need
+what Sprocket does today, and it does not propose how anything should be built. Each need
 gets dealt with on its own, in its own time, and several will be answered in ways nothing
 here anticipates. Recording a need is not a commitment to a mechanism.
 
@@ -42,7 +42,7 @@ allows, direct access does better still.
 
 **The base layer is the terminal, and it is correct.** Its entries are the block's own
 terminal controls. That is worth saying because it is easy to mistake for a weakness: it
-is the surface the player already knows, and story H is explicitly about Reactor being no
+is the surface the player already knows, and story H is explicitly about Sprocket being no
 more work than the terminal.
 
 What it is, though, is a **control** surface. It carries what a player can set and press,
@@ -303,7 +303,7 @@ Two further sources both carry a value:
   and which no amount of value-passing turns into the same thing.
 
 **Built**: an action that declares values is offered, asks for that many, and is performed with
-them. What remains of Design decision 3 is setting a property, which is a surface Reactor does not
+them. What remains of Design decision 3 is setting a property, which is a surface Sprocket does not
 have at all yet, and a decision on relative adjustment - increase and decrease are not setting a
 value, and no amount of value-passing makes them so.
 
@@ -312,13 +312,13 @@ find it out twice:
 
 - **How many.** Not on the interface a block hands out. The same object also implements the one
   mods are given for declaring actions of their own, and the parameter list is on that face, so it
-  is reached by casting. The list holds one entry per value, so its count is the arity. Reactor
+  is reached by casting. The list holds one entry per value, so its count is the arity. Sprocket
   leaves an action with any at all out of the vocabulary, which is what keeps a step that would do
   nothing off the screen.
 - **What type - and the declaration does not say.** Each entry is built from a default, but that
   default is a placeholder for the count: the game's own colour setter declares three *strings* and
   then refuses anything whose type code is not an integer. Their own dialog supplies the values, so
-  the declared type never had to be right. Reactor therefore passes each value as the kind somebody
+  the declared type never had to be right. Sprocket therefore passes each value as the kind somebody
   wrote and lets the action decide.
   It is not one stray action either: the radius and blink setters declare strings and then insist
   on `Single` or `Double`. Every one of the twenty-three string declarations is a placeholder, so
@@ -384,8 +384,8 @@ own. It also suppresses what it has said better, which needs no list: a switch c
 offers `X_On`, `X_Off` and a bare `X`, so a kind that has written both halves does not offer
 the toggle a third time.
 
-The consequence for this section is that nothing below is a block Reactor cannot use. It is
-a list of blocks Reactor cannot *ask about*, which is a smaller and more interesting problem.
+The consequence for this section is that nothing below is a block Sprocket cannot use. It is
+a list of blocks Sprocket cannot *ask about*, which is a smaller and more interesting problem.
 
 Not every block needs one, and the ones that need one most are not the ones people
 automate most. **An extension earns its place where a block is watched, not where it is
@@ -419,8 +419,8 @@ interfaces:
 So one door extension covers five block types rather than five extensions covering one
 each. **And any modded block that implements the vanilla interface inherits the extension
 for free**, which is the strongest argument for keying on the interface rather than on a
-block type id: a mod author who implements `IMyDoor` gets Reactor's whole door vocabulary
-without knowing Reactor exists.
+block type id: a mod author who implements `IMyDoor` gets Sprocket's whole door vocabulary
+without knowing Sprocket exists.
 
 `IMyParachute` is the exception that proves the point. It carries `DoorStatus` and the
 same four door events, and it does **not** derive from `IMyDoor`. A shared shape is not
@@ -460,7 +460,7 @@ should cost one file.
 ## The needs, gathered
 
 Nothing here is required to make an airlock work. All of it is required before the answer
-to "can Reactor do X" stops being "not to that block". They are listed, not ordered, and
+to "can Sprocket do X" stops being "not to that block". They are listed, not ordered, and
 each will be taken on its own.
 
 1. A reading whose possible values are known and finite.

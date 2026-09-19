@@ -1,6 +1,6 @@
-# The Reactor script language
+# The Sprocket script language
 
-A saved program is a script. It is read and written by Reactor, and can be read and repaired by a
+A saved program is a script. It is read and written by Sprocket, and can be read and repaired by a
 person.
 
 ## Shape
@@ -56,7 +56,7 @@ A bare number or a quoted GUID is an id; a name is a name. A sequence called "2"
 Renaming something is far more likely than renumbering it, so a reference written as an id usually
 outlives one written as a name.
 
-## `reactor <version>`
+## `sprocket <version>`
 
 The first statement of every program, and the version of this language the rest of it is written in.
 A file saying any other version is not this language.
@@ -110,18 +110,18 @@ quoted `'Type/Subtype'` for one exact block, or a list of either.
 
 `required trigger <moment> [ <parts> ] to run <sequence>` says the construct announces that moment
 and starts that sequence. A button, a timer, a sensor and an event controller all answer it, because
-each is a toolbar slot: the slot holds Reactor's own action and the construct invokes it. The slot is
+each is a toolbar slot: the slot holds Sprocket's own action and the construct invokes it. The slot is
 the wiring and the only record of it, so it lives in the save beside the program rather than in the
 program.
 
 The parts and the moment may be left out - `required trigger to run <sequence>` - which says only
 that something starts it. That is a whole sentence, not an unfinished one, and then which slot
-answers it is whatever somebody points at Reactor by hand.
+answers it is whatever somebody points at Sprocket by hand.
 
 **Which of the two a moment gets is the block's to say, never the author's.** A button press is
 announced by the construct, so it is a `required trigger`; a door finishing closing is announced to
-nobody, so it is a `when`. Writing the first as a `when` would claim Reactor watches a property the
-game does not have, and Reactor would be inventing a signal rather than reading one.
+nobody, so it is a `when`. Writing the first as a `when` would claim Sprocket watches a property the
+game does not have, and Sprocket would be inventing a signal rather than reading one.
 
 Two triggers running one sequence need two slots running it.
 

@@ -9,7 +9,7 @@
 # and nothing here writes into it.
 #
 # Run with:
-#   dotnet run --project src/Reactor.Host.SpaceEngineers.Sim -- --suite tests/Reference/suite.txt tests/Reference/frames
+#   dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim -- --suite tests/Reference/suite.txt tests/Reference/frames
 #
 # The dumps in frames/ are committed, so `git diff` is the comparison: an empty diff means nothing on
 # any screen moved.

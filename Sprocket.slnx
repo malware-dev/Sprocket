@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sprocket.Host.SpaceEngineers/Sprocket.Host.SpaceEngineers.csproj" />
+    <Project Path="src/Sprocket.Host.SpaceEngineers.Sim/Sprocket.Host.SpaceEngineers.Sim.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sprocket.Core.Tests/Sprocket.Core.Tests.csproj" />
+    <Project Path="tests/Sprocket.Host.SpaceEngineers.Tests/Sprocket.Host.SpaceEngineers.Tests.csproj" />
+    <Project Path="tests/Sprocket.Host.SpaceEngineers.Presentation.Tests/Sprocket.Host.SpaceEngineers.Presentation.Tests.csproj" />
+  </Folder>
+</Solution>

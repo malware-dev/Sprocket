@@ -24,7 +24,7 @@ import xml.sax.saxutils as esc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-FONTS = os.path.join(ROOT, "src", "Reactor.Host.SpaceEngineers", "Content", "Fonts", "Maltek")
+FONTS = os.path.join(ROOT, "src", "Sprocket.Host.SpaceEngineers", "Content", "Fonts", "Maltek")
 
 NAME = "MaltekSymbols"
 
@@ -307,7 +307,7 @@ def cross():
     it hands over to the mod - so the first opaque thing a mod paints buries it. Anything that
     draws its own panel has to carry its own way off it.
 
-    Not drawn by Reactor today: the chevron in the header does that job, on every screen including
+    Not drawn by Sprocket today: the chevron in the header does that job, on every screen including
     the front door. It is here for the dialogs that do not exist yet, where a corner cross is the
     only thing anybody will look for.
 

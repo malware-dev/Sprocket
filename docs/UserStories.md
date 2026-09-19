@@ -1,14 +1,14 @@
 # User stories
 
-Reactor is automation for Space Engineers, meant for people who do not write code.
+Sprocket is automation for Space Engineers, meant for people who do not write code.
 
 This is the list of things players have said they want. It is written so that anybody
 can read it and say whether we have understood them - if one of these is wrong, or
 yours is missing, that is worth telling us.
 
 **Being on this list is a request, not a promise.** The list exists to find out what
-Reactor should support. Some of these will be built, some will turn out to cost far
-more than they are worth, and some may not fit the way Reactor works at all. Nothing
+Sprocket should support. Some of these will be built, some will turn out to cost far
+more than they are worth, and some may not fit the way Sprocket works at all. Nothing
 here is a commitment to implement it, and a story is not less useful for turning out to
 be one we cannot serve - knowing what people want is the point, and we would rather
 have too many wants written down than discover a missing one late.
@@ -127,17 +127,17 @@ nowhere near the tank.
 ## H. All of it in one place
 
 **Context** A corridor with a sensor and a few lights, on a ship that already has a
-dozen other things set up in Reactor.
+dozen other things set up in Sprocket.
 
 > "I could wire the sensor straight to the lights like I always have. But then half my
-> automation's in Reactor and half of it's in block settings, and when something goes
+> automation's in Sprocket and half of it's in block settings, and when something goes
 > odd I don't know where to look."
 
 **So that** there is one place to look, one way to read what the ship does, and only
 one place to go searching when something misbehaves.
 
-**Done when** doing it in Reactor is no more work than doing it in the terminal, so
-nobody has a reason to keep it elsewhere - and a person who has never seen Reactor
+**Done when** doing it in Sprocket is no more work than doing it in the terminal, so
+nobody has a reason to keep it elsewhere - and a person who has never seen Sprocket
 builds it unaided.
 
 ## I. Two airlocks that don't confuse each other

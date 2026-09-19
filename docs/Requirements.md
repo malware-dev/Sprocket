@@ -1,12 +1,12 @@
 # Requirements
 
-What Reactor must do, derived from [UserStories.md](UserStories.md). Internal.
+What Sprocket must do, derived from [UserStories.md](UserStories.md). Internal.
 
 A story is a want. A requirement is what the system has to do to serve it, stated so
 that it can be argued with, tested, and built from. Tests prove requirements; they do
 not replace them.
 
-A requirement is a thing Reactor needs, together with how it needs to work - "we need a
+A requirement is a thing Sprocket needs, together with how it needs to work - "we need a
 stop statement, and this is what stopping does". It is not split into the smallest
 assertions that can be independently tested; that is what tests are for. A requirement
 should be something somebody can be asked to build.
@@ -78,15 +78,15 @@ be able to find out that it happened and why nothing followed. A press that coul
 anything must not look identical to a press that worked.
 
 This is deliberately about any trigger rather than about controls a person operates.
-Reactor cannot tell a person from a timer - a button press is a button triggering - so
+Sprocket cannot tell a person from a timer - a button press is a button triggering - so
 the requirement cannot draw a line the model does not have.
 
 Note "able to find out" rather than "is told". A sensor that trips every few seconds and
 starts nothing cannot push a notice at anybody, so this is a question the player asks,
-not an announcement Reactor makes. That is what keeps the general form affordable.
+not an announcement Sprocket makes. That is what keeps the general form affordable.
 
 *Nothing exists. Waits on a decision about what the player is shown, and on ApiUnknowns 1
-- whether Reactor can know a trigger fired when nothing was listening.*
+- whether Sprocket can know a trigger fired when nothing was listening.*
 
 ## From story B - match the side I'm about to open
 
@@ -124,16 +124,16 @@ is blocked by the game.*
 
 ### R5 - a stop statement
 
-Reactor needs a way to stop a running sequence, available to the player's own automation
+Sprocket needs a way to stop a running sequence, available to the player's own automation
 rather than only to the editor, so that stopping and putting right can be one authored
 thing.
 
 Stopping ceases the sequence at once. Whatever it set moving is halted where the game
 allows a thing to be halted - pistons and rotors stop where they are. Where a motion
-cannot be interrupted part way it finishes, and Reactor does not pretend otherwise.
+cannot be interrupted part way it finishes, and Sprocket does not pretend otherwise.
 
 Nothing is put back, nothing is reversed, and nothing else about the world is touched.
-Reactor must not attempt to restore, reverse, or otherwise infer what "back" means.
+Sprocket must not attempt to restore, reverse, or otherwise infer what "back" means.
 
 *Why that last part is written down rather than simply absent.* Reversal cannot be done
 honestly. Not every action has an inverse; the way back is not the way out reversed, and
@@ -179,7 +179,7 @@ sorter once is the game's business, changing its filter because a ship docked is
 
 ### R8 - capture and restore
 
-Reactor needs a step that remembers how a set of blocks is, and a step that puts them
+Sprocket needs a step that remembers how a set of blocks is, and a step that puts them
 back as they were. The player says when each happens. Nothing is captured on its own and
 nothing is restored on its own.
 
@@ -251,14 +251,14 @@ require understanding how it was made, and must not be a lesser path than author
 
 *Why this is separate from R10.* R10 is the mechanism; this is the audience. A template
 system that only its author can configure would satisfy R10 completely and be worth very
-little - most people who benefit from Reactor will never write a sequence, exactly as
+little - most people who benefit from Sprocket will never write a sequence, exactly as
 most people who use a blueprint never designed one.
 
 *Serves K as well. Waits on nothing technical; it is a bar on whatever R10 becomes.*
 
 ### R12 - setup is derived, and may be improved
 
-Reactor must derive a workable setup from the slots a system uses, with no effort from
+Sprocket must derive a workable setup from the slots a system uses, with no effort from
 its author. A system whose author did nothing beyond building it must still be
 configurable by somebody who has never seen it.
 
@@ -276,7 +276,7 @@ will never be polished by anybody, so the unauthored path is the one most people
 If it only works when somebody has been diligent, R11 does not hold.
 
 **The author supplies words, not layout.** They say what to ask and how to explain it;
-Reactor decides how that is arranged and the target decides how it is drawn - the same
+Sprocket decides how that is arranged and the target decides how it is drawn - the same
 division as everywhere else. A system author is not a programmer either, and improving a
 setup screen must not become laying one out.
 
@@ -348,7 +348,7 @@ not specified.*
 
 ### R15 - named state, holding a named value
 
-Reactor needs named state that a step can set and a condition can read: *the arm* is
+Sprocket needs named state that a step can set and a condition can read: *the arm* is
 *stowed*.
 
 **A named value, not a flag.** The values are named by whoever made the system - stowed,
@@ -365,7 +365,7 @@ It also survives a stop cleanly. Interrupt the deploy sequence and the state sta
 out*, which is exactly what happened. Nothing needs tidying for it to stay honest.
 
 **What it costs.** A remembered state is only as true as the sequences that maintain it.
-Somebody who drags the piston by hand leaves Reactor believing *stowed*, and this is
+Somebody who drags the piston by hand leaves Sprocket believing *stowed*, and this is
 story I's known hazard arriving early: a state that disagrees with the world is the one
 failure this audience cannot diagnose.
 
@@ -406,7 +406,7 @@ rather than argument.
 
 *Open, and worse: whether a crossing can be missed entirely.* On a coarse update tier a
 level may drop below and recover between two of our updates, and the event never
-happened as far as Reactor is concerned - but only where the event is one we have to watch
+happened as far as Sprocket is concerned - but only where the event is one we have to watch
 for rather than one the game tells us about, and only where it changes and changes back
 inside a single update. See ApiUnknowns 1 and T3. This is the first
 requirement where being told rather than looking would change what can honestly be
@@ -417,7 +417,7 @@ detected rather than whether the value exists.*
 
 ### R17 - telling a person
 
-Reactor must be able to tell a person something. Today it can only operate blocks, so a
+Sprocket must be able to tell a person something. Today it can only operate blocks, so a
 warning can only be built as switching on a lamp somebody has to be looking at, which is
 a hope rather than a warning.
 
@@ -439,7 +439,7 @@ right, particularly for somebody nowhere near the base.
 **Chat is for debugging, and only when asked for.** A running commentary in chat is genuinely
 useful while somebody works out why a sequence misbehaves - the cheapest possible form of
 watching. It is never on by default: a commentary nobody asked for is noise, and noise is
-what gets Reactor switched off rather than the commentary.
+what gets Sprocket switched off rather than the commentary.
 
 A chat message can be shown to one client alone, so it goes to the person who asked and to
 nobody else. That is a capability rather than a courtesy, and it means the debugging channel
@@ -676,7 +676,7 @@ present.
 *Bounded deliberately.* One recent reason per sequence, overwritten, is worth almost as
 much as a log and costs a fraction. T1 and T2 mean a per-sequence history across a
 populated server is not affordable, and "we kept everything" is how this requirement turns
-into the thing that gets Reactor uninstalled.
+into the thing that gets Sprocket uninstalled.
 
 *Serves M, Q, R3, R13.*
 
@@ -712,7 +712,7 @@ person. Take this away and holding any state needs something to keep holding it,
 both more expensive and less honest.
 
 It is R5's prohibition generalised. R5 says a stop does not put things back; this says
-nothing puts things back. Neither is an omission - together they are the reason Reactor
+nothing puts things back. Neither is an omission - together they are the reason Sprocket
 never surprises somebody by tidying up after them.
 
 *Already true, and never written down. Serves N, and quietly underpins A, C and D.*
@@ -741,7 +741,7 @@ and cost rather than by the game.*
 
 ### R34 - building a screen is its own authoring surface
 
-Somebody has to make the screen, and that is a thing they do in Reactor: put a heading on
+Somebody has to make the screen, and that is a thing they do in Sprocket: put a heading on
 a panel, add lines, add a bar, say what each one reads from, put them in an order, and
 never type code. O's done-when is that sentence, and it describes a second place to author
 things, not a second component.
@@ -781,7 +781,7 @@ to, so a panel showing yesterday's number looks exactly like a panel showing tod
 a stale reading is worse than a blank one, because it is believed. That is the price of not
 building a second system, and it is not obviously the wrong trade, but it is a real one.
 
-*Open: what is owed about staleness.* A part could say when it was last written, Reactor
+*Open: what is owed about staleness.* A part could say when it was last written, Sprocket
 could notice a screen nothing writes to, or it could be left to the author. Nothing is
 decided.
 
@@ -807,7 +807,7 @@ each of which is at least one story of its own:
   thing that is supposed to be a standing arrangement.
 - **arrangement** - how much the player controls where things sit, given the target draws
   and core is not supposed to know about layout.
-- **what can be read** - block levels and states are obvious. Reactor's own state is not,
+- **what can be read** - block levels and states are obvious. Sprocket's own state is not,
   and *this sequence is stuck* on the bridge screen would serve M better than anything in
   M's own requirements.
 - **history** - anything that shows a trend needs samples kept over time, which nothing
@@ -928,14 +928,14 @@ buildable. A destroyed block is destroyed, which needs no explaining.*
 
 ### R41 - the program does not live in a block
 
-Reactor's automation belongs to the construct, not to any block on it. Losing any single
+Sprocket's automation belongs to the construct, not to any block on it. Losing any single
 block may cost the references to that block and nothing else.
 
 *Why this is here rather than among the technical requirements.* It is technical in nature
 and it is sourced from a story, which is fair - P is the want, and this is what has to be
 true for P to be answerable at all. Vanilla automation keeps the behaviour inside the timer
 or event controller that runs it, so one round through that block and the player starts
-again from nothing. If Reactor's program is destructible in the same way, P is not a
+again from nothing. If Sprocket's program is destructible in the same way, P is not a
 feature we offer, it is the same defeat in a nicer editor.
 
 **Open, and not small: what a construct is when constructs change.** Ships merge and come
@@ -946,7 +946,7 @@ apart, and the program is attached to something that does not hold still.
   systems, possibly with the same names, referring to blocks that all still exist. Nothing
   about that is obviously wrong, and nothing about it is obviously right either.
 
-  Merging is not docking, and Reactor must never describe it as though it were. A merge
+  Merging is not docking, and Sprocket must never describe it as though it were. A merge
   block welds two constructs together; a mod cannot tell that apart from a repair, because
   there is nothing to tell apart - they are the same act. People do use them to dock, and
   the resulting confusion is theirs to have, not ours to encourage. Docking is connectors,
@@ -998,18 +998,18 @@ being able to see it, which is R27 and R29.*
 
 ### R43 - conflicts are looked for, and never declared absent
 
-Where two sequences drive the same block toward opposite states, Reactor should notice and
+Where two sequences drive the same block toward opposite states, Sprocket should notice and
 say so. An action already records the state it is trying to bring about, so one sequence
 driving a door toward shut while another drives it toward open is a comparison of things
 already modelled rather than a guess.
 
 **Best effort, and honest about it.** Plenty of conflicts are not visible this way: one
 sequence that starts another which then fights the first, two that only collide in a
-situation neither describes, a fight that depends entirely on timing. Reactor may say *these
+situation neither describes, a fight that depends entirely on timing. Sprocket may say *these
 two disagree about this block*. It must never say *there are no conflicts*, because it
 cannot know that, and a clean bill of health that is wrong is worse than no bill at all.
 
-**Resolution is authored, not arbitrated.** Reactor does not decide which sequence wins. The
+**Resolution is authored, not arbitrated.** Sprocket does not decide which sequence wins. The
 player already has the tools: a guard so the airlock cycle does not run while the base is
 sealed, or the sealing sequence stopping the cycle outright, which is what R5 exists for.
 
@@ -1121,7 +1121,7 @@ Two things push towards each side running its own, and one thing is simply unkno
 
 - **Reaching into somebody else's ship is a griefing vector.** If station automation can
   operate whatever docks, then tying up at a stranger's station hands them your thrusters,
-  your reactors and your cargo. Ownership might mitigate that; needing mitigation is the
+  your sprockets and your cargo. Ownership might mitigate that; needing mitigation is the
   tell.
 - **The useful actions turn out to be one-sided anyway.** Draining a miner is a sorter on
   the station. Shutting a ship down is that ship's own blocks. Gas moves itself.
@@ -1170,7 +1170,7 @@ because its whole purpose is to earn trust it has not tested. Somebody who watch
 and then stands in the airlock is relying on having seen the thing that is about to happen.
 
 **This is a diagnostic feature and belongs with R28, not before it.** Nobody would open the
-Reactor terminal, walk down to a system and then to a sequence, in order to *use* their
+Sprocket terminal, walk down to a system and then to a sequence, in order to *use* their
 airlock - they would press the button they built. It is far too cumbersome to be anybody's
 normal route. The only motive for reaching past the button is to watch what happens, which
 means the value is entirely in what can be seen while it runs: which step it is on, what it
@@ -1188,11 +1188,11 @@ another one needs it.*
 ### R49 - what somebody is doing at the controls is readable
 
 A cockpit's controls are available as values: how far forward, how far to the side, how much
-turn, how much roll. Reactor reads them the way it reads any other level, and a condition
+turn, how much roll. Sprocket reads them the way it reads any other level, and a condition
 about them is an ordinary condition.
 
 **Named directions, not vectors.** The game reports these as vectors, positional and
-rotational. Nobody using Reactor should ever meet a vector. The vocabulary presents them as
+rotational. Nobody using Sprocket should ever meet a vector. The vocabulary presents them as
 named readings on the cockpit - *forward*, *right*, *up*, *turn*, *roll* - each a value in
 its own right, which is exactly the shape R4 already handles.
 
@@ -1254,7 +1254,7 @@ needs N, counted on both sides, and the terminal side needs somebody in the game
 then it is an aspiration, and story H is where it lives. The number is retired and not
 reused.
 
-**R18 - "anything the game can automate, Reactor can say"** was written up and dropped.
+**R18 - "anything the game can automate, Sprocket can say"** was written up and dropped.
 It is not a requirement, it is a permission: it obliges nobody to build anything, it only
 removes an objection to building it. That belongs in Design.md as a scope rule, and is
 already there. The number is retired and not reused.
@@ -1272,7 +1272,7 @@ Some of these are written ahead of any evidence. T1, T2 and T3 all rest on how S
 Engineers actually behaves - whether we are told about changes or must look for them,
 what update tiers do to a construct nobody is standing next to, what any of it costs on
 a populated server - and none of that is knowable from here. They are predictions made
-from experience, and the first time Reactor runs in the game some of them will be wrong.
+from experience, and the first time Sprocket runs in the game some of them will be wrong.
 
 That is not a reason to leave them unwritten. Written down, they are the list of things
 to measure on first contact rather than things to notice afterwards, and a prediction
@@ -1281,7 +1281,7 @@ measured, it gets corrected here and the old wording is kept.
 
 ### T1 - cost follows what happens, not what exists
 
-The total cost of Reactor on a server must scale with the number of things actually
+The total cost of Sprocket on a server must scale with the number of things actually
 happening, not with how much automation exists anywhere on it. The unit is the whole
 world - many players, many constructs, several sequences each - and not one construct at
 a time.
@@ -1313,7 +1313,7 @@ and watching it less often, not from watching it together.
 
 ### T3 - the same sequence, whatever the update rate
 
-A sequence must do the same thing regardless of how often Reactor is being updated.
+A sequence must do the same thing regardless of how often Sprocket is being updated.
 Nothing about what it does may depend on being updated often, and nothing may drift
 because it was updated rarely.
 

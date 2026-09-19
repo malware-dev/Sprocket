@@ -1,6 +1,6 @@
 # Words on screen that read wrong
 
-Internal. Places where what Reactor says is awkward, ambiguous or grammatically wrong,
+Internal. Places where what Sprocket says is awkward, ambiguous or grammatically wrong,
 gathered as they are met.
 
 **Gathered rather than fixed one at a time.** A sentence is assembled out of fragments from
@@ -66,7 +66,7 @@ is the one a hand-written program or an imported system is most likely to produc
 Every block offers what it declares, and what it declares is named for a button in the
 terminal rather than for a sentence somebody is writing: *Toggle block On/Off*, *Increase
 Velocity*, *Stockpile On*. A step reads **open** *Airlock Inner Door* and then, one block
-along, **Stockpile On** *Hydrogen Tank*, which is the terminal's voice interrupting Reactor's.
+along, **Stockpile On** *Hydrogen Tank*, which is the terminal's voice interrupting Sprocket's.
 They are kept verbatim for a good reason - they are the words the player has already read, and
 a guess at a better phrasing is a guess made once and wrong on ten thousand modded blocks. The
 pass decides whether anything can be done generically: a first letter, a trailing *On* that
@@ -75,7 +75,7 @@ reads as an adverb, or nothing at all.
 
 ### 9. The screens talk round their own nouns
 
-Reactor has three words for the things it is made of - system, sequence, trigger - and the
+Sprocket has three words for the things it is made of - system, sequence, trigger - and the
 screens say the first two and avoid the third, reaching for a phrase instead: *what should it
 do*, *nothing starts this yet*, *runs Cycle*. The phrases are longer than the word, they have
 to be re-invented at every site, and some of them are wrong for a trigger that stops a
