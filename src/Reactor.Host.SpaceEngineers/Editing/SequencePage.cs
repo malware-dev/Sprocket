@@ -410,8 +410,11 @@ namespace Reactor.Host.SpaceEngineers.Editing
             // nothing else - the same rule every other part of a sentence follows.
             if (chosen != null && chosen.Wants > 0)
             {
-                var given = new ValuesSlot(act.Values, chosen.Wants, Typing(Cmd.StepSlot, position, 2,
-                    delegate(string said) { Gave(act, said); }));
+                var names = new List<string>();
+                chosen.Names(names);
+
+                var given = new ValuesSlot(act.Values, names,
+                    Typing(Cmd.StepSlot, position, 2, delegate(string said) { Gave(act, said); }));
 
                 given.Question = SequenceText.Wants(chosen.Wants);
                 built.Slots.Add(given);

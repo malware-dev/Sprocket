@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Reactor.Host.SpaceEngineers.World
 {
     /// <summary>
@@ -62,6 +64,47 @@ namespace Reactor.Host.SpaceEngineers.World
         /// </para>
         /// </remarks>
         public string GameActionId { get; private set; }
+
+        /// <summary>
+        /// What somebody has said its parameters are, or null where nobody has.
+        /// </summary>
+        /// <remarks>
+        /// The action declares how many parameters it takes; this is the only thing that can say
+        /// what they are for. It comes from a file a mod ships, or from this mod's own description
+        /// of the game's own blocks - see <see cref="Catalogue" />.
+        /// </remarks>
+        public Description Description { get; private set; }
+
+        public EntityAction Described(Description description)
+        {
+            Description = description;
+            return this;
+        }
+
+        /// <summary>
+        /// What each value it wants is called, one per value, empty where nobody has said.
+        /// </summary>
+        /// <remarks>
+        /// One per value, in order, because the form asks for them one at a time whatever the
+        /// grouping says. A group's parameters are named individually until there is an editor for
+        /// that group's kind, at which point the group is asked for as one thing instead.
+        /// </remarks>
+        readonly List<string> _named = new List<string>();
+
+        public void Names(IList<string> into)
+        {
+            for (var i = 0; i < Wants; i++)
+                into.Add("");
+
+            if (Description == null)
+                return;
+
+            _named.Clear();
+            Description.Names(_named);
+
+            for (var i = 0; i < _named.Count && i < into.Count; i++)
+                into[i] = _named[i];
+        }
 
         /// <summary>
         /// How many values it has to be given before it will do anything.

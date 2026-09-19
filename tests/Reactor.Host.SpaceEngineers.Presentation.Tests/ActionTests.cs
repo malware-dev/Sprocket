@@ -144,8 +144,9 @@ public class ActionTests
         Assert.True(screen.Editor.Screen.PrimaryAsks, "finishing does not ask for the values");
         Assert.Equal("This needs three values.", screen.Editor.Screen.PrimaryQuestion);
 
-        // One field each. One box holding three things is a separator for somebody to get wrong.
-        Assert.Equal(3, screen.Editor.Screen.PrimaryFields);
+        // One field each, named by whoever described the action - which for a light's colour is
+        // Reactor itself, since these are the game's own blocks.
+        Assert.Equal(new[] { "Red", "Green", "Blue" }, screen.Editor.Screen.PrimaryNames);
 
         screen.Editor.Typed("255 136 0");
         screen.Run(2);

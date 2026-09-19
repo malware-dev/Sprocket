@@ -99,9 +99,9 @@ namespace Reactor.Host.SpaceEngineers.Layout
         /// to fill in: several fields, in the middle of the screen, the same way however many there
         /// are and whatever raised them - a button, a chip in a sentence, or a double press.
         /// </remarks>
-        public static Deed Values(int command, string question, int fields)
+        public static Deed Values(int command, string question, IEnumerable<string> names)
         {
-            return Values(command, question, fields, null);
+            return Values(command, question, names, null);
         }
 
         /// <summary>The same, opening with what is already there.</summary>
@@ -109,25 +109,34 @@ namespace Reactor.Host.SpaceEngineers.Layout
         /// So changing one value of three does not mean typing all three again. A form that opened
         /// empty over values somebody had already given would read as having lost them.
         /// </remarks>
-        public static Deed Values(int command, string question, int fields, IList<string> filled)
+        public static Deed Values(int command, string question, IEnumerable<string> names,
+            IEnumerable<string> filled)
         {
             Deed asks = Asks(command, question);
-            asks.Fields = fields < 1 ? 1 : fields;
+            asks.Names = names;
             asks.Filled = filled;
             return asks;
         }
 
-        /// <summary>What the fields open with, or null for empty ones.</summary>
-        public IList<string> Filled { get; private set; }
-
         /// <summary>
-        /// How many fields the question has, and zero where it is not a form at all.
+        /// What each field is called, one per field, and null where this asks for nothing.
         /// </summary>
         /// <remarks>
-        /// One field each, because one box holding three things is a separator for somebody to get
-        /// wrong. Zero is <see cref="Asks" />: one field, under what was pressed.
+        /// Held rather than copied, and copied out only when a question actually opens. A deed is
+        /// made afresh every time a control is dressed, which is every tick, so anything built here
+        /// would be built sixty times a second for a question nobody has asked yet.
         /// </remarks>
-        public int Fields { get; private set; }
+        public IEnumerable<string> Names { get; private set; }
+
+        /// <summary>What the fields open with, or null for empty ones.</summary>
+        public IEnumerable<string> Filled { get; private set; }
+
+        /// <summary>Whether this asks for values rather than for one thing under what was pressed.</summary>
+        public bool IsForm
+        {
+            get { return Names != null; }
+        }
+
 
         public static Deed Asks(int command, string question)
         {

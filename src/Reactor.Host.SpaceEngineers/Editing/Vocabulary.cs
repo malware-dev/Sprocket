@@ -98,22 +98,25 @@ namespace Reactor.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// How many values one of those actions will not do anything without.
+        /// What each value one of those actions wants is called, one per value.
         /// </summary>
         /// <remarks>
-        /// Asked of the blocks somebody has just picked, because that is where the answer is: the
-        /// action is the block's own and the block is what declared how many values it wants.
+        /// Empty where the action wants nothing, so its length is how many are wanted and whether
+        /// to ask at all. Asked of the blocks somebody has just picked, because that is where the
+        /// answer is: the action is the block's own.
         /// </remarks>
-        public static int Wants(GridWorld world, IList<long> entityIds, string actionId)
+        public static List<string> Names(GridWorld world, IList<long> entityIds, string actionId)
         {
+            var said = new List<string>();
+
             var actions = ActionsOf(world, entityIds);
             for (var i = 0; i < actions.Count; i++)
             {
                 if (actions[i].Id == actionId)
-                    return actions[i].Wants;
+                    actions[i].Names(said);
             }
 
-            return 0;
+            return said;
         }
 
         static List<EntityAction> ActionsOf(List<GridEntity> entities)

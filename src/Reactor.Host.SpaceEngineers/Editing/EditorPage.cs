@@ -239,8 +239,14 @@ namespace Reactor.Host.SpaceEngineers.Editing
         /// </remarks>
         public virtual string PrimaryQuestion => "";
 
-        /// <summary>How many values it asks for, one field each. One unless a page says otherwise.</summary>
-        public virtual int PrimaryFields => 1;
+        /// <summary>
+        /// What each value it asks for is called, one per value, and empty when it asks for none.
+        /// </summary>
+        /// <remarks>
+        /// One field each, named where anybody has said what the value is - which nothing but a
+        /// description can say, since an action declares how many values it takes and no more.
+        /// </remarks>
+        public virtual IList<string> PrimaryNames => null;
 
         public virtual void Primary() { }
 

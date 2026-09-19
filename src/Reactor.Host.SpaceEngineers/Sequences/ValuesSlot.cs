@@ -15,14 +15,19 @@ namespace Reactor.Host.SpaceEngineers.Sequences
     public sealed class ValuesSlot : SentenceSlot
     {
         readonly List<Literal> _values = new List<Literal>();
-        readonly int _wants;
+        readonly List<string> _names = new List<string>();
+        readonly List<string> _filled = new List<string>();
 
-        public ValuesSlot(IList<Literal> values, int wants, int command) : base(command)
+        public ValuesSlot(IList<Literal> values, IList<string> names, int command) : base(command)
         {
             for (var i = 0; i < values.Count; i++)
+            {
                 _values.Add(values[i]);
+                _filled.Add(values[i].Said);
+            }
 
-            _wants = wants < 1 ? 1 : wants;
+            for (var i = 0; i < names.Count; i++)
+                _names.Add(names[i]);
         }
 
         public IList<Literal> Values => _values;
@@ -30,13 +35,13 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         public override bool IsEmpty => _values.Count == 0;
 
         /// <summary>
-        /// One field per value the action wants, which is what it was asked with.
+        /// What each value is called, one per value the action wants.
         /// </summary>
         /// <remarks>
-        /// Not the count it holds: a step whose values were never filled in still has to be asked
-        /// with as many fields as the action declared.
+        /// From the action rather than from what the step holds: a step whose values were never
+        /// filled in still has to be asked with as many fields as the action declared.
         /// </remarks>
-        public override int Fields => _wants;
+        public override IList<string> Names => _names;
 
         /// <summary>
         /// Each value as it is written, one per field.
@@ -44,17 +49,11 @@ namespace Reactor.Host.SpaceEngineers.Sequences
         /// <remarks>
         /// The same spelling the sentence shows and the program holds, so what opens in the field is
         /// what somebody typed into it - not a rendering of it that would come back different.
+        /// <para>
+        /// Made when the slot is, which is when the sentence is built. Worked out on the way past
+        /// instead, it would be worked out every tick, because dressing a chip is a per-tick job.
+        /// </para>
         /// </remarks>
-        public override IList<string> Filled
-        {
-            get
-            {
-                var said = new List<string>();
-                for (var i = 0; i < _values.Count; i++)
-                    said.Add(_values[i].Said);
-
-                return said;
-            }
-        }
+        public override IList<string> Filled => _filled;
     }
 }

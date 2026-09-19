@@ -23,7 +23,24 @@ namespace Reactor.Host.SpaceEngineers.World
     public sealed class GridWorld : IDisposable
     {
         readonly IMyTerminalBlock _anchor;
-        readonly BlockKinds _kinds = new BlockKinds();
+        /// <summary>
+        /// What anybody has said about the game's own actions, read once as this comes up.
+        /// </summary>
+        /// <remarks>
+        /// Reactor's own descriptions go in first and are therefore the ones a mod may override,
+        /// which is the rule the mods themselves follow.
+        /// </remarks>
+        readonly Catalogue _catalogue = Catalogue();
+
+        readonly BlockKinds _kinds;
+
+        static Catalogue Catalogue()
+        {
+            var catalogue = new Catalogue();
+            catalogue.Add(Known.Descriptions(), "");
+            Mods.Read(catalogue);
+            return catalogue;
+        }
 
         readonly List<GridEntity> _entities = new List<GridEntity>();
         readonly Dictionary<long, GridEntity> _byId = new Dictionary<long, GridEntity>();
@@ -37,6 +54,7 @@ namespace Reactor.Host.SpaceEngineers.World
         public GridWorld(IMyTerminalBlock anchor)
         {
             _anchor = anchor;
+            _kinds = new BlockKinds(_catalogue);
         }
 
         /// <summary>

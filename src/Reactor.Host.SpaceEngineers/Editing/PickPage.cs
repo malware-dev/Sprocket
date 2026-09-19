@@ -148,19 +148,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
         {
             get
             {
-                var wants = Wants();
-                return wants > 0 ? SequenceText.Wants(wants) : "";
+                List<string> names = Names();
+                return names.Count > 0 ? SequenceText.Wants(names.Count) : "";
             }
         }
 
-        public override int PrimaryFields
-        {
-            get
-            {
-                var wants = Wants();
-                return wants > 0 ? wants : 1;
-            }
-        }
+        public override IList<string> PrimaryNames => Names();
 
         public override void Primary()
         {
@@ -174,10 +167,12 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _done(new PickAnswer(_selection, _chosen, _all, values));
         }
 
-        int Wants()
+        List<string> Names()
         {
-            return IsComplete ? Editor.Wants(_selection, _chosen) : 0;
+            return IsComplete ? Editor.Names(_selection, _chosen) : _nothing;
         }
+
+        readonly List<string> _nothing = new List<string>();
 
         bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen);
 

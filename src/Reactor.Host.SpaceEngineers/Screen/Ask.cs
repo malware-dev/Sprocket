@@ -167,11 +167,22 @@ namespace Reactor.Host.SpaceEngineers.Screen
             line.Left = numbered ? Numbered(at) : null;
             line.Fill = _boxes[at];
 
-            _numbers[at].Text = numbered
-                ? (at + 1).ToString(CultureInfo.InvariantCulture)
-                : "";
+            // What it is called, where anybody has said, and its place in the order otherwise. The
+            // number is the only thing that can be said about a value nobody has described: an
+            // action declares how many it takes and not one word about any of them.
+            _numbers[at].Text = !numbered
+                ? ""
+                : Named(at) ?? (at + 1).ToString(CultureInfo.InvariantCulture);
 
             return line;
+        }
+
+        string Named(int at)
+        {
+            if (at >= _names.Count)
+                return null;
+
+            return string.IsNullOrEmpty(_names[at]) ? null : _names[at];
         }
 
         /// <summary>The number, held at a width so the fields under each other line up.</summary>
@@ -357,6 +368,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
             _command = command;
             _anchor = anchor;
             _question = question ?? "";
+            _names.Clear();
 
             Fields(1, false);
         }
@@ -369,27 +381,49 @@ namespace Reactor.Host.SpaceEngineers.Screen
         /// raised it is then nobody's business: a button, a chip in a sentence and a double press
         /// all put the same form in the same place, which is one way of doing it rather than three.
         /// </remarks>
-        public void Values(string question, int command, int fields)
+        public void Values(string question, int command, IEnumerable<string> names)
         {
-            Values(question, command, fields, null);
+            Values(question, command, names, null);
         }
 
-        /// <summary>The same, with the fields holding what is already there.</summary>
-        public void Values(string question, int command, int fields, IList<string> filled)
+        /// <summary>
+        /// The same, with the fields holding what is already there.
+        /// </summary>
+        /// <remarks>
+        /// What it is given is copied here, once, because a question opens when somebody presses
+        /// something and lives for one answer - while what handed it over is rebuilt every tick and
+        /// must not be holding anything of its own.
+        /// </remarks>
+        public void Values(string question, int command, IEnumerable<string> names,
+            IEnumerable<string> filled)
         {
             _up = true;
             _command = command;
             _anchor = null;
             _question = question ?? "";
 
-            Fields(fields < 1 ? 1 : fields, true);
+            Copy(names, _names);
+            Fields(_names.Count < 1 ? 1 : _names.Count, true);
 
-            if (filled == null)
+            _filled.Clear();
+            Copy(filled, _filled);
+
+            for (var i = 0; i < _filled.Count && i < Count; i++)
+                _boxes[i].Text = _filled[i] ?? "";
+        }
+
+        static void Copy(IEnumerable<string> from, List<string> into)
+        {
+            into.Clear();
+            if (from == null)
                 return;
 
-            for (var i = 0; i < filled.Count && i < Count; i++)
-                _boxes[i].Text = filled[i] ?? "";
+            foreach (string one in from)
+                into.Add(one);
         }
+
+        readonly List<string> _names = new List<string>();
+        readonly List<string> _filled = new List<string>();
 
         public void Close()
         {

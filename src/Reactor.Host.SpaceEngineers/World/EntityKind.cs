@@ -140,9 +140,12 @@ namespace Reactor.Host.SpaceEngineers.World
         }
 
         /// <summary>The same, for one the game will not perform until it is given values.</summary>
-        public EntityKind WithAction(string id, string text, string gameActionId, int wants)
+        public EntityKind WithAction(string id, string text, string gameActionId, int wants,
+            Description described)
         {
-            _actions.Add(new EntityAction(id, text, null, gameActionId, wants));
+            _actions.Add(new EntityAction(id, text, null, gameActionId, wants)
+                .Described(described));
+
             return this;
         }
 

@@ -22,6 +22,12 @@ namespace Reactor.Host.SpaceEngineers.World
         const string GamePrefix = "MyObjectBuilder_";
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
+        readonly Catalogue _catalogue;
+
+        public BlockKinds(Catalogue catalogue)
+        {
+            _catalogue = catalogue;
+        }
 
         public EntityKind For(IMyTerminalBlock block)
         {
@@ -108,13 +114,27 @@ namespace Reactor.Host.SpaceEngineers.World
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
 
                 if (offer.Wants > 0)
-                    kind.WithAction(offer.Id, said, offer.Id, offer.Wants);
+                    kind.WithAction(offer.Id, said, offer.Id, offer.Wants, Described(kind, offer));
                 else
                     kind.WithAction(offer.Id, said, null, offer.Id);
             }
         }
 
         readonly List<Offer> _offered = new List<Offer>();
+
+        /// <summary>
+        /// What anybody has said this action's parameters are, or null.
+        /// </summary>
+        /// <remarks>
+        /// Asked with the kind's own id, which is the block's definition, so a description naming
+        /// one block answers for that block and no other - and anything claimed about the bare
+        /// action id is the fallback. Asked with the count as well, because a description that does
+        /// not account for every parameter is one that has fallen out of step with the block.
+        /// </remarks>
+        Description Described(EntityKind kind, Offer offer)
+        {
+            return _catalogue == null ? null : _catalogue.Fitting(kind.Id, offer.Id, offer.Wants);
+        }
 
         /// <summary>Whether something in this kind already covers the game's action by that name.</summary>
         /// <remarks>

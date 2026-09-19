@@ -21,6 +21,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
             Components = new ObservableList<EditorComponent>();
             Actions = new ObservableList<ChoiceEntry>();
             Answers = new ObservableList<ChoiceEntry>();
+            PrimaryNames = new ObservableList<string>();
             Question = "";
             Heading = new List<HeadingPart>();
         }
@@ -262,20 +263,14 @@ namespace Reactor.Host.SpaceEngineers.Screen
         bool _questionIsHere;
 
         /// <summary>
-        /// How many values pressing it asks for, one field each.
+        /// What each value pressing it asks for is called, one field each.
         /// </summary>
         /// <remarks>
-        /// One unless the screen says otherwise. It is the count the thing being answered declared,
-        /// so nothing here decides it - an action that wants three values is asked with three
-        /// fields, because one box holding three things is a separator to get wrong.
+        /// One box holding three things is a separator to get wrong, so there is a field per value
+        /// - and a name beside it wherever anybody has said what that value is. Nothing here
+        /// decides either: both come from what the thing being answered declared.
         /// </remarks>
-        public int PrimaryFields
-        {
-            get { return _primaryFields; }
-            set { Set(ref _primaryFields, value, nameof(PrimaryFields)); }
-        }
-
-        int _primaryFields = 1;
+        public ObservableList<string> PrimaryNames { get; private set; }
 
         /// <summary>What to show, in order.</summary>
         public ObservableList<EditorComponent> Components { get; private set; }

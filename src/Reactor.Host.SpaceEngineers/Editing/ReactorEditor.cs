@@ -535,10 +535,10 @@ namespace Reactor.Host.SpaceEngineers.Editing
             Settle();
         }
 
-        /// <summary>How many values an action wants, asked of the blocks it would act on.</summary>
-        internal int Wants(IList<long> entityIds, string actionId)
+        /// <summary>What an action's values are called, one per value, asked of the blocks it acts on.</summary>
+        internal List<string> Names(IList<long> entityIds, string actionId)
         {
-            return Vocabulary.Wants(_world, entityIds, actionId);
+            return Vocabulary.Names(_world, entityIds, actionId);
         }
 
         /// <summary>Reports new text for a search box or any other field, unless the field refuses it.</summary>
@@ -993,7 +993,7 @@ namespace Reactor.Host.SpaceEngineers.Editing
             _redoCommand = page.HasHistory ? Register(Cmd.Redo, page.Redo) : 0;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryQuestion = page.PrimaryQuestion;
-            _screen.PrimaryFields = page.PrimaryFields;
+            _screen.PrimaryNames.Reset(page.PrimaryNames);
             _screen.PrimaryCommand = !_screen.HasPrimary
                 ? 0
                 : _screen.PrimaryAsks

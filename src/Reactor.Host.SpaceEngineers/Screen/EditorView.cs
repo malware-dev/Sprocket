@@ -612,7 +612,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
                 ? Deed.Nothing
                 : screen.PrimaryAsks
                     ? Deed.Values(screen.PrimaryCommand, screen.PrimaryQuestion,
-                        screen.PrimaryFields)
+                        screen.PrimaryNames)
                     : Deed.Sends(screen.PrimaryCommand);
         }
 
@@ -1281,7 +1281,7 @@ namespace Reactor.Host.SpaceEngineers.Screen
             Close();
 
             _raisedBy = target;
-            _ask.Values(screen.PrimaryQuestion, screen.PrimaryCommand, screen.PrimaryFields);
+            _ask.Values(screen.PrimaryQuestion, screen.PrimaryCommand, screen.PrimaryNames);
             _chromeStale = true;
         }
 
@@ -1310,8 +1310,8 @@ namespace Reactor.Host.SpaceEngineers.Screen
             }
 
             // Everything else hangs over the screen, under whatever was pressed.
-            if (deed.Fields > 0)
-                _ask.Values(deed.Question, deed.Command, deed.Fields, deed.Filled);
+            if (deed.IsForm)
+                _ask.Values(deed.Question, deed.Command, deed.Names, deed.Filled);
             else
                 _ask.Open(deed.Question, control, deed.Command);
         }
