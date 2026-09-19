@@ -18,15 +18,6 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             public IconBox Icon;
             public Label Name;
             public Label Detail;
-            public Label Badge;
-
-            /// <summary>What the badge was last written from, so a number is formatted only once.</summary>
-            /// <remarks>
-            /// This runs every frame. Formatting an int allocates a string whether or not the label
-            /// keeps it, so comparing after the fact saves nothing - the number has to be compared
-            /// instead. Minus one because no badge ever carries it.
-            /// </remarks>
-            public int Badged = -1;
         }
 
         sealed class KindVisual
@@ -404,20 +395,6 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 string detail = DetailOf(entry);
                 row.Detail.Text = detail;
                 row.Detail.Collapsed = string.IsNullOrEmpty(detail);
-
-                bool badged = string.IsNullOrEmpty(entry.Status) && entry.Badge > 0;
-
-                // Out of the row rather than drawn in nothing. Held space would be right if this came and
-                // went as somebody used the screen, but which rows carry a count is a property of the
-                // things themselves and settled before the list is drawn.
-                row.Badge.Collapsed = !badged;
-
-                var badge = badged ? entry.Badge : -1;
-                if (row.Badged != badge)
-                {
-                    row.Badged = badge;
-                    row.Badge.Text = badged ? entry.Badge.ToString() : "";
-                }
             }
         }
 
@@ -449,16 +426,10 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             text.Children.Add(row.Name);
             text.Children.Add(row.Detail);
 
-            row.Badge = Widgets.Label("", Palette.Muted, Lettering.Tiny);
-            row.Badge.Background = Palette.SlotFill;
-            row.Badge.Wraps = false;
-            row.Badge.Padding = new Thickness(Space.Item, Space.Hair * 2f);
-
             // A stack, not a bar. A bar spans whatever width it is offered, which is exactly right for a
             // header and exactly wrong here: as the right-hand end of a row it claimed the whole line and
             // left the name to wrap one word at a time.
             Stack right = Widgets.RowOf(Space.Row);
-            right.Children.Add(row.Badge);
 
             row.Line = new Bar();
             row.Line.Spacing = Space.Item;

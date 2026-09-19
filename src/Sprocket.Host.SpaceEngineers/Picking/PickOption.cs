@@ -37,9 +37,6 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// <summary>Whether the thing is doing something right now.</summary>
         public bool IsActive { get; set; }
 
-        /// <summary>A count worth showing, or zero for none.</summary>
-        public int Badge { get; set; }
-
         public bool IsChosen { get; set; }
 
         public int Command { get; set; }
