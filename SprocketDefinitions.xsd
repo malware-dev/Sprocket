@@ -107,8 +107,10 @@
       <xs:annotation>
         <xs:documentation>
           The least this parameter may be, shown beside its name so somebody knows before they
-          type. Either bound may be given on its own. Nothing about the action says what it will
-          accept, so this is the only warning there is.
+          type, and held to: a value outside the bounds is refused where it is typed, with the
+          bounds said back. Either bound may be given on its own. Nothing about the action says
+          what it will accept, so this is the only place it can be said. A bound that cannot be
+          read as a number is shown and holds nobody to anything.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>

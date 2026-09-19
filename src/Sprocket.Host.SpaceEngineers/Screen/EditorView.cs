@@ -475,7 +475,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // it, which core knows nothing about, so it is dressed here rather than announced.
             if (_ask.IsUp && _renaming < 0)
             {
-                _ask.Refused = Taken(_ask.Command, _ask.Answer) ? TakenSays : "";
+                // A name something else already has first, because that is the reason this view can
+                // see and the form cannot. What a field will take is the form's own, and it says so.
+                _ask.Refused = Taken(_ask.Command, _ask.Answer) ? TakenSays : _ask.Wrong;
                 _ask.Dress();
             }
 
@@ -612,7 +614,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 ? Deed.Nothing
                 : screen.PrimaryAsks
                     ? Deed.Values(screen.PrimaryCommand, screen.PrimaryQuestion,
-                        screen.PrimaryNames)
+                        screen.PrimaryFields)
                     : Deed.Sends(screen.PrimaryCommand);
         }
 
@@ -1235,7 +1237,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (Blocked.Length > 0)
                 return;
 
-            if (_renaming < 0 && (string.IsNullOrEmpty(answer) || Taken(command, answer)))
+            if (_renaming < 0
+                && (string.IsNullOrEmpty(answer) || Taken(command, answer) || _ask.Wrong.Length > 0))
                 return;
 
             Close();
@@ -1281,7 +1284,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Close();
 
             _raisedBy = target;
-            _ask.Values(screen.PrimaryQuestion, screen.PrimaryCommand, screen.PrimaryNames);
+            _ask.Values(screen.PrimaryQuestion, screen.PrimaryCommand, screen.PrimaryFields);
             _chromeStale = true;
         }
 
@@ -1311,7 +1314,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // Everything else hangs over the screen, under whatever was pressed.
             if (deed.IsForm)
-                _ask.Values(deed.Question, deed.Command, deed.Names, deed.Filled);
+                _ask.Values(deed.Question, deed.Command, deed.Fields, deed.Filled);
             else
                 _ask.Open(deed.Question, control, deed.Command);
         }

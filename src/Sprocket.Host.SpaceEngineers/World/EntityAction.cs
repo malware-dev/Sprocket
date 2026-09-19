@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -82,28 +83,28 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// What each value it wants is called, one per value, empty where nobody has said.
+        /// What each value it wants asks for, one per value, told nothing where nobody has said.
         /// </summary>
         /// <remarks>
         /// One per value, in order, because the form asks for them one at a time whatever the
-        /// grouping says. A group's parameters are named individually until there is an editor for
-        /// that group's kind, at which point the group is asked for as one thing instead.
+        /// grouping says. A group's parameters are asked for individually until there is an editor
+        /// for that group's kind, at which point the group is asked for as one thing instead.
         /// </remarks>
-        readonly List<string> _named = new List<string>();
+        readonly List<Field> _described = new List<Field>();
 
-        public void Names(IList<string> into)
+        public void Fields(IList<Field> into)
         {
             for (var i = 0; i < Wants; i++)
-                into.Add("");
+                into.Add(Field.Unnamed());
 
             if (Description == null)
                 return;
 
-            _named.Clear();
-            Description.Names(_named);
+            _described.Clear();
+            Description.Fields(_described);
 
-            for (var i = 0; i < _named.Count && i < into.Count; i++)
-                into[i] = _named[i];
+            for (var i = 0; i < _described.Count && i < into.Count; i++)
+                into[i] = _described[i];
         }
 
         /// <summary>

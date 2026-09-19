@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -410,10 +411,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // nothing else - the same rule every other part of a sentence follows.
             if (chosen != null && chosen.Wants > 0)
             {
-                var names = new List<string>();
-                chosen.Names(names);
+                var fields = new List<Field>();
+                chosen.Fields(fields);
 
-                var given = new ValuesSlot(act.Values, names,
+                var given = new ValuesSlot(act.Values, fields,
                     Typing(Cmd.StepSlot, position, 2, delegate(string said) { Gave(act, said); }));
 
                 given.Question = SequenceText.Wants(chosen.Wants);

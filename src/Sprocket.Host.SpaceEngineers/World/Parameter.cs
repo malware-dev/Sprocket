@@ -34,44 +34,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string Note;
 
         /// <summary>
-        /// The least it may be, and the most, or empty where the action does not say.
+        /// The least it may be, and the most, or empty where nobody has said.
         /// </summary>
         /// <remarks>
         /// Text rather than numbers, because absent and zero are different things and a parameter
-        /// may one day be bounded by something that is not a number at all. What it is for now is
-        /// telling somebody what will be accepted before they type it - a colour channel is 0 to
-        /// 255 and nothing about the action says so.
+        /// may one day be bounded by something that is not a number at all. What it buys is a box
+        /// that says what it will take before anybody types into it, and refuses what it will not -
+        /// a colour channel is 0 to 255 and nothing about the action says so.
         /// </remarks>
         [XmlAttribute("min")]
         public string Least;
 
         [XmlAttribute("max")]
         public string Most;
-
-        /// <summary>
-        /// How the bounds read, or empty where there are none.
-        /// </summary>
-        /// <remarks>
-        /// Either end on its own is worth saying: "0 or more" is a real thing to know, and so is a
-        /// ceiling with no floor.
-        /// </remarks>
-        [XmlIgnore]
-        public string Range
-        {
-            get
-            {
-                var least = Least ?? "";
-                var most = Most ?? "";
-
-                if (least.Length > 0 && most.Length > 0)
-                    return least + "-" + most;
-
-                if (least.Length > 0)
-                    return least + " or more";
-
-                return most.Length > 0 ? most + " or less" : "";
-            }
-        }
 
         /// <summary>One. A parameter is one parameter; see <see cref="Group" /> for the other case.</summary>
         public override int Span

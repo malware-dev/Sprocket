@@ -148,7 +148,7 @@ public class ActionTests
         // Sprocket itself, since these are the game's own blocks - and with what each will accept,
         // which the action never says.
         Assert.Equal(new[] { "Red 0-255", "Green 0-255", "Blue 0-255" },
-            screen.Editor.Screen.PrimaryNames);
+            screen.Editor.Screen.PrimaryFields.Select(field => field.Label));
 
         screen.Editor.Typed("255 136 0");
         screen.Run(2);

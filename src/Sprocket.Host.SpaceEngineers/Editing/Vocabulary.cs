@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -98,22 +99,22 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// What each value one of those actions wants is called, one per value.
+        /// What each value one of those actions wants asks for, one per value.
         /// </summary>
         /// <remarks>
         /// Empty where the action wants nothing, so its length is how many are wanted and whether
         /// to ask at all. Asked of the blocks somebody has just picked, because that is where the
         /// answer is: the action is the block's own.
         /// </remarks>
-        public static List<string> Names(GridWorld world, IList<long> entityIds, string actionId)
+        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId)
         {
-            var said = new List<string>();
+            var said = new List<Field>();
 
             var actions = ActionsOf(world, entityIds);
             for (var i = 0; i < actions.Count; i++)
             {
                 if (actions[i].Id == actionId)
-                    actions[i].Names(said);
+                    actions[i].Fields(said);
             }
 
             return said;

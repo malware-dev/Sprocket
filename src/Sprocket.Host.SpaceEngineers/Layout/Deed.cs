@@ -99,9 +99,9 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// to fill in: several fields, in the middle of the screen, the same way however many there
         /// are and whatever raised them - a button, a chip in a sentence, or a double press.
         /// </remarks>
-        public static Deed Values(int command, string question, IEnumerable<string> names)
+        public static Deed Values(int command, string question, IEnumerable<Field> fields)
         {
-            return Values(command, question, names, null);
+            return Values(command, question, fields, null);
         }
 
         /// <summary>The same, opening with what is already there.</summary>
@@ -109,24 +109,24 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// So changing one value of three does not mean typing all three again. A form that opened
         /// empty over values somebody had already given would read as having lost them.
         /// </remarks>
-        public static Deed Values(int command, string question, IEnumerable<string> names,
+        public static Deed Values(int command, string question, IEnumerable<Field> fields,
             IEnumerable<string> filled)
         {
             Deed asks = Asks(command, question);
-            asks.Names = names;
+            asks.Fields = fields;
             asks.Filled = filled;
             return asks;
         }
 
         /// <summary>
-        /// What each field is called, one per field, and null where this asks for nothing.
+        /// What each field asks for, one per field, and null where this asks for nothing.
         /// </summary>
         /// <remarks>
         /// Held rather than copied, and copied out only when a question actually opens. A deed is
         /// made afresh every time a control is dressed, which is every tick, so anything built here
         /// would be built sixty times a second for a question nobody has asked yet.
         /// </remarks>
-        public IEnumerable<string> Names { get; private set; }
+        public IEnumerable<Field> Fields { get; private set; }
 
         /// <summary>What the fields open with, or null for empty ones.</summary>
         public IEnumerable<string> Filled { get; private set; }
@@ -134,7 +134,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <summary>Whether this asks for values rather than for one thing under what was pressed.</summary>
         public bool IsForm
         {
-            get { return Names != null; }
+            get { return Fields != null; }
         }
 
 

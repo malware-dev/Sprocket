@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Lists;
@@ -535,10 +536,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Settle();
         }
 
-        /// <summary>What an action's values are called, one per value, asked of the blocks it acts on.</summary>
-        internal List<string> Names(IList<long> entityIds, string actionId)
+        /// <summary>What an action's values ask for, one per value, asked of the blocks it acts on.</summary>
+        internal List<Field> Fields(IList<long> entityIds, string actionId)
         {
-            return Vocabulary.Names(_world, entityIds, actionId);
+            return Vocabulary.Fields(_world, entityIds, actionId);
         }
 
         /// <summary>Reports new text for a search box or any other field, unless the field refuses it.</summary>
@@ -993,7 +994,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _redoCommand = page.HasHistory ? Register(Cmd.Redo, page.Redo) : 0;
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryQuestion = page.PrimaryQuestion;
-            _screen.PrimaryNames.Reset(page.PrimaryNames);
+            _screen.PrimaryFields.Reset(page.PrimaryFields);
             _screen.PrimaryCommand = !_screen.HasPrimary
                 ? 0
                 : _screen.PrimaryAsks

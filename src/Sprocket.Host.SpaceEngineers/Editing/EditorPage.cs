@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Screen;
 
 namespace Sprocket.Host.SpaceEngineers.Editing
@@ -240,13 +241,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         public virtual string PrimaryQuestion => "";
 
         /// <summary>
-        /// What each value it asks for is called, one per value, and empty when it asks for none.
+        /// What each value it asks for wants, one per value, and empty when it asks for none.
         /// </summary>
         /// <remarks>
-        /// One field each, named where anybody has said what the value is - which nothing but a
-        /// description can say, since an action declares how many values it takes and no more.
+        /// One field each, named and bounded where anybody has said what the value is - which
+        /// nothing but a description can say, since an action declares how many values it takes and
+        /// no more.
         /// </remarks>
-        public virtual IList<string> PrimaryNames => null;
+        public virtual IList<Field> PrimaryFields => null;
 
         public virtual void Primary() { }
 

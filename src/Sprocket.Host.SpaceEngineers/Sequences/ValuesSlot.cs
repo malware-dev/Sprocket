@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
@@ -15,10 +16,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class ValuesSlot : SentenceSlot
     {
         readonly List<Literal> _values = new List<Literal>();
-        readonly List<string> _names = new List<string>();
+        readonly List<Field> _fields = new List<Field>();
         readonly List<string> _filled = new List<string>();
 
-        public ValuesSlot(IList<Literal> values, IList<string> names, int command) : base(command)
+        public ValuesSlot(IList<Literal> values, IList<Field> fields, int command) : base(command)
         {
             for (var i = 0; i < values.Count; i++)
             {
@@ -26,8 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _filled.Add(values[i].Said);
             }
 
-            for (var i = 0; i < names.Count; i++)
-                _names.Add(names[i]);
+            for (var i = 0; i < fields.Count; i++)
+                _fields.Add(fields[i]);
         }
 
         public IList<Literal> Values => _values;
@@ -35,13 +36,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override bool IsEmpty => _values.Count == 0;
 
         /// <summary>
-        /// What each value is called, one per value the action wants.
+        /// What each value asks for, one per value the action wants.
         /// </summary>
         /// <remarks>
         /// From the action rather than from what the step holds: a step whose values were never
         /// filled in still has to be asked with as many fields as the action declared.
         /// </remarks>
-        public override IList<string> Names => _names;
+        public override IList<Field> Fields => _fields;
 
         /// <summary>
         /// Each value as it is written, one per field.

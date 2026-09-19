@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using Sprocket.Host.SpaceEngineers.Layout;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -59,21 +60,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// What each parameter is called, one per parameter, in order.
+        /// What each parameter asks for, one per parameter, in order.
         /// </summary>
         /// <remarks>
         /// Flattened, because the form asks for one value at a time whatever the grouping says. A
         /// group's own name is not here: it belongs to the editor that group asks for, and until
         /// there is one its parameters are asked for singly under their own names.
         /// </remarks>
-        public void Names(IList<string> into)
+        public void Fields(IList<Field> into)
         {
             for (var i = 0; i < Pieces.Count; i++)
             {
                 var one = Pieces[i] as Parameter;
                 if (one != null)
                 {
-                    into.Add(Said(one));
+                    into.Add(Asks(one));
                     continue;
                 }
 
@@ -82,27 +83,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
 
                 for (var p = 0; p < group.Parameters.Count; p++)
-                    into.Add(Said(group.Parameters[p]));
+                    into.Add(Asks(group.Parameters[p]));
             }
         }
 
-        /// <summary>
-        /// What one parameter is called, with what it will accept where that is known.
-        /// </summary>
-        /// <remarks>
-        /// Beside the name rather than somewhere else, because the moment it is worth knowing is the
-        /// moment somebody is deciding what to type. The action itself says nothing about bounds, so
-        /// this is the only warning anybody gets before a value is quietly refused by a block.
-        /// </remarks>
-        static string Said(Parameter one)
+        static Field Asks(Parameter one)
         {
-            var name = one.Name ?? "";
-            var range = one.Range;
-
-            if (range.Length == 0)
-                return name;
-
-            return name.Length == 0 ? range : name + " " + range;
+            return Field.Between(one.Name, one.Least, one.Most);
         }
     }
 }

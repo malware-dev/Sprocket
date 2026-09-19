@@ -84,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 // stopped being something to press, which is how a sequence locks itself while it runs.
                 _slots[i].Press = step.Slots[i].Asks
                     ? Deed.Values(step.Slots[i].Command, step.Slots[i].Question,
-                        step.Slots[i].Names, step.Slots[i].Filled)
+                        step.Slots[i].Fields, step.Slots[i].Filled)
                     : Deed.Sends(step.Slots[i].Command);
 
                 if (ReferenceEquals(_shown[i], step.Slots[i]))

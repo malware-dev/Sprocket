@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
@@ -21,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Components = new ObservableList<EditorComponent>();
             Actions = new ObservableList<ChoiceEntry>();
             Answers = new ObservableList<ChoiceEntry>();
-            PrimaryNames = new ObservableList<string>();
+            PrimaryFields = new ObservableList<Field>();
             Question = "";
             Heading = new List<HeadingPart>();
         }
@@ -263,14 +264,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         bool _questionIsHere;
 
         /// <summary>
-        /// What each value pressing it asks for is called, one field each.
+        /// What each value pressing it asks for wants, one field each.
         /// </summary>
         /// <remarks>
         /// One box holding three things is a separator to get wrong, so there is a field per value
-        /// - and a name beside it wherever anybody has said what that value is. Nothing here
-        /// decides either: both come from what the thing being answered declared.
+        /// - with a name beside it, and what it will take, wherever anybody has said what that
+        /// value is. Nothing here decides any of it: it comes from what the thing being answered
+        /// declared.
         /// </remarks>
-        public ObservableList<string> PrimaryNames { get; private set; }
+        public ObservableList<Field> PrimaryFields { get; private set; }
 
         /// <summary>What to show, in order.</summary>
         public ObservableList<EditorComponent> Components { get; private set; }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
@@ -148,12 +149,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             get
             {
-                List<string> names = Names();
-                return names.Count > 0 ? SequenceText.Wants(names.Count) : "";
+                List<Field> fields = Fields();
+                return fields.Count > 0 ? SequenceText.Wants(fields.Count) : "";
             }
         }
 
-        public override IList<string> PrimaryNames => Names();
+        public override IList<Field> PrimaryFields => Fields();
 
         public override void Primary()
         {
@@ -167,12 +168,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _done(new PickAnswer(_selection, _chosen, _all, values));
         }
 
-        List<string> Names()
+        List<Field> Fields()
         {
-            return IsComplete ? Editor.Names(_selection, _chosen) : _nothing;
+            return IsComplete ? Editor.Fields(_selection, _chosen) : _nothing;
         }
 
-        readonly List<string> _nothing = new List<string>();
+        readonly List<Field> _nothing = new List<Field>();
 
         bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen);
 

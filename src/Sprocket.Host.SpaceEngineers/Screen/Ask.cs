@@ -167,22 +167,38 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             line.Left = numbered ? Numbered(at) : null;
             line.Fill = _boxes[at];
 
-            // What it is called, where anybody has said, and its place in the order otherwise. The
-            // number is the only thing that can be said about a value nobody has described: an
-            // action declares how many it takes and not one word about any of them.
-            _numbers[at].Text = !numbered
-                ? ""
-                : Named(at) ?? (at + 1).ToString(CultureInfo.InvariantCulture);
+            // What it is called and what it will take, where anybody has said, and its place in
+            // the order otherwise. The number is the only thing that can be said about a value
+            // nobody has described: an action declares how many it takes and not one word about
+            // any of them.
+            _numbers[at].Text = !numbered ? "" : Label(at);
 
             return line;
         }
 
-        string Named(int at)
+        string Label(int at)
         {
-            if (at >= _names.Count)
-                return null;
+            string said = at < _wanted.Count ? _wanted[at].Label : "";
+            return said.Length > 0 ? said : Ordinal(at);
+        }
 
-            return string.IsNullOrEmpty(_names[at]) ? null : _names[at];
+        /// <summary>
+        /// What a refusal calls the field it is about.
+        /// </summary>
+        /// <remarks>
+        /// The name on its own and not the label, because the label carries the bounds as well and
+        /// the sentence is about to say those itself. A value nobody named is its place in the
+        /// order, which is what the words beside it say too.
+        /// </remarks>
+        string Called(int at)
+        {
+            string name = at < _wanted.Count ? _wanted[at].Name ?? "" : "";
+            return name.Length > 0 ? name : "Value " + Ordinal(at);
+        }
+
+        static string Ordinal(int at)
+        {
+            return (at + 1).ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>The number, held at a width so the fields under each other line up.</summary>
@@ -383,7 +399,41 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>
         /// Why what is typed cannot be sent, said in place of the question, or empty when it can.
         /// </summary>
+        /// <remarks>
+        /// Set by whoever raised the question, for the reasons only they can see: a name something
+        /// else already has, a target that has gone away. What a field itself will take is
+        /// <see cref="Wrong" />, which is the form's own business because the form was told it.
+        /// </remarks>
         public string Refused { get; set; }
+
+        /// <summary>
+        /// Why one of the fields will not take what is in it, or empty where they all will.
+        /// </summary>
+        /// <remarks>
+        /// The first one, because one reason is what there is room to say and the first is the one
+        /// somebody reaches by reading down. A field is held only to what it was told it takes, and
+        /// nothing here knows what the block will make of the value afterwards.
+        /// <para>
+        /// Worked out on the spot rather than watched for, and read every tick while a question is
+        /// open. The reason has to follow what is being typed as it is typed, and it costs a parse
+        /// per field of one open question - which is at most a handful, for as long as somebody is
+        /// standing at a dialog. Nothing runs it while no question is up.
+        /// </para>
+        /// </remarks>
+        public string Wrong
+        {
+            get
+            {
+                for (var i = 0; i < Count && i < _wanted.Count; i++)
+                {
+                    string why = _wanted[i].Refuses(Called(i), _boxes[i].Text);
+                    if (why.Length > 0)
+                        return why;
+                }
+
+                return "";
+            }
+        }
 
         /// <summary>Whether a point is on the question. False while none is open.</summary>
         public bool Covers(Vector2 point)
@@ -404,7 +454,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _command = command;
             _anchor = anchor;
             _question = question ?? "";
-            _names.Clear();
+            _wanted.Clear();
 
             Fields(1, false);
         }
@@ -417,9 +467,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// raised it is then nobody's business: a button, a chip in a sentence and a double press
         /// all put the same form in the same place, which is one way of doing it rather than three.
         /// </remarks>
-        public void Values(string question, int command, IEnumerable<string> names)
+        public void Values(string question, int command, IEnumerable<Field> wanted)
         {
-            Values(question, command, names, null);
+            Values(question, command, wanted, null);
         }
 
         /// <summary>
@@ -430,7 +480,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// something and lives for one answer - while what handed it over is rebuilt every tick and
         /// must not be holding anything of its own.
         /// </remarks>
-        public void Values(string question, int command, IEnumerable<string> names,
+        public void Values(string question, int command, IEnumerable<Field> wanted,
             IEnumerable<string> filled)
         {
             _up = true;
@@ -438,8 +488,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _anchor = null;
             _question = question ?? "";
 
-            Copy(names, _names);
-            Fields(_names.Count < 1 ? 1 : _names.Count, true);
+            Copy(wanted, _wanted);
+            Fields(_wanted.Count < 1 ? 1 : _wanted.Count, true);
 
             _filled.Clear();
             Copy(filled, _filled);
@@ -448,17 +498,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _boxes[i].Text = _filled[i] ?? "";
         }
 
-        static void Copy(IEnumerable<string> from, List<string> into)
+        static void Copy<T>(IEnumerable<T> from, List<T> into)
         {
             into.Clear();
             if (from == null)
                 return;
 
-            foreach (string one in from)
+            foreach (T one in from)
                 into.Add(one);
         }
 
-        readonly List<string> _names = new List<string>();
+        readonly List<Field> _wanted = new List<Field>();
         readonly List<string> _filled = new List<string>();
 
         public void Close()

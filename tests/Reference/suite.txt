@@ -62,6 +62,16 @@ sequence-ticked     60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1
 sequence-step       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 400 420 800 270 1380 1000
 sequence-wait       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 212 193 100 255
 
+# --- the form an action's values are asked for in -------------------------------------------------
+#
+# A light's colour setter, which is the awkward one: three values, declared as text, with nothing in
+# the game saying they are a colour's channels or that each stops at 255. What is held still is that
+# each field is on its own line with its name and its bounds beside it, and that a value outside them
+# replaces the question rather than appearing beside it - the dialog is the same size either way,
+# which is the whole point of putting the words there.
+values              60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 410 1380 1000
+values-refused      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 410 1380 1000 type 300
+
 # --- the list with something in it, which is where a copy is made from ---------------------------
 #
 # Every other look at this screen in here is of an empty one, so a sequence's row and the controls

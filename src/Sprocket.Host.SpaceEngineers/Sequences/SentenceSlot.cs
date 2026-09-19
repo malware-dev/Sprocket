@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -39,13 +40,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public bool Asks => !string.IsNullOrEmpty(Question);
 
         /// <summary>
-        /// What each value it asks for is called, one per value, or null where it asks for none.
+        /// What each value it asks for wants, one per value, or null where it asks for none.
         /// </summary>
         /// <remarks>
-        /// One field each, named where anybody has said what the value is - which only a
-        /// description can say, an action declaring how many values it takes and nothing else.
+        /// One field each, named and bounded where anybody has said what the value is - which only
+        /// a description can say, an action declaring how many values it takes and nothing else.
         /// </remarks>
-        public virtual IList<string> Names => null;
+        public virtual IList<Field> Fields => null;
 
         /// <summary>
         /// What those fields open holding, or null for empty ones.
