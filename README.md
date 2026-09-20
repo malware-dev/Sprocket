@@ -60,7 +60,7 @@ You simply assign the specific doors, vents, and buttons for each location.
 I built Sprocket to give more players access to complex automation, making ship logic approachable
 for everyone regardless of background.
 
-Basic timer chains quickly grow fragile, while the Programmable Block usually requires custom code.
+Basic timer chains quickly grow fragile, while the Programmable Block requires custom code.
 That creates a steep barrier for players who simply want their ship to work. My goal was to
 demonstrate an inclusive approach to automation and hopefully inspire Keen toward a similar
 direction for the future of Space Engineers.
