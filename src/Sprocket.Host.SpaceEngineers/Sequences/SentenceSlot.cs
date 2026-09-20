@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Layout;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -24,6 +25,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>Nothing chosen yet, so it should read as an invitation.</summary>
         public abstract bool IsEmpty { get; }
+
+        /// <summary>
+        /// A colour this slot stands for, where it stands for one, to be shown instead of words.
+        /// </summary>
+        /// <remarks>
+        /// The one exception to a slot never saying how it reads, and it is an exception because it
+        /// is not words: a colour is the same thing in every language, and spelling it out as three
+        /// numbers is a worse answer in all of them. Nothing else here has a rendering that is not
+        /// text, which is why this is one property rather than a way of saying anything at all.
+        /// </remarks>
+        public virtual Color? Sample
+        {
+            get { return null; }
+        }
 
         public int Command { get; private set; }
 

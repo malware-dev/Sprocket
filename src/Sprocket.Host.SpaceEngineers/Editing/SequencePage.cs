@@ -423,7 +423,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 var given = new ValuesSlot(act.Values, fields,
                     Typing(Cmd.StepSlot, position, 2, delegate(string said) { Gave(act, said); }));
 
-                given.Question = SequenceText.Wants(chosen.Wants);
+                // Asked by what the form will show rather than by how many values the action takes.
+                // The two part company the moment a description says several of them are one thing.
+                given.Question = SequenceText.Wants(fields);
                 built.Slots.Add(given);
             }
 

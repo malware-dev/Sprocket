@@ -36,5 +36,33 @@
             </UVSize>
         </TransparentMaterial>
 
+        <!-- The hue of every colour, left to right, red round to red. The game's own, drawn by its colour
+             picker and its wardrobe; declaring a material over it is the only way a mod can reach it, the
+             same as the blank above. It is a PNG rather than a DDS, which is unusual for a material. -->
+        <TransparentMaterial>
+            <Id>
+                <TypeId>TransparentMaterialDefinition</TypeId>
+                <SubtypeId>Sprocket_Hue</SubtypeId>
+            </Id>
+            <AlphaMistingEnable>false</AlphaMistingEnable>
+            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
+            <AlphaSaturation>1</AlphaSaturation>
+            <Emissivity>0</Emissivity>
+            <IgnoreDepth>false</IgnoreDepth>
+            <NeedSort>false</NeedSort>
+            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
+            <Texture>Textures\GUI\HueScale.png</Texture>
+            <Reflectivity>0</Reflectivity>
+            <UseAtlas>false</UseAtlas>
+            <UVOffset>
+                <X>0</X>
+                <Y>0</Y>
+            </UVOffset>
+            <UVSize>
+                <X>1</X>
+                <Y>1</Y>
+            </UVSize>
+        </TransparentMaterial>
+
     </TransparentMaterials>
 </Definitions>

@@ -1,5 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
+using Sprocket.Host.SpaceEngineers.Layout;
+using VRageMath;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -142,13 +144,14 @@ public class ActionTests
 
         // Asked on the button that finishes the picking, rather than on a screen of its own.
         Assert.True(screen.Editor.Screen.PrimaryAsks, "finishing does not ask for the values");
-        Assert.Equal("This needs three values.", screen.Editor.Screen.PrimaryQuestion);
+        Assert.Equal("This needs a colour.", screen.Editor.Screen.PrimaryQuestion);
 
-        // One field each, named by whoever described the action - which for a light's colour is
-        // Sprocket itself, since these are the game's own blocks - and with what each will accept,
-        // which the action never says.
-        Assert.Equal(new[] { "Red 0-255", "Green 0-255", "Blue 0-255" },
-            screen.Editor.Screen.PrimaryFields.Select(field => field.Label));
+        // One field over all three, because somebody described these three as one colour - which for
+        // a light is Sprocket itself, since these are the game's own blocks. The action still says
+        // nothing about them, and a block nobody has described still gets a box for each.
+        Field asked = Assert.Single(screen.Editor.Screen.PrimaryFields);
+        Assert.Equal(Editor.Colour, asked.Edits);
+        Assert.Equal(3, asked.Covers);
 
         screen.Editor.Typed("255 136 0");
         screen.Run(2);
@@ -161,9 +164,16 @@ public class ActionTests
         Assert.Equal(0, act.Values[2].Whole);
     }
 
-    /// <summary>And the step says what it was given, in the spelling its program uses.</summary>
+    /// <summary>
+    /// And the step shows what it was given as a colour, not as the numbers behind it.
+    /// </summary>
+    /// <remarks>
+    /// The one slot in a sentence that is not words. "255 136 0" is three numbers somebody has to
+    /// imagine, and the step is read far more often than it is written, so what it shows is the
+    /// colour itself.
+    /// </remarks>
     [Fact]
-    public void TheStepSaysWhatItWasGiven()
+    public void TheStepShowsWhatItWasGiven()
     {
         var screen = WithASequence();
 
@@ -173,9 +183,13 @@ public class ActionTests
         screen.Editor.Typed("255 136 0");
         screen.Run(2);
 
-        Assert.True(screen.Shows("255 136 0"), "the step does not say what it was given");
+        SentenceStep step = screen.Editor.Sentence().Steps[0];
+        ValuesSlot given = step.Slots.OfType<ValuesSlot>().Single();
 
-        // One chip for all of them, in the order the action wanted them. Three chips with no names
+        Assert.Equal(new Color(255, 136, 0), given.Sample);
+        Assert.False(screen.Shows("255 136 0"), "the step still spells the colour out");
+
+        // One slot for all of them, in the order the action wanted them. Three chips with no names
         // on them would be three controls somebody cannot tell apart.
         Assert.True(screen.Shows("Set Color"), "the step does not say what it does");
     }

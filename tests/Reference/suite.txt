@@ -64,13 +64,28 @@ sequence-wait       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1
 
 # --- the form an action's values are asked for in -------------------------------------------------
 #
-# A light's colour setter, which is the awkward one: three values, declared as text, with nothing in
-# the game saying they are a colour's channels or that each stops at 255. What is held still is that
-# each field is on its own line with its name and its bounds beside it, and that a value outside them
-# replaces the question rather than appearing beside it - the dialog is the same size either way,
-# which is the whole point of putting the words there.
+# A light's radius, which is one value with bounds on it. What is held still is that the field is on
+# its own line with its name and its bounds beside it, and that a value outside them replaces the
+# question rather than appearing beside it - the dialog is the same size either way, which is the
+# whole point of putting the words there.
 values              60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 410 1380 1000
 values-refused      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 410 1380 1000 type 300
+
+# And the same form asking for the thing nobody should be typing.
+#
+# A light's colour setter is the awkward one: three values, each declared as text, with nothing in
+# the game saying they are a colour's channels. Sprocket says so, so the form shows one control for
+# the three - the hue track, two plain ones, and what the colour is written as. The swatches above
+# them are the player's own and there is nobody to ask here, so the row they would be in is not
+# drawn at all, which is the other thing this holds still.
+values-colour       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 494 1380 1000
+
+# And the step it leaves behind, which is the other half of the same decision.
+#
+# A colour is the one slot in a sentence that is not words. Held still here because a step is read
+# far more often than it is written, and because the fallback - three numbers, or the code - is what
+# it used to show and what it must not go back to showing.
+sequence-colour     60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 494 1380 1000 type #FF8800 enter
 
 # --- the list with something in it, which is where a copy is made from ---------------------------
 #

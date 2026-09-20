@@ -23,3 +23,16 @@ Unload the world first, and copy both files somewhere before touching either.
 A stored program can be read straight out of the XML: `grep -a "sprocket " SANDBOX_0_0_0_.sbs`. The
 version on that line says which turn of the format wrote it, which is far quicker than reasoning
 about what the editor did.
+
+## What needs the game restarted, and what does not
+
+**Content is cached for the life of the process. Code is not.**
+
+Fonts, textures and anything else under `Content` are read once when the game starts, so a change
+to a page, a `.dds`, or a definition in an `.sbc` is invisible until the game is started again.
+
+A change to the mod's own code is not. The scripts are compiled from the mod folder when a world
+loads, so leaving to the main menu and loading the world again is enough to pick it up.
+
+So: after `dotnet build src/Sprocket.Host.SpaceEngineers`, say which of the two it was. Asking for a
+restart when nothing under `Content` moved costs several minutes of somebody else's time.

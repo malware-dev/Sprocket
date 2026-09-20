@@ -3,6 +3,7 @@ using System.Text;
 using VRage.Game;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Layout
 {
@@ -157,8 +158,47 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         public bool Centres { get; set; }
 
+        /// <summary>
+        /// How wide a colour is drawn in place of words.
+        /// </summary>
+        /// <remarks>
+        /// Wide enough to read as a colour rather than as a full stop, and narrower than the code it
+        /// stands in for, which is seven characters. It is a fixed number because every one of these
+        /// says the same amount whatever colour it is, so they should all be the same size.
+        /// </remarks>
+        const float SampleWide = 44f;
+
+        Color? _sample;
+
+        /// <summary>
+        /// A colour to show instead of the words, or nothing to show the words.
+        /// </summary>
+        /// <remarks>
+        /// A colour is the one value that is better shown than spelled: "255 136 0" is three numbers
+        /// somebody has to imagine, and a rectangle of it is the thing itself. The text is still set
+        /// underneath, and comes back the moment there is no colour to show - which is how an empty
+        /// slot still reads as an invitation.
+        /// </remarks>
+        public Color? Sample
+        {
+            get { return _sample; }
+            set
+            {
+                if (_sample == value)
+                    return;
+
+                _sample = value;
+                InvalidateMeasure();
+            }
+        }
+
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
+            // A line tall like any other, so a colour in a sentence sits on the same line as the
+            // words either side of it rather than making its own row taller.
+            if (_sample.HasValue)
+                return new Vector2(SampleWide, g.LineHeight(Font, Scale));
+
             if (_text.Length == 0)
                 return new Vector2(0f, g.LineHeight(Font, Scale));
 
@@ -223,6 +263,13 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
         protected override void DrawContent(IGraphics g)
         {
+            if (_sample.HasValue)
+            {
+                g.DrawSprite(Solid, ContentBounds, _sample.Value, 0f);
+                Outline(g, ContentBounds, Palette.Line, Space.Hair);
+                return;
+            }
+
             if (_text.Length == 0)
                 return;
 

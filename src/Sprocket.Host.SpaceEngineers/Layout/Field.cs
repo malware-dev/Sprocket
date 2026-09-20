@@ -42,6 +42,41 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         public IList<string> Words;
 
+        /// <summary>
+        /// What this is filled in with, where a box will not do.
+        /// </summary>
+        /// <remarks>
+        /// Not a bound and not a name: it says which control asks the question, and everything else
+        /// here describes what that control may answer with.
+        /// </remarks>
+        public Editor Edits;
+
+        /// <summary>
+        /// How many of the values behind the form this one field stands for.
+        /// </summary>
+        /// <remarks>
+        /// One, except where several values are one thing to a person: a colour is three numbers to
+        /// the game and one choice to anybody else. Read through <see cref="Covers" />, because a
+        /// field is a value and a value nobody set is zero, which would mean a field standing for
+        /// nothing at all.
+        /// </remarks>
+        public int Spans;
+
+        /// <summary>How many values this field stands for, which is one unless it was told otherwise.</summary>
+        public int Covers
+        {
+            get { return Spans < 1 ? 1 : Spans; }
+        }
+
+        /// <summary>One field standing over several values, filled in by a control of its own.</summary>
+        public static Field Holding(string name, Editor edits, int spans)
+        {
+            Field field = Called(name);
+            field.Edits = edits;
+            field.Spans = spans;
+            return field;
+        }
+
         /// <summary>A field nobody has described, which is a box that takes anything.</summary>
         public static Field Unnamed()
         {

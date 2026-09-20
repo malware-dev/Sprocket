@@ -82,9 +82,33 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (group == null)
                     continue;
 
+                // One field for the whole group where there is a control that asks for what it is.
+                // The parameters are still described one by one in the file - that is what says how
+                // many values the group covers, and what order they go back in.
+                Editor edits = Drawn(group.Kind);
+                if (edits != Editor.Typed)
+                {
+                    into.Add(Field.Holding("", edits, group.Span));
+                    continue;
+                }
+
                 for (var p = 0; p < group.Parameters.Count; p++)
                     into.Add(Asks(group.Parameters[p]));
             }
+        }
+
+        /// <summary>
+        /// Which control asks for a group of this kind, or none where Sprocket has never heard of it.
+        /// </summary>
+        /// <remarks>
+        /// A kind this build does not know is not an error and is not said anywhere: the group's
+        /// parameters are asked for singly under their own names, which is what they would have got
+        /// if nobody had grouped them. A file written against a later Sprocket therefore still works
+        /// here, and loses only the control.
+        /// </remarks>
+        static Editor Drawn(string kind)
+        {
+            return kind == "color" ? Editor.Colour : Editor.Typed;
         }
 
         static Field Asks(Parameter one)

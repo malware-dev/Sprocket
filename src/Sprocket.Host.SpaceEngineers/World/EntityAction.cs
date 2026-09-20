@@ -133,17 +133,31 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            for (var i = 0; i < Wants; i++)
-                into.Add(Field.Unnamed());
-
             if (Description == null)
+            {
+                for (var i = 0; i < Wants; i++)
+                    into.Add(Field.Unnamed());
+
                 return;
+            }
 
             _described.Clear();
             Description.Fields(_described);
 
-            for (var i = 0; i < _described.Count && i < into.Count; i++)
-                into[i] = _described[i];
+            // Counted by what each field stands for rather than by how many fields there are. One of
+            // them can cover several values - a colour covers three - so a description of two fields
+            // can account for all four values an action wants.
+            var covered = 0;
+            for (var i = 0; i < _described.Count && covered < Wants; i++)
+            {
+                into.Add(_described[i]);
+                covered += _described[i].Covers;
+            }
+
+            // Whatever the description did not reach is still asked for, told nothing. A description
+            // that has fallen behind the block it is about loses the names and keeps the values.
+            for (var i = covered; i < Wants; i++)
+                into.Add(Field.Unnamed());
         }
 
         /// <summary>

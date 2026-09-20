@@ -37,6 +37,13 @@ public class DefinitionTests
         <parameter name=""Blue"" min=""0"" max=""255"" />
       </group>
     </action>
+    <action id=""SetMood"">
+      <group kind=""a-kind-nobody-has-drawn"">
+        <parameter name=""Red"" min=""0"" max=""255"" />
+        <parameter name=""Green"" min=""0"" max=""255"" />
+        <parameter name=""Blue"" min=""0"" max=""255"" />
+      </group>
+    </action>
   </actions>
 </sprocket-definitions>";
 
@@ -61,7 +68,7 @@ public class DefinitionTests
     {
         Descriptions said = Read(Example);
 
-        Assert.Equal(3, said.Actions.Count);
+        Assert.Equal(4, said.Actions.Count);
 
         // A parameter of its own, with a note, against one exact block.
         Description pressure = said.Actions[0];
@@ -84,34 +91,60 @@ public class DefinitionTests
         Assert.Equal(3, group.Parameters.Count);
     }
 
-    /// <summary>The fields come out flattened, because the form asks for one value at a time.</summary>
+    /// <summary>
+    /// A group Sprocket can draw comes out as one field standing over all of its parameters.
+    /// </summary>
+    /// <remarks>
+    /// Which is the whole point of grouping them: three numbers are one colour to a person, and the
+    /// form shows the control for that rather than three boxes with nothing to tell them apart.
+    /// </remarks>
     [Fact]
-    public void TheFieldsComeOutInOrder()
+    public void AGroupItCanDrawComesOutAsOneField()
     {
-        var fields = Fields();
+        var fields = Fields(2);
+
+        Field whole = Assert.Single(fields);
+        Assert.Equal(Editor.Colour, whole.Edits);
+        Assert.Equal(3, whole.Covers);
+    }
+
+    /// <summary>
+    /// A group nothing can draw comes out flattened, which is what it would have been ungrouped.
+    /// </summary>
+    /// <remarks>
+    /// So a file written against a later Sprocket still works here. It loses the control and keeps
+    /// everything else: the names, the order and the bounds.
+    /// </remarks>
+    [Fact]
+    public void AndOneItCannotComesOutInOrder()
+    {
+        var fields = Fields(3);
 
         // Each says what it will accept, because the moment that is worth knowing is the moment
         // somebody is deciding what to type - and the action itself never says.
         Assert.Equal(new[] { "Red 0-255", "Green 0-255", "Blue 0-255" },
             fields.ConvertAll(field => field.Label));
+
+        foreach (Field field in fields)
+            Assert.Equal(1, field.Covers);
     }
 
     /// <summary>And what a file said it accepts is what the field holds anybody to.</summary>
     [Fact]
     public void AndWhatTheyTakeIsWhatTheFileSaid()
     {
-        var fields = Fields();
+        var fields = Fields(3);
 
         Assert.Equal("", fields[0].Refuses("Red", "255"));
         Assert.Equal("Red has to be between 0 and 255.", fields[0].Refuses("Red", "256"));
     }
 
-    static System.Collections.Generic.List<Field> Fields()
+    static System.Collections.Generic.List<Field> Fields(int action)
     {
-        Description glow = Read(Example).Actions[2];
+        Description said = Read(Example).Actions[action];
 
         var fields = new System.Collections.Generic.List<Field>();
-        glow.Fields(fields);
+        said.Fields(fields);
 
         return fields;
     }

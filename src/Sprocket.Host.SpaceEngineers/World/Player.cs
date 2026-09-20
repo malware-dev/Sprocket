@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Look;
+using VRageMath;
+
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>The person at the screen, as far as Sprocket needs to know them.</summary>
@@ -31,6 +36,37 @@ namespace Sprocket.Host.SpaceEngineers.World
                 at++;
 
             return at == 0 ? shown : shown.Substring(at);
+        }
+
+        /// <summary>
+        /// The colours this player keeps to paint with, copied out into <paramref name="into" />.
+        /// </summary>
+        /// <remarks>
+        /// <b>Read and never written.</b> These are the fourteen swatches somebody paints their ship
+        /// with, and a colour chosen for a light has no business rewriting them. The property does have
+        /// a setter, and what it writes is local: it fills the slots and refreshes a client-side cache,
+        /// and tells the server nothing.
+        /// <para>
+        /// Copied rather than held, because the getter hands back the live list. Anything that kept it
+        /// and changed an entry would have edited the player's palette without going through the setter
+        /// at all.
+        /// </para>
+        /// <para>
+        /// Empty where there is nobody to ask, which is every machine with no session on it. A dialog
+        /// with no swatches to show leaves the row out rather than drawing an empty one.
+        /// </para>
+        /// </remarks>
+        public static void Colours(IList<Hsv> into)
+        {
+            if (MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null)
+                return;
+
+            List<Vector3> kept = MyAPIGateway.Session.Player.BuildColorSlots;
+            if (kept == null)
+                return;
+
+            for (var i = 0; i < kept.Count; i++)
+                into.Add(Hsv.Painted(kept[i]));
         }
     }
 }

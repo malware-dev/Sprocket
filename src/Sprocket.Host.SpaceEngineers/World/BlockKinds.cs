@@ -174,6 +174,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (offer.Sets == ValueKind.Flag)
                 return Field.OneOf(said, Literal.Of(true).Said, Literal.Of(false).Said);
 
+            // A colour says so itself, which nothing else here does. Where three parameters of an
+            // action are a colour only because somebody wrote that down, a value declared as one is
+            // one, so it gets the same control without anybody having to describe it.
+            if (offer.Sets == ValueKind.Color)
+                return Field.Holding(said, Editor.Colour, 1);
+
             return Field.Between(said, offer.Least, offer.Most);
         }
 

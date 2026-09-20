@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Layout;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -26,6 +27,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         private readonly Bar _entry = new Bar();
         private readonly Stack _fields = Widgets.Column(Space.Item);
         private readonly List<TextBox> _boxes = new List<TextBox>();
+        private readonly List<Mixer> _mixers = new List<Mixer>();
+        private readonly List<Hsv> _colours = new List<Hsv>();
+        private readonly List<string> _parts = new List<string>();
         private readonly List<Bar> _lines = new List<Bar>();
         private readonly List<Label> _numbers = new List<Label>();
         private readonly Label _confirm = Widgets.Label("Continue", Palette.Ink, Lettering.Small);
@@ -98,6 +102,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _fields.Children.Clear();
             for (var i = 0; i < count; i++)
             {
+                // A field with a control of its own puts that control in instead of a line, and the
+                // box it is answered in belongs to the control rather than to the row of boxes.
+                if (Colourful(i))
+                {
+                    Mixed(i).Written.Text = "";
+                    _fields.Children.Add(Mixed(i).Root);
+                    continue;
+                }
+
                 _boxes[i].Text = "";
                 _fields.Children.Add(Line(i, count));
             }
@@ -115,6 +128,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // rather than as one place to type.
             for (var i = 0; i < _boxes.Count; i++)
                 _boxes[i].IsEditing = false;
+
+            for (var i = 0; i < _mixers.Count; i++)
+                _mixers[i].Written.IsEditing = false;
 
             _at = 0;
             _measure = true;
@@ -237,7 +253,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _measure = false;
 
             var widest = LeastLabel;
-            for (var i = 0; i < Count; i++)
+            for (var i = 0; i < Count && i < _numbers.Count; i++)
             {
                 _numbers[i].Measure(g, new Vector2(width, width));
 
@@ -266,7 +282,35 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>The box being typed into, which is one of several while several are asked for.</summary>
         public TextBox Box
         {
-            get { return _boxes[_at]; }
+            get { return At(_at); }
+        }
+
+        /// <summary>
+        /// Where a field's answer is typed, which is not always one of this form's own boxes.
+        /// </summary>
+        /// <remarks>
+        /// A field with a control of its own carries the box that control shows, so that typing, the
+        /// caret and the answer all go where somebody is looking. Everything that reads or writes what
+        /// is in a field goes through here rather than through the row of boxes.
+        /// </remarks>
+        TextBox At(int at)
+        {
+            return Colourful(at) ? Mixed(at).Written : _boxes[at];
+        }
+
+        /// <summary>Whether the field at <paramref name="at" /> is answered by choosing a colour.</summary>
+        bool Colourful(int at)
+        {
+            return at < _wanted.Count && _wanted[at].Edits == Editor.Colour;
+        }
+
+        /// <summary>The colour control for a field, made the first time that field needs one.</summary>
+        Mixer Mixed(int at)
+        {
+            while (_mixers.Count <= at)
+                _mixers.Add(new Mixer());
+
+            return _mixers[at];
         }
 
         /// <summary>How many values it is asking for.</summary>
@@ -286,7 +330,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             for (var i = 0; i < Count; i++)
             {
-                if (!_boxes[i].Holds(point))
+                // The control's own parts first: a swatch is a press that answers the field, and it
+                // is not a place to type, so it must not also move the caret there and stop.
+                if (Colourful(i) && Mixed(i).Touch(point))
+                {
+                    Move(i);
+                    return true;
+                }
+
+                if (!At(i).Holds(point))
                     continue;
 
                 Move(i);
@@ -294,6 +346,55 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Offers the press to anything on the question that is dragged rather than clicked.
+        /// </summary>
+        /// <remarks>
+        /// Asked before the press is treated as a click, the same way the screen behind asks its own
+        /// views. A slider is the only thing here that answers a drag, and it answers the press that
+        /// starts one as well, so a press on a track is a way of setting it.
+        /// </remarks>
+        public bool Grab(Vector2 point)
+        {
+            for (var i = 0; i < Count; i++)
+            {
+                if (!Colourful(i) || !Mixed(i).Grab(point))
+                    continue;
+
+                Move(i);
+                return true;
+            }
+
+            return false;
+        }
+
+        public void Carry(Vector2 point)
+        {
+            for (var i = 0; i < _mixers.Count; i++)
+                _mixers[i].Carry(point);
+        }
+
+        public void Drop()
+        {
+            for (var i = 0; i < _mixers.Count; i++)
+                _mixers[i].Drop();
+        }
+
+        /// <summary>Whether something on the question is being dragged right now.</summary>
+        public bool IsDragging
+        {
+            get
+            {
+                for (var i = 0; i < _mixers.Count; i++)
+                {
+                    if (_mixers[i].IsDragging)
+                        return true;
+                }
+
+                return false;
+            }
         }
 
         /// <summary>Moves the caret to the next field, and back to the first after the last.</summary>
@@ -307,8 +408,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (to == _at)
                 return;
 
-            _boxes[_at].CaretVisible = false;
-            _boxes[_at].IsEditing = false;
+            At(_at).CaretVisible = false;
+            At(_at).IsEditing = false;
             _at = to;
             Editing();
         }
@@ -316,8 +417,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Hands the caret to the field it is now in.</summary>
         void Editing()
         {
-            _boxes[_at].IsEditing = true;
-            _boxes[_at].CaretVisible = true;
+            At(_at).IsEditing = true;
+            At(_at).CaretVisible = true;
         }
 
         /// <summary>What the answer will be sent to.</summary>
@@ -338,17 +439,29 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             get
             {
-                if (Count == 1)
-                    return _boxes[0].Text;
+                // A field standing over several values becomes those values again here, in the order
+                // its description declared them. That is the other half of showing three numbers as
+                // one colour, and it is the only place the two spellings meet.
+                _parts.Clear();
+                for (var i = 0; i < Count; i++)
+                {
+                    if (Colourful(i))
+                        Channels.Spell(At(i).Text, _wanted[i].Covers, _parts);
+                    else
+                        _parts.Add(At(i).Text);
+                }
+
+                if (_parts.Count == 1)
+                    return _parts[0];
 
                 // Only as far as the last field somebody actually filled in. A field left alone is
                 // a value not given, so the action is handed the default it declared - where an
                 // empty one passed along would be an empty value, which is a different thing and
                 // usually a worse one.
                 var last = -1;
-                for (var i = 0; i < Count; i++)
+                for (var i = 0; i < _parts.Count; i++)
                 {
-                    if (!string.IsNullOrEmpty(_boxes[i].Text))
+                    if (!string.IsNullOrEmpty(_parts[i]))
                         last = i;
                 }
 
@@ -358,7 +471,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     if (said.Length > 0)
                         said += " ";
 
-                    said += Quoted(_boxes[i].Text);
+                    said += Quoted(_parts[i]);
                 }
 
                 return said;
@@ -390,7 +503,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 for (var i = 0; i < Count; i++)
                 {
-                    if (!string.IsNullOrEmpty(_boxes[i].Text))
+                    if (!string.IsNullOrEmpty(At(i).Text))
                         return true;
                 }
 
@@ -428,7 +541,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 for (var i = 0; i < Count && i < _wanted.Count; i++)
                 {
-                    string why = _wanted[i].Refuses(Called(i), _boxes[i].Text);
+                    string why = _wanted[i].Refuses(Called(i), At(i).Text);
                     if (why.Length > 0)
                         return why;
                 }
@@ -497,8 +610,26 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _filled.Clear();
             Copy(filled, _filled);
 
-            for (var i = 0; i < _filled.Count && i < Count; i++)
-                _boxes[i].Text = _filled[i] ?? "";
+            // Read once, when the question opens, and copied out of the live list rather than held.
+            // These are the colours this player paints with, and Sprocket only ever reads them.
+            _colours.Clear();
+            Player.Colours(_colours);
+
+            for (var i = 0; i < Count; i++)
+            {
+                string said = i < _filled.Count ? _filled[i] ?? "" : "";
+
+                if (Colourful(i))
+                {
+                    Mixed(i).Offer(_colours);
+                    Mixed(i).Written.Text = said;
+                    Mixed(i).Reread();
+                    continue;
+                }
+
+                if (i < _filled.Count)
+                    _boxes[i].Text = said;
+            }
         }
 
         static void Copy<T>(IEnumerable<T> from, List<T> into)
@@ -544,6 +675,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // The question gives way to the reason while there is one, so the words sit where somebody
             // is already reading, and come back as soon as the answer is one that can be sent.
+            // What is typed is the one part of a colour that can change without its control hearing,
+            // so the control is brought into line before anything is drawn. It reads a string and
+            // compares it, and does nothing at all while the two agree.
+            for (var i = 0; i < Count; i++)
+            {
+                if (Colourful(i))
+                    Mixed(i).Reread();
+            }
+
             bool refused = !string.IsNullOrEmpty(Refused);
             _label.Text = refused ? Refused : _question;
             _label.Color = refused ? Palette.Problem : Palette.Muted;

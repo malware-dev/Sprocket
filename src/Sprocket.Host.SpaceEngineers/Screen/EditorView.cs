@@ -946,6 +946,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         public bool Grab(Vector2 point)
         {
+            // A question owns the screen, so it is asked first rather than not at all. What it may
+            // have to drag is a slider on a colour, and only inside its own bounds - a drag started
+            // outside one is a press that dismisses it, which is the press path's business.
+            if (_ask.IsUp && _renaming < 0)
+                return _ask.Covers(point) && _ask.Grab(point);
+
             // Nothing is carried out from under a popup, and nothing at all while a name is being
             // typed. The same owner a press respects, asked the same way.
             if (Owner != null || IsAsking)
@@ -976,6 +982,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Where the thing being carried has got to. Ignored when nothing is being carried.</summary>
         public void Carry(Vector2 point)
         {
+            if (_ask.IsDragging)
+            {
+                _ask.Carry(point);
+                return;
+            }
+
             if (_scroll.BarHeld)
             {
                 _scroll.DragBy(point.Y - _held);
@@ -990,6 +1002,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Lets go of whatever was being carried.</summary>
         public void Drop()
         {
+            _ask.Drop();
             _scroll.BarHeld = false;
 
             if (_dragging == null)
@@ -1002,7 +1015,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Whether something is being carried right now.</summary>
         public bool IsDragging
         {
-            get { return _dragging != null || _scroll.BarHeld; }
+            get { return _dragging != null || _scroll.BarHeld || _ask.IsDragging; }
         }
 
         /// <summary>

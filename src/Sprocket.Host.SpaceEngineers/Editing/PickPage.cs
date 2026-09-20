@@ -150,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             get
             {
                 List<Field> fields = Fields();
-                return fields.Count > 0 ? SequenceText.Wants(fields.Count) : "";
+                return fields.Count > 0 ? SequenceText.Wants(fields) : "";
             }
         }
 

@@ -50,11 +50,38 @@ namespace Sprocket.Sim.Simulation
         }
 
         /// <summary>
-        /// Puts the harness behind the two members of the gateway a screen reads.
+        /// The colours the harness says this player paints with.
+        /// </summary>
+        /// <remarks>
+        /// A stand-in for somebody who has painted something, and chosen to be told apart in a
+        /// recorded frame: the game's own defaults are one grey and thirteen blacks, which is what a
+        /// player who has never opened the painter has, and a row of fourteen identical dark squares
+        /// holds nothing still.
+        /// <para>
+        /// Offsets rather than colours, because that is what a build colour slot is: the hue as it
+        /// stands, and the saturation and value shifted so that nought is unpainted armour. Written
+        /// here in the form the game keeps them in, so the mod does the same conversion on these as
+        /// it does on a real player's - see <c>Hsv.Painted</c>.
+        /// </para>
+        /// </remarks>
+        static readonly List<Vector3> Painted = new List<Vector3>
+        {
+            new Vector3(0.000f, -0.800f, 0.170f), new Vector3(0.000f, -0.800f, -0.260f),
+            new Vector3(0.575f, -0.220f, 0.070f), new Vector3(0.545f, -0.020f, 0.410f),
+            new Vector3(0.083f, 0.080f, 0.470f), new Vector3(0.128f, 0.120f, 0.510f),
+            new Vector3(0.015f, 0.040f, 0.310f), new Vector3(0.925f, -0.250f, 0.270f),
+            new Vector3(0.335f, -0.140f, 0.130f), new Vector3(0.275f, 0.060f, 0.350f),
+            new Vector3(0.700f, -0.220f, 0.230f), new Vector3(0.495f, -0.460f, -0.010f),
+            new Vector3(0.000f, -0.800f, 0.490f), new Vector3(0.070f, -0.380f, -0.090f)
+        };
+
+        /// <summary>
+        /// Puts the harness behind the members of the gateway a screen reads.
         /// </summary>
         /// <remarks>
         /// Nothing about drawing any more - that arrives through <see cref="IScreenSpace" /> now. What
-        /// is left is the game's session, which the mod asks for a frame counter and a viewport.
+        /// is left is the game's session: a viewport, and the person at it, whose saved colours a
+        /// colour is chosen from.
         /// </remarks>
         public void Install()
         {
@@ -62,8 +89,13 @@ namespace Sprocket.Sim.Simulation
                 .Gives("ViewportSize", () => ViewportSize)
                 .Done();
 
+            var player = Pretend.To<IMyPlayer>()
+                .Gives("BuildColorSlots", () => Painted)
+                .Done();
+
             MyAPIGateway.Session = Pretend.To<IMySession>()
                 .Gives("Camera", () => camera)
+                .Gives("Player", () => player)
                 .Done();
         }
 

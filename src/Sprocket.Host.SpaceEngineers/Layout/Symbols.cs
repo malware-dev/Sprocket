@@ -129,5 +129,15 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// seam draws sprites and knows nothing of solid colours.
         /// </summary>
         public static readonly MyStringId Fill = MyStringId.GetOrCompute("Sprocket_Fill");
+
+        /// <summary>
+        /// Every hue in order, red round to red, for the one slider whose track says what it does.
+        /// </summary>
+        /// <remarks>
+        /// The game's own <c>Textures\GUI\HueScale.png</c>, which its colour picker and its wardrobe both
+        /// draw. Reached the same way as <see cref="Fill" />, by declaring a material over it, because the
+        /// texture has no id of its own that a mod can use.
+        /// </remarks>
+        public static readonly MyStringId Hue = MyStringId.GetOrCompute("Sprocket_Hue");
     }
 }

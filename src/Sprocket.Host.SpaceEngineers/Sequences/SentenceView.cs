@@ -108,14 +108,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (slot != null)
             {
                 slot.Text = text;
+                slot.Sample = model.Sample;
                 slot.Color = model.IsEmpty ? Palette.Notice : Palette.Ink;
                 slot.Underline = model.IsEmpty ? Palette.Notice : Palette.SlotEdge;
                 return;
             }
 
             var word = element as Label;
-            if (word != null)
-                word.Text = text;
+            if (word == null)
+                return;
+
+            word.Text = text;
+            word.Sample = model.Sample;
         }
     }
 }

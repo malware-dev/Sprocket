@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -187,12 +189,28 @@ namespace Sprocket.Host.SpaceEngineers.Words
         /// inventing knowledge it does not have, on the screen where somebody is deciding what to
         /// type.
         /// </remarks>
-        public static string Wants(int values)
+        static string Wants(int values)
         {
             if (values <= 1)
                 return "This needs one value.";
 
             return "This needs " + Counted(values) + " values.";
+        }
+
+        /// <summary>
+        /// The same, said as what is actually being asked for where somebody has described it.
+        /// </summary>
+        /// <remarks>
+        /// A count is what can be said when the game is the only source, and it stops being the whole
+        /// truth the moment a description says these three values are one colour. Then the form shows
+        /// one control and asking for three values would be counting something nobody can see.
+        /// </remarks>
+        public static string Wants(IList<Field> fields)
+        {
+            if (fields.Count == 1 && fields[0].Edits == Editor.Colour)
+                return "This needs a colour.";
+
+            return Wants(fields.Count);
         }
 
         /// <summary>
