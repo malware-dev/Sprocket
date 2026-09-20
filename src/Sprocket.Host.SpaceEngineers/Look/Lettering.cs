@@ -56,5 +56,19 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// at the same size as small text and came out as a smudge.
         /// </remarks>
         public const float Symbol = 0.57f;
+
+        /// <summary>
+        /// The face for anything read as a listing rather than as prose.
+        /// </summary>
+        /// <remarks>
+        /// Fixed width, so a column of line numbers and a column of indentation line up. Cut to the
+        /// same line height and baseline as the game's own faces, so a line of it stands exactly as
+        /// tall as a line anywhere else and any of the sizes above apply to it unchanged.
+        /// <para>
+        /// A subtype out of the definition registry, the same way <c>Symbols.Font</c> is, and it comes
+        /// from the same place - see <c>Content/Data/Fonts.sbc</c>.
+        /// </para>
+        /// </remarks>
+        public const string Mono = "MaltekMono";
     }
 }

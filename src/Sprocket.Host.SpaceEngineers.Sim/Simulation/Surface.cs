@@ -42,6 +42,9 @@ namespace Sprocket.Sim.Simulation
         readonly SeFontMetrics _symbols;
         readonly GlyphAtlas _symbolAtlas;
 
+        readonly SeFontMetrics _mono;
+        readonly GlyphAtlas _monoAtlas;
+
         ScreenSpaceGraphics _graphics;
 
         /// <summary>
@@ -126,7 +129,13 @@ namespace Sprocket.Sim.Simulation
                 _device, Path.Combine(maltek, "MaltekSymbols.xml"), "the mod's own content", true);
             _symbolAtlas = GlyphAtlas.FromDds(Path.Combine(maltek, "MaltekSymbols-0.dds"));
 
-            _device.Fonts = new FontSet((IFontMetrics)_exact ?? _shapes, _symbols);
+            _mono = SeFontMetrics.LoadFrom(
+                _device, Path.Combine(maltek, "MaltekMono.xml"), "the mod's own content", true);
+            _monoAtlas = GlyphAtlas.FromDds(Path.Combine(maltek, "MaltekMono-0.dds"));
+
+            _device.Fonts = new FontSet((IFontMetrics)_exact ?? _shapes)
+                .And(Symbols.Font, _symbols)
+                .And(Lettering.Mono, _mono);
             _device.Install();
             Focusable = true;
         }
@@ -456,10 +465,17 @@ namespace Sprocket.Sim.Simulation
 
             // Drawn as the game would draw it, boxes and all. Anything else here has glyphs Space
             // Engineers has never heard of, and letting them show would make this window flatter the mod.
-            bool symbolic = command.Font == Symbols.Font;
+            //
+            // A face of ours falls back to nothing rather than to a desktop typeface: a symbol drawn as
+            // the letter its codepoint happens to be is worse than a gap, and a listing drawn in a
+            // proportional stand-in would say the columns line up when they do not.
+            bool ours = command.Font == Symbols.Font || command.Font == Lettering.Mono;
 
-            SeFontMetrics metrics = symbolic ? _symbols : _exact;
-            GlyphAtlas page = symbolic ? _symbolAtlas : _atlas;
+            SeFontMetrics metrics = command.Font == Symbols.Font ? _symbols
+                : command.Font == Lettering.Mono ? _mono : _exact;
+
+            GlyphAtlas page = command.Font == Symbols.Font ? _symbolAtlas
+                : command.Font == Lettering.Mono ? _monoAtlas : _atlas;
 
             string text = metrics == null ? command.Text : metrics.AsDrawn(command.Text);
 
@@ -469,7 +485,7 @@ namespace Sprocket.Sim.Simulation
             // A symbol with no page behind it has no business falling back to a desktop typeface, which
             // would draw the letter the character happens to be - a literal "d" where a bin belongs. That
             // is worse than nothing, because it looks deliberate.
-            if (symbolic)
+            if (ours)
                 return;
 
             FormattedText formatted = Letters(text, _shapes.FontSizeFor(command.Font, command.Scale),

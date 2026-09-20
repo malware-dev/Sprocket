@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Layout;
+using System.Collections.Generic;
 using VRageMath;
 
 namespace Sprocket.Sim.Simulation
@@ -8,8 +8,8 @@ namespace Sprocket.Sim.Simulation
     /// </summary>
     /// <remarks>
     /// The game keeps every loaded font in one registry and picks by subtype, so a screen may name any of
-    /// them on any call. This is the smallest thing that reproduces that: the letters, the symbols, and a
-    /// rule for what happens when a name is neither.
+    /// them on any call. This is the smallest thing that reproduces that: a set of named faces, and a rule
+    /// for what happens when a name is none of them.
     /// <para>
     /// An unknown name falls back to the text font rather than measuring zero, because zero is the answer
     /// that makes a layout collapse silently. A run in a font that is not there should come out the wrong
@@ -19,12 +19,20 @@ namespace Sprocket.Sim.Simulation
     public sealed class FontSet : IFontMetrics
     {
         readonly IFontMetrics _text;
-        readonly IFontMetrics _symbols;
+        readonly Dictionary<string, IFontMetrics> _named = new Dictionary<string, IFontMetrics>();
 
-        public FontSet(IFontMetrics text, IFontMetrics symbols)
+        public FontSet(IFontMetrics text)
         {
             _text = text;
-            _symbols = symbols;
+        }
+
+        /// <summary>Registers a face under the subtype a screen will name it by. Null is ignored.</summary>
+        public FontSet And(string font, IFontMetrics metrics)
+        {
+            if (!string.IsNullOrEmpty(font) && metrics != null)
+                _named[font] = metrics;
+
+            return this;
         }
 
         public Vector2 MeasurePixels(string font, string text, float scale)
@@ -39,7 +47,8 @@ namespace Sprocket.Sim.Simulation
 
         IFontMetrics For(string font)
         {
-            return font == Symbols.Font && _symbols != null ? _symbols : _text;
+            IFontMetrics found;
+            return font != null && _named.TryGetValue(font, out found) ? found : _text;
         }
     }
 }

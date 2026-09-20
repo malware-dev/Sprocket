@@ -1,8 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Sim.Content;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -29,7 +34,24 @@ namespace Sprocket.Sim.Simulation
             _height = windowHeight;
 
             _device = new ScreenSpaceDevice();
-            _device.Fonts = new FallbackFonts(_device, "Segoe UI");
+
+            // The letters are a stand-in, because the game's own widths need the game. The monospace
+            // face is not: it is in the build output, so it is measured exactly and a frame holding a
+            // listing reproduces on a machine that has never had Space Engineers. It matters more for
+            // that face than for any other, because a fixed-width one measured with a proportional
+            // stand-in reports columns lining up when they do not.
+            //
+            // <b>The symbol font is deliberately left on the stand-in, and that is a known
+            // disagreement.</b> The window measures it exactly and this does not, so a symbol occupies
+            // a different box in a recorded frame than it does in the game - the symbol font declares a
+            // line of 53 where the stand-in answers 37 for everything. Putting it right moves every
+            // recorded frame that holds a symbol and changes where the back arrow sits against a
+            // heading, which is a question about the heading rather than about fonts.
+            string maltek = Path.Combine(AppContext.BaseDirectory, "Content", "Fonts", "Maltek");
+
+            _device.Fonts = new FontSet(new FallbackFonts(_device, "Segoe UI"))
+                .And(Lettering.Mono, Ours(maltek, "MaltekMono"));
+
             _device.Install();
 
             float safeWidth = windowHeight * 4f / 3f;
@@ -38,6 +60,13 @@ namespace Sprocket.Sim.Simulation
 
             _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud);
             _scene = EditorScene.Nowhere();
+        }
+
+        /// <summary>One of the faces this mod ships, or null where the build did not carry it.</summary>
+        IFontMetrics Ours(string folder, string name)
+        {
+            return SeFontMetrics.LoadFrom(
+                _device, Path.Combine(folder, name + ".xml"), "the mod's own content", true);
         }
 
         public EditorScene Scene => _scene;

@@ -19,8 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Developing
         {
             _component = component;
 
-            // The face is left as it comes. Changing it is one property, and the white one is the only
-            // face the harness can measure, so a listing shot for a reference frame stays honest.
+            // Fixed width, because a listing is read as columns: the indentation of a step under its
+            // sequence, and the line numbers beside it, only line up if every character is one width.
+            _screed.Font = Lettering.Mono;
             _screed.Scale = Lettering.Small;
             _screed.Color = Palette.Ink;
 
