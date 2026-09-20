@@ -25,7 +25,20 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// </remarks>
         public const float Column = 460f;
 
-        /// <summary>Anything hanging over the screen - a question, a list that opens downward.</summary>
+        /// <summary>
+        /// A dialog hanging over the screen.
+        /// </summary>
+        /// <remarks>
+        /// A width rather than a measurement, because a form's boxes are empty when it opens and
+        /// boxes sized to their contents would open as a row of slivers nobody would take for
+        /// somewhere to type.
+        /// <para>
+        /// <b>Not for a menu.</b> A menu already holds its words, so how wide it is is a fact about
+        /// it rather than a decision - and this number applied to one made a list of five short
+        /// block kinds as wide as a form. A dialog and a list that opens downward are two different
+        /// things and must not inherit each other's sizing.
+        /// </para>
+        /// </remarks>
         public const float Popup = 512f;
 
         /// <summary>The box at the head of a row in a list of several things to choose between.</summary>

@@ -47,6 +47,18 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Lettering.Tiny);
         readonly TextBox _narrow = Widgets.Box(Lettering.Small, Palette.Page);
         readonly Signpost _kindLine = new Signpost("", Symbols.Down);
+
+        /// <summary>Narrows the kinds themselves, which on a varied construct are as many as the blocks.</summary>
+        readonly TextBox _kindNarrow = Widgets.Box(Lettering.Small, Palette.Page);
+
+        /// <summary>The way back to all of them, beside the line rather than inside the list.</summary>
+        readonly Stack _kindHead = Widgets.RowOf(Space.Row);
+
+        readonly Glyph _kindClear = Widgets.Centred(Symbols.Close, Palette.Faint);
+
+        /// <summary>The way to empty each search box, inside it at the right.</summary>
+        readonly Glyph _narrowClear = Widgets.Centred(Symbols.Close, Palette.Faint);
+        readonly Glyph _kindNarrowClear = Widgets.Centred(Symbols.Close, Palette.Faint);
         readonly Label _showing = Widgets.Label("", Palette.Faint, Lettering.Tiny);
         readonly Stack _options = Widgets.RowOf(Space.Region);
         readonly List<OptionRow> _optionRows = new List<OptionRow>();
@@ -97,6 +109,32 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _kindList.Edge = Palette.Line;
             _kindList.Padding = new Thickness(Space.Item);
 
+            // Inside the list rather than beside the line, because it narrows what the list holds and
+            // belongs where that is. It is also the first thing under the pointer once the list opens,
+            // which is where somebody who knows what they want is already heading.
+            _kindNarrow.Hint = "Search";
+            _kindNarrow.Clear = _kindNarrowClear;
+            _kindList.Children.Add(_kindNarrow);
+
+            // A step past the list's own tone, the same as its rows. The list is already drawn in the
+            // highlight colour, so a control inside it that lit with that colour would not light.
+            _kindNarrowClear.Highlight = Palette.Line;
+            _narrowClear.Highlight = Palette.PanelHot;
+
+            _narrow.Clear = _narrowClear;
+
+            // The way back to all of them, on the line rather than in the list: clearing a filter is
+            // something to do without first opening the thing that set it.
+            _kindClear.Padding = new Thickness(Space.Row, 0f);
+            _kindClear.Highlight = Palette.PanelHot;
+            _kindClear.Tip = "Show every kind again";
+
+            // Next to the word it clears and not at the end of the row. A bar puts its right-hand
+            // part against the far edge, which left the cross four hundred units from the filter it
+            // was offering to undo - close enough to the column's edge to read as part of the frame.
+            _kindHead.Children.Add(_kindLine);
+            _kindHead.Children.Add(_kindClear);
+
             _head.Children.Add(_title);
             _head.Children.Add(_subtitle);
 
@@ -111,7 +149,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             // wall of them crowds out the box that would have answered the question in four keystrokes.
             _hasKinds = stage.Filters.Count > 1;
             if (_hasKinds)
-                _head.Children.Add(_kindLine);
+                _head.Children.Add(_kindHead);
 
             if (stage.Filters.Count > 0)
                 _head.Children.Add(_showing);
@@ -194,7 +232,10 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             // The box takes the keyboard rather than sending anything at once, and then every keystroke
             // goes to the same command.
             if (_hasNarrow)
+            {
                 _narrow.Press = Deed.Types(stage.NarrowCommand, _narrow);
+                Clearing(_narrowClear, _narrow, stage.NarrowCommand);
+            }
 
             if (_hasKinds)
             {
@@ -202,7 +243,22 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
                 // The list hangs off this line, and is reachable only while it is hanging there - a
                 // closed one is not in the layout at all, so its rows cannot be pressed through it.
-                _kindLine.Press = Deed.Opens(_kindList);
+                _kindLine.Press = Deed.Opens(_kindList, _kindNarrow);
+
+                // Put back only while nobody is typing into it, the same rule the box over the blocks
+                // keeps: what is in the box is the truth while it is being typed.
+                if (!IsTypingKinds(host))
+                    _kindNarrow.Text = stage.KindText;
+
+                _kindNarrow.Press = Deed.Types(stage.KindCommand, _kindNarrow);
+                Clearing(_kindNarrowClear, _kindNarrow, stage.KindCommand);
+
+                // Nothing to clear while nothing is narrowed, and a way out that does nothing is a
+                // control somebody presses twice before believing it.
+                _kindClear.Collapsed = !stage.IsNarrowed;
+                _kindClear.Press = stage.IsNarrowed
+                    ? Deed.Sends(stage.ClearCommand)
+                    : Deed.Nothing;
             }
 
             if (stage.Filters.Count > 0)
@@ -225,13 +281,37 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         public Element KindLine
         {
-            get { return _kindLine; }
+            get { return _kindHead; }
+        }
+
+        /// <summary>
+        /// Arms the cross beside a box, or takes it away where the box is empty.
+        /// </summary>
+        /// <remarks>
+        /// Nothing to throw away while nothing is written, and a way out that does nothing is a
+        /// control somebody presses twice before believing it.
+        /// </remarks>
+        static void Clearing(Glyph clear, TextBox box, int command)
+        {
+            bool anything = !string.IsNullOrEmpty(box.Text);
+
+            // Collapsed rather than taken out: the room for it is held by the box whether or not it
+            // is showing, so nothing moves when the first character is typed.
+            clear.Collapsed = !anything;
+            clear.Tip = "Clear what is typed";
+            clear.Press = anything ? Deed.Empties(command, box) : Deed.Nothing;
         }
 
         bool IsTyping(IScreenHost host)
         {
             var view = host as EditorView;
             return view != null && view.Focus == _narrow;
+        }
+
+        bool IsTypingKinds(IScreenHost host)
+        {
+            var view = host as EditorView;
+            return view != null && view.Focus == _kindNarrow;
         }
 
         void UpdateKinds(PickStage stage)
@@ -255,6 +335,10 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 row.Line = new Bar();
                 row.Line.Spacing = Space.Region * 1.6f;
                 row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
+
+                // As wide as what is written in it. The list this sits in is a menu, and a menu is
+                // as wide as its longest word rather than as wide as whatever offered it room.
+                row.Line.Tight = true;
 
                 // The list itself is already the highlight tone, so its rows have to go a step past it.
                 row.Line.Highlight = Palette.Line;

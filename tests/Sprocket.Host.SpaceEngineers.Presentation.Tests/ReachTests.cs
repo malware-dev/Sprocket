@@ -108,10 +108,12 @@ public class ReachTests
         var wanted = Row(picker, other);
         var back = Row(picker, first);
 
+        // Taking one puts the list away, the way a list somebody has answered should.
         picker.Do(wanted);
         Assert.Equal(other, Current(picker));
 
-        picker.Do(opener);
+        // And now the row that would have said something else is not there to be pressed, though its
+        // rectangle is where it was.
         picker.Do(back);
 
         Assert.Equal(other, Current(picker));

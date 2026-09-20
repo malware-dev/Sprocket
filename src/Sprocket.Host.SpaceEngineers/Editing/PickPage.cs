@@ -82,6 +82,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         string _blockSearch = "";
         string _kind = "";
+
+        /// <summary>What is typed into the box that narrows the kinds, which narrows nothing else.</summary>
+        string _kindSearch = "";
+
+        /// <summary>The kinds actually offered, which is all of them until the box narrows them.</summary>
+        readonly List<EntityKind> _shownKinds = new List<EntityKind>();
         string _whatSearch = "";
         readonly List<string> _names = new List<string>();
         readonly List<string> _ids = new List<string>();
@@ -117,6 +123,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _asksAll = asksAll;
             _all = all;
             _done = done;
+
+            // Opened the way the last one was left. What is on this construct is not known yet, so a
+            // kind it does not have is dropped later, where it is - see FillFilters.
+            _kind = editor.KindFor(forEvents);
 
             for (var i = 0; i < targets.Count; i++)
                 _selection.Add(targets[i]);
@@ -364,19 +374,68 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         bool FillFilters()
         {
-            var changed = Resize(_blocks.Filters, _kinds.Count + 1);
+            // A kind remembered from an earlier picker may not be on this construct at all, and one
+            // that is not would hide every block with nothing on screen to say why. It is dropped
+            // rather than kept, here, where what this construct actually has is known.
+            if (_kind.Length > 0 && !HasKind(_kind))
+                SetKind("");
 
-            changed |= Apply(_blocks.Filters[0], "Anything", _candidates.Count, _kind.Length == 0,
-                Editor.Register(Cmd.AnyKind, ClearKind));
-
+            _shownKinds.Clear();
             for (var i = 0; i < _kinds.Count; i++)
             {
-                var id = _kinds[i].Id;
-                changed |= Apply(_blocks.Filters[i + 1], _kinds[i].DisplayName, CountOfKind(id),
+                // The one in force is always offered, however the box is narrowed, so that what the
+                // line says is showing is always something the list can be seen to say too.
+                if (_kinds[i].Id == _kind || EntityQuery.MatchesText(_kinds[i].DisplayName, _kindSearch))
+                    _shownKinds.Add(_kinds[i]);
+            }
+
+            var changed = Resize(_blocks.Filters, _shownKinds.Count + 1);
+
+            // One registration, used twice: the row that says anything and the way out beside the
+            // line are the same act, and a command's identity has to be unique on its screen.
+            int anything = Editor.Register(Cmd.AnyKind, ClearKind);
+
+            changed |= Apply(_blocks.Filters[0], "Anything", _candidates.Count, _kind.Length == 0,
+                anything);
+
+            for (var i = 0; i < _shownKinds.Count; i++)
+            {
+                var id = _shownKinds[i].Id;
+                changed |= Apply(_blocks.Filters[i + 1], _shownKinds[i].DisplayName, CountOfKind(id),
                     _kind == id, Editor.Register(Cmd.OneKind, i, delegate { SetKind(id); }));
             }
 
+            _blocks.KindText = _kindSearch;
+            _blocks.KindCommand = Editor.RegisterText(Cmd.NarrowKinds, NarrowKinds);
+            _blocks.IsNarrowed = _kind.Length > 0;
+            _blocks.ClearCommand = anything;
+
             return changed;
+        }
+
+        bool HasKind(string kindId)
+        {
+            for (var i = 0; i < _kinds.Count; i++)
+            {
+                if (_kinds[i].Id == kindId)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Narrows the kinds on offer, and nothing else.
+        /// </summary>
+        /// <remarks>
+        /// The box over the kinds and the box over the blocks are two questions: one asks which
+        /// sort, the other asks which one. Typing into either while the other holds something is an
+        /// ordinary thing to do, so neither clears the other.
+        /// </remarks>
+        void NarrowKinds(string said)
+        {
+            _kindSearch = said ?? "";
+            Editor.Invalidate();
         }
 
         /// <summary>
@@ -847,6 +906,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         void SetKind(string kindId)
         {
             _kind = kindId;
+
+            // Kept where it outlives this page, so the next picker of this sort opens the way this
+            // one was left - and no other sort is touched by it.
+            Editor.RememberKind(_forEvents, kindId);
             Editor.Invalidate();
         }
 

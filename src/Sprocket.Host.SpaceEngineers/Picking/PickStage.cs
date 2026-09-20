@@ -57,6 +57,24 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         public int NarrowCommand { get; set; }
 
         /// <summary>Ways to narrow by kind, built from what is actually here.</summary>
+        /// <summary>
+        /// What is typed into the box that narrows the list of kinds, or empty.
+        /// </summary>
+        /// <remarks>
+        /// The kinds are as long as a construct is varied - a station lists every sort of block on
+        /// it - so the menu that picks one needs narrowing for the same reason the blocks do.
+        /// </remarks>
+        public string KindText { get; set; }
+
+        /// <summary>Where a keystroke in that box goes, or zero where there is no such box.</summary>
+        public int KindCommand { get; set; }
+
+        /// <summary>Whether a kind is in force, which is when there is something to clear.</summary>
+        public bool IsNarrowed { get; set; }
+
+        /// <summary>Puts the kinds back to all of them, or zero where there is nothing to put back.</summary>
+        public int ClearCommand { get; set; }
+
         public List<KindFilter> Filters { get; private set; }
 
         /// <summary>

@@ -30,6 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
         public TextBox()
         {
+            _children = new ElementCollection(this);
+
             Font = MyFontEnum.White;
             Scale = 1f;
             Color = Color.White;
@@ -255,9 +257,54 @@ namespace Sprocket.Host.SpaceEngineers.Layout
                 _anchor = _text.Length;
         }
 
+        /// <summary>The room held for the way to empty it, where there is one.</summary>
+        /// <remarks>
+        /// A fixed number rather than the glyph's own width, so what is typed does not shift sideways
+        /// because a symbol font measured a hair wider than the last one did. The same number the
+        /// chips in a sentence hold for the same mark.
+        /// </remarks>
+        const float Clearing = 20f;
+
+        readonly ElementCollection _children;
+
+        Element _clear;
+
+        /// <summary>
+        /// The way to empty this box, drawn inside it at the right, or nothing.
+        /// </summary>
+        /// <remarks>
+        /// Inside rather than beside, because what it empties is this box: outside, it is a control
+        /// sitting in a row with one, which is a different claim. It is also why the room for it is
+        /// held from the moment there is one to hold it for, whether or not it is showing - a box
+        /// that grew a margin the instant somebody typed would shove itself sideways under the caret.
+        /// </remarks>
+        public Element Clear
+        {
+            get { return _clear; }
+            set
+            {
+                if (_clear == value)
+                    return;
+
+                if (_clear != null)
+                    _children.Remove(_clear);
+
+                if (value != null)
+                    _children.Add(value);
+
+                _clear = value;
+
+                Padding = new Thickness(Padding.Left, Padding.Top,
+                    value == null ? Padding.Left : Padding.Left + Clearing, Padding.Bottom);
+            }
+        }
+
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             float height = LineOf(g);
+
+            if (_clear != null)
+                _clear.Measure(g, new Vector2(Clearing, height));
 
             if (_text.Length == 0)
                 return new Vector2(0f, height);
@@ -286,6 +333,26 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             return _line;
         }
 
+        protected override void ArrangeContent(RectangleF bounds)
+        {
+            if (_clear == null)
+                return;
+
+            // In the room the padding held for it: against the right edge, on the middle of the line
+            // the words sit on.
+            Vector2 wanted = _clear.DesiredSize;
+            float x = Bounds.X + Bounds.Width - Padding.Left * 0.5f - wanted.X;
+            float y = bounds.Y + (bounds.Height - wanted.Y) * 0.5f;
+
+            _clear.Arrange(new RectangleF(x, y, wanted.X, wanted.Y));
+        }
+
+        /// <summary>The cross answers before the box it sits in, so it can be pressed at all.</summary>
+        protected override Element UnderContent(Vector2 point)
+        {
+            return _clear == null ? null : _clear.Under(point);
+        }
+
         protected override void DrawContent(IGraphics g)
         {
             float height = LineOf(g);
@@ -306,6 +373,9 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             // Drawn over the text rather than under it, so it stays visible inside a selection.
             if (IsEditing && CaretVisible)
                 g.DrawSprite(Solid, new RectangleF(at.X + WidthTo(g, _caret), at.Y, 1.5f, height), CaretColor, 0f);
+
+            if (_clear != null)
+                _clear.Draw(g);
         }
 
         /// <summary>The width of the first <paramref name="count" /> characters.</summary>

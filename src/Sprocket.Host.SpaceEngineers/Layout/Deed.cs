@@ -209,6 +209,39 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         }
 
         /// <summary>A control that hangs <paramref name="overlay" /> over the screen, under itself.</summary>
+        /// <summary>A control that throws away what is in a box, and tells the same command.</summary>
+        /// <remarks>
+        /// The command is the one the box types into, because emptying it is the same answer as
+        /// having deleted every character of it by hand - core is told what the box now holds and
+        /// never how it came to hold it.
+        /// </remarks>
+        public static Deed Empties(int command, TextBox box)
+        {
+            var deed = new Deed();
+            deed.Means = Means.Empty;
+            deed.Command = command;
+            deed.Box = box;
+            return deed;
+        }
+
+        /// <summary>
+        /// The same, opening with the caret already in a box inside it.
+        /// </summary>
+        /// <remarks>
+        /// For a list long enough to want narrowing. Somebody who opened it to find one thing among
+        /// thirty is going to type, and making them press the box first is a step that exists only
+        /// because nothing put the caret where they were already looking.
+        /// </remarks>
+        public static Deed Opens(Element overlay, TextBox typing)
+        {
+            Deed deed = Opens(overlay);
+            deed.Typing = typing;
+            return deed;
+        }
+
+        /// <summary>The box inside what this opens that should have the caret, or null.</summary>
+        public TextBox Typing { get; private set; }
+
         public static Deed Opens(Element overlay)
         {
             if (overlay == null)

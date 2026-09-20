@@ -840,7 +840,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         void DrawOverlay(IGraphics g, RectangleF bounds)
         {
-            _overlay.Draw(g, bounds, PopupWidth);
+            _overlay.Draw(g, bounds);
         }
 
         /// <summary>
@@ -896,6 +896,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             if (_focus != null && _focusCommand != 0)
                 _editor.SetText(_focusCommand, _focus.Text);
+        }
+
+        /// <summary>Puts the caret in a box, and says where what is typed into it goes.</summary>
+        void Typing(TextBox box, int command)
+        {
+            _focus = box;
+            _focusCommand = command;
+            _focus.IsEditing = true;
+            _focus.SelectAll();
         }
 
         void Unfocus()
@@ -1121,18 +1130,40 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 // Pressing that line a second time is a press outside the list - it hangs below its
                 // anchor, never over it - so putting it away is already settled above.
                 ShowOverlay(deed.Overlay, target);
+
+                // Opened ready to be typed into, where what opened it said so. The command is the
+                // box's own, so what happens next is exactly what pressing it would have done.
+                if (deed.Typing != null && deed.Typing.Press.Means == Means.Type)
+                    Typing(deed.Typing, deed.Typing.Press.Command);
+
+                return true;
+            }
+
+            if (deed.Means == Means.Empty)
+            {
+                // Emptied and reported in one go, and the caret left where it was. The box may well
+                // be the one being typed into, so what is showing has to be put right as well as
+                // what core holds.
+                if (deed.Box != null)
+                    deed.Box.Text = "";
+
+                _editor.SetText(deed.Command, "");
                 return true;
             }
 
             if (deed.Means == Means.Type)
             {
                 Unfocus();
-                _focus = deed.Box;
-                _focusCommand = deed.Command;
-                _focus.IsEditing = true;
-                _focus.SelectAll();
+                Typing(deed.Box, deed.Command);
                 return true;
             }
+
+            // Taking something from a list puts the list away. Not every press inside one does: a box
+            // that narrows the list is pressed to type into, and closing the list under the pointer
+            // would be answering a question nobody asked. So it is the answering presses and no
+            // others - which is also why this sits after the one above rather than before it.
+            if (_overlay.IsUp)
+                HideOverlay();
 
             Unfocus();
 

@@ -33,6 +33,16 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <summary>Puts the keyboard in its box, and sends what is typed to its command.</summary>
         Type,
 
+        /// <summary>
+        /// Empties a box and says so, without taking the keyboard.
+        /// </summary>
+        /// <remarks>
+        /// Apart from <see cref="Type" /> because it is the opposite act: one asks to start writing
+        /// in a box and this one throws away what is written there. Putting the caret in a box that
+        /// was just emptied would be answering a question nobody asked.
+        /// </remarks>
+        Empty,
+
         /// <summary>Hangs something over the screen, under itself.</summary>
         Open,
 

@@ -57,13 +57,20 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <remarks>
         /// Pushed back inside on both axes rather than allowed to hang off the screen, because a list
         /// opened near the bottom edge is exactly the list somebody most needs to read all of.
+        /// <para>
+        /// <b>It is offered the screen and takes what it needs.</b> A dialog is given a width,
+        /// because a form of empty boxes sized to its contents would open as a row of slivers. A
+        /// menu is the opposite case: it already holds its words, so its width is a fact about it
+        /// rather than a decision. Given a dialog's width it took one, which is how a list of five
+        /// short block kinds came to be as wide as a form.
+        /// </para>
         /// </remarks>
-        public void Draw(IGraphics g, RectangleF bounds, float width)
+        public void Draw(IGraphics g, RectangleF bounds)
         {
             if (_content == null || _anchor == null)
                 return;
 
-            _content.Measure(g, new Vector2(width, bounds.Height));
+            _content.Measure(g, new Vector2(bounds.Width, bounds.Height));
 
             float height = _content.DesiredSize.Y;
             float wide = _content.DesiredSize.X;

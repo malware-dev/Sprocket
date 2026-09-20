@@ -48,6 +48,20 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             set { _right = Adopt(_right, value); }
         }
 
+        /// <summary>
+        /// Whether this reports what its parts need rather than the whole width on offer.
+        /// </summary>
+        /// <remarks>
+        /// Off by default, because spanning is what a bar is for: a row of a list reaches the edge
+        /// whatever is written in it, so a short name and a long one give rows of the same shape.
+        /// <para>
+        /// On for a bar inside something that is as wide as its contents. A menu holds its words
+        /// already, so how wide it is is a fact about it - and a spanning bar inside one answers
+        /// with whatever it was offered, which makes the menu as wide as whatever asked.
+        /// </para>
+        /// </remarks>
+        public bool Tight { get; set; }
+
         /// <summary>Blank room between the parts.</summary>
         public float Spacing
         {
@@ -92,8 +106,16 @@ namespace Sprocket.Host.SpaceEngineers.Layout
                 height = Taller(height, _fill.DesiredSize.Y);
             }
 
-            // The whole width on offer, because the point of this is to span it.
-            return new Vector2(available.X, height);
+            if (!Tight)
+            {
+                // The whole width on offer, because the point of this is to span it.
+                return new Vector2(available.X, height);
+            }
+
+            // What the parts came to. The spacing between them is already in what was used, and the
+            // middle is added here because it was measured against what the other two left.
+            float wide = used + (_fill != null ? _fill.DesiredSize.X : 0f);
+            return new Vector2(wide < available.X ? wide : available.X, height);
         }
 
         protected override void ArrangeContent(RectangleF bounds)

@@ -470,6 +470,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 case Cmd.PickChoice:
                 case Cmd.NarrowEntities:
                 case Cmd.NarrowChoices:
+                case Cmd.NarrowKinds:
                 case Cmd.AnyKind:
                 case Cmd.OneKind:
                 case Cmd.RequireAny:
@@ -623,6 +624,41 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Out of range is ignored rather than refused. A drop past the end of a list is an
         /// ordinary thing for a pointer to do.
         /// </remarks>
+        /// <summary>
+        /// The kind of block a picker is narrowed to, kept per place a picker opens from.
+        /// </summary>
+        /// <remarks>
+        /// Somebody wiring a row of lights opens the picker once per step, and a filter that reset
+        /// itself every time would be set again at every one of them. Held here because a page is
+        /// built afresh each time one opens and this has to outlive that.
+        /// <para>
+        /// <b>One per place and not one in total.</b> What starts a sequence and what it does are
+        /// different questions asked of different blocks - a button and a sensor start things, and
+        /// lights and doors are what gets done to - so a filter set while answering one has no
+        /// business narrowing the other.
+        /// </para>
+        /// <para>
+        /// Not saved with the program. It is how somebody is working right now rather than part of
+        /// what they are building, and a world reopened a week later should not still be hiding
+        /// blocks for a reason nobody remembers.
+        /// </para>
+        /// </remarks>
+        public string KindFor(bool forEvents)
+        {
+            return forEvents ? _whenKind : _doingKind;
+        }
+
+        public void RememberKind(bool forEvents, string kind)
+        {
+            if (forEvents)
+                _whenKind = kind ?? "";
+            else
+                _doingKind = kind ?? "";
+        }
+
+        string _whenKind = "";
+        string _doingKind = "";
+
         public void SetNumber(int command, int value)
         {
             Action<int> action;

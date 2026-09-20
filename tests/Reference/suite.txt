@@ -49,6 +49,18 @@ picker-replaced     60 130 type Airlock enter 60 161 200 375 200 451
 picker-also         60 130 type Airlock enter 60 161 200 375 55 428
 picker-through      60 130 type Airlock enter 60 161 200 375 through 200 527
 picker-box-hover    60 130 type Airlock enter 60 161 move 55 352
+
+# The menu that narrows the list to one kind of block.
+#
+# A menu rather than a dialog, and it is as wide as its longest word: a dialog is given a width
+# because its boxes are empty when it opens, and a menu already holds its words. It carries a box
+# of its own, because a varied construct lists as many kinds as it does blocks. Choosing one puts
+# the menu away and leaves a cross on the line, which is the way back to all of them without
+# opening anything.
+picker-kinds        60 130 type Airlock enter 60 161 60 262
+picker-kinds-ready  60 130 type Airlock enter 60 161 60 262 type door
+picker-kinds-typed  60 130 type Airlock enter 60 161 60 262 60 300 type door
+picker-kind-chosen  60 130 type Airlock enter 60 161 60 262 60 300 type door 60 388
 picker-chosen       60 130 type Airlock enter 60 161 200 375 560 272
 
 # --- the last question of the wizard: what the trigger should do --------------------------------
