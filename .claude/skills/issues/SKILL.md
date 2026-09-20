@@ -26,10 +26,8 @@ Then, in this order:
 2. **Why.** One paragraph. What it costs now, as a fact about the product.
 3. **Bolded claim paragraphs** for the substance - each one led by the claim it is making, so the
    body can be skimmed by its first sentences.
-4. **Not in this**, where a nearby thing is deliberately excluded.
-5. **Open**, a list, for what is genuinely undecided.
-6. **Done when**, a checklist of observable outcomes.
-7. One provenance line: `Raised 2026-09-19.` and nothing more.
+4. **Open**, a list, for what is genuinely undecided.
+5. **Done when**, a checklist of observable outcomes.
 
 **A `design` label means no Done-when.** Writing acceptance criteria for an open design picks the
 answer by accident. Say so by labelling it, never by explaining it in the body.
