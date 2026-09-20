@@ -1,7 +1,5 @@
 <p align="center"><img src="art/thumbnail/sprocket-mark.svg" width="180" alt="Sprocket"></p>
 
-<h1 align="center">SPROCKET</h1>
-
 **Stop Building Disposable Chains.**
 
 You wire a button panel to start an airlock sequence and guess the countdown. When a door runs slow,
