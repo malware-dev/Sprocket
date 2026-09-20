@@ -16,6 +16,10 @@ public class LeavingTests
     const string Filled = "60 130 type Airlock enter 60 161 200 375 560 272";
     const string Back = "19 62";
 
+    /// <summary>A picker whose action will not do anything until it is given a value.</summary>
+    const string WantsValues = "60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
+        + "1300 918 70 193 200 500 800 456";
+
     [Fact]
     public void LeavingAFilledPickerAsksFirst()
     {
@@ -42,7 +46,7 @@ public class LeavingTests
         picker.Run(2);
 
         Assert.False(picker.Shows("Keep the blocks you picked?"), "the question is still up");
-        Assert.Equal(0, picker.Editor.Program.Systems[0].Sequences.Count);
+        Assert.Empty(picker.Editor.Program.Systems[0].Sequences);
     }
 
     /// <summary>A picker opened and read asks nothing, because there is nothing to lose.</summary>
@@ -66,9 +70,6 @@ public class LeavingTests
     [Fact]
     public void AndKeepingAsksForValuesTheSameWayDoneDoes()
     {
-        const string WantsValues = "60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 456";
-
         var picker = Screen.Fresh((WantsValues + " " + Back).Split(' '));
 
         Assert.True(picker.Shows("Keep the blocks you picked?"), "leaving asked nothing");
@@ -85,6 +86,6 @@ public class LeavingTests
         // The step the picker was making, holding the value the dialog asked for.
         var act = Assert.IsType<Act>(picker.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("Radius", act.ActionId);
-        Assert.Equal(1, act.Values.Count);
+        Assert.Single(act.Values);
     }
 }

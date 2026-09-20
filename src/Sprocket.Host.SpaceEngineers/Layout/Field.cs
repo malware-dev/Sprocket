@@ -214,19 +214,6 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             }
         }
 
-        /// <summary>
-        /// Why <paramref name="said" /> cannot be sent, or empty where it can.
-        /// </summary>
-        /// <remarks>
-        /// Only against what this field was told, which is the whole of what the form can know. A
-        /// value the block will refuse for some reason of its own gets through here and is refused
-        /// there, where it is said in the sequence's own problem line.
-        /// <para>
-        /// <paramref name="called" /> is what the field is called on screen rather than
-        /// <see cref="Name" />, so the sentence names the box the way the words beside it do - which
-        /// for a value nobody named is its place in the order.
-        /// </para>
-        /// </remarks>
         /// <summary>The words it takes, said the way somebody would say them aloud.</summary>
         string Listed()
         {
@@ -242,6 +229,19 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             return said;
         }
 
+        /// <summary>
+        /// Why <paramref name="said" /> cannot be sent, or empty where it can.
+        /// </summary>
+        /// <remarks>
+        /// Only against what this field was told, which is the whole of what the form can know. A
+        /// value the block will refuse for some reason of its own gets through here and is refused
+        /// there, where it is said in the sequence's own problem line.
+        /// <para>
+        /// <paramref name="called" /> is what the field is called on screen rather than
+        /// <see cref="Name" />, so the sentence names the box the way the words beside it do - which
+        /// for a value nobody named is its place in the order.
+        /// </para>
+        /// </remarks>
         public string Refuses(string called, string said)
         {
             // An empty field is a value not given, and the action then does what it declared it does

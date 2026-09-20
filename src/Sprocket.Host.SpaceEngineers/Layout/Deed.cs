@@ -69,7 +69,6 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             return deed;
         }
 
-        /// <summary>A switch that puts <paramref name="command" /> into <paramref name="on" />.</summary>
         /// <summary>
         /// A control that takes one of a list, the way whatever is held down says.
         /// </summary>
@@ -109,6 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <summary>Whether the way is whatever is held down rather than the one above.</summary>
         public bool Asked { get; private set; }
 
+        /// <summary>A switch that puts <paramref name="command" /> into <paramref name="on" />.</summary>
         public static Deed Switches(int command, bool on)
         {
             if (command == 0)
@@ -208,7 +208,6 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             return deed;
         }
 
-        /// <summary>A control that hangs <paramref name="overlay" /> over the screen, under itself.</summary>
         /// <summary>A control that throws away what is in a box, and tells the same command.</summary>
         /// <remarks>
         /// The command is the one the box types into, because emptying it is the same answer as
@@ -242,6 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <summary>The box inside what this opens that should have the caret, or null.</summary>
         public TextBox Typing { get; private set; }
 
+        /// <summary>A control that hangs <paramref name="overlay" /> over the screen, under itself.</summary>
         public static Deed Opens(Element overlay)
         {
             if (overlay == null)

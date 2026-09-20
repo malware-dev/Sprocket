@@ -73,15 +73,11 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// placing a glyph against a line is its own reconstruction and disagrees with the game, and a
         /// recorded frame cannot see it at all - a frame records the call, and this moves the ink
         /// inside the page the call names.
+        /// </para>
         /// <para>
         /// It does not apply to a symbol centred in a row, which is not standing on a line of anything
         /// - see <c>Widgets.Centred</c>. Those land on the row's own middle with no help, measured to
         /// within two pixels, and lifting them is what made them look top-aligned.
-        /// </para>
-        /// <para>
-        /// Only the game can referee it. The simulator's rule for placing a glyph against a line is its
-        /// own reconstruction and is known to disagree, and a recorded frame cannot see this at all -
-        /// it records the call, and this moves the ink inside the page the call names.
         /// </para>
         /// </remarks>
         public const float SymbolLift = 0.123f;

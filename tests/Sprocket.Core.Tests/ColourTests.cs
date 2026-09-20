@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 

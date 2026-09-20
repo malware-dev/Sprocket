@@ -857,8 +857,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         /// <remarks>
         /// This screen's own business, not anything a view has to ask for. A control that opens a list
-        /// says so on itself - see <see cref="Deed.Opens" /> - and the press path does the rest, which
-        /// is why nothing here is on <see cref="IScreenHost" /> any more.
+        /// says so on itself - see <see cref="Deed.Opens(Element)" /> - and the press path does the
+        /// rest, which is why nothing here is on <see cref="IScreenHost" /> any more.
         /// </remarks>
         void ShowOverlay(Element content, Element anchor)
         {

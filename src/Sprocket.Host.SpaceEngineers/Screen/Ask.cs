@@ -189,7 +189,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Bar line = _lines[at];
             line.Spacing = Space.Item;
             line.Left = _numbers[at].Text.Length > 0 ? Numbered(at) : null;
-            line.Fill = Chosen(at) ? Picking(at) : (Element)_boxes[at];
+            line.Fill = Chosen(at) ? Picking(at) : _boxes[at];
 
             return line;
         }

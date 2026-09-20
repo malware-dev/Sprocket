@@ -81,7 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly List<EntityKind> _kinds = new List<EntityKind>();
 
         string _blockSearch = "";
-        string _kind = "";
+        string _kind;
 
         /// <summary>What is typed into the box that narrows the kinds, which narrows nothing else.</summary>
         string _kindSearch = "";
