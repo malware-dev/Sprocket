@@ -166,6 +166,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         readonly Overlay _overlay = new Overlay();
 
+        /// <summary>Which question is on screen, so a new one replaces it rather than hiding in it.</summary>
+        int _asked;
+
         TextBox _focus;
         int _focusCommand;
         ComponentView _dragging;
@@ -460,9 +463,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // Opened and closed from what the screen says, rather than remembered here. Core raises a
             // question and clears it when it is answered, so there is one place that knows.
-            if (screen.HasQuestion && !_question.IsUp)
+            // Opened again where a different question has been raised, and not only where none was
+            // up. One question answered by raising another kept the first one's words and the first
+            // one's answers, which is a lie the moment any two follow each other.
+            if (screen.HasQuestion && (!_question.IsUp || _asked != screen.Asked))
+            {
+                _asked = screen.Asked;
                 _question.Open(screen.Question, screen.Answers,
-                    screen.QuestionIsHere ? _raisedBy : null);
+                    screen.QuestionIsHere ? _raisedBy : null, screen.Default);
+            }
             else if (!screen.HasQuestion && _question.IsUp)
                 _question.Close();
 
@@ -625,7 +634,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 ? Deed.Nothing
                 : screen.PrimaryAsks
                     ? Deed.Values(screen.PrimaryCommand, screen.PrimaryQuestion,
-                        screen.PrimaryFields)
+                        screen.PrimaryFields, screen.PrimaryFilled)
                     : Deed.Sends(screen.PrimaryCommand);
         }
 
@@ -1202,6 +1211,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return true;
             }
 
+            // The answer that means "finish this page" goes where the button goes, because that is
+            // what it means. Only where finishing needs a question of its own: everywhere else the
+            // answer's own action finishes, and sending it is the shorter way to the same place.
+            if (deed.Command != 0 && deed.Command == _editor.Screen.Finishing
+                && _editor.Screen.PrimaryAsks)
+            {
+                _editor.Unask();
+                Moving(target);
+                return true;
+            }
+
             // What a question raised by this press will hang under. Held rather than worked out
             // afterwards, because by then the press is over and nothing remembers what it was on -
             // and a question about a row belongs under that row rather than over the middle of the
@@ -1332,6 +1352,49 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         }
 
         /// <summary>
+        /// Takes the answer the page said Enter takes, and says whether there was one.
+        /// </summary>
+        /// <remarks>
+        /// Nothing at all where the page named none. A key that guesses an answer is worse than a
+        /// key that does nothing, because the guess is only noticed after it has been acted on.
+        /// </remarks>
+        public bool TakeDefault()
+        {
+            EditorScreen screen = _editor.Screen;
+            if (!_question.IsUp || screen.Default == 0)
+                return false;
+
+            // The same detour a press on it takes. A key that finished differently from the row it
+            // points at would be two answers wearing one set of words.
+            if (screen.Default == screen.Finishing && screen.PrimaryAsks)
+            {
+                _editor.Unask();
+                Moving(null);
+                return true;
+            }
+
+            _editor.Invoke(screen.Default);
+            return true;
+        }
+
+        /// <summary>
+        /// Dismisses the standing question without answering it.
+        /// </summary>
+        /// <remarks>
+        /// Closing is the whole of it, and that is not a gap. Nothing has happened yet when a
+        /// question is up: a page that asks one has not moved, and its answers are what move it. So
+        /// dismissing already means "I did not mean to leave" wherever the question is about
+        /// leaving, without the page having to say so.
+        /// </remarks>
+        public void Dismiss()
+        {
+            if (!_question.IsUp)
+                return;
+
+            _editor.Unask();
+        }
+
+        /// <summary>
         /// Finishes a screen, or opens the question it cannot finish without.
         /// </summary>
         /// <remarks>
@@ -1353,7 +1416,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Close();
 
             _raisedBy = target;
-            _ask.Values(screen.PrimaryQuestion, screen.PrimaryCommand, screen.PrimaryFields);
+            _ask.Values(screen.PrimaryQuestion, screen.PrimaryCommand, screen.PrimaryFields,
+                screen.PrimaryFilled);
             _chromeStale = true;
         }
 

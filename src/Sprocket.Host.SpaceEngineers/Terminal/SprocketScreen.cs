@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sandbox.ModAPI;
+using VRage.Input;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Drawing;
@@ -131,7 +132,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             // that would read Escape as back and act on the very thing being asked about.
             if (_view.IsQuestioning)
             {
-                _editor.Unask();
+                _view.Dismiss();
                 return false;
             }
 
@@ -141,9 +142,9 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
                 return false;
             }
 
-            // Escape is the key everybody already reads as "back", and docs/Editor.md is firm that going
-            // back always means going back. So it retreats one page at a time and only shuts the editor
-            // once there is nowhere left to retreat to. Closing the whole thing from three pages deep is
+            // Escape is the key everybody already reads as "back", so it does what back does: retreats
+            // one page at a time and only shuts the editor once there is nowhere left to retreat to.
+            // Closing the whole thing from three pages deep is
             // never what somebody backing out of a picker meant.
             EditorScreen screen = _editor.Screen;
             if (screen.CanGoBack)
@@ -295,6 +296,17 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         /// </remarks>
         void Type()
         {
+            // A question with answers has no box, so the keyboard below never runs for one. Enter is
+            // the whole of what it wants: the page said which answer that takes, and a page that
+            // named none is left alone.
+            if (_view.IsQuestioning)
+            {
+                if (MyAPIGateway.Input.IsNewKeyPressed(MyKeys.Enter))
+                    _view.TakeDefault();
+
+                return;
+            }
+
             TextBox box = _view.IsAsking ? _view.AskBox : _view.Focus;
             if (box == null)
                 return;

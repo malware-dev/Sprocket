@@ -114,9 +114,15 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Action<PickAnswer> done,
-            bool asksAll = false, bool all = false)
+            bool asksAll = false, bool all = false, IList<Literal> values = null)
             : base(editor)
         {
+            if (values != null)
+            {
+                for (var i = 0; i < values.Count; i++)
+                    _arrivedValues.Add(values[i]);
+            }
+
             _title = title;
             _forEvents = forEvents;
             _chosen = chosen ?? "";
@@ -129,8 +135,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _kind = editor.KindFor(forEvents);
 
             for (var i = 0; i < targets.Count; i++)
+            {
                 _selection.Add(targets[i]);
+                _arrived.Add(targets[i]);
+            }
         }
+
+        /// <summary>What was already picked when this opened, to tell a change from a look.</summary>
+        /// <remarks>
+        /// Empty where the picker opened to start something and full where it opened to change
+        /// something, which is the whole of the difference between the two ways of being here.
+        /// </remarks>
+        readonly List<long> _arrived = new List<long>();
 
         public override string Title => _title;
 
@@ -165,6 +181,84 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         public override IList<Field> PrimaryFields => Fields();
+
+        /// <summary>
+        /// What the values question opens holding, where this opened on something that has values.
+        /// </summary>
+        /// <remarks>
+        /// A picker opened to change which blocks a step acts on already has that step's values, and
+        /// opening the question empty would make somebody type them again to keep them. Worked out
+        /// the way a step's own chip works them out, so the two say the same thing about one value.
+        /// </remarks>
+        public override IList<string> PrimaryFilled
+        {
+            get
+            {
+                _filled.Clear();
+                if (_arrivedValues.Count > 0)
+                    Channels.Shown(_arrivedValues, Fields(), _filled);
+
+                return _filled;
+            }
+        }
+
+        /// <summary>What the step being changed was already given, or empty where nothing is.</summary>
+        readonly List<Literal> _arrivedValues = new List<Literal>();
+
+        readonly List<string> _filled = new List<string>();
+
+        /// <summary>
+        /// Asks before throwing away what was picked here.
+        /// </summary>
+        /// <remarks>
+        /// Back means back, and both answers go back - the question is only about what survives it.
+        /// So the one Enter takes is the one that keeps the work, because a key pressed without
+        /// reading must not be the one that loses it.
+        /// <para>
+        /// Only where there is something to lose and something to do with it. A picker opened and
+        /// read asks nothing, and nor does one still waiting to be told what happens - a picker
+        /// that cannot be finished has no answer that keeps anything, and leaves without a word.
+        /// <para>
+        /// Keeping is finishing. Where finishing needs values the values are asked for, exactly as
+        /// they are when the button is pressed, because the two are the same act arrived at from
+        /// two directions.
+        /// </para>
+        /// </para>
+        /// <para>
+        /// The same question whichever way somebody arrived, so there is no rule to remember about
+        /// how they got here.
+        /// </para>
+        /// </remarks>
+        public override bool Leaving()
+        {
+            if (!IsComplete || !Moved)
+                return true;
+
+            Editor.Ask("Keep the blocks you picked?");
+
+            Editor.AnswerPrimary("Keep them", true);
+            Editor.Answer("Discard them", delegate { Editor.Pop(); });
+
+            return false;
+        }
+
+        /// <summary>Whether anything here differs from what was already chosen when it opened.</summary>
+        bool Moved
+        {
+            get
+            {
+                if (_selection.Count != _arrived.Count)
+                    return true;
+
+                for (var i = 0; i < _selection.Count; i++)
+                {
+                    if (!Contains(_arrived, _selection[i]))
+                        return true;
+                }
+
+                return false;
+            }
+        }
 
         public override void Primary()
         {

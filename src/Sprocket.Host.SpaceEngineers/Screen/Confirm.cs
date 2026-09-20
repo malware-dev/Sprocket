@@ -70,7 +70,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// Labels are made once per question rather than reused across questions, because a question
         /// appears when somebody presses something and lives for one answer. Nothing here repeats.
         /// </remarks>
-        public void Open(string question, ObservableList<ChoiceEntry> answers, Element anchor)
+        public void Open(string question, ObservableList<ChoiceEntry> answers, Element anchor,
+            int taken)
         {
             _up = true;
             _anchor = anchor;
@@ -84,6 +85,16 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 Label row = Widgets.Way(answer.Text);
                 row.Padding = new Thickness(Space.ChipX, Space.ChipY);
                 row.Press = Deed.Sends(answer.Command);
+
+                // The one Enter takes is drawn the way every other thing that carries on is drawn,
+                // so the key is not something to learn separately from the screen. Without it the
+                // key is a guess somebody makes once and then stops trusting.
+                if (taken != 0 && answer.Command == taken)
+                {
+                    row.Background = Palette.Accent;
+                    row.Color = Palette.Chrome;
+                    row.Highlight = Palette.Ink;
+                }
 
                 _rows.Children.Add(row);
             }

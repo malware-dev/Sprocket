@@ -28,17 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             for (var i = 0; i < fields.Count; i++)
                 _fields.Add(fields[i]);
 
-            // One per field and not one per value, because a field can stand over several of them.
-            // Walked rather than indexed for that reason: a colour takes three and the field after it
-            // starts three later.
-            var at = 0;
-            for (var i = 0; i < _fields.Count; i++)
-            {
-                // Through the field, because a value that is one of a listed few is held as a number
-                // and read as a word. A field that never said so maps a value to itself.
-                _filled.Add(_fields[i].Wording(Channels.Said(_values, at, _fields[i].Covers)));
-                at += _fields[i].Covers;
-            }
+            // One per field and not one per value, and worked out where the question that fills a
+            // step in works it out, so the two cannot arrive at different words for one value.
+            Channels.Shown(_values, _fields, _filled);
 
             // Only where the whole slot is one colour. A slot showing a colour and two other values
             // has no one thing to draw, and a rectangle standing for part of it would say the rest

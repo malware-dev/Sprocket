@@ -23,6 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Actions = new ObservableList<ChoiceEntry>();
             Answers = new ObservableList<ChoiceEntry>();
             PrimaryFields = new ObservableList<Field>();
+            PrimaryFilled = new ObservableList<string>();
             Question = "";
             Heading = new List<HeadingPart>();
         }
@@ -306,9 +307,49 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         public bool HasQuestion => !string.IsNullOrEmpty(Question);
 
+        /// <summary>
+        /// How many questions have been raised, so a target can tell a new one from the same one.
+        /// </summary>
+        /// <remarks>
+        /// A count rather than the words, because two questions can read the same and a target that
+        /// compared text would show the first one's answers under the second one's name. It only has
+        /// to differ from last time, never to mean anything.
+        /// </remarks>
+        public int Asked { get; internal set; }
+
+        /// <summary>
+        /// Which answer means "finish this page", or zero where none does.
+        /// </summary>
+        /// <remarks>
+        /// Said apart from the others because finishing is not always one act. A page that cannot
+        /// finish without values has to ask for them, and that question is a target's to open - so
+        /// an answer that stands for finishing has to reach the same place the button does rather
+        /// than doing half of what it does.
+        /// </remarks>
+        public int Finishing { get; internal set; }
+
+        /// <summary>What the primary's fields open holding, one per field, or empty for none.</summary>
+        public ObservableList<string> PrimaryFilled { get; private set; }
+
         /// <summary>The ways to answer it, in the order they should be offered.</summary>
         /// <remarks>The first is the one a reflex press should land on, so it is the safe one.</remarks>
         public ObservableList<ChoiceEntry> Answers { get; private set; }
+
+        /// <summary>
+        /// Which answer Enter takes, or zero where it takes none.
+        /// </summary>
+        /// <remarks>
+        /// The page's to say and not a target's to guess, and not always the first row: a question
+        /// whose safe answer is "keep it" and one whose safe answer is "carry on" both exist, and
+        /// the order they read best in is not the order of their safety.
+        /// </remarks>
+        public int Default
+        {
+            get { return _default; }
+            set { Set(ref _default, value, nameof(Default)); }
+        }
+
+        int _default;
 
         /// <summary>The parts this is repeating for, so each one can be let go of again.</summary>
         readonly List<HeadingPart> _heard = new List<HeadingPart>();

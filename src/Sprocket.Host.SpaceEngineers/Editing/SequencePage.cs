@@ -217,12 +217,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Editor.Ask("Switch this sequence on?");
 
             // Leaving it parked first, because that is what pressing back already meant - the offer
-            // must not turn the safe answer into the one that takes a second press.
+            // must not turn the safe answer into the one that takes a second press. And the one
+            // Enter takes, for the same reason: the key that gets pressed without reading must not
+            // switch something on.
             Editor.Answer("Leave it off", delegate
             {
                 _quiet = Editor.Program.Wiring;
                 Editor.Pop();
-            });
+            }, true);
 
             Editor.Answer("Switch it on", delegate
             {
@@ -466,6 +468,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             var index = _sequence.Steps.IndexOf(step);
 
+            // Handed what the step already holds, so the question that finishes this opens on those
+            // values rather than empty. Changing which blocks a step acts on is not a reason to type
+            // its values again.
             Editor.Push(new PickPage(Editor, "Do something", false,
                 Resolved(step.Targets), step.ActionId,
                 delegate(PickAnswer answer)
@@ -473,7 +478,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen));
                     Editor.Pop();
-                }));
+                }, values: step.Values));
         }
 
         /// <summary>

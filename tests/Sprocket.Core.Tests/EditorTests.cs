@@ -1315,8 +1315,11 @@ public class EditorTests
         editor.PressChoice("is pressed");
 
         // Both stages are one screen now, and the starters are no longer a screen at all, so
-        // one step back reaches the system and a second reaches the ship.
+        // one step back reaches the system and a second reaches the ship. Leaving a picker that
+        // has been filled in asks what to do with it first, and discarding is what back used to
+        // mean on its own.
         editor.Back();
+        editor.PressChoice("Discard them");
         Assert.Equal("Airlock", editor.Screen.Title());
 
         editor.Back();

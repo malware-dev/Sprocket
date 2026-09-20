@@ -240,16 +240,28 @@ namespace Sprocket.Sim.Simulation
                 return;
             }
 
+            // A question with answers owns both keys, the same way the game's own screen gives them
+            // to it: Enter takes the answer the page named and Escape dismisses, which is not the
+            // same as answering. A script that went to the typed question instead would be reaching
+            // past what is actually on the screen.
             if (step.Kind == Step.Enter)
             {
-                scene.CommitAsk();
+                if (scene.IsQuestioning)
+                    scene.TakeDefault();
+                else
+                    scene.CommitAsk();
+
                 drawn();
                 return;
             }
 
             if (step.Kind == Step.Escape)
             {
-                scene.CancelAsk();
+                if (scene.IsQuestioning)
+                    scene.Dismiss();
+                else
+                    scene.CancelAsk();
+
                 drawn();
                 return;
             }

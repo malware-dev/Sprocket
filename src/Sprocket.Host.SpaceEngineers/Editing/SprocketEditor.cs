@@ -227,6 +227,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Release();
             _screen.Question = question;
             _screen.QuestionIsHere = false;
+            _screen.Default = 0;
+            _screen.Finishing = 0;
+            _screen.Asked++;
         }
 
         /// <summary>
@@ -243,14 +246,47 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Release();
             _screen.Question = question;
             _screen.QuestionIsHere = true;
+            _screen.Default = 0;
+            _screen.Finishing = 0;
+            _screen.Asked++;
         }
 
         /// <summary>Adds a way to answer, in the order they are offered.</summary>
         internal void Answer(string text, Action chosen)
         {
+            Answer(text, chosen, false);
+        }
+
+        /// <summary>
+        /// An answer that means "finish this page", the way its own button would.
+        /// </summary>
+        /// <remarks>
+        /// Not just an answer that happens to call <c>Primary</c>. Finishing can need a question of
+        /// its own - values an action will not work without - and that one is a target's to open, so
+        /// the answer has to be pointed at the same place the button is rather than at half of it.
+        /// </remarks>
+        internal void AnswerPrimary(string text, bool byDefault)
+        {
+            Answer(text, delegate { Current.Primary(); }, byDefault);
+            _screen.Finishing = _screen.Answers[_screen.Answers.Count - 1].Command;
+        }
+
+        /// <summary>
+        /// The same, saying whether this is the one Enter takes.
+        /// </summary>
+        /// <remarks>
+        /// Said here rather than inferred from the order, because the order is what reads best and
+        /// the default is what is safe, and those are not the same question.
+        /// </remarks>
+        internal void Answer(string text, Action chosen, bool byDefault)
+        {
             _answering.Add(new Answering(text, chosen));
-            _screen.Answers.Add(new ChoiceEntry(text, false,
-                Register(Cmd.Answer, _screen.Answers.Count, chosen)));
+
+            int command = Register(Cmd.Answer, _screen.Answers.Count, chosen);
+            _screen.Answers.Add(new ChoiceEntry(text, false, command));
+
+            if (byDefault)
+                _screen.Default = command;
         }
 
         /// <summary>
@@ -510,8 +546,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             Ask("Replace the program this block holds? The one Sprocket could not read will be gone.");
 
-            // The safe answer first, so the reflex press lands on it.
-            Answer("Leave it alone", delegate { });
+            // The safe answer first, so the reflex press lands on it, and the one Enter takes for
+            // the same reason: a key pressed without reading must not throw a program away.
+            Answer("Leave it alone", delegate { }, true);
             // Said here rather than at the save, because this press is the decision and everything
             // after it is ordinary editing. It also settles the banner: what it was warning about has
             // just stopped being true, and nothing else would have told it.
@@ -845,8 +882,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </summary>
         /// <remarks>
         /// Back is the one control on every screen, so a page that wants a word on the way out has
-        /// nowhere else to get it. It may only ask a question, never refuse - a person pressing back
-        /// must always end up somewhere other than where they were, or the control has lied to them.
+        /// nowhere else to get it. A page that answers false stays where it is, and whatever it put
+        /// on screen instead is then responsible for leaving - the question raised on the way out of
+        /// a sequence pops from its own answers, and the one on the way out of a picker does the
+        /// same.
         /// </remarks>
         void Leave()
         {
@@ -1064,6 +1103,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _screen.PrimaryText = page.PrimaryText;
             _screen.PrimaryQuestion = page.PrimaryQuestion;
             _screen.PrimaryFields.Reset(page.PrimaryFields);
+            _screen.PrimaryFilled.Reset(page.PrimaryFilled);
             _screen.PrimaryCommand = !_screen.HasPrimary
                 ? 0
                 : _screen.PrimaryAsks
@@ -1657,6 +1697,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var origin = _stack.Count;
             var index = sequence.Steps.IndexOf(act);
 
+            // Handed what the step already holds, so the question that finishes this opens on those
+            // values rather than empty. Changing which blocks a step acts on is not a reason to type
+            // its values again.
             Push(new PickPage(this, "Do something", false, Blocks(act.Targets), act.ActionId,
                 delegate(PickAnswer answer)
                 {
@@ -1671,7 +1714,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     }
 
                     Do(system, new Rewrite(sequence, new ChangeStep(index, act, named, answer.Chosen)));
-                }));
+                }, values: act.Values));
         }
 
         /// <summary>

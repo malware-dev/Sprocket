@@ -152,6 +152,21 @@ namespace Sprocket.Sim.Simulation
             set => _view.CaretVisible = value;
         }
 
+        /// <summary>Whether a question with answers is waiting, which owns Enter and Escape.</summary>
+        public bool IsQuestioning => _view.IsQuestioning;
+
+        /// <summary>Takes the answer the page said Enter takes, as the game's screen does.</summary>
+        public bool TakeDefault()
+        {
+            return _view.TakeDefault();
+        }
+
+        /// <summary>Dismisses the standing question, telling the page what that meant.</summary>
+        public void Dismiss()
+        {
+            _view.Dismiss();
+        }
+
         public void CommitAsk()
         {
             _view.CommitAsk();

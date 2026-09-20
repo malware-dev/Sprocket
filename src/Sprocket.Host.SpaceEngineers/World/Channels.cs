@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Layout;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -48,6 +49,25 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             return "#" + Hex(parts[0]) + Hex(parts[1]) + Hex(parts[2]);
+        }
+
+        /// <summary>
+        /// What each field shows for the values behind it, one per field.
+        /// </summary>
+        /// <remarks>
+        /// Not one per value: a field can stand over several of them, and can show something other
+        /// than the value itself. Here rather than in either caller, because a step's own chip and
+        /// the question that fills a step in have to arrive at the same words - a value that read
+        /// one way in a sentence and another in the box that sets it would be two values.
+        /// </remarks>
+        public static void Shown(IList<Literal> values, IList<Field> fields, IList<string> into)
+        {
+            var at = 0;
+            for (var i = 0; i < fields.Count; i++)
+            {
+                into.Add(fields[i].Wording(Said(values, at, fields[i].Covers)));
+                at += fields[i].Covers;
+            }
         }
 
         /// <summary>

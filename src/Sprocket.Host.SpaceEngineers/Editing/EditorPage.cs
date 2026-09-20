@@ -250,6 +250,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         public virtual IList<Field> PrimaryFields => null;
 
+        /// <summary>
+        /// What each of those fields opens holding, or null to open them empty.
+        /// </summary>
+        /// <remarks>
+        /// A page that is changing something already has the answers to its own question. Opening
+        /// empty would make somebody retype what they already gave, and a box left alone would then
+        /// mean "no value" rather than "the one that was there".
+        /// </remarks>
+        public virtual IList<string> PrimaryFilled => null;
+
         public virtual void Primary() { }
 
         /// <summary>The same, with what was typed into the question the button asked.</summary>

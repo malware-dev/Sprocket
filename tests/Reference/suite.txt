@@ -63,6 +63,13 @@ picker-kinds-typed  60 130 type Airlock enter 60 161 60 262 60 300 type door
 picker-kind-chosen  60 130 type Airlock enter 60 161 60 262 60 300 type door 60 388
 picker-chosen       60 130 type Airlock enter 60 161 200 375 560 272
 
+# And backing out of one that has been filled in asks what to do with it.
+#
+# Both answers go back, so the question is only about what survives it - which is why Enter takes
+# the one that keeps the work. The same question whichever way somebody arrived here, so there is
+# no rule to remember about how they got in.
+picker-leaving      60 130 type Airlock enter 60 161 200 375 560 272 19 62
+
 # --- the last question of the wizard: what the trigger should do --------------------------------
 #
 # The list a trigger's target is chosen from. It opens with the way to have several things happen,
@@ -123,6 +130,13 @@ sequence-choices    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1
 values-list         60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000
 values-list-open    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000 700 530
 sequence-list       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000 700 530 700 628 enter
+
+# Leaving a sequence that is still switched off asks about it, and says which answer Enter takes.
+#
+# The safe answer is drawn the way everything else that carries on is drawn, because a key nobody
+# can see the effect of is a key nobody trusts twice. Safe, and not the one that reads best first:
+# Enter gets pressed without reading, and must not switch something on.
+sequence-leaving    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000 700 530 700 628 enter 19 62
 
 # And the step it leaves behind, which is the other half of the same decision.
 #
