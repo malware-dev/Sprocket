@@ -478,7 +478,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 // A name something else already has first, because that is the reason this view can
                 // see and the form cannot. What a field will take is the form's own, and it says so.
                 _ask.Refused = Taken(_ask.Command, _ask.Answer) ? TakenSays : _ask.Wrong;
-                _ask.Dress();
+                _ask.Dress(Pointer);
             }
 
             if (!_chromeStale)

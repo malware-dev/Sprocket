@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>
@@ -22,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Sets = ValueKind.Flag;
             Least = "";
             Most = "";
+            Choices = null;
         }
 
         /// <summary>
@@ -48,6 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Sets = sets;
             Least = least ?? "";
             Most = most ?? "";
+            Choices = null;
         }
 
         /// <summary>The least it will accept, and the most, or empty where it says nothing.</summary>
@@ -57,6 +61,31 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>What kind of value it holds, where it is one.</summary>
         public ValueKind Sets { get; private set; }
+
+        /// <summary>
+        /// The same, for a value that is one of a listed few rather than anything within bounds.
+        /// </summary>
+        /// <remarks>
+        /// Handed back rather than set, because this is a struct and one that changed itself would
+        /// change whatever copy happened to be in hand. The list is held rather than copied: it is
+        /// built once per block kind and never written to afterwards.
+        /// </remarks>
+        public Offer Between(IList<Choice> choices)
+        {
+            Offer made = this;
+            made.Choices = choices;
+            return made;
+        }
+
+        /// <summary>
+        /// Everything this value may be, or null where it is not one of a listed few.
+        /// </summary>
+        /// <remarks>
+        /// Not on the value at all in the game's own terms: a set of permitted values lives on the
+        /// terminal control, which is the same object the property is, and says both what each one is
+        /// called and what the block is told for it.
+        /// </remarks>
+        public IList<Choice> Choices { get; private set; }
 
         /// <summary>The game's own name for it, which is what a slot and a saved program hold.</summary>
         public string Id { get; private set; }

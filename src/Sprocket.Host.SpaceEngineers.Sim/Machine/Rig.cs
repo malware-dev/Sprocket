@@ -87,6 +87,20 @@ sealed class Rig
         rig.Weld(new Plain(13, "Warning Beacon", Type<MyObjectBuilder_Beacon>(),
             "LargeBlockBeacon", "Beacon"));
 
+        // A value that may only be one of a listed few, which is the last shape a block's own value
+        // comes in. The game reports a charge mode as a whole number and keeps its three words on
+        // the terminal control, and these are the game's own numbers for them.
+        rig.Weld(new Plain(14, "Standby Battery", Type<MyObjectBuilder_BatteryBlock>(),
+                "LargeBlockBatteryBlock", "Battery"))
+            .Carrying("ChargeMode", "Charge Mode", "Auto", "0", "Recharge", "1", "Discharge", "2");
+
+        // And one with more of them than a row can hold, which is where the list has to fold into a
+        // box. The game's own numbers again, from the six directions a block can face.
+        rig.Weld(new Plain(15, "Tug Autopilot", Type<MyObjectBuilder_RemoteControl>(),
+                "LargeBlockRemoteControl", "Remote Control"))
+            .Carrying("Direction", "Forward Direction", "Forward", "0", "Backward", "1",
+                "Left", "2", "Right", "3", "Up", "4", "Down", "5");
+
         rig.Weld(new Plain(20, "Approach Sensor", Type<MyObjectBuilder_SensorBlock>(),
             "LargeBlockSensor", "Sensor"));
         rig.Weld(new Panel(21, "Airlock Button", Type<MyObjectBuilder_ButtonPanel>(),
@@ -153,7 +167,9 @@ sealed class Rig
             .Offering("SetColor", "Set Color", 3)
 
             // The values it carries, which is where most of what a light can be told lives: the
-            // game hands out an action for three of these and none at all for the rest.
+            // game hands out an action for three of these and none at all for the rest. One of each
+            // kind a block can report, so every control a form can raise is reachable from here.
+            .Carrying("OnOff", "On", ValueKind.Flag)
             .Carrying("Radius", "Radius", ValueKind.Real, "1", "12")
             .Carrying("Falloff", "Falloff", ValueKind.Real, "0", "3")
             .Carrying("Color", "Color", ValueKind.Color);

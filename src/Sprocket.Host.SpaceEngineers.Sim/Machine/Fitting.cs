@@ -219,6 +219,23 @@ abstract class Fitting
     }
 
     /// <summary>
+    /// Gives it one that may only be a listed few, each word standing for what the block is told.
+    /// </summary>
+    /// <remarks>
+    /// What a combo box on the terminal amounts to. The game reports one as a whole number and keeps
+    /// the words on the control, so the two lists are written out here the same way they arrive.
+    /// </remarks>
+    public Fitting Carrying(string id, string text, params string[] wordsAndMeanings)
+    {
+        var choices = new List<Choice>();
+        for (var i = 0; i + 1 < wordsAndMeanings.Length; i += 2)
+            choices.Add(new Choice(wordsAndMeanings[i], wordsAndMeanings[i + 1]));
+
+        _carries.Add(new Offer(id, text, ValueKind.Integer).Between(choices));
+        return this;
+    }
+
+    /// <summary>
     /// Tells one of those values what to be, and writes down that it was told.
     /// </summary>
     /// <remarks>

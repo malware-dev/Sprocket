@@ -100,35 +100,51 @@ on screen     When something happens  |  Start by picking one or more blocks
 093  Sprite     Sprocket_Fill         {X:304 Y:806 W:1 H:17}  #85A1A9FF
 094  Sprite     Sprocket_Fill         {X:315 Y:788 W:54 H:54}  #374851FF
 095  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:315 Y:788 W:54 H:54}  #FFFFFFFF
-096  Text       at {X:378.8 Y:868.972} scale 0.64  #DCF5FDFF  "Warning Beacon"
-097  Text       at {X:378.8 Y:894.452} scale 0.5  #85A1A9FF  "Beacon   on"
+096  Text       at {X:378.8 Y:868.972} scale 0.64  #DCF5FDFF  "Standby Battery"
+097  Text       at {X:378.8 Y:894.452} scale 0.5  #85A1A9FF  "Battery   on"
 098  Sprite     Sprocket_Fill         {X:288 Y:882 W:17 H:1}  #85A1A9FF
 099  Sprite     Sprocket_Fill         {X:288 Y:898 W:17 H:1}  #85A1A9FF
 100  Sprite     Sprocket_Fill         {X:288 Y:882 W:1 H:17}  #85A1A9FF
 101  Sprite     Sprocket_Fill         {X:304 Y:882 W:1 H:17}  #85A1A9FF
 102  Sprite     Sprocket_Fill         {X:315 Y:864 W:54 H:54}  #374851FF
-103  Sprite     MyObjectBuilder_Beacon/LargeBlockBeacon{X:315 Y:864 W:54 H:54}  #FFFFFFFF
-104  Sprite     Sprocket_Fill         {X:691 Y:517 W:12 H:408}  #5F7278FF
-105  SetClip    {X:259 Y:142 W:1402 H:812}
-106  Text       at {X:275 Y:158.102} scale 0.64  #DCF5FDFF  "BLOCKS"
-107  Text       at {X:275 Y:187.782} scale 0.5  #85A1A9FF  "none picked"
-108  Sprite     Sprocket_Fill         {X:275 Y:212 W:428 H:37}  #141B20FF
-109  Sprite     Sprocket_Fill         {X:275 Y:212 W:428 H:1}  #5B737BFF
-110  Sprite     Sprocket_Fill         {X:275 Y:248 W:428 H:1}  #5B737BFF
-111  Sprite     Sprocket_Fill         {X:275 Y:212 W:1 H:37}  #5B737BFF
-112  Sprite     Sprocket_Fill         {X:702 Y:212 W:1 H:37}  #5B737BFF
-113  Text       at {X:287.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
-114  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Anything"
-115  Text       at {X:369.97 Y:257.1779} scale 0.57  #A2C3CDFF  "v"
-116  Text       at {X:275 Y:291.662} scale 0.5  #85A1A9FF  "12 blocks"
-117  ClearClip  
-118  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
-119  SetClip    {X:276 Y:55 W:290 H:33}
-120  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
-121  ClearClip  
-122  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-123  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-124  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Start by picking one or more blocks"
-125  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
-126  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-127  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+103  Sprite     MyObjectBuilder_BatteryBlock/LargeBlockBatteryBlock{X:315 Y:864 W:54 H:54}  #FFFFFFFF
+104  Text       at {X:378.8 Y:945.1721} scale 0.64  #DCF5FDFF  "Tug Autopilot"
+105  Text       at {X:378.8 Y:970.652} scale 0.5  #85A1A9FF  "Remote Control   on"
+106  Sprite     Sprocket_Fill         {X:288 Y:959 W:17 H:1}  #85A1A9FF
+107  Sprite     Sprocket_Fill         {X:288 Y:975 W:17 H:1}  #85A1A9FF
+108  Sprite     Sprocket_Fill         {X:288 Y:959 W:1 H:17}  #85A1A9FF
+109  Sprite     Sprocket_Fill         {X:304 Y:959 W:1 H:17}  #85A1A9FF
+110  Sprite     Sprocket_Fill         {X:315 Y:940 W:54 H:54}  #374851FF
+111  Sprite     MyObjectBuilder_RemoteControl/LargeBlockRemoteControl{X:315 Y:940 W:54 H:54}  #FFFFFFFF
+112  Text       at {X:378.8 Y:1021.372} scale 0.64  #DCF5FDFF  "Warning Beacon"
+113  Text       at {X:378.8 Y:1046.852} scale 0.5  #85A1A9FF  "Beacon   on"
+114  Sprite     Sprocket_Fill         {X:288 Y:1035 W:17 H:1}  #85A1A9FF
+115  Sprite     Sprocket_Fill         {X:288 Y:1051 W:17 H:1}  #85A1A9FF
+116  Sprite     Sprocket_Fill         {X:288 Y:1035 W:1 H:17}  #85A1A9FF
+117  Sprite     Sprocket_Fill         {X:304 Y:1035 W:1 H:17}  #85A1A9FF
+118  Sprite     Sprocket_Fill         {X:315 Y:1016 W:54 H:54}  #374851FF
+119  Sprite     MyObjectBuilder_Beacon/LargeBlockBeacon{X:315 Y:1016 W:54 H:54}  #FFFFFFFF
+120  Sprite     Sprocket_Fill         {X:691 Y:488 W:12 H:349}  #5F7278FF
+121  SetClip    {X:259 Y:142 W:1402 H:812}
+122  Text       at {X:275 Y:158.102} scale 0.64  #DCF5FDFF  "BLOCKS"
+123  Text       at {X:275 Y:187.782} scale 0.5  #85A1A9FF  "none picked"
+124  Sprite     Sprocket_Fill         {X:275 Y:212 W:428 H:37}  #141B20FF
+125  Sprite     Sprocket_Fill         {X:275 Y:212 W:428 H:1}  #5B737BFF
+126  Sprite     Sprocket_Fill         {X:275 Y:248 W:428 H:1}  #5B737BFF
+127  Sprite     Sprocket_Fill         {X:275 Y:212 W:1 H:37}  #5B737BFF
+128  Sprite     Sprocket_Fill         {X:702 Y:212 W:1 H:37}  #5B737BFF
+129  Text       at {X:287.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
+130  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Anything"
+131  Text       at {X:369.97 Y:257.1779} scale 0.57  #A2C3CDFF  "v"
+132  Text       at {X:275 Y:291.662} scale 0.5  #85A1A9FF  "14 blocks"
+133  ClearClip  
+134  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+135  SetClip    {X:276 Y:55 W:290 H:33}
+136  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
+137  ClearClip  
+138  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+139  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+140  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Start by picking one or more blocks"
+141  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+142  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+143  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

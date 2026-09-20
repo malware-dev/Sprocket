@@ -7,6 +7,7 @@ using System.Text;
 using VRage;
 using VRage.Collections;
 using VRage.Game.ModAPI;
+using VRage.ModAPI;
 using VRageMath;
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
@@ -121,12 +122,56 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!Holds(property, out kind) || !Shown(property, block))
                     continue;
 
-                into.Add(new Offer(property.Id, Called(property), kind,
-                    Least(block, property, kind), Most(block, property, kind)));
+                var made = new Offer(property.Id, Called(property), kind,
+                    Least(block, property, kind), Most(block, property, kind));
+
+                into.Add(Listed(property, made));
             }
         }
 
         readonly List<ITerminalProperty> _properties = new List<ITerminalProperty>();
+        readonly List<MyTerminalControlComboBoxItem> _items = new List<MyTerminalControlComboBoxItem>();
+
+        /// <summary>
+        /// Everything a value says it may be, where it says so.
+        /// </summary>
+        /// <remarks>
+        /// <b>The property and the control are the same object again.</b> A value chosen from a list
+        /// is a combo box on the terminal, and a combo box reports itself to a mod as a whole number
+        /// - so the number is all the value surface has, and the words are on the other face of it.
+        /// <para>
+        /// Each one arrives as the number the block is told and an interned id for the words, which
+        /// is the same shape a property's own title arrives in and is turned into a sentence the same
+        /// way. Both are kept, because they are not the same thing: the words are what somebody
+        /// reads and the number is what the program holds.
+        /// </para>
+        /// <para>
+        /// The list handed to the block is this one, cleared and refilled, because this runs once per
+        /// value per block kind while a world is being read. What comes out of it is copied into an
+        /// array the offer keeps, since the block is free to fill this one again.
+        /// </para>
+        /// </remarks>
+        Offer Listed(ITerminalProperty property, Offer made)
+        {
+            var listed = property as IMyTerminalControlCombobox;
+            if (listed == null || listed.ComboBoxContent == null)
+                return made;
+
+            _items.Clear();
+            listed.ComboBoxContent(_items);
+
+            if (_items.Count == 0)
+                return made;
+
+            var choices = new Choice[_items.Count];
+            for (var i = 0; i < _items.Count; i++)
+            {
+                choices[i] = new Choice(MyTexts.GetString(_items[i].Value),
+                    _items[i].Key.ToString(CultureInfo.InvariantCulture));
+            }
+
+            return made.Between(choices);
+        }
 
         /// <summary>
         /// The least a numeric value will accept, or empty where the block says nothing useful.

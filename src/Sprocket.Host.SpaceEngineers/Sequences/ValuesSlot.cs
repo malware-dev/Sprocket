@@ -34,7 +34,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var at = 0;
             for (var i = 0; i < _fields.Count; i++)
             {
-                _filled.Add(Channels.Said(_values, at, _fields[i].Covers));
+                // Through the field, because a value that is one of a listed few is held as a number
+                // and read as a word. A field that never said so maps a value to itself.
+                _filled.Add(_fields[i].Wording(Channels.Said(_values, at, _fields[i].Covers)));
                 at += _fields[i].Covers;
             }
 

@@ -141,6 +141,30 @@ namespace Sprocket.Sim.Simulation
                 float.Parse(args[at + 1], CultureInfo.InvariantCulture));
         }
 
+        /// <summary>
+        /// A press where it lands, the way the host delivers one.
+        /// </summary>
+        /// <remarks>
+        /// <b>Offered as a grab first.</b> The host asks the screen to take hold of whatever is under
+        /// the pointer before it treats the button going down as a click, and lets go on the way up
+        /// without ever pressing. So a click on something that is dragged - a scrollbar, a step being
+        /// reordered, a slider on a colour - reaches it as a grab and a drop, and never as a press.
+        /// <para>
+        /// A script that went straight to the press could not reach any of those at all, and worse,
+        /// the whole grab path was invisible to every frame and every test that runs one.
+        /// </para>
+        /// </remarks>
+        private static void Clicked(EditorScene scene, Vector2 at, int clicks)
+        {
+            if (scene.Grab(at))
+            {
+                scene.Drop();
+                return;
+            }
+
+            scene.Press(at, clicks);
+        }
+
         private static void Run(EditorScene scene, Step step, Action drawn)
         {
             if (step.Kind == Step.Press)
@@ -149,7 +173,7 @@ namespace Sprocket.Sim.Simulation
                 // resting on the thing. A script that pressed without moving would leave the highlight on
                 // whatever it was last over, which is a state no player can produce.
                 scene.MoveTo(step.At);
-                scene.Press(step.At, 1);
+                Clicked(scene, step.At, 1);
                 drawn();
                 return;
             }
@@ -167,7 +191,7 @@ namespace Sprocket.Sim.Simulation
             if (step.Kind == Step.Double)
             {
                 scene.MoveTo(step.At);
-                scene.Press(step.At, 2);
+                Clicked(scene, step.At, 2);
                 drawn();
                 return;
             }

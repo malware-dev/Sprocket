@@ -35,7 +35,9 @@ public class ScrollTests
 
         Assert.False(picker.Shows("Warning Beacon"), "the last block was reachable without scrolling");
 
-        picker.Do("scroll", "250", "600", "300");
+        // Past the end rather than exactly to it, because scrolling clamps and the point is that
+        // the last block can be reached at all - not how many blocks this world happens to have.
+        picker.Do("scroll", "250", "600", "900");
 
         Assert.True(picker.Shows("Warning Beacon"), "scrolling did not bring the last block into view");
     }

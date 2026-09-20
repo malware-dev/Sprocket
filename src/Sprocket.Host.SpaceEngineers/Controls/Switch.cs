@@ -62,10 +62,78 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         /// </remarks>
         public bool Governs { get; private set; }
 
+        /// <summary>
+        /// What the two halves are called, where they are not the two this was built with.
+        /// </summary>
+        /// <remarks>
+        /// A switch is two words that exclude each other, and on and off are only the pair that turns
+        /// up most. A field says which pair it will take, and saying it here is what stops this
+        /// control assuming an answer the field never offered.
+        /// </remarks>
+        public void Says(string on, string off)
+        {
+            _on.Text = Widgets.Caps(on);
+            _off.Text = Widgets.Caps(off);
+        }
+
+        /// <summary>
+        /// Lights this where the pointer is resting on it.
+        /// </summary>
+        /// <remarks>
+        /// For a switch that takes its own presses rather than carrying a deed the screen can find,
+        /// which is the one on a form. Everywhere else the screen lights it, and this is never called.
+        /// </remarks>
+        public void Lit(Vector2 point)
+        {
+            IsHot = !Collapsed && Holds(point);
+        }
+
+        /// <summary>Whether either half is in force. False only where nobody has chosen yet.</summary>
+        public bool IsSet { get; private set; }
+
+        /// <summary>
+        /// Neither way, because nobody has said which.
+        /// </summary>
+        /// <remarks>
+        /// A switch always shows a state, which is right for a thing that has one and wrong for a
+        /// question nobody has answered: lighting the off half would be an answer nobody gave. Both
+        /// words stay readable, so it still says what the two choices are.
+        /// </remarks>
+        public void Unchosen()
+        {
+            Collapsed = false;
+            IsSet = false;
+            IsOn = false;
+            Governs = false;
+
+            _on.Color = Palette.Faint;
+            _off.Color = Palette.Faint;
+            Edge = Palette.Dim;
+        }
+
+        /// <summary>
+        /// Which half a point is on, and whether it is on the control at all.
+        /// </summary>
+        /// <remarks>
+        /// The half rather than the whole, because this control shows both of its positions: pressing
+        /// the word somebody wants is what it looks like it does. Toggling from wherever it happens to
+        /// stand would also have no answer for a switch nobody has set.
+        /// </remarks>
+        public bool Chose(Vector2 point, out bool isOn)
+        {
+            isOn = false;
+            if (Collapsed || !Holds(point))
+                return false;
+
+            isOn = point.X < Bounds.X + Bounds.Width * 0.5f;
+            return true;
+        }
+
         /// <summary>Sets both halves at once, so the two can never disagree about which is lit.</summary>
         public void Show(bool isOn, bool governs)
         {
             Collapsed = false;
+            IsSet = true;
             IsOn = isOn;
             Governs = governs;
 
@@ -126,6 +194,13 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             // so on a fractional width the two either overlap by a pixel or leave a line of whatever is
             // behind them showing through the middle. One rectangle cannot have a seam in it.
             g.DrawSprite(Solid, inner, Palette.SwitchDark, 0f);
+
+            if (!IsSet)
+            {
+                _on.Draw(g);
+                _off.Draw(g);
+                return;
+            }
 
             float half = inner.Width * 0.5f;
             g.DrawSprite(Solid, IsOn

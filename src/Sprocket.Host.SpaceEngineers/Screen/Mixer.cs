@@ -101,6 +101,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _hue.Track = Symbols.Hue;
             _hue.TrackTint = Color.White;
 
+            _hue.HighlightEdge = Palette.Ink;
+            _saturation.HighlightEdge = Palette.Ink;
+            _value.HighlightEdge = Palette.Ink;
+
             _chosen.Edge = Palette.Line;
 
             _root.Children.Add(_palette);
@@ -171,6 +175,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
                 _swatches[i].Background = colours[i].Colour;
                 _swatches[i].Edge = Palette.Chrome;
+
+                // The edge rather than the fill, which is the colour itself and the whole point of
+                // the control. HighlightEdge exists for exactly this: things that are mostly outline,
+                // or whose middle is spoken for.
+                _swatches[i].HighlightEdge = Palette.Ink;
                 _palette.Children.Add(_swatches[i]);
             }
 
@@ -184,7 +193,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             for (var i = 0; i < _colours.Count && i < _swatches.Count; i++)
             {
-                if (!_swatches[i].Bounds.Contains(point))
+                if (!_swatches[i].Holds(point))
                     continue;
 
                 Colour = _colours[i];
@@ -231,6 +240,38 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             _held = null;
         }
+
+        /// <summary>
+        /// Lights whichever part of this the pointer is resting on.
+        /// </summary>
+        /// <remarks>
+        /// The same bargain the other controls on a form keep: the screen lights what a press would
+        /// reach by finding it the way a press does, and anything that takes its own presses has to
+        /// answer the pointer itself.
+        /// </remarks>
+        public void Lit(Vector2 point)
+        {
+            Element hot = Under(point);
+
+            for (var i = 0; i < _colours.Count && i < _swatches.Count; i++)
+            {
+                if (hot == null && _swatches[i].Holds(point))
+                    hot = _swatches[i];
+            }
+
+            if (ReferenceEquals(hot, _hot))
+                return;
+
+            if (_hot != null)
+                _hot.IsHot = false;
+
+            _hot = hot;
+
+            if (_hot != null)
+                _hot.IsHot = true;
+        }
+
+        Element _hot;
 
         /// <summary>Whether a slider is being dragged right now.</summary>
         public bool IsDragging
@@ -282,13 +323,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         Slider Under(Vector2 point)
         {
-            if (_hue.Bounds.Contains(point))
+            if (_hue.Holds(point))
                 return _hue;
 
-            if (_saturation.Bounds.Contains(point))
+            if (_saturation.Holds(point))
                 return _saturation;
 
-            return _value.Bounds.Contains(point) ? _value : null;
+            return _value.Holds(point) ? _value : null;
         }
 
         /// <summary>One slider with the letter the game calls it by in front of it.</summary>

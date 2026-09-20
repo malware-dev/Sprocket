@@ -166,9 +166,12 @@ namespace Sprocket.Host.SpaceEngineers.Words
             if (slot.IsEmpty)
                 return Empty;
 
-            var said = slot.Values[0].Said;
-            for (var i = 1; i < slot.Values.Count; i++)
-                said += " " + slot.Values[i].Said;
+            // What each field of it shows rather than each value it holds. The two part company
+            // wherever a field stands over several values or shows something other than the value
+            // itself: three numbers are one colour, and a number is the word it stands for.
+            var said = slot.Filled[0];
+            for (var i = 1; i < slot.Filled.Count; i++)
+                said += " " + slot.Filled[i];
 
             return said;
         }

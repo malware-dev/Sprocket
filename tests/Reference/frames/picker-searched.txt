@@ -48,7 +48,7 @@ on screen     When something happens  |  Start by picking one or more blocks
 041  Sprite     Sprocket_Fill         {X:321 Y:220 W:2 H:21}  #DCF5FDFF
 042  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Anything"
 043  Text       at {X:369.97 Y:257.1779} scale 0.57  #A2C3CDFF  "v"
-044  Text       at {X:275 Y:291.662} scale 0.5  #85A1A9FF  "3 of 12"
+044  Text       at {X:275 Y:291.662} scale 0.5  #85A1A9FF  "3 of 14"
 045  ClearClip  
 046  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
 047  SetClip    {X:276 Y:55 W:290 H:33}

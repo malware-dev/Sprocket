@@ -77,6 +77,63 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             return field;
         }
 
+        /// <summary>
+        /// What the program holds for each of <see cref="Words" />, or null where they are the same.
+        /// </summary>
+        /// <remarks>
+        /// Two different things wherever a value is one of a listed few: the terminal shows a charge
+        /// mode as Auto and the block is told a number. Null where a word is its own value, which is
+        /// every switch that says on and off, so those need nothing here.
+        /// </remarks>
+        public IList<string> Means;
+
+        /// <summary>What the program holds for a word somebody chose.</summary>
+        /// <remarks>
+        /// The word itself where nothing says otherwise, which is what makes a field that never
+        /// heard of this work unchanged.
+        /// </remarks>
+        public string Meaning(string word)
+        {
+            return Found(Words, word, Means);
+        }
+
+        /// <summary>The word for what the program holds, which is the other way round.</summary>
+        public string Wording(string said)
+        {
+            return Found(Means, said, Words);
+        }
+
+        /// <summary>
+        /// What <paramref name="said" /> stands for, by its place in one list and out of the other.
+        /// </summary>
+        /// <remarks>
+        /// Unchanged where either list is absent or the two have fallen out of step, because a
+        /// mapping that is only half there is one nobody can trust either way round.
+        /// </remarks>
+        static string Found(IList<string> among, string said, IList<string> into)
+        {
+            if (among == null || into == null || among.Count != into.Count)
+                return said;
+
+            for (var i = 0; i < among.Count; i++)
+            {
+                if (among[i] == said)
+                    return into[i];
+            }
+
+            return said;
+        }
+
+        /// <summary>One that will only take one of a listed few, each standing for its own value.</summary>
+        public static Field Among(string name, IList<string> words, IList<string> means)
+        {
+            Field field = Called(name);
+            field.Edits = Editor.Chosen;
+            field.Words = words;
+            field.Means = means;
+            return field;
+        }
+
         /// <summary>A field nobody has described, which is a box that takes anything.</summary>
         public static Field Unnamed()
         {

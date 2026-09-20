@@ -171,8 +171,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         static Field Asks(Offer offer, string said)
         {
+            // What the block says it may be, where it says: a charge mode is Auto, Recharge or
+            // Discharge and the block is told a number, so the words and the values are two lists.
+            if (offer.Choices != null && offer.Choices.Count > 0)
+                return Among(said, offer.Choices);
+
             if (offer.Sets == ValueKind.Flag)
-                return Field.OneOf(said, Literal.Of(true).Said, Literal.Of(false).Said);
+            {
+                // The same thing with two of them, and the one case where each word is its own
+                // value: a flag is written on or off, which is what the block is told.
+                Field either = Field.OneOf(said, Literal.Of(true).Said, Literal.Of(false).Said);
+                either.Edits = Editor.Chosen;
+                return either;
+            }
 
             // A colour says so itself, which nothing else here does. Where three parameters of an
             // action are a colour only because somebody wrote that down, a value declared as one is
@@ -181,6 +192,21 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return Field.Holding(said, Editor.Colour, 1);
 
             return Field.Between(said, offer.Least, offer.Most);
+        }
+
+        /// <summary>One field over everything a value says it may be, kept in the order it said them.</summary>
+        static Field Among(string said, IList<Choice> choices)
+        {
+            var words = new string[choices.Count];
+            var means = new string[choices.Count];
+
+            for (var i = 0; i < choices.Count; i++)
+            {
+                words[i] = choices[i].Word;
+                means[i] = choices[i].Means;
+            }
+
+            return Field.Among(said, words, means);
         }
 
         readonly List<Offer> _offered = new List<Offer>();

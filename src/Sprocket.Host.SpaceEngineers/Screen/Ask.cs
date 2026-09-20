@@ -28,6 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         private readonly Stack _fields = Widgets.Column(Space.Item);
         private readonly List<TextBox> _boxes = new List<TextBox>();
         private readonly List<Mixer> _mixers = new List<Mixer>();
+        private readonly List<Switch> _switches = new List<Switch>();
+        private readonly List<Stack> _holders = new List<Stack>();
+        private readonly List<Choices> _lists = new List<Choices>();
         private readonly List<Hsv> _colours = new List<Hsv>();
         private readonly List<string> _parts = new List<string>();
         private readonly List<Bar> _lines = new List<Bar>();
@@ -186,13 +189,18 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Bar line = _lines[at];
             line.Spacing = Space.Item;
             line.Left = _numbers[at].Text.Length > 0 ? Numbered(at) : null;
-            line.Fill = _boxes[at];
+            line.Fill = Chosen(at) ? Picking(at) : (Element)_boxes[at];
 
             return line;
         }
 
         string Label(int at, int count)
         {
+            // The name alone where the control beside it already shows what it will take. A switch
+            // has both of its words written on it, and "On on or off" is the label saying them again.
+            if (Chosen(at))
+                return _wanted[at].Name ?? "";
+
             string said = at < _wanted.Count ? _wanted[at].Label : "";
             if (said.Length > 0)
                 return said;
@@ -298,6 +306,66 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             return Colourful(at) ? Mixed(at).Written : _boxes[at];
         }
 
+        /// <summary>
+        /// Whether the field at <paramref name="at" /> is answered by choosing one of two words.
+        /// </summary>
+        /// <remarks>
+        /// Both halves of it: the field has to say it wants a switch and to say which two words the
+        /// switch offers. A field that says the first and not the second has nothing to put on the
+        /// two halves, and gets a box like anything else.
+        /// </remarks>
+        bool Chosen(int at)
+        {
+            return at < _wanted.Count && _wanted[at].Edits == Editor.Chosen
+                && _wanted[at].Words != null && _wanted[at].Words.Count > 0;
+        }
+
+        /// <summary>
+        /// Whether that field's few are exactly two, which is the one a switch can take.
+        /// </summary>
+        /// <remarks>
+        /// A question about what fits rather than about the value: two words are a switch because a
+        /// switch is what two mutually exclusive words look like everywhere in this game, and three
+        /// are a row to pick from because a switch has nowhere to put the third.
+        /// </remarks>
+        bool Switched(int at)
+        {
+            return Chosen(at) && _wanted[at].Words.Count == 2;
+        }
+
+        /// <summary>
+        /// The switch for a field, made the first time that field needs one.
+        /// </summary>
+        /// <remarks>
+        /// Inside a row of its own, because a switch is as wide as its two words and the form's lines
+        /// hand the middle whatever width is left. Given that width directly it would stretch across
+        /// the dialog, which is not what a switch looks like anywhere else on these screens.
+        /// </remarks>
+        Element Picking(int at)
+        {
+            if (!Switched(at))
+            {
+                while (_lists.Count <= at)
+                    _lists.Add(new Choices(Lettering.Small));
+
+                _lists[at].Says(_wanted[at].Words);
+                return _lists[at];
+            }
+
+            while (_switches.Count <= at)
+            {
+                var made = new Switch(Lettering.Small);
+                Stack holder = Widgets.RowOf(0f);
+                holder.Children.Add(made);
+
+                _switches.Add(made);
+                _holders.Add(holder);
+            }
+
+            _switches[at].Says(_wanted[at].Words[0], _wanted[at].Words[1]);
+            return _holders[at];
+        }
+
         /// <summary>Whether the field at <paramref name="at" /> is answered by choosing a colour.</summary>
         bool Colourful(int at)
         {
@@ -338,6 +406,30 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     return true;
                 }
 
+                // The half that was pressed, not a toggle. The control shows both of its positions,
+                // so pressing the word somebody wants is what it looks like it does - and a switch
+                // nobody has set yet has no position to toggle away from.
+                bool isOn;
+                if (Switched(i) && i < _switches.Count && _switches[i].Chose(point, out isOn))
+                {
+                    _boxes[i].Text = _wanted[i].Words[isOn ? 0 : 1];
+                    Move(i);
+                    return true;
+                }
+
+                // The control takes the press whether or not it chose anything with it, because
+                // opening or shutting its list is a thing that happened to it and must not also mean
+                // something to whatever is behind.
+                string word;
+                if (Chosen(i) && !Switched(i) && i < _lists.Count && _lists[i].Took(point, out word))
+                {
+                    if (word.Length > 0)
+                        _boxes[i].Text = word;
+
+                    Move(i);
+                    return true;
+                }
+
                 if (!At(i).Holds(point))
                     continue;
 
@@ -345,6 +437,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return true;
             }
 
+            Shut();
             return false;
         }
 
@@ -446,9 +539,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 for (var i = 0; i < Count; i++)
                 {
                     if (Colourful(i))
+                    {
                         Channels.Spell(At(i).Text, _wanted[i].Covers, _parts);
-                    else
-                        _parts.Add(At(i).Text);
+                        continue;
+                    }
+
+                    // What the program holds for the word that was chosen, which is not the word
+                    // wherever a block shows one thing and is told another. Unchanged everywhere
+                    // else, because a field that said nothing about this maps a word to itself.
+                    _parts.Add(i < _wanted.Count ? _wanted[i].Meaning(At(i).Text) : At(i).Text);
                 }
 
                 if (_parts.Count == 1)
@@ -550,10 +649,35 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             }
         }
 
+        /// <summary>Puts away any list left hanging open, for a press that went elsewhere.</summary>
+        /// <remarks>
+        /// A list that stayed open over a form somebody had moved on from would be the only thing on
+        /// these screens that has to be dismissed before anything else can be reached.
+        /// </remarks>
+        void Shut()
+        {
+            for (var i = 0; i < _lists.Count; i++)
+                _lists[i].Close();
+        }
+
         /// <summary>Whether a point is on the question. False while none is open.</summary>
         public bool Covers(Vector2 point)
         {
-            return _up && _popup.Holds(point);
+            if (!_up)
+                return false;
+
+            if (_popup.Holds(point))
+                return true;
+
+            // And whatever it has hanging under itself, which is outside its own bounds. A press on
+            // an open list read as a press outside the question, and put the question away.
+            for (var i = 0; i < _lists.Count; i++)
+            {
+                if (_lists[i].Over(point))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -668,10 +792,21 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// late. It is also before the measure, because how a button is dressed decides how much room
         /// it holds clear inside itself.
         /// </remarks>
-        public void Dress()
+        public void Dress(Vector2 pointer)
         {
             if (!_up)
                 return;
+
+            // What the pointer is resting on, for the parts of this form that take their own presses
+            // and are therefore invisible to the walk that lights everything else.
+            for (var i = 0; i < _lists.Count; i++)
+                _lists[i].Lit(pointer);
+
+            for (var i = 0; i < _switches.Count; i++)
+                _switches[i].Lit(pointer);
+
+            for (var i = 0; i < _mixers.Count; i++)
+                _mixers[i].Lit(pointer);
 
             // The question gives way to the reason while there is one, so the words sit where somebody
             // is already reading, and come back as soon as the answer is one that can be sent.
@@ -681,7 +816,36 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             for (var i = 0; i < Count; i++)
             {
                 if (Colourful(i))
+                {
                     Mixed(i).Reread();
+                    continue;
+                }
+
+                if (!Chosen(i))
+                    continue;
+
+                // Read from the field rather than remembered, so what is shown cannot drift from what
+                // will actually be sent. A field holding none of the words - which is what typing into
+                // it does - leaves none of them lit, and the refusal says why.
+                string said = _boxes[i].Text;
+
+                if (!Switched(i))
+                {
+                    if (i < _lists.Count)
+                        _lists[i].Show(said);
+
+                    continue;
+                }
+
+                if (i >= _switches.Count)
+                    continue;
+
+                if (said == _wanted[i].Words[0])
+                    _switches[i].Show(true, false);
+                else if (said == _wanted[i].Words[1])
+                    _switches[i].Show(false, false);
+                else
+                    _switches[i].Unchosen();
             }
 
             bool refused = !string.IsNullOrEmpty(Refused);
@@ -703,6 +867,20 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 Widgets.Waiting(_confirm);
                 _confirm.Press = Deed.Nothing;
             }
+        }
+
+        /// <summary>
+        /// Draws whatever is hanging open, after the form it hangs over.
+        /// </summary>
+        /// <remarks>
+        /// Last, because a list under a box covers whatever the form put below it - which on this
+        /// form is the way out. Drawn by the form rather than by the control, since a control draws
+        /// where it was arranged and this has to draw somewhere else.
+        /// </remarks>
+        void Hanging(IGraphics g)
+        {
+            for (var i = 0; i < _lists.Count; i++)
+                _lists[i].Hanging(g);
         }
 
         public void Draw(IGraphics g, RectangleF bounds, float width)
@@ -727,6 +905,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     bounds.Y + (bounds.Height - height) * 0.5f, across, height));
 
                 _popup.Draw(g);
+                Hanging(g);
                 return;
             }
 
@@ -743,6 +922,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _popup.Arrange(new RectangleF(x, y, width, height));
             _popup.Draw(g);
+            Hanging(g);
         }
     }
 }

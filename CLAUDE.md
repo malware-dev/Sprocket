@@ -3,8 +3,7 @@
 How this repository is built and what its code must look like live in the skills: `csharp-standards`
 for the general rules, `sprocket-standards` for what is true here and would be wrong anywhere else.
 
-This file is for facts about the machine and the game that are in neither, and that cost an hour to
-rediscover.
+This file is for facts about the machine and the game that are in neither.
 
 ## Editing a saved world by hand
 
@@ -32,7 +31,6 @@ Fonts, textures and anything else under `Content` are read once when the game st
 to a page, a `.dds`, or a definition in an `.sbc` is invisible until the game is started again.
 
 A change to the mod's own code is not. The scripts are compiled from the mod folder when a world
-loads, so leaving to the main menu and loading the world again is enough to pick it up.
+loads, so a quickload picks it up.
 
-So: after `dotnet build src/Sprocket.Host.SpaceEngineers`, say which of the two it was. Asking for a
-restart when nothing under `Content` moved costs several minutes of somebody else's time.
+So after `dotnet build src/Sprocket.Host.SpaceEngineers`, say which of the two changed.

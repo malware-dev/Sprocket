@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
 using Xunit;
 
@@ -261,5 +262,127 @@ public class ActionTests
             rig.Tick();
 
         Assert.Contains("Hydrogen Tank:Stockpile_On", rig.Machine.Log);
+    }
+
+    /// <summary>
+    /// A value that takes one of two words is switched rather than typed.
+    /// </summary>
+    /// <remarks>
+    /// The one field a form can be certain about, and so the one where typing can be wrong with
+    /// nothing to say so: a number outside its bounds is refused out loud, while a word the block
+    /// does not know is written into the program and declined in silence when it runs.
+    /// </remarks>
+    [Fact]
+    public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
+    {
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
+            + "1300 918 70 193 200 500 800 410 1380 1000").Split(' '));
+
+        Assert.True(screen.Scene.IsAsking, "the light's on value does not ask for anything");
+        Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
+        Assert.Equal(2, screen.Editor.Screen.PrimaryFields.Single().Words.Count);
+        Assert.Equal("", screen.Scene.AskBox.Text);
+
+        // The half that was pressed, not a toggle: the control shows both of its positions.
+        screen.Do("520", "530");
+        Assert.Equal("on", screen.Scene.AskBox.Text);
+
+        screen.Do("590", "530");
+        Assert.Equal("off", screen.Scene.AskBox.Text);
+    }
+
+    /// <summary>
+    /// One of the player's own colours is chosen by pressing it, and the hue slider by pressing it.
+    /// </summary>
+    /// <remarks>
+    /// The two halves of the picker that are not typing. The colour that comes out is written the way
+    /// the language writes one, because the box is what the answer is read from - so what a press
+    /// does and what somebody could have typed are the same thing.
+    /// </remarks>
+    [Fact]
+    public void AColourIsChosenByPressingOne()
+    {
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
+            + "1300 918 70 193 200 500 800 545 1380 1000").Split(' '));
+
+        Assert.True(screen.Scene.IsAsking, "the colour setter does not ask for anything");
+        Assert.Equal("", screen.Scene.AskBox.Text);
+
+        // The third of the fourteen. They are the harness's stand-in for a player who has painted.
+        screen.Do("545", "455");
+        Assert.Equal("#386285", screen.Scene.AskBox.Text);
+
+        // And the far left of the hue track is red, at whatever saturation and value were already
+        // chosen: one slider owns one axis and leaves the other two where they stood.
+        screen.Do("486", "490");
+        Assert.Equal("#853838", screen.Scene.AskBox.Text);
+    }
+
+    /// <summary>
+    /// A value of more than two choices is picked from them, and the program holds what the block
+    /// is told rather than what the screen said.
+    /// </summary>
+    /// <remarks>
+    /// The two are not the same thing and that is the whole point: a battery's charge mode reads
+    /// Auto, Recharge or Discharge on the terminal and the block is told nought, one or two. What
+    /// somebody chose has to survive being written down and shown again, both ways round.
+    /// </remarks>
+    [Fact]
+    public void AValueOfSeveralChoicesIsPickedFromThem()
+    {
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
+            + "1300 918 70 193 150 224 type Standby 200 375 800 316 1380 1000").Split(' '));
+
+        Assert.True(screen.Scene.IsAsking, "the charge mode does not ask for anything");
+        Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
+            "the dialog does not show what the value may be");
+
+        screen.Do("660", "530");
+        Assert.Equal("Recharge", screen.Scene.AskBox.Text);
+
+        screen.Do("enter");
+
+        // What the block is told, which is the number the game keeps its charge modes as.
+        var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
+        Literal held = Assert.Single(act.Values);
+        Assert.Equal(1, held.Whole);
+
+        // And what a person reads, which is neither the number nor anywhere in the program.
+        Assert.True(screen.Shows("Recharge"), "the step does not say what was chosen");
+        Assert.False(screen.Shows("1 "), "the step says the number instead of the word");
+    }
+
+    /// <summary>
+    /// More choices than a row can hold fold into a box that opens a list.
+    /// </summary>
+    /// <remarks>
+    /// Three short words are a row somebody takes in at a glance; six are a wall to search, and long
+    /// ones are wider than the form whatever their number. The box is one line either way, which is
+    /// what lets a block carrying several of these stay a form rather than a page.
+    /// </remarks>
+    [Fact]
+    public void MoreChoicesThanFitFoldIntoAList()
+    {
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
+            + "1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000").Split(' '));
+
+        Assert.True(screen.Scene.IsAsking, "the forward direction does not ask for anything");
+
+        // Closed, so none of the six is on the screen and neither is a choice nobody has made.
+        Assert.False(screen.Shows("Forward"), "the list is showing while it is shut");
+
+        screen.Do("700", "530");
+        Assert.True(screen.Shows("Forward") && screen.Shows("Down"),
+            "pressing the box did not open the list");
+
+        screen.Do("700", "628");
+        Assert.Equal("Left", screen.Scene.AskBox.Text);
+        Assert.False(screen.Shows("Down"), "choosing did not put the list away");
+
+        screen.Do("enter");
+
+        var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
+        Assert.Equal(2, Assert.Single(act.Values).Whole);
+        Assert.True(screen.Shows("Left"), "the step does not say what was chosen");
     }
 }
