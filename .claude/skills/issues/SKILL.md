@@ -6,6 +6,9 @@ description: Write and file a GitHub issue for this repository in the form it us
 Issues are the planning surface. `docs/` holds reasoning that is not code yet; neither is where a
 piece of work lives.
 
+`docs/Rules.md` holds the standing rules. Every ticket is judged against all of them, and a ticket
+that cannot meet one says so.
+
 ## Whether it needs one at all
 
 **Designed, unbuilt work gets a ticket whatever it is called.** Not feature versus debt - the test is
