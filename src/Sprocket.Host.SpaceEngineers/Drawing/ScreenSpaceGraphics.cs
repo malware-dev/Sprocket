@@ -179,11 +179,23 @@ namespace Sprocket.Host.SpaceEngineers.Drawing
 
         public void DrawText(string font, string text, Vector2 position, float scale, Color color)
         {
+            DrawText(font, text, position, scale, color, Align.Left);
+        }
+
+        public void DrawText(string font, string text, Vector2 position, float scale, Color color,
+            Align align)
+        {
             if (string.IsNullOrEmpty(text))
                 return;
 
+            // Vertically always the top, because that is what the layout means by a position and the
+            // one half of this the other target could not reproduce.
+            MyGuiDrawAlignEnum placed = align == Align.Right
+                ? MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_TOP
+                : MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP;
+
             _screenSpace.DrawText(font, text, position * _scale + _origin, scale * _fontScale, color,
-                MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP, float.PositiveInfinity, _layer);
+                placed, float.PositiveInfinity, _layer);
         }
 
         public Vector2 MeasureText(string font, StringBuilder text, float scale)

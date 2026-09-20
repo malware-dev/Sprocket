@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Layout;
 using VRageMath;
@@ -30,6 +29,18 @@ public class ScreedTests
     static Screed Long(int count)
     {
         return new Screed { Text = Lines(count) };
+    }
+
+    /// <summary>
+    /// Lays a control out and draws it, for a test that is about neither.
+    /// </summary>
+    /// <remarks>
+    /// A control has no bounds until it has been arranged, so anything that presses at one has to
+    /// have drawn it first even where the frame is not what is being asked about.
+    /// </remarks>
+    static void Laid(Screed screed)
+    {
+        new Easel(screed, Width, Height).Draw(Width, Height);
     }
 
     [Fact]
@@ -254,7 +265,7 @@ public class ScreedTests
     public void DraggingSidewaysMovesItSideways()
     {
         var screed = new Screed { Text = new string('x', 400) };
-        var easel = new Easel(screed, Width, Height);
+        Laid(screed);
 
         screed.Take(new Vector2(100f, 10f));
         screed.Carry(new Vector2(40f, 10f));
@@ -270,7 +281,7 @@ public class ScreedTests
     public void APressOnAThumbTakesTheThumb()
     {
         var screed = new Screed { Text = Lines(5000), BarWidth = 20f, BarColor = Color.White };
-        var easel = new Easel(screed, Width, Height);
+        Laid(screed);
 
         Assert.True(screed.Take(new Vector2(Width - 10f, 10f)));
 

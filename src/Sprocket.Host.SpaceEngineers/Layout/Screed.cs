@@ -72,16 +72,6 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         readonly List<string> _numbers = new List<string>();
 
-        /// <summary>
-        /// How wide each of those numbers actually is.
-        /// </summary>
-        /// <remarks>
-        /// Measured rather than counted in digits. The face is proportional - a <c>1</c> is nothing like
-        /// the width of a <c>0</c> - so a number placed by digit count ends short of the margin by
-        /// however many narrow digits it happens to contain, and a column of them is ragged.
-        /// </remarks>
-        readonly List<float> _widths = new List<float>();
-
         readonly Rail _down = new Rail();
         readonly Rail _across = new Rail();
 
@@ -509,9 +499,10 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             if (_gutter <= 0f || NumberColor.A == 0)
                 return;
 
-            Number(g, first, last);
+            Number(first, last);
 
-            // Right against the words, every number ending a digit's width short of them.
+            // Right against the words, every number ending a digit's width short of them. Placed by
+            // its end rather than its start, so nothing here has to know how wide a number is.
             float edge = view.X + _gutter - _digit;
             float y = top;
 
@@ -519,21 +510,15 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
             for (int i = 0; i < _numbers.Count; i++)
             {
-                g.DrawText(Font, _numbers[i], new Vector2(edge - _widths[i], y), Scale, NumberColor);
+                g.DrawText(Font, _numbers[i], new Vector2(edge, y), Scale, NumberColor, Align.Right);
                 y += _line;
             }
 
             g.PopClip();
         }
 
-        /// <summary>
-        /// Fills the numbers for a band of lines, and their widths, only when the band has moved.
-        /// </summary>
-        /// <remarks>
-        /// A band's worth of measuring while the hand is moving and none at all while it is still, which
-        /// is the same bargain the words themselves are drawn on.
-        /// </remarks>
-        void Number(IGraphics g, int first, int last)
+        /// <summary>Fills the numbers for a band of lines, only when the band has moved.</summary>
+        void Number(int first, int last)
         {
             if (_numbersFrom == first && _numbersTo == last)
                 return;
@@ -541,18 +526,10 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             _numbersFrom = first;
             _numbersTo = last;
             _numbers.Clear();
-            _widths.Clear();
 
+            // One-based, because the first line of anything anybody reads is line one.
             for (int i = first; i <= last; i++)
-            {
-                // One-based, because the first line of anything anybody reads is line one.
-                string said = (i + 1).ToString();
-                _numbers.Add(said);
-
-                _scratch.Length = 0;
-                _scratch.Append(said);
-                _widths.Add(g.MeasureText(Font, _scratch, Scale).X);
-            }
+                _numbers.Add((i + 1).ToString());
         }
 
         /// <summary>The widest of the ten digits, asked only when the face or the scale has moved.</summary>

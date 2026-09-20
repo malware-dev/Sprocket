@@ -57,11 +57,21 @@ namespace Sprocket.Host.SpaceEngineers.Drawing
         void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation);
 
         /// <summary>Draws one run of text with its top-left corner at <paramref name="position" />.</summary>
-        /// <remarks>
-        /// There is no alignment argument: a text panel aligns horizontally and not vertically, so an
-        /// aligned API here could not be reproduced. Alignment is the framework's job, above this line.
-        /// </remarks>
         void DrawText(string font, string text, Vector2 position, float scale, Color color);
+
+        /// <summary>
+        /// The same, with <paramref name="align" /> saying which end of the run the position names.
+        /// </summary>
+        /// <remarks>
+        /// Across only. A text panel aligns horizontally and not vertically, so an alignment naming both
+        /// could not be reproduced on both targets, and vertical alignment stays the framework's job.
+        /// <para>
+        /// It is here rather than left to callers because the alternative is measuring: a run set against
+        /// a right edge has to be measured first and subtracted, by every caller that wants one, on every
+        /// frame the position moves. Both targets can place it for nothing.
+        /// </para>
+        /// </remarks>
+        void DrawText(string font, string text, Vector2 position, float scale, Color color, Align align);
 
         /// <summary>The size of <paramref name="text" /> if it were drawn, in UI units. Allocates nothing.</summary>
         Vector2 MeasureText(string font, StringBuilder text, float scale);

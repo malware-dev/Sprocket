@@ -142,12 +142,44 @@ namespace Sprocket.Sim.Simulation
                 Layer = layer,
                 Font = font,
                 Text = text,
-                Position = position,
+                Position = Placed(font, text, scale, position, align),
                 Scale = scale,
                 Color = color,
                 Align = align,
                 MaxWidth = maxWidth
             });
+        }
+
+        /// <summary>
+        /// Where a run actually starts, once the alignment has been worked out.
+        /// </summary>
+        /// <remarks>
+        /// <b>Resolved here, where the game resolves it.</b> The game is handed an alignment and a point
+        /// and works out the rest inside its own text drawing, so this stands in the same place - and
+        /// then <see cref="DrawCommand.Position" /> goes on meaning what every reader of a frame already
+        /// takes it to mean, which is where the letters begin. A renderer, a dump and a test would
+        /// otherwise each have to undo the alignment, and each be a place to get it wrong.
+        /// <para>
+        /// The width is this device's, so it is as good as <see cref="Fonts" /> is: exact against the
+        /// game's own metrics, and a few percent out against a stand-in face. A right-aligned run is
+        /// therefore placed no better than a question about whether text fits, which is the rule the
+        /// rest of this harness already lives by.
+        /// </para>
+        /// </remarks>
+        Vector2 Placed(string font, string text, float scale, Vector2 position, MyGuiDrawAlignEnum align)
+        {
+            if (Fonts == null || string.IsNullOrEmpty(text) || !Rightward(align))
+                return position;
+
+            return new Vector2(position.X - Fonts.MeasurePixels(font, text, scale).X, position.Y);
+        }
+
+        /// <summary>Whether an alignment puts the point at the run's right-hand end.</summary>
+        static bool Rightward(MyGuiDrawAlignEnum align)
+        {
+            return align == MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_TOP
+                || align == MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_CENTER
+                || align == MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_BOTTOM;
         }
 
         /// <summary>
