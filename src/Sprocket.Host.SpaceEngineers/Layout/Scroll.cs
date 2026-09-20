@@ -26,10 +26,10 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         private readonly ElementCollection _children;
 
         private Element _content;
-        private float _offset;
-        private float _extent;
-        private float _viewport;
         private float _across;
+
+        /// <summary>Everything about where along the content this sits. See <see cref="Rail" />.</summary>
+        private readonly Rail _rail = new Rail();
 
         public Scroll()
         {
@@ -71,7 +71,11 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// long list is a few units of nothing. It stops shrinking here and starts lying instead, which is
         /// the right way round: a thumb nobody can grab tells you less than one slightly out of place.
         /// </remarks>
-        public float BarMinLength { get; set; }
+        public float BarMinLength
+        {
+            get { return _rail.MinThumb; }
+            set { _rail.MinThumb = value; }
+        }
 
         /// <summary>Whether the thumb is being dragged right now, which only changes its colour.</summary>
         public bool BarHeld { get; set; }
@@ -116,35 +120,28 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         public float Scrolled
         {
-            get { return _offset; }
+            get { return _rail.Offset; }
             set
             {
-                if (_offset == value)
+                if (_rail.Offset == value)
                     return;
 
-                _offset = value;
+                _rail.Offset = value;
                 InvalidateArrange();
             }
         }
 
         /// <summary>The full height of the content, once measured.</summary>
-        public float Extent => _extent;
+        public float Extent => _rail.Extent;
 
         /// <summary>The height on show.</summary>
-        public float Viewport => _viewport;
+        public float Viewport => _rail.Viewport;
 
         /// <summary>How far it could still be scrolled. Zero when everything already fits.</summary>
-        public float MaxOffset
-        {
-            get
-            {
-                float max = _extent - _viewport;
-                return max > 0f ? max : 0f;
-            }
-        }
+        public float MaxOffset => _rail.Max;
 
         /// <summary>Whether there is anything out of sight.</summary>
-        public bool CanScroll => MaxOffset > 0f;
+        public bool CanScroll => _rail.CanMove;
 
         /// <summary>Whether a thumb is being drawn: one was asked for, and there is something to scroll.</summary>
         private bool HasBar => BarWidth > 0f && BarColor.A > 0 && CanScroll;
@@ -180,49 +177,12 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             get
             {
                 RectangleF track = Track;
-                float length = ThumbLength;
+                float start = _rail.ThumbStart;
+                float length = _rail.ThumbLength;
 
                 return Horizontal
-                    ? new RectangleF(track.X + Travel * Fraction, track.Y, length, track.Height)
-                    : new RectangleF(track.X, track.Y + Travel * Fraction, track.Width, length);
-            }
-        }
-
-        /// <summary>How far along the content is, from nothing to all of it.</summary>
-        private float Fraction
-        {
-            get
-            {
-                float max = MaxOffset;
-                return max > 0f ? _offset / max : 0f;
-            }
-        }
-
-        private float ThumbLength
-        {
-            get
-            {
-                if (_extent <= 0f || _viewport <= 0f)
-                    return _viewport;
-
-                float length = _viewport * _viewport / _extent;
-
-                if (length < BarMinLength)
-                    length = BarMinLength;
-                if (length > _viewport)
-                    length = _viewport;
-
-                return length;
-            }
-        }
-
-        /// <summary>How much room the thumb has to move in.</summary>
-        private float Travel
-        {
-            get
-            {
-                float travel = _viewport - ThumbLength;
-                return travel > 0f ? travel : 0f;
+                    ? new RectangleF(track.X + start, track.Y, length, track.Height)
+                    : new RectangleF(track.X, track.Y + start, track.Width, length);
             }
         }
 
@@ -236,11 +196,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         public void DragBy(float distance)
         {
-            float travel = Travel;
-            if (travel <= 0f)
-                return;
-
-            ScrollBy(distance * MaxOffset / travel);
+            Scrolled = _rail.Dragged(distance);
         }
 
         /// <summary>Puts the middle of the thumb at <paramref name="at" />, in screen units.</summary>
@@ -251,20 +207,14 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         public void ThumbTo(float at)
         {
-            float travel = Travel;
-            if (travel <= 0f)
-                return;
-
             RectangleF track = Track;
-            float start = Horizontal ? track.X : track.Y;
-
-            Scrolled = Clamp((at - start - ThumbLength * 0.5f) * MaxOffset / travel);
+            Scrolled = _rail.ThumbedTo(at, Horizontal ? track.X : track.Y);
         }
 
         /// <summary>Moves by <paramref name="amount" /> and stays inside the content.</summary>
         public void ScrollBy(float amount)
         {
-            Scrolled = Clamp(_offset + amount);
+            Scrolled = _rail.Moved(amount);
         }
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
@@ -285,22 +235,25 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
         protected override void ArrangeContent(RectangleF bounds)
         {
-            _viewport = Horizontal ? bounds.Width : bounds.Height;
+            _rail.Viewport = Horizontal ? bounds.Width : bounds.Height;
             _across = BarWidth > 0f ? BarWidth : 0f;
 
             if (_content == null)
             {
-                _extent = 0f;
-                _offset = 0f;
+                _rail.Extent = 0f;
+                _rail.Offset = 0f;
                 return;
             }
 
-            _extent = Horizontal ? _content.DesiredSize.X : _content.DesiredSize.Y;
-            _offset = Clamp(_offset);
+            _rail.Extent = Horizontal ? _content.DesiredSize.X : _content.DesiredSize.Y;
+            _rail.Offset = _rail.Clamp(_rail.Offset);
+
+            float extent = _rail.Extent;
+            float offset = _rail.Offset;
 
             _content.Arrange(Horizontal
-                ? new RectangleF(bounds.X - _offset, bounds.Y, _extent, Room(bounds.Height))
-                : new RectangleF(bounds.X, bounds.Y - _offset, Room(bounds.Width), _extent));
+                ? new RectangleF(bounds.X - offset, bounds.Y, extent, Room(bounds.Height))
+                : new RectangleF(bounds.X, bounds.Y - offset, Room(bounds.Width), extent));
         }
 
         protected override void DrawContent(IGraphics g)
@@ -364,20 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <summary>Whatever is left of a side once the bar has had its share.</summary>
         private float Room(float whole)
         {
-            float room = whole - _across;
-            return room > 0f ? room : 0f;
-        }
-
-        private float Clamp(float value)
-        {
-            float max = MaxOffset;
-
-            if (value > max)
-                value = max;
-            if (value < 0f)
-                value = 0f;
-
-            return value;
+            return Rail.Room(whole, _across);
         }
     }
 }

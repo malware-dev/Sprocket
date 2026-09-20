@@ -181,7 +181,18 @@ readonly struct Drawn(DrawCommand command, RectangleF clip)
 
     public RectangleF Clip => clip;
 
+    /// <summary>
+    /// How far outside a clip a position may sit and still be inside it.
+    /// </summary>
+    /// <remarks>
+    /// A scissor is a rectangle of whole pixels and a drawn position is not, so a run laid out flush
+    /// against the edge of its own container lands up to half a pixel the wrong side of it once the
+    /// rectangle has been rounded. That is the two living in different units, not the screen cutting
+    /// anything off.
+    /// </remarks>
+    const float Rounding = 0.5f;
+
     public bool IsInsideItsClip =>
-        At.X >= clip.X && At.X <= clip.X + clip.Width
-        && At.Y >= clip.Y && At.Y <= clip.Y + clip.Height;
+        At.X >= clip.X - Rounding && At.X <= clip.X + clip.Width + Rounding
+        && At.Y >= clip.Y - Rounding && At.Y <= clip.Y + clip.Height + Rounding;
 }
