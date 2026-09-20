@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Layout;
 using VRageMath;
 
 namespace Sprocket.Sim.Simulation
@@ -25,6 +26,16 @@ namespace Sprocket.Sim.Simulation
         public const int Onward = 11;
 
         public int Kind;
+
+        /// <summary>
+        /// What was being held down for this step, which for a press says what it means.
+        /// </summary>
+        /// <remarks>
+        /// Not a kind of its own, because a press with something held is still a press: it lands in
+        /// the same place and reaches the same control, and only what that control makes of it
+        /// differs.
+        /// </remarks>
+        public Held Held;
         public Vector2 At;
         public Vector2 To;
         public int Count;

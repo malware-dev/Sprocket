@@ -240,6 +240,12 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
                 _view.ScrollBy(_pointer, -wheel / 120f * ScrollStep);
             }
 
+            // Read every frame rather than at the press, because the press path is shared with the
+            // simulator and the scripts, which have no keyboard to ask.
+            _view.Held = input.IsAnyShiftKeyPressed() ? Held.Through
+                : input.IsAnyCtrlKeyPressed() ? Held.Also
+                : Held.Alone;
+
             bool down = input.IsLeftMousePressed();
 
             if (input.IsNewLeftMousePressed())

@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
@@ -36,12 +37,41 @@ static class Screen
     static IEnumerable<PickOption> PathEntries(this SprocketEditor editor) =>
         editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages).SelectMany(p => p.Entries);
 
+    /// <summary>Presses a block's row, which takes that block and drops whatever was taken before.</summary>
     public static void PressBlock(this SprocketEditor editor, string name)
     {
-        var entry = editor.PathEntries().FirstOrDefault(e => e.Text == name)
-                    ?? throw new InvalidOperationException(
-                        $"No block '{name}' on '{editor.Screen.Title()}'.");
-        editor.Invoke(entry.Command);
+        editor.SetNumber(Row(editor, name), (int)Held.Alone);
+    }
+
+    /// <summary>
+    /// Ticks a block's box, which takes it as well as whatever was already taken.
+    /// </summary>
+    /// <remarks>
+    /// The other of the two acts a row offers. A test building a set of blocks up is doing what the
+    /// box is for, and pressing the rows would leave it with the last one only.
+    /// </remarks>
+    public static void TickBlock(this SprocketEditor editor, string name)
+    {
+        editor.SetNumber(Row(editor, name), (int)Held.Also);
+    }
+
+    /// <summary>
+    /// Reaches from the last block taken on its own to this one, taking everything between.
+    /// </summary>
+    /// <remarks>
+    /// In the order the blocks are listed rather than the order they were pressed, because a run is
+    /// what somebody drew down the screen.
+    /// </remarks>
+    public static void ThroughBlock(this SprocketEditor editor, string name)
+    {
+        editor.SetNumber(Row(editor, name), (int)Held.Through);
+    }
+
+    static int Row(SprocketEditor editor, string name)
+    {
+        return (editor.PathEntries().FirstOrDefault(e => e.Text == name)
+                ?? throw new InvalidOperationException(
+                    $"No block '{name}' on '{editor.Screen.Title()}'.")).Command;
     }
 
     /// <summary>

@@ -335,7 +335,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
                 changed |= Apply(_blocks.Entries[i], entity.Name, entity.Kind.DisplayName,
                     entity.Status, entity.IsActive, Contains(_selection, id),
-                    Editor.Register(Cmd.PickEntity, Slot(id), delegate { Toggle(id); }),
+                    Editor.RegisterNumber(Cmd.PickEntity, Slot(id),
+                        delegate(int how) { Pick(id, (Held)how); }),
                     entity.Kind.Icon);
             }
 
@@ -701,16 +702,98 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
         }
 
+        /// <summary>
+        /// Takes a block, the way the press said it was taken.
+        /// </summary>
+        /// <remarks>
+        /// Three acts and not three commands, because they are one act with a qualifier: a row was
+        /// chosen, and the qualifier says what happens to everything else. Which key said so is the
+        /// screen's business and never reaches here.
+        /// </remarks>
+        void Pick(long entityId, Held how)
+        {
+            if (how == Held.Through && _anchor != 0L)
+            {
+                Span(_anchor, entityId);
+                Editor.Invalidate();
+                return;
+            }
+
+            // The anchor is where a run would start from, so it follows the presses that take one
+            // block deliberately and not the ones that take a run. Shift with nothing to reach back
+            // to is the first press of a run rather than an error.
+            _anchor = entityId;
+
+            if (how == Held.Also)
+                Toggle(entityId);
+            else
+                Only(entityId);
+
+            // What is on offer changes the moment something is picked, so the whole
+            // path is rebuilt rather than left stale.
+            Editor.Invalidate();
+        }
+
+        /// <summary>
+        /// Where a run of blocks would start from: the last one taken on its own.
+        /// </summary>
+        /// <remarks>
+        /// Zero where nothing has been taken on this page yet, which no entity id ever is.
+        /// </remarks>
+        long _anchor;
+
         void Toggle(long entityId)
         {
             if (Contains(_selection, entityId))
                 _selection.Remove(entityId);
             else
                 _selection.Add(entityId);
+        }
 
-            // What is on offer changes the moment something is picked, so the whole
-            // path is rebuilt rather than left stale.
-            Editor.Invalidate();
+        /// <summary>This one and nothing else, which is what pressing a row plainly means.</summary>
+        void Only(long entityId)
+        {
+            _selection.Clear();
+            _selection.Add(entityId);
+        }
+
+        /// <summary>
+        /// Everything between two blocks, in the order they are listed.
+        /// </summary>
+        /// <remarks>
+        /// The listed order and not the order they were picked, because a run is what somebody drew
+        /// down the screen. A block that has been filtered out of the list since the anchor was set
+        /// is not between anything, so a run that cannot be found leaves the selection alone.
+        /// </remarks>
+        void Span(long from, long to)
+        {
+            int first = Listed(from);
+            int last = Listed(to);
+
+            if (first < 0 || last < 0)
+                return;
+
+            if (first > last)
+            {
+                int swap = first;
+                first = last;
+                last = swap;
+            }
+
+            _selection.Clear();
+            for (int i = first; i <= last; i++)
+                _selection.Add(_filtered[i].Id);
+        }
+
+        int Listed(long entityId)
+        {
+            for (var i = 0; i < _filtered.Count; i++)
+            {
+                if (_filtered[i].Id == entityId)
+                    return i;
+            }
+
+            return -1;
         }
 
         void Choose(string id)

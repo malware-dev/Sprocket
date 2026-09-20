@@ -276,6 +276,15 @@ namespace Sprocket.Sim.Simulation
             return _view.Under(point);
         }
 
+        /// <summary>
+        /// What is being held down, which the game's own screen reads off the keyboard every frame.
+        /// </summary>
+        public Held Held
+        {
+            get { return _view.Held; }
+            set { _view.Held = value; }
+        }
+
         /// <summary>Presses whatever is at <paramref name="point" />, in UI units.</summary>
         public bool Press(Vector2 point, int clicks)
         {

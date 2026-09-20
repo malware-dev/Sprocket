@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Layout;
 using VRageMath;
 
 namespace Sprocket.Sim.Simulation
@@ -101,6 +102,17 @@ namespace Sprocket.Sim.Simulation
                     continue;
                 }
 
+                // A press with something held down. Named for what it means rather than for the key,
+                // the same way the rest of the screen names it: a script is not a keyboard.
+                if ((word == "also" || word == "through") && i + 2 < args.Length)
+                {
+                    Step held = script.Add(Step.Press);
+                    held.At = Point(args, i + 1);
+                    held.Held = word == "also" ? Held.Also : Held.Through;
+                    i += 2;
+                    continue;
+                }
+
                 if (i + 1 >= args.Length)
                     break;
 
@@ -173,7 +185,13 @@ namespace Sprocket.Sim.Simulation
                 // resting on the thing. A script that pressed without moving would leave the highlight on
                 // whatever it was last over, which is a state no player can produce.
                 scene.MoveTo(step.At);
+
+                // Held for the press and let go afterwards, which is what a key does. Left set, one
+                // shifted press would make every press after it a run.
+                scene.Held = step.Held;
                 Clicked(scene, step.At, 1);
+                scene.Held = Held.Alone;
+
                 drawn();
                 return;
             }

@@ -14,6 +14,16 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <summary>Sends its command, which is what most controls do.</summary>
         Send,
 
+        /// <summary>
+        /// Takes one of a list, and says which way it was taken.
+        /// </summary>
+        /// <remarks>
+        /// Apart from <see cref="Send" /> because the answer is not the same every time it is
+        /// pressed: what a press on a row means depends on what was held down, and that is known
+        /// when the press happens rather than when the control was dressed.
+        /// </remarks>
+        Pick,
+
         /// <summary>Puts a switch into the state it carries, rather than inverting whatever is there.</summary>
         Switch,
 

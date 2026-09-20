@@ -381,6 +381,15 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 row.Line.Highlight = entry.IsHeading ? Palette.None : Palette.PanelHot;
                 row.Mark.Collapsed = entry.IsHeading;
 
+                // The box collects one at a time and says so whatever is held down, which is what it
+                // is for. Only where several are being collected: where one is being settled on, a
+                // dot is a picture of the state and there is nothing to collect.
+                row.Mark.Press = entry.IsHeading || !many
+                    ? Deed.Nothing
+                    : Deed.Picks(entry.Command, Held.Also);
+
+                row.Mark.Highlight = entry.IsHeading || !many ? Palette.None : Palette.PanelHot;
+
                 // A tick for things you collect, a dot for things you settle on.
                 row.Mark.Many = many;
                 row.Mark.Chosen = entry.IsChosen;
@@ -443,8 +452,16 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         }
 
         /// <summary>Taking a choice, and moving on with it where only one is being chosen.</summary>
+        /// <remarks>
+        /// Where several are being collected the row asks what was held down: plainly it is the whole
+        /// answer, and with something held it joins what is there. Where one is being settled on there
+        /// is nothing to qualify, so it is the plain send it always was.
+        /// </remarks>
         static Deed Moving(PickOption entry, bool many)
         {
+            if (many)
+                return Deed.Picks(entry.Command);
+
             Deed deed = Deed.Sends(entry.Command);
             deed.Confirms = !many;
             return deed;

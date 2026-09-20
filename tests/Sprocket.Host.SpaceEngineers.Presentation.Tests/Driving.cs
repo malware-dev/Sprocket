@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
@@ -56,10 +57,27 @@ static class Driving
     static IEnumerable<PickStage> Stages(this SprocketEditor editor) =>
         editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages);
 
+    /// <summary>Presses a block's row, which takes that block and drops whatever was taken before.</summary>
     public static void PressBlock(this SprocketEditor editor, string name)
     {
-        var entry = editor.Stages().SelectMany(p => p.Entries).First(e => e.Text == name);
-        editor.Invoke(entry.Command);
+        editor.SetNumber(Row(editor, name), (int)Held.Alone);
+    }
+
+    /// <summary>
+    /// Ticks a block's box, which takes it as well as whatever was already taken.
+    /// </summary>
+    /// <remarks>
+    /// The other of the two acts a row offers. A test building a set of blocks up is doing what the
+    /// box is for, and pressing the rows would leave it with the last one only.
+    /// </remarks>
+    public static void TickBlock(this SprocketEditor editor, string name)
+    {
+        editor.SetNumber(Row(editor, name), (int)Held.Also);
+    }
+
+    static int Row(SprocketEditor editor, string name)
+    {
+        return editor.Stages().SelectMany(p => p.Entries).First(e => e.Text == name).Command;
     }
 
     /// <summary>

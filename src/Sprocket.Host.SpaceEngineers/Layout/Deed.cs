@@ -70,6 +70,45 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         }
 
         /// <summary>A switch that puts <paramref name="command" /> into <paramref name="on" />.</summary>
+        /// <summary>
+        /// A control that takes one of a list, the way whatever is held down says.
+        /// </summary>
+        /// <remarks>
+        /// The way is not decided here. A deed is made afresh every time a control is dressed, and
+        /// what is held down is known only when the press lands - so this says "ask at the time",
+        /// and the screen that reads the keyboard answers it.
+        /// </remarks>
+        public static Deed Picks(int command)
+        {
+            var deed = new Deed();
+            deed.Means = Means.Pick;
+            deed.Command = command;
+            deed.Asked = true;
+            return deed;
+        }
+
+        /// <summary>
+        /// The same, one way whatever is held down.
+        /// </summary>
+        /// <remarks>
+        /// For the tick at the head of a row, which collects one at a time and means that whether or
+        /// not anything is held: the box is the control for building a set up by hand.
+        /// </remarks>
+        public static Deed Picks(int command, Held held)
+        {
+            var deed = new Deed();
+            deed.Means = Means.Pick;
+            deed.Command = command;
+            deed.Held = held;
+            return deed;
+        }
+
+        /// <summary>Which way this takes what it takes, where it does not ask.</summary>
+        public Held Held { get; private set; }
+
+        /// <summary>Whether the way is whatever is held down rather than the one above.</summary>
+        public bool Asked { get; private set; }
+
         public static Deed Switches(int command, bool on)
         {
             if (command == 0)

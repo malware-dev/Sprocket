@@ -125,7 +125,6 @@ public class EditorTests
         ship.Tick();
 
         editor.PressWhen(0);
-        editor.PressBlock("Inner Door");
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
@@ -965,7 +964,7 @@ public class EditorTests
         ship.Editor.NewSystem("Airlock");
         ship.Editor.PressStart("When…");
         ship.Editor.PressBlock("Airlock Button");
-        ship.Editor.PressBlock("Inner Door");
+        ship.Editor.TickBlock("Inner Door");
 
         var what = ship.Editor.Component<PickComponent>().Stages[1];
         Assert.Empty(what.Entries);
@@ -1038,7 +1037,7 @@ public class EditorTests
         editor.NewSystem("Airlock");
         editor.PressStart("When…");
         editor.PressBlock("Inner Door");
-        editor.PressBlock("Outer Door");
+        editor.TickBlock("Outer Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
         editor.PressChoice("Run a new sequence");
@@ -1049,7 +1048,7 @@ public class EditorTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Inner Door");
-        editor.PressBlock("Outer Door");
+        editor.TickBlock("Outer Door");
         editor.PressChoice("close");
         editor.PressPrimary();
 
@@ -1230,7 +1229,7 @@ public class EditorTests
         editor.NewSystem("Airlock");
         editor.PressStart("When…");
         editor.PressBlock("Inner Door");
-        editor.PressBlock("Outer Door");
+        editor.TickBlock("Outer Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
         editor.PressChoice("Run a new sequence");
@@ -1277,7 +1276,7 @@ public class EditorTests
         Assert.False(editor.HasChoice("all of them"));
 
         editor.PressBlock("Inner Door");
-        editor.PressBlock("Outer Door");
+        editor.TickBlock("Outer Door");
 
         Assert.False(editor.HasChoice("all of them"));
     }
@@ -1548,5 +1547,74 @@ public class EditorTests
 
         ship.Editor.SetText(rename, "Airlock");
         Assert.Equal("Hangar", ship.Automation.Systems[1].Name);
+    }
+
+    /// <summary>
+    /// Ticking a block and choosing a block are two acts.
+    /// </summary>
+    /// <remarks>
+    /// The box collects one at a time, which is right for building a set up by hand and wrong for
+    /// the far commoner case of wanting one block: pressing the row is that case, and it drops what
+    /// was taken before rather than adding to it.
+    /// </remarks>
+    [Fact]
+    public void PressingARowTakesThatBlockAndDropsTheRest()
+    {
+        var ship = Build();
+        ship.Editor.NewSystem("Airlock");
+        ship.Editor.PressStart("When…");
+
+        ship.Editor.PressBlock("Inner Door");
+        ship.Editor.PressBlock("Outer Door");
+
+        Assert.Equal(new[] { "Outer Door" }, Taken(ship.Editor));
+
+        // And the box adds to what is there, whatever the row does.
+        ship.Editor.TickBlock("Inner Door");
+        Assert.Equal(new[] { "Inner Door", "Outer Door" }, Taken(ship.Editor));
+
+
+        // Twice is off again, which is the whole of what a box does.
+        ship.Editor.TickBlock("Inner Door");
+        Assert.Equal(new[] { "Outer Door" }, Taken(ship.Editor));
+    }
+
+    /// <summary>
+    /// And reaching back takes everything between, in the order the blocks are listed.
+    /// </summary>
+    /// <remarks>
+    /// The listed order and not the order they were pressed: a run is what somebody drew down the
+    /// screen, so it does not matter which end they started from.
+    /// </remarks>
+    [Fact]
+    public void ReachingBackTakesEverythingBetween()
+    {
+        var ship = Build();
+        ship.Editor.NewSystem("Airlock");
+        ship.Editor.PressStart("When…");
+
+        string[] listed = Listed(ship.Editor).Split(new[] { ", " }, StringSplitOptions.None);
+
+        ship.Editor.PressBlock(listed[0]);
+        ship.Editor.ThroughBlock(listed[2]);
+
+        Assert.Equal(new[] { listed[0], listed[1], listed[2] }, Taken(ship.Editor));
+
+        // Backwards is the same run. Which end it was drawn from is not part of what it means.
+        ship.Editor.PressBlock(listed[2]);
+        ship.Editor.ThroughBlock(listed[0]);
+
+        Assert.Equal(new[] { listed[0], listed[1], listed[2] }, Taken(ship.Editor));
+    }
+
+    /// <summary>What is taken, in the order the picker lists it rather than in any other.</summary>
+    /// <remarks>
+    /// Unsorted on purpose: a run reaching back claims to take everything between in listed order,
+    /// and sorting here would let that claim pass without being tested.
+    /// </remarks>
+    static string[] Taken(SprocketEditor editor)
+    {
+        return editor.Component<PickComponent>().Stages[0].Entries
+            .Where(e => e.IsChosen).Select(e => e.Text).ToArray();
     }
 }

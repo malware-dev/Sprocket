@@ -39,6 +39,16 @@ picker-hover        60 130 type Airlock enter 60 161 move 300 375
 picker-scrolled     60 130 type Airlock enter 60 161 scroll 250 600 300
 picker-searched     60 130 type Airlock enter 60 161 150 224 type door
 picker-picked       60 130 type Airlock enter 60 161 200 375
+
+# Ticking a block and choosing a block are two acts.
+#
+# The box collects: it takes one more and leaves the rest alone, and it lights on its own rather
+# than lighting the row it sits in. The rest of the row chooses: plainly it is the whole answer and
+# whatever was taken before is dropped, and with something held down it joins or reaches back.
+picker-replaced     60 130 type Airlock enter 60 161 200 375 200 451
+picker-also         60 130 type Airlock enter 60 161 200 375 55 428
+picker-through      60 130 type Airlock enter 60 161 200 375 through 200 527
+picker-box-hover    60 130 type Airlock enter 60 161 move 55 352
 picker-chosen       60 130 type Airlock enter 60 161 200 375 560 272
 
 # --- the last question of the wizard: what the trigger should do --------------------------------

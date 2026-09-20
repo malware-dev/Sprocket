@@ -417,6 +417,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             return _checkedTaken;
         }
 
+        /// <summary>
+        /// What is being held down, as what it means rather than as which key it is.
+        /// </summary>
+        /// <remarks>
+        /// Set by whoever reads the input and read when a press lands, rather than travelling with
+        /// the press. A press arrives here from the game's screen, from the simulator and from every
+        /// script in the reference suite, and threading a parameter through all of them for the one
+        /// control that cares would be churn that buys nothing.
+        /// </remarks>
+        public Held Held { get; set; }
+
         /// <summary>The box a question is being answered in. Only meaningful while <see cref="IsAsking" />.</summary>
         public TextBox AskBox
         {
@@ -1142,6 +1153,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (deed.Means == Means.Switch)
             {
                 SetToggle(deed.Command, deed.ToggleTo);
+                return true;
+            }
+
+            // Which way it was taken, answered as a number because that is the channel core already
+            // has for "a control with a value". The deed says whether to ask what is held down or to
+            // mean one thing regardless, which is what the tick at the head of a row does.
+            if (deed.Means == Means.Pick)
+            {
+                SetNumber(deed.Command, (int)(deed.Asked ? Held : deed.Held));
                 return true;
             }
 

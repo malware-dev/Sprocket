@@ -57,4 +57,7 @@ what it says. Approval of the text is approval to file that text.
 ## Closing
 
 Finishing a ticket and committing it closes it - that is part of finishing, not a thing to ask about.
-Close it with a comment saying what landed and where, so the ticket reads as its own record later.
+
+**Close it with no comment.** The ticket said what was wanted and it was built; a comment restating
+that is the commit message in a second place. Comment only where the outcome differs from what the
+ticket asked for, and then say only what differs.
