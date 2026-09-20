@@ -347,6 +347,19 @@ Which is why the values are asked for as values and not as a choice: what a pers
 with the language's own spellings, and the kind they wrote is what the program keeps. The block is
 asked to turn each one into whatever it declared, against the default it declared it with.
 
+**A number's bounds are readable and its scale is not.** A value that is a number says its minimum
+and its maximum, and those are right for each block: a spotlight reaches further than a corner
+light and says so itself. What it will not say is how a position between them maps to a value.
+`IMyTerminalControlSlider` offers `SetLimits`, `SetLogLimits` and `SetDualLogLimits`, all of them
+setters, with nothing to ask which is in force - so three different mappings exist and none can be
+told apart from outside.
+
+The consequence is that a number is edited as a box holding its bounds, not as a slider. A linear
+slider drawn against a value whose terminal slider is logarithmic puts the grip somewhere else for
+the same number, and looks identical while doing it. The terminal's own reason for a slider does
+not carry over either: there the light changes as it is dragged, and here the value is written into
+a step that runs later, so dragging shows nothing.
+
 `ITerminalAction.IsEnabled(block)` answers whether an action is available on this
 particular block right now. **Needed:** somewhere to put that, because it is a free
 contribution to story M.

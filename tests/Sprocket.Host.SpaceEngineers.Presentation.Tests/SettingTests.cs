@@ -51,9 +51,11 @@ public class SettingTests
         Assert.True(screen.Editor.Screen.PrimaryAsks, "finishing does not ask for the value");
         Assert.Equal("This needs one value.", screen.Editor.Screen.PrimaryQuestion);
 
+        // The numbers this block's own definition declares, and nobody else's: a corner light's
+        // falloff stops at two where another light's stops somewhere else.
         Field one = Assert.Single(screen.Editor.Screen.PrimaryFields);
-        Assert.Equal("Falloff 0-3", one.Label);
-        Assert.Equal("Falloff has to be between 0 and 3.", one.Refuses("Falloff", "5"));
+        Assert.Equal("Falloff 0-2", one.Label);
+        Assert.Equal("Falloff has to be between 0 and 2.", one.Refuses("Falloff", "5"));
     }
 
     /// <summary>And the step holds the value the way an action's values are held.</summary>

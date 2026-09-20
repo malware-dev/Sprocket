@@ -170,8 +170,11 @@ sealed class Rig
             // game hands out an action for three of these and none at all for the rest. One of each
             // kind a block can report, so every control a form can raise is reachable from here.
             .Carrying("OnOff", "On", ValueKind.Flag)
-            .Carrying("Radius", "Radius", ValueKind.Real, "1", "12")
-            .Carrying("Falloff", "Falloff", ValueKind.Real, "0", "3")
+            // The bounds this block really declares, from LargeBlockLight_1corner's own definition,
+            // rather than numbers that look plausible. A rig that invents them is telling Sprocket
+            // something the game never said, which is the whole thing a rig must not do.
+            .Carrying("Radius", "Radius", ValueKind.Real, "0.1", "20")
+            .Carrying("Falloff", "Falloff", ValueKind.Real, "0", "2")
             .Carrying("Color", "Color", ValueKind.Color);
     }
 
