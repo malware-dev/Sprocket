@@ -91,8 +91,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             _editor = new SprocketEditor(_world, _program, _runner);
 
             // The player's own name is only where a namespace starts; choosing another is theirs to do.
+            // What the game draws in front of it is not part of that name - see Player.Plain.
             if (MyAPIGateway.Multiplayer != null)
-                _editor.Author = MyAPIGateway.Multiplayer.MyName;
+                _editor.Author = Player.Plain(MyAPIGateway.Multiplayer.MyName);
 
             _editor.DeveloperMode = settings != null && settings.DeveloperMode;
 

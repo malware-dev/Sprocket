@@ -61,11 +61,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Set by the host, which knows who is at the screen - in the game, the player's name until they
         /// choose one of their own. Empty makes systems with no namespace, which is only ever a host that has
         /// not said.
+        /// <para>
+        /// <b>Held to the same rule as any other name, because that is what it becomes.</b> It is written
+        /// into a save as a namespace and read back out of one, so the length and the line it has to fit
+        /// on are the same length and the same line. What a host hands over is its own business.
+        /// </para>
         /// </remarks>
         public string Author
         {
             get { return _author; }
-            set { _author = value ?? ""; }
+            set { _author = Naming.Clean(value); }
         }
 
         /// <summary>
