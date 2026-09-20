@@ -2,6 +2,7 @@ using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -108,7 +109,12 @@ public class RenameTests
         var back = screen.Marks(Symbols.Left)[0];
         var title = screen.Drawings.First(d => d.IsText && d.Scale > 0.8f);
 
-        Assert.Equal(screen.MiddleOf(back), screen.MiddleOf(title), 1);
+        // Centred, and then lifted. The lift is a correction for the game's own letters sitting high
+        // in their line - see Lettering.SymbolLift - so it is added back to ask the question this test
+        // is actually about, which is what the layout centred the arrow against.
+        float line = 2f * (screen.MiddleOf(back) - back.At.Y);
+
+        Assert.Equal(screen.MiddleOf(title), screen.MiddleOf(back) + line * Lettering.SymbolLift, 1);
     }
 
     /// <summary>

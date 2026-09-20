@@ -47,15 +47,15 @@ on screen     When something happens  |  Start by picking one or more blocks
 040  Text       at {X:287.8 Y:220.082} scale 0.57  #DCF5FDFF  "door"
 041  Sprite     Sprocket_Fill         {X:321 Y:220 W:2 H:21}  #DCF5FDFF
 042  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Anything"
-043  Text       at {X:369.97 Y:259.772} scale 0.57  #A2C3CDFF  "v"
+043  Text       at {X:369.97 Y:257.1779} scale 0.57  #A2C3CDFF  "v"
 044  Text       at {X:275 Y:291.662} scale 0.5  #85A1A9FF  "3 of 12"
 045  ClearClip  
 046  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
 047  SetClip    {X:276 Y:55 W:290 H:33}
 048  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
 049  ClearClip  
-050  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
-051  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
+050  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+051  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
 052  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Start by picking one or more blocks"
 053  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
 054  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF

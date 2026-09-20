@@ -232,6 +232,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
 
             plate.Font = MyFontEnum.White;
             plate.Scale = scale;
+            plate.PenLift = Lettering.SymbolLift;
             // None at all, because the pencil brings its own. A symbol advances a full square cell and
             // this one fills about half of it, so at heading size there are already ten units of empty
             // cell between the name and the first ink of the pencil - and ten more after it. Anything
@@ -323,8 +324,30 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             return stack;
         }
 
-        /// <summary>One symbol, at the size a symbol stands beside a line of text.</summary>
+        /// <summary>
+        /// One symbol, at the size a symbol stands beside a line of text, and lined up with it.
+        /// </summary>
+        /// <remarks>
+        /// Lifted by <see cref="Lettering.SymbolLift" />, because the game's letters sit high in their
+        /// own line and a symbol centred in its line would read as low beside them. Anything that is
+        /// not standing on a line of text wants <see cref="Centred" /> instead.
+        /// </remarks>
         public static Glyph Symbol(string symbol, Color tint)
+        {
+            var glyph = new Glyph(symbol, Lettering.Symbol, tint);
+            glyph.Lift = Lettering.SymbolLift;
+            return glyph;
+        }
+
+        /// <summary>
+        /// One symbol in the middle of whatever room it is given, with no text to line up with.
+        /// </summary>
+        /// <remarks>
+        /// A tick inside a checkbox is centred in the checkbox and nothing about the game's letters
+        /// should reach it. Correcting one of these is the bug the other case exists to fix, arriving
+        /// from the opposite direction.
+        /// </remarks>
+        public static Glyph Centred(string symbol, Color tint)
         {
             return new Glyph(symbol, Lettering.Symbol, tint);
         }

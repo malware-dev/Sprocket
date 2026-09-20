@@ -41,37 +41,31 @@ WEIGHT = 0.125
 # Drawn this many times oversized and averaged down.
 OVER = 8
 
-# The metrics, in the same proportions the game's own face uses.
+# The line is the cell, and that is the whole of the vertical design.
 #
-# The game's font is a 45 cell with a line height of 37, a baseline 30 down the line and 35 down the
-# cell, and a left side bearing of -7. Nothing here can see what the renderer then does with those
-# numbers - that drawing lives in the render assembly - so rather than guess the rule, this font is
-# built to the same shape scaled to its own cell. Whatever the rule turns out to be it lands the same
-# way on both, and a symbol sits on a line of text where a capital letter would.
+# A symbol has no baseline, no ascender and no descender. It is a mark, and what it owes anybody who
+# draws it is to sit in the middle of the line it declares. The only way to promise that without
+# knowing how a renderer places a cell against a line is to leave no room between them: a cell the
+# height of its own line has no slack for the ink to be lost in, so ink centred in the cell is ink
+# centred in the line, by construction rather than by arithmetic.
 #
-# Getting it wrong is not subtle, but it is easy to misread: the first cut declared a baseline of 56
-# in a 64 cell, and every symbol drew twelve pixels below the words beside it.
-LINE = round(CELL * 37 / 45)
+# <b>This font is not cut to match Space Engineers' text.</b> The game's face sits slightly high in
+# its own line, and correcting for that here would bake one consumer's quirk into a font meant to be
+# used by anyone. Where a symbol has to line up with the game's letters, the code that puts it there
+# corrects it - see Widgets.
+#
+# The record of getting this wrong is worth keeping: the first cut declared a baseline of 56 in a 64
+# cell and drew twelve pixels low; the second copied the game's cell-to-line proportions and left the
+# ink adrift in the slack, which was then chased with a shift that was doubled by eye when the
+# arithmetic answer still looked wrong. All of that was the slack.
+LINE = CELL
 
-# The baseline where our own artwork's baseline falls, not where the game's does.
+# Where a renderer is told the baseline falls.
 #
-# A renderer puts a glyph's cell at (base - baseline in cell) from the top of the line. Declaring the
-# game's 30/45 left ours seven units adrift of its own ink, so the symbol hung below the box it had
-# just been centred in. Declaring the same proportion the cell is actually built to makes that
-# difference zero and the cell start exactly at the top of the line.
+# It has no meaning for a mark, but the format has the field and a renderer places the cell by it.
+# The game's proportion of its own cell is the one answer that is not invented, and with the cell and
+# the line the same height it puts the cell exactly on the line.
 BASE = round(CELL * 35 / 45)
-
-# And the ink is centred on the LINE rather than on the cell.
-#
-# The cell is square and the line is shorter, because the game's face spends the difference on
-# descenders and ours copies its proportions. Nothing here has a descender, so ink centred in the cell
-# sits low in the line by half that difference - which is exactly how far the tick sat off the middle
-# of its checkbox.
-#
-# The factor is empirical. Half the cell/line difference was the arithmetic answer and still drew low
-# in the game, so it is a whole difference now. Nothing outside the game can referee this: the
-# simulator's vertical rule is its own reconstruction and it drew both acceptably.
-INK = (CELL - LINE) / CELL
 
 # And a bearing of zero, which is the one metric NOT copied from the game's face.
 #
@@ -82,28 +76,96 @@ INK = (CELL - LINE) / CELL
 LSB = 0
 
 
+# How far the glyph being drawn is scaled, set by fitted() while it works out the size.
+#
+# It is applied to the points a shape is written from and never to the width a stroke is drawn
+# at, which is the whole point: every mark in the set is one weight, and scaling finished artwork
+# would thin the ones that shrink and fatten the ones that grow.
+_fit = 1.0
+
+
 def poly(*points):
+    """A shape, in unit coordinates, at whatever size the set has settled on."""
+    return [(0.5 + (x - 0.5) * _fit, 0.5 + (y - 0.5) * _fit) for (x, y) in points]
+
+
+def raw(*points):
+    """The same, already placed - for the primitives that work out their own offsets."""
     return list(points)
+
+
+def placed(p):
+    """One point, at whatever size the set has settled on."""
+    return 0.5 + (p[0] - 0.5) * _fit, 0.5 + (p[1] - 0.5) * _fit
 
 
 def stroke(a, b, w=WEIGHT):
     """A line from a to b as a quad, with squared ends, in unit coordinates."""
-    (x1, y1), (x2, y2) = a, b
+    (x1, y1), (x2, y2) = placed(a), placed(b)
     dx, dy = x2 - x1, y2 - y1
     length = math.hypot(dx, dy)
     if length == 0:
         return []
     nx, ny = -dy / length * w / 2, dx / length * w / 2
-    return poly((x1 + nx, y1 + ny), (x2 + nx, y2 + ny), (x2 - nx, y2 - ny), (x1 - nx, y1 - ny))
+    return raw((x1 + nx, y1 + ny), (x2 + nx, y2 + ny), (x2 - nx, y2 - ny), (x1 - nx, y1 - ny))
+
+
+def path(points, w=WEIGHT):
+    """
+    A polyline of the given width, mitred at every turn, as one polygon.
+
+    Two strokes meeting at a corner do not make a corner: each ends in an edge square to its own
+    direction, so their union is notched on the outside and doubled on the inside. At the size
+    these are drawn that reads as a jog of a pixel or two at every turn, which is most of what
+    makes a mark look coarse beside a shape that has no turns in it.
+
+    So the whole path is offset at once and each corner carried out to where its two edges
+    actually cross. The ends stay square, which is the house style.
+    """
+
+    def unit(p, q):
+        dx, dy = q[0] - p[0], q[1] - p[1]
+        length = math.hypot(dx, dy)
+        return (dx / length, dy / length) if length else (0.0, 0.0)
+
+    points = [placed(p) for p in points]
+    count = len(points)
+    ways = [unit(points[i], points[i + 1]) for i in range(count - 1)]
+    edges = [(-d[1], d[0]) for d in ways]
+
+    def along(sign):
+        half = w / 2.0 * sign
+        out = [(points[0][0] + edges[0][0] * half, points[0][1] + edges[0][1] * half)]
+
+        for i in range(1, count - 1):
+            before, after = edges[i - 1], edges[i]
+            mx, my = before[0] + after[0], before[1] + after[1]
+            length = math.hypot(mx, my)
+
+            if length == 0:
+                out.append((points[i][0] + before[0] * half, points[i][1] + before[1] * half))
+                continue
+
+            mx, my = mx / length, my / length
+
+            # How far along the bisector the two offset edges cross. It runs away as a turn
+            # approaches a fold, so it is held to something a glyph can contain.
+            reach = min((w / 2.0) / max(mx * before[0] + my * before[1], 0.2), w * 3) * sign
+            out.append((points[i][0] + mx * reach, points[i][1] + my * reach))
+
+        out.append((points[-1][0] + edges[-1][0] * half, points[-1][1] + edges[-1][1] * half))
+        return out
+
+    return raw(*(along(1) + list(reversed(along(-1)))))
 
 
 def head(tip, back, width):
     """An arrowhead: a triangle pointing at tip, its base back along the given direction."""
-    (tx, ty), (bx, by) = tip, back
+    (tx, ty), (bx, by) = placed(tip), placed(back)
     dx, dy = tx - bx, ty - by
     length = math.hypot(dx, dy)
     nx, ny = -dy / length * width / 2, dx / length * width / 2
-    return poly((tx, ty), (bx + nx, by + ny), (bx - nx, by - ny))
+    return raw((tx, ty), (bx + nx, by + ny), (bx - nx, by - ny))
 
 
 def uturn(mirrored):
@@ -117,9 +179,7 @@ def uturn(mirrored):
     left, right = 0.22, 0.80
     top, bottom = 0.34, 0.70
     shapes = [
-        stroke((left + 0.14, bottom), (right, bottom)),
-        stroke((right, bottom), (right, top)),
-        stroke((right, top), (left + 0.16, top)),
+        path([(left + 0.14, bottom), (right, bottom), (right, top), (left + 0.16, top)]),
         head((left, top), (left + 0.26, top), 0.30),
     ]
     if mirrored:
@@ -139,10 +199,8 @@ def cycle():
     top, bottom = 0.30, 0.72
 
     return [
-        stroke((left, top), (right - 0.30, top)),
-        stroke((left, top), (left, bottom)),
-        stroke((left, bottom), (right, bottom)),
-        stroke((right, bottom), (right, top + 0.16)),
+        path([(right - 0.30, top), (left, top), (left, bottom), (right, bottom),
+              (right, top + 0.16)]),
         head((right - 0.02, top), (right - 0.32, top), 0.30),
     ]
 
@@ -171,10 +229,7 @@ def check():
     other interface in their life. This audience has used other interfaces and not this one, so the
     tick wins over the convention. Flat terminals like everything else here; no taper.
     """
-    return [
-        stroke((0.20, 0.50), (0.41, 0.71)),
-        stroke((0.38, 0.71), (0.80, 0.29)),
-    ]
+    return [path([(0.20, 0.50), (0.395, 0.705), (0.80, 0.29)])]
 
 
 def bang():
@@ -197,17 +252,30 @@ def bang():
 def bin_():
     """
     Delete: a bin. It says destroy and nothing else, which is exactly what the game's close
-    symbol does not - that one says dismiss, and borrowing it was the mistake this replaces.
+    symbol does not - that one says dismiss, and borrowing it was the mistake this replaced.
+
+    Solid, with the slots taken back out. The first cut drew the whole thing in strokes and read
+    as a tub with a plank over it: at twenty pixels an outline that thin loses its corners, and
+    what survives is the silhouette. So the silhouette is what is drawn, and the two slots are
+    the only detail kept, because a body with no slots is a plant pot.
+
+    It is also cut to the height of the tick and the cross rather than to the room available. The
+    stroked one stood a third taller than the marks it sits beside in a row, which is not a thing
+    a reader forgives in a set of symbols.
     """
-    top, bottom = 0.36, 0.80
-    half, foot = 0.27, 0.21
-    return [
-        stroke((0.5 - 0.14, top - 0.12), (0.5 + 0.14, top - 0.12)),
-        stroke((0.5 - half - 0.03, top), (0.5 + half + 0.03, top)),
-        stroke((0.5 - half + 0.02, top), (0.5 - foot, bottom)),
-        stroke((0.5 + half - 0.02, top), (0.5 + foot, bottom)),
-        stroke((0.5 - foot, bottom), (0.5 + foot, bottom)),
+    lift, foot = 0.34, 0.74
+
+    handle = poly((0.435, 0.26), (0.565, 0.26), (0.565, 0.315), (0.435, 0.315))
+    lid = poly((0.285, 0.325), (0.715, 0.325), (0.715, 0.385), (0.285, 0.385))
+    body = poly((0.335, lift), (0.665, lift), (0.625, foot), (0.375, foot))
+
+    # Taken back out of the body, and tapering with it so they read as cut into the same object.
+    slots = [
+        poly((0.435, 0.415), (0.475, 0.415), (0.468, 0.675), (0.428, 0.675)),
+        poly((0.525, 0.415), (0.565, 0.415), (0.572, 0.675), (0.532, 0.675)),
     ]
+
+    return [handle, lid, body], slots
 
 
 def sheets():
@@ -216,33 +284,46 @@ def sheets():
 
     Everything here is one flat colour, so nothing can be drawn as being behind anything - an
     occluded edge has to simply not be drawn. The sheet behind is therefore its left and top edges
-    in full and the two stubs of its other sides that stand clear of the sheet in front, each
-    stopping exactly on that sheet's outline so the two read as joined.
+    in full and the two stubs of its other sides that stand clear of the sheet in front. The stubs
+    stop a little short of that sheet rather than running into it: two white shapes that touch are
+    one white shape, and the dark between them is the whole of what says there are two.
 
-    Two complete outlines overlapping was the first attempt at this and it loses the gap between
-    them first, which at twenty pixels is the whole of what makes it read as two.
+    <b>Drawn at six units where the set is drawn at eight, and that is the correction, not a
+    lapse.</b> Every other mark here is an open stroke with dark on both sides of it. This one is a
+    frame inside a frame, and the set's stroke leaves an opening no wider than the border round it
+    - which reads as a filled square with a window punched in it, and reads at the small sizes as
+    a blob. A nested shape needs a lighter line than an open one to carry the same weight beside
+    it, which is the ordinary optical correction and is why the width is a number here rather than
+    the set's.
     """
-    near, far = 0.34, 0.82
-    back, over = 0.18, 0.66
+    line = 0.094
+    gap = 0.07
+    near, far = 0.37, 0.85
+    back, over = 0.15, 0.63
+
+    # The opening is set out from the sheet after it has been placed, not written as coordinates
+    # beside it. Written that way the inset is scaled along with the points, so the front sheet's
+    # border came out thinner than the back sheet's outline - one icon drawn at two weights.
+    front = poly((near, near), (far, near), (far, far), (near, far))
+    (left, top), (right, bottom) = front[0], front[2]
+
     return [
-        poly((near, near), (far, near), (far, far), (near, far)),
-        stroke((back, back), (back, over)),
-        stroke((back, back), (over, back)),
-        stroke((over, back), (over, near)),
-        stroke((back, over), (near, over)),
+        front,
+
+        # One path rather than four strokes. Its three turns are corners, and two quads meeting at
+        # one only make a notch - which is what this glyph had at every turn of it.
+        path([(over, near - gap), (over, back), (back, back), (back, over), (near - gap, over)],
+             line),
     ], [
-        poly((near + WEIGHT, near + WEIGHT), (far - WEIGHT, near + WEIGHT),
-             (far - WEIGHT, far - WEIGHT), (near + WEIGHT, far - WEIGHT)),
+        raw((left + line, top + line), (right - line, top + line),
+            (right - line, bottom - line), (left + line, bottom - line)),
     ]
 
 
 def chevron(turns):
     """An open arrowhead pointing left, turned a quarter at a time clockwise."""
     tip, back, half = 0.30, 0.64, 0.22
-    shapes = [
-        stroke((back, 0.5 - half), (tip, 0.5)),
-        stroke((tip, 0.5), (back, 0.5 + half)),
-    ]
+    shapes = [path([(back, 0.5 - half), (tip, 0.5), (back, 0.5 + half)])]
     for _ in range(turns % 4):
         shapes = [[(1.0 - y, x) for (x, y) in s] for s in shapes]
     return shapes
@@ -250,8 +331,8 @@ def chevron(turns):
 
 def circle(r):
     steps = 96
-    return [(0.5 + r * math.cos(t * 2 * math.pi / steps),
-             0.5 + r * math.sin(t * 2 * math.pi / steps)) for t in range(steps)]
+    return poly(*[(0.5 + r * math.cos(t * 2 * math.pi / steps),
+                   0.5 + r * math.sin(t * 2 * math.pi / steps)) for t in range(steps)])
 
 
 def disc():
@@ -359,49 +440,136 @@ def solid(shapes):
     return shapes, []
 
 
+# Each entry says how to draw its glyph rather than holding one already drawn, because the size
+# the set settles on is not known until the glyph has been built once and measured - see fitted().
+#
 # Readable codes on purpose. Nothing but symbols is ever drawn with this font, so there is no
 # collision to avoid, and a draw list that says "u" is one somebody can read.
 GLYPHS = [
-    ("u", "undo", solid(uturn(False))),
-    ("r", "redo", solid(uturn(True))),
-    ("d", "delete", solid(bin_())),
-    ("<", "chevron left", solid(chevron(0))),
-    ("^", "chevron up", solid(chevron(1))),
-    (">", "chevron right", solid(chevron(2))),
-    ("v", "chevron down", solid(chevron(3))),
-    ("o", "ring", ring()),
-    ("0", "disc", disc()),
-    ("-", "minus", solid(minus())),
-    ("+", "plus", solid(plus())),
-    ("a", "arrow", solid(arrow())),
-    ("c", "check", solid(check())),
-    ("p", "pencil", pencil()),
-    ("x", "cross", solid(cross())),
-    ("!", "warning", solid(bang())),
-    ("s", "refresh", solid(cycle())),
-    ("2", "duplicate", sheets()),
-    ("g", "play", solid(play())),
+    ("u", "undo", lambda: solid(uturn(False))),
+    ("r", "redo", lambda: solid(uturn(True))),
+    ("d", "delete", lambda: bin_()),
+    ("<", "chevron left", lambda: solid(chevron(0))),
+    ("^", "chevron up", lambda: solid(chevron(1))),
+    (">", "chevron right", lambda: solid(chevron(2))),
+    ("v", "chevron down", lambda: solid(chevron(3))),
+    ("o", "ring", lambda: ring()),
+    ("0", "disc", lambda: disc()),
+    ("-", "minus", lambda: solid(minus())),
+    ("+", "plus", lambda: solid(plus())),
+    ("a", "arrow", lambda: solid(arrow())),
+    ("c", "check", lambda: solid(check())),
+    ("p", "pencil", lambda: pencil()),
+    ("x", "cross", lambda: solid(cross())),
+    ("!", "warning", lambda: solid(bang())),
+    ("s", "refresh", lambda: solid(cycle())),
+    ("2", "duplicate", lambda: sheets()),
+    ("g", "play", lambda: solid(play())),
     # Not "s", which refresh already has. The letter is in the word and nothing else wanted it.
-    ("t", "stop", solid(stop())),
+    ("t", "stop", lambda: solid(stop())),
 ]
 
 
-def render(glyph):
-    """One glyph as an alpha image, drawn oversized and averaged down."""
+# What every mark is drawn to fill, as a fraction of the cell.
+#
+# A set of symbols is read as a set, so they have to agree with each other at one text size: a
+# mark a third bigger than the one beside it reads as a mistake even when both are well drawn.
+# They did not agree - the largest ran to 46 units of the cell and the smallest to 28 - because
+# each was written to its own coordinates and nothing ever compared them.
+#
+# The number is the middle of where most of them already sat, so the set moves as little as it can
+# to agree.
+EXTENT = 36.0 / 64.0
+
+
+def fitted(make):
+    """
+    Builds a glyph at whatever size makes it fill <see cref="EXTENT" />.
+
+    <b>Built twice, at two sizes, rather than drawn once and resized.</b> A stroke is a polygon by
+    the time a glyph is finished, so scaling the finished artwork scales the line it is drawn with
+    - and a set whose marks agree on size but not on weight is no better off than before. Building
+    it again under a scale puts the scale on the points and leaves the width alone.
+
+    Twice because a stroke adds its own width to whatever the points span, and how much depends on
+    the angle it ends at. The first build says what this glyph actually came out as; the second
+    lands it on the target.
+    """
+
+    global _fit
+
+    _fit = 1.0
+    for _ in range(2):
+        shapes, holes = make()
+        drawn = ink(shapes, holes)
+        if drawn is None:
+            _fit = 1.0
+            return make()
+
+        widest = max(drawn[2] - drawn[0], drawn[3] - drawn[1]) / float(CELL * OVER)
+        if widest <= 0:
+            break
+
+        _fit *= EXTENT / widest
+
+    made = make()
+    _fit = 1.0
+    return made
+
+
+def ink(shapes, holes):
+    """Where a set of shapes actually puts ink, at the oversampled size."""
     from PIL import Image, ImageDraw
 
-    shapes, holes = glyph
     size = CELL * OVER
     page = Image.new("L", (size, size), 0)
     draw = ImageDraw.Draw(page)
 
     for shape in shapes:
-        draw.polygon([(x * size, (y - INK) * size) for (x, y) in shape], fill=255)
+        draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
 
     for hole in holes:
-        draw.polygon([(x * size, (y - INK) * size) for (x, y) in hole], fill=0)
+        draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
 
-    return page.resize((CELL, CELL), Image.LANCZOS)
+    return page.getbbox()
+
+
+def render(glyph):
+    """
+    One glyph as an alpha image, drawn oversized, centred on its own ink, and averaged down.
+
+    <b>Centred on what it drew, not on where it was drawn.</b> Each symbol is a handful of
+    polygons written by hand in a unit square, and no two of them fill it the same way - the up
+    chevron sat five units high of the middle and the down chevron four low, which is a symbol
+    set that cannot be lined up with anything, because there is no one offset that is right for
+    all of them. Centring here is what makes "a mark in the middle of its line" true of every
+    glyph rather than of the average of them.
+
+    It is done at the oversampled size, so the correction lands to a fraction of a final pixel.
+    """
+
+    from PIL import Image, ImageDraw
+
+    shapes, holes = fitted(glyph)
+    size = CELL * OVER
+    page = Image.new("L", (size, size), 0)
+    draw = ImageDraw.Draw(page)
+
+    for shape in shapes:
+        draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
+
+    for hole in holes:
+        draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
+
+    ink = page.getbbox()
+    if ink is not None:
+        left, top, right, bottom = ink
+        middled = Image.new("L", (size, size), 0)
+        middled.paste(page.crop(ink),
+                      ((size - (right - left)) // 2, (size - (bottom - top)) // 2))
+        page = middled
+
+    return page.resize((CELL, CELL), Image.BOX)
 
 
 def main():

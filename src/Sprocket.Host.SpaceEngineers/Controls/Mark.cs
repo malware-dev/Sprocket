@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
     /// </remarks>
     public class Mark : Element
     {
-        readonly Glyph _glyph = Widgets.Symbol(Symbols.Ring, Palette.Faint);
+        readonly Glyph _glyph = Widgets.Centred(Symbols.Ring, Palette.Faint);
 
         public Mark()
         {

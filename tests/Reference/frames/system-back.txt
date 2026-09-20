@@ -36,11 +36,11 @@ on screen     Automation for Test Rig
 029  Text       at {X:275.8467 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
 030  SetClip    {X:451 Y:55 W:96 H:33}
 031  Text       at {X:451.0733 Y:54.71198} scale 0.9  #DCF5FDFF  "Test Rig"
-032  Text       at {X:536.5867 Y:59.52197} scale 0.64  #85A1A9FF  "p"
+032  Text       at {X:536.5867 Y:56.60933} scale 0.64  #85A1A9FF  "p"
 033  ClearClip  
-034  Sprite     Sprocket_Fill         {X:259 Y:61 W:11 H:21}  #29363EFF
-035  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
-036  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
+034  Sprite     Sprocket_Fill         {X:259 Y:58 W:11 H:21}  #29363EFF
+035  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+036  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
 037  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 038  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 039  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

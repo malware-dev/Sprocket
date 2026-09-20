@@ -18,8 +18,8 @@ on screen     Automation for Test Rig
 011  Sprite     Sprocket_Fill         {X:451 Y:55 W:2 H:33}  #DCF5FDFF
 012  Sprite     Sprocket_Fill         {X:451 Y:86 W:86 H:2}  #E84A3AFF
 013  ClearClip  
-014  Text       at {X:259 Y:60.81697} scale 0.57  #A2C3CDFF  "<"
-015  Text       at {X:1654.273 Y:60.81697} scale 0.57  #A2C3CDFF  "s"
+014  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+015  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
 016  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 017  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 018  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
         // The same mark the sequence's own screen uses for the same act, so one look is learnt
         // once.
-        readonly Glyph _run = Widgets.Symbol(Symbols.Play, Palette.Faint);
+        readonly Glyph _run = Widgets.Centred(Symbols.Play, Palette.Faint);
 
         /// <summary>What the second line was last told it opens, so a note is made when it changes.</summary>
         string _opens;
@@ -41,10 +41,10 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         readonly Switch _switch = new Switch(Lettering.Small);
 
         /// <summary>Another of what this row is. Absent on rows where that means nothing.</summary>
-        readonly Glyph _duplicate = Widgets.Symbol(Symbols.Duplicate, Palette.Faint);
+        readonly Glyph _duplicate = Widgets.Centred(Symbols.Duplicate, Palette.Faint);
 
         /// <summary>Throwing this row away. Absent where the row is not somebody's to throw away.</summary>
-        readonly Glyph _delete = Widgets.Symbol(Symbols.Delete, Palette.Faint);
+        readonly Glyph _delete = Widgets.Centred(Symbols.Delete, Palette.Faint);
 
         /// <summary>The controls at the right edge, laid out leftwards from the switch.</summary>
         readonly Stack _tools = Widgets.RowOf(Space.Item);

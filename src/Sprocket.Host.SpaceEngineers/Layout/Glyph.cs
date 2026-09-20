@@ -95,8 +95,40 @@ namespace Sprocket.Host.SpaceEngineers.Layout
                 ? Vector2.Zero
                 : g.MeasureText(Symbols.Font, _measuring, Scale);
 
+            // Here because the lift is a fraction of a height only measuring knows, and because an
+            // offset is what moves an element rather than only what it draws.
+            Offset = new Vector2(Offset.X, -_size.Y * _lift);
+
             return _size;
         }
+
+        /// <summary>
+        /// How far to lift the mark off the middle of its own room, as a fraction of its height.
+        /// </summary>
+        /// <remarks>
+        /// A fraction rather than a number of units, so it holds at whatever size the symbol is drawn.
+        /// Zero centres it, which is what the font promises and what anything standing on its own
+        /// wants. See <c>Widgets.Symbol</c> for the one case that does not.
+        /// <para>
+        /// <b>It moves the whole glyph, not the ink inside it.</b> Nudging only what is drawn would
+        /// leave the mark and the thing a person presses in different places, and a symbol is very
+        /// often a button.
+        /// </para>
+        /// </remarks>
+        public float Lift
+        {
+            get { return _lift; }
+            set
+            {
+                if (_lift == value)
+                    return;
+
+                _lift = value;
+                InvalidateMeasure();
+            }
+        }
+
+        private float _lift;
 
         protected override void DrawContent(IGraphics g)
         {

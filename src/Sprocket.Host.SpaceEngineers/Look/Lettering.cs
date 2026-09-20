@@ -58,6 +58,35 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public const float Symbol = 0.57f;
 
         /// <summary>
+        /// How far to lift a symbol that stands on a line of the game's text, as a fraction of it.
+        /// </summary>
+        /// <remarks>
+        /// <b>This describes the game's face, not the symbols.</b> Space Engineers sets its letters
+        /// slightly high in their own line, so a mark centred in its line - which is what a symbol font
+        /// owes anyone who draws it - reads as sitting low beside them. The correction belongs here
+        /// rather than in the font, because baking it into the artwork would fit one consumer's quirk
+        /// into something meant to be used by anybody. It was baked in three times before this.
+        /// <para>
+        /// <b>Measured in the game, on the one case it is for.</b> A symbol beside the heading sat nine
+        /// pixels below the middle of its capitals on a 3840-wide screen, which is four and a half
+        /// units, which is this much of a symbol. Nothing else referees it: the simulator's rule for
+        /// placing a glyph against a line is its own reconstruction and disagrees with the game, and a
+        /// recorded frame cannot see it at all - a frame records the call, and this moves the ink
+        /// inside the page the call names.
+        /// <para>
+        /// It does not apply to a symbol centred in a row, which is not standing on a line of anything
+        /// - see <c>Widgets.Centred</c>. Those land on the row's own middle with no help, measured to
+        /// within two pixels, and lifting them is what made them look top-aligned.
+        /// </para>
+        /// <para>
+        /// Only the game can referee it. The simulator's rule for placing a glyph against a line is its
+        /// own reconstruction and is known to disagree, and a recorded frame cannot see this at all -
+        /// it records the call, and this moves the ink inside the page the call names.
+        /// </para>
+        /// </remarks>
+        public const float SymbolLift = 0.123f;
+
+        /// <summary>
         /// The face for anything read as a listing rather than as prose.
         /// </summary>
         /// <remarks>

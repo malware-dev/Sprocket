@@ -55,6 +55,19 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             _children.Add(_pen);
         }
 
+        /// <summary>
+        /// How far the pencil is lifted off the middle of its room. See <see cref="Glyph.Lift" />.
+        /// </summary>
+        /// <remarks>
+        /// Set from outside because how a mark sits against the game's letters is a matter of look,
+        /// and this is layout. The pencil stands on a line of text like any other symbol does.
+        /// </remarks>
+        public float PenLift
+        {
+            get { return _pen.Lift; }
+            set { _pen.Lift = value; }
+        }
+
         /// <summary>The name, as it reads when nobody is editing it.</summary>
         /// <remarks>
         /// Not written through to the box while an edit is running: whatever is in the box is the truth
