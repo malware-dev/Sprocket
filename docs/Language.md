@@ -29,7 +29,7 @@ an error.
 
 | Value | Written | Notes |
 |---|---|---|
-| Name | `inner`, `'Airlock System'` | Quoted where it holds anything but letters, digits, `-` and `_`. Write `''` for a quote within one: `'Mal''s airlock'` |
+| Name | `inner`, `'Airlock System'` | A letter, then letters, digits and `_`. Quoted where it holds anything else. Write `''` for a quote within one: `'Mal''s airlock'` |
 | Qualified name | `MalTek.Airlock`, `'MalTek Inc.'.'Airlock System'` | Names joined by the `.` operator, kept as parts: `'a.b'.c` and `a.'b.c'` differ. Spaces around the dot are nothing |
 | Text | `"Airlock Inner Door"` | Write `""` for a quote within one: `"the ""inner"" door"` |
 | Integer | `60`, `74857693847562934` | Whole, 64-bit |
@@ -56,10 +56,21 @@ A bare number or a quoted GUID is an id; a name is a name. A sequence called "2"
 Renaming something is far more likely than renumbering it, so a reference written as an id usually
 outlives one written as a name.
 
-## `sprocket <version>`
+## `sprocket <format> [alpha <draft>]`
 
-The first statement of every program, and the version of this language the rest of it is written in.
-A file saying any other version is not this language.
+The first statement of every program, and the version of the language it is written in.
+
+```
+sprocket 1 alpha 5
+```
+
+`<format>` goes up only when a change would stop existing programs working. A reader of a later
+format converts an earlier program rather than turning it away.
+
+`alpha <draft>` says the format is not finished, and numbers the drafts of it. It goes up for any
+change at all to what is written or read, and a program from another draft is turned away rather
+than converted. It is absent from a finished format, so a program with no `alpha` was written
+against one.
 
 # A system
 
@@ -99,7 +110,7 @@ required block inner expects Door
 required block hangar expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'
 
 # The call button
-required trigger pressed-1 [ call ] to run 1
+required trigger pressed_1 [ call ] to run 1
 
 # Something on the ship, and the program does not say what
 required trigger to run 2

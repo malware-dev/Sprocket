@@ -363,7 +363,7 @@ public class ProgramTextTests
         var sequence = program.AddSequence(system);
         sequence.Name = "Cycle";
 
-        var halt = new RequiredTrigger("pressed-1");
+        var halt = new RequiredTrigger("pressed_1");
         halt.Runs = sequence.Number;
         halt.Stops = true;
         halt.Sources.Add("entity1");
@@ -402,7 +402,7 @@ public class ProgramTextTests
         sequence.Steps.Add(open);
 
         var pressed = new RequiredTrigger();
-        pressed.EventId = "pressed-1";
+        pressed.EventId = "pressed_1";
         pressed.Runs = sequence.Number;
         pressed.Sources.Add("entity2");
         system.AddTrigger(pressed);

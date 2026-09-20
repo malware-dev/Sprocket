@@ -349,7 +349,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             while (true)
             {
                 var c = ptr.Char;
-                if (!Letter(c) && !Digit(c) && c != '_' && c != '-')
+                // No dash. It is subtraction, and a name that could hold one would make a-1 a name
+                // and a - 1 a subtraction, which is the same text meaning two things over a space.
+                if (!Letter(c) && !Digit(c) && c != '_')
                     break;
 
                 ptr++;

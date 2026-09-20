@@ -287,7 +287,7 @@ public class ChangingTests
         screen.Run(2);
 
         var back = Assert.IsType<RequiredTrigger>(System(screen).Triggers[0]);
-        Assert.Equal("pressed-1", back.EventId);
+        Assert.Equal("pressed_1", back.EventId);
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
 
         // And forward again, into the same change rather than a rebuilt one that reads the same.

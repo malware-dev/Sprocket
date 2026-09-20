@@ -103,7 +103,7 @@ public class AirlockTests
         a.Vent = a.Ship.Vent(3, "Airlock Vent");
         a.Inside = a.Ship.Panel(4, "Inside Button");
 
-        var trigger = new WhenTrigger("pressed-1");
+        var trigger = new WhenTrigger("pressed_1");
         trigger.Sources.Add(a.Ref(a.Seen(a.Inside)));
 
         a.LetMeOut = a.Automation.AddSequence(trigger);

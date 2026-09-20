@@ -90,7 +90,7 @@ public class SettingTests
         AutomationSystem system = program.AddSystem();
         system.Name = "Lighting";
 
-        var pressed = new RequiredTrigger("pressed-1");
+        var pressed = new RequiredTrigger("pressed_1");
         pressed.Sources.Add(Named(sim, button));
 
         Sequence dim = program.AddSequence(system, pressed);

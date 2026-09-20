@@ -46,7 +46,7 @@ public class RigTests
         // And what the program says about it: the construct starts this, which is what the game's
         // own arrangement is. A "when" here would be Sprocket claiming it watches the button.
         var program = store.GetValue(SprocketUnit.ProgramKey);
-        Assert.Contains("required trigger pressed-1", program);
+        Assert.Contains("required trigger pressed_1", program);
         Assert.DoesNotContain("when ", program);
 
         Simulation reopened = Simulation.On(store);
@@ -131,7 +131,7 @@ public class RigTests
         AutomationSystem system = program.AddSystem();
         system.Name = "Airlock";
 
-        var pressed = new RequiredTrigger("pressed-1");
+        var pressed = new RequiredTrigger("pressed_1");
         pressed.Sources.Add(Named(sim, front));
 
         Sequence cycle = program.AddSequence(system, pressed);
@@ -235,7 +235,7 @@ public class RigTests
         Simulation rig = Simulation.On(Store.Nowhere());
         rig.Tick();
 
-        var program = "sprocket 4\n\nblock '" + sort + "' door1 [ 2, \"Airlock Inner Door\" ]\n";
+        var program = "sprocket 1 alpha 5\n\nblock '" + sort + "' door1 [ 2, \"Airlock Inner Door\" ]\n";
         Assert.Equal("", ProgramText.Load(program, rig.Editor.Program, rig.World.Values));
 
         rig.Tick();
@@ -274,7 +274,7 @@ public class RigTests
         sequence.Steps.Add(open);
         sequence.Steps.Add(new Await());
 
-        var pressed = new RequiredTrigger("pressed-1");
+        var pressed = new RequiredTrigger("pressed_1");
         pressed.Runs = sequence.Number;
         pressed.Sources.Add(program.Declare(rig.World, rig.World.FindEntity(21)).Name);
         system.AddTrigger(pressed);
@@ -399,7 +399,7 @@ public class RigTests
         Sequence sequence = rig.Editor.Program.Sequences[0];
 
         var halt = new RequiredTrigger();
-        halt.EventId = "pressed-1";
+        halt.EventId = "pressed_1";
         halt.Runs = sequence.Number;
         halt.Stops = true;
         halt.Sources.Add(rig.Editor.Program.Declare(rig.World, rig.World.FindEntity(31)).Name);
@@ -449,7 +449,7 @@ public class RigTests
         // The second way in, written into the program rather than through the screens: the editor
         // has no way to add one yet, which is what #14 is for.
         var inside = new RequiredTrigger();
-        inside.EventId = "pressed-1";
+        inside.EventId = "pressed_1";
         inside.Runs = sequence.Number;
         GridEntity button = rig.World.FindEntity(30);
         Assert.NotNull(button);

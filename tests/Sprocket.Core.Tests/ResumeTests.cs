@@ -86,7 +86,7 @@ public class ResumeTests
         a.Vent = a.Rig.Vent(3, "Airlock Vent");
         a.Button = a.Rig.Panel(4, "Inside Button");
 
-        var trigger = new WhenTrigger("pressed-1");
+        var trigger = new WhenTrigger("pressed_1");
         trigger.Sources.Add(a.Name(a.Button));
 
         var cycle = a.Program.AddSequence(trigger);

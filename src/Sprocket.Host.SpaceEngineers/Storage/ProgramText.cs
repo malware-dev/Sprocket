@@ -34,14 +34,32 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     public static class ProgramText
     {
         /// <summary>
-        /// What this build writes, and the only thing it reads.
+        /// The version of the language this build writes.
         /// </summary>
         /// <remarks>
-        /// <b>Not backwards compatible, on purpose, while the language is still being designed.</b> A save
-        /// saying any other number is read as far as it goes and marked not to be written back, so nothing
-        /// on disk is lost - it simply does not load cleanly.
+        /// <b>Raising this obliges a conversion.</b> It says a change would stop existing programs
+        /// working, so a reader meeting an earlier one has to convert it rather than turn it away. That
+        /// is why nothing done during development raises it, and why it is still one: nothing outside
+        /// this repository has ever been asked to read a program, so there is nothing to convert from.
         /// </remarks>
-        const int Version = 4;
+        const int Version = 1;
+
+        /// <summary>
+        /// Which draft of that format this build writes, while it is not finished.
+        /// </summary>
+        /// <remarks>
+        /// <b>Raising this obliges nothing.</b> A program from another draft is read as far as it goes and
+        /// marked not to be written back, so nothing on disk is lost and the refusal is loud and at the
+        /// first line rather than confusing and deep in the file. That is the whole of what it buys, and it
+        /// is worth having because the format changes most while several worlds are being developed against
+        /// it.
+        /// <para>
+        /// So it is raised in the same change as anything written or read differently, the way
+        /// <c>docs/Language.md</c> is kept in step. A number nobody raises is worse than none, because it
+        /// claims a compatibility it does not have.
+        /// </para>
+        /// </remarks>
+        const int Draft = 5;
 
         /// <summary>
         /// How a <c>changed</c> time may be written: ISO 8601, and nothing else.
@@ -66,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public static string Save(Automation program, Values values)
         {
             var pen = new Pen();
-            pen.Start(Keyword.Sprocket).Whole(Version);
+            pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
             pen.End();
 
             // Before anything that names one, so a reader has them in hand by the time it meets a step.
@@ -131,6 +149,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 trouble.Say("this is not a Sprocket program");
             else if (constructs[0].Whole(0) != Version)
                 trouble.Say("this was written by a different version of Sprocket");
+            else if (DraftOf(constructs[0]) != Draft)
+                trouble.Say("this was written against a different draft of the format");
 
             for (var i = 0; i < constructs.Count; i++)
             {
@@ -148,6 +168,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             warning = trouble.Warning;
             return trouble.What;
+        }
+
+        /// <summary>
+        /// Which draft of the format a program says it was written against, or none where it does not say.
+        /// </summary>
+        /// <remarks>
+        /// A program with no <c>alpha</c> clause was written against a finished format, and this build
+        /// writes an unfinished one - so the absence is a number this build can never be, rather than a
+        /// reason to let it through.
+        /// </remarks>
+        static int DraftOf(Statement statement)
+        {
+            var at = statement.Find(Keyword.Alpha);
+            return at < 0 ? -1 : statement.Whole(at + 1);
         }
 
         static void WriteRef(Pen pen, Values values, EntityRef declared)
@@ -718,7 +752,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Says(1, Keyword.To))
                 return new RequiredTrigger();
 
-            // required trigger pressed-1 [Airlock Button] to run 1: the same, saying which block
+            // required trigger pressed_1 [Airlock Button] to run 1: the same, saying which block
             // and which of its moments, which is what the editor always writes.
             if (!statement.Says(3, Keyword.To))
             {

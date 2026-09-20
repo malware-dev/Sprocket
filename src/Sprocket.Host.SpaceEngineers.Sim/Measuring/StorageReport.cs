@@ -373,7 +373,7 @@ public static class StorageReport
 
         void BuildSequence(Automation program, AutomationSystem system, int number)
         {
-            var trigger = new WhenTrigger("pressed-1");
+            var trigger = new WhenTrigger("pressed_1");
             trigger.Sources.Add(Entity(number));
 
             var sequence = program.AddSequence(system, trigger);

@@ -24,12 +24,12 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class SalvageTests
 {
     /// <summary>What the old format looked like, which is what his test world still held.</summary>
-    const string Older = "sprocket 1\n"
+    const string Older = "sprocket 1 alpha 5\n"
         + "block|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:87472652339029116,t:Button Panel\n"
         + "system|1|on|Test|\n"
         + "one|1|\n"
         + "sequence|1|on||\n"
-        + "when|any|pressed-1|entity1\n";
+        + "when|any|pressed_1|entity1\n";
 
     /// <summary>The notice on the screen, or null. The driving helper throws where there is none.</summary>
     static NoticeComponent Said(Simulation rig) =>
@@ -116,7 +116,7 @@ public class SalvageTests
 
         var saved = store.GetValue(SprocketUnit.ProgramKey);
 
-        Assert.StartsWith("sprocket 4", saved);
+        Assert.StartsWith("sprocket 1 alpha 5", saved);
         Assert.Contains("Airlock", saved);
         Assert.DoesNotContain("|", saved);
 
@@ -199,7 +199,7 @@ public class SalvageTests
         rig.Save();
 
         Assert.False(rig.Editor.Screen.HasQuestion);
-        Assert.StartsWith("sprocket 4", store.GetValue(SprocketUnit.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 5", store.GetValue(SprocketUnit.ProgramKey));
         Assert.Null(Said(rig));
     }
 
@@ -236,7 +236,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.StartsWith("sprocket 4", store.GetValue(SprocketUnit.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 5", store.GetValue(SprocketUnit.ProgramKey));
         Assert.Contains("Airlock", store.GetValue(SprocketUnit.ProgramKey));
     }
 }

@@ -19,7 +19,7 @@ public class ScriptTests
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
     /// <summary>A program's first line and the start of a system with <see cref="Identity" />.</summary>
-    const string Head = "sprocket 4\n\nsystem \"" + Identity + "\" as ";
+    const string Head = "sprocket 1 alpha 5\n\nsystem \"" + Identity + "\" as ";
 
     static readonly Values Store = new Values();
 
@@ -94,7 +94,7 @@ public class ScriptTests
     public void AProgramReadsAsAScript()
     {
         Assert.Equal(
-            "sprocket 4\n" +
+            "sprocket 1 alpha 5\n" +
             "\n" +
             "block 'Door/LargeBlockDoor' inner [ 74857693847562934, \"Airlock Inner Door\" ]\n" +
             "\n" +
@@ -143,9 +143,9 @@ public class ScriptTests
     /// A system with no identity, or one that is not a GUID, is trouble and is not read.
     /// </summary>
     [Theory]
-    [InlineData("sprocket 4\n\nsystem Airlock {\n}\n")]
-    [InlineData("sprocket 4\n\nsystem \"airlock\" as Airlock {\n}\n")]
-    [InlineData("sprocket 4\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 5\n\nsystem Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 5\n\nsystem \"airlock\" as Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 5\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock {\n}\n")]
     public void ASystemWithoutAnIdentityIsTrouble(string text)
     {
         var after = new Automation();
@@ -418,26 +418,26 @@ public class ScriptTests
         var system = program.Systems[0];
         program.AddSequence(system);
 
-        var pressed = new RequiredTrigger("pressed-1");
+        var pressed = new RequiredTrigger("pressed_1");
         pressed.Sources.Add("call");
         pressed.Runs = 1;
         system.AddTrigger(pressed);
 
         var text = Save(program);
-        Assert.Contains("    required trigger pressed-1 [ call ] to run 1\n", text);
+        Assert.Contains("    required trigger pressed_1 [ call ] to run 1\n", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
 
         var read = Assert.IsType<RequiredTrigger>(after.Systems[0].Triggers[0]);
-        Assert.Equal("pressed-1", read.EventId);
+        Assert.Equal("pressed_1", read.EventId);
         Assert.Equal("call", Assert.Single(read.Sources));
         Assert.Equal(1, read.Runs);
     }
 
     [Theory]
     [InlineData("required trigger run 1")]
-    [InlineData("required trigger pressed-1 [call] run 1")]
+    [InlineData("required trigger pressed_1 [call] run 1")]
     [InlineData("required trigger to run")]
     [InlineData("required whatever to run 1")]
     public void ARequiredTriggerThatSaysNothingUsefulIsTrouble(string line)
@@ -843,7 +843,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(
-            "sprocket 4\n\nblock 'Door/LargeBlockDoor' door1 [ 74857693847562934, (3 0 -2) ]\n", after));
+            "sprocket 1 alpha 5\n\nblock 'Door/LargeBlockDoor' door1 [ 74857693847562934, (3 0 -2) ]\n", after));
 
         Assert.False(after.Intact);
     }
@@ -989,7 +989,7 @@ public class ScriptTests
     public void AnAnnotationWithNothingUnderItIsTrouble()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 4\n\n# about nothing at all\n", after));
+        Assert.NotEqual("", Load("sprocket 1 alpha 5\n\n# about nothing at all\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1004,7 +1004,29 @@ public class ScriptTests
     public void ASaveFromAnotherVersionIsReadAsFarAsItGoesAndNotWrittenBack()
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 4", "sprocket 2"), after);
+        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 5", "sprocket 2"), after);
+
+        Assert.NotEqual("", trouble);
+        Assert.False(after.Intact);
+        Assert.Equal("Airlock", after.Systems[0].Name);
+    }
+
+    /// <summary>
+    /// A save from another draft of the same format is refused the same way.
+    /// </summary>
+    /// <remarks>
+    /// The two numbers oblige different things and that is the whole reason there are two: the format
+    /// moving means a program somebody else holds has to be brought forward, and a draft moving means only that this build will not read it. Both are refused at the first line, where the refusal can
+    /// say something, rather than deep in the file where it cannot.
+    /// </remarks>
+    [Theory]
+    [InlineData("sprocket 1 alpha 4")]
+    [InlineData("sprocket 1 alpha 6")]
+    [InlineData("sprocket 1")]
+    public void ASaveFromAnotherDraftOfTheFormatIsRefused(string head)
+    {
+        var after = new Automation();
+        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 5", head), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);
@@ -1037,4 +1059,24 @@ public class ScriptTests
         Assert.Equal("", Load(Save(SystemCalled("", "one\ntwo")), after));
         Assert.Equal("one two", after.Systems[0].Name);
     }
+
+    /// <summary>
+    /// A name holding a dash is quoted, because a dash is subtraction.
+    /// </summary>
+    /// <remarks>
+    /// The half that matters is the writer. Were it to leave such a name bare, <c>Air-lock</c> would
+    /// read back as a subtraction the moment expressions exist, so a save this wrote could not be read
+    /// by the thing that wrote it.
+    /// </remarks>
+    [Fact]
+    public void ANameHoldingADashIsQuoted()
+    {
+        var text = Save(SystemCalled("Mal-Tek", "Air-lock"));
+        Assert.Contains("as 'Mal-Tek'.'Air-lock' {", text);
+
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+        Assert.True(after.Systems[0].Is("Mal-Tek", "Air-lock"));
+    }
+
 }

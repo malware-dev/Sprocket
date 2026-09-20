@@ -83,7 +83,7 @@ public class EditorTests
         StartOnTheButton(ship.Editor);
 
         var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
-        Assert.Equal("pressed-1", pressed.EventId);
+        Assert.Equal("pressed_1", pressed.EventId);
         Assert.Single(pressed.Sources);
 
         // And the same question about a door, which the game announces nothing about.
@@ -132,7 +132,7 @@ public class EditorTests
         ship.Tick();
 
         var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
-        Assert.Equal("pressed-1", pressed.EventId);
+        Assert.Equal("pressed_1", pressed.EventId);
         Assert.Equal("When Airlock Button is pressed", editor.Says(0));
 
         // One trigger for the sequence, not the old one left beside the new.

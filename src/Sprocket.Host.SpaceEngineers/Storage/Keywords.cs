@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "sprocket", "block", "system", "instance", "of", "sequence",
             "when", "every", "then", "trigger", "to", "run", "set",
             "on", "off", "all", "any", "wait", "await", "required", "expects", "=", "changed", "as", "last",
-            "running", "step", "stop", "action", "with"
+            "running", "step", "stop", "action", "with", "alpha"
         };
 
         /// <summary>
@@ -72,9 +72,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Whether a word can be written as it is, or has to be quoted.
         /// </summary>
         /// <remarks>
-        /// The same shape the reader accepts bare: a letter, then letters, digits, underscores and dashes.
+        /// The same shape the reader accepts bare: a letter, then letters, digits and underscores.
         /// Everything else is quoted mechanically, which covers the game's own oddities - properties called
         /// <c>Blink Interval</c>, subtypes with spaces - without anybody choosing.
+        /// <para>
+        /// <b>A dash is not one of them, and that is about subtraction.</b> Were it a name character,
+        /// <c>a-1</c> would be one name and <c>a - 1</c> a subtraction, so the same text would mean two
+        /// different things depending on a space and the wrong reading would be the silent one.
+        /// </para>
         /// </remarks>
         public static bool Bare(string word)
         {
@@ -84,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             for (var i = 1; i < word.Length; i++)
             {
                 var c = word[i];
-                if (!Letter(c) && (c < '0' || c > '9') && c != '_' && c != '-')
+                if (!Letter(c) && (c < '0' || c > '9') && c != '_')
                     return false;
             }
 

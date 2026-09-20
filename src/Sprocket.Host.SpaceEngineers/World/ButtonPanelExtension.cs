@@ -37,8 +37,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public static string Pressed(int button)
         {
-            return "pressed-" + button;
+            return Spelling + button;
         }
+
+        /// <summary>
+        /// What a button's event is called, before its number.
+        /// </summary>
+        /// <remarks>
+        /// An underscore and not a dash, because a dash is subtraction: a name allowed to hold one would
+        /// make <c>a-1</c> a name and <c>a - 1</c> a subtraction. See <c>Keywords.Bare</c>.
+        /// </remarks>
+        const string Spelling = "pressed_";
 
         /// <summary>
         /// Which button an event names, counting from zero, or -1 for anything else.
@@ -49,11 +58,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public static int ButtonOf(string eventId)
         {
-            if (string.IsNullOrEmpty(eventId) || !eventId.StartsWith("pressed-"))
+            if (string.IsNullOrEmpty(eventId) || !eventId.StartsWith(Spelling))
                 return -1;
 
             int number;
-            return int.TryParse(eventId.Substring("pressed-".Length), out number) && number >= 1
+            return int.TryParse(eventId.Substring(Spelling.Length), out number) && number >= 1
                 ? number - 1
                 : -1;
         }

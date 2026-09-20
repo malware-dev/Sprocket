@@ -221,7 +221,7 @@ public class UndoTests
         Sequence sequence = Build();
         var was = (MomentTrigger)sequence.Trigger;
 
-        var now = new RequiredTrigger("pressed-1");
+        var now = new RequiredTrigger("pressed_1");
         now.Sources.Add("call");
 
         RoundTrip(sequence, new ChangeTrigger(was, now));

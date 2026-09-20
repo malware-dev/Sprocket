@@ -59,6 +59,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         Action,
 
         /// <summary>The values such an action has to be given.</summary>
-        With
+        With,
+
+        /// <summary>Which draft of an unfinished format a program was written against.</summary>
+        Alpha
     }
 }
