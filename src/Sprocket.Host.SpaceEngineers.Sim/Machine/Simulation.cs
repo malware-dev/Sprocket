@@ -92,7 +92,9 @@ sealed class Simulation
         if (store.TryGetValue(Wiring.Key, out wired))
             Wiring.Load(wired, _rig);
 
-        _unit = new SprocketUnit(_rig.Sprocket.Block);
+        // Said outright rather than read: the harness has no mod storage. A test that wants the
+        // developer tools sets Editor.DeveloperMode on the way past.
+        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false));
 
         // A press invokes what the slot holds, and what that means is the unit's to say - which is
         // the game's arrangement exactly: the slot carries a key and Sprocket resolves it.

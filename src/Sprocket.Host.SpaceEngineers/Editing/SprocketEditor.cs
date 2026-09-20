@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
@@ -36,12 +37,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly Dictionary<int, Action<int>> _numberActions = new Dictionary<int, Action<int>>();
         readonly EditorScreen _screen = new EditorScreen();
         readonly List<EditorComponent> _gathered = new List<EditorComponent>();
-        // Deliberately never added to - see where it is published. The analyser is right that it is
-        // never updated; that is the point.
-        // ReSharper disable once CollectionNeverUpdated.Local
         readonly List<ChoiceEntry> _actionBar = new List<ChoiceEntry>();
 
         bool _structureDirty;
+        bool _developerMode;
 
         public SprocketEditor(GridWorld world, Automation program, AutomationRunner runner)
         {
@@ -68,6 +67,32 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             get { return _author; }
             set { _author = value ?? ""; }
         }
+
+        /// <summary>
+        /// Whether to offer tools for working on Sprocket itself.
+        /// </summary>
+        /// <remarks>
+        /// Set by the host, which is the only thing that knows where a player writes their settings
+        /// down. Off is the answer for everybody who is here to play rather than to build this.
+        /// <para>
+        /// <b>Rebuilds what is on screen.</b> Pages decide what to offer from this while they are being
+        /// built, and the first one is built before a host has had a chance to say - so a flag that
+        /// merely changed a field would be read as no by the only screen that ever asks.
+        /// </para>
+        /// </remarks>
+        public bool DeveloperMode
+        {
+            get { return _developerMode; }
+            set
+            {
+                if (_developerMode == value)
+                    return;
+
+                _developerMode = value;
+                Invalidate();
+            }
+        }
+
 
         /// <summary>Ticks elapsed. The only honest unit of time available.</summary>
         public int CurrentTick => _runner.CurrentTick;
@@ -425,6 +450,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 case Cmd.OpenSystem:
                 case Cmd.OpenSequence:
                 case Cmd.OpenTrigger:
+                case Cmd.LoadSystem:
+                case Cmd.ShowScript:
                 case Cmd.RunNow:
                 case Cmd.StopNow:
                 case Cmd.TriggerTarget:
@@ -1062,9 +1089,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             _actionBar.Clear();
 
-            // Deliberately empty. A permanent strip of tabs along the bottom is a thing to
-            // learn before you have done anything, and two of the three were only ever
+            // Empty for everybody who is here to play. A permanent strip of tabs along the bottom is a
+            // thing to learn before you have done anything, and the ones it used to hold were only ever
             // navigation - which the screens themselves can offer, where they mean something.
+            //
+            // The listing is the exception that proves it: a way to look at something, reachable from
+            // wherever you happen to be, belonging to the screen rather than to what is on it.
+            if (DeveloperMode)
+                _actionBar.Add(new ChoiceEntry(ScriptPage.Called, Current is ScriptPage,
+                    Register(Cmd.ShowScript, ShowScript)));
+
             _screen.Actions.Reset(_actionBar);
         }
 
@@ -1091,6 +1125,24 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// screen that grows an option later teaches itself twice. What it needs is the
         /// configurator, which needs block slots.
         /// </remarks>
+        /// <summary>
+        /// Opens the listing of what this construct's automation is saved as.
+        /// </summary>
+        /// <remarks>
+        /// A developer tool. Nothing offers it unless <see cref="DeveloperMode" /> says so, and this
+        /// does not check again: the check belongs where the way in is put on a screen, so there is one
+        /// place to read rather than two that can disagree.
+        /// </remarks>
+        internal void ShowScript()
+        {
+            // Offered from every screen including this one, where it is already lit. Pressing it there
+            // means "I am looking at it", not "give me another one on top of the first".
+            if (Current is ScriptPage)
+                return;
+
+            Push(new ScriptPage(this));
+        }
+
         internal void OfferLoading()
         {
             var page = new ChoicePage(this, "Load system");

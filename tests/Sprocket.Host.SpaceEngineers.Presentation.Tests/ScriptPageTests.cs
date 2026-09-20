@@ -1,0 +1,153 @@
+using System.Globalization;
+using System.Linq;
+using Sprocket.Host.SpaceEngineers.Controls;
+using Sprocket.Host.SpaceEngineers.Developing;
+using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Screen;
+using Xunit;
+
+namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
+
+/// <summary>
+/// The listing of what a construct's automation is saved as, and the way in to it.
+/// </summary>
+/// <remarks>
+/// A developer tool. The thing worth testing is that it is not there for anybody else: a way in
+/// offered by default is a way in somebody who came here to play will press.
+/// </remarks>
+public class ScriptPageTests
+{
+    /// <summary>What the footer draws it as.</summary>
+    static readonly string Way = Widgets.Caps(ScriptPage.Called);
+
+    /// <summary>The way back out of a page, on the header.</summary>
+    const string Back = Symbols.Left;
+
+    /// <summary>
+    /// A screen told what it is for, and told nothing else.
+    /// </summary>
+    /// <remarks>
+    /// <b>Saying so is all a host does, and this may do no more than a host does.</b> In the game the
+    /// flag is set on a unit that has just been built, which is after the editor's constructor has
+    /// already built its first screen - so a test that rebuilds the screen itself would pass on a
+    /// build where the way in never appears.
+    /// </remarks>
+    static Screen Developing()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.DeveloperMode = true;
+
+        return screen.Run(1);
+    }
+
+    static Screen Press(Screen screen, string label)
+    {
+        var at = screen.Text(label);
+        var point = Screen.Ui(at.At.X + 4f, at.At.Y + 4f);
+
+        return screen.Do(
+            point.X.ToString("0.##", CultureInfo.InvariantCulture),
+            point.Y.ToString("0.##", CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
+    public void TheWayInIsNotOfferedUnlessItWasAskedFor()
+    {
+        Assert.False(Screen.Fresh().Shows(Way));
+    }
+
+    [Fact]
+    public void DeveloperModeOffersTheWayIn()
+    {
+        Assert.True(Developing().Shows(Way));
+    }
+
+    /// <summary>
+    /// It is on the screen rather than on what the screen is about.
+    /// </summary>
+    /// <remarks>
+    /// Looking at the script is not a thing you add to a construct, so it does not belong among the
+    /// ways to add one - and it is worth reaching from wherever somebody happens to be standing.
+    /// </remarks>
+    [Fact]
+    public void TheWayInIsOnEveryScreen()
+    {
+        Screen screen = Developing();
+
+        Assert.Contains(screen.Editor.Screen.Actions, entry => entry.Text == ScriptPage.Called);
+        Assert.DoesNotContain(screen.Words, said => said.Contains("+ " + ScriptPage.Called));
+    }
+
+    /// <summary>The listing shows the script, beginning where every saved program begins.</summary>
+    [Fact]
+    public void ItShowsWhatTheProgramIsSavedAs()
+    {
+        Screen screen = Press(Developing(), Way);
+
+        Assert.Equal(ScriptPage.Called, screen.Ended);
+        Assert.Contains(screen.Legible, said => said.StartsWith("sprocket "));
+    }
+
+    /// <summary>
+    /// Pressing it while looking at it is not a second one on top of the first.
+    /// </summary>
+    /// <remarks>
+    /// Proved by walking back rather than by counting: one step back from a listing opened twice has
+    /// to leave the listing behind entirely, and would not if the second press had stacked one.
+    /// </remarks>
+    [Fact]
+    public void PressingItWhileOnItStaysWhereItIs()
+    {
+        Screen screen = Developing();
+        string home = screen.Ended;
+
+        Press(Press(screen, Way), Way);
+        Assert.Equal(ScriptPage.Called, screen.Ended);
+
+        Press(screen, Back);
+        Assert.Equal(home, screen.Ended);
+    }
+
+    /// <summary>
+    /// The listing claims the body and does its own scrolling.
+    /// </summary>
+    /// <remarks>
+    /// Both halves or neither. A component that does not claim the height is wrapped in the screen's
+    /// own scroller, which puts a second bar around the screed's and lets the two fight over one
+    /// gesture - and it draws a thumb on a page that has nothing to scroll.
+    /// </remarks>
+    [Fact]
+    public void TheListingIsTheWholeBodyAndScrollsItself()
+    {
+        Screen screen = Press(Developing(), Way);
+        screen.Run(1);
+
+        ScriptComponent listing = screen.Editor.Screen.Components.OfType<ScriptComponent>().Single();
+
+        Assert.True(listing.Fills, "the listing did not claim the body");
+        Assert.True(ComponentView.For(listing).ScrollsItself, "the listing does not scroll itself");
+
+        // Nothing to scroll on a program this short, so no thumb belongs anywhere on the screen.
+        Assert.DoesNotContain(screen.Drawings, d => !d.IsText && d.Ink == Palette.Thumb);
+    }
+
+    /// <summary>
+    /// Nothing is measured on a tick where nobody has touched it.
+    /// </summary>
+    /// <remarks>
+    /// The listing is written out afresh once a second and handed over whole, so the risk is a screen
+    /// that re-reads a thousand lines of text every frame because the string it was given was new.
+    /// </remarks>
+    [Fact]
+    public void AnIdleSecondOnTheListingMeasuresNoText()
+    {
+        Screen screen = Press(Developing(), Way);
+        screen.Run(5);
+
+        var settled = screen.Measured;
+        screen.Run(60);
+
+        Assert.Equal(settled, screen.Measured);
+    }
+}

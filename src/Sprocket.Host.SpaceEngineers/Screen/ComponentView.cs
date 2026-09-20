@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -210,6 +211,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             var triggers = component as TriggerListComponent;
             if (triggers != null)
                 return new TriggerListView(triggers);
+
+            var script = component as ScriptComponent;
+            if (script != null)
+                return new ScriptView(script);
 
             // Everything else, drawn loudly. A component this target has not learned to draw must not be
             // silently absent: a screen missing its picker looks exactly like a screen with nothing to

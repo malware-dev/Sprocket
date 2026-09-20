@@ -71,6 +71,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         Choice,
 
         /// <summary>Where the values an action asked for are typed.</summary>
-        GiveValues
+        GiveValues,
+
+        /// <summary>Tools for working on Sprocket itself. Only ever registered in developer mode.</summary>
+        ShowScript
     }
 }

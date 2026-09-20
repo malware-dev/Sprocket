@@ -25,6 +25,21 @@ namespace Sprocket.Host.SpaceEngineers
         SprocketScreen _screen;
         long _open;
 
+        Settings _settings;
+
+        /// <summary>
+        /// What the player asked for, read the first time anything wants to know.
+        /// </summary>
+        /// <remarks>
+        /// Not in <see cref="LoadData" />: mod storage is not reliably there that early, and a read
+        /// that quietly answered every default would be indistinguishable from a file saying nothing.
+        /// By the time a block adopts itself the world is up.
+        /// </remarks>
+        Settings Asked
+        {
+            get { return _settings ?? (_settings = Settings.Read()); }
+        }
+
         /// <summary>
         /// The unit a block carries, or null. Never creates one.
         /// </summary>
@@ -140,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_units.TryGetValue(block.EntityId, out unit))
                 return unit;
 
-            unit = new SprocketUnit(block);
+            unit = new SprocketUnit(block, Asked);
             _units.Add(block.EntityId, unit);
             return unit;
         }
@@ -219,6 +234,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             _units.Clear();
             _screen = null;
+            _settings = null;
             _current = null;
         }
     }

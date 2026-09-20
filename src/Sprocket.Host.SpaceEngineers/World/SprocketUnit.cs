@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return storage.TryGetValue(ProgramKey, out text) && !string.IsNullOrEmpty(text);
         }
 
-        public SprocketUnit(IMyTerminalBlock block)
+        public SprocketUnit(IMyTerminalBlock block, Settings settings)
         {
             _block = block;
             _world = new GridWorld(block);
@@ -93,6 +93,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             // The player's own name is only where a namespace starts; choosing another is theirs to do.
             if (MyAPIGateway.Multiplayer != null)
                 _editor.Author = MyAPIGateway.Multiplayer.MyName;
+
+            _editor.DeveloperMode = settings != null && settings.DeveloperMode;
 
             // Asked once and then listened for. Whether this machine is working decides whether the
             // automation runs at all, and it changes when the lights go out rather than on a tick -
