@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Screen;
@@ -518,7 +519,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 var pointed = Editor.Register(Cmd.TriggerTarget, which,
                     delegate { Editor.PointTriggerAt(_system, target); });
 
-                sentence.DoesLead = trigger.Stops ? "stops" : "runs";
+                sentence.DoesLead = SentenceText.Then(sentence.Kind, trigger.Stops, true, false);
                 sentence.Does.Add(Clearable(new SequenceSlot(trigger.Runs,
                     sequence == null || !sequence.HasName ? "" : sequence.Name, pointed), clear));
 
@@ -529,11 +530,25 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var doing = Editor.Register(Cmd.TriggerTarget, which,
                 delegate { Editor.ChangeDoing(_system, changed, act); });
 
-            sentence.DoesLead = trigger.Stops ? "stops" : "";
+            EntityAction chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets));
 
-            var actions = Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets);
-            sentence.Does.Add(new ActionSlot(Chosen(actions, act.ActionId), doing));
-            sentence.Does.Add(Clearable(new EntitiesSlot(Resolved(act.Targets), true, doing), clear));
+            sentence.DoesLead = SentenceText.Then(sentence.Kind, trigger.Stops, false, act.Sets);
+            sentence.Does.Add(new ActionSlot(chosen, doing));
+
+            var blocks = new EntitiesSlot(Resolved(act.Targets), true, doing);
+            sentence.Does.Add(blocks);
+
+            // What it was given, where it takes anything, so the line says all of what it does.
+            // Pressing it reopens the whole choice, which opens on these values.
+            if (chosen == null || chosen.Wants == 0)
+            {
+                Clearable(blocks, clear);
+                return;
+            }
+
+            var fields = new List<Field>();
+            chosen.Fields(fields);
+            sentence.Does.Add(Clearable(new ValuesSlot(act.Values, fields, doing), clear));
         }
 
         /// <summary>
@@ -569,17 +584,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
 
             return only;
-        }
-
-        static EntityAction Chosen(List<EntityAction> actions, string id)
-        {
-            for (var i = 0; i < actions.Count; i++)
-            {
-                if (actions[i].Id == id)
-                    return actions[i];
-            }
-
-            return null;
         }
 
         void Collect()

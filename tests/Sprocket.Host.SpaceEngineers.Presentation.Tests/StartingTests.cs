@@ -93,7 +93,7 @@ public class StartingTests
         screen.Run(120);
 
         Assert.NotNull(screen.Editor.Program.Sequences[0].Trigger);
-        Assert.Equal("runs Sequence 1", screen.Editor.Doing(0));
+        Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
 
         // Mended. What the row says now is that it is switched off, which is the next thing to do
         // about it and not the thing that was wrong.

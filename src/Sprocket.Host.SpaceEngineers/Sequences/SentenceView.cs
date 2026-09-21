@@ -24,6 +24,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Label _lead;
         readonly List<Element> _slots = new List<Element>();
 
+        /// <summary>The word before each slot, drawn like the lead and hidden where there is none.</summary>
+        readonly List<Label> _joins = new List<Label>();
+
         /// <summary>What each element was last given, so an unchanged one is not worded again.</summary>
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
 
@@ -41,6 +44,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             for (int i = 0; i < slots; i++)
             {
+                Label join = Widgets.Label("", Palette.Muted, Lettering.Body);
+                join.Wraps = false;
+                join.Collapsed = true;
+                _joins.Add(join);
+                _wrap.Children.Add(join);
+
                 Element slot;
 
                 if (editable)
@@ -76,6 +85,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 _shownStep = step;
                 _lead.Text = SentenceText.Lead(world, step);
+
+                for (int i = 0; i < _joins.Count; i++)
+                {
+                    _joins[i].Text = SentenceText.Joining(step.Slots, i);
+                    _joins[i].Collapsed = _joins[i].Text.Length == 0;
+                }
             }
 
             for (int i = 0; i < _slots.Count && i < step.Slots.Count; i++)

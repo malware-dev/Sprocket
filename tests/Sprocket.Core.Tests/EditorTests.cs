@@ -1370,7 +1370,7 @@ public class EditorTests
         Assert.Equal("Airlock", editor.Screen.Title());
         Assert.Equal("Let me out", editor.Rows()[0].Summary);
         Assert.Equal("When Airlock Button is pressed", editor.Says(0));
-        Assert.Equal("runs Let me out", editor.Doing(0));
+        Assert.Equal("then run Let me out", editor.Doing(0));
     }
 
     [Fact]

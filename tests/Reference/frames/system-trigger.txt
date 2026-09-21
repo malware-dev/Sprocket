@@ -17,11 +17,11 @@ on screen     Airlock
 010  Sprite     Sprocket_Fill         {X:475 Y:208 W:110 H:36}  #374851FF
 011  Sprite     Sprocket_Fill         {X:475 Y:242 W:110 H:2}  #8EBCCFFF
 012  Text       at {X:490.6367 Y:214.382} scale 0.64  #DCF5FDFF  "is pressed"
-013  Text       at {X:594.2467 Y:214.382} scale 0.64  #A2C3CDFF  "runs"
-014  Sprite     Sprocket_Fill         {X:638 Y:208 W:143 H:36}  #374851FF
-015  Sprite     Sprocket_Fill         {X:638 Y:242 W:143 H:2}  #8EBCCFFF
-016  Text       at {X:654.1433 Y:214.382} scale 0.64  #DCF5FDFF  "Sequence 1"
-017  Text       at {X:765.5867 Y:213.0829} scale 0.57  #A2C3CDFF  "x"
+013  Text       at {X:594.2467 Y:214.382} scale 0.64  #A2C3CDFF  "then run"
+014  Sprite     Sprocket_Fill         {X:671 Y:208 W:143 H:36}  #374851FF
+015  Sprite     Sprocket_Fill         {X:671 Y:242 W:143 H:2}  #8EBCCFFF
+016  Text       at {X:686.9634 Y:214.382} scale 0.64  #DCF5FDFF  "Sequence 1"
+017  Text       at {X:798.4067 Y:213.0829} scale 0.57  #A2C3CDFF  "x"
 018  Text       at {X:1633.663 Y:213.0829} scale 0.57  #A2C3CDFF  "d"
 019  Text       at {X:262 Y:282.062} scale 0.57  #85A1A9FF  "SEQUENCES"
 020  Text       at {X:271.8 Y:307.952} scale 0.64  #A2C3CDFF  "+ New sequence"

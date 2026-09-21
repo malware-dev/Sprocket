@@ -80,7 +80,7 @@ public class ChangingTests
         Trigger changed = System(screen).Triggers[1];
         Assert.True(changed.Stops);
         Assert.Equal(1, changed.Runs);
-        Assert.Equal("stops Sequence 1", screen.Editor.Doing(1));
+        Assert.Equal("then stop Sequence 1", screen.Editor.Doing(1));
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Same(was, System(screen).Triggers[0]);
-        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(0));
+        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(0));
 
         // What it used to run stands on its own, so it stays behind rather than going with the
         // pointing.
@@ -171,7 +171,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Single(screen.Editor.Program.Sequences);
-        Assert.Equal("runs Sequence 1", screen.Editor.Doing(1));
+        Assert.Equal("then run Sequence 1", screen.Editor.Doing(1));
 
         // Two acts, so two steps back: the pointing, and then the emptying that took the plain
         // sequence with it.
@@ -184,7 +184,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
     }
 
     /// <summary>
@@ -214,7 +214,7 @@ public class ChangingTests
         screen.Editor.PressChoice("Seal up");
         screen.Run(2);
 
-        Assert.Equal("runs Seal up", screen.Editor.Doing(0));
+        Assert.Equal("then run Seal up", screen.Editor.Doing(0));
         Assert.Single(System(screen).Triggers);
     }
 
@@ -246,7 +246,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("close Airlock Inner Door", screen.Editor.Doing(1));
+        Assert.Equal("then close Airlock Inner Door", screen.Editor.Doing(1));
 
         // And it walks back from here, because the sequence it changed has nowhere else to offer it.
         Assert.Equal("changing a step", screen.Editor.Steps().UndoText);
@@ -254,7 +254,7 @@ public class ChangingTests
         screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
         screen.Run(2);
 
-        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
     }
 
     /// <summary>
@@ -336,7 +336,7 @@ public class ChangingTests
         // Back where it was, with what it did, and in the place it had among the others.
         Assert.Equal(2, screen.Editor.Triggers().Count);
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
     }
 
     /// <summary>
@@ -440,7 +440,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
     }
 
     /// <summary>

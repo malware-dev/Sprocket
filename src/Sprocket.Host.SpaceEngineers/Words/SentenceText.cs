@@ -21,6 +21,12 @@ namespace Sprocket.Host.SpaceEngineers.Words
     /// </remarks>
     public static class SentenceText
     {
+        /// <summary>The word a set is said with, on its step and wherever else it is said.</summary>
+        public const string SetWord = "set";
+
+        const string OnWord = "on";
+        const string ToWord = "to";
+
 
         /// <summary>A slot nobody has filled in yet.</summary>
         public const string Empty = "…";
@@ -45,6 +51,30 @@ namespace Sprocket.Host.SpaceEngineers.Words
         }
 
 
+        /// <summary>The words between what starts a trigger and what it does.</summary>
+        /// <remarks>
+        /// As the program writes it: a moment is followed by "then", "when any closed [ inner ] then
+        /// run 2", and a clock by the verb alone, "every 600t run 3". A trigger that does one plain thing
+        /// has no verb here, because that thing's own words follow; one that sets a value has "set",
+        /// because its value is said by name alone, as on its step.
+        /// </remarks>
+        public static string Then(TriggerKind kind, bool stops, bool sequence, bool sets)
+        {
+            var clock = kind == TriggerKind.Every;
+
+            if (stops)
+                return clock ? "stop" : "then stop";
+
+            if (sequence)
+                return clock ? "run" : "then run";
+
+            if (sets)
+                return clock ? SetWord : "then set";
+
+            return clock ? "" : "then";
+        }
+
+
         /// <summary>What a slot of a trigger reads as.</summary>
         /// <remarks>
         /// A duration in a trigger is a rate, and rates are said in ticks. Seconds would be a promise
@@ -62,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Words
 
 
         /// <summary>
-        /// What comes before a step's slots: the word "wait", a gate, or nothing at all.
+        /// What comes before a step's slots: "wait", "run", "set", or nothing at all.
         /// </summary>
         /// <remarks>
         /// Ordinarily nothing. A step reads as "close the inner door" and the list being a list is
@@ -73,7 +103,39 @@ namespace Sprocket.Host.SpaceEngineers.Words
             if (step.Kind == StepKind.Run)
                 return "run";
 
+            if (step.Kind == StepKind.Set)
+                return SetWord;
+
             return step.Kind == StepKind.Wait ? "wait" : "";
+        }
+
+
+        /// <summary>The word that joins one of a line's slots to what comes before it, or nothing.</summary>
+        /// <remarks>
+        /// A set reads as the program writes it: set a value on some blocks to something. Every other
+        /// line reads with its slots side by side. Worked out from the slots, so a step and a trigger
+        /// that does the same thing read the same.
+        /// </remarks>
+        public static string Joining(IList<SentenceSlot> slots, int slot)
+        {
+            var first = slots.Count > 0 ? slots[0] as ActionSlot : null;
+            if (first == null || first.Action == null || !first.Action.Sets)
+                return "";
+
+            if (slot == 1)
+                return OnWord;
+
+            return slot == 2 ? ToWord : "";
+        }
+
+
+        /// <summary>A set as one line: "set Charge Mode on Standby Battery to Recharge".</summary>
+        /// <remarks>
+        /// The words its step reads in, for where it is said as a line rather than drawn as slots.
+        /// </remarks>
+        public static string Setting(string value, string blocks, string given)
+        {
+            return SetWord + " " + value + " " + OnWord + " " + blocks + " " + ToWord + " " + given;
         }
 
 
@@ -160,7 +222,7 @@ namespace Sprocket.Host.SpaceEngineers.Words
         /// program say the same thing - and so somebody who types a value into this slot sees back
         /// exactly what they typed.
         /// </remarks>
-        static string Given(ValuesSlot slot)
+        public static string Given(ValuesSlot slot)
         {
             if (slot.IsEmpty)
                 return Empty;
@@ -185,9 +247,16 @@ namespace Sprocket.Host.SpaceEngineers.Words
             if (happening != null)
                 return happening.Event == null ? Empty : happening.Event.Text;
 
+            // A value is said by its name alone in its slot, because "set" is said before the slot and
+            // is not part of what pressing it changes.
             var action = slot as ActionSlot;
             if (action != null)
-                return action.Action == null ? Empty : action.Action.Text;
+            {
+                if (action.Action == null)
+                    return Empty;
+
+                return action.Action.Sets ? action.Action.Named : action.Action.Text;
+            }
 
             var duration = slot as DurationSlot;
             if (duration != null)

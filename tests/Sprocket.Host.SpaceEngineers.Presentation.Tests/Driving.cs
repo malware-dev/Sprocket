@@ -44,8 +44,14 @@ static class Driving
         SentenceTrigger trigger = editor.Triggers()[which];
         var line = trigger.DoesLead;
 
-        foreach (SentenceSlot slot in trigger.Does)
-            line += (line.Length > 0 ? " " : "") + SentenceText.InTrigger(editor.World, slot);
+        for (var i = 0; i < trigger.Does.Count; i++)
+        {
+            var join = SentenceText.Joining(trigger.Does, i);
+            if (join.Length > 0)
+                line += (line.Length > 0 ? " " : "") + join;
+
+            line += (line.Length > 0 ? " " : "") + SentenceText.InTrigger(editor.World, trigger.Does[i]);
+        }
 
         return line;
     }

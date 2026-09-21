@@ -32,6 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             public readonly List<Element> Starts = new List<Element>();
             public readonly List<Element> Does = new List<Element>();
 
+            /// <summary>The word before each part of what it does, hidden where there is none.</summary>
+            public readonly List<Label> Joins = new List<Label>();
+
             /// <summary>The crosses, and which part of the sentence each one belongs to.</summary>
             public readonly List<Glyph> Clears = new List<Glyph>();
             public readonly List<int> ClearsAt = new List<int>();
@@ -110,6 +113,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 row.Joined = trigger.DoesLead;
                 row.Between.Text = trigger.DoesLead;
                 row.Between.Collapsed = trigger.DoesLead.Length == 0;
+            }
+
+            // Before the parts are filled, which is what records them as shown: a join is worked out
+            // only for a part that has changed.
+            for (int i = 0; i < row.Joins.Count && i < trigger.Does.Count; i++)
+            {
+                if (ReferenceEquals(row.Shown[trigger.Slots.Count + i], trigger.Does[i]))
+                    continue;
+
+                string join = SentenceText.Joining(trigger.Does, i);
+                row.Joins[i].Text = join;
+                row.Joins[i].Collapsed = join.Length == 0;
             }
 
             Fill(row, row.Starts, trigger.Slots, 0);
@@ -198,7 +213,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             row.Sentence.Children.Add(row.Between);
 
             for (int i = 0; i < trigger.Does.Count; i++)
+            {
+                Label join = Widgets.Label("", Palette.Muted, Lettering.Body);
+                join.Wraps = false;
+                join.Collapsed = true;
+                row.Joins.Add(join);
+                row.Sentence.Children.Add(join);
+
                 Chip(row, row.Does, row.Sentence, trigger.Does[i]);
+            }
 
             row.Sentence.Children.Add(row.Live);
 

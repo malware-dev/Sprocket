@@ -1622,6 +1622,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                             act.Targets.Add(_program.Declare(_world, entity).Name);
                     }
 
+                    for (var i = 0; i < answer.Values.Count; i++)
+                        act.Values.Add(answer.Values[i]);
+
                     var sequence = _program.AddSequence(system);
                     sequence.Steps.Add(act);
                     sequence.Steps.Add(new Await());
@@ -1726,7 +1729,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     }
 
                     Do(system, new Rewrite(sequence, new ChangeStep(index, act, named, answer.Chosen,
-                        answer.Sets)));
+                        answer.Sets, answer.Values)));
                 }, values: act.Values));
         }
 

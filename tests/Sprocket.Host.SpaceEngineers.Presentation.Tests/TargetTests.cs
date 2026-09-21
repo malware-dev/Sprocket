@@ -1,5 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -69,8 +67,8 @@ public class TargetTests
         Assert.Single(screen.Editor.Program.Sequences);
 
         Assert.Equal(2, screen.Editor.Triggers().Count);
-        Assert.Equal("runs Cycle", screen.Editor.Doing(0));
-        Assert.Equal("runs Cycle", screen.Editor.Doing(1));
+        Assert.Equal("then run Cycle", screen.Editor.Doing(0));
+        Assert.Equal("then run Cycle", screen.Editor.Doing(1));
     }
 
     [Fact]
@@ -84,7 +82,7 @@ public class TargetTests
         screen.Run(2);
 
         Assert.Equal(2, screen.Editor.Triggers().Count);
-        Assert.Equal("stops Cycle", screen.Editor.Doing(1));
+        Assert.Equal("then stop Cycle", screen.Editor.Doing(1));
     }
 
     /// <summary>
@@ -108,7 +106,7 @@ public class TargetTests
         screen.Run(2);
 
         Assert.Equal(2, screen.Editor.Triggers().Count);
-        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
 
         // Two sequences exist, but only the named one is a row in the list of them.
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
@@ -128,7 +126,7 @@ public class TargetTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
 
         screen.Editor.Invoke(screen.Editor.Triggers()[1].DeleteCommand);
         screen.Run(2);

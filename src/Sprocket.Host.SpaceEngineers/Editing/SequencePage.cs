@@ -436,6 +436,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (step is Wait)
                 return StepKind.Wait;
 
+            var act = step as Act;
+            if (act != null && act.Sets)
+                return StepKind.Set;
+
             return step is Run ? StepKind.Run : StepKind.Do;
         }
 
@@ -474,7 +478,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 {
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen,
-                            answer.Sets));
+                            answer.Sets, answer.Values));
                     Editor.Pop();
                 }, values: step.Values));
         }

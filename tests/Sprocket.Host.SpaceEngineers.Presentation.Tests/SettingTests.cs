@@ -162,6 +162,58 @@ public class SettingTests
         Assert.False(light.Enabled, "setting the switch to off flipped the light on");
     }
 
+    /// <summary>
+    /// A trigger that sets a value says it the way the step does, value and all.
+    /// </summary>
+    /// <remarks>
+    /// Its line in the trigger list is put together apart from the step's, so it is where the two
+    /// would drift: a trigger that set the charge mode once read as the value and the battery, and
+    /// never said what it was set to.
+    /// </remarks>
+    [Fact]
+    public void ATriggerThatSetsAValueSaysAllOfIt()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewSystem("Power");
+        screen.Editor.PressStart("When…");
+        screen.Editor.PressBlock("Airlock Button");
+        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressPrimary();
+        screen.Editor.PressChoice("Do something");
+        screen.Editor.PressBlock("Standby Battery");
+        screen.Editor.PressChoice("Charge Mode");
+        screen.Editor.Typed("1");
+        screen.Run(2);
+
+        Assert.Equal("then set Charge Mode on Standby Battery to Recharge", screen.Editor.Doing(0));
+    }
+
+    /// <summary>Choosing something else for a step keeps what was given for the new choice.</summary>
+    /// <remarks>
+    /// A step changed from one value to another is given its new value at the end of the choosing.
+    /// Keeping the old one instead would set the new value to a number meant for something else.
+    /// </remarks>
+    [Fact]
+    public void ChangingWhatAStepSetsTakesItsNewValue()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Airlock Light");
+        screen.Editor.PressChoice("Falloff");
+        screen.Editor.Typed("2");
+        screen.Run(2);
+
+        screen.Editor.PressStepSlot(0, 0);
+        screen.Editor.PressChoice("Radius");
+        screen.Editor.Typed("4");
+        screen.Run(2);
+
+        var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
+        Assert.Equal("Radius", act.ActionId);
+        Assert.Equal(4, Assert.Single(act.Values).Whole);
+    }
+
     static string Named(Simulation sim, Fitting fitting)
     {
         GridEntity entity = sim.World.FindEntity(fitting.Id);

@@ -12,6 +12,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Does something to some blocks.</summary>
         Do,
 
+        /// <summary>Sets one of its blocks' values.</summary>
+        Set,
+
         /// <summary>Passes time and nothing else.</summary>
         Wait,
 

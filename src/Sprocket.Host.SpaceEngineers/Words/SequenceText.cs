@@ -318,19 +318,21 @@ namespace Sprocket.Host.SpaceEngineers.Words
                 return SentenceText.Empty;
 
             EntityAction named = step.Names(Vocabulary.ActionsFor(bindings, step.Targets));
-            var text = named == null ? SentenceText.Empty : named.Text;
+            var blocks = SentenceText.Named(bindings, step.Targets, true);
+            if (named == null)
+                return SentenceText.Empty + " " + blocks;
 
-            var said = text + " " + SentenceText.Named(bindings, step.Targets, true);
-            if (step.Values.Count == 0)
-                return said;
+            // The values in the words the step shows them in: a choice as its word, three numbers as
+            // one colour. After what it acts on, because the blocks are what somebody is looking for
+            // in a list of steps and the values are the detail.
+            var fields = new List<Field>();
+            named.Fields(fields);
+            var given = SentenceText.Given(new ValuesSlot(step.Values, fields, 0));
 
-            // After what it acts on, because the blocks are what somebody is looking for in a list
-            // of steps and the values are the detail. Spelled as they are written down, so the line
-            // on screen and the line in the program say the same thing.
-            for (var i = 0; i < step.Values.Count; i++)
-                said += " " + step.Values[i].Said;
+            if (step.Sets)
+                return SentenceText.Setting(named.Named, blocks, given);
 
-            return said;
+            return step.Values.Count == 0 ? named.Text + " " + blocks : named.Text + " " + blocks + " " + given;
         }
     }
 }

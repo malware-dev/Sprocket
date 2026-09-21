@@ -33,13 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What starts it: the blocks and the moment, or how often it comes round.</summary>
         public List<SentenceSlot> Slots { get; private set; }
 
-        /// <summary>
-        /// The word between the two halves: "runs", "stops", or nothing.
-        /// </summary>
-        /// <remarks>
-        /// Nothing where the trigger does one plain thing, because then the second half is that act's
-        /// own sentence - "close the outer door" - and a word in front of it would be a second verb.
-        /// </remarks>
+        /// <summary>The words between the two halves, "then run" or "then", as the program writes them.</summary>
         public string DoesLead
         {
             get { return _doesLead; }

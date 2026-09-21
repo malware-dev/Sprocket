@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -99,6 +100,45 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (left[i] != right[i])
                     return false;
             }
+            return true;
+        }
+
+        protected static List<Literal> CopyOf(IList<Literal> values)
+        {
+            var copy = new List<Literal>();
+            if (values == null)
+                return copy;
+
+            for (var i = 0; i < values.Count; i++)
+                copy.Add(values[i]);
+
+            return copy;
+        }
+
+        protected static void Refill(IList<Literal> target, IList<Literal> source)
+        {
+            target.Clear();
+            for (var i = 0; i < source.Count; i++)
+                target.Add(source[i]);
+        }
+
+        /// <summary>Whether two lists of values say the same thing.</summary>
+        /// <remarks>
+        /// By how each one reads, which is what a value is for: two that write themselves the same
+        /// way are the same value, and comparing the kinds as well would call a step changed for a
+        /// difference nothing can see.
+        /// </remarks>
+        protected static bool Same(IList<Literal> left, IList<Literal> right)
+        {
+            if (left.Count != right.Count)
+                return false;
+
+            for (var i = 0; i < left.Count; i++)
+            {
+                if (left[i].Said != right[i].Said)
+                    return false;
+            }
+
             return true;
         }
     }

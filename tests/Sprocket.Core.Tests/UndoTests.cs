@@ -1,5 +1,6 @@
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Sprocket.Tests;
@@ -158,7 +159,7 @@ public class UndoTests
     public void ChangingAStepReversesExactly()
     {
         Sequence sequence = Build();
-        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", false));
+        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", false, new[] { Literal.Of(4L) }));
     }
 
     [Fact]
@@ -296,7 +297,7 @@ public class UndoTests
     {
         Sequence sequence = Build();
 
-        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", false).Changes);
+        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", false, new Literal[0]).Changes);
         Assert.False(new Rename("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
     }
