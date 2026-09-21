@@ -70,6 +70,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         // A list of answers.
         Choice,
+        ChoiceTyped,
+        ChoiceTaken,
 
         /// <summary>Where the values an action asked for are typed.</summary>
         GiveValues,

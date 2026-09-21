@@ -171,6 +171,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         TextBox _focus;
         int _focusCommand;
+        int _focusTakes;
+
+        /// <summary>What the box with the caret last held that its command took.</summary>
+        string _focusTook = "";
         ComponentView _dragging;
 
         public EditorView(SprocketEditor editor)
@@ -903,15 +907,46 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // will say this has changed.
             _chromeStale = true;
 
-            if (_focus != null && _focusCommand != 0)
-                _editor.SetText(_focusCommand, _focus.Text);
+            if (_focus == null || _focusCommand == 0)
+                return;
+
+            // A box whose command refuses what was typed goes back to what it last took, so what it
+            // shows is always what Enter would take.
+            if (!_editor.Accepts(_focusCommand, _focus.Text))
+            {
+                _focus.Text = _focusTook;
+                return;
+            }
+
+            _focusTook = _focus.Text;
+            _editor.SetText(_focusCommand, _focus.Text);
+        }
+
+        /// <summary>Takes what is typed in the box with the caret, where Enter in it takes anything.</summary>
+        public bool TakeTyped()
+        {
+            if (_focus == null || _focusTakes == 0)
+                return false;
+
+            var takes = _focusTakes;
+            Unfocus();
+            _editor.Invoke(takes);
+            return true;
         }
 
         /// <summary>Puts the caret in a box, and says where what is typed into it goes.</summary>
         void Typing(TextBox box, int command)
         {
+            Typing(box, command, 0);
+        }
+
+        /// <summary>The same, and what Enter in it takes.</summary>
+        void Typing(TextBox box, int command, int takes)
+        {
             _focus = box;
             _focusCommand = command;
+            _focusTakes = takes;
+            _focusTook = box.Text;
             _focus.IsEditing = true;
             _focus.SelectAll();
         }
@@ -924,6 +959,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _focus.IsEditing = false;
             _focus = null;
             _focusCommand = 0;
+            _focusTakes = 0;
         }
 
         /// <summary>
@@ -1163,7 +1199,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (deed.Means == Means.Type)
             {
                 Unfocus();
-                Typing(deed.Box, deed.Command);
+                Typing(deed.Box, deed.Command, deed.Takes);
                 return true;
             }
 

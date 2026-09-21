@@ -248,7 +248,7 @@ namespace Sprocket.Sim.Simulation
             {
                 if (scene.IsQuestioning)
                     scene.TakeDefault();
-                else
+                else if (scene.IsAsking || !scene.TakeTyped())
                     scene.CommitAsk();
 
                 drawn();

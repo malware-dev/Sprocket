@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
@@ -552,7 +553,37 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 var ticks = WaitPresets[i];
                 page.Add(TimeText.WaitChoice(ticks), false, delegate { chosen(ticks); });
             }
+
+            page.AddTyped(TimeText.OtherWait, TimeText.UseLength, WholeTicks, delegate(string said)
+            {
+                int ticks;
+                if (int.TryParse(said, NumberStyles.None, CultureInfo.InvariantCulture, out ticks) && ticks > 0)
+                    chosen(ticks);
+            });
+
             return page;
+        }
+
+        /// <summary>Whether what is typed can still become a number of ticks.</summary>
+        /// <remarks>
+        /// Digits only, and few enough of them to fit, so the box refuses anything else as it is typed
+        /// rather than taking it and doing nothing on Enter. Empty is allowed, so it can be cleared.
+        /// </remarks>
+        static bool WholeTicks(string said)
+        {
+            if (string.IsNullOrEmpty(said))
+                return true;
+
+            if (said.Length > 9)
+                return false;
+
+            for (var i = 0; i < said.Length; i++)
+            {
+                if (said[i] < '0' || said[i] > '9')
+                    return false;
+            }
+
+            return true;
         }
 
         void EditWait(Wait step)

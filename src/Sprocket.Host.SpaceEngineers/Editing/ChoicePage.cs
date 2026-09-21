@@ -18,6 +18,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly string _title;
         readonly List<Option> _options = new List<Option>();
 
+        string _hint;
+        string _takes;
+        Func<string, bool> _accepts;
+        Action<string> _take;
+        string _typed = "";
+
         public ChoicePage(SprocketEditor editor, string title) : base(editor)
         {
             _title = title;
@@ -62,6 +68,19 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _options.Add(new Option(text, isCurrent, intervalTicks, choose));
         }
 
+        /// <summary>A row that is typed into rather than pressed, taking what is typed on Enter.</summary>
+        /// <remarks>
+        /// For an answer that is one of too many to list, such as a length of time. Typed in the list
+        /// itself, beside the answers that are listed, rather than on a screen of its own.
+        /// </remarks>
+        public void AddTyped(string hint, string takes, Func<string, bool> accepts, Action<string> take)
+        {
+            _hint = hint;
+            _takes = takes;
+            _accepts = accepts;
+            _take = take;
+        }
+
         /// <summary>Sets the caution shown beside the option added last.</summary>
         public void WarnOnLast(string warning)
         {
@@ -83,6 +102,17 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 entry.IntervalTicks = option.IntervalTicks;
                 entry.Warning = option.Warning;
                 list.Entries.Add(entry);
+            }
+
+            if (_take != null)
+            {
+                var typed = new ChoiceEntry(_takes, false,
+                    Editor.Register(Cmd.ChoiceTaken, delegate { _take(_typed); }));
+                typed.TextCommand = Editor.RegisterText(Cmd.ChoiceTyped,
+                    delegate(string said) { _typed = said; }, _accepts);
+                typed.Hint = _hint;
+                typed.Typed = _typed;
+                list.Entries.Add(typed);
             }
 
             components.Add(list);

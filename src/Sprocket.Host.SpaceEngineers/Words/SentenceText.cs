@@ -79,8 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Words
 
         /// <summary>What a slot of a step reads as.</summary>
         /// <remarks>
-        /// A duration in a step is a length of time somebody chose, and is said in the units they
-        /// chose it in - nobody thinks "wait three hundred ticks".
+        /// A duration is said in the unit it was written in, which is ticks.
         /// </remarks>
         public static string InStep(GridWorld world, SentenceSlot slot)
         {

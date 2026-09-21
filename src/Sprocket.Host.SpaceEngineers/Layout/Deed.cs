@@ -195,6 +195,12 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <summary>A box that takes the keyboard, and sends what is typed to <paramref name="command" />.</summary>
         public static Deed Types(int command, TextBox box)
         {
+            return Types(command, box, 0);
+        }
+
+        /// <summary>The same, where Enter in the box sends <paramref name="takes" />.</summary>
+        public static Deed Types(int command, TextBox box, int takes)
+        {
             if (command == 0)
                 return Nothing;
 
@@ -205,8 +211,12 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             deed.Means = Means.Type;
             deed.Command = command;
             deed.Box = box;
+            deed.Takes = takes;
             return deed;
         }
+
+        /// <summary>What Enter in a box sends, or 0 where Enter in it takes nothing.</summary>
+        public int Takes { get; private set; }
 
         /// <summary>A control that throws away what is in a box, and tells the same command.</summary>
         /// <remarks>

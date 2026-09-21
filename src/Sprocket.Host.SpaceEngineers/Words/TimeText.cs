@@ -15,27 +15,20 @@ namespace Sprocket.Host.SpaceEngineers.Words
     {
         const int TicksPerSecond = 60;
 
+        /// <summary>What the box for a length nobody offered says while it is empty.</summary>
+        public const string OtherWait = "Another length, in ticks";
 
-        /// <summary>
-        /// A length of time in the units a person would say it in.
-        /// </summary>
-        /// <remarks>
-        /// The tick count is still shown alongside when the duration is being chosen, which is where
-        /// the two vocabularies need to meet.
-        /// </remarks>
+        /// <summary>The button beside that box, which takes the length typed in it.</summary>
+        public const string UseLength = "Use";
+
+        static readonly string[] Minutes = BuildMinutes();
+
+
+        /// <summary>A length of time, in ticks, which is the only unit a program writes one in.</summary>
         public static string Duration(int ticks)
         {
-            if (ticks < 60)
-                return ticks == 1 ? "1 tick" : ticks + " ticks";
-
-            var seconds = ticks / 60;
-            if (seconds < 60)
-                return seconds == 1 ? "1 second" : seconds + " seconds";
-
-            var minutes = seconds / 60;
-            return minutes == 1 ? "a minute" : minutes + " minutes";
+            return ticks == 1 ? "1 tick" : ticks + " ticks";
         }
-
 
         /// <summary>
         /// How long ago, in words.
@@ -79,9 +72,33 @@ namespace Sprocket.Host.SpaceEngineers.Words
         }
 
 
+        /// <summary>One of the lengths offered for a wait, said aloud and then in ticks.</summary>
+        /// <remarks>
+        /// Where somebody meets a tick for the first time, so the length they know sits beside it.
+        /// </remarks>
         public static string WaitChoice(int ticks)
         {
-            return Duration(ticks) + " - " + ticks + " ticks";
+            return Spoken(ticks) + " - " + Duration(ticks);
+        }
+
+
+        public static string Rate(int ticks)
+        {
+            return ticks == 1 ? "tick" : ticks + " ticks";
+        }
+
+        /// <summary>A length of time as it would be said aloud, for a choice that also gives its ticks.</summary>
+        static string Spoken(int ticks)
+        {
+            if (ticks < 60)
+                return Duration(ticks);
+
+            var seconds = ticks / 60;
+            if (seconds < 60)
+                return seconds == 1 ? "1 second" : seconds + " seconds";
+
+            var minutes = seconds / 60;
+            return minutes == 1 ? "a minute" : minutes + " minutes";
         }
 
 
@@ -91,16 +108,6 @@ namespace Sprocket.Host.SpaceEngineers.Words
             for (var i = 2; i < 60; i++)
                 words[i] = i + " minutes ago";
             return words;
-        }
-
-
-
-        static readonly string[] Minutes = BuildMinutes();
-
-
-        public static string Rate(int ticks)
-        {
-            return ticks == 1 ? "tick" : ticks + " ticks";
         }
     }
 }

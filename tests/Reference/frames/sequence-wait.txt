@@ -21,9 +21,9 @@ on screen     Sequence 1
 014  Text       at {X:1547.933 Y:124.012} scale 0.57  #85A1A9FF  "ON"
 015  Text       at {X:1605.56 Y:124.012} scale 0.57  #DCF5FDFF  "OFF"
 016  Text       at {X:342 Y:174.902} scale 0.64  #A2C3CDFF  "wait"
-017  Sprite     Sprocket_Fill         {X:384 Y:169 W:110 H:36}  #374851FF
-018  Sprite     Sprocket_Fill         {X:384 Y:203 W:110 H:2}  #8EBCCFFF
-019  Text       at {X:400.27 Y:174.902} scale 0.64  #DCF5FDFF  "5 seconds"
+017  Sprite     Sprocket_Fill         {X:384 Y:169 W:101 H:36}  #374851FF
+018  Sprite     Sprocket_Fill         {X:384 Y:203 W:101 H:2}  #8EBCCFFF
+019  Text       at {X:400.27 Y:174.902} scale 0.64  #DCF5FDFF  "300 ticks"
 020  Sprite     Sprocket_Fill         {X:278 Y:179 W:3 H:3}  #85A1A9FF
 021  Sprite     Sprocket_Fill         {X:278 Y:185 W:3 H:3}  #85A1A9FF
 022  Sprite     Sprocket_Fill         {X:278 Y:191 W:3 H:3}  #85A1A9FF

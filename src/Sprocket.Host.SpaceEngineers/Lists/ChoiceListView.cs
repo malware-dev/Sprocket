@@ -24,6 +24,9 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             public Label Text;
             public Label Warning;
             public Label Current;
+            public TextBox Box;
+            public Label Take;
+            public bool Taking;
             public int Ticks;
         }
 
@@ -71,6 +74,12 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 ChoiceEntry entry = _component.Entries[i];
                 Row row = _rows[i];
 
+                if (row.Box != null)
+                {
+                    Typed(row, entry);
+                    continue;
+                }
+
                 row.Line.Press = Deed.Sends(entry.Command);
                 row.Text.Text = entry.Text;
                 row.Warning.Text = entry.Warning;
@@ -96,6 +105,17 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             {
                 Row row = _rows[i];
 
+                // The box is typed into without the list hearing about each key, so whether there is
+                // anything to take is read off it here: one length, on a row that has a box, and the
+                // button dressed again only when that answer changes.
+                if (row.Box != null)
+                {
+                    if (row.Taking != row.Box.Text.Length > 0)
+                        Dress(row);
+
+                    continue;
+                }
+
                 if (row.Blink == null)
                     continue;
 
@@ -107,6 +127,34 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
                 row.Blink.IsLit = row.Ticks <= 1 || tick % row.Ticks < flash;
             }
+        }
+
+        /// <summary>A row that is typed into: its box takes the keyboard, and Enter in it takes what is there.</summary>
+        void Typed(Row row, ChoiceEntry entry)
+        {
+            row.Box.Hint = entry.Hint;
+
+            // Put back only while nobody is typing into it, the way a search box is: whatever is in the
+            // box is the truth while it is being typed.
+            var view = Host as EditorView;
+            if (view == null || view.Focus != row.Box)
+                row.Box.Text = entry.Typed;
+
+            row.Box.Press = Deed.Types(entry.TextCommand, row.Box, entry.Command);
+            row.Take.Text = entry.Text;
+            row.Take.Press = Deed.Sends(entry.Command);
+            Dress(row);
+        }
+
+        /// <summary>The button lit while the box holds something to take, and a dim well while it holds nothing.</summary>
+        static void Dress(Row row)
+        {
+            row.Taking = row.Box.Text.Length > 0;
+
+            if (row.Taking)
+                Widgets.Go(row.Take);
+            else
+                Widgets.Waiting(row.Take);
         }
 
         void Rebuild()
@@ -129,6 +177,24 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 ChoiceEntry entry = _component.Entries[i];
 
                 var row = new Row();
+
+                if (entry.TextCommand != 0)
+                {
+                    row.Box = Widgets.Box(Lettering.Body, Palette.Page);
+                    row.Take = Widgets.Label("", Palette.Ink, Lettering.Small);
+                    row.Take.Wraps = false;
+                    row.Line = new Bar();
+                    row.Line.Spacing = Space.PadX;
+                    row.Line.Padding = new Thickness(Space.PadX, Space.PadY);
+                    row.Line.Background = Palette.Panel;
+                    row.Line.Fill = row.Box;
+                    row.Line.Right = row.Take;
+
+                    _rows.Add(row);
+                    _stack.Children.Add(row.Line);
+                    continue;
+                }
+
                 row.Ticks = entry.IntervalTicks;
                 row.Text = Widgets.Label("", Palette.Ink, Lettering.Body);
 

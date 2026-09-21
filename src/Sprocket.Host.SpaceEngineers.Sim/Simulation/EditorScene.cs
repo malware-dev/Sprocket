@@ -172,6 +172,12 @@ namespace Sprocket.Sim.Simulation
             _view.CommitAsk();
         }
 
+        /// <summary>Takes what is typed in the box with the caret, as Enter in it does in the game.</summary>
+        public bool TakeTyped()
+        {
+            return _view.TakeTyped();
+        }
+
         public void CancelAsk()
         {
             _view.CancelAsk();

@@ -320,6 +320,12 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
                 return;
             }
 
+            if (outcome.Commit && _view.TakeTyped())
+            {
+                _blinkFrom = Now();
+                return;
+            }
+
             if (outcome.Onward && _view.IsAsking)
             {
                 _view.NextField();
