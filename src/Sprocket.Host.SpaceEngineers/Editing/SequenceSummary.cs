@@ -265,6 +265,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (adrift.Exists)
                 return adrift;
 
+            SequenceFault unoffered = Unoffered(bindings, sequence);
+            if (unoffered.Exists)
+                return unoffered;
+
+            SequenceFault unawaited = Unawaited(sequence);
+            if (unawaited.Exists)
+                return unawaited;
+
             // A step that is being waited on and cannot finish. Only the block knows - a vent with
             // nowhere to put the air looks exactly like one that is merely slow - so it is asked,
             // and what it says is what gets shown.
@@ -288,5 +296,42 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return SequenceFault.None;
         }
 
+        /// <summary>The first action that is not followed by a wait for it, or none.</summary>
+        static SequenceFault Unawaited(Sequence sequence)
+        {
+            var steps = sequence.Steps;
+            for (var i = 0; i < steps.Count; i++)
+            {
+                if (steps[i] is Act && (i + 1 == steps.Count || !(steps[i + 1] is Await)))
+                    return new SequenceFault(SequenceProblem.Unawaited, i);
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>The first step whose blocks do not offer what it does, or none.</summary>
+        /// <remarks>
+        /// Every block the step names has to offer it, because the step is one act done to all of
+        /// them. Asked of each block's own list rather than of a list built for the purpose, since
+        /// this is worked out every time a fault is.
+        /// </remarks>
+        static SequenceFault Unoffered(Bindings bindings, Sequence sequence)
+        {
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var act = sequence.Steps[i] as Act;
+                if (act == null || !act.HasAction)
+                    continue;
+
+                for (var t = 0; t < act.Targets.Count; t++)
+                {
+                    GridEntity entity = bindings.Entity(act.Targets[t]);
+                    if (entity != null && act.Names(entity.Kind.Actions) == null)
+                        return new SequenceFault(SequenceProblem.Unoffered, i);
+                }
+            }
+
+            return SequenceFault.None;
+        }
     }
 }

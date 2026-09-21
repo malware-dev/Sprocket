@@ -78,6 +78,7 @@ public class ProblemTests
         var shut = new Act("close");
         shut.Targets.Add(ship.Automation.Declare(ship.World, ship.World.FindEntity(2)!).Name);
         warn.Steps.Add(shut);
+        warn.Steps.Add(new Await());
 
         var fault = Fault(ship, warn);
         Assert.Equal(SequenceProblem.NothingStarts, fault.Problem);
@@ -107,6 +108,7 @@ public class ProblemTests
         var shut = new Act("close");
         shut.Targets.Add(ship.Automation.Declare(ship.World, ship.World.FindEntity(2)!).Name);
         warn.Steps.Add(shut);
+        warn.Steps.Add(new Await());
 
         // Long enough for the screens to have marked what they mark, and for Sprocket to have parked
         // anything it parks.
@@ -328,6 +330,54 @@ public class ProblemTests
         ship.Editor.Tick(1800);
 
         Assert.True(string.IsNullOrEmpty(ship.Editor.Triggers()[0].Problem));
+    }
+
+    /// <summary>
+    /// A step whose blocks do not offer what it does is broken, and stays as it was written.
+    /// </summary>
+    /// <remarks>
+    /// A block replaced by one of another kind, or the mod that taught it the act removed. Opening the
+    /// sequence must not turn the step into something the blocks do offer: that is the screen writing
+    /// a program nobody wrote, and the next save keeping it.
+    /// </remarks>
+    [Fact]
+    public void AStepItsBlocksDoNotOfferIsBrokenAndLeftAsWritten()
+    {
+        var ship = Build();
+        var act = (Act)ship.Sequence.Steps[0];
+        act.ActionId = "transmogrify";
+
+        var fault = Fault(ship);
+        Assert.Equal(SequenceProblem.Unoffered, fault.Problem);
+        Assert.Equal(0, fault.Step);
+        Assert.True(fault.Parks);
+
+        // Into the sequence, which is where the step is built for the screen.
+        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
+        ship.Editor.Tick(600);
+
+        Assert.IsType<SequencePage>(ship.Editor.Current);
+        Assert.Equal("transmogrify", act.ActionId);
+    }
+
+    /// <summary>A step that does not wait for what it started is a fault this version reports.</summary>
+    /// <remarks>
+    /// The editor draws every step as one that waits, because it writes a wait after every action.
+    /// A program from anywhere else can leave one out, and drawn as it stands the screen would say the
+    /// door shuts before anything else happens when nothing waits for it at all.
+    /// </remarks>
+    [Fact]
+    public void AStepThatDoesNotWaitIsAFault()
+    {
+        var ship = Build();
+        Assert.IsType<Await>(ship.Sequence.Steps[1]);
+        ship.Sequence.Steps.RemoveAt(1);
+
+        var fault = Fault(ship);
+        Assert.Equal(SequenceProblem.Unawaited, fault.Problem);
+        Assert.Equal(0, fault.Step);
+        Assert.True(fault.Parks);
     }
 
     static SequenceFault Fault(Ship ship) => Fault(ship, ship.Sequence);

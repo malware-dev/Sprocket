@@ -168,6 +168,7 @@ public class OverviewTests
         var shut = new Act("close");
         shut.Targets.Add(ship.Ref(2));
         spare.Steps.Add(shut);
+        spare.Steps.Add(new Await());
 
         ship.Tick(3);
 

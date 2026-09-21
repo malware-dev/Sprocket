@@ -400,14 +400,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (act == null)
                 return built;
 
-            var actions = Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets);
-            var chosen = act.Names(actions);
-            if (actions.Count > 0 && chosen == null)
-            {
-                chosen = actions[0];
-                act.ActionId = chosen.Id;
-                act.Sets = chosen.Sets;
-            }
+            // Shown as written. A step whose blocks do not offer what it does is a fault, said on the
+            // sequence, and the gap in its sentence is where it is re-picked.
+            var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets));
 
             built.Slots.Add(new ActionSlot(chosen,
                 Change(Cmd.StepSlot, position, 0, delegate { EditStep(act); })));

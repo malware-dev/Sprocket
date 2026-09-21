@@ -271,6 +271,10 @@ namespace Sprocket.Host.SpaceEngineers.Words
                 return "This is switched off, so nothing starts it on its own.";
             if (problem == SequenceProblem.MissingGate)
                 return "This waits on something that isn't here any more.";
+            if (problem == SequenceProblem.Unoffered)
+                return "This does something these blocks no longer offer. Replace this step.";
+            if (problem == SequenceProblem.Unawaited)
+                return "This step doesn't wait for what it starts, which this version can't show. Replace this step.";
             if (problem == SequenceProblem.Stuck)
                 return "This is waiting for something that cannot finish.";
             if (problem == SequenceProblem.Conflicted)

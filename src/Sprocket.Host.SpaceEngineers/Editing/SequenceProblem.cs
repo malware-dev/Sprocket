@@ -21,6 +21,22 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>It waits on something that is no longer here.</summary>
         MissingGate,
 
+        /// <summary>It asks its blocks for something they do not offer.</summary>
+        /// <remarks>
+        /// The blocks are all here; what the step does is not among what they offer, because a block
+        /// was replaced by one of another kind or the mod that taught it the act is gone. The step
+        /// stays as it was written, so it can be read and re-picked rather than turned into something
+        /// else.
+        /// </remarks>
+        Unoffered,
+
+        /// <summary>One of its steps goes straight on without waiting for what it started.</summary>
+        /// <remarks>
+        /// A program from anywhere but the editor can hold one, and the editor draws every step as one
+        /// that waits, so what it would show is not what runs. Said rather than drawn as if it waited.
+        /// </remarks>
+        Unawaited,
+
         /// <summary>
         /// Nothing is missing and nothing will ever start it.
         /// </summary>
