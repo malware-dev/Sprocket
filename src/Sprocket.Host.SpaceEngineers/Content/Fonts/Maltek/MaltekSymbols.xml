@@ -30,6 +30,7 @@
 <glyph ch="2" code="0032" bm="0" origin="64,128" size="64x64" aw="63" lsb="0" />
 <glyph ch="g" code="0067" bm="0" origin="128,128" size="64x64" aw="63" lsb="0" />
 <glyph ch="t" code="0074" bm="0" origin="192,128" size="64x64" aw="63" lsb="0" />
+<glyph ch="w" code="0077" bm="0" origin="256,128" size="64x64" aw="63" lsb="0" />
 </glyphs>
 <kernpairs>
 </kernpairs>

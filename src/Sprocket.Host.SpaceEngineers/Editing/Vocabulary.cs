@@ -120,6 +120,24 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return said;
         }
 
+        /// <summary>Whether any of the blocks offers something the others do not, which the shared list leaves out.</summary>
+        /// <remarks>What is hidden counts only while it is being shown.</remarks>
+        public static bool Narrowed(GridWorld world, IList<long> entityIds, bool hidden)
+        {
+            var entities = Blocks(world, entityIds);
+            for (var i = 0; i < entities.Count; i++)
+            {
+                var actions = entities[i].Kind.Actions;
+                for (var j = 0; j < actions.Count; j++)
+                {
+                    if ((hidden || !actions[j].Hidden) && !AllHaveAction(entities, actions[j], 0))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         static List<EntityAction> ActionsOf(List<GridEntity> entities)
         {
             var result = new List<EntityAction>();
@@ -129,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var candidates = entities[0].Kind.Actions;
             for (var i = 0; i < candidates.Count; i++)
             {
-                if (AllHaveAction(entities, candidates[i]))
+                if (AllHaveAction(entities, candidates[i], 1))
                     result.Add(candidates[i]);
             }
             return result;
@@ -211,9 +229,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return true;
         }
 
-        static bool AllHaveAction(List<GridEntity> entities, EntityAction action)
+        static bool AllHaveAction(List<GridEntity> entities, EntityAction action, int from)
         {
-            for (var i = 1; i < entities.Count; i++)
+            for (var i = from; i < entities.Count; i++)
             {
                 if (entities[i].Kind.FindAction(action.Id, action.Sets) == null)
                     return false;

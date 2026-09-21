@@ -91,6 +91,9 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         public const string Stop = "t";
 
+        /// <summary>An arrow meeting a bar. Something that runs until it is finished.</summary>
+        public const string Finish = "w";
+
         /// <summary>A pencil. Changing what something is called, as opposed to what it does.</summary>
         public const string Pencil = "p";
 

@@ -220,6 +220,21 @@ def arrow():
     ]
 
 
+def finish():
+    """
+    An arrow meeting a bar: runs until it is finished.
+
+    The arrow's shaft and head, stopped by an upright where it arrives, so it reads beside play and
+    stop without repeating either: this is neither starting nor stopping but going on to an end.
+    """
+    y = 0.5
+    return [
+        stroke((0.14, y), (0.52, y)),
+        head((0.68, y), (0.46, y), 0.30),
+        stroke((0.80, 0.26), (0.80, 0.74)),
+    ]
+
+
 def check():
     """
     A tick. Yes, as opposed to the game's own filled square.
@@ -467,6 +482,7 @@ GLYPHS = [
     ("g", "play", lambda: solid(play())),
     # Not "s", which refresh already has. The letter is in the word and nothing else wanted it.
     ("t", "stop", lambda: solid(stop())),
+    ("w", "finish", lambda: solid(finish())),
 ]
 
 

@@ -93,5 +93,11 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         /// <summary>Shown instead of the choices when nothing matches.</summary>
         public string EmptyText { get; set; }
+
+        /// <summary>A line over the list saying it is narrowed by the selection, or empty for none.</summary>
+        public string Note { get; set; }
+
+        /// <summary>What the mark on an entry that is waited on says when the pointer rests on it.</summary>
+        public string WaitsTip { get; set; }
     }
 }

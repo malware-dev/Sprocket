@@ -598,6 +598,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _values.Clear();
             _groups.Clear();
             _dimmed.Clear();
+            _waits.Clear();
 
             if (_forEvents)
             {
@@ -613,6 +614,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 Grouped(Vocabulary.ActionsOf(Editor.World, _selection));
             }
 
+            var note = !_forEvents && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsHidden)
+                ? NarrowedSaid
+                : "";
+
             // A choice the blocks can no longer honour is dropped rather than left showing, so
             // "Done" never appears over a sentence that could not run.
             var chosen = _chosen;
@@ -623,6 +628,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
 
             var changed = false;
+            if (_what.WaitsTip != WaitsSaid)
+            {
+                _what.WaitsTip = WaitsSaid;
+                changed = true;
+            }
+
+            if (_what.Note != note)
+            {
+                _what.Note = note;
+                changed = true;
+            }
+
             if (_what.NarrowText != _whatSearch)
             {
                 _what.NarrowText = _whatSearch;
@@ -700,6 +717,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     changed = true;
                 }
 
+                var waits = at >= 0 && _waits.Count > at && _waits[at];
+                if (_what.Entries[i].Waits != waits)
+                {
+                    _what.Entries[i].Waits = waits;
+                    changed = true;
+                }
+
                 if (at < 0)
                 {
                     changed |= Apply(_what.Entries[i], at == -2 ? ValuesSaid : ActionsSaid,
@@ -727,6 +751,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>The heading over the well that holds the game's own words.</summary>
         const string TerminalSaid = "Terminal";
+
+        /// <summary>What the list of what to do says when the picked blocks do not all offer the same.</summary>
+        const string NarrowedSaid = "Currently showing only what the selected blocks share";
+
+        /// <summary>What the mark on something a step waits for says when the pointer rests on it.</summary>
+        const string WaitsSaid = "Holds the sequence until finished";
 
         /// <summary>What the checkbox that shows what is hidden says.</summary>
         const string HiddenSaid = "Show hidden";
@@ -775,6 +805,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _values.Add(one.Sets);
                 _groups.Add(group);
                 _dimmed.Add(one.Hidden);
+                _waits.Add(!string.IsNullOrEmpty(one.LeadsToStateId));
             }
         }
 
@@ -800,6 +831,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>Whether each thing on offer is shown only because what is hidden is being shown.</summary>
         readonly List<bool> _dimmed = new List<bool>();
+
+        /// <summary>Whether a step doing each thing on offer waits for it to finish.</summary>
+        readonly List<bool> _waits = new List<bool>();
 
         /// <summary>
         /// What to draw, in order: an index into the things on offer, or a heading.

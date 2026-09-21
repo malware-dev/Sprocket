@@ -56,5 +56,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         /// <summary>Whether this is shown only because what is hidden is being shown, and so is drawn dimmed.</summary>
         public bool IsDimmed { get; set; }
+
+        /// <summary>Whether a step doing this waits for it to finish.</summary>
+        public bool Waits { get; set; }
     }
 }

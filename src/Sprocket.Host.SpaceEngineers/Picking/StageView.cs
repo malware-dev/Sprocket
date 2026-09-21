@@ -17,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             public Stack Left;
             public Mark Mark;
             public IconBox Icon;
+            public Glyph Waits;
             public Label Name;
             public Label Detail;
         }
@@ -113,6 +114,9 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         float _held;
         readonly List<RowVisual> _visible = new List<RowVisual>();
         readonly Label _empty = Widgets.Label("", Palette.Muted, Lettering.Small);
+
+        /// <summary>The line over the list saying it is narrowed by the selection.</summary>
+        readonly Label _note = Widgets.Wash("", Palette.Muted, Palette.SlotFill);
 
         readonly Stack _kindList = Widgets.Column(Space.Hair * 2f);
         readonly List<KindVisual> _kindRows = new List<KindVisual>();
@@ -217,6 +221,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _wellRoom.Padding = new Thickness(0f, 0f, Space.Row, 0f);
             _wellRoom.Children.Add(_well);
 
+            _list.Children.Add(_note);
             _list.Children.Add(_rows);
             _list.Children.Add(_wellTitle);
             _list.Children.Add(_wellRoom);
@@ -520,6 +525,9 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _wellTitle.Text = Widgets.Caps(stage.WellTitle ?? "");
             _wellTitle.Collapsed = below == 0 || string.IsNullOrEmpty(stage.WellTitle);
 
+            _note.Text = stage.Note ?? "";
+            _note.Collapsed = string.IsNullOrEmpty(stage.Note);
+
             if (stage.Entries.Count == 0)
             {
                 _empty.Text = stage.EmptyText;
@@ -547,11 +555,16 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 // row somebody presses twice before believing it.
                 row.Line.Press = entry.IsHeading ? Deed.Nothing : Moving(entry, many);
 
-                // A heading starts where the marks do and sits against the first thing it names: the
-                // mark's column goes, and the gap after it with it, and so does the room below.
-                row.Left.Collapsed = entry.IsHeading;
+                // No mark where one thing is settled on, only where several are collected: the row's own
+                // tone says which one it is, and the words then start where a heading does. A heading
+                // also sits against the first thing it names, with no room below it.
+                row.Left.Collapsed = entry.IsHeading || !many;
                 row.Line.Padding = entry.IsHeading ? HeadingPad : Pad;
-                row.Line.Highlight = entry.IsHeading ? Palette.None : Palette.PanelHot;
+
+                // The one settled on sits on the highlight tone at rest, the way a chosen answer in a
+                // list of answers does, so lighting it has to go a step further again.
+                bool settled = entry.IsChosen && !many;
+                row.Line.Highlight = entry.IsHeading ? Palette.None : settled ? Palette.Line : Palette.PanelHot;
                 row.Mark.Collapsed = entry.IsHeading;
 
                 // The box collects one at a time and says so whatever is held down, which is what it
@@ -563,7 +576,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
                 row.Mark.Highlight = entry.IsHeading || !many ? Palette.None : Palette.PanelHot;
 
-                // A tick for things you collect, a dot for things you settle on.
+                // A tick for things you collect.
                 row.Mark.Many = many;
                 row.Mark.Chosen = entry.IsChosen;
                 row.Mark.Color = entry.IsChosen ? Palette.Live : Palette.Faint;
@@ -572,11 +585,15 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                     row.Icon.Art = entry.Icon;
 
                 row.Name.Text = entry.IsHeading ? Widgets.Caps(entry.Text) : entry.Text;
+                row.Waits.Collapsed = !entry.Waits;
+                row.Waits.Tip = entry.Waits ? stage.WaitsTip : null;
                 row.Name.Color = entry.IsHeading ? Palette.Faint : entry.IsDimmed ? Palette.Muted : Palette.Ink;
 
                 // Sunk a step further into the well than what is shown by default: the one tone darker
                 // than the well's own, so hidden reads as hidden before the words are read.
-                row.Line.Background = entry.IsDimmed ? Palette.ControlHot : Palette.None;
+                row.Line.Background = settled ? Palette.PanelHot
+                    : entry.IsDimmed ? Palette.ControlHot
+                    : Palette.None;
 
                 string detail = DetailOf(entry);
                 row.Detail.Text = detail;
@@ -626,8 +643,15 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             row.Name = Widgets.Label("", Palette.Ink, Lettering.Body);
             row.Detail = Widgets.Label("", Palette.Faint, Lettering.Tiny);
 
+            // In the line rather than in a column of its own: only a handful of rows carry it, and a
+            // column would indent every other label for nothing.
+            row.Waits = Widgets.Symbol(Symbols.Finish, Palette.Muted);
+            Stack said = Widgets.RowOf(Space.Item);
+            said.Children.Add(row.Waits);
+            said.Children.Add(row.Name);
+
             Stack text = Widgets.Column(Space.Line * 0.6f);
-            text.Children.Add(row.Name);
+            text.Children.Add(said);
             text.Children.Add(row.Detail);
 
             // A stack, not a bar. A bar spans whatever width it is offered, which is exactly right for a

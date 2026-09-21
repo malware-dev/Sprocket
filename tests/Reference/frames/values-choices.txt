@@ -40,10 +40,10 @@ on screen     Do something
 033  Sprite     Sprocket_Fill         {X:729 Y:142 W:1 H:800}  #5B737BFF
 034  Sprite     Sprocket_Fill         {X:1188 Y:142 W:1 H:800}  #5B737BFF
 035  SetClip    {X:745 Y:292 W:428 H:634}
-036  Text       at {X:784.8 Y:301.262} scale 0.64  #DCF5FDFF  "switch off"
-037  Text       at {X:761.655 Y:302.557} scale 0.57  #85A1A9FF  "o"
-038  Text       at {X:784.8 Y:347.142} scale 0.64  #DCF5FDFF  "switch on"
-039  Text       at {X:761.655 Y:348.437} scale 0.57  #85A1A9FF  "o"
+036  Text       at {X:757.8 Y:299.963} scale 0.57  #A2C3CDFF  "w"
+037  Text       at {X:779.26 Y:301.262} scale 0.64  #DCF5FDFF  "switch off"
+038  Text       at {X:757.8 Y:345.843} scale 0.57  #A2C3CDFF  "w"
+039  Text       at {X:779.26 Y:347.142} scale 0.64  #DCF5FDFF  "switch on"
 040  Text       at {X:745 Y:389.422} scale 0.64  #85A1A9FF  "TERMINAL"
 041  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:181}  #141B20FF
 042  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:1}  #5B737BFF
@@ -51,61 +51,60 @@ on screen     Do something
 044  Sprite     Sprocket_Fill         {X:745 Y:416 W:1 H:181}  #5B737BFF
 045  Sprite     Sprocket_Fill         {X:1154 Y:416 W:1 H:181}  #5B737BFF
 046  Text       at {X:767.8 Y:435.702} scale 0.64  #85A1A9FF  "VALUES"
-047  Text       at {X:794.8 Y:471.982} scale 0.64  #DCF5FDFF  "Charge Mode"
-048  Text       at {X:772.0267 Y:473.277} scale 0.57  #3ACC00FF  "0"
+047  Sprite     Sprocket_Fill         {X:755 Y:462 W:390 H:43}  #3C4C52FF
+048  Text       at {X:767.8 Y:471.982} scale 0.64  #DCF5FDFF  "Charge Mode"
 049  Text       at {X:767.8 Y:517.862} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
-050  Text       at {X:794.8 Y:554.142} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
-051  Text       at {X:771.655 Y:555.437} scale 0.57  #85A1A9FF  "o"
-052  SetClip    {X:259 Y:142 W:1402 H:812}
-053  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
-054  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
-055  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
-056  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
-057  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
-058  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
-059  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
-060  Sprite     Sprocket_Fill         {X:758 Y:262 W:17 H:1}  #85A1A9FF
-061  Sprite     Sprocket_Fill         {X:758 Y:278 W:17 H:1}  #85A1A9FF
-062  Sprite     Sprocket_Fill         {X:758 Y:262 W:1 H:17}  #85A1A9FF
-063  Sprite     Sprocket_Fill         {X:774 Y:262 W:1 H:17}  #85A1A9FF
-064  Text       at {X:784.8 Y:259.772} scale 0.57  #A2C3CDFF  "Show hidden"
-065  ClearClip  
-066  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
-067  SetClip    {X:276 Y:55 W:157 H:33}
-068  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
-069  ClearClip  
-070  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-071  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-072  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
-073  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-074  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-075  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
-076  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
-077  Sprite     Sprocket_Fill         {X:684 Y:476 W:552 H:128}  #3C4C52FF
-078  Sprite     Sprocket_Fill         {X:684 Y:476 W:552 H:1}  #5B737BFF
-079  Sprite     Sprocket_Fill         {X:684 Y:603 W:552 H:1}  #5B737BFF
-080  Sprite     Sprocket_Fill         {X:684 Y:476 W:1 H:128}  #5B737BFF
-081  Sprite     Sprocket_Fill         {X:1235 Y:476 W:1 H:128}  #5B737BFF
-082  Text       at {X:700 Y:485.86} scale 0.5  #A2C3CDFF  "This needs one value."
-083  Sprite     Sprocket_Fill         {X:806 Y:514 W:66 H:33}  #060A0CFF
-084  Sprite     Sprocket_Fill         {X:806 Y:514 W:66 H:1}  #5F7278FF
-085  Sprite     Sprocket_Fill         {X:806 Y:546 W:66 H:1}  #5F7278FF
-086  Sprite     Sprocket_Fill         {X:806 Y:514 W:1 H:33}  #5F7278FF
-087  Sprite     Sprocket_Fill         {X:870 Y:514 W:1 H:33}  #5F7278FF
-088  Text       at {X:821.5 Y:520.36} scale 0.57  #85A1A9FF  "Auto"
-089  Sprite     Sprocket_Fill         {X:877 Y:514 W:97 H:33}  #060A0CFF
-090  Sprite     Sprocket_Fill         {X:877 Y:514 W:97 H:1}  #5F7278FF
-091  Sprite     Sprocket_Fill         {X:877 Y:546 W:97 H:1}  #5F7278FF
-092  Sprite     Sprocket_Fill         {X:877 Y:514 W:1 H:33}  #5F7278FF
-093  Sprite     Sprocket_Fill         {X:973 Y:514 W:1 H:33}  #5F7278FF
-094  Text       at {X:893.3633 Y:520.36} scale 0.57  #85A1A9FF  "Recharge"
-095  Sprite     Sprocket_Fill         {X:980 Y:514 W:101 H:33}  #060A0CFF
-096  Sprite     Sprocket_Fill         {X:980 Y:514 W:101 H:1}  #5F7278FF
-097  Sprite     Sprocket_Fill         {X:980 Y:546 W:101 H:1}  #5F7278FF
-098  Sprite     Sprocket_Fill         {X:980 Y:514 W:1 H:33}  #5F7278FF
-099  Sprite     Sprocket_Fill         {X:1080 Y:514 W:1 H:33}  #5F7278FF
-100  Text       at {X:996.1833 Y:520.36} scale 0.57  #85A1A9FF  "Discharge"
-101  Text       at {X:700 Y:520.36} scale 0.57  #85A1A9FF  "Charge Mode"
-102  Text       at {X:1046.153 Y:565.25} scale 0.57  #A2C3CDFF  "Cancel"
-103  Sprite     Sprocket_Fill         {X:1118 Y:557 W:102 H:37}  #374851FF
-104  Text       at {X:1137.467 Y:565.25} scale 0.57  #85A1A9FF  "Continue"
+050  Text       at {X:767.8 Y:554.142} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
+051  SetClip    {X:259 Y:142 W:1402 H:812}
+052  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
+053  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
+054  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
+055  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
+056  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
+057  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
+058  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
+059  Sprite     Sprocket_Fill         {X:758 Y:262 W:17 H:1}  #85A1A9FF
+060  Sprite     Sprocket_Fill         {X:758 Y:278 W:17 H:1}  #85A1A9FF
+061  Sprite     Sprocket_Fill         {X:758 Y:262 W:1 H:17}  #85A1A9FF
+062  Sprite     Sprocket_Fill         {X:774 Y:262 W:1 H:17}  #85A1A9FF
+063  Text       at {X:784.8 Y:259.772} scale 0.57  #A2C3CDFF  "Show hidden"
+064  ClearClip  
+065  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+066  SetClip    {X:276 Y:55 W:157 H:33}
+067  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+068  ClearClip  
+069  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+070  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+071  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+072  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+073  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+074  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
+075  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
+076  Sprite     Sprocket_Fill         {X:684 Y:476 W:552 H:128}  #3C4C52FF
+077  Sprite     Sprocket_Fill         {X:684 Y:476 W:552 H:1}  #5B737BFF
+078  Sprite     Sprocket_Fill         {X:684 Y:603 W:552 H:1}  #5B737BFF
+079  Sprite     Sprocket_Fill         {X:684 Y:476 W:1 H:128}  #5B737BFF
+080  Sprite     Sprocket_Fill         {X:1235 Y:476 W:1 H:128}  #5B737BFF
+081  Text       at {X:700 Y:485.86} scale 0.5  #A2C3CDFF  "This needs one value."
+082  Sprite     Sprocket_Fill         {X:806 Y:514 W:66 H:33}  #060A0CFF
+083  Sprite     Sprocket_Fill         {X:806 Y:514 W:66 H:1}  #5F7278FF
+084  Sprite     Sprocket_Fill         {X:806 Y:546 W:66 H:1}  #5F7278FF
+085  Sprite     Sprocket_Fill         {X:806 Y:514 W:1 H:33}  #5F7278FF
+086  Sprite     Sprocket_Fill         {X:870 Y:514 W:1 H:33}  #5F7278FF
+087  Text       at {X:821.5 Y:520.36} scale 0.57  #85A1A9FF  "Auto"
+088  Sprite     Sprocket_Fill         {X:877 Y:514 W:97 H:33}  #060A0CFF
+089  Sprite     Sprocket_Fill         {X:877 Y:514 W:97 H:1}  #5F7278FF
+090  Sprite     Sprocket_Fill         {X:877 Y:546 W:97 H:1}  #5F7278FF
+091  Sprite     Sprocket_Fill         {X:877 Y:514 W:1 H:33}  #5F7278FF
+092  Sprite     Sprocket_Fill         {X:973 Y:514 W:1 H:33}  #5F7278FF
+093  Text       at {X:893.3633 Y:520.36} scale 0.57  #85A1A9FF  "Recharge"
+094  Sprite     Sprocket_Fill         {X:980 Y:514 W:101 H:33}  #060A0CFF
+095  Sprite     Sprocket_Fill         {X:980 Y:514 W:101 H:1}  #5F7278FF
+096  Sprite     Sprocket_Fill         {X:980 Y:546 W:101 H:1}  #5F7278FF
+097  Sprite     Sprocket_Fill         {X:980 Y:514 W:1 H:33}  #5F7278FF
+098  Sprite     Sprocket_Fill         {X:1080 Y:514 W:1 H:33}  #5F7278FF
+099  Text       at {X:996.1833 Y:520.36} scale 0.57  #85A1A9FF  "Discharge"
+100  Text       at {X:700 Y:520.36} scale 0.57  #85A1A9FF  "Charge Mode"
+101  Text       at {X:1046.153 Y:565.25} scale 0.57  #A2C3CDFF  "Cancel"
+102  Sprite     Sprocket_Fill         {X:1118 Y:557 W:102 H:37}  #374851FF
+103  Text       at {X:1137.467 Y:565.25} scale 0.57  #85A1A9FF  "Continue"

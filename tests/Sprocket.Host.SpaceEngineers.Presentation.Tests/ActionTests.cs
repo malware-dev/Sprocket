@@ -130,6 +130,39 @@ public class ActionTests
         Assert.True(screen.Shows("Turn block On"));
     }
 
+    [Fact]
+    public void ASelectionThatDiffersSaysTheListIsWhatItShares()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.TickBlock("Airlock Inner Door");
+        screen.Editor.TickBlock("Airlock Outer Door");
+        screen.Run(2);
+
+        Assert.Equal("", What(screen).Note);
+
+        screen.Editor.TickBlock("Hydrogen Tank");
+        screen.Run(2);
+
+        Assert.True(screen.Shows("Currently showing only what the selected blocks share"),
+            "a door and a tank together say nothing about what the list leaves out");
+    }
+
+    [Fact]
+    public void WhatAStepWaitsForIsMarked()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Run(2);
+
+        var entries = What(screen).Entries;
+        Assert.True(entries.Single(entry => entry.Text == "open").Waits, "opening a door is not marked");
+        Assert.All(entries.Where(entry => entry.InWell), entry => Assert.False(entry.Waits));
+    }
+
     static PickStage What(Screen screen)
     {
         return screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
