@@ -15,12 +15,14 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// thing a player can mend. It happens once as a world comes up.
     /// </para>
     /// </remarks>
-    static class Told
+    static partial class Told
     {
         const string Ours = "[Sprocket] ";
 
         public static void Say(string what)
         {
+            Heard(what);
+
             if (MyLog.Default != null)
                 MyLog.Default.WriteLineAndConsole(Ours + what);
         }
@@ -30,5 +32,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Say(string.IsNullOrEmpty(mod) ? what : mod + ": " + what);
         }
+
+        /// <summary>Every line as it is said, for a local build to keep.</summary>
+        /// <remarks>
+        /// Without a body in anything packed for the game, where the call compiles to nothing. The
+        /// harness has no game log, so <c>Told.debug.cs</c> gives it one that keeps what was said.
+        /// </remarks>
+        static partial void Heard(string what);
     }
 }

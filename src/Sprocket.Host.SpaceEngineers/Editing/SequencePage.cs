@@ -401,11 +401,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 return built;
 
             var actions = Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets);
-            var chosen = FindAction(actions, act.ActionId);
+            var chosen = act.Names(actions);
             if (actions.Count > 0 && chosen == null)
             {
                 chosen = actions[0];
                 act.ActionId = chosen.Id;
+                act.Sets = chosen.Sets;
             }
 
             built.Slots.Add(new ActionSlot(chosen,
@@ -476,7 +477,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 delegate(PickAnswer answer)
                 {
                     Editor.Do(_sequence,
-                        new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen));
+                        new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen,
+                            answer.Sets));
                     Editor.Pop();
                 }, values: step.Values));
         }
@@ -503,6 +505,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     // Only once both answers are in. Backing out of the questions adds no
                     // step, so there is nothing to take back.
                     var step = new Act(answer.Chosen);
+                    step.Sets = answer.Sets;
                     var named = Declared(answer.Targets);
                     for (var i = 0; i < named.Count; i++)
                         step.Targets.Add(named[i]);
@@ -635,14 +638,5 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Editor.Invalidate();
         }
 
-        static EntityAction FindAction(List<EntityAction> actions, string id)
-        {
-            for (var i = 0; i < actions.Count; i++)
-            {
-                if (actions[i].Id == id)
-                    return actions[i];
-            }
-            return null;
-        }
     }
 }

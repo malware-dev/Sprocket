@@ -120,6 +120,25 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public void Invoke(string actionId, IList<Literal> values)
         {
+            Invoke(actionId, values, false);
+        }
+
+        /// <summary>The same, told whether the step sets one of the block's values.</summary>
+        /// <remarks>
+        /// A value is written as a value and nothing else is tried. The id it shares with the game's
+        /// bare toggle would otherwise find that toggle first, which takes no values, so the value
+        /// would be dropped and the block flipped instead.
+        /// </remarks>
+        public void Invoke(string actionId, IList<Literal> values, bool sets)
+        {
+            if (sets)
+            {
+                if (values != null && values.Count > 0)
+                    Toolbars.Set(_block, actionId, values[0]);
+
+                return;
+            }
+
             if (_extension != null && _extension.TryInvoke(_block, actionId))
                 return;
 
@@ -142,14 +161,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Anything the block declares for itself, performed by the game. An id it does not have
             // is a sequence written against a vocabulary this block no longer offers, and it does
             // nothing rather than throwing - the same answer a reading gives.
-            if (Toolbars.Perform(_block, actionId, values))
-                return;
-
-            // Or one of the values it carries, which is the other way a block is told something.
-            // Second, because an id that is both is an action: a name that has been in saved
-            // programs since before values were written has to go on meaning what it meant.
-            if (values != null && values.Count > 0)
-                Toolbars.Set(_block, actionId, values[0]);
+            Toolbars.Perform(_block, actionId, values);
         }
     }
 }

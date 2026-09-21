@@ -72,6 +72,7 @@ public class SettingTests
 
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("Falloff", act.ActionId);
+        Assert.True(act.Sets, "a value was picked and the step does not say it sets one");
         Assert.Equal(2, Assert.Single(act.Values).Whole);
     }
 
@@ -99,6 +100,7 @@ public class SettingTests
         dim.Name = "Dim";
 
         var set = new Act("Falloff");
+        set.Sets = true;
         set.Targets.Add(Named(sim, light));
         set.Values.Add(Literal.Of(2L));
         dim.Steps.Add(set);
@@ -112,6 +114,52 @@ public class SettingTests
         sim.Tick();
 
         Assert.Equal(new[] { "Light:Falloff 2" }, rig.Log);
+    }
+
+    /// <summary>
+    /// Setting a switch writes it, and never flips the block with the toggle of the same name.
+    /// </summary>
+    /// <remarks>
+    /// A switch's value and the game's bare toggle for it are both called <c>OnOff</c>. Setting it to
+    /// off has to leave a block that is already off exactly as it was.
+    /// </remarks>
+    [Fact]
+    public void SettingASwitchWritesItRatherThanFlippingIt()
+    {
+        var rig = new Rig();
+        Panel button = rig.Panel(1, "Button");
+        Fitting light = rig.Light(11, "Light")
+            .Carrying("OnOff", "On", ValueKind.Flag);
+        light.Enabled = false;
+
+        Simulation sim = Simulation.On(rig);
+        Automation program = sim.Editor.Program;
+
+        AutomationSystem system = program.AddSystem();
+        system.Name = "Lighting";
+
+        var pressed = new RequiredTrigger("pressed_1");
+        pressed.Sources.Add(Named(sim, button));
+
+        Sequence dark = program.AddSequence(system, pressed);
+        dark.Name = "Dark";
+
+        var off = new Act("OnOff");
+        off.Sets = true;
+        off.Targets.Add(Named(sim, light));
+        off.Values.Add(Literal.Of(false));
+        dark.Steps.Add(off);
+
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        rig.Forget();
+
+        sim.Press("Button");
+        sim.Tick();
+
+        Assert.Equal(new[] { "Light:OnOff off" }, rig.Log);
+        Assert.False(light.Enabled, "setting the switch to off flipped the light on");
     }
 
     static string Named(Simulation sim, Fitting fitting)

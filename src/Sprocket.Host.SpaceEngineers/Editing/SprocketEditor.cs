@@ -402,12 +402,23 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _notice.Level = NoticeLevel.Problem;
 
             // One line, and the rest when they ask for it. The line says what is wrong; opening it
-            // says what happened and what it will cost, which is what somebody needs to decide.
-            _notice.Text = "This block holds a program Sprocket cannot read.";
+            // says what happened and what it will cost, which is what somebody needs to decide. Two
+            // faults, because what is on the screen differs: nothing of a program from another
+            // version, and whatever did read of a damaged one.
+            if (_program.Incompatible)
+            {
+                _notice.Text = "This block holds a program from a different version of Sprocket.";
 
-            _notice.Detail = "It was written by a different version of Sprocket, or it is damaged. "
-                + "None of it could be used, which is why this screen is empty. The block still holds "
-                + "it until you change something here - and that replaces it for good.";
+                _notice.Detail = "This version cannot read it, so this screen starts empty. The block "
+                    + "still holds it until you change something here - and that replaces it for good.";
+            }
+            else
+            {
+                _notice.Text = "This block holds a program Sprocket could only partly read.";
+
+                _notice.Detail = "What could be read is shown here. The block still holds the whole of "
+                    + "it until you change something here - and that replaces it with what you see.";
+            }
 
             // The reader's own words, kept because somebody has to be able to say what happened to
             // whoever mends it, and because a person who can read it is better off than one who cannot.
@@ -416,16 +427,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _notice.Expanded = _open;
             _notice.ExpandCommand = Register(Cmd.Expand, delegate { _open = !_open; Invalidate(); });
 
-            // The mending, on the thing that reports the fault. Somebody who has opened the banner and
-            // read what it costs should not then have to go and find an edit to make: the press that
-            // says "yes, replace it" is the same decision the question asks for, and this is the same
-            // answer given a step earlier.
+            // The mending, on the thing that reports the fault, so somebody who has read what it costs
+            // does not have to go and find an edit to make. It asks the same question the first edit
+            // does, because it throws away the same program.
             // Replaced rather than reached into. This banner is deliberately kept between builds, and
             // the command it carries is issued again on every one of them - so writing the id into the
             // entry that is already there would change what the button does while saying nothing, and
             // the view showing it is told rather than asked.
             _mending.Clear();
-            _mending.Add(new ChoiceEntry("Replace it", false, Register(Cmd.Resolve, Replace)));
+            _mending.Add(new ChoiceEntry("Replace it", false,
+                Register(Cmd.Resolve, delegate { AskBeforeReplacing(delegate { }); })));
             _notice.Actions.Reset(_mending);
 
             components.Insert(0, _notice);
@@ -1603,6 +1614,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 delegate(PickAnswer answer)
                 {
                     var act = new Act(answer.Chosen);
+                    act.Sets = answer.Sets;
                     for (var i = 0; i < answer.Targets.Count; i++)
                     {
                         GridEntity entity = _world.FindEntity(answer.Targets[i]);
@@ -1713,7 +1725,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                             named.Add(_program.Declare(_world, entity).Name);
                     }
 
-                    Do(system, new Rewrite(sequence, new ChangeStep(index, act, named, answer.Chosen)));
+                    Do(system, new Rewrite(sequence, new ChangeStep(index, act, named, answer.Chosen,
+                        answer.Sets)));
                 }, values: act.Values));
         }
 

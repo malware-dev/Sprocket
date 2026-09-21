@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var candidates = entities[0].Kind.Actions;
             for (var i = 0; i < candidates.Count; i++)
             {
-                if (AllHaveAction(entities, candidates[i].Id))
+                if (AllHaveAction(entities, candidates[i]))
                     result.Add(candidates[i]);
             }
             return result;
@@ -211,11 +211,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return true;
         }
 
-        static bool AllHaveAction(List<GridEntity> entities, string actionId)
+        static bool AllHaveAction(List<GridEntity> entities, EntityAction action)
         {
             for (var i = 1; i < entities.Count; i++)
             {
-                if (entities[i].Kind.FindAction(actionId) == null)
+                if (entities[i].Kind.FindAction(action.Id, action.Sets) == null)
                     return false;
             }
             return true;

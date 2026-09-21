@@ -305,8 +305,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The same, with the values the action asked for.</summary>
         public void Invoke(GridEntity entity, string actionId, IList<Literal> values)
         {
+            Invoke(entity, actionId, values, false);
+        }
+
+        /// <summary>The same, told whether the step sets one of the block's values.</summary>
+        public void Invoke(GridEntity entity, string actionId, IList<Literal> values, bool sets)
+        {
             if (entity != null)
-                entity.Invoke(actionId, values);
+                entity.Invoke(actionId, values, sets);
         }
 
         /// <summary>
@@ -334,7 +340,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (int i = 0; i < _grids.Count; i++)
             {
                 _slim.Clear();
-                _grids[i].GetBlocks(_slim, null);
+                _grids[i].GetBlocks(_slim);
 
                 for (int b = 0; b < _slim.Count; b++)
                 {

@@ -74,6 +74,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public string Trouble { get; private set; } = "";
 
+        /// <summary>
+        /// Whether what was saved came from a version of Sprocket this one does not read at all,
+        /// rather than being damaged in places.
+        /// </summary>
+        /// <remarks>
+        /// The two are different faults with different consequences. A damaged program is read as far
+        /// as it goes, and what did read is what somebody sees. An incompatible one is not read at all,
+        /// so nothing of it is here.
+        /// </remarks>
+        public bool Incompatible { get; private set; }
+
         /// <summary>Says this program is not all of what was saved, and cannot be saved over it.</summary>
         public void Damaged(string what)
         {
@@ -81,6 +92,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             if (Trouble.Length == 0)
                 Trouble = what ?? "";
+        }
+
+        /// <summary>Says what was saved was written by a version of Sprocket this one does not read.</summary>
+        public void Refused(string what)
+        {
+            Damaged(what);
+            Incompatible = true;
         }
 
         /// <summary>
@@ -99,6 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public void Kept()
         {
             Intact = true;
+            Incompatible = false;
             Trouble = "";
         }
 
@@ -410,8 +429,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (act != null)
             {
                 var copy = new Act(act.ActionId);
+                copy.Sets = act.Sets;
                 for (var i = 0; i < act.Targets.Count; i++)
                     copy.Targets.Add(act.Targets[i]);
+                for (var i = 0; i < act.Values.Count; i++)
+                    copy.Values.Add(act.Values[i]);
                 return Annotated(copy, step);
             }
 

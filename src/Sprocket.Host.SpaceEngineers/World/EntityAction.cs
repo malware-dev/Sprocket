@@ -90,6 +90,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public string GamePropertyId { get; private set; }
 
+        /// <summary>Whether this writes one of the block's own values, which a program says with <c>set</c>.</summary>
+        public bool Sets => GamePropertyId != null;
+
         public EntityAction Writes(string propertyId, Field field, string named)
         {
             GamePropertyId = propertyId;

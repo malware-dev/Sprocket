@@ -9,7 +9,6 @@ using Sprocket.Host.SpaceEngineers.Storage;
 using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
-using VRage.Utils;
 using Sprocket.Host.SpaceEngineers.Terminal;
 
 // The Ingame one, which is where action arguments live. Aliased rather than imported whole, the
@@ -561,7 +560,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (entity == null)
                 return false;
 
-            EntityAction action = entity.Kind.FindAction(act.ActionId);
+            EntityAction action = act.Names(entity.Kind.Actions);
             if (action == null || string.IsNullOrEmpty(action.GameActionId))
                 return false;
 
@@ -611,7 +610,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 IMyToolbar held = Toolbars.Of(grid.Block);
                 MyToolbarItemInfo present;
-                return held != null && held.TryGetItem(want.Slot, out present) && Asked(present, want);
+                return held != null && held.TryGetItem(want.Slot, out present) && Asked(held, present, want);
             }
 
             IBlockExtension extension = BlockExtensions.For(grid.Block);
@@ -846,7 +845,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (needed == null || !needed.Sources.Remove(want.Reference))
                     return;
 
-                Trace("dropped " + want.Reference + " from sequence " + want.SequenceId
+                Told.Say("dropped " + want.Reference + " from sequence " + want.SequenceId
                     + ": slot " + want.Slot + " is no longer ours");
 
                 // So the next pass works from what the trigger now says rather than from what it
@@ -902,11 +901,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId),
                         TriggerAction.Argument(want.Key)))
                 {
-                    Trace("the write was refused mending slot " + want.Slot);
+                    Told.Say("the write was refused mending slot " + want.Slot);
                     continue;
                 }
 
-                Trace("mended slot " + want.Slot + ", now " + want.Key);
+                Told.Say("mended slot " + want.Slot + ", now " + want.Key);
             }
         }
 
@@ -949,7 +948,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 MyToolbarItemInfo present;
 
                 if (toolbar == null || !toolbar.TryGetItem(had.Slot, out present)
-                    || !Asked(present, had))
+                    || !Asked(toolbar, present, had))
                 {
                     // Already empty, already somebody else's, or no longer what this want asked for.
                     // None of those is Sprocket's to clear, and whoever changed it has said what they
@@ -958,7 +957,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 }
 
                 Toolbars.Clear(toolbar, had.Slot);
-                Trace("released slot " + had.Slot + " on panel " + had.PanelId);
+                Told.Say("released slot " + had.Slot + " on panel " + had.PanelId);
             }
         }
 
@@ -985,7 +984,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 // Already exactly this. The ordinary case for a trigger written as the game's own
                 // action, where what is in the slot is not Sprocket's - so the test below would read
                 // Sprocket's own writing as somebody else's work.
-                if (filled && Asked(present, want))
+                if (filled && Asked(toolbar, present, want))
                     continue;
 
                 if (filled && !Mine(present) && !Orphaned(present))
@@ -993,17 +992,17 @@ namespace Sprocket.Host.SpaceEngineers.World
                     // Somebody's panel already does something. Overwriting it would configure
                     // Sprocket by breaking their ship, which is worse than not working - and another
                     // Sprocket holding it is somebody, whose program that button belongs to.
-                    Trace("slot " + want.Slot + " in use by " + present.Kind + " " + present.ActionId);
+                    Told.Say("slot " + want.Slot + " in use by " + present.Kind + " " + present.ActionId);
                     continue;
                 }
 
                 if (!Toolbars.Write(toolbar, want.Slot, Item(want), Arguments(want)))
                 {
-                    Trace("the write was refused for slot " + want.Slot);
+                    Told.Say("the write was refused for slot " + want.Slot);
                     continue;
                 }
 
-                Trace("wired slot " + want.Slot + " to " + Said(want));
+                Told.Say("wired slot " + want.Slot + " to " + Said(want));
             }
         }
 
@@ -1030,7 +1029,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<TerminalActionParameter> _nothing = new List<TerminalActionParameter>();
 
         /// <summary>Whether a slot already holds exactly what a want asks for.</summary>
-        bool Asked(MyToolbarItemInfo present, Want want)
+        /// <remarks>
+        /// Sprocket's own action is exactly this only when it carries this want's key. The action on
+        /// this block with any other key is this block's writing for something else - a program it has
+        /// replaced, or a sequence it no longer has - and is to be written over, not taken as done.
+        /// </remarks>
+        bool Asked(IMyToolbar toolbar, MyToolbarItemInfo present, Want want)
         {
             if (want.GameActionId != null)
             {
@@ -1038,7 +1042,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                     && string.Equals(present.ActionId, want.GameActionId, StringComparison.Ordinal);
             }
 
-            return Mine(present);
+            if (!Mine(present))
+                return false;
+
+            _arguments.Clear();
+            Toolbars.Parameters(toolbar, want.Slot, _arguments);
+
+            return _arguments.Count > 0
+                && string.Equals(_arguments[0].Value as string, want.Key, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -1116,19 +1127,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return block is IMyButtonPanel ? Toolbars.Of(block) : null;
         }
 
-        /// <summary>
-        /// Says something in the game's log, where there is one.
-        /// </summary>
-        /// <remarks>
-        /// The log belongs to a running game and the harness runs this same code outside one, so
-        /// there may be nothing to write to. Everything here goes through this for that reason.
-        /// </remarks>
-        static void Trace(string what)
-        {
-            if (MyLog.Default != null)
-                MyLog.Default.WriteLineAndConsole("[Sprocket] " + what);
-        }
-
         public void Tick(int frame)
         {
             Reconcile();
@@ -1170,7 +1168,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var trouble = ProgramText.Load(text, _program, _world.Values, out warning);
 
             if (warning.Length > 0)
-                Trace(_block.CustomName + " has a program with a warning: " + warning);
+                Told.Say(_block.CustomName + " has a program with a warning: " + warning);
 
             // What is switched off, read after the program, because it names what the program
             // declared. A construct that has nothing parked has nothing here at all.
@@ -1179,7 +1177,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 var wrong = StateText.Load(state, _program, _runner);
                 if (wrong.Length > 0)
-                    Trace(_block.CustomName + " has switches that would not read: " + wrong);
+                    Told.Say(_block.CustomName + " has switches that would not read: " + wrong);
             }
 
             if (trouble.Length == 0)
@@ -1188,7 +1186,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Logged and nowhere else. The program is marked not to be saved over, which is what
             // actually protects somebody's work; there is no screen for this yet, and inventing
             // wording for one in here would put core's words on a host's screen.
-            Trace(_block.CustomName + " has a program that would not read: " + trouble);
+            Told.Say(_block.CustomName + " has a program that would not read: " + trouble);
         }
 
         /// <summary>
@@ -1218,7 +1216,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 // Logged rather than thrown. This runs on the way out of a screen and from the world
                 // save, and taking the game down over it would cost far more than the program does.
-                Trace("mod storage would not attach to " + _block.CustomName + "; program not saved");
+                Told.Say("mod storage would not attach to " + _block.CustomName + "; program not saved");
                 return;
             }
 

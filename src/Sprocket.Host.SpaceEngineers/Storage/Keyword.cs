@@ -27,10 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         Then,
         Trigger,
         To,
-        /// <summary>Reserved before anything writes it, so a save written now still reads when it does.</summary>
         Run,
-
-        /// <summary>Reserved before anything writes it. See <see cref="Run" />.</summary>
         Set,
 
         On,

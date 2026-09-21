@@ -220,7 +220,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     // serves the cycle out and the cycle in, and they are waiting for opposite
                     // things of it - so "what is wrong with the vent" has two answers and only the
                     // step knows which one it is owed.
-                    EntityAction doing = entity.Kind.FindAction(act.ActionId);
+                    EntityAction doing = act.Names(entity.Kind.Actions);
                     if (doing == null || string.IsNullOrEmpty(doing.LeadsToStateId))
                         continue;
 

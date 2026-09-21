@@ -20,7 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
         }
 
-        public PickAnswer(IList<long> targets, string chosen, bool all, IList<Literal> values)
+        public PickAnswer(IList<long> targets, string chosen, bool all, IList<Literal> values,
+            bool sets = false)
         {
             for (var i = 0; i < targets.Count; i++)
                 _targets.Add(targets[i]);
@@ -33,6 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             Chosen = chosen;
             All = all;
+            Sets = sets;
         }
 
         public IList<long> Targets => _targets;
@@ -49,6 +51,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>The event or action that was chosen.</summary>
         public string Chosen { get; private set; }
+
+        /// <summary>Whether what was chosen is one of the blocks' values rather than an action.</summary>
+        public bool Sets { get; private set; }
 
         /// <summary>Whether it takes all of them together, rather than any one.</summary>
         public bool All { get; private set; }

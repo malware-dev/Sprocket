@@ -262,14 +262,24 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override void Primary()
         {
-            _done(new PickAnswer(_selection, _chosen, _all));
+            _done(new PickAnswer(_selection, _chosen, _all, null, ChosenSets));
         }
 
         public override void Primary(string said)
         {
             var values = new List<Literal>();
             ValueLine.Read(said, values);
-            _done(new PickAnswer(_selection, _chosen, _all, values));
+            _done(new PickAnswer(_selection, _chosen, _all, values, ChosenSets));
+        }
+
+        /// <summary>Whether the thing chosen is one of the blocks' values rather than an action.</summary>
+        bool ChosenSets
+        {
+            get
+            {
+                var at = _ids.IndexOf(_chosen);
+                return at >= 0 && at < _values.Count && _values[at];
+            }
         }
 
         List<Field> Fields()

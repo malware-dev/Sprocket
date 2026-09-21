@@ -157,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (entity == null)
                         continue;
 
-                    EntityAction doing = entity.Kind.FindAction(act.ActionId);
+                    EntityAction doing = act.Names(entity.Kind.Actions);
                     if (doing == null || string.IsNullOrEmpty(doing.LeadsToStateId))
                         continue;
 
@@ -427,7 +427,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (entity == null)
                     continue;
 
-                var action = entity.Kind.FindAction(step.ActionId);
+                var action = step.Names(entity.Kind.Actions);
                 if (action == null || string.IsNullOrEmpty(action.LeadsToStateId))
                     continue;
 
@@ -640,10 +640,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (entity == null)
                     continue;
 
-                if (entity.Kind.FindAction(step.ActionId) == null)
+                if (step.Names(entity.Kind.Actions) == null)
                     continue;
 
-                world.Invoke(entity, step.ActionId, step.Values);
+                world.Invoke(entity, step.ActionId, step.Values, step.Sets);
             }
         }
 

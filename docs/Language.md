@@ -61,7 +61,7 @@ outlives one written as a name.
 The first statement of every program, and the version of the language it is written in.
 
 ```
-sprocket 1 alpha 5
+sprocket 1 alpha 6
 ```
 
 `<format>` goes up only when a change would stop existing programs working. A reader of a later
@@ -180,6 +180,7 @@ The name is optional, and is a name rather than text.
 ```
 <action> [ <parts> ]
 action '<id>' on [ <parts> ] [with <values>]
+set '<id>' on [ <parts> ] to <value>
 run <sequence>
 await
 wait <duration>
@@ -203,6 +204,16 @@ or the game's id.
 action 'SetColor' on [ light ] with 255 136 0
 action 'SetRadius' on [ light ] with 4.5
 action 'Run' on [ pb ] with "doors open"
+```
+
+`set '<id>' on [ <parts> ] to <value>` writes one of the block's own values, by the game's id for it.
+A value declares what kind it is, and it is written as that kind. An id can name both one of the
+game's actions and one of the block's values, and `set` always means the value.
+
+```
+set 'Radius' on [ light ] to 4.5
+set 'OnOff' on [ light ] to off
+set 'Color' on [ light ] to #FF8800
 ```
 
 `run <sequence>` starts another sequence of the same system and carries on. A sequence already
@@ -258,7 +269,3 @@ instance 1 of MalTek.Airlock {
     hangar = [ door2, door3 ]
 }
 ```
-
-# Reserved
-
-`set` is a word the language holds before anything writes it.

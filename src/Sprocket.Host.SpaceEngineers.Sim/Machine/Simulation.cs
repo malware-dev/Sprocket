@@ -33,6 +33,9 @@ sealed class Simulation
     readonly Store _store;
     readonly SprocketUnit _unit;
 
+    /// <summary>How much the mod had said when this began.</summary>
+    readonly int _saidBefore;
+
     int _frame;
 
     public Simulation() : this(new Store("prototype"), Rig.Demo())
@@ -80,6 +83,7 @@ sealed class Simulation
     {
         _store = store;
         _rig = rig;
+        _saidBefore = Told.Lines.Count;
 
         // Before the unit, which reads the program out of this the moment it is built.
         _rig.Install();
@@ -116,6 +120,9 @@ sealed class Simulation
     public GridWorld World => _unit.World;
 
     public AutomationRunner Runner => _unit.Runner;
+
+    /// <summary>What the mod has written to the game's log since this began.</summary>
+    public List<string> Log => Told.Lines.GetRange(_saidBefore, Told.Lines.Count - _saidBefore);
 
     /// <summary>The construct itself, for a test that has to weld, grind or cut the power.</summary>
     internal Rig Machine => _rig;

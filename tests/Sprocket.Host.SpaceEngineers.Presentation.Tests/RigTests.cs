@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.Terminal;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
@@ -235,7 +236,7 @@ public class RigTests
         Simulation rig = Simulation.On(Store.Nowhere());
         rig.Tick();
 
-        var program = "sprocket 1 alpha 5\n\nblock '" + sort + "' door1 [ 2, \"Airlock Inner Door\" ]\n";
+        var program = "sprocket 1 alpha 6\n\nblock '" + sort + "' door1 [ 2, \"Airlock Inner Door\" ]\n";
         Assert.Equal("", ProgramText.Load(program, rig.Editor.Program, rig.World.Values));
 
         rig.Tick();
@@ -281,6 +282,102 @@ public class RigTests
         program.Rewire();
 
         return sequence;
+    }
+
+    /// <summary>
+    /// A button still wired to a program this block no longer holds is taken over by the one it does.
+    /// </summary>
+    /// <remarks>
+    /// Replacing a program replaces what the block holds and leaves the buttons in the world as they
+    /// were, still carrying this block's trigger with a key from the program that has gone. Nothing
+    /// answers that key any more, so it is nobody's decision about the button: it is this block's own
+    /// leftover, and a trigger that picks the button has to be able to have it.
+    /// </remarks>
+    [Fact]
+    public void AButtonStillWiredToThisBlocksOldProgramIsTakenOver()
+    {
+        Simulation rig = Simulation.Fresh();
+        rig.Tick();
+
+        // What the program before this one wrote into the button, and never took back.
+        Panel button = Named(rig, "Airlock Button");
+        Toolbar.Changes changes = button.Toolbar.Changing();
+        changes.Set(0, MyToolbarItemInfo.BlockAction(rig.Machine.Sprocket.Id, TriggerAction.ActionId),
+            TriggerAction.Argument("00000000-0000-0000-0000-000000000000/1/1"));
+        Assert.True(changes.Apply());
+
+        Airlock(rig.Editor);
+        rig.Editor.PressAdd("do something");
+        rig.Editor.PressBlock("Airlock Inner Door");
+        rig.Editor.PressChoice("open");
+        rig.Editor.PressPrimary();
+        rig.Editor.SwitchOn();
+
+        for (var i = 0; i < 5; i++)
+            rig.Tick();
+
+        Sequence sequence = rig.Editor.Program.Sequences[0];
+        Assert.Single(((RequiredTrigger)sequence.System.Triggers[0]).Sources);
+
+        // Written over, and never taken for somebody else's wiring.
+        Assert.Contains(rig.Log, line => line.StartsWith("wired slot 0", StringComparison.Ordinal));
+        Assert.DoesNotContain(rig.Log, line => line.StartsWith("dropped", StringComparison.Ordinal));
+
+        rig.Press("Airlock Button");
+        rig.Tick();
+
+        Assert.True(Running(rig, sequence), "the button still answers the program that has gone");
+    }
+
+    /// <summary>
+    /// Two buttons still wired to the old program can both be given to one sequence of the new one.
+    /// </summary>
+    /// <remarks>
+    /// Two triggers running one sequence need two slots running it. A button left holding the old key
+    /// and skipped as already done leaves the count one short, and then neither trigger can start
+    /// anything.
+    /// </remarks>
+    [Fact]
+    public void TwoButtonsFromTheOldProgramCanBothStartOneSequence()
+    {
+        Simulation rig = Simulation.Fresh();
+        rig.Machine.Panel(30, "Inside Button");
+        rig.Tick();
+
+        foreach (var name in new[] { "Airlock Button", "Inside Button" })
+        {
+            Toolbar.Changes changes = Named(rig, name).Toolbar.Changing();
+            changes.Set(0, MyToolbarItemInfo.BlockAction(rig.Machine.Sprocket.Id, TriggerAction.ActionId),
+                TriggerAction.Argument("00000000-0000-0000-0000-000000000000/1/1"));
+            Assert.True(changes.Apply());
+        }
+
+        Airlock(rig.Editor);
+        rig.Editor.PressAdd("do something");
+        rig.Editor.PressBlock("Airlock Inner Door");
+        rig.Editor.PressChoice("open");
+        rig.Editor.PressPrimary();
+        rig.Editor.Back();
+        rig.Editor.PressAnswer("Switch it on");
+
+        Sequence sequence = rig.Editor.Program.Sequences[0];
+
+        rig.Editor.PressStart("When…");
+        rig.Editor.PressBlock("Inside Button");
+        rig.Editor.PressChoice("is pressed");
+        rig.Editor.PressPrimary();
+        rig.Editor.PressChoice("Run an existing sequence");
+        rig.Editor.PressChoice(sequence.Name);
+
+        for (var i = 0; i < 5; i++)
+            rig.Tick();
+
+        Assert.True(rig.World.CanStart(sequence), "nothing can start the sequence both buttons were given");
+
+        rig.Press("Inside Button");
+        rig.Tick();
+
+        Assert.True(Running(rig, sequence), "the inside button still answers the program that has gone");
     }
 
     static Panel Named(Simulation rig, string name)
@@ -393,7 +490,7 @@ public class RigTests
         rig.Editor.PressChoice("Run a new sequence");
         // A wait, so the run lasts long enough to be stopped.
         rig.Editor.PressAdd("wait");
-        rig.Editor.PressChoice(Sprocket.Host.SpaceEngineers.Words.TimeText.WaitChoice(600));
+        rig.Editor.PressChoice(Words.TimeText.WaitChoice(600));
         rig.Editor.SwitchOn();
 
         Sequence sequence = rig.Editor.Program.Sequences[0];
@@ -556,8 +653,7 @@ public class RigTests
 
         Assert.NotNull(panel);
 
-        MyToolbarItemInfo held;
-        Assert.True(panel.Toolbar.TryGetItem(0, out held), "the button ended up wired to nothing");
+        Assert.True(panel.Toolbar.TryGetItem(0, out _), "the button ended up wired to nothing");
 
         Sequence had = rig.Editor.Program.Sequences[0];
         Sequence took = rig.Editor.Program.Sequences[1];

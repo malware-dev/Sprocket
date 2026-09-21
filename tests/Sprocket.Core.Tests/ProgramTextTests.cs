@@ -326,6 +326,36 @@ public class ProgramTextTests
         Assert.DoesNotContain("action", written);
     }
 
+    /// <summary>One of a block's own values is written as a set, and comes back as one.</summary>
+    [Fact]
+    public void AValueIsWrittenAsASet()
+    {
+        var program = new Automation();
+        var values = new Values();
+        program.Restore(Declared("light", "light", values, 1, "Airlock Light"));
+
+        var lights = program.AddSystem();
+        lights.Name = "Lights";
+
+        var sequence = program.AddSequence(lights, null);
+        var radius = new Act("Radius");
+        radius.Sets = true;
+        radius.Targets.Add("light");
+        radius.Values.Add(Literal.Of(4.5));
+        sequence.Steps.Add(radius);
+
+        Assert.Contains("set Radius on [ light ] to 4.5", Save(program));
+
+        var after = new Automation();
+        LoadAll(program, after);
+
+        var back = Assert.IsType<Act>(after.Sequences[0].Steps[0]);
+        Assert.True(back.Sets);
+        Assert.Equal("Radius", back.ActionId);
+        Assert.Equal(new[] { "light" }, back.Targets);
+        Assert.Equal(4.5, Assert.Single(back.Values).Real);
+    }
+
     /// <summary>
     /// Names are whatever somebody typed, and a backslash is an ordinary character.
     /// </summary>

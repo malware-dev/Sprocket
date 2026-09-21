@@ -179,11 +179,17 @@ namespace Sprocket.Host.SpaceEngineers.World
             return null;
         }
 
-        public EntityAction FindAction(string actionId)
+        /// <summary>The entry a step names, by its id and by whether it sets a value.</summary>
+        /// <remarks>
+        /// Both, because the id alone is not unique: a switch's value and the game's bare toggle for
+        /// it are both called <c>OnOff</c>, and a program tells them apart by writing one as a
+        /// <c>set</c>.
+        /// </remarks>
+        public EntityAction FindAction(string actionId, bool sets)
         {
             for (var i = 0; i < _actions.Count; i++)
             {
-                if (_actions[i].Id == actionId)
+                if (_actions[i].Id == actionId && _actions[i].Sets == sets)
                     return _actions[i];
             }
             return null;

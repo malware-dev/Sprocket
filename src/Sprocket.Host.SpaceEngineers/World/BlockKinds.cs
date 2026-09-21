@@ -138,8 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// it pushes people towards is this one. A switch is offered as a value it can be set to.
         /// </para>
         /// <para>
-        /// A value is passed over only where an act already has that id, because the id is what a
-        /// saved program holds and it has to resolve to one thing.
+        /// A value is passed over where an action already has that id.
         /// </para>
         /// </remarks>
         void Values(EntityKind kind, IMyTerminalBlock block)
@@ -151,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 Offer offer = _offered[i];
 
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id) != null)
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, false) != null)
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;

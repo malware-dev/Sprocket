@@ -23,6 +23,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The <see cref="World.EntityAction"/> id to invoke.</summary>
         public string ActionId { get; set; }
 
+        /// <summary>Whether this writes one of the block's own values rather than performing an action.</summary>
+        /// <remarks>
+        /// Part of what names the entry, alongside the id. A switch's value and the game's bare toggle
+        /// for it share an id, and the program writes them as two different statements, a
+        /// <c>set</c> and an action. Carried here rather than read off how many values the step
+        /// holds, because a value somebody has picked and not yet answered holds none.
+        /// </remarks>
+        public bool Sets { get; set; }
+
         /// <summary>The parts affected. All of them, together, in this step.</summary>
         public IList<string> Targets => _targets;
 
@@ -42,5 +51,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Literal> _values = new List<Literal>();
 
         public bool HasAction => Targets.Count > 0 && !string.IsNullOrEmpty(ActionId);
+
+        /// <summary>The entry among these that this step names, or null where there is none.</summary>
+        public EntityAction Names(IList<EntityAction> actions)
+        {
+            for (var i = 0; i < actions.Count; i++)
+            {
+                if (actions[i].Id == ActionId && actions[i].Sets == Sets)
+                    return actions[i];
+            }
+
+            return null;
+        }
     }
 }

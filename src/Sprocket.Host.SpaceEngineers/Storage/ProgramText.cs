@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// claims a compatibility it does not have.
         /// </para>
         /// </remarks>
-        const int Draft = 5;
+        const int Draft = 6;
 
         /// <summary>
         /// How a <c>changed</c> time may be written: ISO 8601, and nothing else.
@@ -145,12 +145,23 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var constructs = parser.Read();
             var trouble = new Trouble(saved, parser.Trouble);
 
+            // Turned away whole rather than read as far as it goes. A different version or draft is
+            // not a damaged program, it is one this build does not speak, so whatever happened to read
+            // would be read as something it does not mean.
+            string refused = null;
             if (constructs.Count == 0 || constructs[0].Key != Keyword.Sprocket)
-                trouble.Say("this is not a Sprocket program");
+                refused = "this is not a Sprocket program";
             else if (constructs[0].Whole(0) != Version)
-                trouble.Say("this was written by a different version of Sprocket");
+                refused = "this was written by a different version of Sprocket";
             else if (DraftOf(constructs[0]) != Draft)
-                trouble.Say("this was written against a different draft of the format");
+                refused = "this was written against a different draft of the format";
+
+            if (refused != null)
+            {
+                program.Refused(refused);
+                warning = "";
+                return refused;
+            }
 
             for (var i = 0; i < constructs.Count; i++)
             {
@@ -832,10 +843,22 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var act = step as Act;
             if (act != null)
             {
-                // One that has to be given values says so in the language's own words, because the
-                // values have to hang off something and a bare head has nowhere to put them. One
-                // that needs none is written as what it is: a verb and the things it acts on.
-                if (act.Values.Count > 0)
+                // A value is a set. One of the game's actions that has to be given values says so in
+                // the language's own words, because the values have to hang off something and a bare
+                // head has nowhere to put them. One that needs none is written as what it is: a verb
+                // and the things it acts on.
+                if (act.Sets)
+                {
+                    pen.Start(Keyword.Set).Word(act.ActionId).Says(Keyword.On);
+                    Names(pen, act.Targets);
+
+                    if (act.Values.Count > 0)
+                    {
+                        pen.Says(Keyword.To);
+                        Written(pen, act.Values[0]);
+                    }
+                }
+                else if (act.Values.Count > 0)
                 {
                     pen.Start(Keyword.Action).Word(act.ActionId).Says(Keyword.On);
                     Names(pen, act.Targets);
@@ -903,7 +926,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             if (statement.Key == Keyword.Action)
-                return Given(statement);
+                return Given(statement, Keyword.With);
+
+            if (statement.Key == Keyword.Set)
+                return Given(statement, Keyword.To);
 
             if (statement.Key != Keyword.None)
                 return null;
@@ -923,17 +949,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         /// <summary>
         /// <c>action 'SetColor' on [ light ] with 255 0 0</c>: one of the game's own, given what it
-        /// asked for.
+        /// asked for. Or <c>set 'Radius' on [ light ] to 4.5</c>, which reads the same way.
         /// </summary>
         /// <remarks>
-        /// Everything after <c>with</c> is a value, in the order it lies, because order is all the
-        /// game says about them - there are no names to match and nothing is optional. Taken by
-        /// position rather than by what it looks like, so a flag written <c>on</c> is a value and
-        /// not mistaken for one of the language's own words.
+        /// Everything after the word that introduces them is a value, in the order it lies, because
+        /// order is all the game says about them - there are no names to match and nothing is
+        /// optional. Taken by position rather than by what it looks like, so a flag written
+        /// <c>on</c> is a value and not mistaken for one of the language's own words.
         /// </remarks>
-        static Step Given(Statement statement)
+        static Step Given(Statement statement, Keyword introduces)
         {
             var act = new Act(statement.Word(0));
+            act.Sets = introduces == Keyword.To;
 
             for (var at = 1; at < statement.Count; at++)
             {
@@ -947,7 +974,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var from = -1;
             for (var at = 1; at < statement.Count; at++)
             {
-                if (!statement.Says(at, Keyword.With))
+                if (!statement.Says(at, introduces))
                     continue;
 
                 from = at + 1;

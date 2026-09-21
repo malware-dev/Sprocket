@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Words
 {
@@ -312,16 +313,8 @@ namespace Sprocket.Host.SpaceEngineers.Words
             if (step.Targets.Count == 0)
                 return SentenceText.Empty;
 
-            var actions = Vocabulary.ActionsFor(bindings, step.Targets);
-            var text = SentenceText.Empty;
-            for (var i = 0; i < actions.Count; i++)
-            {
-                if (actions[i].Id == step.ActionId)
-                {
-                    text = actions[i].Text;
-                    break;
-                }
-            }
+            EntityAction named = step.Names(Vocabulary.ActionsFor(bindings, step.Targets));
+            var text = named == null ? SentenceText.Empty : named.Text;
 
             var said = text + " " + SentenceText.Named(bindings, step.Targets, true);
             if (step.Values.Count == 0)

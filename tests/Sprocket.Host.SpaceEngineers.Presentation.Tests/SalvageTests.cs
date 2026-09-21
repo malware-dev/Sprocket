@@ -74,7 +74,7 @@ public class SalvageTests
     /// game's log, which is the one place a player never looks.
     /// </remarks>
     [Fact]
-    public void TheScreenSaysTheProgramCouldNotBeRead()
+    public void TheScreenSaysTheProgramIsFromAnotherVersion()
     {
         Simulation rig = Simulation.On(Holding(Older));
         rig.Tick();
@@ -83,13 +83,32 @@ public class SalvageTests
 
         Assert.NotNull(said);
         Assert.Equal(NoticeLevel.Problem, said.Level);
-        Assert.Contains("cannot read", said.Text);
+        Assert.Contains("different version", said.Text);
 
         // One line at a glance; why and what to do about it is what opening it gives.
         Assert.NotEqual(0, said.ExpandCommand);
         Assert.Contains("replaces it for good", said.Detail);
 
         // And the reader's own words, which are what gets read back to whoever mends Sprocket.
+        Assert.Contains("different draft", said.Diagnostic);
+    }
+
+    /// <summary>And a program of this version that is damaged in places says that instead.</summary>
+    /// <remarks>
+    /// A different fault with a different screen behind it: what did read is shown, so the banner
+    /// says that what replaces the original is what somebody can see.
+    /// </remarks>
+    [Fact]
+    public void TheScreenSaysADamagedProgramWasOnlyPartlyRead()
+    {
+        Simulation rig = Simulation.On(Holding(Older.Replace("alpha 5", "alpha 6")));
+        rig.Tick();
+
+        NoticeComponent said = Said(rig);
+
+        Assert.NotNull(said);
+        Assert.Contains("only partly read", said.Text);
+        Assert.Contains("replaces it with what you see", said.Detail);
         Assert.Contains("means nothing here", said.Diagnostic);
     }
 
@@ -116,7 +135,7 @@ public class SalvageTests
 
         var saved = store.GetValue(SprocketUnit.ProgramKey);
 
-        Assert.StartsWith("sprocket 1 alpha 5", saved);
+        Assert.StartsWith("sprocket 1 alpha 6", saved);
         Assert.Contains("Airlock", saved);
         Assert.DoesNotContain("|", saved);
 
@@ -199,17 +218,36 @@ public class SalvageTests
         rig.Save();
 
         Assert.False(rig.Editor.Screen.HasQuestion);
-        Assert.StartsWith("sprocket 1 alpha 5", store.GetValue(SprocketUnit.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 6", store.GetValue(SprocketUnit.ProgramKey));
         Assert.Null(Said(rig));
+    }
+
+    /// <summary>And saying no from the banner leaves everything as it was.</summary>
+    [Fact]
+    public void TheBannerLeavesItAloneWhenToldTo()
+    {
+        Store store = Holding(Older);
+
+        Simulation rig = Simulation.On(store);
+        rig.Tick();
+
+        rig.Editor.Invoke(Said(rig).Actions.Single().Command);
+        rig.Tick();
+        Answer(rig, "Leave it alone");
+        rig.Tick();
+        rig.Save();
+
+        Assert.False(rig.Editor.Screen.HasQuestion);
+        Assert.False(Said(rig).Leaving);
+        Assert.Equal(Older, store.GetValue(SprocketUnit.ProgramKey));
     }
 
     /// <summary>
     /// The banner carries the mending, so it can be dealt with where it is read.
     /// </summary>
     /// <remarks>
-    /// The same decision the question asks for, a step earlier: somebody who has opened the banner and
-    /// read what it costs presses it there rather than hunting for an edit to make. Afterwards the
-    /// block saves like any other, and the banner has nothing left to say.
+    /// It asks first, the way the first edit does, because it throws away the same program.
+    /// Afterwards the block saves like any other, and the banner has nothing left to say.
     /// </remarks>
     [Fact]
     public void TheBannerCanResolveItWhereItStands()
@@ -228,7 +266,13 @@ public class SalvageTests
         rig.Editor.Invoke(replace.Command);
         rig.Tick();
 
-        // Resolved: no question was needed, the banner is going, and the block takes what is here now.
+        Assert.True(rig.Editor.Screen.HasQuestion, "the banner replaced the program without asking");
+        Assert.False(Said(rig).Leaving);
+
+        Answer(rig, "Replace it");
+        rig.Tick();
+
+        // Resolved: the banner is going, and the block takes what is here now.
         Assert.False(rig.Editor.Screen.HasQuestion);
         Assert.True(Said(rig).Leaving);
 
@@ -236,7 +280,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.StartsWith("sprocket 1 alpha 5", store.GetValue(SprocketUnit.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 6", store.GetValue(SprocketUnit.ProgramKey));
         Assert.Contains("Airlock", store.GetValue(SprocketUnit.ProgramKey));
     }
 }
