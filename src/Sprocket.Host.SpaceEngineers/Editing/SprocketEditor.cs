@@ -707,6 +707,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         string _whenKind = "";
         string _doingKind = "";
 
+        /// <summary>Whether the list of what to do shows what is hidden.</summary>
+        /// <remarks>
+        /// Kept the way the kind filter is: for as long as the editor is open, and not saved with the
+        /// program, because it is how somebody is working rather than part of what they are building.
+        /// </remarks>
+        public bool ShowsHidden { get; set; }
+
         public void SetNumber(int command, int value)
         {
             Action<int> action;

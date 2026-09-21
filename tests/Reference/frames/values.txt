@@ -143,33 +143,33 @@ on screen     Do something
 136  Sprite     Sprocket_Fill         {X:729 Y:941 W:460 H:1}  #5B737BFF
 137  Sprite     Sprocket_Fill         {X:729 Y:142 W:1 H:800}  #5B737BFF
 138  Sprite     Sprocket_Fill         {X:1188 Y:142 W:1 H:800}  #5B737BFF
-139  SetClip    {X:745 Y:255 W:428 H:671}
-140  Text       at {X:784.8 Y:264.572} scale 0.64  #DCF5FDFF  "switch off"
-141  Text       at {X:761.655 Y:265.867} scale 0.57  #85A1A9FF  "o"
-142  Text       at {X:784.8 Y:310.452} scale 0.64  #DCF5FDFF  "switch on"
-143  Text       at {X:761.655 Y:311.747} scale 0.57  #85A1A9FF  "o"
-144  Text       at {X:745 Y:352.732} scale 0.64  #85A1A9FF  "TERMINAL"
-145  Sprite     Sprocket_Fill         {X:745 Y:379 W:410 H:411}  #141B20FF
-146  Sprite     Sprocket_Fill         {X:745 Y:379 W:410 H:1}  #5B737BFF
-147  Sprite     Sprocket_Fill         {X:745 Y:789 W:410 H:1}  #5B737BFF
-148  Sprite     Sprocket_Fill         {X:745 Y:379 W:1 H:411}  #5B737BFF
-149  Sprite     Sprocket_Fill         {X:1154 Y:379 W:1 H:411}  #5B737BFF
-150  Text       at {X:767.8 Y:399.012} scale 0.64  #85A1A9FF  "VALUES"
-151  Text       at {X:794.8 Y:435.292} scale 0.64  #DCF5FDFF  "Color"
-152  Text       at {X:771.655 Y:436.587} scale 0.57  #85A1A9FF  "o"
-153  Text       at {X:794.8 Y:481.172} scale 0.64  #DCF5FDFF  "Falloff"
-154  Text       at {X:771.655 Y:482.467} scale 0.57  #85A1A9FF  "o"
-155  Text       at {X:794.8 Y:527.0519} scale 0.64  #DCF5FDFF  "On"
-156  Text       at {X:771.655 Y:528.347} scale 0.57  #85A1A9FF  "o"
-157  Text       at {X:794.8 Y:572.9319} scale 0.64  #DCF5FDFF  "Radius"
-158  Text       at {X:772.0267 Y:574.227} scale 0.57  #3ACC00FF  "0"
-159  Text       at {X:767.8 Y:618.812} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
-160  Text       at {X:794.8 Y:655.0919} scale 0.64  #DCF5FDFF  "Set Color"
-161  Text       at {X:771.655 Y:656.387} scale 0.57  #85A1A9FF  "o"
-162  Text       at {X:794.8 Y:700.9719} scale 0.64  #DCF5FDFF  "Set Radius"
-163  Text       at {X:771.655 Y:702.267} scale 0.57  #85A1A9FF  "o"
-164  Text       at {X:794.8 Y:746.8519} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
-165  Text       at {X:771.655 Y:748.147} scale 0.57  #85A1A9FF  "o"
+139  SetClip    {X:745 Y:292 W:428 H:634}
+140  Text       at {X:784.8 Y:301.262} scale 0.64  #DCF5FDFF  "switch off"
+141  Text       at {X:761.655 Y:302.557} scale 0.57  #85A1A9FF  "o"
+142  Text       at {X:784.8 Y:347.142} scale 0.64  #DCF5FDFF  "switch on"
+143  Text       at {X:761.655 Y:348.437} scale 0.57  #85A1A9FF  "o"
+144  Text       at {X:745 Y:389.422} scale 0.64  #85A1A9FF  "TERMINAL"
+145  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:411}  #141B20FF
+146  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:1}  #5B737BFF
+147  Sprite     Sprocket_Fill         {X:745 Y:826 W:410 H:1}  #5B737BFF
+148  Sprite     Sprocket_Fill         {X:745 Y:416 W:1 H:411}  #5B737BFF
+149  Sprite     Sprocket_Fill         {X:1154 Y:416 W:1 H:411}  #5B737BFF
+150  Text       at {X:767.8 Y:435.702} scale 0.64  #85A1A9FF  "VALUES"
+151  Text       at {X:794.8 Y:471.982} scale 0.64  #DCF5FDFF  "Color"
+152  Text       at {X:771.655 Y:473.277} scale 0.57  #85A1A9FF  "o"
+153  Text       at {X:794.8 Y:517.862} scale 0.64  #DCF5FDFF  "Falloff"
+154  Text       at {X:771.655 Y:519.157} scale 0.57  #85A1A9FF  "o"
+155  Text       at {X:794.8 Y:563.7419} scale 0.64  #DCF5FDFF  "On"
+156  Text       at {X:771.655 Y:565.037} scale 0.57  #85A1A9FF  "o"
+157  Text       at {X:794.8 Y:609.6219} scale 0.64  #DCF5FDFF  "Radius"
+158  Text       at {X:772.0267 Y:610.917} scale 0.57  #3ACC00FF  "0"
+159  Text       at {X:767.8 Y:655.502} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
+160  Text       at {X:794.8 Y:691.782} scale 0.64  #DCF5FDFF  "Set Color"
+161  Text       at {X:771.655 Y:693.077} scale 0.57  #85A1A9FF  "o"
+162  Text       at {X:794.8 Y:737.662} scale 0.64  #DCF5FDFF  "Set Radius"
+163  Text       at {X:771.655 Y:738.957} scale 0.57  #85A1A9FF  "o"
+164  Text       at {X:794.8 Y:783.542} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
+165  Text       at {X:771.655 Y:784.837} scale 0.57  #85A1A9FF  "o"
 166  SetClip    {X:259 Y:142 W:1402 H:812}
 167  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
 168  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
@@ -178,31 +178,36 @@ on screen     Do something
 171  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
 172  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
 173  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
-174  ClearClip  
-175  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
-176  SetClip    {X:276 Y:55 W:157 H:33}
-177  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
-178  ClearClip  
-179  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-180  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-181  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
-182  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-183  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-184  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
-185  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
-186  Sprite     Sprocket_Fill         {X:684 Y:473 W:552 H:134}  #3C4C52FF
-187  Sprite     Sprocket_Fill         {X:684 Y:473 W:552 H:1}  #5B737BFF
-188  Sprite     Sprocket_Fill         {X:684 Y:606 W:552 H:1}  #5B737BFF
-189  Sprite     Sprocket_Fill         {X:684 Y:473 W:1 H:134}  #5B737BFF
-190  Sprite     Sprocket_Fill         {X:1235 Y:473 W:1 H:134}  #5B737BFF
-191  Text       at {X:700 Y:482.765} scale 0.5  #A2C3CDFF  "This needs one value."
-192  Sprite     Sprocket_Fill         {X:805 Y:511 W:415 H:39}  #141B20FF
-193  Sprite     Sprocket_Fill         {X:805 Y:511 W:415 H:1}  #5B737BFF
-194  Sprite     Sprocket_Fill         {X:805 Y:550 W:415 H:1}  #5B737BFF
-195  Sprite     Sprocket_Fill         {X:805 Y:511 W:1 H:39}  #5B737BFF
-196  Sprite     Sprocket_Fill         {X:1219 Y:511 W:1 H:39}  #5B737BFF
-197  Sprite     Sprocket_Fill         {X:818 Y:519 W:2 H:24}  #DCF5FDFF
-198  Text       at {X:700 Y:520.36} scale 0.57  #85A1A9FF  "Radius 0.1-20"
-199  Text       at {X:1046.153 Y:568.345} scale 0.57  #A2C3CDFF  "Cancel"
-200  Sprite     Sprocket_Fill         {X:1118 Y:561 W:102 H:37}  #374851FF
-201  Text       at {X:1137.467 Y:568.345} scale 0.57  #85A1A9FF  "Continue"
+174  Sprite     Sprocket_Fill         {X:758 Y:262 W:17 H:1}  #85A1A9FF
+175  Sprite     Sprocket_Fill         {X:758 Y:278 W:17 H:1}  #85A1A9FF
+176  Sprite     Sprocket_Fill         {X:758 Y:262 W:1 H:17}  #85A1A9FF
+177  Sprite     Sprocket_Fill         {X:774 Y:262 W:1 H:17}  #85A1A9FF
+178  Text       at {X:784.8 Y:259.772} scale 0.57  #A2C3CDFF  "Show hidden"
+179  ClearClip  
+180  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+181  SetClip    {X:276 Y:55 W:157 H:33}
+182  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+183  ClearClip  
+184  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+185  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+186  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+187  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+188  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+189  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
+190  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
+191  Sprite     Sprocket_Fill         {X:684 Y:473 W:552 H:134}  #3C4C52FF
+192  Sprite     Sprocket_Fill         {X:684 Y:473 W:552 H:1}  #5B737BFF
+193  Sprite     Sprocket_Fill         {X:684 Y:606 W:552 H:1}  #5B737BFF
+194  Sprite     Sprocket_Fill         {X:684 Y:473 W:1 H:134}  #5B737BFF
+195  Sprite     Sprocket_Fill         {X:1235 Y:473 W:1 H:134}  #5B737BFF
+196  Text       at {X:700 Y:482.765} scale 0.5  #A2C3CDFF  "This needs one value."
+197  Sprite     Sprocket_Fill         {X:805 Y:511 W:415 H:39}  #141B20FF
+198  Sprite     Sprocket_Fill         {X:805 Y:511 W:415 H:1}  #5B737BFF
+199  Sprite     Sprocket_Fill         {X:805 Y:550 W:415 H:1}  #5B737BFF
+200  Sprite     Sprocket_Fill         {X:805 Y:511 W:1 H:39}  #5B737BFF
+201  Sprite     Sprocket_Fill         {X:1219 Y:511 W:1 H:39}  #5B737BFF
+202  Sprite     Sprocket_Fill         {X:818 Y:519 W:2 H:24}  #DCF5FDFF
+203  Text       at {X:700 Y:520.36} scale 0.57  #85A1A9FF  "Radius 0.1-20"
+204  Text       at {X:1046.153 Y:568.345} scale 0.57  #A2C3CDFF  "Cancel"
+205  Sprite     Sprocket_Fill         {X:1118 Y:561 W:102 H:37}  #374851FF
+206  Text       at {X:1137.467 Y:568.345} scale 0.57  #85A1A9FF  "Continue"

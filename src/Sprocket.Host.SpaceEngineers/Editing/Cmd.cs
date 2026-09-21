@@ -63,6 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         NarrowEntities,
         NarrowChoices,
         NarrowKinds,
+        ShowHidden,
         AnyKind,
         OneKind,
         RequireAny,

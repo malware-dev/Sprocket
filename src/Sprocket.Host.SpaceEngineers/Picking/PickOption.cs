@@ -53,5 +53,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         /// <summary>Whether this sits in the recessed well, among what the game declared in its own words.</summary>
         public bool InWell { get; set; }
+
+        /// <summary>Whether this is shown only because what is hidden is being shown, and so is drawn dimmed.</summary>
+        public bool IsDimmed { get; set; }
     }
 }

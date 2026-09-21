@@ -14,7 +14,7 @@ public class AnsweringTests
     /// <summary>A sequence built and left while still switched off, which is what raises one.</summary>
     const string LeavingASequence =
         "60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 "
-        + "150 224 type Tug 200 375 800 439 1380 1000 700 530 700 628 enter 19 62";
+        + "150 224 type Tug 200 375 800 472 1380 1000 700 530 700 628 enter 19 62";
 
     [Fact]
     public void EnterTakesTheAnswerThePageNamed()

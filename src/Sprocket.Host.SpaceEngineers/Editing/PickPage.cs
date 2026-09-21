@@ -315,6 +315,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (wanted && _what == null)
             {
                 _what = new PickStage(_forEvents ? "What happens" : "What to do");
+
+                // Only where there is something an extension can stand in for, which is what somebody
+                // does to a block rather than what happens to one.
+                if (!_forEvents)
+                    _what.Hidden = new ChoiceEntry(HiddenSaid, false, 0);
                 _what.EmptyText = _forEvents
                     ? "Those blocks have nothing in common that can happen to them."
                     : "Those blocks have nothing in common that can be done to them.";
@@ -592,6 +597,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _ids.Clear();
             _values.Clear();
             _groups.Clear();
+            _dimmed.Clear();
 
             if (_forEvents)
             {
@@ -628,6 +634,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             {
                 _what.NarrowCommand = narrow;
                 changed = true;
+            }
+
+            if (_what.Hidden != null)
+            {
+                changed |= Apply(_what.Hidden, HiddenSaid, Editor.ShowsHidden,
+                    Editor.Register(Cmd.ShowHidden, ToggleHidden));
             }
 
             _matched.Clear();
@@ -681,6 +693,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     changed = true;
                 }
 
+                var dim = at >= 0 && _dimmed.Count > at && _dimmed[at];
+                if (_what.Entries[i].IsDimmed != dim)
+                {
+                    _what.Entries[i].IsDimmed = dim;
+                    changed = true;
+                }
+
                 if (at < 0)
                 {
                     changed |= Apply(_what.Entries[i], at == -2 ? ValuesSaid : ActionsSaid,
@@ -708,6 +727,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>The heading over the well that holds the game's own words.</summary>
         const string TerminalSaid = "Terminal";
+
+        /// <summary>What the checkbox that shows what is hidden says.</summary>
+        const string HiddenSaid = "Show hidden";
 
         /// <summary>Which group an entry is listed in: the game's actions, its values, or Sprocket's own.</summary>
         /// <remarks>
@@ -745,14 +767,21 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.Hidden || Group(one) != group)
+                if ((one.Hidden && !Editor.ShowsHidden) || Group(one) != group)
                     continue;
 
                 _names.Add(one.Named);
                 _ids.Add(one.Id);
                 _values.Add(one.Sets);
                 _groups.Add(group);
+                _dimmed.Add(one.Hidden);
             }
+        }
+
+        void ToggleHidden()
+        {
+            Editor.ShowsHidden = !Editor.ShowsHidden;
+            Editor.Invalidate();
         }
 
         static int Group(EntityAction one)
@@ -768,6 +797,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>Which group each thing on offer is listed in, one per entry in <c>_names</c>.</summary>
         readonly List<int> _groups = new List<int>();
+
+        /// <summary>Whether each thing on offer is shown only because what is hidden is being shown.</summary>
+        readonly List<bool> _dimmed = new List<bool>();
 
         /// <summary>
         /// What to draw, in order: an index into the things on offer, or a heading.

@@ -86,6 +86,9 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// </summary>
         public List<ChoiceEntry> Options { get; private set; }
 
+        /// <summary>The checkbox that shows what is hidden, or null where the stage has none.</summary>
+        public ChoiceEntry Hidden { get; set; }
+
         public List<PickOption> Entries { get; private set; }
 
         /// <summary>Shown instead of the choices when nothing matches.</summary>

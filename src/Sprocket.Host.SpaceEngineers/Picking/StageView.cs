@@ -117,8 +117,14 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         readonly Stack _kindList = Widgets.Column(Space.Hair * 2f);
         readonly List<KindVisual> _kindRows = new List<KindVisual>();
 
+        /// <summary>The checkbox that shows what is hidden, under the search box, where there is one.</summary>
+        readonly Stack _hidden = Widgets.RowOf(Space.Item);
+        readonly Mark _hiddenMark = new Mark();
+        readonly Label _hiddenText = Widgets.Label("", Palette.Muted, Lettering.Small);
+
         bool _hasNarrow;
         bool _hasKinds;
+        bool _hasHidden;
 
         public StageView(PickComponent component, int index)
         {
@@ -177,6 +183,19 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _hasKinds = stage.Filters.Count > 1;
             if (_hasKinds)
                 _head.Children.Add(_kindHead);
+
+            // In the place the kind filter takes in the column beside it, so the two columns start
+            // their first row at the same height. Square, because it holds or does not on its own.
+            _hasHidden = stage.Hidden != null;
+            if (_hasHidden)
+            {
+                _hiddenMark.Many = true;
+                _hidden.Children.Add(_hiddenMark);
+                _hidden.Children.Add(_hiddenText);
+                _hidden.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
+                Widgets.Row(_hidden);
+                _head.Children.Add(_hidden);
+            }
 
             if (stage.Filters.Count > 0)
                 _head.Children.Add(_showing);
@@ -313,7 +332,21 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             }
 
             UpdateOptions(stage);
+            UpdateHidden(stage);
             UpdateRows(stage);
+        }
+
+        void UpdateHidden(PickStage stage)
+        {
+            if (!_hasHidden || stage.Hidden == null)
+                return;
+
+            ChoiceEntry hidden = stage.Hidden;
+            _hiddenMark.Chosen = hidden.IsCurrent;
+            _hiddenMark.Color = hidden.IsCurrent ? Palette.Live : Palette.Faint;
+            _hiddenText.Text = hidden.Text;
+            _hiddenText.Color = hidden.IsCurrent ? Palette.Ink : Palette.Muted;
+            _hidden.Press = Deed.Sends(hidden.Command);
         }
 
         /// <summary>The list of kinds, for the screen to hang over everything when this line is pressed.</summary>
@@ -539,7 +572,11 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                     row.Icon.Art = entry.Icon;
 
                 row.Name.Text = entry.IsHeading ? Widgets.Caps(entry.Text) : entry.Text;
-                row.Name.Color = entry.IsHeading ? Palette.Faint : Palette.Ink;
+                row.Name.Color = entry.IsHeading ? Palette.Faint : entry.IsDimmed ? Palette.Muted : Palette.Ink;
+
+                // Sunk a step further into the well than what is shown by default: the one tone darker
+                // than the well's own, so hidden reads as hidden before the words are read.
+                row.Line.Background = entry.IsDimmed ? Palette.ControlHot : Palette.None;
 
                 string detail = DetailOf(entry);
                 row.Detail.Text = detail;

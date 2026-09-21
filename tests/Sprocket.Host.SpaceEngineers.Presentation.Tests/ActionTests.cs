@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.Layout;
@@ -75,6 +76,63 @@ public class ActionTests
 
         Assert.True(screen.Shows("switch on"), "a block with a switch cannot be switched on");
         Assert.False(screen.Shows("Turn block On"), "the game's own on/off is offered twice");
+    }
+
+    /// <summary>
+    /// What an extension stands in for comes back, dimmed in the well, when somebody asks to see it.
+    /// </summary>
+    /// <remarks>
+    /// Hidden is not gone: a use nobody anticipated is still a use. The choice lasts while the editor
+    /// is open, so the next picker opens the way this one was left.
+    /// </remarks>
+    [Fact]
+    public void WhatIsHiddenIsShownDimmedWhenAskedFor()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Hydrogen Tank");
+        screen.Run(2);
+
+        Assert.False(screen.Shows("Turn block On"), "what switch on stands in for is showing");
+
+        screen.Editor.Invoke(What(screen).Hidden.Command);
+        screen.Run(2);
+
+        PickOption turned = What(screen).Entries.Single(entry => entry.Text == "Turn block On");
+        Assert.True(turned.IsDimmed, "a hidden entry is not dimmed");
+        Assert.True(turned.InWell, "a hidden entry is not in the well");
+        Assert.True(What(screen).Hidden.IsCurrent);
+
+        screen.Editor.Invoke(What(screen).Hidden.Command);
+        screen.Run(2);
+
+        Assert.False(screen.Shows("Turn block On"), "unticking did not hide it again");
+    }
+
+    [Fact]
+    public void TheNextPickerOpensTheWayTheLastWasLeft()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Hydrogen Tank");
+        screen.Run(2);
+        screen.Editor.Invoke(What(screen).Hidden.Command);
+        screen.Editor.Back();
+        screen.Run(2);
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Hydrogen Tank");
+        screen.Run(2);
+
+        Assert.True(What(screen).Hidden.IsCurrent, "the picker forgot what was being shown");
+        Assert.True(screen.Shows("Turn block On"));
+    }
+
+    static PickStage What(Screen screen)
+    {
+        return screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
     }
 
     /// <summary>
@@ -252,7 +310,7 @@ public class ActionTests
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 531 1380 1000").Split(' '));
+            + "1300 918 70 193 200 500 800 564 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the light's on value does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
@@ -279,7 +337,7 @@ public class ActionTests
     public void AColourIsChosenByPressingOne()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 668 1380 1000").Split(' '));
+            + "1300 918 70 193 200 500 800 692 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the colour setter does not ask for anything");
         Assert.Equal("", screen.Scene.AskBox.Text);
@@ -307,7 +365,7 @@ public class ActionTests
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 224 type Standby 200 375 800 439 1380 1000").Split(' '));
+            + "1300 918 70 193 150 224 type Standby 200 375 800 472 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the charge mode does not ask for anything");
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
@@ -340,7 +398,7 @@ public class ActionTests
     public void MoreChoicesThanFitFoldIntoAList()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 224 type Tug 200 375 800 439 1380 1000").Split(' '));
+            + "1300 918 70 193 150 224 type Tug 200 375 800 472 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the forward direction does not ask for anything");
 
