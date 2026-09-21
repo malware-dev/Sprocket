@@ -133,6 +133,11 @@ alternatives that were considered, no roadmap, and nothing about what is undecid
 **Any change to a rule, keyword, construct or spelling updates it in the same change as the code.**
 The spec is never left trailing, and the old wording is deleted rather than kept beside the new.
 
+**The language says part and Sprocket says slot, deliberately.** One thing named from two sides: the
+spec and the stored text call it a part, the screens and the requirements call it a slot. The word
+the game uses for a toolbar slot is Keen's and cannot move, which is the whole reason the language
+took the other one. A pass that reconciles the two is mending something that is not broken.
+
 Six rules, each of which the document has already been wrong about:
 
 - **Only the language.** How Sprocket or an editor happens to behave is not a rule of the language.
