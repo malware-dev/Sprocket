@@ -93,6 +93,27 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether this writes one of the block's own values, which a program says with <c>set</c>.</summary>
         public bool Sets => GamePropertyId != null;
 
+        /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
+        /// <remarks>
+        /// What the list sinks into its well, below what Sprocket says in its own words. An
+        /// extension's entry is Sprocket's; one the block declares and nothing has reworded is this.
+        /// </remarks>
+        public bool Unaltered { get; internal set; }
+
+        /// <summary>Whether this is left out of the list somebody chooses from.</summary>
+        /// <remarks>
+        /// Only where an extension stands in for it, naming it as the game's own form of what the
+        /// extension's entry does. Still there for anything that names it, and for a list that shows
+        /// everything.
+        /// </remarks>
+        public bool Hidden { get; private set; }
+
+        /// <summary>Leaves this out of the list somebody chooses from.</summary>
+        public void Hide()
+        {
+            Hidden = true;
+        }
+
         public EntityAction Writes(string propertyId, Field field, string named)
         {
             GamePropertyId = propertyId;

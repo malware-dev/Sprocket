@@ -591,6 +591,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _names.Clear();
             _ids.Clear();
             _values.Clear();
+            _groups.Clear();
 
             if (_forEvents)
             {
@@ -644,23 +645,42 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             for (var i = 0; i < _matched.Count; i++)
             {
                 var at = _matched[i];
-                var mine = _values.Count > at && _values[at] ? 1 : 0;
+                var mine = _groups.Count > at ? _groups[at] : Own;
                 if (_forEvents)
                     mine = group;
 
                 if (mine != group)
                 {
                     group = mine;
-                    _rows.Add(-1 - mine);
+
+                    // Sprocket's own words need no heading: they are the list, and the well under
+                    // them is what is headed.
+                    if (mine != Own)
+                        _rows.Add(-1 - mine);
                 }
 
                 _rows.Add(at);
+            }
+
+            var well = _forEvents ? "" : TerminalSaid;
+            if (_what.WellTitle != well)
+            {
+                _what.WellTitle = well;
+                changed = true;
             }
 
             changed |= Resize(_what.Entries, _rows.Count);
             for (var i = 0; i < _rows.Count; i++)
             {
                 var at = _rows[i];
+                var sunk = at < 0 || (_groups.Count > at && _groups[at] != Own);
+
+                if (_what.Entries[i].InWell != sunk)
+                {
+                    _what.Entries[i].InWell = sunk;
+                    changed = true;
+                }
+
                 if (at < 0)
                 {
                     changed |= Apply(_what.Entries[i], at == -2 ? ValuesSaid : ActionsSaid,
@@ -686,6 +706,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         const string ValuesSaid = "Values";
         const string ActionsSaid = "Toolbar Actions";
 
+        /// <summary>The heading over the well that holds the game's own words.</summary>
+        const string TerminalSaid = "Terminal";
+
+        /// <summary>Which group an entry is listed in: the game's actions, its values, or Sprocket's own.</summary>
+        /// <remarks>
+        /// Numbered so that a group's heading is the negative of one past it - minus one for the
+        /// actions, minus two for the values - and Sprocket's own group, which has no heading, last.
+        /// </remarks>
+        const int Actions = 0;
+        const int Values = 1;
+        const int Own = 2;
+
         /// <summary>
         /// Everything the blocks offer, values first and each group in its own order.
         /// </summary>
@@ -703,26 +735,39 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             actions.Sort(BySaid);
 
-            Listed(actions, true);
-            Listed(actions, false);
+            Listed(actions, Own);
+            Listed(actions, Values);
+            Listed(actions, Actions);
         }
 
-        void Listed(List<EntityAction> actions, bool values)
+        void Listed(List<EntityAction> actions, int group)
         {
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.GamePropertyId != null != values)
+                if (one.Hidden || Group(one) != group)
                     continue;
 
                 _names.Add(one.Named);
                 _ids.Add(one.Id);
-                _values.Add(values);
+                _values.Add(one.Sets);
+                _groups.Add(group);
             }
+        }
+
+        static int Group(EntityAction one)
+        {
+            if (!one.Unaltered)
+                return Own;
+
+            return one.Sets ? Values : Actions;
         }
 
         /// <summary>Which group each thing on offer belongs to, one per entry in <c>_names</c>.</summary>
         readonly List<bool> _values = new List<bool>();
+
+        /// <summary>Which group each thing on offer is listed in, one per entry in <c>_names</c>.</summary>
+        readonly List<int> _groups = new List<int>();
 
         /// <summary>
         /// What to draw, in order: an index into the things on offer, or a heading.

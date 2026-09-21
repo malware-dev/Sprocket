@@ -29,6 +29,9 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// <summary>Context under the title, such as how many are picked.</summary>
         public string Subtitle { get; set; }
 
+        /// <summary>What the recessed well under the list is headed, or empty where there is none.</summary>
+        public string WellTitle { get; set; }
+
         /// <summary>Whether picking one un-picks the last, or adds to them.</summary>
         public bool AllowsMany { get; set; }
 

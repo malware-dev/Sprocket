@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         sealed class RowVisual
         {
             public Bar Line;
+            public Stack Left;
             public Mark Mark;
             public IconBox Icon;
             public Label Name;
@@ -79,8 +80,34 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             public Label Text;
         }
 
+        /// <summary>The room inside a row somebody can press.</summary>
+        static readonly Thickness Pad = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f);
+
+        /// <summary>The same for a heading, with nothing below it.</summary>
+        static readonly Thickness HeadingPad =
+            new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f, Space.ChipX * 0.8f, 0f);
+
         readonly Scroll _scroll = new Scroll();
         readonly Stack _rows = Widgets.Column(Space.Line);
+
+        /// <summary>
+        /// What scrolls: the rows in Sprocket's own words, and under them the well and its heading.
+        /// </summary>
+        readonly Stack _list = Widgets.Column(Space.Line);
+
+        /// <summary>
+        /// The recessed well holding what the game declared in its own words.
+        /// </summary>
+        /// <remarks>
+        /// Filled like the search box, so the depth is already part of the editor's vocabulary. Nothing
+        /// above it is badged: it reads as lifted because the rest is sunk.
+        /// </remarks>
+        readonly Stack _well = Widgets.Column(Space.Line);
+
+        /// <summary>The well, held clear of the scroll bar, which the list's content otherwise runs up to.</summary>
+        readonly Stack _wellRoom = Widgets.Column(0f);
+        readonly Label _wellTitle = Widgets.Label("", Palette.Faint, Lettering.Body);
+        readonly List<RowVisual> _sunk = new List<RowVisual>();
 
         /// <summary>Where the pointer was when the thumb last moved. Only meaningful while it is held.</summary>
         float _held;
@@ -159,8 +186,24 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             // column has width to spare where every line of height comes out of the list.
             _head.Children.Add(_options);
 
+            _wellTitle.Wraps = false;
+
+            // Apart from Sprocket's own entries above it by a little more than they are from each
+            // other, so it reads as the start of something else.
+            _wellTitle.Padding = new Thickness(0f, Space.Row, 0f, 0f);
+            _well.Background = Palette.Page;
+            _well.Edge = Palette.Line;
+            _well.EdgeThickness = Space.Hair;
+            _well.Padding = new Thickness(Space.Item);
+            _wellRoom.Padding = new Thickness(0f, 0f, Space.Row, 0f);
+            _wellRoom.Children.Add(_well);
+
+            _list.Children.Add(_rows);
+            _list.Children.Add(_wellTitle);
+            _list.Children.Add(_wellRoom);
+
             Widgets.Barred(_scroll);
-            _scroll.Content = _rows;
+            _scroll.Content = _list;
 
             _column.Background = Palette.Panel;
             _column.Edge = Palette.Line;
@@ -427,19 +470,22 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         {
             bool many = stage.AllowsMany;
 
-            while (_visible.Count < stage.Entries.Count)
+            int above = 0;
+            int below = 0;
+            for (int i = 0; i < stage.Entries.Count; i++)
             {
-                RowVisual row = BuildRow(stage.HasIcons);
-                _visible.Add(row);
-                _rows.Children.Add(row.Line);
+                if (stage.Entries[i].InWell)
+                    below++;
+                else
+                    above++;
             }
 
-            while (_visible.Count > stage.Entries.Count)
-            {
-                int last = _visible.Count - 1;
-                _rows.Children.Remove(_visible[last].Line);
-                _visible.RemoveAt(last);
-            }
+            Fit(_visible, _rows, above, stage.HasIcons);
+            Fit(_sunk, _well, below, stage.HasIcons);
+
+            _wellRoom.Collapsed = below == 0;
+            _wellTitle.Text = Widgets.Caps(stage.WellTitle ?? "");
+            _wellTitle.Collapsed = below == 0 || string.IsNullOrEmpty(stage.WellTitle);
 
             if (stage.Entries.Count == 0)
             {
@@ -453,15 +499,25 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 _rows.Children.Remove(_empty);
             }
 
+            // Nothing above the well is no room above it either.
+            _rows.Collapsed = above == 0 && stage.Entries.Count > 0;
+
+            int lifted = 0;
+            int sunk = 0;
             for (int i = 0; i < stage.Entries.Count; i++)
             {
                 PickOption entry = stage.Entries[i];
-                RowVisual row = _visible[i];
+                RowVisual row = entry.InWell ? _sunk[sunk++] : _visible[lifted++];
 
                 // A heading is words and nothing else: no mark, because there is nothing to choose,
                 // and no press, because a row that answers the pointer and then does nothing is a
                 // row somebody presses twice before believing it.
                 row.Line.Press = entry.IsHeading ? Deed.Nothing : Moving(entry, many);
+
+                // A heading starts where the marks do and sits against the first thing it names: the
+                // mark's column goes, and the gap after it with it, and so does the room below.
+                row.Left.Collapsed = entry.IsHeading;
+                row.Line.Padding = entry.IsHeading ? HeadingPad : Pad;
                 row.Line.Highlight = entry.IsHeading ? Palette.None : Palette.PanelHot;
                 row.Mark.Collapsed = entry.IsHeading;
 
@@ -488,6 +544,24 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 string detail = DetailOf(entry);
                 row.Detail.Text = detail;
                 row.Detail.Collapsed = string.IsNullOrEmpty(detail);
+            }
+        }
+
+        /// <summary>Makes a pool of rows as long as it needs to be, adding and taking away at its end.</summary>
+        void Fit(List<RowVisual> pool, Stack into, int count, bool withIcon)
+        {
+            while (pool.Count < count)
+            {
+                RowVisual row = BuildRow(withIcon);
+                pool.Add(row);
+                into.Children.Add(row.Line);
+            }
+
+            while (pool.Count > count)
+            {
+                int last = pool.Count - 1;
+                into.Children.Remove(pool[last].Line);
+                pool.RemoveAt(last);
             }
         }
 
@@ -526,9 +600,10 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
             row.Line = new Bar();
             row.Line.Spacing = Space.Item;
-            row.Line.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f);
+            row.Line.Padding = Pad;
             Widgets.Row(row.Line);
             row.Line.Left = left;
+            row.Left = left;
             row.Line.Fill = text;
             row.Line.Right = right;
 

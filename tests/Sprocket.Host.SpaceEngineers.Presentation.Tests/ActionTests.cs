@@ -78,35 +78,11 @@ public class ActionTests
     }
 
     /// <summary>
-    /// A toggle whose two halves are both said already is not offered a third time.
-    /// </summary>
-    /// <remarks>
-    /// The game's convention is that a switch called X offers X_On, X_Off and a bare X that flips
-    /// whichever way it is. "Open or close the door depending" is not a thing anybody writing a
-    /// procedure means, and a door that offered it beside open and close would be asking somebody
-    /// to work out which of three they wanted.
-    /// </remarks>
-    [Fact]
-    public void TheToggleAPairReplacesIsNotOffered()
-    {
-        var screen = WithASequence();
-
-        screen.Editor.PressAdd("do something");
-        screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Run(2);
-
-        Assert.True(screen.Shows("open"), "a door cannot be opened");
-        Assert.True(screen.Shows("close"), "a door cannot be closed");
-        Assert.False(screen.Shows("Open/Closed"), "the door offers the toggle as well as both halves");
-    }
-
-    /// <summary>
     /// The tank declares a toggle of its own, and nothing has said either half, so all three stand.
     /// </summary>
     /// <remarks>
-    /// The rule is not "hide every toggle". It is that Sprocket does not say the same thing twice,
-    /// and where it has said nothing there is nothing to be redundant with - so what the block
-    /// offers is what the block offers.
+    /// Only an extension hides anything, by standing in for the game's own form of what it does.
+    /// Where nothing stands in, what the block offers is what the block offers.
     /// </remarks>
     [Fact]
     public void AToggleNothingReplacesIsLeftAlone()
@@ -276,7 +252,7 @@ public class ActionTests
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 410 1380 1000").Split(' '));
+            + "1300 918 70 193 200 500 800 531 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the light's on value does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
@@ -303,7 +279,7 @@ public class ActionTests
     public void AColourIsChosenByPressingOne()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 545 1380 1000").Split(' '));
+            + "1300 918 70 193 200 500 800 668 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the colour setter does not ask for anything");
         Assert.Equal("", screen.Scene.AskBox.Text);
@@ -331,7 +307,7 @@ public class ActionTests
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 224 type Standby 200 375 800 316 1380 1000").Split(' '));
+            + "1300 918 70 193 150 224 type Standby 200 375 800 439 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the charge mode does not ask for anything");
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
@@ -364,7 +340,7 @@ public class ActionTests
     public void MoreChoicesThanFitFoldIntoAList()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000").Split(' '));
+            + "1300 918 70 193 150 224 type Tug 200 375 800 439 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the forward direction does not ask for anything");
 

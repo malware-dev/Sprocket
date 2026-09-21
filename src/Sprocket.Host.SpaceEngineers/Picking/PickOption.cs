@@ -50,5 +50,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// would sit still while the things it names scrolled past.
         /// </remarks>
         public bool IsHeading { get; set; }
+
+        /// <summary>Whether this sits in the recessed well, among what the game declared in its own words.</summary>
+        public bool InWell { get; set; }
     }
 }

@@ -40,58 +40,66 @@ on screen     Do something
 033  Sprite     Sprocket_Fill         {X:729 Y:142 W:1 H:800}  #5B737BFF
 034  Sprite     Sprocket_Fill         {X:1188 Y:142 W:1 H:800}  #5B737BFF
 035  SetClip    {X:745 Y:255 W:428 H:671}
-036  Text       at {X:767.8 Y:264.572} scale 0.64  #85A1A9FF  "VALUES"
-037  Text       at {X:784.8 Y:310.452} scale 0.64  #DCF5FDFF  "Forward Direction"
-038  Text       at {X:762.0267 Y:311.747} scale 0.57  #3ACC00FF  "0"
-039  Text       at {X:767.8 Y:356.332} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
-040  Text       at {X:784.8 Y:402.212} scale 0.64  #DCF5FDFF  "switch off"
-041  Text       at {X:761.655 Y:403.507} scale 0.57  #85A1A9FF  "o"
-042  Text       at {X:784.8 Y:448.092} scale 0.64  #DCF5FDFF  "switch on"
-043  Text       at {X:761.655 Y:449.387} scale 0.57  #85A1A9FF  "o"
-044  SetClip    {X:259 Y:142 W:1402 H:812}
-045  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
-046  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
-047  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
-048  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
-049  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
-050  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
-051  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
-052  ClearClip  
-053  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
-054  SetClip    {X:276 Y:55 W:157 H:33}
-055  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
-056  ClearClip  
-057  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-058  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-059  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
-060  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-061  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-062  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
-063  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
-064  Sprite     Sprocket_Fill         {X:684 Y:476 W:552 H:128}  #3C4C52FF
-065  Sprite     Sprocket_Fill         {X:684 Y:476 W:552 H:1}  #5B737BFF
-066  Sprite     Sprocket_Fill         {X:684 Y:603 W:552 H:1}  #5B737BFF
-067  Sprite     Sprocket_Fill         {X:684 Y:476 W:1 H:128}  #5B737BFF
-068  Sprite     Sprocket_Fill         {X:1235 Y:476 W:1 H:128}  #5B737BFF
-069  Text       at {X:700 Y:485.86} scale 0.5  #A2C3CDFF  "This needs one value."
-070  Sprite     Sprocket_Fill         {X:835 Y:514 W:385 H:33}  #29363EFF
-071  Sprite     Sprocket_Fill         {X:835 Y:514 W:385 H:1}  #A2C3CDFF
-072  Sprite     Sprocket_Fill         {X:835 Y:546 W:385 H:1}  #A2C3CDFF
-073  Sprite     Sprocket_Fill         {X:835 Y:514 W:1 H:33}  #A2C3CDFF
-074  Sprite     Sprocket_Fill         {X:1219 Y:514 W:1 H:33}  #A2C3CDFF
-075  Text       at {X:1196.403 Y:520.36} scale 0.57  #85A1A9FF  "v"
-076  Text       at {X:700 Y:520.36} scale 0.57  #85A1A9FF  "Forward Direction"
-077  Text       at {X:1046.153 Y:565.25} scale 0.57  #A2C3CDFF  "Cancel"
-078  Sprite     Sprocket_Fill         {X:1118 Y:557 W:102 H:37}  #374851FF
-079  Text       at {X:1137.467 Y:565.25} scale 0.57  #85A1A9FF  "Continue"
-080  Sprite     Sprocket_Fill         {X:835 Y:547 W:385 H:199}  #0C1216FF
-081  Sprite     Sprocket_Fill         {X:835 Y:547 W:385 H:1}  #5B737BFF
-082  Sprite     Sprocket_Fill         {X:835 Y:745 W:385 H:1}  #5B737BFF
-083  Sprite     Sprocket_Fill         {X:835 Y:547 W:1 H:199}  #5B737BFF
-084  Sprite     Sprocket_Fill         {X:1219 Y:547 W:1 H:199}  #5B737BFF
-085  Text       at {X:850.83 Y:553.45} scale 0.57  #A2C3CDFF  "Forward"
-086  Text       at {X:850.83 Y:586.54} scale 0.57  #A2C3CDFF  "Backward"
-087  Text       at {X:850.83 Y:619.6301} scale 0.57  #A2C3CDFF  "Left"
-088  Text       at {X:850.83 Y:652.7201} scale 0.57  #A2C3CDFF  "Right"
-089  Text       at {X:850.83 Y:685.8101} scale 0.57  #A2C3CDFF  "Up"
-090  Text       at {X:850.83 Y:718.9001} scale 0.57  #A2C3CDFF  "Down"
+036  Text       at {X:784.8 Y:264.572} scale 0.64  #DCF5FDFF  "switch off"
+037  Text       at {X:761.655 Y:265.867} scale 0.57  #85A1A9FF  "o"
+038  Text       at {X:784.8 Y:310.452} scale 0.64  #DCF5FDFF  "switch on"
+039  Text       at {X:761.655 Y:311.747} scale 0.57  #85A1A9FF  "o"
+040  Text       at {X:745 Y:352.732} scale 0.64  #85A1A9FF  "TERMINAL"
+041  Sprite     Sprocket_Fill         {X:745 Y:379 W:410 H:181}  #141B20FF
+042  Sprite     Sprocket_Fill         {X:745 Y:379 W:410 H:1}  #5B737BFF
+043  Sprite     Sprocket_Fill         {X:745 Y:560 W:410 H:1}  #5B737BFF
+044  Sprite     Sprocket_Fill         {X:745 Y:379 W:1 H:181}  #5B737BFF
+045  Sprite     Sprocket_Fill         {X:1154 Y:379 W:1 H:181}  #5B737BFF
+046  Text       at {X:767.8 Y:399.012} scale 0.64  #85A1A9FF  "VALUES"
+047  Text       at {X:794.8 Y:435.292} scale 0.64  #DCF5FDFF  "Forward Direction"
+048  Text       at {X:772.0267 Y:436.587} scale 0.57  #3ACC00FF  "0"
+049  Text       at {X:767.8 Y:481.172} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
+050  Text       at {X:794.8 Y:517.452} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
+051  Text       at {X:771.655 Y:518.747} scale 0.57  #85A1A9FF  "o"
+052  SetClip    {X:259 Y:142 W:1402 H:812}
+053  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
+054  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
+055  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
+056  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
+057  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
+058  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
+059  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
+060  ClearClip  
+061  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+062  SetClip    {X:276 Y:55 W:157 H:33}
+063  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+064  ClearClip  
+065  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+066  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+067  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+068  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+069  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+070  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
+071  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
+072  Sprite     Sprocket_Fill         {X:684 Y:476 W:552 H:128}  #3C4C52FF
+073  Sprite     Sprocket_Fill         {X:684 Y:476 W:552 H:1}  #5B737BFF
+074  Sprite     Sprocket_Fill         {X:684 Y:603 W:552 H:1}  #5B737BFF
+075  Sprite     Sprocket_Fill         {X:684 Y:476 W:1 H:128}  #5B737BFF
+076  Sprite     Sprocket_Fill         {X:1235 Y:476 W:1 H:128}  #5B737BFF
+077  Text       at {X:700 Y:485.86} scale 0.5  #A2C3CDFF  "This needs one value."
+078  Sprite     Sprocket_Fill         {X:835 Y:514 W:385 H:33}  #29363EFF
+079  Sprite     Sprocket_Fill         {X:835 Y:514 W:385 H:1}  #A2C3CDFF
+080  Sprite     Sprocket_Fill         {X:835 Y:546 W:385 H:1}  #A2C3CDFF
+081  Sprite     Sprocket_Fill         {X:835 Y:514 W:1 H:33}  #A2C3CDFF
+082  Sprite     Sprocket_Fill         {X:1219 Y:514 W:1 H:33}  #A2C3CDFF
+083  Text       at {X:1196.403 Y:520.36} scale 0.57  #85A1A9FF  "v"
+084  Text       at {X:700 Y:520.36} scale 0.57  #85A1A9FF  "Forward Direction"
+085  Text       at {X:1046.153 Y:565.25} scale 0.57  #A2C3CDFF  "Cancel"
+086  Sprite     Sprocket_Fill         {X:1118 Y:557 W:102 H:37}  #374851FF
+087  Text       at {X:1137.467 Y:565.25} scale 0.57  #85A1A9FF  "Continue"
+088  Sprite     Sprocket_Fill         {X:835 Y:547 W:385 H:199}  #0C1216FF
+089  Sprite     Sprocket_Fill         {X:835 Y:547 W:385 H:1}  #5B737BFF
+090  Sprite     Sprocket_Fill         {X:835 Y:745 W:385 H:1}  #5B737BFF
+091  Sprite     Sprocket_Fill         {X:835 Y:547 W:1 H:199}  #5B737BFF
+092  Sprite     Sprocket_Fill         {X:1219 Y:547 W:1 H:199}  #5B737BFF
+093  Text       at {X:850.83 Y:553.45} scale 0.57  #A2C3CDFF  "Forward"
+094  Text       at {X:850.83 Y:586.54} scale 0.57  #A2C3CDFF  "Backward"
+095  Text       at {X:850.83 Y:619.6301} scale 0.57  #A2C3CDFF  "Left"
+096  Text       at {X:850.83 Y:652.7201} scale 0.57  #A2C3CDFF  "Right"
+097  Text       at {X:850.83 Y:685.8101} scale 0.57  #A2C3CDFF  "Up"
+098  Text       at {X:850.83 Y:718.9001} scale 0.57  #A2C3CDFF  "Down"

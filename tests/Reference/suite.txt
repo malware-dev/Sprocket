@@ -102,8 +102,8 @@ wait-used           60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1
 # its own line with its name and its bounds beside it, and that a value outside them replaces the
 # question rather than appearing beside it - the dialog is the same size either way, which is the
 # whole point of putting the words there.
-values              60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 456 1380 1000
-values-refused      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 456 1380 1000 type 300
+values              60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 577 1380 1000
+values-refused      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 577 1380 1000 type 300
 
 # And the same form asking for the thing nobody should be typing.
 #
@@ -112,43 +112,43 @@ values-refused      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1
 # the three - the hue track, two plain ones, and what the colour is written as. The swatches above
 # them are the player's own and there is nobody to ask here, so the row they would be in is not
 # drawn at all, which is the other thing this holds still.
-values-colour       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 545 1380 1000
+values-colour       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 668 1380 1000
 
 # And the value that is one of two words, which is a switch rather than a box with the words beside
 # it. Neither half is lit until one is pressed, because a switch that opened showing "off" would be
 # answering for somebody.
-values-flag         60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 410 1380 1000
+values-flag         60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 531 1380 1000
 
 # And the same value with more of them than a switch can hold.
 #
 # A battery's charge mode is three words, and the block is told a number for whichever one is
 # chosen. What is held still is that the words are what is on the screen, that none of them is lit
 # until one is pressed, and that the step afterwards reads the word rather than the number.
-values-choices      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Standby 200 375 800 316 1380 1000
-sequence-choices    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Standby 200 375 800 316 1380 1000 660 530 enter
+values-choices      60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Standby 200 375 800 439 1380 1000
+sequence-choices    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Standby 200 375 800 439 1380 1000 660 530 enter
 
 # And more of them than a row can hold, which folds into a box that opens a list.
 #
 # Six forward directions. What is held still is that the box is one line whatever the list holds,
 # that it says nothing until something is chosen, and that the list hangs over the way out of the
 # form rather than under it - which is the whole reason the form draws it and the control does not.
-values-list         60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000
-values-list-open    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000 700 530
-sequence-list       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000 700 530 700 628 enter
+values-list         60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 439 1380 1000
+values-list-open    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 439 1380 1000 700 530
+sequence-list       60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 439 1380 1000 700 530 700 628 enter
 
 # Leaving a sequence that is still switched off asks about it, and says which answer Enter takes.
 #
 # The safe answer is drawn the way everything else that carries on is drawn, because a key nobody
 # can see the effect of is a key nobody trusts twice. Safe, and not the one that reads best first:
 # Enter gets pressed without reading, and must not switch something on.
-sequence-leaving    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 316 1380 1000 700 530 700 628 enter 19 62
+sequence-leaving    60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 150 224 type Tug 200 375 800 439 1380 1000 700 530 700 628 enter 19 62
 
 # And the step it leaves behind, which is the other half of the same decision.
 #
 # A colour is the one slot in a sentence that is not words. Held still here because a step is read
 # far more often than it is written, and because the fallback - three numbers, or the code - is what
 # it used to show and what it must not go back to showing.
-sequence-colour     60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 545 1380 1000 type #FF8800 enter
+sequence-colour     60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 1300 918 70 193 200 500 800 668 1380 1000 type #FF8800 enter
 
 # --- the list with something in it, which is where a copy is made from ---------------------------
 #

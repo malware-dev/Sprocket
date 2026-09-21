@@ -79,6 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // And last of all the values it carries, because an act reads better than telling a
             // value what to be wherever there is one that does the same thing.
             Values(kind, block);
+            Hide(kind);
 
             _kinds.Add(id, kind);
             return kind;
@@ -97,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The words are the game's own, which are written for a button in the terminal rather than
         /// for the middle of a sentence. They are what the player has already read, which is worth
         /// more than a guess at a better phrasing - and where a better one exists, an extension has
-        /// said it and this adds nothing.
+        /// said it, and this one is still added but left out of the list somebody chooses from.
         /// </para>
         /// <para>
         /// No state is claimed: an action here says nothing about what it is trying to bring about,
@@ -113,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < _offered.Count; i++)
             {
                 Offer offer = _offered[i];
-                if (string.IsNullOrEmpty(offer.Id) || Said(kind, offer.Id))
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, false) != null)
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
@@ -122,6 +123,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                     kind.WithAction(offer.Id, said, offer.Id, offer.Wants, Described(kind, offer));
                 else
                     kind.WithAction(offer.Id, said, null, offer.Id);
+
+                Last(kind).Unaltered = true;
             }
         }
 
@@ -138,7 +141,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// it pushes people towards is this one. A switch is offered as a value it can be set to.
         /// </para>
         /// <para>
-        /// A value is passed over where an action already has that id.
+        /// A value is passed over only where another value already has that id, since a program
+        /// could not tell the two apart.
         /// </para>
         /// </remarks>
         void Values(EntityKind kind, IMyTerminalBlock block)
@@ -150,12 +154,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 Offer offer = _offered[i];
 
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, false) != null)
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, true) != null)
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
 
                 kind.WithValue(offer.Id, said, offer.Id, Asks(offer, said));
+                Last(kind).Unaltered = true;
             }
         }
 
@@ -224,26 +229,38 @@ namespace Sprocket.Host.SpaceEngineers.World
             return _catalogue == null ? null : _catalogue.Fitting(kind.Id, offer.Id, offer.Wants);
         }
 
-        /// <summary>Whether something in this kind already covers the game's action by that name.</summary>
+        /// <summary>Marks what is left out of the list somebody chooses from.</summary>
         /// <remarks>
-        /// Either an action of Sprocket's own is written as that one, or both halves of it are: the
-        /// game's convention is that a switch called <c>X</c> offers <c>X_On</c>, <c>X_Off</c> and a
-        /// bare <c>X</c> that flips whichever way it is, and "open or close the door depending" is
-        /// not a thing anybody writing a procedure means. So a door offers open and close, and the
-        /// toggle they came from is not offered a third time.
+        /// An entry is left out where an extension stands in for it, naming it as the game's own form of
+        /// what the extension's entry does: a door's open is the game's <c>Open_On</c> said better.
+        /// Nothing else is. Runs once the list is complete, because the entry that stands in and the one
+        /// it stands in for are added at different times.
         /// </remarks>
-        static bool Said(EntityKind kind, string gameActionId)
-        {
-            return Written(kind, gameActionId)
-                || (Written(kind, gameActionId + "_On") && Written(kind, gameActionId + "_Off"));
-        }
-
-        static bool Written(EntityKind kind, string gameActionId)
+        static void Hide(EntityKind kind)
         {
             var actions = kind.Actions;
             for (var i = 0; i < actions.Count; i++)
             {
-                if (actions[i].GameActionId == gameActionId)
+                if (StoodIn(actions, actions[i]))
+                    actions[i].Hide();
+            }
+        }
+
+        static EntityAction Last(EntityKind kind)
+        {
+            return kind.Actions[kind.Actions.Count - 1];
+        }
+
+        /// <summary>Whether another entry names this one as the game's own form of what it does.</summary>
+        static bool StoodIn(IList<EntityAction> actions, EntityAction one)
+        {
+            for (var i = 0; i < actions.Count; i++)
+            {
+                EntityAction other = actions[i];
+                if (ReferenceEquals(other, one))
+                    continue;
+
+                if (one.Sets ? other.GamePropertyId == one.Id : other.GameActionId == one.Id)
                     return true;
             }
 
