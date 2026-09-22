@@ -46,6 +46,16 @@ Every added comment, against the rule that a comment says what the code **is**:
 - No second person, no "we".
 - Not a restatement of the line under it.
 
+**Grep the added comments before reading them**, because reading skims and a program does not:
+
+```
+git diff -U0 | grep "^+" | grep -iE "//.*(before|used to|previously|now|no longer|instead of|originally|we|you|I)"
+```
+
+Every hit is read in full and either rewritten or justified out loud. Most are innocent - "before the
+next step" - and the few that are not are exactly the ones an eye slides over: "as it did before"
+compares with a shape the reader cannot see, and reads as sense until it is looked at.
+
 Then the structural questions, in this order, because the early ones invalidate the later ones:
 
 1. **Was an existing surface reinvented?** A new fault, status, reading or question about a block is

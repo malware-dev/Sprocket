@@ -19,7 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Turning to an angle is the game's own: it puts a limit at the angle and runs the rotor at it,
     /// so the rotor's limits are the game's to overwrite, and are. The rotor has arrived when it has
     /// reached the limit it is running towards - the test the game itself makes to say a limit was
-    /// reached, read off the rotor, so it holds after a reload as it did before.
+    /// reached. Its angle, its limits and its speed are all the block's own, which the game saves, so
+    /// a turn under way survives a reload and is still known to be under way.
     /// <para>
     /// Hinges share the rotor's type and are not claimed here. The game tells the two apart by the
     /// definition, and a hinge has hard limits of its own.
