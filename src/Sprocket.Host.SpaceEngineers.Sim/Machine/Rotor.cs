@@ -36,6 +36,9 @@ sealed class Rotor : Fitting
             .Gives("UpperLimitRad", () => _upper)
             .Gives("TargetVelocityRPM", () => _speed)
             .Gives("MaxRotorAngularVelocity", () => 30f * 2f * (float)Math.PI / 60f)
+            .Gives("IsAttached", () => Attached)
+            .Gives("RotorLock", () => Locked)
+            .Gives("Torque", () => Torque)
             .Takes("LowerLimitRad", value => _lower = (float)value)
             .Takes("UpperLimitRad", value => _upper = (float)value)
             .Takes("TargetVelocityRPM", value => _speed = (float)value)
@@ -61,6 +64,25 @@ sealed class Rotor : Fitting
 
     /// <summary>How fast it is turning, in revolutions a minute, and which way.</summary>
     public float Speed => _speed;
+
+    /// <summary>Whether it has a head on it, without which it turns nothing.</summary>
+    public bool Attached { get; set; } = true;
+
+    /// <summary>Whether its lock is on, which holds it where it stands.</summary>
+    public bool Locked { get; set; }
+
+    /// <summary>How hard it turns, which is nothing when it is nought.</summary>
+    public float Torque { get; set; } = 1000f;
+
+    /// <summary>
+    /// Whether something is holding it, so its angle stays where it is however fast it is told to go.
+    /// </summary>
+    /// <remarks>
+    /// What a rotor leaning on a wall does. Nothing about the block says so - the speed and the
+    /// torque read the same as a rotor turning freely - which is the whole reason the mod watches
+    /// the angle.
+    /// </remarks>
+    public bool Held { get; set; }
 
     /// <summary>The rotor's angle in degrees, nought to three hundred and sixty.</summary>
     public float Degrees
@@ -120,7 +142,7 @@ sealed class Rotor : Fitting
 
     public override void Tick()
     {
-        if (!Enabled || _speed == 0)
+        if (!Enabled || Held || Locked || !Attached || Torque <= 0f || _speed == 0)
             return;
 
         // A revolution a minute is a sixtieth of a turn a second, at sixty ticks to the second.

@@ -252,10 +252,20 @@ sealed class Rig
             .Gives("MyName", () => Environment.UserName)
             .Gives("IsServer", () => true)
             .Done();
+
+        // Only where nothing has put one up already: a test that draws screens has a session of its
+        // own with a camera and a player on it, and both report the same frame. See Clock.
+        if (MyAPIGateway.Session == null)
+        {
+            MyAPIGateway.Session = Pretend.To<IMySession>()
+                .Gives("GameplayFrameCounter", () => Clock.Frame)
+                .Done();
+        }
     }
 
     public void Tick()
     {
+        Clock.Tick();
         _grid.Tick();
     }
 

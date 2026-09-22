@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Sim.Machine;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
@@ -96,6 +97,7 @@ namespace Sprocket.Sim.Simulation
             MyAPIGateway.Session = Pretend.To<IMySession>()
                 .Gives("Camera", () => camera)
                 .Gives("Player", () => player)
+                .Gives("GameplayFrameCounter", () => Clock.Frame)
                 .Done();
         }
 

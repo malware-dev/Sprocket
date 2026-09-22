@@ -1,5 +1,5 @@
+using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Editing;
-using System;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -264,6 +264,127 @@ public class RotorTests
         Assert.Equal(0f, rotor.Speed);
         Assert.InRange(rotor.Degrees, reached, reached + 1f);
         Assert.False(runner.Get(sequence)!.IsRunning);
+    }
+
+    /// <summary>
+    /// A rotor something is holding says so, and the sequence waiting on it is at fault rather than
+    /// waiting for ever.
+    /// </summary>
+    [Fact]
+    public void ARotorThatIsHeldSaysSo()
+    {
+        var ship = new Rigged();
+        var rotor = ship.Rotor(1, "Rotor");
+        var automation = new Automation();
+        var sequence = Turning(ship, automation, rotor, 350, 5);
+        var runner = new AutomationRunner(automation, ship.World);
+
+        var frame = 0;
+        ship.Tick();
+        runner.Tick(++frame);
+        runner.Call(sequence);
+
+        for (; frame < 30; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame + 1);
+        }
+
+        Assert.NotEqual(SequenceProblem.Stuck, Faulted(ship, runner, sequence).Problem);
+
+        // Something leans on it: the speed and the torque say nothing, and the angle stops.
+        rotor.Held = true;
+        for (var end = frame + 120; frame < end; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame + 1);
+        }
+
+        // Waited through: the sequence says what is wrong and holds, so a cleared obstruction lets it
+        // finish by itself.
+        var fault = Faulted(ship, runner, sequence);
+        Assert.Equal(SequenceProblem.Stuck, fault.Problem);
+        Assert.Equal("cannot turn - something is holding it", fault.Because);
+        Assert.True(runner.Get(sequence)!.IsRunning);
+    }
+
+    /// <summary>
+    /// The watch on a rotor is what says it is held, and a turn starts it afresh: a rotor standing
+    /// where the last turn left it has not been held, it has been still.
+    /// </summary>
+    [Fact]
+    public void AFreshTurnIsNotJudgedByTheLastOne()
+    {
+        var ship = new Rigged();
+        var rotor = ship.Rotor(1, "Rotor");
+
+        var block = (IMyMotorStator)rotor.Block;
+        Assert.True(RotorTurn.Turning(block), "a rotor just looked at is already called held");
+
+        for (var frame = 0; frame < 120; frame++)
+            ship.Tick();
+
+        Assert.False(RotorTurn.Turning(block), "a rotor that has not moved for two seconds reads as turning");
+
+        RotorTurn.Began(block);
+        Assert.True(RotorTurn.Turning(block), "a turn just begun is called held before it can move");
+    }
+
+    /// <summary>What is plainly wrong with a rotor is read off it, and needs no watching.</summary>
+    [Theory]
+    [InlineData("power", "cannot turn - it is switched off or has no power")]
+    [InlineData("head", "cannot turn - it has no head")]
+    [InlineData("lock", "cannot turn - it is locked")]
+    [InlineData("torque", "cannot turn - its torque is nought")]
+    public void ARotorThatCannotTurnSaysWhy(string what, string said)
+    {
+        var ship = new Rigged();
+        var rotor = ship.Rotor(1, "Rotor");
+        var automation = new Automation();
+        var sequence = Turning(ship, automation, rotor, 350, 5);
+        var runner = new AutomationRunner(automation, ship.World);
+
+        ship.Tick();
+        runner.Tick(1);
+        runner.Call(sequence);
+
+        if (what == "power")
+            rotor.Enabled = false;
+        else if (what == "head")
+            rotor.Attached = false;
+        else if (what == "lock")
+            rotor.Locked = true;
+        else
+            rotor.Torque = 0f;
+
+        for (var frame = 2; frame < 20; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame);
+        }
+
+        var fault = Faulted(ship, runner, sequence);
+        Assert.Equal(SequenceProblem.Stuck, fault.Problem);
+        Assert.Equal(said, fault.Because);
+    }
+
+    static SequenceFault Faulted(Rigged ship, AutomationRunner runner, Sequence sequence)
+    {
+        return SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence));
+    }
+
+    /// <summary>A sequence that turns the rotor and waits for it.</summary>
+    static Sequence Turning(Rigged ship, Automation automation, Rotor rotor, long degrees, long rpm)
+    {
+        var sequence = automation.AddSequence((Trigger)null!);
+        var turn = new Act(RotorExtension.RotateTo);
+        turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
+        turn.Values.Add(Literal.Of(Clockwise));
+        turn.Values.Add(Literal.Of(degrees));
+        turn.Values.Add(Literal.Of(rpm));
+        sequence.Steps.Add(turn);
+        sequence.Steps.Add(new Await());
+        return sequence;
     }
 
     [Fact]

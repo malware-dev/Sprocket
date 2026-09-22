@@ -202,6 +202,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             else
                 rotor.RotateToAngle(way, angle, speed);
 
+            RotorTurn.Began(rotor);
             return true;
         }
 
@@ -269,10 +270,42 @@ namespace Sprocket.Host.SpaceEngineers.World
                 rotor.TargetVelocityRPM = 0f;
         }
 
-        /// <summary>Nothing yet: why a rotor would not arrive is a question of its own.</summary>
+        /// <summary>
+        /// Why the rotor is not getting to its angle, or nothing while it still might.
+        /// </summary>
+        /// <remarks>
+        /// In the order somebody would look: whether it can turn at all, then whether it was told to,
+        /// then whether something is holding it. A rotor whose speed has been taken away is the one
+        /// answer worth giving up on - it was set by the turn, so nought means something else has
+        /// been at it and nothing is heading for the angle any more.
+        /// </remarks>
         public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
         {
-            return Trouble.None;
+            var rotor = block as IMyMotorStator;
+            if (rotor == null || stateId != There || AtLimit(rotor))
+                return Trouble.None;
+
+            if (!rotor.IsWorking)
+                return Trouble.Waiting("cannot turn - it is switched off or has no power");
+
+            if (!rotor.IsAttached)
+                return Trouble.Waiting("cannot turn - it has no head");
+
+            if (rotor.RotorLock)
+                return Trouble.Waiting("cannot turn - it is locked");
+
+            if (rotor.Torque <= 0f)
+                return Trouble.Waiting("cannot turn - its torque is nought");
+
+            if (rotor.TargetVelocityRPM == 0f)
+                return Trouble.Fatal("stopped turning - its speed was set to nought");
+
+            // Waited through rather than given up on. Whatever is holding the rotor may be moved, and
+            // the rotor leaning on it meanwhile is no worse than the rotor stopped: measured in game,
+            // taking its speed away does not settle what the pushing does to a construct.
+            return RotorTurn.Turning(rotor)
+                ? Trouble.None
+                : Trouble.Waiting("cannot turn - something is holding it");
         }
 
         public string StatusOf(IMyTerminalBlock block)
