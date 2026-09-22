@@ -12,11 +12,15 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Whether a vent is still working on a room, asked of the gas moving through it.
     /// </summary>
     /// <remarks>
+    /// One per set of extensions, which is one per world: what it remembers is about the vents of one
+    /// construct, and it goes when they do.
+    /// <para>
     /// <b>The level cannot answer this and the status is worse.</b> A room that is as full as it
     /// will ever get settles below one and the game goes on calling it Pressurizing for as long as
     /// it exists, so waiting for either is waiting forever. What does answer it is the gas: a vent
     /// filling a room draws its full rate the whole time and drops to nothing the moment it is
     /// finished, and a vent emptying one pushes out the same way.
+    /// </para>
     /// <para>
     /// Measured in game: 300 in while filling, 0 within one sample of finishing, 300 out while
     /// emptying. The readings are what the resource distributor granted rather than what the vent
@@ -24,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// working for ever.
     /// </para>
     /// </remarks>
-    static class VentGas
+    sealed class VentGas
     {
         /// <summary>
         /// The flow below which nothing is happening.
@@ -57,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// never been seen moving anything is treated as having moved something just now, so it is
         /// given its beat to get started rather than being called finished before it has begun.
         /// </remarks>
-        static readonly Dictionary<long, int> _stopped = new Dictionary<long, int>();
+        readonly Dictionary<long, int> _stopped = new Dictionary<long, int>();
 
         /// <summary>
         /// Whether the vent is moving gas the way <paramref name="emptying" /> asks, right now.
@@ -67,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// can be wrong for a frame without costing anybody anything, where a step finishing early
         /// opens a door - so only the settling path pays for the beat.
         /// </remarks>
-        public static bool Moving(IMyAirVent vent, bool emptying)
+        public bool Moving(IMyAirVent vent, bool emptying)
         {
             if (vent == null)
                 return false;
@@ -84,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// level is already inside the band - the reading before it short-circuits - so the cost
         /// falls in the last moments of a fill rather than for as long as the room is filling.
         /// </remarks>
-        public static bool Working(IMyAirVent vent, bool emptying)
+        public bool Working(IMyAirVent vent, bool emptying)
         {
             if (vent == null)
                 return false;
@@ -108,20 +112,20 @@ namespace Sprocket.Host.SpaceEngineers.World
             return frame - last < Beat;
         }
 
-        static int Frame()
+        int Frame()
         {
             return MyAPIGateway.Session == null ? -1 : MyAPIGateway.Session.GameplayFrameCounter;
         }
 
         /// <summary>What it is being given, which is how a vent fills a room.</summary>
-        public static float In(IMyAirVent vent)
+        public float In(IMyAirVent vent)
         {
             var sink = vent.Components.Get<MyResourceSinkComponent>();
             return sink == null ? -1f : sink.CurrentInputByType(Oxygen);
         }
 
         /// <summary>What it is passing on, which is how a vent empties one.</summary>
-        public static float Out(IMyAirVent vent)
+        public float Out(IMyAirVent vent)
         {
             var source = vent.Components.Get<MyResourceSourceComponent>();
             return source == null ? -1f : source.CurrentOutputByType(Oxygen);

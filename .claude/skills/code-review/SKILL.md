@@ -11,6 +11,13 @@ the read has caught a whole mechanism built beside the one that already existed.
 Load **csharp-standards** and **sprocket-standards** first. This is how to apply them to a diff, not
 a second copy of them.
 
+**The job is to hold the change to every rule in both, not to the list below.** The diff passes only
+where nothing in it breaks a standard: what a comment may say, what may be static, one type per file,
+folders by capability, member order, names, what a repeating path may do, and the questions to be
+answered before changing anything. The sections that follow are the traps this repository falls into
+most often, written down because they were missed - they are a prompt, never the whole of it. A
+finding that breaks a rule not listed here is still a finding.
+
 ## Run the inspection
 
 ```
@@ -55,6 +62,17 @@ git diff -U0 | grep "^+" | grep -iE "//.*(before|used to|previously|now|no long
 Every hit is read in full and either rewritten or justified out loud. Most are innocent - "before the
 next step" - and the few that are not are exactly the ones an eye slides over: "as it did before"
 compares with a shape the reader cannot see, and reads as sense until it is looked at.
+
+**Grep the added lines for state that outlives a call**, which is the rule hardest to see by reading:
+
+```
+git diff -U0 | grep "^+" | grep -nE "static.*(Dictionary|List|HashSet|Queue|Stack|Array)"
+```
+
+Every hit answers: **what owns this, and when does it die?** A `static readonly` holding an immutable
+value is a constant. A collection added to at runtime is state, and it belongs to something with a
+lifetime - the world, the unit, the runner - so that it dies with what it is about. That another
+class already does it this way is not an answer: copying the flaw is how the second one appears.
 
 Then the structural questions, in this order, because the early ones invalidate the later ones:
 

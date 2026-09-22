@@ -24,10 +24,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
         readonly Catalogue _catalogue;
+        readonly BlockExtensions _extensions;
 
-        public BlockKinds(Catalogue catalogue)
+        public BlockKinds(Catalogue catalogue, BlockExtensions extensions)
         {
             _catalogue = catalogue;
+            _extensions = extensions;
         }
 
         public EntityKind For(IMyTerminalBlock block)
@@ -49,7 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             kind = new EntityKind(id, name).WithIcon(id);
 
             // What this block is, before what every block is, so a door offers "open" above "switch on".
-            IBlockExtension extension = BlockExtensions.For(block);
+            IBlockExtension extension = _extensions.For(block);
             if (extension != null)
                 extension.Describe(kind, block);
 

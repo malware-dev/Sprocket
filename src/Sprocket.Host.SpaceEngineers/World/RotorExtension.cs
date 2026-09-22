@@ -37,6 +37,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         const string Arrived = "arrived";
         const string There = "is-there";
 
+        /// <summary>What this world's rotors were last seen doing. See <see cref="RotorTurn" />.</summary>
+        readonly RotorTurn _turn = new RotorTurn();
+
         /// <summary>The game's own names for the three directions, which are the values the game is told.</summary>
         /// <remarks>Transcribed from the game's <c>MyRotationDirection</c>: shortest way, then clockwise, then counter-clockwise.</remarks>
         static readonly string[] Directions = { "0", "1", "2" };
@@ -202,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             else
                 rotor.RotateToAngle(way, angle, speed);
 
-            RotorTurn.Began(rotor);
+            _turn.Began(rotor);
             return true;
         }
 
@@ -303,7 +306,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Waited through rather than given up on. Whatever is holding the rotor may be moved, and
             // the rotor leaning on it meanwhile is no worse than the rotor stopped: measured in game,
             // taking its speed away does not settle what the pushing does to a construct.
-            return RotorTurn.Turning(rotor)
+            return _turn.Turning(rotor)
                 ? Trouble.None
                 : Trouble.Waiting("cannot turn - something is holding it");
         }

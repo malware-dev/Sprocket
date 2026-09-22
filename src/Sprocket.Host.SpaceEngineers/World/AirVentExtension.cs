@@ -47,6 +47,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         public const string Level = "level";
         public const string Sealed = "sealed";
 
+        /// <summary>What this world's vents were last seen doing. See <see cref="VentGas" />.</summary>
+        readonly VentGas _gas = new VentGas();
+
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyAirVent;
@@ -101,11 +104,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 // finish one it gave up on at a tenth.
                 case Air:
                     value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() >= Filled
-                        && !VentGas.Working(vent, false));
+                        && !_gas.Working(vent, false));
                     return true;
                 case Empty:
                     value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() <= Emptied
-                        && !VentGas.Working(vent, true));
+                        && !_gas.Working(vent, true));
                     return true;
                 case Level:
                     value = EntityValue.Of(vent.GetOxygenLevel());
@@ -200,10 +203,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// the runtime settles a step by, and it has no use for it: what is on screen is about this
         /// moment and is drawn again a moment later.
         /// </remarks>
-        static Trouble Said(IMyAirVent vent)
+        Trouble Said(IMyAirVent vent)
         {
             if (vent.Depressurize)
-                return vent.GetOxygenLevel() > Emptied && !VentGas.Moving(vent, true)
+                return vent.GetOxygenLevel() > Emptied && !_gas.Moving(vent, true)
                     ? Trouble.Waiting("cannot empty - nowhere to put the air")
                     : Trouble.None;
 
@@ -213,12 +216,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!vent.CanPressurize)
                 return Trouble.Waiting("cannot fill - the room is not airtight");
 
-            return VentGas.Moving(vent, false)
+            return _gas.Moving(vent, false)
                 ? Trouble.None
                 : Trouble.Waiting("cannot fill - no oxygen to fill it with");
         }
 
-        static Trouble Emptying(IMyAirVent vent)
+        Trouble Emptying(IMyAirVent vent)
         {
             if (vent.GetOxygenLevel() <= Emptied)
                 return Trouble.None;
@@ -226,13 +229,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!vent.Depressurize)
                 return Trouble.Fatal("stopped - something else told this vent to fill the room");
 
-            return VentGas.Working(vent, true)
+            return _gas.Working(vent, true)
                 ? Trouble.None
                 : Trouble.Waiting("cannot empty - nowhere to put the air");
         }
 
         /// <summary>Why the room will not fill, or null while it still might.</summary>
-        static Trouble Filling(IMyAirVent vent)
+        Trouble Filling(IMyAirVent vent)
         {
             if (vent.GetOxygenLevel() >= Filled)
                 return Trouble.None;
@@ -243,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!vent.CanPressurize)
                 return Trouble.Waiting("cannot fill - the room is not airtight");
 
-            return VentGas.Working(vent, false)
+            return _gas.Working(vent, false)
                 ? Trouble.None
                 : Trouble.Waiting("cannot fill - no oxygen to fill it with");
         }

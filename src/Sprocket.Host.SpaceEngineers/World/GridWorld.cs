@@ -34,6 +34,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly BlockKinds _kinds;
 
+        /// <summary>What is known about the kinds of block on this construct. See <see cref="BlockExtensions" />.</summary>
+        readonly BlockExtensions _extensions = new BlockExtensions();
+
         static Catalogue Catalogue()
         {
             var catalogue = new Catalogue();
@@ -54,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public GridWorld(IMyTerminalBlock anchor)
         {
             _anchor = anchor;
-            _kinds = new BlockKinds(_catalogue);
+            _kinds = new BlockKinds(_catalogue, _extensions);
         }
 
         /// <summary>
@@ -67,6 +70,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// so this is only reached for to carry something wider, which today means text.
         /// </remarks>
         public Values Values { get; } = new Values();
+
+        /// <summary>What this world knows about kinds of block, for whatever holds a block and no entity.</summary>
+        internal BlockExtensions Extensions
+        {
+            get { return _extensions; }
+        }
 
         /// <summary>
         /// Bumped by <see cref="Rebuild" />, which is the only place the set changes.
@@ -348,7 +357,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     if (block == null || _byId.ContainsKey(block.EntityId))
                         continue;
 
-                    IBlockExtension extension = BlockExtensions.For(block);
+                    IBlockExtension extension = _extensions.For(block);
                     GridEntity entity = new GridEntity(block, _kinds.For(block), extension);
                     _byId.Add(block.EntityId, entity);
                     _entities.Add(entity);

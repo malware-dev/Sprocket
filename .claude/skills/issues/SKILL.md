@@ -52,8 +52,17 @@ Every issue is read by somebody who was not in the conversation that produced it
 **Show Mal the text and wait.** Never create or edit an issue on the repository before he has read
 what it says. Approval of the text is approval to file that text.
 
-`gh issue create --title ... --label ... --body` with a heredoc. Labels are the stock set plus
-`design` and `stretch`.
+`gh issue create --title ... --label ... --body` with a heredoc. Labels are the stock set plus three:
+
+- **`design`** - the shape is open, so the ticket carries no Done-when.
+- **`tentative`** - in the milestone it sits in on sufferance, and moves out without argument.
+- **`dream`** - wanted, may never happen, and belongs in no milestone.
+
+Three milestones, and a ticket that is none of them has none:
+
+- **First test** - enough that a few remote testers can build something and report.
+- **Release** - enough that a stranger can do the same with nobody to ask.
+- **Stretch** - likely to be built, and not before the first public release.
 
 ## Closing
 

@@ -1,13 +1,18 @@
 using Sandbox.ModAPI;
 
-// The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
-// are declared in both, and the mod-side ones are the ones with the events on them.
-
 namespace Sprocket.Host.SpaceEngineers.World
 {
-    static class BlockExtensions
+    /// <summary>
+    /// What Sprocket knows about particular kinds of block, one of each for a world.
+    /// </summary>
+    /// <remarks>
+    /// One set per world rather than one for the game, because an extension watching a block over time
+    /// remembers what it saw - a vent moving gas, a rotor at an angle - and that memory is about the
+    /// blocks of one construct in one world. Held by the world, it goes when the world goes.
+    /// </remarks>
+    sealed class BlockExtensions
     {
-        static readonly IBlockExtension[] All =
+        readonly IBlockExtension[] _all =
         {
             new DoorExtension(),
             new AirVentExtension(),
@@ -15,12 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             new RotorExtension()
         };
 
-        public static IBlockExtension For(IMyTerminalBlock block)
+        public IBlockExtension For(IMyTerminalBlock block)
         {
-            for (var i = 0; i < All.Length; i++)
+            for (var i = 0; i < _all.Length; i++)
             {
-                if (All[i].Claims(block))
-                    return All[i];
+                if (_all[i].Claims(block))
+                    return _all[i];
             }
 
             return null;

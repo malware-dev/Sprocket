@@ -616,7 +616,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return held != null && held.TryGetItem(want.Slot, out present) && Asked(held, present, want);
             }
 
-            IBlockExtension extension = BlockExtensions.For(grid.Block);
+            IBlockExtension extension = _world.Extensions.For(grid.Block);
             return extension == null || extension.Raises(grid.Block, want.EventId, want.Key);
         }
 
