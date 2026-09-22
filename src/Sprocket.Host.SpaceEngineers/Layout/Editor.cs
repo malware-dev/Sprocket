@@ -28,6 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// pick from, which is a question about what fits on a screen rather than about the value.
         /// </para>
         /// </remarks>
-        Chosen
+        Chosen,
+
+        /// <summary>An angle in degrees, typed until it has a control of its own.</summary>
+        Angle
     }
 }

@@ -48,7 +48,7 @@ on screen     Automation for Test Rig
 041  Sprite     Sprocket_Fill         {X:259 Y:240 W:512 H:1}  #5B737BFF
 042  Sprite     Sprocket_Fill         {X:259 Y:153 W:1 H:88}  #5B737BFF
 043  Sprite     Sprocket_Fill         {X:770 Y:153 W:1 H:88}  #5B737BFF
-044  Text       at {X:275 Y:163.292} scale 0.5  #E84A3AFF  "That name is taken"
+044  Text       at {X:275 Y:163.292} scale 0.5  #A2C3CDFF  "What is it?"
 045  Sprite     Sprocket_Fill         {X:275 Y:192 W:368 H:39}  #141B20FF
 046  Sprite     Sprocket_Fill         {X:275 Y:192 W:368 H:1}  #5B737BFF
 047  Sprite     Sprocket_Fill         {X:275 Y:230 W:368 H:1}  #5B737BFF

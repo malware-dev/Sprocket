@@ -51,6 +51,25 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </remarks>
         public Editor Edits;
 
+        /// <summary>Whether the value has to be given: a field that stands for nothing when it is empty.</summary>
+        /// <remarks>
+        /// Most values may be left out, and the action then does what it does without one. Some cannot:
+        /// a rotor told to turn at no speed sets out for somewhere it can never reach.
+        /// </remarks>
+        public bool Needed;
+
+        /// <summary>Whether <see cref="Least" /> is a bound the value must be above, rather than one it may be.</summary>
+        public bool Above;
+
+        /// <summary>What the field starts with where nothing has been given yet, as it is shown, or null for nothing.</summary>
+        public string Default;
+
+        /// <summary>What a sentence says before this value, or null for nothing: "to" in "to 90°".</summary>
+        public string Lead;
+
+        /// <summary>What a sentence says straight after this value, or null for nothing: the "°" in "90°".</summary>
+        public string Unit;
+
         /// <summary>
         /// How many of the values behind the form this one field stands for.
         /// </summary>
@@ -204,13 +223,14 @@ namespace Sprocket.Host.SpaceEngineers.Layout
                 string least = Least ?? "";
                 string most = Most ?? "";
 
+                // In brackets beside the name, as a range is written: "speed (0 - 30)".
                 if (least.Length > 0 && most.Length > 0)
-                    return least + "-" + most;
+                    return "(" + least + " - " + most + ")";
 
                 if (least.Length > 0)
-                    return least + " or more";
+                    return "(" + least + " or more)";
 
-                return most.Length > 0 ? most + " or less" : "";
+                return most.Length > 0 ? "(" + most + " or less)" : "";
             }
         }
 
@@ -245,10 +265,10 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         public string Refuses(string called, string said)
         {
             // An empty field is a value not given, and the action then does what it declared it does
-            // without one. Held to a bound it would be a value of nothing, which is a different
-            // thing and a worse one.
+            // without one - unless it declared that it needs one. Held to a bound it would be a value
+            // of nothing, which is a different thing and a worse one.
             if (string.IsNullOrEmpty(said))
-                return "";
+                return Needed ? called + " needs a value." : "";
 
             if (Words != null && Words.Count > 0)
                 return Knows(said) ? "" : called + " has to be " + Listed() + ".";
@@ -264,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             if (!Reads(said, out value))
                 return called + " has to be a number.";
 
-            if ((hasLow && value < low) || (hasHigh && value > high))
+            if ((hasLow && (Above ? value <= low : value < low)) || (hasHigh && value > high))
                 return called + " has to be " + Within(hasLow, hasHigh) + ".";
 
             return "";
@@ -274,9 +294,12 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         string Within(bool hasLow, bool hasHigh)
         {
             if (hasLow && hasHigh)
-                return "between " + Least + " and " + Most;
+                return Above ? "above " + Least + " and at most " + Most : "between " + Least + " and " + Most;
 
-            return hasLow ? Least + " or more" : Most + " or less";
+            if (hasLow)
+                return Above ? "more than " + Least : Least + " or more";
+
+            return Most + " or less";
         }
 
         bool Knows(string said)

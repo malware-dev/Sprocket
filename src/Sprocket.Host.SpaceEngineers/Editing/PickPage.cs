@@ -805,7 +805,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _values.Add(one.Sets);
                 _groups.Add(group);
                 _dimmed.Add(one.Hidden);
-                _waits.Add(!string.IsNullOrEmpty(one.LeadsToStateId));
+                _waits.Add(one.Lasts);
             }
         }
 

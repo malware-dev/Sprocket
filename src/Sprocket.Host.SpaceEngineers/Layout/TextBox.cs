@@ -353,10 +353,28 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             return _clear == null ? null : _clear.Under(point);
         }
 
+        /// <summary>Whether what is in the box cannot be accepted as it stands.</summary>
+        /// <remarks>
+        /// Set by whoever knows the rule; this only wears it. Drawn as a line under the words rather
+        /// than a border round them, which a box already has and which would sit against the first
+        /// letter with no room to give it.
+        /// </remarks>
+        public bool Wrong { get; set; }
+
+        /// <summary>The line under the words while <see cref="Wrong" />.</summary>
+        public Color WrongEdge { get; set; }
+
+        /// <summary>Whether what is in the box sits against its right-hand end rather than its left.</summary>
+        /// <remarks>
+        /// For numbers, which are read from the right: a column of them lines up on its units, and a
+        /// value typed into a box the width of its largest grows the way a number grows.
+        /// </remarks>
+        public bool Trails { get; set; }
+
         protected override void DrawContent(IGraphics g)
         {
             float height = LineOf(g);
-            Vector2 at = new Vector2(ContentBounds.X, ContentBounds.Y);
+            Vector2 at = new Vector2(ContentBounds.X + Shift(g), ContentBounds.Y);
 
             if (HasSelection)
             {
@@ -374,9 +392,36 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             if (IsEditing && CaretVisible)
                 g.DrawSprite(Solid, new RectangleF(at.X + WidthTo(g, _caret), at.Y, 1.5f, height), CaretColor, 0f);
 
+            if (Wrong && WrongEdge.A > 0)
+            {
+                var box = ContentBounds;
+                g.DrawSprite(Solid, new RectangleF(box.X, box.Y + box.Height - Rule, box.Width, Rule),
+                    WrongEdge, 0f);
+            }
+
             if (_clear != null)
                 _clear.Draw(g);
         }
+
+        /// <summary>How thick the line under a box holding something that cannot be accepted is.</summary>
+        const float Rule = 2f;
+
+        /// <summary>How far in the words start, which is nothing until they are made to trail.</summary>
+        /// <remarks>
+        /// Never negative: what is too long for the box starts at its left-hand end and runs past the
+        /// right, which is what a box that clips its content does.
+        /// </remarks>
+        private float Shift(IGraphics g)
+        {
+            if (!Trails)
+                return 0f;
+
+            float room = ContentBounds.Width - WidthTo(g, _text.Length) - CaretRoom;
+            return room > 0f ? room : 0f;
+        }
+
+        /// <summary>Room kept after the words for the caret, so it is inside the box at the end of a full one.</summary>
+        const float CaretRoom = 2f;
 
         /// <summary>The width of the first <paramref name="count" /> characters.</summary>
         private float WidthTo(IGraphics g, int count)

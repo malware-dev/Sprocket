@@ -113,10 +113,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Nothing of Sprocket's own takes any, so values only ever reach the game's own actions -
         /// which is also the only place anything knows what to turn them into.
         /// </remarks>
-        /// <summary>How many ticks this block should take to finish what the action started, or <see cref="Unestimated" />.</summary>
-        public int Expected(string actionId)
+        /// <summary>Calls off what the action started, where this block's own knowledge says how.</summary>
+        public void Stop(string actionId)
         {
-            return _extension == null ? Unestimated : _extension.Expected(_block, actionId);
+            if (_extension != null)
+                _extension.Stop(_block, actionId);
+        }
+
+        /// <summary>How many ticks this block should take to finish what the action started, or <see cref="Unestimated" />.</summary>
+        public int Expected(string actionId, IList<Literal> values)
+        {
+            return _extension == null ? Unestimated : _extension.Expected(_block, actionId, values);
         }
 
         /// <summary>
@@ -140,15 +147,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public void Invoke(string actionId, IList<Literal> values, bool sets)
         {
+            // The step names Sprocket's entry, which may stand for one of the block's own members
+            // under other words: the game is told the member, never the words.
+            var entry = _kind.FindAction(actionId, sets);
+
             if (sets)
             {
+                var property = entry == null || entry.GamePropertyId == null ? actionId : entry.GamePropertyId;
                 if (values != null && values.Count > 0)
-                    Toolbars.Set(_block, actionId, values[0]);
+                    Toolbars.Set(_block, property, values[0]);
 
                 return;
             }
 
-            if (_extension != null && _extension.TryInvoke(_block, actionId))
+            if (_extension != null && _extension.TryInvoke(_block, actionId, values))
                 return;
 
             IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
@@ -170,7 +182,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Anything the block declares for itself, performed by the game. An id it does not have
             // is a sequence written against a vocabulary this block no longer offers, and it does
             // nothing rather than throwing - the same answer a reading gives.
-            Toolbars.Perform(_block, actionId, values);
+            var performed = entry == null || entry.GameActionId == null ? actionId : entry.GameActionId;
+            Toolbars.Perform(_block, performed, values);
         }
     }
 }

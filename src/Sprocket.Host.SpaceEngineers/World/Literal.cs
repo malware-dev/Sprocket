@@ -73,6 +73,23 @@ namespace Sprocket.Host.SpaceEngineers.World
             get { return System.BitConverter.Int64BitsToDouble(Value.Bits); }
         }
 
+        /// <summary>What it is as a number, whether it was written whole or with a point, and nought for anything else.</summary>
+        /// <remarks>
+        /// A program writes "90" as a whole number and "90.5" as a real one, and somebody typing an
+        /// angle does not choose between them. <see cref="Real" /> reads the bits of a real number, and
+        /// read over a whole one it is not the number at all.
+        /// </remarks>
+        public double Number
+        {
+            get
+            {
+                if (Kind == ValueKind.Integer)
+                    return Whole;
+
+                return Kind == ValueKind.Real ? Real : 0;
+            }
+        }
+
         public byte Red
         {
             get { return (byte)(Value.Bits >> 24); }

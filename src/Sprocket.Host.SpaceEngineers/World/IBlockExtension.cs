@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sandbox.ModAPI;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
@@ -49,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value);
 
-        bool TryInvoke(IMyTerminalBlock block, string actionId);
+        bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values);
 
         /// <summary>
         /// This block's live state in the player's own words, or null to fall back to the floor.
@@ -86,6 +87,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         bool IsBusy(IMyTerminalBlock block);
 
         /// <summary>
+        /// Calls off what this action started, for a block the sequence was still waiting on.
+        /// </summary>
+        /// <remarks>
+        /// Every way a run ends comes through here for everything it had in flight: switched off,
+        /// stopped by hand, taken over by something else, or at fault. A rotor left turning is the
+        /// case this exists for - a stop that leaves a machine moving is not a stop - and what
+        /// calling it off means is the block's own to say. A door that was opening goes on opening,
+        /// because a door half closed on somebody is worse than a door left open.
+        /// </remarks>
+        void Stop(IMyTerminalBlock block, string actionId);
+
+        /// <summary>
         /// How many ticks the block should take to finish what this action started, or
         /// <see cref="GridEntity.Unestimated" /> where it cannot say.
         /// </summary>
@@ -93,6 +106,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Decides how often a wait for it is looked at, never whether it has arrived: a wrong answer
         /// costs a few ticks either way and nothing else.
         /// </remarks>
-        int Expected(IMyTerminalBlock block, string actionId);
+        int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values);
     }
 }

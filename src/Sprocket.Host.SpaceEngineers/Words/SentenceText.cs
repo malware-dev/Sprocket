@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -230,11 +231,27 @@ namespace Sprocket.Host.SpaceEngineers.Words
             // What each field of it shows rather than each value it holds. The two part company
             // wherever a field stands over several values or shows something other than the value
             // itself: three numbers are one colour, and a number is the word it stands for.
-            var said = slot.Filled[0];
-            for (var i = 1; i < slot.Filled.Count; i++)
-                said += " " + slot.Filled[i];
+            var said = "";
+            for (var i = 0; i < slot.Filled.Count; i++)
+            {
+                if (said.Length > 0)
+                    said += " ";
+
+                said += Around(slot.Fields, i, slot.Filled[i]);
+            }
 
             return said;
+        }
+
+        /// <summary>One value as a sentence says it, with the words its field puts around it.</summary>
+        static string Around(IList<Field> fields, int at, string filled)
+        {
+            if (at >= fields.Count)
+                return filled;
+
+            var field = fields[at];
+            var said = filled + (field.Unit ?? "");
+            return string.IsNullOrEmpty(field.Lead) ? said : field.Lead + " " + said;
         }
 
         static string Of(GridWorld world, SentenceSlot slot)

@@ -122,7 +122,7 @@ public class DefinitionTests
 
         // Each says what it will accept, because the moment that is worth knowing is the moment
         // somebody is deciding what to type - and the action itself never says.
-        Assert.Equal(new[] { "Red 0-255", "Green 0-255", "Blue 0-255" },
+        Assert.Equal(new[] { "Red (0 - 255)", "Green (0 - 255)", "Blue (0 - 255)" },
             fields.ConvertAll(field => field.Label));
 
         foreach (Field field in fields)

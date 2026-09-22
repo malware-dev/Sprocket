@@ -195,6 +195,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
 
             box.CaretColor = Palette.Ink;
             box.HintColor = Palette.Faint;
+            box.WrongEdge = Palette.Problem;
 
             // A mid tone rather than the focus blue. The words stay their own colour while they are
             // selected, and pale ink on the pale focus fill is two things the same brightness.

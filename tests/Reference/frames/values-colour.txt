@@ -144,159 +144,157 @@ on screen     Do something
 137  Sprite     Sprocket_Fill         {X:729 Y:142 W:1 H:800}  #5B737BFF
 138  Sprite     Sprocket_Fill         {X:1188 Y:142 W:1 H:800}  #5B737BFF
 139  SetClip    {X:745 Y:292 W:428 H:634}
-140  Text       at {X:757.8 Y:299.963} scale 0.57  #A2C3CDFF  "w"
-141  Text       at {X:779.26 Y:301.262} scale 0.64  #DCF5FDFF  "switch off"
-142  Text       at {X:757.8 Y:345.843} scale 0.57  #A2C3CDFF  "w"
-143  Text       at {X:779.26 Y:347.142} scale 0.64  #DCF5FDFF  "switch on"
-144  Text       at {X:745 Y:389.422} scale 0.64  #85A1A9FF  "TERMINAL"
-145  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:411}  #141B20FF
-146  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:1}  #5B737BFF
-147  Sprite     Sprocket_Fill         {X:745 Y:826 W:410 H:1}  #5B737BFF
-148  Sprite     Sprocket_Fill         {X:745 Y:416 W:1 H:411}  #5B737BFF
-149  Sprite     Sprocket_Fill         {X:1154 Y:416 W:1 H:411}  #5B737BFF
-150  Text       at {X:767.8 Y:435.702} scale 0.64  #85A1A9FF  "VALUES"
-151  Text       at {X:767.8 Y:471.982} scale 0.64  #DCF5FDFF  "Color"
-152  Text       at {X:767.8 Y:517.862} scale 0.64  #DCF5FDFF  "Falloff"
-153  Text       at {X:767.8 Y:563.7419} scale 0.64  #DCF5FDFF  "On"
-154  Text       at {X:767.8 Y:609.6219} scale 0.64  #DCF5FDFF  "Radius"
-155  Text       at {X:767.8 Y:655.502} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
-156  Sprite     Sprocket_Fill         {X:755 Y:682 W:390 H:43}  #3C4C52FF
-157  Text       at {X:767.8 Y:691.782} scale 0.64  #DCF5FDFF  "Set Color"
-158  Text       at {X:767.8 Y:737.662} scale 0.64  #DCF5FDFF  "Set Radius"
-159  Text       at {X:767.8 Y:783.542} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
-160  SetClip    {X:259 Y:142 W:1402 H:812}
-161  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
-162  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
-163  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
-164  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
-165  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
-166  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
-167  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
-168  Sprite     Sprocket_Fill         {X:758 Y:262 W:17 H:1}  #85A1A9FF
-169  Sprite     Sprocket_Fill         {X:758 Y:278 W:17 H:1}  #85A1A9FF
-170  Sprite     Sprocket_Fill         {X:758 Y:262 W:1 H:17}  #85A1A9FF
-171  Sprite     Sprocket_Fill         {X:774 Y:262 W:1 H:17}  #85A1A9FF
-172  Text       at {X:784.8 Y:259.772} scale 0.57  #A2C3CDFF  "Show hidden"
-173  ClearClip  
-174  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
-175  SetClip    {X:276 Y:55 W:157 H:33}
-176  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
-177  ClearClip  
-178  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-179  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-180  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
-181  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-182  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-183  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
-184  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
-185  Sprite     Sprocket_Fill         {X:684 Y:404 W:552 H:272}  #3C4C52FF
-186  Sprite     Sprocket_Fill         {X:684 Y:404 W:552 H:1}  #5B737BFF
-187  Sprite     Sprocket_Fill         {X:684 Y:675 W:552 H:1}  #5B737BFF
-188  Sprite     Sprocket_Fill         {X:684 Y:404 W:1 H:272}  #5B737BFF
-189  Sprite     Sprocket_Fill         {X:1235 Y:404 W:1 H:272}  #5B737BFF
-190  Text       at {X:700 Y:413.765} scale 0.5  #A2C3CDFF  "This needs a colour."
-191  Sprite     Sprocket_Fill         {X:700 Y:442 W:31 H:26}  #9E9E9EFF
-192  Sprite     Sprocket_Fill         {X:700 Y:442 W:31 H:1}  #1B242AFF
-193  Sprite     Sprocket_Fill         {X:700 Y:467 W:31 H:1}  #1B242AFF
-194  Sprite     Sprocket_Fill         {X:700 Y:442 W:1 H:26}  #1B242AFF
-195  Sprite     Sprocket_Fill         {X:730 Y:442 W:1 H:26}  #1B242AFF
-196  Sprite     Sprocket_Fill         {X:737 Y:442 W:31 H:26}  #303030FF
-197  Sprite     Sprocket_Fill         {X:737 Y:442 W:31 H:1}  #1B242AFF
-198  Sprite     Sprocket_Fill         {X:737 Y:467 W:31 H:1}  #1B242AFF
-199  Sprite     Sprocket_Fill         {X:737 Y:442 W:1 H:26}  #1B242AFF
-200  Sprite     Sprocket_Fill         {X:767 Y:442 W:1 H:26}  #1B242AFF
-201  Sprite     Sprocket_Fill         {X:774 Y:442 W:31 H:26}  #386285FF
-202  Sprite     Sprocket_Fill         {X:774 Y:442 W:31 H:1}  #1B242AFF
-203  Sprite     Sprocket_Fill         {X:774 Y:467 W:31 H:1}  #1B242AFF
-204  Sprite     Sprocket_Fill         {X:774 Y:442 W:1 H:26}  #1B242AFF
-205  Sprite     Sprocket_Fill         {X:804 Y:442 W:1 H:26}  #1B242AFF
-206  Sprite     Sprocket_Fill         {X:811 Y:442 W:31 H:26}  #30ADDBFF
-207  Sprite     Sprocket_Fill         {X:811 Y:442 W:31 H:1}  #1B242AFF
-208  Sprite     Sprocket_Fill         {X:811 Y:467 W:31 H:1}  #1B242AFF
-209  Sprite     Sprocket_Fill         {X:811 Y:442 W:1 H:26}  #1B242AFF
-210  Sprite     Sprocket_Fill         {X:841 Y:442 W:1 H:26}  #1B242AFF
-211  Sprite     Sprocket_Fill         {X:848 Y:442 W:31 H:26}  #EB831CFF
-212  Sprite     Sprocket_Fill         {X:848 Y:442 W:31 H:1}  #1B242AFF
-213  Sprite     Sprocket_Fill         {X:848 Y:467 W:31 H:1}  #1B242AFF
-214  Sprite     Sprocket_Fill         {X:848 Y:442 W:1 H:26}  #1B242AFF
-215  Sprite     Sprocket_Fill         {X:878 Y:442 W:1 H:26}  #1B242AFF
-216  Sprite     Sprocket_Fill         {X:885 Y:442 W:31 H:26}  #F5C114FF
-217  Sprite     Sprocket_Fill         {X:885 Y:442 W:31 H:1}  #1B242AFF
-218  Sprite     Sprocket_Fill         {X:885 Y:467 W:31 H:1}  #1B242AFF
-219  Sprite     Sprocket_Fill         {X:885 Y:442 W:1 H:26}  #1B242AFF
-220  Sprite     Sprocket_Fill         {X:915 Y:442 W:1 H:26}  #1B242AFF
-221  Sprite     Sprocket_Fill         {X:922 Y:442 W:31 H:26}  #C22E1FFF
-222  Sprite     Sprocket_Fill         {X:922 Y:442 W:31 H:1}  #1B242AFF
-223  Sprite     Sprocket_Fill         {X:922 Y:467 W:31 H:1}  #1B242AFF
-224  Sprite     Sprocket_Fill         {X:922 Y:442 W:1 H:26}  #1B242AFF
-225  Sprite     Sprocket_Fill         {X:952 Y:442 W:1 H:26}  #1B242AFF
-226  Sprite     Sprocket_Fill         {X:959 Y:442 W:31 H:26}  #B85380FF
-227  Sprite     Sprocket_Fill         {X:959 Y:442 W:31 H:1}  #1B242AFF
-228  Sprite     Sprocket_Fill         {X:959 Y:467 W:31 H:1}  #1B242AFF
-229  Sprite     Sprocket_Fill         {X:959 Y:442 W:1 H:26}  #1B242AFF
-230  Sprite     Sprocket_Fill         {X:989 Y:442 W:1 H:26}  #1B242AFF
-231  Sprite     Sprocket_Fill         {X:996 Y:442 W:31 H:26}  #329433FF
-232  Sprite     Sprocket_Fill         {X:996 Y:442 W:31 H:1}  #1B242AFF
-233  Sprite     Sprocket_Fill         {X:996 Y:467 W:31 H:1}  #1B242AFF
-234  Sprite     Sprocket_Fill         {X:996 Y:442 W:1 H:26}  #1B242AFF
-235  Sprite     Sprocket_Fill         {X:1026 Y:442 W:1 H:26}  #1B242AFF
-236  Sprite     Sprocket_Fill         {X:1033 Y:442 W:31 H:26}  #5ACC1DFF
-237  Sprite     Sprocket_Fill         {X:1033 Y:442 W:31 H:1}  #1B242AFF
-238  Sprite     Sprocket_Fill         {X:1033 Y:467 W:31 H:1}  #1B242AFF
-239  Sprite     Sprocket_Fill         {X:1033 Y:442 W:1 H:26}  #1B242AFF
-240  Sprite     Sprocket_Fill         {X:1063 Y:442 W:1 H:26}  #1B242AFF
-241  Sprite     Sprocket_Fill         {X:1070 Y:442 W:31 H:26}  #5D49ADFF
-242  Sprite     Sprocket_Fill         {X:1070 Y:442 W:31 H:1}  #1B242AFF
-243  Sprite     Sprocket_Fill         {X:1070 Y:467 W:31 H:1}  #1B242AFF
-244  Sprite     Sprocket_Fill         {X:1070 Y:442 W:1 H:26}  #1B242AFF
-245  Sprite     Sprocket_Fill         {X:1100 Y:442 W:1 H:26}  #1B242AFF
-246  Sprite     Sprocket_Fill         {X:1107 Y:442 W:31 H:26}  #4A706FFF
-247  Sprite     Sprocket_Fill         {X:1107 Y:442 W:31 H:1}  #1B242AFF
-248  Sprite     Sprocket_Fill         {X:1107 Y:467 W:31 H:1}  #1B242AFF
-249  Sprite     Sprocket_Fill         {X:1107 Y:442 W:1 H:26}  #1B242AFF
-250  Sprite     Sprocket_Fill         {X:1137 Y:442 W:1 H:26}  #1B242AFF
-251  Sprite     Sprocket_Fill         {X:1144 Y:442 W:31 H:26}  #F0F0F0FF
-252  Sprite     Sprocket_Fill         {X:1144 Y:442 W:31 H:1}  #1B242AFF
-253  Sprite     Sprocket_Fill         {X:1144 Y:467 W:31 H:1}  #1B242AFF
-254  Sprite     Sprocket_Fill         {X:1144 Y:442 W:1 H:26}  #1B242AFF
-255  Sprite     Sprocket_Fill         {X:1174 Y:442 W:1 H:26}  #1B242AFF
-256  Sprite     Sprocket_Fill         {X:1181 Y:442 W:31 H:26}  #5C4535FF
-257  Sprite     Sprocket_Fill         {X:1181 Y:442 W:31 H:1}  #1B242AFF
-258  Sprite     Sprocket_Fill         {X:1181 Y:467 W:31 H:1}  #1B242AFF
-259  Sprite     Sprocket_Fill         {X:1181 Y:442 W:1 H:26}  #1B242AFF
-260  Sprite     Sprocket_Fill         {X:1211 Y:442 W:1 H:26}  #1B242AFF
-261  Sprite     Sprocket_Fill         {X:724 Y:478 W:390 H:1}  #5B737BFF
-262  Sprite     Sprocket_Fill         {X:724 Y:501 W:390 H:1}  #5B737BFF
-263  Sprite     Sprocket_Fill         {X:724 Y:478 W:1 H:24}  #5B737BFF
-264  Sprite     Sprocket_Fill         {X:1113 Y:478 W:1 H:24}  #5B737BFF
-265  Sprite     Sprocket_Hue          {X:724 Y:478 W:390 H:24}  #FFFFFFFF
-266  Sprite     Sprocket_Fill         {X:724 Y:475 W:8 H:30}  #DCF5FDFF
-267  Text       at {X:700 Y:479.72} scale 0.57  #A2C3CDFF  "H"
-268  Sprite     Sprocket_Fill         {X:724 Y:512 W:390 H:1}  #5B737BFF
-269  Sprite     Sprocket_Fill         {X:724 Y:535 W:390 H:1}  #5B737BFF
-270  Sprite     Sprocket_Fill         {X:724 Y:512 W:1 H:24}  #5B737BFF
-271  Sprite     Sprocket_Fill         {X:1113 Y:512 W:1 H:24}  #5B737BFF
-272  Sprite     Sprocket_Fill         {X:724 Y:512 W:390 H:24}  #0C1216FF
-273  Sprite     Sprocket_Fill         {X:724 Y:509 W:8 H:30}  #DCF5FDFF
-274  Text       at {X:700 Y:513.72} scale 0.57  #A2C3CDFF  "S"
-275  Sprite     Sprocket_Fill         {X:724 Y:546 W:390 H:1}  #5B737BFF
-276  Sprite     Sprocket_Fill         {X:724 Y:569 W:390 H:1}  #5B737BFF
-277  Sprite     Sprocket_Fill         {X:724 Y:546 W:1 H:24}  #5B737BFF
-278  Sprite     Sprocket_Fill         {X:1113 Y:546 W:1 H:24}  #5B737BFF
-279  Sprite     Sprocket_Fill         {X:724 Y:546 W:390 H:24}  #0C1216FF
-280  Sprite     Sprocket_Fill         {X:1106 Y:543 W:8 H:30}  #DCF5FDFF
-281  Text       at {X:700 Y:547.72} scale 0.57  #A2C3CDFF  "V"
-282  Sprite     Sprocket_Fill         {X:1124 Y:478 W:96 H:92}  #141B20FF
-283  Sprite     Sprocket_Fill         {X:1124 Y:478 W:96 H:1}  #5B737BFF
-284  Sprite     Sprocket_Fill         {X:1124 Y:569 W:96 H:1}  #5B737BFF
-285  Sprite     Sprocket_Fill         {X:1124 Y:478 W:1 H:92}  #5B737BFF
-286  Sprite     Sprocket_Fill         {X:1219 Y:478 W:1 H:92}  #5B737BFF
-287  Sprite     Sprocket_Fill         {X:700 Y:580 W:148 H:39}  #141B20FF
-288  Sprite     Sprocket_Fill         {X:700 Y:580 W:148 H:1}  #5B737BFF
-289  Sprite     Sprocket_Fill         {X:700 Y:619 W:148 H:1}  #5B737BFF
-290  Sprite     Sprocket_Fill         {X:700 Y:580 W:1 H:39}  #5B737BFF
-291  Sprite     Sprocket_Fill         {X:847 Y:580 W:1 H:39}  #5B737BFF
-292  Sprite     Sprocket_Fill         {X:713 Y:588 W:2 H:24}  #DCF5FDFF
-293  Text       at {X:1046.153 Y:637.345} scale 0.57  #A2C3CDFF  "Cancel"
-294  Sprite     Sprocket_Fill         {X:1118 Y:630 W:102 H:37}  #374851FF
-295  Text       at {X:1137.467 Y:637.345} scale 0.57  #85A1A9FF  "Continue"
+140  Text       at {X:757.8 Y:301.262} scale 0.64  #DCF5FDFF  "switch off"
+141  Text       at {X:757.8 Y:347.142} scale 0.64  #DCF5FDFF  "switch on"
+142  Text       at {X:745 Y:389.422} scale 0.64  #85A1A9FF  "TERMINAL"
+143  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:411}  #141B20FF
+144  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:1}  #5B737BFF
+145  Sprite     Sprocket_Fill         {X:745 Y:826 W:410 H:1}  #5B737BFF
+146  Sprite     Sprocket_Fill         {X:745 Y:416 W:1 H:411}  #5B737BFF
+147  Sprite     Sprocket_Fill         {X:1154 Y:416 W:1 H:411}  #5B737BFF
+148  Text       at {X:767.8 Y:435.702} scale 0.64  #85A1A9FF  "VALUES"
+149  Text       at {X:767.8 Y:471.982} scale 0.64  #DCF5FDFF  "Color"
+150  Text       at {X:767.8 Y:517.862} scale 0.64  #DCF5FDFF  "Falloff"
+151  Text       at {X:767.8 Y:563.7419} scale 0.64  #DCF5FDFF  "On"
+152  Text       at {X:767.8 Y:609.6219} scale 0.64  #DCF5FDFF  "Radius"
+153  Text       at {X:767.8 Y:655.502} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
+154  Sprite     Sprocket_Fill         {X:755 Y:682 W:390 H:43}  #3C4C52FF
+155  Text       at {X:767.8 Y:691.782} scale 0.64  #DCF5FDFF  "Set Color"
+156  Text       at {X:767.8 Y:737.662} scale 0.64  #DCF5FDFF  "Set Radius"
+157  Text       at {X:767.8 Y:783.542} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
+158  SetClip    {X:259 Y:142 W:1402 H:812}
+159  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
+160  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
+161  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
+162  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
+163  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
+164  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
+165  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
+166  Sprite     Sprocket_Fill         {X:758 Y:262 W:17 H:1}  #85A1A9FF
+167  Sprite     Sprocket_Fill         {X:758 Y:278 W:17 H:1}  #85A1A9FF
+168  Sprite     Sprocket_Fill         {X:758 Y:262 W:1 H:17}  #85A1A9FF
+169  Sprite     Sprocket_Fill         {X:774 Y:262 W:1 H:17}  #85A1A9FF
+170  Text       at {X:784.8 Y:259.772} scale 0.57  #A2C3CDFF  "Show hidden"
+171  ClearClip  
+172  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+173  SetClip    {X:276 Y:55 W:157 H:33}
+174  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+175  ClearClip  
+176  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+177  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+178  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+179  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+180  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+181  Sprite     Sprocket_Fill         {X:1578 Y:985 W:86 H:39}  #8EBCCFFF
+182  Text       at {X:1596.77 Y:992.6081} scale 0.64  #1B242AFF  "DONE"
+183  Sprite     Sprocket_Fill         {X:684 Y:404 W:552 H:272}  #3C4C52FF
+184  Sprite     Sprocket_Fill         {X:684 Y:404 W:552 H:1}  #5B737BFF
+185  Sprite     Sprocket_Fill         {X:684 Y:675 W:552 H:1}  #5B737BFF
+186  Sprite     Sprocket_Fill         {X:684 Y:404 W:1 H:272}  #5B737BFF
+187  Sprite     Sprocket_Fill         {X:1235 Y:404 W:1 H:272}  #5B737BFF
+188  Text       at {X:700 Y:413.765} scale 0.5  #A2C3CDFF  "This needs a colour."
+189  Sprite     Sprocket_Fill         {X:700 Y:442 W:31 H:26}  #9E9E9EFF
+190  Sprite     Sprocket_Fill         {X:700 Y:442 W:31 H:1}  #1B242AFF
+191  Sprite     Sprocket_Fill         {X:700 Y:467 W:31 H:1}  #1B242AFF
+192  Sprite     Sprocket_Fill         {X:700 Y:442 W:1 H:26}  #1B242AFF
+193  Sprite     Sprocket_Fill         {X:730 Y:442 W:1 H:26}  #1B242AFF
+194  Sprite     Sprocket_Fill         {X:737 Y:442 W:31 H:26}  #303030FF
+195  Sprite     Sprocket_Fill         {X:737 Y:442 W:31 H:1}  #1B242AFF
+196  Sprite     Sprocket_Fill         {X:737 Y:467 W:31 H:1}  #1B242AFF
+197  Sprite     Sprocket_Fill         {X:737 Y:442 W:1 H:26}  #1B242AFF
+198  Sprite     Sprocket_Fill         {X:767 Y:442 W:1 H:26}  #1B242AFF
+199  Sprite     Sprocket_Fill         {X:774 Y:442 W:31 H:26}  #386285FF
+200  Sprite     Sprocket_Fill         {X:774 Y:442 W:31 H:1}  #1B242AFF
+201  Sprite     Sprocket_Fill         {X:774 Y:467 W:31 H:1}  #1B242AFF
+202  Sprite     Sprocket_Fill         {X:774 Y:442 W:1 H:26}  #1B242AFF
+203  Sprite     Sprocket_Fill         {X:804 Y:442 W:1 H:26}  #1B242AFF
+204  Sprite     Sprocket_Fill         {X:811 Y:442 W:31 H:26}  #30ADDBFF
+205  Sprite     Sprocket_Fill         {X:811 Y:442 W:31 H:1}  #1B242AFF
+206  Sprite     Sprocket_Fill         {X:811 Y:467 W:31 H:1}  #1B242AFF
+207  Sprite     Sprocket_Fill         {X:811 Y:442 W:1 H:26}  #1B242AFF
+208  Sprite     Sprocket_Fill         {X:841 Y:442 W:1 H:26}  #1B242AFF
+209  Sprite     Sprocket_Fill         {X:848 Y:442 W:31 H:26}  #EB831CFF
+210  Sprite     Sprocket_Fill         {X:848 Y:442 W:31 H:1}  #1B242AFF
+211  Sprite     Sprocket_Fill         {X:848 Y:467 W:31 H:1}  #1B242AFF
+212  Sprite     Sprocket_Fill         {X:848 Y:442 W:1 H:26}  #1B242AFF
+213  Sprite     Sprocket_Fill         {X:878 Y:442 W:1 H:26}  #1B242AFF
+214  Sprite     Sprocket_Fill         {X:885 Y:442 W:31 H:26}  #F5C114FF
+215  Sprite     Sprocket_Fill         {X:885 Y:442 W:31 H:1}  #1B242AFF
+216  Sprite     Sprocket_Fill         {X:885 Y:467 W:31 H:1}  #1B242AFF
+217  Sprite     Sprocket_Fill         {X:885 Y:442 W:1 H:26}  #1B242AFF
+218  Sprite     Sprocket_Fill         {X:915 Y:442 W:1 H:26}  #1B242AFF
+219  Sprite     Sprocket_Fill         {X:922 Y:442 W:31 H:26}  #C22E1FFF
+220  Sprite     Sprocket_Fill         {X:922 Y:442 W:31 H:1}  #1B242AFF
+221  Sprite     Sprocket_Fill         {X:922 Y:467 W:31 H:1}  #1B242AFF
+222  Sprite     Sprocket_Fill         {X:922 Y:442 W:1 H:26}  #1B242AFF
+223  Sprite     Sprocket_Fill         {X:952 Y:442 W:1 H:26}  #1B242AFF
+224  Sprite     Sprocket_Fill         {X:959 Y:442 W:31 H:26}  #B85380FF
+225  Sprite     Sprocket_Fill         {X:959 Y:442 W:31 H:1}  #1B242AFF
+226  Sprite     Sprocket_Fill         {X:959 Y:467 W:31 H:1}  #1B242AFF
+227  Sprite     Sprocket_Fill         {X:959 Y:442 W:1 H:26}  #1B242AFF
+228  Sprite     Sprocket_Fill         {X:989 Y:442 W:1 H:26}  #1B242AFF
+229  Sprite     Sprocket_Fill         {X:996 Y:442 W:31 H:26}  #329433FF
+230  Sprite     Sprocket_Fill         {X:996 Y:442 W:31 H:1}  #1B242AFF
+231  Sprite     Sprocket_Fill         {X:996 Y:467 W:31 H:1}  #1B242AFF
+232  Sprite     Sprocket_Fill         {X:996 Y:442 W:1 H:26}  #1B242AFF
+233  Sprite     Sprocket_Fill         {X:1026 Y:442 W:1 H:26}  #1B242AFF
+234  Sprite     Sprocket_Fill         {X:1033 Y:442 W:31 H:26}  #5ACC1DFF
+235  Sprite     Sprocket_Fill         {X:1033 Y:442 W:31 H:1}  #1B242AFF
+236  Sprite     Sprocket_Fill         {X:1033 Y:467 W:31 H:1}  #1B242AFF
+237  Sprite     Sprocket_Fill         {X:1033 Y:442 W:1 H:26}  #1B242AFF
+238  Sprite     Sprocket_Fill         {X:1063 Y:442 W:1 H:26}  #1B242AFF
+239  Sprite     Sprocket_Fill         {X:1070 Y:442 W:31 H:26}  #5D49ADFF
+240  Sprite     Sprocket_Fill         {X:1070 Y:442 W:31 H:1}  #1B242AFF
+241  Sprite     Sprocket_Fill         {X:1070 Y:467 W:31 H:1}  #1B242AFF
+242  Sprite     Sprocket_Fill         {X:1070 Y:442 W:1 H:26}  #1B242AFF
+243  Sprite     Sprocket_Fill         {X:1100 Y:442 W:1 H:26}  #1B242AFF
+244  Sprite     Sprocket_Fill         {X:1107 Y:442 W:31 H:26}  #4A706FFF
+245  Sprite     Sprocket_Fill         {X:1107 Y:442 W:31 H:1}  #1B242AFF
+246  Sprite     Sprocket_Fill         {X:1107 Y:467 W:31 H:1}  #1B242AFF
+247  Sprite     Sprocket_Fill         {X:1107 Y:442 W:1 H:26}  #1B242AFF
+248  Sprite     Sprocket_Fill         {X:1137 Y:442 W:1 H:26}  #1B242AFF
+249  Sprite     Sprocket_Fill         {X:1144 Y:442 W:31 H:26}  #F0F0F0FF
+250  Sprite     Sprocket_Fill         {X:1144 Y:442 W:31 H:1}  #1B242AFF
+251  Sprite     Sprocket_Fill         {X:1144 Y:467 W:31 H:1}  #1B242AFF
+252  Sprite     Sprocket_Fill         {X:1144 Y:442 W:1 H:26}  #1B242AFF
+253  Sprite     Sprocket_Fill         {X:1174 Y:442 W:1 H:26}  #1B242AFF
+254  Sprite     Sprocket_Fill         {X:1181 Y:442 W:31 H:26}  #5C4535FF
+255  Sprite     Sprocket_Fill         {X:1181 Y:442 W:31 H:1}  #1B242AFF
+256  Sprite     Sprocket_Fill         {X:1181 Y:467 W:31 H:1}  #1B242AFF
+257  Sprite     Sprocket_Fill         {X:1181 Y:442 W:1 H:26}  #1B242AFF
+258  Sprite     Sprocket_Fill         {X:1211 Y:442 W:1 H:26}  #1B242AFF
+259  Sprite     Sprocket_Fill         {X:724 Y:478 W:390 H:1}  #5B737BFF
+260  Sprite     Sprocket_Fill         {X:724 Y:501 W:390 H:1}  #5B737BFF
+261  Sprite     Sprocket_Fill         {X:724 Y:478 W:1 H:24}  #5B737BFF
+262  Sprite     Sprocket_Fill         {X:1113 Y:478 W:1 H:24}  #5B737BFF
+263  Sprite     Sprocket_Hue          {X:724 Y:478 W:390 H:24}  #FFFFFFFF
+264  Sprite     Sprocket_Fill         {X:724 Y:475 W:8 H:30}  #DCF5FDFF
+265  Text       at {X:700 Y:479.72} scale 0.57  #A2C3CDFF  "H"
+266  Sprite     Sprocket_Fill         {X:724 Y:512 W:390 H:1}  #5B737BFF
+267  Sprite     Sprocket_Fill         {X:724 Y:535 W:390 H:1}  #5B737BFF
+268  Sprite     Sprocket_Fill         {X:724 Y:512 W:1 H:24}  #5B737BFF
+269  Sprite     Sprocket_Fill         {X:1113 Y:512 W:1 H:24}  #5B737BFF
+270  Sprite     Sprocket_Fill         {X:724 Y:512 W:390 H:24}  #0C1216FF
+271  Sprite     Sprocket_Fill         {X:724 Y:509 W:8 H:30}  #DCF5FDFF
+272  Text       at {X:700 Y:513.72} scale 0.57  #A2C3CDFF  "S"
+273  Sprite     Sprocket_Fill         {X:724 Y:546 W:390 H:1}  #5B737BFF
+274  Sprite     Sprocket_Fill         {X:724 Y:569 W:390 H:1}  #5B737BFF
+275  Sprite     Sprocket_Fill         {X:724 Y:546 W:1 H:24}  #5B737BFF
+276  Sprite     Sprocket_Fill         {X:1113 Y:546 W:1 H:24}  #5B737BFF
+277  Sprite     Sprocket_Fill         {X:724 Y:546 W:390 H:24}  #0C1216FF
+278  Sprite     Sprocket_Fill         {X:1106 Y:543 W:8 H:30}  #DCF5FDFF
+279  Text       at {X:700 Y:547.72} scale 0.57  #A2C3CDFF  "V"
+280  Sprite     Sprocket_Fill         {X:1124 Y:478 W:96 H:92}  #141B20FF
+281  Sprite     Sprocket_Fill         {X:1124 Y:478 W:96 H:1}  #5B737BFF
+282  Sprite     Sprocket_Fill         {X:1124 Y:569 W:96 H:1}  #5B737BFF
+283  Sprite     Sprocket_Fill         {X:1124 Y:478 W:1 H:92}  #5B737BFF
+284  Sprite     Sprocket_Fill         {X:1219 Y:478 W:1 H:92}  #5B737BFF
+285  Sprite     Sprocket_Fill         {X:700 Y:580 W:148 H:39}  #141B20FF
+286  Sprite     Sprocket_Fill         {X:700 Y:580 W:148 H:1}  #5B737BFF
+287  Sprite     Sprocket_Fill         {X:700 Y:619 W:148 H:1}  #5B737BFF
+288  Sprite     Sprocket_Fill         {X:700 Y:580 W:1 H:39}  #5B737BFF
+289  Sprite     Sprocket_Fill         {X:847 Y:580 W:1 H:39}  #5B737BFF
+290  Sprite     Sprocket_Fill         {X:713 Y:588 W:2 H:24}  #DCF5FDFF
+291  Text       at {X:1046.153 Y:637.345} scale 0.57  #A2C3CDFF  "Cancel"
+292  Sprite     Sprocket_Fill         {X:1118 Y:630 W:102 H:37}  #374851FF
+293  Text       at {X:1137.467 Y:637.345} scale 0.57  #85A1A9FF  "Continue"

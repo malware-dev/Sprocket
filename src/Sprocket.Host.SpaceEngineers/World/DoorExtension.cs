@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sandbox.ModAPI;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
@@ -41,8 +42,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 .WithState("is-open", Open, true, "is open")
                 .WithState("is-shut", Shut, true, "is shut")
                 .WithState("is-moving", Moving, true, "is moving")
-                .WithAction("open", "open", "is-open", "Open_On")
-                .WithAction("close", "close", "is-shut", "Open_Off");
+                .WithAction("open", "open", "is-open", "Open_On").Lasting()
+                .WithAction("close", "close", "is-shut", "Open_Off").Lasting();
         }
 
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
@@ -70,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
-        public bool TryInvoke(IMyTerminalBlock block, string actionId)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             var door = block as IMyDoor;
             if (door == null)
@@ -123,7 +124,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 && (door.Status == DoorStatus.Opening || door.Status == DoorStatus.Closing);
         }
 
-        public int Expected(IMyTerminalBlock block, string actionId)
+        /// <summary>Nothing: a door goes on to where it was going, and one stopped half way is a hole in a wall.</summary>
+        public void Stop(IMyTerminalBlock block, string actionId)
+        {
+        }
+
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             return GridEntity.Unestimated;
         }

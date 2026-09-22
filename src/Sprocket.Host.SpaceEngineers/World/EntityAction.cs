@@ -31,6 +31,35 @@ namespace Sprocket.Host.SpaceEngineers.World
             Wants = wants;
         }
 
+        /// <summary>Whether reaching the state it leads to takes time, rather than happening in the tick it is done.</summary>
+        /// <remarks>
+        /// What the list somebody chooses from marks as holding the sequence until finished. Switching
+        /// a block on leads to its being on in the same tick and holds nothing; a door takes seconds.
+        /// </remarks>
+        public bool Lasts { get; private set; }
+
+        /// <summary>The block's own action this one takes over, where it is not performed as that action, or null.</summary>
+        /// <remarks>
+        /// An action that does what one of the game's does, its own way, hides the game's as surely as one
+        /// that performs it: the two do the same thing, and one is enough to choose from. Kept apart from
+        /// <see cref="GameActionId" />, which also says what a slot on a toolbar is given to do.
+        /// </remarks>
+        public string Replaces { get; private set; }
+
+        /// <summary>Says which of the block's own actions this one takes over.</summary>
+        public EntityAction Replacing(string gameActionId)
+        {
+            Replaces = gameActionId;
+            return this;
+        }
+
+        /// <summary>Says that reaching this action's state takes time.</summary>
+        public EntityAction Lasting()
+        {
+            Lasts = true;
+            return this;
+        }
+
         /// <summary>Stable identifier, referenced by saved sequences.</summary>
         public string Id { get; private set; }
 
@@ -148,8 +177,50 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         readonly List<Field> _described = new List<Field>();
 
+        /// <summary>Gives it the values it asks for, one field per value, in the order they are written.</summary>
+        /// <remarks>For an action of Sprocket's own, which describes itself rather than being described.</remarks>
+        public EntityAction Asking(IList<Field> fields)
+        {
+            _asks = fields;
+            Wants = fields.Count;
+            return this;
+        }
+
+        /// <summary>The fields an action of Sprocket's own asks with, or null.</summary>
+        IList<Field> _asks;
+
+        /// <summary>Whether a value it cannot do without is among the ones it has not been given.</summary>
+        /// <remarks>
+        /// Asked of the action rather than worked out from a list of its fields, so nothing has to keep
+        /// a list to ask the question - which is asked of every step of every sequence being looked at.
+        /// </remarks>
+        public bool Needs(int given)
+        {
+            _wanted.Clear();
+            Fields(_wanted);
+
+            for (var i = 0; i < _wanted.Count; i++)
+            {
+                if (_wanted[i].Needed && i >= given)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>What it asks for, while it is being asked whether it has it. Reused, never held.</summary>
+        readonly List<Field> _wanted = new List<Field>();
+
         public void Fields(IList<Field> into)
         {
+            if (_asks != null)
+            {
+                for (var i = 0; i < _asks.Count; i++)
+                    into.Add(_asks[i]);
+
+                return;
+            }
+
             // A value describes itself, so nothing has to have been written about it.
             if (GamePropertyId != null)
             {

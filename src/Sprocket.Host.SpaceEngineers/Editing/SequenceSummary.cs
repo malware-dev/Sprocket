@@ -269,6 +269,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (unoffered.Exists)
                 return unoffered;
 
+            SequenceFault unfilled = Unfilled(bindings, sequence);
+            if (unfilled.Exists)
+                return unfilled;
+
             SequenceFault unawaited = Unawaited(sequence);
             if (unawaited.Exists)
                 return unawaited;
@@ -304,6 +308,37 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             {
                 if (steps[i] is Act && (i + 1 == steps.Count || !(steps[i + 1] is Await)))
                     return new SequenceFault(SequenceProblem.Unawaited, i);
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>The first step that has not been given a value its action needs, or none.</summary>
+        /// <remarks>
+        /// Asked of the action the blocks offer, because what is needed is the action's to declare and
+        /// a block may have been replaced by one that declares otherwise.
+        /// </remarks>
+        static SequenceFault Unfilled(Bindings bindings, Sequence sequence)
+        {
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var act = sequence.Steps[i] as Act;
+                if (act == null || !act.HasAction)
+                    continue;
+
+                for (var t = 0; t < act.Targets.Count; t++)
+                {
+                    GridEntity entity = bindings.Entity(act.Targets[t]);
+                    if (entity == null)
+                        continue;
+
+                    EntityAction doing = act.Names(entity.Kind.Actions);
+                    if (doing == null)
+                        continue;
+
+                    if (doing.Needs(act.Values.Count))
+                        return new SequenceFault(SequenceProblem.Unfilled, i);
+                }
             }
 
             return SequenceFault.None;

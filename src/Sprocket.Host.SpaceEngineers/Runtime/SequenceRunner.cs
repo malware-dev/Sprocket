@@ -539,8 +539,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Pace();
         }
 
+        /// <summary>
+        /// Ends the run, and calls off what it had in flight.
+        /// </summary>
+        /// <remarks>
+        /// Every way a run ends comes through here - switched off, stopped by hand, taken over,
+        /// at fault - so this is where a machine left moving is told to stop. What that means is the
+        /// block's own to say, and for most of them it means nothing at all.
+        /// </remarks>
         public void Stop()
         {
+            Called();
+
             IsRunning = false;
             IsWaiting = false;
             _byHand = false;
@@ -550,6 +560,28 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _holding = false;
             _outstanding.Clear();
             _rota.Leave(_busy);
+        }
+
+        /// <summary>Tells every block still being waited on to call off what was started on it.</summary>
+        void Called()
+        {
+            if (_bindings == null)
+                return;
+
+            for (var i = 0; i < _outstanding.Count; i++)
+            {
+                Act act = _outstanding[i];
+                if (!act.HasAction || act.Sets)
+                    continue;
+
+                var acted = ActedOn(act.Targets);
+                for (var t = 0; t < acted.Count; t++)
+                {
+                    GridEntity entity = _bindings.Entity(acted[t]);
+                    if (entity != null)
+                        entity.Stop(act.ActionId);
+                }
+            }
         }
 
         /// <summary>
@@ -794,7 +826,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (entity == null)
                         continue;
 
-                    var expected = entity.Expected(_outstanding[i].ActionId);
+                    var expected = entity.Expected(_outstanding[i].ActionId, _outstanding[i].Values);
                     if (expected < 0)
                         return GridEntity.Unestimated;
 

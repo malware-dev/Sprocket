@@ -184,6 +184,11 @@ sealed class Rig
         return Weld(new Door(id, name, Type<MyObjectBuilder_Door>(), "LargeBlockDoor", "Door"));
     }
 
+    public Rotor Rotor(long id, string name)
+    {
+        return Weld(new Rotor(id, name, Type<MyObjectBuilder_MotorStator>(), "LargeStator", "Rotor"));
+    }
+
     public Vent Vent(long id, string name)
     {
         return Weld(new Vent(id, name, Type<MyObjectBuilder_AirVent>(), "SmallAirVent", "Air Vent"));

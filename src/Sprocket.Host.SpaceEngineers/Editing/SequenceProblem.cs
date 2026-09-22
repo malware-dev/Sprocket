@@ -30,6 +30,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         Unoffered,
 
+        /// <summary>
+        /// One of its steps has not been given a value it cannot do without.
+        /// </summary>
+        /// <remarks>
+        /// What an action needs is the action's to say: a rotor told to turn at no speed sets out for
+        /// an angle it can never reach. A program written anywhere but the editor can hold one, and so
+        /// can one the editor wrote before the action said it needed it.
+        /// </remarks>
+        Unfilled,
+
         /// <summary>One of its steps goes straight on without waiting for what it started.</summary>
         /// <remarks>
         /// A program from anywhere but the editor can hold one, and the editor draws every step as one

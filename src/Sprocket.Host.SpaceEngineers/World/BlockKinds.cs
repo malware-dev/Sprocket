@@ -119,13 +119,23 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
 
-                if (offer.Wants > 0)
-                    kind.WithAction(offer.Id, said, offer.Id, offer.Wants, Described(kind, offer));
-                else
-                    kind.WithAction(offer.Id, said, null, offer.Id);
+                string id;
+                string named;
+                if (kind.Promoted(offer.Id, false, out id, out named))
+                    Act(kind, offer, id, named);
 
+                Act(kind, offer, offer.Id, said);
                 Last(kind).Unaltered = true;
             }
+        }
+
+        /// <summary>One of the block's own actions, under the given id and words, performing the game's.</summary>
+        void Act(EntityKind kind, Offer offer, string id, string said)
+        {
+            if (offer.Wants > 0)
+                kind.WithAction(id, said, offer.Id, offer.Wants, Described(kind, offer));
+            else
+                kind.WithAction(id, said, null, offer.Id);
         }
 
         /// <summary>
@@ -158,6 +168,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
+
+                string id;
+                string named;
+                if (kind.Promoted(offer.Id, true, out id, out named))
+                    kind.WithValue(id, named, offer.Id, Asks(offer, named));
 
                 kind.WithValue(offer.Id, said, offer.Id, Asks(offer, said));
                 Last(kind).Unaltered = true;
@@ -260,7 +275,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (ReferenceEquals(other, one))
                     continue;
 
-                if (one.Sets ? other.GamePropertyId == one.Id : other.GameActionId == one.Id)
+                if (one.Sets ? other.GamePropertyId == one.Id : other.GameActionId == one.Id || other.Replaces == one.Id)
                     return true;
             }
 

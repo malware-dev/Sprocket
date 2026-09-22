@@ -125,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
-        public bool TryInvoke(IMyTerminalBlock block, string actionId)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             return false;
         }
@@ -166,7 +166,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
 
-        public int Expected(IMyTerminalBlock block, string actionId)
+        /// <summary>Nothing: a button starts things and holds nothing up, so there is nothing to call off.</summary>
+        public void Stop(IMyTerminalBlock block, string actionId)
+        {
+        }
+
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             return GridEntity.Unestimated;
         }

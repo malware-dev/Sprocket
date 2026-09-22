@@ -1363,7 +1363,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return;
 
             if (_renaming < 0
-                && (string.IsNullOrEmpty(answer) || Taken(command, answer) || _ask.Wrong.Length > 0))
+                && (string.IsNullOrEmpty(answer) || Taken(command, answer) || _ask.Wrong.Length > 0
+                    || _ask.Missing))
                 return;
 
             Close();

@@ -43,6 +43,11 @@ sealed class Rigged
         return Rig.Vent(id, name);
     }
 
+    public Rotor Rotor(long id, string name)
+    {
+        return Rig.Rotor(id, name);
+    }
+
     public Panel Panel(long id, string name, int buttons = 1)
     {
         return Rig.Panel(id, name, buttons);

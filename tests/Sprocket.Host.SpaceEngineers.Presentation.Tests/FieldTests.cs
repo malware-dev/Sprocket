@@ -18,9 +18,9 @@ public class FieldTests
     [Fact]
     public void WhatItTakesIsSaidBesideItsName()
     {
-        Assert.Equal("Red 0-255", Field.Between("Red", "0", "255").Label);
-        Assert.Equal("Angle 0 or more", Field.Between("Angle", "0", "").Label);
-        Assert.Equal("Angle 90 or less", Field.Between("Angle", "", "90").Label);
+        Assert.Equal("Red (0 - 255)", Field.Between("Red", "0", "255").Label);
+        Assert.Equal("Angle (0 or more)", Field.Between("Angle", "0", "").Label);
+        Assert.Equal("Angle (90 or less)", Field.Between("Angle", "", "90").Label);
         Assert.Equal("Angle", Field.Called("Angle").Label);
     }
 
@@ -28,7 +28,7 @@ public class FieldTests
     [Fact]
     public void AndOnItsOwnWhereNobodyNamedTheValue()
     {
-        Assert.Equal("0-255", Field.Between("", "0", "255").Label);
+        Assert.Equal("(0 - 255)", Field.Between("", "0", "255").Label);
         Assert.Equal("", Field.Unnamed().Label);
     }
 
@@ -98,7 +98,7 @@ public class FieldTests
     {
         Field odd = Field.Between("Mood", "sullen", "cheerful");
 
-        Assert.Equal("Mood sullen-cheerful", odd.Label);
+        Assert.Equal("Mood (sullen - cheerful)", odd.Label);
         Assert.Equal("", odd.Refuses("Mood", "7"));
         Assert.Equal("", odd.Refuses("Mood", "livid"));
     }

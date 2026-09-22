@@ -150,6 +150,82 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>
+        /// The same, for one of Sprocket's own that is given values, each asked for by its field.
+        /// </summary>
+        public EntityKind WithAction(string id, string text, string leadsToStateId, params Field[] asks)
+        {
+            _actions.Add(new EntityAction(id, text, leadsToStateId, null).Asking(asks));
+            return this;
+        }
+
+        /// <summary>Says which of the block's own actions the action added last takes over.</summary>
+        public EntityKind Replacing(string gameActionId)
+        {
+            _actions[_actions.Count - 1].Replacing(gameActionId);
+            return this;
+        }
+
+        /// <summary>Says that reaching the state of the action added last takes time.</summary>
+        public EntityKind Lasting()
+        {
+            _actions[_actions.Count - 1].Lasting();
+            return this;
+        }
+
+        /// <summary>
+        /// Offers one of the block's own members under Sprocket's words, in the place of the game's.
+        /// </summary>
+        /// <remarks>
+        /// For a member worth offering as it is, only said better: the block still declares it, with
+        /// what it takes, and the entry made from that declaration stands in for the game's, which is
+        /// then left out of the list somebody chooses from like any other that is stood in for. Taken
+        /// up where the block's own members are read, so a block that does not declare it gets
+        /// nothing - see <c>BlockKinds</c>.
+        /// </remarks>
+        public EntityKind Promoting(string gameId, bool sets, string id, string named)
+        {
+            _promoted.Add(new Promotion(gameId, sets, id, named));
+            return this;
+        }
+
+        /// <summary>What one of the block's own members is offered as, where something promoted it.</summary>
+        internal bool Promoted(string gameId, bool sets, out string id, out string named)
+        {
+            for (var i = 0; i < _promoted.Count; i++)
+            {
+                if (_promoted[i].GameId == gameId && _promoted[i].Sets == sets)
+                {
+                    id = _promoted[i].Id;
+                    named = _promoted[i].Named;
+                    return true;
+                }
+            }
+
+            id = null;
+            named = null;
+            return false;
+        }
+
+        /// <summary>One of the block's own members offered under Sprocket's words.</summary>
+        struct Promotion
+        {
+            public readonly string GameId;
+            public readonly bool Sets;
+            public readonly string Id;
+            public readonly string Named;
+
+            public Promotion(string gameId, bool sets, string id, string named)
+            {
+                GameId = gameId;
+                Sets = sets;
+                Id = id;
+                Named = named;
+            }
+        }
+
+        readonly List<Promotion> _promoted = new List<Promotion>();
+
         /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
         public EntityKind WithValue(string id, string named, string propertyId, Field field)
         {

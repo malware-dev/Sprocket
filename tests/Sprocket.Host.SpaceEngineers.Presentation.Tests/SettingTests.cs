@@ -54,7 +54,7 @@ public class SettingTests
         // The numbers this block's own definition declares, and nobody else's: a corner light's
         // falloff stops at two where another light's stops somewhere else.
         Field one = Assert.Single(screen.Editor.Screen.PrimaryFields);
-        Assert.Equal("Falloff 0-2", one.Label);
+        Assert.Equal("Falloff (0 - 2)", one.Label);
         Assert.Equal("Falloff has to be between 0 and 2.", one.Refuses("Falloff", "5"));
     }
 

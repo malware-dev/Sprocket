@@ -273,6 +273,8 @@ namespace Sprocket.Host.SpaceEngineers.Words
                 return "This waits on something that isn't here any more.";
             if (problem == SequenceProblem.Unoffered)
                 return "This does something these blocks no longer offer. Replace this step.";
+            if (problem == SequenceProblem.Unfilled)
+                return "This step is missing a value it needs. Fill it in.";
             if (problem == SequenceProblem.Unawaited)
                 return "This step doesn't wait for what it starts, which this version can't show. Replace this step.";
             if (problem == SequenceProblem.Stuck)

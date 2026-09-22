@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 
@@ -69,8 +70,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 .WithState("is-empty", Empty, true, "is empty")
                 .WithState("is-sealed", Sealed, true, "is airtight")
                 .WithState("is-leaking", Sealed, false, "is not airtight")
-                .WithAction("pressurize", "pressurize", "has-air", "Depressurize_Off")
-                .WithAction("depressurize", "depressurize", "is-empty", "Depressurize_On");
+                .WithAction("pressurize", "pressurize", "has-air", "Depressurize_Off").Lasting()
+                .WithAction("depressurize", "depressurize", "is-empty", "Depressurize_On").Lasting();
         }
 
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
@@ -117,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
-        public bool TryInvoke(IMyTerminalBlock block, string actionId)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             var vent = block as IMyAirVent;
             if (vent == null)
@@ -254,7 +255,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 && (vent.Status == VentStatus.Pressurizing || vent.Status == VentStatus.Depressurizing);
         }
 
-        public int Expected(IMyTerminalBlock block, string actionId)
+        /// <summary>Nothing: a vent goes on with the air it was moving, and a room half emptied is no kind of stop.</summary>
+        public void Stop(IMyTerminalBlock block, string actionId)
+        {
+        }
+
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             return GridEntity.Unestimated;
         }

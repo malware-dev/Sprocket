@@ -45,6 +45,16 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public const float Mark = 17f;
 
         /// <summary>
+        /// How much room one character of a number takes, for sizing a box to what will go in it.
+        /// </summary>
+        /// <remarks>
+        /// Enough rather than exact: a box is made from the longest value a field will take, and a
+        /// box a little wide is a box, where one measured to the character is a box things fall out
+        /// of. Nothing is laid out from this - see the boxes themselves, which measure what they hold.
+        /// </remarks>
+        public const float Digit = 16f;
+
+        /// <summary>
         /// How narrow an editable name may get before it stops being something anybody can hit.
         /// </summary>
         /// <remarks>

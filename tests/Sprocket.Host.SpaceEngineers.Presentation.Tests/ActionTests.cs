@@ -160,6 +160,7 @@ public class ActionTests
 
         var entries = What(screen).Entries;
         Assert.True(entries.Single(entry => entry.Text == "open").Waits, "opening a door is not marked");
+        Assert.False(entries.Single(entry => entry.Text == "switch on").Waits, "switching on is marked, and holds nothing");
         Assert.All(entries.Where(entry => entry.InWell), entry => Assert.False(entry.Waits));
     }
 

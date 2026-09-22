@@ -144,52 +144,50 @@ on screen     Do something  |  Now pick what happens
 137  Sprite     Sprocket_Fill         {X:729 Y:142 W:1 H:800}  #5B737BFF
 138  Sprite     Sprocket_Fill         {X:1188 Y:142 W:1 H:800}  #5B737BFF
 139  SetClip    {X:745 Y:292 W:428 H:634}
-140  Text       at {X:757.8 Y:299.963} scale 0.57  #A2C3CDFF  "w"
-141  Text       at {X:779.26 Y:301.262} scale 0.64  #DCF5FDFF  "switch off"
-142  Text       at {X:757.8 Y:345.843} scale 0.57  #A2C3CDFF  "w"
-143  Text       at {X:779.26 Y:347.142} scale 0.64  #DCF5FDFF  "switch on"
-144  Text       at {X:745 Y:389.422} scale 0.64  #85A1A9FF  "TERMINAL"
-145  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:502}  #141B20FF
-146  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:1}  #5B737BFF
-147  Sprite     Sprocket_Fill         {X:745 Y:918 W:410 H:1}  #5B737BFF
-148  Sprite     Sprocket_Fill         {X:745 Y:416 W:1 H:502}  #5B737BFF
-149  Sprite     Sprocket_Fill         {X:1154 Y:416 W:1 H:502}  #5B737BFF
-150  Text       at {X:767.8 Y:435.702} scale 0.64  #85A1A9FF  "VALUES"
-151  Text       at {X:767.8 Y:471.982} scale 0.64  #DCF5FDFF  "Color"
-152  Text       at {X:767.8 Y:517.862} scale 0.64  #DCF5FDFF  "Falloff"
-153  Text       at {X:767.8 Y:563.7419} scale 0.64  #DCF5FDFF  "On"
-154  Text       at {X:767.8 Y:609.6219} scale 0.64  #DCF5FDFF  "Radius"
-155  Text       at {X:767.8 Y:655.502} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
-156  Text       at {X:767.8 Y:691.782} scale 0.64  #DCF5FDFF  "Set Color"
-157  Text       at {X:767.8 Y:737.662} scale 0.64  #DCF5FDFF  "Set Radius"
-158  Text       at {X:767.8 Y:783.542} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
-159  Sprite     Sprocket_Fill         {X:755 Y:820 W:390 H:43}  #0C1216FF
-160  Text       at {X:767.8 Y:829.422} scale 0.64  #A2C3CDFF  "Turn block Off"
-161  Sprite     Sprocket_Fill         {X:755 Y:866 W:390 H:43}  #0C1216FF
-162  Text       at {X:767.8 Y:875.302} scale 0.64  #A2C3CDFF  "Turn block On"
-163  SetClip    {X:259 Y:142 W:1402 H:812}
-164  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
-165  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
-166  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
-167  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
-168  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
-169  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
-170  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
-171  Sprite     Sprocket_Fill         {X:745 Y:255 W:428 H:31}  #3C4C52FF
-172  Sprite     Sprocket_Fill         {X:758 Y:262 W:17 H:1}  #3ACC00FF
-173  Sprite     Sprocket_Fill         {X:758 Y:278 W:17 H:1}  #3ACC00FF
-174  Sprite     Sprocket_Fill         {X:758 Y:262 W:1 H:17}  #3ACC00FF
-175  Sprite     Sprocket_Fill         {X:774 Y:262 W:1 H:17}  #3ACC00FF
-176  Text       at {X:764.1766 Y:264.2003} scale 0.331  #3ACC00FF  "c"
-177  Text       at {X:784.8 Y:259.772} scale 0.57  #DCF5FDFF  "Show hidden"
-178  ClearClip  
-179  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
-180  SetClip    {X:276 Y:55 W:157 H:33}
-181  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
-182  ClearClip  
-183  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-184  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-185  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Now pick what happens"
-186  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
-187  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-188  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+140  Text       at {X:757.8 Y:301.262} scale 0.64  #DCF5FDFF  "switch off"
+141  Text       at {X:757.8 Y:347.142} scale 0.64  #DCF5FDFF  "switch on"
+142  Text       at {X:745 Y:389.422} scale 0.64  #85A1A9FF  "TERMINAL"
+143  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:502}  #141B20FF
+144  Sprite     Sprocket_Fill         {X:745 Y:416 W:410 H:1}  #5B737BFF
+145  Sprite     Sprocket_Fill         {X:745 Y:918 W:410 H:1}  #5B737BFF
+146  Sprite     Sprocket_Fill         {X:745 Y:416 W:1 H:502}  #5B737BFF
+147  Sprite     Sprocket_Fill         {X:1154 Y:416 W:1 H:502}  #5B737BFF
+148  Text       at {X:767.8 Y:435.702} scale 0.64  #85A1A9FF  "VALUES"
+149  Text       at {X:767.8 Y:471.982} scale 0.64  #DCF5FDFF  "Color"
+150  Text       at {X:767.8 Y:517.862} scale 0.64  #DCF5FDFF  "Falloff"
+151  Text       at {X:767.8 Y:563.7419} scale 0.64  #DCF5FDFF  "On"
+152  Text       at {X:767.8 Y:609.6219} scale 0.64  #DCF5FDFF  "Radius"
+153  Text       at {X:767.8 Y:655.502} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
+154  Text       at {X:767.8 Y:691.782} scale 0.64  #DCF5FDFF  "Set Color"
+155  Text       at {X:767.8 Y:737.662} scale 0.64  #DCF5FDFF  "Set Radius"
+156  Text       at {X:767.8 Y:783.542} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
+157  Sprite     Sprocket_Fill         {X:755 Y:820 W:390 H:43}  #0C1216FF
+158  Text       at {X:767.8 Y:829.422} scale 0.64  #A2C3CDFF  "Turn block Off"
+159  Sprite     Sprocket_Fill         {X:755 Y:866 W:390 H:43}  #0C1216FF
+160  Text       at {X:767.8 Y:875.302} scale 0.64  #A2C3CDFF  "Turn block On"
+161  SetClip    {X:259 Y:142 W:1402 H:812}
+162  Text       at {X:745 Y:158.102} scale 0.64  #DCF5FDFF  "WHAT TO DO"
+163  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:37}  #141B20FF
+164  Sprite     Sprocket_Fill         {X:745 Y:212 W:428 H:1}  #5B737BFF
+165  Sprite     Sprocket_Fill         {X:745 Y:248 W:428 H:1}  #5B737BFF
+166  Sprite     Sprocket_Fill         {X:745 Y:212 W:1 H:37}  #5B737BFF
+167  Sprite     Sprocket_Fill         {X:1172 Y:212 W:1 H:37}  #5B737BFF
+168  Text       at {X:757.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
+169  Sprite     Sprocket_Fill         {X:745 Y:255 W:428 H:31}  #3C4C52FF
+170  Sprite     Sprocket_Fill         {X:758 Y:262 W:17 H:1}  #3ACC00FF
+171  Sprite     Sprocket_Fill         {X:758 Y:278 W:17 H:1}  #3ACC00FF
+172  Sprite     Sprocket_Fill         {X:758 Y:262 W:1 H:17}  #3ACC00FF
+173  Sprite     Sprocket_Fill         {X:774 Y:262 W:1 H:17}  #3ACC00FF
+174  Text       at {X:764.1766 Y:264.2003} scale 0.331  #3ACC00FF  "c"
+175  Text       at {X:784.8 Y:259.772} scale 0.57  #DCF5FDFF  "Show hidden"
+176  ClearClip  
+177  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+178  SetClip    {X:276 Y:55 W:157 H:33}
+179  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+180  ClearClip  
+181  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+182  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+183  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Now pick what happens"
+184  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+185  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+186  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

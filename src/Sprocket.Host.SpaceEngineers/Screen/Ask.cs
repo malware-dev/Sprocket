@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Drawing;
@@ -28,6 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         private readonly Stack _fields = Widgets.Column(Space.Item);
         private readonly List<TextBox> _boxes = new List<TextBox>();
         private readonly List<Mixer> _mixers = new List<Mixer>();
+        private readonly List<Dial> _dials = new List<Dial>();
         private readonly List<Switch> _switches = new List<Switch>();
         private readonly List<Stack> _holders = new List<Stack>();
         private readonly List<Choices> _lists = new List<Choices>();
@@ -37,6 +39,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         private readonly List<Label> _numbers = new List<Label>();
         private readonly Label _confirm = Widgets.Label("Continue", Palette.Ink, Lettering.Small);
         private readonly Label _cancel = Widgets.Label("Cancel", Palette.Muted, Lettering.Small);
+
+        /// <summary>Why what is filled in cannot be sent, beside the way out rather than over the question.</summary>
+        private readonly Label _why = Widgets.Label("", Palette.Problem, Lettering.Small);
+
+        /// <summary>Which fields the caret has been in, so an empty one is not called wrong before it is reached.</summary>
+        private readonly List<bool> _seen = new List<bool>();
 
         private readonly Sized _form = new Sized(FormWidth);
 
@@ -61,6 +69,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _entry.Spacing = Space.Item;
             _entry.Right = ways;
+            _why.Padding = new Thickness(Space.ChipX, Space.ChipY);
+            _why.Wraps = true;
 
             _popup.Background = Palette.PanelHot;
             _popup.Edge = Palette.Line;
@@ -114,11 +124,19 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     continue;
                 }
 
-                _boxes[i].Text = "";
+                if (Dialled(i))
+                    Turned(i).Written.Text = "";
+                else
+                    _boxes[i].Text = "";
+
                 _fields.Children.Add(Line(i, count));
             }
 
-            _entry.Fill = form ? null : _boxes[0];
+            // The reason sits on the same line as the way out, where somebody who has just pressed a
+            // dead button is looking. A name question has its box there instead.
+            _entry.Fill = form ? (Element)_why : _boxes[0];
+
+            _seen.Clear();
             _form.Collapsed = !form;
 
             // The way out is the form's, and not every question's. A name is left by pressing away
@@ -134,6 +152,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             for (var i = 0; i < _mixers.Count; i++)
                 _mixers[i].Written.IsEditing = false;
+
+            for (var i = 0; i < _dials.Count; i++)
+                _dials[i].Written.IsEditing = false;
 
             _at = 0;
             _measure = true;
@@ -189,16 +210,63 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Bar line = _lines[at];
             line.Spacing = Space.Item;
             line.Left = _numbers[at].Text.Length > 0 ? Numbered(at) : null;
-            line.Fill = Chosen(at) ? Picking(at) : _boxes[at];
+            line.Fill = Dialled(at) ? Turned(at).Root : Chosen(at) ? Picking(at) : Boxed(at);
 
             return line;
         }
 
+        /// <summary>
+        /// The box a field is typed into, no wider than the longest value it will take.
+        /// </summary>
+        /// <remarks>
+        /// A box given the width of the form invites a sentence, where a field bounded at thirty holds
+        /// two digits. A field that says nothing about what it takes keeps the width, because anything
+        /// could go in it.
+        /// </remarks>
+        Element Boxed(int at)
+        {
+            var wide = Room(at);
+            if (wide <= 0f)
+            {
+                _boxes[at].Trails = false;
+                return _boxes[at];
+            }
+
+            // A number sits against the right-hand end of a box made to its own width.
+            _boxes[at].Trails = true;
+
+            while (_sized.Count <= at)
+                _sized.Add(new Sized(0f));
+
+            _sized[at].Width = wide;
+            _sized[at].Content = _boxes[at];
+            return _sized[at];
+        }
+
+        /// <summary>How much room the longest value a field will take needs, or nought where it says nothing.</summary>
+        static float Room(Field field)
+        {
+            var longest = Math.Max((field.Least ?? "").Length, (field.Most ?? "").Length);
+            if (longest < 1)
+                return 0f;
+
+            // The longest value it will take, and room for the caret after it.
+            return (longest + 1) * Sizes.Digit;
+        }
+
+        float Room(int at)
+        {
+            return at < _wanted.Count ? Room(_wanted[at]) : 0f;
+        }
+
+        readonly List<Sized> _sized = new List<Sized>();
+
         string Label(int at, int count)
         {
             // The name alone where the control beside it already shows what it will take. A switch
-            // has both of its words written on it, and "On on or off" is the label saying them again.
-            if (Chosen(at))
+            // has both of its words written on it, and "On on or off" is the label saying them again;
+            // a dial is a whole turn either way, drawn.
+            if (Chosen(at) || Dialled(at))
                 return _wanted[at].Name ?? "";
 
             string said = at < _wanted.Count ? _wanted[at].Label : "";
@@ -303,7 +371,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         TextBox At(int at)
         {
-            return Colourful(at) ? Mixed(at).Written : _boxes[at];
+            if (Colourful(at))
+                return Mixed(at).Written;
+
+            return Dialled(at) ? Turned(at).Written : _boxes[at];
         }
 
         /// <summary>
@@ -381,6 +452,21 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             return _mixers[at];
         }
 
+        /// <summary>Whether the field at <paramref name="at" /> is answered by turning a dial.</summary>
+        bool Dialled(int at)
+        {
+            return at < _wanted.Count && _wanted[at].Edits == Editor.Angle;
+        }
+
+        /// <summary>The dial for a field, made the first time that field needs one.</summary>
+        Dial Turned(int at)
+        {
+            while (_dials.Count <= at)
+                _dials.Add(new Dial());
+
+            return _dials[at];
+        }
+
         /// <summary>How many values it is asking for.</summary>
         public int Count
         {
@@ -453,7 +539,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             for (var i = 0; i < Count; i++)
             {
-                if (!Colourful(i) || !Mixed(i).Grab(point))
+                var grabbed = Colourful(i) ? Mixed(i).Grab(point) : Dialled(i) && Turned(i).Grab(point);
+                if (!grabbed)
                     continue;
 
                 Move(i);
@@ -467,12 +554,18 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             for (var i = 0; i < _mixers.Count; i++)
                 _mixers[i].Carry(point);
+
+            for (var i = 0; i < _dials.Count; i++)
+                _dials[i].Carry(point);
         }
 
         public void Drop()
         {
             for (var i = 0; i < _mixers.Count; i++)
                 _mixers[i].Drop();
+
+            for (var i = 0; i < _dials.Count; i++)
+                _dials[i].Drop();
         }
 
         /// <summary>Whether something on the question is being dragged right now.</summary>
@@ -483,6 +576,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 for (var i = 0; i < _mixers.Count; i++)
                 {
                     if (_mixers[i].IsDragging)
+                        return true;
+                }
+
+                for (var i = 0; i < _dials.Count; i++)
+                {
+                    if (_dials[i].IsDragging)
                         return true;
                 }
 
@@ -508,10 +607,61 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         }
 
         /// <summary>Hands the caret to the field it is now in.</summary>
+        /// <remarks>
+        /// With what is in it taken, so typing replaces it. A field arrived at already holds either
+        /// what it was given or what it starts at, and somebody who moves to it means to say something
+        /// else - the same bargain a search box keeps.
+        /// </remarks>
         void Editing()
         {
             At(_at).IsEditing = true;
             At(_at).CaretVisible = true;
+            At(_at).SelectAll();
+
+            while (_seen.Count <= _at)
+                _seen.Add(false);
+
+            _seen[_at] = true;
+        }
+
+        /// <summary>Whether the caret has been in the field at <paramref name="at" />.</summary>
+        bool Seen(int at)
+        {
+            return at < _seen.Count && _seen[at];
+        }
+
+        /// <summary>
+        /// Why the field at <paramref name="at" /> cannot be sent as it stands, or empty.
+        /// </summary>
+        /// <remarks>
+        /// A field nobody has reached yet is not called wrong for being empty. It still holds the form
+        /// back - see <see cref="Missing" /> - so what is not filled in cannot be sent; it is only not
+        /// marked in red before somebody has had the chance to fill it.
+        /// </remarks>
+        string Refuses(int at)
+        {
+            if (at >= _wanted.Count)
+                return "";
+
+            if (!Seen(at) && string.IsNullOrEmpty(At(at).Text))
+                return "";
+
+            return _wanted[at].Refuses(Called(at), At(at).Text);
+        }
+
+        /// <summary>Whether a field that has to be given a value has none.</summary>
+        public bool Missing
+        {
+            get
+            {
+                for (var i = 0; i < Count && i < _wanted.Count; i++)
+                {
+                    if (_wanted[i].Needed && string.IsNullOrEmpty(At(i).Text))
+                        return true;
+                }
+
+                return false;
+            }
         }
 
         /// <summary>What the answer will be sent to.</summary>
@@ -640,7 +790,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 for (var i = 0; i < Count && i < _wanted.Count; i++)
                 {
-                    string why = _wanted[i].Refuses(Called(i), At(i).Text);
+                    string why = Refuses(i);
                     if (why.Length > 0)
                         return why;
                 }
@@ -743,6 +893,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 string said = i < _filled.Count ? _filled[i] ?? "" : "";
 
+                // A field somebody has not answered yet starts at what it says is usual, where it says.
+                if (said.Length == 0 && i < _wanted.Count && !string.IsNullOrEmpty(_wanted[i].Default))
+                    said = _wanted[i].Default;
+
                 if (Colourful(i))
                 {
                     Mixed(i).Offer(_colours);
@@ -751,7 +905,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     continue;
                 }
 
-                if (i < _filled.Count)
+                if (Dialled(i))
+                {
+                    Turned(i).Written.Text = said;
+                    Turned(i).Reread();
+                    continue;
+                }
+
+                if (i < _filled.Count || said.Length > 0)
                     _boxes[i].Text = said;
             }
         }
@@ -808,6 +969,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             for (var i = 0; i < _mixers.Count; i++)
                 _mixers[i].Lit(pointer);
 
+            for (var i = 0; i < _dials.Count; i++)
+                _dials[i].Lit(pointer);
+
             // The question gives way to the reason while there is one, so the words sit where somebody
             // is already reading, and come back as soon as the answer is one that can be sent.
             // What is typed is the one part of a colour that can change without its control hearing,
@@ -818,6 +982,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 if (Colourful(i))
                 {
                     Mixed(i).Reread();
+                    continue;
+                }
+
+                if (Dialled(i))
+                {
+                    Turned(i).Reread();
                     continue;
                 }
 
@@ -849,15 +1019,21 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             }
 
             bool refused = !string.IsNullOrEmpty(Refused);
-            _label.Text = refused ? Refused : _question;
-            _label.Color = refused ? Palette.Problem : Palette.Muted;
+            _label.Text = _question;
+            _label.Color = Palette.Muted;
+            _why.Text = Refused ?? "";
+            _why.Collapsed = !refused;
+
+            // The field the reason is about wears it too, so a form of three says which one to mend.
+            for (var i = 0; i < Count; i++)
+                At(i).Wrong = Refuses(i).Length > 0;
 
             // Dead until there is something to send, because an empty answer here is not a meaningful
             // one. Renaming is the opposite case and allows it, which is why the two are told apart.
             //
             // Dressed and armed together, so a button drawn as a dead well cannot still answer a press.
             // That rule was being kept in two halves and only one of them said so.
-            if (Filled && !refused)
+            if (Filled && !refused && !Missing)
             {
                 Widgets.Go(_confirm);
                 _confirm.Press = Deed.Commits();
