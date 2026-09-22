@@ -27,6 +27,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         DateTime? _changed;
         int _lastSequence;
 
+        /// <summary>Told whenever a sequence or one of this system comes or goes. See <see cref="Automation.Reshaped" />.</summary>
+        internal Action Reshaped;
+
+        void Reshape()
+        {
+            if (Reshaped != null)
+                Reshaped();
+        }
+
         public AutomationSystem(int id, Guid identity)
         {
             Id = id;
@@ -341,6 +350,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             var instance = new SystemInstance(highest + 1);
             _instances.Add(instance);
+            Reshape();
             return instance;
         }
 
@@ -362,6 +372,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var instance = new SystemInstance(number);
             instance.Name = name;
             _instances.Add(instance);
+            Reshape();
             return instance;
         }
 
@@ -369,12 +380,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             _sequences.Add(sequence);
             sequence.System = this;
+            Reshape();
             Used(sequence.Number);
         }
 
         internal bool Remove(Sequence sequence)
         {
-            return _sequences.Remove(sequence);
+            if (!_sequences.Remove(sequence))
+                return false;
+
+            Reshape();
+            return true;
         }
 
         /// <summary>

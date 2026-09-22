@@ -79,6 +79,7 @@ public class SwitchTests
         ship.Secure = ship.Program.AddSequence(ship.Airlock, opened);
         ship.Secure.Name = "Secure";
         ship.Secure.Steps.Add(Do("close", ship.Ref(ship.Outer)));
+        ship.Secure.Steps.Add(new Await());
 
         ship.Runner = new AutomationRunner(ship.Program, ship.World);
         return ship;
@@ -98,6 +99,7 @@ public class SwitchTests
         var sequence = ship.Program.AddSequence(ship.Airlock);
         sequence.Name = name;
         sequence.Steps.Add(Do(actionId, target));
+        sequence.Steps.Add(new Await());
         return sequence;
     }
 
@@ -128,7 +130,7 @@ public class SwitchTests
         ship.Secure.Enabled = true;
 
         ship.Inner.ForceOpen();
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
 
         Assert.Contains("Outer Door:close", ship.Log);
     }
@@ -150,11 +152,11 @@ public class SwitchTests
         warn.Enabled = false;
         ship.Secure.Steps.Add(new Run(warn.Number));
 
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
         ship.Log.Clear();
 
         ship.Inner.ForceOpen();
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
 
         Assert.DoesNotContain("Outer Door:off", ship.Log);
         Assert.Equal(1, ship.State(warn).RefusedCount);
@@ -165,7 +167,7 @@ public class SwitchTests
         warn.Enabled = true;
 
         ship.Inner.ForceOpen();
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
 
         Assert.Contains("Outer Door:off", ship.Log);
         Assert.Equal(1, ship.State(warn).RefusedCount);
@@ -186,14 +188,14 @@ public class SwitchTests
         ship.Secure.Steps.Add(new Wait(600));
         ship.Secure.Steps.Add(Do("open", ship.Ref(ship.Outer)));
 
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
         ship.Inner.ForceOpen();
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
 
         Assert.True(ship.State(ship.Secure).IsRunning);
 
         ship.Secure.Enabled = false;
-        ship.Tick();
+        ship.Tick(Rota.Ten);
 
         Assert.False(ship.State(ship.Secure).IsRunning);
 

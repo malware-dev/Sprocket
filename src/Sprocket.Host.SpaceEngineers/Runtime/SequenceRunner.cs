@@ -15,11 +15,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Sequence _sequence;
 
         int _stepIndex = -1;
+
+        /// <summary>How long the wait being entered lasts, until it is pinned to a tick.</summary>
         int _waitTicks;
 
-        public SequenceRunner(Sequence sequence) : this(sequence, null)
-        {
-        }
+        /// <summary>The tick the wait under way ends on, or negative while none is pinned.</summary>
+        /// <remarks>
+        /// A tick of the game's rather than a count of calls, so a wait lasts as long as it says however
+        /// often the runner is woken. Pinned on the first tick the step is reached rather than when it
+        /// is entered, because a run resumed from a save is entered before it knows what tick it is.
+        /// </remarks>
+        int _waitUntil = -1;
 
         /// <summary>
         /// One sequence, running for one of a system.
@@ -29,11 +35,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// block slots the author built with into its own doors. Null means the slots are the
         /// blocks themselves, which is what the first one of a system does and what every
         /// system built before block slots existed keeps doing.
+        /// <para>
+        /// The owner is the runner for the whole program, which knows the world, its bindings and the rota.
+        /// </para>
         /// </remarks>
-        public SequenceRunner(Sequence sequence, SystemInstance instance)
+        public SequenceRunner(Sequence sequence, SystemInstance instance, AutomationRunner owner)
         {
             _sequence = sequence;
             _instance = instance;
+            _owner = owner;
+            _rota = owner.Rota;
+
+            var place = _rota.Join();
+            _sampling = new Shift(place, Sample);
+            _busy = new Shift(place, Continued);
+            _rota.Every(_sampling, Rota.Ten);
             LastFiredTick = -1;
             LastSkippedTick = -1;
         }
@@ -135,6 +151,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>How often a held run asks whether it has been overruled.</summary>
         Interval _conflicts = new Interval(60);
 
+        readonly AutomationRunner _owner;
+        readonly Rota _rota;
+
+        /// <summary>Samples the triggers and keeps an eye on a run. See <see cref="Sample" />.</summary>
+        readonly Shift _sampling;
+
+        /// <summary>Takes the run on when what it is waiting for is due. See <see cref="Continued" />.</summary>
+        readonly Shift _busy;
+
+        /// <summary>The await being held on, and how often it is looked at. Meaningful while <c>_holding</c>.</summary>
+        Hold _hold;
+        bool _holding;
+
         /// <summary>The tick this runner last saw, for the things it does on a cadence.</summary>
         int _tick;
 
@@ -188,7 +217,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>Written down when a world is saved, so a pause survives being reloaded.</remarks>
         public int WaitTicks
         {
-            get { return _waitTicks; }
+            get
+            {
+                if (_waitUntil < 0)
+                    return _waitTicks;
+
+                var left = _waitUntil - _tick;
+                return left > 0 ? left : 0;
+            }
         }
 
         public int LastFiredTick { get; private set; }
@@ -230,18 +266,22 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public bool HasMissingSources { get; private set; }
 
         /// <summary>
-        /// One tick of this sequence.
+        /// Samples this sequence's triggers, and keeps an eye on a run: done every ten ticks while
+        /// there is anything to sample or a run under way, and every hundred otherwise.
         /// </summary>
         /// <remarks>
-        /// <paramref name="live" /> is whether the machine Sprocket runs on can do anything at all:
-        /// its own block powered and switched on. Nothing starts and nothing moves on while it is
-        /// false, and what was already running is <b>kept</b> rather than stopped - a power cut is
-        /// not somebody pressing a switch, and coming back up part way through a cycle is the whole
-        /// point of remembering the run at all.
+        /// Whether the machine Sprocket runs on can do anything at all - its own block powered and
+        /// switched on - is asked here. Nothing starts and nothing moves on while it cannot, and what
+        /// was already running is <b>kept</b> rather than stopped: a power cut is not somebody
+        /// pressing a switch, and coming back up part way through a cycle is the whole point of
+        /// remembering the run at all.
         /// <para>
-        /// The trigger is still sampled. Edge detection is stateful, so a skipped sample makes the
-        /// next one wrong, and a door opened during a blackout must not read as having just opened
-        /// when the lights come back.
+        /// The trigger is still sampled. Edge detection compares a sample with the one before it, so
+        /// a door opened during a blackout must not read as having just opened when the lights come
+        /// back. What matters is that no turn is skipped, not that every tick is looked at: every edge
+        /// sampled is a change that stays changed - a door that is open afterwards - and is still
+        /// there when the turn comes round. Anything that exists for a moment only is answered rather
+        /// than sampled.
         /// </para>
         /// <para>
         /// The same rule the programmable block follows: it will not instantiate a script until its
@@ -250,44 +290,142 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// construct.
         /// </para>
         /// </remarks>
-        public void Tick(GridWorld world, Bindings bindings, int tick, bool live = true)
+        void Sample(int tick)
         {
-            _bindings = bindings;
-            _tick = tick;
-
-            // Sample every tick, even while running or switched off. Edge detection
-            // is stateful, so a skipped sample makes the next one wrong.
+            Enter(tick);
+            var world = _owner.World;
             var triggered = SampleTrigger(world);
 
-            if (!live)
+            if (_owner.Live)
+            {
+                // A run somebody started by hand is theirs, and the switch is not about them: they
+                // are standing at the screen watching it. Everything else a switched-off sequence
+                // refuses.
+                if (!CanRun && !_byHand)
+                {
+                    if (IsRunning)
+                        Stop();
+                }
+                else if (IsRunning)
+                {
+                    if (triggered)
+                    {
+                        SkippedCount++;
+                        LastSkippedTick = tick;
+                    }
+
+                    Rescue(tick);
+                }
+                else if (triggered)
+                {
+                    Start(world, tick);
+                }
+            }
+
+            Pace();
+        }
+
+        /// <summary>Takes the run a step further: done when what it is waiting on is due.</summary>
+        void Continued(int tick)
+        {
+            Enter(tick);
+            if (!IsRunning)
                 return;
 
-            // A run somebody started by hand is theirs, and the switch is not about them: they are
-            // standing at the screen watching it. Everything else a switched-off sequence refuses.
+            // Held, not stopped, and looked at again once the machine could have come back.
+            if (!_owner.Live)
+            {
+                _rota.Every(_busy, Rota.Ten);
+                return;
+            }
+
             if (!CanRun && !_byHand)
             {
-                // Only when there is a run to abandon. This is the tick path, and a parked sequence
-                // sits here for as long as it stays parked: stopping one that is not running costs
-                // the same as stopping one that is, and nothing outside can tell either way.
-                if (IsRunning)
-                    Stop();
-
+                Stop();
                 return;
             }
 
-            if (IsRunning)
+            Advance(_owner.World);
+            Schedule();
+        }
+
+        void Enter(int tick)
+        {
+            _tick = tick;
+            _bindings = _owner.Current;
+        }
+
+        /// <summary>Puts the run's next look on the rota, for whatever it has stopped at.</summary>
+        void Schedule()
+        {
+            if (!IsRunning)
             {
-                if (triggered)
-                {
-                    SkippedCount++;
-                    LastSkippedTick = tick;
-                }
-                Advance(world);
+                _rota.Leave(_busy);
                 return;
             }
 
-            if (triggered)
-                Start(world, tick);
+            if (_holding)
+            {
+                _rota.Every(_busy, _hold.Period(_tick));
+                return;
+            }
+
+            if (_waitUntil >= 0)
+            {
+                _rota.At(_busy, _waitUntil);
+                return;
+            }
+
+            _rota.At(_busy, _tick + 1);
+        }
+
+        /// <summary>
+        /// A run that is going on with nothing on the rota to move it, put back on.
+        /// </summary>
+        /// <remarks>
+        /// Every change of state schedules the next look, and a run left without one would never move
+        /// again with nothing to say so. Said in the log when it happens, because it means something
+        /// forgot to.
+        /// </remarks>
+        void Rescue(int tick)
+        {
+            if (_busy.Listed)
+                return;
+
+            Told.Say("A run of \"" + _sequence.Name + "\" had nothing on the rota to move it, and was put back.");
+            _rota.At(_busy, tick);
+        }
+
+        /// <summary>How often the triggers are sampled: every ten while there is anything to watch.</summary>
+        /// <remarks>
+        /// A sequence with only buttons to start it, and nothing running, is still looked at every
+        /// hundred ticks, which is how a trigger added to it later comes to be sampled.
+        /// </remarks>
+        void Pace()
+        {
+            _rota.Every(_sampling, IsRunning || Reads() ? Rota.Ten : Rota.Hundred);
+        }
+
+        /// <summary>Whether any trigger of this sequence is read off the blocks rather than answered.</summary>
+        bool Reads()
+        {
+            var system = _sequence.System;
+            var triggers = system == null ? null : system.Triggers;
+            for (var i = 0; triggers != null && i < triggers.Count; i++)
+            {
+                var trigger = triggers[i];
+                if (trigger.Runs == _sequence.Number && (trigger is WhenTrigger || trigger is EveryTrigger))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Takes this sequence off the rota for good, when it no longer exists.</summary>
+        public void Retire()
+        {
+            _rota.Leave(_sampling);
+            _rota.Leave(_busy);
         }
 
         /// <summary>Starts the sequence by name, from another sequence, a trigger or a button.</summary>
@@ -308,6 +446,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             bool byHand = false)
         {
             _bindings = bindings;
+            _tick = tick;
 
             // Power is refused whoever asks: a machine with none does nothing, and a person at the
             // screen of a dead block is not an exception to that.
@@ -373,7 +512,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             IsRunning = true;
             IsWaiting = waiting;
             _stepIndex = step;
-            _waitTicks = waitTicks < 0 ? 0 : waitTicks;
+            // What was left when the world was written down, and the first tick after loading is the
+            // one after that: pinning the whole of it there would end the wait a tick late.
+            _waitTicks = waitTicks > 1 ? waitTicks - 1 : 0;
+            _waitUntil = -1;
+            _holding = false;
 
             _outstanding.Clear();
 
@@ -389,6 +532,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (act != null)
                     _outstanding.Add(act);
             }
+
+            // Looked at on the first tick the rota runs: the world has only just loaded, and what the
+            // run is waiting for is answered by the blocks as they are then.
+            _rota.At(_busy, int.MinValue);
+            Pace();
         }
 
         public void Stop()
@@ -398,7 +546,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _byHand = false;
             _stepIndex = -1;
             _waitTicks = 0;
+            _waitUntil = -1;
+            _holding = false;
             _outstanding.Clear();
+            _rota.Leave(_busy);
         }
 
         /// <summary>
@@ -470,11 +621,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _stepIndex = 0;
             EnterStep();
             Advance(world);
+            Schedule();
+            Pace();
         }
 
         void EnterStep()
         {
             _waitTicks = 0;
+            _waitUntil = -1;
             if (_stepIndex < 0 || _stepIndex >= _sequence.Steps.Count)
                 return;
 
@@ -538,8 +692,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     // is switched off within the second by SprocketEditor.ParkBroken, which is what
                     // stops the run and marks it. The same road a step that cannot act at all
                     // already travels.
+                    // Looked at the moment it is reached, so what has already arrived passes in the same
+                    // tick, and from then on when the hold's pace brings it round.
                     if (Missing() || !Finished(world))
                     {
+                        if (!_holding)
+                        {
+                            _hold = new Hold(_tick, Expected());
+                            _holding = true;
+                        }
+
                         // A block that has been sent the other way by something else is not worth
                         // waiting for: nothing is heading towards the state this step wants, and
                         // no amount of waiting changes that. The run ends where it stands.
@@ -561,14 +723,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     }
 
                     _outstanding.Clear();
+                    _holding = false;
                     IsWaiting = false;
                     Step();
                     continue;
                 }
 
-                if (_waitTicks > 0)
+                if (_waitUntil < 0)
+                    _waitUntil = _tick + _waitTicks;
+
+                if (_tick < _waitUntil)
                 {
-                    _waitTicks--;
                     IsWaiting = true;
                     return;
                 }
@@ -611,6 +776,34 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             return false;
+        }
+
+        /// <summary>How many ticks the slowest of what is being waited on should take, or unknown if any cannot say.</summary>
+        int Expected()
+        {
+            var longest = 0;
+            for (var i = 0; i < _outstanding.Count; i++)
+            {
+                if (!_outstanding[i].HasAction)
+                    continue;
+
+                var waiting = ActedOn(_outstanding[i].Targets);
+                for (var q = 0; q < waiting.Count; q++)
+                {
+                    var entity = _bindings.Entity(waiting[q]);
+                    if (entity == null)
+                        continue;
+
+                    var expected = entity.Expected(_outstanding[i].ActionId);
+                    if (expected < 0)
+                        return GridEntity.Unestimated;
+
+                    if (expected > longest)
+                        longest = expected;
+                }
+            }
+
+            return longest;
         }
 
         /// <summary>Whether everything started since the last await has got where it was going.</summary>
@@ -723,7 +916,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             public int All = -1;
 
-            public int Counted;
+            /// <summary>The tick a timer last fell due, or negative before it has been sampled.</summary>
+            public int Due = -1;
 
             /// <summary>
             /// What this one trigger's signal read at the last sample.
@@ -875,14 +1069,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return fired;
         }
 
+        /// <remarks>
+        /// Measured in the game's ticks rather than in samples, because samples are only taken when
+        /// this sequence's place comes round. The next time falls due from when the last one did,
+        /// not from when it was noticed, so a timer noticed a few ticks late runs late by the same
+        /// few ticks every time rather than drifting further each time.
+        /// </remarks>
         bool SampleEvery(EveryTrigger every, Watch watch)
         {
             var interval = every.IntervalTicks < 1 ? 1 : every.IntervalTicks;
-            watch.Counted++;
-            if (watch.Counted < interval)
+            if (watch.Due < 0 || _tick < watch.Due)
+            {
+                watch.Due = _tick;
+                return false;
+            }
+
+            if (_tick - watch.Due < interval)
                 return false;
 
-            watch.Counted = 0;
+            // A world that was paused, or a sequence that was not ticked, starts counting again
+            // rather than firing once for every period it missed.
+            watch.Due = _tick - watch.Due < 2 * interval ? watch.Due + interval : _tick;
             return true;
         }
     }

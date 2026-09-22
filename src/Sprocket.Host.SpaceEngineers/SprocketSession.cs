@@ -4,7 +4,7 @@ using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Terminal;
 using Sprocket.Host.SpaceEngineers.World;
-
+using Sprocket.Host.SpaceEngineers.Runtime;
 
 namespace Sprocket.Host.SpaceEngineers
 {
@@ -21,6 +21,9 @@ namespace Sprocket.Host.SpaceEngineers
         static SprocketSession _current;
 
         readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();
+
+        /// <summary>The world's turn, shared by every Sprocket in it, so their waits spread across the ticks.</summary>
+        readonly Rota _rota = new Rota();
 
         SprocketScreen _screen;
         long _open;
@@ -155,7 +158,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_units.TryGetValue(block.EntityId, out unit))
                 return unit;
 
-            unit = new SprocketUnit(block, Asked);
+            unit = new SprocketUnit(block, Asked, _rota);
             _units.Add(block.EntityId, unit);
             return unit;
         }
@@ -209,6 +212,10 @@ namespace Sprocket.Host.SpaceEngineers
             int frame = MyAPIGateway.Session.GameplayFrameCounter;
             foreach (KeyValuePair<long, SprocketUnit> unit in _units)
                 unit.Value.Tick(frame);
+
+            // After every Sprocket has ticked, so each one's bindings are current when the rota calls
+            // its sequences.
+            _rota.Run(frame);
         }
 
         /// <summary>

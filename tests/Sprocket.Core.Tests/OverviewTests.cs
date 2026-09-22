@@ -116,10 +116,10 @@ public class OverviewTests
         // The door it closes has to be open, or closing it finishes in the tick it started and the
         // sequence is over before anybody could glance at it.
         Door(ship, 2).ForceOpen();
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
 
         Door(ship, 1).ForceOpen();
-        ship.Tick(2);
+        ship.Tick(Rota.Ten);
 
         var overview = new Overview();
         overview.Fill(ship.World, ship.Program, ship.Runner);

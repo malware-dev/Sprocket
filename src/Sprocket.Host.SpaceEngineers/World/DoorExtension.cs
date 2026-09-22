@@ -122,5 +122,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             return door != null
                 && (door.Status == DoorStatus.Opening || door.Status == DoorStatus.Closing);
         }
+
+        public int Expected(IMyTerminalBlock block, string actionId)
+        {
+            return GridEntity.Unestimated;
+        }
     }
 }

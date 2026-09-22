@@ -110,15 +110,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Engineers passes its own counter, a desktop host passes one it keeps, a
         /// test passes whatever it likes. Nothing in core counts time for itself.
         /// </remarks>
+        /// <summary>One frame of a screen somebody is looking at.</summary>
+        /// <remarks>
+        /// Only while a screen is open: everything here is about what a screen shows. What runs the
+        /// program, and what switches off a sequence that cannot work, is the runtime's and goes on
+        /// whether or not anybody looks.
+        /// </remarks>
         public void Tick(int tick)
         {
-            _runner.Tick(tick);
-
-            // Once a second, and whether or not anybody has a screen open, because a sequence that
-            // cannot work is not made safer by nobody looking at it.
-            if (_parked.Due(tick))
-                ParkBroken();
-
             if (_structureDirty)
             {
                 Rebuild();
@@ -166,51 +165,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         int _undoCommand;
         int _redoCommand;
 
-        /// <summary>
-        /// Switches off anything that cannot work.
-        /// </summary>
-        /// <remarks>
-        /// Sprocket switching off somebody's automation, which it does nowhere else, and the reason it
-        /// is allowed here is that there is nothing to switch off: the thing is already not running.
-        /// A sequence nothing can start never fires, and one whose blocks are gone can only get part
-        /// way through - which is worse than not starting, because it leaves a machine half-way.
-        /// <para>
-        /// It also removes a step. A sequence may only be edited while it is switched off, so finding
-        /// a broken one meant switching it off yourself before you could mend it - an errand on top of
-        /// a problem you did not ask for.
-        /// </para>
-        /// <para>
-        /// <b>Off, and never back on.</b> Mending it leaves it parked, and switching a sequence on is
-        /// somebody's decision every time - Sprocket starting a machine on its own judgement is the one
-        /// direction that can hurt. Leaving the editor with it off is where the offer to switch it on
-        /// belongs.
-        /// </para>
-        /// </remarks>
-        void ParkBroken()
-        {
-            var sequences = _program.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
-            {
-                Sequence sequence = sequences[i];
-                if (!sequence.Enabled)
-                    continue;
-
-                // Faults only. A sequence nothing starts yet is not broken, and parking it would make
-                // the step somebody is about to point at it fail for a second reason.
-                var fault = SequenceSummary.Fault(_world, _runner.Bindings, sequence,
-                    _runner.Get(sequence));
-
-                if (fault.Parks)
-                    sequence.Enabled = false;
-            }
-        }
-
         /// <summary>Ticks in a second, at the rate the game runs at.</summary>
         const int Second = 60;
-
-        /// <summary>A second behind the start, so the first tick looks rather than waiting.</summary>
-        /// <summary>Switching off what cannot work, which is worth doing whether or not anybody looks.</summary>
-        Interval _parked = new Interval(Second);
 
         /// <summary>Reading the words in the heading again, which nothing announces.</summary>
         Interval _worded = new Interval(Second);

@@ -9,6 +9,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         internal const string OnProperty = "on";
         internal const string WorkingProperty = "working";
 
+        /// <summary>What a block answers when it cannot say how long something will take.</summary>
+        public const int Unestimated = -1;
+
         readonly IMyTerminalBlock _block;
         readonly EntityKind _kind;
         readonly IBlockExtension _extension;
@@ -110,6 +113,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Nothing of Sprocket's own takes any, so values only ever reach the game's own actions -
         /// which is also the only place anything knows what to turn them into.
         /// </remarks>
+        /// <summary>How many ticks this block should take to finish what the action started, or <see cref="Unestimated" />.</summary>
+        public int Expected(string actionId)
+        {
+            return _extension == null ? Unestimated : _extension.Expected(_block, actionId);
+        }
+
         /// <summary>
         /// Why this block cannot reach <paramref name="stateId" />, or null while it might.
         /// </summary>

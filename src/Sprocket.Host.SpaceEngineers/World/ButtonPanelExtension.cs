@@ -165,5 +165,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
+
+        public int Expected(IMyTerminalBlock block, string actionId)
+        {
+            return GridEntity.Unestimated;
+        }
     }
 }

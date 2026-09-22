@@ -93,6 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             // Shown again, which is not the same as made again: this screen and its view are kept per
             // Sprocket and reopened. Whatever it was told while it was away, it was not listening.
             _view.Attach();
+            _unit.Showing = true;
 
             // A piston or rotor may have attached since this was last looked at, which changes which grids
             // are part of the construct without adding a block to any of them.
@@ -179,6 +180,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         {
             // Let go of core before anything else. This screen is going away and core's is not.
             _view.Release();
+            _unit.Showing = false;
 
             _unit.Persist();
 

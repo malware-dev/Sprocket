@@ -1,0 +1,192 @@
+using System.Collections.Generic;
+
+namespace Sprocket.Host.SpaceEngineers.Runtime
+{
+    /// <summary>
+    /// The world's timetable: everything the runtime looks at, and the tick each thing is looked at on.
+    /// </summary>
+    /// <remarks>
+    /// One for the whole world, shared by every Sprocket in it, and it does the calling: a tick visits
+    /// only what is due on it, so something with nothing going on costs nothing until its turn. Whatever
+    /// joins is given a place in the turn, handed out in order, and at a period of ten it is due on the
+    /// ticks that match its place - a tenth of everything on each tick rather than all of it on one.
+    /// <para>
+    /// The three periods are the three the game wakes a mod at. The game spreads its own the same way,
+    /// by block; this is the same thing by the piece of work, whose pace changes as it goes.
+    /// </para>
+    /// <para>
+    /// Every tick number is walked, from the last one run up to the one being run, so a frame counter
+    /// that jumps leaves nothing behind: a list skipped would be a turn lost for all of it, and a
+    /// deadline on the skipped tick would never be met.
+    /// </para>
+    /// </remarks>
+    public sealed class Rota
+    {
+        /// <summary>Looked at on every tick.</summary>
+        public const int Each = 1;
+
+        /// <summary>Looked at once in ten ticks.</summary>
+        public const int Ten = 10;
+
+        /// <summary>Looked at once in a hundred ticks, which is also how many places there are.</summary>
+        public const int Hundred = 100;
+
+        readonly List<Shift> _each = new List<Shift>();
+        readonly List<Shift>[] _tens = Lists(Ten);
+        readonly List<Shift>[] _hundreds = Lists(Hundred);
+
+        /// <summary>What falls due on the tick being run, gathered before any of it is done.</summary>
+        /// <remarks>
+        /// Doing a shift can move others - a sequence starting another one puts that one's work on
+        /// the rota - so the lists are never walked while anything is being done.
+        /// </remarks>
+        readonly List<Shift> _due = new List<Shift>();
+
+        int _next;
+        int _last;
+        bool _started;
+
+        /// <summary>A place in the turn for something new.</summary>
+        /// <remarks>
+        /// In order rather than by a hash of a name, so the places fill evenly however few there are.
+        /// </remarks>
+        public int Join()
+        {
+            var place = _next;
+            _next = (_next + 1) % Hundred;
+            return place;
+        }
+
+        /// <summary>How many shifts have been done, all told.</summary>
+        /// <remarks>Counted so what an idle world costs can be measured rather than guessed at.</remarks>
+        internal int Done { get; private set; }
+
+        /// <summary>How many shifts are on the rota.</summary>
+        public int Count
+        {
+            get
+            {
+                var count = _each.Count;
+                for (var i = 0; i < Ten; i++)
+                    count += _tens[i].Count;
+                for (var i = 0; i < Hundred; i++)
+                    count += _hundreds[i].Count;
+                return count;
+            }
+        }
+
+        /// <summary>Looks at a shift once every period, on its place, until told otherwise.</summary>
+        public void Every(Shift shift, int period)
+        {
+            var list = period <= Each ? _each
+                : period <= Ten ? _tens[shift.Place % Ten]
+                : _hundreds[shift.Place % Hundred];
+
+            if (shift.List == list && !shift.Once)
+                return;
+
+            Leave(shift);
+            shift.Once = false;
+            Put(shift, list);
+        }
+
+        /// <summary>Looks at a shift once, on the given tick, or on the next one run if that has passed.</summary>
+        public void At(Shift shift, int tick)
+        {
+            Leave(shift);
+            shift.Once = true;
+            shift.At = tick;
+
+            // A deadline sits in the list for its own tick's place, so it is visited once a hundred
+            // ticks at most and done on the tick itself.
+            var soon = !_started || tick <= _last + 1;
+            Put(shift, soon ? _each : _hundreds[Place(tick, Hundred)]);
+        }
+
+        /// <summary>Takes a shift off the rota.</summary>
+        public void Leave(Shift shift)
+        {
+            var list = shift.List;
+            if (list == null)
+                return;
+
+            var last = list.Count - 1;
+            var moved = list[last];
+            list[shift.Index] = moved;
+            moved.Index = shift.Index;
+            list.RemoveAt(last);
+
+            shift.List = null;
+        }
+
+        /// <summary>Does everything due from the tick after the last one run up to this one.</summary>
+        public void Run(int tick)
+        {
+            // A world begun, a counter that went backwards, or a gap longer than a whole turn: a
+            // hundred ticks visit every list once, which is all a gap of any length can owe.
+            if (!_started || tick <= _last)
+                _last = tick - 1;
+            else if (tick - _last > Hundred)
+                _last = tick - Hundred;
+
+            _started = true;
+
+            while (_last < tick)
+            {
+                _last++;
+                Turn(_last);
+            }
+        }
+
+        /// <summary>Does what is due on one tick.</summary>
+        void Turn(int tick)
+        {
+            _due.Clear();
+            _due.AddRange(_each);
+            _due.AddRange(_tens[Place(tick, Ten)]);
+            _due.AddRange(_hundreds[Place(tick, Hundred)]);
+
+            for (var i = 0; i < _due.Count; i++)
+            {
+                var shift = _due[i];
+                if (shift.List == null || shift.Ran == tick)
+                    continue;
+
+                if (shift.Once)
+                {
+                    if (shift.At > tick)
+                        continue;
+
+                    Leave(shift);
+                }
+
+                shift.Ran = tick;
+                Done++;
+                shift.Due(tick);
+            }
+
+            _due.Clear();
+        }
+
+        void Put(Shift shift, List<Shift> list)
+        {
+            shift.List = list;
+            shift.Index = list.Count;
+            list.Add(shift);
+        }
+
+        static int Place(int tick, int period)
+        {
+            var at = tick % period;
+            return at < 0 ? at + period : at;
+        }
+
+        static List<Shift>[] Lists(int count)
+        {
+            var lists = new List<Shift>[count];
+            for (var i = 0; i < count; i++)
+                lists[i] = new List<Shift>();
+            return lists;
+        }
+    }
+}

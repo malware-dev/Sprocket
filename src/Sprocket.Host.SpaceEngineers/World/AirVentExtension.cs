@@ -253,5 +253,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             return vent != null
                 && (vent.Status == VentStatus.Pressurizing || vent.Status == VentStatus.Depressurizing);
         }
+
+        public int Expected(IMyTerminalBlock block, string actionId)
+        {
+            return GridEntity.Unestimated;
+        }
     }
 }

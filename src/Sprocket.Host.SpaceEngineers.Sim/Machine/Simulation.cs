@@ -33,6 +33,9 @@ sealed class Simulation
     readonly Store _store;
     readonly SprocketUnit _unit;
 
+    /// <summary>The world's rota, run after the unit on every frame the way the session runs it.</summary>
+    readonly Rota _rota = new Rota();
+
     /// <summary>How much the mod had said when this began.</summary>
     readonly int _saidBefore;
 
@@ -98,7 +101,10 @@ sealed class Simulation
 
         // Said outright rather than read: the harness has no mod storage. A test that wants the
         // developer tools sets Editor.DeveloperMode on the way past.
-        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false));
+        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false), _rota);
+
+        // The harness is always drawing the screen, which is what the unit ticks its editor for.
+        _unit.Showing = true;
 
         // A press invokes what the slot holds, and what that means is the unit's to say - which is
         // the game's arrangement exactly: the slot carries a key and Sprocket resolves it.
@@ -163,6 +169,9 @@ sealed class Simulation
 
         _rig.Tick();
         _unit.Tick(_frame);
+
+        // After the unit, as the session does it, so its bindings are current when its sequences run.
+        _rota.Run(_frame);
 
         if (_frame % SaveEvery == 0)
             Save();

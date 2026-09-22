@@ -84,5 +84,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// the ship and the light stops meaning anything. Only a thing in motion is busy.
         /// </remarks>
         bool IsBusy(IMyTerminalBlock block);
+
+        /// <summary>
+        /// How many ticks the block should take to finish what this action started, or
+        /// <see cref="GridEntity.Unestimated" /> where it cannot say.
+        /// </summary>
+        /// <remarks>
+        /// Decides how often a wait for it is looked at, never whether it has arrived: a wrong answer
+        /// costs a few ticks either way and nothing else.
+        /// </remarks>
+        int Expected(IMyTerminalBlock block, string actionId);
     }
 }

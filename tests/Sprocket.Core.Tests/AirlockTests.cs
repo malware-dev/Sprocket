@@ -206,8 +206,10 @@ public class AirlockTests
         a.Ship.Grind(a.Inner);
         a.Tick(300);
 
+        // A block that is gone is a fault, and a sequence at fault is switched off, which is what
+        // ends the run: holding for it and then parking, never walking on.
         Assert.DoesNotContain("Outer Door:open", a.Log);
-        Assert.True(a.State.IsWaiting, "it stopped waiting for a door that is not there");
+        Assert.False(a.LetMeOut.Enabled, "a sequence waiting on a door that is not there was left on");
     }
 
     /// <summary>
@@ -310,8 +312,9 @@ public class AirlockTests
         Then(sequence, BlockKinds.SwitchOn, a.Ref(a.Seen(beacon)));
         Then(sequence, "close", a.Ref(a.Seen(a.Inner)));
 
-        a.Tick();
-        Assert.Equal(["Beacon:on", "Inner Door:close"], a.Log);
+        // Fired on the first turn it is sampled, and both land in the tick it fired.
+        a.Tick(2 * Rota.Ten);
+        Assert.Equal(["Beacon:on", "Inner Door:close"], a.Log.Take(2));
     }
 
     [Fact]
@@ -383,10 +386,10 @@ public class AirlockTests
         // Both off to begin with, so switching one on is an edge either trigger could miss.
         a.World.Invoke(a.Seen(one), BlockKinds.SwitchOff);
         a.World.Invoke(a.Seen(other), BlockKinds.SwitchOff);
-        a.Tick(3);
+        a.Tick(Rota.Ten);
 
         a.World.Invoke(a.Seen(one), BlockKinds.SwitchOn);
-        a.Tick(2);
+        a.Tick(Rota.Ten);
         Assert.Equal(1, a.State.FiredCount);
 
         // Let the cycle finish, then the other one, which has its own edge to detect.
@@ -394,7 +397,7 @@ public class AirlockTests
         Assert.False(a.State.IsRunning);
 
         a.World.Invoke(a.Seen(other), BlockKinds.SwitchOn);
-        a.Tick(2);
+        a.Tick(Rota.Ten);
         Assert.Equal(2, a.State.FiredCount);
     }
 
@@ -516,10 +519,10 @@ public class AirlockTests
 
         Assert.Equal(DoorStatus.Open, a.Inner.Status);
 
-        // And the sequence is stuck on the await, waiting for a door that can no longer move -
-        // which is the right failure, because the alternative is opening the outer door onto it.
+        // And the outer door is never opened onto it. A step that does not wait is a fault, so the
+        // sequence is switched off rather than left to carry on.
         Assert.Equal(DoorStatus.Closed, a.Outer.Status);
-        Assert.True(a.State.IsRunning || a.Runner.Get(letMeOut)!.IsWaiting);
+        Assert.False(letMeOut.Enabled, "a sequence with a step that does not wait was left on");
     }
 
     /// <summary>
@@ -587,7 +590,7 @@ public class AirlockTests
 
         var opener = a.Automation.AddSequence(new EveryTrigger(1));
         Then(opener, "open", a.Ref(a.Seen(a.Outer)));
-        a.Tick(60);
+        a.Tick(60 + 2 * Rota.Ten);
 
         Assert.Equal(DoorStatus.Open, a.Outer.Status);
     }

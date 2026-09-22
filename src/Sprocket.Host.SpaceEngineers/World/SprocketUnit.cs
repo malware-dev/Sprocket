@@ -78,11 +78,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             return storage.TryGetValue(ProgramKey, out text) && !string.IsNullOrEmpty(text);
         }
 
-        public SprocketUnit(IMyTerminalBlock block, Settings settings)
+        /// <remarks>
+        /// <paramref name="rota" /> is the world's, shared by every Sprocket in it. See <see cref="Rota" />.
+        /// </remarks>
+        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota)
         {
             _block = block;
             _world = new GridWorld(block);
-            _runner = new AutomationRunner(_program, _world);
+            _runner = new AutomationRunner(_program, _world, rota);
 
             // Before the editor, which builds its first screen out of whatever the program already says.
             Load();
@@ -1144,8 +1147,18 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Reach();
             }
 
-            _editor.Tick(frame);
+            _runner.Tick(frame);
+
+            if (Showing)
+                _editor.Tick(frame);
         }
+
+        /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
+        /// <remarks>
+        /// Set by the screen as it opens and closes. The editor has nothing to do while nobody is
+        /// looking, so it is ticked only while this holds; the program runs either way.
+        /// </remarks>
+        public bool Showing { get; set; }
 
         /// <summary>
         /// Reads the program back out of the block.
@@ -1233,6 +1246,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Dispose()
         {
             _block.IsWorkingChanged -= Working;
+            _runner.Retire();
             _world.Dispose();
         }
     }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -33,12 +34,38 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Automation _automation;
         readonly GridWorld _world;
         readonly Bindings _bindings = new Bindings();
+        readonly Rota _rota;
 
-        public AutomationRunner(Automation automation, GridWorld world)
+        /// <summary>Switches off what cannot work. See <see cref="ParkBroken" />.</summary>
+        readonly Shift _parking;
+
+        /// <summary>Whether this runner's rota is its own to run, rather than the world's.</summary>
+        readonly bool _runsRota;
+
+        /// <summary>Whether the program has gained or lost a sequence, or one of a system, since the runners were matched to it.</summary>
+        bool _reshaped = true;
+
+        /// <summary>
+        /// A runner with a rota of its own, which it runs itself, for a program that shares its world
+        /// with nothing else.
+        /// </summary>
+        public AutomationRunner(Automation automation, GridWorld world) : this(automation, world, new Rota())
+        {
+            _runsRota = true;
+        }
+
+        /// <summary>A runner on the world's rota, shared by every runner in it. See <see cref="Rota" />.</summary>
+        public AutomationRunner(Automation automation, GridWorld world, Rota rota)
         {
             _automation = automation;
             _world = world;
+            _rota = rota;
             Live = true;
+
+            _automation.Reshaped += delegate { _reshaped = true; };
+
+            _parking = new Shift(_rota.Join(), ParkBroken);
+            _rota.Every(_parking, Rota.Hundred);
         }
 
         /// <summary>
@@ -92,19 +119,43 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public void Tick(int tick)
         {
             CurrentTick = tick;
-            Reconcile();
+
+            if (_reshaped)
+            {
+                _reshaped = false;
+                Reconcile();
+            }
 
             // Two integer comparisons on an ordinary tick. See Bindings.Refresh.
             _bindings.Refresh(_world, _automation);
 
-
-            for (var i = 0; i < _live.Count; i++)
-            {
-                SequenceRunner runner;
-                if (_runners.TryGetValue(_live[i], out runner))
-                    runner.Tick(_world, _bindings, CurrentTick, Live);
-            }
+            // The sequences are not visited here: each is on the rota for what it is doing, and the
+            // rota calls what is due. A world's rota is run by the session once every Sprocket in it
+            // has ticked, so every runner's bindings are current when its sequences are called.
+            if (_runsRota)
+                _rota.Run(tick);
         }
+
+        /// <summary>Takes everything this program put on the rota off it, when its Sprocket goes away.</summary>
+        public void Retire()
+        {
+            _rota.Leave(_parking);
+            foreach (var runner in _runners.Values)
+                runner.Retire();
+        }
+
+        /// <summary>How many times the runners have been matched to the program.</summary>
+        /// <remarks>Counted so it can be shown that an ordinary tick matches nothing.</remarks>
+        internal int Reconciled { get; private set; }
+
+        /// <summary>The world this program runs in.</summary>
+        internal GridWorld World => _world;
+
+        /// <summary>What the program's declarations point at, as last resolved on a tick.</summary>
+        internal Bindings Current => _bindings;
+
+        /// <summary>The rota this program's sequences are on.</summary>
+        internal Rota Rota => _rota;
 
         /// <summary>
         /// Live state for a sequence on the first of its system, or null if never ticked.
@@ -244,11 +295,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Keeps the set of runners matching the sequences and the ones of each system.
         /// </summary>
         /// <remarks>
-        /// The live list is rebuilt here rather than walked from the systems on every tick,
-        /// because ticking is the hot path and this only has to notice a change.
+        /// Done on the tick after the program says it gained or lost something, and on no other: the
+        /// program is what changes, so it is what says so. See <see cref="Automation.Reshaped" />.
         /// </remarks>
         void Reconcile()
         {
+            Reconciled++;
             _live.Clear();
 
             var systems = _automation.Systems;
@@ -268,7 +320,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         if (_runners.ContainsKey(key))
                             continue;
 
-                        var runner = new SequenceRunner(sequences[q], instances[n]);
+                        var runner = new SequenceRunner(sequences[q], instances[n], this);
 
                         // What a run step reaches: the same system, the same one of it, by number.
                         var owner = system;
@@ -292,7 +344,51 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             for (var i = 0; i < _stale.Count; i++)
+            {
+                _runners[_stale[i]].Retire();
                 _runners.Remove(_stale[i]);
+            }
+        }
+
+        /// <summary>
+        /// Switches off anything that cannot work.
+        /// </summary>
+        /// <remarks>
+        /// On the world's rota every hundred ticks, and whether or not anybody has a screen open,
+        /// because a sequence that cannot work is not made safer by nobody looking at it.
+        /// <para>
+        /// Sprocket switching off somebody's automation, which it does nowhere else, and the reason it
+        /// is allowed here is that there is nothing to switch off: the thing is already not running.
+        /// A sequence nothing can start never fires, and one whose blocks are gone can only get part
+        /// way through - which is worse than not starting, because it leaves a machine half-way.
+        /// </para>
+        /// <para>
+        /// It also saves a step. A sequence may only be edited while it is switched off, so a broken
+        /// one is ready to mend the moment somebody finds it.
+        /// </para>
+        /// <para>
+        /// <b>Off, and never back on.</b> Mending it leaves it parked, and switching a sequence on is
+        /// somebody's decision every time - Sprocket starting a machine on its own judgement is the one
+        /// direction that can hurt. Leaving the editor with it off is where the offer to switch it on
+        /// belongs.
+        /// </para>
+        /// </remarks>
+        void ParkBroken(int tick)
+        {
+            var sequences = _automation.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                Sequence sequence = sequences[i];
+                if (!sequence.Enabled)
+                    continue;
+
+                // Faults only. A sequence nothing starts yet is not broken, and parking it would make
+                // the step somebody is about to point at it fail for a second reason.
+                var fault = SequenceSummary.Fault(_world, Bindings, sequence, Get(sequence));
+
+                if (fault.Parks)
+                    sequence.Enabled = false;
+            }
         }
     }
 }

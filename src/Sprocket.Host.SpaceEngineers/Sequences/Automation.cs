@@ -158,6 +158,23 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public int Wiring { get; private set; }
 
+        /// <summary>
+        /// Raised whenever a sequence, or one of a system, comes or goes.
+        /// </summary>
+        /// <remarks>
+        /// What the runtime keeps one runner for, so it is told rather than looking: whatever changed
+        /// the program - an edit, a step back, a load, and in time a message from somebody editing on
+        /// another machine - changed it here.
+        /// </remarks>
+        public event Action Reshaped;
+
+        void Reshape()
+        {
+            var reshaped = Reshaped;
+            if (reshaped != null)
+                reshaped();
+        }
+
         /// <summary>Says that something moved and whatever arranges triggers should look again.</summary>
         public void Rewire()
         {
@@ -253,6 +270,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public AutomationSystem AddSystem()
         {
             var system = new AutomationSystem(_nextSystemId++, Guid.NewGuid());
+            system.Reshaped = Reshape;
             system.Name = FreeName();
             system.AddInstance();
             _systems.Add(system);
@@ -295,6 +313,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public AutomationSystem Restore(Guid identity, string space, string name)
         {
             var system = new AutomationSystem(_nextSystemId++, identity);
+            system.Reshaped = Reshape;
             system.Namespace = space ?? "";
             system.Name = name ?? "";
             _systems.Add(system);

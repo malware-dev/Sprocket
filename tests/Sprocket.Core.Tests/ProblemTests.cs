@@ -118,6 +118,7 @@ public class ProblemTests
         Assert.True(warn.Enabled);
 
         ship.Editor.PressRow(1);
+        ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
         var row = ship.Editor.Rows()[1];
@@ -127,6 +128,7 @@ public class ProblemTests
 
         // And the sequence's own screen says it too, quietly.
         ship.Editor.PressRow(1);
+        ship.Runner.Tick(1800);
         ship.Editor.Tick(1800);
 
         var sentence = ship.Editor.Sentence();
@@ -196,6 +198,7 @@ public class ProblemTests
         ship.Rig.Grind(2);
 
         ship.Editor.PressRow(1);
+        ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
         var rows = ship.Editor.Rows();
@@ -219,6 +222,7 @@ public class ProblemTests
         ship.Rig.CannotStart(ship.Sequence);
 
         ship.Editor.PressRow(1);
+        ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
         Assert.Equal("Nothing can start this.", ship.Editor.Triggers()[0].Problem);
@@ -322,6 +326,7 @@ public class ProblemTests
         ship.Rig.CannotStart(ship.Sequence);
 
         ship.Editor.PressRow(1);
+        ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
         Assert.Equal("Nothing can start this.", ship.Editor.Triggers()[0].Problem);
 
@@ -355,6 +360,7 @@ public class ProblemTests
         // Into the sequence, which is where the step is built for the screen.
         ship.Editor.PressRow(1);
         ship.Editor.PressRow(0);
+        ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
         Assert.IsType<SequencePage>(ship.Editor.Current);

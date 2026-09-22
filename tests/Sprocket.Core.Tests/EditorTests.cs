@@ -33,7 +33,8 @@ public class EditorTests
             for (var i = 0; i < ticks; i++)
             {
                 Rig.Tick();
-                Editor.Tick(++_frame);
+                Runner.Tick(++_frame);
+                Editor.Tick(_frame);
             }
         }
 
@@ -1205,7 +1206,7 @@ public class EditorTests
             sequence.Enabled = true;
 
         Door(ship, "Inner Door").ForceOpen();
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
 
         Assert.True(editor.Triggers()[0].IsLiveNow);
         Assert.False(editor.Triggers()[1].IsLiveNow);
@@ -1245,13 +1246,13 @@ public class EditorTests
         editor.PressPrimary();
         editor.SwitchOn();
 
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
         Door(ship, "Inner Door").ForceOpen();
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
         Assert.Empty(ship.Log);
 
         Door(ship, "Outer Door").ForceOpen();
-        ship.Tick(3);
+        ship.Tick(Rota.Ten);
         Assert.Contains("Airlock Light:on", ship.Log);
     }
 
