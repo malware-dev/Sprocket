@@ -22,8 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
     /// <b>Nothing already on screen is allowed to move.</b> Controls that come and go keep their place
     /// whether or not they are showing, the heading turns into its own edit box rather than summoning one,
     /// and a question opens directly beneath whatever was pressed so that everything above the press stays
-    /// exactly where the eye left it. A screen that rearranges itself as you use it makes you re-find your
-    /// place every time you act, and undoes the one thing a layout is for.
+    /// exactly where the eye left it. A screen that rearranges itself in use costs its reader that place
+    /// every time they act, and undoes the one thing a layout is for.
     /// </para>
     /// <para>
     /// Shared source rather than a library, because the mod compiles loose files and cannot load one. The
@@ -42,10 +42,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         readonly Dock _root = new Dock();
         readonly Bar _headerBar = new Bar();
-        // The chevron alone. It carried the word BACK beside it for a while, which cost most of the room
-        // between the left edge and the heading to say what the arrow had already said. What replaces the
-        // word is the hover tip, which is where a control that cannot speak for itself is supposed to say
-        // what it is - so nothing is actually lost except the space.
+        // The chevron alone. A word beside it would cost most of the room between the left edge and the
+        // heading to say what the arrow already says. The hover tip carries it instead, which is where a
+        // control that cannot speak for itself says what it is.
         readonly Glyph _back = Widgets.Symbol(Symbols.Left, Palette.Muted);
         readonly HeadingRow _title = new HeadingRow();
 
@@ -188,8 +187,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // horizontal stack hands each child its own width, which is exactly the hug wanted here.
             // Lit on every screen, the root included, where it leaves the editor rather than
             // retreating a page. Not two controls: a chevron means "leave what I am looking at", and on
-            // the front door what you are looking at is the editor. That is the rule Escape has always
-            // followed here, and nobody has ever found Escape confusing.
+            // the front door what is being looked at is the editor. That is the rule Escape follows
+            // here, and nobody has ever found Escape confusing.
             //
             // Set once. Neither of these has ever depended on anything, and writing them on every frame
             // was the same reading habit this whole arrangement is here to break.
@@ -210,8 +209,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // The switch and the refresh sit together on the right, in that order, so the switch stays
             // where it has always been and the refresh reads as furniture rather than as part of it.
             // The way back sits with the rest of the furniture rather than in a row of its own: it
-            // is what you do to the screen you are on, like Back and the switch, and a strip holding
-            // nothing but two arrows was most of a line spent on them.
+            // is done to the screen it sits on, like Back and the switch, and a strip holding
+            // nothing but two arrows is most of a line spent on them.
             //
             // Left of the switch, and both hold their place on a screen that has a history at all, so
             // the switch cannot be moved sideways by somebody making their first edit.
@@ -382,7 +381,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// already has somewhere to live: the problem line on a sequence.
         /// </para>
         /// <para>
-        /// Escape is deliberately not gated. Something has to get you out of a modal state or it is a trap,
+        /// Escape is deliberately not gated. Something has to lead out of a modal state or it is a trap,
         /// and Escape already means "abandon this edit" rather than "leave the screen" while a box is up -
         /// so the way out exists, costs nothing, and is the one everybody already reaches for.
         /// </para>
@@ -519,9 +518,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         /// <remarks>
         /// Behind the same gate as <see cref="Wire" />, and counted with it, because both are the same
-        /// act: taking what core says and putting it on the controls. It used to sit above the gate,
-        /// where it wrote a heading's four values and made a fresh capitalised string on every frame -
-        /// and the count said zero, which is the way an instrument placed to flatter always reads.
+        /// act: taking what core says and putting it on the controls. Above the gate it would write a
+        /// heading's four values and make a fresh capitalised string on every frame, where the idle
+        /// count is placed to flatter and reads zero.
         /// </remarks>
         void Dress(EditorScreen screen)
         {
@@ -662,7 +661,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </para>
         /// <para>
         /// The width here is 1.0 rather than the terminal's 1.0157. That overhang is under a percent
-        /// either side and exists because the game's screen background has soft edges to hide; ours has
+        /// either side and exists because the game's screen background has soft edges to hide; Sprocket's has
         /// hard ones, and <see cref="IGraphics.Size" /> is the area the seam calls drawable.
         /// </para>
         /// </remarks>
@@ -897,7 +896,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         /// <remarks>
         /// Asked for afresh on every keystroke rather than on finishing, because a search that only
-        /// narrowed when you stopped typing would feel broken. The box is asked for its own text rather
+        /// narrowed when the typing stopped would feel broken. The box is asked for its own text rather
         /// than the text being captured, so what is sent is always what is in it.
         /// </remarks>
         public void Typed()

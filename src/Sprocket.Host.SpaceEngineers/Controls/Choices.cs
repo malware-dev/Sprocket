@@ -29,12 +29,10 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         /// <summary>How many words still read as a row rather than as a list to search.</summary>
         const int Few = 3;
 
-        readonly ElementCollection _children;
         readonly Wrap _row = new Wrap();
         readonly Stack _list;
         readonly Bar _closed = new Bar();
         readonly Label _chosen;
-        readonly Glyph _mark;
         readonly List<Label> _words = new List<Label>();
         readonly List<Label> _lines = new List<Label>();
         readonly float _scale;
@@ -45,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         public Choices(float scale)
         {
             _scale = scale;
-            _children = new ElementCollection(this);
+            var children = new ElementCollection(this);
 
             _row.ItemSpacing = Space.Row;
             _row.LineSpacing = Space.Row;
@@ -53,11 +51,11 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             _chosen = Widgets.Label("", Palette.Ink, scale);
             _chosen.Wraps = false;
 
-            _mark = Widgets.Centred(Symbols.Down, Palette.Faint);
+            var mark = Widgets.Centred(Symbols.Down, Palette.Faint);
 
             _closed.Spacing = Space.Item;
             _closed.Fill = _chosen;
-            _closed.Right = _mark;
+            _closed.Right = mark;
             _closed.Background = Palette.ControlHot;
             _closed.Highlight = Palette.Panel;
             _closed.HighlightEdge = Palette.Muted;
@@ -70,8 +68,8 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             _list.Edge = Palette.Line;
             _list.EdgeThickness = Space.Hair;
 
-            _children.Add(_row);
-            _children.Add(_closed);
+            children.Add(_row);
+            children.Add(_closed);
         }
 
         /// <summary>

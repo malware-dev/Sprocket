@@ -121,7 +121,7 @@ namespace Sprocket.Sim.Shell
             _surface.Frame += OnFrame;
             _surface.MouseMove += OnMouseMove;
             _surface.MouseDown += OnMouseDown;
-            _surface.MouseWheel += delegate(object sender, MouseWheelEventArgs e)
+            _surface.MouseWheel += delegate(object _, MouseWheelEventArgs e)
             {
                 if (!_showProbe)
                 {

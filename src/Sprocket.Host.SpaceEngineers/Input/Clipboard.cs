@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Input
         /// Copying on one screen and pasting on another is the whole of what a clipboard is for, so this
         /// has to outlive any one of them. An instance owned by a screen would be a different feature.
         /// </remarks>
-        private static string _value = string.Empty;
+        static string _value = string.Empty;
 
         public static string Get()
         {

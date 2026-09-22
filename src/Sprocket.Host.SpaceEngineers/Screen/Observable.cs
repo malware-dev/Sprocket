@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
     /// </summary>
     /// <remarks>
     /// Uses <see cref="INotifyPropertyChanged"/> deliberately rather than an interface
-    /// of our own. Space Engineers whitelists it, and every XAML-based target binds to
+    /// of Sprocket's own. Space Engineers whitelists it, and every XAML-based target binds to
     /// it for nothing - a bespoke equivalent would buy purity and cost a translation
     /// layer in every such target.
     ///

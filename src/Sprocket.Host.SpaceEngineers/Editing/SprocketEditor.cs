@@ -1145,11 +1145,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _actionBar.Clear();
 
             // Empty for everybody who is here to play. A permanent strip of tabs along the bottom is a
-            // thing to learn before you have done anything, and the ones it used to hold were only ever
-            // navigation - which the screens themselves can offer, where they mean something.
+            // thing to learn before anything has been done, and navigation is what the screens
+            // themselves offer, where it means something.
             //
             // The listing is the exception that proves it: a way to look at something, reachable from
-            // wherever you happen to be, belonging to the screen rather than to what is on it.
+            // anywhere, belonging to the screen rather than to what is on it.
             if (DeveloperMode)
                 _actionBar.Add(new ChoiceEntry(ScriptPage.Called, Current is ScriptPage,
                     Register(Cmd.ShowScript, ShowScript)));
@@ -1211,7 +1211,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </summary>
         /// <remarks>
         /// At the top of the system, in the same place and the same shape as the construct's own
-        /// "new system", because it is the same question either way: what would you like to add here.
+        /// "new system", because it is the same question either way: what to add here.
         /// <para>
         /// The catalogue lives here rather than on the page, so a third way to start something is one
         /// line in one place.
@@ -1702,7 +1702,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <remarks>
         /// Straight to the question it was made with rather than to the top of the wizard. A trigger
         /// that listens for a moment stays one: what somebody came to change is which block, or which
-        /// moment of it. Turning a repeat into a moment is deleting it and making the one you meant.
+        /// moment of it. Turning a repeat into a moment is deleting it and making the one that was meant.
         /// <para>
         /// Everything the trigger is for is carried over, because this question was only ever about
         /// what starts it - the sequence it runs, whether it stops that sequence instead, and
@@ -1850,8 +1850,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// again, and a sequence is work.
         /// <para>
         /// The safe answer is listed first, so the reflex press lands on it, and it is spelt out
-        /// rather than left to back. Back does mean keep - it always means return to where you came
-        /// from - but a screen whose only row is the destructive one is a screen where a stray press
+        /// rather than left to back. Back does mean keep - it always means return to where somebody
+        /// came from - but a screen whose only row is the destructive one is a screen where a stray press
         /// destroys something.
         /// </para>
         /// <para>

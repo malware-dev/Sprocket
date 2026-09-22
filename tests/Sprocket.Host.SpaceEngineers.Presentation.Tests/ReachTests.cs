@@ -200,7 +200,7 @@ public class ReachTests
         // Every screen, and every thing that hangs over one. A sweep that only ever walked the
         // ordinary screens said nothing about the popups, and the banner's whole strip answered a
         // press and could not be lit for as long as it existed.
-        AssertEverythingLights("the construct", screen => { });
+        AssertEverythingLights("the construct", _ => { });
 
         AssertEverythingLights("the name box open", screen => screen.Do("60", "130"));
 

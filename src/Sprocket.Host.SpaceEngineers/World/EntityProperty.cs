@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     ///
     /// Declared rather than implied. A set of readings that existed only in whatever ids a kind's
     /// events and states happened to mention could not be shown to anybody, and showing what a thing
-    /// can tell you about itself is most of what a diagnosis screen is.
+    /// can say about itself is most of what a diagnosis screen is.
     /// </remarks>
     public sealed class EntityProperty
     {

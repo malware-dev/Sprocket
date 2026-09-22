@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The file, in both stores, and the one section inside it.
         /// </summary>
         /// <remarks>
-        /// Global storage is shared with every other mod, so the name has to be ours.
+        /// Global storage is shared with every other mod, so the name has to be Sprocket's.
         /// </remarks>
         const string File = "Sprocket.ini";
 

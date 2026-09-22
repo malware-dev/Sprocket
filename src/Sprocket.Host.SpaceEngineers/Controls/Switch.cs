@@ -23,7 +23,6 @@ namespace Sprocket.Host.SpaceEngineers.Controls
     /// </remarks>
     public class Switch : Element
     {
-        readonly ElementCollection _children;
         readonly Label _on;
         readonly Label _off;
 
@@ -31,13 +30,13 @@ namespace Sprocket.Host.SpaceEngineers.Controls
 
         public Switch(float scale)
         {
-            _children = new ElementCollection(this);
+            var children = new ElementCollection(this);
 
             _on = Half(Widgets.Caps("on"), scale);
             _off = Half(Widgets.Caps("off"), scale);
 
-            _children.Add(_on);
-            _children.Add(_off);
+            children.Add(_on);
+            children.Add(_off);
 
             Edge = Palette.Dim;
             EdgeThickness = Space.Hair;
@@ -50,17 +49,6 @@ namespace Sprocket.Host.SpaceEngineers.Controls
 
         /// <summary>Which way it is set. The lit half and the bright word both follow this.</summary>
         public bool IsOn { get; private set; }
-
-        /// <summary>
-        /// Whether this governs everything below it as well as itself.
-        /// </summary>
-        /// <remarks>
-        /// Two of them in a column need telling apart, because stopping a whole airlock is not the same
-        /// as stopping one of its sequences. The indent already says which is nested; this says which is
-        /// the bigger act, as a brighter border - a solid fill is spoken for, since both halves are
-        /// drawn.
-        /// </remarks>
-        public bool Governs { get; private set; }
 
         /// <summary>
         /// What the two halves are called, where they are not the two this was built with.
@@ -104,7 +92,6 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             Collapsed = false;
             IsSet = false;
             IsOn = false;
-            Governs = false;
 
             _on.Color = Palette.Faint;
             _off.Color = Palette.Faint;
@@ -135,12 +122,11 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             Collapsed = false;
             IsSet = true;
             IsOn = isOn;
-            Governs = governs;
 
             // The game leaves both words nearly as bright as each other - its inactive font is
             // (220, 244, 252) against a white one - and lets the difference between the two fills carry
             // the state. That works at the size it draws a switch, which is a hundred and seventy pixels
-            // to a half; ours is a fifth of that, so the word has to help.
+            // to a half; this one is a fifth of that, so the word has to help.
             //
             // But only help. The unlit colour puts the off word at 2.2:1 against the dark half, which
             // makes a control whose whole promise is that both of its positions can be read into one that

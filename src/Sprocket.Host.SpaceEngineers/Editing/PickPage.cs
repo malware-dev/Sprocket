@@ -41,14 +41,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// this page.
         /// </summary>
         /// <remarks>
-        /// A command's number is twelve bits, and an entity's id is whatever the game hands us. Space
-        /// Engineers gives blocks ids in the quintillions, so casting one into that field clamped every
-        /// block to the same number and the second one registered threw. The invented ship numbers its
-        /// blocks from zero, which is why this only ever appeared against a real one.
+        /// A command's number is twelve bits, and an entity's id is whatever the game hands out. Space
+        /// Engineers gives blocks ids in the quintillions, so casting one into that field clamps every
+        /// block to the same number and the second one registered throws. The invented ship numbers its
+        /// blocks from zero, so only a real one shows it.
         ///
         /// A row's position would fit and would be wrong: narrowing the list, or a block being welded on,
-        /// would leave a held id pointing at a different block. That is the "which slot was it in" bug the
-        /// whole command redesign existed to kill, so the map is by identity and outlives any rebuild.
+        /// would leave a held id pointing at a different block. That is the "which slot was it in" mistake the
+        /// numbering exists to prevent, so the map is by identity and outlives any rebuild.
         /// </remarks>
         readonly Dictionary<long, int> _slots = new Dictionary<long, int>();
 
@@ -946,8 +946,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// shrink underneath them.
         ///
         /// Narrowing is the one thing that can hide a row, and a picked block is exempt: a
-        /// choice has to be undoable from where it was made, and a tick you cannot find is a
-        /// tick you cannot clear.
+        /// choice has to be undoable from where it was made, and a tick nobody can find is a
+        /// tick nobody can clear.
         ///
         /// Sorted by name, and not by the order the world hands them over. That order is whatever
         /// walking the grid produced, which means nothing to somebody looking for a door. Picking
@@ -1086,7 +1086,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Takes new search text, and ignores text that is not new.
         /// </summary>
         /// <remarks>
-        /// A target that puts our own value back into its search box, and reports that
+        /// A target that puts this page's own value back into its search box, and reports that
         /// as an edit, must not cost a rebuild. Some raise the change notification
         /// after the assignment has returned, so the target cannot always tell its own
         /// echo apart from a keystroke - and a rebuild would rewrite the box, which

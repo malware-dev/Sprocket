@@ -576,7 +576,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
                 row.Mark.Highlight = entry.IsHeading || !many ? Palette.None : Palette.PanelHot;
 
-                // A tick for things you collect.
+                // A tick where several may be chosen.
                 row.Mark.Many = many;
                 row.Mark.Chosen = entry.IsChosen;
                 row.Mark.Color = entry.IsChosen ? Palette.Live : Palette.Faint;

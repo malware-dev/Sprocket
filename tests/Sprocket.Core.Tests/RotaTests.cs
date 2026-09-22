@@ -86,6 +86,10 @@ public class RotaTests
         var done = new List<string>();
         Shift mover = null!;
         Shift leaver = null!;
+
+        // ReSharper disable AccessToModifiedClosure
+        // Both are named before they exist, because what is under test is a shift that re-lists itself
+        // and drops another one while the turn that called it is still running.
         mover = new Shift(0, _ =>
         {
             done.Add("mover");
@@ -93,6 +97,7 @@ public class RotaTests
             rota.Leave(leaver);
         });
         leaver = new Shift(0, _ => done.Add("leaver"));
+        // ReSharper restore AccessToModifiedClosure
         rota.Every(mover, Rota.Ten);
         rota.Every(leaver, Rota.Ten);
 

@@ -1,7 +1,6 @@
 using System.IO;
 using System.Text;
 using System.Xml;
-using System.Xml.Schema;
 using System.Xml.Serialization;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.World;
@@ -55,7 +54,7 @@ public class DefinitionTests
         var settings = new XmlReaderSettings();
         settings.ValidationType = ValidationType.Schema;
         settings.Schemas.Add(null, Path.Combine(Root(), "SprocketDefinitions.xsd"));
-        settings.ValidationEventHandler += (sender, e) => trouble += e.Message + " ";
+        settings.ValidationEventHandler += (_, e) => trouble += e.Message + " ";
 
         using (var reader = XmlReader.Create(new StringReader(Example), settings))
             while (reader.Read()) { }
@@ -139,11 +138,11 @@ public class DefinitionTests
         Assert.Equal("Red has to be between 0 and 255.", fields[0].Refuses("Red", "256"));
     }
 
-    static System.Collections.Generic.List<Field> Fields(int action)
+    static List<Field> Fields(int action)
     {
         Description said = Read(Example).Actions[action];
 
-        var fields = new System.Collections.Generic.List<Field>();
+        var fields = new List<Field>();
         said.Fields(fields);
 
         return fields;

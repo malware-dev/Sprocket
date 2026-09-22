@@ -43,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// Which way to put a switch, for <see cref="Means.Switch" />.
         /// </summary>
         /// <remarks>
-        /// The state to end up in, not "the other one from whatever you have", so two presses arriving
+        /// The state to end up in, not "the other one from whatever is there", so two presses arriving
         /// out of order still agree about where it ends up.
         /// </remarks>
         public bool ToggleTo;

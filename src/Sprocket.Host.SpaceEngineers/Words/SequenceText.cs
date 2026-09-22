@@ -111,9 +111,9 @@ namespace Sprocket.Host.SpaceEngineers.Words
 
         /// <summary>What to call a sequence nobody has renamed: "Sequence 3".</summary>
         /// <remarks>
-        /// Numbered, not described. Sprocket used to word a row out of what the sequence did, which
-        /// read well and made a row's identity change as somebody edited it. The game names a block
-        /// and lets you overtype it, and everybody already knows that.
+        /// Numbered, not described. A row worded out of what the sequence does reads well and makes
+        /// a row's identity change as somebody edits it. The game names a block and lets the name be
+        /// overtyped, and everybody already knows that.
         /// </remarks>
         public static string DefaultName(int number)
         {

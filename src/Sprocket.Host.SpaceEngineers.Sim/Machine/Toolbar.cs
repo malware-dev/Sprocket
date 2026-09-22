@@ -138,7 +138,7 @@ sealed class Toolbar : IMyToolbar
         }
 
         public IMyToolbarChangeBuilder Set(int index, MyToolbarItemInfo item,
-            List<TerminalActionParameter> parameters)
+            List<TerminalActionParameter>? parameters)
         {
             _slots.Add(index);
             _items.Add(item);

@@ -6,6 +6,8 @@ using Sandbox.ModAPI;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Drawing;
 using Sprocket.Host.SpaceEngineers.Layout;
+// Supplies Lettering, which the inspection does not see from every configuration it runs in.
+// ReSharper disable once RedundantUsingDirective
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Sim.Content;
 

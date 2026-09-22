@@ -51,7 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>
         /// The whole of what Sprocket knows about most blocks. Asked once per block type rather than
         /// per block - see <see cref="BlockKinds" /> - because a definition declares the same actions
-        /// whichever one of it you ask.
+        /// whichever one of it is asked.
         /// </remarks>
         void Offered(IMyTerminalBlock block, List<Offer> into);
 

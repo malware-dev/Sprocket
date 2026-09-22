@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Linq;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Layout;

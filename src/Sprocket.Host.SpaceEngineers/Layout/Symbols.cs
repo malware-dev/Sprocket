@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
         /// <summary>A shaft with a head on it. What one thing led to.</summary>
         /// <remarks>
-        /// Not <see cref="Right" />: a chevron is a direction to travel and sits on something you
+        /// Not <see cref="Right" />: a chevron is a direction to travel and sits on something to
         /// press, where this is a consequence and sits in a sentence.
         /// </remarks>
         public const string Arrow = "a";

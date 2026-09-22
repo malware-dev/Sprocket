@@ -1,6 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.Layout
 {
-    /// <summary>One axis of scrolling: how much there is, how much is on show, and where along it we are.</summary>
+    /// <summary>One axis of scrolling: how much there is, how much is on show, and where along it the view sits.</summary>
     /// <remarks>
     /// The arithmetic only, with no idea which way it runs or where on the screen it is. A control says
     /// how long the content is and how much room it has, and asks where the thumb goes and where a
@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <remarks>
         /// A thumb is the same fraction of the track that the viewport is of the content, which on a very
         /// long list is a few units of nothing. It stops shrinking here and starts lying instead, which is
-        /// the right way round: a thumb nobody can grab tells you less than one slightly out of place.
+        /// the right way round: a thumb nobody can grab says less than one slightly out of place.
         /// </remarks>
         public float MinThumb { get; set; }
 

@@ -160,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <remarks>
         /// Deliberately blind to what is already picked. Picking blocks decides what
         /// can be said about them, never the other way round: a list that loses rows
-        /// as you tick them reads as the ship shrinking, and a block somebody knows
+        /// as they are ticked reads as the ship shrinking, and a block somebody knows
         /// they have going missing is the one thing a picker must never do.
         ///
         /// So an impossible pair is allowed to be made, and answered where the answer

@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// <remarks>
     /// Where somebody spends their time. Close to what the editor was before systems existed,
     /// because the work itself has not changed - what changed is that the sequences on this
-    /// screen are the ones belonging to the thing you came here about, rather than every
+    /// screen are the ones belonging to the thing somebody came here about, rather than every
     /// sequence on the ship.
     /// </remarks>
     sealed class SystemPage : EditorPage
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <para>
         /// Each is under its own row of ways to add to it, and each is named, which is what tells
         /// them apart on screen. They are drawn differently too, and that is the honest difference:
-        /// a sequence is a thing you open, and a trigger is a sentence you change in place.
+        /// a sequence is a thing to open, and a trigger is a sentence changed in place.
         /// </para>
         /// </remarks>
         TriggerListComponent _starts;

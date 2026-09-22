@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             bool pressable = entry.Command != 0;
 
             // A row leading to something wrong is washed rather than merely marked. A small glyph
-            // beside a name is something you find when you already suspect; the point of this is to
+            // beside a name is something found by somebody who already suspects; the point of this is to
             // be seen by somebody who does not yet know to look.
             var wrong = entry.Problems > 0;
 
@@ -155,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 Widgets.Row(_line);
 
             // The same plus the start block uses, for the same reason: this row adds something. Core marks
-            // it as an action and leaves the drawing to us.
+            // it as an action and leaves the drawing to the row.
             _summary.Text = entry.IsAction ? StartView.Plus + entry.Summary : entry.Summary;
             _summary.Color = entry.IsAction ? Palette.Muted : Palette.Ink;
             _summary.Scale = entry.IsAction ? Lettering.Small : Lettering.Body;

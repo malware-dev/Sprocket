@@ -69,15 +69,15 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// pointer is on; this game darkens a control and lightens a panel, and the two together are what
         /// make its chrome read as pressed metal rather than as a web page.
         /// <para>
-        /// <b>Rows are not controls for this purpose, whatever they behave like.</b> They deepened for a
-        /// while, on the reasoning that a row you can press is a control - which reads well and is not what
-        /// the game does. <c>MyGuiConstants.HIGHLIGHT_BACKGROUND_COLOR</c> is (60, 76, 82), which is
+        /// <b>Rows are not controls for this purpose, whatever they behave like.</b> A row that can be
+        /// pressed reads as a control, which is not what the game does.
+        /// <c>MyGuiConstants.HIGHLIGHT_BACKGROUND_COLOR</c> is (60, 76, 82), which is
         /// <see cref="PanelHot" /> exactly, and <c>CONTROL_MOUSE_OVER_BACKGROUND_COLOR_MULTIPLIER</c> is
         /// 1.2 - the game brightens what the pointer is on, by a named colour or by a fifth. Deepening is
         /// what its button textures do and nothing else.
         /// </para>
         /// <para>
-        /// It cost something to come back: the smallest text reads 3.3:1 on a lifted row against 6.9 on a
+        /// It costs something: the smallest text reads 3.3:1 on a lifted row against 6.9 on a
         /// deepened one. That is the price of looking like the game rather than being easiest to read on,
         /// and it is the game's own price - its lists have the same problem and it has not bothered anybody.
         /// </para>
@@ -94,8 +94,8 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// Not white, which is what it looks like next to the panels and is the mistake worth avoiding.
         /// <para>
         /// Sampled from the terminal's own text, not from Textures/GUI/Icons/*.png, which are
-        /// single-colour and a few steps darker. The game reserves plain white for the row you have
-        /// selected and writes everything else in this.
+        /// single-colour and a few steps darker. The game reserves plain white for the selected row
+        /// and writes everything else in this.
         /// </para>
         /// </remarks>
         public static readonly Color Ink = new Color(220, 245, 253);
@@ -134,8 +134,8 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// </summary>
         /// <remarks>
         /// Deliberately not <see cref="PanelHot" />, which would put an unlit light and the panel behind
-        /// it within a rounding error of each other - you would not see there was a light there at all,
-        /// only that a green one sometimes appeared. Off is a state and has to be drawn.
+        /// it within a rounding error of each other - an unlit light would not read as a light at all,
+        /// only as a green one sometimes appearing. Off is a state and has to be drawn.
         /// <para>
         /// Lighter than the panel rather than darker, because nothing can be darker than these panels by
         /// enough to matter: the page is already near black and the arithmetic has no room left below it.

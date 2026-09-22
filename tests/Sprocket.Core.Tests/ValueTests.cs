@@ -30,8 +30,11 @@ public class ValueTests
     [Fact]
     public void ADoubleCannotTellTwoEntityIdsApart()
     {
-        // The premise. If this ever fails, the tests below are testing nothing.
+        // The premise. If this ever fails, the tests below are testing nothing. The casts are what
+        // is under test: two ids one apart land on the same double.
+        // ReSharper disable RedundantCast
         Assert.Equal((double)OneId, (double)TheNextIdAlong);
+        // ReSharper restore RedundantCast
     }
 
     [Fact]

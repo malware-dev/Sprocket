@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
     /// <summary>
@@ -13,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
     /// So a heading is several of these, in order, and each one answers for itself whether it can be
     /// renamed. There is deliberately no joined-up version of the whole thing on
     /// <see cref="EditorScreen" />: a target handed one string would draw one string, and the one thing a
-    /// heading has to say now is <b>which part of it you can change</b>.
+    /// heading has to say now is <b>which part of it can be changed</b>.
     /// </para>
     /// <para>
     /// Words between the parts are the target's, not core's - an arrow, a dot, a line break on something

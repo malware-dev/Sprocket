@@ -80,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </summary>
         /// <remarks>
         /// On the sentence rather than on the screen, because the history is per sequence -
-        /// it is one of the things you do to this sequence, alongside pausing and deleting it,
+        /// it is one of the things done to this sequence, alongside pausing and deleting it,
         /// and it belongs with them.
         /// </remarks>
         public int UndoCommand
@@ -138,7 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// somebody needs in order to fix it.
         ///
         /// This is a fact about the system rather than a mode the editor is in. Nobody has to
-        /// be taught it: you cannot rewire a live circuit either.
+        /// be taught it: a live circuit cannot be rewired either.
         ///
         /// The name is not covered. Renaming changes nothing about what the thing does.
         /// </remarks>

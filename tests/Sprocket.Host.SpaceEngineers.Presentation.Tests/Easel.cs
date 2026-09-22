@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Drawing;
@@ -43,7 +42,7 @@ sealed class Easel
 
         _device = new ScreenSpaceDevice();
 
-        SeFontMetrics game = exact ? SeFontMetrics.Load(_device) : null;
+        SeFontMetrics? game = exact ? SeFontMetrics.Load(_device) : null;
         _exact = game != null;
         _device.Fonts = game ?? (IFontMetrics)new FallbackFonts(_device, "Segoe UI");
 

@@ -49,7 +49,7 @@ public class AnnouncingTests
                     continue;
 
                 var heard = false;
-                PropertyChangedEventHandler listen = (sender, e) => heard = true;
+                PropertyChangedEventHandler listen = (_, _) => heard = true;
 
                 subject.PropertyChanged += listen;
                 property.SetValue(subject, next, null);
@@ -122,16 +122,16 @@ public class AnnouncingTests
     /// The point of the whole exercise is that nothing is said when a value has not moved, so a test
     /// that wrote the same value back would be asserting the opposite of the rule.
     /// </remarks>
-    static object Different(object held, Type type)
+    static object? Different(object? held, Type type)
     {
         if (type == typeof(string))
-            return (string)held == "moved" ? "moved again" : "moved";
+            return (string?)held == "moved" ? "moved again" : "moved";
 
         if (type == typeof(bool))
-            return !(bool)held;
+            return !(bool)held!;
 
         if (type == typeof(int))
-            return (int)held + 1;
+            return (int)held! + 1;
 
         if (type.IsEnum)
         {

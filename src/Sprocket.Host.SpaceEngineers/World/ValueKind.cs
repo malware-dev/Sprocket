@@ -6,7 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// script and a reading taken off a block are the same kind of thing, so they are one system rather
     /// than two with a conversion between them. A conversion is where precision quietly dies.
     /// <para>
-    /// The list is not ours to choose freely. <c>ITerminalProperty.TypeName</c> is one of
+    /// The list is not Sprocket's to choose freely. <c>ITerminalProperty.TypeName</c> is one of
     /// <c>Boolean</c>, <c>Single</c>, <c>Int64</c>, <c>StringBuilder</c> and <c>Color</c>, and every
     /// block can expose all five, so anything missing here is a reading Sprocket cannot carry, and
     /// nothing beyond them is here yet.

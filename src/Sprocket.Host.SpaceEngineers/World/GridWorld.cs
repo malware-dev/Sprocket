@@ -330,8 +330,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>
         /// <c>GridLinkTypeEnum.Mechanical</c> and not <c>Logical</c>, because that is exactly the rule
         /// <see cref="Entities" /> states: rotors, pistons and hinges are this machine, and a connector
-        /// is somebody else's parked next to it. The game supplies the predicate; we only have to pick
-        /// the right one.
+        /// is somebody else's parked next to it. The game supplies the predicate, and only the right one
+        /// has to be picked.
         /// </remarks>
         void Rebuild()
         {
@@ -390,7 +390,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Marks the list for rebuilding. For the moments the grid cannot tell us about, above all a piston
+        /// Marks the list for rebuilding. For the moments the grid does not report, above all a piston
         /// or rotor attaching, which changes which grids are in the group without adding a block to any of
         /// them.
         /// </summary>

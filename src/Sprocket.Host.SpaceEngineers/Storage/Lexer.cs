@@ -245,7 +245,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </summary>
         /// <remarks>
         /// Scientific notation is forced rather than chosen: a writer emitting a double so that it can be read
-        /// back exactly produces <c>1E-05</c> on its own, so refusing it would mean refusing what we wrote.
+        /// back exactly produces <c>1E-05</c> on its own, so refusing it would mean refusing what Sprocket wrote.
         /// </remarks>
         Token Number()
         {

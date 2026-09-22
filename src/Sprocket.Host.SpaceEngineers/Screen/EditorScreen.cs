@@ -139,7 +139,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         /// <remarks>
         /// Screen furniture, beside Back and the switch, because that is what it is: the way back
-        /// from what you did to the thing you are looking at. A sequence's own pair sits on its
+        /// from what was done to the thing on screen. A sequence's own pair sits on its
         /// sentence instead, among the bin and the switch that belong to that sentence.
         /// </remarks>
         public int UndoCommand
@@ -204,12 +204,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         /// <remarks>
         /// Deliberately separate from going back, which always means exactly what it
-        /// says: return to the screen you came from. Overloading back with "finished"
+        /// says: return to the screen before. Overloading back with "finished"
         /// breaks the one navigation idea everybody already has, and leaves someone
         /// who genuinely wants to retreat with nowhere to press.
         ///
         /// Empty when there is nothing to move on to - which on a picker also means
-        /// "you have not chosen anything yet".
+        /// "nothing has been chosen yet".
         /// </remarks>
         public string PrimaryText
         {

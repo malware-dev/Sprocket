@@ -6,7 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Input
     /// <remarks>
     /// The game reports a key as newly pressed for exactly one tick, which is right for a jump and wrong
     /// for a caret. Typed characters do not need this: the keyboard's own repeat has already put them in
-    /// the text buffer by the time we see it. This is only for the keys that are read raw.
+    /// the text buffer by the time it arrives. This is only for the keys that are read raw.
     /// <para>
     /// The caller passes the tick and the key state, so none of it needs a game running.
     /// </para>

@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </summary>
     /// <remarks>
     /// The same thing a mod ships in a file, built here instead, for one reason: these have to be
-    /// read before anybody else's so that anybody else can override them, and a file of ours would
+    /// read before anybody else's so that anybody else can override them, and a file of Sprocket's would
     /// be read wherever the player happened to have put this mod in their list.
     /// <para>
     /// By action id and not by block, because these are the game's own words and mean the same

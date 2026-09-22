@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Lists;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
@@ -98,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <remarks>
         /// Set by whoever raised it, rather than dropping the notice outright: a banner that is simply
         /// taken out of the list disappears between one frame and the next, and everything under it jumps
-        /// up to fill the gap. This says "stop showing this, in your own time".
+        /// up to fill the gap. This says "stop showing this, in good time".
         /// </remarks>
         public bool Leaving
         {

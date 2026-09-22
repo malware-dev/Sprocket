@@ -18,6 +18,13 @@ namespace Sprocket.Host.SpaceEngineers
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
     public class SprocketSession : MySessionComponentBase
     {
+        /// <summary>The session component the game made, for the callers that have no instance of it.</summary>
+        /// <remarks>
+        /// A session component is constructed by Space Engineers and handed to nothing: a terminal
+        /// control, a screen host and a block's own component are all reached through statics of the
+        /// game's own. This holds the one instance so those can find the units it owns, and holds an
+        /// ordinary object rather than being one.
+        /// </remarks>
         static SprocketSession _current;
 
         readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();

@@ -8,8 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// What starts the things a system does, each written out as its own sentence.
     /// </summary>
     /// <remarks>
-    /// Its own component rather than rows in the list below it, because a trigger is not a thing you
-    /// open - it is a sentence you change in place, and a row that could only be pressed as a whole
+    /// Its own component rather than rows in the list below it, because a trigger is not a thing to
+    /// open - it is a sentence changed in place, and a row that could only be pressed as a whole
     /// had to ask which half was meant.
     /// </remarks>
     public sealed class TriggerListComponent : EditorComponent

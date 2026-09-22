@@ -28,13 +28,11 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class SprocketUnit : IDisposable
     {
-        /// <summary>One object answering two interfaces: how a sequence reads, and how a time reads.</summary>
-
         /// <summary>
         /// Where the program sits in the block's mod storage.
         /// </summary>
         /// <remarks>
-        /// Mod storage is shared with every other mod on the entity, so the key has to be ours and has to
+        /// Mod storage is shared with every other mod on the entity, so the key has to be Sprocket's and has to
         /// never change: a new one would read as an empty Sprocket and quietly discard somebody's ship.
         /// <para>
         /// <b>It also has to be claimed in <c>Content/Data/EntityComponents.sbc</c>, and the two must
@@ -131,19 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public AutomationRunner Runner => _runner;
 
-        /// <summary>
-        /// Advances everything by one frame.
-        /// </summary>
-        /// <remarks>
-        /// Through the editor rather than straight to the runner, because <c>SprocketEditor.Tick</c> ticks
-        /// the runner itself and then brings its screen up to date. Doing both would run every sequence
-        /// twice on the frames somebody had the editor open, and the runner takes an absolute frame number
-        /// rather than ignoring a repeat.
-        ///
-        /// The cost is that a closed editor still refreshes a screen nobody is looking at. That is cheap by
-        /// construction - core compares before it writes and says nothing when nothing differs - and it is
-        /// worth more than a flag saying which of two things is doing the ticking this frame.
-        /// </remarks>
+        /// <summary>The wiring number the panels were last brought into line with.</summary>
         int _reconciled = -1;
 
         /// <summary>Whether the panels have been looked at once, which is not the same as written to.</summary>
@@ -376,7 +362,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Nothing is written for a program that has just been loaded. Every button it asks for was
             // wired by the session that built it and the game has owned those slots ever since; a slot
             // that is empty now is somebody having cleared it by hand, which is an instruction and not
-            // a gap to fill. Sprocket used to write them all back here, which undid that silently.
+            // a gap to fill.
             if (_adopted)
             {
                 Release();
@@ -794,9 +780,9 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                // Not wired, and we could see that for ourselves - so the trigger stops naming it.
+                // Not wired, and Sprocket can see that for itself - so the trigger stops naming it.
                 // A screen has to show what is true, and "this sequence starts from that button" is
-                // not true once the button no longer points here. Marking it instead left the same
+                // not true once the button no longer points here. Marking it instead would leave the same
                 // untruth in three places: the sentence, the rows above it, and the picker opening
                 // with a button preselected that nothing was going to honour.
                 _dropped.Add(want);
@@ -832,7 +818,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// button or pointed it at something else, which is a decision, and honouring it means the
         /// sequence stops claiming that button starts it.
         /// <para>
-        /// Only ever done from a toolbar we could actually read - see <see cref="Reach" />. A panel
+        /// Only ever done from a toolbar that could actually be read - see <see cref="Reach" />. A panel
         /// that cannot be looked at right now says nothing, rather than saying no.
         /// </para>
         /// </remarks>
@@ -859,7 +845,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Rewrites the slots that are ours and say nothing we understand.
+        /// Rewrites the slots that are Sprocket's and say nothing it understands.
         /// </summary>
         /// <remarks>
         /// The one exception to leaving a loaded program's slots alone, and it is not a loophole in
@@ -867,8 +853,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// is a person's decision:
         /// <list type="bullet">
         /// <item>empty, or holding somebody else's action - a person changed it, so it stands;</item>
-        /// <item>ours, with a key that resolves - working, so leave it;</item>
-        /// <item><b>ours, with a key that means nothing</b> - nobody typed that, and nobody could.</item>
+        /// <item>Sprocket's, with a key that resolves - working, so leave it;</item>
+        /// <item><b>Sprocket's, with a key that means nothing</b> - nobody typed that, and nobody could.</item>
         /// </list>
         /// The third can only be Sprocket's own writing gone stale: a key format that has changed
         /// underneath it, or a payload of the wrong type entirely. Leaving it would leave somebody's
@@ -895,7 +881,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                // One of ours that already says something this program can resolve is left alone.
+                // One of Sprocket's that already says something this program can resolve is left alone.
                 // An orphan is rewritten whatever its key says, because the id is the broken part:
                 // the block it names is gone, so nothing it says can be honoured by anybody.
                 if (Mine(present) && Understood(toolbar, want.Slot))
@@ -912,7 +898,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>Whether a slot of ours carries a key this program can resolve.</summary>
+        /// <summary>Whether a slot of Sprocket's carries a key this program can resolve.</summary>
         /// <remarks>
         /// Read once per wanted button on the first pass after a load, never on a tick. A slot holds
         /// whatever was written into it rather than what the action declares, so anything that is not
@@ -1164,7 +1150,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Reads the program back out of the block.
         /// </summary>
         /// <remarks>
-        /// A block with no storage, or storage with nothing of ours in it, is a Sprocket nobody has written
+        /// A block with no storage, or storage with nothing of Sprocket's in it, is a Sprocket nobody has written
         /// a program on yet, which is an empty ship rather than an error.
         /// </remarks>
         void Load()

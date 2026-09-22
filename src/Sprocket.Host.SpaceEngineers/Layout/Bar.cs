@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
     /// </summary>
     /// <remarks>
     /// <see cref="Dock" /> lying down. A stack cannot do this, because it gives every child exactly what
-    /// it asked for and there is no way to say "and you take the rest".
+    /// it asked for and there is no way to say "and this one takes the rest".
     /// <para>
     /// The middle is measured against what the other two left behind, so a long title gives way to the
     /// controls rather than pushing one off the end, where nothing would be left to say it existed.

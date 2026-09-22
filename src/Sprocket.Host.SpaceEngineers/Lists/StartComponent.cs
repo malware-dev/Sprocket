@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     /// Every screen that holds a list of things somebody made has one of these above it: the
     /// ship offers a new system or a loaded one, a system offers the ways a sequence can
     /// begin. The shape is deliberately the same in both places, because it is the same
-    /// question - what would you like to add here - and a screen whose top half is learnt once
+    /// question - what to add here - and a screen whose top half is learnt once
     /// is learnt everywhere.
     ///
     /// An option that needs an answer before anything can happen carries the question it wants

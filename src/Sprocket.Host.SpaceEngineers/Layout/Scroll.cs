@@ -69,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// <remarks>
         /// A thumb is the same fraction of the track that the viewport is of the content, which on a very
         /// long list is a few units of nothing. It stops shrinking here and starts lying instead, which is
-        /// the right way round: a thumb nobody can grab tells you less than one slightly out of place.
+        /// the right way round: a thumb nobody can grab says less than one slightly out of place.
         /// </remarks>
         public float BarMinLength
         {
@@ -265,7 +265,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
                 return;
 
             // No groove behind it. The game draws the thumb alone against whatever the panel already is,
-            // and a track under ours would be a line down every list saying nothing the thumb does not.
+            // and a track under this one would be a line down every list saying nothing the thumb does not.
             Color thumb = BarHeld && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
             g.DrawSprite(Solid, Thumb, thumb, 0f);
         }

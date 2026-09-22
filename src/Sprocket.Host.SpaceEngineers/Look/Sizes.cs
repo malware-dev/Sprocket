@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public const float Name = 0f;
 
         /// <summary>
-        /// A scrollbar, across. The game reserves twelve units for its own and so do we.
+        /// A scrollbar, across. The game reserves twelve units for its own, and so does this.
         /// </summary>
         public const float Bar = 12f;
 

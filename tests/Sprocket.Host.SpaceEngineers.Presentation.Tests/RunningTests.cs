@@ -1,6 +1,4 @@
-using System.Linq;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;

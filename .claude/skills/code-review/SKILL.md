@@ -56,23 +56,36 @@ Every added comment, against the rule that a comment says what the code **is**:
 **Grep the added comments before reading them**, because reading skims and a program does not:
 
 ```
-git diff -U0 | grep "^+" | grep -iE "//.*(before|used to|previously|now|no longer|instead of|originally|we|you|I)"
+git diff -U0 | grep "^+" | grep -iE "//.*\b(before|used to|previously|now|no longer|instead of|originally|formerly|for a while|to come back|at first|at one point|we|our|ours|us|you|your|I)\b"
 ```
 
 Every hit is read in full and either rewritten or justified out loud. Most are innocent - "before the
 next step" - and the few that are not are exactly the ones an eye slides over: "as it did before"
 compares with a shape the reader cannot see, and reads as sense until it is looked at.
 
+**Every widening of that pattern was paid for.** `our\b` does not match "ours", which hid twelve
+sites. History has idioms no list of verbs catches: a chevron that "carried the word BACK **for a
+while**", rows that deepened until "it cost something **to come back**", a heading that said "Your
+ship" **for a long time**. All three read as sense, and all three describe a shape the reader cannot
+see. A hit that quotes words on a screen - naming a heading rather than addressing the reader -
+stays.
+
 **Grep the added lines for state that outlives a call**, which is the rule hardest to see by reading:
 
 ```
-git diff -U0 | grep "^+" | grep -nE "static.*(Dictionary|List|HashSet|Queue|Stack|Array)"
+git diff -U0 | grep "^+" | grep -nE "(^|[^A-Za-z])static([^A-Za-z]|$)" | grep -vE "\bconst\b"
 ```
 
 Every hit answers: **what owns this, and when does it die?** A `static readonly` holding an immutable
 value is a constant. A collection added to at runtime is state, and it belongs to something with a
 lifetime - the world, the unit, the runner - so that it dies with what it is about. That another
 class already does it this way is not an answer: copying the flaw is how the second one appears.
+
+**Every static, not only the collections.** A `static bool`, a `static int`, a static event and an
+`Instance` are the same question with a smaller type, and a grep naming container types walks past
+all four. Most hits are methods and constants and are dismissed in a glance, which is what makes the
+wide pattern affordable. Where the game leaves no choice - a session component, a one-time
+registration - the static stays and says at its declaration which requirement forces it.
 
 Then the structural questions, in this order, because the early ones invalidate the later ones:
 
@@ -90,6 +103,19 @@ Then the structural questions, in this order, because the early ones invalidate 
 5. **Names**: a word, not a description, and no role suffixes.
 6. **What the tests do not cover**, said out loud. The harness models no gas, no power and no
    conveyors, so anything resting on those is proved in the game or not at all.
+
+## When the subject is the whole codebase
+
+A pass over everything is not this review made bigger, and `git diff` says nothing about it.
+**csharp-standards, "Cleaning up existing code", governs it**: behaviour does not change, every
+change is proved rather than believed, any difference is a defect in the pass, and no test is ever
+weakened to make a change pass. The evidence here is `dotnet test` and the reference suite, and a
+pass that touches drawing re-shoots the suite and expects no pixel to move.
+
+The mechanical half runs over the tree instead of a diff - the inspection, the two greps above, one
+type per file, folders by capability, names - and it is cheap enough to run before deciding whether
+to buy any reading. The findings go in a file as the pass goes, and what could not be proved is
+named there rather than left implied.
 
 ## Report
 

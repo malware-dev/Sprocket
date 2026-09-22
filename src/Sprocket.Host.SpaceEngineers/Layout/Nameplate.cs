@@ -23,7 +23,6 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         private float _leastWidth;
         private Color _penColor;
 
-        private readonly ElementCollection _children;
         private readonly Label _label = new Label();
         private readonly TextBox _box = new TextBox();
         private readonly Glyph _pen;
@@ -35,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
         public Nameplate(string pen, float penScale)
         {
-            _children = new ElementCollection(this);
+            var children = new ElementCollection(this);
 
             // A label can be told to trim and a box cannot: what somebody is typing has to stay where they
             // typed it, so it runs on past the end and the clip is what stops it.
@@ -50,9 +49,9 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
             _pen = new Glyph(pen, penScale, Color.White);
 
-            _children.Add(_label);
-            _children.Add(_box);
-            _children.Add(_pen);
+            children.Add(_label);
+            children.Add(_box);
+            children.Add(_pen);
         }
 
         /// <summary>
@@ -185,7 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </summary>
         /// <remarks>
         /// Painted only while the box is up, so it is the one thing telling somebody the heading has
-        /// become a field. It covers the words and not the pencil, which is not part of what you type.
+        /// become a field. It covers the words and not the pencil, which is not part of what is typed.
         /// </remarks>
         public Color Well { get; set; }
 

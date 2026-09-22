@@ -28,8 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         /// <remarks>
         /// Used by the repeat rates, where the label alone asks the reader to imagine a speed.
         /// Knowing the actual number lets a target show it rather than describe it - this host
-        /// blinks a dot at exactly that rate, so "every ten ticks" is a thing you can see
-        /// instead of a thing you have to picture. Whether to do that, and how, is its own
+        /// blinks a dot at exactly that rate, so "every ten ticks" is a thing to see
+        /// instead of a thing to picture. Whether to do that, and how, is its own
         /// decision; core supplies the number.
         /// </remarks>
         public int IntervalTicks { get; set; }

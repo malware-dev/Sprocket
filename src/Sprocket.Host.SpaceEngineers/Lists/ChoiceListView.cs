@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     /// </summary>
     /// <remarks>
     /// An option standing for a repeat rate gets a light that blinks at that rate, because core supplies
-    /// the interval and a speed you can watch is easier to judge than one you have to imagine. The flash
+    /// the interval and a speed that can be watched is easier to judge than one that has to be imagined. The flash
     /// is short rather than half the cycle: at even duty a ten-second rate would sit lit for five and
     /// read as "on" rather than as "rarely".
     /// </remarks>

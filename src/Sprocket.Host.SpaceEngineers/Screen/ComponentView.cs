@@ -5,8 +5,6 @@ using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Controls;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {

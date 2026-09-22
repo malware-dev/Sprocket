@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -23,7 +22,7 @@ public class VanillaTests
         Simulation rig = Simulation.Fresh();
         rig.Tick();
 
-        Panel panel = null;
+        Panel panel = null!;
         foreach (Panel found in rig.Panels())
             if (found.Name == "Airlock Button")
                 panel = found;

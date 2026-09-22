@@ -28,19 +28,17 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </summary>
         public const int Default = 100;
 
-        static readonly Cadence[] _all =
+        public static readonly IReadOnlyList<Cadence> All = new[]
         {
-            new Cadence("every tick", 1, true,
+            new Cadence("every tick", 1,
                 "Runs sixty times a second. Hard on the server - only worth it if nothing slower will do."),
-            new Cadence("fast", 10, true,
+            new Cadence("fast", 10,
                 "Six times a second. Still costly; try something slower first."),
-            new Cadence("steady", 100, true),
-            new Cadence("slow", 300, false),
-            new Cadence("very slow", 600, false),
-            new Cadence("occasional", 1800, false),
-            new Cadence("rare", 3600, false)
+            new Cadence("steady", 100),
+            new Cadence("slow", 300),
+            new Cadence("very slow", 600),
+            new Cadence("occasional", 1800),
+            new Cadence("rare", 3600)
         };
-
-        public static IList<Cadence> All => _all;
     }
 }

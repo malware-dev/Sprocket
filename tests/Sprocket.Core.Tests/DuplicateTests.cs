@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
@@ -216,8 +212,8 @@ public class DuplicateTests
             }
 
             arguments.Add(wanted.ParameterType.IsValueType
-                ? Activator.CreateInstance(wanted.ParameterType)
-                : null);
+                ? Activator.CreateInstance(wanted.ParameterType)!
+                : null!);
         }
 
         return (Step)made.Invoke(arguments.ToArray());

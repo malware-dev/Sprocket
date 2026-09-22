@@ -294,7 +294,7 @@ public class ScreedTests
     public void TextThatFitsIsNotTakenHoldOf()
     {
         var screed = new Screed { Text = "one\ntwo" };
-        var easel = new Easel(screed, Width, Height);
+        _ = new Easel(screed, Width, Height);
 
         Assert.False(screed.Take(new Vector2(100f, 10f)));
         Assert.False(screed.IsPanning);

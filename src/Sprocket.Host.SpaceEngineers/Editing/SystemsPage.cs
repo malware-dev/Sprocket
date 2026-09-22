@@ -37,10 +37,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// What the construct is called, with what this screen is about led in front of it.
         /// </summary>
         /// <remarks>
-        /// It said "Your ship" for a long time, which made two claims and could be wrong about both: not
-        /// every construct is a ship, and on a server it is the faction's rather than yours. Worse, it
-        /// said the same thing on every Sprocket in the game, so the one screen somebody arrives on never
-        /// told them where they had arrived.
+        /// The construct's own name, so the one screen somebody arrives on tells them where they have
+        /// arrived. A fixed heading reads the same on every Sprocket in the game, and "your ship" makes
+        /// two claims besides: not every construct is a ship, and on a server it is the faction's.
         /// <para>
         /// The lead is here because this is <b>not</b> an overview of the machine. It is the automation on
         /// it, and a heading that was only a name would be promising the rest.

@@ -92,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </summary>
         /// <remarks>
         /// <b>Only for a control that cannot say what it is.</b> A row reading "Airlock 1" needs no note
-        /// telling you it is Airlock 1, and a screen that explained every word on it would be one nobody
+        /// saying it is Airlock 1, and a screen that explained every word on it would be one nobody
         /// could scan. What earns one is a picture: a bin, an arrow that turns back on itself, a switch
         /// whose two words say the state rather than the act.
         /// <para>

@@ -67,6 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             };
         }
 
+        /// <summary>Whether the action is up, since the game offers no way to ask.</summary>
         static bool _registered;
 
         /// <summary>What a slot points at: this block, and this trigger of it.</summary>

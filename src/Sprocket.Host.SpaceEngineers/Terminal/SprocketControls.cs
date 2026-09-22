@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
     /// </remarks>
     static class SprocketControls
     {
+        /// <summary>Whether the controls are up, since the game offers no way to ask.</summary>
         static bool _done;
 
         public static void DoOnce()

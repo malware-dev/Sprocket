@@ -18,8 +18,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         const string Running = "running";
         const string Idle = "";
 
-        readonly static List<string> Names = new List<string>();
-
         /// <summary>
         /// What to call this system: what the player called it, what its blocks suggest, or
         /// its number.
@@ -38,10 +36,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (system.HasName)
                 return system.Name;
 
-            Names.Clear();
-            CollectEntityNames(bindings, system, Names);
+            var names = new List<string>();
+            CollectEntityNames(bindings, system, names);
 
-            var common = CommonPrefix(Names);
+            var common = CommonPrefix(names);
             if (common.Length > 0)
                 return common;
 

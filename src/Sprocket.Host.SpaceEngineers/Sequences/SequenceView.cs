@@ -534,7 +534,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
                 // A grip rather than the whole line, because the line is full of chips and "press
                 // anywhere that is not one" is a rule nobody can see. A handle says where to grab, and
-                // says that grabbing is a thing you can do at all.
+                // says that grabbing is a thing that can be done at all.
                 row.Grip = new Grip(Palette.Faint);
                 row.Grip.Collapsed = !_component.Editable;
 

@@ -292,7 +292,7 @@ namespace Sprocket.Sim.Simulation
         /// For asking the screen about itself rather than driving it: what a test can then do is sweep
         /// every point and hold the rules that are true of everything a person can reach.
         /// </remarks>
-        public Element Under(Vector2 point)
+        public Element? Under(Vector2 point)
         {
             return _view.Under(point);
         }

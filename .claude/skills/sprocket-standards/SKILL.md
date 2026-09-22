@@ -124,6 +124,26 @@ on every element on every tick.
 A cleanup that touches a property setter checks which of the three it is. Getting this wrong breaks
 scrolling in a way every test still passes, which has happened.
 
+## The runtime runs on the world's rota
+
+One `Rota` per world, shared by every Sprocket on it. Its periods are the three the game wakes a mod
+at - `Each`, `Ten`, `Hundred` - and a shift joining it is handed a place in that period in turn, so
+two machines built the same afternoon do not land on the same tick. `Rota.Run` walks every tick
+number from the last one it saw to now, so nothing is skipped when the game wakes it late.
+
+**Repeating work joins the rota. It does not keep its own clock.** A `Shift` is a place, a callback
+and the list it sits in; `Every` puts it on a period, `At` gives it a deadline, `Leave` takes it off.
+A wait is a deadline rather than a countdown, and how often it looks is `Hold`'s to decide.
+
+**Per tick is a judgement, not a ban.** What it costs, how often the answer actually changes, and who
+suffers if it arrives a tick later. A reading behind a short-circuit is cheap, and the comment says
+so; a reading on its own is not.
+
+**Nothing counts its own wake-ups.** Elapsed time is `now - then` against the frame the game reports,
+because the slower two periods are not guaranteed to land on exact multiples - when they fire depends
+on what else is in the game's component list. A shift counting how often it was called is measuring
+server load and calling it time.
+
 ## The language's spec is `docs/Language.md`
 
 **It holds the current truth of the script language and nothing else.** What the language is right

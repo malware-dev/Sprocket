@@ -182,7 +182,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <para>
         /// Only when something was actually changed, and only once per change. Opening a sequence to
         /// read it and leaving asks nothing; nor does leaving again after somebody has already
-        /// answered. Being asked a question you have answered is how a helpful prompt turns into one
+        /// answered. Being asked a question already answered is how a helpful prompt turns into one
         /// people learn to dismiss without reading.
         /// </para>
         /// <para>

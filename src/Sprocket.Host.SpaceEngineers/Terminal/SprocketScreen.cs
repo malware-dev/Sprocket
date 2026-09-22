@@ -363,7 +363,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         /// <c>Position</c> is the centre of the panel in the game's normalized GUI coordinates and
         /// <c>Size</c> is normalized too, while everything laid out is in UI units against the safe
         /// area. Read every frame rather than cached because a resolution or UI-scale change moves it, and
-        /// <c>OnLayoutChanged</c> is a notification we would then have to remember to honour.
+        /// <c>OnLayoutChanged</c> is a notification that would then have to be remembered and honoured.
         /// </remarks>
         RectangleF Bounds()
         {

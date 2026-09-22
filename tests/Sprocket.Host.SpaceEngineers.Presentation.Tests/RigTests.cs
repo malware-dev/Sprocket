@@ -386,7 +386,7 @@ public class RigTests
             if (found.Name == name)
                 return found;
 
-        return null;
+        throw new InvalidOperationException("no panel called " + name);
     }
 
     /// <summary>
@@ -646,7 +646,7 @@ public class RigTests
         for (var i = 0; i < 60; i++)
             rig.Tick();
 
-        Panel panel = null;
+        Panel panel = null!;
         foreach (Panel found in rig.Panels())
             if (found.Name == "Airlock Button")
                 panel = found;
@@ -762,7 +762,7 @@ public class RigTests
         Sequence sequence = pasted.Editor.Program.Sequences[0];
         Assert.False(pasted.World.CanStart(sequence), "it claimed a button somebody else holds");
 
-        Panel panel = null;
+        Panel panel = null!;
         foreach (Panel found in pasted.Panels())
             if (found.Name == "Airlock Button")
                 panel = found;

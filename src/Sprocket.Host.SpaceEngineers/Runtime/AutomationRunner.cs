@@ -72,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// The game's current frame, as last reported.
         /// </summary>
         /// <remarks>
-        /// Told to us rather than counted by us, and that distinction is load-bearing.
+        /// Told rather than counted, and that distinction is load-bearing.
         /// Space Engineers wakes a mod every frame, every ten, or every hundred - and
         /// the slower two are not guaranteed to land on exact multiples, because when
         /// they fire depends on what else is in the game's component list.
@@ -80,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// A runner counting its own wake-ups would therefore be measuring "how often
         /// I was woken", which is not time, and every duration in the system would
         /// drift with server load. Taking the frame number means elapsed is
-        /// <c>now - then</c> and stays exact however irregularly we are called.
+        /// <c>now - then</c> and stays exact however irregularly the runner is woken.
         /// </remarks>
         public int CurrentTick { get; private set; }
 
@@ -258,7 +258,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             var held = new Held();
-            held.Key = key;
+            held.Which = key;
             held.Step = step;
             held.Waiting = waiting;
             held.WaitTicks = waitTicks;
@@ -268,7 +268,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>One run read out of storage, waiting for its runner to be made.</summary>
         struct Held
         {
-            public long Key;
+            public long Which;
             public int Step;
             public bool Waiting;
             public int WaitTicks;
@@ -281,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             for (var i = 0; i < _resuming.Count; i++)
             {
-                if (_resuming[i].Key != key)
+                if (_resuming[i].Which != key)
                     continue;
 
                 var held = _resuming[i];

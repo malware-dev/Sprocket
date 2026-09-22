@@ -50,7 +50,7 @@ public class ClearTests
     {
         var picker = Screen.Fresh("60 130 type Airlock enter 60 161".Split(' '));
 
-        Element at = picker.Scene.Under(new Vector2(452f, 230f));
+        Element? at = picker.Scene.Under(new Vector2(452f, 230f));
 
         Assert.True(at == null || at.Press.Means != Means.Empty,
             "the cross is offered over an empty box");
