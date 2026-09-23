@@ -14,11 +14,11 @@ public class KeepingTests
 {
     /// <summary>A step that sets a light's radius to 5.</summary>
     const string ARadiusStep = "60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-        + "1300 918 70 193 200 500 800 554 1380 1000 type 5 enter";
+        + "1300 918 70 193 200 476 800 637 1380 1000 type 5 enter";
 
     /// <summary>The same, with a colour: three values the form shows as one.</summary>
     const string AColourStep = "60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-        + "1300 918 70 193 200 500 800 416 1380 1000 type #FF8800 enter";
+        + "1300 918 70 193 200 476 800 545 1380 1000 type #FF8800 enter";
 
     /// <summary>Pressing the step's blocks, then finishing.</summary>
     const string Again = "270 175 1380 1000";

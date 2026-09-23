@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -32,7 +33,13 @@ public class SettingTests
         Assert.True(screen.Shows("Falloff"), "the light does not offer its falloff");
         Assert.True(screen.Shows("Color"), "the light does not offer its colour");
 
-        // Under a heading that says what they are, which is why they do not each say "set".
+        // Under a heading saying what they are about, which is why they do not each say "set".
+        Assert.True(screen.Shows("APPEARANCE"), "a light's colour is not grouped with how it looks");
+
+        // And the block's own division is what the terminal view groups by instead.
+        screen.Editor.Invoke(What(screen).Views[1].Command);
+        screen.Run(2);
+
         Assert.True(screen.Shows("VALUES"), "the values are not grouped");
         Assert.True(screen.Shows("TOOLBAR ACTIONS"), "the actions are not grouped");
     }
@@ -230,5 +237,10 @@ public class SettingTests
         screen.Editor.PressPrimary();
         screen.Editor.PressChoice("Run a new sequence");
         return screen.Run(2);
+    }
+
+    static PickStage What(Screen screen)
+    {
+        return screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
     }
 }

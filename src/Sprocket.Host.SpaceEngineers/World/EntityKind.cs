@@ -159,6 +159,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Says what the member added last is about, for one the game did not name.</summary>
+        public EntityKind In(Category category)
+        {
+            _actions[_actions.Count - 1].Category = category;
+            return this;
+        }
+
         /// <summary>Says which of the block's own actions the action added last takes over.</summary>
         public EntityKind Replacing(string gameActionId)
         {

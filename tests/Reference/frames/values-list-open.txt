@@ -40,13 +40,13 @@ on screen     Do something
 033  Sprite     Sprocket_Fill         {X:729 Y:118 W:1 H:824}  #5B737BFF
 034  Sprite     Sprocket_Fill         {X:1188 Y:118 W:1 H:824}  #5B737BFF
 035  SetClip    {X:745 Y:270 W:428 H:656}
-036  Text       at {X:757.8 Y:279.572} scale 0.64  #DCF5FDFF  "switch off"
-037  Text       at {X:757.8 Y:325.452} scale 0.64  #DCF5FDFF  "switch on"
-038  Text       at {X:757.8 Y:371.332} scale 0.64  #85A1A9FF  "VALUES"
-039  Sprite     Sprocket_Fill         {X:745 Y:398 W:416 H:43}  #3C4C52FF
-040  Text       at {X:757.8 Y:407.612} scale 0.64  #DCF5FDFF  "Forward Direction"
-041  Text       at {X:757.8 Y:453.492} scale 0.64  #85A1A9FF  "TOOLBAR ACTIONS"
-042  Text       at {X:757.8 Y:489.772} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
+036  Text       at {X:757.8 Y:279.572} scale 0.64  #85A1A9FF  "POWER"
+037  Text       at {X:757.8 Y:315.852} scale 0.64  #DCF5FDFF  "switch off"
+038  Text       at {X:757.8 Y:361.732} scale 0.64  #DCF5FDFF  "switch on"
+039  Text       at {X:757.8 Y:407.612} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
+040  Text       at {X:757.8 Y:453.492} scale 0.64  #85A1A9FF  "FLIGHT"
+041  Sprite     Sprocket_Fill         {X:745 Y:480 W:416 H:43}  #3C4C52FF
+042  Text       at {X:757.8 Y:489.772} scale 0.64  #DCF5FDFF  "Forward Direction"
 043  SetClip    {X:259 Y:118 W:1402 H:836}
 044  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT TO DO"
 045  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:37}  #141B20FF

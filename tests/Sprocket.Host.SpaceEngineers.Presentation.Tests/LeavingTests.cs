@@ -18,7 +18,7 @@ public class LeavingTests
 
     /// <summary>A picker whose action will not do anything until it is given a value.</summary>
     const string WantsValues = "60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-        + "1300 918 70 193 200 500 800 554";
+        + "1300 918 70 193 200 476 800 637";
 
     [Fact]
     public void LeavingAFilledPickerAsksFirst()

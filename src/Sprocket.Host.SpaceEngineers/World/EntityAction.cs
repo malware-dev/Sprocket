@@ -29,6 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             GameActionId = gameActionId;
             Named = text;
             Wants = wants;
+            Category = Categories.Of(gameActionId);
         }
 
         /// <summary>Whether reaching the state it leads to takes time, rather than happening in the tick it is done.</summary>
@@ -137,6 +138,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Hidden { get; private set; }
 
+        /// <summary>
+        /// What this member is about, which is the group it is listed under.
+        /// </summary>
+        /// <remarks>
+        /// Worked out from the game's own id where there is one - see <see cref="Categories" /> - and
+        /// said outright by an extension for anything Sprocket invented, which has no game id to ask
+        /// about.
+        /// </remarks>
+        public Category Category { get; internal set; }
+
         /// <summary>Leaves this out of the list somebody chooses from.</summary>
         public void Hide()
         {
@@ -146,6 +157,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityAction Writes(string propertyId, Field field, string named)
         {
             GamePropertyId = propertyId;
+
+            // A value is asked about by the id it writes, since that is the only id the game gave it.
+            if (Category == Category.Other)
+                Category = Categories.Of(propertyId);
+
             Named = named;
             _writes = field;
             return this;

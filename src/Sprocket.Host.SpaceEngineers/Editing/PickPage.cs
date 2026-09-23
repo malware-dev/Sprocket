@@ -662,18 +662,15 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             for (var i = 0; i < _matched.Count; i++)
             {
                 var at = _matched[i];
-                var mine = _groups.Count > at ? _groups[at] : Own;
+                // An event list is one list with no groups in it, so nothing is ever headed there.
+                var mine = _groups.Count > at ? _groups[at] : group;
                 if (_forEvents)
                     mine = group;
 
                 if (mine != group)
                 {
                     group = mine;
-
-                    // Sprocket's own words need no heading: in the organized view they are the list,
-                    // and the terminal view never holds any.
-                    if (mine != Own)
-                        _rows.Add(-1 - mine);
+                    _rows.Add(-1 - mine);
                 }
 
                 _rows.Add(at);
@@ -693,9 +690,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
                 if (at < 0)
                 {
-                    changed |= Apply(_what.Entries[i], at == -2 ? ValuesSaid : ActionsSaid,
-                        "", "", false, false, 0, "", true);
-
+                    changed |= Apply(_what.Entries[i], Heading(-1 - at), "", "", false, false, 0, "", true);
                     continue;
                 }
 
@@ -751,14 +746,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>What the mark on something a step waits for says when the pointer rests on it.</summary>
         const string WaitsSaid = "Holds the sequence until finished";
 
-        /// <summary>Which group an entry is listed in: the game's actions, its values, or Sprocket's own.</summary>
+        /// <summary>The terminal view's two groups: the block's own actions, and its values.</summary>
         /// <remarks>
-        /// Numbered so that a group's heading is the negative of one past it - minus one for the
-        /// actions, minus two for the values - and Sprocket's own group, which has no heading, last.
+        /// A heading sits in the list as the negative of one past its group, so that one list of
+        /// positions holds both the things and the words over them.
         /// </remarks>
         const int Actions = 0;
         const int Values = 1;
-        const int Own = 2;
 
         /// <summary>
         /// Everything the blocks offer, values first and each group in its own order.
@@ -777,9 +771,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             actions.Sort(BySaid);
 
-            Listed(actions, Own);
-            Listed(actions, Values);
-            Listed(actions, Actions);
+            // The block's own division, which is the only one it declares.
+            if (Editor.ShowsTerminal)
+            {
+                Listed(actions, Values);
+                Listed(actions, Actions);
+                return;
+            }
+
+            // Sprocket's, in the order the categories are declared, so a player who has learnt where
+            // a light's colour sits finds a sorter's in the same place.
+            for (var group = 0; group <= (int)Category.Other; group++)
+                Listed(actions, group);
         }
 
         void Listed(List<EntityAction> actions, int group)
@@ -811,12 +814,30 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return Editor.ShowsTerminal ? one.Unaltered : !one.Hidden;
         }
 
-        static int Group(EntityAction one)
+        /// <summary>
+        /// Which group of the view now showing this one is listed in.
+        /// </summary>
+        /// <remarks>
+        /// Two sets of numbers through one field, because only one view is ever on screen: the
+        /// terminal's are its two kinds of member, and the organized one's are the categories. What
+        /// a number means is settled by which view asked, which is also what <see cref="Heading" />
+        /// needs to word it.
+        /// </remarks>
+        int Group(EntityAction one)
         {
-            if (!one.Unaltered)
-                return Own;
+            if (Editor.ShowsTerminal)
+                return one.Sets ? Values : Actions;
 
-            return one.Sets ? Values : Actions;
+            return (int)one.Category;
+        }
+
+        /// <summary>What a group is headed.</summary>
+        string Heading(int group)
+        {
+            if (Editor.ShowsTerminal)
+                return group == Values ? ValuesSaid : ActionsSaid;
+
+            return CategoryText.Of((Category)group);
         }
 
         /// <summary>Which group each thing on offer belongs to, one per entry in <c>_names</c>.</summary>

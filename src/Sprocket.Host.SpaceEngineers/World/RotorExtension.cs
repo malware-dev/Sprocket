@@ -102,7 +102,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             kind.WithProperty(Arrived, "at its angle")
                 .WithState(There, Arrived, true, "is at its angle")
-                .WithAction(RotateTo, "rotate", There, Way(), Angle(block), Speed(block)).Lasting().Replacing("RotateToAngle")
+                .WithAction(RotateTo, "rotate", There, Way(), Angle(block), Speed(block))
+                .Lasting().Replacing("RotateToAngle").In(Category.Movement)
                 .Promoting("Reverse", false, "reverse", "reverse")
                 .Promoting("Attach", false, "attach", "attach")
                 .Promoting("Detach", false, "detach", "detach")

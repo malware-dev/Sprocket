@@ -391,7 +391,7 @@ public class ActionTests
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 508 1380 1000").Split(' '));
+            + "1300 918 70 193 200 476 800 325 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the light's on value does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
@@ -418,7 +418,7 @@ public class ActionTests
     public void AColourIsChosenByPressingOne()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 416 1380 1000").Split(' '));
+            + "1300 918 70 193 200 476 800 545 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the colour setter does not ask for anything");
         Assert.Equal("", screen.Scene.AskBox.Text);
@@ -446,7 +446,7 @@ public class ActionTests
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 200 type Standby 200 351 800 416 1380 1000").Split(' '));
+            + "1300 918 70 193 150 200 type Standby 200 351 800 325 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the charge mode does not ask for anything");
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
@@ -479,7 +479,7 @@ public class ActionTests
     public void MoreChoicesThanFitFoldIntoAList()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 200 type Tug 200 351 800 416 1380 1000").Split(' '));
+            + "1300 918 70 193 150 200 type Tug 200 351 800 499 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the forward direction does not ask for anything");
 
