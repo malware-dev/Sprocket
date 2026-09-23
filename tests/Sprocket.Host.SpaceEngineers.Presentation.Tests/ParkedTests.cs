@@ -31,7 +31,7 @@ public class ParkedTests
         screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("close");
+        screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
 
         screen.Editor.Back();

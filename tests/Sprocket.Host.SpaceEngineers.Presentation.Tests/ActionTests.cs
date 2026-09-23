@@ -75,7 +75,7 @@ public class ActionTests
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
-        Assert.True(screen.Shows("switch on"), "a block with a switch cannot be switched on");
+        Assert.True(screen.Shows("Switch on"), "a block with a switch cannot be switched on");
         Assert.False(screen.Shows("Turn block On"), "the game's own on/off is offered twice");
     }
 
@@ -101,14 +101,39 @@ public class ActionTests
         screen.Run(2);
 
         Assert.True(screen.Shows("Turn block On"), "the block's own switch is not in its own view");
-        Assert.False(screen.Shows("switch on"), "Sprocket's wording is in the block's own view");
+        Assert.False(screen.Shows("Switch on"), "Sprocket's wording is in the block's own view");
         Assert.True(Terminal(screen).IsCurrent);
 
         screen.Editor.Invoke(Organized(screen).Command);
         screen.Run(2);
 
         Assert.False(screen.Shows("Turn block On"), "going back did not put it away again");
-        Assert.True(screen.Shows("switch on"));
+        Assert.True(screen.Shows("Switch on"));
+    }
+
+    /// <summary>
+    /// A block's name is left where the game keeps it, and out of what a sequence can say.
+    /// </summary>
+    /// <remarks>
+    /// A step names the block it is about, so a step that renamed one would break itself and every
+    /// other step naming it. The game still offers it, in the block's own view, where a person
+    /// renaming a block is doing it deliberately.
+    /// </remarks>
+    [Fact]
+    public void ABlocksNameIsNotSomethingASequenceSets()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Airlock Light");
+        screen.Run(2);
+
+        Assert.False(screen.Shows("Name"), "a sequence is offered the block's own name");
+
+        screen.Editor.Invoke(Terminal(screen).Command);
+        screen.Run(2);
+
+        Assert.True(screen.Shows("Name"), "the block's own view has lost what the block carries");
     }
 
     /// <summary>
@@ -130,7 +155,7 @@ public class ActionTests
         Assert.NotEqual(0, Organized(screen).Command);
         Assert.NotEqual(0, Terminal(screen).Command);
         Assert.True(Organized(screen).IsCurrent, "the picker did not open on Sprocket's own words");
-        Assert.True(screen.Shows("switch on"));
+        Assert.True(screen.Shows("Switch on"));
     }
 
     [Fact]
@@ -182,8 +207,8 @@ public class ActionTests
         screen.Run(2);
 
         var entries = What(screen).Entries;
-        Assert.True(entries.Single(entry => entry.Text == "open").Waits, "opening a door is not marked");
-        Assert.False(entries.Single(entry => entry.Text == "switch on").Waits, "switching on is marked, and holds nothing");
+        Assert.True(entries.Single(entry => entry.Text == "Open").Waits, "opening a door is not marked");
+        Assert.False(entries.Single(entry => entry.Text == "Switch on").Waits, "switching on is marked, and holds nothing");
     }
 
     /// <summary>The tab answers where it is drawn, which nothing else on this screen proves.</summary>
@@ -391,18 +416,18 @@ public class ActionTests
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 476 800 325 1380 1000").Split(' '));
+            + "1300 918 70 193 150 200 type Approach 200 351 800 499 1380 1000").Split(' '));
 
-        Assert.True(screen.Scene.IsAsking, "the light's on value does not ask for anything");
+        Assert.True(screen.Scene.IsAsking, "the sensor's chime does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
         Assert.Equal(2, screen.Editor.Screen.PrimaryFields.Single().Words.Count);
         Assert.Equal("", screen.Scene.AskBox.Text);
 
         // The half that was pressed, not a toggle: the control shows both of its positions.
-        screen.Do("520", "530");
+        screen.Do("630", "530");
         Assert.Equal("on", screen.Scene.AskBox.Text);
 
-        screen.Do("590", "530");
+        screen.Do("690", "530");
         Assert.Equal("off", screen.Scene.AskBox.Text);
     }
 
@@ -418,7 +443,7 @@ public class ActionTests
     public void AColourIsChosenByPressingOne()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 476 800 545 1380 1000").Split(' '));
+            + "1300 918 70 193 200 476 800 499 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the colour setter does not ask for anything");
         Assert.Equal("", screen.Scene.AskBox.Text);

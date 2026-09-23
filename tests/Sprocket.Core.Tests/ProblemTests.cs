@@ -410,7 +410,7 @@ public class ProblemTests
 
         ship.Editor.PressAdd("do something");
         ship.Editor.PressBlock("Inner Door");
-        ship.Editor.PressChoice("close");
+        ship.Editor.PressChoice("Close");
         ship.Editor.PressPrimary();
 
         ship.Editor.GoToRoot();

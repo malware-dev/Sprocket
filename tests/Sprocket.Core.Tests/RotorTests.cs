@@ -42,6 +42,45 @@ public class RotorTests
         Assert.False(kind.FindAction("Displacement", true)!.Hidden);
     }
 
+    /// <summary>
+    /// Growing a head is welding the machine, so it is left out however well it is named.
+    /// </summary>
+    /// <remarks>
+    /// Nothing stands in for it, which is what separates it from the game's own Reverse: there is no
+    /// better way to say it, and no sequence has any use for it said at all.
+    /// </remarks>
+    [Fact]
+    public void BuildingTheMachineIsNotSomethingASequenceCanTellItToDo()
+    {
+        var ship = new Rigged();
+        var rotor = ship.Rotor(1, "Rotor");
+        var kind = ship.Entity(rotor.Id).Kind;
+
+        foreach (var id in new[]
+                 {
+                     "AddRotorTopPart", "AddSmallRotorTopPart", "AddMediumRotorTopPart"
+                 })
+        {
+            Assert.True(kind.FindAction(id, false)!.Hidden, id + " is offered as a step");
+        }
+    }
+
+    /// <summary>Sprocket's own words are spelled for a list the way the game spells its own.</summary>
+    [Fact]
+    public void AListNamesSprocketsOwnMembersTheWayTheGameNamesIts()
+    {
+        var ship = new Rigged();
+        var rotor = ship.Rotor(1, "Rotor");
+        var kind = ship.Entity(rotor.Id).Kind;
+
+        Assert.Equal("Rotate", kind.FindAction(RotorExtension.RotateTo, false)!.Named);
+        Assert.Equal("Reverse", kind.FindAction("reverse", false)!.Named);
+        Assert.Equal("Braking torque", kind.FindAction("braking-torque", true)!.Named);
+
+        // And the sentence keeps the word it needs, which is the one the extension wrote.
+        Assert.Equal("rotate", kind.FindAction(RotorExtension.RotateTo, false)!.Text);
+    }
+
     /// <summary>Sprocket's words reach the game's own members.</summary>
     [Fact]
     public void APromotedMemberDoesWhatTheGamesDoes()

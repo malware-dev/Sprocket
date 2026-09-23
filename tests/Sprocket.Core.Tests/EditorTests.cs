@@ -65,6 +65,151 @@ public class EditorTests
     }
 
     /// <summary>
+    /// A member that cannot be made into a step is still listed, and says why when it is chosen.
+    /// </summary>
+    /// <remarks>
+    /// Left out, it would read as a block that does not have it. Offered as a number box, it would be
+    /// a number nobody can know the meaning of, declined in silence when the step runs.
+    /// </remarks>
+    [Fact]
+    public void AMemberThatCannotBeAStepSaysWhy()
+    {
+        var ship = new Ship();
+        ship.Rig.Panel(3, "Airlock Button");
+        ship.Rig.Light(4, "Airlock Light").CarryingUnread("Pattern", "Pattern");
+        ship.Runner = new AutomationRunner(ship.Automation, ship.World);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+
+        PickStage What() => editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
+            .Single(s => s.Entries.Any(e => e.Text == "Pattern"));
+
+        var pattern = What().Entries.Single(e => e.Text == "Pattern");
+        Assert.True(pattern.IsWithheld);
+        Assert.Equal("pending", pattern.Status);
+        Assert.False(What().Entries.Single(e => e.Text == "Switch on").IsWithheld);
+
+        // It says why where the pointer rests, and gives a press nothing to do.
+        Assert.StartsWith("Set this in the terminal", pattern.Tip);
+        Assert.Equal(0, pattern.Command);
+        Assert.Null(What().Entries.Single(e => e.Text == "Switch on").Tip);
+    }
+
+    /// <summary>
+    /// A switch's value and the act that flips it share an id, and choosing one is not choosing both.
+    /// </summary>
+    /// <remarks>
+    /// The game gives the act that flips a switch the switch's own id. Chosen by id alone, both rows
+    /// would light and the step would be whichever came first in the list - a flip made into a set,
+    /// asking for a value the flip does not take.
+    /// </remarks>
+    [Fact]
+    public void AValueAndTheActThatFlipsItAreChosenApart()
+    {
+        var ship = new Ship();
+        ship.Rig.Panel(3, "Airlock Button");
+        ship.Rig.Light(4, "Airlock Light")
+            .Carrying("AIBehavior", "AI Behavior", ValueKind.Flag)
+            .Offering("AIBehavior", "AI Behavior On/Off");
+        ship.Runner = new AutomationRunner(ship.Automation, ship.World);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+
+        IEnumerable<PickOption> Offered() =>
+            editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages).SelectMany(s => s.Entries);
+
+        editor.PressChoice("AI Behavior On/Off");
+        Assert.True(Offered().Single(e => e.Text == "AI Behavior On/Off").IsChosen);
+        Assert.False(Offered().Single(e => e.Text == "AI Behavior").IsChosen);
+        Assert.Equal("", editor.Screen.PrimaryQuestion);
+
+        editor.PressPrimary();
+        var step = ship.Automation.Sequences[0].Steps.OfType<Act>().Last();
+        Assert.Equal("AIBehavior", step.ActionId);
+        Assert.False(step.Sets);
+    }
+
+    /// <summary>
+    /// The colon the game ends some of its names with is left to the terminal view.
+    /// </summary>
+    /// <remarks>
+    /// "Mode:" is how the terminal labels the box beside it. In a list of things to choose it reads as a
+    /// label with nothing after it, so the organized view says "Mode", and the terminal view shows the
+    /// block's own words as they are.
+    /// </remarks>
+    [Fact]
+    public void TheGamesLabelColonIsLeftToTheTerminalView()
+    {
+        var ship = new Ship();
+        ship.Rig.Panel(3, "Airlock Button");
+        ship.Rig.Light(4, "Airlock Light").Carrying("Mode", "Mode:", ValueKind.Flag);
+        ship.Runner = new AutomationRunner(ship.Automation, ship.World);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+
+        IEnumerable<PickStage> Stages() => editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages);
+
+        Assert.Contains(Stages().SelectMany(s => s.Entries), e => e.Text == "Mode");
+        Assert.DoesNotContain(Stages().SelectMany(s => s.Entries), e => e.Text == "Mode:");
+
+        editor.Invoke(Stages().SelectMany(s => s.Views).Single(v => v.Text == "Terminal").Command);
+        Assert.Contains(Stages().SelectMany(s => s.Entries), e => e.Text == "Mode:");
+    }
+
+    /// <summary>
+    /// A member known to be out of a mod's reach is listed only where the block is shown as it is.
+    /// </summary>
+    /// <remarks>
+    /// The organized view is what Sprocket offers, and this is nothing it can offer. The terminal view
+    /// is what the block declares, and there it is, saying why nothing can be done with it.
+    /// </remarks>
+    [Fact]
+    public void AMemberKnownToBeOutOfReachIsListedOnlyInTheTerminalView()
+    {
+        var ship = new Ship();
+        ship.Rig.Panel(3, "Airlock Button");
+        var light = ship.Rig.Light(4, "Airlock Light").Carrying("Pattern", "Pattern", ValueKind.Flag);
+        ship.Runner = new AutomationRunner(ship.Automation, ship.World);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        var editor = ship.Editor;
+
+        // What a block's own knowledge says about it, the way the event controller's says it.
+        foreach (var one in ship.Rig.Entity(light.Id).Kind.Actions)
+        {
+            if (one.GamePropertyId == "Pattern")
+                one.Withhold(Readiness.Unsupported, "Set this in the terminal: the game keeps it from mods");
+        }
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+
+        IEnumerable<PickOption> Offered() =>
+            editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages).SelectMany(s => s.Entries);
+
+        Assert.DoesNotContain(Offered(), e => e.Text == "Pattern");
+
+        editor.Invoke(editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
+            .SelectMany(s => s.Views).Single(v => v.Text == "Terminal").Command);
+        var pattern = Offered().Single(e => e.Text == "Pattern");
+        Assert.True(pattern.IsWithheld);
+        Assert.Equal("not supported", pattern.Status);
+        Assert.Equal(0, pattern.Command);
+    }
+
+    /// <summary>
     /// What somebody asks for and what the program says are not the same thing.
     /// </summary>
     /// <remarks>
@@ -289,7 +434,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("switch on");
+        editor.PressChoice("Switch on");
         editor.PressPrimary();
         ship.Tick();
 
@@ -337,7 +482,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("switch on");
+        editor.PressChoice("Switch on");
         editor.PressPrimary();
         editor.Invoke(editor.Sentence().UndoCommand);
         ship.Tick();
@@ -371,7 +516,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("do something");
         editor.PressBlock("Inner Door");
-        editor.PressChoice("close");
+        editor.PressChoice("Close");
         editor.PressPrimary();
         ship.Tick();
 
@@ -382,7 +527,7 @@ public class EditorTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Outer Door");
-        editor.PressChoice("open");
+        editor.PressChoice("Open");
         editor.PressPrimary();
         ship.Tick();
 
@@ -830,7 +975,7 @@ public class EditorTests
 
         ship.Editor.PressStepSlot(0, 0);
         ship.Tick();
-        ship.Editor.PressChoice("open");
+        ship.Editor.PressChoice("Open");
         ship.Editor.PressPrimary();
         ship.Tick();
 
@@ -877,7 +1022,7 @@ public class EditorTests
 
         ship.Editor.PressAdd("do something");
         ship.Editor.PressBlock("Inner Door");
-        ship.Editor.PressChoice("close");
+        ship.Editor.PressChoice("Close");
         ship.Editor.PressPrimary();
         ship.Tick();
 
@@ -1050,7 +1195,7 @@ public class EditorTests
         editor.PressAdd("do something");
         editor.PressBlock("Inner Door");
         editor.TickBlock("Outer Door");
-        editor.PressChoice("close");
+        editor.PressChoice("Close");
         editor.PressPrimary();
 
         var targets = Assert.IsType<EntitiesSlot>(editor.Sentence().Steps[0].Slots[1]);
@@ -1077,7 +1222,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("switch on");
+        editor.PressChoice("Switch on");
         editor.PressPrimary();
         editor.SwitchOn();
 
@@ -1115,7 +1260,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("switch on");
+        editor.PressChoice("Switch on");
         editor.PressPrimary();
         ship.Tick();
 
@@ -1153,7 +1298,7 @@ public class EditorTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("switch on");
+        editor.PressChoice("Switch on");
         editor.PressPrimary();
         ship.Tick();
 
@@ -1242,7 +1387,7 @@ public class EditorTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("switch on");
+        editor.PressChoice("Switch on");
         editor.PressPrimary();
         editor.SwitchOn();
 
@@ -1408,7 +1553,7 @@ public class EditorTests
         editor.PressBlock("Inner Door");
         Assert.Equal(2, editor.Component<PickComponent>().Stages.Count);
 
-        editor.PressChoice("close");
+        editor.PressChoice("Close");
         editor.PressPrimary();
 
         // One row, even though the sequence has the step and the await after it.

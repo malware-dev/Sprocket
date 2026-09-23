@@ -53,5 +53,11 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         /// <summary>Whether a step doing this waits for it to finish.</summary>
         public bool Waits { get; set; }
+
+        /// <summary>Whether this is listed to be read about rather than chosen.</summary>
+        public bool IsWithheld { get; set; }
+
+        /// <summary>What it says when the pointer rests on it, or null for nothing.</summary>
+        public string Tip { get; set; }
     }
 }

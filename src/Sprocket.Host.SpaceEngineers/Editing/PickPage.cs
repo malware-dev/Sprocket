@@ -31,6 +31,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly Action<PickAnswer> _done;
 
         string _chosen;
+
+        /// <summary>Whether what is chosen is one of the blocks' values, which its id alone does not say.</summary>
+        bool _chosenSets;
         bool _all;
 
         readonly List<GridEntity> _candidates = new List<GridEntity>();
@@ -113,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </para>
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
-            IList<long> targets, string chosen, Action<PickAnswer> done,
+            IList<long> targets, string chosen, bool chosenSets, Action<PickAnswer> done,
             bool asksAll = false, bool all = false, IList<Literal> values = null)
             : base(editor)
         {
@@ -126,6 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _title = title;
             _forEvents = forEvents;
             _chosen = chosen ?? "";
+            _chosenSets = chosenSets;
             _asksAll = asksAll;
             _all = all;
             _done = done;
@@ -263,23 +267,17 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>Whether the thing chosen is one of the blocks' values rather than an action.</summary>
-        bool ChosenSets
-        {
-            get
-            {
-                var at = _ids.IndexOf(_chosen);
-                return at >= 0 && at < _values.Count && _values[at];
-            }
-        }
+        bool ChosenSets => _chosenSets;
 
         List<Field> Fields()
         {
-            return IsComplete ? Editor.Fields(_selection, _chosen) : _nothing;
+            return IsComplete ? Editor.Fields(_selection, _chosen, _chosenSets) : _nothing;
         }
 
         readonly List<Field> _nothing = new List<Field>();
 
-        bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen);
+        bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen)
+            && ReadinessOf(_chosen, _chosenSets) == Readiness.Ready;
 
         public override void Build(List<EditorComponent> components)
         {
@@ -591,6 +589,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _values.Clear();
             _groups.Clear();
             _waits.Clear();
+            _ready.Clear();
+            _why.Clear();
 
             if (_forEvents)
             {
@@ -613,10 +613,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // A choice the blocks can no longer honour is dropped rather than left showing, so
             // "Done" never appears over a sentence that could not run.
             var chosen = _chosen;
-            if (!_ids.Contains(chosen))
+            if (At(chosen, _chosenSets) < 0)
             {
                 chosen = "";
                 _chosen = "";
+                _chosenSets = false;
             }
 
             var changed = false;
@@ -690,13 +691,34 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
                 if (at < 0)
                 {
+                    if (_what.Entries[i].IsWithheld || _what.Entries[i].Tip != null)
+                    {
+                        _what.Entries[i].IsWithheld = false;
+                        _what.Entries[i].Tip = null;
+                        changed = true;
+                    }
+
                     changed |= Apply(_what.Entries[i], Heading(-1 - at), "", "", false, false, 0, "", true);
                     continue;
                 }
 
+                var ready = _ready.Count > at ? _ready[at] : Readiness.Ready;
+                var withheld = ready != Readiness.Ready;
+                var tip = withheld ? _why[at] : null;
+                if (_what.Entries[i].IsWithheld != withheld || _what.Entries[i].Tip != tip)
+                {
+                    _what.Entries[i].IsWithheld = withheld;
+                    _what.Entries[i].Tip = tip;
+                    changed = true;
+                }
+
+                // Something that cannot be made into a step is listed to be read about and not
+                // chosen, so it is given nothing to do when pressed.
                 var id = _ids[at];
-                changed |= Apply(_what.Entries[i], _names[at], "", "", false, id == chosen,
-                    Editor.Register(Cmd.PickChoice, at, delegate { Choose(id); }));
+                var sets = _values.Count > at && _values[at];
+                changed |= Apply(_what.Entries[i], _names[at], "", ReadinessText.Tag(ready), false,
+                    id == chosen && sets == _chosenSets,
+                    withheld ? 0 : Editor.Register(Cmd.PickChoice, at, delegate { Choose(id, sets); }));
             }
 
             return changed;
@@ -793,12 +815,57 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 if (!Lists(one) || Group(one) != group)
                     continue;
 
-                _names.Add(one.Named);
+                _names.Add(Editor.ShowsTerminal || !one.Unaltered ? one.Named : Unlabelled(one.Named));
                 _ids.Add(one.Id);
                 _values.Add(one.Sets);
                 _groups.Add(group);
                 _waits.Add(one.Lasts);
+                _ready.Add(one.Readiness);
+                _why.Add(one.Why);
             }
+        }
+
+        /// <summary>The game's name for a member, without the colon it ends a terminal label with.</summary>
+        /// <remarks>
+        /// The game names some values the way its terminal labels the box beside them - "Mode:" - which
+        /// in a list of things to choose reads as a label waiting for something after it. Only ever
+        /// given the game's own names: a word Sprocket or a mod's definition chose is left as written,
+        /// and the terminal view shows the game's as the game wrote them.
+        /// </remarks>
+        static string Unlabelled(string named)
+        {
+            if (string.IsNullOrEmpty(named))
+                return named;
+
+            var trimmed = named.TrimEnd();
+            return trimmed.EndsWith(":", StringComparison.Ordinal)
+                ? trimmed.Substring(0, trimmed.Length - 1).TrimEnd()
+                : named;
+        }
+
+        /// <summary>Whether what is on offer under that id can be made into a step.</summary>
+        Readiness ReadinessOf(string id, bool sets)
+        {
+            var at = At(id, sets);
+            return at >= 0 && at < _ready.Count ? _ready[at] : Readiness.Ready;
+        }
+
+        /// <summary>
+        /// Where the thing on offer under that id is in the list, or -1 where it is not listed.
+        /// </summary>
+        /// <remarks>
+        /// By the id and by whether it sets a value, because the id alone names two things wherever a
+        /// block has a switch: the value and the act that flips it share one.
+        /// </remarks>
+        int At(string id, bool sets)
+        {
+            for (var i = 0; i < _ids.Count; i++)
+            {
+                if (_ids[i] == id && (_values.Count > i && _values[i]) == sets)
+                    return i;
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -811,7 +878,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         bool Lists(EntityAction one)
         {
-            return Editor.ShowsTerminal ? one.Unaltered : !one.Hidden;
+            if (Editor.ShowsTerminal)
+                return one.Unaltered;
+
+            // Something known to be out of reach has nothing to offer here, and is listed where the
+            // block is shown as it is, saying so.
+            return !one.Hidden && one.Readiness != Readiness.Unsupported;
         }
 
         /// <summary>
@@ -848,6 +920,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>Whether a step doing each thing on offer waits for it to finish.</summary>
         readonly List<bool> _waits = new List<bool>();
+
+        /// <summary>Whether each thing on offer can be made into a step.</summary>
+        readonly List<Readiness> _ready = new List<Readiness>();
+
+        /// <summary>Why each thing on offer cannot be made into a step, or empty where it can.</summary>
+        readonly List<string> _why = new List<string>();
 
         /// <summary>
         /// What to draw, in order: an index into the things on offer, or a heading.
@@ -1084,9 +1162,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return -1;
         }
 
-        void Choose(string id)
+        void Choose(string id, bool sets)
         {
             _chosen = id;
+            _chosenSets = sets;
             Editor.Invalidate();
         }
 

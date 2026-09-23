@@ -102,10 +102,10 @@ wait-used           60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1
 # its own line with its name and its bounds beside it, and that a value outside them replaces the
 # question rather than appearing beside it - the dialog is the same size either way, which is the
 # whole point of putting the words there.
-values              60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 637 1380 1000
+values              60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 591 1380 1000
 picker-terminal     60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 820 244
 picker-shared       60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 56 404 56 556 56 480
-values-refused      60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 637 1380 1000 type 300
+values-refused      60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 591 1380 1000 type 300
 
 # And the same form asking for the thing nobody should be typing.
 #
@@ -114,12 +114,12 @@ values-refused      60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1
 # the three - the hue track, two plain ones, and what the colour is written as. The swatches above
 # them are the player's own and there is nobody to ask here, so the row they would be in is not
 # drawn at all, which is the other thing this holds still.
-values-colour       60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 545 1380 1000
+values-colour       60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 499 1380 1000
 
 # And the value that is one of two words, which is a switch rather than a box with the words beside
 # it. Neither half is lit until one is pressed, because a switch that opened showing "off" would be
 # answering for somebody.
-values-flag         60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 325 1380 1000
+values-flag         60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 150 200 type Approach 200 351 800 499 1380 1000
 
 # And the same value with more of them than a switch can hold.
 #
@@ -150,7 +150,7 @@ sequence-leaving    60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1
 # A colour is the one slot in a sentence that is not words. Held still here because a step is read
 # far more often than it is written, and because the fallback - three numbers, or the code - is what
 # it used to show and what it must not go back to showing.
-sequence-colour     60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 545 1380 1000 type #FF8800 enter
+sequence-colour     60 130 type Airlock enter 60 161 200 351 560 248 1380 1000 1300 918 70 193 200 476 800 499 1380 1000 type #FF8800 enter
 
 # --- the list with something in it, which is where a copy is made from ---------------------------
 #

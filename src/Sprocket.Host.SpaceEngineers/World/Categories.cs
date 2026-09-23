@@ -44,14 +44,23 @@ namespace Sprocket.Host.SpaceEngineers.World
             // controller, a switch per thing a safe zone forbids.
             if (Starts(plain, "targetinggroup"))
                 return Category.Weapons;
+            // A safe zone spends most of its ids on one switch per thing it forbids - the game spells
+            // them with a Cb for checkbox - and the rest on the wall itself.
             if (Starts(plain, "safezone"))
-                return Category.Access;
+            {
+                if (Ends(plain, "cb") || plain == "safezonecreate")
+                    return Category.Access;
+                if (Ends(plain, "color") || Ends(plain, "texturecombo"))
+                    return Category.Appearance;
+
+                return Category.Behaviour;
+            }
             if (Starts(plain, "detect"))
-                return Category.Detection;
+                return Category.Behaviour;
             if (Starts(plain, "transmitmessage") || Starts(plain, "message"))
                 return Category.Signals;
             if (Starts(plain, "flightmode"))
-                return Category.Flight;
+                return Category.Behaviour;
             if (Starts(plain, "offensivecombat") || Starts(plain, "attackmode")
                 || Starts(plain, "targetpriority"))
                 return Category.Weapons;
@@ -93,6 +102,24 @@ namespace Sprocket.Host.SpaceEngineers.World
                 to -= 4;
 
             return to <= from ? id : id.Substring(from, to - from);
+        }
+
+        /// <summary>
+        /// Whether the id names growing a part onto the machine rather than working the machine.
+        /// </summary>
+        /// <remarks>
+        /// Read rather than listed, because a block offers more of these than it can use and the
+        /// list is not fixed: a rotor declares a head in three sizes and a hinge head besides, and
+        /// the game adds a spelling whenever it adds a part. What they have in common is the whole
+        /// of what they are - something added, and the thing added is a head or a top part.
+        /// </remarks>
+        internal static bool Builds(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return false;
+
+            var plain = Plain(id);
+            return Starts(plain, "add") && (Ends(plain, "toppart") || Ends(plain, "head"));
         }
 
         /// <summary>
@@ -143,17 +170,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "recharge":
                 case "discharge":
                 case "auto":
-                case "powertransferoverride":
-                case "powerdependency":
                     return Category.Power;
 
                 // Joints, wheels, and what they are told to do.
                 case "velocity":
                 case "upperlimit":
                 case "lowerlimit":
-                case "torque":
-                case "brakingtorque":
-                case "displacement":
                 case "rotorlock":
                 case "hingelock":
                 case "attach":
@@ -170,85 +192,159 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "addhingetoppart":
                 case "addmediumhingetoppart":
                 case "addsmallhingetoppart":
-                case "safetydetach":
                 case "shareinertiatensor":
-                case "maximpulseaxis":
-                case "maximpulsenonaxis":
+                case "propulsionoverride":
+                case "steeroverride":
+                    return Category.Movement;
+
+                // Letting something through.
+                case "open":
+                    return Category.Opening;
+
+                // Holding fast to something else, which a door does not do and a gear does.
+                case "lock":
+                case "unlock":
+                case "switchlock":
+                    return Category.Locking;
+
+                // Left to itself, this is what it does.
+                case "autolock":
+                case "showonhud":
+                case "showinterminal":
+                case "showininventory":
+                case "showintoolbarconfig":
+                case "searchable":
+                case "minheightaboveterrain":
+                case "maxpitchangle":
+                case "maxrollangle":
+                case "idrepeatchekbox":
+                case "idshowpathcheckbox":
+                case "idshowpointscheckbox":
+                case "idrecordstepsslider":
+                case "idminimaldistanceslider":
+                case "range":
+                case "speedlimit":
+                case "targetlock":
+                case "powerdependency":
                 case "steering":
                 case "propulsion":
                 case "braking":
+                case "height":
+                case "gravity":
+                case "width":
+                case "depth":
+                case "virtualmass":
+                case "restitution":
+                case "flightmode":
+                case "power":
                 case "airshock":
                 case "invertsteering":
                 case "invertpropulsion":
                 case "maxsteerangle":
-                case "power":
-                case "strength":
-                case "height":
                 case "friction":
-                case "propulsionoverride":
-                case "steeroverride":
-                case "enableparking":
-                    return Category.Movement;
-
-                // Letting something through, and holding on to something.
-                case "open":
-                case "autodeploy":
-                case "autodeployheight":
-                case "lock":
-                case "unlock":
-                case "switchlock":
-                case "autolock":
+                case "strength":
+                case "controlthrusters":
+                case "controlwheels":
+                case "controlgyros":
+                case "maincockpit":
+                case "mainremotecontrol":
+                case "horizonindicator":
+                case "targetlocking":
+                case "direction":
+                case "forward":
+                case "backward":
+                case "up":
+                case "down":
+                case "useconveyor":
+                case "detectplayers":
+                case "detectfloatingobjects":
+                case "detectsmallships":
+                case "detectlargeships":
+                case "detectstations":
+                case "detectsubgrids":
+                case "detectasteroids":
+                case "detectowner":
+                case "detectfriendly":
+                case "detectneutral":
+                case "detectenemy":
+                case "audibleproximityalert":
+                case "enablepanning":
+                case "isperm":
+                case "showshipname":
+                case "useantenna":
+                case "broadcasttarget":
+                case "silent":
+                case "slavemode":
+                case "terrainclearingmode":
+                case "requiretargetlock":
+                case "invertcamera":
+                case "maximpulseaxis":
+                case "maximpulsenonaxis":
+                case "safetydetach":
+                case "torque":
+                case "brakingtorque":
+                case "displacement":
                 case "breakforce":
                 case "autounlocktime":
-                    return Category.Opening;
+                case "enableparking":
+                case "autodeploy":
+                case "autodeployheight":
+                case "autorefill":
+                case "automaticallypullbottles":
+                case "enableidlemovement":
+                case "safety":
+                case "keepprojection":
+                case "instantbuilding":
+                case "showonlybuildable":
+                case "trading":
+                case "powertransferoverride":
+                case "collisionavoidance":
+                case "dockingmode":
+                case "aligntogravity":
+                case "activatebehavior":
+                case "suntracking":
+                case "targetmeteors":
+                case "targetmissiles":
+                case "targetsmallships":
+                case "targetlargeships":
+                case "targetcharacters":
+                case "targetstations":
+                case "targetneutrals":
+                case "targetfriends":
+                case "targetenemies":
+                case "enabletargetlocking":
+                case "cantargetcharacters":
+                case "targetpriority":
+                case "attackpattern":
+                case "locktarget":
+                case "flee":
+                case "fleemode":
+                case "fleedistance":
+                case "evasivemaneuvers":
+                case "evasivemaneuverangle":
+                case "evasivemaneuverintervalrange":
+                    return Category.Behaviour;
 
                 // Flying the construct.
                 case "override":
                 case "yaw":
                 case "pitch":
                 case "roll":
-                case "controlthrusters":
-                case "controlwheels":
-                case "controlgyros":
                 case "handbrake":
                 case "park":
                 case "dampenersoverride":
-                case "horizonindicator":
-                case "maincockpit":
-                case "targetlocking":
-                case "mainremotecontrol":
                 case "autopilot":
-                case "collisionavoidance":
-                case "dockingmode":
                 case "cameralist":
-                case "flightmode":
-                case "speedlimit":
                 case "jump":
                 case "jumpdistance":
                 case "gravityacceleration":
-                case "forward":
-                case "backward":
-                case "up":
-                case "down":
-                case "direction":
                 case "control":
-                case "gravity":
-                case "width":
-                case "depth":
-                case "virtualmass":
-                case "restitution":
-                case "minheightaboveterrain":
-                case "aligntogravity":
-                case "maxpitchangle":
-                case "maxrollangle":
                     return Category.Flight;
 
                 // What a block holds and what it does with it.
-                case "useconveyor":
                 case "collectall":
                 case "throwout":
                 case "drainall":
-                case "trading":
                 case "blacklistwhitelist":
                 case "currentlist":
                 case "candidateslist":
@@ -259,22 +355,15 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "depressurize":
                 case "stockpile":
                 case "refill":
-                case "autorefill":
-                case "automaticallypullbottles":
                     return Category.Air;
 
                 // Making things.
-                case "slavemode":
                 case "cooperativemode":
                 case "repeat":
                 case "disassembleall":
-                case "terrainclearingmode":
-                case "keepprojection":
                 case "spawnprojection":
-                case "showonlybuildable":
                 case "markmissingblocks":
                 case "markunfinishedblocks":
-                case "instantbuilding":
                 case "getownership":
                 case "numberofprojections":
                 case "numberofblocks":
@@ -297,51 +386,25 @@ namespace Sprocket.Host.SpaceEngineers.World
                 // Shooting.
                 case "shoot":
                 case "shootonce":
-                case "range":
                 case "detonate":
-                case "safety":
                 case "startcountdown":
                 case "stopcountdown":
-                case "enableidlemovement":
-                case "targetmeteors":
-                case "targetmissiles":
-                case "targetsmallships":
-                case "targetlargeships":
-                case "targetcharacters":
-                case "targetstations":
-                case "targetneutrals":
-                case "targetfriends":
-                case "targetenemies":
                 case "selectedammotype":
                 case "cycleselectedammotype":
                 case "forcereload":
-                case "enabletargetlocking":
                 case "focuslockedtarget":
-                case "invertcamera":
                 case "launchhatch":
-                case "requiretargetlock":
                 case "detonationtime":
                 case "multiplieraz":
                 case "multiplierel":
                 case "angledeviation":
-                case "suntracking":
                 case "ai":
                 case "rotorazimuth":
                 case "rotorelevation":
                 case "toollist":
                 case "selectedtoolslist":
-                case "locktarget":
-                case "cantargetcharacters":
-                case "flee":
-                case "fleemode":
-                case "fleedistance":
                 case "waypointzonesize":
-                case "evasivemaneuvers":
-                case "evasivemaneuverangle":
-                case "evasivemaneuverintervalrange":
-                case "targetpriority":
                 case "updateinterval":
-                case "attackpattern":
                 case "countdown":
                 case "delay":
                 case "enablerestoration":
@@ -354,20 +417,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "top":
                 case "back":
                 case "front":
-                case "audibleproximityalert":
-                case "detectplayers":
-                case "detectfloatingobjects":
-                case "detectsmallships":
-                case "detectlargeships":
-                case "detectstations":
-                case "detectsubgrids":
-                case "detectasteroids":
-                case "detectowner":
-                case "detectfriendly":
-                case "detectneutral":
-                case "detectenemy":
                 case "view":
-                case "enablepanning":
                 case "viewrotation":
                 case "threshold":
                 case "andcheckbox":
@@ -389,7 +439,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "run":
                 case "runwithdefaultargument":
                 case "consolecommand":
-                case "activatebehavior":
                 case "selectmission":
                 case "idmodeselectorcombobox":
                 case "currentpositionhome":
@@ -401,30 +450,21 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "stopfollowing":
                 case "followdistance":
                 case "idplaycheckbox":
-                case "idrepeatchekbox":
-                case "idshowpathcheckbox":
-                case "idshowpointscheckbox":
                 case "idrecordcheckbox":
-                case "idrecordstepsslider":
-                case "idminimaldistanceslider":
                 case "idaddwaypoint":
                 case "reversepath":
                     return Category.Automation;
 
                 // Talking to other constructs.
                 case "enablebroadcast":
-                case "showshipname":
-                case "broadcasttarget":
                 case "broadcasttargeteveryone":
                 case "broadcasttargetowner":
                 case "broadcasttargetfaction":
-                case "useantenna":
                 case "transmitrandommessage":
                 case "sendgps":
                 case "gpscoords":
                 case "pastegpscoords":
                 case "connectgps":
-                case "isperm":
                 case "idle":
                 case "receivefrom":
                 case "sendsignal":
@@ -472,21 +512,15 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "loopableslider":
                 case "playsound":
                 case "stopsound":
-                case "silent":
                     return Category.Sound;
 
-                // Where a block turns up on screen.
-                case "showonhud":
-                case "showinterminal":
-                case "showininventory":
-                case "showintoolbarconfig":
+                // What it is called.
                 case "name":
                 case "customname":
                 case "customdata":
                 case "hudtext":
                 case "buttonname":
-                case "searchable":
-                    return Category.Listing;
+                    return Category.Identity;
 
                 // Who may use it.
                 case "anyonecanuse":

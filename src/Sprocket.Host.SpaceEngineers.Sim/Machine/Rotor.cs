@@ -48,6 +48,9 @@ sealed class Rotor : Fitting
                 Told("rotate " + arguments[1] + " at " + arguments[2]);
             }));
 
+        Offering("AddRotorTopPart", "Add Rotor Head");
+        Offering("AddSmallRotorTopPart", "Add Small Rotor Head");
+        Offering("AddMediumRotorTopPart", "Add Medium Rotor Head");
         Offering("Reverse", "Reverse");
         Offering("Attach", "Attach");
         Offering("Detach", "Detach");

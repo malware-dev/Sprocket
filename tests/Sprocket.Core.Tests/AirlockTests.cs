@@ -690,4 +690,26 @@ public class PropertyTests
         Assert.False(Relations.Suits(Relation.Above, ValueKind.Flag));
         Assert.True(Relations.Suits(Relation.Above, ValueKind.Real));
     }
+
+    /// <summary>
+    /// The switch a pair of words has already said does not reach the list a third time.
+    /// </summary>
+    /// <remarks>
+    /// A vent's switch is called Depressurize, and the game offers it three ways: the value, the act
+    /// that flips it, and the pair that turns it each way. Sprocket says the pair as pressurize and
+    /// depressurize, so the value beneath it is the same sentence written backwards.
+    /// </remarks>
+    [Fact]
+    public void AValueThePairAlreadySaysIsLeftOut()
+    {
+        var ship = new Rigged();
+        var vent = ship.Vent(1, "Vent");
+        var kind = ship.Entity(vent.Id).Kind;
+
+        Assert.True(kind.FindAction("Depressurize", true)!.Hidden);
+
+        // The act that flips it stays: nothing else in the list says "whichever way it is not".
+        Assert.False(kind.FindAction("Depressurize", false)!.Hidden);
+    }
+
 }

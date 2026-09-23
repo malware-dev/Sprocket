@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
@@ -76,9 +77,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Every action the block declares, as the terminal would list them.
         /// </summary>
         /// <remarks>
-        /// The list is the game's to fill and is handed back whole. A block with no actions at all
-        /// is an ordinary answer - a conveyor tube has none - and so is a name the game leaves
-        /// empty, which is why the id goes through as well and is what everything else holds.
+        /// The list is the game's to fill. A block with no actions at all is an ordinary answer - a
+        /// conveyor tube has none - and so is a name the game leaves empty, which is why the id goes
+        /// through as well and is what everything else holds.
+        /// <para>
+        /// <b>What the list holds is not what the terminal shows.</b> The game registers an action on
+        /// a type and then asks each block whether it is one the action is for: an advanced rotor and
+        /// a hinge are one type, and each declares the other's head. <c>IsEnabled</c> is the question
+        /// the terminal asks, and asking it here is what keeps Sprocket offering what the game does.
+        /// </para>
+        /// <para>
+        /// Asked of the block a kind is built from, so an answer that turns on what the block is
+        /// doing rather than on what it is would be fixed for the whole type at that moment.
+        /// </para>
         /// </remarks>
         public void Offered(IMyTerminalBlock block, List<Offer> into)
         {
@@ -91,6 +102,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < _actions.Count; i++)
             {
                 ITerminalAction action = _actions[i];
+                if (!action.IsEnabled(block))
+                    continue;
+
                 into.Add(new Offer(action.Id, action.Name == null ? "" : action.Name.ToString(),
                     Wants(action)));
             }
@@ -154,11 +168,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         Offer Listed(ITerminalProperty property, Offer made)
         {
             var listed = property as IMyTerminalControlCombobox;
-            if (listed == null || listed.ComboBoxContent == null)
+            if (listed == null)
                 return made;
 
             _items.Clear();
-            listed.ComboBoxContent(_items);
+            try
+            {
+                listed.ComboBoxContent(_items);
+            }
+            catch (NullReferenceException)
+            {
+                // Asked of a combo box that fills its list per block, this throws: the getter hands a
+                // mod a wrapper around the list-filler whether or not there is one, so there is nothing
+                // to test first.
+                return made.Unread();
+            }
 
             if (_items.Count == 0)
                 return made;

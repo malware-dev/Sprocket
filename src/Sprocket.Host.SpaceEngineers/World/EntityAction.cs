@@ -27,7 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             Text = text;
             LeadsToStateId = leadsToStateId;
             GameActionId = gameActionId;
-            Named = text;
+            Named = Capitalised(text);
+            Why = "";
             Wants = wants;
             Category = Categories.Of(gameActionId);
         }
@@ -39,19 +40,33 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Lasts { get; private set; }
 
-        /// <summary>The block's own action this one takes over, where it is not performed as that action, or null.</summary>
+        /// <summary>
+        /// The same word as a list of things to choose from spells it.
+        /// </summary>
         /// <remarks>
-        /// An action that does what one of the game's does, its own way, hides the game's as surely as one
-        /// that performs it: the two do the same thing, and one is enough to choose from. Kept apart from
-        /// <see cref="GameActionId" />, which also says what a slot on a toolbar is given to do.
+        /// The game capitalises the first letter of every member it names and leaves the rest of the
+        /// words as they are - <c>Open</c>, <c>Toggle block On/Off</c>. Sprocket's own are written
+        /// for the middle of a sentence, so the list is where they are made to match.
         /// </remarks>
-        public string Replaces { get; private set; }
-
-        /// <summary>Says which of the block's own actions this one takes over.</summary>
-        public EntityAction Replacing(string gameActionId)
+        static string Capitalised(string text)
         {
-            Replaces = gameActionId;
-            return this;
+            if (string.IsNullOrEmpty(text) || char.IsUpper(text[0]))
+                return text;
+
+            return char.ToUpperInvariant(text[0]) + text.Substring(1);
+        }
+
+        /// <summary>Whether this can be made into a step, which nearly everything can.</summary>
+        public Readiness Readiness { get; private set; }
+
+        /// <summary>Why it cannot be made into a step, for the person looking at it, or empty where it can.</summary>
+        public string Why { get; private set; }
+
+        /// <summary>Keeps this from being made into a step, saying why.</summary>
+        public void Withhold(Readiness readiness, string why)
+        {
+            Readiness = readiness;
+            Why = why ?? "";
         }
 
         /// <summary>Says that reaching this action's state takes time.</summary>
@@ -162,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (Category == Category.Other)
                 Category = Categories.Of(propertyId);
 
-            Named = named;
+            Named = Capitalised(named);
             _writes = field;
             return this;
         }

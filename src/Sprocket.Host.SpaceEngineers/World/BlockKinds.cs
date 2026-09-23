@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
-using SpaceEngineers.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Layout;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -82,7 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // And last of all the values it carries, because an act reads better than telling a
             // value what to be wherever there is one that does the same thing.
             Values(kind, block);
-            Means(kind, block);
+            Meanings.Settle(kind, block);
             Hide(kind);
 
             _kinds.Add(id, kind);
@@ -176,12 +175,34 @@ namespace Sprocket.Host.SpaceEngineers.World
                 string id;
                 string named;
                 if (kind.Promoted(offer.Id, true, out id, out named))
+                {
                     kind.WithValue(id, named, offer.Id, Asks(offer, named));
+                    Unread(Last(kind), offer);
+                }
 
                 kind.WithValue(offer.Id, said, offer.Id, Asks(offer, said));
                 Last(kind).Unaltered = true;
+                Unread(Last(kind), offer);
             }
         }
+
+        /// <summary>
+        /// Keeps a value out of reach where it is one of a listed few and the list could not be read.
+        /// </summary>
+        /// <remarks>
+        /// Offered as its number it would be a box somebody types a number into with nothing saying
+        /// what the number means, and a wrong one declined in silence when the step runs. Pending
+        /// rather than unsupported, because a list the game will not hand over can often be found
+        /// another way - a camera list is the cameras on the ship - and nothing here knows which.
+        /// </remarks>
+        static void Unread(EntityAction one, Offer offer)
+        {
+            if (offer.Unreadable)
+                one.Withhold(Readiness.Pending, UnreadSaid);
+        }
+
+        /// <summary>Why a value whose list the game would not hand over is set in the terminal.</summary>
+        const string UnreadSaid = "Set this in the terminal for now: whether Sprocket can offer it is being looked at";
 
         /// <summary>
         /// What the form asks for one of a block's values, from what the block said about it.
@@ -251,74 +272,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Marks what is left out of the list somebody chooses from.</summary>
         /// <remarks>
         /// An entry is left out where an extension stands in for it, naming it as the game's own form of
-        /// what the extension's entry does: a door's open is the game's <c>Open_On</c> said better.
-        /// Nothing else is. Runs once the list is complete, because the entry that stands in and the one
-        /// it stands in for are added at different times.
+        /// what the extension's entry does - a door's open is the game's <c>Open_On</c> said better - and
+        /// where the kind names it outright. Runs once the list is complete, because the entry that stands
+        /// in and the one it stands in for are added at different times.
         /// </remarks>
         static void Hide(EntityKind kind)
         {
             var actions = kind.Actions;
             for (var i = 0; i < actions.Count; i++)
             {
-                if (StoodIn(actions, actions[i]))
-                    actions[i].Hide();
-            }
-        }
-
-        /// <summary>
-        /// What this kind means by an id that means something else elsewhere.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="Categories" /> reads an id without knowing which block declared it, which is
-        /// what lets one table cover every block. The price is the handful of ids the game spends
-        /// twice: a light's <c>Radius</c> and an antenna's are the same word for a glow and for how
-        /// far a signal carries. Here is where a block says which it meant.
-        /// <para>
-        /// Runs once the list is complete, because these are the game's own members and they are
-        /// added last.
-        /// </para>
-        /// </remarks>
-        static void Means(EntityKind kind, IMyTerminalBlock block)
-        {
-            if (block is IMyRadioAntenna || block is IMyBeacon)
-                Means(kind, "Radius", Category.Signals);
-
-            if (block is IMyLaserAntenna)
-                Means(kind, "Range", Category.Signals);
-
-            if (block is IMyShipConnector || block is IMyLandingGear)
-                Means(kind, "Strength", Category.Opening);
-
-            if (block is IMyGyro)
-                Means(kind, "Power", Category.Flight);
-
-            if (block is IMyGravityGenerator || block is IMyGravityGeneratorSphere)
-            {
-                Means(kind, "Height", Category.Flight);
-                Means(kind, "Radius", Category.Flight);
-            }
-
-            if (block is IMyRemoteControl)
-            {
-                Means(kind, "Left", Category.Flight);
-                Means(kind, "Right", Category.Flight);
-            }
-
-            if (block is IMyMotorSuspension)
-                Means(kind, "Speed Limit", Category.Movement);
-        }
-
-        /// <summary>Puts every member the game named <paramref name="stem" /> in its true category.</summary>
-        static void Means(EntityKind kind, string stem, Category category)
-        {
-            var actions = kind.Actions;
-            for (var i = 0; i < actions.Count; i++)
-            {
                 EntityAction one = actions[i];
-                string id = one.Sets ? one.GamePropertyId : one.GameActionId;
-
-                if (Categories.Names(id, stem))
-                    one.Category = category;
+                if (StoodIn(actions, one) || kind.Hides(one.Sets ? one.GamePropertyId : one.GameActionId))
+                    one.Hide();
             }
         }
 
@@ -328,6 +293,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether another entry names this one as the game's own form of what it does.</summary>
+        /// <remarks>
+        /// The game makes actions out of a value: a switch gets a pair that turns it each way and an
+        /// act that flips it, and a slider gets a step up, a step down and sometimes a reset. The value
+        /// says everything the pair and the steps say, so those are stood in for by it. The act that
+        /// flips a switch and the reset stay, being the two things a value cannot say: whichever way
+        /// it is not, and whatever the block starts at.
+        /// <para>
+        /// Where Sprocket has said a switch's pair in its own words it is the other way round, and the
+        /// value is the third way of saying the same thing: a vent that reads pressurize and
+        /// depressurize has no use for a Depressurize to be told true.
+        /// </para>
+        /// </remarks>
         static bool StoodIn(IList<EntityAction> actions, EntityAction one)
         {
             for (var i = 0; i < actions.Count; i++)
@@ -336,11 +313,63 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (ReferenceEquals(other, one))
                     continue;
 
-                if (one.Sets ? other.GamePropertyId == one.Id : other.GameActionId == one.Id || other.Replaces == one.Id)
+                if (one.Sets)
+                {
+                    if (other.GamePropertyId == one.Id
+                        || !other.Unaltered && Turns(other.GameActionId, one.Id))
+                    {
+                        return true;
+                    }
+                }
+                else if (other.GameActionId == one.Id
+                         || one.Unaltered && other.Sets && Generated(one.GameActionId, other.GamePropertyId))
+                {
                     return true;
+                }
             }
 
             return false;
+        }
+
+        /// <summary>Whether the game made the action out of that value, and the value says it too.</summary>
+        static bool Generated(string gameActionId, string propertyId)
+        {
+            if (gameActionId == null || propertyId == null)
+                return false;
+
+            return Turns(gameActionId, propertyId)
+                || Steps(gameActionId, "Increase", propertyId)
+                || Steps(gameActionId, "Decrease", propertyId);
+        }
+
+        /// <summary>Whether the action is the value's id with that in front, as a slider's steps are.</summary>
+        static bool Steps(string gameActionId, string step, string propertyId)
+        {
+            return gameActionId.Length == step.Length + propertyId.Length
+                && string.CompareOrdinal(gameActionId, 0, step, 0, step.Length) == 0
+                && string.CompareOrdinal(gameActionId, step.Length, propertyId, 0, propertyId.Length) == 0;
+        }
+
+        /// <summary>Whether the action is one half of the pair the game makes of that switch.</summary>
+        /// <remarks>
+        /// The game's convention, and the only thing tying the two together: a switch called
+        /// <c>X</c> is turned by <c>X_On</c> and <c>X_Off</c>.
+        /// </remarks>
+        static bool Turns(string gameActionId, string propertyId)
+        {
+            if (gameActionId == null || propertyId == null)
+                return false;
+
+            int over = gameActionId.Length - propertyId.Length;
+            if (over != 3 && over != 4)
+                return false;
+
+            if (string.CompareOrdinal(gameActionId, 0, propertyId, 0, propertyId.Length) != 0)
+                return false;
+
+            return over == 3
+                ? string.CompareOrdinal(gameActionId, propertyId.Length, "_On", 0, 3) == 0
+                : string.CompareOrdinal(gameActionId, propertyId.Length, "_Off", 0, 4) == 0;
         }
 
         /// <summary>

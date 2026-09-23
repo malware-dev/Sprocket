@@ -25,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Least = "";
             Most = "";
             Choices = null;
+            Unreadable = false;
         }
 
         /// <summary>
@@ -52,6 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Least = least ?? "";
             Most = most ?? "";
             Choices = null;
+            Unreadable = false;
         }
 
         /// <summary>The least it will accept, and the most, or empty where it says nothing.</summary>
@@ -70,6 +72,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// change whatever copy happened to be in hand. The list is held rather than copied: it is
         /// built once per block kind and never written to afterwards.
         /// </remarks>
+        /// <summary>Whether this value is one of a listed few whose list the game would not hand over.</summary>
+        public bool Unreadable { get; private set; }
+
+        /// <summary>The same, for a value whose list the game would not hand over.</summary>
+        public Offer Unread()
+        {
+            Offer unread = this;
+            unread.Unreadable = true;
+            return unread;
+        }
+
         public Offer Between(IList<Choice> choices)
         {
             Offer made = this;

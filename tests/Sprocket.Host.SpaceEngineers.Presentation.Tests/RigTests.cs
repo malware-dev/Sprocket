@@ -80,7 +80,7 @@ public class RigTests
 
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("open");
+        rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 
@@ -190,7 +190,7 @@ public class RigTests
 
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("open");
+        rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
 
         // Long enough for the slot to be written and looked at again. Left parked, which is where the
@@ -309,7 +309,7 @@ public class RigTests
         Airlock(rig.Editor);
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("open");
+        rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 
@@ -355,7 +355,7 @@ public class RigTests
         Airlock(rig.Editor);
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("open");
+        rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
         rig.Editor.Back();
         rig.Editor.PressAnswer("Switch it on");
@@ -537,7 +537,7 @@ public class RigTests
         Airlock(rig.Editor);
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("open");
+        rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 
@@ -584,7 +584,7 @@ public class RigTests
         rig.Editor.PressChoice("Run a new sequence");
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("open");
+        rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 
@@ -690,7 +690,7 @@ public class RigTests
 
         built.Editor.PressAdd("do something");
         built.Editor.PressBlock("Airlock Inner Door");
-        built.Editor.PressChoice("open");
+        built.Editor.PressChoice("Open");
         built.Editor.PressPrimary();
         built.Editor.SwitchOn();
 
@@ -741,7 +741,7 @@ public class RigTests
 
         built.Editor.PressAdd("do something");
         built.Editor.PressBlock("Airlock Inner Door");
-        built.Editor.PressChoice("open");
+        built.Editor.PressChoice("Open");
         built.Editor.PressPrimary();
         built.Editor.SwitchOn();
 

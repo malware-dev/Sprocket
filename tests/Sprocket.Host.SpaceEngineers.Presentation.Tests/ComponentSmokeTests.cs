@@ -42,7 +42,7 @@ public class ComponentSmokeTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Landing Lights");
-        editor.PressChoice("switch on");
+        editor.PressChoice("Switch on");
         editor.PressPrimary();
 
         // The front door: the systems on this construct.

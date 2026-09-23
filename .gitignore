@@ -59,3 +59,6 @@ desktop.ini
 
 ## MDK2
 mdk.local.ini
+
+## Python
+__pycache__/

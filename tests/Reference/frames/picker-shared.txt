@@ -150,8 +150,8 @@ on screen     Do something
 143  Sprite     Sprocket_Fill         {X:745 Y:270 W:416 H:40}  #374851FF
 144  Text       at {X:761 Y:279.572} scale 0.57  #A2C3CDFF  "Currently showing only what the selected blocks share"
 145  Text       at {X:757.8 Y:322.862} scale 0.64  #85A1A9FF  "POWER"
-146  Text       at {X:757.8 Y:359.142} scale 0.64  #DCF5FDFF  "switch off"
-147  Text       at {X:757.8 Y:405.022} scale 0.64  #DCF5FDFF  "switch on"
+146  Text       at {X:757.8 Y:359.142} scale 0.64  #DCF5FDFF  "Switch off"
+147  Text       at {X:757.8 Y:405.022} scale 0.64  #DCF5FDFF  "Switch on"
 148  Text       at {X:757.8 Y:450.902} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
 149  SetClip    {X:259 Y:118 W:1402 H:836}
 150  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT TO DO"

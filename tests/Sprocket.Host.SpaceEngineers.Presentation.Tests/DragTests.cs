@@ -189,9 +189,9 @@ public class DragTests
         editor.PressPrimary();
         editor.PressChoice("Run a new sequence");
 
-        Step(editor, "Airlock Inner Door", "close");
-        Step(editor, "Airlock Vent", "depressurize");
-        Step(editor, "Airlock Outer Door", "open");
+        Step(editor, "Airlock Inner Door", "Close");
+        Step(editor, "Airlock Vent", "Depressurize");
+        Step(editor, "Airlock Outer Door", "Open");
 
         screen.Run(5);
         return screen;

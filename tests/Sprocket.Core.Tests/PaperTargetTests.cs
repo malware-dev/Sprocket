@@ -48,7 +48,7 @@ public class PaperTargetTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("switch on");
+        editor.PressChoice("Switch on");
         editor.PressPrimary();
         Note(seen, ship);
 
@@ -81,7 +81,7 @@ public class PaperTargetTests
 
         editor.PressAdd("do something");
         editor.PressBlock("Inner Door");
-        editor.PressChoice("close");
+        editor.PressChoice("Close");
         editor.PressPrimary();
 
         var paper = PaperTarget.Draw(ship.World, editor.Screen);

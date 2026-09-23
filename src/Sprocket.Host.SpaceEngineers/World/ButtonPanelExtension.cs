@@ -116,6 +116,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 var words = buttons == 1 ? "is pressed" : "button " + i + " is pressed";
                 kind.WithAnsweredEvent(Pressed(i), words);
             }
+
+            // What is written on the panel for somebody standing in front of it to read, which is a
+            // label on the machine rather than anything the machine does.
+            kind.Hiding("ButtonName");
         }
 
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)

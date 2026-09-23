@@ -101,7 +101,7 @@ public class TargetTests
 
         screen.Editor.PressChoice("Do something");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("close");
+        screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -122,7 +122,7 @@ public class TargetTests
 
         screen.Editor.PressChoice("Do something");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("close");
+        screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 

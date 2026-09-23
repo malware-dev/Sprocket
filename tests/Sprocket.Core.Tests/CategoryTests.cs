@@ -55,10 +55,10 @@ public class CategoryTests
         Assert.Equal(Category.Appearance, Categories.Of("SetBlinkInterval"));
         Assert.Equal(Category.Appearance, Categories.Of("IncreaseBlink Interval"));
 
-        Assert.Equal(Category.Stock, Categories.Of("UseConveyor"));
-        Assert.Equal(Category.Stock, Categories.Of("useConveyor"));
+        Assert.Equal(Category.Behaviour, Categories.Of("UseConveyor"));
+        Assert.Equal(Category.Behaviour, Categories.Of("useConveyor"));
 
-        Assert.Equal(Category.Air, Categories.Of("Auto-Refill"));
+        Assert.Equal(Category.Behaviour, Categories.Of("Auto-Refill"));
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class CategoryTests
     {
         Assert.Equal(Category.Weapons, Categories.Of("TargetingGroup_Anything"));
         Assert.Equal(Category.Weapons, Categories.Of("TargetingGroup_CycleSubsystems"));
-        Assert.Equal(Category.Detection, Categories.Of("Detect Small Ships_On"));
+        Assert.Equal(Category.Behaviour, Categories.Of("Detect Small Ships_On"));
         Assert.Equal(Category.Signals, Categories.Of("Transmit Message 3"));
         Assert.Equal(Category.Access, Categories.Of("SafeZoneDrillingCb"));
     }

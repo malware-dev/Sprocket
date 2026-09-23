@@ -105,15 +105,19 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Empty where the action wants nothing, so its length is how many are wanted and whether
         /// to ask at all. Asked of the blocks somebody has just picked, because that is where the
         /// answer is: the action is the block's own.
+        /// <para>
+        /// Asked by id and by whether it sets a value, because the id alone names two things wherever
+        /// a block has a switch: the value and the act that flips it share one.
+        /// </para>
         /// </remarks>
-        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId)
+        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, bool sets)
         {
             var said = new List<Field>();
 
             var actions = ActionsOf(world, entityIds);
             for (var i = 0; i < actions.Count; i++)
             {
-                if (actions[i].Id == actionId)
+                if (actions[i].Id == actionId && actions[i].Sets == sets)
                     actions[i].Fields(said);
             }
 

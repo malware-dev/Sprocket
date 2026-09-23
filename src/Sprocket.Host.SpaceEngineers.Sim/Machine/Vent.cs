@@ -72,6 +72,13 @@ sealed class Vent : Fitting
         base.Offered(into);
     }
 
+    /// <summary>The switch itself, which the game carries beside the pair that turns it.</summary>
+    public override void Carried(List<Offer> into)
+    {
+        into.Add(new Offer("Depressurize", "Depressurize", ValueKind.Flag, "", ""));
+        base.Carried(into);
+    }
+
     public override void Perform(string actionId, IList<Literal> values)
     {
         if (actionId == "Depressurize_On")

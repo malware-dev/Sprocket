@@ -145,14 +145,14 @@ on screen     Do something
 138  Sprite     Sprocket_Fill         {X:1188 Y:118 W:1 H:824}  #5B737BFF
 139  SetClip    {X:745 Y:270 W:428 H:656}
 140  Text       at {X:757.8 Y:279.572} scale 0.64  #85A1A9FF  "POWER"
-141  Text       at {X:757.8 Y:315.852} scale 0.64  #DCF5FDFF  "switch off"
-142  Text       at {X:757.8 Y:361.732} scale 0.64  #DCF5FDFF  "switch on"
+141  Text       at {X:757.8 Y:315.852} scale 0.64  #DCF5FDFF  "Switch off"
+142  Text       at {X:757.8 Y:361.732} scale 0.64  #DCF5FDFF  "Switch on"
 143  Text       at {X:757.8 Y:407.612} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
 144  Text       at {X:757.8 Y:453.492} scale 0.64  #85A1A9FF  "OPENING"
 145  Text       at {X:757.8 Y:488.473} scale 0.57  #A2C3CDFF  "w"
-146  Text       at {X:779.26 Y:489.772} scale 0.64  #DCF5FDFF  "close"
+146  Text       at {X:779.26 Y:489.772} scale 0.64  #DCF5FDFF  "Close"
 147  Text       at {X:757.8 Y:534.3529} scale 0.57  #A2C3CDFF  "w"
-148  Text       at {X:779.26 Y:535.652} scale 0.64  #DCF5FDFF  "open"
+148  Text       at {X:779.26 Y:535.652} scale 0.64  #DCF5FDFF  "Open"
 149  Text       at {X:757.8 Y:581.532} scale 0.64  #DCF5FDFF  "Open/Closed"
 150  SetClip    {X:259 Y:118 W:1402 H:836}
 151  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT TO DO"

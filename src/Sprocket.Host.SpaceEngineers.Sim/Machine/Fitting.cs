@@ -199,8 +199,17 @@ abstract class Fitting
     /// controls, which describe themselves; the rig says what it carries so a test can watch a value
     /// being told something.
     /// </remarks>
+    /// <summary>
+    /// Every value this block carries, the name every block carries first.
+    /// </summary>
+    /// <remarks>
+    /// The game gives every terminal block a name that can be written to, which is the floor under
+    /// the values the way the switch is the floor under the actions.
+    /// </remarks>
     public virtual void Carried(List<Offer> into)
     {
+        into.Add(new Offer("CustomName", "Name", ValueKind.Text, "", ""));
+
         for (var i = 0; i < _carries.Count; i++)
             into.Add(_carries[i]);
     }
@@ -232,6 +241,19 @@ abstract class Fitting
             choices.Add(new Choice(wordsAndMeanings[i], wordsAndMeanings[i + 1]));
 
         _carries.Add(new Offer(id, text, ValueKind.Integer).Between(choices));
+        return this;
+    }
+
+    /// <summary>
+    /// Gives this block a value that is one of a listed few, where the game will not hand over the list.
+    /// </summary>
+    /// <remarks>
+    /// What a real block does wherever it fills a drop-down per block: the list a mod is handed throws
+    /// when it is read, and all that comes through is the number.
+    /// </remarks>
+    public Fitting CarryingUnread(string id, string text)
+    {
+        _carries.Add(new Offer(id, text, ValueKind.Integer).Unread());
         return this;
     }
 

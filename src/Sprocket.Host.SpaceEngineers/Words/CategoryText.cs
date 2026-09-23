@@ -16,6 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Words
                 case Category.Power: return "Power";
                 case Category.Movement: return "Movement";
                 case Category.Opening: return "Opening";
+                case Category.Locking: return "Locking";
                 case Category.Flight: return "Flight";
                 case Category.Stock: return "Cargo";
                 case Category.Air: return "Air";
@@ -23,11 +24,12 @@ namespace Sprocket.Host.SpaceEngineers.Words
                 case Category.Weapons: return "Weapons";
                 case Category.Detection: return "Detection";
                 case Category.Automation: return "Automation";
+                case Category.Behaviour: return "Behaviour";
                 case Category.Signals: return "Signals";
                 case Category.Appearance: return "Appearance";
                 case Category.Screen: return "Screens";
                 case Category.Sound: return "Sound";
-                case Category.Listing: return "Where it shows";
+                case Category.Identity: return "Identity";
                 case Category.Access: return "Access";
                 default: return "Other";
             }

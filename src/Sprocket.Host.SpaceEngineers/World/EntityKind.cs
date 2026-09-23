@@ -18,6 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<EntityEvent> _events = new List<EntityEvent>();
         readonly List<EntityState> _states = new List<EntityState>();
         readonly List<EntityAction> _actions = new List<EntityAction>();
+        readonly List<string> _hidden = new List<string>();
 
         public EntityKind(string id, string displayName)
         {
@@ -166,11 +167,37 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>Says which of the block's own actions the action added last takes over.</summary>
-        public EntityKind Replacing(string gameActionId)
+        /// <summary>
+        /// Keeps the block's own members out of the list somebody chooses from, by the game's ids.
+        /// </summary>
+        /// <remarks>
+        /// For what this kind says better elsewhere, and for what the game offers that no sequence
+        /// can use. A velocity to set makes the game's increase and decrease worse than useless, and
+        /// growing a rotor a head is building the machine rather than running it. Said as a set
+        /// because one entry standing in for one other is the rare case, not the rule.
+        /// <para>
+        /// The game's members are added last, so this is read once the list is complete rather than
+        /// applied where it is declared.
+        /// </para>
+        /// </remarks>
+        public EntityKind Hiding(params string[] gameIds)
         {
-            _actions[_actions.Count - 1].Replacing(gameActionId);
+            for (var i = 0; i < gameIds.Length; i++)
+                _hidden.Add(gameIds[i]);
+
             return this;
+        }
+
+        /// <summary>Whether this kind keeps the block's own member out of that list.</summary>
+        internal bool Hides(string gameId)
+        {
+            for (var i = 0; i < _hidden.Count; i++)
+            {
+                if (_hidden[i] == gameId)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Says that reaching the state of the action added last takes time.</summary>

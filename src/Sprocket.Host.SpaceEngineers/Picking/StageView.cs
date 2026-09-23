@@ -534,8 +534,11 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
                 // A heading is words and nothing else: no mark, because there is nothing to choose,
                 // and no press, because a row that answers the pointer and then does nothing is a
-                // row somebody presses twice before believing it.
-                row.Line.Press = entry.IsHeading ? Deed.Nothing : Moving(entry, many);
+                // row somebody presses twice before believing it. A row listed only to be read about
+                // is the same, and says why when the pointer rests on it.
+                bool inert = entry.IsHeading || entry.IsWithheld;
+                row.Line.Press = inert ? Deed.Nothing : Moving(entry, many);
+                row.Line.Tip = entry.IsWithheld ? entry.Tip : null;
 
                 // No mark where one thing is settled on, only where several are collected: the row's own
                 // tone says which one it is, and the words then start where a heading does. A heading
@@ -546,17 +549,17 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 // The one settled on sits on the highlight tone at rest, the way a chosen answer in a
                 // list of answers does, so lighting it has to go a step further again.
                 bool settled = entry.IsChosen && !many;
-                row.Line.Highlight = entry.IsHeading ? Palette.None : settled ? Palette.Line : Palette.PanelHot;
+                row.Line.Highlight = inert ? Palette.None : settled ? Palette.Line : Palette.PanelHot;
                 row.Mark.Collapsed = entry.IsHeading;
 
                 // The box collects one at a time and says so whatever is held down, which is what it
                 // is for. Only where several are being collected: where one is being settled on, a
                 // dot is a picture of the state and there is nothing to collect.
-                row.Mark.Press = entry.IsHeading || !many
+                row.Mark.Press = inert || !many
                     ? Deed.Nothing
                     : Deed.Picks(entry.Command, Held.Also);
 
-                row.Mark.Highlight = entry.IsHeading || !many ? Palette.None : Palette.PanelHot;
+                row.Mark.Highlight = inert || !many ? Palette.None : Palette.PanelHot;
 
                 // A tick where several may be chosen.
                 row.Mark.Many = many;
@@ -569,7 +572,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 row.Name.Text = entry.IsHeading ? Widgets.Caps(entry.Text) : entry.Text;
                 row.Waits.Collapsed = !entry.Waits;
                 row.Waits.Tip = entry.Waits ? stage.WaitsTip : null;
-                row.Name.Color = entry.IsHeading ? Palette.Faint : Palette.Ink;
+                row.Name.Color = entry.IsHeading ? Palette.Faint : entry.IsWithheld ? Palette.Muted : Palette.Ink;
                 row.Line.Background = settled ? Palette.PanelHot : Palette.None;
 
                 string detail = DetailOf(entry);

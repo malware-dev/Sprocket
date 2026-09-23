@@ -575,9 +575,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>What an action's values ask for, one per value, asked of the blocks it acts on.</summary>
-        internal List<Field> Fields(IList<long> entityIds, string actionId)
+        internal List<Field> Fields(IList<long> entityIds, string actionId, bool sets)
         {
-            return Vocabulary.Fields(_world, entityIds, actionId);
+            return Vocabulary.Fields(_world, entityIds, actionId, sets);
         }
 
         /// <summary>Reports new text for a search box or any other field, unless the field refuses it.</summary>
@@ -1262,7 +1262,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             {
                 // Nothing picked yet: the sequence is being made, so there is nothing to resolve.
                 Push(new PickPage(this, "When something happens", true,
-                    new List<long>(), moment.EventId,
+                    new List<long>(), moment.EventId, false,
                     delegate(PickAnswer answer)
                     {
                         // Nothing to record: the sequence does not exist yet, so there is no
@@ -1577,7 +1577,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh)
         {
-            Push(new PickPage(this, "Do something", false, new List<long>(), "",
+            Push(new PickPage(this, "Do something", false, new List<long>(), "", false,
                 delegate(PickAnswer answer)
                 {
                     var act = new Act(answer.Chosen);
@@ -1682,7 +1682,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // Handed what the step already holds, so the question that finishes this opens on those
             // values rather than empty. Changing which blocks a step acts on is not a reason to type
             // its values again.
-            Push(new PickPage(this, "Do something", false, Blocks(act.Targets), act.ActionId,
+            Push(new PickPage(this, "Do something", false, Blocks(act.Targets), act.ActionId, act.Sets,
                 delegate(PickAnswer answer)
                 {
                     UnwindTo(origin);
@@ -1742,7 +1742,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var was = moment as WhenTrigger;
 
             Push(new PickPage(this, "When something happens", true,
-                Blocks(moment.Sources), moment.EventId,
+                Blocks(moment.Sources), moment.EventId, false,
                 delegate(PickAnswer answer)
                 {
                     UnwindTo(origin);

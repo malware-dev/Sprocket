@@ -19,8 +19,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Going somewhere: turning, extending, locking, and how fast.</summary>
         Movement,
 
-        /// <summary>Letting something through: doors, hatches, gear and the like.</summary>
+        /// <summary>Letting something through: doors, hatches and the like.</summary>
         Opening,
+
+        /// <summary>Holding fast to something else: a landing gear, a connector.</summary>
+        Locking,
 
         /// <summary>Flying the construct, and what helps it fly.</summary>
         Flight,
@@ -55,8 +58,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What it makes a noise about.</summary>
         Sound,
 
-        /// <summary>Where it shows up: the terminal, the HUD, an inventory screen.</summary>
-        Listing,
+        /// <summary>What it is called, and what it carries written on it.</summary>
+        Identity,
+
+        /// <summary>
+        /// How the machine is set up to behave: what it does when nobody tells it, and what it was
+        /// tuned to when it was built.
+        /// </summary>
+        /// <remarks>
+        /// Low in the list because none of it belongs in a sequence twice. A landing gear is told to
+        /// lock, and locks by itself because somebody set autolock; a rotor is told to turn, and
+        /// turns with the torque it was built with. Neither is something an automation revisits.
+        /// </remarks>
+        Behaviour,
 
         /// <summary>Who may use it.</summary>
         Access,
