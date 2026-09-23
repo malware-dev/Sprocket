@@ -105,8 +105,11 @@ sealed class Rig
             .Carrying("Direction", "Forward Direction", "Forward", "0", "Backward", "1",
                 "Left", "2", "Right", "3", "Up", "4", "Down", "5");
 
+        // Carrying something Sprocket has never heard of, which is what a modded block looks like
+        // from here: the member is offered like any other and grouped under Other.
         rig.Weld(new Plain(20, "Approach Sensor", Type<MyObjectBuilder_SensorBlock>(),
-            "LargeBlockSensor", "Sensor"));
+                "LargeBlockSensor", "Sensor")
+            .Carrying("ChimeOnApproach", "Chime On Approach", ValueKind.Flag));
         rig.Weld(new Panel(21, "Airlock Button", Type<MyObjectBuilder_ButtonPanel>(),
             "ButtonPanelLarge", "Button Panel", 1));
         // A block Sprocket knows nothing about beyond its switch, which is most of a ship. What it

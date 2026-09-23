@@ -261,6 +261,31 @@ public class SettingTests
         Assert.False(screen.Shows("APPEARANCE"), "a beacon's radius is grouped as how it looks");
     }
 
+    /// <summary>
+    /// What nothing has been said about is offered last, under Other.
+    /// </summary>
+    /// <remarks>
+    /// Which is what every member of a modded block is until somebody writes a category for it. Last
+    /// rather than left out: a member Sprocket cannot place is still a member the block can perform.
+    /// </remarks>
+    [Fact]
+    public void WhatNothingKnowsAboutComesLast()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Approach Sensor");
+        screen.Run(2);
+
+        var entries = What(screen).Entries;
+        var other = entries.ToList().FindIndex(entry => entry.IsHeading && entry.Text == "Other");
+        var power = entries.ToList().FindIndex(entry => entry.IsHeading && entry.Text == "Power");
+
+        Assert.True(other >= 0, "nothing is grouped under Other");
+        Assert.True(power >= 0 && power < other, "Other is not last");
+        Assert.True(screen.Shows("Chime On Approach"), "the unknown member is not offered at all");
+    }
+
     static PickStage What(Screen screen)
     {
         return screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
