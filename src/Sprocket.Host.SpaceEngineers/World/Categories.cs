@@ -52,6 +52,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return Category.Signals;
             if (Starts(plain, "flightmode"))
                 return Category.Flight;
+            if (Starts(plain, "offensivecombat") || Starts(plain, "attackmode")
+                || Starts(plain, "targetpriority"))
+                return Category.Weapons;
+            if (Starts(plain, "filter"))
+                return Category.Signals;
 
             return Known(plain);
         }
@@ -139,6 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "discharge":
                 case "auto":
                 case "powertransferoverride":
+                case "powerdependency":
                     return Category.Power;
 
                 // Joints, wheels, and what they are told to do.
@@ -231,6 +237,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "depth":
                 case "virtualmass":
                 case "restitution":
+                case "minheightaboveterrain":
+                case "aligntogravity":
+                case "maxpitchangle":
+                case "maxrollangle":
                     return Category.Flight;
 
                 // What a block holds and what it does with it.
@@ -275,6 +285,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "roty":
                 case "rotz":
                 case "scale":
+                case "repairservicerange":
+                case "salvageservicerange":
+                case "precisionmodetoggle":
+                case "showpivottoggle":
+                case "offsetx":
+                case "offsety":
+                case "offsetz":
                     return Category.Making;
 
                 // Shooting.
@@ -313,6 +330,21 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "rotorelevation":
                 case "toollist":
                 case "selectedtoolslist":
+                case "locktarget":
+                case "cantargetcharacters":
+                case "flee":
+                case "fleemode":
+                case "fleedistance":
+                case "waypointzonesize":
+                case "evasivemaneuvers":
+                case "evasivemaneuverangle":
+                case "evasivemaneuverintervalrange":
+                case "targetpriority":
+                case "updateinterval":
+                case "attackpattern":
+                case "countdown":
+                case "delay":
+                case "enablerestoration":
                     return Category.Weapons;
 
                 // Watching for something.
@@ -357,6 +389,26 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "run":
                 case "runwithdefaultargument":
                 case "consolecommand":
+                case "activatebehavior":
+                case "selectmission":
+                case "idmodeselectorcombobox":
+                case "currentpositionhome":
+                case "currentgridpositionhome":
+                case "followhomeminrange":
+                case "followhomemaxrange":
+                case "wander":
+                case "followme":
+                case "stopfollowing":
+                case "followdistance":
+                case "idplaycheckbox":
+                case "idrepeatchekbox":
+                case "idshowpathcheckbox":
+                case "idshowpointscheckbox":
+                case "idrecordcheckbox":
+                case "idrecordstepsslider":
+                case "idminimaldistanceslider":
+                case "idaddwaypoint":
+                case "reversepath":
                     return Category.Automation;
 
                 // Talking to other constructs.
@@ -374,6 +426,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "connectgps":
                 case "isperm":
                 case "idle":
+                case "receivefrom":
+                case "sendsignal":
+                case "channel":
+                case "channelvalue":
+                case "channelvaluesendsignal":
+                case "broadcastusingantennas":
                     return Category.Signals;
 
                 // What it looks like from outside.
@@ -386,6 +444,9 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "blinklenght":
                 case "blinkoffset":
                 case "rotationspeed":
+                case "colormin":
+                case "colormax":
+                case "effectscombo":
                     return Category.Appearance;
 
                 // What it writes on itself.
@@ -424,10 +485,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "customdata":
                 case "hudtext":
                 case "buttonname":
+                case "searchable":
                     return Category.Listing;
 
                 // Who may use it.
                 case "anyonecanuse":
+                case "spawnname":
+                case "takeownership":
+                case "faction":
                     return Category.Access;
 
                 default:

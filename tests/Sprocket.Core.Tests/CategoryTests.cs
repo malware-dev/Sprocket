@@ -74,6 +74,22 @@ public class CategoryTests
         Assert.Equal(Category.Access, Categories.Of("SafeZoneDrillingCb"));
     }
 
+    /// <summary>
+    /// A member whose only id begins with Set is found by what it sets.
+    /// </summary>
+    /// <remarks>
+    /// The stem is what the table answers, so a button the game only ever registers one way still
+    /// has to be entered without the prefix. Written down because it is an easy entry to make wrong
+    /// and a silent one: the case simply never matches and the member falls to Other.
+    /// </remarks>
+    [Fact]
+    public void AButtonNamedForWhatItSetsIsStillFound()
+    {
+        Assert.Equal(Category.Access, Categories.Of("SetFaction"));
+        Assert.Equal(Category.Automation, Categories.Of("SetCurrentPositionHome"));
+        Assert.Equal(Category.Signals, Categories.Of("SetChannelValue"));
+    }
+
     /// <summary>An id nothing has been said about is a place in the list rather than a failure.</summary>
     [Fact]
     public void AnUnknownIdIsOther()
