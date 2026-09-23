@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             Title = title;
             Filters = new List<KindFilter>();
             Options = new List<ChoiceEntry>();
+            Views = new List<ChoiceEntry>();
             Entries = new List<PickOption>();
         }
 
@@ -28,9 +29,6 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         /// <summary>Context under the title, such as how many are picked.</summary>
         public string Subtitle { get; set; }
-
-        /// <summary>What the recessed well under the list is headed, or empty where there is none.</summary>
-        public string WellTitle { get; set; }
 
         /// <summary>Whether picking one un-picks the last, or adds to them.</summary>
         public bool AllowsMany { get; set; }
@@ -59,7 +57,6 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// <summary>Where to send typing, or zero if it cannot be narrowed.</summary>
         public int NarrowCommand { get; set; }
 
-        /// <summary>Ways to narrow by kind, built from what is actually here.</summary>
         /// <summary>
         /// What is typed into the box that narrows the list of kinds, or empty.
         /// </summary>
@@ -86,8 +83,15 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// </summary>
         public List<ChoiceEntry> Options { get; private set; }
 
-        /// <summary>The checkbox that shows what is hidden, or null where the stage has none.</summary>
-        public ChoiceEntry Hidden { get; set; }
+        /// <summary>
+        /// The ways of looking at what is on offer, one of them current, or empty where there is
+        /// only one way.
+        /// </summary>
+        /// <remarks>
+        /// Two, over what somebody does to a block: what Sprocket has made of the block's
+        /// vocabulary, and that vocabulary as the block itself declares it.
+        /// </remarks>
+        public List<ChoiceEntry> Views { get; private set; }
 
         public List<PickOption> Entries { get; private set; }
 

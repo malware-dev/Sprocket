@@ -51,18 +51,12 @@ public class RenameTests
     /// A screen's header holds its height for as long as that screen is up.
     /// </summary>
     /// <remarks>
-    /// A picker's subtitle empties the moment the pick is complete, and a header that shrank when it
-    /// did would move the screen under somebody mid-task. The line stays reserved instead.
-    /// <para>
-    /// Only for as long as the screen is up, and only because the picker is currently the odd one out.
-    /// The header is designed without a subtitle - one was rare enough that reserving its line made the
-    /// header look wrong on every other screen - so a picker standing 77 units against a sequence's 53
-    /// is the picker disagreeing with the design rather than the header bending for it. The picker is
-    /// what wants redesigning; see docs/Editor.md.
-    /// </para>
+    /// Everything on a screen is placed from the bottom of the header, so a line arriving in it or
+    /// leaving takes the whole page with it and moves what somebody is reading. Whether there is room
+    /// for a subtitle is settled as a screen goes up and never again while it is up.
     /// </remarks>
     [Fact]
-    public void TheHeaderHoldsItsHeightWhileItsSubtitleComesAndGoes()
+    public void TheHeaderHoldsItsHeightForTheLifeOfAScreen()
     {
         var screen = Screen.Fresh();
         var editor = screen.Editor;
@@ -72,20 +66,13 @@ public class RenameTests
         screen.Run(5);
 
         var tall = Header(screen);
-        Assert.NotEqual("", editor.Screen.Subtitle);
 
         editor.PressBlock("Airlock Button");
         screen.Run(5);
-
-        // A different subtitle, same screen.
-        Assert.NotEqual("", editor.Screen.Subtitle);
         Assert.Equal(tall, Header(screen));
 
         editor.PressChoice("is pressed");
         screen.Run(5);
-
-        // Complete: the subtitle emptied, and the header must not have moved.
-        Assert.Equal("", editor.Screen.Subtitle);
         Assert.Equal(tall, Header(screen));
     }
 

@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
@@ -79,14 +80,14 @@ public class ActionTests
     }
 
     /// <summary>
-    /// What an extension stands in for comes back, dimmed in the well, when somebody asks to see it.
+    /// What an extension stands in for is in the terminal view, under the name the block gives it.
     /// </summary>
     /// <remarks>
-    /// Hidden is not gone: a use nobody anticipated is still a use. The choice lasts while the editor
-    /// is open, so the next picker opens the way this one was left.
+    /// Replaced is not gone: a use nobody anticipated is still a use. The two views are disjoint, so
+    /// what one offers in Sprocket's words the other offers in the block's.
     /// </remarks>
     [Fact]
-    public void WhatIsHiddenIsShownDimmedWhenAskedFor()
+    public void TheTerminalViewHoldsWhatTheOrganizedOneReplaced()
     {
         var screen = WithASequence();
 
@@ -96,18 +97,40 @@ public class ActionTests
 
         Assert.False(screen.Shows("Turn block On"), "what switch on stands in for is showing");
 
-        screen.Editor.Invoke(What(screen).Hidden.Command);
+        screen.Editor.Invoke(Terminal(screen).Command);
         screen.Run(2);
 
-        PickOption turned = What(screen).Entries.Single(entry => entry.Text == "Turn block On");
-        Assert.True(turned.IsDimmed, "a hidden entry is not dimmed");
-        Assert.True(turned.InWell, "a hidden entry is not in the well");
-        Assert.True(What(screen).Hidden.IsCurrent);
+        Assert.True(screen.Shows("Turn block On"), "the block's own switch is not in its own view");
+        Assert.False(screen.Shows("switch on"), "Sprocket's wording is in the block's own view");
+        Assert.True(Terminal(screen).IsCurrent);
 
-        screen.Editor.Invoke(What(screen).Hidden.Command);
+        screen.Editor.Invoke(Organized(screen).Command);
         screen.Run(2);
 
-        Assert.False(screen.Shows("Turn block On"), "unticking did not hide it again");
+        Assert.False(screen.Shows("Turn block On"), "going back did not put it away again");
+        Assert.True(screen.Shows("switch on"));
+    }
+
+    /// <summary>
+    /// Both views are offered, and the organized one is what a picker opens on.
+    /// </summary>
+    /// <remarks>
+    /// Every functional block has an organizer whether or not anything was written for its kind:
+    /// switch on and switch off are Sprocket's words for what the game calls Toggle block On/Off.
+    /// </remarks>
+    [Fact]
+    public void APickerOpensOnTheOrganizedView()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Airlock Light");
+        screen.Run(2);
+
+        Assert.NotEqual(0, Organized(screen).Command);
+        Assert.NotEqual(0, Terminal(screen).Command);
+        Assert.True(Organized(screen).IsCurrent, "the picker did not open on Sprocket's own words");
+        Assert.True(screen.Shows("switch on"));
     }
 
     [Fact]
@@ -118,7 +141,7 @@ public class ActionTests
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
-        screen.Editor.Invoke(What(screen).Hidden.Command);
+        screen.Editor.Invoke(Terminal(screen).Command);
         screen.Editor.Back();
         screen.Run(2);
 
@@ -126,7 +149,7 @@ public class ActionTests
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
-        Assert.True(What(screen).Hidden.IsCurrent, "the picker forgot what was being shown");
+        Assert.True(Terminal(screen).IsCurrent, "the picker forgot which view was being shown");
         Assert.True(screen.Shows("Turn block On"));
     }
 
@@ -161,12 +184,36 @@ public class ActionTests
         var entries = What(screen).Entries;
         Assert.True(entries.Single(entry => entry.Text == "open").Waits, "opening a door is not marked");
         Assert.False(entries.Single(entry => entry.Text == "switch on").Waits, "switching on is marked, and holds nothing");
-        Assert.All(entries.Where(entry => entry.InWell), entry => Assert.False(entry.Waits));
+    }
+
+    /// <summary>The tab answers where it is drawn, which nothing else on this screen proves.</summary>
+    [Fact]
+    public void TheTabIsPressedWhereItIsDrawn()
+    {
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
+            + "1300 918 70 193 200 500").Split(' '));
+
+        PickStage what = screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
+        Assert.NotEqual(0, what.Views[1].Command);
+
+        screen.Do("820", "244");
+        Assert.True(screen.Editor.ShowsTerminal, "pressing the tab did not change the view");
+        Assert.True(screen.Shows("Toggle block On/Off"), "the block's own words are not listed");
     }
 
     static PickStage What(Screen screen)
     {
         return screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
+    }
+
+    static ChoiceEntry Organized(Screen screen)
+    {
+        return What(screen).Views[0];
+    }
+
+    static ChoiceEntry Terminal(Screen screen)
+    {
+        return What(screen).Views[1];
     }
 
     /// <summary>
@@ -344,7 +391,7 @@ public class ActionTests
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 564 1380 1000").Split(' '));
+            + "1300 918 70 193 200 500 800 508 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the light's on value does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
@@ -371,7 +418,7 @@ public class ActionTests
     public void AColourIsChosenByPressingOne()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 500 800 692 1380 1000").Split(' '));
+            + "1300 918 70 193 200 500 800 416 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the colour setter does not ask for anything");
         Assert.Equal("", screen.Scene.AskBox.Text);
@@ -399,7 +446,7 @@ public class ActionTests
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 224 type Standby 200 375 800 472 1380 1000").Split(' '));
+            + "1300 918 70 193 150 200 type Standby 200 351 800 416 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the charge mode does not ask for anything");
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
@@ -432,7 +479,7 @@ public class ActionTests
     public void MoreChoicesThanFitFoldIntoAList()
     {
         var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 224 type Tug 200 375 800 472 1380 1000").Split(' '));
+            + "1300 918 70 193 150 200 type Tug 200 351 800 416 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the forward direction does not ask for anything");
 

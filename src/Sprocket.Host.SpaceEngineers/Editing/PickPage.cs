@@ -150,16 +150,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override string Title => _title;
 
-        public override string Subtitle
-        {
-            get
-            {
-                if (_selection.Count == 0)
-                    return "Start by picking one or more blocks";
-                return IsComplete ? "" : "Now pick what happens";
-            }
-        }
-
         public override string PrimaryText => IsComplete ? "Done" : "";
 
         /// <summary>
@@ -316,10 +306,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             {
                 _what = new PickStage(_forEvents ? "What happens" : "What to do");
 
-                // Only where there is something an extension can stand in for, which is what somebody
-                // does to a block rather than what happens to one.
+                // Only over what somebody does to a block. What happens to one is Sprocket's own
+                // wording throughout, so there is no second way to look at it.
                 if (!_forEvents)
-                    _what.Hidden = new ChoiceEntry(HiddenSaid, false, 0);
+                {
+                    _what.Views.Add(new ChoiceEntry(OrganizedSaid, true, 0));
+                    _what.Views.Add(new ChoiceEntry(TerminalSaid, false, 0));
+                }
                 _what.EmptyText = _forEvents
                     ? "Those blocks have nothing in common that can happen to them."
                     : "Those blocks have nothing in common that can be done to them.";
@@ -597,7 +590,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _ids.Clear();
             _values.Clear();
             _groups.Clear();
-            _dimmed.Clear();
             _waits.Clear();
 
             if (_forEvents)
@@ -614,7 +606,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 Grouped(Vocabulary.ActionsOf(Editor.World, _selection));
             }
 
-            var note = !_forEvents && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsHidden)
+            var note = !_forEvents && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsTerminal)
                 ? NarrowedSaid
                 : "";
 
@@ -653,11 +645,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 changed = true;
             }
 
-            if (_what.Hidden != null)
-            {
-                changed |= Apply(_what.Hidden, HiddenSaid, Editor.ShowsHidden,
-                    Editor.Register(Cmd.ShowHidden, ToggleHidden));
-            }
+            changed |= FillViews();
 
             _matched.Clear();
             for (var i = 0; i < _names.Count; i++)
@@ -682,8 +670,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 {
                     group = mine;
 
-                    // Sprocket's own words need no heading: they are the list, and the well under
-                    // them is what is headed.
+                    // Sprocket's own words need no heading: in the organized view they are the list,
+                    // and the terminal view never holds any.
                     if (mine != Own)
                         _rows.Add(-1 - mine);
                 }
@@ -691,31 +679,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _rows.Add(at);
             }
 
-            var well = _forEvents ? "" : TerminalSaid;
-            if (_what.WellTitle != well)
-            {
-                _what.WellTitle = well;
-                changed = true;
-            }
-
             changed |= Resize(_what.Entries, _rows.Count);
             for (var i = 0; i < _rows.Count; i++)
             {
                 var at = _rows[i];
-                var sunk = at < 0 || (_groups.Count > at && _groups[at] != Own);
-
-                if (_what.Entries[i].InWell != sunk)
-                {
-                    _what.Entries[i].InWell = sunk;
-                    changed = true;
-                }
-
-                var dim = at >= 0 && _dimmed.Count > at && _dimmed[at];
-                if (_what.Entries[i].IsDimmed != dim)
-                {
-                    _what.Entries[i].IsDimmed = dim;
-                    changed = true;
-                }
 
                 var waits = at >= 0 && _waits.Count > at && _waits[at];
                 if (_what.Entries[i].Waits != waits)
@@ -740,6 +707,27 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return changed;
         }
 
+        /// <summary>The two ways of looking at what a block offers, and which one is showing.</summary>
+        bool FillViews()
+        {
+            if (_what.Views.Count == 0)
+                return false;
+
+            var changed = Apply(_what.Views[0], OrganizedSaid, !Editor.ShowsTerminal,
+                Editor.Register(Cmd.ShowOrganized, delegate { Show(false); }));
+
+            changed |= Apply(_what.Views[1], TerminalSaid, Editor.ShowsTerminal,
+                Editor.Register(Cmd.ShowTerminal, delegate { Show(true); }));
+
+            return changed;
+        }
+
+        void Show(bool terminal)
+        {
+            Editor.ShowsTerminal = terminal;
+            Editor.Invalidate();
+        }
+
         /// <summary>The heading over the block's own values, and the one over its actions.</summary>
         /// <remarks>
         /// Named for where somebody has already met them. Almost nobody arrives here without having
@@ -749,7 +737,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         const string ValuesSaid = "Values";
         const string ActionsSaid = "Toolbar Actions";
 
-        /// <summary>The heading over the well that holds the game's own words.</summary>
+        /// <summary>What the two views are called.</summary>
+        /// <remarks>
+        /// Terminal is the game's own name for the surface it lists, and the one somebody has
+        /// already met wiring a toolbar by hand.
+        /// </remarks>
+        const string OrganizedSaid = "Organized";
         const string TerminalSaid = "Terminal";
 
         /// <summary>What the list of what to do says when the picked blocks do not all offer the same.</summary>
@@ -757,9 +750,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>What the mark on something a step waits for says when the pointer rests on it.</summary>
         const string WaitsSaid = "Holds the sequence until finished";
-
-        /// <summary>What the checkbox that shows what is hidden says.</summary>
-        const string HiddenSaid = "Show hidden";
 
         /// <summary>Which group an entry is listed in: the game's actions, its values, or Sprocket's own.</summary>
         /// <remarks>
@@ -797,22 +787,28 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if ((one.Hidden && !Editor.ShowsHidden) || Group(one) != group)
+                if (!Lists(one) || Group(one) != group)
                     continue;
 
                 _names.Add(one.Named);
                 _ids.Add(one.Id);
                 _values.Add(one.Sets);
                 _groups.Add(group);
-                _dimmed.Add(one.Hidden);
                 _waits.Add(one.Lasts);
             }
         }
 
-        void ToggleHidden()
+        /// <summary>
+        /// Whether the view now showing lists this one.
+        /// </summary>
+        /// <remarks>
+        /// The terminal view lists what the block declares, whether or not something has been
+        /// offered in its place; the organized view lists what is on offer, whoever worded it. A
+        /// member nothing has touched is in both, under the one name it has.
+        /// </remarks>
+        bool Lists(EntityAction one)
         {
-            Editor.ShowsHidden = !Editor.ShowsHidden;
-            Editor.Invalidate();
+            return Editor.ShowsTerminal ? one.Unaltered : !one.Hidden;
         }
 
         static int Group(EntityAction one)
@@ -828,9 +824,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>Which group each thing on offer is listed in, one per entry in <c>_names</c>.</summary>
         readonly List<int> _groups = new List<int>();
-
-        /// <summary>Whether each thing on offer is shown only because what is hidden is being shown.</summary>
-        readonly List<bool> _dimmed = new List<bool>();
 
         /// <summary>Whether a step doing each thing on offer waits for it to finish.</summary>
         readonly List<bool> _waits = new List<bool>();

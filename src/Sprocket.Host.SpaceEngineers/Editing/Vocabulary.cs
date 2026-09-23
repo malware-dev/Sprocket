@@ -121,8 +121,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>Whether any of the blocks offers something the others do not, which the shared list leaves out.</summary>
-        /// <remarks>What is hidden counts only while it is being shown.</remarks>
-        public static bool Narrowed(GridWorld world, IList<long> entityIds, bool hidden)
+        /// <remarks>Asked of the view showing, because each lists a different set.</remarks>
+        public static bool Narrowed(GridWorld world, IList<long> entityIds, bool terminal)
         {
             var entities = Blocks(world, entityIds);
             for (var i = 0; i < entities.Count; i++)
@@ -130,13 +130,15 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 var actions = entities[i].Kind.Actions;
                 for (var j = 0; j < actions.Count; j++)
                 {
-                    if ((hidden || !actions[j].Hidden) && !AllHaveAction(entities, actions[j], 0))
+                    var listed = terminal ? actions[j].Unaltered : !actions[j].Hidden;
+                    if (listed && !AllHaveAction(entities, actions[j], 0))
                         return true;
                 }
             }
 
             return false;
         }
+
 
         static List<EntityAction> ActionsOf(List<GridEntity> entities)
         {

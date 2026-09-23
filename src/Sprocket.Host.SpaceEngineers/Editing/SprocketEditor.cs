@@ -663,12 +663,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         string _whenKind = "";
         string _doingKind = "";
 
-        /// <summary>Whether the list of what to do shows what is hidden.</summary>
+        /// <summary>Whether the list of what to do shows the block's own vocabulary rather than Sprocket's.</summary>
         /// <remarks>
         /// Kept the way the kind filter is: for as long as the editor is open, and not saved with the
         /// program, because it is how somebody is working rather than part of what they are building.
+        /// <para>
+        /// Held here rather than on the picker so that somebody who works in the block's own words
+        /// keeps working in them, rather than being put back a step at every sequence.
+        /// </para>
         /// </remarks>
-        public bool ShowsHidden { get; set; }
+        public bool ShowsTerminal { get; set; }
 
         public void SetNumber(int command, int value)
         {

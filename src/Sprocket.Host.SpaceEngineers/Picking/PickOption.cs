@@ -51,12 +51,6 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// </remarks>
         public bool IsHeading { get; set; }
 
-        /// <summary>Whether this sits in the recessed well, among what the game declared in its own words.</summary>
-        public bool InWell { get; set; }
-
-        /// <summary>Whether this is shown only because what is hidden is being shown, and so is drawn dimmed.</summary>
-        public bool IsDimmed { get; set; }
-
         /// <summary>Whether a step doing this waits for it to finish.</summary>
         public bool Waits { get; set; }
     }

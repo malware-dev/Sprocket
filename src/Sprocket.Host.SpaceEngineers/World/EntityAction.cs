@@ -124,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
         /// <remarks>
-        /// What the list sinks into its well, below what Sprocket says in its own words. An
+        /// What the terminal view lists, whether or not the organized one has replaced it. An
         /// extension's entry is Sprocket's; one the block declares and nothing has reworded is this.
         /// </remarks>
         public bool Unaltered { get; internal set; }

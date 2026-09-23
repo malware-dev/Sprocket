@@ -31,17 +31,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override string Title => _title;
 
-        public override string Subtitle
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(Caption))
-                    return Caption;
-                return _options.Count == 0 ? EmptyText : "";
-            }
-        }
+        /// <summary>
+        /// What the question is about, which a choice page says for as long as it is up.
+        /// </summary>
+        /// <remarks>
+        /// Set when the page is made and never after, because the header holds its size for the life
+        /// of a screen: a line that arrived later would take the whole screen down with it.
+        /// </remarks>
+        public override string Subtitle => Caption ?? "";
 
-        /// <summary>Shown when there is nothing to choose from yet.</summary>
+        /// <summary>Shown where the rows would be when there is nothing to choose from yet.</summary>
         public string EmptyText { get; set; }
 
         /// <summary>

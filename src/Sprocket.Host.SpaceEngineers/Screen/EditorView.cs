@@ -65,9 +65,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         string _redoSays;
         readonly Label _subtitle = Widgets.Label("", Palette.Faint, Lettering.Small);
 
-        /// <summary>Whether the screen now up has written a subtitle at any point since it opened.</summary>
-        bool _hadSubtitle;
-
         readonly Dock _bodyDock = new Dock();
         readonly Scroll _scroll = new Scroll();
 
@@ -225,12 +222,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _headerBar.Fill = titleLane;
             _headerBar.Right = rightLane;
 
-            // The subtitle's line is held for as long as a screen that has ever had one is up, and not
-            // at all on a screen that never does. Reserving it everywhere was the first answer and it was
-            // paying for the picker's guidance on every screen in the editor - a fifth of the header, on
-            // screens where nothing can ever write there. Dropping the reservation outright was the other
-            // wrong answer: a picker's guidance clears the moment the picking is done, and a header that
-            // shrank at that moment would take the whole screen up with it.
+            // The subtitle's line is held for a screen that has one and not for a screen that does not,
+            // decided once as the screen goes up. <b>The header never changes size while a screen is
+            // up.</b> Everything under it is placed from the bottom of this block, so a line arriving
+            // or leaving takes the whole page with it, and a page that moves under the pointer loses
+            // whoever was reading it.
             Stack headerBlock = Widgets.Column(Space.Line);
             headerBlock.Background = Palette.Chrome;
 
@@ -526,13 +522,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             _title.Update(screen.Heading, _renaming);
 
-            // Latched rather than read straight off, so the line does not come and go inside one screen.
-            // Cleared in Rebuild, which is where one screen becomes another.
-            if (!string.IsNullOrEmpty(screen.Subtitle))
-                _hadSubtitle = true;
-
+            // Only the words. Whether there is room for them was settled when this screen went up - see
+            // Rebuild - because changing it now would move the page under whoever is reading it.
             _subtitle.Text = screen.Subtitle;
-            _subtitle.Collapsed = !_hadSubtitle;
 
             // Which part wears the pencil is the row's business now, because it is a per-part answer.
             if (_renaming >= 0)
@@ -1534,7 +1526,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _views.Clear();
             _shown.Clear();
-            _hadSubtitle = false;
+
+            // Settled here, once, for the life of this screen: a page either says something under its
+            // heading or it never does, and the header holds whichever shape that is.
+            _subtitle.Collapsed = string.IsNullOrEmpty(screen.Subtitle);
 
             for (int i = 0; i < screen.Components.Count; i++)
             {

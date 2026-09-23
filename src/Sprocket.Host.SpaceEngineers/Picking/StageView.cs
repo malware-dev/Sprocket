@@ -91,24 +91,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         readonly Scroll _scroll = new Scroll();
         readonly Stack _rows = Widgets.Column(Space.Line);
 
-        /// <summary>
-        /// What scrolls: the rows in Sprocket's own words, and under them the well and its heading.
-        /// </summary>
+        /// <summary>What scrolls: the line saying the list is narrowed, and the rows themselves.</summary>
         readonly Stack _list = Widgets.Column(Space.Line);
-
-        /// <summary>
-        /// The recessed well holding what the game declared in its own words.
-        /// </summary>
-        /// <remarks>
-        /// Filled like the search box, so the depth is already part of the editor's vocabulary. Nothing
-        /// above it is badged: it reads as lifted because the rest is sunk.
-        /// </remarks>
-        readonly Stack _well = Widgets.Column(Space.Line);
-
-        /// <summary>The well, held clear of the scroll bar, which the list's content otherwise runs up to.</summary>
-        readonly Stack _wellRoom = Widgets.Column(0f);
-        readonly Label _wellTitle = Widgets.Label("", Palette.Faint, Lettering.Body);
-        readonly List<RowVisual> _sunk = new List<RowVisual>();
 
         /// <summary>Where the pointer was when the thumb last moved. Only meaningful while it is held.</summary>
         float _held;
@@ -121,14 +105,13 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         readonly Stack _kindList = Widgets.Column(Space.Hair * 2f);
         readonly List<KindVisual> _kindRows = new List<KindVisual>();
 
-        /// <summary>The checkbox that shows what is hidden, under the search box, where there is one.</summary>
-        readonly Stack _hidden = Widgets.RowOf(Space.Item);
-        readonly Mark _hiddenMark = new Mark();
-        readonly Label _hiddenText = Widgets.Label("", Palette.Muted, Lettering.Small);
+        /// <summary>The ways of looking at the list, across the bottom of the head where there is more than one.</summary>
+        readonly Stack _tabs = Widgets.RowOf(0f);
+        readonly List<Label> _tabLabels = new List<Label>();
 
         bool _hasNarrow;
         bool _hasKinds;
-        bool _hasHidden;
+        bool _hasViews;
 
         public StageView(PickComponent component, int index)
         {
@@ -188,17 +171,31 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             if (_hasKinds)
                 _head.Children.Add(_kindHead);
 
-            // In the place the kind filter takes in the column beside it, so the two columns start
-            // their first row at the same height. Square, because it holds or does not on its own.
-            _hasHidden = stage.Hidden != null;
-            if (_hasHidden)
+            // Equal plates butted edge to edge, each keeping its own edge, which is how the game
+            // draws the tabs across the top of its terminal. Sized rather than left to the words, so
+            // the strip is the same shape whatever the two views are called.
+            _hasViews = stage.Views.Count > 1;
+            if (_hasViews)
             {
-                _hiddenMark.Many = true;
-                _hidden.Children.Add(_hiddenMark);
-                _hidden.Children.Add(_hiddenText);
-                _hidden.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 0.8f);
-                Widgets.Row(_hidden);
-                _head.Children.Add(_hidden);
+                float across = (PickView.ColumnWidth - Space.Region * 2f) / stage.Views.Count;
+                for (var i = 0; i < stage.Views.Count; i++)
+                {
+                    Label tab = Widgets.Label("", Palette.Muted, Lettering.Small);
+                    tab.Wraps = false;
+                    tab.Trims = true;
+                    tab.Centres = true;
+                    tab.Padding = new Thickness(Space.ChipX * 0.5f, Space.ChipY);
+                    tab.Edge = Palette.Line;
+                    tab.EdgeThickness = Space.Hair;
+
+                    var held = new Sized(across);
+                    held.Content = tab;
+
+                    _tabs.Children.Add(held);
+                    _tabLabels.Add(tab);
+                }
+
+                _head.Children.Add(_tabs);
             }
 
             if (stage.Filters.Count > 0)
@@ -209,22 +206,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             // column has width to spare where every line of height comes out of the list.
             _head.Children.Add(_options);
 
-            _wellTitle.Wraps = false;
-
-            // Apart from Sprocket's own entries above it by a little more than they are from each
-            // other, so it reads as the start of something else.
-            _wellTitle.Padding = new Thickness(0f, Space.Row, 0f, 0f);
-            _well.Background = Palette.Page;
-            _well.Edge = Palette.Line;
-            _well.EdgeThickness = Space.Hair;
-            _well.Padding = new Thickness(Space.Item);
-            _wellRoom.Padding = new Thickness(0f, 0f, Space.Row, 0f);
-            _wellRoom.Children.Add(_well);
-
             _list.Children.Add(_note);
             _list.Children.Add(_rows);
-            _list.Children.Add(_wellTitle);
-            _list.Children.Add(_wellRoom);
 
             Widgets.Barred(_scroll);
             _scroll.Content = _list;
@@ -337,21 +320,40 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             }
 
             UpdateOptions(stage);
-            UpdateHidden(stage);
+            UpdateViews(stage);
             UpdateRows(stage);
         }
 
-        void UpdateHidden(PickStage stage)
+        /// <summary>
+        /// Puts each tab in the state the stage gives it.
+        /// </summary>
+        /// <remarks>
+        /// <b>The one showing is the lightest plate</b>, which is the game's own answer and the
+        /// opposite of the rest of this editor: a row somebody has settled on is deepened, while a
+        /// selected tab is lifted. Transcribed from the three tab textures - the normal plate is
+        /// <see cref="Palette.Panel" />, the pointer lifts it to <see cref="Palette.PanelHot" />, and
+        /// the one selected is <see cref="Palette.Line" /> - so the strip reads the way every other
+        /// tab strip in the game does.
+        /// <para>
+        /// The words do not change with the selection, also as the game has it: the plate carries the
+        /// state and the text carries only the hover.
+        /// </para>
+        /// </remarks>
+        void UpdateViews(PickStage stage)
         {
-            if (!_hasHidden || stage.Hidden == null)
+            if (!_hasViews)
                 return;
 
-            ChoiceEntry hidden = stage.Hidden;
-            _hiddenMark.Chosen = hidden.IsCurrent;
-            _hiddenMark.Color = hidden.IsCurrent ? Palette.Live : Palette.Faint;
-            _hiddenText.Text = hidden.Text;
-            _hiddenText.Color = hidden.IsCurrent ? Palette.Ink : Palette.Muted;
-            _hidden.Press = Deed.Sends(hidden.Command);
+            for (int i = 0; i < _tabLabels.Count && i < stage.Views.Count; i++)
+            {
+                ChoiceEntry view = stage.Views[i];
+                Label tab = _tabLabels[i];
+
+                tab.Text = view.Text;
+                tab.Background = view.IsCurrent ? Palette.Line : Palette.Panel;
+                tab.Highlight = view.IsCurrent ? Palette.Line : Palette.PanelHot;
+                tab.Press = view.IsCurrent ? Deed.Nothing : Deed.Sends(view.Command);
+            }
         }
 
         /// <summary>The list of kinds, for the screen to hang over everything when this line is pressed.</summary>
@@ -508,22 +510,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         {
             bool many = stage.AllowsMany;
 
-            int above = 0;
-            int below = 0;
-            for (int i = 0; i < stage.Entries.Count; i++)
-            {
-                if (stage.Entries[i].InWell)
-                    below++;
-                else
-                    above++;
-            }
-
-            Fit(_visible, _rows, above, stage.HasIcons);
-            Fit(_sunk, _well, below, stage.HasIcons);
-
-            _wellRoom.Collapsed = below == 0;
-            _wellTitle.Text = Widgets.Caps(stage.WellTitle ?? "");
-            _wellTitle.Collapsed = below == 0 || string.IsNullOrEmpty(stage.WellTitle);
+            Fit(_visible, _rows, stage.Entries.Count, stage.HasIcons);
 
             _note.Text = stage.Note ?? "";
             _note.Collapsed = string.IsNullOrEmpty(stage.Note);
@@ -540,15 +527,10 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 _rows.Children.Remove(_empty);
             }
 
-            // Nothing above the well is no room above it either.
-            _rows.Collapsed = above == 0 && stage.Entries.Count > 0;
-
-            int lifted = 0;
-            int sunk = 0;
             for (int i = 0; i < stage.Entries.Count; i++)
             {
                 PickOption entry = stage.Entries[i];
-                RowVisual row = entry.InWell ? _sunk[sunk++] : _visible[lifted++];
+                RowVisual row = _visible[i];
 
                 // A heading is words and nothing else: no mark, because there is nothing to choose,
                 // and no press, because a row that answers the pointer and then does nothing is a
@@ -587,13 +569,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 row.Name.Text = entry.IsHeading ? Widgets.Caps(entry.Text) : entry.Text;
                 row.Waits.Collapsed = !entry.Waits;
                 row.Waits.Tip = entry.Waits ? stage.WaitsTip : null;
-                row.Name.Color = entry.IsHeading ? Palette.Faint : entry.IsDimmed ? Palette.Muted : Palette.Ink;
-
-                // Sunk a step further into the well than what is shown by default: the one tone darker
-                // than the well's own, so hidden reads as hidden before the words are read.
-                row.Line.Background = settled ? Palette.PanelHot
-                    : entry.IsDimmed ? Palette.ControlHot
-                    : Palette.None;
+                row.Name.Color = entry.IsHeading ? Palette.Faint : Palette.Ink;
+                row.Line.Background = settled ? Palette.PanelHot : Palette.None;
 
                 string detail = DetailOf(entry);
                 row.Detail.Text = detail;

@@ -2,54 +2,53 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     When something happens  |  Start by picking one or more blocks
+on screen     When something happens
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:142 W:1402 H:812}
-002  Sprite     Sprocket_Fill         {X:259 Y:142 W:460 H:800}  #29363EFF
-003  Sprite     Sprocket_Fill         {X:259 Y:142 W:460 H:1}  #5B737BFF
+001  SetClip    {X:259 Y:118 W:1402 H:836}
+002  Sprite     Sprocket_Fill         {X:259 Y:118 W:460 H:824}  #29363EFF
+003  Sprite     Sprocket_Fill         {X:259 Y:118 W:460 H:1}  #5B737BFF
 004  Sprite     Sprocket_Fill         {X:259 Y:941 W:460 H:1}  #5B737BFF
-005  Sprite     Sprocket_Fill         {X:259 Y:142 W:1 H:800}  #5B737BFF
-006  Sprite     Sprocket_Fill         {X:718 Y:142 W:1 H:800}  #5B737BFF
-007  SetClip    {X:275 Y:316 W:428 H:609}
-008  Sprite     Sprocket_Fill         {X:275 Y:316 W:416 H:73}  #3C4C52FF
-009  Text       at {X:378.8 Y:330.772} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
-010  Text       at {X:378.8 Y:356.252} scale 0.5  #85A1A9FF  "Door   shut"
-011  Sprite     Sprocket_Fill         {X:288 Y:344 W:17 H:1}  #85A1A9FF
-012  Sprite     Sprocket_Fill         {X:288 Y:360 W:17 H:1}  #85A1A9FF
-013  Sprite     Sprocket_Fill         {X:288 Y:344 W:1 H:17}  #85A1A9FF
-014  Sprite     Sprocket_Fill         {X:304 Y:344 W:1 H:17}  #85A1A9FF
-015  Sprite     Sprocket_Fill         {X:315 Y:326 W:54 H:54}  #374851FF
-016  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:326 W:54 H:54}  #FFFFFFFF
-017  Text       at {X:378.8 Y:406.972} scale 0.64  #DCF5FDFF  "Airlock Outer Door"
-018  Text       at {X:378.8 Y:432.452} scale 0.5  #85A1A9FF  "Door   shut"
-019  Sprite     Sprocket_Fill         {X:288 Y:420 W:17 H:1}  #85A1A9FF
-020  Sprite     Sprocket_Fill         {X:288 Y:436 W:17 H:1}  #85A1A9FF
-021  Sprite     Sprocket_Fill         {X:288 Y:420 W:1 H:17}  #85A1A9FF
-022  Sprite     Sprocket_Fill         {X:304 Y:420 W:1 H:17}  #85A1A9FF
-023  Sprite     Sprocket_Fill         {X:315 Y:402 W:54 H:54}  #374851FF
-024  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:402 W:54 H:54}  #FFFFFFFF
-025  SetClip    {X:259 Y:142 W:1402 H:812}
-026  Text       at {X:275 Y:158.102} scale 0.64  #DCF5FDFF  "BLOCKS"
-027  Text       at {X:275 Y:187.782} scale 0.5  #85A1A9FF  "none picked"
-028  Sprite     Sprocket_Fill         {X:275 Y:212 W:428 H:37}  #141B20FF
-029  Sprite     Sprocket_Fill         {X:275 Y:212 W:428 H:1}  #5B737BFF
-030  Sprite     Sprocket_Fill         {X:275 Y:248 W:428 H:1}  #5B737BFF
-031  Sprite     Sprocket_Fill         {X:275 Y:212 W:1 H:37}  #5B737BFF
-032  Sprite     Sprocket_Fill         {X:702 Y:212 W:1 H:37}  #5B737BFF
-033  Text       at {X:287.8 Y:220.082} scale 0.57  #85A1A9FF  "Search"
-034  Text       at {X:287.8 Y:259.772} scale 0.57  #A2C3CDFF  "Door"
-035  Text       at {X:341.81 Y:257.1779} scale 0.57  #A2C3CDFF  "v"
-036  Text       at {X:361.4067 Y:259.772} scale 0.57  #85A1A9FF  "x"
-037  Text       at {X:275 Y:291.662} scale 0.5  #85A1A9FF  "2 of 14"
+005  Sprite     Sprocket_Fill         {X:259 Y:118 W:1 H:824}  #5B737BFF
+006  Sprite     Sprocket_Fill         {X:718 Y:118 W:1 H:824}  #5B737BFF
+007  SetClip    {X:275 Y:292 W:428 H:634}
+008  Sprite     Sprocket_Fill         {X:275 Y:292 W:416 H:73}  #3C4C52FF
+009  Text       at {X:378.8 Y:306.682} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
+010  Text       at {X:378.8 Y:332.162} scale 0.5  #85A1A9FF  "Door   shut"
+011  Sprite     Sprocket_Fill         {X:288 Y:320 W:17 H:1}  #85A1A9FF
+012  Sprite     Sprocket_Fill         {X:288 Y:336 W:17 H:1}  #85A1A9FF
+013  Sprite     Sprocket_Fill         {X:288 Y:320 W:1 H:17}  #85A1A9FF
+014  Sprite     Sprocket_Fill         {X:304 Y:320 W:1 H:17}  #85A1A9FF
+015  Sprite     Sprocket_Fill         {X:315 Y:302 W:54 H:54}  #374851FF
+016  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:302 W:54 H:54}  #FFFFFFFF
+017  Text       at {X:378.8 Y:382.882} scale 0.64  #DCF5FDFF  "Airlock Outer Door"
+018  Text       at {X:378.8 Y:408.362} scale 0.5  #85A1A9FF  "Door   shut"
+019  Sprite     Sprocket_Fill         {X:288 Y:396 W:17 H:1}  #85A1A9FF
+020  Sprite     Sprocket_Fill         {X:288 Y:412 W:17 H:1}  #85A1A9FF
+021  Sprite     Sprocket_Fill         {X:288 Y:396 W:1 H:17}  #85A1A9FF
+022  Sprite     Sprocket_Fill         {X:304 Y:396 W:1 H:17}  #85A1A9FF
+023  Sprite     Sprocket_Fill         {X:315 Y:378 W:54 H:54}  #374851FF
+024  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:378 W:54 H:54}  #FFFFFFFF
+025  SetClip    {X:259 Y:118 W:1402 H:836}
+026  Text       at {X:275 Y:134.012} scale 0.64  #DCF5FDFF  "BLOCKS"
+027  Text       at {X:275 Y:163.692} scale 0.5  #85A1A9FF  "none picked"
+028  Sprite     Sprocket_Fill         {X:275 Y:188 W:428 H:37}  #141B20FF
+029  Sprite     Sprocket_Fill         {X:275 Y:188 W:428 H:1}  #5B737BFF
+030  Sprite     Sprocket_Fill         {X:275 Y:224 W:428 H:1}  #5B737BFF
+031  Sprite     Sprocket_Fill         {X:275 Y:188 W:1 H:37}  #5B737BFF
+032  Sprite     Sprocket_Fill         {X:702 Y:188 W:1 H:37}  #5B737BFF
+033  Text       at {X:287.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
+034  Text       at {X:287.8 Y:235.682} scale 0.57  #A2C3CDFF  "Door"
+035  Text       at {X:341.81 Y:233.088} scale 0.57  #A2C3CDFF  "v"
+036  Text       at {X:361.4067 Y:235.682} scale 0.57  #85A1A9FF  "x"
+037  Text       at {X:275 Y:267.572} scale 0.5  #85A1A9FF  "2 of 14"
 038  ClearClip  
-039  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+039  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
 040  SetClip    {X:276 Y:55 W:290 H:33}
 041  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
 042  ClearClip  
 043  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
 044  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-045  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Start by picking one or more blocks"
-046  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
-047  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-048  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+045  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
+046  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+047  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
