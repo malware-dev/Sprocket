@@ -56,6 +56,19 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Known(plain);
         }
 
+        /// <summary>
+        /// Whether an id is the game's name for the member <paramref name="stem" /> names.
+        /// </summary>
+        /// <remarks>
+        /// For the blocks that mean something of their own by a shared id. One member answers to
+        /// several spellings, so a block saying what its <c>Radius</c> is about has to catch
+        /// <c>IncreaseRadius</c> and <c>SetRadius</c> with it.
+        /// </remarks>
+        public static bool Names(string id, string stem)
+        {
+            return !string.IsNullOrEmpty(id) && Plain(Stem(id)) == Plain(Stem(stem));
+        }
+
         /// <summary>The id with the prefixes and suffixes the game generates taken off.</summary>
         static string Stem(string id)
         {

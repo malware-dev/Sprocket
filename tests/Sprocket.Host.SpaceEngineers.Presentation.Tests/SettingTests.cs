@@ -239,6 +239,28 @@ public class SettingTests
         return screen.Run(2);
     }
 
+    /// <summary>
+    /// A block says which of two things the game meant by one word.
+    /// </summary>
+    /// <remarks>
+    /// A light's radius is how far it shines and a beacon's is how far it is heard, and the game
+    /// calls both of them Radius. The table that reads ids knows nothing about blocks, so the block
+    /// is what settles it.
+    /// </remarks>
+    [Fact]
+    public void ABlockSaysWhatItMeantByAWordItShares()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("do something");
+        screen.Editor.PressBlock("Warning Beacon");
+        screen.Run(2);
+
+        Assert.True(screen.Shows("Radius"), "the beacon does not offer its radius");
+        Assert.True(screen.Shows("SIGNALS"), "a beacon's radius is not grouped with what it says");
+        Assert.False(screen.Shows("APPEARANCE"), "a beacon's radius is grouped as how it looks");
+    }
+
     static PickStage What(Screen screen)
     {
         return screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();

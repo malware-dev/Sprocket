@@ -84,8 +84,12 @@ sealed class Rig
         Light(rig, 10, "Landing Lights");
         Light(rig, 11, "Airlock Light");
         Light(rig, 12, "Cockpit Light");
-        rig.Weld(new Plain(13, "Warning Beacon", Type<MyObjectBuilder_Beacon>(),
-            "LargeBlockBeacon", "Beacon"));
+        // A beacon, answering the game's own beacon interface and carrying the value that makes it
+        // one: how far it is heard. A light carries a Radius too, and the two mean different things
+        // by the word - which is the whole reason a block gets to say what it meant.
+        rig.Weld(new Beacon(13, "Warning Beacon", Type<MyObjectBuilder_Beacon>(),
+                "LargeBlockBeacon", "Beacon")
+            .Carrying("Radius", "Radius", ValueKind.Real, "1", "50000"));
 
         // A value that may only be one of a listed few, which is the last shape a block's own value
         // comes in. The game reports a charge mode as a whole number and keeps its three words on

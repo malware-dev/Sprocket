@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using SpaceEngineers.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Layout;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -81,6 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // And last of all the values it carries, because an act reads better than telling a
             // value what to be wherever there is one that does the same thing.
             Values(kind, block);
+            Means(kind, block);
             Hide(kind);
 
             _kinds.Add(id, kind);
@@ -260,6 +262,63 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 if (StoodIn(actions, actions[i]))
                     actions[i].Hide();
+            }
+        }
+
+        /// <summary>
+        /// What this kind means by an id that means something else elsewhere.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Categories" /> reads an id without knowing which block declared it, which is
+        /// what lets one table cover every block. The price is the handful of ids the game spends
+        /// twice: a light's <c>Radius</c> and an antenna's are the same word for a glow and for how
+        /// far a signal carries. Here is where a block says which it meant.
+        /// <para>
+        /// Runs once the list is complete, because these are the game's own members and they are
+        /// added last.
+        /// </para>
+        /// </remarks>
+        static void Means(EntityKind kind, IMyTerminalBlock block)
+        {
+            if (block is IMyRadioAntenna || block is IMyBeacon)
+                Means(kind, "Radius", Category.Signals);
+
+            if (block is IMyLaserAntenna)
+                Means(kind, "Range", Category.Signals);
+
+            if (block is IMyShipConnector || block is IMyLandingGear)
+                Means(kind, "Strength", Category.Opening);
+
+            if (block is IMyGyro)
+                Means(kind, "Power", Category.Flight);
+
+            if (block is IMyGravityGenerator || block is IMyGravityGeneratorSphere)
+            {
+                Means(kind, "Height", Category.Flight);
+                Means(kind, "Radius", Category.Flight);
+            }
+
+            if (block is IMyRemoteControl)
+            {
+                Means(kind, "Left", Category.Flight);
+                Means(kind, "Right", Category.Flight);
+            }
+
+            if (block is IMyMotorSuspension)
+                Means(kind, "Speed Limit", Category.Movement);
+        }
+
+        /// <summary>Puts every member the game named <paramref name="stem" /> in its true category.</summary>
+        static void Means(EntityKind kind, string stem, Category category)
+        {
+            var actions = kind.Actions;
+            for (var i = 0; i < actions.Count; i++)
+            {
+                EntityAction one = actions[i];
+                string id = one.Sets ? one.GamePropertyId : one.GameActionId;
+
+                if (Categories.Names(id, stem))
+                    one.Category = category;
             }
         }
 
