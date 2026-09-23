@@ -17,8 +17,8 @@ public class LeavingTests
     const string Back = "19 62";
 
     /// <summary>A picker whose action will not do anything until it is given a value.</summary>
-    const string WantsValues = "60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
-        + "1300 918 70 193 200 476 800 676";
+    const string WantsValues = "60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
+        + "70 193 200 476 800 676";
 
     [Fact]
     public void LeavingAFilledPickerAsksFirst()
@@ -33,8 +33,8 @@ public class LeavingTests
         Assert.True(picker.Scene.TakeDefault(), "Enter took no answer");
         picker.Run(2);
 
-        Assert.True(picker.Editor.Program.Systems[0].Sequences.Count > 0
-            || picker.Shows("What should it do?"), "keeping did not carry the choice through");
+        Assert.True(picker.Editor.Program.Systems[0].Sequences.Count > 0,
+            "keeping did not carry the choice through");
     }
 
     [Fact]

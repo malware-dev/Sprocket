@@ -48,6 +48,12 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// <summary>The values the chosen thing takes, and the way to finish, where the pick is finished here.</summary>
         readonly Ask _given;
 
+        /// <summary>
+        /// The way to finish where there are no values to give, under the rows of the column the pick is
+        /// finished from, as the values column carries its own under its fields.
+        /// </summary>
+        readonly Label _done;
+
         readonly Sized _givenRoot = new Sized(ColumnWidth);
         readonly Dock _givenColumn = new Dock();
         readonly Stack _givenHead = Widgets.Column(Space.Row);
@@ -101,7 +107,10 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _strip.Content = _columns;
 
             if (!component.Finishes)
+            {
+                _done = Widgets.Label("Done", Palette.Ink, Lettering.Small);
                 return;
+            }
 
             _given = Ask.Column(ColumnWidth - Space.Region * 2f);
 
@@ -151,6 +160,16 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
             _reported = answer;
             Host.SetText(_component.EnteredCommand, answer);
+        }
+
+        public override bool Gives
+        {
+            get { return _given != null; }
+        }
+
+        public override Label Done
+        {
+            get { return _done; }
         }
 
         /// <summary>The values column, while it is on the screen.</summary>
@@ -203,6 +222,28 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 _restated = _component.Restated;
                 Refill();
             }
+
+            Show();
+        }
+
+        /// <summary>
+        /// Puts the values column on after the stages once something to do is chosen, and takes it off
+        /// when nothing is.
+        /// </summary>
+        void Show()
+        {
+            if (_given == null)
+                return;
+
+            var wanted = _component.Stages.Count > 1 && !string.IsNullOrEmpty(_component.Given);
+            var shown = _givenRoot.Parent != null;
+            if (wanted == shown)
+                return;
+
+            if (wanted)
+                _columns.Children.Add(_givenRoot);
+            else
+                _columns.Children.Remove(_givenRoot);
         }
 
         /// <summary>
@@ -370,19 +411,23 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         void Rebuild()
         {
+            for (int i = 0; i < _stages.Count; i++)
+                _stages[i].Finishing(null);
+
             _stages.Clear();
             _columns.Children.Clear();
 
             for (int i = 0; i < _component.Stages.Count; i++)
             {
                 var stage = new StageView(_component, i);
+                if (_done != null && _component.Stages[i].Finishes)
+                    stage.Finishing(_done);
+
                 _stages.Add(stage);
                 _columns.Children.Add(stage.Root);
             }
 
-            // Once there is something to do, which is when there is something to do it with.
-            if (_given != null && _component.Stages.Count > 1)
-                _columns.Children.Add(_givenRoot);
+            Show();
         }
     }
 }

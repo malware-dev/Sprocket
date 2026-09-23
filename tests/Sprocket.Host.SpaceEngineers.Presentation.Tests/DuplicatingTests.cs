@@ -22,7 +22,6 @@ public class DuplicatingTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.Back();
         return screen.Run(2);
     }

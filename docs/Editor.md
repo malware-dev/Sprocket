@@ -130,33 +130,31 @@ sequence is called and what it does; the rows above the list are the reasons it 
 **A trigger is written out as a sentence, and every part of it is a control.** *When* **Airlock
 Button** **is pressed** *runs* **Cycle** - the same chips a step of a sequence is made of, at the
 same size, because it is the same act: words with the parts somebody chose sitting in them, each
-one opening the question it was answered with. The blocks and the moment lead to the picker; what
-it does leads to the list the wizard asks with.
+one opening the question it was answered with. The blocks, the moment and the sequence it runs all
+lead to the picker it was made in, where what it does is the column beside what starts it.
 
 It was a card for a while, and a card can only be pressed as a whole - which meant asking which
 half was meant, on a screen of its own, for a question whose answer was already on the row behind
 it. A trigger that is reading true right now says so on its own row, where the sequence's screen
 used to say it for whichever trigger came first.
 
-Changing **when** it happens carries everything else through: the sequence it runs, whether it
-stops that sequence instead, and whatever was written about it.
+**What it does is the picker's last column**, *What it does*: *A single action…*, *A new
+sequence*, and then the system's named sequences under their own heading, with *run* and *stop* at
+the head once there is a sequence to stop. A timer's picker is the rates and the same column. Done
+sits under the list, as it sits under the fields of a step's values. Changing when it happens keeps
+what it does unless the column says otherwise, and whatever was written about it; a change to both
+on one Done is one step back.
 
-**Pressing what it does changes what is in it**, and nothing more: the sequence it runs opens the
-list of sequences, and the one act it does opens the picker that act was chosen in. Being asked
-what a trigger is for - *run a new sequence*, *run an existing one*, *stop one*, *do something* -
-to change which door a button closes is three answers where one would do.
+**The one act a trigger does opens the picker that act was chosen in**, since it has no screen of
+its own.
 
-**That whole question is behind the cross inside the slot.** It empties what the trigger does, so
-it is asked again, and it is drawn inside the chip because what it empties is that chip - beside it
-the same mark read as belonging to the whole sentence, which already has one at the end of the row
-that destroys the trigger rather than emptying part of it. The trigger itself is kept through any
-of this, since what starts it has not changed and the toolbar slot the construct holds names that
-trigger. Pointing away from a sequence nobody named takes that sequence with it: it existed only to
-be the one thing this trigger did.
-
-The four answers hang under whatever was pressed, as a menu rather than a page: four short answers
-are not a screenful, and a screen of its own put the row somebody was working on out of sight
-behind the question about it.
+**The cross inside the slot empties what the trigger does.** It is drawn inside the chip because
+what it empties is that chip - beside it the same mark read as belonging to the whole sentence,
+which already has one at the end of the row that destroys the trigger rather than emptying part of
+it. Pressing the empty slot opens the picker on a new sequence. The trigger itself is kept through
+any change to what it does, since the toolbar slot the construct holds names that trigger. Pointing
+away from a sequence nobody named takes that sequence with it: it existed only to be the one thing
+this trigger did.
 
 ### Two triggers on one button
 

@@ -117,10 +117,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
-            bool asksAll = false, bool all = false, IList<Literal> values = null, bool opensOnValues = false)
+            bool asksAll = false, bool all = false, IList<Literal> values = null, bool opensOnValues = false,
+            Aim aim = null)
             : base(editor)
         {
             _opensOnValues = opensOnValues;
+            _aim = aim;
 
             if (values != null)
             {
@@ -209,6 +211,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>Whether this opens with the caret in the values, for somebody who came to change them.</summary>
         readonly bool _opensOnValues;
 
+        /// <summary>What the trigger does, chosen beside what starts it, or null where this is not a trigger.</summary>
+        readonly Aim _aim;
+
+        PickStage _does;
+
         /// <summary>What the step being changed did, which is what its values were given to.</summary>
         readonly string _arrivedChosen;
 
@@ -274,6 +281,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 }
 
                 if (_chosen != _arrivedChosen || _chosenForm != _arrivedForm || _all != _arrivedAll)
+                    return true;
+
+                if (_aim != null && _aim.Moved)
                     return true;
 
                 return ValuesMoved;
@@ -345,7 +355,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly List<Field> _nothing = new List<Field>();
 
         bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen)
-            && ReadinessOf(_chosen, _chosenForm) == Readiness.Ready;
+            && ReadinessOf(_chosen, _chosenForm) == Readiness.Ready
+            && (_aim == null || _aim.Chosen);
 
         public override void Build(List<EditorComponent> components)
         {
@@ -393,6 +404,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
             else if (!wanted && _what != null)
             {
+                if (_does != null)
+                {
+                    _pick.RemoveLast();
+                    _does = null;
+                }
+
                 _pick.RemoveLast();
                 _what = null;
             }
@@ -400,7 +417,24 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (_what != null)
                 changed |= FillWhat();
 
+            // What the trigger does, beside what happens, once what happens is chosen.
+            var does = _what != null && _aim != null && !string.IsNullOrEmpty(_chosen);
+            if (does && _does == null)
+            {
+                _does = new PickStage("What it does");
+                _does.Finishes = true;
+                _pick.Add(_does);
+            }
+            else if (!does && _does != null)
+            {
+                _pick.RemoveLast();
+                _does = null;
+            }
+
             changed |= FillGiven();
+
+            if (_does != null && _aim != null)
+                changed |= _aim.Fill(_does);
 
             if (changed)
                 _pick.Changed();
@@ -1133,7 +1167,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
         }
 
-        static bool Apply(PickOption entry, string text, string secondary, string status,
+        internal static bool Apply(PickOption entry, string text, string secondary, string status,
             bool active, bool chosen, int command, string icon = "", bool heading = false)
         {
             var changed = false;
@@ -1164,7 +1198,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return changed;
         }
 
-        static bool Apply(ChoiceEntry option, string text, bool current, int command)
+        internal static bool Apply(ChoiceEntry option, string text, bool current, int command)
         {
             var changed = false;
 
@@ -1175,7 +1209,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return changed;
         }
 
-        static bool Resize(List<PickOption> list, int count)
+        internal static bool Resize(List<PickOption> list, int count)
         {
             var changed = false;
             while (list.Count < count) { list.Add(new PickOption("", 0)); changed = true; }
@@ -1191,7 +1225,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return changed;
         }
 
-        static bool Resize(List<ChoiceEntry> list, int count)
+        internal static bool Resize(List<ChoiceEntry> list, int count)
         {
             var changed = false;
             while (list.Count < count) { list.Add(new ChoiceEntry("", false, 0)); changed = true; }

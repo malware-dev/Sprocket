@@ -31,7 +31,6 @@ public class RepeatedTickTests
         screen.Run(60);
 
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
         screen.Run(60);
 
         editor.PressAdd("do something");
@@ -74,7 +73,6 @@ public class RepeatedTickTests
 
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
         AssertStill(screen, "the sequence");
 
         editor.PressAdd("do something");
@@ -118,7 +116,6 @@ public class RepeatedTickTests
         AssertIdle(screen, "the picker, with an event chosen");
 
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
         AssertIdle(screen, "a sequence");
 
         editor.PressAdd("do something");
@@ -164,7 +161,6 @@ public class RepeatedTickTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
         AssertQuiet(screen, "a sequence");
     }
 

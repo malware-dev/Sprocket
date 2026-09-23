@@ -90,7 +90,6 @@ public class VanillaTests
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
-        rig.Editor.PressChoice("Run a new sequence");
 
         for (var i = 0; i < 5; i++)
             rig.Tick();

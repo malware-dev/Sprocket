@@ -43,7 +43,6 @@ public class PaperTargetTests
 
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
         Note(seen, ship);
 
         editor.PressAdd("do something");
@@ -77,7 +76,6 @@ public class PaperTargetTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
 
         editor.PressAdd("do something");
         editor.PressBlock("Inner Door");

@@ -187,7 +187,6 @@ public class DragTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
 
         Step(editor, "Airlock Inner Door", "Close");
         Step(editor, "Airlock Vent", "Depressurize");

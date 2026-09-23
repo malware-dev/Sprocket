@@ -33,7 +33,6 @@ public class ActionTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         return screen.Run(2);
     }
 
@@ -217,8 +216,8 @@ public class ActionTests
     [Fact]
     public void TheTabIsPressedWhereItIsDrawn()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
-            + "1300 918 70 193 200 500").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
+            + "70 193 200 500").Split(' '));
 
         PickStage what = screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
         Assert.NotEqual(0, what.Views[1].Command);
@@ -368,7 +367,6 @@ public class ActionTests
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
-        rig.Editor.PressChoice("Run a new sequence");
 
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Light");
@@ -400,7 +398,6 @@ public class ActionTests
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
-        rig.Editor.PressChoice("Run a new sequence");
 
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Hydrogen Tank");
@@ -431,8 +428,8 @@ public class ActionTests
     [Fact]
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
-            + "1300 918 70 193 150 200 type Approach 200 351 800 584").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
+            + "70 193 150 200 type Approach 200 351 800 584").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
@@ -457,8 +454,8 @@ public class ActionTests
     [Fact]
     public void AColourIsChosenByPressingOne()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
-            + "1300 918 70 193 200 476 800 584").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
+            + "70 193 200 476 800 584").Split(' '));
 
 
         // The third of the fourteen. They are the harness's stand-in for a player who has painted.
@@ -483,8 +480,8 @@ public class ActionTests
     [Fact]
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
-            + "1300 918 70 193 150 200 type Standby 200 351 800 410").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
+            + "70 193 150 200 type Standby 200 351 800 410").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
             "the column does not show what the value may be");
@@ -515,8 +512,8 @@ public class ActionTests
     [Fact]
     public void MoreChoicesThanFitFoldIntoAList()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
-            + "1300 918 70 193 150 200 type Tug 200 351 800 584").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
+            + "70 193 150 200 type Tug 200 351 800 584").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");
 

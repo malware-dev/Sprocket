@@ -486,24 +486,23 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// same two slots a step of a sequence uses - one thing done by a trigger and the same thing
         /// done by a step then read alike.
         /// <para>
-        /// Pressing a part changes what is in it: which sequence, or which block and what to do to
-        /// it. The cross beside it asks the whole question of what the trigger is for, which is the
-        /// rarer thing to want and the one that throws away what is there.
+        /// Pressing a sequence opens the picker the trigger was made in, where what it does sits
+        /// beside what starts it. Pressing one act opens the picker that act was chosen in. The cross
+        /// beside either empties it, which throws away what is there.
         /// </para>
         /// </remarks>
         void Doing(SentenceTrigger sentence, int which, Trigger trigger)
         {
             var target = trigger;
 
-            // Nothing chosen yet, which is what the cross leaves behind. An empty slot is one
-            // nobody has answered, so pressing it asks the whole question rather than offering to
-            // change something that is not there - and there is nothing to clear.
+            // Nothing chosen yet, which is what the cross leaves behind. Pressing it opens the
+            // picker the trigger was made in, and there is nothing to clear.
             if (trigger.Runs < 1)
             {
                 sentence.DoesLead = "";
                 sentence.Does.Add(new SequenceSlot(0, "",
                     Editor.Register(Cmd.TriggerTarget, which,
-                        delegate { Editor.ChangeTarget(_system, target); })));
+                        delegate { Editor.ChangeTrigger(_system, target); })));
 
                 return;
             }
@@ -517,7 +516,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (act == null)
             {
                 var pointed = Editor.Register(Cmd.TriggerTarget, which,
-                    delegate { Editor.PointTriggerAt(_system, target); });
+                    delegate { Editor.ChangeTrigger(_system, target); });
 
                 sentence.DoesLead = SentenceText.Then(sentence.Kind, trigger.Stops, true, false);
                 sentence.Does.Add(Clearable(new SequenceSlot(trigger.Runs,

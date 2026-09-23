@@ -186,8 +186,8 @@ public class SettingTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("A single action…");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Do something");
         screen.Editor.PressBlock("Standby Battery");
         screen.Editor.PressChoice("Set Charge Mode");
         screen.Editor.Typed("1");
@@ -236,7 +236,6 @@ public class SettingTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         return screen.Run(2);
     }
 

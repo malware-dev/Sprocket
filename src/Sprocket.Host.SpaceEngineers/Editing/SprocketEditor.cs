@@ -1259,6 +1259,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // pushed is dropped and the finished sequence lands directly on it.
             var origin = _stack.Count;
 
+            // A new sequence is what a trigger usually does, and one being made does nothing yet.
+            var aim = new Aim(this, system, null);
+
             var moment = trigger as MomentTrigger;
             if (moment != null)
             {
@@ -1277,16 +1280,22 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                             if (taken != null)
                                 taken.Sources.Clear();
 
-                            FinishTrigger(made, origin);
+                            FinishTrigger(made, origin, aim);
                         });
                     },
-                    true));
+                    true, aim: aim));
                 return;
             }
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                Push(RatePage(every, delegate { FinishTrigger(every, origin); }));
+            {
+                Push(new TimerPage(this, every.IntervalTicks, aim, delegate(int ticks)
+                {
+                    every.IntervalTicks = ticks;
+                    FinishTrigger(every, origin, aim);
+                }));
+            }
         }
 
         /// <summary>
@@ -1406,87 +1415,70 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return made;
         }
 
-        /// <summary>The repeat rates, shared by the wizard and by editing a sequence.</summary>
-        internal ChoicePage RatePage(EveryTrigger every, Action chosen)
-        {
-            var page = new ChoicePage(this, "How often?");
-            var cadences = Cadences.All;
-
-            for (var i = 0; i < cadences.Count; i++)
-            {
-                var ticks = cadences[i].Ticks;
-                var label = ticks == 1 ? "every tick" : cadences[i].Name + " - every " + ticks + " ticks";
-
-                page.Add(label, ticks == every.IntervalTicks, ticks, delegate
-                {
-                    every.IntervalTicks = ticks;
-                    chosen();
-                });
-                page.WarnOnLast(cadences[i].Warning);
-            }
-
-            return page;
-        }
-
         /// <summary>
-        /// Asks what the trigger should do, now that it is known what starts it.
+        /// Does what the trigger was made to do, now that it is known what starts it.
         /// </summary>
-        /// <remarks>
-        /// Nothing exists until one of these is answered, so backing out of the questions leaves
-        /// nothing behind. The order is the teaching: a trigger does one thing, and the way to have
-        /// several things happen is the first row on the list rather than a rule to explain.
-        /// </remarks>
-        void FinishTrigger(Trigger trigger, int origin)
+        /// <remarks>Nothing exists until this, so backing out before it leaves nothing behind.</remarks>
+        void FinishTrigger(Trigger trigger, int origin, Aim aim)
         {
             var system = _pendingSystem;
             _pendingSystem = null;
 
             UnwindTo(origin);
-            AskWhatItDoes(system, trigger, origin, true);
+            Aimed(system, trigger, aim, origin, true, null);
         }
 
         /// <summary>
-        /// The same question, for a trigger that already exists.
+        /// Carries out what a trigger was chosen to do, with the change to what starts it where there
+        /// is one.
         /// </summary>
         /// <remarks>
-        /// One question and one set of answers, because "what should this do" is one thought whether
-        /// the trigger is being made or mended - and a second list that read differently would be two
-        /// things to learn about one act.
-        /// <para>
-        /// Hung over the screen rather than shown as a page of its own. Four short answers is not a
-        /// screenful, and a whole screen for them put the row somebody was working on out of sight
-        /// behind the question about it. Dismissing it is a third outcome: the trigger is left as it
-        /// was, which for one being made means there is nothing to leave behind.
-        /// </para>
+        /// A trigger being changed that goes on doing what it did has only its start to change, and one
+        /// that did nothing takes what the column opened on. What starts it goes in with what it does,
+        /// as one edit, wherever what it does is settled here; a single action is settled on the
+        /// picker after this, and goes in with that.
         /// </remarks>
-        void AskWhatItDoes(AutomationSystem system, Trigger trigger, int origin, bool fresh)
+        void Aimed(AutomationSystem system, Trigger trigger, Aim aim, int origin, bool fresh,
+            SystemEdit start)
         {
-            AskHere("What should it do?");
-
-            Answer("Run a new sequence", delegate { RunNew(system, trigger, origin, fresh); });
-
-            if (Standing(system))
+            if (!fresh && !aim.Moved && trigger.Runs > 0)
             {
-                Answer("Run an existing sequence",
-                    delegate { PickSequence(system, trigger, false, origin, fresh); });
+                if (start != null)
+                    Do(system, start);
 
-                Answer("Stop a sequence",
-                    delegate { PickSequence(system, trigger, true, origin, fresh); });
+                return;
             }
 
-            Answer("Do something", delegate { DoOneThing(system, trigger, origin, fresh); });
+            if (aim.Outcome == Outcome.New)
+            {
+                RunNew(system, trigger, origin, fresh, start);
+                return;
+            }
+
+            if (aim.Outcome == Outcome.One)
+            {
+                DoOneThing(system, trigger, origin, fresh, start);
+                return;
+            }
+
+            var sequence = system.FindSequence(aim.Sequence);
+            if (sequence != null)
+                Points(system, trigger, sequence, aim.Stops, fresh, null, start);
+            else if (start != null)
+                Do(system, start);
         }
 
         /// <summary>
-        /// Where every answer to that question lands.
+        /// Where every choice of what a trigger does lands.
         /// </summary>
         /// <remarks>
         /// A trigger being made is not yet in the system, and nothing has been done that could be
         /// taken back - the way back from making one is the bin on its row. A trigger being changed
-        /// is already there, so this is an edit, and it is the system's to walk back.
+        /// is already there, so this is an edit, and it is the system's to walk back, together with
+        /// <paramref name="start" /> where what starts it changed too.
         /// </remarks>
         void Points(AutomationSystem system, Trigger trigger, Sequence sequence, bool stops,
-            bool fresh, Sequence made)
+            bool fresh, Sequence made, SystemEdit start)
         {
             if (fresh)
             {
@@ -1498,20 +1490,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 return;
             }
 
-            Do(system, new PointTrigger(_program, trigger, sequence.Number, stops, made));
-        }
-
-        /// <summary>Whether this system has a sequence that stands on its own and can be named.</summary>
-        static bool Standing(AutomationSystem system)
-        {
-            var sequences = system.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
-            {
-                if (sequences[i].HasName)
-                    return true;
-            }
-
-            return false;
+            var point = new PointTrigger(_program, trigger, sequence.Number, stops, made);
+            Do(system, start == null ? point : (SystemEdit)new Retrigger(start, point));
         }
 
         /// <summary>
@@ -1523,49 +1503,19 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// a system half-doing something nobody has finished describing. It is also the only way the
         /// switch can gate editing without a new sequence being unbuildable the moment it exists.
         /// </remarks>
-        void RunNew(AutomationSystem system, Trigger trigger, int origin, bool fresh)
+        void RunNew(AutomationSystem system, Trigger trigger, int origin, bool fresh, SystemEdit start)
         {
-            // The question goes with the answer. Left on the stack, backing out of the sequence would
-            // land on "what should it do?" for a trigger that already does something.
+            // The picker goes with the answer. Left on the stack, backing out of the sequence would
+            // land on the choice of what it does, for a trigger that already does something.
             UnwindTo(origin);
 
             var sequence = _program.AddSequence(system);
             sequence.Enabled = false;
             sequence.Name = Name(sequence);
 
-            Points(system, trigger, sequence, false, fresh, sequence);
+            Points(system, trigger, sequence, false, fresh, sequence, start);
 
             Push(new SequencePage(this, sequence));
-        }
-
-        /// <summary>
-        /// Points the trigger at a sequence that already exists, to run or to stop.
-        /// </summary>
-        /// <remarks>
-        /// Only the ones that stand on their own. A sequence nobody named is the one thing its own
-        /// trigger does and is not a thing to point a second one at - it has no name to offer, and
-        /// pointing at it would be sharing something the person never made separately.
-        /// </remarks>
-        void PickSequence(AutomationSystem system, Trigger trigger, bool stops, int origin,
-            bool fresh)
-        {
-            var page = new ChoicePage(this, stops ? "Stop which sequence?" : "Run which sequence?");
-
-            var sequences = system.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
-            {
-                if (!sequences[i].HasName)
-                    continue;
-
-                var chosen = sequences[i];
-                page.Add(chosen.Name, false, delegate
-                {
-                    UnwindTo(origin);
-                    Points(system, trigger, chosen, stops, fresh, null);
-                });
-            }
-
-            Push(page);
         }
 
         /// <summary>
@@ -1577,7 +1527,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// into the button and Sprocket is not part of the press - see <c>SprocketUnit</c>, which
         /// decides that by looking at the sequence rather than by being told.
         /// </remarks>
-        void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh)
+        void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh,
+            SystemEdit start)
         {
             Push(new PickPage(this, "Do something", false, new List<long>(), "", Form.Native,
                 delegate(PickAnswer answer)
@@ -1599,7 +1550,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     sequence.Steps.Add(new Await());
 
                     UnwindTo(origin);
-                    Points(system, trigger, sequence, false, fresh, sequence);
+                    Points(system, trigger, sequence, false, fresh, sequence, start);
                 }));
         }
 
@@ -1626,24 +1577,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Asks what a trigger should do, which is what an empty slot is waiting to be told.
-        /// </summary>
-        /// <remarks>
-        /// The whole question - run a new sequence, run an existing one, stop one, do something -
-        /// because an empty slot is one nobody has answered yet rather than one to be changed.
-        /// </remarks>
-        internal void ChangeTarget(AutomationSystem system, Trigger trigger)
-        {
-            AskWhatItDoes(system, trigger, _stack.Count, false);
-        }
-
-        /// <summary>
         /// Empties what a trigger does, so it is waiting to be told again.
         /// </summary>
         /// <remarks>
         /// What the cross on that part of the row does, and it does exactly that: the slot goes
-        /// empty, the trigger stops doing anything, and pressing the empty slot asks the whole
-        /// question. A cross that opened a question instead would be a mark saying one thing and
+        /// empty, the trigger stops doing anything, and pressing the empty slot opens the picker on
+        /// a new sequence. A cross that opened a picker instead would be a mark saying one thing and
         /// doing another.
         /// <para>
         /// A sequence nobody named goes with it, because it existed only to be the thing this
@@ -1654,18 +1593,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         internal void ClearTarget(AutomationSystem system, Trigger trigger)
         {
             Do(system, new PointTrigger(_program, trigger, 0, false, null));
-        }
-
-        /// <summary>
-        /// Asks which sequence a trigger is about, keeping what it does with it.
-        /// </summary>
-        /// <remarks>
-        /// One that stops a sequence goes on stopping the one it is pointed at next. Changing that is
-        /// the whole question, which is what the cross on the slot asks.
-        /// </remarks>
-        internal void PointTriggerAt(AutomationSystem system, Trigger trigger)
-        {
-            PickSequence(system, trigger, trigger.Stops, _stack.Count, false);
         }
 
         /// <summary>
@@ -1703,36 +1630,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Asks again what starts a trigger, and puts the answer in its place.
+        /// Opens the picker a trigger was made in, on what starts it and what it does now, and puts
+        /// the answer in its place.
         /// </summary>
         /// <remarks>
-        /// Straight to the question it was made with rather than to the top of the wizard. A trigger
-        /// that listens for a moment stays one: what somebody came to change is which block, or which
-        /// moment of it. Turning a repeat into a moment is deleting it and making the one that was meant.
+        /// Wherever the trigger's row was pressed - what starts it, or what it does - because the two
+        /// are chosen side by side. A trigger that listens for a moment stays one: turning a repeat
+        /// into a moment is deleting it and making the one that was meant.
         /// <para>
-        /// Everything the trigger is for is carried over, because this question was only ever about
-        /// what starts it - the sequence it runs, whether it stops that sequence instead, and
-        /// whatever somebody wrote about it.
+        /// Whatever somebody wrote about it is carried over, and what it does is changed only where a
+        /// different choice was made.
         /// </para>
         /// </remarks>
         internal void ChangeTrigger(AutomationSystem system, Trigger trigger)
         {
             // Back to the screen the row is on, which is where the answer lands.
             var origin = _stack.Count;
+            var aim = new Aim(this, system, trigger);
 
             var every = trigger as EveryTrigger;
             if (every != null)
             {
-                // The page the wizard uses, so a rate reads the same wherever it is met. It sets the
-                // interval itself, which is why the edit is handed what it was before that.
                 var rate = every.IntervalTicks;
-                Push(RatePage(every, delegate
+                Push(new TimerPage(this, rate, aim, delegate(int ticks)
                 {
-                    var chosen = every.IntervalTicks;
-                    every.IntervalTicks = rate;
-
                     UnwindTo(origin);
-                    Do(system, new SetCadence(every, rate, chosen));
+                    Aimed(system, every, aim, origin, false,
+                        ticks == rate ? null : new SetCadence(every, rate, ticks));
                 }));
                 return;
             }
@@ -1754,13 +1678,21 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     {
                         var change = new ChangeTrigger(moment, made);
 
+                        // The trigger kept where what starts it is the same, because the toolbar
+                        // slot names that one.
+                        if (!change.Changes && taken == null)
+                        {
+                            Aimed(system, moment, aim, origin, false, null);
+                            return;
+                        }
+
                         // One edit either way, because it is one answer to one question.
-                        Do(system, taken == null
+                        Aimed(system, made, aim, origin, false, taken == null
                             ? (SystemEdit)change
                             : new TakeOver(change, taken));
                     });
                 },
-                true, was != null && was.RequiresAll));
+                true, was != null && was.RequiresAll, aim: aim));
         }
 
         /// <summary>What these declarations point at, as blocks, for a picker that shows blocks.</summary>

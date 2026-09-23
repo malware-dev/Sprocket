@@ -94,6 +94,12 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// <summary>What scrolls: the line saying the list is narrowed, and the rows themselves.</summary>
         readonly Stack _list = Widgets.Column(Space.Line);
 
+        /// <summary>
+        /// Under the rows, the way to finish where the pick is finished from this column, as the values
+        /// column carries its own under its fields.
+        /// </summary>
+        readonly Bar _foot = new Bar();
+
         /// <summary>Where the pointer was when the thumb last moved. Only meaningful while it is held.</summary>
         float _held;
         readonly List<RowVisual> _visible = new List<RowVisual>();
@@ -209,6 +215,9 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _list.Children.Add(_note);
             _list.Children.Add(_rows);
 
+            // The gap the values column keeps between its last field and its Done.
+            _foot.Padding = new Thickness(0f, Space.Region - Space.Line, 0f, 0f);
+
             Widgets.Barred(_scroll);
             _scroll.Content = _list;
 
@@ -224,6 +233,16 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         public Element Root
         {
             get { return _root; }
+        }
+
+        /// <summary>Puts the way to finish under the last row, or takes it away where given null.</summary>
+        public void Finishing(Element done)
+        {
+            _foot.Right = done;
+            if (done == null)
+                _list.Children.Remove(_foot);
+            else if (_foot.Parent == null)
+                _list.Children.Add(_foot);
         }
 
         /// <summary>Moves this column's rows, if the point is in it and there is anything out of sight.</summary>

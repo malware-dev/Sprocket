@@ -72,7 +72,6 @@ public class WaitTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         return screen.Run(2);
     }
 }

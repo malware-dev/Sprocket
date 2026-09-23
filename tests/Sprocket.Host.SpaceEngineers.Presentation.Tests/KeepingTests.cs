@@ -14,12 +14,12 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class KeepingTests
 {
     /// <summary>A step that sets a light's radius to 5.</summary>
-    const string ARadiusStep = "60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
-        + "1300 918 70 193 200 476 800 676 1315 206 type 5 enter";
+    const string ARadiusStep = "60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
+        + "70 193 200 476 800 676 1315 206 type 5 enter";
 
     /// <summary>The same, with a colour: three values the form shows as one.</summary>
-    const string AColourStep = "60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
-        + "1300 918 70 193 200 476 800 584 1049 371 type #FF8800 enter";
+    const string AColourStep = "60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
+        + "70 193 200 476 800 584 1049 371 type #FF8800 enter";
 
     /// <summary>Pressing the step's blocks, which opens the picker on them.</summary>
     const string Again = "270 175";

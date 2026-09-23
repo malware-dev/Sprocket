@@ -90,6 +90,10 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             // reads as bad artwork rather than as a missed call.
             _glyph.Symbol = Many ? Symbols.Check : (Chosen ? Symbols.Disc : Symbols.Ring);
             _glyph.Scale = Many ? Lettering.Symbol * 0.58f : Lettering.Symbol;
+
+            // A ring stands beside the words of its choice, so it is lifted the way any symbol beside a
+            // line of text is - centred in its own line it reads low against them.
+            _glyph.Lift = Many ? 0f : Lettering.SymbolLift;
             _glyph.Tint = Color;
             _glyph.Measure(g, available);
 

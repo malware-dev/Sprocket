@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
@@ -22,7 +23,6 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.Back();
         return screen.Run(2);
     }
@@ -65,9 +65,9 @@ public class ChangingTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Stop a sequence");
+        screen.Editor.PressChoice("stop");
         screen.Editor.PressChoice("Sequence 1");
+        screen.Editor.PressPrimary();
         screen.Run(2);
 
         screen.Editor.PressWhen(1);
@@ -90,13 +90,19 @@ public class ChangingTests
         screen.Editor.NewSystem("Housekeeping");
         screen.Editor.PressStart("Every…");
         screen.Editor.PressChoice("steady - every 100 ticks");
-        screen.Editor.PressChoice("Run a new sequence");
+        screen.Editor.PressPrimary();
         screen.Editor.Back();
         screen.Run(2);
 
+        Trigger was = System(screen).Triggers[0];
+
         screen.Editor.PressWhen(0);
         screen.Editor.PressChoice("slow - every 300 ticks");
+        screen.Editor.PressPrimary();
         screen.Run(2);
+
+        Assert.Same(was, System(screen).Triggers[0]);
+        Assert.Equal(1, was.Runs);
 
         Assert.Equal(300, Assert.IsType<EveryTrigger>(System(screen).Triggers[0]).IntervalTicks);
         Assert.Equal("Every 300 ticks", screen.Editor.Says(0));
@@ -106,13 +112,9 @@ public class ChangingTests
     /// The other half of the row: what the trigger does, changed without remaking it.
     /// </summary>
     /// <remarks>
-    /// The same list the wizard asks with, so there is one way to say what a trigger is for. The
-    /// trigger itself is kept rather than replaced, because what starts it has not changed - and the
-    /// toolbar slot the construct holds names that trigger.
-    /// <para>
-    /// Asked for by the cross, which is what takes back the answer that is there. Pressing the words
-    /// themselves changes what is in them, which is the commoner thing to want.
-    /// </para>
+    /// The same picker the trigger was made in, so there is one way to say what a trigger is for.
+    /// The trigger itself is kept rather than replaced, because what starts it has not changed - and
+    /// the toolbar slot the construct holds names that trigger.
     /// </remarks>
     [Fact]
     public void ATriggerCanBePointedAtSomethingElse()
@@ -121,10 +123,10 @@ public class ChangingTests
 
         Trigger was = System(screen).Triggers[0];
 
-        // The cross empties it, and an empty slot is what asks the whole question.
         screen.Editor.PressClear(0);
         screen.Editor.PressDoes(0);
-        screen.Editor.PressChoice("Do something");
+        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressPrimary();
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -155,8 +157,8 @@ public class ChangingTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("A single action…");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Do something");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -166,8 +168,8 @@ public class ChangingTests
 
         screen.Editor.PressClear(1);
         screen.Editor.PressDoes(1);
-        screen.Editor.PressChoice("Run an existing sequence");
         screen.Editor.PressChoice("Sequence 1");
+        screen.Editor.PressPrimary();
         screen.Run(2);
 
         Assert.Single(screen.Editor.Program.Sequences);
@@ -188,15 +190,14 @@ public class ChangingTests
     }
 
     /// <summary>
-    /// Pressing what a trigger runs asks which one, and nothing else.
+    /// Pressing what a trigger runs opens the picker it was made in, on the sequence it runs.
     /// </summary>
     /// <remarks>
     /// Changing which sequence a button runs is what somebody pressing those words almost always
-    /// means. Being asked what a trigger is for first - run a new one, run an existing one, stop
-    /// one, do something - is three answers where one would do, every time.
+    /// means, and the sequences are in the column beside what starts it, with no question first.
     /// </remarks>
     [Fact]
-    public void PressingWhatItRunsAsksWhichOne()
+    public void PressingWhatItRunsOpensThePickerOnIt()
     {
         var screen = WithOne();
 
@@ -205,17 +206,58 @@ public class ChangingTests
         screen.Editor.Back();
         screen.Run(2);
 
+        Trigger was = System(screen).Triggers[0];
         screen.Editor.PressDoes(0);
 
-        // Straight to the sequences, with no question about what the trigger is for.
-        Assert.Equal("Run which sequence?", screen.Editor.Screen.Title());
+        Assert.Equal("When something happens", screen.Editor.Screen.Title());
         Assert.Equal("", screen.Editor.Screen.Question);
 
+        var does = screen.Editor.Component<PickComponent>().Stages[2];
+        Assert.Contains(does.Entries, e => e.Text == "Sequence 1" && e.IsChosen);
+
         screen.Editor.PressChoice("Seal up");
+        screen.Editor.PressPrimary();
         screen.Run(2);
 
         Assert.Equal("then run Seal up", screen.Editor.Doing(0));
-        Assert.Single(System(screen).Triggers);
+        Assert.Same(was, System(screen).Triggers[0]);
+    }
+
+    /// <summary>
+    /// A change to what starts a trigger and to what it does, made on one Done, is one step back.
+    /// </summary>
+    [Fact]
+    public void ChangingBothWalksBackAsOne()
+    {
+        var screen = WithOne();
+
+        screen.Editor.PressStart("New sequence");
+        screen.Editor.Name("Seal up");
+        screen.Editor.Back();
+        screen.Run(2);
+
+        screen.Editor.PressWhen(0);
+        screen.Editor.PressBlock("Airlock Button");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("Seal up");
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(0));
+        Assert.Equal("then run Seal up", screen.Editor.Doing(0));
+
+        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Run(2);
+
+        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
+
+        screen.Editor.Invoke(screen.Editor.Steps().RedoCommand);
+        screen.Run(2);
+
+        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(0));
+        Assert.Equal("then run Seal up", screen.Editor.Doing(0));
     }
 
     /// <summary>
@@ -233,8 +275,8 @@ public class ChangingTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("A single action…");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Do something");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -314,8 +356,8 @@ public class ChangingTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("A single action…");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Do something");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -401,9 +443,15 @@ public class ChangingTests
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
         Assert.Single(System(screen).Triggers);
 
-        // And the empty part is what asks for an answer.
+        // And the empty part opens the picker it is answered in, on a new sequence.
         screen.Editor.PressDoes(0);
-        Assert.Equal("What should it do?", screen.Editor.Screen.Question);
+        Assert.Equal("When something happens", screen.Editor.Screen.Title());
+
+        screen.Editor.PressPrimary();
+        screen.Editor.Back();
+        screen.Run(2);
+
+        Assert.Equal("then run Sequence 2", screen.Editor.Doing(0));
     }
 
     /// <summary>
@@ -421,8 +469,8 @@ public class ChangingTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("A single action…");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Do something");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -484,7 +532,6 @@ public class ChangingTests
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
         screen.Editor.PressChoice("Take it over");
-        screen.Editor.PressChoice("Run a new sequence");
         screen.Run(2);
 
         Assert.Equal(2, System(screen).Triggers.Count);
@@ -506,7 +553,6 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.Back();
         screen.Run(2);
 
@@ -544,7 +590,6 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.Back();
         screen.Run(2);
 

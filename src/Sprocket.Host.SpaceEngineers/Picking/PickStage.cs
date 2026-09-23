@@ -103,5 +103,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         /// <summary>What the mark on an entry that is waited on says when the pointer rests on it.</summary>
         public string WaitsTip { get; set; }
+
+        /// <summary>Whether the pick is finished from this stage, as the last thing chosen before it is done.</summary>
+        public bool Finishes { get; set; }
     }
 }

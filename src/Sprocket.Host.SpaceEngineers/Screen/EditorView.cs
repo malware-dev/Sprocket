@@ -388,6 +388,37 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             }
         }
 
+        /// <summary>The way to finish that a view on the screen carries itself, or null where the footer's is the one.</summary>
+        Label Carried
+        {
+            get
+            {
+                for (int i = 0; i < _views.Count; i++)
+                {
+                    Label done = _views[i].Done;
+                    if (done != null)
+                        return done;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>Whether a view on the screen gives values in a column of its own, shown or not yet.</summary>
+        bool Gives
+        {
+            get
+            {
+                for (int i = 0; i < _views.Count; i++)
+                {
+                    if (_views[i].Gives)
+                        return true;
+                }
+
+                return false;
+            }
+        }
+
         /// <summary>Whether one of the fields shown as part of the screen has the keyboard.</summary>
         public bool IsFilling
         {
@@ -580,13 +611,22 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _switch.Hide();
 
             // Where the screen is finished in a column of its own, that column's Done is the one.
-            bool here = screen.HasPrimary && Given == null;
+            Label carried = Carried;
+            bool here = screen.HasPrimary && Given == null && carried == null;
             _primary.Text = here ? Widgets.Caps(screen.PrimaryText) : "";
 
             if (here)
                 Widgets.Go(_primary);
             else
                 Widgets.Absent(_primary);
+
+            if (carried == null)
+                return;
+
+            if (screen.HasPrimary)
+                Widgets.Go(carried);
+            else
+                Widgets.Waiting(carried);
         }
 
         /// <summary>
@@ -670,12 +710,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // Asking rather than sending where the screen cannot finish without a value: the field
             // opens under this button, which is the one somebody just pressed to finish.
-            _primary.Press = !screen.HasPrimary || Given != null
+            Deed finish = !screen.HasPrimary
                 ? Deed.Nothing
                 : screen.PrimaryAsks
                     ? Deed.Values(screen.PrimaryCommand, screen.PrimaryQuestion,
                         screen.PrimaryFields, screen.PrimaryFilled)
                     : Deed.Sends(screen.PrimaryCommand);
+
+            Label carried = Carried;
+            _primary.Press = Given != null || carried != null ? Deed.Nothing : finish;
+            if (carried != null)
+                carried.Press = finish;
         }
 
         /// <summary>How wide a question's popup is, whatever it is hanging under.</summary>
@@ -1568,8 +1613,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return;
             }
 
-            // Where the values are a column, a double press goes to them rather than raising them.
-            if (Given != null)
+            // Where the values are a column, a double press goes to them rather than raising them - once
+            // the column has caught up with what the press chose, which may be what puts it there.
+            if (Gives)
             {
                 _movingOn = true;
                 return;

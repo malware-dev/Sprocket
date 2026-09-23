@@ -270,7 +270,6 @@ public class EditorTests
         ship.Editor.PressBlock("Inner Door");
         ship.Editor.PressChoice("finishes closing");
         ship.Editor.PressPrimary();
-        ship.Editor.PressChoice("Run a new sequence");
 
         var closed = Assert.IsType<WhenTrigger>(ship.Automation.Sequences[1].Trigger);
         Assert.Equal("closed", closed.EventId);
@@ -290,7 +289,6 @@ public class EditorTests
         editor.PressBlock("Inner Door");
         editor.PressChoice("finishes closing");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
         ship.Tick();
 
         Assert.IsType<WhenTrigger>(ship.Automation.Sequences[0].Trigger);
@@ -321,7 +319,6 @@ public class EditorTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
     }
 
     /// <summary>
@@ -890,7 +887,6 @@ public class EditorTests
         // That button is already spoken for, which is asked about before anything else - and here
         // two on one button is the point of the walk.
         ship.Editor.PressChoice("Take it over");
-        ship.Editor.PressChoice("Run a new sequence");
         ship.Tick();
     }
 
@@ -1186,18 +1182,16 @@ public class EditorTests
         // Still nothing to move on to - the path is not finished.
         Assert.False(editor.Screen.HasPrimary);
 
+        // What happens, and then beside it what the trigger does.
         editor.PressChoice("is pressed");
+        var stages = editor.Component<PickComponent>().Stages;
+        Assert.Equal(3, stages.Count);
+        Assert.Contains(stages[2].Entries, e => e.Text == "A new sequence" && e.IsChosen);
         Assert.True(editor.Screen.HasPrimary);
 
+        // A new sequence is what a trigger usually does, so finishing lands on its sentence.
         editor.PressPrimary();
-
-        // And then the last question of all: what the trigger should do. It hangs over the screen
-        // rather than taking one of its own, because four short answers are not a screenful. The
-        // sentence is what answering it with a new sequence lands on.
-        Assert.Equal("What should it do?", editor.Question());
-        Assert.True(editor.HasAnswer("Run a new sequence"));
-
-        editor.PressChoice("Run a new sequence");
+        Assert.Equal("", editor.Question());
         Assert.NotNull(editor.Sentence());
     }
 
@@ -1216,7 +1210,6 @@ public class EditorTests
         editor.TickBlock("Outer Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
 
         var starts = Assert.IsType<WhenTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal(2, starts.Sources.Count);
@@ -1366,14 +1359,12 @@ public class EditorTests
         editor.PressBlock("Inner Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
         editor.Back();
 
         editor.PressStart("When…");
         editor.PressBlock("Outer Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
         editor.Back();
 
         // Sampled only while they may run, which is what the switch on each row is for.
@@ -1408,7 +1399,6 @@ public class EditorTests
         editor.TickBlock("Outer Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
 
         var starts = Assert.IsType<WhenTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal(2, starts.Sources.Count);
@@ -1526,7 +1516,6 @@ public class EditorTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
 
         ship.Tick();
         Assert.Equal("Sequence 1", editor.Screen.Title());
@@ -1559,7 +1548,7 @@ public class EditorTests
         editor.NewSystem("Airlock");
         editor.PressStart("Every…");
         editor.PressChoice("steady - every 100 ticks");
-        editor.PressChoice("Run a new sequence");
+        editor.PressPrimary();
 
         // The component instances must survive, or a target rebuilds its controls
         // and the field loses focus and the caret mid-word.
@@ -1646,7 +1635,6 @@ public class EditorTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
 
         editor.SwitchOn();
         ship.Tick();

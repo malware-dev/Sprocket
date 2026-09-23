@@ -365,9 +365,8 @@ public class RigTests
         rig.Editor.PressStart("When…");
         rig.Editor.PressBlock("Inside Button");
         rig.Editor.PressChoice("is pressed");
-        rig.Editor.PressPrimary();
-        rig.Editor.PressChoice("Run an existing sequence");
         rig.Editor.PressChoice(sequence.Name);
+        rig.Editor.PressPrimary();
 
         for (var i = 0; i < 5; i++)
             rig.Tick();
@@ -487,7 +486,6 @@ public class RigTests
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
-        rig.Editor.PressChoice("Run a new sequence");
         // A wait, so the run lasts long enough to be stopped.
         rig.Editor.PressAdd("wait");
         rig.Editor.PressChoice(Words.TimeText.WaitChoice(600));
@@ -581,7 +579,6 @@ public class RigTests
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
-        rig.Editor.PressChoice("Run a new sequence");
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
@@ -641,7 +638,6 @@ public class RigTests
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
         rig.Editor.PressChoice("Take it over");
-        rig.Editor.PressChoice("Run a new sequence");
 
         for (var i = 0; i < 60; i++)
             rig.Tick();
@@ -779,7 +775,6 @@ public class RigTests
         editor.PressBlock("Airlock Button");
         editor.PressChoice("is pressed");
         editor.PressPrimary();
-        editor.PressChoice("Run a new sequence");
     }
 
     static bool Running(Simulation rig, Sequence sequence)

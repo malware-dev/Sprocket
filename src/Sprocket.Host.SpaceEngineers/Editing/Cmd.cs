@@ -70,6 +70,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         RequireAny,
         RequireAll,
         EnterValues,
+        TriggerRuns,
+        TriggerStops,
+        TriggerDoes,
 
         // A list of answers.
         Choice,

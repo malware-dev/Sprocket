@@ -180,21 +180,13 @@ on screen     Do something
 173  Sprite     Sprocket_Fill         {X:959 Y:231 W:1 H:33}  #5B737BFF
 174  Sprite     Sprocket_Fill         {X:1172 Y:231 W:1 H:33}  #5B737BFF
 175  Text       at {X:1036.528 Y:236.882} scale 0.57  #A2C3CDFF  "Terminal"
-176  Sprite     Sprocket_Fill         {X:1199 Y:118 W:460 H:824}  #29363EFF
-177  Sprite     Sprocket_Fill         {X:1199 Y:118 W:460 H:1}  #5B737BFF
-178  Sprite     Sprocket_Fill         {X:1199 Y:941 W:460 H:1}  #5B737BFF
-179  Sprite     Sprocket_Fill         {X:1199 Y:118 W:1 H:824}  #5B737BFF
-180  Sprite     Sprocket_Fill         {X:1658 Y:118 W:1 H:824}  #5B737BFF
-181  Text       at {X:1215 Y:134.012} scale 0.64  #DCF5FDFF  "VALUES"
-182  Sprite     Sprocket_Fill         {X:1567 Y:140 W:76 H:37}  #374851FF
-183  Text       at {X:1586.327 Y:147.557} scale 0.57  #85A1A9FF  "Done"
-184  ClearClip  
-185  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-186  SetClip    {X:276 Y:55 W:157 H:33}
-187  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
-188  ClearClip  
-189  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-190  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-191  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
-192  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-193  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+176  ClearClip  
+177  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
+178  SetClip    {X:276 Y:55 W:157 H:33}
+179  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+180  ClearClip  
+181  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+182  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+183  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
+184  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+185  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

@@ -24,7 +24,6 @@ public class RunningTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
 
         // Written into the model rather than through the screens: what this is about is the row, and
         // a wait is the shortest step that leaves a sequence running for longer than an instant.
@@ -84,7 +83,6 @@ public class RunningTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.Back();
         screen.Run(2);
 

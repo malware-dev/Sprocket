@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class ValuesColumnTests
 {
     /// <summary>A sequence with a light picked in a step's picker, and nothing chosen for it yet.</summary>
-    const string ALight = "60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 1300 918 70 193 200 476";
+    const string ALight = "60 130 type Airlock enter 60 161 200 375 560 357 1353 311 70 193 200 476";
 
     const string SetRadius = "800 676";
     const string SetColour = "800 584";
@@ -24,6 +24,16 @@ public class ValuesColumnTests
     static Screen Open(string then)
     {
         return Screen.Fresh((ALight + " " + then).Split(' '));
+    }
+
+    /// <summary>The column comes once something to do is chosen, and not before.</summary>
+    [Fact]
+    public void TheColumnWaitsForSomethingToDo()
+    {
+        var screen = Screen.Fresh(ALight.Split(' '));
+
+        Assert.False(screen.Shows("VALUES"), "the values column came before anything was chosen");
+        Assert.True(screen.Shows("WHAT TO DO"), "the second column is not there");
     }
 
     [Fact]

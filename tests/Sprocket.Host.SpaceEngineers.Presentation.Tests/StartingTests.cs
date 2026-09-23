@@ -87,9 +87,8 @@ public class StartingTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run an existing sequence");
         screen.Editor.PressChoice("Sequence 1");
+        screen.Editor.PressPrimary();
         screen.Run(120);
 
         Assert.NotNull(screen.Editor.Program.Sequences[0].Trigger);

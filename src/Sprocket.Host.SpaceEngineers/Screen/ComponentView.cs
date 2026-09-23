@@ -179,6 +179,19 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             get { return null; }
         }
 
+        /// <summary>Whether this view gives values in a column of its own, shown or not yet.</summary>
+        public virtual bool Gives
+        {
+            get { return false; }
+        }
+
+        /// <summary>The way to finish the screen, where this view carries it rather than the footer, or null.</summary>
+        /// <remarks>Answered whether or not it is on the screen yet, so the footer never shows a second one.</remarks>
+        public virtual Label Done
+        {
+            get { return null; }
+        }
+
         /// <summary>Says that what is in <see cref="Given" /> may have changed, for a view that tells core.</summary>
         public virtual void Entered()
         {

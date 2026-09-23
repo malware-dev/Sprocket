@@ -28,7 +28,6 @@ public class ParkedTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Close");
@@ -124,7 +123,6 @@ public class ParkedTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
-        screen.Editor.PressChoice("Run a new sequence");
         screen.Editor.Back();
         screen.Run(120);
 

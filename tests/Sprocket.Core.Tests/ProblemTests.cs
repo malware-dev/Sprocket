@@ -406,7 +406,6 @@ public class ProblemTests
         ship.Editor.PressBlock("Airlock Button");
         ship.Editor.PressChoice("is pressed");
         ship.Editor.PressPrimary();
-        ship.Editor.PressChoice("Run a new sequence");
 
         ship.Editor.PressAdd("do something");
         ship.Editor.PressBlock("Inner Door");

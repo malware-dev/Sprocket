@@ -43,7 +43,6 @@ public class ListeningTests
             if (editor.HasAnswer("Take it over"))
                 editor.PressChoice("Take it over");
 
-            editor.PressChoice("Run a new sequence");
             AssertListening(screen, "a sequence");
 
             editor.PressAdd("do something");
@@ -91,8 +90,7 @@ public class ListeningTests
         editor.PressChoice("is pressed");
         screen.Run(2);
 
-        var says = editor.Screen.PrimaryText.ToUpperInvariant();
-        var button = screen.Text(says);
+        var button = screen.Text(editor.Screen.PrimaryText);
         var was = screen.Ended;
 
         // Pressed where it is drawn, rather than invoked through core: what the reopening breaks is

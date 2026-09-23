@@ -229,7 +229,6 @@ public class ReachTests
             screen.Editor.PressBlock("Airlock Button");
             screen.Editor.PressChoice("is pressed");
             screen.Editor.PressPrimary();
-            screen.Editor.PressChoice("Run a new sequence");
             screen.Editor.Back();
         });
 
@@ -240,7 +239,6 @@ public class ReachTests
             screen.Editor.PressBlock("Airlock Button");
             screen.Editor.PressChoice("is pressed");
             screen.Editor.PressPrimary();
-            screen.Editor.PressChoice("Run a new sequence");
         });
 
         AssertEverythingLights("a banner that has arrived", screen =>
