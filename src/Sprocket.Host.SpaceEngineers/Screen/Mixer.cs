@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly Slider _value = new Slider();
 
         readonly Swatch _chosen = new Swatch(ChosenWide, Slider.Thick * 3f + Space.Item * 2f);
-        readonly TextBox _written = Widgets.Box(Lettering.Body, Palette.Page);
+        readonly TextBox _written = Widgets.Box(Lettering.Small, Palette.Page);
 
         Slider _held;
 

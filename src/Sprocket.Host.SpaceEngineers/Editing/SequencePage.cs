@@ -5,7 +5,6 @@ using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -357,12 +356,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return _sequence.CanRun ? 0 : Editor.Register(kind, which, part, action);
         }
 
-        /// <summary>The same, for a slot whose contents are typed rather than chosen.</summary>
-        int Typing(Cmd kind, int which, int part, Action<string> action)
-        {
-            return _sequence.CanRun ? 0 : Editor.RegisterText(kind, which, part, action);
-        }
-
         /// <summary>Where each row's step sits among the sequence's lines.</summary>
         readonly List<int> _shown = new List<int>();
 
@@ -412,20 +405,15 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 Change(Cmd.StepSlot, position, 1, delegate { EditStep(act); })));
 
             // Last, because the blocks are what somebody scanning a list of steps is looking for
-            // and the values are the detail. Its own slot, so pressing it changes the values and
-            // nothing else - the same rule every other part of a sentence follows.
+            // and the values are the detail. Pressing it opens the step where its values are given,
+            // with the caret already in them.
             if (chosen != null && chosen.Wants > 0)
             {
                 var fields = new List<Field>();
                 chosen.Fields(fields);
 
-                var given = new ValuesSlot(act.Values, fields,
-                    Typing(Cmd.StepSlot, position, 2, delegate(string said) { Gave(act, said); }));
-
-                // Asked by what the form will show rather than by how many values the action takes.
-                // The two part company the moment a description says several of them are one thing.
-                given.Question = SequenceText.Wants(fields);
-                built.Slots.Add(given);
+                built.Slots.Add(new ValuesSlot(act.Values, fields,
+                    Change(Cmd.StepSlot, position, 2, delegate { EditStep(act, true); })));
             }
 
             return built;
@@ -449,22 +437,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await ? 2 : 1;
         }
 
-        /// <summary>
-        /// Replaces the values a step was given with what was typed into its slot.
-        /// </summary>
-        /// <remarks>
-        /// All of them at once, because that is how they were asked for: one line of values, in the
-        /// order the action takes them.
-        /// </remarks>
-        void Gave(Act step, string said)
+        void EditStep(Act step)
         {
-            var given = new List<Literal>();
-            ValueLine.Read(said, given);
-
-            Editor.Do(_sequence, new SetValues(_sequence.Steps.IndexOf(step), step.Values, given));
+            EditStep(step, false);
         }
 
-        void EditStep(Act step)
+        /// <summary>Opens a step's picker on what it does, with the caret in its values where <paramref name="values" /> says so.</summary>
+        void EditStep(Act step, bool values)
         {
             var index = _sequence.Steps.IndexOf(step);
 
@@ -479,7 +458,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                         new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen,
                             answer.Form, answer.Values));
                     Editor.Pop();
-                }, values: step.Values));
+                }, values: step.Values, opensOnValues: values));
         }
 
         /// <summary>

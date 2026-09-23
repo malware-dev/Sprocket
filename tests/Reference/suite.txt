@@ -88,7 +88,7 @@ sequence-ticked     60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1
 # The words on a step are the host's, not core's: core says which blocks and which action, and this
 # target says "open" and joins them. A step that read right before the words moved out and wrong
 # after would show up nowhere else, because nothing else in the suite gets as far as a step.
-sequence-step       60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 400 396 800 362 1380 1000
+sequence-step       60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 400 396 800 650 1365 159
 sequence-wait       60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 212 193 100 255
 wait-chooser        60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 212 193
 wait-typed          60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 212 193 100 490 type 90 enter
@@ -96,61 +96,61 @@ wait-refused        60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1
 wait-ready          60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 212 193 100 490 type 90
 wait-used           60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 212 193 100 490 type 90 1360 494
 
-# --- the form an action's values are asked for in -------------------------------------------------
+# --- the column an action's values are given in ---------------------------------------------------
 #
 # A light's radius, which is one value with bounds on it. What is held still is that the field is on
-# its own line with its name and its bounds beside it, and that a value outside them replaces the
-# question rather than appearing beside it - the dialog is the same size either way, which is the
-# whole point of putting the words there.
-values              60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 800 676 1380 1000
+# its own line with its name and its bounds beside it, in the picker's third column with Done at its
+# foot, and that a value outside them is refused by Done with the reason over it - Done stays where
+# it is whatever the reason says.
+values              60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 800 676
 picker-terminal     60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 820 244
 picker-shared       60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 56 404 56 556 56 480
-values-refused      60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 800 676 1380 1000 type 300
+values-refused      60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 800 676 1315 206 type 300 1365 260
 
-# And the same form asking for the thing nobody should be typing.
+# And the same column asking for the thing nobody should be typing.
 #
 # A light's colour setter is the awkward one: three values, each declared as text, with nothing in
-# the game saying they are a colour's channels. Sprocket says so, so the form shows one control for
+# the game saying they are a colour's channels. Sprocket says so, so the column shows one control for
 # the three - the hue track, two plain ones, and what the colour is written as. The swatches above
 # them are the player's own and there is nobody to ask here, so the row they would be in is not
 # drawn at all, which is the other thing this holds still.
-values-colour       60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 800 584 1380 1000
+values-colour       60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 800 584
 
 # And the value that is one of two words, which is a switch rather than a box with the words beside
 # it. Neither half is lit until one is pressed, because a switch that opened showing "off" would be
 # answering for somebody.
-values-flag         60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Approach 200 351 800 584 1380 1000
+values-flag         60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Approach 200 351 800 584
 
 # And the same value with more of them than a switch can hold.
 #
 # A battery's charge mode is three words, and the block is told a number for whichever one is
 # chosen. What is held still is that the words are what is on the screen, that none of them is lit
 # until one is pressed, and that the step afterwards reads the word rather than the number.
-values-choices      60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Standby 200 351 800 410 1380 1000
-sequence-choices    60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Standby 200 351 800 410 1380 1000 660 530 enter
+values-choices      60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Standby 200 351 800 410
+sequence-choices    60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Standby 200 351 800 410 1247 198 enter
 
 # And more of them than a row can hold, which folds into a box that opens a list.
 #
 # Six forward directions. What is held still is that the box is one line whatever the list holds,
-# that it says nothing until something is chosen, and that the list hangs over the way out of the
-# form rather than under it - which is the whole reason the form draws it and the control does not.
-values-list         60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Tug 200 351 800 584 1380 1000
-values-list-open    60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Tug 200 351 800 584 1380 1000 700 530
-sequence-list       60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Tug 200 351 800 584 1380 1000 700 530 700 628 enter
+# that it says nothing until something is chosen, and that the list hangs over whatever is below it
+# rather than under it - which is the whole reason the column draws it and the control does not.
+values-list         60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Tug 200 351 800 584
+values-list-open    60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Tug 200 351 800 584 1345 206
+sequence-list       60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Tug 200 351 800 584 1345 206 1345 316 enter
 
 # Leaving a sequence that is still switched off asks about it, and says which answer Enter takes.
 #
 # The safe answer is drawn the way everything else that carries on is drawn, because a key nobody
 # can see the effect of is a key nobody trusts twice. Safe, and not the one that reads best first:
 # Enter gets pressed without reading, and must not switch something on.
-sequence-leaving    60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Tug 200 351 800 584 1380 1000 700 530 700 628 enter 19 62
+sequence-leaving    60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 150 200 type Tug 200 351 800 584 1345 206 1345 316 enter 19 62
 
 # And the step it leaves behind, which is the other half of the same decision.
 #
 # A colour is the one slot in a sentence that is not words. Held still here because a step is read
 # far more often than it is written, and because the fallback - three numbers, or the code - is what
 # it used to show and what it must not go back to showing.
-sequence-colour     60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 800 584 1380 1000 type #FF8800 enter
+sequence-colour     60 130 type Airlock enter 60 161 200 351 560 333 1380 1000 1300 918 70 193 200 476 800 584 1049 371 type #FF8800 enter
 
 # --- the list with something in it, which is where a copy is made from ---------------------------
 #

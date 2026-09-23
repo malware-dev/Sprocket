@@ -43,18 +43,18 @@ on screen     Automation for Test Rig
 036  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 037  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 038  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-039  Sprite     Sprocket_Fill         {X:259 Y:153 W:512 H:88}  #3C4C52FF
+039  Sprite     Sprocket_Fill         {X:259 Y:153 W:512 H:85}  #3C4C52FF
 040  Sprite     Sprocket_Fill         {X:259 Y:153 W:512 H:1}  #5B737BFF
-041  Sprite     Sprocket_Fill         {X:259 Y:240 W:512 H:1}  #5B737BFF
-042  Sprite     Sprocket_Fill         {X:259 Y:153 W:1 H:88}  #5B737BFF
-043  Sprite     Sprocket_Fill         {X:770 Y:153 W:1 H:88}  #5B737BFF
+041  Sprite     Sprocket_Fill         {X:259 Y:237 W:512 H:1}  #5B737BFF
+042  Sprite     Sprocket_Fill         {X:259 Y:153 W:1 H:85}  #5B737BFF
+043  Sprite     Sprocket_Fill         {X:770 Y:153 W:1 H:85}  #5B737BFF
 044  Text       at {X:275 Y:163.292} scale 0.5  #A2C3CDFF  "What is it?"
-045  Sprite     Sprocket_Fill         {X:275 Y:192 W:368 H:39}  #141B20FF
+045  Sprite     Sprocket_Fill         {X:275 Y:192 W:368 H:37}  #141B20FF
 046  Sprite     Sprocket_Fill         {X:275 Y:192 W:368 H:1}  #5B737BFF
-047  Sprite     Sprocket_Fill         {X:275 Y:230 W:368 H:1}  #5B737BFF
-048  Sprite     Sprocket_Fill         {X:275 Y:192 W:1 H:39}  #5B737BFF
-049  Sprite     Sprocket_Fill         {X:642 Y:192 W:1 H:39}  #5B737BFF
-050  Text       at {X:287.8 Y:199.592} scale 0.64  #DCF5FDFF  "Airlock"
-051  Sprite     Sprocket_Fill         {X:342 Y:200 W:2 H:24}  #DCF5FDFF
-052  Sprite     Sprocket_Fill         {X:653 Y:193 W:102 H:37}  #374851FF
-053  Text       at {X:672.4667 Y:200.887} scale 0.57  #85A1A9FF  "Continue"
+047  Sprite     Sprocket_Fill         {X:275 Y:227 W:368 H:1}  #5B737BFF
+048  Sprite     Sprocket_Fill         {X:275 Y:192 W:1 H:37}  #5B737BFF
+049  Sprite     Sprocket_Fill         {X:642 Y:192 W:1 H:37}  #5B737BFF
+050  Text       at {X:287.8 Y:199.592} scale 0.57  #DCF5FDFF  "Airlock"
+051  Sprite     Sprocket_Fill         {X:336 Y:200 W:2 H:21}  #DCF5FDFF
+052  Sprite     Sprocket_Fill         {X:653 Y:192 W:102 H:37}  #374851FF
+053  Text       at {X:672.4667 Y:199.592} scale 0.57  #85A1A9FF  "Continue"

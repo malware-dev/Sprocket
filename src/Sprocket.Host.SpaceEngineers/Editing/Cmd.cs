@@ -69,6 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         OneKind,
         RequireAny,
         RequireAll,
+        EnterValues,
 
         // A list of answers.
         Choice,

@@ -168,6 +168,23 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         }
 
         /// <summary>
+        /// The fields this view shows as part of the screen, or null where it shows none.
+        /// </summary>
+        /// <remarks>
+        /// Laid out by the view and answered through the screen, which is what takes the keyboard,
+        /// the presses and the drags and hands them on - see <see cref="Ask.Column" />.
+        /// </remarks>
+        public virtual Ask Given
+        {
+            get { return null; }
+        }
+
+        /// <summary>Says that what is in <see cref="Given" /> may have changed, for a view that tells core.</summary>
+        public virtual void Entered()
+        {
+        }
+
+        /// <summary>
         /// The screen this view is on, for the few things a view cannot do from inside the layout.
         /// </summary>
         /// <remarks>

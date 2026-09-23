@@ -117,9 +117,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
-            bool asksAll = false, bool all = false, IList<Literal> values = null)
+            bool asksAll = false, bool all = false, IList<Literal> values = null, bool opensOnValues = false)
             : base(editor)
         {
+            _opensOnValues = opensOnValues;
+
             if (values != null)
             {
                 for (var i = 0; i < values.Count; i++)
@@ -130,6 +132,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _forEvents = forEvents;
             _chosen = chosen ?? "";
             _chosenForm = chosenForm;
+            _arrivedChosen = _chosen;
+            _arrivedForm = chosenForm;
+            _arrivedAll = all;
             _asksAll = asksAll;
             _all = all;
             _done = done;
@@ -188,8 +193,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             get
             {
+                // Only for what the step did. Another action's values are not these, whatever their
+                // count happens to be.
                 _filled.Clear();
-                if (_arrivedValues.Count > 0)
+                if (_arrivedValues.Count > 0 && _chosen == _arrivedChosen && _chosenForm == _arrivedForm)
                     Channels.Shown(_arrivedValues, Fields(), _filled);
 
                 return _filled;
@@ -198,6 +205,19 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>What the step being changed was already given, or empty where nothing is.</summary>
         readonly List<Literal> _arrivedValues = new List<Literal>();
+
+        /// <summary>Whether this opens with the caret in the values, for somebody who came to change them.</summary>
+        readonly bool _opensOnValues;
+
+        /// <summary>What the step being changed did, which is what its values were given to.</summary>
+        readonly string _arrivedChosen;
+
+        readonly Form _arrivedForm;
+
+        readonly bool _arrivedAll;
+
+        /// <summary>What the values hold, as a program would write them, or null before they have said.</summary>
+        string _entered;
 
         readonly List<string> _filled = new List<string>();
 
@@ -228,7 +248,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (!IsComplete || !Moved)
                 return true;
 
-            Editor.Ask("Keep the blocks you picked?");
+            Editor.Ask("Keep your changes?");
 
             Editor.AnswerPrimary("Keep them", true);
             Editor.Answer("Discard them", delegate { Editor.Pop(); });
@@ -236,7 +256,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return false;
         }
 
-        /// <summary>Whether anything here differs from what was already chosen when it opened.</summary>
+        /// <summary>
+        /// Whether anything here differs from what was already chosen when it opened: the blocks, what
+        /// is done to them, whether any or all of them, or the values it is done with.
+        /// </summary>
         bool Moved
         {
             get
@@ -250,8 +273,53 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                         return true;
                 }
 
+                if (_chosen != _arrivedChosen || _chosenForm != _arrivedForm || _all != _arrivedAll)
+                    return true;
+
+                return ValuesMoved;
+            }
+        }
+
+        /// <summary>
+        /// Whether the values hold anything other than what the step was given.
+        /// </summary>
+        /// <remarks>
+        /// By value rather than by spelling: a field shows a real number with a place after the point,
+        /// so a step given 5 opens showing 5.0, which is the same value and no change.
+        /// </remarks>
+        bool ValuesMoved
+        {
+            get
+            {
+                if (_entered == null)
+                    return false;
+
+                var entered = new List<Literal>();
+                ValueLine.Read(_entered, entered);
+                if (entered.Count != _arrivedValues.Count)
+                    return true;
+
+                for (var i = 0; i < entered.Count; i++)
+                {
+                    if (!Same(entered[i], _arrivedValues[i]))
+                        return true;
+                }
+
                 return false;
             }
+        }
+
+        static bool Same(Literal a, Literal b)
+        {
+            var numbers = (a.Kind == ValueKind.Integer || a.Kind == ValueKind.Real)
+                && (b.Kind == ValueKind.Integer || b.Kind == ValueKind.Real);
+
+            return numbers ? a.Number == b.Number : a.Kind == b.Kind && a.Said == b.Said;
+        }
+
+        void OnEntered(string said)
+        {
+            _entered = said ?? "";
         }
 
         public override void Primary()
@@ -287,6 +355,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             {
                 _pick = new PickComponent();
                 _pick.Fills = true;
+
+                // A step is finished by giving what it does its values. What happens to a block takes
+                // none, so a trigger is finished the way it always was.
+                _pick.Finishes = !_forEvents;
+                _pick.OpensOnValues = _opensOnValues;
+                if (_pick.Finishes)
+                    _pick.EnteredCommand = Editor.RegisterText(Cmd.EnterValues, OnEntered);
 
                 _blocks = new PickStage("Blocks");
                 _blocks.AllowsMany = true;
@@ -324,6 +399,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             if (_what != null)
                 changed |= FillWhat();
+
+            changed |= FillGiven();
 
             if (changed)
                 _pick.Changed();
@@ -390,6 +467,50 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             if (changed)
                 _pick.Changed();
+        }
+
+        /// <summary>
+        /// Says what the chosen thing takes, and what it opens holding, where either has changed.
+        /// </summary>
+        /// <remarks>
+        /// The same thing can be asked for differently as the blocks change - a hinge picked beside a
+        /// rotor turns without a direction - so the fields are compared as well as what they are for.
+        /// </remarks>
+        bool FillGiven()
+        {
+            if (!_pick.Finishes)
+                return false;
+
+            var given = IsComplete ? _chosenForm + " " + _chosen : "";
+            var fields = Fields();
+            if (_pick.Given == given && Same(_pick.Fields, fields))
+                return false;
+
+            _pick.Given = given;
+            _pick.Fields.Clear();
+            _pick.Fields.AddRange(fields);
+            _pick.Filled.Clear();
+            _pick.Filled.AddRange(PrimaryFilled);
+            _pick.Restate();
+            return true;
+        }
+
+        static bool Same(IList<Field> held, IList<Field> fields)
+        {
+            if (held.Count != fields.Count)
+                return false;
+
+            for (var i = 0; i < held.Count; i++)
+            {
+                if (held[i].Name != fields[i].Name || held[i].Least != fields[i].Least
+                    || held[i].Most != fields[i].Most || held[i].Edits != fields[i].Edits
+                    || held[i].Entry != fields[i].Entry || held[i].Covers != fields[i].Covers)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         bool FillBlocks()

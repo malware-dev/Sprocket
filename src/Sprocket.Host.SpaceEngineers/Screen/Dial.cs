@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         readonly Bar _root = new Bar();
         readonly Face _face = new Face();
-        readonly TextBox _written = Widgets.Box(Lettering.Body, Palette.Page);
+        readonly TextBox _written = Widgets.Box(Lettering.Small, Palette.Page);
 
 
         float _degrees;
@@ -52,7 +52,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             var held = new Sized(WrittenWide);
             held.Content = _written;
 
+            // As wide as the dial and its box, so a line that puts it on the right can.
             _root.Spacing = Space.Item;
+            _root.Tight = true;
             _root.Left = _face;
             _root.Fill = held;
         }

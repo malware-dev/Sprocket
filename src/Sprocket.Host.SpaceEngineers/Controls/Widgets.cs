@@ -191,7 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             box.Color = Palette.Ink;
             box.Background = background;
             box.Edge = Palette.Line;
-            box.Padding = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.3f);
+            box.Padding = new Thickness(Space.ChipX * 0.8f, Space.FieldY);
 
             box.CaretColor = Palette.Ink;
             box.HintColor = Palette.Faint;

@@ -17,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
     public class Bar : Element
     {
         private float _spacing;
+        private bool _tops;
 
         private readonly ElementCollection _children;
 
@@ -61,6 +62,26 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         /// </para>
         /// </remarks>
         public bool Tight { get; set; }
+
+        /// <summary>
+        /// Whether the parts sit along the top of the bar rather than on its middle.
+        /// </summary>
+        /// <remarks>
+        /// For a middle that grows downwards - words that wrap - beside a part that must stay where it
+        /// is while they do.
+        /// </remarks>
+        public bool Tops
+        {
+            get { return _tops; }
+            set
+            {
+                if (_tops == value)
+                    return;
+
+                _tops = value;
+                InvalidateArrange();
+            }
+        }
 
         /// <summary>Blank room between the parts.</summary>
         public float Spacing
@@ -126,21 +147,21 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             if (Shows(_left))
             {
                 float width = _left.DesiredSize.X;
-                _left.Arrange(Centred(left, bounds, width, _left.DesiredSize.Y));
+                _left.Arrange(Placed(left, bounds, width, _left.DesiredSize.Y));
                 left += width + Spacing;
             }
 
             if (Shows(_right))
             {
                 float width = _right.DesiredSize.X;
-                _right.Arrange(Centred(right - width, bounds, width, _right.DesiredSize.Y));
+                _right.Arrange(Placed(right - width, bounds, width, _right.DesiredSize.Y));
                 right -= width + Spacing;
             }
 
             if (_fill != null)
             {
                 float width = right - left;
-                _fill.Arrange(Centred(left, bounds, width > 0f ? width : 0f, _fill.DesiredSize.Y));
+                _fill.Arrange(Placed(left, bounds, width > 0f ? width : 0f, _fill.DesiredSize.Y));
             }
         }
 
@@ -173,6 +194,15 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         private static bool Shows(Element part)
         {
             return part != null && !part.Collapsed;
+        }
+
+        /// <summary>Where a part goes: along the top where the bar says so, and on its middle otherwise.</summary>
+        private RectangleF Placed(float x, RectangleF bounds, float width, float height)
+        {
+            if (!_tops || height <= 0f || height > bounds.Height)
+                return Centred(x, bounds, width, height);
+
+            return new RectangleF(x, bounds.Y, width, height);
         }
 
         /// <summary>

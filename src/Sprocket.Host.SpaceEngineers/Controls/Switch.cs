@@ -28,12 +28,17 @@ namespace Sprocket.Host.SpaceEngineers.Controls
 
         float _half;
 
-        public Switch(float scale)
+        public Switch(float scale) : this(scale, false)
+        {
+        }
+
+        /// <summary>A switch that is one of the fields a value is given in, and so as tall as a box.</summary>
+        public Switch(float scale, bool field)
         {
             var children = new ElementCollection(this);
 
-            _on = Half(Widgets.Caps("on"), scale);
-            _off = Half(Widgets.Caps("off"), scale);
+            _on = Half(Widgets.Caps("on"), scale, field);
+            _off = Half(Widgets.Caps("off"), scale, field);
 
             children.Add(_on);
             children.Add(_off);
@@ -198,10 +203,10 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             _off.Draw(g);
         }
 
-        static Label Half(string text, float scale)
+        static Label Half(string text, float scale, bool field)
         {
             Label half = Widgets.Label(text, Palette.Faint, scale);
-            half.Padding = new Thickness(Space.ChipX, Space.ChipY);
+            half.Padding = new Thickness(Space.ChipX, field ? Space.FieldY : Space.ChipY);
             half.Centres = true;
             half.Wraps = false;
             return half;

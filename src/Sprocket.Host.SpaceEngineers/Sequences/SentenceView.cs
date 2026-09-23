@@ -97,10 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 // Every tick, unlike the words: a slot core handed back unchanged can still have
                 // stopped being something to press, which is how a sequence locks itself while it runs.
-                _slots[i].Press = step.Slots[i].Asks
-                    ? Deed.Values(step.Slots[i].Command, step.Slots[i].Question,
-                        step.Slots[i].Fields, step.Slots[i].Filled)
-                    : Deed.Sends(step.Slots[i].Command);
+                _slots[i].Press = Deed.Sends(step.Slots[i].Command);
 
                 if (ReferenceEquals(_shown[i], step.Slots[i]))
                     continue;

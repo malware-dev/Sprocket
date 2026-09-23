@@ -103,6 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
         {
             float x = bounds.X;
             float y = bounds.Y;
+            float lineWidth = 0f;
             float lineHeight = 0f;
             bool first = true;
             int lineFrom = 0;
@@ -115,9 +116,12 @@ namespace Sprocket.Host.SpaceEngineers.Layout
                     continue;
 
                 float width = child.DesiredSize.X;
-                float advance = x > bounds.X ? width + ItemSpacing : width;
+                float advance = lineWidth > 0f ? width + ItemSpacing : width;
 
-                if (!first && x > bounds.X && x - bounds.X + advance > bounds.Width)
+                // The same sum, added up the same way, as measuring did: worked out from the position
+                // instead, a line measured as exactly fitting came out a hair over and dropped its last
+                // child onto a line of its own.
+                if (!first && lineWidth > 0f && lineWidth + advance > bounds.Width)
                 {
                     // The line just finished is now known, so its short children can be dropped onto its
                     // middle before the next one starts.
@@ -125,14 +129,17 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
                     y += lineHeight + LineSpacing;
                     x = bounds.X;
+                    lineWidth = 0f;
                     lineHeight = 0f;
                     lineFrom = i;
+                    advance = width;
                 }
 
-                float left = x > bounds.X ? x + ItemSpacing : x;
+                float left = lineWidth > 0f ? x + ItemSpacing : x;
                 child.Arrange(new RectangleF(left, y, width, child.DesiredSize.Y));
 
                 x = left + width;
+                lineWidth += advance;
                 lineHeight = Wider(lineHeight, child.DesiredSize.Y);
                 first = false;
             }

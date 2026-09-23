@@ -137,7 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
                 return false;
             }
 
-            if (_view.IsAsking)
+            if (_view.IsAsking || _view.IsFilling)
             {
                 _view.CancelAsk();
                 return false;
@@ -328,7 +328,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
                 return;
             }
 
-            if (outcome.Onward && _view.IsAsking)
+            if (outcome.Onward && (_view.IsAsking || _view.IsFilling))
             {
                 _view.NextField();
                 _blinkFrom = Now();

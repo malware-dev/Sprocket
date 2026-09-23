@@ -214,6 +214,12 @@ namespace Sprocket.Host.SpaceEngineers.Words
             return Wants(fields.Count);
         }
 
+        /// <summary>What the picker's column of values is headed.</summary>
+        public static string ValuesTitle()
+        {
+            return "Values";
+        }
+
         /// <summary>
         /// What the one button that starts and stops a sequence promises, whichever way it faces.
         /// </summary>

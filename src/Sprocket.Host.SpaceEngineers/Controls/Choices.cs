@@ -33,6 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         readonly Stack _list;
         readonly Bar _closed = new Bar();
         readonly Label _chosen;
+
+        /// <summary>The mark on the shut box that says it opens.</summary>
+        readonly Element _mark;
         readonly List<Label> _words = new List<Label>();
         readonly List<Label> _lines = new List<Label>();
         readonly float _scale;
@@ -51,17 +54,17 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             _chosen = Widgets.Label("", Palette.Ink, scale);
             _chosen.Wraps = false;
 
-            var mark = Widgets.Centred(Symbols.Down, Palette.Faint);
+            _mark = Widgets.Centred(Symbols.Down, Palette.Faint);
 
             _closed.Spacing = Space.Item;
             _closed.Fill = _chosen;
-            _closed.Right = mark;
+            _closed.Right = _mark;
             _closed.Background = Palette.ControlHot;
             _closed.Highlight = Palette.Panel;
             _closed.HighlightEdge = Palette.Muted;
             _closed.Edge = Palette.Line;
             _closed.EdgeThickness = Space.Hair;
-            _closed.Padding = new Thickness(Space.ChipX, Space.ChipY);
+            _closed.Padding = new Thickness(Space.ChipX, Space.FieldY);
 
             _list = Widgets.Column(0f);
             _list.Background = Palette.ControlHot;
@@ -258,7 +261,21 @@ namespace Sprocket.Host.SpaceEngineers.Controls
                 return _row.DesiredSize;
 
             _closed.Measure(g, available);
-            return _closed.DesiredSize;
+
+            // As wide as the longest word it can hold and the mark beside it, whichever word is chosen,
+            // so choosing one does not move the box and a box on the right of a line stays there.
+            var widest = 0f;
+            for (var i = 0; i < _row.Children.Count; i++)
+            {
+                if (_row.Children[i].DesiredSize.X > widest)
+                    widest = _row.Children[i].DesiredSize.X;
+            }
+
+            // And as tall as a box, whatever the mark beside the word is drawn at, because everything a
+            // value is given in is one height.
+            var wide = widest + Space.Item + _mark.DesiredSize.X;
+            var tall = _chosen.DesiredSize.Y + Space.FieldY * 2f;
+            return new Vector2(wide < available.X ? wide : available.X, tall);
         }
 
         protected override void ArrangeContent(RectangleF bounds)
@@ -320,7 +337,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         Label Chip()
         {
             Label made = Widgets.Label("", Palette.Faint, _scale);
-            made.Padding = new Thickness(Space.ChipX, Space.ChipY);
+            made.Padding = new Thickness(Space.ChipX, Space.FieldY);
             made.Wraps = false;
             made.Background = Palette.SwitchDark;
             made.Edge = Palette.Dim;
@@ -331,7 +348,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         Label Line()
         {
             Label made = Widgets.Label("", Palette.Muted, _scale);
-            made.Padding = new Thickness(Space.ChipX, Space.ChipY);
+            made.Padding = new Thickness(Space.ChipX, Space.FieldY);
             made.Wraps = false;
             made.Highlight = Palette.Panel;
             return made;

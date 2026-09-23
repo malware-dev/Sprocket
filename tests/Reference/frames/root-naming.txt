@@ -22,17 +22,17 @@ on screen     Automation for Test Rig
 015  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 016  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 017  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-018  Sprite     Sprocket_Fill         {X:259 Y:153 W:512 H:88}  #3C4C52FF
+018  Sprite     Sprocket_Fill         {X:259 Y:153 W:512 H:85}  #3C4C52FF
 019  Sprite     Sprocket_Fill         {X:259 Y:153 W:512 H:1}  #5B737BFF
-020  Sprite     Sprocket_Fill         {X:259 Y:240 W:512 H:1}  #5B737BFF
-021  Sprite     Sprocket_Fill         {X:259 Y:153 W:1 H:88}  #5B737BFF
-022  Sprite     Sprocket_Fill         {X:770 Y:153 W:1 H:88}  #5B737BFF
+020  Sprite     Sprocket_Fill         {X:259 Y:237 W:512 H:1}  #5B737BFF
+021  Sprite     Sprocket_Fill         {X:259 Y:153 W:1 H:85}  #5B737BFF
+022  Sprite     Sprocket_Fill         {X:770 Y:153 W:1 H:85}  #5B737BFF
 023  Text       at {X:275 Y:163.292} scale 0.5  #A2C3CDFF  "What is it?"
-024  Sprite     Sprocket_Fill         {X:275 Y:192 W:368 H:39}  #141B20FF
+024  Sprite     Sprocket_Fill         {X:275 Y:192 W:368 H:37}  #141B20FF
 025  Sprite     Sprocket_Fill         {X:275 Y:192 W:368 H:1}  #5B737BFF
-026  Sprite     Sprocket_Fill         {X:275 Y:230 W:368 H:1}  #5B737BFF
-027  Sprite     Sprocket_Fill         {X:275 Y:192 W:1 H:39}  #5B737BFF
-028  Sprite     Sprocket_Fill         {X:642 Y:192 W:1 H:39}  #5B737BFF
-029  Sprite     Sprocket_Fill         {X:288 Y:200 W:2 H:24}  #DCF5FDFF
-030  Sprite     Sprocket_Fill         {X:653 Y:193 W:102 H:37}  #374851FF
-031  Text       at {X:672.4667 Y:200.887} scale 0.57  #85A1A9FF  "Continue"
+026  Sprite     Sprocket_Fill         {X:275 Y:227 W:368 H:1}  #5B737BFF
+027  Sprite     Sprocket_Fill         {X:275 Y:192 W:1 H:37}  #5B737BFF
+028  Sprite     Sprocket_Fill         {X:642 Y:192 W:1 H:37}  #5B737BFF
+029  Sprite     Sprocket_Fill         {X:288 Y:200 W:2 H:21}  #DCF5FDFF
+030  Sprite     Sprocket_Fill         {X:653 Y:192 W:102 H:37}  #374851FF
+031  Text       at {X:672.4667 Y:199.592} scale 0.57  #85A1A9FF  "Continue"

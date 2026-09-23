@@ -4,6 +4,7 @@ using VRageMath;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers.Picking
 {
@@ -44,12 +45,118 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         int _revision = -1;
         int _built = -1;
 
+        /// <summary>The values the chosen thing takes, and the way to finish, where the pick is finished here.</summary>
+        readonly Ask _given;
+
+        readonly Sized _givenRoot = new Sized(ColumnWidth);
+        readonly Dock _givenColumn = new Dock();
+        readonly Stack _givenHead = Widgets.Column(Space.Row);
+
+        /// <summary>The heading on the left, and Done on the right of it while there are no fields.</summary>
+        readonly Bar _givenTop = new Bar();
+        readonly Label _givenTitle = Widgets.Label("", Palette.Ink, Lettering.Body);
+
+        /// <summary>
+        /// The line under the heading, where a stage says what it holds, kept so the first field lines
+        /// up with the search boxes beside it.
+        /// </summary>
+        readonly Label _givenUnder = Widgets.Label("", Palette.Faint, Lettering.Tiny);
+
+        /// <summary>The fields, and the line under them.</summary>
+        readonly Stack _givenBody = Widgets.Column(Space.Region);
+
+        /// <summary>Under the fields: why nothing can be finished yet, and Done on the right of it.</summary>
+        readonly Bar _givenFoot = new Bar();
+
+        /// <summary>
+        /// What was entered for each chosen thing while the pick is open, by what it is for and then by
+        /// field.
+        /// </summary>
+        /// <remarks>
+        /// Kept by the view because what is typed is the view's until it is finished, and for as long as
+        /// the view lives, which is as long as the pick is open. Each field as its own control spells it,
+        /// so going back to something refills its controls the way opening on a step does.
+        /// </remarks>
+        readonly Dictionary<string, Dictionary<string, string>> _entered =
+            new Dictionary<string, Dictionary<string, string>>();
+
+        /// <summary>Which chosen thing the fields are showing, or null before they have shown anything.</summary>
+        string _shown;
+
+        int _restated = -1;
+
+        /// <summary>Whether the fields have been filled for the first time, which is when they may take the caret on opening.</summary>
+        bool _opened;
+
+        readonly List<string> _filling = new List<string>();
+
+        /// <summary>What core was last told the values hold.</summary>
+        string _reported;
+
         public PickView(PickComponent component)
         {
             _component = component;
             _strip.Horizontal = true;
             Widgets.Barred(_strip);
             _strip.Content = _columns;
+
+            if (!component.Finishes)
+                return;
+
+            _given = Ask.Column(ColumnWidth - Space.Region * 2f);
+
+            _givenTitle.Wraps = false;
+            _givenTitle.Trims = true;
+            _givenTitle.Text = Widgets.Caps(SequenceText.ValuesTitle());
+            _givenHead.Children.Add(_givenTitle);
+            _givenHead.Children.Add(_givenUnder);
+            _givenTop.Spacing = Space.Item;
+            _givenTop.Fill = _givenHead;
+
+            // The gap a stage keeps between its heading and its search box, so the first field lines
+            // up with the search boxes beside it.
+            _givenTop.Padding = new Thickness(0f, 0f, 0f, Space.Row);
+
+            // The reason beside Done, wrapping downwards, so Done stays where it is whatever it says.
+            _givenFoot.Spacing = Space.Item;
+            _givenFoot.Tops = true;
+            _givenFoot.Fill = _given.Why;
+
+            _givenBody.Children.Add(_given.Form);
+            _givenBody.Children.Add(_givenFoot);
+
+            _givenColumn.Background = Palette.Panel;
+            _givenColumn.Edge = Palette.Line;
+            _givenColumn.Padding = new Thickness(Space.Region);
+            _givenColumn.Top = _givenTop;
+            _givenColumn.Fill = _givenBody;
+            _givenRoot.Content = _givenColumn;
+        }
+
+        /// <summary>
+        /// Tells core what the values hold, where that differs from what it was last told.
+        /// </summary>
+        /// <remarks>
+        /// Asked after something that can change them - a key, a press or a drag in the column, or the
+        /// column being filled again - and never on a tick.
+        /// </remarks>
+        public override void Entered()
+        {
+            if (_given == null || _component.EnteredCommand == 0 || Host == null)
+                return;
+
+            var answer = _given.Answer;
+            if (answer == _reported)
+                return;
+
+            _reported = answer;
+            Host.SetText(_component.EnteredCommand, answer);
+        }
+
+        /// <summary>The values column, while it is on the screen.</summary>
+        public override Ask Given
+        {
+            get { return _given != null && _givenRoot.Parent != null ? _given : null; }
         }
 
         /// <summary>
@@ -90,6 +197,95 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
             for (int i = 0; i < _stages.Count && i < _component.Stages.Count; i++)
                 _stages[i].Update(_component.Stages[i], Host);
+
+            if (_given != null && _restated != _component.Restated)
+            {
+                _restated = _component.Restated;
+                Refill();
+            }
+        }
+
+        /// <summary>
+        /// Fills the fields for what is chosen now, keeping what was entered for what was chosen before.
+        /// </summary>
+        /// <remarks>
+        /// What something opens holding is what was entered for it earlier in this pick, where anything
+        /// was, and what the pick says otherwise: a step's own values, for what the step does.
+        /// </remarks>
+        void Refill()
+        {
+            if (!string.IsNullOrEmpty(_shown))
+            {
+                var was = Kept(_shown);
+                was.Clear();
+                _given.Spell(was);
+            }
+
+            var given = _component.Given ?? "";
+            if (given != _shown)
+                _given.Unjudge();
+
+            _shown = given;
+
+            Dictionary<string, string> kept = null;
+            if (given.Length > 0)
+                _entered.TryGetValue(given, out kept);
+
+            List<Field> fields = _component.Fields;
+            _filling.Clear();
+            for (var i = 0; i < fields.Count; i++)
+            {
+                string said;
+                if (kept != null)
+                    _filling.Add(kept.TryGetValue(Ask.Key(fields[i], i), out said) ? said : "");
+                else
+                    _filling.Add(i < _component.Filled.Count ? _component.Filled[i] : "");
+            }
+
+            // The fields say what is wanted by being there, and nothing is said over them.
+            _given.Values("", 0, fields, _filling);
+
+            Place(_given.Count > 0);
+
+            // Nowhere to type is nowhere to keep the keyboard. Somebody who came for the values gets
+            // the caret in them, once, when they first arrive.
+            if (_given.Count == 0)
+                _given.Release();
+            else if (_component.OpensOnValues && !_opened)
+                _given.Take();
+
+            _opened = true;
+            Entered();
+        }
+
+        /// <summary>
+        /// Puts Done under the fields where there are any, and beside the heading where there are none.
+        /// </summary>
+        /// <remarks>Only when what is chosen changes, never while it is being filled in.</remarks>
+        void Place(bool underFields)
+        {
+            if (underFields)
+            {
+                _givenTop.Right = null;
+                _givenFoot.Right = _given.Done;
+            }
+            else
+            {
+                _givenFoot.Right = null;
+                _givenTop.Right = _given.Done;
+            }
+        }
+
+        Dictionary<string, string> Kept(string given)
+        {
+            Dictionary<string, string> kept;
+            if (!_entered.TryGetValue(given, out kept))
+            {
+                kept = new Dictionary<string, string>();
+                _entered[given] = kept;
+            }
+
+            return kept;
         }
 
         /// <summary>
@@ -183,6 +379,10 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 _stages.Add(stage);
                 _columns.Children.Add(stage.Root);
             }
+
+            // Once there is something to do, which is when there is something to do it with.
+            if (_given != null && _component.Stages.Count > 1)
+                _columns.Children.Add(_givenRoot);
         }
     }
 }

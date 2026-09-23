@@ -144,6 +144,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Whether a question is open and wants the keyboard.</summary>
         public bool IsAsking => _view.IsAsking;
 
+        /// <summary>Whether a field shown as part of the screen has the keyboard.</summary>
+        public bool IsFilling => _view.IsFilling;
+
         /// <summary>The box that question is being answered in.</summary>
         public TextBox AskBox => _view.AskBox;
 

@@ -165,6 +165,16 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Which question is on screen, so a new one replaces it rather than hiding in it.</summary>
         int _asked;
 
+        /// <summary>
+        /// Whether a double press chose something that takes values, and the values column has yet to
+        /// be filled for it.
+        /// </summary>
+        /// <remarks>
+        /// Acted on once the views have caught up with the choice, since until then the column is
+        /// still showing what was chosen before.
+        /// </remarks>
+        bool _movingOn;
+
         TextBox _focus;
         int _focusCommand;
         int _focusTakes;
@@ -362,6 +372,32 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             get { return _ask.IsUp || _renaming >= 0; }
         }
 
+        /// <summary>The fields a view shows as part of the screen, or null where none does.</summary>
+        Ask Given
+        {
+            get
+            {
+                for (int i = 0; i < _views.Count; i++)
+                {
+                    Ask given = _views[i].Given;
+                    if (given != null)
+                        return given;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>Whether one of the fields shown as part of the screen has the keyboard.</summary>
+        public bool IsFilling
+        {
+            get
+            {
+                Ask given = Given;
+                return given != null && given.Typing;
+            }
+        }
+
         /// <summary>
         /// Why this screen cannot be left as it stands, or empty when it can.
         /// </summary>
@@ -448,6 +484,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
                 if (_focus != null)
                     _focus.CaretVisible = value;
+
+                Ask given = Given;
+                if (given != null && given.Typing)
+                    given.Box.CaretVisible = value;
             }
         }
 
@@ -483,6 +523,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             for (int i = 0; i < _views.Count; i++)
                 _views[i].Tick(_editor.CurrentTick);
+
+            // After the views, so the column is showing what is chosen now.
+            DressGiven(screen);
 
             if (_actionRevision != screen.Actions.Revision)
             {
@@ -536,9 +579,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             else
                 _switch.Hide();
 
-            _primary.Text = screen.HasPrimary ? Widgets.Caps(screen.PrimaryText) : "";
+            // Where the screen is finished in a column of its own, that column's Done is the one.
+            bool here = screen.HasPrimary && Given == null;
+            _primary.Text = here ? Widgets.Caps(screen.PrimaryText) : "";
 
-            if (screen.HasPrimary)
+            if (here)
                 Widgets.Go(_primary);
             else
                 Widgets.Absent(_primary);
@@ -625,7 +670,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // Asking rather than sending where the screen cannot finish without a value: the field
             // opens under this button, which is the one somebody just pressed to finish.
-            _primary.Press = !screen.HasPrimary
+            _primary.Press = !screen.HasPrimary || Given != null
                 ? Deed.Nothing
                 : screen.PrimaryAsks
                     ? Deed.Values(screen.PrimaryCommand, screen.PrimaryQuestion,
@@ -683,12 +728,19 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         public void Draw(IGraphics g, RectangleF bounds)
         {
+            Ask given = Given;
+            if (given != null)
+                given.Settle(g, bounds.Width);
+
             _root.Measure(g, new Vector2(bounds.Width, bounds.Height));
             _root.Arrange(bounds);
 
             LightWhatIsUnderThePointer();
 
             _root.Draw(g);
+
+            if (given != null)
+                given.DrawHanging(g);
 
             DrawPopup(g, bounds);
             DrawOverlay(g, bounds);
@@ -877,10 +929,26 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _editor.SetToggle(command, on);
         }
 
+        public void SetText(int command, string text)
+        {
+            if (command != 0)
+                _editor.SetText(command, text);
+        }
+
+        /// <summary>Lets the view showing the values column tell core what they hold now.</summary>
+        void Entered()
+        {
+            for (int i = 0; i < _views.Count; i++)
+            {
+                if (_views[i].Given != null)
+                    _views[i].Entered();
+            }
+        }
+
         /// <summary>The box the keyboard is in, or null when nothing is being typed into.</summary>
         public TextBox Focus
         {
-            get { return _focus; }
+            get { return IsFilling ? Given.Box : _focus; }
         }
 
         /// <summary>
@@ -893,6 +961,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         public void Typed()
         {
+            if (IsFilling)
+                Entered();
+
             // What is typed decides whether the name in hand can be given, which is what the heading
             // says while somebody is typing it. Core knows nothing about the box, so nothing else
             // will say this has changed.
@@ -916,6 +987,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Takes what is typed in the box with the caret, where Enter in it takes anything.</summary>
         public bool TakeTyped()
         {
+            // Enter in a field of the values column is Done.
+            if (IsFilling)
+            {
+                FinishGiven();
+                return true;
+            }
+
             if (_focus == null || _focusTakes == 0)
                 return false;
 
@@ -942,7 +1020,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _focus.SelectAll();
         }
 
+        /// <summary>Puts down whatever was being typed into, a field of the values column as well.</summary>
         void Unfocus()
+        {
+            Ask given = Given;
+            if (given != null)
+                given.Release();
+
+            UnfocusBox();
+        }
+
+        void UnfocusBox()
         {
             if (_focus == null)
                 return;
@@ -1013,6 +1101,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (Owner != null || IsAsking)
                 return false;
 
+            // A dial or a colour in the values column, which is turned or mixed by dragging.
+            Ask given = Given;
+            if (given != null && given.Covers(point) && given.Grab(point))
+            {
+                UnfocusBox();
+                return true;
+            }
+
             for (int i = 0; i < _views.Count; i++)
             {
                 if (!_views[i].TryGrab(point))
@@ -1044,6 +1140,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return;
             }
 
+            // Told to core when it is let go rather than at every step of the drag.
+            Ask given = Given;
+            if (given != null && given.IsDragging)
+            {
+                given.Carry(point);
+                return;
+            }
+
             if (_scroll.BarHeld)
             {
                 _scroll.DragBy(point.Y - _held);
@@ -1061,6 +1165,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _ask.Drop();
             _scroll.BarHeld = false;
 
+            Ask given = Given;
+            if (given != null)
+            {
+                given.Drop();
+                Entered();
+            }
+
             if (_dragging == null)
                 return;
 
@@ -1071,7 +1182,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Whether something is being carried right now.</summary>
         public bool IsDragging
         {
-            get { return _dragging != null || _scroll.BarHeld || _ask.IsDragging; }
+            get
+            {
+                Ask given = Given;
+                return _dragging != null || _scroll.BarHeld || _ask.IsDragging
+                    || given != null && given.IsDragging;
+            }
         }
 
         /// <summary>
@@ -1151,6 +1267,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 HideOverlay();
                 return true;
             }
+
+            if (PressedGiven(point))
+                return true;
 
             Element target = Under(point);
             if (target == null)
@@ -1245,7 +1364,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 && _editor.Screen.PrimaryAsks)
             {
                 _editor.Unask();
-                Moving(target);
+                Finish(target);
                 return true;
             }
 
@@ -1320,6 +1439,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (_renaming >= 0)
                 return;
 
+            if (!_ask.IsUp && IsFilling)
+            {
+                Given.Next();
+                return;
+            }
+
             _ask.Next();
         }
 
@@ -1367,8 +1492,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Abandons the question. Core was never told it was open, so nothing has to be undone.</summary>
         public void CancelAsk()
         {
+            // A field of the values column is put down, and everything in it stays.
             if (!IsAsking)
+            {
+                Unfocus();
                 return;
+            }
 
             Close();
         }
@@ -1397,7 +1526,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (screen.Default == screen.Finishing && screen.PrimaryAsks)
             {
                 _editor.Unask();
-                Moving(null);
+                Finish(null);
                 return true;
             }
 
@@ -1439,6 +1568,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return;
             }
 
+            // Where the values are a column, a double press goes to them rather than raising them.
+            if (Given != null)
+            {
+                _movingOn = true;
+                return;
+            }
+
             // Whatever was open goes first, because closing is what puts a name being typed away -
             // and it closes the form as well, so opening before it would open and shut in one press.
             Close();
@@ -1447,6 +1583,118 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _ask.Values(screen.PrimaryQuestion, screen.PrimaryCommand, screen.PrimaryFields,
                 screen.PrimaryFilled);
             _chromeStale = true;
+        }
+
+        /// <summary>
+        /// Finishes a screen the way its Done does: through the values column where there is one.
+        /// </summary>
+        void Finish(Element target)
+        {
+            if (Given != null)
+            {
+                FinishGiven();
+                return;
+            }
+
+            Moving(target);
+        }
+
+        /// <summary>
+        /// Takes a press on the values column, and answers whether it was one.
+        /// </summary>
+        /// <remarks>
+        /// A field takes the keyboard, and Done tries to finish. Anywhere else in the column is still
+        /// the column, and goes no further.
+        /// </remarks>
+        bool PressedGiven(Vector2 point)
+        {
+            Ask given = Given;
+            if (given == null || !given.Covers(point))
+                return false;
+
+            UnfocusBox();
+
+            if (_renaming >= 0)
+                CommitAsk();
+
+            if (given.Touch(point))
+            {
+                Entered();
+                return true;
+            }
+
+            Element inside = Under(point);
+            if (inside != null && inside.Press.Means == Means.Commit)
+                FinishGiven();
+
+            return true;
+        }
+
+        /// <summary>
+        /// Finishes with what is in the values column, or says what is wrong with it.
+        /// </summary>
+        /// <remarks>
+        /// Every field is held to what it takes from here on, so the reason shows at the foot and the
+        /// field it is about is marked, and the caret goes to the first field that needs mending. What
+        /// is chosen taking nothing is finished as it is.
+        /// </remarks>
+        void FinishGiven()
+        {
+            EditorScreen screen = _editor.Screen;
+            Ask given = Given;
+            if (given == null || !screen.HasPrimary)
+                return;
+
+            if (!screen.PrimaryAsks)
+            {
+                given.Release();
+                _editor.Invoke(screen.PrimaryCommand);
+                return;
+            }
+
+            given.Judge();
+            if (given.Wrong.Length > 0 || given.Missing)
+            {
+                UnfocusBox();
+                given.Take();
+                return;
+            }
+
+            given.Release();
+            _editor.SetText(screen.PrimaryCommand, given.Answer);
+        }
+
+        /// <summary>
+        /// Puts this tick's state on the values column, and carries out a double press waiting on it.
+        /// </summary>
+        /// <remarks>
+        /// A double press finishes where there is nothing left to fill in - a step whose values are
+        /// already there - and otherwise takes the caret to the first field that needs something.
+        /// </remarks>
+        void DressGiven(EditorScreen screen)
+        {
+            Ask given = Given;
+            bool movingOn = _movingOn;
+            _movingOn = false;
+
+            if (given == null)
+                return;
+
+            if (movingOn)
+            {
+                if (given.Complete)
+                {
+                    FinishGiven();
+                    return;
+                }
+
+                UnfocusBox();
+                given.Take();
+            }
+
+            given.Finishable = screen.HasPrimary;
+            given.Refused = given.Wrong;
+            given.Dress(Pointer);
         }
 
         void BeginAsk(Element control)

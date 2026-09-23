@@ -42,5 +42,11 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public const float ChipX = 16f;
 
         public const float ChipY = 6f;
+
+        /// <summary>
+        /// Inside anything a value is given in, down: a box, a switch, a choice. The one number that
+        /// makes all of them one height when their words are one size.
+        /// </summary>
+        public const float FieldY = ChipY * 1.3f;
     }
 }

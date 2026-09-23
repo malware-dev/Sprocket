@@ -57,11 +57,51 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         private bool _up;
         private int _at;
 
-        public Ask()
+        /// <summary>Whether this is a column of a screen rather than a question hanging over one.</summary>
+        private readonly bool _column;
+
+        /// <summary>Whether a field has the keyboard, which a question always has and a column only once a field is pressed.</summary>
+        private bool _typing = true;
+
+        /// <summary>Whether what is filled in is being held to what it takes, which a column only is once finishing it has been tried.</summary>
+        private bool _judged = true;
+
+        public Ask() : this(false, FormWidth)
         {
+        }
+
+        /// <summary>
+        /// The fields as a column of a screen, as wide as <paramref name="width" />, finished by its own Done.
+        /// </summary>
+        /// <remarks>
+        /// Always there rather than raised, so it takes the keyboard only when one of its fields is
+        /// pressed, and holds nothing against what is filled in until finishing it is tried. Its parts
+        /// are laid out by the column holding it - see <see cref="Form" />, <see cref="Done" /> and
+        /// <see cref="Why" />.
+        /// </remarks>
+        public static Ask Column(float width)
+        {
+            return new Ask(true, width);
+        }
+
+        Ask(bool column, float width)
+        {
+            _column = column;
+            _form.Width = width;
+
+            if (column)
+            {
+                _typing = false;
+                _judged = false;
+                _confirm.Text = "Done";
+            }
+
             var ways = Widgets.RowOf(Space.Item);
-            ways.Children.Add(_cancel);
-            ways.Children.Add(_confirm);
+            if (!column)
+            {
+                ways.Children.Add(_cancel);
+                ways.Children.Add(_confirm);
+            }
 
             _cancel.Padding = new Thickness(Space.ChipX, Space.ChipY);
             _cancel.Press = Deed.Cancels();
@@ -81,13 +121,44 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _form.Content = _fields;
 
             // The form above the line that finishes it, so reading down the dialog is the order it
-            // is filled in: what it wants, the fields, then the way out.
-            _popup.Children.Add(_label);
-            _popup.Children.Add(_form);
-            _popup.Children.Add(_entry);
+            // is filled in: what it wants, the fields, then the way out. A column lays its fields, its
+            // Done and its reason out itself.
+            if (!column)
+            {
+                _popup.Children.Add(_label);
+                _popup.Children.Add(_form);
+                _popup.Children.Add(_entry);
+            }
 
             Fields(1, false);
         }
+
+        /// <summary>The fields, as a column lays them out.</summary>
+        public Element Form
+        {
+            get { return _form; }
+        }
+
+        /// <summary>The way to finish, as a column lays it out.</summary>
+        public Element Done
+        {
+            get { return _confirm; }
+        }
+
+        /// <summary>Why nothing can be finished yet, as a column lays it out.</summary>
+        public Element Why
+        {
+            get { return _why; }
+        }
+
+        /// <summary>Whether one of the fields has the keyboard.</summary>
+        public bool Typing
+        {
+            get { return _typing; }
+        }
+
+        /// <summary>Whether the way to finish can be pressed. Only a column is told.</summary>
+        public bool Finishable { get; set; }
 
         /// <summary>
         /// Gives the question one field per value it is asking for, side by side.
@@ -113,7 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         void Fields(int count, bool form)
         {
             while (_boxes.Count < count)
-                _boxes.Add(Widgets.Box(Lettering.Body, Palette.Page));
+                _boxes.Add(Widgets.Box(Lettering.Small, Palette.Page));
 
             _fields.Children.Clear();
             for (var i = 0; i < count; i++)
@@ -137,15 +208,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // The reason sits on the same line as the way out, where somebody who has just pressed a
             // dead button is looking. A name question has its box there instead.
-            _entry.Fill = form ? (Element)_why : _boxes[0];
+            _entry.Fill = _column ? null : form ? (Element)_why : _boxes[0];
 
             _seen.Clear();
             _form.Collapsed = !form;
 
             // The way out is the form's, and not every question's. A name is left by pressing away
             // or by Escape, the way it always has been, and a Cancel beside it would take width
-            // from the box somebody is typing in.
-            _cancel.Collapsed = !form;
+            // from the box somebody is typing in. A column is left by pressing anything else.
+            _cancel.Collapsed = !form || _column;
 
             // The caret belongs to the field it is in, and to no other. Every box editing meant
             // every box drawing one, with only the real one blinking - which reads as three carets
@@ -173,6 +244,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// take for somewhere to type. Wide enough for a sentence, since a value can be text.
         /// </remarks>
         const float FormWidth = 520f;
+
+        /// <summary>
+        /// How wide every number box in a column is: a sign, six digits, a point and two places, and
+        /// the caret after them.
+        /// </summary>
+        const float Numbers = 11f * Sizes.Digit;
 
         /// <summary>
         /// The least room a label takes, in screen units, before anything is measured.
@@ -216,9 +293,29 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (Dialled(at))
                 Turned(at).Reach(_wanted[at].Least, _wanted[at].Most);
 
-            line.Fill = Dialled(at) ? Turned(at).Root : Chosen(at) ? Picking(at) : Boxed(at);
+            Element control = Dialled(at) ? Turned(at).Root : Chosen(at) ? Picking(at) : Boxed(at);
+
+            // A column puts its controls against its right-hand edge, the edge its Done is on, so they
+            // read as one line down the column whatever the labels beside them say. A box for text
+            // still takes whatever the label leaves.
+            if (_column && !Stretches(at))
+            {
+                line.Fill = null;
+                line.Right = control;
+            }
+            else
+            {
+                line.Right = null;
+                line.Fill = control;
+            }
 
             return line;
+        }
+
+        /// <summary>Whether a field's control takes the width its line has left rather than its own.</summary>
+        bool Stretches(int at)
+        {
+            return !Dialled(at) && !Chosen(at) && Room(at) <= 0f;
         }
 
         /// <summary>
@@ -238,13 +335,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return _boxes[at];
             }
 
-            // A number sits against the right-hand end of a box made to its own width.
+            // A number sits against the right-hand end of a box made to its own width. In a column every
+            // number box is one width, so the boxes under each other start as well as end together.
             _boxes[at].Trails = true;
 
             while (_sized.Count <= at)
                 _sized.Add(new Sized(0f));
 
-            _sized[at].Width = wide;
+            _sized[at].Width = _column ? Numbers : wide;
             _sized[at].Content = _boxes[at];
             return _sized[at];
         }
@@ -433,7 +531,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             while (_switches.Count <= at)
             {
-                var made = new Switch(Lettering.Small);
+                var made = new Switch(Lettering.Small, true);
                 Stack holder = Widgets.RowOf(0f);
                 holder.Children.Add(made);
 
@@ -496,7 +594,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 // is not a place to type, so it must not also move the caret there and stop.
                 if (Colourful(i) && Mixed(i).Touch(point))
                 {
-                    Move(i);
+                    Enter(i);
                     return true;
                 }
 
@@ -507,7 +605,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 if (Switched(i) && i < _switches.Count && _switches[i].Chose(point, out isOn))
                 {
                     _boxes[i].Text = _wanted[i].Words[isOn ? 0 : 1];
-                    Move(i);
+                    Enter(i);
                     return true;
                 }
 
@@ -520,14 +618,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     if (word.Length > 0)
                         _boxes[i].Text = word;
 
-                    Move(i);
+                    Enter(i);
                     return true;
                 }
 
                 if (!At(i).Holds(point))
                     continue;
 
-                Move(i);
+                Enter(i);
                 return true;
             }
 
@@ -551,7 +649,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 if (!grabbed)
                     continue;
 
-                Move(i);
+                Enter(i);
                 return true;
             }
 
@@ -603,6 +701,109 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Move(_at + 1 < Count ? _at + 1 : 0);
         }
 
+        /// <summary>Gives the keyboard to a field that was pressed.</summary>
+        void Enter(int at)
+        {
+            var had = _typing;
+            _typing = true;
+
+            if (at != _at)
+                Move(at);
+            else if (!had)
+                Editing();
+        }
+
+        /// <summary>
+        /// Gives the keyboard to the first field still to be filled in, or the first that is wrong, or
+        /// the first there is.
+        /// </summary>
+        /// <remarks>Nothing where there are no fields to give it to.</remarks>
+        public void Take()
+        {
+            if (Count == 0)
+                return;
+
+            var first = 0;
+            for (var i = 0; i < Count && i < _wanted.Count; i++)
+            {
+                if (At(i).Text.Length > 0 && _wanted[i].Refuses(Called(i), At(i).Text).Length == 0)
+                    continue;
+
+                first = i;
+                break;
+            }
+
+            Enter(first);
+        }
+
+        /// <summary>Takes the keyboard away from the fields, and puts away any list left open.</summary>
+        public void Release()
+        {
+            if (!_typing || !_column)
+                return;
+
+            _typing = false;
+            At(_at).CaretVisible = false;
+            At(_at).IsEditing = false;
+            Shut();
+        }
+
+        /// <summary>Holds every field to what it takes from now on, and says why the first one that fails does.</summary>
+        public void Judge()
+        {
+            _judged = true;
+
+            for (var i = 0; i < Count; i++)
+            {
+                while (_seen.Count <= i)
+                    _seen.Add(false);
+
+                _seen[i] = true;
+            }
+        }
+
+        /// <summary>Stops holding the fields to anything until finishing is tried again. Only a column is ever let off.</summary>
+        public void Unjudge()
+        {
+            if (_column)
+                _judged = false;
+        }
+
+        /// <summary>Whether every field holds something it takes, so there is nothing left to fill in.</summary>
+        public bool Complete
+        {
+            get
+            {
+                for (var i = 0; i < Count && i < _wanted.Count; i++)
+                {
+                    if (At(i).Text.Length == 0 || _wanted[i].Refuses(Called(i), At(i).Text).Length > 0)
+                        return false;
+                }
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// What each field holds, as its own control spells it, by the field it is in.
+        /// </summary>
+        /// <remarks>
+        /// By name, and by place for a field nobody named, so what was typed survives the fields
+        /// changing under it: a hinge picked beside a rotor takes the direction away and leaves the
+        /// angle where it was.
+        /// </remarks>
+        public void Spell(IDictionary<string, string> into)
+        {
+            for (var i = 0; i < Count && i < _wanted.Count; i++)
+                into[Key(_wanted[i], i)] = At(i).Text;
+        }
+
+        /// <summary>What a field is known by in <see cref="Spell" />.</summary>
+        public static string Key(Field field, int at)
+        {
+            return string.IsNullOrEmpty(field.Name) ? "#" + Ordinal(at) : field.Name;
+        }
+
         void Move(int to)
         {
             if (to == _at)
@@ -622,6 +823,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         void Editing()
         {
+            if (!_typing)
+                return;
+
             At(_at).IsEditing = true;
             At(_at).CaretVisible = true;
             At(_at).SelectAll();
@@ -648,7 +852,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         string Refuses(int at)
         {
-            if (at >= _wanted.Count)
+            if (at >= _wanted.Count || !_judged)
                 return "";
 
             if (!Seen(at) && string.IsNullOrEmpty(At(at).Text))
@@ -809,6 +1013,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                         return why;
                 }
 
+                // Nothing at all is not an answer, even where every value may be left out: the
+                // question's own Continue stays dead for it, and a column's Done says so.
+                if (_column && _judged && Count > 0 && !Filled)
+                    return Called(0) + " needs a value.";
+
                 return "";
             }
         }
@@ -830,7 +1039,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (!_up)
                 return false;
 
-            if (_popup.Holds(point))
+            if (_column ? _form.Holds(point) || _confirm.Holds(point) : _popup.Holds(point))
                 return true;
 
             // And whatever it has hanging under itself, which is outside its own bounds. A press on
@@ -892,8 +1101,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _anchor = null;
             _question = question ?? "";
 
+            // A column shows as many fields as there are, which may be none. A question opened for
+            // values always has somewhere to type one.
             Copy(wanted, _wanted);
-            Fields(_wanted.Count < 1 ? 1 : _wanted.Count, true);
+            Fields(_wanted.Count < 1 && !_column ? 1 : _wanted.Count, true);
 
             _filled.Clear();
             Copy(filled, _filled);
@@ -1041,16 +1252,20 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _why.Text = Refused ?? "";
             _why.Collapsed = !refused;
 
-            // The field the reason is about wears it too, so a form of three says which one to mend.
+            // The field the reason is about wears it too, so a form of three says which one to mend. A
+            // column given nothing at all is about its first field.
+            var blank = _column && _judged && !Filled;
             for (var i = 0; i < Count; i++)
-                At(i).Wrong = Refuses(i).Length > 0;
+                At(i).Wrong = Refuses(i).Length > 0 || blank && i == 0;
 
             // Dead until there is something to send, because an empty answer here is not a meaningful
-            // one. Renaming is the opposite case and allows it, which is why the two are told apart.
+            // one. Renaming is the opposite case and allows it, which is why the two are told apart. A
+            // column's Done is live whenever there is something to finish, because pressing it is how
+            // it is told what is wrong.
             //
             // Dressed and armed together, so a button drawn as a dead well cannot still answer a press.
             // That rule was being kept in two halves and only one of them said so.
-            if (Filled && !refused && !Missing)
+            if (_column ? Finishable : Filled && !refused && !Missing)
             {
                 Widgets.Go(_confirm);
                 _confirm.Press = Deed.Commits();
@@ -1070,6 +1285,19 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// form is the way out. Drawn by the form rather than by the control, since a control draws
         /// where it was arranged and this has to draw somewhere else.
         /// </remarks>
+        /// <summary>Measures what a column's labels need, before the column holding it is measured.</summary>
+        /// <remarks>Does nothing unless the fields have changed since it last measured them.</remarks>
+        public void Settle(IGraphics g, float width)
+        {
+            Inset(g, width);
+        }
+
+        /// <summary>Draws a column's hanging lists over everything else, after the screen has been drawn.</summary>
+        public void DrawHanging(IGraphics g)
+        {
+            Hanging(g);
+        }
+
         void Hanging(IGraphics g)
         {
             for (var i = 0; i < _lists.Count; i++)

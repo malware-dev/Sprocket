@@ -43,18 +43,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public int Command { get; private set; }
 
         /// <summary>
-        /// What pressing it asks for, or empty when pressing it opens a list instead.
-        /// </summary>
-        /// <remarks>
-        /// A slot whose contents are typed rather than chosen from something. The field hangs under
-        /// the chip that was pressed, which is where somebody is already looking, and what they
-        /// typed goes to the same command.
-        /// </remarks>
-        public string Question { get; set; }
-
-        public bool Asks => !string.IsNullOrEmpty(Question);
-
-        /// <summary>
         /// What each value it asks for wants, one per value, or null where it asks for none.
         /// </summary>
         /// <remarks>

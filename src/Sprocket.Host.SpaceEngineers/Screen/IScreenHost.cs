@@ -20,5 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         /// <summary>Sends a switch's new state to core.</summary>
         void SetToggle(int command, bool on);
+
+        /// <summary>Sends text to core.</summary>
+        void SetText(int command, string text);
     }
 }

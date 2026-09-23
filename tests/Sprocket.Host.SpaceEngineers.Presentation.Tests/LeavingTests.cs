@@ -25,7 +25,7 @@ public class LeavingTests
     {
         var picker = Screen.Fresh((Filled + " " + Back).Split(' '));
 
-        Assert.True(picker.Shows("Keep the blocks you picked?"), "leaving asked nothing");
+        Assert.True(picker.Shows("Keep your changes?"), "leaving asked nothing");
         Assert.True(picker.Scene.IsQuestioning, "the question does not own the screen");
 
         // Enter keeps them, because a key pressed without reading must not be the one that loses
@@ -45,7 +45,7 @@ public class LeavingTests
         picker.Editor.PressChoice("Discard them");
         picker.Run(2);
 
-        Assert.False(picker.Shows("Keep the blocks you picked?"), "the question is still up");
+        Assert.False(picker.Shows("Keep your changes?"), "the question is still up");
         Assert.Empty(picker.Editor.Program.Systems[0].Sequences);
     }
 
@@ -56,7 +56,7 @@ public class LeavingTests
         var picker = Screen.Fresh(("60 130 type Airlock enter 60 161 " + Back).Split(' '));
 
         Assert.False(picker.Scene.IsQuestioning, "leaving an untouched picker asked something");
-        Assert.False(picker.Shows("Keep the blocks you picked?"), "it asked anyway");
+        Assert.False(picker.Shows("Keep your changes?"), "it asked anyway");
     }
 
     /// <summary>
@@ -72,18 +72,20 @@ public class LeavingTests
     {
         var picker = Screen.Fresh((WantsValues + " " + Back).Split(' '));
 
-        Assert.True(picker.Shows("Keep the blocks you picked?"), "leaving asked nothing");
+        Assert.True(picker.Shows("Keep your changes?"), "leaving asked nothing");
 
         picker.Scene.TakeDefault();
         picker.Run(2);
 
-        Assert.True(picker.Shows("This needs one value."), "keeping did not ask for the value");
+        // Keeping is Done, and Done with nothing given says so and puts the caret in the field.
+        Assert.True(picker.Shows("Radius needs a value."), "keeping did not ask for the value");
+        Assert.True(picker.Scene.IsFilling, "the caret did not go to the field");
 
         picker.Do("type", "5");
         picker.Do("enter");
         picker.Run(2);
 
-        // The step the picker was making, holding the value the dialog asked for.
+        // The step the picker was making, holding the value the column asked for.
         var act = Assert.IsType<Act>(picker.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("Radius", act.ActionId);
         Assert.Single(act.Values);
