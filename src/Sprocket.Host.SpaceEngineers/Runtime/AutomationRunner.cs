@@ -151,6 +151,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>The world this program runs in.</summary>
         internal GridWorld World => _world;
 
+        /// <summary>The program being run.</summary>
+        internal Automation Program => _automation;
+
         /// <summary>What the program's declarations point at, as last resolved on a tick.</summary>
         internal Bindings Current => _bindings;
 

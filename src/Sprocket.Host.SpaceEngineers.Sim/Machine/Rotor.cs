@@ -16,6 +16,10 @@ namespace Sprocket.Sim.Machine;
 /// limits has its angle said again by whole turns so that it lies within them. Everything else a
 /// rotor does - torque, load, what it is carrying - is not here, so a rotor on the rig always
 /// arrives.
+/// <para>
+/// A hinge is the same block with a subtype that says so, as in the game: a quarter turn either way
+/// at most, its own lock and its own head.
+/// </para>
 /// </remarks>
 sealed class Rotor : Fitting
 {
@@ -26,10 +30,15 @@ sealed class Rotor : Fitting
     float _lower = float.NegativeInfinity;
     float _upper = float.PositiveInfinity;
     float _speed;
+    readonly float _reach;
 
     public Rotor(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
+        var hinge = subtype.Contains("Hinge");
+        _reach = hinge ? 90f : 360f;
+        var locks = hinge ? "HingeLock" : "RotorLock";
+
         Fit(Pretend.To<IMyMotorStator>()
             .Gives("Angle", () => _angle)
             .Gives("LowerLimitRad", () => _lower)
@@ -48,16 +57,24 @@ sealed class Rotor : Fitting
                 Told("rotate " + arguments[1] + " at " + arguments[2]);
             }));
 
-        Offering("AddRotorTopPart", "Add Rotor Head");
-        Offering("AddSmallRotorTopPart", "Add Small Rotor Head");
-        Offering("AddMediumRotorTopPart", "Add Medium Rotor Head");
+        if (hinge)
+        {
+            Offering("AddHingeTopPart", "Add Hinge Head");
+        }
+        else
+        {
+            Offering("AddRotorTopPart", "Add Rotor Head");
+            Offering("AddSmallRotorTopPart", "Add Small Rotor Head");
+            Offering("AddMediumRotorTopPart", "Add Medium Rotor Head");
+        }
+
         Offering("Reverse", "Reverse");
         Offering("Attach", "Attach");
         Offering("Detach", "Detach");
-        Offering("RotorLock_On", "Rotor lock On");
-        Offering("RotorLock_Off", "Rotor lock Off");
+        Offering(locks + "_On", hinge ? "Hinge lock On" : "Rotor lock On");
+        Offering(locks + "_Off", hinge ? "Hinge lock Off" : "Rotor lock Off");
         Offering("RotateToAngle", "Rotate To Angle", 3);
-        Carrying("RotorLock", "Rotor lock", ValueKind.Flag);
+        Carrying(locks, hinge ? "Hinge lock" : "Rotor lock", ValueKind.Flag);
         Carrying("Velocity", "Velocity", ValueKind.Real, "-30", "30");
         Carrying("LowerLimit", "Lower limit", ValueKind.Real, "-361", "360");
         Carrying("UpperLimit", "Upper limit", ValueKind.Real, "-360", "361");
@@ -107,7 +124,7 @@ sealed class Rotor : Fitting
     /// <summary>What the game does when a rotor is told to turn to an angle.</summary>
     void RotateTo(MyRotationDirection way, float degrees, float rpm)
     {
-        var target = Math.Max(-360f, Math.Min(360f, degrees)) * (float)Math.PI / 180f;
+        var target = Math.Max(-_reach, Math.Min(_reach, degrees)) * (float)Math.PI / 180f;
         var difference = target - _angle;
         if (Math.Abs(difference) <= float.Epsilon)
             return;

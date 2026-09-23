@@ -30,10 +30,11 @@ public class SettingTests
 
         // The game hands out an action for a light's radius and none at all for its falloff, which
         // is the arbitrariness this exists to end.
-        Assert.True(screen.Shows("Falloff"), "the light does not offer its falloff");
-        Assert.True(screen.Shows("Color"), "the light does not offer its colour");
+        Assert.True(screen.Shows("Set Falloff"), "the light does not offer its falloff");
+        Assert.True(screen.Shows("Set Color"), "the light does not offer its colour");
 
-        // Under a heading saying what they are about, which is why they do not each say "set".
+        // Said as setting them, since values and actions are listed together, and under a heading
+        // saying what they are about.
         Assert.True(screen.Shows("APPEARANCE"), "a light's colour is not grouped with how it looks");
 
         // And the block's own division is what the terminal view groups by instead.
@@ -52,7 +53,7 @@ public class SettingTests
 
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("Falloff");
+        screen.Editor.PressChoice("Set Falloff");
         screen.Run(2);
 
         Assert.True(screen.Editor.Screen.PrimaryAsks, "finishing does not ask for the value");
@@ -73,7 +74,7 @@ public class SettingTests
 
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("Falloff");
+        screen.Editor.PressChoice("Set Falloff");
         screen.Editor.Typed("2");
         screen.Run(2);
 
@@ -188,7 +189,7 @@ public class SettingTests
         screen.Editor.PressPrimary();
         screen.Editor.PressChoice("Do something");
         screen.Editor.PressBlock("Standby Battery");
-        screen.Editor.PressChoice("Charge Mode");
+        screen.Editor.PressChoice("Set Charge Mode");
         screen.Editor.Typed("1");
         screen.Run(2);
 
@@ -207,12 +208,12 @@ public class SettingTests
 
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("Falloff");
+        screen.Editor.PressChoice("Set Falloff");
         screen.Editor.Typed("2");
         screen.Run(2);
 
         screen.Editor.PressStepSlot(0, 0);
-        screen.Editor.PressChoice("Radius");
+        screen.Editor.PressChoice("Set Radius");
         screen.Editor.Typed("4");
         screen.Run(2);
 
@@ -256,7 +257,7 @@ public class SettingTests
         screen.Editor.PressBlock("Warning Beacon");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Radius"), "the beacon does not offer its radius");
+        Assert.True(screen.Shows("Set Radius"), "the beacon does not offer its radius");
         Assert.True(screen.Shows("SIGNALS"), "a beacon's radius is not grouped with what it says");
         Assert.False(screen.Shows("APPEARANCE"), "a beacon's radius is grouped as how it looks");
     }
@@ -283,7 +284,7 @@ public class SettingTests
 
         Assert.True(other >= 0, "nothing is grouped under Other");
         Assert.True(power >= 0 && power < other, "Other is not last");
-        Assert.True(screen.Shows("Chime On Approach"), "the unknown member is not offered at all");
+        Assert.True(screen.Shows("Set Chime On Approach"), "the unknown member is not offered at all");
     }
 
     static PickStage What(Screen screen)

@@ -127,6 +127,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             return _extension == null ? World.Trouble.None : _extension.TroubleWith(_block, stateId);
         }
 
+        /// <summary>
+        /// What this block is told by a step doing one of the game's actions or values, made ready, or
+        /// null for one of Sprocket's own or one the block does not have.
+        /// </summary>
+        public Order Prepare(EntityAction action, IList<Literal> values)
+        {
+            if (action.Form == Form.Native)
+                return null;
+
+            return Toolbars.Prepare(_block, action.Id, action.Form, values, action.Primitives);
+        }
+
         public void Invoke(string actionId, IList<Literal> values)
         {
             Invoke(actionId, values, Form.Native);

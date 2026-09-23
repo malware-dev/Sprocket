@@ -11,6 +11,7 @@ using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRageMath;
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
+using IngameSurfaces = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -106,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
 
                 into.Add(new Offer(action.Id, action.Name == null ? "" : action.Name.ToString(),
-                    Wants(action)));
+                    Wants(action)).Declaring(Declared(action)));
             }
         }
 
@@ -133,7 +134,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 ITerminalProperty property = _properties[i];
 
                 ValueKind kind;
-                if (!Holds(property, out kind) || !Shown(property, block))
+                if (!Holds(property, out kind) || !Has(property, block))
                     continue;
 
                 var made = new Offer(property.Id, Called(property), kind,
@@ -240,25 +241,49 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Whether the game itself would show this value on this block's own screen.
+        /// Whether the block has this value, which every value it declares is but a screen's own.
         /// </summary>
         /// <remarks>
-        /// <b>The game answers this and nothing else has to.</b> Every functional block carries the
-        /// whole text surface apparatus whether or not it has a screen - font, alignment, padding,
-        /// four colours, image lists - and a light would otherwise offer twenty-five values of which
-        /// six are the light. The controls that do not apply carry a test saying so: the script's
-        /// colours are shown only where the surface is running a script, the rotation only where
-        /// there are four panels.
+        /// Every functional block carries the whole screen apparatus whether or not it has a screen -
+        /// what is shown, the font, its size and colour, the padding, the backgrounds - and a light
+        /// would otherwise offer a dozen values of which a handful are the light. So a screen's values
+        /// are the block's where it has a screen at all, which is a fact about the block rather than
+        /// about the moment: its script's colours count while it is showing text, and its font while it
+        /// is showing nothing.
         /// <para>
-        /// Asked of the control rather than matched against a list of ids, so a block from a mod is
-        /// filtered by its author's own answer, and nothing here has to be kept in step with the
-        /// game.
+        /// The game's own actions on these values already follow the same test, so a block with no
+        /// screen has neither.
         /// </para>
         /// </remarks>
-        static bool Shown(ITerminalProperty property, IMyTerminalBlock block)
+        static bool Has(ITerminalProperty property, IMyTerminalBlock block)
         {
-            var control = property as IMyTerminalControl;
-            return control == null || control.Visible == null || control.Visible(block);
+            if (!Screen(property.Id))
+                return true;
+
+            var surfaces = block as IngameSurfaces;
+            return surfaces != null && surfaces.SurfaceCount > 0;
+        }
+
+        /// <summary>Whether the value is one every functional block carries for a screen, from the game's own terminal data.</summary>
+        static bool Screen(string id)
+        {
+            switch (id)
+            {
+                case "Content":
+                case "ScriptForegroundColor":
+                case "ScriptBackgroundColor":
+                case "Font":
+                case "FontSize":
+                case "FontColor":
+                case "alignment":
+                case "TextPaddingSlider":
+                case "BackgroundColor":
+                case "ChangeIntervalSlider":
+                case "PreserveAspectRatio":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         /// <summary>
@@ -338,13 +363,59 @@ namespace Sprocket.Host.SpaceEngineers.World
             return wanted == null ? 0 : wanted.Count;
         }
 
+        /// <summary>What type each of an action's values is declared as, or null where it takes none.</summary>
+        static IList<Primitive> Declared(ITerminalAction action)
+        {
+            var declared = action as IMyTerminalAction;
+            List<TerminalActionParameter> wanted = declared == null ? null : declared.ParameterDefinitions;
+            if (wanted == null || wanted.Count == 0)
+                return null;
+
+            var types = new Primitive[wanted.Count];
+            for (var i = 0; i < wanted.Count; i++)
+                types[i] = Type(wanted[i].Value);
+
+            return types;
+        }
+
+        /// <summary>The type an action's parameter is declared as, or none for one that is not a primitive.</summary>
+        /// <remarks>Read off the default it was declared with, since the parameter's own type code is off the mod whitelist.</remarks>
+        static Primitive Type(object declared)
+        {
+            if (declared is bool)
+                return Primitive.Boolean;
+            if (declared is byte)
+                return Primitive.Byte;
+            if (declared is sbyte)
+                return Primitive.SByte;
+            if (declared is short)
+                return Primitive.Int16;
+            if (declared is ushort)
+                return Primitive.UInt16;
+            if (declared is int)
+                return Primitive.Int32;
+            if (declared is uint)
+                return Primitive.UInt32;
+            if (declared is long)
+                return Primitive.Int64;
+            if (declared is ulong)
+                return Primitive.UInt64;
+            if (declared is float)
+                return Primitive.Single;
+            if (declared is double)
+                return Primitive.Double;
+            if (declared is char)
+                return Primitive.Char;
+
+            return declared is string ? Primitive.String : Primitive.None;
+        }
+
         /// <summary>
         /// Tells one of a block's own values what to be.
         /// </summary>
         /// <remarks>
-        /// Written as the kind the property says it holds, which is the whole difference between
-        /// this and handing values to an action: a property declares its type honestly, where an
-        /// action's declaration is a placeholder that says string and means something else.
+        /// Written as the kind the property says it holds, which a property declares honestly where
+        /// an action's declaration often says text and means a number.
         /// <para>
         /// A value written as the wrong kind is refused rather than guessed at. Turning a number
         /// into the text of that number, or text into a number, would be Sprocket deciding what
@@ -353,49 +424,135 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Set(IMyTerminalBlock block, string propertyId, Literal value)
         {
-            if (block == null)
+            var order = block == null ? null : Written(block, propertyId, value);
+            if (order == null)
                 return false;
 
+            order.Give();
+            return true;
+        }
+
+        public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
+            IList<Primitive> types)
+        {
+            if (block == null)
+                return null;
+
+            if (form == Form.Value)
+                return values == null || values.Count == 0 ? null : Written(block, id, values[0]);
+
+            ITerminalAction action = block.GetActionWithName(id);
+            if (action == null)
+                return null;
+
+            if (values == null || values.Count == 0)
+                return new Performed(block, action, null);
+
+            var given = new List<TerminalActionParameter>();
+            Fill(action, values, types, given);
+            return new Performed(block, action, given);
+        }
+
+        /// <summary>A value made ready to be written as the type the property holds, or null where it is not that kind.</summary>
+        static Order Written(IMyTerminalBlock block, string propertyId, Literal value)
+        {
             ITerminalProperty property = block.GetProperty(propertyId);
             if (property == null)
-                return false;
+                return null;
 
-            if (property.TypeName == "Boolean" && value.Kind == ValueKind.Flag)
+            switch (property.TypeName)
             {
-                property.AsBool().SetValue(block, value.Flag);
-                return true;
+                case "Boolean":
+                    return value.Kind == ValueKind.Flag ? new Writes<bool>(block, property.AsBool(), value.Flag) : null;
+                case "Single":
+                    return value.Kind == ValueKind.Real
+                        ? new Writes<float>(block, property.AsFloat(), (float)value.Real)
+                        : null;
+                case "Int64":
+                    return value.Kind == ValueKind.Integer
+                        ? new Writes<long>(block, property.As<long>(), value.Whole)
+                        : null;
+                case "Color":
+                    return value.Kind == ValueKind.Color
+                        ? new Writes<Color>(block, property.AsColor(),
+                            new Color(value.Red, value.Green, value.Blue, value.Alpha))
+                        : null;
+                case "StringBuilder":
+                    return value.Kind == ValueKind.Text
+                        ? new Texts(block, property.As<StringBuilder>(), value.Text)
+                        : null;
             }
 
-            if (property.TypeName == "Single" && (value.Kind == ValueKind.Real
-                || value.Kind == ValueKind.Integer))
-            {
-                property.AsFloat().SetValue(block,
-                    value.Kind == ValueKind.Real ? (float)value.Real : value.Whole);
+            return null;
+        }
 
-                return true;
+        /// <summary>One of the block's actions, with its values already the types it takes.</summary>
+        sealed class Performed : Order
+        {
+            readonly IMyTerminalBlock _block;
+            readonly ITerminalAction _action;
+            readonly List<TerminalActionParameter> _given;
+
+            public Performed(IMyTerminalBlock block, ITerminalAction action, List<TerminalActionParameter> given)
+            {
+                _block = block;
+                _action = action;
+                _given = given;
             }
 
-            if (property.TypeName == "Int64" && value.Kind == ValueKind.Integer)
+            public override void Give()
             {
-                property.As<long>().SetValue(block, value.Whole);
-                return true;
+                if (_given == null)
+                    _action.Apply(_block);
+                else
+                    _action.Apply(_block, new ListReader<TerminalActionParameter>(_given));
+            }
+        }
+
+        /// <summary>One of the block's values, already the type it holds.</summary>
+        sealed class Writes<T> : Order
+        {
+            readonly IMyTerminalBlock _block;
+            readonly ITerminalProperty<T> _property;
+            readonly T _value;
+
+            public Writes(IMyTerminalBlock block, ITerminalProperty<T> property, T value)
+            {
+                _block = block;
+                _property = property;
+                _value = value;
             }
 
-            if (property.TypeName == "Color" && value.Kind == ValueKind.Color)
+            public override void Give()
             {
-                property.AsColor().SetValue(block,
-                    new Color(value.Red, value.Green, value.Blue, value.Alpha));
+                _property.SetValue(_block, _value);
+            }
+        }
 
-                return true;
+        /// <summary>
+        /// One of the block's text values.
+        /// </summary>
+        /// <remarks>
+        /// A fresh builder every time it is given, because the block is handed the builder itself and
+        /// what it does with it afterwards is the block's business.
+        /// </remarks>
+        sealed class Texts : Order
+        {
+            readonly IMyTerminalBlock _block;
+            readonly ITerminalProperty<StringBuilder> _property;
+            readonly string _text;
+
+            public Texts(IMyTerminalBlock block, ITerminalProperty<StringBuilder> property, string text)
+            {
+                _block = block;
+                _property = property;
+                _text = text;
             }
 
-            if (property.TypeName == "StringBuilder" && value.Kind == ValueKind.Text)
+            public override void Give()
             {
-                property.As<StringBuilder>().SetValue(block, new StringBuilder(value.Said));
-                return true;
+                _property.SetValue(_block, new StringBuilder(_text));
             }
-
-            return false;
         }
 
         public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
@@ -414,7 +571,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             _given.Clear();
-            Fill(action, values, _given);
+            Fill(action, values, null, _given);
             action.Apply(block, new ListReader<TerminalActionParameter>(_given));
             return true;
         }
@@ -422,14 +579,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<TerminalActionParameter> _given = new List<TerminalActionParameter>();
 
         /// <summary>
-        /// Hands the action as many values as it asked for, as what somebody wrote.
+        /// Hands the action as many values as it asked for, each as the type it takes where that is
+        /// known.
         /// </summary>
         /// <remarks>
         /// As many as it declared, however many were written: a step left short hands on the
         /// declared default for the rest, which is what the game does when a player fills in part
         /// of a toolbar action's dialog.
         /// </remarks>
-        static void Fill(ITerminalAction action, IList<Literal> values,
+        static void Fill(ITerminalAction action, IList<Literal> values, IList<Primitive> types,
             List<TerminalActionParameter> into)
         {
             var declared = action as IMyTerminalAction;
@@ -441,7 +599,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 if (i < values.Count)
                 {
-                    into.Add(Given(values[i]));
+                    var type = types == null || i >= types.Count ? Primitive.None : types[i];
+                    into.Add(type == Primitive.None
+                        ? Given(values[i])
+                        : TerminalActionParameter.Get(values[i].Native(type)));
                     continue;
                 }
 
@@ -450,18 +611,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// One value, as the kind it was written as.
+        /// One value whose type nothing says, as the kind it was written as.
         /// </summary>
         /// <remarks>
-        /// <b>Not converted to the type the declaration carries.</b> A declaration's default says
-        /// how many values an action takes and nothing trustworthy about what they are: the game's
-        /// own colour setter declares three <em>strings</em> and then refuses anything whose type is
-        /// not an integer. Converted to what was declared, every value it was given was thrown away
-        /// and the light never changed colour.
-        /// <para>
-        /// So what was written goes across as what it is, and the action decides. Somebody who
-        /// wrote a number gets a number; somebody who wrote text in quotes gets text.
-        /// </para>
+        /// The action decides what to make of it.
         /// <para>
         /// A whole number goes as a 32-bit one where it fits, because that is what the game's own
         /// handlers cast to - and a cast of a boxed 64-bit value to <c>int</c> throws, however

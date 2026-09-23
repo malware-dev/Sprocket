@@ -290,6 +290,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "autodeploy":
                 case "autodeployheight":
                 case "autorefill":
+                case "refill":
                 case "automaticallypullbottles":
                 case "enableidlemovement":
                 case "safety":
@@ -354,7 +355,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 // Air, and the tanks that hold it.
                 case "depressurize":
                 case "stockpile":
-                case "refill":
                     return Category.Air;
 
                 // Making things.

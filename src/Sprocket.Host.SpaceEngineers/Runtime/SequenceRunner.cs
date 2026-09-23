@@ -179,18 +179,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             for (var i = 0; i < _outstanding.Count; i++)
             {
-                Act act = _outstanding[i];
-                for (var t = 0; t < act.Targets.Count; t++)
+                var compiled = Compile(_outstanding[i]);
+                for (var t = 0; t < compiled.Entities.Count; t++)
                 {
-                    GridEntity entity = _bindings.Entity(act.Targets[t]);
-                    if (entity == null)
+                    EntityAction doing = compiled.Actions[t];
+                    if (string.IsNullOrEmpty(doing.LeadsToStateId))
                         continue;
 
-                    EntityAction doing = act.Names(entity.Kind.Actions);
-                    if (doing == null || string.IsNullOrEmpty(doing.LeadsToStateId))
-                        continue;
-
-                    Trouble said = entity.Trouble(doing.LeadsToStateId);
+                    Trouble said = compiled.Entities[t].Trouble(doing.LeadsToStateId);
                     if (said.Ends)
                         return said.Said;
                 }
@@ -574,13 +570,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!act.HasAction || act.Sets)
                     continue;
 
-                var acted = ActedOn(act.Targets);
-                for (var t = 0; t < acted.Count; t++)
-                {
-                    GridEntity entity = _bindings.Entity(acted[t]);
-                    if (entity != null)
-                        entity.Stop(act.ActionId);
-                }
+                var compiled = Compile(act);
+                for (var t = 0; t < compiled.Entities.Count; t++)
+                    compiled.Entities[t].Stop(act.ActionId);
             }
         }
 
@@ -603,15 +595,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!step.HasAction)
                 return true;
 
-            var settling = ActedOn(step.Targets);
-            for (var i = 0; i < settling.Count; i++)
+            var compiled = Compile(step);
+            for (var i = 0; i < compiled.Entities.Count; i++)
             {
-                var entity = _bindings.Entity(settling[i]);
-                if (entity == null)
-                    continue;
-
-                var action = step.Names(entity.Kind.Actions);
-                if (action == null || string.IsNullOrEmpty(action.LeadsToStateId))
+                var entity = compiled.Entities[i];
+                var action = compiled.Actions[i];
+                if (string.IsNullOrEmpty(action.LeadsToStateId))
                     continue;
 
                 var state = entity.Kind.FindState(action.LeadsToStateId);
@@ -819,14 +808,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!_outstanding[i].HasAction)
                     continue;
 
-                var waiting = ActedOn(_outstanding[i].Targets);
-                for (var q = 0; q < waiting.Count; q++)
+                var compiled = Compile(_outstanding[i]);
+                for (var q = 0; q < compiled.Entities.Count; q++)
                 {
-                    var entity = _bindings.Entity(waiting[q]);
-                    if (entity == null)
-                        continue;
-
-                    var expected = entity.Expected(_outstanding[i].ActionId, _outstanding[i].Values);
+                    var expected = compiled.Entities[q].Expected(_outstanding[i].ActionId, compiled.Values[q]);
                     if (expected < 0)
                         return GridEntity.Unestimated;
 
@@ -858,6 +843,67 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!step.HasAction)
                 return;
 
+            var compiled = Compile(step);
+            for (var i = 0; i < compiled.Entities.Count; i++)
+            {
+                if (step.Form == Form.Native)
+                    world.Invoke(compiled.Entities[i], step.ActionId, compiled.Values[i], step.Form);
+                else if (compiled.Orders[i] != null)
+                    compiled.Orders[i].Give();
+            }
+        }
+
+        /// <summary>
+        /// What one act comes to on this one's blocks: each block it acts on, what it does there, its
+        /// values as that takes them, and where it is one of the game's own, the order made ready.
+        /// </summary>
+        sealed class Compiled
+        {
+            public readonly List<GridEntity> Entities = new List<GridEntity>();
+            public readonly List<EntityAction> Actions = new List<EntityAction>();
+            public readonly List<IList<Literal>> Values = new List<IList<Literal>>();
+            public readonly List<Order> Orders = new List<Order>();
+        }
+
+        /// <summary>Every act worked out so far, until the program or what its names point at changes.</summary>
+        readonly Dictionary<Act, Compiled> _compiled = new Dictionary<Act, Compiled>();
+
+        /// <summary>The <see cref="Bindings.Revision" /> and <see cref="Automation.Edits" /> the acts were worked out at.</summary>
+        int _boundAt = -1;
+        int _editedAt = -1;
+
+        /// <summary>How many times an act has been worked out.</summary>
+        /// <remarks>Counted so it can be shown that a run repeating what it asks works nothing out again.</remarks>
+        internal int Compilations { get; private set; }
+
+        /// <summary>
+        /// What an act comes to, worked out the first time it is asked after anything it rests on has
+        /// changed.
+        /// </summary>
+        /// <remarks>
+        /// <b>Every act a run does and waits on is asked for here, on the tick it happens.</b> So the
+        /// blocks, what each is told and the values it is handed are found once per change to the
+        /// program or to what its names point at, and a tick that repeats a step does a lookup and
+        /// the act. A block whose action takes a value as some other kind is left out: the step is
+        /// at fault, and the fault says so.
+        /// </remarks>
+        Compiled Compile(Act step)
+        {
+            var bound = _bindings.Revision;
+            var edited = _owner.Program.Edits;
+            if (bound != _boundAt || edited != _editedAt)
+            {
+                _compiled.Clear();
+                _boundAt = bound;
+                _editedAt = edited;
+            }
+
+            Compiled compiled;
+            if (_compiled.TryGetValue(step, out compiled))
+                return compiled;
+
+            Compilations++;
+            compiled = new Compiled();
             var acting = ActedOn(step.Targets);
             for (var i = 0; i < acting.Count; i++)
             {
@@ -865,11 +911,41 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (entity == null)
                     continue;
 
-                if (step.Names(entity.Kind.Actions) == null)
+                var action = step.Names(entity.Kind.Actions);
+                if (action == null)
                     continue;
 
-                world.Invoke(entity, step.ActionId, step.Values, step.Form);
+                var values = Converted(compiled, action, step.Values);
+                if (values == null)
+                    continue;
+
+                compiled.Entities.Add(entity);
+                compiled.Actions.Add(action);
+                compiled.Values.Add(values);
+                compiled.Orders.Add(entity.Prepare(action, values));
             }
+
+            _compiled[step] = compiled;
+            return compiled;
+        }
+
+        /// <summary>
+        /// The values as <paramref name="action" /> takes them, or null where it cannot take them.
+        /// </summary>
+        /// <remarks>
+        /// Shared between the blocks of one act that do the same thing, which is every block of the
+        /// same kind: an airlock's two doors are handed one list.
+        /// </remarks>
+        static IList<Literal> Converted(Compiled compiled, EntityAction action, IList<Literal> given)
+        {
+            for (var i = 0; i < compiled.Actions.Count; i++)
+            {
+                if (compiled.Actions[i] == action)
+                    return compiled.Values[i];
+            }
+
+            var converted = new List<Literal>(given.Count);
+            return action.Converts(given, converted) ? converted : null;
         }
 
         /// <summary>

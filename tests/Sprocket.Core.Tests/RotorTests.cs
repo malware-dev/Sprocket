@@ -85,6 +85,49 @@ public class RotorTests
         }
     }
 
+    /// <summary>
+    /// A hinge is asked for an angle within a quarter turn either way, and a speed, and never a way round.
+    /// </summary>
+    /// <remarks>
+    /// It goes the short way whatever it is told, so a direction would be a question with one answer.
+    /// Its angle is what its definition allows, which is what the dial shows as a half circle. Its lock
+    /// is its own, beside the rotor's, and is the one said as lock and unlock.
+    /// </remarks>
+    [Fact]
+    public void AHingeIsTurnedWithoutAWayRound()
+    {
+        var ship = new Rigged();
+        var hinge = ship.Hinge(1, "Hinge");
+        var kind = ship.Entity(hinge.Id).Kind;
+
+        var asked = new List<Field>();
+        kind.FindAction(RotorExtension.RotateTo, Form.Native)!.Fields(asked);
+
+        Assert.Equal(2, asked.Count);
+        Assert.Equal("-90", asked[0].Least);
+        Assert.Equal("90", asked[0].Most);
+        Assert.Equal(Editor.Angle, asked[0].Edits);
+
+        Assert.Equal("Lock", kind.FindAction("HingeLock_On", Form.Action)!.Named);
+        Assert.Equal("Unlock", kind.FindAction("HingeLock_Off", Form.Action)!.Named);
+        Assert.True(kind.FindAction("HingeLock", Form.Value)!.Hidden);
+    }
+
+    [Fact]
+    public void AHingeTurnedToAnAngleArrives()
+    {
+        var ship = new Rigged();
+        var hinge = ship.Hinge(1, "Hinge");
+        var lamp = ship.Light(2, "Lamp");
+
+        var frames = Turned(ship, hinge, lamp, Literal.Of(45L), Literal.Of(5L));
+
+        Assert.InRange(hinge.Degrees, 44.9f, 45.1f);
+
+        // Forty-five degrees at half a degree a tick.
+        Assert.InRange(frames, 90, 100);
+    }
+
     /// <summary>Sprocket's own words are spelled for a list the way the game spells its own.</summary>
     [Fact]
     public void AListNamesSprocketsOwnMembersTheWayTheGameNamesIts()
@@ -93,7 +136,7 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var kind = ship.Entity(rotor.Id).Kind;
 
-        Assert.Equal("Rotate", kind.FindAction(RotorExtension.RotateTo, Form.Native)!.Named);
+        Assert.Equal("Rotate to", kind.FindAction(RotorExtension.RotateTo, Form.Native)!.Named);
         Assert.Equal("Unlock", kind.FindAction("RotorLock_Off", Form.Action)!.Named);
         Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", Form.Value)!.Named);
 
@@ -210,7 +253,7 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var entity = ship.Entity(rotor.Id);
 
-        var ticks = entity.Expected(RotorExtension.RotateTo, [Literal.Of(Directly), Literal.Of(90L), Literal.Of(10L)]);
+        var ticks = entity.Expected(RotorExtension.RotateTo, [Literal.Of(Directly), Literal.Of(90.0), Literal.Of(10.0)]);
 
         Assert.Equal(90, ticks);
     }
@@ -483,17 +526,22 @@ public class RotorTests
     }
 
     /// <summary>Turns the rotor, waits for it, then switches the lamp on; answers the tick the lamp came on.</summary>
-    static int Run(Rigged ship, Rotor rotor, Plain lamp, long way, double degrees, double rpm)
+    static int Run(Rigged ship, Rotor rotor, Lamp lamp, long way, double degrees, double rpm)
+    {
+        // Whole where they are whole, as a program reads them: "90" is a whole number and "90.5" is not.
+        return Turned(ship, rotor, lamp, Literal.Of(way), Written(degrees), Written(rpm));
+    }
+
+    /// <summary>Turns the block with what a step gave it, and counts the frames until the next step runs.</summary>
+    static int Turned(Rigged ship, Rotor rotor, Lamp lamp, params Literal[] given)
     {
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
         var turn = new Act(RotorExtension.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
-        // Whole where they are whole, as a program reads them: "90" is a whole number and "90.5" is not.
-        turn.Values.Add(Literal.Of(way));
-        turn.Values.Add(Written(degrees));
-        turn.Values.Add(Written(rpm));
+        foreach (var value in given)
+            turn.Values.Add(value);
         sequence.Steps.Add(turn);
         sequence.Steps.Add(new Await());
 

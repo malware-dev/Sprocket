@@ -29,7 +29,7 @@ public class KeepingTests
         var screen = Screen.Fresh((ARadiusStep + " " + Again).Split(' '));
 
         Assert.True(screen.Shows("This needs one value."), "finishing asked nothing");
-        Assert.True(screen.Shows("5"), "the box opened empty");
+        Assert.True(screen.Shows("5.0"), "the box opened empty");
     }
 
     /// <summary>

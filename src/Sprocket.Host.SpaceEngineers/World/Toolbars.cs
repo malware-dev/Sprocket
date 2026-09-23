@@ -102,6 +102,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                 && _slots.Set(block, propertyId, value);
         }
 
+        /// <summary>One of a block's own actions or values made ready to be given, or null.</summary>
+        public static Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
+            IList<Primitive> types)
+        {
+            return block == null || string.IsNullOrEmpty(id) ? null : _slots.Prepare(block, id, form, values, types);
+        }
+
         /// <summary>Performs one of a block's own actions, if it has one by that name.</summary>
         public static bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {

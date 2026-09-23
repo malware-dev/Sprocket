@@ -60,6 +60,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         bool Set(IMyTerminalBlock block, string propertyId, Literal value);
 
         /// <summary>
+        /// One of the block's own actions or values made ready to be given, or null where it has no
+        /// such thing or the value is not the kind it holds.
+        /// </summary>
+        /// <remarks>
+        /// Asked once, when a program is bound; each value is built as the type in
+        /// <paramref name="types" /> where there is one, so giving the order does nothing else.
+        /// </remarks>
+        Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
+            IList<Primitive> types);
+
+        /// <summary>
         /// Performs one of the block's own actions, and answers whether there was one to perform.
         /// </summary>
         /// <remarks>

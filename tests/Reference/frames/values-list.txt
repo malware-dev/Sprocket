@@ -50,7 +50,7 @@ on screen     Do something
 043  Text       at {X:757.8 Y:493.082} scale 0.64  #DCF5FDFF  "Toggle block On/Off"
 044  Text       at {X:757.8 Y:538.962} scale 0.64  #85A1A9FF  "BEHAVIOUR"
 045  Sprite     Sprocket_Fill         {X:745 Y:566 W:416 H:43}  #3C4C52FF
-046  Text       at {X:757.8 Y:575.2419} scale 0.64  #DCF5FDFF  "Forward Direction"
+046  Text       at {X:757.8 Y:575.2419} scale 0.64  #DCF5FDFF  "Set Forward Direction"
 047  SetClip    {X:259 Y:118 W:1402 H:836}
 048  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT TO DO"
 049  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:37}  #141B20FF

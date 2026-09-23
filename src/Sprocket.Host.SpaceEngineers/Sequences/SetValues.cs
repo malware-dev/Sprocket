@@ -7,9 +7,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// Changes what an action is given, all of it at once.
     /// </summary>
     /// <remarks>
-    /// One edit for the whole list, because that is how it was asked for: the action says how many
-    /// values it wants and nothing about what each one is, so there is no such thing as changing the
-    /// second one on its own.
+    /// One edit for the whole list, because that is how it was asked for: one line of values, in the
+    /// order the action takes them.
     /// </remarks>
     sealed class SetValues : SequenceEdit
     {

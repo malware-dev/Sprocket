@@ -40,6 +40,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         Unfilled,
 
+        /// <summary>One of its steps has been given a value its action does not take: another kind, or too large for its type.</summary>
+        /// <remarks>
+        /// Found when the program is bound rather than when the step runs, and the step does nothing to
+        /// a block that would not take it. A program written anywhere but the editor can hold one.
+        /// </remarks>
+        Mistyped,
+
         /// <summary>One of its steps goes straight on without waiting for what it started.</summary>
         /// <remarks>
         /// A program from anywhere but the editor can hold one, and the editor draws every step as one

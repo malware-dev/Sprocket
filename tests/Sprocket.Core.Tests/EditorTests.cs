@@ -86,9 +86,9 @@ public class EditorTests
         editor.PressBlock("Airlock Light");
 
         PickStage What() => editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
-            .Single(s => s.Entries.Any(e => e.Text == "Pattern"));
+            .Single(s => s.Entries.Any(e => e.Text == "Set Pattern"));
 
-        var pattern = What().Entries.Single(e => e.Text == "Pattern");
+        var pattern = What().Entries.Single(e => e.Text == "Set Pattern");
         Assert.True(pattern.IsWithheld);
         Assert.Equal("pending", pattern.Status);
         Assert.False(What().Entries.Single(e => e.Text == "Switch on").IsWithheld);
@@ -158,7 +158,7 @@ public class EditorTests
 
         editor.PressChoice("AI Behavior On/Off");
         Assert.True(Offered().Single(e => e.Text == "AI Behavior On/Off").IsChosen);
-        Assert.False(Offered().Single(e => e.Text == "AI Behavior").IsChosen);
+        Assert.False(Offered().Single(e => e.Text == "Set AI Behavior").IsChosen);
         Assert.Equal("", editor.Screen.PrimaryQuestion);
 
         editor.PressPrimary();
@@ -172,7 +172,7 @@ public class EditorTests
     /// </summary>
     /// <remarks>
     /// "Mode:" is how the terminal labels the box beside it. In a list of things to choose it reads as a
-    /// label with nothing after it, so the organized view says "Mode", and the terminal view shows the
+    /// label with nothing after it, so the organized view says "Set Mode", and the terminal view shows the
     /// block's own words as they are.
     /// </remarks>
     [Fact]
@@ -191,8 +191,8 @@ public class EditorTests
 
         IEnumerable<PickStage> Stages() => editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages);
 
-        Assert.Contains(Stages().SelectMany(s => s.Entries), e => e.Text == "Mode");
-        Assert.DoesNotContain(Stages().SelectMany(s => s.Entries), e => e.Text == "Mode:");
+        Assert.Contains(Stages().SelectMany(s => s.Entries), e => e.Text == "Set Mode");
+        Assert.DoesNotContain(Stages().SelectMany(s => s.Entries), e => e.Text == "Set Mode:");
 
         editor.Invoke(Stages().SelectMany(s => s.Views).Single(v => v.Text == "Terminal").Command);
         Assert.Contains(Stages().SelectMany(s => s.Entries), e => e.Text == "Mode:");
@@ -229,7 +229,7 @@ public class EditorTests
         IEnumerable<PickOption> Offered() =>
             editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages).SelectMany(s => s.Entries);
 
-        Assert.DoesNotContain(Offered(), e => e.Text == "Pattern");
+        Assert.DoesNotContain(Offered(), e => e.Text == "Pattern" || e.Text == "Set Pattern");
 
         editor.Invoke(editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
             .SelectMany(s => s.Views).Single(v => v.Text == "Terminal").Command);

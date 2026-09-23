@@ -158,6 +158,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public int Wiring { get; private set; }
 
+        /// <summary>Bumped whenever somebody changes what the program says.</summary>
+        /// <remarks>
+        /// What a runner holds what it worked out from the program against, alongside what the
+        /// program's names point at, so a step is worked out once rather than every time it runs.
+        /// </remarks>
+        public int Edits { get; private set; }
+
         /// <summary>
         /// Raised whenever a sequence, or one of a system, comes or goes.
         /// </summary>
@@ -179,6 +186,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public void Rewire()
         {
             Wiring++;
+        }
+
+        /// <summary>Says that the program has been changed, and anything worked out from it is stale.</summary>
+        public void Edited()
+        {
+            Edits++;
         }
 
         /// <summary>

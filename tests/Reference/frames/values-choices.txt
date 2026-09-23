@@ -46,7 +46,7 @@ on screen     Do something
 039  Text       at {X:761 Y:321.752} scale 0.57  #A2C3CDFF  "named."
 040  Text       at {X:757.8 Y:365.042} scale 0.64  #85A1A9FF  "POWER"
 041  Sprite     Sprocket_Fill         {X:745 Y:392 W:416 H:43}  #3C4C52FF
-042  Text       at {X:757.8 Y:401.322} scale 0.64  #DCF5FDFF  "Charge Mode"
+042  Text       at {X:757.8 Y:401.322} scale 0.64  #DCF5FDFF  "Set Charge Mode"
 043  Text       at {X:757.8 Y:447.202} scale 0.64  #DCF5FDFF  "Switch off"
 044  Text       at {X:757.8 Y:493.082} scale 0.64  #DCF5FDFF  "Switch on"
 045  Text       at {X:757.8 Y:538.962} scale 0.64  #DCF5FDFF  "Toggle block On/Off"

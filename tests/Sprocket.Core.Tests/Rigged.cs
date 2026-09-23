@@ -53,7 +53,7 @@ sealed class Rigged
         return Rig.Panel(id, name, buttons);
     }
 
-    public Plain Light(long id, string name)
+    public Lamp Light(long id, string name)
     {
         return Rig.Light(id, name);
     }
@@ -61,6 +61,16 @@ sealed class Rigged
     public Beacon Beacon(long id, string name)
     {
         return Rig.Beacon(id, name);
+    }
+
+    public Rotor Hinge(long id, string name)
+    {
+        return Rig.Hinge(id, name);
+    }
+
+    public Piston Piston(long id, string name)
+    {
+        return Rig.Piston(id, name);
     }
 
     /// <summary>What Sprocket sees of a block, which is what a program refers to.</summary>

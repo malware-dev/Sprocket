@@ -191,6 +191,16 @@ abstract class Fitting
         return this;
     }
 
+    /// <summary>The same, declaring what type each of its values is, as the game's own actions do.</summary>
+    public Fitting Offering(string id, string text, params Primitive[] declares)
+    {
+        _offers.Add(new Offer(id, text, declares.Length).Declaring(declares));
+        return this;
+    }
+
+    /// <summary>What the last of its actions to be given values was handed, each as the type it was built as.</summary>
+    public IList<object> Handed { get; set; }
+
     /// <summary>
     /// Every value this block carries that can be told what to be.
     /// </summary>

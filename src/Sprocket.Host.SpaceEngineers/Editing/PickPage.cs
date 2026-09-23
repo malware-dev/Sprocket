@@ -860,7 +860,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (Editor.ShowsTerminal)
                 return one.Declared;
 
-            return one.Unaltered && !one.Renamed ? Unlabelled(one.Named) : one.Named;
+            // Values and actions are listed together here, so everything is said as something to do,
+            // and a value as setting it: its sentence's own words, "set speed".
+            var said = one.Sets ? one.Text : one.Named;
+            if (one.Unaltered && !one.Renamed)
+                said = Unlabelled(said);
+
+            return string.IsNullOrEmpty(said) ? said : char.ToUpperInvariant(said[0]) + said.Substring(1);
         }
 
         /// <summary>The game's name for a member, without the colon it ends a terminal label with.</summary>
@@ -999,7 +1005,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 if (one == null)
                     return "";
 
-                return _declared ? one.Declared : one.Named;
+                if (_declared)
+                    return one.Declared;
+
+                return one.Sets ? one.Text : one.Named;
             }
         }
 

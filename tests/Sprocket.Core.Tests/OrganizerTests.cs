@@ -45,6 +45,21 @@ public class OrganizerTests
     }
 
     /// <summary>
+    /// A switch set once when the machine is built keeps its value and loses the act that flips it.
+    /// </summary>
+    [Fact]
+    public void ASwitchSetWhenTheMachineIsBuiltIsNotFlipped()
+    {
+        var ship = new Rigged();
+        var lamp = ship.Light(1, "Lamp");
+        lamp.Carrying("ShowOnHUD", "Show on HUD", ValueKind.Flag).Offering("ShowOnHUD", "Show on HUD On/Off");
+        var kind = ship.Entity(lamp.Id).Kind;
+
+        Assert.True(kind.FindAction("ShowOnHUD", Form.Action)!.Hidden);
+        Assert.False(kind.FindAction("ShowOnHUD", Form.Value)!.Hidden);
+    }
+
+    /// <summary>
     /// A setter somebody wrote by hand beside a value is left out where the block is known to have
     /// one, and nowhere else.
     /// </summary>

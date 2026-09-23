@@ -13,7 +13,7 @@ using MyRotationDirection = Sandbox.ModAPI.Ingame.MyRotationDirection;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>
-    /// A rotor: turned to an angle, and the members of its terminal said in Sprocket's words.
+    /// A rotor or a hinge: turned to an angle, and the members of its terminal said in Sprocket's words.
     /// </summary>
     /// <remarks>
     /// Turning to an angle is the game's own: it puts a limit at the angle and runs the rotor at it,
@@ -22,8 +22,9 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// reached. Its angle, its limits and its speed are all the block's own, which the game saves, so
     /// a turn under way survives a reload and is still known to be under way.
     /// <para>
-    /// Hinges share the rotor's type and are not claimed here. The game tells the two apart by the
-    /// definition, and a hinge has hard limits of its own.
+    /// A hinge is a rotor that goes no further than its definition allows, a quarter turn either way,
+    /// and always the short way: it is asked for an angle and a speed, and not for a direction. Its lock
+    /// is its own, beside the rotor's.
     /// </para>
     /// </remarks>
     sealed class RotorExtension : IBlockExtension
@@ -48,18 +49,23 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public bool Claims(IMyTerminalBlock block)
         {
-            return block is IMyMotorStator && !Hinge(block);
+            return block is IMyMotorStator;
         }
 
         /// <summary>Whether the block's definition says it is a hinge rather than a rotor.</summary>
         /// <remarks>
         /// Asked of the definition because nothing else says: a rotor and a hinge are the same type
-        /// with the same terminal. With no definitions loaded - the test harness - a rotor is a rotor.
+        /// with the same terminal. Where no definitions are loaded - the test harness - by the subtype,
+        /// which names every hinge the game has.
         /// </remarks>
         static bool Hinge(IMyTerminalBlock block)
         {
             var definition = Definition(block);
-            return definition != null && definition.RotorType == MyRotorType.Hinge;
+            if (definition != null)
+                return definition.RotorType == MyRotorType.Hinge;
+
+            var subtype = block.BlockDefinition.SubtypeName;
+            return subtype != null && subtype.IndexOf("Hinge", StringComparison.Ordinal) >= 0;
         }
 
         /// <summary>What the game says this block is, or null where nothing has been loaded to say.</summary>
@@ -100,16 +106,25 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
+            // A hinge's lock is its own, and a hinge goes the short way whatever it is told.
+            var hinge = Hinge(block);
+            var locks = hinge ? "HingeLock" : "RotorLock";
+
             kind.WithProperty(Arrived, "at its angle")
-                .WithState(There, Arrived, true, "is at its angle")
-                .WithAction(RotateTo, "rotate", There, Way(), Angle(block), Speed(block))
-                .Lasting().In(Category.Movement)
-                .Hiding("RotateToAngle", "RotorLock")
+                .WithState(There, Arrived, true, "is at its angle");
+
+            if (hinge)
+                kind.WithAction(RotateTo, "rotate", There, Angle(block), Speed(block));
+            else
+                kind.WithAction(RotateTo, "rotate", There, Way(), Angle(block), Speed(block));
+
+            kind.Lasting().Listed("rotate to").In(Category.Movement)
+                .Hiding("RotateToAngle", "RotorLock", "HingeLock")
                 .Renaming("Reverse", false, "reverse")
                 .Renaming("Attach", false, "attach")
                 .Renaming("Detach", false, "detach")
-                .Renaming("RotorLock_On", false, "lock")
-                .Renaming("RotorLock_Off", false, "unlock")
+                .Renaming(locks + "_On", false, "lock")
+                .Renaming(locks + "_Off", false, "unlock")
                 .Renaming("Velocity", true, "speed")
                 .Renaming("LowerLimit", true, "lower limit")
                 .Renaming("UpperLimit", true, "upper limit")
@@ -120,16 +135,22 @@ namespace Sprocket.Host.SpaceEngineers.World
         static Field Way()
         {
             var way = Field.Among("direction", Ways, Directions);
+            way.Entry = Entry.Whole;
             way.Needed = true;
             way.Default = Ways[0];
             return way;
         }
 
         /// <summary>How far round the block will go, which is the block's own to say.</summary>
+        /// <remarks>
+        /// A quarter turn either way for a hinge with no definition to say otherwise - the test harness -
+        /// which is what every hinge the game has is built to.
+        /// </remarks>
         static Field Angle(IMyTerminalBlock block)
         {
-            float least = -360f;
-            float most = 360f;
+            var reach = Hinge(block) ? 90f : 360f;
+            float least = -reach;
+            float most = reach;
 
             var definition = Definition(block);
             if (definition != null)
@@ -140,6 +161,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             var angle = Field.Between("angle", Said(least), Said(most));
             angle.Needed = true;
+            angle.Entry = Entry.Decimal;
             angle.Edits = Editor.Angle;
             angle.Lead = "to";
             angle.Unit = "°";
@@ -153,6 +175,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var speed = Field.Between("speed", "0", Said(Fastest(block)));
             speed.Needed = true;
             speed.Above = true;
+            speed.Entry = Entry.Decimal;
             speed.Default = "1";
             speed.Lead = "at";
             speed.Unit = " rpm";
@@ -199,7 +222,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             MyRotationDirection way;
             float angle;
             float speed;
-            if (!Given(values, out way, out angle, out speed))
+            if (!Given(values, Hinge(block), out way, out angle, out speed))
                 return true;
 
             if (Already(rotor, angle))
@@ -243,19 +266,26 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>The direction, angle and speed a step turning the rotor was given, in that order.</summary>
-        static bool Given(IList<Literal> values, out MyRotationDirection way, out float angle, out float speed)
+        /// <summary>
+        /// The direction, angle and speed a step turning the rotor was given, in that order, or the angle
+        /// and speed a step turning a hinge was given, which goes the short way.
+        /// </summary>
+        static bool Given(IList<Literal> values, bool hinge, out MyRotationDirection way, out float angle,
+            out float speed)
         {
             way = MyRotationDirection.AUTO;
             angle = 0;
             speed = 0;
 
-            if (values == null || values.Count < 3)
+            var at = hinge ? 0 : 1;
+            if (values == null || values.Count < at + 2)
                 return false;
 
-            way = (MyRotationDirection)(long)values[0].Number;
-            angle = (float)values[1].Number;
-            speed = (float)Math.Abs(values[2].Number);
+            if (!hinge)
+                way = (MyRotationDirection)values[0].Whole;
+
+            angle = (float)values[at].Real;
+            speed = (float)Math.Abs(values[at + 1].Real);
             return true;
         }
 
@@ -338,7 +368,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             MyRotationDirection way;
             float angle;
             float speed;
-            if (rotor == null || actionId != RotateTo || !Given(values, out way, out angle, out speed) || speed <= 0)
+            if (rotor == null || actionId != RotateTo || !Given(values, Hinge(block), out way, out angle, out speed)
+                || speed <= 0)
                 return GridEntity.Unestimated;
 
             var from = Degrees(rotor.Angle);

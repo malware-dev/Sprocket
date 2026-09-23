@@ -168,7 +168,7 @@ sealed class Rig
     /// </remarks>
     static void Light(Rig rig, long id, string name)
     {
-        rig.Weld(new Plain(id, name, Type<MyObjectBuilder_InteriorLight>(),
+        rig.Weld(new Lamp(id, name, Type<MyObjectBuilder_InteriorLight>(),
                 "LargeBlockLight_1corner", "Interior Light"))
             .Offering("SetRadius", "Set Radius", 1)
             .Offering("SetColor", "Set Color", 3)
@@ -209,15 +209,26 @@ sealed class Rig
     }
 
     /// <summary>A block with nothing but a switch, which is most of a ship.</summary>
+    public Piston Piston(long id, string name)
+    {
+        return Weld(new Piston(id, name, Type<MyObjectBuilder_ExtendedPistonBase>(), "LargePistonBase", "Piston"));
+    }
+
+    /// <summary>A hinge, which the game builds as a rotor that says it is a hinge.</summary>
+    public Rotor Hinge(long id, string name)
+    {
+        return Weld(new Rotor(id, name, Type<MyObjectBuilder_MotorAdvancedStator>(), "LargeHinge", "Hinge"));
+    }
+
     /// <summary>A beacon, answering the game's own beacon interface.</summary>
     public Beacon Beacon(long id, string name)
     {
         return Weld(new Beacon(id, name, Type<MyObjectBuilder_Beacon>(), "LargeBlockBeacon", "Beacon"));
     }
 
-    public Plain Light(long id, string name)
+    public Lamp Light(long id, string name)
     {
-        return Weld(new Plain(id, name, Type<MyObjectBuilder_InteriorLight>(),
+        return Weld(new Lamp(id, name, Type<MyObjectBuilder_InteriorLight>(),
             "LargeBlockLight_1corner", "Interior Light"));
     }
 

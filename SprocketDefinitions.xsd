@@ -4,10 +4,10 @@
   What this is for.
 
   Space Engineers lets a block declare actions, and a toolbar action may take parameters. What the
-  game declares about those parameters is how many there are. It does not say what any of them is
-  for, what to call it, or what type it really wants - so an automation editor showing them has
-  nothing to put beside the boxes, and has to ask for three unnamed numbers where a person was
-  thinking of one colour.
+  game declares about those parameters is how many there are and a type for each, and the type is
+  often not the one the action accepts. It does not say what any of them is for or what to call it -
+  so an automation editor showing them has nothing to put beside the boxes, and has to ask for three
+  unnamed numbers where a person was thinking of one colour.
 
   This file is how a mod says what its own actions' parameters are. Put it in your mod at
   Data/SprocketDefinitions.xml and Sprocket will read it when the world loads. It is
@@ -117,6 +117,20 @@
     <xs:attribute name="max" type="xs:string">
       <xs:annotation>
         <xs:documentation>The most it may be. See min.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="kind" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          The type the action accepts here, named as .NET names it, in lower case: boolean, byte,
+          sbyte, int16, uint16, int32, uint32, int64, uint64, single, double, char or string. Left
+          out, the type the action declares for it stands. Give it wherever that declaration is
+          wrong - an action that declares a string and refuses anything but a number is the usual
+          case. The value is handed to the action as exactly this type. A program step holding a
+          value that is not this type, or does not fit in it, is at fault and does not run; a whole
+          number is taken where a single or double is wanted. A name this build does not know
+          leaves the declaration standing.
+        </xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

@@ -26,8 +26,8 @@ public class DefinitionTests
       <parameter name=""Bar"">How hard to squeeze it, between 0 and 50.</parameter>
     </action>
     <action id=""SetSpin"">
-      <parameter name=""Revolutions per minute"" />
-      <parameter name=""Clockwise"" />
+      <parameter name=""Revolutions per minute"" kind=""single"" />
+      <parameter name=""Clockwise"" kind=""boolean"" />
     </action>
     <action id=""SetGlow"" block=""MyObjectBuilder_InteriorLight/GlowyThing"">
       <group kind=""color"">
@@ -76,10 +76,13 @@ public class DefinitionTests
         Assert.Equal(1, pressure.Covers);
         Assert.Contains("squeeze", ((Parameter)pressure.Pieces[0]).Note);
 
-        // Two, on no block at all, which is the loose claim.
+        // Two, on no block at all, which is the loose claim, each saying what kind it is.
         Description spin = said.Actions[1];
         Assert.Equal("", spin.Block ?? "");
         Assert.Equal(2, spin.Covers);
+        Assert.Equal(Primitive.Single, ((Parameter)spin.Pieces[0]).Holds);
+        Assert.Equal(Primitive.Boolean, ((Parameter)spin.Pieces[1]).Holds);
+        Assert.Equal(Primitive.None, ((Parameter)pressure.Pieces[0]).Holds);
 
         // A group, which covers as many as it holds and says what they are together.
         Description glow = said.Actions[2];

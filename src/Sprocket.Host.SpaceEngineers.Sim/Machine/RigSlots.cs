@@ -107,6 +107,67 @@ sealed class RigSlots : ISlots
         return false;
     }
 
+    /// <summary>
+    /// A made-up block's action or value, made ready the way the game's are: each value built as the
+    /// type it is taken as, which the fitting keeps for a test to look at when it is given.
+    /// </summary>
+    public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
+        IList<Primitive> types)
+    {
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block != block)
+                continue;
+
+            if (form == Form.Value)
+                return values == null || values.Count == 0 ? null : new Told(fitting, id, values, null, true);
+
+            if (!fitting.Offers(id))
+                return null;
+
+            var handed = new List<object>();
+            for (var i = 0; values != null && i < values.Count; i++)
+            {
+                var type = types == null || i >= types.Count ? Primitive.None : types[i];
+                handed.Add(values[i].Native(type));
+            }
+
+            return new Told(fitting, id, values, handed, false);
+        }
+
+        return null;
+    }
+
+    sealed class Told : Order
+    {
+        readonly Fitting _fitting;
+        readonly string _id;
+        readonly IList<Literal> _values;
+        readonly IList<object> _handed;
+        readonly bool _sets;
+
+        public Told(Fitting fitting, string id, IList<Literal> values, IList<object> handed, bool sets)
+        {
+            _fitting = fitting;
+            _id = id;
+            _values = values;
+            _handed = handed;
+            _sets = sets;
+        }
+
+        public override void Give()
+        {
+            if (_sets)
+            {
+                _fitting.Set(_id, _values[0]);
+                return;
+            }
+
+            _fitting.Handed = _handed;
+            _fitting.Perform(_id, _values);
+        }
+    }
+
     public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
     {
         foreach (Fitting fitting in _rig.Fitted)

@@ -7,9 +7,8 @@ namespace Sprocket.Host.SpaceEngineers.Layout
     /// What one field of a form asks for: what it is called, and what it will take.
     /// </summary>
     /// <remarks>
-    /// Told to the form rather than worked out by it, because nothing in the game says any of this:
-    /// an action declares how many values it wants and not one word about any of them. A field told
-    /// nothing is a numbered box that takes whatever is put in it, which is the usual case.
+    /// Told to the form rather than worked out by it, because the form knows nothing about what it is
+    /// asking for. A field told nothing is a numbered box that takes whatever is put in it.
     /// <para>
     /// The bounds are written text and not numbers. They arrive from a file somebody else ships,
     /// where absent and zero are different things, and a bound nobody can read as a number is still
@@ -22,6 +21,10 @@ namespace Sprocket.Host.SpaceEngineers.Layout
     /// </remarks>
     public struct Field
     {
+        /// <summary>How many places after the point a decimal field gives room for.</summary>
+        /// <remarks>Enough for a quarter of a metre on a piston, which is as fine as the game's own blocks go.</remarks>
+        public const int Places = 2;
+
         /// <summary>What it is called, or empty to leave it numbered.</summary>
         public string Name;
 
@@ -69,6 +72,14 @@ namespace Sprocket.Host.SpaceEngineers.Layout
 
         /// <summary>What a sentence says straight after this value, or null for nothing: the "°" in "90°".</summary>
         public string Unit;
+
+        /// <summary>What may be typed into the box.</summary>
+        /// <remarks>
+        /// Beside the bounds rather than read from them, because a bound says how long the whole part
+        /// can be and nothing about the rest: a piston goes from nought to ten metres and stops at a
+        /// quarter of one.
+        /// </remarks>
+        public Entry Entry;
 
         /// <summary>
         /// How many of the values behind the form this one field stands for.
@@ -276,13 +287,24 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             double low, high;
             bool hasLow = Reads(Least, out low);
             bool hasHigh = Reads(Most, out high);
+            bool numeric = Entry == Entry.Whole || Entry == Entry.Decimal;
 
-            if (!hasLow && !hasHigh)
+            if (!hasLow && !hasHigh && !numeric)
                 return "";
 
             double value;
             if (!Reads(said, out value))
                 return called + " has to be a number.";
+
+            long whole;
+            if (Entry == Entry.Whole
+                && !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
+            {
+                return called + " has to be a whole number.";
+            }
+
+            if (!hasLow && !hasHigh)
+                return "";
 
             if ((hasLow && (Above ? value <= low : value < low)) || (hasHigh && value > high))
                 return called + " has to be " + Within(hasLow, hasHigh) + ".";
@@ -311,6 +333,26 @@ namespace Sprocket.Host.SpaceEngineers.Layout
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// How a value reads in the box: with a place after the point where the field takes a fraction
+        /// and the value was written without one.
+        /// </summary>
+        /// <remarks>
+        /// Only how it is shown. A program holding 5 for a speed holds a whole number, and the box
+        /// showing 5.0 says the speed takes fractions without changing what was written.
+        /// </remarks>
+        public string Shown(string said)
+        {
+            long whole;
+            if (Entry != Entry.Decimal || string.IsNullOrEmpty(said)
+                || !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
+            {
+                return said;
+            }
+
+            return said + ".0";
         }
 
         static bool Reads(string said, out double value)

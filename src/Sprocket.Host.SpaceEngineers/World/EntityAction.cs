@@ -7,8 +7,9 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Something a sequence can tell an entity to do.
     /// </summary>
     /// <remarks>
-    /// Most carry no values at all. The ones that do are the game's own, which declare how many they
-    /// want and nothing else about them: no names, and no set of what a value may be one of.
+    /// Most carry no values at all. Of the game's own that do, each declares how many it wants and a
+    /// type for each, which is often wrong, and nothing else: no names, and no set of what a value may
+    /// be one of.
     /// </remarks>
     public sealed class EntityAction
     {
@@ -19,6 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>What the value it writes is called, and what it will take.</summary>
         Field _writes;
+
+        /// <summary>What kind the value it writes is.</summary>
+        ValueKind _holds;
+
+        /// <summary>What type each value of one of the game's actions is taken as, or null for anything else.</summary>
+        IList<Primitive> _takes;
 
         public EntityAction(string id, string text, string leadsToStateId, string gameActionId,
             int wants)
@@ -98,6 +105,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>What the block itself calls it, which the terminal view shows as written.</summary>
         public string Declared { get; private set; }
+
+        /// <summary>What a list calls it, where that is not what a sentence calls it.</summary>
+        internal void List(string words)
+        {
+            Named = Capitalised(words);
+        }
 
         /// <summary>Whether Sprocket has given one of the block's own members a word of its own.</summary>
         public bool Renamed { get; private set; }
@@ -198,9 +211,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             Hidden = true;
         }
 
-        public EntityAction Writes(string propertyId, Field field, string named)
+        public EntityAction Writes(string propertyId, Field field, string named, ValueKind holds)
         {
             GamePropertyId = propertyId;
+            _holds = holds;
 
             // A value is asked about by the id it writes, since that is the only id the game gave it.
             if (Category == Category.Other)
@@ -238,6 +252,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         readonly List<Field> _described = new List<Field>();
 
+        /// <summary>Says what type each of the values it is handed is taken as, one per value.</summary>
+        /// <remarks>For one of the game's actions, whose declaration says and is often wrong - see <see cref="Known" />.</remarks>
+        public EntityAction Taking(IList<Primitive> types)
+        {
+            _takes = types;
+            return this;
+        }
+
+        /// <summary>What type each value of one of the game's actions is taken as, or null for anything else.</summary>
+        internal IList<Primitive> Primitives
+        {
+            get { return _takes; }
+        }
+
         /// <summary>Gives it the values it asks for, one field per value, in the order they are written.</summary>
         /// <remarks>For an action of Sprocket's own, which describes itself rather than being described.</remarks>
         public EntityAction Asking(IList<Field> fields)
@@ -272,7 +300,205 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What it asks for, while it is being asked whether it has it. Reused, never held.</summary>
         readonly List<Field> _wanted = new List<Field>();
 
+        /// <summary>Whether every value a step was given is one this can take.</summary>
+        public bool Takes(IList<Literal> given)
+        {
+            return Converts(given, null);
+        }
+
+        /// <summary>
+        /// Puts the values a step was given into the kinds this takes, or answers false where one
+        /// cannot be.
+        /// </summary>
+        /// <remarks>
+        /// Asked when a program is bound and never while it runs, so what a block is handed is already
+        /// what it takes: the kind a value of the block's holds, the type one of the game's actions
+        /// takes it as, the kind the box for one of Sprocket's own is for. A value nothing says the
+        /// kind of goes as it was written. Given nowhere to put them, it only answers.
+        /// </remarks>
+        public bool Converts(IList<Literal> given, List<Literal> into)
+        {
+            Literal became;
+            if (GamePropertyId != null)
+            {
+                for (var i = 0; i < given.Count; i++)
+                {
+                    if (!given[i].Becomes(_holds, out became))
+                        return false;
+
+                    if (into != null)
+                        into.Add(became);
+                }
+
+                return true;
+            }
+
+            if (_takes != null)
+            {
+                for (var i = 0; i < given.Count; i++)
+                {
+                    if (!given[i].Fits(i < _takes.Count ? _takes[i] : Primitive.None, out became))
+                        return false;
+
+                    if (into != null)
+                        into.Add(became);
+                }
+
+                return true;
+            }
+
+            _wanted.Clear();
+            Fields(_wanted);
+
+            var at = 0;
+            for (var f = 0; f < _wanted.Count && at < given.Count; f++)
+            {
+                ValueKind kind;
+                if (_wanted[f].Covers != 1 || !Kind(_wanted[f].Entry, out kind))
+                {
+                    for (var c = 0; c < _wanted[f].Covers && at < given.Count; c++, at++)
+                    {
+                        if (into != null)
+                            into.Add(given[at]);
+                    }
+
+                    continue;
+                }
+
+                if (!given[at].Becomes(kind, out became))
+                    return false;
+
+                if (into != null)
+                    into.Add(became);
+
+                at++;
+            }
+
+            for (; at < given.Count && into != null; at++)
+                into.Add(given[at]);
+
+            return true;
+        }
+
+        /// <summary>What may be typed into a box for a value of this kind.</summary>
+        internal static Entry Entered(ValueKind kind)
+        {
+            switch (kind)
+            {
+                case ValueKind.Integer:
+                    return Entry.Whole;
+                case ValueKind.Real:
+                    return Entry.Decimal;
+                case ValueKind.Text:
+                    return Entry.Text;
+            }
+
+            return Entry.Any;
+        }
+
+        /// <summary>The kind a box of this sort holds, or false where it may hold anything.</summary>
+        static bool Kind(Entry entry, out ValueKind kind)
+        {
+            kind = ValueKind.Text;
+            switch (entry)
+            {
+                case Entry.Whole:
+                    kind = ValueKind.Integer;
+                    return true;
+                case Entry.Decimal:
+                    kind = ValueKind.Real;
+                    return true;
+                case Entry.Text:
+                    return true;
+            }
+
+            return false;
+        }
+
         public void Fields(IList<Field> into)
+        {
+            var from = into.Count;
+            Listed(into);
+            Entered(into, from);
+        }
+
+        /// <summary>Holds each box to the type its value is taken as, where the box says nothing of its own.</summary>
+        void Entered(IList<Field> into, int from)
+        {
+            if (_takes == null)
+                return;
+
+            var at = 0;
+            for (var i = from; i < into.Count; i++)
+            {
+                var field = into[i];
+                if (field.Covers == 1 && field.Entry == Entry.Any && at < _takes.Count)
+                {
+                    field.Entry = Entered(_takes[at]);
+                    Bound(ref field, _takes[at]);
+                    into[i] = field;
+                }
+
+                at += field.Covers;
+            }
+        }
+
+        /// <summary>What may be typed into a box for a value taken as this type.</summary>
+        static Entry Entered(Primitive type)
+        {
+            switch (type)
+            {
+                case Primitive.Byte:
+                case Primitive.SByte:
+                case Primitive.Int16:
+                case Primitive.UInt16:
+                case Primitive.Int32:
+                case Primitive.UInt32:
+                case Primitive.Int64:
+                case Primitive.UInt64:
+                    return Entry.Whole;
+                case Primitive.Single:
+                case Primitive.Double:
+                    return Entry.Decimal;
+                case Primitive.Char:
+                case Primitive.String:
+                    return Entry.Text;
+            }
+
+            return Entry.Any;
+        }
+
+        /// <summary>
+        /// Gives a box the bounds of a small whole-number type, where nobody has given it any.
+        /// </summary>
+        /// <remarks>Only the small ones: the bounds of a 32-bit number are nothing anybody wants to read beside a box.</remarks>
+        static void Bound(ref Field field, Primitive type)
+        {
+            if (field.Least.Length > 0 || field.Most.Length > 0)
+                return;
+
+            switch (type)
+            {
+                case Primitive.Byte:
+                    field.Least = "0";
+                    field.Most = "255";
+                    break;
+                case Primitive.SByte:
+                    field.Least = "-128";
+                    field.Most = "127";
+                    break;
+                case Primitive.Int16:
+                    field.Least = "-32768";
+                    field.Most = "32767";
+                    break;
+                case Primitive.UInt16:
+                    field.Least = "0";
+                    field.Most = "65535";
+                    break;
+            }
+        }
+
+        void Listed(IList<Field> into)
         {
             if (_asks != null)
             {

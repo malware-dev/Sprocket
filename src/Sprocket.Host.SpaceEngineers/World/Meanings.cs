@@ -1,5 +1,6 @@
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.Terminal;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -110,6 +111,40 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             if (block is IMyStoreBlock)
                 In(kind, "Searchable", Category.Behaviour);
+
+            if (block is IMyGasTank)
+                HideToggle(kind, "Stockpile");
+
+            // What a sensor reacts to is set when it is placed; the switches stay, to be set.
+            if (block is IMySensorBlock)
+            {
+                foreach (var one in new[]
+                         {
+                             "Detect Players", "Detect Floating Objects", "Detect Small Ships", "Detect Large Ships",
+                             "Detect Stations", "Detect Subgrids", "Detect Asteroids", "Detect Owner",
+                             "Detect Friendly", "Detect Neutral", "Detect Enemy"
+                         })
+                {
+                    HideToggle(kind, one);
+                }
+            }
+
+            if (block is IMyShipConnector)
+            {
+                HideToggle(kind, "Trading");
+                HideToggle(kind, "PowerTransferOverride");
+                HideToggle(kind, "CollectAll");
+                HideToggle(kind, "ThrowOut");
+            }
+
+            // Charge mode says all of these, one value and three words.
+            if (block is IMyBatteryBlock)
+                kind.Hiding("Recharge", "Recharge_On", "Recharge_Off", "Discharge", "Discharge_On", "Discharge_Off", "Auto");
+
+            // What starts a programmable block's own script. A step runs a script by running the block,
+            // and the argument and Sprocket's own toolbar action are the wiring of the thing.
+            if (block is IMyProgrammableBlock)
+                kind.Hiding("ConsoleCommand", "RunWithDefaultArgument", TriggerAction.ActionId);
         }
 
         /// <summary>Takes out the setters written by hand beside a value that says the same.</summary>
@@ -164,6 +199,15 @@ namespace Sprocket.Host.SpaceEngineers.World
             In(kind, "ANDCheckbox", Category.Behaviour);
             In(kind, "ReceiveFrom", Category.Behaviour);
             Hide(kind, "SearchBox");
+
+            // Set once when the machine is built, so flipping it is nothing a sequence does. The value
+            // stays, to be set.
+            HideToggle(kind, "ShowOnHUD");
+            HideToggle(kind, "AnyoneCanUse");
+            HideToggle(kind, "EnableParking");
+            HideToggle(kind, "Auto-Refill");
+            HideToggle(kind, "UseConveyor");
+            HideToggle(kind, "AutomaticallyPullBottles");
 
             // A sequence says which block it means by the block's name, so a sequence that renamed
             // one would be cutting the ground from under itself and every other sequence besides.
@@ -315,6 +359,21 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 EntityAction one = actions[i];
                 if (one.Sets && Categories.Names(one.GamePropertyId, stem))
+                    one.Hide();
+            }
+        }
+
+        /// <summary>Takes the game's act that flips a switch out of the organized view, and nothing else of it.</summary>
+        /// <remarks>
+        /// By its exact id, because the switch's value and the act share it and the value stays.
+        /// </remarks>
+        static void HideToggle(EntityKind kind, string id)
+        {
+            var actions = kind.Actions;
+            for (var i = 0; i < actions.Count; i++)
+            {
+                EntityAction one = actions[i];
+                if (one.Form == Form.Action && one.GameActionId == id)
                     one.Hide();
             }
         }

@@ -26,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Most = "";
             Choices = null;
             Unreadable = false;
+            Declares = null;
         }
 
         /// <summary>
@@ -54,6 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Most = most ?? "";
             Choices = null;
             Unreadable = false;
+            Declares = null;
         }
 
         /// <summary>The least it will accept, and the most, or empty where it says nothing.</summary>
@@ -64,16 +66,24 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What kind of value it holds, where it is one.</summary>
         public ValueKind Sets { get; private set; }
 
-        /// <summary>
-        /// The same, for a value that is one of a listed few rather than anything within bounds.
-        /// </summary>
-        /// <remarks>
-        /// Handed back rather than set, because this is a struct and one that changed itself would
-        /// change whatever copy happened to be in hand. The list is held rather than copied: it is
-        /// built once per block kind and never written to afterwards.
-        /// </remarks>
         /// <summary>Whether this value is one of a listed few whose list the game would not hand over.</summary>
         public bool Unreadable { get; private set; }
+
+        /// <summary>What type the action says each of its values is, one per value.</summary>
+        /// <remarks>
+        /// Null where the block was not asked. What an action declares is often wrong: most of the
+        /// game's own declare text for values they refuse unless they are numbers, which is what
+        /// <see cref="Known" /> is there to correct.
+        /// </remarks>
+        public IList<Primitive> Declares { get; private set; }
+
+        /// <summary>The same, saying what type each of its values is declared as.</summary>
+        public Offer Declaring(IList<Primitive> types)
+        {
+            Offer declaring = this;
+            declaring.Declares = types;
+            return declaring;
+        }
 
         /// <summary>The same, for a value whose list the game would not hand over.</summary>
         public Offer Unread()
@@ -83,6 +93,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             return unread;
         }
 
+        /// <summary>
+        /// The same, for a value that is one of a listed few rather than anything within bounds.
+        /// </summary>
+        /// <remarks>
+        /// Handed back rather than set, because this is a struct and one that changed itself would
+        /// change whatever copy happened to be in hand. The list is held rather than copied: it is
+        /// built once per block kind and never written to afterwards.
+        /// </remarks>
         public Offer Between(IList<Choice> choices)
         {
             Offer made = this;

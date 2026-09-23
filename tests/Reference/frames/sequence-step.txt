@@ -157,7 +157,7 @@ on screen     Do something
 150  Text       at {X:779.26 Y:575.2419} scale 0.64  #DCF5FDFF  "Close"
 151  Text       at {X:757.8 Y:619.8229} scale 0.57  #A2C3CDFF  "w"
 152  Text       at {X:779.26 Y:621.1219} scale 0.64  #DCF5FDFF  "Open"
-153  Text       at {X:757.8 Y:667.002} scale 0.64  #DCF5FDFF  "Open/Closed"
+153  Text       at {X:757.8 Y:667.002} scale 0.64  #DCF5FDFF  "Reverse"
 154  SetClip    {X:259 Y:118 W:1402 H:836}
 155  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT TO DO"
 156  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:37}  #141B20FF

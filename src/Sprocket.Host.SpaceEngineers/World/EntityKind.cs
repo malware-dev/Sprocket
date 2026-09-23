@@ -146,10 +146,11 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The same, for one the game will not perform until it is given values.</summary>
         public EntityKind WithAction(string id, string text, string gameActionId, int wants,
-            Description described)
+            Description described, IList<Primitive> takes)
         {
             _actions.Add(new EntityAction(id, text, null, gameActionId, wants)
-                .Described(described));
+                .Described(described)
+                .Taking(takes));
 
             return this;
         }
@@ -201,6 +202,19 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Names the action added last in a list of things to choose from, where a sentence says it
+        /// differently.
+        /// </summary>
+        /// <remarks>
+        /// A turn to an angle is "rotate to" in a list, and "rotate" in a sentence whose angle says "to".
+        /// </remarks>
+        public EntityKind Listed(string words)
+        {
+            _actions[_actions.Count - 1].List(words);
+            return this;
         }
 
         /// <summary>Says that reaching the state of the action added last takes time.</summary>
@@ -258,10 +272,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<Alias> _renamed = new List<Alias>();
 
         /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
-        public EntityKind WithValue(string id, string named, string propertyId, Field field)
+        public EntityKind WithValue(string id, string named, string propertyId, Field field, ValueKind holds)
         {
             _actions.Add(new EntityAction(id, "set " + named, null, null, 1)
-                .Writes(propertyId, field, named));
+                .Writes(propertyId, field, named, holds));
 
             return this;
         }

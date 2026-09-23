@@ -17,14 +17,21 @@ namespace Sprocket.Host.SpaceEngineers.Screen
     /// told to go round to minus ninety is not the same instruction as one told to go to two hundred
     /// and seventy. The dial turns in whole degrees; the box takes whatever is typed into it.
     /// <para>
+    /// How far it turns is the field's to say. A hinge goes no further than a quarter turn either way,
+    /// so its dial is the top half of one, from minus ninety on the left to ninety on the right.
+    /// </para>
+    /// <para>
     /// The box is this control's own, and the question hands the caret to it in place of the field's,
     /// as it does for a colour.
     /// </para>
     /// </remarks>
     public sealed class Dial
     {
-        /// <summary>How far the dial counts either way: a whole turn, which is what the game will turn to.</summary>
+        /// <summary>How far the dial counts either way at most: a whole turn, which is what the game will turn to.</summary>
         const float Most = 360f;
+
+        /// <summary>How far a dial drawn as a half circle turns either way.</summary>
+        const float RightAngle = 90f;
 
         /// <summary>How much room the written angle takes: a sign, three digits, and the caret after them.</summary>
         const float WrittenWide = 5f * Sizes.Digit;
@@ -35,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
 
         float _degrees;
+        float _most = Most;
         bool _held;
 
         public Dial()
@@ -59,6 +67,29 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         public TextBox Written
         {
             get { return _written; }
+        }
+
+        /// <summary>
+        /// Says how far the field lets the angle go either way, which decides the face it is drawn on.
+        /// </summary>
+        /// <remarks>
+        /// The field's bounds as it writes them, either of which may be empty for "as far as the game
+        /// goes". Within a quarter turn both ways, it is drawn as the half of a dial it can reach.
+        /// </remarks>
+        public void Reach(string least, string most)
+        {
+            var reach = Math.Max(Bound(least), Bound(most));
+            _most = Math.Min(Most, reach);
+            _face.Halved = _most <= RightAngle;
+        }
+
+        /// <summary>How far one bound lets the angle go from nought, or a whole turn where it says nothing.</summary>
+        static float Bound(string written)
+        {
+            float bound;
+            return float.TryParse(written, NumberStyles.Float, CultureInfo.InvariantCulture, out bound)
+                ? Math.Abs(bound)
+                : Most;
         }
 
         /// <summary>Whether the dial is being turned right now.</summary>
@@ -122,7 +153,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             float said;
             if (float.TryParse(_written.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out said))
             {
-                _degrees = Math.Max(-Most, Math.Min(Most, said));
+                _degrees = Math.Max(-_most, Math.Min(_most, said));
                 _face.Degrees = _degrees;
                 _face.Shows = true;
                 return;
@@ -134,10 +165,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         void Turn(float degrees)
         {
-            _degrees = Math.Max(-Most, Math.Min(Most, degrees));
+            _degrees = Math.Max(-_most, Math.Min(_most, degrees));
             _face.Degrees = _degrees;
             _face.Shows = true;
-            _written.Text = ((int)_degrees).ToString(CultureInfo.InvariantCulture);
+            // An angle takes a fraction, so it reads as one even though the dial turns in whole degrees.
+            _written.Text = ((int)_degrees).ToString("0.0", CultureInfo.InvariantCulture);
             _written.MoveCaretEnd(false);
         }
 
@@ -173,10 +205,51 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             /// <summary>Whether there is an angle to point at, as against a field nobody has filled.</summary>
             public bool Shows;
 
+            bool _half;
+
+            /// <summary>Whether it is drawn as the top half of a dial, for an angle within a quarter turn.</summary>
+            /// <remarks>Half as tall, so a change is a change of size.</remarks>
+            public bool Halved
+            {
+                get { return _half; }
+                set
+                {
+                    if (_half == value)
+                        return;
+
+                    _half = value;
+                    InvalidateMeasure();
+                }
+            }
+
+            /// <summary>Where the needle turns about: the middle of a whole dial, the foot of a half one.</summary>
+            Vector2 Pivot
+            {
+                get
+                {
+                    var bounds = ContentBounds;
+                    return Halved
+                        ? new Vector2(bounds.Center.X, bounds.Y + bounds.Height - Hub)
+                        : bounds.Center;
+                }
+            }
+
+            /// <summary>How far from the pivot the marks reach.</summary>
+            float Reach
+            {
+                get
+                {
+                    var bounds = ContentBounds;
+                    return Halved
+                        ? Math.Min(bounds.Width / 2f, bounds.Height - Hub)
+                        : Math.Min(bounds.Width, bounds.Height) / 2f;
+                }
+            }
+
             /// <summary>Where the pointer is round the dial, clockwise from straight up, if it is far enough out to say.</summary>
             public bool Pointing(Vector2 point, out float degrees)
             {
-                var centre = ContentBounds.Center;
+                var centre = Pivot;
                 var dx = point.X - centre.X;
                 var dy = point.Y - centre.Y;
 
@@ -190,17 +263,19 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
             {
-                return new Vector2(Across, Across);
+                return Halved ? new Vector2(Across, Across / 2f + Hub) : new Vector2(Across, Across);
             }
 
             protected override void DrawContent(IGraphics g)
             {
-                var centre = ContentBounds.Center;
-                var reach = Math.Min(ContentBounds.Width, ContentBounds.Height) / 2f;
+                var centre = Pivot;
+                var reach = Reach;
 
                 // A mark every fifteen degrees and a longer one on each quarter, so a right angle can be
-                // found by eye and the needle read to within a mark.
-                for (var i = 0; i < 24; i++)
+                // found by eye and the needle read to within a mark. A half dial has the ones it can reach.
+                var from = Halved ? -6 : 0;
+                var to = Halved ? 6 : 23;
+                for (var i = from; i <= to; i++)
                 {
                     var quarter = i % 6 == 0;
                     var length = quarter ? Quarter : Mark;

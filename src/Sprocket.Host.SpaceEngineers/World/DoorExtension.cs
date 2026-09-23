@@ -43,7 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 .WithState("is-shut", Shut, true, "is shut")
                 .WithState("is-moving", Moving, true, "is moving")
                 .WithAction("open", "open", "is-open", "Open_On").Lasting()
-                .WithAction("close", "close", "is-shut", "Open_Off").Lasting();
+                .WithAction("close", "close", "is-shut", "Open_Off").Lasting()
+                .Renaming("Open", false, "reverse");
         }
 
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)

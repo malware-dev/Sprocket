@@ -41,9 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// The values the action has to be given, in the order it declares them.
         /// </summary>
         /// <remarks>
-        /// Each carries its own kind, because nothing else does: an action declares how many values
-        /// it wants and not one thing about what they are, so the program is the only record of
-        /// whether somebody wrote a number, a flag or a colour.
+        /// Each carries the kind it was written as, which is the program's record of what somebody
+        /// wrote. What the action takes is applied when the program is bound - see
+        /// <see cref="World.EntityAction.Converts" />.
         /// <para>
         /// Empty for every action of Sprocket's own, and for the great majority of the game's.
         /// </para>

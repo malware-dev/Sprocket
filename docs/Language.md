@@ -194,7 +194,9 @@ the list is the parts it acts on.
 `action '<id>' on [ <parts> ]` runs one of the game's terminal actions by the game's own id.
 
 `with` carries the values an action takes, in either form. Every value is written as the kind it is,
-in order, and a value left out is the default the action declared.
+in order, and a value left out is the default the action declared. Where an action says what type a
+value has to be, a value of another kind, or a whole number too large for that type, is an error,
+and a whole number stands for a real.
 
 ```
 'rotate-to' [ arm ] with 0 90 2
@@ -204,8 +206,9 @@ action 'Run' on [ pb ] with "doors open"
 ```
 
 `set '<id>' on [ <parts> ] to <value>` writes one of the block's own values, by the game's id for it.
-A value declares what kind it is, and it is written as that kind. An id can name both one of the
-game's actions and one of the block's values, and `set` always means the value.
+A value declares what kind it is, and it is written as that kind, or as a whole number where it is
+real. An id can name both one of the game's actions and one of the block's values, and `set` always
+means the value.
 
 ```
 set 'Radius' on [ light ] to 4.5

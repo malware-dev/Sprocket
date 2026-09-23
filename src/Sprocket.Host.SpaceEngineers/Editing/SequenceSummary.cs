@@ -273,6 +273,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (unfilled.Exists)
                 return unfilled;
 
+            SequenceFault mistyped = Mistyped(bindings, sequence);
+            if (mistyped.Exists)
+                return mistyped;
+
             SequenceFault unawaited = Unawaited(sequence);
             if (unawaited.Exists)
                 return unawaited;
@@ -338,6 +342,34 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
                     if (doing.Needs(act.Values.Count))
                         return new SequenceFault(SequenceProblem.Unfilled, i);
+                }
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>The first step given a value its action takes as another kind, or none.</summary>
+        /// <remarks>
+        /// Asked of each block's own action, as <see cref="Unfilled" /> is: what a value has to be is
+        /// the action's to declare.
+        /// </remarks>
+        static SequenceFault Mistyped(Bindings bindings, Sequence sequence)
+        {
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var act = sequence.Steps[i] as Act;
+                if (act == null || !act.HasAction || act.Values.Count == 0)
+                    continue;
+
+                for (var t = 0; t < act.Targets.Count; t++)
+                {
+                    GridEntity entity = bindings.Entity(act.Targets[t]);
+                    if (entity == null)
+                        continue;
+
+                    EntityAction doing = act.Names(entity.Kind.Actions);
+                    if (doing != null && !doing.Takes(act.Values))
+                        return new SequenceFault(SequenceProblem.Mistyped, i);
                 }
             }
 

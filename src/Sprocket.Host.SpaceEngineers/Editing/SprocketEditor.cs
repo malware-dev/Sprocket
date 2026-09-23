@@ -934,6 +934,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         void Settled<T>(Edit<T> edit)
         {
+            _program.Edited();
             _program.Rewire();
 
             if (edit.ChangesShape)
@@ -1011,6 +1012,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (edit == null)
                 return;
 
+            _program.Edited();
             _program.Rewire();
             Invalidate();
         }

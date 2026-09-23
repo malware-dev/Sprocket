@@ -12,7 +12,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     {
         public static Evaluation Of(IMyTerminalBlock block)
         {
-            if (block is IMyDoor || block is IMyAirVent || block is IMyMotorStator || block is IMyButtonPanel)
+            if (block is IMyDoor || block is IMyAirVent || block is IMyMotorStator || block is IMyButtonPanel
+                || block is IMyPistonBase)
                 return Evaluation.Partial;
 
             return Evaluation.Pending;

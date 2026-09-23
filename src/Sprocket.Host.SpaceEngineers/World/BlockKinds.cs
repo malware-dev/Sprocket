@@ -136,9 +136,30 @@ namespace Sprocket.Host.SpaceEngineers.World
         void Act(EntityKind kind, Offer offer, string id, string said)
         {
             if (offer.Wants > 0)
-                kind.WithAction(id, said, offer.Id, offer.Wants, Described(kind, offer));
+            {
+                var described = Described(kind, offer);
+                kind.WithAction(id, said, offer.Id, offer.Wants, described, Takes(offer, described));
+            }
             else
+            {
                 kind.WithAction(id, said, null, offer.Id);
+            }
+        }
+
+        /// <summary>
+        /// What type each value of an action is: what the action declares, corrected by what has been
+        /// said about it.
+        /// </summary>
+        static IList<Primitive> Takes(Offer offer, Description described)
+        {
+            var types = new Primitive[offer.Wants];
+            for (var i = 0; offer.Declares != null && i < types.Length && i < offer.Declares.Count; i++)
+                types[i] = offer.Declares[i];
+
+            if (described != null)
+                described.Correct(types);
+
+            return types;
         }
 
         /// <summary>
@@ -175,7 +196,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 string word;
                 var renamed = kind.Renames(offer.Id, true, out word);
 
-                kind.WithValue(offer.Id, said, offer.Id, Asks(offer, renamed ? word : said));
+                kind.WithValue(offer.Id, said, offer.Id, Asks(offer, renamed ? word : said), offer.Sets);
                 Last(kind).Unaltered = true;
                 Unread(Last(kind), offer);
 
@@ -233,7 +254,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (offer.Sets == ValueKind.Color)
                 return Field.Holding(said, Editor.Colour, 1);
 
-            return Field.Between(said, offer.Least, offer.Most);
+            // What is typed is held to the kind the block says the value is, whatever its bounds look
+            // like: a real number takes a fraction and a whole one refuses it.
+            var between = Field.Between(said, offer.Least, offer.Most);
+            between.Entry = EntityAction.Entered(offer.Sets);
+            return between;
         }
 
         /// <summary>One field over everything a value says it may be, kept in the order it said them.</summary>

@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -8,9 +9,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <remarks>
     /// An <see cref="EntityValue" /> is eight bytes and says nothing about itself, because a reading
     /// always comes from a declared property and the declaration is what knows the kind. A value
-    /// somebody wrote into a step has no declaration behind it: the action it is for declares how
-    /// many values it wants and not one thing about what they are, and the block may not even be
-    /// present when the program is read. So this one carries its kind.
+    /// somebody wrote into a step is written before anything is bound to it, and the block may not
+    /// even be present when the program is read. So this one carries its kind.
     /// <para>
     /// Text is a field rather than a slot in <see cref="Values" /> because a step's values belong to
     /// the step. They are made when somebody writes a sequence and never on a tick.
@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public double Real
         {
-            get { return System.BitConverter.Int64BitsToDouble(Value.Bits); }
+            get { return BitConverter.Int64BitsToDouble(Value.Bits); }
         }
 
         /// <summary>What it is as a number, whether it was written whole or with a point, and nought for anything else.</summary>
@@ -138,6 +138,114 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return "#" + Hex(Red) + Hex(Green) + Hex(Blue)
                     + (Alpha == 255 ? "" : Hex(Alpha));
             }
+        }
+
+        /// <summary>
+        /// This as the game will take it as <paramref name="type" />, or false where it cannot be one.
+        /// </summary>
+        /// <remarks>
+        /// Within the language's rule - a value is the kind it was written as, and a whole number is
+        /// also a real one - and within what the type holds: 300 is no byte. A type nothing says is
+        /// anything.
+        /// </remarks>
+        public bool Fits(Primitive type, out Literal became)
+        {
+            became = this;
+            switch (type)
+            {
+                case Primitive.None:
+                    return true;
+                case Primitive.Boolean:
+                    return Kind == ValueKind.Flag;
+                case Primitive.Byte:
+                    return Within(byte.MinValue, byte.MaxValue);
+                case Primitive.SByte:
+                    return Within(sbyte.MinValue, sbyte.MaxValue);
+                case Primitive.Int16:
+                    return Within(short.MinValue, short.MaxValue);
+                case Primitive.UInt16:
+                    return Within(ushort.MinValue, ushort.MaxValue);
+                case Primitive.Int32:
+                    return Within(int.MinValue, int.MaxValue);
+                case Primitive.UInt32:
+                    return Within(uint.MinValue, uint.MaxValue);
+                case Primitive.Int64:
+                    return Kind == ValueKind.Integer;
+                case Primitive.UInt64:
+                    return Within(0, long.MaxValue);
+                case Primitive.Single:
+                    return Becomes(ValueKind.Real, out became) && Math.Abs(became.Real) <= float.MaxValue;
+                case Primitive.Double:
+                    return Becomes(ValueKind.Real, out became);
+                case Primitive.Char:
+                    return Kind == ValueKind.Text && Text.Length == 1;
+                case Primitive.String:
+                    return Kind == ValueKind.Text;
+            }
+
+            return false;
+        }
+
+        bool Within(long least, long most)
+        {
+            return Kind == ValueKind.Integer && Whole >= least && Whole <= most;
+        }
+
+        /// <summary>
+        /// This as a value of <paramref name="type" /> itself, boxed, for one that <see cref="Fits" />.
+        /// </summary>
+        /// <remarks>Made when a program is bound, never when it runs, so the boxing is paid once.</remarks>
+        public object Native(Primitive type)
+        {
+            switch (type)
+            {
+                case Primitive.Boolean:
+                    return Flag;
+                case Primitive.Byte:
+                    return (byte)Whole;
+                case Primitive.SByte:
+                    return (sbyte)Whole;
+                case Primitive.Int16:
+                    return (short)Whole;
+                case Primitive.UInt16:
+                    return (ushort)Whole;
+                case Primitive.Int32:
+                    return (int)Whole;
+                case Primitive.UInt32:
+                    return (uint)Whole;
+                case Primitive.Int64:
+                    return Whole;
+                case Primitive.UInt64:
+                    return (ulong)Whole;
+                case Primitive.Single:
+                    return (float)Number;
+                case Primitive.Double:
+                    return Number;
+                case Primitive.Char:
+                    return Text[0];
+                case Primitive.String:
+                    return Text;
+            }
+
+            return Said;
+        }
+
+        /// <summary>This as <paramref name="kind" />, or false where it cannot be one.</summary>
+        /// <remarks>
+        /// The same kind is itself and a whole number is also a real one. Nothing else becomes
+        /// anything: a value is written as the kind it is.
+        /// </remarks>
+        public bool Becomes(ValueKind kind, out Literal became)
+        {
+            became = this;
+            if (Kind == kind)
+                return true;
+
+            if (Kind != ValueKind.Integer || kind != ValueKind.Real)
+                return false;
+
+            became = Of((double)Whole);
+            return true;
         }
 
         static string Hex(byte value)

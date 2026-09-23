@@ -453,9 +453,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Replaces the values a step was given with what was typed into its slot.
         /// </summary>
         /// <remarks>
-        /// All of them at once, because that is how they were asked for: an action declares how many
-        /// values it wants and nothing about what each one is, so there is no such thing as changing
-        /// the second one.
+        /// All of them at once, because that is how they were asked for: one line of values, in the
+        /// order the action takes them.
         /// </remarks>
         void Gave(Act step, string said)
         {

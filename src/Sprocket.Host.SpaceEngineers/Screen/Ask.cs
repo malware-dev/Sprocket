@@ -35,6 +35,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         private readonly List<Choices> _lists = new List<Choices>();
         private readonly List<Hsv> _colours = new List<Hsv>();
         private readonly List<string> _parts = new List<string>();
+
+        /// <summary>Which of <see cref="_parts" /> are text, and so quoted whatever they spell.</summary>
+        private readonly List<bool> _texts = new List<bool>();
         private readonly List<Bar> _lines = new List<Bar>();
         private readonly List<Label> _numbers = new List<Label>();
         private readonly Label _confirm = Widgets.Label("Continue", Palette.Ink, Lettering.Small);
@@ -210,6 +213,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Bar line = _lines[at];
             line.Spacing = Space.Item;
             line.Left = _numbers[at].Text.Length > 0 ? Numbered(at) : null;
+            if (Dialled(at))
+                Turned(at).Reach(_wanted[at].Least, _wanted[at].Most);
+
             line.Fill = Dialled(at) ? Turned(at).Root : Chosen(at) ? Picking(at) : Boxed(at);
 
             return line;
@@ -250,8 +256,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (longest < 1)
                 return 0f;
 
-            // The longest value it will take, and room for the caret after it.
-            return (longest + 1) * Sizes.Digit;
+            // The longest value it will take - its whole part, and a point and the places after it where
+            // it takes a fraction - and room for the caret after it.
+            var places = field.Entry == Entry.Decimal ? Field.Places + 1 : 0;
+            return (longest + places + 1) * Sizes.Digit;
         }
 
         float Room(int at)
@@ -686,11 +694,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 // its description declared them. That is the other half of showing three numbers as
                 // one colour, and it is the only place the two spellings meet.
                 _parts.Clear();
+                _texts.Clear();
                 for (var i = 0; i < Count; i++)
                 {
                     if (Colourful(i))
                     {
                         Channels.Spell(At(i).Text, _wanted[i].Covers, _parts);
+                        while (_texts.Count < _parts.Count)
+                            _texts.Add(false);
+
                         continue;
                     }
 
@@ -698,10 +710,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     // wherever a block shows one thing and is told another. Unchanged everywhere
                     // else, because a field that said nothing about this maps a word to itself.
                     _parts.Add(i < _wanted.Count ? _wanted[i].Meaning(At(i).Text) : At(i).Text);
+                    _texts.Add(i < _wanted.Count && _wanted[i].Entry == Entry.Text);
                 }
 
+                // Text is quoted whatever it spells, so a 42 typed where text is wanted stays text.
                 if (_parts.Count == 1)
-                    return _parts[0];
+                    return _texts[0] && _parts[0].Length > 0 ? Quoted(_parts[0], true) : _parts[0];
 
                 // Only as far as the last field somebody actually filled in. A field left alone is
                 // a value not given, so the action is handed the default it declared - where an
@@ -720,7 +734,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     if (said.Length > 0)
                         said += " ";
 
-                    said += Quoted(_parts[i]);
+                    said += Quoted(_parts[i], _texts[i] && _parts[i].Length > 0);
                 }
 
                 return said;
@@ -734,12 +748,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// The language's rule, so nothing is lost and nothing changes meaning: a doubled quote
         /// stands for one, which is why no character can escape the next.
         /// </remarks>
-        static string Quoted(string said)
+        static string Quoted(string said, bool always)
         {
             if (said == null)
                 return "\"\"";
 
-            if (said.IndexOf(' ') < 0 && said.IndexOf('"') < 0)
+            if (!always && said.IndexOf(' ') < 0 && said.IndexOf('"') < 0)
                 return said;
 
             return "\"" + said.Replace("\"", "\"\"") + "\"";
@@ -896,6 +910,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 // A field somebody has not answered yet starts at what it says is usual, where it says.
                 if (said.Length == 0 && i < _wanted.Count && !string.IsNullOrEmpty(_wanted[i].Default))
                     said = _wanted[i].Default;
+
+                if (i < _wanted.Count)
+                    said = _wanted[i].Shown(said);
 
                 if (Colourful(i))
                 {

@@ -17,7 +17,7 @@ public class SetTests
     readonly EntityAction _toggle = new EntityAction("OnOff", "Toggle block On/Off", null, "OnOff");
 
     readonly EntityAction _value = new EntityAction("OnOff", "set On", null, null, 1)
-        .Writes("OnOff", Field.Called("On"), "On");
+        .Writes("OnOff", Field.Called("On"), "On", ValueKind.Flag);
 
     [Fact]
     public void AnActionNamesTheToggle()

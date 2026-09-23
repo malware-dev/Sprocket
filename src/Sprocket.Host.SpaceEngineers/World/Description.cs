@@ -98,6 +98,36 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
+        /// Overwrites the type of each parameter this says the type of, one per parameter, in order.
+        /// </summary>
+        public void Correct(IList<Primitive> types)
+        {
+            var at = 0;
+            for (var i = 0; i < Pieces.Count; i++)
+            {
+                var one = Pieces[i] as Parameter;
+                if (one != null)
+                {
+                    Correct(types, at++, one);
+                    continue;
+                }
+
+                var group = Pieces[i] as Group;
+                if (group == null)
+                    continue;
+
+                for (var p = 0; p < group.Parameters.Count; p++)
+                    Correct(types, at++, group.Parameters[p]);
+            }
+        }
+
+        static void Correct(IList<Primitive> types, int at, Parameter one)
+        {
+            if (at < types.Count && one.Holds != Primitive.None)
+                types[at] = one.Holds;
+        }
+
+        /// <summary>
         /// Which control asks for a group of this kind, or none where Sprocket has never heard of it.
         /// </summary>
         /// <remarks>
