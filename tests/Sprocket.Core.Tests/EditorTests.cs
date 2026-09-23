@@ -100,6 +100,36 @@ public class EditorTests
     }
 
     /// <summary>
+    /// The list of what a block offers says above it how far that kind of block has been checked.
+    /// </summary>
+    /// <remarks>
+    /// What a block offers is read from the game and tidied by rules that know nothing of it, so a
+    /// block nobody has gone through can offer something doubled or oddly named. Said of the least
+    /// checked of the picked blocks, since that is the one whose list may be wrong.
+    /// </remarks>
+    [Fact]
+    public void TheListSaysHowFarItsBlockHasBeenChecked()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+
+        PickStage What() => editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
+            .Single(s => s.Entries.Any(e => e.Text == "Switch on"));
+
+        editor.PressBlock("Airlock Light");
+        Assert.StartsWith("Sprocket has not checked this block yet", What().Note);
+
+        editor.PressBlock("Inner Door");
+        Assert.StartsWith("Sprocket has only partly checked this block", What().Note);
+
+        editor.TickBlock("Airlock Light");
+        Assert.StartsWith("Sprocket has not checked this block yet", What().Note);
+    }
+
+    /// <summary>
     /// A switch's value and the act that flips it share an id, and choosing one is not choosing both.
     /// </summary>
     /// <remarks>

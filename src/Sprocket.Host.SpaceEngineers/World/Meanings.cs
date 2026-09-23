@@ -23,6 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static void Settle(EntityKind kind, IMyTerminalBlock block)
         {
             Everywhere(kind);
+            Setters(kind, block);
 
             if (block is IMyShipController)
                 Controllers(kind, block);
@@ -109,6 +110,45 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             if (block is IMyStoreBlock)
                 In(kind, "Searchable", Category.Behaviour);
+        }
+
+        /// <summary>Takes out the setters written by hand beside a value that says the same.</summary>
+        /// <remarks>
+        /// Each was made by hand for its own block, so each is said here rather than read off its id -
+        /// from the game's own terminal data, one block at a time. A thruster's <c>SetOverride</c> is
+        /// not among them though it looks it: it takes a percentage, where the value takes newtons.
+        /// </remarks>
+        static void Setters(EntityKind kind, IMyTerminalBlock block)
+        {
+            if (block is IMyLightingBlock || block is IMySearchlight)
+                kind.Hiding("SetColor", "SetRadius", "SetBlinkInterval");
+
+            if (block is IMyBeacon || block is IMyRadioAntenna)
+                kind.Hiding("SetHudText", "SetRadius");
+
+            if (block is IMySensorBlock)
+                kind.Hiding("SetLeft", "SetRight", "SetTop", "SetBottom", "SetFront", "SetBack");
+
+            if (block is IMyGyro)
+                kind.Hiding("SetPitch", "SetYaw", "SetRoll", "SetPower");
+
+            if (block is IMyMotorStator)
+                kind.Hiding("SetLowerLimit", "SetUpperLimit", "SetVelocity");
+
+            if (block is IMyPistonBase)
+                kind.Hiding("SetVelocity");
+
+            if (block is IMyMotorSuspension)
+                kind.Hiding("SetSpeedLimit", "SetPropulsionOverride", "SetSteerOverride");
+
+            if (block is IMyFlightMovementBlock)
+                kind.Hiding("SetSpeedLimit");
+
+            if (block is IMyTurretControlBlock)
+                kind.Hiding("SetAngleDeviation");
+
+            if (block is IMyHeatVent)
+                kind.Hiding("SetColorMin", "SetColorMax");
         }
 
         /// <summary>What every block means by a word, where the table's answer is the wrong one.</summary>

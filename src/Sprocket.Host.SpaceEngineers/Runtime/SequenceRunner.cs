@@ -868,7 +868,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (step.Names(entity.Kind.Actions) == null)
                     continue;
 
-                world.Invoke(entity, step.ActionId, step.Values, step.Sets);
+                world.Invoke(entity, step.ActionId, step.Values, step.Form);
             }
         }
 

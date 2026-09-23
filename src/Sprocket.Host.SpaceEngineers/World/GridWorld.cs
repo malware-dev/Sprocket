@@ -314,14 +314,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The same, with the values the action asked for.</summary>
         public void Invoke(GridEntity entity, string actionId, IList<Literal> values)
         {
-            Invoke(entity, actionId, values, false);
+            Invoke(entity, actionId, values, Form.Native);
         }
 
-        /// <summary>The same, told whether the step sets one of the block's values.</summary>
-        public void Invoke(GridEntity entity, string actionId, IList<Literal> values, bool sets)
+        /// <summary>The same, told which of the three ways the step reaches the block.</summary>
+        public void Invoke(GridEntity entity, string actionId, IList<Literal> values, Form form)
         {
             if (entity != null)
-                entity.Invoke(actionId, values, sets);
+                entity.Invoke(actionId, values, form);
         }
 
         /// <summary>

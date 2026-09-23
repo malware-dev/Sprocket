@@ -28,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             LeadsToStateId = leadsToStateId;
             GameActionId = gameActionId;
             Named = Capitalised(text);
+            Declared = text;
             Why = "";
             Wants = wants;
             Category = Categories.Of(gameActionId);
@@ -95,6 +96,27 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public string Named { get; private set; }
 
+        /// <summary>What the block itself calls it, which the terminal view shows as written.</summary>
+        public string Declared { get; private set; }
+
+        /// <summary>Whether Sprocket has given one of the block's own members a word of its own.</summary>
+        public bool Renamed { get; private set; }
+
+        /// <summary>
+        /// Gives one of the block's own members Sprocket's word for it, and nothing else.
+        /// </summary>
+        /// <remarks>
+        /// The member stays the block's: the same id, performed the same way, written into a program
+        /// the same way. Only what a list and a sentence call it changes, and the terminal view goes on
+        /// showing what the block calls it.
+        /// </remarks>
+        public void Rename(string word)
+        {
+            Renamed = true;
+            Named = Capitalised(word);
+            Text = Sets ? "set " + word : word;
+        }
+
         /// <summary>
         /// The <see cref="EntityState"/> this action is trying to bring about, or
         /// null if it does not settle into a state.
@@ -138,6 +160,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether this writes one of the block's own values, which a program says with <c>set</c>.</summary>
         public bool Sets => GamePropertyId != null;
 
+        /// <summary>Which of the three ways a step reaches this one.</summary>
+        /// <remarks>
+        /// A value is the block's own and is set; anything the block itself declared is the game's
+        /// action, whatever Sprocket calls it; and what is left is Sprocket's own.
+        /// </remarks>
+        public Form Form => Sets ? Form.Value : Unaltered ? Form.Action : Form.Native;
+
         /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
         /// <remarks>
         /// What the terminal view lists, whether or not the organized one has replaced it. An
@@ -178,6 +207,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Category = Categories.Of(propertyId);
 
             Named = Capitalised(named);
+            Declared = named;
             _writes = field;
             return this;
         }

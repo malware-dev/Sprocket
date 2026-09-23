@@ -236,7 +236,7 @@ public class RigTests
         Simulation rig = Simulation.On(Store.Nowhere());
         rig.Tick();
 
-        var program = "sprocket 1 alpha 6\n\nblock '" + sort + "' door1 [ 2, \"Airlock Inner Door\" ]\n";
+        var program = "sprocket 1 alpha 7\n\nblock '" + sort + "' door1 [ 2, \"Airlock Inner Door\" ]\n";
         Assert.Equal("", ProgramText.Load(program, rig.Editor.Program, rig.World.Values));
 
         rig.Tick();

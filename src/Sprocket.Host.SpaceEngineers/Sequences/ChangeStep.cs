@@ -11,44 +11,44 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly int _index;
         readonly List<string> _wasTargets;
         readonly string _wasAction;
-        readonly bool _wasSets;
+        readonly Form _wasForm;
         readonly List<Literal> _wasValues;
         readonly List<string> _nowTargets;
         readonly string _nowAction;
-        readonly bool _nowSets;
+        readonly Form _nowForm;
         readonly List<Literal> _nowValues;
 
-        public ChangeStep(int index, Act step, IList<string> targets, string actionId, bool sets,
+        public ChangeStep(int index, Act step, IList<string> targets, string actionId, Form form,
             IList<Literal> values)
         {
             _index = index;
             _wasTargets = CopyOf(step.Targets);
             _wasAction = step.ActionId;
-            _wasSets = step.Sets;
+            _wasForm = step.Form;
             _wasValues = CopyOf(step.Values);
             _nowTargets = CopyOf(targets);
             _nowAction = actionId;
-            _nowSets = sets;
+            _nowForm = form;
             _nowValues = CopyOf(values);
         }
 
         public override string Label => "changing a step";
 
         public override bool Changes =>
-            _wasAction != _nowAction || _wasSets != _nowSets || !Same(_wasTargets, _nowTargets)
+            _wasAction != _nowAction || _wasForm != _nowForm || !Same(_wasTargets, _nowTargets)
             || !Same(_wasValues, _nowValues);
 
         public override void Apply(Sequence sequence)
         {
-            Put(sequence, _nowTargets, _nowAction, _nowSets, _nowValues);
+            Put(sequence, _nowTargets, _nowAction, _nowForm, _nowValues);
         }
 
         public override void Undo(Sequence sequence)
         {
-            Put(sequence, _wasTargets, _wasAction, _wasSets, _wasValues);
+            Put(sequence, _wasTargets, _wasAction, _wasForm, _wasValues);
         }
 
-        void Put(Sequence sequence, IList<string> targets, string action, bool sets,
+        void Put(Sequence sequence, IList<string> targets, string action, Form form,
             IList<Literal> values)
         {
             var step = sequence.Steps[_index] as Act;
@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             Refill(step.Targets, targets);
             step.ActionId = action;
-            step.Sets = sets;
+            step.Form = form;
             Refill(step.Values, values);
         }
     }

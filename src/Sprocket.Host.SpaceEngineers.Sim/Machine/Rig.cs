@@ -209,6 +209,12 @@ sealed class Rig
     }
 
     /// <summary>A block with nothing but a switch, which is most of a ship.</summary>
+    /// <summary>A beacon, answering the game's own beacon interface.</summary>
+    public Beacon Beacon(long id, string name)
+    {
+        return Weld(new Beacon(id, name, Type<MyObjectBuilder_Beacon>(), "LargeBlockBeacon", "Beacon"));
+    }
+
     public Plain Light(long id, string name)
     {
         return Weld(new Plain(id, name, Type<MyObjectBuilder_InteriorLight>(),

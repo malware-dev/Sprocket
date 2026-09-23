@@ -13,12 +13,12 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class LeavingTests
 {
-    const string Filled = "60 130 type Airlock enter 60 161 200 375 560 272";
+    const string Filled = "60 130 type Airlock enter 60 161 200 375 560 357";
     const string Back = "19 62";
 
     /// <summary>A picker whose action will not do anything until it is given a value.</summary>
-    const string WantsValues = "60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-        + "1300 918 70 193 200 476 800 591";
+    const string WantsValues = "60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
+        + "1300 918 70 193 200 476 800 676";
 
     [Fact]
     public void LeavingAFilledPickerAsksFirst()

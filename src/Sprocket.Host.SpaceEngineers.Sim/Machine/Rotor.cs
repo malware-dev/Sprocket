@@ -57,6 +57,7 @@ sealed class Rotor : Fitting
         Offering("RotorLock_On", "Rotor lock On");
         Offering("RotorLock_Off", "Rotor lock Off");
         Offering("RotateToAngle", "Rotate To Angle", 3);
+        Carrying("RotorLock", "Rotor lock", ValueKind.Flag);
         Carrying("Velocity", "Velocity", ValueKind.Real, "-30", "30");
         Carrying("LowerLimit", "Lower limit", ValueKind.Real, "-361", "360");
         Carrying("UpperLimit", "Upper limit", ValueKind.Real, "-360", "361");

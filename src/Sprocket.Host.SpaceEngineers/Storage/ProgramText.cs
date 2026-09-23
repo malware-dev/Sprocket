@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// claims a compatibility it does not have.
         /// </para>
         /// </remarks>
-        const int Draft = 6;
+        const int Draft = 7;
 
         /// <summary>
         /// How a <c>changed</c> time may be written: ISO 8601, and nothing else.
@@ -843,11 +843,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var act = step as Act;
             if (act != null)
             {
-                // A value is a set. One of the game's actions that has to be given values says so in
-                // the language's own words, because the values have to hang off something and a bare
-                // head has nowhere to put them. One that needs none is written as what it is: a verb
-                // and the things it acts on.
-                if (act.Sets)
+                // Written as what it is: a value is a set, one of the game's actions is an action, and
+                // one of Sprocket's own is a bare head. Either action carries its values after with.
+                if (act.Form == Form.Value)
                 {
                     pen.Start(Keyword.Set).Word(act.ActionId).Says(Keyword.On);
                     Names(pen, act.Targets);
@@ -858,19 +856,22 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                         Written(pen, act.Values[0]);
                     }
                 }
-                else if (act.Values.Count > 0)
-                {
-                    pen.Start(Keyword.Action).Word(act.ActionId).Says(Keyword.On);
-                    Names(pen, act.Targets);
-                    pen.Says(Keyword.With);
-
-                    for (var i = 0; i < act.Values.Count; i++)
-                        Written(pen, act.Values[i]);
-                }
                 else
                 {
-                    pen.Head(act.ActionId);
+                    if (act.Form == Form.Action)
+                        pen.Start(Keyword.Action).Word(act.ActionId).Says(Keyword.On);
+                    else
+                        pen.Head(act.ActionId);
+
                     Names(pen, act.Targets);
+
+                    if (act.Values.Count > 0)
+                    {
+                        pen.Says(Keyword.With);
+
+                        for (var i = 0; i < act.Values.Count; i++)
+                            Written(pen, act.Values[i]);
+                    }
                 }
 
                 pen.End();
@@ -944,23 +945,42 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 break;
             }
 
+            Values(statement, 0, Keyword.With, act.Values);
             return Noted(act, statement);
         }
 
         /// <summary>
-        /// <c>action 'SetColor' on [ light ] with 255 0 0</c>: one of the game's own, given what it
-        /// asked for. Or <c>set 'Radius' on [ light ] to 4.5</c>, which reads the same way.
+        /// Everything after the word that introduces a step's values, in the order it lies.
         /// </summary>
         /// <remarks>
-        /// Everything after the word that introduces them is a value, in the order it lies, because
-        /// order is all the game says about them - there are no names to match and nothing is
+        /// Order is all the game says about them - there are no names to match and nothing is
         /// optional. Taken by position rather than by what it looks like, so a flag written
         /// <c>on</c> is a value and not mistaken for one of the language's own words.
         /// </remarks>
+        static void Values(Statement statement, int from, Keyword introduces, IList<Literal> into)
+        {
+            var start = -1;
+            for (var at = from; at < statement.Count; at++)
+            {
+                if (!statement.Says(at, introduces))
+                    continue;
+
+                start = at + 1;
+                break;
+            }
+
+            for (var at = start; at >= 0 && at < statement.Count; at++)
+                into.Add(Given(statement.ValueAt(at)));
+        }
+
+        /// <summary>
+        /// <c>action 'SetColor' on [ light ] with 255 0 0</c>: one of the game's own actions, given what
+        /// it asked for. Or <c>set 'Radius' on [ light ] to 4.5</c>, one of the block's own values.
+        /// </summary>
         static Step Given(Statement statement, Keyword introduces)
         {
             var act = new Act(statement.Word(0));
-            act.Sets = introduces == Keyword.To;
+            act.Form = introduces == Keyword.To ? Form.Value : Form.Action;
 
             for (var at = 1; at < statement.Count; at++)
             {
@@ -971,19 +991,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 break;
             }
 
-            var from = -1;
-            for (var at = 1; at < statement.Count; at++)
-            {
-                if (!statement.Says(at, introduces))
-                    continue;
-
-                from = at + 1;
-                break;
-            }
-
-            for (var at = from; at >= 0 && at < statement.Count; at++)
-                act.Values.Add(Given(statement.ValueAt(at)));
-
+            Values(statement, 1, introduces, act.Values);
             return Noted(act, statement);
         }
 

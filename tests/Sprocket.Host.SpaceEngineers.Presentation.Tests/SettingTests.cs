@@ -107,7 +107,7 @@ public class SettingTests
         dim.Name = "Dim";
 
         var set = new Act("Falloff");
-        set.Sets = true;
+        set.Form = Form.Value;
         set.Targets.Add(Named(sim, light));
         set.Values.Add(Literal.Of(2L));
         dim.Steps.Add(set);
@@ -152,7 +152,7 @@ public class SettingTests
         dark.Name = "Dark";
 
         var off = new Act("OnOff");
-        off.Sets = true;
+        off.Form = Form.Value;
         off.Targets.Add(Named(sim, light));
         off.Values.Add(Literal.Of(false));
         dark.Steps.Add(off);

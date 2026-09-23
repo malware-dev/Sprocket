@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class SalvageTests
 {
     /// <summary>What the old format looked like, which is what his test world still held.</summary>
-    const string Older = "sprocket 1 alpha 5\n"
+    const string Older = "sprocket 1 alpha 6\n"
         + "block|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:87472652339029116,t:Button Panel\n"
         + "system|1|on|Test|\n"
         + "one|1|\n"
@@ -101,7 +101,7 @@ public class SalvageTests
     [Fact]
     public void TheScreenSaysADamagedProgramWasOnlyPartlyRead()
     {
-        Simulation rig = Simulation.On(Holding(Older.Replace("alpha 5", "alpha 6")));
+        Simulation rig = Simulation.On(Holding(Older.Replace("alpha 6", "alpha 7")));
         rig.Tick();
 
         NoticeComponent said = Said(rig);
@@ -135,7 +135,7 @@ public class SalvageTests
 
         var saved = store.GetValue(SprocketUnit.ProgramKey);
 
-        Assert.StartsWith("sprocket 1 alpha 6", saved);
+        Assert.StartsWith("sprocket 1 alpha 7", saved);
         Assert.Contains("Airlock", saved);
         Assert.DoesNotContain("|", saved);
 
@@ -218,7 +218,7 @@ public class SalvageTests
         rig.Save();
 
         Assert.False(rig.Editor.Screen.HasQuestion);
-        Assert.StartsWith("sprocket 1 alpha 6", store.GetValue(SprocketUnit.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 7", store.GetValue(SprocketUnit.ProgramKey));
         Assert.Null(Said(rig));
     }
 
@@ -280,7 +280,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.StartsWith("sprocket 1 alpha 6", store.GetValue(SprocketUnit.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 7", store.GetValue(SprocketUnit.ProgramKey));
         Assert.Contains("Airlock", store.GetValue(SprocketUnit.ProgramKey));
     }
 }

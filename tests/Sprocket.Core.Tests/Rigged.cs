@@ -58,6 +58,11 @@ sealed class Rigged
         return Rig.Light(id, name);
     }
 
+    public Beacon Beacon(long id, string name)
+    {
+        return Rig.Beacon(id, name);
+    }
+
     /// <summary>What Sprocket sees of a block, which is what a program refers to.</summary>
     public GridEntity Entity(long id)
     {

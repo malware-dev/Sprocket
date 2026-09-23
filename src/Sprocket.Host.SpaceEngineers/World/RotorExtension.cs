@@ -104,17 +104,17 @@ namespace Sprocket.Host.SpaceEngineers.World
                 .WithState(There, Arrived, true, "is at its angle")
                 .WithAction(RotateTo, "rotate", There, Way(), Angle(block), Speed(block))
                 .Lasting().In(Category.Movement)
-                .Hiding("RotateToAngle")
-                .Promoting("Reverse", false, "reverse", "reverse")
-                .Promoting("Attach", false, "attach", "attach")
-                .Promoting("Detach", false, "detach", "detach")
-                .Promoting("RotorLock_On", false, "lock", "lock")
-                .Promoting("RotorLock_Off", false, "unlock", "unlock")
-                .Promoting("Velocity", true, "speed", "speed")
-                .Promoting("LowerLimit", true, "lower-limit", "lower limit")
-                .Promoting("UpperLimit", true, "upper-limit", "upper limit")
-                .Promoting("Torque", true, "torque", "torque")
-                .Promoting("BrakingTorque", true, "braking-torque", "braking torque");
+                .Hiding("RotateToAngle", "RotorLock")
+                .Renaming("Reverse", false, "reverse")
+                .Renaming("Attach", false, "attach")
+                .Renaming("Detach", false, "detach")
+                .Renaming("RotorLock_On", false, "lock")
+                .Renaming("RotorLock_Off", false, "unlock")
+                .Renaming("Velocity", true, "speed")
+                .Renaming("LowerLimit", true, "lower limit")
+                .Renaming("UpperLimit", true, "upper limit")
+                .Renaming("Torque", true, "torque")
+                .Renaming("BrakingTorque", true, "braking torque");
         }
 
         static Field Way()

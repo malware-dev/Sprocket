@@ -241,6 +241,68 @@ public class ProgramTextTests
     /// hang: a bare head has nowhere to put one.
     /// </para>
     /// </remarks>
+    /// <summary>
+    /// A step is written in the form that says whose it is, and read back as the same.
+    /// </summary>
+    /// <remarks>
+    /// A bare head is Sprocket's own word, <c>action</c> is one of the game's actions and <c>set</c>
+    /// one of the block's values. Whether values are given has no bearing on which: the game's
+    /// reverse takes none and is still the game's, and Sprocket's own rotate-to takes values and is
+    /// still a head.
+    /// </remarks>
+    [Fact]
+    public void AStepIsWrittenAsWhoseItIs()
+    {
+        var program = new Automation();
+        var values = new Values();
+        program.Restore(Declared("rotor", "rotor", values, 1, "Arm Rotor"));
+
+        var arm = program.AddSystem();
+        arm.Name = "Arm";
+
+        var sequence = program.AddSequence(arm, null);
+
+        var reverse = new Act("Reverse") { Form = Form.Action };
+        reverse.Targets.Add("rotor");
+        sequence.Steps.Add(reverse);
+
+        var rotate = new Act(RotorExtension.RotateTo) { Form = Form.Native };
+        rotate.Targets.Add("rotor");
+        rotate.Values.Add(Literal.Of(90L));
+        rotate.Values.Add(Literal.Of(2.5));
+        sequence.Steps.Add(rotate);
+
+        var speed = new Act("Velocity") { Form = Form.Value };
+        speed.Targets.Add("rotor");
+        speed.Values.Add(Literal.Of(5.0));
+        sequence.Steps.Add(speed);
+
+        var saved = Save(program);
+        Assert.Contains("action Reverse on [ rotor ]", saved);
+        Assert.Contains("'rotate-to' [ rotor ] with 90 2.5", saved);
+        Assert.Contains("set Velocity on [ rotor ] to 5", saved);
+
+        var after = new Automation();
+        LoadAll(program, after);
+        var steps = after.Sequences[0].Steps;
+
+        var game = Assert.IsType<Act>(steps[0]);
+        Assert.Equal(Form.Action, game.Form);
+        Assert.Equal("Reverse", game.ActionId);
+        Assert.Empty(game.Values);
+
+        var own = Assert.IsType<Act>(steps[1]);
+        Assert.Equal(Form.Native, own.Form);
+        Assert.Equal(RotorExtension.RotateTo, own.ActionId);
+        Assert.Equal(2, own.Values.Count);
+        Assert.Equal(90, own.Values[0].Whole);
+        Assert.Equal(2.5, own.Values[1].Real);
+
+        var value = Assert.IsType<Act>(steps[2]);
+        Assert.Equal(Form.Value, value.Form);
+        Assert.Equal("Velocity", value.ActionId);
+    }
+
     [Fact]
     public void TheValuesAnActionWasGivenSurvive()
     {
@@ -253,14 +315,14 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(lights, null);
 
-        var colour = new Act("SetColor");
+        var colour = new Act("SetColor") { Form = Form.Action };
         colour.Targets.Add("light");
         colour.Values.Add(Literal.Of(255));
         colour.Values.Add(Literal.Of(136));
         colour.Values.Add(Literal.Of(0));
         sequence.Steps.Add(colour);
 
-        var each = new Act("SetEverything");
+        var each = new Act("SetEverything") { Form = Form.Action };
         each.Targets.Add("light");
         each.Values.Add(Literal.Of("four and a half"));
         each.Values.Add(Literal.Of(4.5));
@@ -339,7 +401,7 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(lights, null);
         var radius = new Act("Radius");
-        radius.Sets = true;
+        radius.Form = Form.Value;
         radius.Targets.Add("light");
         radius.Values.Add(Literal.Of(4.5));
         sequence.Steps.Add(radius);

@@ -36,11 +36,33 @@ public class OrganizerTests
         var kind = ship.Entity(tank.Id).Kind;
 
         foreach (var id in new[] { "Stockpile_On", "Stockpile_Off", "IncreaseRadius", "DecreaseRadius" })
-            Assert.True(kind.FindAction(id, false)!.Hidden, id + " is offered beside its value");
+            Assert.True(kind.FindAction(id, Form.Action)!.Hidden, id + " is offered beside its value");
 
-        Assert.False(kind.FindAction("Stockpile", true)!.Hidden);
-        Assert.False(kind.FindAction("Stockpile", false)!.Hidden);
-        Assert.False(kind.FindAction("Radius", true)!.Hidden);
-        Assert.False(kind.FindAction("ResetRadius", false)!.Hidden);
+        Assert.False(kind.FindAction("Stockpile", Form.Value)!.Hidden);
+        Assert.False(kind.FindAction("Stockpile", Form.Action)!.Hidden);
+        Assert.False(kind.FindAction("Radius", Form.Value)!.Hidden);
+        Assert.False(kind.FindAction("ResetRadius", Form.Action)!.Hidden);
+    }
+
+    /// <summary>
+    /// A setter somebody wrote by hand beside a value is left out where the block is known to have
+    /// one, and nowhere else.
+    /// </summary>
+    /// <remarks>
+    /// Nothing the game generates makes a setter, so its id says nothing about what it does: a
+    /// thruster's looks like one and takes a percentage where its value takes newtons. A beacon's is
+    /// known to say what its value says. A door carrying the same two is left as it is.
+    /// </remarks>
+    [Fact]
+    public void AHandWrittenSetterIsLeftOutOnlyWhereItIsKnown()
+    {
+        var ship = new Rigged();
+        var beacon = ship.Beacon(1, "Beacon");
+        beacon.Carrying("HudText", "Text", ValueKind.Text).Offering("SetHudText", "Set HUD Text", 1);
+        var hatch = ship.Door(2, "Hatch");
+        hatch.Carrying("HudText", "Text", ValueKind.Text).Offering("SetHudText", "Set HUD Text", 1);
+
+        Assert.True(ship.Entity(beacon.Id).Kind.FindAction("SetHudText", Form.Action)!.Hidden);
+        Assert.False(ship.Entity(hatch.Id).Kind.FindAction("SetHudText", Form.Action)!.Hidden);
     }
 }

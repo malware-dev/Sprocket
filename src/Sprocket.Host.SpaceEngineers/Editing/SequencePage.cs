@@ -473,12 +473,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // values rather than empty. Changing which blocks a step acts on is not a reason to type
             // its values again.
             Editor.Push(new PickPage(Editor, "Do something", false,
-                Resolved(step.Targets), step.ActionId, step.Sets,
+                Resolved(step.Targets), step.ActionId, step.Form,
                 delegate(PickAnswer answer)
                 {
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen,
-                            answer.Sets, answer.Values));
+                            answer.Form, answer.Values));
                     Editor.Pop();
                 }, values: step.Values));
         }
@@ -499,13 +499,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var origin = Editor.Depth;
 
             Editor.Push(new PickPage(Editor, "Do something", false,
-                new List<long>(), "", false,
+                new List<long>(), "", Form.Native,
                 delegate(PickAnswer answer)
                 {
                     // Only once both answers are in. Backing out of the questions adds no
                     // step, so there is nothing to take back.
                     var step = new Act(answer.Chosen);
-                    step.Sets = answer.Sets;
+                    step.Form = answer.Form;
                     var named = Declared(answer.Targets);
                     for (var i = 0; i < named.Count; i++)
                         step.Targets.Add(named[i]);

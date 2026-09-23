@@ -61,7 +61,7 @@ outlives one written as a name.
 The first statement of every program, and the version of the language it is written in.
 
 ```
-sprocket 1 alpha 6
+sprocket 1 alpha 7
 ```
 
 `<format>` goes up only when a change would stop existing programs working. A reader of a later
@@ -178,7 +178,7 @@ The name is optional, and is a name rather than text.
 ## Steps
 
 ```
-<action> [ <parts> ]
+<action> [ <parts> ] [with <values>]
 action '<id>' on [ <parts> ] [with <values>]
 set '<id>' on [ <parts> ] to <value>
 run <sequence>
@@ -189,20 +189,17 @@ wait <duration>
 A step starts something and the next statement follows immediately.
 
 The head of a step is an action from the host's own vocabulary - `open`, `close`, `depressurize` - and
-the list is the parts it acts on. An action whose id is one of the language's words is quoted.
+the list is the parts it acts on.
 
-`action '<id>' on [ <parts> ]` runs a terminal action of the game by its own id, and `with` carries
-the values that action takes. Every value is written as the kind it is, in order, because an action
-declares how many values it wants and nothing else about them - no names, and no set of what a value
-may be one of. A value left out is the default the action declared.
+`action '<id>' on [ <parts> ]` runs one of the game's terminal actions by the game's own id.
 
-The two forms reach the same actions, so the longer one is what a value hangs off: a bare head has
-nowhere to put one. An action given no values is written as a head, whether it is the host's own word
-or the game's id.
+`with` carries the values an action takes, in either form. Every value is written as the kind it is,
+in order, and a value left out is the default the action declared.
 
 ```
+'rotate-to' [ arm ] with 0 90 2
+action 'Reverse' on [ arm ]
 action 'SetColor' on [ light ] with 255 136 0
-action 'SetRadius' on [ light ] with 4.5
 action 'Run' on [ pb ] with "doors open"
 ```
 

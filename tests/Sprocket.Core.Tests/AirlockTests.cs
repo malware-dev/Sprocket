@@ -706,10 +706,10 @@ public class PropertyTests
         var vent = ship.Vent(1, "Vent");
         var kind = ship.Entity(vent.Id).Kind;
 
-        Assert.True(kind.FindAction("Depressurize", true)!.Hidden);
+        Assert.True(kind.FindAction("Depressurize", Form.Value)!.Hidden);
 
         // The act that flips it stays: nothing else in the list says "whichever way it is not".
-        Assert.False(kind.FindAction("Depressurize", false)!.Hidden);
+        Assert.False(kind.FindAction("Depressurize", Form.Action)!.Hidden);
     }
 
 }

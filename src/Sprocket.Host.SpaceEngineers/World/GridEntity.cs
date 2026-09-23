@@ -106,13 +106,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             Invoke(actionId, null);
         }
 
-        /// <summary>
-        /// The same, with the values the action declared it wanted.
-        /// </summary>
-        /// <remarks>
-        /// Nothing of Sprocket's own takes any, so values only ever reach the game's own actions -
-        /// which is also the only place anything knows what to turn them into.
-        /// </remarks>
         /// <summary>Calls off what the action started, where this block's own knowledge says how.</summary>
         public void Stop(string actionId)
         {
@@ -136,27 +129,29 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public void Invoke(string actionId, IList<Literal> values)
         {
-            Invoke(actionId, values, false);
+            Invoke(actionId, values, Form.Native);
         }
 
-        /// <summary>The same, told whether the step sets one of the block's values.</summary>
+        /// <summary>The same, told which of the three ways the step reaches the block.</summary>
         /// <remarks>
-        /// A value is written as a value and nothing else is tried. The id it shares with the game's
-        /// bare toggle would otherwise find that toggle first, which takes no values, so the value
-        /// would be dropped and the block flipped instead.
+        /// Each is tried as what it is and nothing else. A value and the game's act that flips it share
+        /// an id, and one of Sprocket's own words may be spelled like one of the game's, so a step
+        /// that went looking for whatever answered to its id could find the wrong one.
         /// </remarks>
-        public void Invoke(string actionId, IList<Literal> values, bool sets)
+        public void Invoke(string actionId, IList<Literal> values, Form form)
         {
-            // The step names Sprocket's entry, which may stand for one of the block's own members
-            // under other words: the game is told the member, never the words.
-            var entry = _kind.FindAction(actionId, sets);
-
-            if (sets)
+            // The block's own members are named by the block's ids, so those go straight to the game.
+            if (form == Form.Value)
             {
-                var property = entry == null || entry.GamePropertyId == null ? actionId : entry.GamePropertyId;
                 if (values != null && values.Count > 0)
-                    Toolbars.Set(_block, property, values[0]);
+                    Toolbars.Set(_block, actionId, values[0]);
 
+                return;
+            }
+
+            if (form == Form.Action)
+            {
+                Toolbars.Perform(_block, actionId, values);
                 return;
             }
 
@@ -179,11 +174,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 }
             }
 
-            // Anything the block declares for itself, performed by the game. An id it does not have
-            // is a sequence written against a vocabulary this block no longer offers, and it does
-            // nothing rather than throwing - the same answer a reading gives.
-            var performed = entry == null || entry.GameActionId == null ? actionId : entry.GameActionId;
-            Toolbars.Perform(_block, performed, values);
+            // One of Sprocket's own that is the game's act said another way. An id this block does not
+            // have is a sequence written against a vocabulary it no longer offers, and it does nothing
+            // rather than throwing - the same answer a reading gives.
+            var entry = _kind.FindAction(actionId, Form.Native);
+            if (entry != null && entry.GameActionId != null)
+                Toolbars.Perform(_block, entry.GameActionId, values);
         }
     }
 }

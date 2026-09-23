@@ -448,7 +448,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (act != null)
             {
                 var copy = new Act(act.ActionId);
-                copy.Sets = act.Sets;
+                copy.Form = act.Form;
                 for (var i = 0; i < act.Targets.Count; i++)
                     copy.Targets.Add(act.Targets[i]);
                 for (var i = 0; i < act.Values.Count; i++)

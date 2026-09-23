@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         string _chosen;
 
         /// <summary>Whether what is chosen is one of the blocks' values, which its id alone does not say.</summary>
-        bool _chosenSets;
+        Form _chosenForm;
         bool _all;
 
         readonly List<GridEntity> _candidates = new List<GridEntity>();
@@ -116,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </para>
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
-            IList<long> targets, string chosen, bool chosenSets, Action<PickAnswer> done,
+            IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
             bool asksAll = false, bool all = false, IList<Literal> values = null)
             : base(editor)
         {
@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _title = title;
             _forEvents = forEvents;
             _chosen = chosen ?? "";
-            _chosenSets = chosenSets;
+            _chosenForm = chosenForm;
             _asksAll = asksAll;
             _all = all;
             _done = done;
@@ -256,28 +256,28 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override void Primary()
         {
-            _done(new PickAnswer(_selection, _chosen, _all, null, ChosenSets));
+            _done(new PickAnswer(_selection, _chosen, _all, null, ChosenForm));
         }
 
         public override void Primary(string said)
         {
             var values = new List<Literal>();
             ValueLine.Read(said, values);
-            _done(new PickAnswer(_selection, _chosen, _all, values, ChosenSets));
+            _done(new PickAnswer(_selection, _chosen, _all, values, ChosenForm));
         }
 
-        /// <summary>Whether the thing chosen is one of the blocks' values rather than an action.</summary>
-        bool ChosenSets => _chosenSets;
+        /// <summary>Which of the three ways the thing chosen reaches the blocks.</summary>
+        Form ChosenForm => _chosenForm;
 
         List<Field> Fields()
         {
-            return IsComplete ? Editor.Fields(_selection, _chosen, _chosenSets) : _nothing;
+            return IsComplete ? Editor.Fields(_selection, _chosen, _chosenForm) : _nothing;
         }
 
         readonly List<Field> _nothing = new List<Field>();
 
         bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen)
-            && ReadinessOf(_chosen, _chosenSets) == Readiness.Ready;
+            && ReadinessOf(_chosen, _chosenForm) == Readiness.Ready;
 
         public override void Build(List<EditorComponent> components)
         {
@@ -586,7 +586,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             _names.Clear();
             _ids.Clear();
-            _values.Clear();
+            _forms.Clear();
             _groups.Clear();
             _waits.Clear();
             _ready.Clear();
@@ -606,18 +606,19 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 Grouped(Vocabulary.ActionsOf(Editor.World, _selection));
             }
 
-            var note = !_forEvents && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsTerminal)
-                ? NarrowedSaid
-                : "";
+            var note = Checked(Vocabulary.Least(Editor.World, _selection));
+            if (!_forEvents && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsTerminal))
+                note = note.Length == 0 ? NarrowedSaid : note + " " + NarrowedSaid + ".";
+
 
             // A choice the blocks can no longer honour is dropped rather than left showing, so
             // "Done" never appears over a sentence that could not run.
             var chosen = _chosen;
-            if (At(chosen, _chosenSets) < 0)
+            if (At(chosen, _chosenForm) < 0)
             {
                 chosen = "";
                 _chosen = "";
-                _chosenSets = false;
+                _chosenForm = Form.Native;
             }
 
             var changed = false;
@@ -715,10 +716,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 // Something that cannot be made into a step is listed to be read about and not
                 // chosen, so it is given nothing to do when pressed.
                 var id = _ids[at];
-                var sets = _values.Count > at && _values[at];
+                var form = _forms.Count > at ? _forms[at] : Form.Native;
                 changed |= Apply(_what.Entries[i], _names[at], "", ReadinessText.Tag(ready), false,
-                    id == chosen && sets == _chosenSets,
-                    withheld ? 0 : Editor.Register(Cmd.PickChoice, at, delegate { Choose(id, sets); }));
+                    id == chosen && form == _chosenForm,
+                    withheld ? 0 : Editor.Register(Cmd.PickChoice, at, delegate { Choose(id, form); }));
             }
 
             return changed;
@@ -765,6 +766,30 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>What the list of what to do says when the picked blocks do not all offer the same.</summary>
         const string NarrowedSaid = "Currently showing only what the selected blocks share";
 
+        /// <summary>
+        /// What the list of what the blocks offer says above it, where one of them is not yet checked
+        /// through.
+        /// </summary>
+        /// <remarks>
+        /// Said of the least checked of them, since that is the one whose list may be wrong. Above the
+        /// list rather than on it, because picking a block replaces the whole list anyway.
+        /// </remarks>
+        static string Checked(Evaluation least)
+        {
+            switch (least)
+            {
+                case Evaluation.Pending: return PendingSaid;
+                case Evaluation.Partial: return PartialSaid;
+                default: return "";
+            }
+        }
+
+        const string PendingSaid = "Sprocket has not checked this block yet, so some of what it offers may "
+            + "be doubled, missing or oddly named.";
+
+        const string PartialSaid = "Sprocket has only partly checked this block, so some of what it offers "
+            + "may still be doubled, missing or oddly named.";
+
         /// <summary>What the mark on something a step waits for says when the pointer rests on it.</summary>
         const string WaitsSaid = "Holds the sequence until finished";
 
@@ -791,7 +816,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         void Grouped(List<EntityAction> actions)
         {
-            actions.Sort(BySaid);
+            actions.Sort(Editor.ShowsTerminal ? ByDeclared : BySaid);
 
             // The block's own division, which is the only one it declares.
             if (Editor.ShowsTerminal)
@@ -815,14 +840,27 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 if (!Lists(one) || Group(one) != group)
                     continue;
 
-                _names.Add(Editor.ShowsTerminal || !one.Unaltered ? one.Named : Unlabelled(one.Named));
+                _names.Add(Said(one));
                 _ids.Add(one.Id);
-                _values.Add(one.Sets);
+                _forms.Add(one.Form);
                 _groups.Add(group);
                 _waits.Add(one.Lasts);
                 _ready.Add(one.Readiness);
                 _why.Add(one.Why);
             }
+        }
+
+        /// <summary>What the view now showing calls this one.</summary>
+        /// <remarks>
+        /// The terminal view shows the block's own words as the block wrote them, and the organized one
+        /// Sprocket's, where it has any.
+        /// </remarks>
+        string Said(EntityAction one)
+        {
+            if (Editor.ShowsTerminal)
+                return one.Declared;
+
+            return one.Unaltered && !one.Renamed ? Unlabelled(one.Named) : one.Named;
         }
 
         /// <summary>The game's name for a member, without the colon it ends a terminal label with.</summary>
@@ -844,9 +882,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>Whether what is on offer under that id can be made into a step.</summary>
-        Readiness ReadinessOf(string id, bool sets)
+        Readiness ReadinessOf(string id, Form form)
         {
-            var at = At(id, sets);
+            var at = At(id, form);
             return at >= 0 && at < _ready.Count ? _ready[at] : Readiness.Ready;
         }
 
@@ -854,14 +892,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Where the thing on offer under that id is in the list, or -1 where it is not listed.
         /// </summary>
         /// <remarks>
-        /// By the id and by whether it sets a value, because the id alone names two things wherever a
-        /// block has a switch: the value and the act that flips it share one.
+        /// By the id and by which of the three ways it reaches the block, because the id alone can name
+        /// more than one: a switch's value and the act that flips it share one.
         /// </remarks>
-        int At(string id, bool sets)
+        int At(string id, Form form)
         {
             for (var i = 0; i < _ids.Count; i++)
             {
-                if (_ids[i] == id && (_values.Count > i && _values[i]) == sets)
+                if (_ids[i] == id && (_forms.Count > i ? _forms[i] : Form.Native) == form)
                     return i;
             }
 
@@ -912,8 +950,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return CategoryText.Of((Category)group);
         }
 
-        /// <summary>Which group each thing on offer belongs to, one per entry in <c>_names</c>.</summary>
-        readonly List<bool> _values = new List<bool>();
+        /// <summary>Which of the three ways each thing on offer reaches the blocks, one per entry in <c>_names</c>.</summary>
+        readonly List<Form> _forms = new List<Form>();
 
         /// <summary>Which group each thing on offer is listed in, one per entry in <c>_names</c>.</summary>
         readonly List<int> _groups = new List<int>();
@@ -937,18 +975,31 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly List<int> _rows = new List<int>();
 
         /// <summary>By the words, because that is what somebody is scanning the list for.</summary>
-        static readonly SaidOrder BySaid = new SaidOrder();
+        static readonly SaidOrder BySaid = new SaidOrder(false);
+
+        /// <summary>The same, by the block's own words, which are what the terminal view shows.</summary>
+        static readonly SaidOrder ByDeclared = new SaidOrder(true);
 
         sealed class SaidOrder : IComparer<EntityAction>
         {
+            readonly bool _declared;
+
+            public SaidOrder(bool declared)
+            {
+                _declared = declared;
+            }
+
             public int Compare(EntityAction left, EntityAction right)
             {
                 return string.Compare(Said(left), Said(right), StringComparison.OrdinalIgnoreCase);
             }
 
-            static string Said(EntityAction one)
+            string Said(EntityAction one)
             {
-                return one == null ? "" : one.Named;
+                if (one == null)
+                    return "";
+
+                return _declared ? one.Declared : one.Named;
             }
         }
 
@@ -1162,10 +1213,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return -1;
         }
 
-        void Choose(string id, bool sets)
+        void Choose(string id, Form form)
         {
             _chosen = id;
-            _chosenSets = sets;
+            _chosenForm = form;
             Editor.Invalidate();
         }
 

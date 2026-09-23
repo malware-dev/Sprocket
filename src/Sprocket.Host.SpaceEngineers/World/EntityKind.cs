@@ -33,6 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What this kind is called in the UI, e.g. "Door".</summary>
         public string DisplayName { get; private set; }
 
+        /// <summary>How far Sprocket has checked this kind, which is pending until somebody says otherwise.</summary>
+        public Evaluation Evaluation { get; internal set; }
+
         /// <summary>
         /// Names a picture of this kind, or empty for none.
         /// </summary>
@@ -208,57 +211,51 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Offers one of the block's own members under Sprocket's words, in the place of the game's.
+        /// Gives one of the block's own members Sprocket's word for it.
         /// </summary>
         /// <remarks>
-        /// For a member worth offering as it is, only said better: the block still declares it, with
-        /// what it takes, and the entry made from that declaration stands in for the game's, which is
-        /// then left out of the list somebody chooses from like any other that is stood in for. Taken
-        /// up where the block's own members are read, so a block that does not declare it gets
+        /// A rename and nothing more: the member keeps the block's id and is performed as the block's.
+        /// Taken up where the block's own members are read, so a block that does not declare it gets
         /// nothing - see <c>BlockKinds</c>.
         /// </remarks>
-        public EntityKind Promoting(string gameId, bool sets, string id, string named)
+        public EntityKind Renaming(string gameId, bool sets, string word)
         {
-            _promoted.Add(new Promotion(gameId, sets, id, named));
+            _renamed.Add(new Alias(gameId, sets, word));
             return this;
         }
 
-        /// <summary>What one of the block's own members is offered as, where something promoted it.</summary>
-        internal bool Promoted(string gameId, bool sets, out string id, out string named)
+        /// <summary>Sprocket's word for one of the block's own members, where it has one.</summary>
+        internal bool Renames(string gameId, bool sets, out string word)
         {
-            for (var i = 0; i < _promoted.Count; i++)
+            for (var i = 0; i < _renamed.Count; i++)
             {
-                if (_promoted[i].GameId == gameId && _promoted[i].Sets == sets)
+                if (_renamed[i].GameId == gameId && _renamed[i].Sets == sets)
                 {
-                    id = _promoted[i].Id;
-                    named = _promoted[i].Named;
+                    word = _renamed[i].Word;
                     return true;
                 }
             }
 
-            id = null;
-            named = null;
+            word = null;
             return false;
         }
 
-        /// <summary>One of the block's own members offered under Sprocket's words.</summary>
-        struct Promotion
+        /// <summary>Sprocket's word for one of the block's own members.</summary>
+        struct Alias
         {
             public readonly string GameId;
             public readonly bool Sets;
-            public readonly string Id;
-            public readonly string Named;
+            public readonly string Word;
 
-            public Promotion(string gameId, bool sets, string id, string named)
+            public Alias(string gameId, bool sets, string word)
             {
                 GameId = gameId;
                 Sets = sets;
-                Id = id;
-                Named = named;
+                Word = word;
             }
         }
 
-        readonly List<Promotion> _promoted = new List<Promotion>();
+        readonly List<Alias> _renamed = new List<Alias>();
 
         /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
         public EntityKind WithValue(string id, string named, string propertyId, Field field)
@@ -295,11 +292,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// it are both called <c>OnOff</c>, and a program tells them apart by writing one as a
         /// <c>set</c>.
         /// </remarks>
-        public EntityAction FindAction(string actionId, bool sets)
+        public EntityAction FindAction(string actionId, Form form)
         {
             for (var i = 0; i < _actions.Count; i++)
             {
-                if (_actions[i].Id == actionId && _actions[i].Sets == sets)
+                if (_actions[i].Id == actionId && _actions[i].Form == form)
                     return _actions[i];
             }
             return null;

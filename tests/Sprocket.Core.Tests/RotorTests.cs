@@ -20,6 +20,14 @@ public class RotorTests
     const long Directly = 0;
     const long Clockwise = 1;
 
+    /// <summary>
+    /// What matters about a rotor is said in Sprocket's words, and is still the rotor's own.
+    /// </summary>
+    /// <remarks>
+    /// A rename changes what a list and a sentence call a member and nothing else: the id is the
+    /// block's, so a program names the same member whatever Sprocket calls it, and the terminal view
+    /// goes on showing the block's own words.
+    /// </remarks>
     [Fact]
     public void WhatMattersAboutARotorIsSaidInSprocketsWords()
     {
@@ -27,19 +35,31 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var kind = ship.Entity(rotor.Id).Kind;
 
-        foreach (var id in new[] { RotorExtension.RotateTo, "reverse", "attach", "detach", "lock", "unlock" })
-            Assert.NotNull(kind.FindAction(id, false));
+        Assert.Equal("reverse", kind.FindAction("Reverse", Form.Action)!.Text);
+        Assert.Equal("lock", kind.FindAction("RotorLock_On", Form.Action)!.Text);
+        Assert.Equal("Speed", kind.FindAction("Velocity", Form.Value)!.Named);
+        Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", Form.Value)!.Named);
 
-        foreach (var id in new[] { "speed", "lower-limit", "upper-limit", "torque", "braking-torque" })
-            Assert.NotNull(kind.FindAction(id, true));
+        // One member each, under the block's id, offered in the organized view and shown in the
+        // terminal one as the block words it.
+        var lockOn = kind.FindAction("RotorLock_On", Form.Action)!;
+        Assert.False(lockOn.Hidden);
+        Assert.True(lockOn.Unaltered);
+        Assert.Equal("Rotor lock On", lockOn.Declared);
+        Assert.Null(kind.FindAction("lock", Form.Native));
+        Assert.Null(kind.FindAction("speed", Form.Value));
 
-        // The game's own are still there to be shown, and left out of the list otherwise.
-        Assert.True(kind.FindAction("Reverse", false)!.Hidden);
-        Assert.True(kind.FindAction("Velocity", true)!.Hidden);
-        Assert.True(kind.FindAction("RotateToAngle", false)!.Hidden);
+        // Lock and unlock are the lock's own pair, offered because the rotor keeps the value they
+        // were made out of to the terminal - not because they have been renamed.
+        Assert.True(kind.FindAction("RotorLock", Form.Value)!.Hidden);
+        Assert.False(kind.FindAction("RotorLock_Off", Form.Action)!.Hidden);
 
-        // What is not promoted stays in the well as the game says it.
-        Assert.False(kind.FindAction("Displacement", true)!.Hidden);
+        // Rotating to an angle is Sprocket's own, performed its own way, so the game's is left out.
+        Assert.NotNull(kind.FindAction(RotorExtension.RotateTo, Form.Native));
+        Assert.True(kind.FindAction("RotateToAngle", Form.Action)!.Hidden);
+
+        // What is not renamed stays as the game says it.
+        Assert.False(kind.FindAction("Displacement", Form.Value)!.Renamed);
     }
 
     /// <summary>
@@ -61,7 +81,7 @@ public class RotorTests
                      "AddRotorTopPart", "AddSmallRotorTopPart", "AddMediumRotorTopPart"
                  })
         {
-            Assert.True(kind.FindAction(id, false)!.Hidden, id + " is offered as a step");
+            Assert.True(kind.FindAction(id, Form.Action)!.Hidden, id + " is offered as a step");
         }
     }
 
@@ -73,24 +93,24 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var kind = ship.Entity(rotor.Id).Kind;
 
-        Assert.Equal("Rotate", kind.FindAction(RotorExtension.RotateTo, false)!.Named);
-        Assert.Equal("Reverse", kind.FindAction("reverse", false)!.Named);
-        Assert.Equal("Braking torque", kind.FindAction("braking-torque", true)!.Named);
+        Assert.Equal("Rotate", kind.FindAction(RotorExtension.RotateTo, Form.Native)!.Named);
+        Assert.Equal("Unlock", kind.FindAction("RotorLock_Off", Form.Action)!.Named);
+        Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", Form.Value)!.Named);
 
         // And the sentence keeps the word it needs, which is the one the extension wrote.
-        Assert.Equal("rotate", kind.FindAction(RotorExtension.RotateTo, false)!.Text);
+        Assert.Equal("rotate", kind.FindAction(RotorExtension.RotateTo, Form.Native)!.Text);
     }
 
-    /// <summary>Sprocket's words reach the game's own members.</summary>
+    /// <summary>A renamed member is the game's own, and does what the game's does.</summary>
     [Fact]
-    public void APromotedMemberDoesWhatTheGamesDoes()
+    public void ARenamedMemberDoesWhatTheGamesDoes()
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
         var entity = ship.Entity(rotor.Id);
 
-        ship.World.Invoke(entity, "reverse");
-        ship.World.Invoke(entity, "speed", [Literal.Of(5.0)], true);
+        ship.World.Invoke(entity, "Reverse", null, Form.Action);
+        ship.World.Invoke(entity, "Velocity", [Literal.Of(5.0)], Form.Value);
 
         Assert.Contains("Rotor:Reverse", ship.Rig.Log);
         Assert.Contains("Rotor:Velocity 5", ship.Rig.Log);
@@ -203,7 +223,7 @@ public class RotorTests
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
-        var action = ship.Entity(rotor.Id).Kind.FindAction(RotorExtension.RotateTo, false)!;
+        var action = ship.Entity(rotor.Id).Kind.FindAction(RotorExtension.RotateTo, Form.Native)!;
         var fields = new List<Field>();
         action.Fields(fields);
 
@@ -432,7 +452,7 @@ public class RotorTests
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
-        var action = ship.Entity(rotor.Id).Kind.FindAction(RotorExtension.RotateTo, false)!;
+        var action = ship.Entity(rotor.Id).Kind.FindAction(RotorExtension.RotateTo, Form.Native)!;
         var fields = new List<Field>();
         action.Fields(fields);
 

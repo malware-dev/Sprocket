@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -188,13 +189,14 @@ public class ActionTests
         screen.Editor.TickBlock("Airlock Outer Door");
         screen.Run(2);
 
-        Assert.Equal("", What(screen).Note);
+        const string shares = "Currently showing only what the selected blocks share";
+        Assert.DoesNotContain(shares, What(screen).Note);
 
         screen.Editor.TickBlock("Hydrogen Tank");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Currently showing only what the selected blocks share"),
-            "a door and a tank together say nothing about what the list leaves out");
+        // Beside what it says about how far the blocks have been checked, so looked for within it.
+        Assert.Contains(shares, What(screen).Note);
     }
 
     [Fact]
@@ -215,7 +217,7 @@ public class ActionTests
     [Fact]
     public void TheTabIsPressedWhereItIsDrawn()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
             + "1300 918 70 193 200 500").Split(' '));
 
         PickStage what = screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
@@ -239,6 +241,17 @@ public class ActionTests
     static ChoiceEntry Terminal(Screen screen)
     {
         return What(screen).Views[1];
+    }
+
+    /// <summary>Turns the picker to the block's own view, where the game's actions are listed as they are.</summary>
+    /// <remarks>
+    /// Where a light's colour setter is offered: the organized view offers the colour itself, and a
+    /// setter beside it would say the same thing twice.
+    /// </remarks>
+    static void ShowTerminal(SprocketEditor editor)
+    {
+        editor.Invoke(editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
+            .SelectMany(s => s.Views).Single(v => v.Text == "Terminal").Command);
     }
 
     /// <summary>
@@ -276,6 +289,7 @@ public class ActionTests
 
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Light");
+        ShowTerminal(screen.Editor);
         screen.Run(2);
 
         Assert.True(screen.Shows("Set Color"), "the light does not offer its colour setter");
@@ -320,6 +334,7 @@ public class ActionTests
 
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Light");
+        ShowTerminal(screen.Editor);
         screen.Editor.PressChoice("Set Color");
         screen.Editor.Typed("255 136 0");
         screen.Run(2);
@@ -357,6 +372,7 @@ public class ActionTests
 
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Light");
+        ShowTerminal(rig.Editor);
         rig.Editor.PressChoice("Set Color");
         rig.Editor.Typed("255 136 0");
         rig.Editor.SwitchOn();
@@ -415,8 +431,8 @@ public class ActionTests
     [Fact]
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 200 type Approach 200 351 800 499 1380 1000").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
+            + "1300 918 70 193 150 200 type Approach 200 351 800 584 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the sensor's chime does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
@@ -442,8 +458,8 @@ public class ActionTests
     [Fact]
     public void AColourIsChosenByPressingOne()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 200 476 800 499 1380 1000").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
+            + "1300 918 70 193 200 476 800 584 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the colour setter does not ask for anything");
         Assert.Equal("", screen.Scene.AskBox.Text);
@@ -470,8 +486,8 @@ public class ActionTests
     [Fact]
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 200 type Standby 200 351 800 325 1380 1000").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
+            + "1300 918 70 193 150 200 type Standby 200 351 800 410 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the charge mode does not ask for anything");
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
@@ -503,8 +519,8 @@ public class ActionTests
     [Fact]
     public void MoreChoicesThanFitFoldIntoAList()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 272 1380 1000 "
-            + "1300 918 70 193 150 200 type Tug 200 351 800 499 1380 1000").Split(' '));
+        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1380 1000 "
+            + "1300 918 70 193 150 200 type Tug 200 351 800 584 1380 1000").Split(' '));
 
         Assert.True(screen.Scene.IsAsking, "the forward direction does not ask for anything");
 

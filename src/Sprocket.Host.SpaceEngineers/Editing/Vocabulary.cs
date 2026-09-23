@@ -106,18 +106,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// to ask at all. Asked of the blocks somebody has just picked, because that is where the
         /// answer is: the action is the block's own.
         /// <para>
-        /// Asked by id and by whether it sets a value, because the id alone names two things wherever
-        /// a block has a switch: the value and the act that flips it share one.
+        /// Asked by id and by which of the three ways it reaches the block, because the id alone can
+        /// name more than one: a switch's value and the act that flips it share one.
         /// </para>
         /// </remarks>
-        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, bool sets)
+        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, Form form)
         {
             var said = new List<Field>();
 
             var actions = ActionsOf(world, entityIds);
             for (var i = 0; i < actions.Count; i++)
             {
-                if (actions[i].Id == actionId && actions[i].Sets == sets)
+                if (actions[i].Id == actionId && actions[i].Form == form)
                     actions[i].Fields(said);
             }
 
@@ -213,6 +213,20 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return result;
         }
 
+        /// <summary>How far the least checked of the blocks has been checked, or completed where none are picked.</summary>
+        public static Evaluation Least(GridWorld world, IList<long> entityIds)
+        {
+            var least = Evaluation.Completed;
+            var entities = Blocks(world, entityIds);
+            for (var i = 0; i < entities.Count; i++)
+            {
+                if (entities[i].Kind.Evaluation < least)
+                    least = entities[i].Kind.Evaluation;
+            }
+
+            return least;
+        }
+
         static List<GridEntity> Blocks(GridWorld world, IList<long> entityIds)
         {
             var result = new List<GridEntity>();
@@ -239,7 +253,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             for (var i = from; i < entities.Count; i++)
             {
-                if (entities[i].Kind.FindAction(action.Id, action.Sets) == null)
+                if (entities[i].Kind.FindAction(action.Id, action.Form) == null)
                     return false;
             }
             return true;

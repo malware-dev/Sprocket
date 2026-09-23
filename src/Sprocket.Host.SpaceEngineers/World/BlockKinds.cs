@@ -49,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // It is the same string as the kind id, which is not a coincidence - both are "which block
             // type is this".
             kind = new EntityKind(id, name).WithIcon(id);
+            kind.Evaluation = Evaluations.Of(block);
 
             // What this block is, before what every block is, so a door offers "open" above "switch on".
             IBlockExtension extension = _extensions.For(block);
@@ -117,18 +118,17 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < _offered.Count; i++)
             {
                 Offer offer = _offered[i];
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, false) != null)
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Form.Action) != null)
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
 
-                string id;
-                string named;
-                if (kind.Promoted(offer.Id, false, out id, out named))
-                    Act(kind, offer, id, named);
-
                 Act(kind, offer, offer.Id, said);
                 Last(kind).Unaltered = true;
+
+                string word;
+                if (kind.Renames(offer.Id, false, out word))
+                    Last(kind).Rename(word);
             }
         }
 
@@ -167,22 +167,20 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 Offer offer = _offered[i];
 
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, true) != null)
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Form.Value) != null)
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
 
-                string id;
-                string named;
-                if (kind.Promoted(offer.Id, true, out id, out named))
-                {
-                    kind.WithValue(id, named, offer.Id, Asks(offer, named));
-                    Unread(Last(kind), offer);
-                }
+                string word;
+                var renamed = kind.Renames(offer.Id, true, out word);
 
-                kind.WithValue(offer.Id, said, offer.Id, Asks(offer, said));
+                kind.WithValue(offer.Id, said, offer.Id, Asks(offer, renamed ? word : said));
                 Last(kind).Unaltered = true;
                 Unread(Last(kind), offer);
+
+                if (renamed)
+                    Last(kind).Rename(word);
             }
         }
 
@@ -279,10 +277,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         static void Hide(EntityKind kind)
         {
             var actions = kind.Actions;
+
+            // Values first, because whether a value is listed decides whether the actions the game
+            // made out of it are.
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (StoodIn(actions, one) || kind.Hides(one.Sets ? one.GamePropertyId : one.GameActionId))
+                if (one.Sets && (Turned(actions, one) || kind.Hides(one.GamePropertyId)))
+                    one.Hide();
+            }
+
+            for (var i = 0; i < actions.Count; i++)
+            {
+                EntityAction one = actions[i];
+                if (!one.Sets && (StoodIn(actions, one) || kind.Hides(one.GameActionId)))
                     one.Hide();
             }
         }
@@ -292,40 +300,51 @@ namespace Sprocket.Host.SpaceEngineers.World
             return kind.Actions[kind.Actions.Count - 1];
         }
 
-        /// <summary>Whether another entry names this one as the game's own form of what it does.</summary>
+        /// <summary>Whether something else offered says what this one of the block's own actions says.</summary>
         /// <remarks>
-        /// The game makes actions out of a value: a switch gets a pair that turns it each way and an
-        /// act that flips it, and a slider gets a step up, a step down and sometimes a reset. The value
-        /// says everything the pair and the steps say, so those are stood in for by it. The act that
-        /// flips a switch and the reset stay, being the two things a value cannot say: whichever way
-        /// it is not, and whatever the block starts at.
+        /// One of Sprocket's own entries that performs it, or a value the game made it out of. A
+        /// switch gets a pair that turns it each way and an act that flips it, and a slider a step up,
+        /// a step down and sometimes a reset; the value says what the pair and the steps say. The act
+        /// that flips a switch and the reset stay, being the two things a value cannot say: whichever
+        /// way it is not, and whatever the block starts at.
         /// <para>
-        /// Where Sprocket has said a switch's pair in its own words it is the other way round, and the
-        /// value is the third way of saying the same thing: a vent that reads pressurize and
-        /// depressurize has no use for a Depressurize to be told true.
+        /// Decided by the ids alone. A value that is not itself listed stands in for nothing, so a
+        /// block that keeps a value out of the list keeps the actions made out of it.
         /// </para>
         /// </remarks>
         static bool StoodIn(IList<EntityAction> actions, EntityAction one)
         {
+            if (!one.Unaltered)
+                return false;
+
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction other = actions[i];
                 if (ReferenceEquals(other, one))
                     continue;
 
-                if (one.Sets)
-                {
-                    if (other.GamePropertyId == one.Id
-                        || !other.Unaltered && Turns(other.GameActionId, one.Id))
-                    {
-                        return true;
-                    }
-                }
-                else if (other.GameActionId == one.Id
-                         || one.Unaltered && other.Sets && Generated(one.GameActionId, other.GamePropertyId))
-                {
+                if (!other.Unaltered && other.GameActionId == one.Id)
                     return true;
-                }
+
+                if (other.Sets && !other.Hidden && Generated(one.GameActionId, other.GamePropertyId))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether Sprocket's own entries turn this switch each way.</summary>
+        /// <remarks>
+        /// Then the value is the third way of saying the same thing: a vent that reads pressurize and
+        /// depressurize has no use for a Depressurize to be told true.
+        /// </remarks>
+        static bool Turned(IList<EntityAction> actions, EntityAction value)
+        {
+            for (var i = 0; i < actions.Count; i++)
+            {
+                EntityAction other = actions[i];
+                if (!other.Unaltered && Turns(other.GameActionId, value.Id))
+                    return true;
             }
 
             return false;
@@ -343,6 +362,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether the action is the value's id with that in front, as a slider's steps are.</summary>
+        /// <remarks>
+        /// Only what the game's own controls make, which follows the value's id exactly. A setter
+        /// somebody wrote by hand beside a value is a different thing, and is said per block - see
+        /// <c>Meanings</c>.
+        /// </remarks>
         static bool Steps(string gameActionId, string step, string propertyId)
         {
             return gameActionId.Length == step.Length + propertyId.Length

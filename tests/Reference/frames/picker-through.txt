@@ -147,23 +147,27 @@ on screen     When something happens
 140  Sprite     Sprocket_Fill         {X:729 Y:118 W:1 H:824}  #5B737BFF
 141  Sprite     Sprocket_Fill         {X:1188 Y:118 W:1 H:824}  #5B737BFF
 142  SetClip    {X:745 Y:231 W:428 H:695}
-143  Text       at {X:748 Y:240.882} scale 0.57  #A2C3CDFF  "Those blocks have nothing in common that can happen to"
-144  Text       at {X:748 Y:261.972} scale 0.57  #A2C3CDFF  "them."
-145  SetClip    {X:259 Y:118 W:1402 H:836}
-146  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT HAPPENS"
-147  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:37}  #141B20FF
-148  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:1}  #5B737BFF
-149  Sprite     Sprocket_Fill         {X:745 Y:224 W:428 H:1}  #5B737BFF
-150  Sprite     Sprocket_Fill         {X:745 Y:188 W:1 H:37}  #5B737BFF
-151  Sprite     Sprocket_Fill         {X:1172 Y:188 W:1 H:37}  #5B737BFF
-152  Text       at {X:757.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
-153  ClearClip  
-154  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-155  SetClip    {X:276 Y:55 W:290 H:33}
-156  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
+143  Sprite     Sprocket_Fill         {X:745 Y:231 W:416 H:82}  #374851FF
+144  Text       at {X:761 Y:240.482} scale 0.57  #A2C3CDFF  "Sprocket has not checked this block yet, so some of"
+145  Text       at {X:761 Y:261.572} scale 0.57  #A2C3CDFF  "what it offers may be doubled, missing or oddly"
+146  Text       at {X:761 Y:282.662} scale 0.57  #A2C3CDFF  "named."
+147  Text       at {X:748 Y:326.352} scale 0.57  #A2C3CDFF  "Those blocks have nothing in common that can happen to"
+148  Text       at {X:748 Y:347.442} scale 0.57  #A2C3CDFF  "them."
+149  SetClip    {X:259 Y:118 W:1402 H:836}
+150  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT HAPPENS"
+151  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:37}  #141B20FF
+152  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:1}  #5B737BFF
+153  Sprite     Sprocket_Fill         {X:745 Y:224 W:428 H:1}  #5B737BFF
+154  Sprite     Sprocket_Fill         {X:745 Y:188 W:1 H:37}  #5B737BFF
+155  Sprite     Sprocket_Fill         {X:1172 Y:188 W:1 H:37}  #5B737BFF
+156  Text       at {X:757.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
 157  ClearClip  
-158  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-159  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-160  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
-161  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-162  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+158  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
+159  SetClip    {X:276 Y:55 W:290 H:33}
+160  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
+161  ClearClip  
+162  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
+163  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+164  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
+165  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+166  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
