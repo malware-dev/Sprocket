@@ -623,8 +623,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (carried == null)
                 return;
 
+            // Its own words while there is somewhere to go on to, which is Next where a page follows.
             if (screen.HasPrimary)
+            {
+                carried.Text = screen.PrimaryText;
                 Widgets.Go(carried);
+            }
             else
                 Widgets.Waiting(carried);
         }
@@ -996,6 +1000,18 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             get { return IsFilling ? Given.Box : _focus; }
         }
 
+        /// <inheritdoc />
+        /// <remarks>Only a box pressing would type into; any other is left as it is.</remarks>
+        public void Take(TextBox box)
+        {
+            Deed deed = box.Press;
+            if (deed.Means != Means.Type)
+                return;
+
+            Unfocus();
+            Typing(box, deed.Command, deed.Takes);
+        }
+
         /// <summary>
         /// Sends what has just been typed wherever it belongs.
         /// </summary>
@@ -1027,6 +1043,54 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _focusTook = _focus.Text;
             _editor.SetText(_focusCommand, _focus.Text);
+        }
+
+        /// <summary>
+        /// Whether the field with the keyboard is answered by choosing one of its words, so letters and
+        /// arrows choose and nothing is typed into it.
+        /// </summary>
+        public bool Chooses
+        {
+            get { return IsFilling && Given.Chooses; }
+        }
+
+        /// <summary>
+        /// Takes an arrow key for the field with the keyboard, where that field is stepped rather than
+        /// typed through, and answers whether it did.
+        /// </summary>
+        /// <param name="across">One for right, minus one for left.</param>
+        /// <param name="down">One for down, minus one for up.</param>
+        /// <remarks>
+        /// Words are stepped by any arrow, onward being right or down. A dial is turned by up and down
+        /// only, and more by up, because left and right are what move the caret in the number it is
+        /// typed as.
+        /// </remarks>
+        public bool Arrow(int across, int down)
+        {
+            if (!IsFilling)
+                return false;
+
+            Ask given = Given;
+            var by = given.Chooses ? across + down : given.Turns ? -down : 0;
+            if (by == 0)
+                return false;
+
+            if (given.Step(by))
+                Entered();
+
+            return true;
+        }
+
+        /// <summary>Takes a letter for a field answered by choosing, and answers whether it did.</summary>
+        public bool Letter(char letter)
+        {
+            if (!Chooses)
+                return false;
+
+            if (Given.Letter(letter))
+                Entered();
+
+            return true;
         }
 
         /// <summary>Takes what is typed in the box with the caret, where Enter in it takes anything.</summary>

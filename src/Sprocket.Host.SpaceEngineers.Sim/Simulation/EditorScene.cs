@@ -231,9 +231,27 @@ namespace Sprocket.Sim.Simulation
             Typed();
         }
 
+        /// <summary>An arrow key, as the game's screen hands one over.</summary>
+        public void Arrow(int across, int down)
+        {
+            _view.Arrow(across, down);
+        }
+
         /// <summary>Types <paramref name="text" /> into whatever has the keyboard.</summary>
+        /// <remarks>A field answered by choosing takes each letter as a choice, as it does in the game.</remarks>
         public void Type(string text)
         {
+            if (_view.Chooses && !string.IsNullOrEmpty(text))
+            {
+                for (int i = 0; i < text.Length; i++)
+                {
+                    if (char.IsLetterOrDigit(text[i]))
+                        _view.Letter(text[i]);
+                }
+
+                return;
+            }
+
             TextBox box = Typing;
             if (box == null || string.IsNullOrEmpty(text))
                 return;

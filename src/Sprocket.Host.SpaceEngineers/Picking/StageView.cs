@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// </remarks>
         const float IconSize = Sizes.Icon;
 
-        readonly Sized _root = new Sized(PickView.ColumnWidth);
+        readonly Sized _root = new Sized(0f);
         readonly Dock _column = new Dock();
         readonly Stack _head = Widgets.Column(Space.Row);
         readonly Label _title = Widgets.Label("", Palette.Ink, Lettering.Body);
@@ -119,9 +119,11 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         bool _hasKinds;
         bool _hasViews;
 
-        public StageView(PickComponent component, int index)
+        /// <summary>The column for the stage at <paramref name="index" />, as wide as <paramref name="width" />.</summary>
+        public StageView(PickComponent component, int index, float width)
         {
             PickStage stage = component.Stages[index];
+            _root.Width = width;
 
             _title.Wraps = false;
             _title.Trims = true;
@@ -183,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _hasViews = stage.Views.Count > 1;
             if (_hasViews)
             {
-                float across = (PickView.ColumnWidth - Space.Region * 2f) / stage.Views.Count;
+                float across = (width - Space.Region * 2f) / stage.Views.Count;
                 for (var i = 0; i < stage.Views.Count; i++)
                 {
                     Label tab = Widgets.Label("", Palette.Muted, Lettering.Small);
@@ -230,9 +232,24 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _root.Content = _column;
         }
 
+        /// <summary>The column, as the strip of columns holds it.</summary>
         public Element Root
         {
             get { return _root; }
+        }
+
+        /// <summary>Puts the caret in the box that narrows this column, where it has one.</summary>
+        public void Take(IScreenHost host)
+        {
+            if (_hasNarrow)
+                host.Take(_narrow);
+        }
+
+        /// <summary>How wide the column is.</summary>
+        public float Width
+        {
+            get { return _root.Width; }
+            set { _root.Width = value; }
         }
 
         /// <summary>Puts the way to finish under the last row, or takes it away where given null.</summary>

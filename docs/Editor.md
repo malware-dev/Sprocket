@@ -145,16 +145,19 @@ sits under the list, as it sits under the fields of a step's values. Changing wh
 what it does unless the column says otherwise, and whatever was written about it; a change to both
 on one Done is one step back.
 
+**A single action is the picker's next page.** Choosing *A single action…* turns to it: the
+trigger's columns slide out to the left, *What it does* folds into a narrow strip that is the way
+back, and the action's own columns come in beside it. Back on the trigger's page, the last column
+gives up room at the right for a strip that is the way on. The action's page is kept while going
+back and on, and let go once *What it does* says something else; nothing is kept until its Done.
+
 **The one act a trigger does opens the picker that act was chosen in**, since it has no screen of
 its own.
 
-**The cross inside the slot empties what the trigger does.** It is drawn inside the chip because
-what it empties is that chip - beside it the same mark read as belonging to the whole sentence,
-which already has one at the end of the row that destroys the trigger rather than emptying part of
-it. Pressing the empty slot opens the picker on a new sequence. The trigger itself is kept through
-any change to what it does, since the toolbar slot the construct holds names that trigger. Pointing
-away from a sequence nobody named takes that sequence with it: it existed only to be the one thing
-this trigger did.
+**A trigger always does something.** There is no way to empty what it does, only to change it. The
+trigger itself is kept through any change to what it does, since the toolbar slot the construct
+holds names that trigger. Pointing away from a sequence nobody named takes that sequence with it:
+it existed only to be the one thing this trigger did.
 
 ### Two triggers on one button
 

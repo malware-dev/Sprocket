@@ -399,10 +399,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets));
 
             built.Slots.Add(new ActionSlot(chosen,
-                Change(Cmd.StepSlot, position, 0, delegate { EditStep(act); })));
+                Change(Cmd.StepSlot, position, 0, delegate { EditStep(act, Opening.What); })));
 
             built.Slots.Add(new EntitiesSlot(Resolved(act.Targets), true,
-                Change(Cmd.StepSlot, position, 1, delegate { EditStep(act); })));
+                Change(Cmd.StepSlot, position, 1, delegate { EditStep(act, Opening.Blocks); })));
 
             // Last, because the blocks are what somebody scanning a list of steps is looking for
             // and the values are the detail. Pressing it opens the step where its values are given,
@@ -413,7 +413,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 chosen.Fields(fields);
 
                 built.Slots.Add(new ValuesSlot(act.Values, fields,
-                    Change(Cmd.StepSlot, position, 2, delegate { EditStep(act, true); })));
+                    Change(Cmd.StepSlot, position, 2, delegate { EditStep(act, Opening.Values); })));
             }
 
             return built;
@@ -437,13 +437,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await ? 2 : 1;
         }
 
-        void EditStep(Act step)
-        {
-            EditStep(step, false);
-        }
-
-        /// <summary>Opens a step's picker on what it does, with the caret in its values where <paramref name="values" /> says so.</summary>
-        void EditStep(Act step, bool values)
+        /// <summary>Opens a step's picker on the column <paramref name="opens" /> says, the part that was pressed.</summary>
+        void EditStep(Act step, Opening opens)
         {
             var index = _sequence.Steps.IndexOf(step);
 
@@ -458,7 +453,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                         new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen,
                             answer.Form, answer.Values));
                     Editor.Pop();
-                }, values: step.Values, opensOnValues: values));
+                }, values: step.Values, opens: opens));
         }
 
         /// <summary>

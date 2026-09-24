@@ -35,7 +35,7 @@ static class Screen
         editor.Component<SequenceComponent>();
 
     static IEnumerable<PickOption> PathEntries(this SprocketEditor editor) =>
-        editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages).SelectMany(p => p.Entries);
+        editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages.Skip(p.Page)).SelectMany(p => p.Entries);
 
     /// <summary>Presses a block's row, which takes that block and drops whatever was taken before.</summary>
     public static void PressBlock(this SprocketEditor editor, string name)
@@ -128,7 +128,7 @@ static class Screen
             return;
         }
 
-        foreach (var pane in editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages))
+        foreach (var pane in editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages.Skip(p.Page)))
         {
             var option = pane.Options.FirstOrDefault(e => e.Text == text);
             if (option != null)
@@ -150,7 +150,7 @@ static class Screen
 
     public static bool HasChoice(this SprocketEditor editor, string text) =>
         editor.Screen.Components.OfType<ChoiceListComponent>().Any(l => l.Entries.Any(e => e.Text == text))
-        || editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
+        || editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages.Skip(p.Page))
             .Any(p => p.Options.Any(e => e.Text == text) || p.Entries.Any(e => e.Text == text));
 
     /// <summary>
@@ -197,21 +197,6 @@ static class Screen
             line += (line.Length > 0 ? " " : "") + SentenceText.InTrigger(editor.World, slot);
 
         return line;
-    }
-
-    /// <summary>
-    /// Presses the cross beside what a trigger does, which asks the whole question again.
-    /// </summary>
-    /// <remarks>
-    /// Found rather than counted: which part of the sentence carries it is core's decision, and a
-    /// test holding a number would be asserting that decision on its way somewhere else.
-    /// </remarks>
-    public static void PressClear(this SprocketEditor editor, int which)
-    {
-        SentenceTrigger trigger = editor.Triggers()[which];
-        SentenceSlot slot = trigger.Does.First(s => s.ClearCommand != 0);
-
-        editor.Invoke(slot.ClearCommand);
     }
 
     /// <summary>Presses the part of a trigger that says when it happens.</summary>

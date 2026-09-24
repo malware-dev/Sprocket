@@ -695,6 +695,109 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             }
         }
 
+        /// <summary>
+        /// Whether the field with the keyboard is answered by choosing one of its words, so what is
+        /// pressed on the keyboard chooses rather than types.
+        /// </summary>
+        public bool Chooses
+        {
+            get { return _typing && Chosen(_at); }
+        }
+
+        /// <summary>Whether the field with the keyboard is a dial, which is typed into and turned as well.</summary>
+        public bool Turns
+        {
+            get { return _typing && Dialled(_at); }
+        }
+
+        /// <summary>How far one step turns a dial, in degrees.</summary>
+        const float Notch = 5f;
+
+        /// <summary>
+        /// Moves the field with the keyboard on by <paramref name="by" /> steps, and answers whether it
+        /// moved.
+        /// </summary>
+        /// <remarks>
+        /// A step is the next word along, or a notch of a dial. Words stop at either end rather than
+        /// going round, so holding a key comes to rest on the last one.
+        /// </remarks>
+        public bool Step(int by)
+        {
+            if (Chooses)
+            {
+                var words = _wanted[_at].Words;
+                var now = words.IndexOf(_boxes[_at].Text);
+                var next = now < 0
+                    ? by > 0 ? 0 : words.Count - 1
+                    : Math.Max(0, Math.Min(words.Count - 1, now + by));
+
+                if (next == now)
+                    return false;
+
+                _boxes[_at].Text = words[next];
+                return true;
+            }
+
+            if (!Turns)
+                return false;
+
+            // From what is written, which is what the dial shows, and within what the field will take.
+            float degrees;
+            var written = Turned(_at).Written;
+            if (!float.TryParse(written.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out degrees))
+                degrees = 0f;
+
+            degrees = Bounded(_wanted[_at], (float)Math.Round(degrees / Notch) * Notch + by * Notch);
+            written.Text = degrees.ToString("0.0", CultureInfo.InvariantCulture);
+            written.MoveCaretEnd(false);
+            Turned(_at).Reread();
+            return true;
+        }
+
+        /// <summary>Holds an angle within the bounds a field writes, where it writes any.</summary>
+        static float Bounded(Field field, float degrees)
+        {
+            float bound;
+            if (float.TryParse(field.Least, NumberStyles.Float, CultureInfo.InvariantCulture, out bound))
+                degrees = Math.Max(bound, degrees);
+
+            if (float.TryParse(field.Most, NumberStyles.Float, CultureInfo.InvariantCulture, out bound))
+                degrees = Math.Min(bound, degrees);
+
+            return degrees;
+        }
+
+        /// <summary>
+        /// Chooses the next word of the field with the keyboard that starts with
+        /// <paramref name="letter" />, and answers whether there was one.
+        /// </summary>
+        /// <remarks>
+        /// After the one chosen, and round to the start, so pressing the same letter again walks through
+        /// every word that starts with it.
+        /// </remarks>
+        public bool Letter(char letter)
+        {
+            if (!Chooses)
+                return false;
+
+            var words = _wanted[_at].Words;
+            var now = words.IndexOf(_boxes[_at].Text);
+            for (var i = 1; i <= words.Count; i++)
+            {
+                var word = words[(now + i + words.Count) % words.Count];
+                if (word.Length == 0 || char.ToUpperInvariant(word[0]) != char.ToUpperInvariant(letter))
+                    continue;
+
+                if (word == _boxes[_at].Text)
+                    return false;
+
+                _boxes[_at].Text = word;
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Moves the caret to the next field, and back to the first after the last.</summary>
         public void Next()
         {
@@ -1226,6 +1329,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 // will actually be sent. A field holding none of the words - which is what typing into
                 // it does - leaves none of them lit, and the refusal says why.
                 string said = _boxes[i].Text;
+
+                // Its line on a lighter plate while it has the keyboard, which is how a field with no
+                // caret says where the keys are going. A plate rather than a ring, because the words'
+                // own buttons fill the line's height and would be drawn over one.
+                if (i < _lines.Count)
+                    _lines[i].Background = _typing && i == _at ? Palette.PanelHot : Palette.None;
 
                 if (!Switched(i))
                 {

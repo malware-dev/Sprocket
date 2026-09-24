@@ -52,6 +52,22 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
         int _enteredCommand;
 
+        /// <summary>
+        /// The stage whose box takes the caret when its page is first shown, or minus one where none
+        /// does.
+        /// </summary>
+        /// <remarks>
+        /// The column standing for what was pressed to open the pick. Only once, on arriving: a page
+        /// gone back to is where it was left.
+        /// </remarks>
+        public int Opens
+        {
+            get { return _opens; }
+            set { Set(ref _opens, value, nameof(Opens)); }
+        }
+
+        int _opens = -1;
+
         /// <summary>Whether the values open with the caret in the first of them.</summary>
         /// <remarks>For somebody who came to change a step's values rather than what it does or to what.</remarks>
         public bool OpensOnValues
@@ -77,6 +93,40 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         }
 
         string _given;
+
+        /// <summary>
+        /// The first stage asked on the page showing now. Those before it were answered on an earlier
+        /// page, and the last of them is what the way back to it is about.
+        /// </summary>
+        /// <remarks>
+        /// A pick that asks more than one screen holds goes on in pages, each taking up where the last
+        /// left off - what a trigger does, and then the action it does.
+        /// </remarks>
+        public int Page
+        {
+            get { return _page; }
+            set { Set(ref _page, value, nameof(Page)); }
+        }
+
+        int _page;
+
+        /// <summary>Where going on to the page after goes, or zero where nothing chosen has a page after it.</summary>
+        public int Onward
+        {
+            get { return _onward; }
+            set { Set(ref _onward, value, nameof(Onward)); }
+        }
+
+        int _onward;
+
+        /// <summary>Where going back to the page before goes, or zero on the first page.</summary>
+        public int Returns
+        {
+            get { return _returns; }
+            set { Set(ref _returns, value, nameof(Returns)); }
+        }
+
+        int _returns;
 
         /// <summary>What each value the chosen thing takes asks for, one field each, in order.</summary>
         public List<Field> Fields { get; } = new List<Field>();
@@ -127,6 +177,27 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         {
             _stages.Add(stage);
             Revision++;
+        }
+
+        /// <summary>
+        /// Comes back to the page starting at <paramref name="page" />, whose stages end before
+        /// <paramref name="count" />, and answers whether anything had to go.
+        /// </summary>
+        /// <remarks>What later pages asked goes, and so do the values they were given.</remarks>
+        public bool Return(int page, int count)
+        {
+            Page = page;
+            if (_stages.Count <= count)
+                return false;
+
+            while (_stages.Count > count)
+                RemoveLast();
+
+            Given = null;
+            Fields.Clear();
+            Filled.Clear();
+            Restate();
+            return true;
         }
 
         /// <summary>Drops the last stage, when there is no longer anything for it to be about.</summary>

@@ -95,5 +95,28 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// the other. This is the only place they meet.
         /// </remarks>
         public bool CanRun => Enabled && (System == null || System.Enabled);
+
+        /// <summary>Its one act, where waiting aside it holds exactly one, or null.</summary>
+        /// <remarks>What a trigger doing a single action holds, in a sequence nobody named.</remarks>
+        public Act Only
+        {
+            get
+            {
+                Act only = null;
+                for (var i = 0; i < _steps.Count; i++)
+                {
+                    if (_steps[i] is Await)
+                        continue;
+
+                    var act = _steps[i] as Act;
+                    if (act == null || only != null)
+                        return null;
+
+                    only = act;
+                }
+
+                return only;
+            }
+        }
     }
 }

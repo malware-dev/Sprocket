@@ -38,7 +38,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         // Triggers.
         OpenTrigger,
         TriggerTarget,
-        ClearTarget,
         DeleteTrigger,
 
         // A sequence.
@@ -73,6 +72,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         TriggerRuns,
         TriggerStops,
         TriggerDoes,
+        PageOn,
+        PageBack,
 
         // A list of answers.
         Choice,

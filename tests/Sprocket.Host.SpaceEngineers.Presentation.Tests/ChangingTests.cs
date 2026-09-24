@@ -123,10 +123,8 @@ public class ChangingTests
 
         Trigger was = System(screen).Triggers[0];
 
-        screen.Editor.PressClear(0);
         screen.Editor.PressDoes(0);
         screen.Editor.PressChoice("A single action…");
-        screen.Editor.PressPrimary();
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -158,7 +156,6 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A single action…");
-        screen.Editor.PressPrimary();
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -166,8 +163,7 @@ public class ChangingTests
 
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
 
-        screen.Editor.PressClear(1);
-        screen.Editor.PressDoes(1);
+        screen.Editor.PressWhen(1);
         screen.Editor.PressChoice("Sequence 1");
         screen.Editor.PressPrimary();
         screen.Run(2);
@@ -175,13 +171,7 @@ public class ChangingTests
         Assert.Single(screen.Editor.Program.Sequences);
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(1));
 
-        // Two acts, so two steps back: the pointing, and then the emptying that took the plain
-        // sequence with it.
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
-        screen.Run(2);
-
-        Assert.Equal("…", screen.Editor.Doing(1));
-
+        // One step back puts the plain sequence back with what the trigger did.
         screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
         screen.Run(2);
 
@@ -221,6 +211,166 @@ public class ChangingTests
 
         Assert.Equal("then run Seal up", screen.Editor.Doing(0));
         Assert.Same(was, System(screen).Triggers[0]);
+    }
+
+    /// <summary>
+    /// A single action is chosen on the page after the trigger's, in the same pick, and going back
+    /// finds the trigger's page as it was left.
+    /// </summary>
+    /// <remarks>
+    /// Nothing is kept until the action is done, and then what starts it and what it does are one
+    /// step back.
+    /// </remarks>
+    [Fact]
+    public void ASingleActionIsThePageAfter()
+    {
+        var screen = WithOne();
+        Trigger was = System(screen).Triggers[0];
+
+        screen.Editor.PressWhen(0);
+        screen.Editor.PressBlock("Airlock Button");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("A single action…");
+        screen.Run(2);
+
+        Assert.Equal("Do something", screen.Editor.Screen.Title());
+        Assert.Equal(3, screen.Editor.Component<PickComponent>().Page);
+
+        screen.Editor.Back();
+        screen.Run(2);
+
+        Assert.Equal("When something happens", screen.Editor.Screen.Title());
+        var pick = screen.Editor.Component<PickComponent>();
+        Assert.Equal(0, pick.Page);
+        Assert.Equal(3, pick.Stages.Count);
+        Assert.Contains(pick.Stages[2].Entries, e => e.Text == "A single action…" && e.IsChosen);
+        Assert.Same(was, System(screen).Triggers[0]);
+
+        // Nothing to finish here while a single action is chosen: choosing it again goes on.
+        Assert.False(screen.Editor.Screen.HasPrimary);
+        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressBlock("Airlock Outer Door");
+        screen.Editor.PressChoice("Close");
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(0));
+        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(0));
+
+        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Run(2);
+
+        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
+    }
+
+    /// <summary>A trigger being made is not made where its single action is never chosen.</summary>
+    [Fact]
+    public void NothingIsMadeUntilTheActionIsChosen()
+    {
+        var screen = WithOne();
+
+        screen.Editor.PressStart("When…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("A single action…");
+        screen.Editor.Back();
+        screen.Editor.Back();
+        screen.Editor.PressChoice("Discard them");
+        screen.Run(2);
+
+        Assert.Single(System(screen).Triggers);
+    }
+
+    /// <summary>
+    /// Going on from a trigger that already does one thing opens that thing, and finishing changes
+    /// it where it is.
+    /// </summary>
+    [Fact]
+    public void GoingOnOpensTheActionItDoes()
+    {
+        var screen = WithOne();
+
+        screen.Editor.PressStart("When…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressBlock("Airlock Outer Door");
+        screen.Editor.PressChoice("Close");
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        var sequences = screen.Editor.Program.Sequences.Count;
+
+        screen.Editor.PressWhen(1);
+        screen.Editor.PressChoice("A single action…");
+        screen.Run(2);
+
+        var pick = screen.Editor.Component<PickComponent>();
+        Assert.Contains(pick.Stages[pick.Page].Entries, e => e.Text == "Airlock Outer Door" && e.IsChosen);
+
+        screen.Editor.PressChoice("Open");
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        Assert.Equal("then open Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.Equal(sequences, screen.Editor.Program.Sequences.Count);
+    }
+
+    /// <summary>
+    /// Going back to the trigger's page and on again finds the action's page as it was left, and the
+    /// way on is there only while something chosen has a page after it.
+    /// </summary>
+    [Fact]
+    public void PagingBackAndOnKeepsTheActionsPage()
+    {
+        var screen = WithOne();
+
+        screen.Editor.PressStart("When…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("finishes closing");
+        Assert.Equal(0, screen.Editor.Component<PickComponent>().Onward);
+
+        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressBlock("Airlock Outer Door");
+        screen.Editor.Back();
+        screen.Run(2);
+
+        var pick = screen.Editor.Component<PickComponent>();
+        Assert.Equal("When something happens", screen.Editor.Screen.Title());
+        Assert.NotEqual(0, pick.Onward);
+
+        screen.Editor.Invoke(pick.Onward);
+        screen.Run(2);
+
+        pick = screen.Editor.Component<PickComponent>();
+        Assert.Equal("Do something", screen.Editor.Screen.Title());
+        Assert.Contains(pick.Stages[pick.Page].Entries, e => e.Text == "Airlock Outer Door" && e.IsChosen);
+    }
+
+    /// <summary>Choosing something else for the trigger to do lets the action's page go.</summary>
+    [Fact]
+    public void ChoosingSomethingElseLetsTheActionsPageGo()
+    {
+        var screen = WithOne();
+
+        screen.Editor.PressStart("When…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressBlock("Airlock Outer Door");
+        screen.Editor.Back();
+        screen.Editor.PressChoice("A new sequence");
+        screen.Run(2);
+
+        Assert.Equal(0, screen.Editor.Component<PickComponent>().Onward);
+
+        screen.Editor.PressChoice("A single action…");
+        screen.Run(2);
+
+        var pick = screen.Editor.Component<PickComponent>();
+        Assert.DoesNotContain(pick.Stages[pick.Page].Entries, e => e.IsChosen);
     }
 
     /// <summary>
@@ -276,7 +426,6 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A single action…");
-        screen.Editor.PressPrimary();
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -357,7 +506,6 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A single action…");
-        screen.Editor.PressPrimary();
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -415,80 +563,6 @@ public class ChangingTests
         // And the trigger is left as the game left it.
         Assert.Same(trigger, System(screen).Triggers[0]);
         Assert.Empty(trigger.Sources);
-    }
-
-    /// <summary>
-    /// The cross empties what a trigger does, and says so by being empty.
-    /// </summary>
-    /// <remarks>
-    /// What it does rather than what it asks: a mark that opened a question instead would be saying
-    /// one thing and doing another. An empty slot is the editor's way of saying nobody has answered
-    /// yet, everywhere else in a sentence, and pressing one is how it gets answered.
-    /// </remarks>
-    [Fact]
-    public void TheCrossEmptiesWhatItDoes()
-    {
-        var screen = WithOne();
-
-        screen.Editor.PressClear(0);
-        screen.Run(2);
-
-        Assert.Equal(0, System(screen).Triggers[0].Runs);
-        Assert.True(screen.Editor.Triggers()[0].Does[0].IsEmpty);
-
-        // The same gap an unanswered part of any sentence reads as.
-        Assert.Equal("…", screen.Editor.Doing(0));
-
-        // Still a trigger, still saying when it happens, and still on the list.
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
-        Assert.Single(System(screen).Triggers);
-
-        // And the empty part opens the picker it is answered in, on a new sequence.
-        screen.Editor.PressDoes(0);
-        Assert.Equal("When something happens", screen.Editor.Screen.Title());
-
-        screen.Editor.PressPrimary();
-        screen.Editor.Back();
-        screen.Run(2);
-
-        Assert.Equal("then run Sequence 2", screen.Editor.Doing(0));
-    }
-
-    /// <summary>
-    /// Emptying it takes the one thing it did with it, and walks back.
-    /// </summary>
-    /// <remarks>
-    /// The same rule as pointing it somewhere else: a sequence nobody named existed only to be the
-    /// thing this trigger did, so nothing is left that could ever run it. The arrows put both back.
-    /// </remarks>
-    [Fact]
-    public void EmptyingItTakesThePlainThingWithIt()
-    {
-        var screen = WithOne();
-
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressChoice("A single action…");
-        screen.Editor.PressPrimary();
-        screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
-        screen.Editor.PressPrimary();
-        screen.Run(2);
-
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-
-        screen.Editor.PressClear(1);
-        screen.Run(2);
-
-        Assert.Single(screen.Editor.Program.Sequences);
-        Assert.Equal("…", screen.Editor.Doing(1));
-
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
-        screen.Run(2);
-
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-        Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
     }
 
     /// <summary>

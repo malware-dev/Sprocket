@@ -136,7 +136,6 @@ public class TargetTests
         Another(screen);
 
         screen.Editor.PressChoice("A single action…");
-        screen.Editor.PressPrimary();
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -158,7 +157,6 @@ public class TargetTests
         Another(screen);
 
         screen.Editor.PressChoice("A single action…");
-        screen.Editor.PressPrimary();
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();

@@ -22,30 +22,40 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         int _ticks;
 
         PickComponent _pick;
+
+        /// <summary>Whether this goes straight on to the page after it once it is first built.</summary>
+        bool _goesOn;
         PickStage _rates;
         PickStage _does;
 
+        /// <summary>Opens on <paramref name="ticks" />, and hands the rate chosen to <paramref name="done" />.</summary>
         public TimerPage(SprocketEditor editor, int ticks, Aim aim, Action<int> done) : base(editor)
         {
             _ticks = ticks;
             _aim = aim;
+            aim.Onward = Primary;
             _done = done;
         }
 
+        /// <inheritdoc />
         public override string Title => "How often?";
 
-        public override string PrimaryText => _aim.Chosen ? "Done" : "";
+        /// <inheritdoc />
+        public override string PrimaryText => _aim.Finishes ? "Done" : "";
 
+        /// <inheritdoc />
         public override void Primary()
         {
             _done(_ticks);
         }
 
+        /// <inheritdoc />
         public override void Build(List<EditorComponent> components)
         {
             if (_pick == null)
             {
                 _pick = new PickComponent();
+                _aim.Pick = _pick;
                 _pick.Fills = true;
 
                 _rates = new PickStage("How often");
@@ -55,12 +65,31 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _pick.Add(_does);
             }
 
-            var changed = FillRates();
+            // Back from the page after this one, whatever that page asked goes with it.
+            var changed = _pick.Return(0, 2);
+            _pick.Finishes = false;
+            _pick.Returns = 0;
+            _pick.EnteredCommand = 0;
+            _pick.Onward = _aim.Outcome == Outcome.One ? Editor.Register(Cmd.PageOn, Primary) : 0;
+
+            changed |= FillRates();
             changed |= _aim.Fill(_does);
             if (changed)
                 _pick.Changed();
 
             components.Add(_pick);
+
+            if (!_goesOn)
+                return;
+
+            _goesOn = false;
+            Primary();
+        }
+
+        /// <summary>Goes straight on to the page after this one as soon as this is built.</summary>
+        internal void GoOn()
+        {
+            _goesOn = true;
         }
 
         /// <summary>Every rate there is, the one chosen marked, and what the costly ones cost on the pointer.</summary>

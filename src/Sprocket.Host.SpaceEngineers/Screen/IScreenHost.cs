@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
@@ -23,5 +24,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         /// <summary>Sends text to core.</summary>
         void SetText(int command, string text);
+
+        /// <summary>Puts the caret in a box a view shows, as pressing the box would.</summary>
+        void Take(TextBox box);
     }
 }

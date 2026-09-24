@@ -61,7 +61,7 @@ static class Driving
         editor.Screen.Components.OfType<StatusListComponent>().Last();
 
     static IEnumerable<PickStage> Stages(this SprocketEditor editor) =>
-        editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages);
+        editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages.Skip(p.Page));
 
     /// <summary>Presses a block's row, which takes that block and drops whatever was taken before.</summary>
     public static void PressBlock(this SprocketEditor editor, string name)
@@ -188,21 +188,6 @@ static class Driving
 
     /// <summary>The way back on a screen that carries one, which is screen furniture.</summary>
     public static EditorScreen Steps(this SprocketEditor editor) => editor.Screen;
-
-    /// <summary>
-    /// Presses the cross beside what a trigger does, which asks the whole question again.
-    /// </summary>
-    /// <remarks>
-    /// Found rather than counted: which part of the sentence carries it is core's decision, and a
-    /// test holding a number would be asserting that decision on its way somewhere else.
-    /// </remarks>
-    public static void PressClear(this SprocketEditor editor, int which)
-    {
-        SentenceTrigger trigger = editor.Triggers()[which];
-        SentenceSlot slot = trigger.Does.First(s => s.ClearCommand != 0);
-
-        editor.Invoke(slot.ClearCommand);
-    }
 
     /// <summary>Presses the part of a trigger that says when it happens.</summary>
     public static void PressWhen(this SprocketEditor editor, int which) =>

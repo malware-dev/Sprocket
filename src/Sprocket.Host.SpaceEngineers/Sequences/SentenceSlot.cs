@@ -60,18 +60,5 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// thrown them away.
         /// </remarks>
         public virtual IList<string> Filled => null;
-
-        /// <summary>
-        /// Empties this part, where emptying it is a thing to offer. Zero where it is not.
-        /// </summary>
-        /// <remarks>
-        /// Pressing a slot changes what is in it; this takes what is in it away, and the two are
-        /// different intentions.
-        /// <para>
-        /// The slot, not the things named in it. Taking one block out of three is an answer to the
-        /// picker, which is where that choice was made.
-        /// </para>
-        /// </remarks>
-        public int ClearCommand { get; set; }
     }
 }

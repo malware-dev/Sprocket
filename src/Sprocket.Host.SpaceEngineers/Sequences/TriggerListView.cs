@@ -35,10 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             /// <summary>The word before each part of what it does, hidden where there is none.</summary>
             public readonly List<Label> Joins = new List<Label>();
 
-            /// <summary>The crosses, and which part of the sentence each one belongs to.</summary>
-            public readonly List<Glyph> Clears = new List<Glyph>();
-            public readonly List<int> ClearsAt = new List<int>();
-
             /// <summary>What each part was last given, so an unchanged one is not worded again.</summary>
             public readonly List<SentenceSlot> Shown = new List<SentenceSlot>();
 
@@ -130,13 +126,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Fill(row, row.Starts, trigger.Slots, 0);
             Fill(row, row.Does, trigger.Does, trigger.Slots.Count);
 
-            for (int i = 0; i < row.Clears.Count && i < row.ClearsAt.Count; i++)
-            {
-                SentenceSlot slot = Part(trigger, row.ClearsAt[i], trigger.Slots.Count);
-                Widgets.Waiting(row.Clears[i], slot == null ? 0 : slot.ClearCommand,
-                    "Ask again what this should do");
-            }
-
             // Idle while the signal reads true is not a contradiction. It is the difference between a
             // moment and a situation, shown rather than explained.
             row.Live.Collapsed = !trigger.IsLiveNow;
@@ -149,16 +138,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             row.Line.Background = trigger.Problem.Length > 0 ? Palette.ProblemWash : Palette.None;
 
             Widgets.Waiting(row.Delete, trigger.DeleteCommand, "Delete this trigger");
-        }
-
-        /// <summary>The slot a part of the row stands for, whichever half it is in.</summary>
-        static SentenceSlot Part(SentenceTrigger trigger, int at, int starts)
-        {
-            if (at < starts)
-                return at < trigger.Slots.Count ? trigger.Slots[at] : null;
-
-            var into = at - starts;
-            return into < trigger.Does.Count ? trigger.Does[into] : null;
         }
 
         void Fill(Row row, List<Element> parts, List<SentenceSlot> slots, int from)
@@ -208,7 +187,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             row.Sentence.Children.Add(row.Lead);
 
             for (int i = 0; i < trigger.Slots.Count; i++)
-                Chip(row, row.Starts, row.Sentence, trigger.Slots[i]);
+                Chip(row, row.Starts, row.Sentence);
 
             row.Sentence.Children.Add(row.Between);
 
@@ -220,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 row.Joins.Add(join);
                 row.Sentence.Children.Add(join);
 
-                Chip(row, row.Does, row.Sentence, trigger.Does[i]);
+                Chip(row, row.Does, row.Sentence);
             }
 
             row.Sentence.Children.Add(row.Live);
@@ -248,33 +227,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return row;
         }
 
-        /// <summary>
-        /// One part of the sentence, with the cross inside it where it has one.
-        /// </summary>
-        /// <remarks>
-        /// Inside the chip, because what it empties is that chip. A mark in the gap beside it reads
-        /// as belonging to the whole sentence, and the sentence has its own mark at the end of the
-        /// row - which destroys the trigger rather than emptying a part of it.
-        /// </remarks>
-        static void Chip(Row row, List<Element> parts, Wrap into, SentenceSlot slot)
+        /// <summary>One part of the sentence.</summary>
+        static void Chip(Row row, List<Element> parts, Wrap into)
         {
             var part = new Slot();
             parts.Add(part);
             row.Shown.Add(null);
             into.Children.Add(part);
-
-            if (slot.ClearCommand == 0)
-                return;
-
-            // Putting away rather than destroying, which is what the two marks are for: this takes
-            // back the answer, where the bin at the end of the row takes the trigger itself.
-            Glyph clear = Widgets.Symbol(Symbols.Close, Palette.Faint);
-            clear.Highlight = Palette.Panel;
-
-            part.Clear = clear;
-
-            row.Clears.Add(clear);
-            row.ClearsAt.Add(row.Shown.Count - 1);
         }
     }
 }
