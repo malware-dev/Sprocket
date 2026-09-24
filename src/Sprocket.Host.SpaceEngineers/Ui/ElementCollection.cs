@@ -31,17 +31,38 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             return _items.GetEnumerator();
         }
 
-        /// <summary>Adds <paramref name="child" /> and adopts it. A child already somewhere else moves.</summary>
+        /// <summary>Adds <paramref name="child" /> at the end and adopts it, moving it from wherever it was.</summary>
         public void Add(Element child)
+        {
+            Insert(_items.Count, child);
+        }
+
+        /// <summary>Puts <paramref name="child" /> at <paramref name="index" /> and adopts it, moving it from wherever it was.</summary>
+        /// <remarks>Throws, leaving everything as it was, when the owner cannot place the child as its placement asks.</remarks>
+        public void Insert(int index, Element child)
         {
             if (child == null || child == _owner)
                 return;
 
-            child.Holder?.Remove(child);
+            _owner.Admit(child, child.Placement);
 
-            _items.Add(child);
+            if (child.Holder != null)
+            {
+                if (child.Holder == this && _items.IndexOf(child) < index)
+                    index--;
+
+                child.Holder.Remove(child);
+            }
+
+            if (index < 0)
+                index = 0;
+            if (index > _items.Count)
+                index = _items.Count;
+
+            _items.Insert(index, child);
             child.Parent = _owner;
             child.Holder = this;
+            _owner.Joined(child, index);
 
             // A child never measured is already dirty, so its own invalidation stops at itself and never
             // reaches the owner.
@@ -49,14 +70,26 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             _owner.InvalidateMeasure();
         }
 
+        /// <summary>Where <paramref name="child" /> is, or -1 when it is not here.</summary>
+        public int IndexOf(Element child)
+        {
+            return _items.IndexOf(child);
+        }
+
         /// <summary>Takes <paramref name="child" /> out and orphans it, and says whether it was here.</summary>
         public bool Remove(Element child)
         {
-            if (child == null || !_items.Remove(child))
+            if (child == null)
                 return false;
 
+            var index = _items.IndexOf(child);
+            if (index < 0)
+                return false;
+
+            _items.RemoveAt(index);
             child.Parent = null;
             child.Holder = null;
+            _owner.Released(child, index);
             _owner.InvalidateMeasure();
             return true;
         }
@@ -64,13 +97,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         /// <summary>Takes every child out and orphans them.</summary>
         public void Clear()
         {
-            for (var i = 0; i < _items.Count; i++)
+            for (var i = _items.Count - 1; i >= 0; i--)
             {
-                _items[i].Parent = null;
-                _items[i].Holder = null;
+                var child = _items[i];
+                _items.RemoveAt(i);
+                child.Parent = null;
+                child.Holder = null;
+                _owner.Released(child, i);
             }
 
-            _items.Clear();
             _owner.InvalidateMeasure();
         }
 

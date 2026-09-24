@@ -1,3 +1,4 @@
+using System;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Look;
@@ -9,6 +10,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui
     /// <summary>Anything that occupies a rectangle and draws in it.</summary>
     public abstract class Element
     {
+        /// <summary>Room along an axis that stands for no limit at all, as a scroll gives its content.</summary>
+        /// <remarks>Finite, because a stack subtracts from what it was offered as it goes.</remarks>
+        public const float Unbounded = 1000000f;
+
         /// <summary>A flat white texture, tinted to whatever colour is wanted.</summary>
         protected static readonly MyStringId Solid = Symbols.Fill;
 
@@ -21,6 +26,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         Vector2 _measuredFor;
         Vector2 _offset;
         Thickness _padding;
+        IPlacement _placement;
+
+        /// <summary>Held so that listening to a placement allocates once in this element's life.</summary>
+        Action _placementChanged;
 
         Deed _press;
 
@@ -29,6 +38,33 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         /// <summary>The collection this sits in, so being added somewhere else can take it out of where it was.</summary>
         internal ElementCollection Holder { get; set; }
+
+        /// <summary>How whatever holds this is asked to place it, or null for the holder's own default.</summary>
+        /// <remarks>Throws, leaving the placement as it was, when the holder cannot place this that way.</remarks>
+        public IPlacement Placement
+        {
+            get { return _placement; }
+            set
+            {
+                if (_placement == value)
+                    return;
+
+                Parent?.Admit(this, value);
+
+                if (_placementChanged == null)
+                    _placementChanged = PlacementChanged;
+
+                if (_placement != null)
+                    _placement.Changed -= _placementChanged;
+
+                _placement = value;
+
+                if (_placement != null)
+                    _placement.Changed += _placementChanged;
+
+                PlacementChanged();
+            }
+        }
 
         /// <summary>Painted across <see cref="Bounds" /> before anything else.</summary>
         public Color Background { get; set; }
@@ -331,6 +367,38 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             }
 
             return null;
+        }
+
+        /// <summary>Checks that this can place <paramref name="child" /> by <paramref name="placement" />, before it joins or changes.</summary>
+        /// <remarks>A container that cannot place it throws.</remarks>
+        internal virtual void Admit(Element child, IPlacement placement)
+        {
+        }
+
+        /// <summary>Told that <paramref name="child" /> has joined this element's children at <paramref name="index" />.</summary>
+        internal virtual void Joined(Element child, int index)
+        {
+        }
+
+        /// <summary>Told that <paramref name="child" /> has left this element's children from <paramref name="index" />.</summary>
+        internal virtual void Released(Element child, int index)
+        {
+        }
+
+        /// <summary>Told that the placement of <paramref name="child" />, one of this element's children, has changed.</summary>
+        internal virtual void Replaced(Element child)
+        {
+        }
+
+        void PlacementChanged()
+        {
+            InvalidateMeasure();
+
+            if (Parent == null)
+                return;
+
+            Parent.Replaced(this);
+            Parent.InvalidateMeasure();
         }
     }
 }

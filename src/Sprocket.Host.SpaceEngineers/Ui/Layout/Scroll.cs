@@ -7,10 +7,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
     /// <summary>Shows part of something taller than the room available, and cuts the rest off.</summary>
     public class Scroll : Element
     {
-        /// <summary>The length offered to content along the direction of travel when measuring.</summary>
-        /// <remarks>Finite, because a stack subtracts from what it was offered as it goes.</remarks>
-        const float Unbounded = 1000000f;
-
         readonly ElementCollection _children;
 
         /// <summary>Where along the content this sits.</summary>
