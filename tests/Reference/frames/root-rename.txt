@@ -5,22 +5,22 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Automation for Test Rig
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:171 W:1402 H:782}
-002  Text       at {X:265 Y:177.292} scale 0.57  #A2C3CDFF  "Nothing automated here yet."
+001  SetClip    {X:259 Y:174 W:1402 H:779}
+002  Text       at {X:265 Y:180.472} scale 0.57  #A2C3CDFF  "Nothing automated here yet."
 003  ClearClip  
-004  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ New system…"
-005  Text       at {X:432.2733 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load system"
-006  Sprite     Sprocket_Fill         {X:259 Y:160 W:1402 H:1}  #5B737BFF
-007  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-008  Text       at {X:275.8467 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
-009  SetClip    {X:451 Y:55 W:96 H:33}
-010  Sprite     Sprocket_Fill         {X:451 Y:55 W:86 H:33}  #3C4C52FF
-011  Sprite     Sprocket_Fill         {X:451 Y:55 W:86 H:33}  #5B737BFF
-012  Text       at {X:451.0733 Y:54.71198} scale 0.9  #DCF5FDFF  "Test Rig"
-013  Sprite     Sprocket_Fill         {X:537 Y:55 W:2 H:33}  #DCF5FDFF
+004  Text       at {X:271.8 Y:125.992} scale 0.64  #A2C3CDFF  "+ New system…"
+005  Text       at {X:432.2733 Y:125.992} scale 0.64  #A2C3CDFF  "+ Load system"
+006  Sprite     Sprocket_Fill         {X:259 Y:163 W:1402 H:1}  #5B737BFF
+007  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
+008  Text       at {X:301.48 Y:56.30198} scale 0.9  #A2C3CDFF  "Automation for"
+009  SetClip    {X:477 Y:56 W:126 H:33}
+010  Sprite     Sprocket_Fill         {X:477 Y:56 W:86 H:33}  #3C4C52FF
+011  Sprite     Sprocket_Fill         {X:477 Y:56 W:86 H:33}  #5B737BFF
+012  Text       at {X:476.7067 Y:56.30198} scale 0.9  #DCF5FDFF  "Test Rig"
+013  Sprite     Sprocket_Fill         {X:562 Y:56 W:2 H:33}  #DCF5FDFF
 014  ClearClip  
-015  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-016  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-017  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
+015  Text       at {X:259 Y:50.22493} scale 0.57  #A2C3CDFF  "<"
+016  Text       at {X:1624.52 Y:50.22493} scale 0.57  #A2C3CDFF  "s"
+017  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 018  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 019  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

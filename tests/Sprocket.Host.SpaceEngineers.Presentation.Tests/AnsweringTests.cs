@@ -13,8 +13,8 @@ public class AnsweringTests
 {
     /// <summary>A sequence built and left while still switched off, which is what raises one.</summary>
     const string LeavingASequence =
-        "60 130 type Airlock enter 60 161 200 375 560 357 1353 311 70 193 "
-        + "150 200 type Tug 200 351 800 584 1345 206 1345 316 enter 19 62";
+        "60 133 type Airlock enter 60 164 200 384 560 360 1353 314 70 200 "
+        + "150 203 type Tug 200 360 800 587 1316 201 1316 319 enter 19 54";
 
     [Fact]
     public void EnterTakesTheAnswerThePageNamed()

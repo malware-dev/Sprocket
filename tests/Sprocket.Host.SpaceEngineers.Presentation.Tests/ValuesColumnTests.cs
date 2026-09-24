@@ -14,12 +14,12 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class ValuesColumnTests
 {
     /// <summary>A sequence with a light picked in a step's picker, and nothing chosen for it yet.</summary>
-    const string ALight = "60 130 type Airlock enter 60 161 200 375 560 357 1353 311 70 193 200 476";
+    const string ALight = "60 133 type Airlock enter 60 164 200 384 560 360 1353 314 70 200 200 485";
 
-    const string SetRadius = "800 676";
-    const string SetColour = "800 584";
-    const string RadiusBox = "1315 206";
-    const string Done = "1365 260";
+    const string SetRadius = "800 679";
+    const string SetColour = "800 587";
+    const string RadiusBox = "1315 209";
+    const string Done = "1365 263";
 
     static Screen Open(string then)
     {
@@ -101,7 +101,7 @@ public class ValuesColumnTests
     [Fact]
     public void ADoublePressOnSomethingThatTakesNothingFinishes()
     {
-        var screen = Open("double 800 457");
+        var screen = Open("double 800 460");
 
         Assert.Equal("Sequence 1", screen.Ended);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
@@ -124,7 +124,7 @@ public class ValuesColumnTests
     [Fact]
     public void PressingAStepsValuesOpensItsPickerOnThem()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " 447 185");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " 447 192");
 
         Assert.Equal("Do something", screen.Ended);
         Assert.False(screen.Scene.IsAsking, "a dialog was raised");
@@ -136,11 +136,11 @@ public class ValuesColumnTests
     /// Leaving asks about any change: a value, or what is done, as well as the blocks.
     /// </summary>
     [Theory]
-    [InlineData("447 185 type 7 escape")]
-    [InlineData("270 175 800 584")]
+    [InlineData("447 192 type 7 escape")]
+    [InlineData("270 182 800 587")]
     public void LeavingAsksAboutAnyChange(string change)
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 19 62");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 19 54");
 
         Assert.True(screen.Scene.IsQuestioning, "leaving asked nothing");
         Assert.True(screen.Shows("Keep your changes?"), "the question is not about changes");
@@ -150,7 +150,7 @@ public class ValuesColumnTests
     [Fact]
     public void LeavingAsksNothingWhereNothingChanged()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 447 185 escape 19 62");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 447 192 escape 19 54");
 
         Assert.False(screen.Scene.IsQuestioning, "leaving asked about 5 shown as 5.0");
         Assert.Equal("Sequence 1", screen.Ended);

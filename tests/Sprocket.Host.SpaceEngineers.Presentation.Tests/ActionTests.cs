@@ -216,13 +216,13 @@ public class ActionTests
     [Fact]
     public void TheTabIsPressedWhereItIsDrawn()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
-            + "70 193 200 500").Split(' '));
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+            + "70 200 200 509").Split(' '));
 
         PickStage what = screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
         Assert.NotEqual(0, what.Views[1].Command);
 
-        screen.Do("820", "244");
+        screen.Do("820", "247");
         Assert.True(screen.Editor.ShowsTerminal, "pressing the tab did not change the view");
         Assert.True(screen.Shows("Toggle block On/Off"), "the block's own words are not listed");
     }
@@ -428,18 +428,18 @@ public class ActionTests
     [Fact]
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
-            + "70 193 150 200 type Approach 200 351 800 584").Split(' '));
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+            + "70 200 150 203 type Approach 200 360 800 587").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
         Assert.Equal(2, screen.Editor.Screen.PrimaryFields.Single().Words.Count);
 
         // The half that was pressed, not a toggle: the control shows both of its positions.
-        screen.Do("1313", "198");
+        screen.Do("1313", "201");
         Assert.Equal("on", screen.Scene.Typing.Text);
 
-        screen.Do("1373", "198");
+        screen.Do("1373", "201");
         Assert.Equal("off", screen.Scene.Typing.Text);
     }
 
@@ -454,17 +454,17 @@ public class ActionTests
     [Fact]
     public void AColourIsChosenByPressingOne()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
-            + "70 193 200 476 800 584").Split(' '));
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+            + "70 200 200 485 800 587").Split(' '));
 
 
         // The third of the fourteen. They are the harness's stand-in for a player who has painted.
-        screen.Do("1064", "195");
+        screen.Do("1064", "198");
         Assert.Equal("#386285", screen.Scene.Typing.Text);
 
         // And the far left of the hue track is red, at whatever saturation and value were already
         // chosen: one slider owns one axis and leaves the other two where they stood.
-        screen.Do("1000", "262");
+        screen.Do("1000", "265");
         Assert.Equal("#853838", screen.Scene.Typing.Text);
     }
 
@@ -480,13 +480,13 @@ public class ActionTests
     [Fact]
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
-            + "70 193 150 200 type Standby 200 351 800 410").Split(' '));
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+            + "70 200 150 203 type Standby 200 360 800 413").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
             "the column does not show what the value may be");
 
-        screen.Do("1247", "198");
+        screen.Do("1247", "201");
         Assert.Equal("Recharge", screen.Scene.Typing.Text);
 
         screen.Do("enter");
@@ -512,19 +512,19 @@ public class ActionTests
     [Fact]
     public void MoreChoicesThanFitFoldIntoAList()
     {
-        var screen = Screen.Fresh(("60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
-            + "70 193 150 200 type Tug 200 351 800 584").Split(' '));
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+            + "70 200 150 203 type Tug 200 360 800 587").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");
 
         // Closed, so none of the six is on the screen and neither is a choice nobody has made.
         Assert.False(screen.Shows("Backward"), "the list is showing while it is shut");
 
-        screen.Do("1345", "206");
+        screen.Do("1316", "201");
         Assert.True(screen.Shows("Backward") && screen.Shows("Down"),
             "pressing the box did not open the list");
 
-        screen.Do("1345", "316");
+        screen.Do("1316", "319");
         Assert.Equal("Left", screen.Scene.Typing.Text);
         Assert.False(screen.Shows("Down"), "choosing did not put the list away");
 

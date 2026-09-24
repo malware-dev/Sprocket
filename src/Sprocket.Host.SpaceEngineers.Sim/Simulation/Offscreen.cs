@@ -36,22 +36,14 @@ namespace Sprocket.Sim.Simulation
 
             _device = new ScreenSpaceDevice();
 
-            // The letters are a stand-in, because the game's own widths need the game. The monospace
-            // face is not: it is in the build output, so it is measured exactly and a frame holding a
-            // listing reproduces on a machine that has never had Space Engineers. It matters more for
-            // that face than for any other, because a fixed-width one measured with a proportional
-            // stand-in reports columns lining up when they do not.
-            //
-            // <b>The symbol font is deliberately left on the stand-in, and that is a known
-            // disagreement.</b> The window measures it exactly and this does not, so a symbol occupies
-            // a different box in a recorded frame than it does in the game - the symbol font declares a
-            // line of 53 where the stand-in answers 37 for everything. Putting it right moves every
-            // recorded frame that holds a symbol and changes where the back arrow sits against a
-            // heading, which is a question about the heading rather than about fonts.
+            // The letters are a stand-in, because the game's own widths need the game. The mod's own two
+            // faces are not: they are in the build output, so they are measured exactly and a frame
+            // reproduces on a machine that has never had Space Engineers.
             string maltek = Path.Combine(AppContext.BaseDirectory, "Content", "Fonts", "Maltek");
 
             _device.Fonts = new FontSet(new FallbackFonts(_device, "Segoe UI"))
-                .And(Lettering.Mono, Ours(maltek, "MaltekMono"));
+                .And(Lettering.Mono, Ours(maltek, "MaltekMono"))
+                .And(Symbols.Font, Ours(maltek, "MaltekSymbols"));
 
             _device.Install();
 
