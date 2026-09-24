@@ -27,9 +27,9 @@ on screen     Airlock
 020  Text       at {X:271.8 Y:307.952} scale 0.64  #A2C3CDFF  "+ New sequence"
 021  Sprite     Sprocket_Fill         {X:259 Y:345 W:1390 H:1}  #5B737BFF
 022  Sprite     Sprocket_Fill         {X:259 Y:356 W:1390 H:72}  #29363EFF
-023  Text       at {X:310 Y:370.432} scale 0.64  #DCF5FDFF  "Sequence 1"
-024  Text       at {X:310 Y:395.912} scale 0.5  #85A1A9FF  "switched off"
-025  Sprite     Sprocket_Fill         {X:278 Y:386 W:13 H:13}  #5F7278FF
+023  Sprite     Sprocket_Fill         {X:278 Y:386 W:13 H:13}  #5F7278FF
+024  Text       at {X:310 Y:370.432} scale 0.64  #DCF5FDFF  "Sequence 1"
+025  Text       at {X:310 Y:395.912} scale 0.5  #85A1A9FF  "switched off"
 026  Text       at {X:1453.9 Y:381.877} scale 0.57  #A2C3CDFF  "g"
 027  Text       at {X:1473.237 Y:381.877} scale 0.57  #85A1A9FF  "2"
 028  Sprite     Sprocket_Fill         {X:1492 Y:376 W:119 H:1}  #5F7278FF

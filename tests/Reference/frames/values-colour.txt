@@ -252,27 +252,27 @@ on screen     Do something
 245  Sprite     Sprocket_Fill         {X:1289 Y:245 W:31 H:1}  #1B242AFF
 246  Sprite     Sprocket_Fill         {X:1289 Y:220 W:1 H:26}  #1B242AFF
 247  Sprite     Sprocket_Fill         {X:1319 Y:220 W:1 H:26}  #1B242AFF
-248  Sprite     Sprocket_Fill         {X:1239 Y:256 W:298 H:1}  #5B737BFF
-249  Sprite     Sprocket_Fill         {X:1239 Y:279 W:298 H:1}  #5B737BFF
-250  Sprite     Sprocket_Fill         {X:1239 Y:256 W:1 H:24}  #5B737BFF
-251  Sprite     Sprocket_Fill         {X:1536 Y:256 W:1 H:24}  #5B737BFF
-252  Sprite     Sprocket_Hue          {X:1239 Y:256 W:298 H:24}  #FFFFFFFF
-253  Sprite     Sprocket_Fill         {X:1239 Y:253 W:8 H:30}  #DCF5FDFF
-254  Text       at {X:1215 Y:257.647} scale 0.57  #A2C3CDFF  "H"
-255  Sprite     Sprocket_Fill         {X:1239 Y:290 W:298 H:1}  #5B737BFF
-256  Sprite     Sprocket_Fill         {X:1239 Y:313 W:298 H:1}  #5B737BFF
-257  Sprite     Sprocket_Fill         {X:1239 Y:290 W:1 H:24}  #5B737BFF
-258  Sprite     Sprocket_Fill         {X:1536 Y:290 W:1 H:24}  #5B737BFF
-259  Sprite     Sprocket_Fill         {X:1239 Y:290 W:298 H:24}  #0C1216FF
-260  Sprite     Sprocket_Fill         {X:1239 Y:287 W:8 H:30}  #DCF5FDFF
-261  Text       at {X:1215 Y:291.647} scale 0.57  #A2C3CDFF  "S"
-262  Sprite     Sprocket_Fill         {X:1239 Y:324 W:298 H:1}  #5B737BFF
-263  Sprite     Sprocket_Fill         {X:1239 Y:347 W:298 H:1}  #5B737BFF
-264  Sprite     Sprocket_Fill         {X:1239 Y:324 W:1 H:24}  #5B737BFF
-265  Sprite     Sprocket_Fill         {X:1536 Y:324 W:1 H:24}  #5B737BFF
-266  Sprite     Sprocket_Fill         {X:1239 Y:324 W:298 H:24}  #0C1216FF
-267  Sprite     Sprocket_Fill         {X:1529 Y:321 W:8 H:30}  #DCF5FDFF
-268  Text       at {X:1215 Y:325.647} scale 0.57  #A2C3CDFF  "V"
+248  Text       at {X:1215 Y:257.647} scale 0.57  #A2C3CDFF  "H"
+249  Sprite     Sprocket_Fill         {X:1239 Y:256 W:298 H:1}  #5B737BFF
+250  Sprite     Sprocket_Fill         {X:1239 Y:279 W:298 H:1}  #5B737BFF
+251  Sprite     Sprocket_Fill         {X:1239 Y:256 W:1 H:24}  #5B737BFF
+252  Sprite     Sprocket_Fill         {X:1536 Y:256 W:1 H:24}  #5B737BFF
+253  Sprite     Sprocket_Hue          {X:1239 Y:256 W:298 H:24}  #FFFFFFFF
+254  Sprite     Sprocket_Fill         {X:1239 Y:253 W:8 H:30}  #DCF5FDFF
+255  Text       at {X:1215 Y:291.647} scale 0.57  #A2C3CDFF  "S"
+256  Sprite     Sprocket_Fill         {X:1239 Y:290 W:298 H:1}  #5B737BFF
+257  Sprite     Sprocket_Fill         {X:1239 Y:313 W:298 H:1}  #5B737BFF
+258  Sprite     Sprocket_Fill         {X:1239 Y:290 W:1 H:24}  #5B737BFF
+259  Sprite     Sprocket_Fill         {X:1536 Y:290 W:1 H:24}  #5B737BFF
+260  Sprite     Sprocket_Fill         {X:1239 Y:290 W:298 H:24}  #0C1216FF
+261  Sprite     Sprocket_Fill         {X:1239 Y:287 W:8 H:30}  #DCF5FDFF
+262  Text       at {X:1215 Y:325.647} scale 0.57  #A2C3CDFF  "V"
+263  Sprite     Sprocket_Fill         {X:1239 Y:324 W:298 H:1}  #5B737BFF
+264  Sprite     Sprocket_Fill         {X:1239 Y:347 W:298 H:1}  #5B737BFF
+265  Sprite     Sprocket_Fill         {X:1239 Y:324 W:1 H:24}  #5B737BFF
+266  Sprite     Sprocket_Fill         {X:1536 Y:324 W:1 H:24}  #5B737BFF
+267  Sprite     Sprocket_Fill         {X:1239 Y:324 W:298 H:24}  #0C1216FF
+268  Sprite     Sprocket_Fill         {X:1529 Y:321 W:8 H:30}  #DCF5FDFF
 269  Sprite     Sprocket_Fill         {X:1547 Y:256 W:96 H:92}  #141B20FF
 270  Sprite     Sprocket_Fill         {X:1547 Y:256 W:96 H:1}  #5B737BFF
 271  Sprite     Sprocket_Fill         {X:1547 Y:347 W:96 H:1}  #5B737BFF
