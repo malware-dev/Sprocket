@@ -5,46 +5,37 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 {
-    /// <summary>
-    ///     The screen the game gives a mod to draw on.
-    /// </summary>
+    /// <summary>The screen the game gives a mod to draw on, in the game's own terms.</summary>
     /// <remarks>
-    ///     Everything here is the game's own screen-space API said once, in the game's own terms: pixels,
-    ///     layers, materials. <see cref="ScreenSpaceGraphics" /> is what turns a layout's units into those,
-    ///     and <see cref="GameScreenSpace" /> is the game behind it.
-    ///     <para>
-    ///         It exists so a frame can be recorded rather than drawn. The harness answers these calls by
-    ///         writing them down, which is what the reference frames are, and it is the only way to compare
-    ///         what a screen drew with what it drew yesterday.
-    ///     </para>
-    ///     <para>
-    ///         <b>A scissor is pushed and popped rather than handed back as something to dispose.</b> The
-    ///         game's own is a struct scope, and an interface returning it as <c>IDisposable</c> would box one
-    ///         per clipped element per frame. So the stack belongs to whoever implements this.
-    ///     </para>
+    ///     The harness implements this to record a frame instead of drawing it. The game's scissor is a
+    ///     struct scope, so each implementation keeps its own stack of them.
     /// </remarks>
     public interface IScreenSpace
     {
         /// <summary>The area the game promises is on screen, in pixels.</summary>
         RectangleF SafeArea { get; }
 
-        /// <summary>
-        ///     The whole window in pixels, which is wider than the safe area on anything but 4:3.
-        /// </summary>
-        /// <remarks>
-        ///     A pointer belongs in this one: the game lets its own cursor reach the physical edges of the
-        ///     screen rather than the edges of its HUD.
-        /// </remarks>
+        /// <summary>The whole window in pixels, which is wider than the safe area on anything but 4:3.</summary>
+        /// <remarks>The game's own cursor reaches the edges of this, not of the safe area.</remarks>
         Vector2 ViewportSize { get; }
 
+        /// <summary>
+        ///     Cuts what is drawn on <paramref name="layer" /> to <paramref name="pixels" /> until the matching pop.
+        /// </summary>
         void PushScissor(Rectangle pixels, MyScreenSpaceLayer layer);
 
         /// <summary>Drops the innermost scissor, putting its parent's back.</summary>
         void PopScissor(MyScreenSpaceLayer layer);
 
+        /// <summary>
+        ///     Draws <paramref name="material" /> stretched over <paramref name="destination" />, tinted and rotated.
+        /// </summary>
         void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,
             MyScreenSpaceLayer layer);
 
+        /// <summary>
+        ///     Draws one run of text at <paramref name="position" />, placed about it as <paramref name="align" /> says.
+        /// </summary>
         void DrawText(string font, string text, Vector2 position, float scale, Color color,
             MyGuiDrawAlignEnum align, float maxWidth, MyScreenSpaceLayer layer);
 
@@ -57,14 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         /// <summary>Where the pointer is in pixels, or false where the game is not showing one.</summary>
         bool TryCursorPixels(out Vector2 pixels);
 
-        /// <summary>
-        ///     A point in the game's own normalized units, in pixels.
-        /// </summary>
-        /// <remarks>
-        ///     The game places a screen in fractions of the window and answers questions about it in
-        ///     pixels, so a screen host has to convert between the two. The conversion is the game's, not
-        ///     arithmetic worth reproducing.
-        /// </remarks>
+        /// <summary>A point in the game's own normalized units, in pixels.</summary>
         Vector2 NormalizedToPixels(Vector2 position);
 
         /// <summary>A size in the game's own normalized units, in pixels.</summary>

@@ -1,25 +1,12 @@
 namespace Sprocket.Host.SpaceEngineers.Ui.Look
 {
-    /// <summary>
-    ///     Room, named for what it separates.
-    /// </summary>
-    /// <remarks>
-    ///     Here for the same reason <see cref="Lettering" /> is: these were sixty literals scattered across five
-    ///     files, every one of them a judgement about how much air something needs, and none of them
-    ///     findable. Naming them makes a pass over the whole look six numbers rather than an archaeology
-    ///     expedition.
-    ///     <para>
-    ///         Sized for one of the game's own screens, which is four by three at the full height of the
-    ///         monitor - considerably more room than a window somebody sized with a mouse, and small numbers
-    ///         carried over from one would leave a third of this empty out of habit.
-    ///     </para>
-    /// </remarks>
+    /// <summary>Room, named for what it separates.</summary>
     public static class Space
     {
-        /// <summary>A rule. One unit is one pixel at the height the UI is defined against.</summary>
+        /// <summary>A rule.</summary>
         public const float Hair = 1f;
 
-        /// <summary>Between two lines that are one thing - a name, and what it is doing.</summary>
+        /// <summary>Between two lines that are one thing: a name, and what it is doing.</summary>
         public const float Line = 3f;
 
         /// <summary>Between one row of a list and the next.</summary>
@@ -34,18 +21,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Look
         /// <summary>Inside a row, across.</summary>
         public const float PadX = 19f;
 
-        /// <summary>Inside a row, down. Less than across, because a line of text is wider than it is tall.</summary>
+        /// <summary>Inside a row, down.</summary>
         public const float PadY = 14f;
 
-        /// <summary>Inside something small that is not a row - a chip, a switch, a quiet control.</summary>
+        /// <summary>Inside something small that is not a row: a chip, a switch, a quiet control.</summary>
         public const float ChipX = 16f;
 
+        /// <summary>Inside something small that is not a row, down.</summary>
         public const float ChipY = 6f;
 
-        /// <summary>
-        ///     Inside anything a value is given in, down: a box, a switch, a choice. The one number that
-        ///     makes all of them one height when their words are one size.
-        /// </summary>
+        /// <summary>Inside anything a value is given in, down: a box, a switch, a choice.</summary>
+        /// <remarks>Shared, so that all of them are one height when their words are one size.</remarks>
         public const float FieldY = ChipY * 1.3f;
     }
 }

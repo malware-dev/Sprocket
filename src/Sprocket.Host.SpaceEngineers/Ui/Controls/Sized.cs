@@ -4,11 +4,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>Something held to a width, whatever it would rather be.</summary>
-    /// <remarks>
-    ///     Columns need this and nothing else does yet. A stack hands every child the width it asked for, and
-    ///     a scrolling column asks for everything on offer, so without a cap the first column would take the
-    ///     screen and the rest would have nowhere to go.
-    /// </remarks>
     public class Sized : Element
     {
         readonly ElementCollection _children;
@@ -16,12 +11,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         Element _content;
         float _width;
 
+        /// <summary>Makes a holder <paramref name="width" /> wide, empty until given <see cref="Content" />.</summary>
         public Sized(float width)
         {
             _children = new ElementCollection(this);
             Width = width;
         }
 
+        /// <summary>The width the content is held to.</summary>
         public float Width
         {
             get { return _width; }
@@ -35,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
+        /// <summary>The one thing held.</summary>
         public Element Content
         {
             get { return _content; }
@@ -53,6 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             if (_content == null)
@@ -62,16 +61,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             return new Vector2(Width, _content.DesiredSize.Y);
         }
 
+        /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
             _content?.Arrange(new RectangleF(bounds.X, bounds.Y, Width, bounds.Height));
         }
 
+        /// <inheritdoc />
         protected override Element UnderContent(Vector2 point)
         {
             return _content?.Under(point);
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
             _content?.Draw(g);

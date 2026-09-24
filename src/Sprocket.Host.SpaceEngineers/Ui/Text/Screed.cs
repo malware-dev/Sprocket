@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using VRage.Game;
 using VRageMath;
 
@@ -11,47 +10,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 {
     /// <summary>A long piece of text, and a window onto it that moves both ways.</summary>
     /// <remarks>
-    ///     <b>A viewport rather than something to put in one.</b> It takes the room it is given and moves the
-    ///     text behind it, which is what lets it hold thousands of lines: a <see cref="Scroll" /> arranges its
-    ///     content at full height and a listing arranged at full height is a draw call per line, all but a
-    ///     screenful of them thrown away by the scissor.
-    ///     <para>
-    ///         <b>Down is free.</b> Every line of one face at one scale stands the same height, so how tall the
-    ///         whole is comes out of a multiplication: five thousand lines cost what five do, and only the lines
-    ///         the window is actually over are drawn.
-    ///     </para>
-    ///     <para>
-    ///         <b>Across is learned, never swept.</b> How wide the widest line is cannot be had by arithmetic, and
-    ///         measuring every line to find out is not affordable - timed here at 11ms for five hundred lines and
-    ///         221ms for ten thousand, against a frame of under 17. So a line is measured when it comes into view,
-    ///         and how far there is to go sideways is the widest seen so far. The consequence is deliberate: the
-    ///         sideways thumb settles as somebody explores rather than being right from the first frame. What it
-    ///         is never wrong about is the text on screen, because that is precisely what has been measured.
-    ///     </para>
-    ///     <para>
-    ///         <b>The text can be taken hold of and dragged</b>, either thumb or the words themselves, so reaching
-    ///         a bar is never the only way to get somewhere.
-    ///     </para>
-    ///     <para>
-    ///         <b>Lines are not wrapped.</b> A listing's structure is its lines, and folding the long ones would
-    ///         destroy exactly the thing somebody opened it to read. That is what the sideways axis is for.
-    ///     </para>
-    ///     <para>
-    ///         <b>The text is held as lines, not as one run.</b> Nothing yet changes one of them and this offers no
-    ///         way to - but a caret has to be able to land on a line, and a line has to be able to change without
-    ///         the rest being rebuilt, and holding the lines is what keeps that a later piece of work rather than a
-    ///         rewrite.
-    ///     </para>
+    ///     How far there is to go sideways is the widest line seen so far, so the sideways thumb settles as
+    ///     the text is explored; see <see cref="Widen" />.
     /// </remarks>
     public class Screed : Element
     {
-        /// <summary>
-        ///     Every ending, because text arrives from whatever wrote it.
-        /// </summary>
-        /// <remarks>
-        ///     Held rather than made at the call, which would be an array per assignment.
-        /// </remarks>
-        static readonly string[] _endings = { "\r\n", "\n", "\r" };
+        /// <summary>Every line ending the text may arrive with.</summary>
+        static readonly string[] Endings = { "\r\n", "\n", "\r" };
 
         readonly Rail _across = new Rail();
 
@@ -59,36 +24,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         readonly List<string> _lines = new List<string>();
 
-        /// <summary>
-        ///     The numbers down the gutter, for the lines on screen and no others.
-        /// </summary>
+        /// <summary>The numbers down the gutter, for the lines on screen and no others.</summary>
         /// <remarks>
-        ///     Kept because <c>DrawText</c> wants a string and turning an int into one allocates. Held still
-        ///     this is refilled never; moving refills it once, which is a handful of very small strings for
-        ///     as long as the hand is moving.
+        ///     Kept because <c>DrawText</c> takes a string and formatting a number allocates; refilled only
+        ///     when the band of lines on screen moves.
         /// </remarks>
         readonly List<string> _numbers = new List<string>();
 
-        /// <summary>
-        ///     One line at a time, because measuring is only offered a <c>StringBuilder</c>.
-        /// </summary>
-        /// <remarks>
-        ///     Kept and refilled rather than made per line, so one builder grown to the longest line is the
-        ///     whole allocation however much text goes through it.
-        /// </remarks>
+        /// <summary>Holds one line at a time, because <c>MeasureText</c> takes only a <c>StringBuilder</c>.</summary>
         readonly StringBuilder _scratch = new StringBuilder(128);
 
         float _barWidth;
 
-        /// <summary>
-        ///     The widest of the ten digits, and how wide the gutter therefore is.
-        /// </summary>
-        /// <remarks>
-        ///     Ten measurements, once per face and scale, and the gutter is arithmetic from there: a number
-        ///     of <i>n</i> digits is never wider than <i>n</i> of the widest one. Measuring the numbers
-        ///     actually on screen instead would be exact and would change the gutter's width as somebody
-        ///     scrolled past a longer one, which moves every line of the listing sideways under their eyes.
-        /// </remarks>
+        /// <summary>The widest of the ten digits, which the gutter's width is worked out from.</summary>
         float _digit;
 
         float _digitAt = -1f;
@@ -101,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         float _gutter;
 
-        /// <summary>The line height and the whole height, kept: drawing cannot be invalidated.</summary>
+        /// <summary>The line height, kept because drawing runs every frame.</summary>
         float _line;
 
         float _lineAt = -1f;
@@ -115,15 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         float _scale;
 
-        /// <summary>
-        ///     The lines that were on screen last time it was drawn.
-        /// </summary>
-        /// <remarks>
-        ///     The whole of what it remembers about measuring, and it is two numbers rather than one per
-        ///     line: a line is measured when it falls outside this, so a window held still measures nothing
-        ///     and moving down one line measures one line. Coming back over ground already covered measures
-        ///     it again, which is one line per step and the price of not keeping a note per line.
-        /// </remarks>
+        /// <summary>The lines that were on screen last time it was drawn.</summary>
         int _shownFrom = int.MaxValue;
 
         int _shownTo = int.MinValue;
@@ -133,6 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>The widest line seen so far, which is how far sideways there is to go.</summary>
         float _widest;
 
+        /// <summary>An empty screed in white, at a scale of one, clipped to its bounds.</summary>
         public Screed()
         {
             Font = MyFontEnum.White;
@@ -141,13 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             ClipsContent = true;
         }
 
-        /// <summary>
-        ///     The whole of it, split into lines as it is set.
-        /// </summary>
-        /// <remarks>
-        ///     One pass over the characters, once, when somebody puts text in. Nothing reads the text again:
-        ///     every later question is answered from the lines.
-        /// </remarks>
+        /// <summary>The whole of it, split into lines as it is set.</summary>
         public string Text
         {
             get { return _text; }
@@ -161,14 +96,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 _lines.Clear();
 
                 if (incoming.Length > 0)
-                    _lines.AddRange(incoming.Split(_endings, StringSplitOptions.None));
+                    _lines.AddRange(incoming.Split(Endings, StringSplitOptions.None));
 
                 Forget();
                 InvalidateMeasure();
             }
         }
 
-        /// <summary>Which face it is drawn in. Anything the target knows.</summary>
+        /// <summary>Which face it is drawn in.</summary>
         public string Font
         {
             get { return _font; }
@@ -183,6 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
+        /// <summary>The font scale it is drawn at.</summary>
         public float Scale
         {
             get { return _scale; }
@@ -197,16 +133,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
+        /// <summary>The colour the text is drawn in.</summary>
         public Color Color { get; set; }
 
-        /// <summary>
-        ///     Whether each line is numbered down a gutter on the left.
-        /// </summary>
-        /// <remarks>
-        ///     The gutter belongs to the window rather than to the text: it holds still while the words are
-        ///     dragged sideways past it, because a line number that scrolled off the edge would be no use
-        ///     at exactly the moment somebody is following a long line across.
-        /// </remarks>
+        /// <summary>Whether each line is numbered down a gutter on the left.</summary>
         public bool Numbered
         {
             get { return _numbered; }
@@ -220,10 +150,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>What the numbers are drawn in. Dimmer than the text, or they read as part of it.</summary>
+        /// <summary>What the numbers are drawn in.</summary>
         public Color NumberColor { get; set; }
 
-        /// <summary>How thick the bars are. Zero for none, and then nothing is taken out of the room.</summary>
+        /// <summary>How thick the bars are, or zero for none.</summary>
         public float BarWidth
         {
             get { return _barWidth; }
@@ -237,10 +167,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>The thumbs. Nothing is drawn while this is transparent, whatever the width says.</summary>
+        /// <summary>What colour the thumbs are, where transparent means there are no bars.</summary>
         public Color BarColor { get; set; }
 
-        /// <summary>A thumb while it is being held. Falls back to <see cref="BarColor" />.</summary>
+        /// <summary>A thumb's colour while it is held, or transparent to use <see cref="BarColor" />.</summary>
         public Color BarHeldColor { get; set; }
 
         /// <summary>How short a thumb is allowed to get. See <see cref="Rail.MinThumb" />.</summary>
@@ -254,7 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>Which thumb, if either, is being dragged right now. Only changes a colour.</summary>
+        /// <summary>Which thumb, if either, is being dragged right now.</summary>
         public Way Held { get; set; }
 
         /// <summary>How far down the text has been moved, in UI units.</summary>
@@ -347,23 +277,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return HasBar(way) && Reaches(point) && Inside(Thumb(way), point);
         }
 
-        /// <summary>
-        ///     Takes hold at <paramref name="point" />, of a thumb or of the text itself.
-        /// </summary>
-        /// <remarks>
-        ///     One question rather than three, so a host offers the press once and is told whether it was
-        ///     wanted. Thumbs first: they sit on top of the text's own room and a press there means the bar.
-        /// </remarks>
+        /// <summary>Takes hold at <paramref name="point" />, of a thumb or of the text itself.</summary>
         public bool Take(Vector2 point)
         {
             return Grab(Way.Down, point) || Grab(Way.Across, point) || Pan(point);
         }
 
-        /// <summary>Where the hand has got to. Ignored while nothing is held.</summary>
-        /// <remarks>
-        ///     Panning is direct: the text goes where the hand goes, so the window moves against it. Dragging
-        ///     downwards brings back what is above, which is what taking hold of a sheet of paper does.
-        /// </remarks>
+        /// <summary>Follows the hand to <paramref name="point" />, while something is held.</summary>
         public void Carry(Vector2 point)
         {
             if (Held != Way.None)
@@ -388,13 +308,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             IsPanning = false;
         }
 
-        /// <summary>
-        ///     The room it was given. The text moves behind it rather than it growing to fit the text.
-        /// </summary>
-        /// <remarks>
-        ///     Both extents are worked out here, where the font can be asked questions, and read again during
-        ///     arranging, where it cannot.
-        /// </remarks>
+        /// <summary>Takes all the room it was given.</summary>
+        /// <remarks>Works out the extents here, because arranging has no font to ask.</remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             var line = LineOf(g);
@@ -418,6 +333,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return digits;
         }
 
+        /// <summary>Fits both rails to the room it was given and clamps each offset to its rail.</summary>
         protected override void ArrangeContent(RectangleF bounds)
         {
             var bar = _barWidth > 0f ? _barWidth : 0f;
@@ -425,12 +341,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             _down.Extent = _tall;
             _across.Extent = _widest;
 
-            // The room is taken whether or not there is anything to scroll, so the text does not shuffle
-            // the moment it grows past its box.
+            // Room for the bar is taken even with nothing to scroll, so the text does not move when it
+            // starts to.
             _down.Viewport = Rail.Room(bounds.Height, bar);
 
-            // The gutter is not room the words get, so how far across there is to go is measured
-            // against what is left beside it.
             _across.Viewport = Rail.Room(Rail.Room(bounds.Width, bar), _gutter);
 
             _down.Offset = _down.Clamp(_down.Offset);
@@ -462,8 +376,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 var x = words.X - _across.Offset;
                 var y = top;
 
-                // Narrowed to the words' own room, so a long line stops at the gutter and the bars
-                // rather than running underneath them.
                 g.PushClip(words);
 
                 for (var i = first; i <= last; i++)
@@ -490,14 +402,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             Bar(g, Way.Across);
         }
 
-        /// <summary>
-        ///     The numbers of the lines on screen, right against the words they belong to.
-        /// </summary>
-        /// <remarks>
-        ///     It does not move with <see cref="Shifted" />. Dragging the words sideways leaves the numbers
-        ///     where they are, which is the only arrangement in which they are any use while following a
-        ///     long line across.
-        /// </remarks>
+        /// <summary>The numbers of the lines on screen, right against the words they belong to.</summary>
         void Gutter(IGraphics g, RectangleF view, int first, int last, float top)
         {
             if (_gutter <= 0f || NumberColor.A == 0)
@@ -505,8 +410,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             Number(first, last);
 
-            // Right against the words, every number ending a digit's width short of them. Placed by
-            // its end rather than its start, so nothing here has to know how wide a number is.
             var edge = view.X + _gutter - _digit;
             var y = top;
 
@@ -531,7 +434,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             _numbersTo = last;
             _numbers.Clear();
 
-            // One-based, because the first line of anything anybody reads is line one.
             for (var i = first; i <= last; i++)
                 _numbers.Add((i + 1).ToString());
         }
@@ -592,8 +494,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             if (!HasBar(way))
                 return;
 
-            // No groove behind it, the same as everywhere else: the thumb alone, against whatever the
-            // panel already is.
             var thumb = Held == way && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
             g.DrawSprite(Solid, Thumb(way), thumb, 0f);
         }
@@ -655,19 +555,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return _line;
         }
 
-        /// <summary>
-        ///     Measures one line the first time it is ever drawn, and reaches further if it is the longest yet.
-        /// </summary>
+        /// <summary>Measures a line coming into view, and reaches further if it is the longest yet.</summary>
         /// <remarks>
-        ///     <b>The one place here that measures text while drawing, and it is deliberate.</b> The rule it
-        ///     bends is about work that repeats, and this does not: the caller only asks about lines that were
-        ///     not on screen last frame, so a window held still measures nothing and moving down one line
-        ///     measures one line. Measuring the whole listing up front instead was timed at 11ms for five
-        ///     hundred lines and 221ms for ten thousand, against a frame of under 17 - a frozen game rather
-        ///     than a cost.
+        ///     Measures while drawing on purpose: it is asked only about lines that were not on screen last
+        ///     frame, and measuring the whole listing up front was timed at 11ms for five hundred lines and
+        ///     221ms for ten thousand, against a frame of under 17.
         ///     <para>
-        ///         The reach is put straight onto the rail rather than invalidating anything. Nothing is laid out
-        ///         from it; only the thumb is drawn from it, and that is drawn after this.
+        ///         The reach goes straight onto the rail without invalidating, because only the thumb is drawn
+        ///         from it, after this.
         ///     </para>
         /// </remarks>
         void Widen(IGraphics g, string said)
@@ -694,13 +589,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             _numbersTo = int.MinValue;
         }
 
-        /// <summary>
-        ///     Whether a point is inside one of the bars' own rectangles.
-        /// </summary>
-        /// <remarks>
-        ///     Not <see cref="Element.Holds" />, which asks about this element's own bounds. A track and a
-        ///     thumb are worked out rather than arranged, so they are not any element's bounds.
-        /// </remarks>
+        /// <summary>Whether a point is inside a rectangle that is not any element's bounds.</summary>
         static bool Inside(RectangleF bounds, Vector2 point)
         {
             return point.X >= bounds.X && point.X <= bounds.X + bounds.Width

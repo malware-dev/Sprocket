@@ -3,31 +3,27 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
-    /// <summary>
-    ///     The handle a row is dragged by: six small squares, two across and three down.
-    /// </summary>
-    /// <remarks>
-    ///     Drawn rather than fetched. The game has no grip of its own to borrow - nothing in it is dragged
-    ///     the way a step in a sequence is - and six rectangles are crisp at any size where a picture
-    ///     squeezed to eleven pixels across would be six grey smudges.
-    /// </remarks>
+    /// <summary>The handle a row is dragged by: six small squares, two across and three down.</summary>
     public class Grip : Element
     {
         const int Across = 2;
         const int Down = 3;
 
-        /// <summary>How big one square is, and how far apart they sit.</summary>
+        /// <summary>How big one square is.</summary>
         const float Square = 3f;
 
         const float Gap = 3f;
 
+        /// <summary>Makes a grip drawn in <paramref name="color" />.</summary>
         public Grip(Color color)
         {
             Color = color;
         }
 
+        /// <summary>The colour of its squares.</summary>
         public Color Color { get; set; }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             return new Vector2(
@@ -35,6 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                 Down * Square + (Down - 1) * Gap);
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
             var width = Across * Square + (Across - 1) * Gap;

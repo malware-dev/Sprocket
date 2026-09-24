@@ -9,20 +9,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
     ///     A name that can be changed where it stands: the words, a pencil beside them, and the box that
     ///     replaces the words while somebody is typing.
     /// </summary>
-    /// <remarks>
-    ///     One element rather than three, because the awkward part is that the box has to land exactly where
-    ///     the label was: it takes no padding of its own and no border, since the words had neither. Getting
-    ///     either wrong moves the heading sideways the moment somebody starts typing into it.
-    ///     <para>
-    ///         It knows nothing about keyboards or focus. Something else decides that an edit has begun and that
-    ///         it has finished; this owns only what the two states look like.
-    ///     </para>
-    /// </remarks>
     public class Nameplate : Element
     {
         readonly Label _label = new Label();
 
-        /// <summary>Reused for measuring the hint, so a frame of drawing one costs no allocation.</summary>
+        /// <summary>The hint, held for measuring, since measuring from a builder allocates nothing.</summary>
         readonly StringBuilder _measuring = new StringBuilder(32);
 
         readonly Glyph _pen;
@@ -31,18 +22,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         float _leastWidth;
         Color _penColor;
 
+        /// <summary>
+        ///     Makes a nameplate whose pencil is the symbol <paramref name="pen" /> at <paramref name="penScale" />.
+        /// </summary>
         public Nameplate(string pen, float penScale)
         {
             var children = new ElementCollection(this);
 
-            // A label can be told to trim and a box cannot: what somebody is typing has to stay where they
-            // typed it, so it runs on past the end and the clip is what stops it.
+            // A box cannot trim, so what is typed runs on past the end and the clip stops it.
             ClipsContent = true;
 
             _label.Wraps = false;
             _label.Trims = true;
 
-            // What makes the box stand where the words stand, which is this element's reason for existing.
+            // No padding and no edge, so the box stands exactly where the words stood.
             Box.Padding = new Thickness();
             Box.Edge = new Color(0, 0, 0, 0);
 
@@ -53,13 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             children.Add(_pen);
         }
 
-        /// <summary>
-        ///     How far the pencil is lifted off the middle of its room. See <see cref="Glyph.Lift" />.
-        /// </summary>
-        /// <remarks>
-        ///     Set from outside because how a mark sits against the game's letters is a matter of look,
-        ///     and this is layout. The pencil stands on a line of text like any other symbol does.
-        /// </remarks>
+        /// <summary>How far the pencil is lifted off the middle of its room, as <see cref="Glyph.Lift" />.</summary>
         public float PenLift
         {
             get { return _pen.Lift; }
@@ -68,9 +55,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         /// <summary>The name, as it reads when nobody is editing it.</summary>
         /// <remarks>
-        ///     Not written through to the box while an edit is running: whatever is in the box is the truth
-        ///     for as long as somebody is typing, and putting the model's answer back over the top would
-        ///     fight the caret on every keystroke.
+        ///     Never written through to the box, which holds the truth while an edit runs; writing over it
+        ///     would fight the caret on every keystroke.
         /// </remarks>
         public string Text
         {
@@ -84,12 +70,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>What the box says while it is up. The words the edit will commit.</summary>
+        /// <summary>What the box says, which is what the edit will commit.</summary>
         public string Editing => Box.Text;
 
         /// <summary>The box itself, for whoever gives it the keyboard.</summary>
         public TextBox Box { get; } = new TextBox();
 
+        /// <summary>The font of the words, in both modes.</summary>
         public string Font
         {
             get { return _label.Font; }
@@ -100,6 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
+        /// <summary>The scale of the words, in both modes.</summary>
         public float Scale
         {
             get { return _label.Scale; }
@@ -110,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>The words, in both modes. The caret takes the same colour.</summary>
+        /// <summary>The colour of the words in both modes, and of the caret.</summary>
         public Color Color
         {
             get { return _label.Color; }
@@ -122,18 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>
-        ///     The pencil. Transparent for a name that cannot be changed, which then draws as a plain heading.
-        /// </summary>
-        /// <remarks>
-        ///     A plate with no pencil takes no room for one: the pencil is a suffix, so dropping it moves
-        ///     nothing to its left, and a heading of several parts would otherwise hold a pencil-shaped hole
-        ///     wherever a part could not be renamed.
-        ///     <para>
-        ///         The room is kept while the box is up, though, because there the pencil really does come and go
-        ///         under somebody's hands - see <see cref="DrawContent" />.
-        ///     </para>
-        /// </remarks>
+        /// <summary>The pencil's colour, transparent for a name that cannot be changed.</summary>
         public Color PenColor
         {
             get { return _penColor; }
@@ -148,6 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
+        /// <summary>The colour behind text selected in the box.</summary>
         public Color SelectionColor
         {
             get { return Box.SelectionColor; }
@@ -172,35 +150,26 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
+        /// <summary>The colour the hint is drawn in.</summary>
         public Color HintColor
         {
             get { return Box.HintColor; }
             set { Box.HintColor = value; }
         }
 
-        /// <summary>
-        ///     What the words sit in while they are being typed. Transparent for a plate that shows no well.
-        /// </summary>
-        /// <remarks>
-        ///     Painted only while the box is up, so it is the one thing telling somebody the heading has
-        ///     become a field. It covers the words and not the pencil, which is not part of what is typed.
-        /// </remarks>
+        /// <summary>What the words sit in while they are being typed.</summary>
         public Color Well { get; set; }
 
         /// <summary>Whether what is in the box cannot be accepted as it stands.</summary>
-        /// <remarks>
-        ///     Set by whoever knows the rule; this only wears it. A plate that decided for itself what
-        ///     counted as a good name would be a plate that had to be told about systems and sequences.
-        /// </remarks>
         public bool Wrong { get; set; }
 
         /// <summary>The well while <see cref="Wrong" />.</summary>
         public Color WrongWell { get; set; }
 
-        /// <summary>A line under the words while <see cref="Wrong" />, and the only mark that has to be loud.</summary>
+        /// <summary>A line under the words while <see cref="Wrong" />.</summary>
         /// <remarks>
-        ///     Under rather than around: a border one unit wide is drawn inside the box, and with no padding
-        ///     to give it room it would sit against the first letter. A rule beneath touches nothing.
+        ///     Under the words rather than an edge round the box, which with no padding would touch the
+        ///     first letter.
         /// </remarks>
         public Color WrongEdge { get; set; }
 
@@ -221,12 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>How narrow the name is allowed to get. A line tall's worth when nobody says otherwise.</summary>
-        /// <remarks>
-        ///     A name somebody has emptied measures nothing, and a box with no width is a box nobody can find
-        ///     to type into. It is not what keeps the plate steady while somebody deletes - the measure
-        ///     already takes the wider of the label and the box for that.
-        /// </remarks>
+        /// <summary>How narrow the name is allowed to get, one line's height when left at zero.</summary>
         public float LeastWidth
         {
             get { return _leastWidth; }
@@ -240,14 +204,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>Whether the box is up. Set it through <see cref="Begin" /> and <see cref="End" />.</summary>
+        /// <summary>Whether the box is up.</summary>
         public bool IsEditing { get; private set; }
 
         /// <summary>Puts the box up, holding the name it started with and all of it selected.</summary>
-        /// <remarks>
-        ///     Selected rather than with the caret parked at the end, because renaming something is usually
-        ///     replacing the name rather than appending to it.
-        /// </remarks>
         public void Begin()
         {
             IsEditing = true;
@@ -255,13 +215,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
             Box.Text = _label.Text;
             Box.SelectAll();
-
-            // The box draws its caret only while it believes an edit is running, and the plate is the one
-            // that knows.
             Box.IsEditing = true;
         }
 
-        /// <summary>Puts the box away. Whether anything was kept is the caller's business, not this one's.</summary>
+        /// <summary>Puts the box away; keeping what was typed is the caller's business.</summary>
         public void End()
         {
             IsEditing = false;
@@ -269,23 +226,22 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             InvalidateMeasure();
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             _pen.Measure(g, available);
 
-            // Nothing set aside for a pencil this plate will never draw. While it is being edited the
-            // pencil is hidden rather than absent, and there the room has to stay or the words jog
-            // sideways at the moment somebody starts typing.
+            // Room for the pencil only where it can be drawn, and kept while editing, when it is hidden,
+            // so the words do not jog sideways as typing starts.
             var pen = IsEditing || PenColor.A > 0;
             var aside = pen ? _pen.DesiredSize.X + Gap : 0f;
             var room = new Vector2(available.X - aside, available.Y);
             if (room.X < 0f)
                 room.X = 0f;
 
-            // Both, every time, because the one that is not showing still has to be arranged. Only the one
-            // on show gets a say in how wide this is - a box keeps what was last typed into it, so letting
-            // it speak while it was put away would hold the plate at the width of a name since deleted.
-            // While an edit is running both speak, so the plate never narrows under the pointer.
+            // Both are measured because both are arranged. The box counts toward the width only while
+            // editing, since it keeps what was last typed into it; then both count, so the plate never
+            // narrows under the pointer.
             _label.Measure(g, room);
             Box.Measure(g, room);
 
@@ -295,9 +251,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             if (IsEditing && Box.DesiredSize.X > name)
                 name = Box.DesiredSize.X;
 
-            // A box measures the words in it and an empty one measures nothing, so a hint shown in an empty
-            // box is part of how wide this is. Otherwise the plate makes no room for it and the clip cuts
-            // it off.
+            // An empty box measures nothing, so the hint it shows is measured here or the clip cuts it off.
             if (IsEditing && _measuring.Length > 0 && Box.Text.Length == 0)
             {
                 var hint = g.MeasureText(_label.Font, _measuring, _label.Scale).X;
@@ -305,23 +259,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                     name = hint;
             }
 
-            // No wider than the plate is tall unless somebody insists. A field that has been emptied has to
-            // stay findable and that is all it has to do.
             var least = LeastWidth > 0f ? LeastWidth : line;
             if (name < least)
                 name = least;
 
-            // One line of this font at this scale, and nothing in the plate can change it: not the longest
-            // name anybody types, not whether the pencil is showing, not which mode is up.
-            //
-            // That is the invariant the whole thing rests on. A row centres what is in it, so a plate a few
-            // units taller than its neighbour puts its words a couple of units above them and a heading
-            // reads as though somebody had nudged half of it. Measuring from the tallest part does not have
-            // the property: a symbol measures its whole square cell, which stands clear of the text line at
-            // any size worth drawing.
+            // Always one line of this font at this scale, whatever the parts measure: a row centres what is
+            // in it, so a taller plate would sit its words above its neighbours'. A symbol measures its
+            // whole square cell, which is taller than the line.
             return new Vector2(name + aside, line);
         }
 
+        /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
             var pen = IsEditing || PenColor.A > 0 ? _pen.DesiredSize.X : 0f;
@@ -329,9 +277,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             if (name < 0f)
                 name = 0f;
 
-            // Everything on the middle of the line, including the words. Given a fixed height, centring is
-            // what lets the parts disagree about their own without any of them moving: each sits on the
-            // same middle and any excess hangs off both ends rather than pushing down from the top.
+            // Every part is centred on the line, so a part taller than the line overhangs both ends evenly.
             Centre(_label, bounds, bounds.X, name);
             Centre(Box, bounds, bounds.X, name);
             Centre(_pen, bounds, bounds.X + bounds.Width - pen, pen);
@@ -347,6 +293,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             part.Arrange(new RectangleF(x, bounds.Y + (bounds.Height - height) * 0.5f, width, height));
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
             if (IsEditing)
@@ -366,8 +313,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             else
                 _label.Draw(g);
 
-            // Nothing while the box is up: the box says it is being edited better than a picture of a
-            // pencil beside it could, and two ways of saying it is one too many.
             _pen.Tint = IsEditing ? new Color(0, 0, 0, 0) : PenColor;
             _pen.Draw(g);
         }

@@ -4,14 +4,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>A band at the top, a band at the bottom, and everything left over in between.</summary>
-    /// <remarks>
-    ///     Three named places rather than a side per child, which would need per-child metadata that
-    ///     <see cref="ElementCollection" /> does not carry.
-    ///     <para>
-    ///         The middle is given whatever height is left rather than what it asked for, which is what lets one
-    ///         region scroll while the header and footer stay put.
-    ///     </para>
-    /// </remarks>
     public class Dock : Element
     {
         readonly ElementCollection _children;
@@ -20,30 +12,34 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         Element _top;
 
+        /// <summary>An empty dock.</summary>
         public Dock()
         {
             _children = new ElementCollection(this);
         }
 
+        /// <summary>The band at the top, given the height it asks for.</summary>
         public Element Top
         {
             get { return _top; }
             set { _top = Adopt(_top, value); }
         }
 
-        /// <summary>The middle. Gets the height the other two did not take.</summary>
+        /// <summary>The middle, given the height the other two did not take.</summary>
         public Element Fill
         {
             get { return _fill; }
             set { _fill = Adopt(_fill, value); }
         }
 
+        /// <summary>The band at the bottom, given the height it asks for.</summary>
         public Element Bottom
         {
             get { return _bottom; }
             set { _bottom = Adopt(_bottom, value); }
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             var used = 0f;
@@ -70,11 +66,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
                 width = Wider(width, _fill.DesiredSize.X);
             }
 
-            // The whole height on offer, not the sum of the parts. Asking for less would let a parent
-            // shrink this to fit its contents, and then the middle would have nothing spare to fill.
+            // The whole height on offer, so that no parent can shrink the middle to fit its contents.
             return new Vector2(width, available.Y);
         }
 
+        /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
             var top = bounds.Y;
@@ -101,14 +97,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             }
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            // The middle first, so chrome drawn over it wins where they overlap by a pixel.
+            // The middle first, so the bands draw over it where they overlap.
             _fill?.Draw(g);
             _top?.Draw(g);
             _bottom?.Draw(g);
         }
 
+        /// <inheritdoc />
         protected override Element UnderContent(Vector2 point)
         {
             var found = _bottom?.Under(point);

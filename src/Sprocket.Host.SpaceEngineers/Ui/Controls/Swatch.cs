@@ -4,20 +4,18 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>A rectangle of one colour, shown so that the colour itself is the answer.</summary>
-    /// <remarks>
-    ///     The colour goes in <see cref="Element.Background" />, which the element already draws, so there
-    ///     is nothing in the content but the size it holds. It is a type rather than a bare box because a
-    ///     swatch is a thing on the screen that somebody presses, and a box with a background set is not.
-    /// </remarks>
+    /// <remarks>The colour is its <see cref="Element.Background" />.</remarks>
     public class Swatch : Element
     {
         Vector2 _size;
 
+        /// <summary>Makes a swatch <paramref name="width" /> by <paramref name="height" />.</summary>
         public Swatch(float width, float height)
         {
             _size = new Vector2(width, height);
         }
 
+        /// <summary>How big the swatch is.</summary>
         public Vector2 Size
         {
             get { return _size; }
@@ -31,11 +29,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             return _size;
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
         }

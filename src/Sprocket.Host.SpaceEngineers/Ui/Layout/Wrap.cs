@@ -4,26 +4,18 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>Puts its children in a line and starts a new one when the line runs out.</summary>
-    /// <remarks>
-    ///     A sentence is what this is for: a trigger reads "When the hangar door finishes opening" with the
-    ///     nouns as chips, and a stack would run that off the right-hand edge the moment somebody picked a
-    ///     block with a long name.
-    ///     <para>
-    ///         Children keep the size they asked for and are never stretched. A child wider than the whole line
-    ///         is put on a line of its own and left to overflow, which is visible and therefore fixable, rather
-    ///         than being silently shrunk into something unreadable.
-    ///     </para>
-    /// </remarks>
     public class Wrap : Element
     {
         float _itemSpacing;
         float _lineSpacing;
 
+        /// <summary>An empty wrap.</summary>
         public Wrap()
         {
             Children = new ElementCollection(this);
         }
 
+        /// <summary>What is laid out, in order.</summary>
         public ElementCollection Children { get; }
 
         /// <summary>Blank room between one child and the next along a line.</summary>
@@ -54,6 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             }
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             var lineWidth = 0f;
@@ -75,7 +68,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
                 if (!first && lineWidth > 0f && lineWidth + advance > available.X)
                 {
-                    // This one starts the next line, so the one just finished is now known.
                     total += lineHeight + (total > 0f ? LineSpacing : 0f);
                     widest = Wider(widest, lineWidth);
                     lineWidth = width;
@@ -97,6 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             return new Vector2(widest, total);
         }
 
+        /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
             var x = bounds.X;
@@ -116,13 +109,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
                 var width = child.DesiredSize.X;
                 var advance = lineWidth > 0f ? width + ItemSpacing : width;
 
-                // The same sum, added up the same way, as measuring did: worked out from the position
-                // instead, a line measured as exactly fitting came out a hair over and dropped its last
-                // child onto a line of its own.
+                // Summed exactly as measuring sums it, so that a line measured as fitting cannot break
+                // here on float rounding.
                 if (!first && lineWidth > 0f && lineWidth + advance > bounds.Width)
                 {
-                    // The line just finished is now known, so its short children can be dropped onto its
-                    // middle before the next one starts.
                     Centre(lineFrom, i, y, lineHeight);
 
                     y += lineHeight + LineSpacing;
@@ -145,14 +135,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             Centre(lineFrom, Children.Count, y, lineHeight);
         }
 
-        /// <summary>
-        ///     Drops everything on one line onto that line's middle.
-        /// </summary>
-        /// <remarks>
-        ///     A second pass, because a line's height is not known until the child that ends it has been
-        ///     seen. Without it a sentence hangs its light and its lead-in from the top of the tallest chip
-        ///     on the line, which reads as a stray mark above the words rather than as part of them.
-        /// </remarks>
+        /// <summary>Drops everything on one line onto that line's middle.</summary>
+        /// <remarks>Arranges a second time, because a line's height is known only once the child that ends it has been seen.</remarks>
         void Centre(int from, int to, float y, float lineHeight)
         {
             for (var i = from; i < to && i < Children.Count; i++)
@@ -175,11 +159,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             }
         }
 
+        /// <inheritdoc />
         protected override Element UnderContent(Vector2 point)
         {
             return OnTop(Children, point);
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
             for (var i = 0; i < Children.Count; i++)

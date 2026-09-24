@@ -3,17 +3,7 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
-    /// <summary>
-    ///     Something on the left, something on the right, and whatever is in the middle taking the slack.
-    /// </summary>
-    /// <remarks>
-    ///     <see cref="Dock" /> lying down. A stack cannot do this, because it gives every child exactly what
-    ///     it asked for and there is no way to say "and this one takes the rest".
-    ///     <para>
-    ///         The middle is measured against what the other two left behind, so a long title gives way to the
-    ///         controls rather than pushing one off the end, where nothing would be left to say it existed.
-    ///     </para>
-    /// </remarks>
+    /// <summary>Something on the left, something on the right, and whatever is in the middle taking the slack.</summary>
     public class Bar : Element
     {
         readonly ElementCollection _children;
@@ -24,51 +14,41 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         float _spacing;
         bool _tops;
 
+        /// <summary>An empty bar.</summary>
         public Bar()
         {
             _children = new ElementCollection(this);
         }
 
+        /// <summary>The part at the left, given the width it asks for.</summary>
         public Element Left
         {
             get { return _left; }
             set { _left = Adopt(_left, value); }
         }
 
-        /// <summary>The middle. Gets the width the other two did not take.</summary>
+        /// <summary>The middle, given the width the other two did not take.</summary>
         public Element Fill
         {
             get { return _fill; }
             set { _fill = Adopt(_fill, value); }
         }
 
+        /// <summary>The part at the right, given the width it asks for.</summary>
         public Element Right
         {
             get { return _right; }
             set { _right = Adopt(_right, value); }
         }
 
-        /// <summary>
-        ///     Whether this reports what its parts need rather than the whole width on offer.
-        /// </summary>
+        /// <summary>Whether this reports what its parts need rather than the whole width on offer.</summary>
         /// <remarks>
-        ///     Off by default, because spanning is what a bar is for: a row of a list reaches the edge
-        ///     whatever is written in it, so a short name and a long one give rows of the same shape.
-        ///     <para>
-        ///         On for a bar inside something that is as wide as its contents. A menu holds its words
-        ///         already, so how wide it is is a fact about it - and a spanning bar inside one answers
-        ///         with whatever it was offered, which makes the menu as wide as whatever asked.
-        ///     </para>
+        ///     Set for a bar inside anything sized by its contents, which a spanning bar would otherwise widen
+        ///     to whatever it was offered.
         /// </remarks>
         public bool Tight { get; set; }
 
-        /// <summary>
-        ///     Whether the parts sit along the top of the bar rather than on its middle.
-        /// </summary>
-        /// <remarks>
-        ///     For a middle that grows downwards - words that wrap - beside a part that must stay where it
-        ///     is while they do.
-        /// </remarks>
+        /// <summary>Whether the parts sit along the top of the bar rather than on its middle.</summary>
         public bool Tops
         {
             get { return _tops; }
@@ -96,15 +76,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             }
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             var used = 0f;
             var height = 0f;
 
-            // A collapsed part is skipped along with its spacing, the way a stack skips one. Counting the
-            // spacing anyway would hold open a gap the width of the room between two controls, on every
-            // row that happens not to have the control - which is the reserved emptiness this layout is
-            // supposed to be rid of.
             if (Shows(_left))
             {
                 _left.Measure(g, available);
@@ -128,16 +105,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
             if (!Tight)
             {
-                // The whole width on offer, because the point of this is to span it.
                 return new Vector2(available.X, height);
             }
 
-            // What the parts came to. The spacing between them is already in what was used, and the
-            // middle is added here because it was measured against what the other two left.
             var wide = used + (_fill != null ? _fill.DesiredSize.X : 0f);
             return new Vector2(wide < available.X ? wide : available.X, height);
         }
 
+        /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
             var left = bounds.X;
@@ -164,6 +139,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             }
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
             _fill?.Draw(g);
@@ -171,6 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             _right?.Draw(g);
         }
 
+        /// <inheritdoc />
         protected override Element UnderContent(Vector2 point)
         {
             var found = _right?.Under(point);
@@ -199,10 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             return new RectangleF(x, bounds.Y, width, height);
         }
 
-        /// <summary>
-        ///     Vertically centred against the bar rather than stretched to it, so a small control beside a
-        ///     large one sits on its middle instead of on its top edge.
-        /// </summary>
+        /// <summary>Where a part goes when it sits on the middle of the bar.</summary>
         static RectangleF Centred(float x, RectangleF bounds, float width, float height)
         {
             if (height > bounds.Height || height <= 0f)

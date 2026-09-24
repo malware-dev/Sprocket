@@ -4,23 +4,21 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>Puts its children in a line, down the screen or across it.</summary>
-    /// <remarks>
-    ///     Give it a <see cref="Element.Background" /> and it is a panel; set
-    ///     <see cref="Element.ClipsContent" /> and it is the beginnings of a scrolling one.
-    /// </remarks>
     public class Stack : Element
     {
         bool _horizontal;
         float _spacing;
 
+        /// <summary>An empty stack that runs down.</summary>
         public Stack()
         {
             Children = new ElementCollection(this);
         }
 
+        /// <summary>What is in the line, in order.</summary>
         public ElementCollection Children { get; }
 
-        /// <summary>Down the screen unless told otherwise, which is what a list of anything wants.</summary>
+        /// <summary>Whether the children run across rather than down.</summary>
         public bool Horizontal
         {
             get { return _horizontal; }
@@ -48,6 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             }
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             var along = 0f;
@@ -58,8 +57,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             {
                 var child = Children[i];
 
-                // Each child is offered what is left along the line and all of it across, so a child that
-                // wraps its text knows the width it has to wrap into.
                 var room = Horizontal
                     ? new Vector2(available.X - along, available.Y)
                     : new Vector2(available.X, available.Y - along);
@@ -71,9 +68,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
                 child.Measure(g, room);
 
-                // A collapsed child takes no room and no spacing either. Spacing counted from whether
-                // anything has actually been placed rather than from the index, or a collapsed first
-                // child would leave a gap where it used to be.
                 if (child.Collapsed)
                     continue;
 
@@ -93,6 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             return Horizontal ? new Vector2(along, across) : new Vector2(across, along);
         }
 
+        /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
             var cursor = Horizontal ? bounds.X : bounds.Y;
@@ -112,10 +107,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
                 if (Horizontal)
                 {
-                    // Across the line a child sits on the middle rather than being stretched to the
-                    // height of the tallest. A row is a line of words and controls of different sizes -
-                    // a switch beside a name, a light beside a sentence - and hanging the short ones from
-                    // the top makes them read as superscript rather than as part of the line.
                     var height = child.DesiredSize.Y;
                     var y = height > 0f && height < bounds.Height
                         ? bounds.Y + (bounds.Height - height) * 0.5f
@@ -134,14 +125,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             }
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            // In the order they were added, so a later child covers an earlier one. Children that fell
-            // outside are drawn anyway and cut by the clip, which is cheaper than working out which.
             for (var i = 0; i < Children.Count; i++)
                 Children[i].Draw(g);
         }
 
+        /// <inheritdoc />
         protected override Element UnderContent(Vector2 point)
         {
             return OnTop(Children, point);

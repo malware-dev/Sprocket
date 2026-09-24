@@ -9,24 +9,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 {
     /// <summary>A run of text, on one line or on as many as it needs.</summary>
     /// <remarks>
-    ///     It keeps a <c>StringBuilder</c> beside the string it was given, because the only allocation-free
-    ///     way to measure is from one of those. Writing <see cref="Text" /> syncs it, so the cost lands when
-    ///     somebody changes the words.
-    ///     <para>
-    ///         Wrapping is off by default and is not free: breaking a run costs a measurement per word, so the
-    ///         result is kept until the words, the size or the room they have to fit in change.
-    ///     </para>
+    ///     Keeps a <c>StringBuilder</c> beside the string, because <c>MeasureText</c> measures from one
+    ///     without allocating.
     /// </remarks>
     public class Label : Element
     {
-        /// <summary>
-        ///     How wide a colour is drawn in place of words.
-        /// </summary>
-        /// <remarks>
-        ///     Wide enough to read as a colour rather than as a full stop, and narrower than the code it
-        ///     stands in for, which is seven characters. It is a fixed number because every one of these
-        ///     says the same amount whatever colour it is, so they should all be the same size.
-        /// </remarks>
+        /// <summary>How wide a colour is drawn in place of words.</summary>
         const float SampleWide = 44f;
 
         readonly List<string> _lines = new List<string>();
@@ -34,11 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         readonly StringBuilder _measured = new StringBuilder(64);
         readonly StringBuilder _scratch = new StringBuilder(64);
 
-        /// <summary>The width of the line last centred, kept so that centring does not cost a measurement.</summary>
-        /// <remarks>
-        ///     Drawing is not invalidated - it happens on every frame by definition - so anything that asks
-        ///     the font a question here asks it sixty times a second no matter what the layout does.
-        /// </remarks>
+        /// <summary>The line last centred, kept with its width because drawing runs every frame.</summary>
         string _centred;
 
         float _centredAt = -1f;
@@ -68,6 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         Vector2 _wrapped;
         bool _wraps;
 
+        /// <summary>An empty label in white, at a scale of one.</summary>
         public Label()
         {
             Font = MyFontEnum.White;
@@ -75,6 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             Color = Color.White;
         }
 
+        /// <summary>The words shown.</summary>
         public string Text
         {
             get { return _text; }
@@ -93,6 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
+        /// <summary>Which face it is drawn in.</summary>
         public string Font
         {
             get { return _font; }
@@ -106,6 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
+        /// <summary>The font scale it is drawn at.</summary>
         public float Scale
         {
             get { return _scale; }
@@ -119,11 +107,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
+        /// <summary>The colour the words are drawn in.</summary>
         public Color Color { get; set; }
 
-        /// <summary>
-        ///     Whether a run too wide for its room continues on the next line rather than running off the end.
-        /// </summary>
+        /// <summary>Whether a run too wide for its room continues on the next line.</summary>
         public bool Wraps
         {
             get { return _wraps; }
@@ -137,16 +124,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>
-        ///     Whether a run too wide for its room is cut short with an ellipsis instead of overflowing.
-        /// </summary>
-        /// <remarks>
-        ///     For the things that must stay one line and inside their box - a heading, where a long name
-        ///     pushing past the edge would carry whatever sits beside it off the end.
-        ///     <para>
-        ///         Ignored when <see cref="Wraps" /> is set.
-        ///     </para>
-        /// </remarks>
+        /// <summary>Whether a run too wide for its room is cut short with an ellipsis.</summary>
+        /// <remarks>Ignored when <see cref="Wraps" /> is set.</remarks>
         public bool Trims
         {
             get { return _trims; }
@@ -160,25 +139,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>
-        ///     Whether the words sit in the middle of the room they were given rather than at its left edge.
-        /// </summary>
-        /// <remarks>
-        ///     For a control held to a width it did not choose. A switch says two different words in two
-        ///     states, and the way to stop it stepping about as they swap is to give it the width of the
-        ///     longer one and put both in the middle of it.
-        /// </remarks>
+        /// <summary>Whether the words sit in the middle of the room they were given.</summary>
         public bool Centres { get; set; }
 
-        /// <summary>
-        ///     A colour to show instead of the words, or nothing to show the words.
-        /// </summary>
-        /// <remarks>
-        ///     A colour is the one value that is better shown than spelled: "255 136 0" is three numbers
-        ///     somebody has to imagine, and a rectangle of it is the thing itself. The text is still set
-        ///     underneath, and comes back the moment there is no colour to show - which is how an empty
-        ///     slot still reads as an invitation.
-        /// </remarks>
+        /// <summary>A colour to show instead of the words, or nothing to show the words.</summary>
         public Color? Sample
         {
             get { return _sample; }
@@ -192,22 +156,18 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            // A line tall like any other, so a colour in a sentence sits on the same line as the
-            // words either side of it rather than making its own row taller.
             if (_sample.HasValue)
                 return new Vector2(SampleWide, g.LineHeight(Font, Scale));
 
             if (_text.Length == 0)
                 return new Vector2(0f, g.LineHeight(Font, Scale));
 
-            // A line tall, because a line is what this draws: DrawText places a line box at
-            // ContentBounds.Y and the renderer puts the baseline inside it, so how far the particular
-            // letters reach has nothing to do with how much room the drawing takes. The glyph cell is not
-            // the same number - in the game's face it is 45 against a line of 37 - so a label measured
-            // that way reports a size it does not draw at. Only the width is worth asking the letters
-            // about.
+            // The line height, not the measured height: DrawText places a line box at ContentBounds.Y,
+            // and the game's glyph cell is 45 against a line of 37, so the measured height is not what
+            // is drawn.
             if (!Wraps && !Trims)
                 return new Vector2(Flat(g), LineOf(g));
 
@@ -221,14 +181,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return _wrapped;
         }
 
-        /// <summary>
-        ///     The width of one unwrapped run, kept between frames.
-        /// </summary>
+        /// <summary>The width of one unwrapped run, kept between measures.</summary>
         /// <remarks>
-        ///     For the same reason the line height is kept: a control that does not wrap - a button, a
-        ///     switch, a chip - is measured again whenever anything above it changes size, and the width of
-        ///     words that have not changed is a number already known. Text measurement is the dearest call
-        ///     in the layout and the one no picture can show being made.
+        ///     Kept because a measure re-runs whenever anything above it changes size, and measuring text is
+        ///     the dearest call the layout makes.
         /// </remarks>
         float Flat(IGraphics g)
         {
@@ -243,12 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return _flat;
         }
 
-        /// <summary>The line height, kept between frames.</summary>
-        /// <remarks>
-        ///     Cheap, but cheap sixty times a second for every label on screen, to be told a number that only
-        ///     changes when the font or the scale does. Draw is the one path invalidation cannot help,
-        ///     because it always runs.
-        /// </remarks>
+        /// <summary>The line height, kept because drawing asks for it every frame.</summary>
         float LineOf(IGraphics g)
         {
             if (_lineAt != Scale || _lineIn != Font)
@@ -261,6 +212,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return _line;
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
             if (_sample.HasValue)
@@ -314,10 +266,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return ContentBounds.X + (ContentBounds.Width - width) * 0.5f;
         }
 
-        /// <summary>
-        ///     Breaks the run into lines that fit <paramref name="width" />, if anything about the problem has
-        ///     changed since the last time.
-        /// </summary>
+        /// <summary>Breaks the run into lines that fit <paramref name="width" />, if anything has changed since.</summary>
         void Rewrap(IGraphics g, float width)
         {
             if (!_dirty && _laidOutFor == width && _laidOutAt == Scale && _laidOutIn == Font)
@@ -339,9 +288,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             var i = 0;
             while (i < _text.Length)
             {
-                // A newline ends the line wherever it falls, which is what somebody typing one meant.
-                // An empty line between two of them is a paragraph break and is kept as one: the
-                // annotations people write have them, and squeezing them out runs two thoughts together.
+                // An empty line between two newlines is kept as a line of its own.
                 if (_text[i] == '\n')
                 {
                     Commit(ref widest, committed);
@@ -358,14 +305,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
                 if (candidate > width && committed > 0f)
                 {
-                    // It did not fit, so the line ends before this word and the word starts the next.
                     _scratch.Length -= length;
                     Commit(ref widest, committed);
 
                     _scratch.Append(_text, i, length);
 
-                    // A leading space would then sit at the start of the new line, which reads as an
-                    // indent nobody asked for.
                     TrimLeading();
                     committed = g.MeasureText(Font, _scratch, Scale).X;
                 }
@@ -381,13 +325,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             _wrapped = new Vector2(widest, _lines.Count * line);
         }
 
-        /// <summary>
-        ///     Cuts the run down to something that fits, ending in an ellipsis.
-        /// </summary>
-        /// <remarks>
-        ///     By character rather than by word. A heading is often one long word, and trimming to the last
-        ///     whole word would leave a name showing nothing but its first syllable.
-        /// </remarks>
+        /// <summary>Cuts the run down, a character at a time, to something that fits with an ellipsis.</summary>
         void Retrim(IGraphics g, float width)
         {
             if (!_dirty && _laidOutFor == width && _laidOutAt == Scale && _laidOutIn == Font)

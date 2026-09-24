@@ -1,28 +1,24 @@
-// Needed by one of the two projects this shared code is compiled into and not the other, so an
-// inspection run against either will call it redundant. It is not.
 using System.Collections;
-// ReSharper disable once RedundantUsingDirective
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Ui
 {
     /// <summary>The children of one element.</summary>
-    /// <remarks>
-    ///     A list of its own rather than a bare <c>List&lt;Element&gt;</c> because adding a child is what
-    ///     gives it a parent, and a plain list cannot do that.
-    /// </remarks>
     public sealed class ElementCollection : IEnumerable<Element>
     {
         readonly List<Element> _items = new List<Element>();
         readonly Element _owner;
 
+        /// <summary>An empty collection whose members become children of <paramref name="owner" />.</summary>
         internal ElementCollection(Element owner)
         {
             _owner = owner;
         }
 
+        /// <summary>How many children there are.</summary>
         public int Count => _items.Count;
 
+        /// <summary>The child at <paramref name="index" />.</summary>
         public Element this[int index] => _items[index];
 
         IEnumerator<Element> IEnumerable<Element>.GetEnumerator()
@@ -47,12 +43,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             child.Parent = _owner;
             child.Holder = this;
 
-            // The child arrives dirty - it has never been measured where it now is - and the owner has to
-            // hear about it, because a container's size is made of what is in it.
+            // A child never measured is already dirty, so its own invalidation stops at itself and never
+            // reaches the owner.
             child.InvalidateMeasure();
             _owner.InvalidateMeasure();
         }
 
+        /// <summary>Takes <paramref name="child" /> out and orphans it, and says whether it was here.</summary>
         public bool Remove(Element child)
         {
             if (child == null || !_items.Remove(child))
@@ -64,6 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             return true;
         }
 
+        /// <summary>Takes every child out and orphans them.</summary>
         public void Clear()
         {
             for (var i = 0; i < _items.Count; i++)
@@ -76,6 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             _owner.InvalidateMeasure();
         }
 
+        /// <summary>The children in order, through the list's own struct enumerator, which a foreach walks without allocating.</summary>
         public List<Element>.Enumerator GetEnumerator()
         {
             return _items.GetEnumerator();

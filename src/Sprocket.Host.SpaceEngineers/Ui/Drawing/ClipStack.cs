@@ -4,13 +4,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 {
     /// <summary>A stack of clip rectangles where every entry is already intersected with the one below it.</summary>
-    /// <remarks>
-    ///     Neither target has this. A text panel has a single clip state - one sprite sets it, another clears
-    ///     it - with no stack and no intersection, and screen space has nothing at all. Both need the same two
-    ///     things on top: an inner container must never widen its parent's clip, and tearing an inner clip
-    ///     down must leave the parent's standing rather than clearing outright. Doing it here means a backend
-    ///     only ever has to honour one rectangle.
-    /// </remarks>
     public sealed class ClipStack
     {
         readonly List<RectangleF> _stack = new List<RectangleF>();
@@ -18,10 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         /// <summary>Whether anything is clipping right now.</summary>
         public bool HasClip => _stack.Count > 0;
 
-        /// <summary>
-        ///     The rectangle in force, already intersected all the way down. Only meaningful while
-        ///     <see cref="HasClip" /> is true.
-        /// </summary>
+        /// <summary>The rectangle in force, already intersected all the way down.</summary>
+        /// <remarks>Only meaningful while <see cref="HasClip" /> is true.</remarks>
         public RectangleF Current => _stack.Count > 0 ? _stack[_stack.Count - 1] : new RectangleF(0f, 0f, 0f, 0f);
 
         /// <summary>Pushes <paramref name="bounds" />, narrowed by whatever is already in force.</summary>
@@ -30,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
             _stack.Add(_stack.Count > 0 ? Intersect(bounds, _stack[_stack.Count - 1]) : bounds);
         }
 
-        /// <summary>Drops the innermost rectangle. Popping an empty stack is not an error.</summary>
+        /// <summary>Drops the innermost rectangle.</summary>
         public void Pop()
         {
             if (_stack.Count > 0)

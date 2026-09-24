@@ -4,19 +4,24 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 {
     /// <summary>Room on each side of something.</summary>
     /// <remarks>
-    ///     <b>Equality is written out rather than inherited, and that is not tidiness.</b> The one a struct
-    ///     gets for free takes an <c>object</c>, so every comparison boxes - and because these are floats,
-    ///     the runtime cannot take its bitwise shortcut and walks the fields by reflection instead. The
-    ///     layout asks this question to decide whether a change is worth re-measuring for, so the inherited
-    ///     version costs more than the work it exists to avoid.
+    ///     Equality is written out because the inherited <c>ValueType.Equals</c> boxes, and for float fields
+    ///     compares them by reflection.
     /// </remarks>
     public struct Thickness : IEquatable<Thickness>
     {
+        /// <summary>Room on the left.</summary>
         public readonly float Left;
+
+        /// <summary>Room along the top.</summary>
         public readonly float Top;
+
+        /// <summary>Room on the right.</summary>
         public readonly float Right;
+
+        /// <summary>Room along the bottom.</summary>
         public readonly float Bottom;
 
+        /// <summary>The same room on every side.</summary>
         public Thickness(float all)
         {
             Left = all;
@@ -25,6 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             Bottom = all;
         }
 
+        /// <summary><paramref name="horizontal" /> on the left and right, <paramref name="vertical" /> on the top and bottom.</summary>
         public Thickness(float horizontal, float vertical)
         {
             Left = horizontal;
@@ -33,6 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             Bottom = vertical;
         }
 
+        /// <summary>Room given side by side.</summary>
         public Thickness(float left, float top, float right, float bottom)
         {
             Left = left;
@@ -41,36 +48,40 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             Bottom = bottom;
         }
 
+        /// <summary>The room on the left and right together.</summary>
         public float Horizontal => Left + Right;
 
+        /// <summary>The room on the top and bottom together.</summary>
         public float Vertical => Top + Bottom;
 
+        /// <summary>Whether there is no room on any side.</summary>
         public bool IsEmpty => Left == 0f && Top == 0f && Right == 0f && Bottom == 0f;
 
+        /// <summary>Whether <paramref name="a" /> and <paramref name="b" /> hold the same room on every side.</summary>
         public static bool operator ==(Thickness a, Thickness b)
         {
             return a.Equals(b);
         }
 
+        /// <summary>Whether <paramref name="a" /> and <paramref name="b" /> differ on any side.</summary>
         public static bool operator !=(Thickness a, Thickness b)
         {
             return !a.Equals(b);
         }
 
+        /// <summary>Whether <paramref name="other" /> holds the same room on every side.</summary>
         public bool Equals(Thickness other)
         {
             return Left == other.Left && Top == other.Top && Right == other.Right && Bottom == other.Bottom;
         }
 
+        /// <inheritdoc />
         public override bool Equals(object other)
         {
             return other is Thickness && Equals((Thickness)other);
         }
 
-        /// <summary>
-        ///     Never a key, and here because overriding <see cref="Equals(object)" /> without it is a
-        ///     warning and a trap.
-        /// </summary>
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             var hash = Left.GetHashCode();

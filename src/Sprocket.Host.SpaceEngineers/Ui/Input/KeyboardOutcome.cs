@@ -1,7 +1,3 @@
-// Two interfaces share this name. VRage.Input's is the engine's own and is not whitelisted; the mod-facing
-// one is what MyAPIGateway.Input hands back. Saying which removes an ambiguity that otherwise resolves to
-// the wrong one and fails only at the whitelist gate.
-
 namespace Sprocket.Host.SpaceEngineers.Ui.Input
 {
     /// <summary>What a pass over the keyboard did.</summary>
@@ -10,16 +6,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
         /// <summary>The text or the caret moved, so anything watching should look again.</summary>
         public bool Changed;
 
-        /// <summary>Enter was pressed. What that means is the caller's business.</summary>
+        /// <summary>Enter was pressed.</summary>
         public bool Commit;
 
-        /// <summary>
-        ///     Move to the next field of a form.
-        /// </summary>
-        /// <remarks>
-        ///     A form with three fields and no way off the first but the mouse is a form most people
-        ///     will fill in one field and finish, which is exactly what happened.
-        /// </remarks>
+        /// <summary>Tab was pressed: move to the next field of a form.</summary>
         public bool Onward;
     }
 }

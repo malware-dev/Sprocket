@@ -1,28 +1,19 @@
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRage.Input;
-// Two interfaces share this name. VRage.Input's is the engine's own and is not whitelisted; the mod-facing
-// one is what MyAPIGateway.Input hands back. Saying which removes an ambiguity that otherwise resolves to
-// the wrong one and fails only at the whitelist gate.
+// VRage.Input also declares an IMyInput, the engine's own, which the whitelist rejects. MyAPIGateway.Input
+// returns this one.
 using IMyInput = VRage.ModAPI.IMyInput;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Input
 {
-    /// <summary>
-    ///     Types into whichever box the screen says has the keyboard.
-    /// </summary>
+    /// <summary>Types into whichever box the screen says has the keyboard.</summary>
     /// <remarks>
-    ///     Owns no box. <c>EditorView</c> decides what has the keyboard - a question while one is open,
-    ///     otherwise whatever was last focused - and this is handed the answer.
+    ///     Characters come from the game's text buffer, which has already applied the keyboard layout, dead
+    ///     keys and modifiers.
     ///     <para>
-    ///         Characters come from the game's own text buffer, which has already dealt with the keyboard layout,
-    ///         dead keys and modifiers, so what arrives is what the player meant to type. Everything else is read as
-    ///         keys, because a caret movement is not a character.
-    ///     </para>
-    ///     <para>
-    ///         <b>Escape is deliberately not here.</b> The screen owns it: the game routes it through
-    ///         <c>OnCancelling</c>, which is where a question gets to refuse the close and dismiss itself instead.
-    ///         Reading it here as well would act on it twice.
+    ///         Escape must not be read here: the game routes it to the screen's <c>OnCancelling</c>, and
+    ///         reading it here as well would act on it twice.
     ///     </para>
     /// </remarks>
     public sealed class ScreenKeyboard
@@ -35,14 +26,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
             _repeat.Clear();
         }
 
-        /// <summary>
-        ///     Reads one frame of the keyboard into <paramref name="box" />.
-        /// </summary>
-        /// <remarks>
-        ///     Call only while the screen has focus. There is no sweep here watching for the world to move on
-        ///     underneath an edit, which the overlay needed and which would now be actively wrong: it abandoned
-        ///     on the mouse cursor becoming visible, and on a screen the cursor is always visible.
-        /// </remarks>
+        /// <summary>Reads one frame of the keyboard into <paramref name="box" />.</summary>
+        /// <remarks>Call only while the screen has focus.</remarks>
         public KeyboardOutcome HandleInput(TextBox box)
         {
             var outcome = new KeyboardOutcome();
@@ -55,8 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
 
             if (input.IsAnyCtrlKeyPressed())
             {
-                // Handled before characters, and instead of them: a keyboard usually suppresses the letter
-                // under Ctrl, but taking both would insert a 'v' into whatever was just pasted.
+                // Instead of the typed characters, which can still carry the letter under Ctrl.
                 if (input.IsNewKeyPressed(MyKeys.A))
                 {
                     box.SelectAll();

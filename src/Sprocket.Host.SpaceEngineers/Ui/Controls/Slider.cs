@@ -6,24 +6,20 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>One number between nothing and everything, set by putting a grip where it goes.</summary>
-    /// <remarks>
-    ///     The track may be any material, which is the whole reason this is not a scrollbar: a hue runs
-    ///     along its own track and the track is what says so. Saturation and value have nothing to show and
-    ///     take a plain one, which is how the game draws the same three.
-    /// </remarks>
     public class Slider : Element
     {
-        /// <summary>How tall a track is, matched to the boxes it stands among rather than chosen.</summary>
+        /// <summary>How tall a track is, matched to the boxes it stands among.</summary>
         public const float Thick = 24f;
 
-        /// <summary>How wide the grip is, and how far the track is inset so it stays on it.</summary>
+        /// <summary>How wide the grip is.</summary>
         const float Grip = 8f;
 
-        /// <summary>How far the grip stands out of the track, top and bottom, so it can be seen on a dark one.</summary>
+        /// <summary>How far the grip stands out of the track, top and bottom.</summary>
         const float Lip = 3f;
 
         float _fraction;
 
+        /// <summary>Makes a slider on a plain track.</summary>
         public Slider()
         {
             Track = Solid;
@@ -34,17 +30,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         /// <summary>The material the track is drawn with.</summary>
         public MyStringId Track { get; set; }
 
-        /// <summary>What the track is tinted, which is white where the material is already a picture.</summary>
+        /// <summary>What the track is tinted.</summary>
+        /// <remarks>White for a material that is already a picture.</remarks>
         public Color TrackTint { get; set; }
 
-        /// <summary>
-        ///     Where the grip is, from nothing at the left to everything at the right.
-        /// </summary>
-        /// <remarks>
-        ///     Neither measure nor arrangement, so neither is invalidated: moving a grip changes what is
-        ///     drawn inside a box whose size and place are already settled. The same reason a colour change
-        ///     invalidates nothing.
-        /// </remarks>
+        /// <summary>Where the grip is, from nothing at the left to everything at the right.</summary>
+        /// <remarks>Changes only what is drawn, so it invalidates nothing.</remarks>
         public float Fraction
         {
             get { return _fraction; }
@@ -53,9 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         /// <summary>What fraction a point along the track stands for, whether or not it is on it.</summary>
         /// <remarks>
-        ///     Worked out from the travel the grip actually has rather than from the whole width, so that
-        ///     pressing the far left gives nothing and the far right gives everything. Measuring against the
-        ///     whole width leaves half a grip at each end that cannot be reached.
+        ///     Measured over the grip's travel rather than the whole width, so that both ends of the range
+        ///     can be reached.
         /// </remarks>
         public float At(Vector2 point)
         {
@@ -66,11 +56,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             return (point.X - (ContentBounds.X + Grip / 2f)) / travel;
         }
 
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             return new Vector2(available.X, Thick);
         }
 
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
             g.DrawSprite(Track, ContentBounds, TrackTint, 0f);
