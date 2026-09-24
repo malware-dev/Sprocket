@@ -31,10 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         Element _clear;
         string _font;
 
-        float _line;
-        float _lineAt = -1f;
-        string _lineIn;
-        float _scale;
+        float _fontSize;
         float _selectionFrom;
         float _selectionTo;
         float _shift;
@@ -44,13 +41,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         string _written;
 
-        /// <summary>An empty box in white, at a scale of one, with its caret shown.</summary>
+        /// <summary>An empty box in white, with lines 24 units tall, with its caret shown.</summary>
         public TextBox()
         {
             _children = new ElementCollection(this);
 
             Font = MyFontEnum.White;
-            Scale = 1f;
+            FontSize = 24f;
             Color = Color.White;
             SelectionColor = new Color(40, 90, 150);
             HintColor = new Color(110, 122, 138);
@@ -72,16 +69,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>The font scale it is drawn at.</summary>
-        public float Scale
+        /// <summary>How tall one line is, in UI units.</summary>
+        public float FontSize
         {
-            get { return _scale; }
+            get { return _fontSize; }
             set
             {
-                if (_scale == value)
+                if (_fontSize == value)
                     return;
 
-                _scale = value;
+                _fontSize = value;
                 Unmeasure();
             }
         }
@@ -358,7 +355,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            var height = LineOf(g);
+            var height = FontSize;
 
             _clear?.Measure(g, new Vector2(Clearing, height));
 
@@ -377,25 +374,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>Measures everything drawing places by, so that nothing in the draw path measures.</summary>
         void MeasureWidths(IGraphics g)
         {
-            _textSize = _text.Length == 0 ? Vector2.Zero : g.MeasureText(Font, _text, Scale);
+            _textSize = _text.Length == 0 ? Vector2.Zero : g.MeasureText(Font, _text, FontSize);
             _caretAt = WidthTo(g, Caret);
 
             var selects = HasSelection;
             _selectionFrom = selects ? WidthTo(g, SelectionStart) : 0f;
             _selectionTo = selects ? WidthTo(g, SelectionEnd) : 0f;
-        }
-
-        /// <summary>The line height, kept because drawing asks for it every frame.</summary>
-        float LineOf(IGraphics g)
-        {
-            if (_lineAt != Scale || _lineIn != Font)
-            {
-                _lineAt = Scale;
-                _lineIn = Font;
-                _line = g.LineHeight(Font, Scale);
-            }
-
-            return _line;
         }
 
         /// <inheritdoc />
@@ -423,7 +407,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            var height = LineOf(g);
+            var height = FontSize;
             var at = new Vector2(ContentBounds.X + _shift, ContentBounds.Y);
 
             if (HasSelection)
@@ -431,9 +415,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                     SelectionColor, 0f);
 
             if (_text.Length > 0)
-                g.DrawText(Font, Written, at, Scale, Color);
+                g.DrawText(Font, Written, at, FontSize, Color);
             else if (!string.IsNullOrEmpty(Hint))
-                g.DrawText(Font, Hint, at, Scale, HintColor);
+                g.DrawText(Font, Hint, at, FontSize, HintColor);
 
             // After the text, so the caret shows inside a selection.
             if (IsEditing && CaretVisible)
@@ -463,7 +447,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             for (var i = 0; i < count && i < _text.Length; i++)
                 _run.Append(_text[i]);
 
-            return g.MeasureText(Font, _run, Scale).X;
+            return g.MeasureText(Font, _run, FontSize).X;
         }
     }
 }

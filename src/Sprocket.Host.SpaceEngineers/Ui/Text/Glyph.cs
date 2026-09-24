@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         readonly StringBuilder _measuring = new StringBuilder(2);
 
         float _lift;
-        float _scale;
+        float _fontSize;
         Vector2 _size;
 
         float _sizedAt = -1f;
@@ -21,11 +21,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         string _symbol;
 
-        /// <summary>A glyph drawing <paramref name="symbol" /> at <paramref name="scale" />, tinted <paramref name="tint" />.</summary>
-        public Glyph(string symbol, float scale, Color tint)
+        /// <summary>A glyph drawing <paramref name="symbol" /> at <paramref name="fontSize" />, tinted <paramref name="tint" />.</summary>
+        public Glyph(string symbol, float fontSize, Color tint)
         {
             Symbol = symbol;
-            Scale = scale;
+            FontSize = fontSize;
             Tint = tint;
         }
 
@@ -47,16 +47,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>How big, as a font scale.</summary>
-        public float Scale
+        /// <summary>How tall the symbol font's line is, in UI units.</summary>
+        public float FontSize
         {
-            get { return _scale; }
+            get { return _fontSize; }
             set
             {
-                if (_scale == value)
+                if (_fontSize == value)
                     return;
 
-                _scale = value;
+                _fontSize = value;
                 InvalidateMeasure();
             }
         }
@@ -78,22 +78,22 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>How much room the symbol wants, measured once per symbol and scale.</summary>
+        /// <summary>How much room the symbol wants, measured once per symbol and size.</summary>
         /// <remarks>
         ///     Held, because a measure re-runs whenever anything above it moves and measuring text is the
         ///     dearest call the layout makes.
         /// </remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            if (_sizedFor == _symbol && _sizedAt == Scale)
+            if (_sizedFor == _symbol && _sizedAt == FontSize)
                 return _size;
 
             _sizedFor = _symbol;
-            _sizedAt = Scale;
+            _sizedAt = FontSize;
 
             _size = _measuring.Length == 0
                 ? Vector2.Zero
-                : g.MeasureText(Symbols.Font, _measuring, Scale);
+                : g.MeasureText(Symbols.Font, _measuring, FontSize);
 
             // Set while measuring because the lift is a fraction of a height only measuring knows.
             Offset = new Vector2(Offset.X, -_size.Y * _lift);
@@ -110,7 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             var room = ContentBounds;
             g.DrawText(Symbols.Font, _symbol, new Vector2(
                 room.X + (room.Width - _size.X) * 0.5f,
-                room.Y + (room.Height - _size.Y) * 0.5f), Scale, Tint);
+                room.Y + (room.Height - _size.Y) * 0.5f), FontSize, Tint);
         }
     }
 }

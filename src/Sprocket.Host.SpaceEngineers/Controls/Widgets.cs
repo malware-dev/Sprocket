@@ -20,11 +20,11 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         /// "Hangar door - outer, port side" has to be readable in a 250-unit column, and the alternative
         /// is a row that silently says something shorter than what is there.
         /// </remarks>
-        public static Label Label(string text, Color color, float scale)
+        public static Label Label(string text, Color color, float fontSize)
         {
             var label = new Label();
             label.Font = MyFontEnum.White;
-            label.Scale = scale;
+            label.FontSize = fontSize;
             label.Color = color;
             label.Wraps = true;
             label.Text = text;
@@ -187,11 +187,11 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         /// to be drawn. A box made anywhere else keeps them, which puts three colours on screen that the
         /// palette was never asked about.
         /// </remarks>
-        public static TextBox Box(float scale, Color background)
+        public static TextBox Box(float fontSize, Color background)
         {
             var box = new TextBox();
             box.Font = MyFontEnum.White;
-            box.Scale = scale;
+            box.FontSize = fontSize;
             box.Color = Palette.Ink;
             box.Background = background;
             box.Edge = Palette.Line;
@@ -231,12 +231,12 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         /// largest text on a screen rather than beside a row. At the ordinary size it read as a speck
         /// somebody had dropped on the heading.
         /// </remarks>
-        public static Nameplate Nameplate(float scale)
+        public static Nameplate Nameplate(float fontSize)
         {
-            var plate = new Nameplate(Symbols.Pencil, Lettering.Body);
+            var plate = new Nameplate(Symbols.Pencil, Lettering.Pen);
 
             plate.Font = MyFontEnum.White;
-            plate.Scale = scale;
+            plate.FontSize = fontSize;
             plate.PenLift = Lettering.SymbolLift;
             // None at all, because the pencil brings its own. A symbol advances a full square cell and
             // this one fills about half of it, so at heading size there are already ten units of empty

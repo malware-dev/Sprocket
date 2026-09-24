@@ -64,6 +64,39 @@ new Grid
 
 `Length` exists for a grid's tracks and nowhere else.
 
+## Styles
+
+Styles belong to the application, never to the framework, which ships no colours or sizes of its own.
+
+A style holds simple visual properties only: colours, fonts, sizes, spacing. Nothing that moves.
+
+A style is found by reference, never looked up. The application keeps its styles as static fields,
+each built with an initializer and frozen, after which any setter throws. A style based on another
+starts from a copy of it.
+
+Every style has a `Base`. The states beyond it belong to the control the style is for, and its style
+type declares them as layers of its own: a switch's style has `On`, a text box's has `Editing`, and a
+label's has none. Each style type lays its layers in an order it states, so a later layer wins. A
+state names only what it changes, and may change anything `Base` can, sizes included.
+
+```csharp
+public static readonly SwitchStyle Toggle = new SwitchStyle
+{
+    Base = { Background = Palette.Page },
+    On = { Background = Palette.Live },
+    Hot = { Edge = Palette.Ink }
+}.Frozen();
+```
+
+Applying a style lays down neutral values the style type holds as constants, then `Base`, then the
+states its control is in. An element given no style starts from the same neutral values.
+
+The framework decides only two states about any element: hot, being what a press would reach, and
+enabled. A state that only the application knows, such as a button waiting to be ready, is a different
+style the view assigns.
+
+A control is composed rather than derived: a button has a label, and is not one.
+
 ## Text
 
 A font size is a size in UI units, never a scale of the font's own size. The size is the font's line
@@ -91,10 +124,10 @@ controls in the meantime moves onto it.
 - Margin: on every element, or in placement.
 - Alignment of a child inside the room it is given, across a stack and inside a grid cell.
 - The name of the `As` extension.
-- Styles as values that an initializer assigns, in place of the static helpers in `Widgets`. A
-  `Widgets` factory hands back a finished element, and a method's result cannot take properties in
-  an initializer, so a factory-made child cannot be given a `Placement` where it sits. Rows whose
-  growing middle comes from a factory, such as the choice list's typed row, wait on this.
+- What a property the view sets on an element does when a style's state later changes the same
+  property: whether the state wins, or the view's value is kept.
+- How a control's state reaches what it contains, such as a disabled button dimming its label: the
+  button's style setting its content's text colour, or text colour flowing down to what it holds.
 - What `Bar` still does that HStack does not, before the last of them fold in: `Tight`, where the
   middle may shrink but the bar reports only what its parts need, and `Tops`, where the parts sit
   along the top rather than on the middle.

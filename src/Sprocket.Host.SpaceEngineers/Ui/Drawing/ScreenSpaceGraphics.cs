@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Sandbox.ModAPI;
 using VRage.Utils;
@@ -24,6 +25,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         public const float NativePixels = 0f;
 
         readonly ClipStack _clip = new ClipStack();
+
+        /// <summary>Each font's line height at a scale of one, in UI units, asked of the game once a font.</summary>
+        readonly Dictionary<string, float> _lines = new Dictionary<string, float>();
         readonly MyScreenSpaceLayer _layer;
         readonly float _referenceHeight;
 
@@ -31,6 +35,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
         /// <summary>How many scissors this has pushed and not yet popped.</summary>
         int _clips;
+
+        /// <summary>The font last turned into a scale, kept with its line, so a run of text in one font asks nothing.</summary>
+        string _lastFont;
+
+        float _lastLine;
 
         /// <summary>Applied to a font scale on the way out, to undo the game's own scaling and put back this instance's.</summary>
         /// <remarks>The game multiplies every font scale it is handed by its own HUD scale.</remarks>
@@ -93,13 +102,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         }
 
         /// <inheritdoc />
-        public void DrawText(string font, string text, Vector2 position, float scale, Color color)
+        public void DrawText(string font, string text, Vector2 position, float size, Color color)
         {
-            DrawText(font, text, position, scale, color, Align.Left);
+            DrawText(font, text, position, size, color, Align.Left);
         }
 
         /// <inheritdoc />
-        public void DrawText(string font, string text, Vector2 position, float scale, Color color,
+        public void DrawText(string font, string text, Vector2 position, float size, Color color,
             Align align)
         {
             if (string.IsNullOrEmpty(text))
@@ -110,20 +119,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
                 ? MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_TOP
                 : MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP;
 
-            _screenSpace.DrawText(font, text, position * _scale + _origin, scale * _fontScale, color,
+            _screenSpace.DrawText(font, text, position * _scale + _origin, ScaleOf(font, size) * _fontScale, color,
                 placed, float.PositiveInfinity, _layer);
         }
 
         /// <inheritdoc />
-        public Vector2 MeasureText(string font, StringBuilder text, float scale)
+        public Vector2 MeasureText(string font, StringBuilder text, float size)
         {
-            return _screenSpace.MeasureText(font, text, scale * _fontScale) / _scale;
-        }
-
-        /// <inheritdoc />
-        public float LineHeight(string font, float scale)
-        {
-            return _screenSpace.LineHeight(font, scale * _fontScale) / _scale;
+            return _screenSpace.MeasureText(font, text, ScaleOf(font, size) * _fontScale) / _scale;
         }
 
         /// <summary>Samples the safe area and drops any clip left over.</summary>
@@ -136,8 +139,18 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
             var gameScale = area.Height > 0f ? area.Height / GameReferenceHeight : 1f;
 
             _origin = new Vector2(area.X, area.Y);
-            _scale = _referenceHeight > 0f && area.Height > 0f ? area.Height / _referenceHeight : 1f;
-            _fontScale = gameScale > 0f ? _scale / gameScale : 1f;
+
+            var scale = _referenceHeight > 0f && area.Height > 0f ? area.Height / _referenceHeight : 1f;
+            var fontScale = gameScale > 0f ? scale / gameScale : 1f;
+
+            if (scale != _scale || fontScale != _fontScale)
+            {
+                _lines.Clear();
+                _lastFont = null;
+            }
+
+            _scale = scale;
+            _fontScale = fontScale;
             Size = new Vector2(area.Width / _scale, area.Height / _scale);
 
             // Starts at a negative X on anything wider than 4:3.
@@ -151,6 +164,25 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
             CloseScissors();
             _clip.Clear();
+        }
+
+        /// <summary>The scale that draws <paramref name="font" /> with lines <paramref name="size" /> tall.</summary>
+        float ScaleOf(string font, float size)
+        {
+            if (!ReferenceEquals(font, _lastFont))
+            {
+                float line;
+                if (!_lines.TryGetValue(font, out line))
+                {
+                    line = _screenSpace.LineHeight(font, _fontScale) / _scale;
+                    _lines[font] = line;
+                }
+
+                _lastFont = font;
+                _lastLine = line;
+            }
+
+            return _lastLine > 0f ? size / _lastLine : 0f;
         }
 
         /// <summary>Ends every scissor still standing, innermost first.</summary>

@@ -1,6 +1,7 @@
 using System;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using VRage.Utils;
 using VRageMath;
 
@@ -23,10 +24,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         bool _measureDirty = true;
 
+        bool _disabled;
+        bool _hot;
+
         Vector2 _measuredFor;
         Vector2 _offset;
         Thickness _padding;
         IPlacement _placement;
+        IStyle _style;
 
         /// <summary>Held so that listening to a placement allocates once in this element's life.</summary>
         Action _placementChanged;
@@ -80,7 +85,47 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         /// <summary>Whether the pointer is on this right now.</summary>
         /// <remarks>Set by whatever owns the screen.</remarks>
-        public bool IsHot { get; set; }
+        public bool IsHot
+        {
+            get { return _hot; }
+            set
+            {
+                if (_hot == value)
+                    return;
+
+                _hot = value;
+                Restyle();
+            }
+        }
+
+        /// <summary>Whether this can be used now.</summary>
+        public bool IsEnabled
+        {
+            get { return !_disabled; }
+            set
+            {
+                if (_disabled == !value)
+                    return;
+
+                _disabled = !value;
+                Restyle();
+            }
+        }
+
+        /// <summary>How this looks, applied onto its own properties now and again whenever its state changes.</summary>
+        /// <remarks>A property set after the style is kept only until a change of state applies the style again.</remarks>
+        public IStyle Style
+        {
+            get { return _style; }
+            set
+            {
+                if (_style == value)
+                    return;
+
+                _style = value;
+                Restyle();
+            }
+        }
 
         /// <summary>What pressing this means.</summary>
         public Deed Press
@@ -388,6 +433,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         /// <summary>Told that the placement of <paramref name="child" />, one of this element's children, has changed.</summary>
         internal virtual void Replaced(Element child)
         {
+        }
+
+        /// <summary>Applies this element's style again, for a control whose own state has just changed.</summary>
+        protected void Restyle()
+        {
+            _style?.Apply(this);
         }
 
         void PlacementChanged()

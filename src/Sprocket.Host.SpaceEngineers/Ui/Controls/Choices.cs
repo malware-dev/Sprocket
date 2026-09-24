@@ -31,16 +31,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         int _shown;
 
-        /// <summary>Makes a set of choices whose words are drawn at <paramref name="scale" />.</summary>
-        public Choices(float scale)
+        /// <summary>Makes a set of choices whose words are drawn at <paramref name="fontSize" />.</summary>
+        public Choices(float fontSize)
         {
-            _scale = scale;
+            _scale = fontSize;
             var children = new ElementCollection(this);
 
             _row.ItemSpacing = Space.Row;
             _row.LineSpacing = Space.Row;
 
-            _chosen = Widgets.Label("", Palette.Ink, scale);
+            _chosen = Widgets.Label("", Palette.Ink, fontSize);
             _chosen.Wraps = false;
 
             _mark = Widgets.Centred(Symbols.Down, Palette.Faint);

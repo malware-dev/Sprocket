@@ -115,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             _summary.Text = entry.IsAction ? StartView.Plus + entry.Summary : entry.Summary;
             _summary.Color = entry.IsAction ? Palette.Muted : Palette.Ink;
-            _summary.Scale = entry.IsAction ? Lettering.Small : Lettering.Body;
+            _summary.FontSize = entry.IsAction ? Lettering.Small : Lettering.Body;
 
             _light.Background = wrong
                 ? Palette.Problem

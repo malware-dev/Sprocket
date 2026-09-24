@@ -40,23 +40,21 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         float _laidOutFor = -1f;
         string _laidOutIn;
-        float _line;
-        float _lineAt = -1f;
-        string _lineIn;
 
         Color? _sample;
-        float _scale;
+
+        float _fontSize;
 
         string _text = string.Empty;
         bool _trims;
         Vector2 _wrapped;
         bool _wraps;
 
-        /// <summary>An empty label in white, at a scale of one.</summary>
+        /// <summary>An empty label in white, with lines 24 units tall.</summary>
         public Label()
         {
             Font = MyFontEnum.White;
-            Scale = 1f;
+            FontSize = 24f;
             Color = Color.White;
         }
 
@@ -93,16 +91,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>The font scale it is drawn at.</summary>
-        public float Scale
+        /// <summary>How tall one line is, in UI units.</summary>
+        public float FontSize
         {
-            get { return _scale; }
+            get { return _fontSize; }
             set
             {
-                if (_scale == value)
+                if (_fontSize == value)
                     return;
 
-                _scale = value;
+                _fontSize = value;
                 InvalidateMeasure();
             }
         }
@@ -162,21 +160,21 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             if (_sample.HasValue)
-                return new Vector2(SampleWide, g.LineHeight(Font, Scale));
+                return new Vector2(SampleWide, FontSize);
 
             if (_text.Length == 0)
-                return new Vector2(0f, g.LineHeight(Font, Scale));
+                return new Vector2(0f, FontSize);
 
             // The line height, not the measured height: DrawText places a line box at ContentBounds.Y,
             // and the game's glyph cell is 45 against a line of 37, so the measured height is not what
             // is drawn.
             if (!Wraps && !Trims)
-                return new Vector2(Flat(g), LineOf(g));
+                return new Vector2(Flat(g), FontSize);
 
             if (!Wraps)
             {
                 Retrim(g, available.X);
-                return new Vector2(_wrapped.X, g.LineHeight(Font, Scale));
+                return new Vector2(_wrapped.X, FontSize);
             }
 
             Rewrap(g, available.X);
@@ -190,28 +188,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// </remarks>
         float Flat(IGraphics g)
         {
-            if (!_flatDirty && _flatAt == Scale && _flatIn == Font)
+            if (!_flatDirty && _flatAt == FontSize && _flatIn == Font)
                 return _flat;
 
             _flatDirty = false;
-            _flatAt = Scale;
+            _flatAt = FontSize;
             _flatIn = Font;
-            _flat = g.MeasureText(Font, _measured, Scale).X;
+            _flat = g.MeasureText(Font, _measured, FontSize).X;
 
             return _flat;
-        }
-
-        /// <summary>The line height, kept because drawing asks for it every frame.</summary>
-        float LineOf(IGraphics g)
-        {
-            if (_lineAt != Scale || _lineIn != Font)
-            {
-                _lineAt = Scale;
-                _lineIn = Font;
-                _line = g.LineHeight(Font, Scale);
-            }
-
-            return _line;
         }
 
         /// <inheritdoc />
@@ -230,16 +215,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             if (!Wraps)
             {
                 var shown = Trims && _lines.Count > 0 ? _lines[0] : _text;
-                g.DrawText(Font, shown, new Vector2(Left(g, shown), ContentBounds.Y), Scale, Color);
+                g.DrawText(Font, shown, new Vector2(Left(g, shown), ContentBounds.Y), FontSize, Color);
                 return;
             }
 
-            var line = LineOf(g);
+            var line = FontSize;
             var y = ContentBounds.Y;
 
             for (var i = 0; i < _lines.Count; i++)
             {
-                g.DrawText(Font, _lines[i], new Vector2(Left(g, _lines[i]), y), Scale, Color);
+                g.DrawText(Font, _lines[i], new Vector2(Left(g, _lines[i]), y), FontSize, Color);
                 y += line;
             }
         }
@@ -250,15 +235,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             if (!Centres)
                 return ContentBounds.X;
 
-            if (_centred != line || _centredAt != Scale || _centredIn != Font)
+            if (_centred != line || _centredAt != FontSize || _centredIn != Font)
             {
                 _scratch.Clear();
                 _scratch.Append(line);
 
                 _centred = line;
-                _centredAt = Scale;
+                _centredAt = FontSize;
                 _centredIn = Font;
-                _centredWidth = g.MeasureText(Font, _scratch, Scale).X;
+                _centredWidth = g.MeasureText(Font, _scratch, FontSize).X;
             }
 
             var width = _centredWidth;
@@ -271,17 +256,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>Breaks the run into lines that fit <paramref name="width" />, if anything has changed since.</summary>
         void Rewrap(IGraphics g, float width)
         {
-            if (!_dirty && _laidOutFor == width && _laidOutAt == Scale && _laidOutIn == Font)
+            if (!_dirty && _laidOutFor == width && _laidOutAt == FontSize && _laidOutIn == Font)
                 return;
 
             _dirty = false;
             _laidOutFor = width;
-            _laidOutAt = Scale;
+            _laidOutAt = FontSize;
             _laidOutIn = Font;
 
             _lines.Clear();
 
-            var line = LineOf(g);
+            var line = FontSize;
             var widest = 0f;
 
             _scratch.Clear();
@@ -303,7 +288,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 var length = end - i;
 
                 _scratch.Append(_text, i, length);
-                var candidate = g.MeasureText(Font, _scratch, Scale).X;
+                var candidate = g.MeasureText(Font, _scratch, FontSize).X;
 
                 if (candidate > width && committed > 0f)
                 {
@@ -313,7 +298,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                     _scratch.Append(_text, i, length);
 
                     TrimLeading();
-                    committed = g.MeasureText(Font, _scratch, Scale).X;
+                    committed = g.MeasureText(Font, _scratch, FontSize).X;
                 }
                 else
                     committed = candidate;
@@ -330,17 +315,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>Cuts the run down, a character at a time, to something that fits with an ellipsis.</summary>
         void Retrim(IGraphics g, float width)
         {
-            if (!_dirty && _laidOutFor == width && _laidOutAt == Scale && _laidOutIn == Font)
+            if (!_dirty && _laidOutFor == width && _laidOutAt == FontSize && _laidOutIn == Font)
                 return;
 
             _dirty = false;
             _laidOutFor = width;
-            _laidOutAt = Scale;
+            _laidOutAt = FontSize;
             _laidOutIn = Font;
 
             _lines.Clear();
 
-            var full = g.MeasureText(Font, _measured, Scale).X;
+            var full = g.MeasureText(Font, _measured, FontSize).X;
             if (full <= width)
             {
                 _lines.Add(_text);
@@ -357,7 +342,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 _scratch.Append(_text, 0, keep);
                 _scratch.Append("…");
 
-                if (g.MeasureText(Font, _scratch, Scale).X <= width)
+                if (g.MeasureText(Font, _scratch, FontSize).X <= width)
                     break;
             }
 

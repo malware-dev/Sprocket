@@ -74,8 +74,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         {
             _glyph.Symbol = Many ? Symbols.Check : Chosen ? Symbols.Disc : Symbols.Ring;
 
-            // The tick is drawn inside the box and at the ring's scale climbs out of it. Sized by eye.
-            _glyph.Scale = Many ? Lettering.Symbol * 0.58f : Lettering.Symbol;
+            // The tick is drawn inside the box and at the ring's size climbs out of it. Sized by eye.
+            _glyph.FontSize = Many ? Lettering.Symbol * 0.58f : Lettering.Symbol;
 
             // Only the ring stands beside text, so only the ring takes the lift a symbol beside text takes.
             _glyph.Lift = Many ? 0f : Lettering.SymbolLift;

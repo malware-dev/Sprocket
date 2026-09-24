@@ -23,9 +23,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         Color _penColor;
 
         /// <summary>
-        ///     Makes a nameplate whose pencil is the symbol <paramref name="pen" /> at <paramref name="penScale" />.
+        ///     Makes a nameplate whose pencil is the symbol <paramref name="pen" /> at <paramref name="penSize" />.
         /// </summary>
-        public Nameplate(string pen, float penScale)
+        public Nameplate(string pen, float penSize)
         {
             var children = new ElementCollection(this);
 
@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             Box.Padding = new Thickness();
             Box.Edge = new Color(0, 0, 0, 0);
 
-            _pen = new Glyph(pen, penScale, Color.White);
+            _pen = new Glyph(pen, penSize, Color.White);
 
             children.Add(_label);
             children.Add(Box);
@@ -87,14 +87,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>The scale of the words, in both modes.</summary>
-        public float Scale
+        /// <summary>How tall a line of the words is, in UI units, in both modes.</summary>
+        public float FontSize
         {
-            get { return _label.Scale; }
+            get { return _label.FontSize; }
             set
             {
-                _label.Scale = value;
-                Box.Scale = value;
+                _label.FontSize = value;
+                Box.FontSize = value;
             }
         }
 
@@ -245,7 +245,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             _label.Measure(g, room);
             Box.Measure(g, room);
 
-            var line = g.LineHeight(_label.Font, _label.Scale);
+            var line = _label.FontSize;
 
             var name = _label.DesiredSize.X;
             if (IsEditing && Box.DesiredSize.X > name)
@@ -254,7 +254,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             // An empty box measures nothing, so the hint it shows is measured here or the clip cuts it off.
             if (IsEditing && _measuring.Length > 0 && Box.Text.Length == 0)
             {
-                var hint = g.MeasureText(_label.Font, _measuring, _label.Scale).X;
+                var hint = g.MeasureText(_label.Font, _measuring, _label.FontSize).X;
                 if (hint > name)
                     name = hint;
             }
@@ -263,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             if (name < least)
                 name = least;
 
-            // Always one line of this font at this scale, whatever the parts measure: a row centres what is
+            // Always one line of this font at this size, whatever the parts measure: a row centres what is
             // in it, so a taller plate would sit its words above its neighbours'. A symbol measures its
             // whole square cell, which is taller than the line.
             return new Vector2(name + aside, line);

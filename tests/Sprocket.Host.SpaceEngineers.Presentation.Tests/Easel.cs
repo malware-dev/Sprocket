@@ -2,6 +2,7 @@ using System.Text;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;
@@ -67,8 +68,8 @@ sealed class Easel
     /// <summary>How many times anything has asked for the width of a string.</summary>
     public int Measured => _device.Measured;
 
-    /// <summary>A line of the default face, in the units the screen lays out in.</summary>
-    public float LineHeight => _graphics.LineHeight(VRage.Game.MyFontEnum.White, 1f);
+    /// <summary>A line of text at the size a text element starts at, in the units the screen lays out in.</summary>
+    public float LineHeight => Starting;
 
     /// <summary>
     /// Window pixels per UI unit.
@@ -89,10 +90,13 @@ sealed class Easel
         _measuring.Length = 0;
         _measuring.Append(said);
 
-        return _graphics.MeasureText(VRage.Game.MyFontEnum.White, _measuring, 1f).X * Pixels;
+        return _graphics.MeasureText(VRage.Game.MyFontEnum.White, _measuring, Starting).X * Pixels;
     }
 
     readonly StringBuilder _measuring = new StringBuilder(32);
+
+    /// <summary>The font size a text element starts at, read from one rather than written down again here.</summary>
+    static readonly float Starting = new Label().FontSize;
 
     /// <summary>Lays out and draws again, which is what a frame is.</summary>
     public void Draw(float width, float height)

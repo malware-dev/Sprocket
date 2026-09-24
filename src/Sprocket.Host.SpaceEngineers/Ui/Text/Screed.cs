@@ -50,10 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         float _gutter;
 
         /// <summary>The line height, kept because drawing runs every frame.</summary>
-        float _line;
 
-        float _lineAt = -1f;
-        string _lineIn;
         bool _numbered;
 
         /// <summary>Which band <see cref="_numbers" /> was filled for, so it is only filled again if it moved.</summary>
@@ -61,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         int _numbersTo = int.MinValue;
 
-        float _scale;
+        float _fontSize;
 
         /// <summary>The lines that were on screen last time it was drawn.</summary>
         int _shownFrom = int.MaxValue;
@@ -73,11 +70,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>The widest line seen so far, which is how far sideways there is to go.</summary>
         float _widest;
 
-        /// <summary>An empty screed in white, at a scale of one, clipped to its bounds.</summary>
+        /// <summary>An empty screed in white, with lines 24 units tall, clipped to its bounds.</summary>
         public Screed()
         {
             Font = MyFontEnum.White;
-            Scale = 1f;
+            FontSize = 24f;
             Color = Color.White;
             ClipsContent = true;
         }
@@ -118,16 +115,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>The font scale it is drawn at.</summary>
-        public float Scale
+        /// <summary>How tall one line is, in UI units.</summary>
+        public float FontSize
         {
-            get { return _scale; }
+            get { return _fontSize; }
             set
             {
-                if (_scale == value)
+                if (_fontSize == value)
                     return;
 
-                _scale = value;
+                _fontSize = value;
                 Forget();
                 InvalidateMeasure();
             }
@@ -312,7 +309,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <remarks>Works out the extents here, because arranging has no font to ask.</remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            var line = LineOf(g);
+            var line = FontSize;
 
             _tall = _lines.Count > 0 ? _lines.Count * line : line;
             _gutter = Numbered && _lines.Count > 0 ? (Digits(_lines.Count) + 2) * DigitOf(g) : 0f;
@@ -356,17 +353,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         {
             var view = View;
 
-            if (_lines.Count > 0 && _line > 0f && view.Height > 0f)
+            if (_lines.Count > 0 && FontSize > 0f && view.Height > 0f)
             {
-                var first = (int)(_down.Offset / _line);
+                var first = (int)(_down.Offset / FontSize);
                 if (first < 0)
                     first = 0;
 
-                var last = (int)((_down.Offset + view.Height) / _line);
+                var last = (int)((_down.Offset + view.Height) / FontSize);
                 if (last >= _lines.Count)
                     last = _lines.Count - 1;
 
-                var top = view.Y - _down.Offset + first * _line;
+                var top = view.Y - _down.Offset + first * FontSize;
 
                 Gutter(g, view, first, last, top);
 
@@ -386,10 +383,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                         if (i < _shownFrom || i > _shownTo)
                             Widen(g, said);
 
-                        g.DrawText(Font, said, new Vector2(x, y), Scale, Color);
+                        g.DrawText(Font, said, new Vector2(x, y), FontSize, Color);
                     }
 
-                    y += _line;
+                    y += FontSize;
                 }
 
                 _shownFrom = first;
@@ -417,8 +414,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             for (var i = 0; i < _numbers.Count; i++)
             {
-                g.DrawText(Font, _numbers[i], new Vector2(edge, y), Scale, NumberColor, Align.Right);
-                y += _line;
+                g.DrawText(Font, _numbers[i], new Vector2(edge, y), FontSize, NumberColor, Align.Right);
+                y += FontSize;
             }
 
             g.PopClip();
@@ -438,13 +435,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 _numbers.Add((i + 1).ToString());
         }
 
-        /// <summary>The widest of the ten digits, asked only when the face or the scale has moved.</summary>
+        /// <summary>The widest of the ten digits, asked only when the face or the size has moved.</summary>
         float DigitOf(IGraphics g)
         {
-            if (_digitAt == Scale && _digitIn == Font)
+            if (_digitAt == FontSize && _digitIn == Font)
                 return _digit;
 
-            _digitAt = Scale;
+            _digitAt = FontSize;
             _digitIn = Font;
             _digit = 0f;
 
@@ -453,7 +450,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 _scratch.Length = 0;
                 _scratch.Append((char)('0' + d));
 
-                var wide = g.MeasureText(Font, _scratch, Scale).X;
+                var wide = g.MeasureText(Font, _scratch, FontSize).X;
                 if (wide > _digit)
                     _digit = wide;
             }
@@ -542,19 +539,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 Scrolled = offset;
         }
 
-        /// <summary>The line height, asked of the font only when the face or the scale has moved.</summary>
-        float LineOf(IGraphics g)
-        {
-            if (_lineAt != Scale || _lineIn != Font)
-            {
-                _lineAt = Scale;
-                _lineIn = Font;
-                _line = g.LineHeight(Font, Scale);
-            }
-
-            return _line;
-        }
-
         /// <summary>Measures a line coming into view, and reaches further if it is the longest yet.</summary>
         /// <remarks>
         ///     Measures while drawing on purpose: it is asked only about lines that were not on screen last
@@ -570,7 +554,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             _scratch.Length = 0;
             _scratch.Append(said);
 
-            var wide = g.MeasureText(Font, _scratch, Scale).X;
+            var wide = g.MeasureText(Font, _scratch, FontSize).X;
             if (wide <= _widest)
                 return;
 

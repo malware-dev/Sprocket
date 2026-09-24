@@ -19,12 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         float _half;
 
         /// <remarks><paramref name="field" /> stands it among the boxes a value is given in, as tall as one.</remarks>
-        public Switch(float scale, bool field = false)
+        public Switch(float fontSize, bool field = false)
         {
             var children = new ElementCollection(this);
 
-            _on = Half(Widgets.Caps("on"), scale, field);
-            _off = Half(Widgets.Caps("off"), scale, field);
+            _on = Half(Widgets.Caps("on"), fontSize, field);
+            _off = Half(Widgets.Caps("off"), fontSize, field);
 
             children.Add(_on);
             children.Add(_off);
@@ -155,9 +155,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             _off.Draw(g);
         }
 
-        static Label Half(string text, float scale, bool field)
+        static Label Half(string text, float fontSize, bool field)
         {
-            var half = Widgets.Label(text, Palette.Faint, scale);
+            var half = Widgets.Label(text, Palette.Faint, fontSize);
             half.Padding = new Thickness(Space.ChipX, field ? Space.FieldY : Space.ChipY);
             half.Centres = true;
             half.Wraps = false;

@@ -70,10 +70,10 @@ namespace Sprocket.Sim.Simulation
         /// <summary>How many times anything has asked for the width of a string. See the device.</summary>
         public int Measured => _device.Measured;
 
-        /// <summary>How tall a line of this font stands, in the units the screen lays out in.</summary>
+        /// <summary>How tall a line of this font stands at a scale the game was handed, in the units the screen lays out in.</summary>
         public float LineHeight(string font, float scale)
         {
-            return _graphics.LineHeight(font, scale);
+            return _device.LineHeight(font, scale) / (_height / ScreenSpaceGraphics.GameReferenceHeight);
         }
 
         public void Draw()

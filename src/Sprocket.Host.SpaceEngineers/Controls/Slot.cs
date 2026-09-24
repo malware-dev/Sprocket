@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         {
             _children = new ElementCollection(this);
 
-            Scale = Lettering.Body;
+            FontSize = Lettering.Body;
             Color = Palette.Ink;
             Background = Palette.SlotFill;
             Highlight = Palette.ControlHot;
