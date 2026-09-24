@@ -120,6 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                     return;
 
                 _wraps = value;
+                _dirty = true;
                 InvalidateMeasure();
             }
         }
@@ -135,6 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                     return;
 
                 _trims = value;
+                _dirty = true;
                 InvalidateMeasure();
             }
         }
