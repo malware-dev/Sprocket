@@ -1,4 +1,4 @@
-namespace Sprocket.Host.SpaceEngineers.Ui.Look
+namespace Sprocket.Host.SpaceEngineers.Look
 {
     /// <summary>Things that are a size rather than a gap.</summary>
     public static class Sizes

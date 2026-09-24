@@ -1,7 +1,7 @@
 using VRage.Game;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Look
+namespace Sprocket.Host.SpaceEngineers.Look
 {
     /// <summary>A colour as hue, saturation and value.</summary>
     /// <remarks>

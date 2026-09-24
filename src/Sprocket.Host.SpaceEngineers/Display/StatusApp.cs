@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.World;
 using Sandbox.Game.GameSystems.TextSurfaceScripts;

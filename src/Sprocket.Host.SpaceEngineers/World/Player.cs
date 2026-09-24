@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Look;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.World

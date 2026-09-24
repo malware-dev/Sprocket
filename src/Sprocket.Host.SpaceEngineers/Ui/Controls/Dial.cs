@@ -3,7 +3,7 @@ using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
 

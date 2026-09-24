@@ -106,7 +106,7 @@ afterwards as the UI regression tests.
 
 ## Values that are transcriptions, not choices
 
-The palette in `Ui/Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
+The palette in `Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
 taken from the game's own textures and constants. **They are never adjusted by eye and never
 "improved".** Each carries a citation saying where it came from; that citation is the reason it may
 not be touched, and it is why the values need no further comment.

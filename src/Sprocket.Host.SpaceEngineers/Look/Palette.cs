@@ -1,6 +1,6 @@
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Look
+namespace Sprocket.Host.SpaceEngineers.Look
 {
     /// <summary>The colours a screen is drawn in.</summary>
     /// <remarks>A value that names a texture was sampled from that texture in the game's content.</remarks>

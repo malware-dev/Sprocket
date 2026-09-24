@@ -1,6 +1,6 @@
 using VRage.Utils;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Look
+namespace Sprocket.Host.SpaceEngineers.Look
 {
     /// <summary>The shapes a screen is built from that letters cannot draw.</summary>
     public static class Symbols
@@ -74,10 +74,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Look
 
         /// <summary>Two sheets, one behind the other: another of something that already exists.</summary>
         public const string Duplicate = "2";
-
-        /// <summary>Flat white, tinted to whatever colour is wanted.</summary>
-        /// <remarks>Declared in <c>Content/Data/TransparentMaterials.sbc</c>.</remarks>
-        public static readonly MyStringId Fill = MyStringId.GetOrCompute("Sprocket_Fill");
 
         /// <summary>Every hue in order, red round to red.</summary>
         /// <remarks>

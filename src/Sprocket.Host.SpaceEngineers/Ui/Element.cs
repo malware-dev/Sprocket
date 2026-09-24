@@ -1,7 +1,6 @@
 using System;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Look;
 using VRage.Utils;
 using VRageMath;
 
@@ -15,7 +14,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         public const float Unbounded = 1000000f;
 
         /// <summary>A flat white texture, tinted to whatever colour is wanted.</summary>
-        protected static readonly MyStringId Solid = Symbols.Fill;
+        /// <remarks>Declared in <c>Content/Data/TransparentMaterials.sbc</c>.</remarks>
+        protected static readonly MyStringId Solid = MyStringId.GetOrCompute("Sprocket_Fill");
 
         bool _arrangeDirty = true;
         RectangleF _arrangedTo;

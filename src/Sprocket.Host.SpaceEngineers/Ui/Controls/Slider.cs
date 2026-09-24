@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Look;
 using VRage.Utils;
 using VRageMath;
 

@@ -1,4 +1,4 @@
-namespace Sprocket.Host.SpaceEngineers.Ui.Look
+namespace Sprocket.Host.SpaceEngineers.Look
 {
     /// <summary>Room, named for what it separates.</summary>
     public static class Space

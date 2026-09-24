@@ -1,4 +1,4 @@
-namespace Sprocket.Host.SpaceEngineers.Ui.Look
+namespace Sprocket.Host.SpaceEngineers.Look
 {
     /// <summary>Text sizes as font scales, named for what they are for.</summary>
     public static class Lettering
