@@ -1,7 +1,7 @@
 using System.Text;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Drawing;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;

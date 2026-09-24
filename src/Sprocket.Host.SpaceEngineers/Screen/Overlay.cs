@@ -1,6 +1,6 @@
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Drawing;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {

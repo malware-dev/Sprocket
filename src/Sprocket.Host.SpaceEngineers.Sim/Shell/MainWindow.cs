@@ -5,12 +5,12 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;
-using TextBox = Sprocket.Host.SpaceEngineers.Layout.TextBox;
+using TextBox = Sprocket.Host.SpaceEngineers.Ui.Text.TextBox;
 
 namespace Sprocket.Sim.Shell
 {

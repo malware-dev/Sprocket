@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Look;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 

@@ -13,8 +13,8 @@ Two projects, and the first one is the mod:
 - **`src/Sprocket.Host.SpaceEngineers`** is everything that runs in the game, in one tree, one folder
   per capability and each holding the whole of it: a sequence's model, the slots a screen is asked to
   show for it and the views that draw them all sit in `Sequences/`. `Words/` decides how a sentence is
-  composed, which is not the same as holding the English - see below. `Layout/`, `Drawing/` and `Look/` know nothing of Sprocket and sit beside the
-  features that use them. Files are globbed, so a new file is in the build by being in the folder.
+  composed, which is not the same as holding the English - see below. `Ui/` is the UI framework, kept apart
+  from the features built on it, and sits beside them. Files are globbed, so a new file is in the build by being in the folder.
 
   **What a screen is asked to show carries structure and never words** - stated on
   `Screen/EditorComponent` and proved by `PaperTarget` in the tests. That rule used to be a folder
@@ -25,7 +25,7 @@ Two projects, and the first one is the mod:
 The three test projects reference the mod, or the harness where they need a screen.
 
 **Two things only the game can do, and each is an interface the mod asks through.**
-`Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers
+`Ui/Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers
 both, which is how a frame is recorded rather than drawn and how a toolbar slot is read without one.
 Everything else - mod storage, the grid's events, the block interfaces - the harness uses for real,
 through Castle proxies over the game's own types. See `Fakes/Pretend.cs`.
@@ -106,7 +106,7 @@ afterwards as the UI regression tests.
 
 ## Values that are transcriptions, not choices
 
-The palette in `Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
+The palette in `Ui/Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
 taken from the game's own textures and constants. **They are never adjusted by eye and never
 "improved".** Each carries a citation saying where it came from; that citation is the reason it may
 not be touched, and it is why the values need no further comment.

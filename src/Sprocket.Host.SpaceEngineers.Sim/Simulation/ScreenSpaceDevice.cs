@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
-using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;

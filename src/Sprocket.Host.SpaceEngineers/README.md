@@ -18,11 +18,10 @@ is drawn together, because a change to how a sentence works should be a change i
 | `World/` | the game's blocks, what they can do, and their toolbars |
 | `Words/` | how a sentence is composed: word order, capitals, and the words that join phrases |
 | `Screen/` | the editor's surface, and the screen that draws it |
-| `Layout/` | elements, containers, text - laying out, knowing nothing of Sprocket |
-| `Drawing/` | what everything draws through, and the game's own backend |
-| `Look/` | palette, type scale, spacing, sizes, icons |
-| `Controls/` | the pieces a screen is built from |
-| `Input/` | pointers, held keys, copied text, and the game's keyboard as edits |
+| `Ui/` | the UI framework: elements at its root, then layout, text, controls, drawing, input and the game's look |
+| `Layout/` | what pressing a control means, and what a question's fields take |
+| `Look/` | icons for kinds of things |
+| `Controls/` | the house style, and the slot in a sentence |
 | `Terminal/` | the control that opens the editor, and the screen it opens |
 | `Content/` | materials, fonts, and the mod's own metadata |
 
@@ -39,7 +38,7 @@ blocks it makes up, through the game's own interfaces - so the world layer, the 
 storage are exercised outside the game, and the reference frames in `tests/Reference/` see them.
 
 Two things only the game can do, so each is an interface here and the harness answers it:
-`Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars. Everything else the
+`Ui/Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars. Everything else the
 harness uses for real.
 
 What the harness cannot answer is whether Keen's API still means what it meant. That is answered by

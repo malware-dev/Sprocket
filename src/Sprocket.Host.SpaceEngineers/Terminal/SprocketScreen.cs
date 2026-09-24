@@ -1,13 +1,14 @@
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sandbox.ModAPI;
 using VRage.Input;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Drawing;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Input;
 using Sprocket.Host.SpaceEngineers.Display;
 using VRage.Game.GUI.TextPanel;
 using IngameSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;

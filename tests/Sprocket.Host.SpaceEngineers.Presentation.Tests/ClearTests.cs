@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
 using VRageMath;
 using Xunit;
 

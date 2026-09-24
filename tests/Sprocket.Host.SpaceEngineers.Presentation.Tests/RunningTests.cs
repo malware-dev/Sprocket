@@ -1,5 +1,5 @@
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 

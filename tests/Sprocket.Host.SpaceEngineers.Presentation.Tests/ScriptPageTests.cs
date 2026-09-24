@@ -1,8 +1,7 @@
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Controls;
+using Sprocket.Host.SpaceEngineers.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Developing;
-using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Xunit;
 
