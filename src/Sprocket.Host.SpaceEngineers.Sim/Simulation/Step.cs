@@ -25,6 +25,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Onward to the next field of a form, which is Tab.</summary>
         public const int Onward = 11;
 
+        /// <summary>An arrow key, which way held in <see cref="At" />: right and down are one, left and up minus one.</summary>
+        public const int Arrow = 12;
+
         public int Kind;
 
         /// <summary>

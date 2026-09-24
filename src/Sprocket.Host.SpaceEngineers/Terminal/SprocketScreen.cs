@@ -314,6 +314,12 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             if (box == null)
                 return;
 
+            if (Chose())
+            {
+                _blinkFrom = Now();
+                return;
+            }
+
             KeyboardOutcome outcome = _keyboard.HandleInput(box);
 
             if (outcome.Commit && _view.IsAsking)
@@ -343,6 +349,41 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             // would feel broken.
             _view.Typed();
             _blinkFrom = Now();
+        }
+
+        /// <summary>
+        /// Takes the keys a field answered by choosing, or a dial, takes for itself, and answers whether
+        /// that was all there was to take.
+        /// </summary>
+        /// <remarks>
+        /// Before the box is typed into, because a field of words has a box only to hold the word, and
+        /// letters typed into it would be a word nobody chose. So a field of words takes Tab and Enter
+        /// here as well, and every other key goes to choosing.
+        /// </remarks>
+        bool Chose()
+        {
+            IMyInput input = MyAPIGateway.Input;
+            var across = input.IsNewKeyPressed(MyKeys.Right) ? 1 : input.IsNewKeyPressed(MyKeys.Left) ? -1 : 0;
+            var down = input.IsNewKeyPressed(MyKeys.Down) ? 1 : input.IsNewKeyPressed(MyKeys.Up) ? -1 : 0;
+            if ((across != 0 || down != 0) && _view.Arrow(across, down))
+                return true;
+
+            if (!_view.Chooses)
+                return false;
+
+            if (input.IsNewKeyPressed(MyKeys.Tab))
+                _view.NextField();
+            else if (input.IsNewKeyPressed(MyKeys.Enter))
+                _view.TakeTyped();
+
+            var typed = input.TextInput;
+            for (var i = 0; i < typed.Count; i++)
+            {
+                if (char.IsLetterOrDigit(typed[i]))
+                    _view.Letter(typed[i]);
+            }
+
+            return true;
         }
 
         static int Now()

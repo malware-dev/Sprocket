@@ -79,6 +79,13 @@ picker-leaving      60 130 type Airlock enter 60 161 200 351 560 333 19 62
 trigger-target      60 130 type Airlock enter 60 161 200 351 560 333
 trigger-target-full 60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 60 161 200 351 560 333
 
+# A single action is the page after the trigger's, in the same pick: the trigger's last column
+# folds to the narrow way back at the left, and the action's three columns share the rest. Back on
+# the trigger's page, its last column makes room at the right for the way on to that page.
+trigger-paged       60 130 type Airlock enter 60 161 200 351 560 333 1000 207 tick 30
+trigger-paged-values 60 130 type Airlock enter 60 161 200 351 560 333 1000 207 tick 30 260 490 620 677
+trigger-onward      60 130 type Airlock enter 60 161 200 351 560 333 1000 207 tick 30 47 500 tick 30
+
 # --- the sequence that walk arrives at ----------------------------------------------------------
 sequence            60 130 type Airlock enter 60 161 200 351 560 333 1353 311
 sequence-hover      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 move 100 193
@@ -167,13 +174,6 @@ system-copying      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25
 # is a control: the blocks, the moment, and what it then does. Hovering a part is how that is said,
 # so this is the frame that would notice them going back to being a line of words.
 system-trigger      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 move 150 226
-
-# --- the cross inside a part of that sentence ----------------------------------------------------
-#
-# A control inside a control: pressing the words changes what is in them, and this takes the answer
-# back so the whole question can be asked again. The frame holds the hover, which is the only thing
-# that says the two are separate - and it is inside the chip, where what it empties is.
-system-clearing     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 move 530 224
 
 # --- a sequence switched on, which is the only time it can be run by hand ------------------------
 #

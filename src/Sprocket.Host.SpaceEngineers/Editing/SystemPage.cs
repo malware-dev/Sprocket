@@ -419,8 +419,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         SentenceTrigger Starting(int which, Trigger trigger)
         {
             var asked = trigger;
-            var starts = Editor.Register(Cmd.OpenTrigger, which,
-                delegate { Editor.ChangeTrigger(_system, asked); });
 
             var sentence = new SentenceTrigger(Kind(trigger));
 
@@ -432,14 +430,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             {
                 var when = moment as WhenTrigger;
                 sentence.Slots.Add(new EntitiesSlot(Resolved(moment.Sources),
-                    when != null && when.RequiresAll, starts));
+                    when != null && when.RequiresAll, Starts(which, 0, asked, Opening.Blocks)));
 
-                sentence.Slots.Add(new EventSlot(Happening(moment), starts));
+                sentence.Slots.Add(new EventSlot(Happening(moment), Starts(which, 1, asked, Opening.What)));
             }
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                sentence.Slots.Add(new DurationSlot(every.IntervalTicks, starts));
+                sentence.Slots.Add(new DurationSlot(every.IntervalTicks, Starts(which, 0, asked, Opening.Nothing)));
 
             Doing(sentence, which, trigger);
 
@@ -487,102 +485,58 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// done by a step then read alike.
         /// <para>
         /// Pressing a sequence opens the picker the trigger was made in, where what it does sits
-        /// beside what starts it. Pressing one act opens the picker that act was chosen in. The cross
-        /// beside either empties it, which throws away what is there.
+        /// beside what starts it. Pressing one act opens the picker that act was chosen in.
         /// </para>
         /// </remarks>
         void Doing(SentenceTrigger sentence, int which, Trigger trigger)
         {
             var target = trigger;
 
-            // Nothing chosen yet, which is what the cross leaves behind. Pressing it opens the
-            // picker the trigger was made in, and there is nothing to clear.
-            if (trigger.Runs < 1)
-            {
-                sentence.DoesLead = "";
-                sentence.Does.Add(new SequenceSlot(0, "",
-                    Editor.Register(Cmd.TriggerTarget, which,
-                        delegate { Editor.ChangeTrigger(_system, target); })));
-
-                return;
-            }
-
-            var clear = Editor.Register(Cmd.ClearTarget, which,
-                delegate { Editor.ClearTarget(_system, target); });
-
             Sequence sequence = _system.FindSequence(trigger.Runs);
-            var act = sequence == null || sequence.HasName ? null : Act(sequence);
+            var act = sequence == null || sequence.HasName ? null : sequence.Only;
 
             if (act == null)
             {
                 var pointed = Editor.Register(Cmd.TriggerTarget, which,
-                    delegate { Editor.ChangeTrigger(_system, target); });
+                    delegate { Editor.ChangeTrigger(_system, target, Opening.Nothing, false); });
 
                 sentence.DoesLead = SentenceText.Then(sentence.Kind, trigger.Stops, true, false);
-                sentence.Does.Add(Clearable(new SequenceSlot(trigger.Runs,
-                    sequence == null || !sequence.HasName ? "" : sequence.Name, pointed), clear));
+                sentence.Does.Add(new SequenceSlot(trigger.Runs,
+                    sequence == null || !sequence.HasName ? "" : sequence.Name, pointed));
 
                 return;
             }
 
-            var changed = sequence;
-            var doing = Editor.Register(Cmd.TriggerTarget, which,
-                delegate { Editor.ChangeDoing(_system, changed, act); });
-
             EntityAction chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets));
 
+            // Each part opens the trigger's picker on the page the action was made on, at its column.
             sentence.DoesLead = SentenceText.Then(sentence.Kind, trigger.Stops, false, act.Sets);
-            sentence.Does.Add(new ActionSlot(chosen, doing));
+            sentence.Does.Add(new ActionSlot(chosen, Does(which, 0, target, Opening.What)));
 
-            var blocks = new EntitiesSlot(Resolved(act.Targets), true, doing);
-            sentence.Does.Add(blocks);
+            sentence.Does.Add(new EntitiesSlot(Resolved(act.Targets), true, Does(which, 1, target, Opening.Blocks)));
 
             // What it was given, where it takes anything, so the line says all of what it does.
             // Pressing it reopens the whole choice, which opens on these values.
             if (chosen == null || chosen.Wants == 0)
-            {
-                Clearable(blocks, clear);
                 return;
-            }
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            sentence.Does.Add(Clearable(new ValuesSlot(act.Values, fields, doing), clear));
+            sentence.Does.Add(new ValuesSlot(act.Values, fields, Does(which, 2, target, Opening.Values)));
         }
 
-        /// <summary>
-        /// The part that carries the cross, which is the last of them.
-        /// </summary>
-        /// <remarks>
-        /// One per sentence rather than one per part: what the cross empties is what the trigger
-        /// does, which the parts say together. On the last of them because that is where the
-        /// sentence stops.
-        /// </remarks>
-        static SentenceSlot Clearable(SentenceSlot slot, int command)
+        /// <summary>What pressing a part of what a trigger does does: opens its picker on that part's column.</summary>
+        int Does(int which, int part, Trigger trigger, Opening opens)
         {
-            slot.ClearCommand = command;
-            return slot;
+            return Editor.Register(Cmd.TriggerTarget, which, part,
+                delegate { Editor.ChangeTrigger(_system, trigger, opens, true); });
         }
 
-        /// <summary>The one act of a sequence nobody named, or null where it is not one act.</summary>
-        static Act Act(Sequence sequence)
+        /// <summary>What pressing a part of what starts a trigger does: opens its picker on that part's column.</summary>
+        int Starts(int which, int part, Trigger trigger, Opening opens)
         {
-            Act only = null;
-            var steps = sequence.Steps;
-
-            for (var i = 0; i < steps.Count; i++)
-            {
-                if (steps[i] is Await)
-                    continue;
-
-                var act = steps[i] as Act;
-                if (act == null || only != null)
-                    return null;
-
-                only = act;
-            }
-
-            return only;
+            return Editor.Register(Cmd.OpenTrigger, which, part,
+                delegate { Editor.ChangeTrigger(_system, trigger, opens, false); });
         }
 
         void Collect()

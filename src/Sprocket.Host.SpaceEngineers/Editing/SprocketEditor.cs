@@ -463,7 +463,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 case Cmd.RunNow:
                 case Cmd.StopNow:
                 case Cmd.TriggerTarget:
-                case Cmd.ClearTarget:
                 case Cmd.StartWhen:
                 case Cmd.StartEvery:
                 case Cmd.AddAction:
@@ -1092,6 +1091,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             _gathered.Clear();
             page.Build(_gathered);
+
+            // A page that went straight on to another as it was built is never shown: the one it went
+            // on to is, built from the start.
+            if (Current != page)
+            {
+                Rebuild();
+                return;
+            }
             Said(_gathered);
 
             // Everything, not just what the cadence is due to say: the components above were made from
@@ -1252,8 +1259,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         internal void StartSequence(AutomationSystem system, Trigger trigger)
         {
-            _pendingSystem = system;
-
             // Where to unwind to once the questions are answered. The system's screen is
             // already underneath - the starters live on it now - so everything the questions
             // pushed is dropped and the finished sequence lands directly on it.
@@ -1266,7 +1271,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (moment != null)
             {
                 // Nothing picked yet: the sequence is being made, so there is nothing to resolve.
-                Push(new PickPage(this, "When something happens", true,
+                var picker = new PickPage(this, "When something happens", true,
                     new List<long>(), moment.EventId, Form.Native,
                     delegate(PickAnswer answer)
                     {
@@ -1280,22 +1285,26 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                             if (taken != null)
                                 taken.Sources.Clear();
 
-                            FinishTrigger(made, origin, aim);
-                        });
+                            Aimed(system, made, aim, origin, true, null);
+                        }, delegate { });
                     },
-                    true, aim: aim));
+                    true, aim: aim);
+
+                Push(picker);
                 return;
             }
 
             var every = trigger as EveryTrigger;
-            if (every != null)
+            if (every == null)
+                return;
+
+            var timer = new TimerPage(this, every.IntervalTicks, aim, delegate(int ticks)
             {
-                Push(new TimerPage(this, every.IntervalTicks, aim, delegate(int ticks)
-                {
-                    every.IntervalTicks = ticks;
-                    FinishTrigger(every, origin, aim);
-                }));
-            }
+                every.IntervalTicks = ticks;
+                Aimed(system, every, aim, origin, true, null);
+            });
+
+            Push(timer);
         }
 
         /// <summary>
@@ -1344,7 +1353,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// itself.
         /// </para>
         /// </remarks>
-        void Unless(MomentTrigger made, Trigger except, Action<MomentTrigger> then)
+        void Unless(MomentTrigger made, Trigger except, Action<MomentTrigger> then, Action otherwise)
         {
             var taken = Holding(made, except) as MomentTrigger;
             if (taken == null)
@@ -1354,7 +1363,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
 
             AskHere(SequenceText.Taken(_runner.Bindings, taken));
-            Answer("Leave it alone", delegate { });
+            Answer("Leave it alone", otherwise);
             Answer("Take it over", delegate { then(taken); });
         }
 
@@ -1416,32 +1425,30 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Does what the trigger was made to do, now that it is known what starts it.
-        /// </summary>
-        /// <remarks>Nothing exists until this, so backing out before it leaves nothing behind.</remarks>
-        void FinishTrigger(Trigger trigger, int origin, Aim aim)
-        {
-            var system = _pendingSystem;
-            _pendingSystem = null;
-
-            UnwindTo(origin);
-            Aimed(system, trigger, aim, origin, true, null);
-        }
-
-        /// <summary>
         /// Carries out what a trigger was chosen to do, with the change to what starts it where there
         /// is one.
         /// </summary>
         /// <remarks>
         /// A trigger being changed that goes on doing what it did has only its start to change, and one
         /// that did nothing takes what the column opened on. What starts it goes in with what it does,
-        /// as one edit, wherever what it does is settled here; a single action is settled on the
-        /// picker after this, and goes in with that.
+        /// as one edit.
+        /// <para>
+        /// A single action is chosen on the page after, in the same pick, and nothing is kept until it
+        /// is. A trigger being made does not exist until then, so backing out leaves nothing behind.
+        /// </para>
         /// </remarks>
         void Aimed(AutomationSystem system, Trigger trigger, Aim aim, int origin, bool fresh,
             SystemEdit start)
         {
-            if (!fresh && !aim.Moved && trigger.Runs > 0)
+            if (aim.Outcome == Outcome.One)
+            {
+                DoOneThing(system, trigger, origin, fresh, start, aim);
+                return;
+            }
+
+            UnwindTo(origin);
+
+            if (!fresh && !aim.Moved)
             {
                 if (start != null)
                     Do(system, start);
@@ -1452,12 +1459,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (aim.Outcome == Outcome.New)
             {
                 RunNew(system, trigger, origin, fresh, start);
-                return;
-            }
-
-            if (aim.Outcome == Outcome.One)
-            {
-                DoOneThing(system, trigger, origin, fresh, start);
                 return;
             }
 
@@ -1519,39 +1520,99 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Asks what one thing the trigger should do, and makes it do exactly that.
+        /// Asks what one thing the trigger should do, as the next page of the pick what it does was
+        /// chosen in, and makes it do exactly that.
         /// </summary>
         /// <remarks>
         /// What it holds is a sequence of one act that nobody named, which is what "one thing" is in
         /// the model. Where the block has an action of the game's own for it, the host writes that
         /// into the button and Sprocket is not part of the press - see <c>SprocketUnit</c>, which
         /// decides that by looking at the sequence rather than by being told.
+        /// <para>
+        /// A trigger that already does one thing opens on it, and finishing changes that act where it
+        /// is, together with <paramref name="start" />.
+        /// </para>
+        /// <para>
+        /// The page is kept on <paramref name="aim" /> while the single action stays chosen, so going
+        /// back to look at what starts the trigger and on again finds it as it was left. What finishing
+        /// it does is set afresh every time, since what starts the trigger may have changed between.
+        /// </para>
         /// </remarks>
         void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh,
-            SystemEdit start)
+            SystemEdit start, Aim aim)
         {
-            Push(new PickPage(this, "Do something", false, new List<long>(), "", Form.Native,
-                delegate(PickAnswer answer)
+            Sequence doing = fresh ? null : system.FindSequence(trigger.Runs);
+            var only = doing == null || doing.HasName ? null : doing.Only;
+            if (only != null)
+            {
+                var index = doing.Steps.IndexOf(only);
+                aim.Finish = delegate(PickAnswer answer)
                 {
-                    var act = new Act(answer.Chosen);
-                    act.Form = answer.Form;
-                    for (var i = 0; i < answer.Targets.Count; i++)
-                    {
-                        GridEntity entity = _world.FindEntity(answer.Targets[i]);
-                        if (entity != null)
-                            act.Targets.Add(_program.Declare(_world, entity).Name);
-                    }
-
-                    for (var i = 0; i < answer.Values.Count; i++)
-                        act.Values.Add(answer.Values[i]);
-
-                    var sequence = _program.AddSequence(system);
-                    sequence.Steps.Add(act);
-                    sequence.Steps.Add(new Await());
-
                     UnwindTo(origin);
-                    Points(system, trigger, sequence, false, fresh, sequence, start);
-                }));
+
+                    var rewrite = new Rewrite(doing, new ChangeStep(index, only, Named(answer.Targets),
+                        answer.Chosen, answer.Form, answer.Values));
+                    Do(system, start == null ? rewrite : (SystemEdit)new Retrigger(start, rewrite));
+                };
+
+                if (aim.Following == null)
+                {
+                    aim.Following = new PickPage(this, "Do something", false, Blocks(only.Targets),
+                        only.ActionId, only.Form, delegate(PickAnswer answer) { aim.Finish(answer); },
+                        values: only.Values, opens: aim.Opens, after: aim.Pick);
+                }
+
+                aim.Following.Arrived(aim.Straight);
+                aim.Straight = false;
+                Push(aim.Following);
+                return;
+            }
+
+            aim.Finish = delegate(PickAnswer answer)
+            {
+                var act = new Act(answer.Chosen);
+                act.Form = answer.Form;
+                for (var i = 0; i < answer.Targets.Count; i++)
+                {
+                    GridEntity entity = _world.FindEntity(answer.Targets[i]);
+                    if (entity != null)
+                        act.Targets.Add(_program.Declare(_world, entity).Name);
+                }
+
+                for (var i = 0; i < answer.Values.Count; i++)
+                    act.Values.Add(answer.Values[i]);
+
+                var sequence = _program.AddSequence(system);
+                sequence.Steps.Add(act);
+                sequence.Steps.Add(new Await());
+
+                UnwindTo(origin);
+                Points(system, trigger, sequence, false, fresh, sequence, start);
+            };
+
+            if (aim.Following == null)
+            {
+                aim.Following = new PickPage(this, "Do something", false, new List<long>(), "", Form.Native,
+                    delegate(PickAnswer answer) { aim.Finish(answer); }, opens: aim.Opens, after: aim.Pick);
+            }
+
+            aim.Following.Arrived(aim.Straight);
+            aim.Straight = false;
+            Push(aim.Following);
+        }
+
+        /// <summary>What the program calls each of these blocks, declaring any it has not named yet.</summary>
+        List<string> Named(IList<long> targets)
+        {
+            var named = new List<string>();
+            for (var i = 0; i < targets.Count; i++)
+            {
+                GridEntity entity = _world.FindEntity(targets[i]);
+                if (entity != null)
+                    named.Add(_program.Declare(_world, entity).Name);
+            }
+
+            return named;
         }
 
         /// <summary>
@@ -1577,59 +1638,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Empties what a trigger does, so it is waiting to be told again.
-        /// </summary>
-        /// <remarks>
-        /// What the cross on that part of the row does, and it does exactly that: the slot goes
-        /// empty, the trigger stops doing anything, and pressing the empty slot opens the picker on
-        /// a new sequence. A cross that opened a picker instead would be a mark saying one thing and
-        /// doing another.
-        /// <para>
-        /// A sequence nobody named goes with it, because it existed only to be the thing this
-        /// trigger did - and comes back if this is walked back, which is the same machinery that
-        /// carries one when a trigger is pointed somewhere else.
-        /// </para>
-        /// </remarks>
-        internal void ClearTarget(AutomationSystem system, Trigger trigger)
-        {
-            Do(system, new PointTrigger(_program, trigger, 0, false, null));
-        }
-
-        /// <summary>
-        /// Changes the one act a trigger does, in the picker it was chosen in.
-        /// </summary>
-        /// <remarks>
-        /// The act belongs to a sequence nobody named - what the trigger does rather than a thing in
-        /// its own right - so it has no screen to be changed on, and the way back is the system's
-        /// rather than that sequence's own unreachable history.
-        /// </remarks>
-        internal void ChangeDoing(AutomationSystem system, Sequence sequence, Act act)
-        {
-            var origin = _stack.Count;
-            var index = sequence.Steps.IndexOf(act);
-
-            // Handed what the step already holds, so the question that finishes this opens on those
-            // values rather than empty. Changing which blocks a step acts on is not a reason to type
-            // its values again.
-            Push(new PickPage(this, "Do something", false, Blocks(act.Targets), act.ActionId, act.Form,
-                delegate(PickAnswer answer)
-                {
-                    UnwindTo(origin);
-
-                    var named = new List<string>();
-                    for (var i = 0; i < answer.Targets.Count; i++)
-                    {
-                        GridEntity entity = _world.FindEntity(answer.Targets[i]);
-                        if (entity != null)
-                            named.Add(_program.Declare(_world, entity).Name);
-                    }
-
-                    Do(system, new Rewrite(sequence, new ChangeStep(index, act, named, answer.Chosen,
-                        answer.Form, answer.Values)));
-                }, values: act.Values));
-        }
-
-        /// <summary>
         /// Opens the picker a trigger was made in, on what starts it and what it does now, and puts
         /// the answer in its place.
         /// </summary>
@@ -1641,23 +1649,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Whatever somebody wrote about it is carried over, and what it does is changed only where a
         /// different choice was made.
         /// </para>
+        /// <para>
+        /// It opens on the column of the part pressed. A part of the single action a trigger does is
+        /// on the page after, so the picker goes straight on to that page, where the action was made.
+        /// </para>
         /// </remarks>
-        internal void ChangeTrigger(AutomationSystem system, Trigger trigger)
+        internal void ChangeTrigger(AutomationSystem system, Trigger trigger, Opening opens, bool action)
         {
             // Back to the screen the row is on, which is where the answer lands.
             var origin = _stack.Count;
             var aim = new Aim(this, system, trigger);
+            aim.Opens = action ? opens : Opening.Blocks;
+            aim.Straight = action;
 
             var every = trigger as EveryTrigger;
             if (every != null)
             {
                 var rate = every.IntervalTicks;
-                Push(new TimerPage(this, rate, aim, delegate(int ticks)
+                var timer = new TimerPage(this, rate, aim, delegate(int ticks)
                 {
-                    UnwindTo(origin);
                     Aimed(system, every, aim, origin, false,
                         ticks == rate ? null : new SetCadence(every, rate, ticks));
-                }));
+                });
+
+                Push(timer);
+                if (action)
+                    timer.GoOn();
+
                 return;
             }
 
@@ -1667,12 +1685,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             var was = moment as WhenTrigger;
 
-            Push(new PickPage(this, "When something happens", true,
+            var picker = new PickPage(this, "When something happens", true,
                 Blocks(moment.Sources), moment.EventId, Form.Native,
                 delegate(PickAnswer answer)
                 {
-                    UnwindTo(origin);
-
                     MomentTrigger made = Starter(answer);
                     Unless(made, moment, delegate(MomentTrigger taken)
                     {
@@ -1690,9 +1706,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                         Aimed(system, made, aim, origin, false, taken == null
                             ? (SystemEdit)change
                             : new TakeOver(change, taken));
-                    });
+                    }, delegate { UnwindTo(origin); });
                 },
-                true, was != null && was.RequiresAll, aim: aim));
+                true, was != null && was.RequiresAll, opens: action ? Opening.Nothing : opens, aim: aim);
+
+            Push(picker);
+            if (action)
+                picker.GoOn();
         }
 
         /// <summary>What these declarations point at, as blocks, for a picker that shows blocks.</summary>
@@ -1877,15 +1897,5 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     return wanted;
             }
         }
-
-        /// <summary>
-        /// The system a sequence being built belongs to, or null to make a new one.
-        /// </summary>
-        /// <remarks>
-        /// Held across the run of questions rather than passed through them, because every
-        /// question in between is about the sequence and none of them cares which system it
-        /// is for. Cleared when the sequence is made, so an abandoned run leaves nothing.
-        /// </remarks>
-        AutomationSystem _pendingSystem;
     }
 }

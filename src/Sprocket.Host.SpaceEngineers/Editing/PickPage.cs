@@ -117,12 +117,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
-            bool asksAll = false, bool all = false, IList<Literal> values = null, bool opensOnValues = false,
-            Aim aim = null)
+            bool asksAll = false, bool all = false, IList<Literal> values = null,
+            Opening opens = Opening.Blocks, Aim aim = null, PickComponent after = null)
             : base(editor)
         {
-            _opensOnValues = opensOnValues;
+            _opens = opens;
             _aim = aim;
+            if (aim != null)
+                aim.Onward = Primary;
+
+            // Going on in the pick that came before, as its next page.
+            _pick = after;
+            _base = after == null ? 0 : after.Stages.Count;
 
             if (values != null)
             {
@@ -161,7 +167,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override string Title => _title;
 
-        public override string PrimaryText => IsComplete ? "Done" : "";
+        /// <inheritdoc />
+        /// <remarks>Nothing where what the trigger does goes on to a page of its own.</remarks>
+        public override string PrimaryText => IsComplete && (_aim == null || _aim.Finishes) ? "Done" : "";
 
         /// <summary>
         /// What the chosen action will not do anything without, asked here rather than on a screen
@@ -208,11 +216,23 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>What the step being changed was already given, or empty where nothing is.</summary>
         readonly List<Literal> _arrivedValues = new List<Literal>();
 
-        /// <summary>Whether this opens with the caret in the values, for somebody who came to change them.</summary>
-        readonly bool _opensOnValues;
+        /// <summary>The column this opens on, which is the part somebody pressed to come here.</summary>
+        readonly Opening _opens;
+
+        /// <summary>Whether this goes straight on to the page after it once it is first built.</summary>
+        bool _goesOn;
+
+        /// <summary>
+        /// Whether this page was opened straight onto rather than paged to, so going back leaves the
+        /// pick rather than paging through it.
+        /// </summary>
+        bool _straight;
 
         /// <summary>What the trigger does, chosen beside what starts it, or null where this is not a trigger.</summary>
         readonly Aim _aim;
+
+        /// <summary>Where this page's stages start in the pick, which is past those of the pages before it.</summary>
+        readonly int _base;
 
         PickStage _does;
 
@@ -252,7 +272,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         public override bool Leaving()
         {
-            if (!IsComplete || !Moved)
+            // Back retraces the way here: through the pick where it was paged through, and out of it
+            // where it was opened straight on this page.
+            if (_base > 0)
+                return _straight ? LeavingStraight() : true;
+
+            var after = _aim == null ? null : _aim.Following;
+            if (!IsComplete || !Moved && (after == null || !after.Moved))
                 return true;
 
             Editor.Ask("Keep your changes?");
@@ -267,7 +293,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Whether anything here differs from what was already chosen when it opened: the blocks, what
         /// is done to them, whether any or all of them, or the values it is done with.
         /// </summary>
-        bool Moved
+        internal bool Moved
         {
             get
             {
@@ -358,22 +384,43 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             && ReadinessOf(_chosen, _chosenForm) == Readiness.Ready
             && (_aim == null || _aim.Chosen);
 
+        /// <inheritdoc />
         public override void Build(List<EditorComponent> components)
         {
             Collect();
 
             if (_pick == null)
-            {
                 _pick = new PickComponent();
-                _pick.Fills = true;
 
-                // A step is finished by giving what it does its values. What happens to a block takes
-                // none, so a trigger is finished the way it always was.
-                _pick.Finishes = !_forEvents;
-                _pick.OpensOnValues = _opensOnValues;
-                if (_pick.Finishes)
-                    _pick.EnteredCommand = Editor.RegisterText(Cmd.EnterValues, OnEntered);
+            if (_aim != null)
+                _aim.Pick = _pick;
 
+            // Back from a page after this one, whatever that page asked goes with it; and back here from
+            // the page before, what this one asked is put back.
+            var changed = _pick.Return(_base, _base + Own);
+            if (_pick.Stages.Count == _base && _blocks != null)
+            {
+                _pick.Add(_blocks);
+                if (_what != null)
+                    _pick.Add(_what);
+
+                if (_does != null)
+                    _pick.Add(_does);
+            }
+
+            _pick.Fills = true;
+            _pick.Returns = _base > 0 ? Editor.Register(Cmd.PageBack, PageBack) : 0;
+            _pick.Onward = _aim != null && _aim.Outcome == Outcome.One ? Editor.Register(Cmd.PageOn, Primary) : 0;
+
+            // A step is finished by giving what it does its values. What happens to a block takes
+            // none, so a trigger is finished the way it always was.
+            _pick.Finishes = !_forEvents;
+            _pick.OpensOnValues = _opens == Opening.Values;
+            _pick.Opens = _opens == Opening.Blocks ? _base : _opens == Opening.What ? _base + 1 : -1;
+            _pick.EnteredCommand = _forEvents ? 0 : Editor.RegisterText(Cmd.EnterValues, OnEntered);
+
+            if (_blocks == null)
+            {
                 _blocks = new PickStage("Blocks");
                 _blocks.AllowsMany = true;
                 _blocks.EmptyText = _forEvents
@@ -382,7 +429,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _pick.Add(_blocks);
             }
 
-            var changed = FillBlocks();
+            changed |= FillBlocks();
 
             // The second stage exists only once there is something for it to be about.
             var wanted = _selection.Count > 0;
@@ -440,7 +487,69 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _pick.Changed();
 
             components.Add(_pick);
+
+            if (!_goesOn)
+                return;
+
+            _goesOn = false;
+            Primary();
         }
+
+        /// <summary>
+        /// Goes straight on to the page after this one as soon as this is built, for a part pressed
+        /// that stands for something on that page.
+        /// </summary>
+        /// <remarks>
+        /// Built first all the same, because the page after carries on from the stages this one asks.
+        /// The editor never shows a page that went on while it was being built.
+        /// </remarks>
+        internal void GoOn()
+        {
+            _goesOn = true;
+        }
+
+        /// <summary>Says whether this page is being opened straight onto, rather than paged to.</summary>
+        internal void Arrived(bool straight)
+        {
+            _straight = straight;
+        }
+
+        /// <summary>
+        /// Pages back to the page before, which is what the way back beside the columns does however
+        /// this page was come to - and from then on this page was paged to.
+        /// </summary>
+        void PageBack()
+        {
+            _straight = false;
+            Editor.Pop();
+        }
+
+        /// <summary>
+        /// Leaves the pick from a page opened straight onto, past the page before that was never
+        /// looked at, asking first where anything here has changed.
+        /// </summary>
+        bool LeavingStraight()
+        {
+            if (!IsComplete || !Moved)
+            {
+                Editor.Pop();
+                return true;
+            }
+
+            Editor.Ask("Keep your changes?");
+
+            Editor.AnswerPrimary("Keep them", true);
+            Editor.Answer("Discard them", delegate
+            {
+                Editor.Pop();
+                Editor.Pop();
+            });
+
+            return false;
+        }
+
+        /// <summary>The stages this page asks, which are the last in the pick while it is on top.</summary>
+        int Own => (_blocks == null ? 0 : 1) + (_what == null ? 0 : 1) + (_does == null ? 0 : 1);
 
         /// <summary>How often the ship is asked what its blocks are doing, in ticks.</summary>
         /// <remarks>
@@ -1167,6 +1276,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
         }
 
+        /// <summary>Writes what a row says and does onto <paramref name="entry" />, and answers whether any of it changed.</summary>
         internal static bool Apply(PickOption entry, string text, string secondary, string status,
             bool active, bool chosen, int command, string icon = "", bool heading = false)
         {
@@ -1198,6 +1308,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return changed;
         }
 
+        /// <summary>Writes what a choice says and does onto <paramref name="option" />, and answers whether any of it changed.</summary>
         internal static bool Apply(ChoiceEntry option, string text, bool current, int command)
         {
             var changed = false;
@@ -1209,6 +1320,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return changed;
         }
 
+        /// <summary>Makes <paramref name="list" /> hold <paramref name="count" /> rows, and answers whether it had to.</summary>
         internal static bool Resize(List<PickOption> list, int count)
         {
             var changed = false;
@@ -1225,6 +1337,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return changed;
         }
 
+        /// <summary>Makes <paramref name="list" /> hold <paramref name="count" /> choices, and answers whether it had to.</summary>
         internal static bool Resize(List<ChoiceEntry> list, int count)
         {
             var changed = false;

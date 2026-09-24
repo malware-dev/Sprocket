@@ -50,6 +50,14 @@ namespace Sprocket.Sim.Simulation
                     continue;
                 }
 
+                if (word == "left" || word == "right" || word == "up" || word == "down")
+                {
+                    script.Add(Step.Arrow).At = new Vector2(
+                        word == "right" ? 1 : word == "left" ? -1 : 0,
+                        word == "down" ? 1 : word == "up" ? -1 : 0);
+                    continue;
+                }
+
                 if (word == "enter" || word == "escape" || word == "clear")
                 {
                     script.Add(word == "enter" ? Step.Enter : word == "escape" ? Step.Escape : Step.Clear);
@@ -202,6 +210,13 @@ namespace Sprocket.Sim.Simulation
             if (step.Kind == Step.Onward)
             {
                 scene.NextField();
+                drawn();
+                return;
+            }
+
+            if (step.Kind == Step.Arrow)
+            {
+                scene.Arrow((int)step.At.X, (int)step.At.Y);
                 drawn();
                 return;
             }

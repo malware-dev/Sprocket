@@ -30,6 +30,18 @@ namespace Sprocket.Host.SpaceEngineers.Picking
     {
         public const float ColumnWidth = Sizes.Column;
 
+        /// <summary>How wide the way back to the page before is, standing where its last column was.</summary>
+        const float FoldWidth = 56f;
+
+        /// <summary>
+        /// How wide a column is on a page after the first, which makes room for the way back beside
+        /// three of them in the width three columns take on the first.
+        /// </summary>
+        const float PagedWidth = (ColumnWidth * 3f - FoldWidth - Space.Item) / 3f;
+
+        /// <summary>How many ticks a page takes to slide in, which is a third of a second.</summary>
+        const int SlideTicks = 20;
+
         readonly PickComponent _component;
         readonly Stack _columns = Widgets.RowOf(Space.Item);
         readonly Scroll _strip = new Scroll();
@@ -49,14 +61,83 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         int _revision = -1;
         int _built = -1;
 
-        /// <summary>The values the chosen thing takes, and the way to finish, where the pick is finished here.</summary>
-        readonly Ask _given;
+        /// <summary>The page the columns were last built for, or minus one before they have been.</summary>
+        int _paged = -1;
+
+        /// <summary>The pages that have been shown, which is when each one gave its column the caret.</summary>
+        readonly List<int> _arrived = new List<int>();
+
+        /// <summary>
+        /// The way back to the page before, where the last column of that page stood, drawn narrow
+        /// because what it was about is answered.
+        /// </summary>
+        readonly Sized _fold = new Sized(FoldWidth);
+        readonly Dock _foldColumn = new Dock();
+
+        /// <summary>
+        /// The way on to the page after, at the right of the last column, where something chosen has a
+        /// page after it.
+        /// </summary>
+        readonly Sized _next = new Sized(FoldWidth);
+        readonly Dock _nextColumn = new Dock();
+
+        /// <summary>Whether the way on stands at the right of the strip.</summary>
+        bool _onward;
+
+        /// <summary>How far into making room for the way on or taking it away, or minus one where neither is under way.</summary>
+        int _squeeze = -1;
+
+        float _squeezeFrom;
+        float _squeezeTo;
+
+        /// <summary>
+        /// The column coming back out of the way back, drawn only as wide as the way back has grown, so
+        /// what is in it is there all the way and nothing is put in its place at the end.
+        /// </summary>
+        readonly Sized _reveal = new Sized(FoldWidth);
+        readonly Scroll _revealWindow = new Scroll();
+
+        /// <summary>What grows or shrinks as a page turns: the way back folding, or a column coming back out of it.</summary>
+        Sized _resized;
+
+        /// <summary>The columns of the page being left, sliding out of sight, and nothing otherwise.</summary>
+        readonly List<Element> _leaving = new List<Element>();
+
+        /// <summary>
+        /// Room past the last column while a page turns, a page wide, so the strip can scroll as far as
+        /// the slide goes.
+        /// </summary>
+        /// <remarks>
+        /// A scroller stops where its content ends, and a page turning forward has only its first
+        /// column yet - so without this the slide stops short of the page and jumps the rest at the end.
+        /// </remarks>
+        readonly Sized _room = new Sized(ColumnWidth * 3f + Space.Item * 2f);
+
+        /// <summary>How far into a slide from one page to another, or minus one where none is under way.</summary>
+        int _slide = -1;
+
+        float _slideFrom;
+        float _slideTo;
+
+        /// <summary>How wide what grows or shrinks as a page turns starts the slide, and ends it.</summary>
+        float _resizedFrom;
+
+        float _resizedTo;
+
+        /// <summary>What the strip held before a page turned, kept only while the new page is laid out.</summary>
+        readonly List<Element> _old = new List<Element>();
+
+        /// <summary>
+        /// The values the chosen thing takes, and the way to finish, once a page of the pick gives any.
+        /// </summary>
+        /// <remarks>Made when first wanted, at the width of the page that wants it.</remarks>
+        Ask _given;
 
         /// <summary>
         /// The way to finish where there are no values to give, under the rows of the column the pick is
         /// finished from, as the values column carries its own under its fields.
         /// </summary>
-        readonly Label _done;
+        readonly Label _done = Widgets.Label("Done", Palette.Ink, Lettering.Small);
 
         readonly Sized _givenRoot = new Sized(ColumnWidth);
         readonly Dock _givenColumn = new Dock();
@@ -110,13 +191,35 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             Widgets.Barred(_strip);
             _strip.Content = _columns;
 
-            if (!component.Finishes)
-            {
-                _done = Widgets.Label("Done", Palette.Ink, Lettering.Small);
-                return;
-            }
+            // Pressed anywhere down its length: it is the whole of what that page was, and going back
+            // to it is the one thing it does.
+            _foldColumn.Background = Palette.Panel;
+            _foldColumn.Edge = Palette.Line;
+            _foldColumn.Highlight = Palette.PanelHot;
+            _foldColumn.Padding = new Thickness(0f, Space.Region);
+            _foldColumn.Fill = Widgets.Centred(Symbols.Left, Palette.Muted);
+            _foldColumn.Tip = "Back";
+            _fold.Content = _foldColumn;
 
-            _given = Ask.Column(ColumnWidth - Space.Region * 2f);
+            _nextColumn.Background = Palette.Panel;
+            _nextColumn.Edge = Palette.Line;
+            _nextColumn.Highlight = Palette.PanelHot;
+            _nextColumn.Padding = new Thickness(0f, Space.Region);
+            _nextColumn.Fill = Widgets.Centred(Symbols.Right, Palette.Muted);
+            _nextColumn.Tip = "Next";
+            _next.Content = _nextColumn;
+
+            // A window rather than a scroller: it is never moved, only made wider, and what it shows
+            // keeps the width it will have when it stands on its own.
+            _revealWindow.Horizontal = true;
+            _reveal.Content = _revealWindow;
+        }
+
+        /// <summary>Makes the values column, as wide as the columns beside it.</summary>
+        void Giving(float width)
+        {
+            _given = Ask.Column(width - Space.Region * 2f);
+            _givenRoot.Width = width;
 
             _givenTitle.Wraps = false;
             _givenTitle.Trims = true;
@@ -166,14 +269,26 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             Host.SetText(_component.EnteredCommand, answer);
         }
 
+        /// <inheritdoc />
         public override bool Gives
         {
-            get { return _given != null; }
+            get { return _component.Finishes; }
         }
 
+        /// <summary>The way to finish under the column the page is finished from, where the page has one.</summary>
         public override Label Done
         {
-            get { return _done; }
+            get
+            {
+                var stages = _component.Stages;
+                for (int i = _component.Page; i < stages.Count; i++)
+                {
+                    if (stages[i].Finishes)
+                        return _done;
+                }
+
+                return null;
+            }
         }
 
         /// <summary>The values column, while it is on the screen.</summary>
@@ -189,7 +304,11 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         /// </summary>
         protected override bool Stale
         {
-            get { return _revision != _component.Revision || _built != _component.Stages.Count; }
+            get
+            {
+                return _revision != _component.Revision || _built != _component.Stages.Count
+                    || _paged != _component.Page;
+            }
         }
 
         public override Element Root
@@ -212,14 +331,25 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
             _revision = _component.Revision;
 
-            if (_built != _component.Stages.Count)
+            if (_given == null && _component.Finishes)
+                Giving(Width);
+
+            var onward = _component.Onward != 0;
+            _nextColumn.Press = onward ? Deed.Sends(_component.Onward) : Deed.Nothing;
+
+            if (_built != _component.Stages.Count || _paged != _component.Page)
             {
                 _built = _component.Stages.Count;
                 Rebuild();
             }
+            else if (onward != _onward)
+                Squeeze(onward);
 
-            for (int i = 0; i < _stages.Count && i < _component.Stages.Count; i++)
-                _stages[i].Update(_component.Stages[i], Host);
+            var page = _component.Page;
+            for (int i = 0; i < _stages.Count && page + i < _component.Stages.Count; i++)
+                _stages[i].Update(_component.Stages[page + i], Host);
+
+            Arrive();
 
             if (_given != null && _restated != _component.Restated)
             {
@@ -239,7 +369,8 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             if (_given == null)
                 return;
 
-            var wanted = _component.Stages.Count > 1 && !string.IsNullOrEmpty(_component.Given);
+            var wanted = _component.Finishes && _component.Stages.Count - _component.Page > 1
+                && !string.IsNullOrEmpty(_component.Given);
             var shown = _givenRoot.Parent != null;
             if (wanted == shown)
                 return;
@@ -413,25 +544,323 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _grabbed = None;
         }
 
+        /// <summary>
+        /// Gives the caret to the box of the column the pick opens on, the first time its page is shown.
+        /// </summary>
+        /// <remarks>
+        /// Once per page, so a page gone back to is where it was left rather than where it opened.
+        /// </remarks>
+        void Arrive()
+        {
+            var page = _component.Page;
+            if (Host == null || _arrived.Contains(page))
+                return;
+
+            _arrived.Add(page);
+
+            var at = _component.Opens - page;
+            if (at >= 0 && at < _stages.Count)
+                _stages[at].Take(Host);
+        }
+
+        /// <summary>How wide a column is on the page showing now.</summary>
+        float Width => _component.Page > 0 ? PagedWidth : ColumnWidth;
+
+        /// <summary>
+        /// Makes the columns of the page showing now, turning to it where the page is a different one.
+        /// </summary>
+        /// <remarks>
+        /// Only the columns of this page are made. Those before it were answered on an earlier page and
+        /// are nothing to press now, and the way back to them is the fold.
+        /// </remarks>
         void Rebuild()
         {
+            var page = _component.Page;
+            var was = _paged;
+            _paged = page;
+
+            Settle();
+            _squeeze = -1;
+
+            // Going on from the first page, the column the next page follows is the one that folds.
+            Element folding = null;
+            if (was == 0 && page > 0 && page - 1 < _stages.Count)
+                folding = _stages[page - 1].Root;
+
+            _old.Clear();
+            foreach (var column in _columns.Children)
+            {
+                if (column != _givenRoot && column != _next)
+                    _old.Add(column);
+            }
+
             for (int i = 0; i < _stages.Count; i++)
                 _stages[i].Finishing(null);
 
             _stages.Clear();
             _columns.Children.Clear();
 
-            for (int i = 0; i < _component.Stages.Count; i++)
+            // The last column gives the way on its room, where there is a way on.
+            _onward = _component.Onward != 0;
+            var width = Width;
+            var last = _component.Stages.Count - 1;
+            for (int i = page; i <= last; i++)
             {
-                var stage = new StageView(_component, i);
-                if (_done != null && _component.Stages[i].Finishes)
+                var across = _onward && i == last ? width - FoldWidth - Space.Item : width;
+                var stage = new StageView(_component, i, across);
+                if (_component.Stages[i].Finishes)
                     stage.Finishing(_done);
 
                 _stages.Add(stage);
-                _columns.Children.Add(stage.Root);
             }
 
+            _foldColumn.Press = _component.Returns != 0 ? Deed.Sends(_component.Returns) : Deed.Nothing;
+
+            if (folding != null)
+                Fold(folding);
+            else if (page == 0 && was > 0 && was - 1 < _stages.Count)
+                Unfold(_stages[was - 1].Root);
+            else
+                Lay();
+
+            _old.Clear();
             Show();
+        }
+
+        /// <summary>The page as it stands: the way back where there is a page before it, its columns, and the way on where there is a page after.</summary>
+        void Lay()
+        {
+            if (_component.Page > 0)
+            {
+                _fold.Width = FoldWidth;
+                _columns.Children.Add(_fold);
+            }
+
+            for (int i = 0; i < _stages.Count; i++)
+                _columns.Children.Add(_stages[i].Root);
+
+            Onward();
+        }
+
+        /// <summary>Puts the way on at the right of the columns, where there is a page after this one.</summary>
+        void Onward()
+        {
+            if (!_onward)
+                return;
+
+            _next.Width = FoldWidth;
+            _columns.Children.Add(_next);
+        }
+
+        /// <summary>
+        /// Turns forward: the page being left slides out to the left, and the column this page follows
+        /// on from folds into the way back as it goes.
+        /// </summary>
+        /// <remarks>
+        /// The column folds as an empty panel. What was in it is answered, and a column's rows squeezed
+        /// narrower on every tick would be words wrapping and measured again all the way down.
+        /// </remarks>
+        void Fold(Element folding)
+        {
+            var across = 0f;
+            var before = true;
+            for (int i = 0; i < _old.Count; i++)
+            {
+                if (_old[i] == folding)
+                {
+                    _fold.Width = Across(folding);
+                    _columns.Children.Add(_fold);
+                    before = false;
+                    continue;
+                }
+
+                _columns.Children.Add(_old[i]);
+                _leaving.Add(_old[i]);
+                if (before)
+                    across += Across(_old[i]) + Space.Item;
+            }
+
+            for (int i = 0; i < _stages.Count; i++)
+                _columns.Children.Add(_stages[i].Root);
+
+            Onward();
+            Slide(0f, across, _fold, _fold.Width, FoldWidth);
+        }
+
+        /// <summary>
+        /// Turns back: the page coming back slides in from the left, and the column the way back stood
+        /// for comes out of it, shown only as wide as it has grown.
+        /// </summary>
+        void Unfold(Element unfolding)
+        {
+            var across = 0f;
+            var before = true;
+            for (int i = 0; i < _stages.Count; i++)
+            {
+                var root = _stages[i].Root;
+                if (root == unfolding)
+                {
+                    _revealWindow.Content = unfolding;
+                    _reveal.Width = FoldWidth;
+                    _columns.Children.Add(_reveal);
+                    before = false;
+                    continue;
+                }
+
+                _columns.Children.Add(root);
+                if (before)
+                    across += Across(root) + Space.Item;
+            }
+
+            Onward();
+
+            for (int i = 0; i < _old.Count; i++)
+            {
+                if (_old[i] == _fold)
+                    continue;
+
+                _columns.Children.Add(_old[i]);
+                _leaving.Add(_old[i]);
+            }
+
+            Slide(across, 0f, _reveal, FoldWidth, Across(unfolding));
+        }
+
+        /// <summary>Starts the strip sliding, and <paramref name="resized" /> growing or shrinking with it.</summary>
+        void Slide(float from, float to, Sized resized, float resizedFrom, float resizedTo)
+        {
+            // The strip's own thumb would sweep across under it, saying the strip scrolls when it is
+            // only the page turning.
+            _strip.BarColor = Palette.None;
+            _columns.Children.Add(_room);
+
+            _slide = 0;
+            _slideFrom = from;
+            _slideTo = to;
+            _resized = resized;
+            _resizedFrom = resizedFrom;
+            _resizedTo = resizedTo;
+            _strip.Scrolled = from;
+        }
+
+        /// <summary>How wide a column of the strip is, from what it was made to be rather than from a measure.</summary>
+        static float Across(Element column)
+        {
+            var sized = column as Sized;
+            return sized != null ? sized.Width : column.DesiredSize.X;
+        }
+
+        /// <summary>Ends a slide where it is going, taking away what it left behind.</summary>
+        void Settle()
+        {
+            if (_slide < 0)
+                return;
+
+            _slide = -1;
+            for (int i = 0; i < _leaving.Count; i++)
+                _columns.Children.Remove(_leaving[i]);
+
+            _leaving.Clear();
+            _columns.Children.Remove(_room);
+            _resized.Width = _resizedTo;
+
+            // The column that came back stands on its own where its window stood, looking the same.
+            if (_resized == _reveal)
+            {
+                var unfolded = _revealWindow.Content;
+                _revealWindow.Content = null;
+
+                _old.Clear();
+                foreach (var column in _columns.Children)
+                    _old.Add(column == _reveal ? unfolded : column);
+
+                _columns.Children.Clear();
+                for (int i = 0; i < _old.Count; i++)
+                    _columns.Children.Add(_old[i]);
+
+                _old.Clear();
+            }
+
+            _resized = null;
+            _strip.BarColor = Palette.Thumb;
+            _strip.Scrolled = 0f;
+        }
+
+        /// <summary>
+        /// Makes room for the way on at the right of the last column, or takes it away, a step at a
+        /// tick, as something chosen comes to have a page after it or stops having one.
+        /// </summary>
+        void Squeeze(bool opening)
+        {
+            _onward = opening;
+            if (_stages.Count == 0)
+                return;
+
+            if (opening && _next.Parent == null)
+            {
+                _next.Width = 0f;
+                _columns.Children.Add(_next);
+            }
+
+            _squeeze = 0;
+            _squeezeFrom = _next.Width;
+            _squeezeTo = opening ? FoldWidth : 0f;
+        }
+
+        /// <summary>Quick to leave and slow to arrive, so the eye has where it is going before it stops.</summary>
+        static float Eased(int step)
+        {
+            var t = (float)step / SlideTicks;
+            return 1f - (1f - t) * (1f - t) * (1f - t);
+        }
+
+        /// <summary>
+        /// Moves a page turning, or the room for the way on being made, on by a tick.
+        /// </summary>
+        /// <remarks>
+        /// Every tick only while either is under way, which is a third of a second. A page turning moves
+        /// the strip and resizes one panel; room being made resizes the last column and the way on, and
+        /// measures that column again.
+        /// </remarks>
+        protected override void Moved(int tick)
+        {
+            if (_squeeze >= 0)
+                Squeezing();
+
+            if (_slide < 0)
+                return;
+
+            _slide++;
+            if (_slide >= SlideTicks)
+            {
+                Settle();
+                return;
+            }
+
+            var eased = Eased(_slide);
+            _strip.Scrolled = _slideFrom + (_slideTo - _slideFrom) * eased;
+            _resized.Width = _resizedFrom + (_resizedTo - _resizedFrom) * eased;
+        }
+
+        /// <summary>One tick of making room for the way on, or of taking it away.</summary>
+        void Squeezing()
+        {
+            _squeeze++;
+            var done = _squeeze >= SlideTicks;
+            var next = done ? _squeezeTo : _squeezeFrom + (_squeezeTo - _squeezeFrom) * Eased(_squeeze);
+
+            var last = _stages[_stages.Count - 1];
+            _next.Width = next;
+            last.Width = Width - Space.Item - next;
+            if (!done)
+                return;
+
+            _squeeze = -1;
+            if (_squeezeTo > 0f)
+                return;
+
+            _columns.Children.Remove(_next);
+            last.Width = Width;
         }
     }
 }
