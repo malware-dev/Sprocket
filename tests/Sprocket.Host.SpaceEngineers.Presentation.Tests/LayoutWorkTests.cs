@@ -27,6 +27,33 @@ public class LayoutWorkTests
         Assert.Equal(settled, screen.Measured);
     }
 
+    /// <summary>A box being typed into measures no text while nothing is typed.</summary>
+    [Fact]
+    public void AnIdleBoxBeingTypedIntoMeasuresNoText()
+    {
+        var screen = Screen.Fresh("240", "70", "type", "Air");
+        screen.Run(5);
+
+        var settled = screen.Measured;
+        screen.Run(60);
+
+        Assert.Equal(settled, screen.Measured);
+    }
+
+    /// <summary>A number kept against the right of its box measures no text while idle.</summary>
+    [Fact]
+    public void AnIdleTrailingNumberMeasuresNoText()
+    {
+        var screen = Screen.Fresh("60", "130", "type", "Airlock", "enter", "60", "161", "200", "351", "560", "333",
+            "1353", "311", "70", "193", "200", "476", "800", "676", "1315", "206", "type", "300", "1365", "260");
+        screen.Run(120);
+
+        var settled = screen.Measured;
+        screen.Run(60);
+
+        Assert.Equal(settled, screen.Measured);
+    }
+
     /// <summary>
     /// A banner sliding in measures no text while it moves.
     /// </summary>

@@ -25,6 +25,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         readonly StringBuilder _text = new StringBuilder(64);
         int _anchor;
+        int _caret;
+        float _caretAt;
 
         Element _clear;
         string _font;
@@ -33,6 +35,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         float _lineAt = -1f;
         string _lineIn;
         float _scale;
+        float _selectionFrom;
+        float _selectionTo;
+        float _shift;
+        Vector2 _textSize;
+        bool _trails;
+        bool _widthsStale = true;
 
         string _written;
 
@@ -60,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                     return;
 
                 _font = value;
-                InvalidateMeasure();
+                Unmeasure();
             }
         }
 
@@ -74,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                     return;
 
                 _scale = value;
-                InvalidateMeasure();
+                Unmeasure();
             }
         }
 
@@ -118,9 +126,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 if (!string.IsNullOrEmpty(value))
                     _text.Append(value);
 
-                _written = null;
+                Rewritten();
                 ClampCaret();
-                InvalidateMeasure();
             }
         }
 
@@ -128,14 +135,39 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         public int Length => _text.Length;
 
         /// <summary>Where the caret sits, between 0 and <see cref="Length" />.</summary>
-        public int Caret { get; private set; }
+        public int Caret
+        {
+            get { return _caret; }
+            private set
+            {
+                if (_caret == value)
+                    return;
+
+                _caret = value;
+                Unmeasure();
+            }
+        }
 
         /// <summary>Whether a run is selected.</summary>
-        public bool HasSelection => Caret != _anchor;
+        public bool HasSelection => Caret != Anchor;
 
-        int SelectionStart => Caret < _anchor ? Caret : _anchor;
+        /// <summary>The end of the selection the caret did not move to.</summary>
+        int Anchor
+        {
+            get { return _anchor; }
+            set
+            {
+                if (_anchor == value)
+                    return;
 
-        int SelectionEnd => Caret < _anchor ? _anchor : Caret;
+                _anchor = value;
+                Unmeasure();
+            }
+        }
+
+        int SelectionStart => Caret < Anchor ? Caret : Anchor;
+
+        int SelectionEnd => Caret < Anchor ? Anchor : Caret;
 
         /// <summary>The way to empty this box, drawn inside it at the right, or nothing.</summary>
         /// <remarks>
@@ -170,7 +202,18 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         public Color WrongEdge { get; set; }
 
         /// <summary>Whether what is in the box sits against its right-hand end.</summary>
-        public bool Trails { get; set; }
+        public bool Trails
+        {
+            get { return _trails; }
+            set
+            {
+                if (_trails == value)
+                    return;
+
+                _trails = value;
+                InvalidateArrange();
+            }
+        }
 
         /// <summary>Types <paramref name="c" /> at the caret, replacing any selection.</summary>
         public void InsertChar(char c)
@@ -178,9 +221,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             InvalidateMeasure();
             DeleteSelection();
             _text.Insert(Caret, c);
-            _written = null;
+            Rewritten();
             Caret++;
-            _anchor = Caret;
+            Anchor = Caret;
         }
 
         /// <summary>Types <paramref name="s" /> at the caret, replacing any selection when there is something to type.</summary>
@@ -192,9 +235,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             DeleteSelection();
             _text.Insert(Caret, s);
-            _written = null;
+            Rewritten();
             Caret += s.Length;
-            _anchor = Caret;
+            Anchor = Caret;
         }
 
         /// <summary>Deletes the selection, or else the character before the caret.</summary>
@@ -208,9 +251,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 return;
 
             _text.Remove(Caret - 1, 1);
-            _written = null;
+            Rewritten();
             Caret--;
-            _anchor = Caret;
+            Anchor = Caret;
         }
 
         /// <summary>Deletes the selection, or else the character after the caret.</summary>
@@ -224,7 +267,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 return;
 
             _text.Remove(Caret, 1);
-            _written = null;
+            Rewritten();
         }
 
         /// <summary>Moves the caret one character left, extending the selection when <paramref name="select" /> is set.</summary>
@@ -254,7 +297,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>Selects everything in the box, with the caret at the end.</summary>
         public void SelectAll()
         {
-            _anchor = 0;
+            Anchor = 0;
             Caret = _text.Length;
         }
 
@@ -276,7 +319,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             Caret = index;
             if (!select)
-                _anchor = index;
+                Anchor = index;
         }
 
         bool DeleteSelection()
@@ -286,9 +329,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             var start = SelectionStart;
             _text.Remove(start, SelectionEnd - start);
-            _written = null;
+            Rewritten();
             Caret = start;
-            _anchor = start;
+            Anchor = start;
             return true;
         }
 
@@ -296,8 +339,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         {
             if (Caret > _text.Length)
                 Caret = _text.Length;
-            if (_anchor > _text.Length)
-                _anchor = _text.Length;
+            if (Anchor > _text.Length)
+                Anchor = _text.Length;
+        }
+
+        void Rewritten()
+        {
+            _written = null;
+            Unmeasure();
+        }
+
+        void Unmeasure()
+        {
+            _widthsStale = true;
+            InvalidateMeasure();
         }
 
         /// <inheritdoc />
@@ -307,11 +362,27 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             _clear?.Measure(g, new Vector2(Clearing, height));
 
+            if (_widthsStale)
+            {
+                MeasureWidths(g);
+                _widthsStale = false;
+            }
+
             if (_text.Length == 0)
                 return new Vector2(0f, height);
 
-            var size = g.MeasureText(Font, _text, Scale);
-            return new Vector2(size.X, height > size.Y ? height : size.Y);
+            return new Vector2(_textSize.X, height > _textSize.Y ? height : _textSize.Y);
+        }
+
+        /// <summary>Measures everything drawing places by, so that nothing in the draw path measures.</summary>
+        void MeasureWidths(IGraphics g)
+        {
+            _textSize = _text.Length == 0 ? Vector2.Zero : g.MeasureText(Font, _text, Scale);
+            _caretAt = WidthTo(g, Caret);
+
+            var selects = HasSelection;
+            _selectionFrom = selects ? WidthTo(g, SelectionStart) : 0f;
+            _selectionTo = selects ? WidthTo(g, SelectionEnd) : 0f;
         }
 
         /// <summary>The line height, kept because drawing asks for it every frame.</summary>
@@ -330,6 +401,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
+            var room = bounds.Width - _textSize.X - CaretRoom;
+            _shift = Trails && room > 0f ? room : 0f;
+
             if (_clear == null)
                 return;
 
@@ -350,14 +424,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         protected override void DrawContent(IGraphics g)
         {
             var height = LineOf(g);
-            var at = new Vector2(ContentBounds.X + Shift(g), ContentBounds.Y);
+            var at = new Vector2(ContentBounds.X + _shift, ContentBounds.Y);
 
             if (HasSelection)
-            {
-                var from = WidthTo(g, SelectionStart);
-                var to = WidthTo(g, SelectionEnd);
-                g.DrawSprite(Solid, new RectangleF(at.X + from, at.Y, to - from, height), SelectionColor, 0f);
-            }
+                g.DrawSprite(Solid, new RectangleF(at.X + _selectionFrom, at.Y, _selectionTo - _selectionFrom, height),
+                    SelectionColor, 0f);
 
             if (_text.Length > 0)
                 g.DrawText(Font, Written, at, Scale, Color);
@@ -366,7 +437,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             // After the text, so the caret shows inside a selection.
             if (IsEditing && CaretVisible)
-                g.DrawSprite(Solid, new RectangleF(at.X + WidthTo(g, Caret), at.Y, 1.5f, height), CaretColor, 0f);
+                g.DrawSprite(Solid, new RectangleF(at.X + _caretAt, at.Y, 1.5f, height), CaretColor, 0f);
 
             if (Wrong && WrongEdge.A > 0)
             {
@@ -378,21 +449,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             _clear?.Draw(g);
         }
 
-        /// <summary>How far in the words start.</summary>
-        float Shift(IGraphics g)
-        {
-            if (!Trails)
-                return 0f;
-
-            var room = ContentBounds.Width - WidthTo(g, _text.Length) - CaretRoom;
-            return room > 0f ? room : 0f;
-        }
-
         /// <summary>The width of the first <paramref name="count" /> characters.</summary>
+        /// <remarks>Reads the whole text's width from <c>_textSize</c>, so that is measured first.</remarks>
         float WidthTo(IGraphics g, int count)
         {
             if (count <= 0)
                 return 0f;
+
+            if (count >= _text.Length)
+                return _textSize.X;
 
             _run.Clear();
             for (var i = 0; i < count && i < _text.Length; i++)
