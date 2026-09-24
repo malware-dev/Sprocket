@@ -4,24 +4,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
 {
     /// <summary>Turns a held key into the press, pause, flood pattern every text field has.</summary>
     /// <remarks>
-    /// The game reports a key as newly pressed for exactly one tick, which is right for a jump and wrong
-    /// for a caret. Typed characters do not need this: the keyboard's own repeat has already put them in
-    /// the text buffer by the time it arrives. This is only for the keys that are read raw.
-    /// <para>
-    /// The caller passes the tick and the key state, so none of it needs a game running.
-    /// </para>
+    ///     The game reports a key as newly pressed for exactly one tick, which is right for a jump and wrong
+    ///     for a caret. Typed characters do not need this: the keyboard's own repeat has already put them in
+    ///     the text buffer by the time it arrives. This is only for the keys that are read raw.
+    ///     <para>
+    ///         The caller passes the tick and the key state, so none of it needs a game running.
+    ///     </para>
     /// </remarks>
     public sealed class KeyRepeater
     {
-        private struct State
-        {
-            public int FirstPress;
-            public int LastFire;
-        }
+        readonly int _delayTicks;
+        readonly int _intervalTicks;
 
-        private readonly Dictionary<int, State> _states = new Dictionary<int, State>();
-        private readonly int _delayTicks;
-        private readonly int _intervalTicks;
+        readonly Dictionary<int, State> _states = new Dictionary<int, State>();
 
         /// <summary>Half a second before it starts, then about twenty a second, which is the usual feel.</summary>
         public KeyRepeater()
@@ -68,6 +63,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
         public void Clear()
         {
             _states.Clear();
+        }
+
+        struct State
+        {
+            public int FirstPress;
+            public int LastFire;
         }
     }
 }

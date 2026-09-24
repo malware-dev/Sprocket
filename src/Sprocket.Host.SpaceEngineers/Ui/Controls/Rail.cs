@@ -2,15 +2,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>One axis of scrolling: how much there is, how much is on show, and where along it the view sits.</summary>
     /// <remarks>
-    /// The arithmetic only, with no idea which way it runs or where on the screen it is. A control says
-    /// how long the content is and how much room it has, and asks where the thumb goes and where a
-    /// gesture lands; turning a distance along the axis into a rectangle is the control's own business,
-    /// because only it knows whether this is the one that runs down or the one that runs across.
-    /// <para>
-    /// <b>Nothing here moves anything.</b> Every answer is returned rather than stored, so the control
-    /// assigns through its own property and the invalidation that a move needs happens in the one place
-    /// that knows about it.
-    /// </para>
+    ///     The arithmetic only, with no idea which way it runs or where on the screen it is. A control says
+    ///     how long the content is and how much room it has, and asks where the thumb goes and where a
+    ///     gesture lands; turning a distance along the axis into a rectangle is the control's own business,
+    ///     because only it knows whether this is the one that runs down or the one that runs across.
+    ///     <para>
+    ///         <b>Nothing here moves anything.</b> Every answer is returned rather than stored, so the control
+    ///         assigns through its own property and the invalidation that a move needs happens in the one place
+    ///         that knows about it.
+    ///     </para>
     /// </remarks>
     public sealed class Rail
     {
@@ -21,22 +21,22 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         public float Viewport { get; set; }
 
         /// <summary>
-        /// How far along the content has been moved.
+        ///     How far along the content has been moved.
         /// </summary>
         /// <remarks>
-        /// Not held inside the ends on the way in. A control may be told where to sit before it has been
-        /// laid out and therefore before either of the other two is known, and clamping against an extent
-        /// of nothing would quietly answer zero. <see cref="Clamp" /> is called once the room is known.
+        ///     Not held inside the ends on the way in. A control may be told where to sit before it has been
+        ///     laid out and therefore before either of the other two is known, and clamping against an extent
+        ///     of nothing would quietly answer zero. <see cref="Clamp" /> is called once the room is known.
         /// </remarks>
         public float Offset { get; set; }
 
         /// <summary>
-        /// How short the thumb is allowed to get.
+        ///     How short the thumb is allowed to get.
         /// </summary>
         /// <remarks>
-        /// A thumb is the same fraction of the track that the viewport is of the content, which on a very
-        /// long list is a few units of nothing. It stops shrinking here and starts lying instead, which is
-        /// the right way round: a thumb nobody can grab says less than one slightly out of place.
+        ///     A thumb is the same fraction of the track that the viewport is of the content, which on a very
+        ///     long list is a few units of nothing. It stops shrinking here and starts lying instead, which is
+        ///     the right way round: a thumb nobody can grab says less than one slightly out of place.
         /// </remarks>
         public float MinThumb { get; set; }
 
@@ -45,23 +45,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         {
             get
             {
-                float max = Extent - Viewport;
+                var max = Extent - Viewport;
                 return max > 0f ? max : 0f;
             }
         }
 
         /// <summary>Whether there is anything out of sight.</summary>
-        public bool CanMove
-        {
-            get { return Max > 0f; }
-        }
+        public bool CanMove => Max > 0f;
 
         /// <summary>How far along the content is, from nothing to all of it.</summary>
         public float Fraction
         {
             get
             {
-                float max = Max;
+                var max = Max;
                 return max > 0f ? Offset / max : 0f;
             }
         }
@@ -74,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                 if (Extent <= 0f || Viewport <= 0f)
                     return Viewport;
 
-                float length = Viewport * Viewport / Extent;
+                var length = Viewport * Viewport / Extent;
 
                 if (length < MinThumb)
                     length = MinThumb;
@@ -90,16 +87,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         {
             get
             {
-                float travel = Viewport - ThumbLength;
+                var travel = Viewport - ThumbLength;
                 return travel > 0f ? travel : 0f;
             }
         }
 
         /// <summary>Where the thumb starts, measured from the start of the track.</summary>
-        public float ThumbStart
-        {
-            get { return Travel * Fraction; }
-        }
+        public float ThumbStart => Travel * Fraction;
 
         /// <summary>The offset it would have after moving by <paramref name="amount" />.</summary>
         public float Moved(float amount)
@@ -108,27 +102,27 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>
-        /// The offset it would have if the thumb were dragged <paramref name="distance" />.
+        ///     The offset it would have if the thumb were dragged <paramref name="distance" />.
         /// </summary>
         /// <remarks>
-        /// The conversion is the whole reason this is not simply the distance: a thumb travels its track
-        /// while the content travels its own length, and the two are the same only on a list one screen
-        /// long.
+        ///     The conversion is the whole reason this is not simply the distance: a thumb travels its track
+        ///     while the content travels its own length, and the two are the same only on a list one screen
+        ///     long.
         /// </remarks>
         public float Dragged(float distance)
         {
-            float travel = Travel;
+            var travel = Travel;
             return travel > 0f ? Clamp(Offset + distance * Max / travel) : Offset;
         }
 
         /// <summary>
-        /// The offset that would put the middle of the thumb at <paramref name="at" />.
+        ///     The offset that would put the middle of the thumb at <paramref name="at" />.
         /// </summary>
         /// <param name="at">Where along the axis, in the same units as <paramref name="start" />.</param>
         /// <param name="start">Where the track begins.</param>
         public float ThumbedTo(float at, float start)
         {
-            float travel = Travel;
+            var travel = Travel;
             if (travel <= 0f)
                 return Offset;
 
@@ -138,14 +132,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         /// <summary>Whatever is left of a side once a bar this thick has had its share.</summary>
         public static float Room(float whole, float bar)
         {
-            float room = whole - bar;
+            var room = whole - bar;
             return room > 0f ? room : 0f;
         }
 
         /// <summary>Holds a value between nothing and <see cref="Max" />.</summary>
         public float Clamp(float value)
         {
-            float max = Max;
+            var max = Max;
 
             if (value > max)
                 value = max;

@@ -4,16 +4,16 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Look
 {
     /// <summary>
-    /// A colour as hue, saturation and value: the way one is chosen rather than the way one is held.
+    ///     A colour as hue, saturation and value: the way one is chosen rather than the way one is held.
     /// </summary>
     /// <remarks>
-    /// The game's arrangement rather than a preference. Its own colour picker's three sliders are
-    /// these three, hue multiplied out to 360 and the other two from zero to one, which is the one
-    /// place the two halves disagree with each other.
-    /// <para>
-    /// The conversions are the game's, from <c>VRageMath.ColorExtensions</c>, so a colour chosen here
-    /// and a colour chosen in the painter land on the same bytes.
-    /// </para>
+    ///     The game's arrangement rather than a preference. Its own colour picker's three sliders are
+    ///     these three, hue multiplied out to 360 and the other two from zero to one, which is the one
+    ///     place the two halves disagree with each other.
+    ///     <para>
+    ///         The conversions are the game's, from <c>VRageMath.ColorExtensions</c>, so a colour chosen here
+    ///         and a colour chosen in the painter land on the same bytes.
+    ///     </para>
     /// </remarks>
     public struct Hsv
     {
@@ -25,13 +25,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Look
         }
 
         /// <summary>Where round the wheel, from zero to one, red at both ends.</summary>
-        public float Hue { get; private set; }
+        public float Hue { get; }
 
         /// <summary>How much of the hue there is, from white at zero.</summary>
-        public float Saturation { get; private set; }
+        public float Saturation { get; }
 
         /// <summary>How much light there is, from black at zero.</summary>
-        public float Value { get; private set; }
+        public float Value { get; }
 
         public static Hsv Of(float hue, float saturation, float value)
         {
@@ -49,18 +49,18 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Look
         }
 
         /// <summary>
-        /// One of the colours a player paints with, which is not held as one of these.
+        ///     One of the colours a player paints with, which is not held as one of these.
         /// </summary>
         /// <remarks>
-        /// <b>A build colour slot is an offset, not a colour.</b> Its saturation and its value are
-        /// shifted so that nought means the ordinary grey of unpainted armour rather than black, and
-        /// both run from minus one to one. Read as if they were a colour, a whole palette comes out
-        /// black, which is what happened.
-        /// <para>
-        /// The shift is the game's, and so is the arithmetic that undoes it: its own colour picker
-        /// puts every slot through <c>HSVOffsetToHSV</c> before it draws the swatch. Using theirs
-        /// rather than copying the numbers is what stops the two drifting apart.
-        /// </para>
+        ///     <b>A build colour slot is an offset, not a colour.</b> Its saturation and its value are
+        ///     shifted so that nought means the ordinary grey of unpainted armour rather than black, and
+        ///     both run from minus one to one. Read as if they were a colour, a whole palette comes out
+        ///     black, which is what happened.
+        ///     <para>
+        ///         The shift is the game's, and so is the arithmetic that undoes it: its own colour picker
+        ///         puts every slot through <c>HSVOffsetToHSV</c> before it draws the swatch. Using theirs
+        ///         rather than copying the numbers is what stops the two drifting apart.
+        ///     </para>
         /// </remarks>
         public static Hsv Painted(Vector3 slot)
         {
@@ -83,10 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Look
             return Of(Hue, Saturation, value);
         }
 
-        public Color Colour
-        {
-            get { return new Vector3(Hue, Saturation, Value).HSVtoColor(); }
-        }
+        public Color Colour => new Vector3(Hue, Saturation, Value).HSVtoColor();
 
         static float Held(float part)
         {

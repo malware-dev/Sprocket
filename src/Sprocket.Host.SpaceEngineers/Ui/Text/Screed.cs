@@ -1,120 +1,104 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using VRage.Game;
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using VRage.Game;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Text
 {
     /// <summary>A long piece of text, and a window onto it that moves both ways.</summary>
     /// <remarks>
-    /// <b>A viewport rather than something to put in one.</b> It takes the room it is given and moves the
-    /// text behind it, which is what lets it hold thousands of lines: a <see cref="Scroll" /> arranges its
-    /// content at full height and a listing arranged at full height is a draw call per line, all but a
-    /// screenful of them thrown away by the scissor.
-    /// <para>
-    /// <b>Down is free.</b> Every line of one face at one scale stands the same height, so how tall the
-    /// whole is comes out of a multiplication: five thousand lines cost what five do, and only the lines
-    /// the window is actually over are drawn.
-    /// </para>
-    /// <para>
-    /// <b>Across is learned, never swept.</b> How wide the widest line is cannot be had by arithmetic, and
-    /// measuring every line to find out is not affordable - timed here at 11ms for five hundred lines and
-    /// 221ms for ten thousand, against a frame of under 17. So a line is measured when it comes into view,
-    /// and how far there is to go sideways is the widest seen so far. The consequence is deliberate: the
-    /// sideways thumb settles as somebody explores rather than being right from the first frame. What it
-    /// is never wrong about is the text on screen, because that is precisely what has been measured.
-    /// </para>
-    /// <para>
-    /// <b>The text can be taken hold of and dragged</b>, either thumb or the words themselves, so reaching
-    /// a bar is never the only way to get somewhere.
-    /// </para>
-    /// <para>
-    /// <b>Lines are not wrapped.</b> A listing's structure is its lines, and folding the long ones would
-    /// destroy exactly the thing somebody opened it to read. That is what the sideways axis is for.
-    /// </para>
-    /// <para>
-    /// <b>The text is held as lines, not as one run.</b> Nothing yet changes one of them and this offers no
-    /// way to - but a caret has to be able to land on a line, and a line has to be able to change without
-    /// the rest being rebuilt, and holding the lines is what keeps that a later piece of work rather than a
-    /// rewrite.
-    /// </para>
+    ///     <b>A viewport rather than something to put in one.</b> It takes the room it is given and moves the
+    ///     text behind it, which is what lets it hold thousands of lines: a <see cref="Scroll" /> arranges its
+    ///     content at full height and a listing arranged at full height is a draw call per line, all but a
+    ///     screenful of them thrown away by the scissor.
+    ///     <para>
+    ///         <b>Down is free.</b> Every line of one face at one scale stands the same height, so how tall the
+    ///         whole is comes out of a multiplication: five thousand lines cost what five do, and only the lines
+    ///         the window is actually over are drawn.
+    ///     </para>
+    ///     <para>
+    ///         <b>Across is learned, never swept.</b> How wide the widest line is cannot be had by arithmetic, and
+    ///         measuring every line to find out is not affordable - timed here at 11ms for five hundred lines and
+    ///         221ms for ten thousand, against a frame of under 17. So a line is measured when it comes into view,
+    ///         and how far there is to go sideways is the widest seen so far. The consequence is deliberate: the
+    ///         sideways thumb settles as somebody explores rather than being right from the first frame. What it
+    ///         is never wrong about is the text on screen, because that is precisely what has been measured.
+    ///     </para>
+    ///     <para>
+    ///         <b>The text can be taken hold of and dragged</b>, either thumb or the words themselves, so reaching
+    ///         a bar is never the only way to get somewhere.
+    ///     </para>
+    ///     <para>
+    ///         <b>Lines are not wrapped.</b> A listing's structure is its lines, and folding the long ones would
+    ///         destroy exactly the thing somebody opened it to read. That is what the sideways axis is for.
+    ///     </para>
+    ///     <para>
+    ///         <b>The text is held as lines, not as one run.</b> Nothing yet changes one of them and this offers no
+    ///         way to - but a caret has to be able to land on a line, and a line has to be able to change without
+    ///         the rest being rebuilt, and holding the lines is what keeps that a later piece of work rather than a
+    ///         rewrite.
+    ///     </para>
     /// </remarks>
     public class Screed : Element
     {
         /// <summary>
-        /// Every ending, because text arrives from whatever wrote it.
+        ///     Every ending, because text arrives from whatever wrote it.
         /// </summary>
         /// <remarks>
-        /// Held rather than made at the call, which would be an array per assignment.
+        ///     Held rather than made at the call, which would be an array per assignment.
         /// </remarks>
-        static readonly string[] Endings = { "\r\n", "\n", "\r" };
+        static readonly string[] _endings = { "\r\n", "\n", "\r" };
+
+        readonly Rail _across = new Rail();
+
+        readonly Rail _down = new Rail();
 
         readonly List<string> _lines = new List<string>();
 
         /// <summary>
-        /// One line at a time, because measuring is only offered a <c>StringBuilder</c>.
+        ///     The numbers down the gutter, for the lines on screen and no others.
         /// </summary>
         /// <remarks>
-        /// Kept and refilled rather than made per line, so one builder grown to the longest line is the
-        /// whole allocation however much text goes through it.
-        /// </remarks>
-        readonly StringBuilder _scratch = new StringBuilder(128);
-
-        /// <summary>
-        /// The numbers down the gutter, for the lines on screen and no others.
-        /// </summary>
-        /// <remarks>
-        /// Kept because <c>DrawText</c> wants a string and turning an int into one allocates. Held still
-        /// this is refilled never; moving refills it once, which is a handful of very small strings for
-        /// as long as the hand is moving.
+        ///     Kept because <c>DrawText</c> wants a string and turning an int into one allocates. Held still
+        ///     this is refilled never; moving refills it once, which is a handful of very small strings for
+        ///     as long as the hand is moving.
         /// </remarks>
         readonly List<string> _numbers = new List<string>();
 
-        readonly Rail _down = new Rail();
-        readonly Rail _across = new Rail();
-
-        string _font;
-        float _scale;
-        string _text = string.Empty;
-
-        /// <summary>The widest line seen so far, which is how far sideways there is to go.</summary>
-        float _widest;
-
         /// <summary>
-        /// The lines that were on screen last time it was drawn.
+        ///     One line at a time, because measuring is only offered a <c>StringBuilder</c>.
         /// </summary>
         /// <remarks>
-        /// The whole of what it remembers about measuring, and it is two numbers rather than one per
-        /// line: a line is measured when it falls outside this, so a window held still measures nothing
-        /// and moving down one line measures one line. Coming back over ground already covered measures
-        /// it again, which is one line per step and the price of not keeping a note per line.
+        ///     Kept and refilled rather than made per line, so one builder grown to the longest line is the
+        ///     whole allocation however much text goes through it.
         /// </remarks>
-        int _shownFrom = int.MaxValue;
+        readonly StringBuilder _scratch = new StringBuilder(128);
 
-        int _shownTo = int.MinValue;
-
-        /// <summary>Which band <see cref="_numbers" /> was filled for, so it is only filled again if it moved.</summary>
-        int _numbersFrom = int.MaxValue;
-
-        int _numbersTo = int.MinValue;
+        float _barWidth;
 
         /// <summary>
-        /// The widest of the ten digits, and how wide the gutter therefore is.
+        ///     The widest of the ten digits, and how wide the gutter therefore is.
         /// </summary>
         /// <remarks>
-        /// Ten measurements, once per face and scale, and the gutter is arithmetic from there: a number
-        /// of <i>n</i> digits is never wider than <i>n</i> of the widest one. Measuring the numbers
-        /// actually on screen instead would be exact and would change the gutter's width as somebody
-        /// scrolled past a longer one, which moves every line of the listing sideways under their eyes.
+        ///     Ten measurements, once per face and scale, and the gutter is arithmetic from there: a number
+        ///     of <i>n</i> digits is never wider than <i>n</i> of the widest one. Measuring the numbers
+        ///     actually on screen instead would be exact and would change the gutter's width as somebody
+        ///     scrolled past a longer one, which moves every line of the listing sideways under their eyes.
         /// </remarks>
         float _digit;
 
         float _digitAt = -1f;
         string _digitIn;
+
+        string _font;
+
+        /// <summary>Where the hand was when it was last heard from, while something is being dragged.</summary>
+        Vector2 _from;
+
         float _gutter;
 
         /// <summary>The line height and the whole height, kept: drawing cannot be invalidated.</summary>
@@ -122,15 +106,32 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         float _lineAt = -1f;
         string _lineIn;
-        float _tall;
-
-        float _barWidth;
         bool _numbered;
 
-        /// <summary>Where the hand was when it was last heard from, while something is being dragged.</summary>
-        Vector2 _from;
+        /// <summary>Which band <see cref="_numbers" /> was filled for, so it is only filled again if it moved.</summary>
+        int _numbersFrom = int.MaxValue;
 
-        bool _panning;
+        int _numbersTo = int.MinValue;
+
+        float _scale;
+
+        /// <summary>
+        ///     The lines that were on screen last time it was drawn.
+        /// </summary>
+        /// <remarks>
+        ///     The whole of what it remembers about measuring, and it is two numbers rather than one per
+        ///     line: a line is measured when it falls outside this, so a window held still measures nothing
+        ///     and moving down one line measures one line. Coming back over ground already covered measures
+        ///     it again, which is one line per step and the price of not keeping a note per line.
+        /// </remarks>
+        int _shownFrom = int.MaxValue;
+
+        int _shownTo = int.MinValue;
+        float _tall;
+        string _text = string.Empty;
+
+        /// <summary>The widest line seen so far, which is how far sideways there is to go.</summary>
+        float _widest;
 
         public Screed()
         {
@@ -141,18 +142,18 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <summary>
-        /// The whole of it, split into lines as it is set.
+        ///     The whole of it, split into lines as it is set.
         /// </summary>
         /// <remarks>
-        /// One pass over the characters, once, when somebody puts text in. Nothing reads the text again:
-        /// every later question is answered from the lines.
+        ///     One pass over the characters, once, when somebody puts text in. Nothing reads the text again:
+        ///     every later question is answered from the lines.
         /// </remarks>
         public string Text
         {
             get { return _text; }
             set
             {
-                string incoming = value ?? string.Empty;
+                var incoming = value ?? string.Empty;
                 if (_text == incoming)
                     return;
 
@@ -160,7 +161,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 _lines.Clear();
 
                 if (incoming.Length > 0)
-                    _lines.AddRange(incoming.Split(Endings, StringSplitOptions.None));
+                    _lines.AddRange(incoming.Split(_endings, StringSplitOptions.None));
 
                 Forget();
                 InvalidateMeasure();
@@ -199,12 +200,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         public Color Color { get; set; }
 
         /// <summary>
-        /// Whether each line is numbered down a gutter on the left.
+        ///     Whether each line is numbered down a gutter on the left.
         /// </summary>
         /// <remarks>
-        /// The gutter belongs to the window rather than to the text: it holds still while the words are
-        /// dragged sideways past it, because a line number that scrolled off the edge would be no use
-        /// at exactly the moment somebody is following a long line across.
+        ///     The gutter belongs to the window rather than to the text: it holds still while the words are
+        ///     dragged sideways past it, because a line number that scrolled off the edge would be no use
+        ///     at exactly the moment somebody is following a long line across.
         /// </remarks>
         public bool Numbered
         {
@@ -285,21 +286,28 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <summary>How many lines it holds.</summary>
-        public int Lines
-        {
-            get { return _lines.Count; }
-        }
+        public int Lines => _lines.Count;
 
         /// <summary>How tall the whole listing stands, once it has been measured.</summary>
-        public float Extent
-        {
-            get { return _down.Extent; }
-        }
+        public float Extent => _down.Extent;
 
         /// <summary>How wide its widest line is, once it has been measured.</summary>
-        public float Widest
+        public float Widest => _across.Extent;
+
+        /// <summary>Whether the text itself is being dragged about right now.</summary>
+        public bool IsPanning { get; private set; }
+
+        /// <summary>The text's own room: what is left once the bars have had their share.</summary>
+        RectangleF View
         {
-            get { return _across.Extent; }
+            get
+            {
+                var box = ContentBounds;
+                var bar = _barWidth > 0f ? _barWidth : 0f;
+
+                return new RectangleF(box.X, box.Y,
+                    Rail.Room(box.Width, bar), Rail.Room(box.Height, bar));
+            }
         }
 
         /// <summary>Whether there is anything out of sight in a direction.</summary>
@@ -323,7 +331,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>Puts the middle of a thumb at <paramref name="at" />, in screen units.</summary>
         public void ThumbTo(Way way, float at)
         {
-            RectangleF track = Track(way);
+            var track = Track(way);
             Put(way, Of(way).ThumbedTo(at, way == Way.Across ? track.X : track.Y));
         }
 
@@ -340,11 +348,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <summary>
-        /// Takes hold at <paramref name="point" />, of a thumb or of the text itself.
+        ///     Takes hold at <paramref name="point" />, of a thumb or of the text itself.
         /// </summary>
         /// <remarks>
-        /// One question rather than three, so a host offers the press once and is told whether it was
-        /// wanted. Thumbs first: they sit on top of the text's own room and a press there means the bar.
+        ///     One question rather than three, so a host offers the press once and is told whether it was
+        ///     wanted. Thumbs first: they sit on top of the text's own room and a press there means the bar.
         /// </remarks>
         public bool Take(Vector2 point)
         {
@@ -353,8 +361,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         /// <summary>Where the hand has got to. Ignored while nothing is held.</summary>
         /// <remarks>
-        /// Panning is direct: the text goes where the hand goes, so the window moves against it. Dragging
-        /// downwards brings back what is above, which is what taking hold of a sheet of paper does.
+        ///     Panning is direct: the text goes where the hand goes, so the window moves against it. Dragging
+        ///     downwards brings back what is above, which is what taking hold of a sheet of paper does.
         /// </remarks>
         public void Carry(Vector2 point)
         {
@@ -365,7 +373,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 return;
             }
 
-            if (!_panning)
+            if (!IsPanning)
                 return;
 
             MoveBy(Way.Down, _from.Y - point.Y);
@@ -377,25 +385,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         public void Drop()
         {
             Held = Way.None;
-            _panning = false;
-        }
-
-        /// <summary>Whether the text itself is being dragged about right now.</summary>
-        public bool IsPanning
-        {
-            get { return _panning; }
+            IsPanning = false;
         }
 
         /// <summary>
-        /// The room it was given. The text moves behind it rather than it growing to fit the text.
+        ///     The room it was given. The text moves behind it rather than it growing to fit the text.
         /// </summary>
         /// <remarks>
-        /// Both extents are worked out here, where the font can be asked questions, and read again during
-        /// arranging, where it cannot.
+        ///     Both extents are worked out here, where the font can be asked questions, and read again during
+        ///     arranging, where it cannot.
         /// </remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            float line = LineOf(g);
+            var line = LineOf(g);
 
             _tall = _lines.Count > 0 ? _lines.Count * line : line;
             _gutter = Numbered && _lines.Count > 0 ? (Digits(_lines.Count) + 2) * DigitOf(g) : 0f;
@@ -418,7 +420,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         protected override void ArrangeContent(RectangleF bounds)
         {
-            float bar = _barWidth > 0f ? _barWidth : 0f;
+            var bar = _barWidth > 0f ? _barWidth : 0f;
 
             _down.Extent = _tall;
             _across.Extent = _widest;
@@ -438,7 +440,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>Only the lines the window is over, and then the thumbs.</summary>
         protected override void DrawContent(IGraphics g)
         {
-            RectangleF view = View;
+            var view = View;
 
             if (_lines.Count > 0 && _line > 0f && view.Height > 0f)
             {
@@ -450,23 +452,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 if (last >= _lines.Count)
                     last = _lines.Count - 1;
 
-                float top = view.Y - _down.Offset + first * _line;
+                var top = view.Y - _down.Offset + first * _line;
 
                 Gutter(g, view, first, last, top);
 
                 var words = new RectangleF(view.X + _gutter, view.Y,
                     Rail.Room(view.Width, _gutter), view.Height);
 
-                float x = words.X - _across.Offset;
-                float y = top;
+                var x = words.X - _across.Offset;
+                var y = top;
 
                 // Narrowed to the words' own room, so a long line stops at the gutter and the bars
                 // rather than running underneath them.
                 g.PushClip(words);
 
-                for (int i = first; i <= last; i++)
+                for (var i = first; i <= last; i++)
                 {
-                    string said = _lines[i];
+                    var said = _lines[i];
                     if (said.Length > 0)
                     {
                         if (i < _shownFrom || i > _shownTo)
@@ -489,12 +491,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <summary>
-        /// The numbers of the lines on screen, right against the words they belong to.
+        ///     The numbers of the lines on screen, right against the words they belong to.
         /// </summary>
         /// <remarks>
-        /// It does not move with <see cref="Shifted" />. Dragging the words sideways leaves the numbers
-        /// where they are, which is the only arrangement in which they are any use while following a
-        /// long line across.
+        ///     It does not move with <see cref="Shifted" />. Dragging the words sideways leaves the numbers
+        ///     where they are, which is the only arrangement in which they are any use while following a
+        ///     long line across.
         /// </remarks>
         void Gutter(IGraphics g, RectangleF view, int first, int last, float top)
         {
@@ -505,12 +507,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             // Right against the words, every number ending a digit's width short of them. Placed by
             // its end rather than its start, so nothing here has to know how wide a number is.
-            float edge = view.X + _gutter - _digit;
-            float y = top;
+            var edge = view.X + _gutter - _digit;
+            var y = top;
 
             g.PushClip(new RectangleF(view.X, view.Y, _gutter, view.Height));
 
-            for (int i = 0; i < _numbers.Count; i++)
+            for (var i = 0; i < _numbers.Count; i++)
             {
                 g.DrawText(Font, _numbers[i], new Vector2(edge, y), Scale, NumberColor, Align.Right);
                 y += _line;
@@ -530,7 +532,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             _numbers.Clear();
 
             // One-based, because the first line of anything anybody reads is line one.
-            for (int i = first; i <= last; i++)
+            for (var i = first; i <= last; i++)
                 _numbers.Add((i + 1).ToString());
         }
 
@@ -549,25 +551,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 _scratch.Length = 0;
                 _scratch.Append((char)('0' + d));
 
-                float wide = g.MeasureText(Font, _scratch, Scale).X;
+                var wide = g.MeasureText(Font, _scratch, Scale).X;
                 if (wide > _digit)
                     _digit = wide;
             }
 
             return _digit;
-        }
-
-        /// <summary>The text's own room: what is left once the bars have had their share.</summary>
-        RectangleF View
-        {
-            get
-            {
-                RectangleF box = ContentBounds;
-                float bar = _barWidth > 0f ? _barWidth : 0f;
-
-                return new RectangleF(box.X, box.Y,
-                    Rail.Room(box.Width, bar), Rail.Room(box.Height, bar));
-            }
         }
 
         /// <summary>Takes hold of one bar, jumping the thumb to the press if it landed off it.</summary>
@@ -593,7 +582,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             if (!_down.CanMove && !_across.CanMove)
                 return false;
 
-            _panning = true;
+            IsPanning = true;
             _from = point;
             return true;
         }
@@ -605,7 +594,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             // No groove behind it, the same as everywhere else: the thumb alone, against whatever the
             // panel already is.
-            Color thumb = Held == way && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
+            var thumb = Held == way && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
             g.DrawSprite(Solid, Thumb(way), thumb, 0f);
         }
 
@@ -617,8 +606,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>The whole of a bar, thumb and empty part alike, inside the room the text does not get.</summary>
         RectangleF Track(Way way)
         {
-            RectangleF box = ContentBounds;
-            float bar = _barWidth > 0f ? _barWidth : 0f;
+            var box = ContentBounds;
+            var bar = _barWidth > 0f ? _barWidth : 0f;
 
             if (bar <= 0f)
                 return new RectangleF(box.X, box.Y, 0f, 0f);
@@ -630,10 +619,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         RectangleF Thumb(Way way)
         {
-            RectangleF track = Track(way);
-            Rail rail = Of(way);
-            float start = rail.ThumbStart;
-            float length = rail.ThumbLength;
+            var track = Track(way);
+            var rail = Of(way);
+            var start = rail.ThumbStart;
+            var length = rail.ThumbLength;
 
             return way == Way.Across
                 ? new RectangleF(track.X + start, track.Y, length, track.Height)
@@ -667,26 +656,26 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <summary>
-        /// Measures one line the first time it is ever drawn, and reaches further if it is the longest yet.
+        ///     Measures one line the first time it is ever drawn, and reaches further if it is the longest yet.
         /// </summary>
         /// <remarks>
-        /// <b>The one place here that measures text while drawing, and it is deliberate.</b> The rule it
-        /// bends is about work that repeats, and this does not: the caller only asks about lines that were
-        /// not on screen last frame, so a window held still measures nothing and moving down one line
-        /// measures one line. Measuring the whole listing up front instead was timed at 11ms for five
-        /// hundred lines and 221ms for ten thousand, against a frame of under 17 - a frozen game rather
-        /// than a cost.
-        /// <para>
-        /// The reach is put straight onto the rail rather than invalidating anything. Nothing is laid out
-        /// from it; only the thumb is drawn from it, and that is drawn after this.
-        /// </para>
+        ///     <b>The one place here that measures text while drawing, and it is deliberate.</b> The rule it
+        ///     bends is about work that repeats, and this does not: the caller only asks about lines that were
+        ///     not on screen last frame, so a window held still measures nothing and moving down one line
+        ///     measures one line. Measuring the whole listing up front instead was timed at 11ms for five
+        ///     hundred lines and 221ms for ten thousand, against a frame of under 17 - a frozen game rather
+        ///     than a cost.
+        ///     <para>
+        ///         The reach is put straight onto the rail rather than invalidating anything. Nothing is laid out
+        ///         from it; only the thumb is drawn from it, and that is drawn after this.
+        ///     </para>
         /// </remarks>
         void Widen(IGraphics g, string said)
         {
             _scratch.Length = 0;
             _scratch.Append(said);
 
-            float wide = g.MeasureText(Font, _scratch, Scale).X;
+            var wide = g.MeasureText(Font, _scratch, Scale).X;
             if (wide <= _widest)
                 return;
 
@@ -706,16 +695,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <summary>
-        /// Whether a point is inside one of the bars' own rectangles.
+        ///     Whether a point is inside one of the bars' own rectangles.
         /// </summary>
         /// <remarks>
-        /// Not <see cref="Element.Holds" />, which asks about this element's own bounds. A track and a
-        /// thumb are worked out rather than arranged, so they are not any element's bounds.
+        ///     Not <see cref="Element.Holds" />, which asks about this element's own bounds. A track and a
+        ///     thumb are worked out rather than arranged, so they are not any element's bounds.
         /// </remarks>
         static bool Inside(RectangleF bounds, Vector2 point)
         {
             return point.X >= bounds.X && point.X <= bounds.X + bounds.Width
-                && point.Y >= bounds.Y && point.Y <= bounds.Y + bounds.Height;
+                                       && point.Y >= bounds.Y && point.Y <= bounds.Y + bounds.Height;
         }
     }
 }

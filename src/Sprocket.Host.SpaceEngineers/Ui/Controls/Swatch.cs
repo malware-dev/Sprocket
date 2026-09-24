@@ -1,13 +1,13 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>A rectangle of one colour, shown so that the colour itself is the answer.</summary>
     /// <remarks>
-    /// The colour goes in <see cref="Element.Background" />, which the element already draws, so there
-    /// is nothing in the content but the size it holds. It is a type rather than a bare box because a
-    /// swatch is a thing on the screen that somebody presses, and a box with a background set is not.
+    ///     The colour goes in <see cref="Element.Background" />, which the element already draws, so there
+    ///     is nothing in the content but the size it holds. It is a type rather than a bare box because a
+    ///     swatch is a thing on the screen that somebody presses, and a box with a background set is not.
     /// </remarks>
     public class Swatch : Element
     {

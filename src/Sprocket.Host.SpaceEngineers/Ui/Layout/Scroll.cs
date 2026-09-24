@@ -1,36 +1,36 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>Shows part of something taller than the room available, and cuts the rest off.</summary>
     /// <remarks>
-    /// Content arranged higher than the box it sits in, and the clip that stops it spilling. It therefore
-    /// needs nothing of a backend that a clipped panel could not also do.
-    /// <para>
-    /// One direction at a time, chosen by <see cref="Horizontal" />: a list of rows scrolls down, and a
-    /// strip of columns scrolls across.
-    /// </para>
+    ///     Content arranged higher than the box it sits in, and the clip that stops it spilling. It therefore
+    ///     needs nothing of a backend that a clipped panel could not also do.
+    ///     <para>
+    ///         One direction at a time, chosen by <see cref="Horizontal" />: a list of rows scrolls down, and a
+    ///         strip of columns scrolls across.
+    ///     </para>
     /// </remarks>
     public class Scroll : Element
     {
-        private float _barWidth;
-        private bool _horizontal;
-
         /// <summary>
-        /// The height offered to content when measuring. Not infinity: a stack works out its height by
-        /// subtracting as it goes, and infinity minus anything stays infinity, which is true but useless.
+        ///     The height offered to content when measuring. Not infinity: a stack works out its height by
+        ///     subtracting as it goes, and infinity minus anything stays infinity, which is true but useless.
         /// </summary>
-        private const float Unbounded = 1000000f;
+        const float Unbounded = 1000000f;
 
-        private readonly ElementCollection _children;
-
-        private Element _content;
-        private float _across;
+        readonly ElementCollection _children;
 
         /// <summary>Everything about where along the content this sits. See <see cref="Rail" />.</summary>
-        private readonly Rail _rail = new Rail();
+        readonly Rail _rail = new Rail();
+
+        float _across;
+        float _barWidth;
+
+        Element _content;
+        bool _horizontal;
 
         public Scroll()
         {
@@ -39,11 +39,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <summary>
-        /// How wide the bar is, across the direction of travel. Zero for no bar at all.
+        ///     How wide the bar is, across the direction of travel. Zero for no bar at all.
         /// </summary>
         /// <remarks>
-        /// The room is taken from the content whether or not there is anything to scroll, so a list does
-        /// not shuffle sideways the moment it grows past its box.
+        ///     The room is taken from the content whether or not there is anything to scroll, so a list does
+        ///     not shuffle sideways the moment it grows past its box.
         /// </remarks>
         public float BarWidth
         {
@@ -65,12 +65,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         public Color BarHeldColor { get; set; }
 
         /// <summary>
-        /// How short the thumb is allowed to get.
+        ///     How short the thumb is allowed to get.
         /// </summary>
         /// <remarks>
-        /// A thumb is the same fraction of the track that the viewport is of the content, which on a very
-        /// long list is a few units of nothing. It stops shrinking here and starts lying instead, which is
-        /// the right way round: a thumb nobody can grab says less than one slightly out of place.
+        ///     A thumb is the same fraction of the track that the viewport is of the content, which on a very
+        ///     long list is a few units of nothing. It stops shrinking here and starts lying instead, which is
+        ///     the right way round: a thumb nobody can grab says less than one slightly out of place.
         /// </remarks>
         public float BarMinLength
         {
@@ -115,9 +115,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         /// <summary>How far down the content has been moved, in UI units. Never past its end.</summary>
         /// <remarks>
-        /// Moving the content is an arrangement and not a size, so this says so. Nothing else does: the
-        /// tree is only laid out when something has said it changed, and a scroller that moved in silence
-        /// simply did not move - the offset was new and the arrangement that reads it never ran again.
+        ///     Moving the content is an arrangement and not a size, so this says so. Nothing else does: the
+        ///     tree is only laid out when something has said it changed, and a scroller that moved in silence
+        ///     simply did not move - the offset was new and the arrangement that reads it never ran again.
         /// </remarks>
         public float Scrolled
         {
@@ -145,23 +145,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         public bool CanScroll => _rail.CanMove;
 
         /// <summary>Whether a thumb is being drawn: one was asked for, and there is something to scroll.</summary>
-        private bool HasBar => BarWidth > 0f && BarColor.A > 0 && CanScroll;
+        bool HasBar => BarWidth > 0f && BarColor.A > 0 && CanScroll;
 
         /// <summary>
-        /// The whole of the bar, thumb and empty part alike. Where a press counts as being on it.
+        ///     The whole of the bar, thumb and empty part alike. Where a press counts as being on it.
         /// </summary>
         /// <remarks>
-        /// Answered even when there is nothing to scroll, which is what lets
-        /// <see cref="OnBar" /> be the one question a caller has to ask.
+        ///     Answered even when there is nothing to scroll, which is what lets
+        ///     <see cref="OnBar" /> be the one question a caller has to ask.
         /// </remarks>
-        private RectangleF Track
+        RectangleF Track
         {
             get
             {
                 // ContentBounds and not Bounds, because that is what the viewport was measured against.
                 // Padding would otherwise put the thumb's travel and the content's travel out of step by
                 // exactly the padding, which reads as a thumb that stops short of the end of its own list.
-                RectangleF box = ContentBounds;
+                var box = ContentBounds;
 
                 if (BarWidth <= 0f)
                     return new RectangleF(box.X, box.Y, 0f, 0f);
@@ -173,13 +173,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <summary>The part of the track that stands for what is on show.</summary>
-        private RectangleF Thumb
+        RectangleF Thumb
         {
             get
             {
-                RectangleF track = Track;
-                float start = _rail.ThumbStart;
-                float length = _rail.ThumbLength;
+                var track = Track;
+                var start = _rail.ThumbStart;
+                var length = _rail.ThumbLength;
 
                 return Horizontal
                     ? new RectangleF(track.X + start, track.Y, length, track.Height)
@@ -188,12 +188,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <summary>
-        /// Moves the content as though the thumb had been dragged <paramref name="distance" /> units.
+        ///     Moves the content as though the thumb had been dragged <paramref name="distance" /> units.
         /// </summary>
         /// <remarks>
-        /// The conversion is the whole reason this lives here rather than in the caller: a thumb travels
-        /// the track while the content travels its own length, and the two are the same only on a list one
-        /// screen long. Doing it in the view would put the extent and the viewport in two places.
+        ///     The conversion is the whole reason this lives here rather than in the caller: a thumb travels
+        ///     the track while the content travels its own length, and the two are the same only on a list one
+        ///     screen long. Doing it in the view would put the extent and the viewport in two places.
         /// </remarks>
         public void DragBy(float distance)
         {
@@ -202,13 +202,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         /// <summary>Puts the middle of the thumb at <paramref name="at" />, in screen units.</summary>
         /// <remarks>
-        /// What a press on the empty part of the track does. Jumping to where the pointer is beats paging
-        /// towards it: it is one gesture rather than several, and it is what the press already looked like
-        /// it was going to do.
+        ///     What a press on the empty part of the track does. Jumping to where the pointer is beats paging
+        ///     towards it: it is one gesture rather than several, and it is what the press already looked like
+        ///     it was going to do.
         /// </remarks>
         public void ThumbTo(float at)
         {
-            RectangleF track = Track;
+            var track = Track;
             Scrolled = _rail.ThumbedTo(at, Horizontal ? track.X : track.Y);
         }
 
@@ -222,12 +222,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         {
             _across = BarWidth > 0f ? BarWidth : 0f;
 
-            if (_content != null)
-            {
-                _content.Measure(g, Horizontal
-                    ? new Vector2(Unbounded, Room(available.Y))
-                    : new Vector2(Room(available.X), Unbounded));
-            }
+            _content?.Measure(g, Horizontal
+                ? new Vector2(Unbounded, Room(available.Y))
+                : new Vector2(Room(available.X), Unbounded));
 
             // Takes what it is given rather than what its content wants, which is what makes it a window
             // onto the content instead of a container that grows with it.
@@ -249,8 +246,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             _rail.Extent = Horizontal ? _content.DesiredSize.X : _content.DesiredSize.Y;
             _rail.Offset = _rail.Clamp(_rail.Offset);
 
-            float extent = _rail.Extent;
-            float offset = _rail.Offset;
+            var extent = _rail.Extent;
+            var offset = _rail.Offset;
 
             _content.Arrange(Horizontal
                 ? new RectangleF(bounds.X - offset, bounds.Y, extent, Room(bounds.Height))
@@ -259,37 +256,36 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         protected override void DrawContent(IGraphics g)
         {
-            if (_content != null)
-                _content.Draw(g);
+            _content?.Draw(g);
 
             if (!HasBar)
                 return;
 
             // No groove behind it. The game draws the thumb alone against whatever the panel already is,
             // and a track under this one would be a line down every list saying nothing the thumb does not.
-            Color thumb = BarHeld && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
+            var thumb = BarHeld && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
             g.DrawSprite(Solid, Thumb, thumb, 0f);
         }
 
         /// <summary>
-        /// What is under a point in the content, or null.
+        ///     What is under a point in the content, or null.
         /// </summary>
         /// <remarks>
-        /// The thumb is not offered here. A bar is taken hold of rather than pressed, which happens
-        /// before a press is a press at all - see <c>Grab</c> on the screen.
+        ///     The thumb is not offered here. A bar is taken hold of rather than pressed, which happens
+        ///     before a press is a press at all - see <c>Grab</c> on the screen.
         /// </remarks>
         protected override Element UnderContent(Vector2 point)
         {
-            return _content != null ? _content.Under(point) : null;
+            return _content?.Under(point);
         }
 
         /// <summary>
-        /// Whether a point is anywhere on the bar, thumb and empty track alike.
+        ///     Whether a point is anywhere on the bar, thumb and empty track alike.
         /// </summary>
         /// <remarks>
-        /// False when there is no bar, so a caller has one question to ask rather than two - and false
-        /// where this scroller is not itself on show, because a bar cut away by something above it is
-        /// still a rectangle, and dragging one scrolls a list nobody can see.
+        ///     False when there is no bar, so a caller has one question to ask rather than two - and false
+        ///     where this scroller is not itself on show, because a bar cut away by something above it is
+        ///     still a rectangle, and dragging one scrolls a list nobody can see.
         /// </remarks>
         public bool OnBar(Vector2 point)
         {
@@ -303,20 +299,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <summary>
-        /// Whether a point is inside one of the bar's own rectangles.
+        ///     Whether a point is inside one of the bar's own rectangles.
         /// </summary>
         /// <remarks>
-        /// Not <see cref="Element.Holds" />, which asks about this element's own bounds. The track and
-        /// the thumb are worked out rather than arranged, so they are not any element's bounds.
+        ///     Not <see cref="Element.Holds" />, which asks about this element's own bounds. The track and
+        ///     the thumb are worked out rather than arranged, so they are not any element's bounds.
         /// </remarks>
         static bool Inside(RectangleF bounds, Vector2 point)
         {
             return point.X >= bounds.X && point.X <= bounds.X + bounds.Width
-                && point.Y >= bounds.Y && point.Y <= bounds.Y + bounds.Height;
+                                       && point.Y >= bounds.Y && point.Y <= bounds.Y + bounds.Height;
         }
 
         /// <summary>Whatever is left of a side once the bar has had its share.</summary>
-        private float Room(float whole)
+        float Room(float whole)
         {
             return Rail.Room(whole, _across);
         }

@@ -1,24 +1,24 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>A band at the top, a band at the bottom, and everything left over in between.</summary>
     /// <remarks>
-    /// Three named places rather than a side per child, which would need per-child metadata that
-    /// <see cref="ElementCollection" /> does not carry.
-    /// <para>
-    /// The middle is given whatever height is left rather than what it asked for, which is what lets one
-    /// region scroll while the header and footer stay put.
-    /// </para>
+    ///     Three named places rather than a side per child, which would need per-child metadata that
+    ///     <see cref="ElementCollection" /> does not carry.
+    ///     <para>
+    ///         The middle is given whatever height is left rather than what it asked for, which is what lets one
+    ///         region scroll while the header and footer stay put.
+    ///     </para>
     /// </remarks>
     public class Dock : Element
     {
-        private readonly ElementCollection _children;
+        readonly ElementCollection _children;
+        Element _bottom;
+        Element _fill;
 
-        private Element _top;
-        private Element _fill;
-        private Element _bottom;
+        Element _top;
 
         public Dock()
         {
@@ -46,8 +46,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            float used = 0f;
-            float width = 0f;
+            var used = 0f;
+            var width = 0f;
 
             if (_top != null)
             {
@@ -65,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
             if (_fill != null)
             {
-                float left = available.Y - used;
+                var left = available.Y - used;
                 _fill.Measure(g, new Vector2(available.X, left > 0f ? left : 0f));
                 width = Wider(width, _fill.DesiredSize.X);
             }
@@ -77,26 +77,26 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         protected override void ArrangeContent(RectangleF bounds)
         {
-            float top = bounds.Y;
-            float bottom = bounds.Y + bounds.Height;
+            var top = bounds.Y;
+            var bottom = bounds.Y + bounds.Height;
 
             if (_top != null)
             {
-                float height = _top.DesiredSize.Y;
+                var height = _top.DesiredSize.Y;
                 _top.Arrange(new RectangleF(bounds.X, top, bounds.Width, height));
                 top += height;
             }
 
             if (_bottom != null)
             {
-                float height = _bottom.DesiredSize.Y;
+                var height = _bottom.DesiredSize.Y;
                 _bottom.Arrange(new RectangleF(bounds.X, bottom - height, bounds.Width, height));
                 bottom -= height;
             }
 
             if (_fill != null)
             {
-                float height = bottom - top;
+                var height = bottom - top;
                 _fill.Arrange(new RectangleF(bounds.X, top, bounds.Width, height > 0f ? height : 0f));
             }
         }
@@ -104,19 +104,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         protected override void DrawContent(IGraphics g)
         {
             // The middle first, so chrome drawn over it wins where they overlap by a pixel.
-            if (_fill != null)
-                _fill.Draw(g);
-
-            if (_top != null)
-                _top.Draw(g);
-
-            if (_bottom != null)
-                _bottom.Draw(g);
+            _fill?.Draw(g);
+            _top?.Draw(g);
+            _bottom?.Draw(g);
         }
 
         protected override Element UnderContent(Vector2 point)
         {
-            Element found = _bottom != null ? _bottom.Under(point) : null;
+            var found = _bottom?.Under(point);
 
             if (found == null && _top != null)
                 found = _top.Under(point);
@@ -127,12 +122,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             return found;
         }
 
-        private static float Wider(float a, float b)
+        static float Wider(float a, float b)
         {
             return a > b ? a : b;
         }
 
-        private Element Adopt(Element current, Element incoming)
+        Element Adopt(Element current, Element incoming)
         {
             if (current == incoming)
                 return current;

@@ -6,22 +6,22 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 {
     /// <summary>
-    /// The screen the game gives a mod to draw on.
+    ///     The screen the game gives a mod to draw on.
     /// </summary>
     /// <remarks>
-    /// Everything here is the game's own screen-space API said once, in the game's own terms: pixels,
-    /// layers, materials. <see cref="ScreenSpaceGraphics" /> is what turns a layout's units into those,
-    /// and <see cref="GameScreenSpace" /> is the game behind it.
-    /// <para>
-    /// It exists so a frame can be recorded rather than drawn. The harness answers these calls by
-    /// writing them down, which is what the reference frames are, and it is the only way to compare
-    /// what a screen drew with what it drew yesterday.
-    /// </para>
-    /// <para>
-    /// <b>A scissor is pushed and popped rather than handed back as something to dispose.</b> The
-    /// game's own is a struct scope, and an interface returning it as <c>IDisposable</c> would box one
-    /// per clipped element per frame. So the stack belongs to whoever implements this.
-    /// </para>
+    ///     Everything here is the game's own screen-space API said once, in the game's own terms: pixels,
+    ///     layers, materials. <see cref="ScreenSpaceGraphics" /> is what turns a layout's units into those,
+    ///     and <see cref="GameScreenSpace" /> is the game behind it.
+    ///     <para>
+    ///         It exists so a frame can be recorded rather than drawn. The harness answers these calls by
+    ///         writing them down, which is what the reference frames are, and it is the only way to compare
+    ///         what a screen drew with what it drew yesterday.
+    ///     </para>
+    ///     <para>
+    ///         <b>A scissor is pushed and popped rather than handed back as something to dispose.</b> The
+    ///         game's own is a struct scope, and an interface returning it as <c>IDisposable</c> would box one
+    ///         per clipped element per frame. So the stack belongs to whoever implements this.
+    ///     </para>
     /// </remarks>
     public interface IScreenSpace
     {
@@ -29,11 +29,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         RectangleF SafeArea { get; }
 
         /// <summary>
-        /// The whole window in pixels, which is wider than the safe area on anything but 4:3.
+        ///     The whole window in pixels, which is wider than the safe area on anything but 4:3.
         /// </summary>
         /// <remarks>
-        /// A pointer belongs in this one: the game lets its own cursor reach the physical edges of the
-        /// screen rather than the edges of its HUD.
+        ///     A pointer belongs in this one: the game lets its own cursor reach the physical edges of the
+        ///     screen rather than the edges of its HUD.
         /// </remarks>
         Vector2 ViewportSize { get; }
 
@@ -58,12 +58,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         bool TryCursorPixels(out Vector2 pixels);
 
         /// <summary>
-        /// A point in the game's own normalized units, in pixels.
+        ///     A point in the game's own normalized units, in pixels.
         /// </summary>
         /// <remarks>
-        /// The game places a screen in fractions of the window and answers questions about it in
-        /// pixels, so a screen host has to convert between the two. The conversion is the game's, not
-        /// arithmetic worth reproducing.
+        ///     The game places a screen in fractions of the window and answers questions about it in
+        ///     pixels, so a screen host has to convert between the two. The conversion is the game's, not
+        ///     arithmetic worth reproducing.
         /// </remarks>
         Vector2 NormalizedToPixels(Vector2 position);
 

@@ -1,40 +1,36 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>
-    /// The game's own on/off control: two halves side by side, both words always readable, the half that
-    /// is in force filled light and the other left dark.
+    ///     The game's own on/off control: two halves side by side, both words always readable, the half that
+    ///     is in force filled light and the other left dark.
     /// </summary>
     /// <remarks>
-    /// Copied from <c>MyGuiControlOnOffSwitch</c> rather than invented. That control is a bordered box
-    /// holding two half-width checkboxes and two labels; the state is shown by which half is checked and
-    /// by the font each label is drawn in - White on the side in force, Blue on the side that is not.
-    /// Every part of it is a flat fill, a one-pixel border or a word, so all of it is reproducible here.
-    /// <para>
-    /// It says <b>what state the thing is in</b>, where everything else on these screens says what
-    /// pressing it does. That is the game's convention and it is worth the inconsistency: an audience
-    /// who have never programmed should not have to work out whether a lone word is a label or a button,
-    /// and a switch showing both of its positions cannot be read the wrong way round.
-    /// </para>
+    ///     Copied from <c>MyGuiControlOnOffSwitch</c> rather than invented. That control is a bordered box
+    ///     holding two half-width checkboxes and two labels; the state is shown by which half is checked and
+    ///     by the font each label is drawn in - White on the side in force, Blue on the side that is not.
+    ///     Every part of it is a flat fill, a one-pixel border or a word, so all of it is reproducible here.
+    ///     <para>
+    ///         It says <b>what state the thing is in</b>, where everything else on these screens says what
+    ///         pressing it does. That is the game's convention and it is worth the inconsistency: an audience
+    ///         who have never programmed should not have to work out whether a lone word is a label or a button,
+    ///         and a switch showing both of its positions cannot be read the wrong way round.
+    ///     </para>
     /// </remarks>
     public class Switch : Element
     {
-        readonly Label _on;
         readonly Label _off;
+        readonly Label _on;
 
         float _half;
 
-        public Switch(float scale) : this(scale, false)
-        {
-        }
-
         /// <summary>A switch that is one of the fields a value is given in, and so as tall as a box.</summary>
-        public Switch(float scale, bool field)
+        public Switch(float scale, bool field = false)
         {
             var children = new ElementCollection(this);
 
@@ -56,13 +52,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         /// <summary>Which way it is set. The lit half and the bright word both follow this.</summary>
         public bool IsOn { get; private set; }
 
+        /// <summary>Whether either half is in force. False only where nobody has chosen yet.</summary>
+        public bool IsSet { get; private set; }
+
         /// <summary>
-        /// What the two halves are called, where they are not the two this was built with.
+        ///     What the two halves are called, where they are not the two this was built with.
         /// </summary>
         /// <remarks>
-        /// A switch is two words that exclude each other, and on and off are only the pair that turns
-        /// up most. A field says which pair it will take, and saying it here is what stops this
-        /// control assuming an answer the field never offered.
+        ///     A switch is two words that exclude each other, and on and off are only the pair that turns
+        ///     up most. A field says which pair it will take, and saying it here is what stops this
+        ///     control assuming an answer the field never offered.
         /// </remarks>
         public void Says(string on, string off)
         {
@@ -71,27 +70,24 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>
-        /// Lights this where the pointer is resting on it.
+        ///     Lights this where the pointer is resting on it.
         /// </summary>
         /// <remarks>
-        /// For a switch that takes its own presses rather than carrying a deed the screen can find,
-        /// which is the one on a form. Everywhere else the screen lights it, and this is never called.
+        ///     For a switch that takes its own presses rather than carrying a deed the screen can find,
+        ///     which is the one on a form. Everywhere else the screen lights it, and this is never called.
         /// </remarks>
         public void Lit(Vector2 point)
         {
             IsHot = !Collapsed && Holds(point);
         }
 
-        /// <summary>Whether either half is in force. False only where nobody has chosen yet.</summary>
-        public bool IsSet { get; private set; }
-
         /// <summary>
-        /// Neither way, because nobody has said which.
+        ///     Neither way, because nobody has said which.
         /// </summary>
         /// <remarks>
-        /// A switch always shows a state, which is right for a thing that has one and wrong for a
-        /// question nobody has answered: lighting the off half would be an answer nobody gave. Both
-        /// words stay readable, so it still says what the two choices are.
+        ///     A switch always shows a state, which is right for a thing that has one and wrong for a
+        ///     question nobody has answered: lighting the off half would be an answer nobody gave. Both
+        ///     words stay readable, so it still says what the two choices are.
         /// </remarks>
         public void Unchosen()
         {
@@ -105,12 +101,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>
-        /// Which half a point is on, and whether it is on the control at all.
+        ///     Which half a point is on, and whether it is on the control at all.
         /// </summary>
         /// <remarks>
-        /// The half rather than the whole, because this control shows both of its positions: pressing
-        /// the word somebody wants is what it looks like it does. Toggling from wherever it happens to
-        /// stand would also have no answer for a switch nobody has set.
+        ///     The half rather than the whole, because this control shows both of its positions: pressing
+        ///     the word somebody wants is what it looks like it does. Toggling from wherever it happens to
+        ///     stand would also have no answer for a switch nobody has set.
         /// </remarks>
         public bool Chose(Vector2 point, out bool isOn)
         {
@@ -162,7 +158,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             // it was switched, and a row of them down a screen would not line up with each other.
             _half = _on.DesiredSize.X > _off.DesiredSize.X ? _on.DesiredSize.X : _off.DesiredSize.X;
 
-            float height = _on.DesiredSize.Y > _off.DesiredSize.Y ? _on.DesiredSize.Y : _off.DesiredSize.Y;
+            var height = _on.DesiredSize.Y > _off.DesiredSize.Y ? _on.DesiredSize.Y : _off.DesiredSize.Y;
             return new Vector2(_half * 2f, height);
         }
 
@@ -176,7 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         {
             // Inside the border rather than over it, so the one pixel the game draws its controls with
             // survives the fills going on top of it.
-            float inset = EdgeThickness;
+            var inset = EdgeThickness;
             var inner = new RectangleF(
                 Bounds.X + inset, Bounds.Y + inset,
                 Bounds.Width - inset * 2f, Bounds.Height - inset * 2f);
@@ -194,10 +190,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                 return;
             }
 
-            float half = inner.Width * 0.5f;
+            var half = inner.Width * 0.5f;
             g.DrawSprite(Solid, IsOn
-                ? new RectangleF(inner.X, inner.Y, half, inner.Height)
-                : new RectangleF(inner.X + half, inner.Y, inner.Width - half, inner.Height),
+                    ? new RectangleF(inner.X, inner.Y, half, inner.Height)
+                    : new RectangleF(inner.X + half, inner.Y, inner.Width - half, inner.Height),
                 Palette.SwitchLit, 0f);
 
             _on.Draw(g);
@@ -206,7 +202,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         static Label Half(string text, float scale, bool field)
         {
-            Label half = Widgets.Label(text, Palette.Faint, scale);
+            var half = Widgets.Label(text, Palette.Faint, scale);
             half.Padding = new Thickness(Space.ChipX, field ? Space.FieldY : Space.ChipY);
             half.Centres = true;
             half.Wraps = false;

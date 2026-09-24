@@ -1,15 +1,15 @@
-using VRage.Utils;
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Look;
+using VRage.Utils;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>One number between nothing and everything, set by putting a grip where it goes.</summary>
     /// <remarks>
-    /// The track may be any material, which is the whole reason this is not a scrollbar: a hue runs
-    /// along its own track and the track is what says so. Saturation and value have nothing to show and
-    /// take a plain one, which is how the game draws the same three.
+    ///     The track may be any material, which is the whole reason this is not a scrollbar: a hue runs
+    ///     along its own track and the track is what says so. Saturation and value have nothing to show and
+    ///     take a plain one, which is how the game draws the same three.
     /// </remarks>
     public class Slider : Element
     {
@@ -38,12 +38,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         public Color TrackTint { get; set; }
 
         /// <summary>
-        /// Where the grip is, from nothing at the left to everything at the right.
+        ///     Where the grip is, from nothing at the left to everything at the right.
         /// </summary>
         /// <remarks>
-        /// Neither measure nor arrangement, so neither is invalidated: moving a grip changes what is
-        /// drawn inside a box whose size and place are already settled. The same reason a colour change
-        /// invalidates nothing.
+        ///     Neither measure nor arrangement, so neither is invalidated: moving a grip changes what is
+        ///     drawn inside a box whose size and place are already settled. The same reason a colour change
+        ///     invalidates nothing.
         /// </remarks>
         public float Fraction
         {
@@ -53,13 +53,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         /// <summary>What fraction a point along the track stands for, whether or not it is on it.</summary>
         /// <remarks>
-        /// Worked out from the travel the grip actually has rather than from the whole width, so that
-        /// pressing the far left gives nothing and the far right gives everything. Measuring against the
-        /// whole width leaves half a grip at each end that cannot be reached.
+        ///     Worked out from the travel the grip actually has rather than from the whole width, so that
+        ///     pressing the far left gives nothing and the far right gives everything. Measuring against the
+        ///     whole width leaves half a grip at each end that cannot be reached.
         /// </remarks>
         public float At(Vector2 point)
         {
-            float travel = ContentBounds.Width - Grip;
+            var travel = ContentBounds.Width - Grip;
             if (travel <= 0f)
                 return 0f;
 
@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         {
             g.DrawSprite(Track, ContentBounds, TrackTint, 0f);
 
-            float left = ContentBounds.X + (ContentBounds.Width - Grip) * _fraction;
+            var left = ContentBounds.X + (ContentBounds.Width - Grip) * _fraction;
             g.DrawSprite(Solid,
                 new RectangleF(left, ContentBounds.Y - Lip, Grip, ContentBounds.Height + Lip * 2f),
                 Palette.Ink, 0f);

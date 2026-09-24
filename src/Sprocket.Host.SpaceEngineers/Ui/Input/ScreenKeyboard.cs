@@ -1,31 +1,29 @@
 using Sandbox.ModAPI;
-using VRage.Collections;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRage.Input;
-
 // Two interfaces share this name. VRage.Input's is the engine's own and is not whitelisted; the mod-facing
 // one is what MyAPIGateway.Input hands back. Saying which removes an ambiguity that otherwise resolves to
 // the wrong one and fails only at the whitelist gate.
 using IMyInput = VRage.ModAPI.IMyInput;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Input
 {
     /// <summary>
-    /// Types into whichever box the screen says has the keyboard.
+    ///     Types into whichever box the screen says has the keyboard.
     /// </summary>
     /// <remarks>
-    /// Owns no box. <c>EditorView</c> decides what has the keyboard - a question while one is open,
-    /// otherwise whatever was last focused - and this is handed the answer.
-    /// <para>
-    /// Characters come from the game's own text buffer, which has already dealt with the keyboard layout,
-    /// dead keys and modifiers, so what arrives is what the player meant to type. Everything else is read as
-    /// keys, because a caret movement is not a character.
-    /// </para>
-    /// <para>
-    /// <b>Escape is deliberately not here.</b> The screen owns it: the game routes it through
-    /// <c>OnCancelling</c>, which is where a question gets to refuse the close and dismiss itself instead.
-    /// Reading it here as well would act on it twice.
-    /// </para>
+    ///     Owns no box. <c>EditorView</c> decides what has the keyboard - a question while one is open,
+    ///     otherwise whatever was last focused - and this is handed the answer.
+    ///     <para>
+    ///         Characters come from the game's own text buffer, which has already dealt with the keyboard layout,
+    ///         dead keys and modifiers, so what arrives is what the player meant to type. Everything else is read as
+    ///         keys, because a caret movement is not a character.
+    ///     </para>
+    ///     <para>
+    ///         <b>Escape is deliberately not here.</b> The screen owns it: the game routes it through
+    ///         <c>OnCancelling</c>, which is where a question gets to refuse the close and dismiss itself instead.
+    ///         Reading it here as well would act on it twice.
+    ///     </para>
     /// </remarks>
     public sealed class ScreenKeyboard
     {
@@ -38,22 +36,22 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
         }
 
         /// <summary>
-        /// Reads one frame of the keyboard into <paramref name="box" />.
+        ///     Reads one frame of the keyboard into <paramref name="box" />.
         /// </summary>
         /// <remarks>
-        /// Call only while the screen has focus. There is no sweep here watching for the world to move on
-        /// underneath an edit, which the overlay needed and which would now be actively wrong: it abandoned
-        /// on the mouse cursor becoming visible, and on a screen the cursor is always visible.
+        ///     Call only while the screen has focus. There is no sweep here watching for the world to move on
+        ///     underneath an edit, which the overlay needed and which would now be actively wrong: it abandoned
+        ///     on the mouse cursor becoming visible, and on a screen the cursor is always visible.
         /// </remarks>
         public KeyboardOutcome HandleInput(TextBox box)
         {
-            KeyboardOutcome outcome = new KeyboardOutcome();
+            var outcome = new KeyboardOutcome();
 
             if (box == null || MyAPIGateway.Input == null)
                 return outcome;
 
-            IMyInput input = MyAPIGateway.Input;
-            bool shift = input.IsAnyShiftKeyPressed();
+            var input = MyAPIGateway.Input;
+            var shift = input.IsAnyShiftKeyPressed();
 
             if (input.IsAnyCtrlKeyPressed())
             {
@@ -65,9 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
                     outcome.Changed = true;
                 }
                 else if (input.IsNewKeyPressed(MyKeys.C))
-                {
                     Clipboard.Set(box.SelectedText());
-                }
                 else if (input.IsNewKeyPressed(MyKeys.X))
                 {
                     Clipboard.Set(box.SelectedText());
@@ -82,10 +78,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
             }
             else
             {
-                ListReader<char> typed = input.TextInput;
-                for (int i = 0; i < typed.Count; i++)
+                var typed = input.TextInput;
+                for (var i = 0; i < typed.Count; i++)
                 {
-                    char c = typed[i];
+                    var c = typed[i];
                     if (c < 32 || c == 127)
                         continue;
 
@@ -106,14 +102,43 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
                 return outcome;
             }
 
-            int now = Tick();
+            var now = Tick();
 
-            if (Fires(input, MyKeys.Back, now)) { box.Backspace(); outcome.Changed = true; }
-            if (Fires(input, MyKeys.Delete, now)) { box.DeleteForward(); outcome.Changed = true; }
-            if (Fires(input, MyKeys.Left, now)) { box.MoveCaretLeft(shift); outcome.Changed = true; }
-            if (Fires(input, MyKeys.Right, now)) { box.MoveCaretRight(shift); outcome.Changed = true; }
-            if (Fires(input, MyKeys.Home, now)) { box.MoveCaretHome(shift); outcome.Changed = true; }
-            if (Fires(input, MyKeys.End, now)) { box.MoveCaretEnd(shift); outcome.Changed = true; }
+            if (Fires(input, MyKeys.Back, now))
+            {
+                box.Backspace();
+                outcome.Changed = true;
+            }
+
+            if (Fires(input, MyKeys.Delete, now))
+            {
+                box.DeleteForward();
+                outcome.Changed = true;
+            }
+
+            if (Fires(input, MyKeys.Left, now))
+            {
+                box.MoveCaretLeft(shift);
+                outcome.Changed = true;
+            }
+
+            if (Fires(input, MyKeys.Right, now))
+            {
+                box.MoveCaretRight(shift);
+                outcome.Changed = true;
+            }
+
+            if (Fires(input, MyKeys.Home, now))
+            {
+                box.MoveCaretHome(shift);
+                outcome.Changed = true;
+            }
+
+            if (Fires(input, MyKeys.End, now))
+            {
+                box.MoveCaretEnd(shift);
+                outcome.Changed = true;
+            }
 
             return outcome;
         }

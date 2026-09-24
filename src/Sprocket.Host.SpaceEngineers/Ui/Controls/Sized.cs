@@ -1,21 +1,20 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>Something held to a width, whatever it would rather be.</summary>
     /// <remarks>
-    /// Columns need this and nothing else does yet. A stack hands every child the width it asked for, and
-    /// a scrolling column asks for everything on offer, so without a cap the first column would take the
-    /// screen and the rest would have nowhere to go.
+    ///     Columns need this and nothing else does yet. A stack hands every child the width it asked for, and
+    ///     a scrolling column asks for everything on offer, so without a cap the first column would take the
+    ///     screen and the rest would have nowhere to go.
     /// </remarks>
     public class Sized : Element
     {
-        private float _width;
-
         readonly ElementCollection _children;
 
         Element _content;
+        float _width;
 
         public Sized(float width)
         {
@@ -65,19 +64,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         protected override void ArrangeContent(RectangleF bounds)
         {
-            if (_content != null)
-                _content.Arrange(new RectangleF(bounds.X, bounds.Y, Width, bounds.Height));
+            _content?.Arrange(new RectangleF(bounds.X, bounds.Y, Width, bounds.Height));
         }
 
         protected override Element UnderContent(Vector2 point)
         {
-            return _content != null ? _content.Under(point) : null;
+            return _content?.Under(point);
         }
 
         protected override void DrawContent(IGraphics g)
         {
-            if (_content != null)
-                _content.Draw(g);
+            _content?.Draw(g);
         }
     }
 }

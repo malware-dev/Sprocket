@@ -1,7 +1,6 @@
-using System.Collections;
-
 // Needed by one of the two projects this shared code is compiled into and not the other, so an
 // inspection run against either will call it redundant. It is not.
+using System.Collections;
 // ReSharper disable once RedundantUsingDirective
 using System.Collections.Generic;
 
@@ -9,13 +8,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 {
     /// <summary>The children of one element.</summary>
     /// <remarks>
-    /// A list of its own rather than a bare <c>List&lt;Element&gt;</c> because adding a child is what
-    /// gives it a parent, and a plain list cannot do that.
+    ///     A list of its own rather than a bare <c>List&lt;Element&gt;</c> because adding a child is what
+    ///     gives it a parent, and a plain list cannot do that.
     /// </remarks>
     public sealed class ElementCollection : IEnumerable<Element>
     {
-        private readonly List<Element> _items = new List<Element>();
-        private readonly Element _owner;
+        readonly List<Element> _items = new List<Element>();
+        readonly Element _owner;
 
         internal ElementCollection(Element owner)
         {
@@ -26,14 +25,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         public Element this[int index] => _items[index];
 
+        IEnumerator<Element> IEnumerable<Element>.GetEnumerator()
+        {
+            return _items.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _items.GetEnumerator();
+        }
+
         /// <summary>Adds <paramref name="child" /> and adopts it. A child already somewhere else moves.</summary>
         public void Add(Element child)
         {
             if (child == null || child == _owner)
                 return;
 
-            if (child.Holder != null)
-                child.Holder.Remove(child);
+            child.Holder?.Remove(child);
 
             _items.Add(child);
             child.Parent = _owner;
@@ -58,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         public void Clear()
         {
-            for (int i = 0; i < _items.Count; i++)
+            for (var i = 0; i < _items.Count; i++)
             {
                 _items[i].Parent = null;
                 _items[i].Holder = null;
@@ -69,16 +77,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         }
 
         public List<Element>.Enumerator GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
-
-        IEnumerator<Element> IEnumerable<Element>.GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
         {
             return _items.GetEnumerator();
         }

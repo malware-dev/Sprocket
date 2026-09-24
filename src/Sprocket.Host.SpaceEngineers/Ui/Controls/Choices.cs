@@ -1,49 +1,52 @@
 using System.Collections.Generic;
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>Everything a value may be, laid out to be picked from.</summary>
     /// <remarks>
-    /// Two shapes, and which one is used is decided here rather than by whoever puts one on a form,
-    /// because the only place the room available is known is where the measuring happens.
-    /// <para>
-    /// <b>A few short words are a row.</b> Drawn like the game's own switch, every word readable and
-    /// the one in force filled, so the choices can be read before one is made. That is the whole
-    /// reason not to use a box with the words listed beside it, where the only way to be wrong is to
-    /// be silently wrong.
-    /// </para>
-    /// <para>
-    /// <b>Anything longer is a closed box that opens a list.</b> Past about three the row stops being
-    /// something taken in at a glance and becomes a wall to search, and long words make a row wider
-    /// than the form whatever their number - an AI block carries several of these at once. A closed
-    /// box is one line whatever the list holds, and it is what a player has already met on the
-    /// terminal, where every one of these values is a drop-down.
-    /// </para>
+    ///     Two shapes, and which one is used is decided here rather than by whoever puts one on a form,
+    ///     because the only place the room available is known is where the measuring happens.
+    ///     <para>
+    ///         <b>A few short words are a row.</b> Drawn like the game's own switch, every word readable and
+    ///         the one in force filled, so the choices can be read before one is made. That is the whole
+    ///         reason not to use a box with the words listed beside it, where the only way to be wrong is to
+    ///         be silently wrong.
+    ///     </para>
+    ///     <para>
+    ///         <b>Anything longer is a closed box that opens a list.</b> Past about three the row stops being
+    ///         something taken in at a glance and becomes a wall to search, and long words make a row wider
+    ///         than the form whatever their number - an AI block carries several of these at once. A closed
+    ///         box is one line whatever the list holds, and it is what a player has already met on the
+    ///         terminal, where every one of these values is a drop-down.
+    ///     </para>
     /// </remarks>
     public class Choices : Element
     {
         /// <summary>How many words still read as a row rather than as a list to search.</summary>
         const int Few = 3;
 
-        readonly Wrap _row = new Wrap();
-        readonly Stack _list;
-        readonly Bar _closed = new Bar();
         readonly Label _chosen;
+        readonly Bar _closed = new Bar();
+        readonly List<Label> _lines = new List<Label>();
+        readonly Stack _list;
 
         /// <summary>The mark on the shut box that says it opens.</summary>
         readonly Element _mark;
-        readonly List<Label> _words = new List<Label>();
-        readonly List<Label> _lines = new List<Label>();
+
+        readonly Wrap _row = new Wrap();
         readonly float _scale;
+        readonly List<Label> _words = new List<Label>();
+        bool _asRow = true;
+
+        Element _hot;
 
         int _shown;
-        bool _asRow = true;
 
         public Choices(float scale)
         {
@@ -77,12 +80,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             children.Add(_closed);
         }
 
+        /// <summary>Whether the list is hanging open under the box.</summary>
+        public bool IsOpen { get; private set; }
+
         /// <summary>
-        /// What there is to choose from, in the order the block listed them.
+        ///     What there is to choose from, in the order the block listed them.
         /// </summary>
         /// <remarks>
-        /// Rebuilt only where the words have actually changed, because a question is dressed on every
-        /// tick and the words on one cannot move while it is open.
+        ///     Rebuilt only where the words have actually changed, because a question is dressed on every
+        ///     tick and the words on one cannot move while it is open.
         /// </remarks>
         public void Says(IList<string> words)
         {
@@ -118,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         {
             for (var i = 0; i < _shown && i < _words.Count; i++)
             {
-                bool lit = _words[i].Text == chosen;
+                var lit = _words[i].Text == chosen;
 
                 _words[i].Background = lit ? Palette.SwitchLit : Palette.SwitchDark;
                 _words[i].Color = lit ? Palette.Ink : Palette.Faint;
@@ -133,13 +139,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>
-        /// Lights whichever part of this the pointer is resting on.
+        ///     Lights whichever part of this the pointer is resting on.
         /// </summary>
         /// <remarks>
-        /// Done here because the presses are taken here. The screen lights what a press would reach
-        /// by finding it the same way a press does, and this control is the one thing a press does
-        /// not reach that way - so it owes the other half of the bargain: everything in here that
-        /// answers a press says so under the pointer.
+        ///     Done here because the presses are taken here. The screen lights what a press would reach
+        ///     by finding it the same way a press does, and this control is the one thing a press does
+        ///     not reach that way - so it owes the other half of the bargain: everything in here that
+        ///     answers a press says so under the pointer.
         /// </remarks>
         public void Lit(Vector2 point)
         {
@@ -164,8 +170,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                 _hot.IsHot = true;
         }
 
-        Element _hot;
-
         static Element Among(List<Label> parts, Vector2 point)
         {
             for (var i = 0; i < parts.Count; i++)
@@ -177,16 +181,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             return null;
         }
 
-        /// <summary>Whether the list is hanging open under the box.</summary>
-        public bool IsOpen { get; private set; }
-
         /// <summary>
-        /// Whether a point is on the open list, which is outside this control's own bounds.
+        ///     Whether a point is on the open list, which is outside this control's own bounds.
         /// </summary>
         /// <remarks>
-        /// The list hangs under the box rather than inside it, so anything asking what a press landed
-        /// on has to ask this as well - a form that only knew its own bounds would read a press on
-        /// the list as a press outside the question, and put the question away.
+        ///     The list hangs under the box rather than inside it, so anything asking what a press landed
+        ///     on has to ask this as well - a form that only knew its own bounds would read a press on
+        ///     the list as a press outside the question, and put the question away.
         /// </remarks>
         public bool Over(Vector2 point)
         {
@@ -200,11 +201,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>
-        /// Takes the press, and says which word it chose where it chose one.
+        ///     Takes the press, and says which word it chose where it chose one.
         /// </summary>
         /// <remarks>
-        /// Answers true for a press that only opened or shut the list as well, because the press did
-        /// land on this control and must not go on to mean something else as well.
+        ///     Answers true for a press that only opened or shut the list as well, because the press did
+        ///     land on this control and must not go on to mean something else as well.
         /// </remarks>
         public bool Took(Vector2 point, out string word)
         {
@@ -229,12 +230,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>
-        /// Draws the open list, over everything the form has already drawn.
+        ///     Draws the open list, over everything the form has already drawn.
         /// </summary>
         /// <remarks>
-        /// Drawn by whoever owns the form rather than in this control's own drawing, because a list
-        /// hanging under a box hangs over whatever the form put below it. Drawn where this control
-        /// ended up, which is only known once the form has been arranged.
+        ///     Drawn by whoever owns the form rather than in this control's own drawing, because a list
+        ///     hanging under a box hangs over whatever the form put below it. Drawn where this control
+        ///     ended up, which is only known once the form has been arranged.
         /// </remarks>
         public void Hanging(IGraphics g)
         {
@@ -338,7 +339,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         Label Chip()
         {
-            Label made = Widgets.Label("", Palette.Faint, _scale);
+            var made = Widgets.Label("", Palette.Faint, _scale);
             made.Padding = new Thickness(Space.ChipX, Space.FieldY);
             made.Wraps = false;
             made.Background = Palette.SwitchDark;
@@ -349,7 +350,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         Label Line()
         {
-            Label made = Widgets.Label("", Palette.Muted, _scale);
+            var made = Widgets.Label("", Palette.Muted, _scale);
             made.Padding = new Thickness(Space.ChipX, Space.FieldY);
             made.Wraps = false;
             made.Highlight = Palette.Panel;

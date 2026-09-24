@@ -1,22 +1,22 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>
-    /// Shows part of one child, from the bottom up, and cuts off the rest.
+    ///     Shows part of one child, from the bottom up, and cuts off the rest.
     /// </summary>
     /// <remarks>
-    /// What makes something slide in rather than appear. A banner that is simply added to a column takes
-    /// its full height on the frame it arrives, and everything below it jumps down by that much - which
-    /// is the one thing this screen is not allowed to do, because a list that moves under a pointer is a
-    /// list somebody presses the wrong row in.
-    /// <para>
-    /// The child is always arranged at the height it asked for and is moved up out of view instead, so
-    /// nothing inside it is ever squashed: text keeps its line breaks and a row keeps its height while
-    /// the whole thing is part way in. <see cref="Element.ClipsContent" /> is what makes the part that is
-    /// out of view invisible, and it is on from the start rather than something a caller sets.
-    /// </para>
+    ///     What makes something slide in rather than appear. A banner that is simply added to a column takes
+    ///     its full height on the frame it arrives, and everything below it jumps down by that much - which
+    ///     is the one thing this screen is not allowed to do, because a list that moves under a pointer is a
+    ///     list somebody presses the wrong row in.
+    ///     <para>
+    ///         The child is always arranged at the height it asked for and is moved up out of view instead, so
+    ///         nothing inside it is ever squashed: text keeps its line breaks and a row keeps its height while
+    ///         the whole thing is part way in. <see cref="Element.ClipsContent" /> is what makes the part that is
+    ///         out of view invisible, and it is on from the start rather than something a caller sets.
+    ///     </para>
     /// </remarks>
     public class Reveal : Element
     {
@@ -52,19 +52,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <summary>
-        /// How much of the child is in view, from none of it to all of it.
+        ///     How much of the child is in view, from none of it to all of it.
         /// </summary>
         /// <remarks>
-        /// Drives the height this asks for, so setting it invalidates the measure: whatever is animating
-        /// it is saying the layout has changed, and on the frames it is not being touched nothing here
-        /// costs anything.
+        ///     Drives the height this asks for, so setting it invalidates the measure: whatever is animating
+        ///     it is saying the layout has changed, and on the frames it is not being touched nothing here
+        ///     costs anything.
         /// </remarks>
         public float Openness
         {
             get { return _openness; }
             set
             {
-                var wanted = value < 0f ? 0f : (value > 1f ? 1f : value);
+                var wanted = value < 0f ? 0f : value > 1f ? 1f : value;
                 if (_openness == wanted)
                     return;
 
@@ -77,18 +77,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         public bool Shut => _openness <= 0f;
 
         /// <summary>
-        /// Nothing inside this can be reached until all of it is in view.
+        ///     Nothing inside this can be reached until all of it is in view.
         /// </summary>
         /// <remarks>
-        /// A control that answers before it has arrived is a control somebody hits by accident on the
-        /// way to whatever was underneath it, and the banner this exists for slides in over a list
-        /// somebody is already pressing. Said here rather than in the walk, so that the walk and
-        /// <see cref="Element.Reaches" /> - a press and a grab - cannot come to disagree about it.
+        ///     A control that answers before it has arrived is a control somebody hits by accident on the
+        ///     way to whatever was underneath it, and the banner this exists for slides in over a list
+        ///     somebody is already pressing. Said here rather than in the walk, so that the walk and
+        ///     <see cref="Element.Reaches" /> - a press and a grab - cannot come to disagree about it.
         /// </remarks>
-        internal override bool Passes
-        {
-            get { return _openness >= 1f; }
-        }
+        internal override bool Passes => _openness >= 1f;
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {

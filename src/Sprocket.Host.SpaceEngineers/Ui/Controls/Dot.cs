@@ -1,17 +1,17 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Look;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>
-    /// A state light.
+    ///     A state light.
     /// </summary>
     /// <remarks>
-    /// Square rather than round, which is not a decision: the seam draws sprites by material id, there
-    /// is no round one declared, and inventing a rounded primitive would put a shape into the graphics
-    /// abstraction that an <c>IMyTextSurface</c> would have to reproduce. A circular texture is the
-    /// answer when this is worth doing properly.
+    ///     Square rather than round, which is not a decision: the seam draws sprites by material id, there
+    ///     is no round one declared, and inventing a rounded primitive would put a shape into the graphics
+    ///     abstraction that an <c>IMyTextSurface</c> would have to reproduce. A circular texture is the
+    ///     answer when this is worth doing properly.
     /// </remarks>
     public class Dot : Element
     {

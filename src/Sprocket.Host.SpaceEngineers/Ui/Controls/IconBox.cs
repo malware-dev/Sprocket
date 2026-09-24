@@ -1,20 +1,20 @@
-using VRageMath;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>
-    /// A picture of a thing, held to a square.
+    ///     A picture of a thing, held to a square.
     /// </summary>
     /// <remarks>
-    /// Nothing underneath it. A block in Space Engineers always has an icon - it is part of the block's
-    /// definition and the game will not load one without it - so a target drawing something else in case
-    /// there is no picture would be carrying a branch that can never be taken.
+    ///     Nothing underneath it. A block in Space Engineers always has an icon - it is part of the block's
+    ///     definition and the game will not load one without it - so a target drawing something else in case
+    ///     there is no picture would be carrying a branch that can never be taken.
     /// </remarks>
     public class IconBox : Element
     {
-        private float _size;
+        float _size;
 
         public IconBox(float size)
         {
@@ -36,11 +36,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>
-        /// What core called this kind of thing.
+        ///     What core called this kind of thing.
         /// </summary>
         /// <remarks>
-        /// A name, not a path. Core says "door" because that is all core knows; which picture a door has
-        /// is the target's business, and in the game it is the block's own definition that answers.
+        ///     A name, not a path. Core says "door" because that is all core knows; which picture a door has
+        ///     is the target's business, and in the game it is the block's own definition that answers.
         /// </remarks>
         public string Art { get; set; }
 

@@ -1,15 +1,15 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>
-    /// The handle a row is dragged by: six small squares, two across and three down.
+    ///     The handle a row is dragged by: six small squares, two across and three down.
     /// </summary>
     /// <remarks>
-    /// Drawn rather than fetched. The game has no grip of its own to borrow - nothing in it is dragged
-    /// the way a step in a sequence is - and six rectangles are crisp at any size where a picture
-    /// squeezed to eleven pixels across would be six grey smudges.
+    ///     Drawn rather than fetched. The game has no grip of its own to borrow - nothing in it is dragged
+    ///     the way a step in a sequence is - and six rectangles are crisp at any size where a picture
+    ///     squeezed to eleven pixels across would be six grey smudges.
     /// </remarks>
     public class Grip : Element
     {
@@ -37,16 +37,18 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         protected override void DrawContent(IGraphics g)
         {
-            float width = Across * Square + (Across - 1) * Gap;
-            float height = Down * Square + (Down - 1) * Gap;
+            var width = Across * Square + (Across - 1) * Gap;
+            var height = Down * Square + (Down - 1) * Gap;
 
-            float left = ContentBounds.X + (ContentBounds.Width - width) * 0.5f;
-            float top = ContentBounds.Y + (ContentBounds.Height - height) * 0.5f;
+            var left = ContentBounds.X + (ContentBounds.Width - width) * 0.5f;
+            var top = ContentBounds.Y + (ContentBounds.Height - height) * 0.5f;
 
-            for (int x = 0; x < Across; x++)
-                for (int y = 0; y < Down; y++)
-                    g.DrawSprite(Solid, new RectangleF(
-                        left + x * (Square + Gap), top + y * (Square + Gap), Square, Square), Color, 0f);
+            for (var x = 0; x < Across; x++)
+            for (var y = 0; y < Down; y++)
+            {
+                g.DrawSprite(Solid, new RectangleF(
+                    left + x * (Square + Gap), top + y * (Square + Gap), Square, Square), Color, 0f);
+            }
         }
     }
 }

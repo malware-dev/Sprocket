@@ -7,30 +7,27 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 {
     /// <summary>
-    /// The game's own screen, as the one thing that touches its screen-space API.
+    ///     The game's own screen, as the one thing that touches its screen-space API.
     /// </summary>
     /// <remarks>
-    /// Every call the mod makes to <c>MyScreenSpace</c>, <c>MyScreenSpaceSprite</c> and
-    /// <c>MyScreenSpaceText</c> is here and nowhere else, so what the mod needs from the game's screen
-    /// can be read in one file - and so the harness can answer the same calls by writing them down.
+    ///     Every call the mod makes to <c>MyScreenSpace</c>, <c>MyScreenSpaceSprite</c> and
+    ///     <c>MyScreenSpaceText</c> is here and nowhere else, so what the mod needs from the game's screen
+    ///     can be read in one file - and so the harness can answer the same calls by writing them down.
     /// </remarks>
     public sealed class GameScreenSpace : IScreenSpace
     {
         /// <summary>
-        /// The scopes the game handed back, innermost last.
+        ///     The scopes the game handed back, innermost last.
         /// </summary>
         /// <remarks>
-        /// A typed list rather than <c>IDisposable</c>, because <c>MyScissorScope</c> is a struct and
-        /// one box per clipped element per frame is not a thing to pay for. Disposing a copy of one is
-        /// safe: it reads its two fields and pops.
+        ///     A typed list rather than <c>IDisposable</c>, because <c>MyScissorScope</c> is a struct and
+        ///     one box per clipped element per frame is not a thing to pay for. Disposing a copy of one is
+        ///     safe: it reads its two fields and pops.
         /// </remarks>
         readonly List<MyScreenSpace.MyScissorScope> _scissors =
             new List<MyScreenSpace.MyScissorScope>();
 
-        public RectangleF SafeArea
-        {
-            get { return MyScreenSpace.GetSafeGuiArea(); }
-        }
+        public RectangleF SafeArea => MyScreenSpace.GetSafeGuiArea();
 
         public Vector2 ViewportSize
         {
@@ -41,15 +38,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
                 if (MyAPIGateway.Session != null && MyAPIGateway.Session.Camera != null)
                     return MyAPIGateway.Session.Camera.ViewportSize;
 
-                RectangleF area = MyScreenSpace.GetSafeGuiArea();
+                var area = MyScreenSpace.GetSafeGuiArea();
                 return new Vector2(area.Width, area.Height);
             }
         }
 
         /// <remarks>
-        /// <b>Not verified in the game yet:</b> whether a scope is recorded into a buffered layer's
-        /// queue or applied when that queue replays. The harness honours it either way, and the demo
-        /// mod only exercises it inside a screen's own draw.
+        ///     <b>Not verified in the game yet:</b> whether a scope is recorded into a buffered layer's
+        ///     queue or applied when that queue replays. The harness honours it either way, and the demo
+        ///     mod only exercises it inside a screen's own draw.
         /// </remarks>
         public void PushScissor(Rectangle pixels, MyScreenSpaceLayer layer)
         {
@@ -58,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
         public void PopScissor(MyScreenSpaceLayer layer)
         {
-            int last = _scissors.Count - 1;
+            var last = _scissors.Count - 1;
             if (last < 0)
                 return;
 

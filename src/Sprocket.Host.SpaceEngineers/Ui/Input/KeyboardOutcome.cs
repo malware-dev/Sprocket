@@ -1,4 +1,3 @@
-
 // Two interfaces share this name. VRage.Input's is the engine's own and is not whitelisted; the mod-facing
 // one is what MyAPIGateway.Input hands back. Saying which removes an ambiguity that otherwise resolves to
 // the wrong one and fails only at the whitelist gate.
@@ -15,11 +14,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
         public bool Commit;
 
         /// <summary>
-        /// Move to the next field of a form.
+        ///     Move to the next field of a form.
         /// </summary>
         /// <remarks>
-        /// A form with three fields and no way off the first but the mouse is a form most people
-        /// will fill in one field and finish, which is exactly what happened.
+        ///     A form with three fields and no way off the first but the mouse is a form most people
+        ///     will fill in one field and finish, which is exactly what happened.
         /// </remarks>
         public bool Onward;
     }

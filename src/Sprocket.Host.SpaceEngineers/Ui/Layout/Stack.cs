@@ -1,26 +1,24 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>Puts its children in a line, down the screen or across it.</summary>
     /// <remarks>
-    /// Give it a <see cref="Element.Background" /> and it is a panel; set
-    /// <see cref="Element.ClipsContent" /> and it is the beginnings of a scrolling one.
+    ///     Give it a <see cref="Element.Background" /> and it is a panel; set
+    ///     <see cref="Element.ClipsContent" /> and it is the beginnings of a scrolling one.
     /// </remarks>
     public class Stack : Element
     {
-        private bool _horizontal;
-        private float _spacing;
-
-        private readonly ElementCollection _children;
+        bool _horizontal;
+        float _spacing;
 
         public Stack()
         {
-            _children = new ElementCollection(this);
+            Children = new ElementCollection(this);
         }
 
-        public ElementCollection Children => _children;
+        public ElementCollection Children { get; }
 
         /// <summary>Down the screen unless told otherwise, which is what a list of anything wants.</summary>
         public bool Horizontal
@@ -52,17 +50,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            float along = 0f;
-            float across = 0f;
-            bool placed = false;
+            var along = 0f;
+            var across = 0f;
+            var placed = false;
 
-            for (int i = 0; i < _children.Count; i++)
+            for (var i = 0; i < Children.Count; i++)
             {
-                Element child = _children[i];
+                var child = Children[i];
 
                 // Each child is offered what is left along the line and all of it across, so a child that
                 // wraps its text knows the width it has to wrap into.
-                Vector2 room = Horizontal
+                var room = Horizontal
                     ? new Vector2(available.X - along, available.Y)
                     : new Vector2(available.X, available.Y - along);
 
@@ -79,8 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
                 if (child.Collapsed)
                     continue;
 
-                float childAlong = Horizontal ? child.DesiredSize.X : child.DesiredSize.Y;
-                float childAcross = Horizontal ? child.DesiredSize.Y : child.DesiredSize.X;
+                var childAlong = Horizontal ? child.DesiredSize.X : child.DesiredSize.Y;
+                var childAcross = Horizontal ? child.DesiredSize.Y : child.DesiredSize.X;
 
                 if (placed)
                     along += Spacing;
@@ -97,12 +95,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         protected override void ArrangeContent(RectangleF bounds)
         {
-            float cursor = Horizontal ? bounds.X : bounds.Y;
-            bool placed = false;
+            var cursor = Horizontal ? bounds.X : bounds.Y;
+            var placed = false;
 
-            for (int i = 0; i < _children.Count; i++)
+            for (var i = 0; i < Children.Count; i++)
             {
-                Element child = _children[i];
+                var child = Children[i];
 
                 if (child.Collapsed)
                     continue;
@@ -118,8 +116,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
                     // height of the tallest. A row is a line of words and controls of different sizes -
                     // a switch beside a name, a light beside a sentence - and hanging the short ones from
                     // the top makes them read as superscript rather than as part of the line.
-                    float height = child.DesiredSize.Y;
-                    float y = height > 0f && height < bounds.Height
+                    var height = child.DesiredSize.Y;
+                    var y = height > 0f && height < bounds.Height
                         ? bounds.Y + (bounds.Height - height) * 0.5f
                         : bounds.Y;
 
@@ -140,13 +138,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         {
             // In the order they were added, so a later child covers an earlier one. Children that fell
             // outside are drawn anyway and cut by the clip, which is cheaper than working out which.
-            for (int i = 0; i < _children.Count; i++)
-                _children[i].Draw(g);
+            for (var i = 0; i < Children.Count; i++)
+                Children[i].Draw(g);
         }
 
         protected override Element UnderContent(Vector2 point)
         {
-            return OnTop(_children, point);
+            return OnTop(Children, point);
         }
     }
 }

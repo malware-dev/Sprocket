@@ -4,11 +4,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
 {
     /// <summary>Something that points at a place on the screen and can press it.</summary>
     /// <remarks>
-    /// The two targets produce this in completely different ways and nothing above this line should know
-    /// which. On screen the mouse drives it, and the game's look controls have to be taken away for the
-    /// duration; on a text panel the player's own gaze drives it, by pointing their head at the block, so
-    /// taking look away would remove the only means of aiming. That is why suspending look is an argument
-    /// somewhere rather than a rule everywhere.
+    ///     The two targets produce this in completely different ways and nothing above this line should know
+    ///     which. On screen the mouse drives it, and the game's look controls have to be taken away for the
+    ///     duration; on a text panel the player's own gaze drives it, by pointing their head at the block, so
+    ///     taking look away would remove the only means of aiming. That is why suspending look is an argument
+    ///     somewhere rather than a rule everywhere.
     /// </remarks>
     public interface IPointer
     {

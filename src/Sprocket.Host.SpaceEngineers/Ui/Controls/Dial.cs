@@ -1,30 +1,30 @@
 using System;
 using System.Globalization;
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>
-    /// Where an angle is chosen: a dial to turn, and what it is written as.
+    ///     Where an angle is chosen: a dial to turn, and what it is written as.
     /// </summary>
     /// <remarks>
-    /// Nought is straight up and the needle turns clockwise, the way the game turns a rotor clockwise.
-    /// Turning it past a whole turn carries on counting, to a whole turn either way, because a rotor
-    /// told to go round to minus ninety is not the same instruction as one told to go to two hundred
-    /// and seventy. The dial turns in whole degrees; the box takes whatever is typed into it.
-    /// <para>
-    /// How far it turns is the field's to say. A hinge goes no further than a quarter turn either way,
-    /// so its dial is the top half of one, from minus ninety on the left to ninety on the right.
-    /// </para>
-    /// <para>
-    /// The box is this control's own, and the question hands the caret to it in place of the field's,
-    /// as it does for a colour.
-    /// </para>
+    ///     Nought is straight up and the needle turns clockwise, the way the game turns a rotor clockwise.
+    ///     Turning it past a whole turn carries on counting, to a whole turn either way, because a rotor
+    ///     told to go round to minus ninety is not the same instruction as one told to go to two hundred
+    ///     and seventy. The dial turns in whole degrees; the box takes whatever is typed into it.
+    ///     <para>
+    ///         How far it turns is the field's to say. A hinge goes no further than a quarter turn either way,
+    ///         so its dial is the top half of one, from minus ninety on the left to ninety on the right.
+    ///     </para>
+    ///     <para>
+    ///         The box is this control's own, and the question hands the caret to it in place of the field's,
+    ///         as it does for a colour.
+    ///     </para>
     /// </remarks>
     public sealed class Dial
     {
@@ -37,21 +37,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         /// <summary>How much room the written angle takes: a sign, three digits, and the caret after them.</summary>
         const float WrittenWide = 5f * Sizes.Digit;
 
-        readonly Bar _root = new Bar();
         readonly Face _face = new Face();
-        readonly TextBox _written = Widgets.Box(Lettering.Small, Palette.Page);
 
+        readonly Bar _root = new Bar();
 
         float _degrees;
         float _most = Most;
-        bool _held;
 
         public Dial()
         {
-            _written.Trails = true;
+            Written.Trails = true;
 
             var held = new Sized(WrittenWide);
-            held.Content = _written;
+            held.Content = Written;
 
             // As wide as the dial and its box, so a line that puts it on the right can.
             _root.Spacing = Space.Item;
@@ -61,23 +59,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>What to put in the form.</summary>
-        public Element Root
-        {
-            get { return _root; }
-        }
+        public Element Root => _root;
 
         /// <summary>The box the angle is written in, which is where the question puts the caret.</summary>
-        public TextBox Written
-        {
-            get { return _written; }
-        }
+        public TextBox Written { get; } = Widgets.Box(Lettering.Small, Palette.Page);
+
+        /// <summary>Whether the dial is being turned right now.</summary>
+        public bool IsDragging { get; private set; }
 
         /// <summary>
-        /// Says how far the field lets the angle go either way, which decides the face it is drawn on.
+        ///     Says how far the field lets the angle go either way, which decides the face it is drawn on.
         /// </summary>
         /// <remarks>
-        /// The field's bounds as it writes them, either of which may be empty for "as far as the game
-        /// goes". Within a quarter turn both ways, it is drawn as the half of a dial it can reach.
+        ///     The field's bounds as it writes them, either of which may be empty for "as far as the game
+        ///     goes". Within a quarter turn both ways, it is drawn as the half of a dial it can reach.
         /// </remarks>
         public void Reach(string least, string most)
         {
@@ -95,33 +90,27 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                 : Most;
         }
 
-        /// <summary>Whether the dial is being turned right now.</summary>
-        public bool IsDragging
-        {
-            get { return _held; }
-        }
-
         /// <summary>Takes hold of the dial where it was pressed, and turns the needle there at once.</summary>
         public bool Grab(Vector2 point)
         {
             if (!_face.Holds(point))
                 return false;
 
-            _held = true;
+            IsDragging = true;
             Carry(point);
             return true;
         }
 
         /// <summary>
-        /// Turns the needle to follow the pointer, the short way from where it stands.
+        ///     Turns the needle to follow the pointer, the short way from where it stands.
         /// </summary>
         /// <remarks>
-        /// By how far the pointer moved round rather than by where it is, so going round twice
-        /// counts twice rather than landing back where it began.
+        ///     By how far the pointer moved round rather than by where it is, so going round twice
+        ///     counts twice rather than landing back where it began.
         /// </remarks>
         public void Carry(Vector2 point)
         {
-            if (!_held)
+            if (!IsDragging)
                 return;
 
             float pointing;
@@ -134,27 +123,27 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         public void Drop()
         {
-            _held = false;
+            IsDragging = false;
         }
 
         /// <summary>Lights the dial while the pointer rests on it, and all the while it is being turned.</summary>
         public void Lit(Vector2 point)
         {
-            _face.IsHot = _held || _face.Holds(point);
+            _face.IsHot = IsDragging || _face.Holds(point);
         }
 
         /// <summary>
-        /// Brings the needle into line with what has been typed into the box.
+        ///     Brings the needle into line with what has been typed into the box.
         /// </summary>
         /// <remarks>
-        /// Read every tick while the question is up, because the text is the one part somebody can
-        /// change without this control hearing about it. What cannot be read is left alone rather than
-        /// corrected, so a half-typed angle does not fight the person typing it.
+        ///     Read every tick while the question is up, because the text is the one part somebody can
+        ///     change without this control hearing about it. What cannot be read is left alone rather than
+        ///     corrected, so a half-typed angle does not fight the person typing it.
         /// </remarks>
         public void Reread()
         {
             float said;
-            if (float.TryParse(_written.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out said))
+            if (float.TryParse(Written.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out said))
             {
                 _degrees = Math.Max(-_most, Math.Min(_most, said));
                 _face.Degrees = _degrees;
@@ -162,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                 return;
             }
 
-            if (string.IsNullOrEmpty(_written.Text))
+            if (string.IsNullOrEmpty(Written.Text))
                 _face.Shows = false;
         }
 
@@ -172,8 +161,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             _face.Degrees = _degrees;
             _face.Shows = true;
             // An angle takes a fraction, so it reads as one even though the dial turns in whole degrees.
-            _written.Text = ((int)_degrees).ToString("0.0", CultureInfo.InvariantCulture);
-            _written.MoveCaretEnd(false);
+            Written.Text = ((int)_degrees).ToString("0.0", CultureInfo.InvariantCulture);
+            Written.MoveCaretEnd(false);
         }
 
         /// <summary>An angle brought into one turn, nought to three hundred and sixty.</summary>

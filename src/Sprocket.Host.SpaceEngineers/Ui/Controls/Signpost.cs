@@ -6,14 +6,14 @@ using Sprocket.Host.SpaceEngineers.Ui.Text;
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>
-    /// A word with an arrowhead beside it, saying where pressing it goes.
+    ///     A word with an arrowhead beside it, saying where pressing it goes.
     /// </summary>
     /// <remarks>
-    /// Two things rather than the word alone. A list of kinds is the only thing on a column that opens
-    /// downward, and an audience who have never used one finds the arrow before it reads anything.
-    /// <para>
-    /// The arrow trails the word, pointing at what pressing it is about to open.
-    /// </para>
+    ///     Two things rather than the word alone. A list of kinds is the only thing on a column that opens
+    ///     downward, and an audience who have never used one finds the arrow before it reads anything.
+    ///     <para>
+    ///         The arrow trails the word, pointing at what pressing it is about to open.
+    ///     </para>
     /// </remarks>
     public class Signpost : Stack
     {

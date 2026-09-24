@@ -1,46 +1,47 @@
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>
-    /// The box or circle at the head of a row somebody is choosing from.
+    ///     The box or circle at the head of a row somebody is choosing from.
     /// </summary>
     /// <remarks>
-    /// Square where several may be chosen and round where only one may, which is the one piece of this
-    /// screen borrowed from desktops rather than from the game. Space Engineers has a checkbox and no
-    /// radio button, because nothing in it asks a question that way; the shape still carries the answer
-    /// to "may I pick more than one of these", and that is worth more here than the consistency is.
-    /// <para>
-    /// The square is drawn and the circle is a sprite, for the same reason everything else here is one or
-    /// the other: a rectangle is exact at any size and a curve cannot be made of them.
-    /// </para>
+    ///     Square where several may be chosen and round where only one may, which is the one piece of this
+    ///     screen borrowed from desktops rather than from the game. Space Engineers has a checkbox and no
+    ///     radio button, because nothing in it asks a question that way; the shape still carries the answer
+    ///     to "may I pick more than one of these", and that is worth more here than the consistency is.
+    ///     <para>
+    ///         The square is drawn and the circle is a sprite, for the same reason everything else here is one or
+    ///         the other: a rectangle is exact at any size and a curve cannot be made of them.
+    ///     </para>
     /// </remarks>
     public class Mark : Element
     {
         readonly Glyph _glyph = Widgets.Centred(Symbols.Ring, Palette.Faint);
+
+        bool _chosen;
+        Color _color;
+
+        /// <summary>Whether more than one of the rows this heads may be chosen.</summary>
+        bool _many;
 
         public Mark()
         {
             Color = Palette.Faint;
         }
 
-        /// <summary>Whether more than one of the rows this heads may be chosen.</summary>
-        private bool _many;
-        private bool _chosen;
-        private Color _color;
-
         /// <summary>
-        /// Whether this is one of several that can be held at once.
+        ///     Whether this is one of several that can be held at once.
         /// </summary>
         /// <remarks>
-        /// Asks for a new measure when it changes, as do the two below it. Which glyph this is gets
-        /// decided in <see cref="MeasureContent" /> - it has to be, because a glyph centres itself
-        /// against the line it was measured with - so a change that does not ask for a measure is a
-        /// change that never reaches the screen.
+        ///     Asks for a new measure when it changes, as do the two below it. Which glyph this is gets
+        ///     decided in <see cref="MeasureContent" /> - it has to be, because a glyph centres itself
+        ///     against the line it was measured with - so a change that does not ask for a measure is a
+        ///     change that never reaches the screen.
         /// </remarks>
         public bool Many
         {
@@ -89,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             // several - and a glyph arranged without having been measured centres itself against nothing.
             // That was worth an hour: the ring drew low and to the right of where it belonged, which
             // reads as bad artwork rather than as a missed call.
-            _glyph.Symbol = Many ? Symbols.Check : (Chosen ? Symbols.Disc : Symbols.Ring);
+            _glyph.Symbol = Many ? Symbols.Check : Chosen ? Symbols.Disc : Symbols.Ring;
             _glyph.Scale = Many ? Lettering.Symbol * 0.58f : Lettering.Symbol;
 
             // A ring stands beside the words of its choice, so it is lifted the way any symbol beside a
@@ -113,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                 return;
             }
 
-            RectangleF box = new RectangleF(
+            var box = new RectangleF(
                 ContentBounds.X + (ContentBounds.Width - Sizes.Mark) * 0.5f,
                 ContentBounds.Y + (ContentBounds.Height - Sizes.Mark) * 0.5f,
                 Sizes.Mark, Sizes.Mark);
