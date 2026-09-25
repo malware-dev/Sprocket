@@ -28,6 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
         /// <summary>Each font's line height at a scale of one, in UI units, asked of the game once a font.</summary>
         readonly Dictionary<string, float> _lines = new Dictionary<string, float>();
+
+        /// <summary>Nothing, measured to find how tall a line the game draws.</summary>
+        readonly StringBuilder _nothing = new StringBuilder();
         readonly MyScreenSpaceLayer _layer;
         readonly float _referenceHeight;
 
@@ -167,6 +170,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         }
 
         /// <summary>The scale that draws <paramref name="font" /> with lines <paramref name="size" /> tall.</summary>
+        /// <remarks>
+        ///     The line is measured rather than asked for: the game's <c>MyScreenSpaceText.GetLineHeight</c> leaves out
+        ///     the <c>FONT_SCALE</c> its drawing and measuring apply, and so answers 37/28.8 of the line it draws.
+        /// </remarks>
         float ScaleOf(string font, float size)
         {
             if (!ReferenceEquals(font, _lastFont))
@@ -174,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
                 float line;
                 if (!_lines.TryGetValue(font, out line))
                 {
-                    line = _screenSpace.LineHeight(font, _fontScale) / _scale;
+                    line = _screenSpace.MeasureText(font, _nothing, _fontScale).Y / _scale;
                     _lines[font] = line;
                 }
 

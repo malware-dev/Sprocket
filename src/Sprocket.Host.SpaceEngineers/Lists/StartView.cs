@@ -1,76 +1,62 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Controls;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
-    /// <summary>
-    /// The ways to start something new.
-    /// </summary>
-    /// <remarks>
-    /// Everything in here adds something, so everything in here gets a plus. Core does not spell that
-    /// into the labels - it says these are the ways to start something, which is already the whole of the
-    /// claim - and drawing it as a plus is this target agreeing with the other one.
-    /// <para>
-    /// A line closes the block off, because what follows is a different kind of thing: above is what can
-    /// be added, below is what is already there.
-    /// </para>
-    /// </remarks>
+    /// <summary>The ways to start something new, as a row of buttons with a line closing them off.</summary>
+    /// <remarks>Core's labels carry no plus; this target draws one on everything that adds.</remarks>
     public sealed class StartView : ComponentView
     {
+        /// <summary>What goes before the words of anything that adds.</summary>
         public const string Plus = "+ ";
 
         readonly StartComponent _component;
-        readonly Stack _stack = Widgets.Column(Space.Row);
-
-        /// <summary>
-        /// The buttons themselves, in a row of their own.
-        /// </summary>
-        /// <remarks>
-        /// A row rather than a column, so each one is as wide as its words: the same button that adds a
-        /// step to a sentence, laid out the same way. Full-width rows read as a list of places to go,
-        /// which is what the things underneath the line are.
-        /// </remarks>
-        readonly Stack _buttons = Widgets.RowOf(Space.Item);
-        readonly List<Label> _rows = new List<Label>();
-        readonly Rule _line = Widgets.Line();
+        readonly VStack _stack;
+        readonly HStack _buttons;
+        readonly List<Button> _rows = new List<Button>();
 
         int _count = -1;
 
+        /// <summary>A view of <paramref name="component" />.</summary>
         public StartView(StartComponent component)
         {
             _component = component;
+
+            _stack = new VStack
+            {
+                Children =
+                {
+                    new HStack { Spacing = 8f }.As(out _buttons),
+                    new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }
+                }
+            };
         }
 
-        /// <summary>
-        /// Told rather than asked. A page writes these once, when it builds the block, and a screen
-        /// that offers different ways to start something is a different screen with a new component.
-        /// </summary>
+        /// <summary>Told rather than asked: a page writes its ways to start once, when it builds the block.</summary>
         protected override bool Stale
         {
             get { return false; }
         }
 
+        /// <inheritdoc />
         public override Element Root
         {
             get { return _stack; }
         }
 
+        /// <inheritdoc />
         protected override void Refresh()
         {
             Rebuild();
 
-            // The row is what the question hangs under, which is why nothing here has to be told
-            // where to put one.
-            for (int i = 0; i < _rows.Count && i < _component.Options.Count; i++)
+            for (var i = 0; i < _rows.Count && i < _component.Options.Count; i++)
             {
-                StartOption option = _component.Options[i];
+                var option = _component.Options[i];
                 _rows[i].Press = Deed.Asks(option.Command, option.Question);
             }
         }
@@ -82,31 +68,18 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             _count = _component.Options.Count;
             _rows.Clear();
-
-            for (int i = 0; i < _component.Options.Count; i++)
-            {
-                StartOption option = _component.Options[i];
-
-                // An ellipsis on the ones that will ask something, which is the convention every desktop
-                // already uses for "this opens a question rather than doing it".
-                //
-                // The same button that adds a step to a sentence, at this screen's size: adding a system
-                // and adding a step are one act, and a filled panel here said they were two.
-                _rows.Add(Widgets.Way(Plus + option.Label + (option.Asks ? "…" : "")));
-            }
-
-            // Closer to the buttons than to what is under it, because the line is what ends them.
-            // Even air on both sides put the line further below the buttons than the first row was
-            // below the line, which reads as the buttons sitting in a box of their own.
-            _line.Padding = new Thickness(0f, Space.Line, 0f, Space.Item);
-
             _buttons.Children.Clear();
-            for (int i = 0; i < _rows.Count; i++)
-                _buttons.Children.Add(_rows[i]);
 
-            _stack.Children.Clear();
-            _stack.Children.Add(_buttons);
-            _stack.Children.Add(_line);
+            for (var i = 0; i < _component.Options.Count; i++)
+            {
+                var option = _component.Options[i];
+
+                // The ellipsis is the desktop convention for a button that asks something before it acts.
+                var button = new Button { Style = Styles.Way, Text = Plus + option.Label + (option.Asks ? "…" : "") };
+
+                _rows.Add(button);
+                _buttons.Children.Add(button);
+            }
         }
     }
 }

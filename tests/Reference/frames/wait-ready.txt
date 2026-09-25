@@ -7,34 +7,34 @@ on screen     How long should it wait?
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:121 W:1402 H:832}
 002  Sprite     Sprocket_Fill         {X:259 Y:121 W:1390 H:52}  #29363EFF
-003  Text       at {X:278 Y:135.192} scale 0.64  #DCF5FDFF  "1 second - 60 ticks"
+003  Text       at {X:278 Y:135.192} scale 0.822  #DCF5FDFF  "1 second - 60 ticks"
 004  Sprite     Sprocket_Fill         {X:259 Y:179 W:1390 H:52}  #29363EFF
-005  Text       at {X:278 Y:192.872} scale 0.64  #DCF5FDFF  "2 seconds - 120 ticks"
+005  Text       at {X:278 Y:192.872} scale 0.822  #DCF5FDFF  "2 seconds - 120 ticks"
 006  Sprite     Sprocket_Fill         {X:259 Y:237 W:1390 H:52}  #29363EFF
-007  Text       at {X:278 Y:250.552} scale 0.64  #DCF5FDFF  "5 seconds - 300 ticks"
+007  Text       at {X:278 Y:250.552} scale 0.822  #DCF5FDFF  "5 seconds - 300 ticks"
 008  Sprite     Sprocket_Fill         {X:259 Y:294 W:1390 H:52}  #29363EFF
-009  Text       at {X:278 Y:308.232} scale 0.64  #DCF5FDFF  "10 seconds - 600 ticks"
+009  Text       at {X:278 Y:308.232} scale 0.822  #DCF5FDFF  "10 seconds - 600 ticks"
 010  Sprite     Sprocket_Fill         {X:259 Y:352 W:1390 H:52}  #29363EFF
-011  Text       at {X:278 Y:365.912} scale 0.64  #DCF5FDFF  "30 seconds - 1800 ticks"
+011  Text       at {X:278 Y:365.912} scale 0.822  #DCF5FDFF  "30 seconds - 1800 ticks"
 012  Sprite     Sprocket_Fill         {X:259 Y:410 W:1390 H:52}  #29363EFF
-013  Text       at {X:278 Y:423.5919} scale 0.64  #DCF5FDFF  "a minute - 3600 ticks"
+013  Text       at {X:278 Y:423.5919} scale 0.822  #DCF5FDFF  "a minute - 3600 ticks"
 014  Sprite     Sprocket_Fill         {X:259 Y:467 W:1390 H:67}  #29363EFF
 015  Sprite     Sprocket_Fill         {X:278 Y:481 W:1269 H:39}  #141B20FF
 016  Sprite     Sprocket_Fill         {X:278 Y:481 W:1269 H:1}  #5B737BFF
 017  Sprite     Sprocket_Fill         {X:278 Y:520 W:1269 H:1}  #5B737BFF
 018  Sprite     Sprocket_Fill         {X:278 Y:481 W:1 H:39}  #5B737BFF
 019  Sprite     Sprocket_Fill         {X:1546 Y:481 W:1 H:39}  #5B737BFF
-020  Text       at {X:290.8 Y:489.0719} scale 0.64  #DCF5FDFF  "90"
+020  Text       at {X:290.8 Y:489.0719} scale 0.822  #DCF5FDFF  "90"
 021  Sprite     Sprocket_Fill         {X:310 Y:489 W:2 H:24}  #DCF5FDFF
 022  Sprite     Sprocket_Fill         {X:1566 Y:483 W:64 H:37}  #8EBCCFFF
-023  Text       at {X:1585.087 Y:490.3669} scale 0.57  #1B242AFF  "Use"
+023  Text       at {X:1585.087 Y:490.3669} scale 0.732  #1B242AFF  "Use"
 024  ClearClip  
 025  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 026  SetClip    {X:301 Y:56 W:273 H:33}
-027  Text       at {X:301.48 Y:56.30198} scale 0.9  #DCF5FDFF  "How long should it wait?"
+027  Text       at {X:300.91 Y:56.30198} scale 1.156  #DCF5FDFF  "How long should it wait?"
 028  ClearClip  
-029  Text       at {X:259 Y:50.22493} scale 0.57  #A2C3CDFF  "<"
-030  Text       at {X:1624.52 Y:50.22493} scale 0.57  #A2C3CDFF  "s"
+029  Text       at {X:259 Y:50.22493} scale 0.732  #A2C3CDFF  "<"
+030  Text       at {X:1625.09 Y:50.22493} scale 0.732  #A2C3CDFF  "s"
 031  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 032  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 033  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

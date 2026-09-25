@@ -1,0 +1,37 @@
+namespace Sprocket.Host.SpaceEngineers.Ui.Styling
+{
+    /// <summary>How a symbol looks, and how it changes while hot and while it cannot be used.</summary>
+    /// <remarks>Laid in that order, so a disabled symbol looks disabled whatever else it is.</remarks>
+    public sealed class GlyphStyle : Style<GlyphState>
+    {
+        /// <summary>A style with nothing set, which applies as the neutral values.</summary>
+        public GlyphStyle()
+        {
+            Hot = Layer();
+            Disabled = Layer();
+        }
+
+        /// <summary>A style starting from a copy of everything <paramref name="basedOn" /> sets.</summary>
+        public GlyphStyle(GlyphStyle basedOn) : base(basedOn)
+        {
+            Hot = Layer();
+            Disabled = Layer();
+        }
+
+        /// <summary>What changes while a press would reach the symbol.</summary>
+        public GlyphState Hot { get; }
+
+        /// <summary>What changes while the symbol cannot be used.</summary>
+        public GlyphState Disabled { get; }
+
+        /// <inheritdoc />
+        protected override void LayStates(Element element)
+        {
+            if (element.IsHot)
+                Lay(Hot, element);
+
+            if (!element.IsEnabled)
+                Lay(Disabled, element);
+        }
+    }
+}

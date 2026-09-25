@@ -19,7 +19,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>What the held size was measured from, so it is only measured again when it moves.</summary>
         string _sizedFor;
 
+        string _font = Symbols.Font;
         string _symbol;
+
+        /// <summary>A glyph with no symbol, in the neutral look.</summary>
+        public Glyph()
+        {
+        }
 
         /// <summary>A glyph drawing <paramref name="symbol" /> at <paramref name="fontSize" />, tinted <paramref name="tint" />.</summary>
         public Glyph(string symbol, float fontSize, Color tint)
@@ -27,6 +33,21 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             Symbol = symbol;
             FontSize = fontSize;
             Tint = tint;
+        }
+
+        /// <summary>Which font the symbol is drawn from.</summary>
+        public string Font
+        {
+            get { return _font; }
+            set
+            {
+                if (_font == value)
+                    return;
+
+                _font = value;
+                _sizedAt = -1f;
+                InvalidateMeasure();
+            }
         }
 
         /// <summary>Which symbol, as one of the constants on <see cref="Symbols" />.</summary>
@@ -93,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             _size = _measuring.Length == 0
                 ? Vector2.Zero
-                : g.MeasureText(Symbols.Font, _measuring, FontSize);
+                : g.MeasureText(_font, _measuring, FontSize);
 
             // Set while measuring because the lift is a fraction of a height only measuring knows.
             Offset = new Vector2(Offset.X, -_size.Y * _lift);
@@ -108,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 return;
 
             var room = ContentBounds;
-            g.DrawText(Symbols.Font, _symbol, new Vector2(
+            g.DrawText(_font, _symbol, new Vector2(
                 room.X + (room.Width - _size.X) * 0.5f,
                 room.Y + (room.Height - _size.Y) * 0.5f), FontSize, Tint);
         }

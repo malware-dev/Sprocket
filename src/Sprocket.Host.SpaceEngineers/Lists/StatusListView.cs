@@ -4,7 +4,6 @@ using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Controls;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
@@ -12,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     public sealed class StatusListView : ComponentView
     {
         readonly StatusListComponent _component;
-        readonly Stack _stack = Widgets.Column(Space.Row);
+        readonly VStack _stack = new VStack { Spacing = 8f };
         readonly List<StatusRow> _rows = new List<StatusRow>();
 
         int _revision = -1;
@@ -78,8 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 if (_component.EmptyText.Length == 0)
                     return;
 
-                _empty = Widgets.Label(_component.EmptyText, Palette.Muted, Lettering.Small);
-                _empty.Padding = new Thickness(Space.Row, Space.Row, 0f, 0f);
+                _empty = new Label { Style = Styles.Empty, Wraps = true, Text = _component.EmptyText };
                 _stack.Children.Add(_empty);
                 return;
             }

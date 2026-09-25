@@ -12,24 +12,24 @@ on screen     When something happens
 005  Sprite     Sprocket_Fill         {X:259 Y:121 W:1 H:820}  #5B737BFF
 006  Sprite     Sprocket_Fill         {X:718 Y:121 W:1 H:820}  #5B737BFF
 007  SetClip    {X:275 Y:301 W:428 H:625}
-008  Text       at {X:378.8 Y:315.652} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
-009  Text       at {X:378.8 Y:341.132} scale 0.5  #85A1A9FF  "Door   shut"
+008  Text       at {X:378.8 Y:315.652} scale 0.822  #DCF5FDFF  "Airlock Inner Door"
+009  Text       at {X:378.8 Y:341.132} scale 0.642  #85A1A9FF  "Door   shut"
 010  Sprite     Sprocket_Fill         {X:288 Y:329 W:17 H:1}  #85A1A9FF
 011  Sprite     Sprocket_Fill         {X:288 Y:345 W:17 H:1}  #85A1A9FF
 012  Sprite     Sprocket_Fill         {X:288 Y:329 W:1 H:17}  #85A1A9FF
 013  Sprite     Sprocket_Fill         {X:304 Y:329 W:1 H:17}  #85A1A9FF
 014  Sprite     Sprocket_Fill         {X:315 Y:311 W:54 H:54}  #374851FF
 015  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:311 W:54 H:54}  #FFFFFFFF
-016  Text       at {X:378.8 Y:391.852} scale 0.64  #DCF5FDFF  "Airlock Outer Door"
-017  Text       at {X:378.8 Y:417.332} scale 0.5  #85A1A9FF  "Door   shut"
+016  Text       at {X:378.8 Y:391.852} scale 0.822  #DCF5FDFF  "Airlock Outer Door"
+017  Text       at {X:378.8 Y:417.332} scale 0.642  #85A1A9FF  "Door   shut"
 018  Sprite     Sprocket_Fill         {X:288 Y:405 W:17 H:1}  #85A1A9FF
 019  Sprite     Sprocket_Fill         {X:288 Y:421 W:17 H:1}  #85A1A9FF
 020  Sprite     Sprocket_Fill         {X:288 Y:405 W:1 H:17}  #85A1A9FF
 021  Sprite     Sprocket_Fill         {X:304 Y:405 W:1 H:17}  #85A1A9FF
 022  Sprite     Sprocket_Fill         {X:315 Y:387 W:54 H:54}  #374851FF
 023  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:387 W:54 H:54}  #FFFFFFFF
-024  Text       at {X:378.8 Y:468.052} scale 0.64  #DCF5FDFF  "Hangar Door"
-025  Text       at {X:378.8 Y:493.532} scale 0.5  #85A1A9FF  "Hangar Door   shut"
+024  Text       at {X:378.8 Y:468.052} scale 0.822  #DCF5FDFF  "Hangar Door"
+025  Text       at {X:378.8 Y:493.532} scale 0.642  #85A1A9FF  "Hangar Door   shut"
 026  Sprite     Sprocket_Fill         {X:288 Y:482 W:17 H:1}  #85A1A9FF
 027  Sprite     Sprocket_Fill         {X:288 Y:498 W:17 H:1}  #85A1A9FF
 028  Sprite     Sprocket_Fill         {X:288 Y:482 W:1 H:17}  #85A1A9FF
@@ -37,26 +37,26 @@ on screen     When something happens
 030  Sprite     Sprocket_Fill         {X:315 Y:463 W:54 H:54}  #374851FF
 031  Sprite     MyObjectBuilder_AirtightHangarDoor/AirtightHangarDoor{X:315 Y:463 W:54 H:54}  #FFFFFFFF
 032  SetClip    {X:259 Y:121 W:1402 H:832}
-033  Text       at {X:275 Y:137.192} scale 0.64  #DCF5FDFF  "BLOCKS"
-034  Text       at {X:275 Y:166.872} scale 0.5  #85A1A9FF  "none picked"
+033  Text       at {X:275 Y:137.192} scale 0.822  #DCF5FDFF  "BLOCKS"
+034  Text       at {X:275 Y:166.872} scale 0.642  #85A1A9FF  "none picked"
 035  Sprite     Sprocket_Fill         {X:275 Y:191 W:428 H:37}  #141B20FF
 036  Sprite     Sprocket_Fill         {X:275 Y:191 W:428 H:1}  #5B737BFF
 037  Sprite     Sprocket_Fill         {X:275 Y:227 W:428 H:1}  #5B737BFF
 038  Sprite     Sprocket_Fill         {X:275 Y:191 W:1 H:37}  #5B737BFF
 039  Sprite     Sprocket_Fill         {X:702 Y:191 W:1 H:37}  #5B737BFF
-040  Text       at {X:287.8 Y:199.172} scale 0.57  #DCF5FDFF  "door"
+040  Text       at {X:287.8 Y:199.172} scale 0.732  #DCF5FDFF  "door"
 041  Sprite     Sprocket_Fill         {X:321 Y:199 W:2 H:21}  #DCF5FDFF
-042  Text       at {X:660.12 Y:191.4771} scale 0.57  #85A1A9FF  "x"
-043  Text       at {X:287.8 Y:241.757} scale 0.57  #A2C3CDFF  "Anything"
-044  Text       at {X:369.97 Y:229.575} scale 0.57  #A2C3CDFF  "v"
-045  Text       at {X:275 Y:276.5421} scale 0.5  #85A1A9FF  "3 of 14"
+042  Text       at {X:660.69 Y:191.4771} scale 0.732  #85A1A9FF  "x"
+043  Text       at {X:287.8 Y:241.757} scale 0.732  #A2C3CDFF  "Anything"
+044  Text       at {X:369.97 Y:229.575} scale 0.732  #A2C3CDFF  "v"
+045  Text       at {X:275 Y:276.5421} scale 0.642  #85A1A9FF  "3 of 14"
 046  ClearClip  
 047  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 048  SetClip    {X:301 Y:56 W:290 H:33}
-049  Text       at {X:301.48 Y:56.30198} scale 0.9  #DCF5FDFF  "When something happens"
+049  Text       at {X:300.91 Y:56.30198} scale 1.156  #DCF5FDFF  "When something happens"
 050  ClearClip  
-051  Text       at {X:259 Y:50.22493} scale 0.57  #A2C3CDFF  "<"
-052  Text       at {X:1624.52 Y:50.22493} scale 0.57  #A2C3CDFF  "s"
+051  Text       at {X:259 Y:50.22493} scale 0.732  #A2C3CDFF  "<"
+052  Text       at {X:1625.09 Y:50.22493} scale 0.732  #A2C3CDFF  "s"
 053  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 054  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 055  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

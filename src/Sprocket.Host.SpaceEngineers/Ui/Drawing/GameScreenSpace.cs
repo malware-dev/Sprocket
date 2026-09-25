@@ -76,14 +76,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         }
 
         /// <inheritdoc />
-        public float LineHeight(string font, float scale)
-        {
-            // GetLineHeight answers in normalized units, and everything on this interface is pixels.
-            return MyScreenSpace.NormalizedSizeToPixels(
-                new Vector2(0f, MyScreenSpaceText.GetLineHeight(font, scale))).Y;
-        }
-
-        /// <inheritdoc />
         public bool TryCursorPixels(out Vector2 pixels)
         {
             return MyScreenSpace.TryGetCursorPositionPixels(out pixels);

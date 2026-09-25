@@ -15,6 +15,9 @@
         <RootNamespace>Sprocket.Sim</RootNamespace>
         <AssemblyName>Sprocket.Host.SpaceEngineers.Sim</AssemblyName>
         <Platforms>x64</Platforms>
+
+        <!-- Picks DirectXTexNet's 64-bit native half, which the game's 64-bit assemblies need. -->
+        <PlatformTarget>x64</PlatformTarget>
         <Configurations>Debug;Release</Configurations>
 
         <!-- "annotations" rather than "enable": the syntax is understood, and no warnings are raised

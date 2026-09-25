@@ -160,7 +160,7 @@ sealed class Screen
     /// is the whole of what lining a heading up with the mark beside it means.
     /// </remarks>
     public float MiddleOf(Drawn drawing) =>
-        drawing.At.Y + _frame.LineHeight(drawing.Font, drawing.Scale) / 2f;
+        drawing.At.Y + _frame.LineHeight(drawing.Font, drawing.Scale) * Sim.Content.SeFontMetrics.FontScale / 2f;
 
     /// <summary>
     /// A point the frame reported, in the units a script presses in.

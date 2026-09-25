@@ -95,7 +95,18 @@ The framework decides only two states about any element: hot, being what a press
 enabled. A state that only the application knows, such as a button waiting to be ready, is a different
 style the view assigns.
 
-A control is composed rather than derived: a button has a label, and is not one.
+A style is for a control's own look and its own states, and each kind of a control, such as a default
+and a cancel button, is a style of its own. A value that carries the application's data,
+such as a state light's colour or the colour of a warning, is set on the element directly over a
+default style. A separate style earns its place only where it saves setting many properties at once;
+for one or two it is overkill.
+
+A control is composed rather than derived: a button has a label, and is not one. A control's style
+styles the parts it owns, so a button's style sets its own label's font, size and colour in each of
+its states. Nothing is inherited from what an element sits in.
+
+Any element can be pressed, by being given a press. `Button` is one control among others, with text
+of its own, not the only thing that answers a press.
 
 ## Text
 
@@ -126,8 +137,6 @@ controls in the meantime moves onto it.
 - The name of the `As` extension.
 - What a property the view sets on an element does when a style's state later changes the same
   property: whether the state wins, or the view's value is kept.
-- How a control's state reaches what it contains, such as a disabled button dimming its label: the
-  button's style setting its content's text colour, or text colour flowing down to what it holds.
 - What `Bar` still does that HStack does not, before the last of them fold in: `Tight`, where the
   middle may shrink but the bar reports only what its parts need, and `Tops`, where the parts sit
   along the top rather than on the middle.

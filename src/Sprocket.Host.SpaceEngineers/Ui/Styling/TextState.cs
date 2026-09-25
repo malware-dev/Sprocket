@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
     public class TextState : ElementState
     {
         /// <summary>How tall a line is when a style leaves it to the neutral values.</summary>
-        const float NeutralFontSize = 24f;
+        internal const float NeutralFontSize = 24f;
 
         Color? _color;
         string _font;
@@ -53,12 +53,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             base.Neutral(element);
 
             var label = element as Label;
-            if (label == null)
-                return;
-
-            label.Font = MyFontEnum.White;
-            label.FontSize = NeutralFontSize;
-            label.Color = VRageMath.Color.White;
+            if (label != null)
+                NeutralText(label);
         }
 
         /// <inheritdoc />
@@ -67,9 +63,21 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             base.Lay(element);
 
             var label = element as Label;
-            if (label == null)
-                return;
+            if (label != null)
+                LayText(label);
+        }
 
+        /// <summary>Writes the text values every style starts from onto <paramref name="label" />.</summary>
+        internal static void NeutralText(Label label)
+        {
+            label.Font = MyFontEnum.White;
+            label.FontSize = NeutralFontSize;
+            label.Color = VRageMath.Color.White;
+        }
+
+        /// <summary>Writes what this state sets about text onto <paramref name="label" />, and nothing else.</summary>
+        internal void LayText(Label label)
+        {
             if (_font != null)
                 label.Font = _font;
 

@@ -273,7 +273,7 @@ public class ReachTests
             if (found.Press.Means == Means.Nothing || found.Press.Means == Means.Type)
                 continue;
 
-            if (found.Highlight.A > 0 || found.HighlightEdge.A > 0)
+            if (Lights(found))
                 continue;
 
             var said = found.GetType().Name + " " + found.Press.Means + " at " + found.Bounds;
@@ -283,6 +283,23 @@ public class ReachTests
 
         Assert.True(dark.Count == 0,
             $"at {where}, these answer a press and cannot be lit: " + string.Join(", ", dark));
+    }
+
+    /// <summary>Whether being under the pointer changes how <paramref name="element" /> is filled or edged.</summary>
+    static bool Lights(Element element)
+    {
+        if (element.Highlight.A > 0 || element.HighlightEdge.A > 0)
+            return true;
+
+        var was = element.IsHot;
+        var fill = element.Background.PackedValue;
+        var edge = element.Edge.PackedValue;
+
+        element.IsHot = !was;
+        var changed = element.Background.PackedValue != fill || element.Edge.PackedValue != edge;
+        element.IsHot = was;
+
+        return changed;
     }
 
     /// <summary>Everything the pointer can reach, by asking at every point on the screen.</summary>

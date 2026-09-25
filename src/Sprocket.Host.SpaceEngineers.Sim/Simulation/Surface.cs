@@ -519,27 +519,24 @@ namespace Sprocket.Sim.Simulation
             }
         }
 
-        /// <summary>
-        /// Draws a run out of the game's own font page, one glyph at a time.
-        /// </summary>
+        /// <summary>Draws a run out of its font page, one glyph at a time, where the game's renderer puts each.</summary>
         /// <remarks>
-        /// Deliberately walked the same way <see cref="SeFontMetrics.WidthInUnits" /> walks it - kern
-        /// first, then advance, then the game's per-character spacing - because the two answering
-        /// differently is the one failure that would be invisible. A layout is measured by that method
-        /// and drawn by this one, and a run that measured one width and drew another would look like a
-        /// wrapping bug for as long as it took somebody to suspect the font.
+        ///     The game rounds the run's start up to a whole pixel, then places each cell at the pen plus the
+        ///     glyph's bearing across, and at the line's top plus <see cref="SeFontMetrics.CellTop" /> down.
+        ///     Walked as <see cref="SeFontMetrics.MeasurePixels" /> walks, so a run draws as wide as it measures.
         /// </remarks>
         bool DrawGlyphs(DrawingContext context, DrawCommand command, string text,
             SeFontMetrics metrics, GlyphAtlas atlas)
         {
-            float unit = metrics.EffectiveScale(command.Scale);
+            float unit = metrics.DrawScale(command.Scale);
             if (unit <= 0f)
                 return false;
 
             BitmapSource page = atlas.Tinted(command.Color.R, command.Color.G, command.Color.B);
 
-            double pen = command.Position.X;
-            double top = command.Position.Y + metrics.CellTop * unit;
+            double start = Math.Ceiling(command.Position.X);
+            double pen = start;
+            double top = Math.Ceiling(command.Position.Y);
             char previous = '\0';
 
             // The whole run's alpha at once, rather than a paler tint per colour: the page is already a
@@ -555,26 +552,33 @@ namespace Sprocket.Sim.Simulation
                 {
                     char c = text[i];
 
-                    SeFontMetrics.Glyph glyph;
-                    if (!metrics.TryGlyph(c, out glyph) && !metrics.TryReplacement(out glyph))
+                    if (c == SeFontMetrics.Newline)
                     {
-                        previous = c;
+                        pen = start;
+                        top += metrics.FontLineHeight * unit;
+                        previous = '\0';
                         continue;
                     }
 
-                    if (previous != '\0')
-                        pen += metrics.Kerning(previous, c) * unit;
+                    SeFontMetrics.Glyph glyph;
+                    if (!metrics.TryDrawn(c, out glyph))
+                        continue;
+
+                    pen += metrics.Kerning(previous, c) * unit;
+                    previous = c;
 
                     if (glyph.Width > 0 && glyph.Height > 0)
                     {
-                        var destination = new Rect(
-                            pen + glyph.Bearing * unit, top, glyph.Width * unit, glyph.Height * unit);
+                        var destination = new Rect(pen + glyph.Bearing * unit,
+                            top + SeFontMetrics.CellTop(glyph) * unit, glyph.Width * unit, glyph.Height * unit);
 
                         Cell(context, page, glyph, destination);
                     }
 
-                    pen += (glyph.Advance + SeFontMetrics.Spacing) * unit;
-                    previous = c;
+                    pen += glyph.Advance * unit;
+
+                    if (i < text.Length - 1)
+                        pen += SeFontMetrics.Spacing * unit;
                 }
             }
             finally

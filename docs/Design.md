@@ -845,23 +845,6 @@ there being a second host, so neither is reopened by there not being one.
 Nothing to do now. The one thing to avoid is a mechanism adopted halfway: ids for some strings and
 literals for the rest is worse than literals everywhere, because it reads as finished.
 
-## Text sits a little high, and one number is why
-
-Every line of text in the editor draws a touch above where it should. It appeared when `Label`
-started reporting a line rather than a glyph cell, which is the correct answer to what a label
-occupies - the game's own face is a 37-unit line made of 45-unit cells, and a label that claimed
-45 was lying about its own drawing. So the measuring is right and the *placing* is what is out.
-
-The suspect is `SeFontMetrics.GlyphBaselineInCell`, currently 35. **That number is not in the
-font file.** `FontDataPA.xml` declares the line - `base="30" height="37"` - and the cell size per
-glyph, and says nothing about where a glyph's own baseline sits inside its cell. 35 was derived,
-and everything vertical hangs off it: `CellTop` is `base - GlyphBaselineInCell`, so being wrong
-by one unit moves every glyph in the interface by one.
-
-Pin it from the game rather than deriving it again. Left alone deliberately for now: it is a
-single number, it is wrong by a small amount, and guessing at it a third time is how the last
-two attempts went.
-
 *The editor's own interface has been worked over hard, and `docs/Editor.md` is where that
 lives rather than here. The load-bearing conclusions: narrowing runs one way only, one trip
 through a picker is one edit, a system cannot be rewired while it runs, and a running

@@ -40,10 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
             MyGuiDrawAlignEnum align, float maxWidth, MyScreenSpaceLayer layer);
 
         /// <summary>How big this run would be, in pixels.</summary>
+        /// <remarks>An empty run measures as one line, as tall as the game draws a line.</remarks>
         Vector2 MeasureText(string font, StringBuilder text, float scale);
-
-        /// <summary>How tall a line of this font stands, in pixels, including leading.</summary>
-        float LineHeight(string font, float scale);
 
         /// <summary>Where the pointer is in pixels, or false where the game is not showing one.</summary>
         bool TryCursorPixels(out Vector2 pixels);

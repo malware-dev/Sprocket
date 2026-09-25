@@ -52,7 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly Glyph _back = Widgets.Symbol(Symbols.Left, Palette.Muted);
         readonly HeadingRow _title = new HeadingRow();
 
-        readonly Switch _switch = new Switch(Lettering.Small);
+        /// <summary>The header's switch, governing everything on the screen under it.</summary>
+        readonly Switch _switch = new Switch { Style = Unconverted.Governing, IsSet = true };
 
         /// <summary>The header's "look again".</summary>
         readonly Glyph _refresh = Widgets.Symbol(Symbols.Refresh, Palette.Muted);
@@ -608,11 +609,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (_renaming >= 0)
                 _title[_renaming].Wrong = Blocked.Length > 0;
 
-            // Governs everything on the screen under it, which is what a switch in the header means.
-            if (screen.HasSwitch)
-                _switch.Show(screen.SwitchIsOn, true);
-            else
-                _switch.Hide();
+            _switch.Collapsed = !screen.HasSwitch;
+            _switch.IsOn = screen.SwitchIsOn;
 
             // Where the screen is finished in a column of its own, that column's Done is the one.
             Label carried = Carried;
