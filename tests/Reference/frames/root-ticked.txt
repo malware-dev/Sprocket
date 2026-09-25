@@ -9,16 +9,16 @@ on screen     Automation for Test Rig
 002  Text       at {X:265 Y:177.292} scale 0.57  #A2C3CDFF  "Nothing automated here yet."
 003  ClearClip  
 004  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ New system…"
-005  Text       at {X:432.2733 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load system"
+005  Text       at {X:404.6033 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load system"
 006  Sprite     Sprocket_Fill         {X:259 Y:160 W:1402 H:1}  #5B737BFF
 007  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-008  Text       at {X:275.8467 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
-009  SetClip    {X:451 Y:55 W:96 H:33}
-010  Text       at {X:451.0733 Y:54.71198} scale 0.9  #DCF5FDFF  "Test Rig"
-011  Text       at {X:536.5867 Y:56.60933} scale 0.64  #85A1A9FF  "p"
+008  Text       at {X:273.4433 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
+009  SetClip    {X:411 Y:55 W:75 H:33}
+010  Text       at {X:411.1767 Y:54.71198} scale 0.9  #DCF5FDFF  "Test Rig"
+011  Text       at {X:477.7367 Y:59.87884} scale 0.64  #85A1A9FF  "p"
 012  ClearClip  
-013  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-014  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+013  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
+014  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
 015  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 016  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 017  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

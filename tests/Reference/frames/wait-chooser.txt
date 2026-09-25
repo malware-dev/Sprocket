@@ -19,21 +19,21 @@ on screen     How long should it wait?
 012  Sprite     Sprocket_Fill         {X:259 Y:406 W:1390 H:52}  #29363EFF
 013  Text       at {X:278 Y:420.412} scale 0.64  #DCF5FDFF  "a minute - 3600 ticks"
 014  Sprite     Sprocket_Fill         {X:259 Y:464 W:1390 H:67}  #29363EFF
-015  Sprite     Sprocket_Fill         {X:278 Y:478 W:1269 H:39}  #141B20FF
-016  Sprite     Sprocket_Fill         {X:278 Y:478 W:1269 H:1}  #5B737BFF
-017  Sprite     Sprocket_Fill         {X:278 Y:516 W:1269 H:1}  #5B737BFF
+015  Sprite     Sprocket_Fill         {X:278 Y:478 W:1275 H:39}  #141B20FF
+016  Sprite     Sprocket_Fill         {X:278 Y:478 W:1275 H:1}  #5B737BFF
+017  Sprite     Sprocket_Fill         {X:278 Y:516 W:1275 H:1}  #5B737BFF
 018  Sprite     Sprocket_Fill         {X:278 Y:478 W:1 H:39}  #5B737BFF
-019  Sprite     Sprocket_Fill         {X:1546 Y:478 W:1 H:39}  #5B737BFF
+019  Sprite     Sprocket_Fill         {X:1552 Y:478 W:1 H:39}  #5B737BFF
 020  Text       at {X:290.8 Y:485.8919} scale 0.64  #85A1A9FF  "Another length, in ticks"
-021  Sprite     Sprocket_Fill         {X:1566 Y:479 W:64 H:37}  #374851FF
-022  Text       at {X:1585.087 Y:487.187} scale 0.57  #85A1A9FF  "Use"
+021  Sprite     Sprocket_Fill         {X:1572 Y:479 W:58 H:37}  #374851FF
+022  Text       at {X:1590.83 Y:487.187} scale 0.57  #85A1A9FF  "Use"
 023  ClearClip  
 024  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-025  SetClip    {X:276 Y:55 W:273 H:33}
-026  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "How long should it wait?"
+025  SetClip    {X:273 Y:55 W:213 H:33}
+026  Text       at {X:273.4433 Y:54.71198} scale 0.9  #DCF5FDFF  "How long should it wait?"
 027  ClearClip  
-028  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-029  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+028  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
+029  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
 030  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 031  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 032  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

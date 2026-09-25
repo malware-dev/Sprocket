@@ -25,15 +25,27 @@ namespace Sprocket.Sim.Content
     /// </remarks>
     public sealed class SeFontMetrics : IFontMetrics
     {
-        /// <summary>
-        /// Added to every glyph's advance, as the game does. Seven percent of a long row on its own, and
-        /// nowhere in the font file - it lives in the game's renderer. This is the first number to suspect
-        /// if measurements ever come out uniformly wrong.
-        /// </summary>
+        /// <summary>Added between two glyphs, in font units.</summary>
+        /// <remarks>The game's <c>MyFont</c> constructor default, which every font definition takes.</remarks>
         public const int Spacing = 1;
+
+        /// <summary>What the game multiplies a scale by before it measures or draws text.</summary>
+        /// <remarks>
+        ///     The game's <c>MyRenderGuiConstants.FONT_SCALE</c>. Its screen-space <c>GetLineHeight</c> leaves it
+        ///     out, and so does <see cref="LineHeightPixels" />.
+        /// </remarks>
+        public const float FontScale = 28.8f / 37f;
+
+        /// <summary>How far below the top of its line the game draws a glyph's cell, in font units, before the glyph's own offsets.</summary>
+        /// <remarks>The game's <c>MyRenderGuiConstants.FONT_TOP_SIDE_BEARING</c>.</remarks>
+        public const float TopSideBearing = 3f * 23f / 18f;
 
         /// <summary>The reference height the game's HUD scaling is defined against.</summary>
         public const float GameReferenceHeight = 1080f;
+
+        /// <summary>What the game takes as a font's usual glyph height when the font has no <c>a</c>.</summary>
+        /// <remarks>The game's default for <c>MyFont.AverageFontLineOffset</c>.</remarks>
+        const int UsualGlyphHeight = 45;
 
         /// <summary>Where one glyph sits on the page, and what it costs to draw.</summary>
         public struct Glyph
@@ -44,49 +56,28 @@ namespace Sprocket.Sim.Content
             public int Width;
             public int Height;
 
-            /// <summary>How far the pen moves afterwards, before the game's own spacing.</summary>
+            /// <summary>How far the pen moves afterwards, before the spacing.</summary>
             public int Advance;
 
-            /// <summary>
-            /// How far left of the pen the cell starts. Always -7 in this font, because the baker padded
-            /// every glyph by seven so that neighbouring cells could not bleed into one another.
-            /// </summary>
+            /// <summary>The font file's <c>lsb</c>: how far right of the pen the cell starts, and how far down, since the game adds it to both.</summary>
             public int Bearing;
+
+            /// <summary>The font file's <c>ho</c>: how far down the cell is moved, and zero where the file leaves it out.</summary>
+            public int HeightOffset;
         }
 
-        /// <summary>
-        /// How far down each cell the baseline sits, in font units.
-        /// </summary>
-        /// <remarks>
-        /// Measured off the page rather than taken from the file, because the file does not say: it
-        /// gives a line height of 37, a baseline of 30 and cells of 45, and no combination of those
-        /// yields the vertical padding. Every flat-bottomed glyph in the font - H E L A O x n u v w -
-        /// has its last row of ink at 34 and nothing at 35, which pins it exactly.
-        /// <para>
-        /// So a cell is drawn five units above the top of its line. To check it again: crop any of those
-        /// glyphs out of the page and look at where the alpha stops.
-        /// </para>
-        /// </remarks>
-        public const int GlyphBaselineInCell = 35;
-
-        /// <summary>The cell that measurement was made on, so another font can be scaled against it.</summary>
-        public const int GameCellHeight = 45;
-
         readonly Dictionary<char, Glyph> _glyphs = new Dictionary<char, Glyph>();
-        readonly Dictionary<char, int> _advances = new Dictionary<char, int>();
         readonly Dictionary<long, int> _kerning = new Dictionary<long, int>();
         readonly ScreenSpaceDevice _device;
         readonly int _lineHeight;
-        readonly int _base;
 
-        /// <summary>How tall a cell on this page is, taken from the first glyph that says.</summary>
-        int _cellHeight;
+        /// <summary>The game's <c>MyFont.AverageFontLineOffset</c>: the height of <c>a</c> less its height offset.</summary>
+        int _usualHeight = UsualGlyphHeight;
 
-        SeFontMetrics(ScreenSpaceDevice device, int lineHeight, int baseline, string source, bool fromGame)
+        SeFontMetrics(ScreenSpaceDevice device, int lineHeight, string source, bool fromGame)
         {
             _device = device;
             _lineHeight = lineHeight;
-            _base = baseline;
             Source = source;
             FromGame = fromGame;
         }
@@ -94,35 +85,23 @@ namespace Sprocket.Sim.Content
         /// <summary>Which page the glyphs are on, as the font file names it.</summary>
         public string PageFile { get; private set; }
 
-        /// <summary>
-        /// How far above the top of a line a glyph's cell begins, in font units. Negative, always.
-        /// </summary>
-        public int CellTop => _base - BaselineInCell;
-
-        /// <summary>
-        /// Where the baseline falls inside this font's cell, in its own units.
-        /// </summary>
-        /// <remarks>
-        /// In the game's proportion rather than as a flat constant, because a constant is only right for
-        /// the cell it was measured on. A font with a bigger cell has its baseline further down it, and
-        /// treating 35 as universal put this project's own symbols six pixels below the words they stand
-        /// beside - which reads as the artwork being wrong rather than the arithmetic.
-        /// </remarks>
-        public int BaselineInCell =>
-            _cellHeight <= 0 || _cellHeight == GameCellHeight
-                ? GlyphBaselineInCell
-                : (int)Math.Round(_cellHeight * (double)GlyphBaselineInCell / GameCellHeight);
-
-        /// <summary>Where <paramref name="c" /> is on the page, if the game has it at all.</summary>
-        public bool TryGlyph(char c, out Glyph glyph)
+        /// <summary>How far below the top of its line the game draws <paramref name="glyph" />'s cell, in font units.</summary>
+        public static float CellTop(Glyph glyph)
         {
-            return _glyphs.TryGetValue(c, out glyph);
+            return glyph.Bearing + glyph.HeightOffset + TopSideBearing;
         }
 
-        /// <summary>What the game draws in place of a character it does not have.</summary>
-        public bool TryReplacement(out Glyph glyph)
+        /// <summary>What the game draws for <paramref name="c" />, if it draws anything.</summary>
+        /// <remarks>
+        ///     The replacement glyph for a character the font lacks, unless that character is white space or a
+        ///     control character, which the game skips outright.
+        /// </remarks>
+        public bool TryDrawn(char c, out Glyph glyph)
         {
-            return _glyphs.TryGetValue(Replacement, out glyph);
+            if (_glyphs.TryGetValue(c, out glyph))
+                return true;
+
+            return !char.IsWhiteSpace(c) && !char.IsControl(c) && _glyphs.TryGetValue(Replacement, out glyph);
         }
 
         /// <summary>How much a kerned pair pulls together, in font units. Zero for most pairs.</summary>
@@ -181,9 +160,8 @@ namespace Sprocket.Sim.Content
 
                 XNamespace ns = font.Name.Namespace;
                 int lineHeight = (int?)font.Attribute("height") ?? 37;
-                int baseline = (int?)font.Attribute("base") ?? 30;
 
-                var metrics = new SeFontMetrics(device, lineHeight, baseline, source, live);
+                var metrics = new SeFontMetrics(device, lineHeight, source, live);
 
                 XElement page = font.Descendants(ns + "bitmap").FirstOrDefault();
                 metrics.PageFile = page == null ? null : (string)page.Attribute("name");
@@ -193,22 +171,17 @@ namespace Sprocket.Sim.Content
                     string character = (string)glyph.Attribute("ch");
                     int? advance = (int?)glyph.Attribute("aw");
 
-                    if (string.IsNullOrEmpty(character) || !advance.HasValue)
+                    Glyph cell;
+                    if (string.IsNullOrEmpty(character) || !advance.HasValue || !ReadCell(glyph, advance.Value, out cell))
                         continue;
 
-                    metrics._advances[character[0]] = advance.Value;
+                    metrics._glyphs[character[0]] = cell;
 
-                    Glyph cell;
-                    if (ReadCell(glyph, advance.Value, out cell))
-                    {
-                        metrics._glyphs[character[0]] = cell;
-
-                        if (metrics._cellHeight == 0)
-                            metrics._cellHeight = cell.Height;
-                    }
+                    if (character[0] == 'a')
+                        metrics._usualHeight = cell.Height - cell.HeightOffset;
                 }
 
-                if (metrics._advances.Count == 0)
+                if (metrics._glyphs.Count == 0)
                     return null;
 
                 foreach (XElement pair in font.Descendants(ns + "kernpair"))
@@ -229,64 +202,80 @@ namespace Sprocket.Sim.Content
             }
         }
 
-        /// <summary>
-        /// What the game answers when asked how big a string is.
-        /// </summary>
+        /// <summary>What the game's <c>MyFont.MeasureString</c> answers, in pixels.</summary>
         /// <remarks>
-        /// <b>The cell, not the line, and the two are not the same number.</b> <c>MyFont.MeasureString</c>
-        /// walks the glyphs and takes the tallest, and in this face every glyph is a uniform 45 units in a
-        /// line of 37 - so a measured string comes back a fifth taller than the line it will be drawn on,
-        /// for any text at all.
-        /// <para>
-        /// This returned the line height for both, which made the difference invisible here and cost two
-        /// wrong diagnoses of the same misalignment: anything laid out against a measured height sat
-        /// correctly in the simulator and wrongly in the game, and the simulator agreed with every guess.
-        /// A harness that cannot be wrong about the thing being tested is not a harness.
-        /// </para>
+        ///     The width is the widest line, with <see cref="Spacing" /> between glyphs and none after the last.
+        ///     The height is a line per line break, plus half of how far any glyph stands above its line on
+        ///     every line but the last, plus how far the last line's lowest glyph reaches below the font's
+        ///     <c>a</c>.
         /// </remarks>
         public Vector2 MeasurePixels(string font, string text, float scale)
         {
-            float perUnit = EffectiveScale(scale);
-            float height = (_cellHeight > 0 ? _cellHeight : GameCellHeight) * perUnit;
+            text = text ?? string.Empty;
 
-            if (string.IsNullOrEmpty(text))
-                return new Vector2(0f, height);
+            var lines = 1;
+            var pen = 0;
+            var widest = 0;
+            var raised = 0;
+            var raisedHere = 0;
+            var below = 0;
+            var previous = '\0';
 
-            return new Vector2(WidthInUnits(text) * perUnit, height);
+            for (var i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+
+                if (c == Newline)
+                {
+                    lines++;
+                    pen = 0;
+                    previous = '\0';
+                    below = 0;
+                    raised += raisedHere;
+                    raisedHere = 0;
+                    continue;
+                }
+
+                Glyph glyph;
+                if (!TryDrawn(c, out glyph))
+                    continue;
+
+                var above = glyph.Height + glyph.HeightOffset - _lineHeight;
+                if (above > raisedHere)
+                    raisedHere = above;
+
+                var under = glyph.Height - glyph.HeightOffset - _usualHeight;
+                if (under > below)
+                    below = under;
+
+                pen += Kerning(previous, c) + glyph.Advance;
+                previous = c;
+
+                if (i < text.Length - 1)
+                    pen += Spacing;
+
+                if (pen > widest)
+                    widest = pen;
+            }
+
+            var unit = DrawScale(scale);
+            return new Vector2(widest * unit, (lines * _lineHeight + raised / 2f + below) * unit);
         }
 
+        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers, in pixels: without <see cref="FontScale" />.</summary>
         public float LineHeightPixels(string font, float scale)
         {
             return _lineHeight * EffectiveScale(scale);
         }
 
-        /// <summary>
-        /// What the game draws in place of a character it does not have.
-        /// </summary>
-        /// <remarks>
-        /// The font declares it, at U+25A1, which is how we know this is what happens rather than nothing
-        /// happening.
-        /// </remarks>
         /// <summary>Left alone, since a line break is not a character the font is asked for.</summary>
         public const char Newline = (char)10;
 
+        /// <summary>What the game draws in place of a character it does not have.</summary>
         public const char Replacement = '□';
 
-        /// <summary>Whether the game can actually draw this character.</summary>
-        public bool Has(char c)
-        {
-            return _advances.ContainsKey(c);
-        }
-
-        /// <summary>
-        /// The run as the game would actually show it, with anything it cannot draw replaced.
-        /// </summary>
-        /// <remarks>
-        /// The simulator measures with the game's numbers and draws with a desktop face, which is fine for
-        /// shape and wrong for coverage: a desktop face has glyphs the game has never heard of, so a
-        /// character the game would show as a box was quietly rendering perfectly here. Substituting makes
-        /// the window admit it.
-        /// </remarks>
+        /// <summary>The run as the game shows it, with every character it would draw as the replacement replaced.</summary>
+        /// <remarks>For the desktop face drawn where the page is missing, which has glyphs the game does not.</remarks>
         public string AsDrawn(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -294,9 +283,10 @@ namespace Sprocket.Sim.Content
 
             char[] copy = null;
 
-            for (int i = 0; i < text.Length; i++)
+            for (var i = 0; i < text.Length; i++)
             {
-                if (text[i] == Newline || Has(text[i]))
+                var c = text[i];
+                if (c == Newline || _glyphs.ContainsKey(c) || char.IsWhiteSpace(c) || char.IsControl(c))
                     continue;
 
                 if (copy == null)
@@ -308,45 +298,18 @@ namespace Sprocket.Sim.Content
             return copy == null ? text : new string(copy);
         }
 
-        /// <summary>The width of a run in font units, before any scaling.</summary>
-        public int WidthInUnits(string text)
-        {
-            int total = 0;
-            char previous = '\0';
-
-            for (int i = 0; i < text.Length; i++)
-            {
-                char c = text[i];
-
-                int advance;
-                if (!_advances.TryGetValue(c, out advance))
-                {
-                    // The game draws a replacement box for anything it does not have, and a box still
-                    // takes room. Skipping would make unknown text measure short instead of wide.
-                    _advances.TryGetValue('□', out advance);
-                }
-
-                int kern;
-                if (previous != '\0' && _kerning.TryGetValue(Key(previous, c), out kern))
-                    total += kern;
-
-                total += advance + Spacing;
-                previous = c;
-            }
-
-            return total;
-        }
-
-        /// <summary>
-        /// Pixels per font unit at the requested scale, which includes the game's own HUD scaling. The
-        /// backend corrects for that scaling on the way out, so a simulator that did not apply it would
-        /// make the correction look like a fault.
-        /// </summary>
+        /// <summary>Pixels per font unit in the game's line-height arithmetic, which includes its HUD scaling.</summary>
         public float EffectiveScale(float scale)
         {
-            float height = _device.SafeArea.Height;
-            float hud = height > 0f ? height / GameReferenceHeight : 1f;
+            var height = _device.SafeArea.Height;
+            var hud = height > 0f ? height / GameReferenceHeight : 1f;
             return scale * hud;
+        }
+
+        /// <summary>Pixels per font unit where the game measures and draws, which is <see cref="EffectiveScale" /> times <see cref="FontScale" />.</summary>
+        public float DrawScale(float scale)
+        {
+            return EffectiveScale(scale) * FontScale;
         }
 
         /// <summary>
@@ -357,7 +320,8 @@ namespace Sprocket.Sim.Content
         {
             cell = new Glyph();
 
-            int[] origin = Pair((string)glyph.Attribute("origin"), ',');
+            // The game reads "loc" and falls back to the older "origin".
+            int[] origin = Pair((string)glyph.Attribute("loc") ?? (string)glyph.Attribute("origin"), ',');
             int[] size = Pair((string)glyph.Attribute("size"), 'x');
 
             if (origin == null || size == null)
@@ -369,6 +333,7 @@ namespace Sprocket.Sim.Content
             cell.Height = size[1];
             cell.Advance = advance;
             cell.Bearing = (int?)glyph.Attribute("lsb") ?? 0;
+            cell.HeightOffset = (int?)glyph.Attribute("ho") ?? 0;
             return true;
         }
 

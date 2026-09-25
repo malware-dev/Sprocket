@@ -55,18 +55,28 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Whether these measurements are the game's. They are not, and will not be here.</summary>
         public bool IsExact => false;
 
+        /// <summary>A stand-in width, and the game's height for one line as it measures it, with <see cref="Content.SeFontMetrics.FontScale" />.</summary>
         public Vector2 MeasurePixels(string font, string text, float scale)
         {
+            float line = DrawnLineHeight(scale);
+
             if (string.IsNullOrEmpty(text))
-                return new Vector2(0f, LineHeightPixels(font, scale));
+                return new Vector2(0f, line);
 
             FormattedText formatted = Build(text, FontSizeFor(font, scale));
-            return new Vector2((float)formatted.WidthIncludingTrailingWhitespace, (float)formatted.Height);
+            return new Vector2((float)formatted.WidthIncludingTrailingWhitespace, line);
         }
 
+        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers, without <see cref="Content.SeFontMetrics.FontScale" />.</summary>
         public float LineHeightPixels(string font, float scale)
         {
             return GameLineHeight * EffectiveScale(scale);
+        }
+
+        /// <summary>How tall a line the game draws at <paramref name="scale" />, in pixels.</summary>
+        float DrawnLineHeight(float scale)
+        {
+            return LineHeightPixels(null, scale) * Content.SeFontMetrics.FontScale;
         }
 
         /// <summary>
@@ -92,7 +102,7 @@ namespace Sprocket.Sim.Simulation
                     _heightPerSize = 1d;
             }
 
-            return LineHeightPixels(font, scale) / _heightPerSize;
+            return DrawnLineHeight(scale) / _heightPerSize;
         }
 
         public FormattedText Build(string text, double size)

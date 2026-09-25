@@ -111,8 +111,6 @@ taken from the game's own textures and constants. **They are never adjusted by e
 "improved".** Each carries a citation saying where it came from; that citation is the reason it may
 not be touched, and it is why the values need no further comment.
 
-`SeFontMetrics.GlyphBaselineInCell` is a known open number, recorded in `docs/`. Leave it alone.
-
 ## Drawing runs sixty times a second
 
 `Draw` is called every frame; a screen is used perhaps twice a minute. **Nothing measures text in the

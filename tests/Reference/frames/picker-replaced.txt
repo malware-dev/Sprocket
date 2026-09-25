@@ -27,7 +27,7 @@ on screen     When Airlock Inner Door …
 020  Sprite     Sprocket_Fill         {X:288 Y:412 W:17 H:1}  #3ACC00FF
 021  Sprite     Sprocket_Fill         {X:288 Y:396 W:1 H:17}  #3ACC00FF
 022  Sprite     Sprocket_Fill         {X:304 Y:396 W:1 H:17}  #3ACC00FF
-023  Text       at {X:294.1767 Y:398.7554} scale 0.331  #3ACC00FF  "c"
+023  Text       at {X:294.6467 Y:400.1114} scale 0.331  #3ACC00FF  "c"
 024  Sprite     Sprocket_Fill         {X:315 Y:378 W:54 H:54}  #374851FF
 025  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:315 Y:378 W:54 H:54}  #FFFFFFFF
 026  Text       at {X:378.8 Y:459.0821} scale 0.64  #DCF5FDFF  "Airlock Light"
@@ -137,7 +137,7 @@ on screen     When Airlock Inner Door …
 130  Sprite     Sprocket_Fill         {X:702 Y:188 W:1 H:37}  #5B737BFF
 131  Text       at {X:287.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
 132  Text       at {X:287.8 Y:235.682} scale 0.57  #A2C3CDFF  "Anything"
-133  Text       at {X:369.97 Y:233.088} scale 0.57  #A2C3CDFF  "v"
+133  Text       at {X:355.9233 Y:235.9998} scale 0.57  #A2C3CDFF  "v"
 134  Text       at {X:275 Y:267.572} scale 0.5  #85A1A9FF  "14 blocks"
 135  Sprite     Sprocket_Fill         {X:729 Y:118 W:460 H:824}  #29363EFF
 136  Sprite     Sprocket_Fill         {X:729 Y:118 W:460 H:1}  #5B737BFF
@@ -145,29 +145,28 @@ on screen     When Airlock Inner Door …
 138  Sprite     Sprocket_Fill         {X:729 Y:118 W:1 H:824}  #5B737BFF
 139  Sprite     Sprocket_Fill         {X:1188 Y:118 W:1 H:824}  #5B737BFF
 140  SetClip    {X:745 Y:231 W:428 H:695}
-141  Sprite     Sprocket_Fill         {X:745 Y:231 W:416 H:82}  #374851FF
-142  Text       at {X:761 Y:240.482} scale 0.57  #A2C3CDFF  "Sprocket has only partly checked this block, so some"
-143  Text       at {X:761 Y:261.572} scale 0.57  #A2C3CDFF  "of what it offers may still be doubled, missing or oddly"
-144  Text       at {X:761 Y:282.662} scale 0.57  #A2C3CDFF  "named."
-145  Text       at {X:757.8 Y:325.952} scale 0.64  #DCF5FDFF  "finishes opening"
-146  Text       at {X:757.8 Y:371.832} scale 0.64  #DCF5FDFF  "finishes closing"
-147  Text       at {X:757.8 Y:417.712} scale 0.64  #DCF5FDFF  "is switched on"
-148  Text       at {X:757.8 Y:463.592} scale 0.64  #DCF5FDFF  "is switched off"
-149  SetClip    {X:259 Y:118 W:1402 H:836}
-150  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT HAPPENS"
-151  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:37}  #141B20FF
-152  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:1}  #5B737BFF
-153  Sprite     Sprocket_Fill         {X:745 Y:224 W:428 H:1}  #5B737BFF
-154  Sprite     Sprocket_Fill         {X:745 Y:188 W:1 H:37}  #5B737BFF
-155  Sprite     Sprocket_Fill         {X:1172 Y:188 W:1 H:37}  #5B737BFF
-156  Text       at {X:757.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
-157  ClearClip  
-158  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-159  SetClip    {X:276 Y:55 W:299 H:33}
-160  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When Airlock Inner Door …"
-161  ClearClip  
-162  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-163  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
-164  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
-165  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-166  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+141  Sprite     Sprocket_Fill         {X:745 Y:231 W:416 H:61}  #374851FF
+142  Text       at {X:761 Y:240.482} scale 0.57  #A2C3CDFF  "Sprocket has only partly checked this block, so some of what it offers"
+143  Text       at {X:761 Y:261.572} scale 0.57  #A2C3CDFF  "may still be doubled, missing or oddly named."
+144  Text       at {X:757.8 Y:304.862} scale 0.64  #DCF5FDFF  "finishes opening"
+145  Text       at {X:757.8 Y:350.742} scale 0.64  #DCF5FDFF  "finishes closing"
+146  Text       at {X:757.8 Y:396.622} scale 0.64  #DCF5FDFF  "is switched on"
+147  Text       at {X:757.8 Y:442.502} scale 0.64  #DCF5FDFF  "is switched off"
+148  SetClip    {X:259 Y:118 W:1402 H:836}
+149  Text       at {X:745 Y:134.012} scale 0.64  #DCF5FDFF  "WHAT HAPPENS"
+150  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:37}  #141B20FF
+151  Sprite     Sprocket_Fill         {X:745 Y:188 W:428 H:1}  #5B737BFF
+152  Sprite     Sprocket_Fill         {X:745 Y:224 W:428 H:1}  #5B737BFF
+153  Sprite     Sprocket_Fill         {X:745 Y:188 W:1 H:37}  #5B737BFF
+154  Sprite     Sprocket_Fill         {X:1172 Y:188 W:1 H:37}  #5B737BFF
+155  Text       at {X:757.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
+156  ClearClip  
+157  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
+158  SetClip    {X:273 Y:55 W:232 H:33}
+159  Text       at {X:273.4433 Y:54.71198} scale 0.9  #DCF5FDFF  "When Airlock Inner Door …"
+160  ClearClip  
+161  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
+162  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
+163  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
+164  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+165  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

@@ -137,15 +137,15 @@ on screen     When something happens
 130  Text       at {X:287.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
 131  Sprite     Sprocket_Fill         {X:288 Y:196 W:2 H:21}  #DCF5FDFF
 132  Text       at {X:287.8 Y:235.682} scale 0.57  #A2C3CDFF  "Anything"
-133  Text       at {X:369.97 Y:233.088} scale 0.57  #A2C3CDFF  "v"
+133  Text       at {X:355.9233 Y:235.9998} scale 0.57  #A2C3CDFF  "v"
 134  Text       at {X:275 Y:267.572} scale 0.5  #85A1A9FF  "14 blocks"
 135  ClearClip  
 136  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-137  SetClip    {X:276 Y:55 W:290 H:33}
-138  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
+137  SetClip    {X:273 Y:55 W:226 H:33}
+138  Text       at {X:273.4433 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
 139  ClearClip  
-140  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-141  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+140  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
+141  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
 142  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 143  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 144  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

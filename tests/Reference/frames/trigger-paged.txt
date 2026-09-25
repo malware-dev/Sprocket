@@ -11,7 +11,7 @@ on screen     Do something
 004  Sprite     Sprocket_Fill         {X:259 Y:941 W:56 H:1}  #5B737BFF
 005  Sprite     Sprocket_Fill         {X:259 Y:118 W:1 H:824}  #5B737BFF
 006  Sprite     Sprocket_Fill         {X:314 Y:118 W:1 H:824}  #5B737BFF
-007  Text       at {X:281.5767 Y:519.265} scale 0.57  #A2C3CDFF  "<"
+007  Text       at {X:282.7783 Y:521.6021} scale 0.57  #A2C3CDFF  "<"
 008  Sprite     Sprocket_Fill         {X:325 Y:118 W:438 H:824}  #29363EFF
 009  Sprite     Sprocket_Fill         {X:325 Y:118 W:438 H:1}  #5B737BFF
 010  Sprite     Sprocket_Fill         {X:325 Y:941 W:438 H:1}  #5B737BFF
@@ -142,15 +142,15 @@ on screen     Do something
 135  Text       at {X:353.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
 136  Sprite     Sprocket_Fill         {X:354 Y:196 W:2 H:21}  #DCF5FDFF
 137  Text       at {X:353.8 Y:235.682} scale 0.57  #A2C3CDFF  "Anything"
-138  Text       at {X:435.97 Y:233.088} scale 0.57  #A2C3CDFF  "v"
+138  Text       at {X:421.9233 Y:235.9998} scale 0.57  #A2C3CDFF  "v"
 139  Text       at {X:341 Y:267.572} scale 0.5  #85A1A9FF  "14 blocks"
 140  ClearClip  
 141  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-142  SetClip    {X:276 Y:55 W:157 H:33}
-143  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+142  SetClip    {X:273 Y:55 W:122 H:33}
+143  Text       at {X:273.4433 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
 144  ClearClip  
-145  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
-146  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
+145  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
+146  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
 147  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 148  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 149  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

@@ -48,18 +48,17 @@ SIZE = 29
 # The line, the cell and where the baseline sits in it, all transcribed from the game's own face
 # so a glyph of ours lands where a glyph of theirs would.
 #
-# A renderer places the cell at (base - baseline in cell) from the top of the line, so declaring
-# the game's numbers is what puts our text on their baseline rather than near it.
+# The game draws a cell a fixed distance plus its lsb below the top of the line (see
+# SeFontMetrics.CellTop), so where the ink sits in the cell decides where our baseline lands.
 LINE = 37
 BASE = 30
 CELL_HEIGHT = 45
 
 # Where the baseline sits in the cell.
 #
-# Read off a screenshot of both faces set side by side rather than taken from
-# SeFontMetrics.GlyphBaselineInCell, which says 35 and which this repository already records as a
-# number nobody has pinned down. At 35 every row of ours sat exactly one pixel below the game's,
-# on four rows measured, which is what 34 corrects.
+# Read off a screenshot of both faces set side by side in the game. At 35, where the game's own
+# face has its baseline, every row of ours sat exactly one pixel below the game's, on four rows
+# measured, which is what 34 corrects.
 BASELINE_IN_CELL = 34
 
 # The advance and the room either side of it are measured from the face rather than declared, so
