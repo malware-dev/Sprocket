@@ -1460,7 +1460,16 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // mean one thing regardless, which is what the tick at the head of a row does.
             if (deed.Means == Means.Pick)
             {
-                SetNumber(deed.Command, (int)(deed.Asked ? Held : deed.Held));
+                Held held = deed.Asked ? Held : deed.Held;
+                SetNumber(deed.Command, (int)held);
+
+                // A plain press takes this one and nothing else, so pressing it twice is taking one
+                // thing and moving on - the same gesture as in a list where only one can be chosen.
+                // With something held, or on the tick, a second press is building a set, and moving
+                // on would cut that short.
+                if (clicks > 1 && deed.Asked && held == Held.Alone && _editor.Screen.HasPrimary)
+                    Moving(target);
+
                 return true;
             }
 

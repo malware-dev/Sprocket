@@ -199,7 +199,7 @@ public class ChangingTests
         Trigger was = System(screen).Triggers[0];
         screen.Editor.PressDoes(0);
 
-        Assert.Equal("When something happens", screen.Editor.Screen.Title());
+        Assert.Equal("When Airlock Button is pressed", screen.Editor.Screen.Title());
         Assert.Equal("", screen.Editor.Screen.Question);
 
         var does = screen.Editor.Component<PickComponent>().Stages[2];
@@ -240,7 +240,7 @@ public class ChangingTests
         screen.Editor.Back();
         screen.Run(2);
 
-        Assert.Equal("When something happens", screen.Editor.Screen.Title());
+        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
         var pick = screen.Editor.Component<PickComponent>();
         Assert.Equal(0, pick.Page);
         Assert.Equal(3, pick.Stages.Count);
@@ -338,14 +338,14 @@ public class ChangingTests
         screen.Run(2);
 
         var pick = screen.Editor.Component<PickComponent>();
-        Assert.Equal("When something happens", screen.Editor.Screen.Title());
+        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
         Assert.NotEqual(0, pick.Onward);
 
         screen.Editor.Invoke(pick.Onward);
         screen.Run(2);
 
         pick = screen.Editor.Component<PickComponent>();
-        Assert.Equal("Do something", screen.Editor.Screen.Title());
+        Assert.Equal("… Airlock Outer Door", screen.Editor.Screen.Title());
         Assert.Contains(pick.Stages[pick.Page].Entries, e => e.Text == "Airlock Outer Door" && e.IsChosen);
     }
 

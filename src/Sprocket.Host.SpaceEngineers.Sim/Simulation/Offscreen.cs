@@ -55,7 +55,7 @@ namespace Sprocket.Sim.Simulation
             _scene = EditorScene.Nowhere();
         }
 
-        /// <summary>One of the faces this mod ships, or null where the build did not carry it.</summary>
+        /// <summary>One of the faces this mod requires, or null where the build did not carry it.</summary>
         IFontMetrics Ours(string folder, string name)
         {
             return SeFontMetrics.LoadFrom(

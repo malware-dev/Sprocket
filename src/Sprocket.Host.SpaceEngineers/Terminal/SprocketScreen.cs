@@ -1,7 +1,9 @@
+using System;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sandbox.Game;
 using Sandbox.ModAPI;
 using VRage.Input;
 using IMyInput = VRage.ModAPI.IMyInput;
@@ -58,10 +60,15 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         /// <summary>When the caret's blink was last restarted, so typing never hides it mid-blink.</summary>
         int _blinkFrom;
 
-        public SprocketScreen(SprocketUnit unit)
+        /// <summary>What closing the screen hands back: the Sprocket, to whoever lent it.</summary>
+        readonly Action _closed;
+
+        /// <summary>The editor on <paramref name="unit" />, telling <paramref name="closed" /> each time it closes.</summary>
+        public SprocketScreen(SprocketUnit unit, Action closed)
             : base("Sprocket", null, new Vector2(EditorView.ScreenWidth, EditorView.ScreenHeight))
         {
             _unit = unit;
+            _closed = closed;
             _editor = unit.Editor;
             _view = new EditorView(_editor);
 
@@ -96,6 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             // Sprocket and reopened. Whatever it was told while it was away, it was not listening.
             _view.Attach();
             _unit.Showing = true;
+            Hud(false);
 
             // A piston or rotor may have attached since this was last looked at, which changes which grids
             // are part of the construct without adding a block to any of them.
@@ -178,16 +186,31 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         /// Closing the editor is the moment somebody has finished saying something, so it is the cheapest
         /// honest place to put the program where a world save will find it.
         /// </remarks>
+        /// <summary>Hides the game's HUD while this is open, and gives it back as it closes.</summary>
+        /// <remarks>
+        /// Forced to its minimum rather than switched off, which leaves the player's own HUD setting
+        /// alone: lifting the force puts back whatever they had. Player 0 is this machine's own player,
+        /// done here and nowhere else, so no server is asked.
+        /// </remarks>
+        static void Hud(bool shown)
+        {
+            MyVisualScriptLogicProvider.ShowHud(shown, 0);
+        }
+
         protected override void OnClosed(bool isUnloading)
         {
             // Let go of core before anything else. This screen is going away and core's is not.
             _view.Release();
             _unit.Showing = false;
+            Hud(true);
 
             _unit.Persist();
 
             if (!isUnloading)
                 Offer();
+
+            if (_closed != null)
+                _closed();
         }
 
         /// <summary>

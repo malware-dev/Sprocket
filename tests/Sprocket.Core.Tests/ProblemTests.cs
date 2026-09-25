@@ -117,7 +117,7 @@ public class ProblemTests
 
         Assert.True(warn.Enabled);
 
-        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
@@ -158,20 +158,19 @@ public class ProblemTests
     }
 
     /// <summary>
-    /// The one of a system that is broken is marked, and the system itself is not.
+    /// The logic system that is broken is marked on the construct's own list.
     /// </summary>
     /// <remarks>
     /// The same sequence can be sound on the front airlock and broken on the port one, so the count
-    /// belongs to the fitting rather than the design. Marking both would say there are two problems.
+    /// belongs to the logic system rather than to the blueprint it may be made from.
     /// </remarks>
     [Fact]
-    public void TheFailingInstanceIsMarkedAndTheSystemIsNot()
+    public void TheFailingLogicSystemIsMarked()
     {
         var ship = Build();
         var rows = ship.Editor.Rows();
 
         Assert.Equal(0, rows[0].Problems);
-        Assert.Equal(0, rows[1].Problems);
 
         // Worked out on a cadence while the screen is open, so a tick is what picks up a change
         // made outside Sprocket - answering can cost a toolbar read, so it is not asked per frame.
@@ -180,8 +179,7 @@ public class ProblemTests
         ship.Editor.Tick(600);
 
         rows = ship.Editor.Rows();
-        Assert.Equal(0, rows[0].Problems);
-        Assert.Equal(1, rows[1].Problems);
+        Assert.Equal(1, rows[0].Problems);
     }
 
     /// <summary>
@@ -197,7 +195,7 @@ public class ProblemTests
         var ship = Build();
         ship.Rig.Grind(2);
 
-        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
@@ -221,7 +219,7 @@ public class ProblemTests
         var ship = Build();
         ship.Rig.CannotStart(ship.Sequence);
 
-        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
@@ -245,7 +243,7 @@ public class ProblemTests
         var ship = Build();
         ship.Rig.CannotStart(ship.Sequence);
 
-        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
         ship.Editor.PressRow(0);
 
         var sentence = ship.Editor.Sentence();
@@ -306,7 +304,7 @@ public class ProblemTests
     {
         var ship = Build();
 
-        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
         ship.Editor.PressRow(0);
 
         ship.Rig.Grind(2);
@@ -325,7 +323,7 @@ public class ProblemTests
         var ship = Build();
         ship.Rig.CannotStart(ship.Sequence);
 
-        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
         Assert.Equal("Nothing can start this.", ship.Editor.Triggers()[0].Problem);
@@ -358,7 +356,7 @@ public class ProblemTests
         Assert.True(fault.Parks);
 
         // Into the sequence, which is where the step is built for the screen.
-        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
         ship.Editor.PressRow(0);
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
@@ -390,7 +388,7 @@ public class ProblemTests
 
     static SequenceFault Fault(Ship ship, Sequence sequence) =>
         SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence,
-            ship.Runner.Get(sequence));
+            ship.Runner.Get(sequence), sequence.System.First);
 
     static Ship Build()
     {
@@ -453,12 +451,12 @@ public class ProblemTests
         // Nothing on this construct claims it, which is what the host says by this.
         ship.Rig.CannotStart(sequence);
 
-        var fault = SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence, null);
+        var fault = SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence, null, sequence.System.First);
         Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
 
         // And a sequence nothing is supposed to start is not scolded: it may be there to be run.
         var called = ship.Automation.AddSequence(system);
         ship.Rig.CannotStart(called);
-        Assert.False(SequenceSummary.Fault(ship.World, ship.Runner.Bindings, called, null).Exists);
+        Assert.False(SequenceSummary.Fault(ship.World, ship.Runner.Bindings, called, null, called.System.First).Exists);
     }
 }

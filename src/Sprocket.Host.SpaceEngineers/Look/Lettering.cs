@@ -48,8 +48,13 @@ namespace Sprocket.Host.SpaceEngineers.Look
 
         /// <summary>The fixed-width face for anything read as a listing rather than as prose.</summary>
         /// <remarks>
-        ///     Cut to the same line height and baseline as the game's own faces, so the sizes above apply to it
-        ///     unchanged. Declared in <c>Content/Data/Fonts.sbc</c>.
+        /// Fixed width, so a column of line numbers and a column of indentation line up. Cut to the
+        /// same line height and baseline as the game's own faces, so a line of it stands exactly as
+        /// tall as a line anywhere else and any of the sizes above apply to it unchanged.
+        /// <para>
+        /// A subtype out of the definition registry, the same way <c>Symbols.Font</c> is, declared by
+        /// the Maltek Mono mod this one requires.
+        /// </para>
         /// </remarks>
         public const string Mono = "MaltekMono";
     }

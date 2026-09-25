@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -20,12 +21,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// last put on each element is remembered, and a slot core handed over again unchanged is left
     /// alone. Core rebuilds a sentence by making new slots, so being the same object is the same
     /// question as being unchanged.
+    /// <para>
+    /// A slot is a chip whether or not it can be pressed, so a sentence stands the same size in the
+    /// same place when its sequence locks. One that cannot be pressed loses its bright fill, which is
+    /// what marks a control, and its underline with it.
+    /// </para>
     /// </remarks>
     public sealed class SentenceView
     {
         readonly Wrap _wrap = new Wrap();
         readonly Label _lead;
-        readonly List<Element> _slots = new List<Element>();
+        readonly List<Slot> _slots = new List<Slot>();
 
         /// <summary>The word before each slot, drawn like the lead and hidden where there is none.</summary>
         readonly List<Label> _joins = new List<Label>();
@@ -36,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The step the lead was last worked out from.</summary>
         SentenceStep _shownStep;
 
-        public SentenceView(bool editable, int slots)
+        public SentenceView(int slots)
         {
             _wrap.ItemSpacing = Space.Item;
             _wrap.LineSpacing = Space.Row;
@@ -53,19 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _joins.Add(join);
                 _wrap.Children.Add(join);
 
-                Element slot;
-
-                if (editable)
-                {
-                    slot = new Slot();
-                }
-                else
-                {
-                    Label word = Widgets.Label("", Palette.Ink, Lettering.Body);
-                    word.Wraps = false;
-                    slot = word;
-                }
-
+                var slot = new Slot();
                 _slots.Add(slot);
                 _shown.Add(null);
                 _wrap.Children.Add(slot);
@@ -100,14 +94,26 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 // Every tick, unlike the words: a slot core handed back unchanged can still have
                 // stopped being something to press, which is how a sequence locks itself while it runs.
-                _slots[i].Press = Deed.Sends(step.Slots[i].Command);
+                SentenceSlot model = step.Slots[i];
+                _slots[i].Press = Deed.Sends(model.Command);
 
-                if (ReferenceEquals(_shown[i], step.Slots[i]))
-                    continue;
+                if (!ReferenceEquals(_shown[i], model))
+                {
+                    _shown[i] = model;
+                    Apply(_slots[i], model, SentenceText.InStep(world, model));
+                }
 
-                _shown[i] = step.Slots[i];
-                Apply(_slots[i], step.Slots[i], SentenceText.InStep(world, step.Slots[i]));
+                // The bright fill is what says a chip can be pressed. One that cannot keeps its place and
+                // its shape, lifted only a notch off the page so the words still read as one part.
+                bool pressable = model.Command != 0;
+                _slots[i].Background = pressable ? Palette.SlotFill : Palette.Chrome;
+                _slots[i].Underline = pressable ? Edge(model) : Palette.None;
             }
+        }
+
+        static Color Edge(SentenceSlot model)
+        {
+            return model.IsEmpty ? Palette.Notice : Palette.SlotEdge;
         }
 
         /// <summary>
@@ -125,7 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 slot.Text = text;
                 slot.Sample = model.Sample;
                 slot.Color = model.IsEmpty ? Palette.Notice : Palette.Ink;
-                slot.Underline = model.IsEmpty ? Palette.Notice : Palette.SlotEdge;
+                slot.Underline = Edge(model);
                 return;
             }
 

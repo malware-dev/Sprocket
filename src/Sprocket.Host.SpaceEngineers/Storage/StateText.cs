@@ -36,12 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var system = systems[i];
                 var identity = system.Identity.ToString("D");
 
-                if (!system.Enabled)
-                {
-                    pen.Start(Keyword.Off).Text(identity);
-                    pen.End();
-                }
-
                 var sequences = system.Sequences;
                 for (var s = 0; s < sequences.Count; s++)
                 {
@@ -65,6 +59,24 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (runner != null)
                     Runs(pen, runner, system, identity);
             }
+
+            return pen.ToString();
+        }
+
+        /// <summary>
+        /// What is running, and nothing about what is switched off.
+        /// </summary>
+        /// <remarks>
+        /// For carrying the runs across when the program is rebuilt from somebody else's switches: a
+        /// client editing a Sprocket says what is off, and the server alone knows what is running.
+        /// </remarks>
+        public static string Running(Automation program, AutomationRunner runner)
+        {
+            var pen = new Pen();
+            var systems = program.Systems;
+
+            for (var i = 0; i < systems.Count; i++)
+                Runs(pen, runner, systems[i], systems[i].Identity.ToString("D"));
 
             return pen.ToString();
         }
@@ -251,9 +263,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system == null)
                 return;
 
+            // A system switched off as a whole, which is every one of it switched off.
             if (line.Count == 1)
             {
-                system.Enabled = false;
+                for (var i = 0; i < system.Instances.Count; i++)
+                    system.Instances[i].Enabled = false;
+
                 return;
             }
 

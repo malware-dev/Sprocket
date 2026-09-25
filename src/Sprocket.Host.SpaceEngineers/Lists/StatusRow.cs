@@ -24,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         readonly Label _problem;
         readonly Switch _switch;
         readonly Glyph _duplicate;
+        readonly Button _button;
         readonly Glyph _delete;
         readonly HStack _detail;
         readonly Glyph _below;
@@ -79,6 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                                 {
                                     new Glyph { Symbol = Symbols.Play, Style = Styles.Tool }.As(out _run),
                                     new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Tool }.As(out _duplicate),
+                                    new Button { Style = Styles.Offer }.As(out _button),
                                     new Switch { Style = Styles.Switch, IsSet = true }.As(out _switch),
                                     new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin }.As(out _delete)
                                 }
@@ -97,24 +99,28 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         {
             _inside.Padding = new Thickness(entry.Depth > 0 ? Inset : 0f, 0f, 0f, 0f);
 
-            _line.Press = Deed.Sends(entry.Command);
+            _line.Press = Deed.Asks(entry.Command, entry.Question);
 
             var pressable = entry.Command != 0;
             var wrong = entry.Problems > 0;
 
             _line.Style = wrong
-                ? Styles.Broken
+                ? (entry.Chosen ? Styles.BrokenChosen : Styles.Broken)
                 : entry.Running
-                    ? Styles.Running
+                    ? (entry.Chosen ? Styles.RunningChosen : Styles.Running)
                     : entry.Parked
-                        ? Styles.Parked
-                        : !pressable
-                            ? Styles.Still
-                            : entry.IsAction
-                                ? Styles.AddRow
-                                : Styles.Row;
+                        ? (entry.Chosen ? Styles.ParkedChosen : Styles.Parked)
+                        : entry.Chosen
+                            ? Styles.Chosen
+                            : !pressable
+                                ? Styles.Still
+                                : entry.IsAction
+                                    ? Styles.AddRow
+                                    : Styles.Row;
 
-            _summary.Text = entry.IsAction ? StartView.Plus + entry.Summary : entry.Summary;
+            _summary.Text = entry.IsAction
+                ? StartView.Plus + entry.Summary + (entry.Question.Length > 0 ? "…" : "")
+                : entry.Summary;
             _summary.Color = entry.IsAction ? Palette.Muted : Palette.Ink;
 
             _light.Tint = wrong
@@ -182,6 +188,15 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             _duplicate.Collapsed = !copies;
             _duplicate.Press = Deed.Sends(entry.DuplicateCommand);
             _duplicate.Tip = copies ? entry.DuplicateText : null;
+
+            var offers = entry.ButtonCommand != 0;
+            _button.Collapsed = !offers;
+            _button.Press = entry.ButtonFields.Count > 0
+                ? Deed.Values(entry.ButtonCommand, entry.ButtonQuestion, entry.ButtonFields, entry.ButtonFilled)
+                : Deed.Asks(entry.ButtonCommand, entry.ButtonQuestion);
+
+            if (offers)
+                _button.Text = entry.ButtonText;
 
             var bins = entry.DeleteCommand != 0;
             _delete.Collapsed = !bins;

@@ -106,7 +106,7 @@ public class ProgramTextTests
 
         var rig = program.AddSystem();
         rig.Name = "Drill Rig";
-        rig.Enabled = false;
+        rig.Instances[0].Enabled = false;
 
         var timed = program.AddSequence(rig, new EveryTrigger(600));
         timed.Name = "Top up";
@@ -184,7 +184,6 @@ public class ProgramTextTests
         var airlock = after.Systems[0];
         Assert.Equal("Airlock", airlock.Name);
         Assert.Equal("Cycles the front airlock", airlock.Annotation);
-        Assert.True(airlock.Enabled);
         Assert.Equal(2, airlock.Instances.Count);
         Assert.Equal("Port", airlock.Instances[1].Name);
 
@@ -206,7 +205,7 @@ public class ProgramTextTests
         Assert.Equal(new[] { "call", "spare" }, port.FilledWith("vent"));
         Assert.Null(port.FilledWith("nothing-like-this"));
 
-        Assert.False(after.Systems[1].Enabled);
+        Assert.False(after.Systems[1].Instances[0].Enabled);
 
         var letMeOut = after.Sequences[0];
         Assert.Equal("Let me out", letMeOut.Name);

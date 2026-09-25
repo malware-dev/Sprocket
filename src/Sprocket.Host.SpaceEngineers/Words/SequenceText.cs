@@ -28,8 +28,11 @@ namespace Sprocket.Host.SpaceEngineers.Words
         /// list of triggers is a list of what they set up. A trigger that does one thing has nothing
         /// to name, so its own sentence is the answer - "open Airlock Inner Door" - which is also
         /// what it reads as in the construct's own wiring, where it ends up.
+        /// <para>
+        /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
+        /// </para>
         /// </remarks>
-        public static string Runs(Bindings bindings, AutomationSystem system, Trigger trigger)
+        public static string Runs(Bindings bindings, AutomationSystem system, Trigger trigger, SystemInstance through)
         {
             Sequence sequence = system == null ? null : system.FindSequence(trigger.Runs);
             if (sequence == null)
@@ -38,7 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Words
             if (sequence.HasName)
                 return (trigger.Stops ? "stops " : "runs ") + sequence.Name;
 
-            return trigger.Stops ? "stops " + Doing(bindings, sequence) : Doing(bindings, sequence);
+            return trigger.Stops
+                ? "stops " + Doing(bindings, sequence, through)
+                : Doing(bindings, sequence, through);
         }
 
 
@@ -49,15 +54,19 @@ namespace Sprocket.Host.SpaceEngineers.Words
         /// The same line whether Sprocket watches for the moment or the construct announces it. That
         /// difference is real and it is not a difference in what somebody asked for, so it is not
         /// something to read about on every row.
+        /// <para>
+        /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
+        /// </para>
         /// </remarks>
-        public static string Trigger(Bindings bindings, Trigger trigger)
+        public static string Trigger(Bindings bindings, Trigger trigger, SystemInstance through)
         {
             var moment = trigger as MomentTrigger;
             if (moment != null && moment.Sources.Count > 0)
             {
                 var when = moment as WhenTrigger;
-                return "When " + SentenceText.Named(bindings, moment.Sources,
-                    when != null && when.RequiresAll) + " " + Happening(bindings, moment);
+                var sources = SystemInstance.Through(through, moment.Sources);
+                return "When " + SentenceText.Named(bindings, sources,
+                    when != null && when.RequiresAll) + " " + Happening(bindings, moment, sources);
             }
 
             var every = trigger as EveryTrigger;
@@ -83,22 +92,25 @@ namespace Sprocket.Host.SpaceEngineers.Words
         /// apart, because a moment reads as a verb: "button 3 is pressed is already in use". What is
         /// on screen behind this question is the choice it is about.
         /// </para>
+        /// <para>
+        /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
+        /// </para>
         /// </remarks>
-        public static string Taken(Bindings bindings, Trigger trigger)
+        public static string Taken(Bindings bindings, Trigger trigger, SystemInstance through)
         {
             var moment = trigger as MomentTrigger;
             if (moment == null || moment.Sources.Count == 0)
                 return "That is already in use";
 
             var when = moment as WhenTrigger;
-            return SentenceText.Named(bindings, moment.Sources, when != null && when.RequiresAll)
-                + " is already in use";
+            return SentenceText.Named(bindings, SystemInstance.Through(through, moment.Sources),
+                when != null && when.RequiresAll) + " is already in use";
         }
 
-        /// <summary>The words for the moment a trigger watches for, or an unfilled gap.</summary>
-        static string Happening(Bindings bindings, MomentTrigger moment)
+        /// <summary>The words for the moment a trigger watches for on <paramref name="sources" />, or an unfilled gap.</summary>
+        static string Happening(Bindings bindings, MomentTrigger moment, IList<string> sources)
         {
-            var events = Vocabulary.EventsFor(bindings, moment.Sources);
+            var events = Vocabulary.EventsFor(bindings, sources);
             for (var i = 0; i < events.Count; i++)
             {
                 if (events[i].Id == moment.EventId)
@@ -121,7 +133,9 @@ namespace Sprocket.Host.SpaceEngineers.Words
         }
 
 
-        public static string Doing(Bindings bindings, Sequence sequence)
+        /// <summary>What a sequence does, in a line: its name, or its first step and how many follow.</summary>
+        /// <remarks>Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.</remarks>
+        public static string Doing(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             if (sequence.HasName)
                 return sequence.Name;
@@ -152,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.Words
             if (told == null)
                 return "nothing yet";
 
-            var first = Step(bindings, sequence, told);
+            var first = Step(bindings, sequence, told, through);
             return lines == 1 ? first : first + " (+" + (lines - 1) + " more)";
         }
 
@@ -301,7 +315,7 @@ namespace Sprocket.Host.SpaceEngineers.Words
         /// Three sorts of line, because a sequence has three: something done to some blocks, waiting
         /// for what has been started, and spending time.
         /// </remarks>
-        static string Step(Bindings bindings, Sequence sequence, Step step)
+        static string Step(Bindings bindings, Sequence sequence, Step step, SystemInstance through)
         {
             var wait = step as Wait;
             if (wait != null)
@@ -318,17 +332,18 @@ namespace Sprocket.Host.SpaceEngineers.Words
             }
 
             var act = step as Act;
-            return act == null ? "wait for it to finish" : Action(bindings, act);
+            return act == null ? "wait for it to finish" : Action(bindings, act, through);
         }
 
 
-        static string Action(Bindings bindings, Act step)
+        static string Action(Bindings bindings, Act step, SystemInstance through)
         {
             if (step.Targets.Count == 0)
                 return SentenceText.Empty;
 
-            EntityAction named = step.Names(Vocabulary.ActionsFor(bindings, step.Targets));
-            var blocks = SentenceText.Named(bindings, step.Targets, true);
+            var targets = SystemInstance.Through(through, step.Targets);
+            EntityAction named = step.Names(Vocabulary.ActionsFor(bindings, targets));
+            var blocks = SentenceText.Named(bindings, targets, true);
             if (named == null)
                 return SentenceText.Empty + " " + blocks;
 

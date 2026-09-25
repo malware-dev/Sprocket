@@ -28,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly List<Nameplate> _plates = new List<Nameplate>();
         readonly List<Glyph> _joins = new List<Glyph>();
         readonly List<Label> _leads = new List<Label>();
+        readonly List<Label> _afters = new List<Label>();
 
         /// <summary>
         /// How many parts are on show, which is not how many plates exist.
@@ -83,6 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 plate.Highlight = part.CanRename && i != renaming ? Palette.Panel : Palette.None;
 
                 _leads[i].Text = part.Lead;
+                _afters[i].Text = part.After;
             }
         }
 
@@ -98,7 +100,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             int shape = parts.Count;
             for (int i = 0; i < parts.Count; i++)
+            {
                 shape = shape * 2 + (string.IsNullOrEmpty(parts[i].Lead) ? 0 : 1);
+                shape = shape * 2 + (string.IsNullOrEmpty(parts[i].After) ? 0 : 1);
+            }
 
             return shape;
         }
@@ -121,6 +126,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 // Quieter than the name it leads into, and the same size. It is the part of the heading
                 // nobody chose - saying it as loudly as the name would make the boilerplate the subject.
                 _leads.Add(Widgets.Label("", Palette.Muted, Lettering.Title));
+                _afters.Add(Widgets.Label("", Palette.Muted, Lettering.Title));
             }
 
             for (int i = 0; i < parts.Count; i++)
@@ -141,6 +147,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 }
 
                 _row.Children.Add(_plates[i]);
+
+                if (!string.IsNullOrEmpty(parts[i].After))
+                {
+                    _afters[i].Wraps = false;
+                    _row.Children.Add(_afters[i]);
+                }
             }
         }
     }

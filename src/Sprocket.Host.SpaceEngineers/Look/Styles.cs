@@ -76,6 +76,30 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Hot = { Background = Palette.None }
         }.Frozen();
 
+        /// <summary>The row a screen is about, edged so being chosen shows whatever else the row is.</summary>
+        public static readonly ElementStyle Chosen = new ElementStyle(Row)
+        {
+            Base = { Background = Palette.SlotFill, Edge = Palette.Accent }
+        }.Frozen();
+
+        /// <summary>The chosen row, with something wrong in it.</summary>
+        public static readonly ElementStyle BrokenChosen = new ElementStyle(Broken)
+        {
+            Base = { Edge = Palette.Accent }
+        }.Frozen();
+
+        /// <summary>The chosen row, running.</summary>
+        public static readonly ElementStyle RunningChosen = new ElementStyle(Running)
+        {
+            Base = { Edge = Palette.Accent }
+        }.Frozen();
+
+        /// <summary>The chosen row, stopped where it is waiting to be let on.</summary>
+        public static readonly ElementStyle ParkedChosen = new ElementStyle(Parked)
+        {
+            Base = { Edge = Palette.Accent }
+        }.Frozen();
+
         /// <summary>A state light, whose color the view sets from the state.</summary>
         public static readonly GlyphStyle Light = new GlyphStyle
         {
@@ -133,6 +157,13 @@ namespace Sprocket.Host.SpaceEngineers.Look
         {
             Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
             Hot = { Background = Palette.Panel }
+        }.Frozen();
+
+        /// <summary>A button in words on a row, edged because the row under it is already a panel.</summary>
+        public static readonly ButtonStyle Offer = new ButtonStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted, Edge = Palette.Dim, Padding = new Thickness(16f, 8f) },
+            Hot = { Background = Palette.PanelHot }
         }.Frozen();
 
         /// <summary>The quiet line under a name, where pressing it changes what it says.</summary>

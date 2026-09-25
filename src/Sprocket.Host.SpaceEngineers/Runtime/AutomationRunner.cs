@@ -387,7 +387,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 // Faults only. A sequence nothing starts yet is not broken, and parking it would make
                 // the step somebody is about to point at it fail for a second reason.
-                var fault = SequenceSummary.Fault(_world, Bindings, sequence, Get(sequence));
+                var fault = SequenceSummary.Fault(_world, Bindings, sequence, Get(sequence),
+                    sequence.System == null ? null : sequence.System.First);
 
                 if (fault.Parks)
                     sequence.Enabled = false;

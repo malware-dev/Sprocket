@@ -330,9 +330,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             // The parts before the ones that fill them in, so a reader meets the vocabulary before
             // the answers.
+            var used = new List<string>();
+            system.Acted(used);
+
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
-                WritePart(pen, parts[i]);
+            {
+                if (parts[i].Kept(used.Contains(parts[i].Id)))
+                    WritePart(pen, parts[i]);
+            }
 
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
@@ -508,7 +514,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (instance.HasName)
                 pen.Says(Keyword.As).Word(instance.Name);
 
-            var parts = Sorted(instance);
+            var parts = Sorted(system, instance);
             if (parts.Count == 0)
             {
                 pen.End();
@@ -527,18 +533,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// Which parts this one fills, in a settled order.
+        /// Which parts this one fills, in a settled order, leaving out a part the system does not keep.
         /// </summary>
         /// <remarks>
         /// Sorted, so a saved file does not churn between runs for no reason: a dictionary hands its
         /// keys back in whatever order it likes, and a save that differs every time is one that gets
         /// written every time and reads as a change in a diff.
         /// </remarks>
-        static List<string> Sorted(SystemInstance instance)
+        static List<string> Sorted(AutomationSystem system, SystemInstance instance)
         {
+            var used = new List<string>();
+            system.Acted(used);
+
             var parts = new List<string>();
             foreach (var slot in instance.Filled)
-                parts.Add(slot);
+            {
+                Part part = system.FindPart(slot);
+                if (part == null || part.Kept(used.Contains(slot)))
+                    parts.Add(slot);
+            }
 
             parts.Sort(StringComparer.Ordinal);
             return parts;

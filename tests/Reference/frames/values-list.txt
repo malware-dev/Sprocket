@@ -2,7 +2,7 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Do something
+on screen     Set Forward Direction on Tug Autopilot
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:121 W:1402 H:832}
@@ -88,8 +88,8 @@ on screen     Do something
 081  Text       at {X:1215 Y:137.192} scale 0.822  #DCF5FDFF  "VALUES"
 082  ClearClip  
 083  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
-084  SetClip    {X:301 Y:56 W:157 H:33}
-085  Text       at {X:300.91 Y:56.30198} scale 1.156  #DCF5FDFF  "Do something"
+084  SetClip    {X:301 Y:56 W:434 H:33}
+085  Text       at {X:300.91 Y:56.30198} scale 1.156  #DCF5FDFF  "Set Forward Direction on Tug Autopilot"
 086  ClearClip  
 087  Text       at {X:259 Y:50.22493} scale 0.732  #A2C3CDFF  "<"
 088  Text       at {X:1625.09 Y:50.22493} scale 0.732  #A2C3CDFF  "s"

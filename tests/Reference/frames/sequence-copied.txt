@@ -8,7 +8,7 @@ on screen     Sequence 2
 001  SetClip    {X:259 Y:121 W:1402 H:832}
 002  Sprite     Sprocket_Fill         {X:259 Y:133 W:13 H:13}  #5F7278FF
 003  Text       at {X:282 Y:128.887} scale 0.732  #A2C3CDFF  "switched off"
-004  Text       at {X:1322.3 Y:116.7049} scale 0.732  #A2C3CDFF  "g"
+004  Text       at {X:1316.255 Y:116.7049} scale 0.732  #A2C3CDFF  "g"
 005  Text       at {X:1374.255 Y:116.7049} scale 0.732  #5F7278FF  "u"
 006  Text       at {X:1432.255 Y:116.7049} scale 0.732  #5F7278FF  "r"
 007  Text       at {X:1484.21 Y:116.7049} scale 0.732  #A2C3CDFF  "d"

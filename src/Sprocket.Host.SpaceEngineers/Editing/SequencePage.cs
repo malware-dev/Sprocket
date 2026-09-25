@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// same words. What starts it is not here either: that is a row on its system's screen, and
         /// a sequence three triggers start has no one line to say so.
         /// </remarks>
-        public override string Title => SequenceText.Doing(Editor.Runner.Bindings, _sequence);
+        public override string Title => SequenceText.Doing(Editor.Runner.Bindings, _sequence, Editor.StandIn(_sequence.System));
 
         /// <summary>
         /// Naming happens on the heading, because the heading is what the name is for.
@@ -103,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // sequence still reads as a whole sentence and naming one is a choice rather than a chore.
             // The same call a list row makes, so the two cannot come to disagree.
             parts[0].Name = CustomName;
-            parts[0].Text = SequenceText.Doing(Editor.Runner.Bindings, _sequence);
+            parts[0].Text = SequenceText.Doing(Editor.Runner.Bindings, _sequence, Editor.StandIn(_sequence.System));
         }
 
         public override void Build(List<EditorComponent> components)
@@ -116,9 +116,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // The commands are simply not issued, so there is nothing for a target to invoke
             // by accident - and the screen keeps the same shape either way, so nothing appears
             // or disappears as somebody flips the switch.
-            _sentence.Editable = !_sequence.CanRun;
-            _sentence.LockedText = "Running. Stop it to make changes - whatever it has already "
-                + "done stays done.";
+            _sentence.Editable = !Running && Editor.Holder == null;
+            _sentence.LockedText = Editor.Holder != null
+                ? "Read only while " + Editor.Holder + " edits it."
+                : "Switched on. Switch it off to make changes.";
             // Not held back by the switch, unlike everything that changes what this does. Throwing
             // it away is not editing it, and a sequence somebody wants rid of while it is running is
             // exactly when they want rid of it.
@@ -208,8 +209,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             //
             // A warning is not that. Nothing starts this one yet, which is exactly the state somebody
             // walks away from thinking they have finished, so it earns the offer like any other.
+            SystemInstance through = Editor.StandIn(_sequence.System);
             var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
-                Editor.Runner.Get(_sequence));
+                Editor.Runner.Get(_sequence, through), through);
 
             if (fault.Exists && !fault.IsWarning)
                 return true;
@@ -321,8 +323,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         void Mark()
         {
+            SystemInstance through = Editor.StandIn(_sequence.System);
             var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
-                Editor.Runner.Get(_sequence));
+                Editor.Runner.Get(_sequence, through), through);
 
             _sentence.Problem = fault.Exists ? SequenceText.Problem(fault) : "";
             _sentence.ProblemIsWarning = fault.IsWarning;
@@ -346,6 +349,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return Change(kind, 0, 0, action);
         }
 
+        /// <summary>Whether it may run on the one of its system being edited, which is what locks it.</summary>
+        bool Running => _sequence.CanRun(Editor.StandIn(_sequence.System));
+
         int Change(Cmd kind, int which, Action action)
         {
             return Change(kind, which, 0, action);
@@ -353,7 +359,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         int Change(Cmd kind, int which, int part, Action action)
         {
-            return _sequence.CanRun ? 0 : Editor.Register(kind, which, part, action);
+            return Running ? 0 : Editor.Register(kind, which, part, action);
         }
 
         /// <summary>Where each row's step sits among the sequence's lines.</summary>
@@ -367,7 +373,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             var built = new SentenceStep(row + 1, Kind(step));
             built.Position = position;
-            built.MoveToCommand = _sequence.CanRun
+            built.MoveToCommand = Running
                 ? 0
                 : Editor.RegisterNumber(Cmd.MoveStep, position, delegate(int to) { Move(position, to); });
             built.DeleteCommand = Change(Cmd.DeleteStep, position, delegate { RemoveStep(index); });
@@ -396,12 +402,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             // Shown as written. A step whose blocks do not offer what it does is a fault, said on the
             // sequence, and the gap in its sentence is where it is re-picked.
-            var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets));
+            var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, act.Targets)));
 
             built.Slots.Add(new ActionSlot(chosen,
                 Change(Cmd.StepSlot, position, 0, delegate { EditStep(act, Opening.What); })));
 
-            built.Slots.Add(new EntitiesSlot(Resolved(act.Targets), true,
+            built.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), true,
                 Change(Cmd.StepSlot, position, 1, delegate { EditStep(act, Opening.Blocks); })));
 
             // Last, because the blocks are what somebody scanning a list of steps is looking for
@@ -446,11 +452,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // values rather than empty. Changing which blocks a step acts on is not a reason to type
             // its values again.
             Editor.Push(new PickPage(Editor, "Do something", false,
-                Resolved(step.Targets), step.ActionId, step.Form,
+                Editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
                 delegate(PickAnswer answer)
                 {
                     Editor.Do(_sequence,
-                        new ChangeStep(index, step, Declared(answer.Targets), answer.Chosen,
+                        new ChangeStep(index, step, Editor.Named(_sequence.System, answer.Targets), answer.Chosen,
                             answer.Form, answer.Values));
                     Editor.Pop();
                 }, values: step.Values, opens: opens));
@@ -479,7 +485,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     // step, so there is nothing to take back.
                     var step = new Act(answer.Chosen);
                     step.Form = answer.Form;
-                    var named = Declared(answer.Targets);
+                    var named = Editor.Named(_sequence.System, answer.Targets);
                     for (var i = 0; i < named.Count; i++)
                         step.Targets.Add(named[i]);
 

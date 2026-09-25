@@ -31,12 +31,12 @@
     </PropertyGroup>
 
     <!--
-        The symbol font the mod ships, copied so the simulator draws the same glyphs the game will.
-        Referenced where it lives rather than duplicated: one page, one set of metrics, and no chance of
-        the harness showing symbols the mod does not have.
+        The fonts the mod requires, copied so the simulator draws the same glyphs the game will.
+        Referenced where they live rather than duplicated: one page, one set of metrics, and no chance
+        of the harness showing symbols the game does not have.
     -->
     <ItemGroup>
-        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Fonts\Maltek\**\*">
+        <None Include="..\Maltek.Symbols\Content\Fonts\Maltek\**\*;..\Maltek.Mono\Content\Fonts\Maltek\**\*">
             <Link>Content\Fonts\Maltek\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

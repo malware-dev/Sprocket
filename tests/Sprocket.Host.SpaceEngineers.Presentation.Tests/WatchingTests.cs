@@ -5,18 +5,17 @@ using Sprocket.Host.SpaceEngineers.Look;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// A running sequence is drawn as a thing being watched, not as an editor with its hands tied.
+/// A locked sequence is the same page with nothing to press.
 /// </summary>
 /// <remarks>
 /// Core withholding the commands is tested on its own side. This is the other half, and it is the
-/// half that rots quietly: nothing else notices if a target starts drawing arrows and crosses that
-/// cannot do anything, and the first attempt at this greyed them instead of removing them, which read
-/// as broken rather than as a readout.
+/// half that rots quietly: nothing else notices if locking starts taking controls away, and every one
+/// taken away moves what stood beside or below it.
 /// </remarks>
 public class WatchingTests
 {
     [Fact]
-    public void TheEditingAffordancesAreAbsentWhileItRuns()
+    public void NothingMovesWhenItIsSwitchedOn()
     {
         var screen = Screen.Fresh();
         var editor = screen.Editor;
@@ -28,30 +27,39 @@ public class WatchingTests
         editor.PressPrimary();
         screen.Run(5);
 
-        // Parked, which is how a new sequence starts: the whole toolkit is there.
-        Assert.True(HasGrip(screen), "no drag grip while parked");
-        Assert.Equal(2, screen.Marks(Symbols.Delete).Count);
-        Assert.True(screen.Shows("+ do something"), "no add button while parked");
+        var parked = Places(screen);
+        var adders = screen.Text("+ do something").At.Y;
 
         editor.SwitchOn();
         screen.Run(5);
 
-        // Running: gone, not greyed. There is nothing left drawn wearing a disabled look, because
-        // there is nothing left drawn - grey says "broken, or not yours to touch", and neither is
-        // true of a system that is simply running.
-        Assert.False(HasGrip(screen), "drag grip still drawn while running");
-        Assert.False(screen.Shows("+ do something"), "add button still drawn while running");
+        Assert.Equal(parked, Places(screen));
 
-        // All but the bin on the sentence itself, which is not an edit: the crosses that take a step
-        // out are gone, and the one that takes the whole sequence away stays.
-        Assert.Single(screen.Marks(Symbols.Delete));
+        // The adders' line says why there are none, on the same line.
+        Assert.False(screen.Shows("+ do something"), "add button still offered while locked");
+        Assert.Equal(adders, screen.Text(editor.Sentence().LockedText).At.Y);
 
         editor.SetToggle(editor.Sentence().ToggleCommand, false);
         screen.Run(5);
 
-        // Back to parked, and the toolkit returns rather than staying gone.
-        Assert.True(HasGrip(screen), "drag grip did not come back");
+        Assert.Equal(parked, Places(screen));
         Assert.True(screen.Shows("+ do something"), "add button did not come back");
+    }
+
+    /// <summary>Where the step's words, its grips and every bin and arrow stand.</summary>
+    /// <remarks>A grip is six small squares, and nothing else on the screen is.</remarks>
+    static List<string> Places(Screen screen)
+    {
+        var places = new List<string> { "Airlock Light " + screen.Text("Airlock Light").At };
+
+        places.AddRange(screen.Drawings
+            .Where(d => !d.IsText && d.Where.Width == 3 && d.Where.Height == 3)
+            .Select(d => "grip " + d.Where));
+
+        foreach (var symbol in new[] { Symbols.Delete, Symbols.Undo, Symbols.Redo })
+            places.AddRange(screen.Marks(symbol).Select(d => symbol + " " + d.At));
+
+        return places;
     }
 
     /// <summary>The sentence stays readable while it runs, because reading it is the point.</summary>
@@ -130,9 +138,18 @@ public class WatchingTests
         Assert.Equal(placed[1], redo.At);
     }
 
-    /// <summary>A grip is six small squares, and nothing else on the screen is.</summary>
-    static bool HasGrip(Screen screen) =>
-        screen.Drawings.Any(d => !d.IsText && d.Where.Width == 3 && d.Where.Height == 3);
+    /// <summary>A copy somebody else is editing says so at the head of every page, the first included.</summary>
+    [Fact]
+    public void SomebodyElsesSprocketSaysWhoseItIs()
+    {
+        var screen = Screen.Fresh();
+        Sequence(screen.Editor);
+        screen.Editor.GoToRoot();
+        screen.Editor.Holder = "Enenra";
+        screen.Run(60);
+
+        Assert.True(screen.Shows("Enenra is editing this block's automation."), "the first page does not say whose it is");
+    }
 
     static void Sequence(SprocketEditor editor)
     {

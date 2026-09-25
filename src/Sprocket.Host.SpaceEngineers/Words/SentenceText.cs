@@ -140,6 +140,29 @@ namespace Sprocket.Host.SpaceEngineers.Words
         }
 
 
+        /// <summary>
+        /// A trigger or a step being picked, as far as it has got: "When Airlock Button …".
+        /// </summary>
+        /// <remarks>
+        /// In the order and the words of the line it will become, with a part not chosen yet said as
+        /// <see cref="Empty" />, so the title of the picker reads as the row it is making.
+        /// </remarks>
+        /// <param name="forEvents">Whether it is what starts something rather than what is done.</param>
+        /// <param name="blocks">The blocks as <see cref="Entities" /> says them.</param>
+        /// <param name="chosen">What is chosen, in the words its list shows it in, or empty.</param>
+        /// <param name="sets">Whether what is chosen sets a value, which reads "set it on the blocks".</param>
+        public static string Picking(bool forEvents, string blocks, string chosen, bool sets)
+        {
+            if (chosen.Length == 0)
+                chosen = Empty;
+
+            if (forEvents)
+                return "When " + blocks + " " + chosen;
+
+            chosen = char.ToUpperInvariant(chosen[0]) + chosen.Substring(1);
+            return sets ? chosen + " " + OnWord + " " + blocks : chosen + " " + blocks;
+        }
+
         /// <summary>What a slot of a step reads as.</summary>
         /// <remarks>
         /// A duration is said in the unit it was written in, which is ticks.

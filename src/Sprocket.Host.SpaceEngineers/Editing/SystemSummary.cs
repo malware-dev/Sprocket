@@ -112,11 +112,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             for (var i = 0; i < sequences.Count; i++)
             {
-                SequenceRunner state = instance == null
-                    ? runner.Get(sequences[i])
-                    : runner.Get(sequences[i], instance);
+                SystemInstance through = instance ?? system.First;
+                SequenceRunner state = runner.Get(sequences[i], through);
 
-                var fault = SequenceSummary.Fault(world, bindings, sequences[i], state);
+                var fault = SequenceSummary.Fault(world, bindings, sequences[i], state, through);
                 if (fault.Exists && !fault.IsWarning)
                     count++;
             }
@@ -145,11 +144,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             for (var i = 0; i < sequences.Count; i++)
             {
-                SequenceRunner state = instance == null
-                    ? runner.Get(sequences[i])
-                    : runner.Get(sequences[i], instance);
+                SystemInstance through = instance ?? system.First;
+                SequenceRunner state = runner.Get(sequences[i], through);
 
-                var fault = SequenceSummary.Fault(world, bindings, sequences[i], state);
+                var fault = SequenceSummary.Fault(world, bindings, sequences[i], state, through);
                 if (fault.Problem == SequenceProblem.Conflicted)
                     count++;
             }
@@ -166,13 +164,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
                 var moment = sequence.Trigger as MomentTrigger;
                 if (moment != null)
-                    AddNames(bindings, moment.Sources, result);
+                    AddNames(bindings, SystemInstance.Through(system.First, moment.Sources), result);
 
                 for (var s = 0; s < sequence.Steps.Count; s++)
                 {
                     var act = sequence.Steps[s] as Act;
                     if (act != null)
-                        AddNames(bindings, act.Targets, result);
+                        AddNames(bindings, SystemInstance.Through(system.First, act.Targets), result);
                 }
             }
         }

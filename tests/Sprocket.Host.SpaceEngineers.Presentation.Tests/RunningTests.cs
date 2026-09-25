@@ -51,15 +51,14 @@ public class RunningTests
     }
 
     /// <summary>
-    /// And the row a screen further out, which is one of the system rather than a sequence.
+    /// And the row a screen further out, which is the logic system rather than a sequence.
     /// </summary>
     /// <remarks>
-    /// The construct's own list shows systems with the ones of them underneath, and the one that is
-    /// going is what somebody arriving at that screen is looking for. Asked of that one of the system
-    /// and not of the system, because the port airlock cycling is not the front one cycling.
+    /// The one that is going is what somebody arriving at the construct's own list is looking for.
+    /// Asked of that logic system, because the port airlock cycling is not the front one cycling.
     /// </remarks>
     [Fact]
-    public void AnInstanceThatIsRunningIsWashedToo()
+    public void ALogicSystemThatIsRunningIsWashedToo()
     {
         var screen = WithOneRunning();
         screen.Editor.GoToRoot();
@@ -67,10 +66,7 @@ public class RunningTests
 
         var rows = screen.Editor.Rows().Entries;
 
-        // The system's own row is a heading over the ones of it and is never marked - the same rule
-        // the problem mark follows, for the same reason.
-        Assert.False(rows[0].Running);
-        Assert.True(rows[1].Running);
+        Assert.True(rows[0].Running);
         Assert.True(Washed(screen, Palette.LiveWash), "a running airlock's row has no ground");
     }
 

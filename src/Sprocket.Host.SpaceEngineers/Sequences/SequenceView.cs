@@ -20,9 +20,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// an editor. Watching a sequence arm, fire, sit on step three and skip a re-trigger is what saves
     /// somebody from having to run the program in their head.
     /// <para>
-    /// While it is running there is no editor to speak of: the grips, the delete marks and the adders are
-    /// gone rather than greyed, and the slots read as words instead of chips. What is on screen then is a
-    /// view of a system working, not an editor with its hands tied.
+    /// Locked, the page is the same page with nothing to press: every grip, chip, bin and arrow stays
+    /// where it stands and goes quiet, and the line the adders stand on says why instead. Nothing moves
+    /// when a sequence is switched on or off, starts or stops, because a page that rearranges itself
+    /// under somebody is a page they have to read again.
     /// </para>
     /// </remarks>
     public sealed class SequenceView : ComponentView
@@ -64,12 +65,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Glyph _undo = Widgets.Symbol(Symbols.Undo, Palette.Muted);
         readonly Glyph _redo = Widgets.Symbol(Symbols.Redo, Palette.Muted);
 
-        readonly Sized _undoSlot;
-        readonly Sized _redoSlot;
-
         // The one mark anybody already knows, and the note on it says what it promises: started as
         // its trigger would start it, rather than tried out.
         readonly Glyph _run = Widgets.Symbol(Symbols.Play, Palette.Muted);
+
+        /// <summary>The run mark's place, as wide for stop as for play.</summary>
+        readonly Sized _runSlot;
         readonly Switch _enable = new Switch(Lettering.Small);
         // The same bin the step rows use. Deleting a sequence and deleting a step out of one are the
         // same act at two sizes, and drawing them as a word and a picture said they were different kinds
@@ -77,7 +78,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         // the steps, beside the switch that governs the whole sequence.
         readonly Glyph _delete = Widgets.Symbol(Symbols.Delete, Palette.Muted);
 
-        readonly Label _locked = Widgets.Wash("", Palette.Muted, Palette.SlotFill);
+        /// <summary>Why nothing here can be pressed, said on the line the adders stand on.</summary>
+        readonly Label _locked = Widgets.Quiet("", Lettering.Small);
         /// <summary>
         /// What is wrong, where the state would otherwise be.
         /// </summary>
@@ -106,7 +108,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         readonly List<Label> _adderRows = new List<Label>();
 
-        bool _builtEditable;
         bool _built;
 
         /// <summary>The step being carried, or -1.</summary>
@@ -126,14 +127,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             // Deleting the whole sequence, so the same red warning the per-step crosses use.
             _delete.Highlight = Palette.ProblemWash;
 
-            // Both hold their place for the whole time the sentence is editable and go quiet when there is
-            // nothing to walk back. Hiding them would move Run and Delete sideways every time somebody
-            // made or undid a change, under the pointer they were about to use.
-            _undoSlot = new Sized(48f);
-            _undoSlot.Content = _undo;
+            // Both hold their place and go quiet when there is nothing to walk back, locked or not.
+            // Hiding them would move Run and Delete sideways under the pointer about to use them.
+            var undoSlot = new Sized(48f);
+            undoSlot.Content = _undo;
 
-            _redoSlot = new Sized(48f);
-            _redoSlot.Content = _redo;
+            var redoSlot = new Sized(48f);
+            redoSlot.Content = _redo;
+
+            // Play and stop are marks of different widths, and a mark that changed width as the
+            // sequence started would shift under the pointer that started it.
+            _runSlot = new Sized(48f);
+            _runSlot.Content = _run;
 
             // The light leads the state, because it is the same fact said faster: "Waiting" with a
             // green flash is what a sequence firing looks like from across the room.
@@ -145,14 +150,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             // The switch is last, and that is the whole point of the order. This row is anchored to the
             // right edge and lays out leftwards from it, so a control's position depends only on what
-            // stands to its right - which means the last one cannot be moved by anything. Undo, redo and
-            // Delete all come and go with whether the sequence is running; the switch is the one control
-            // that is always here, and it is also the one being pressed when the others leave. Putting it
-            // anywhere but last meant pressing it slid it out from under the pointer that pressed it.
+            // stands to its right - which means the last one cannot be moved by anything. The run mark
+            // is first because it is the one control that comes and goes, and first is the one place
+            // where going moves nothing else.
             Stack tools = Widgets.RowOf(Space.Item);
-            tools.Children.Add(_run);
-            tools.Children.Add(_undoSlot);
-            tools.Children.Add(_redoSlot);
+            tools.Children.Add(_runSlot);
+            tools.Children.Add(undoSlot);
+            tools.Children.Add(redoSlot);
             tools.Children.Add(_delete);
             tools.Children.Add(_enable);
 
@@ -180,8 +184,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         protected override void Refresh()
         {
-            if (!_built || _builtEditable != _component.Editable || !SameShape())
+            if (!_built || !SameShape())
                 Build();
+
+            bool editable = _component.Editable;
 
             // One of the two, never both and never neither, so the row is the same height whatever
             // is happening.
@@ -199,9 +205,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (skipping)
                 _skipped.Text = Skips(_component.SkippedCount, _component.RefusedCount);
 
-            // Absent rather than blank. A banner with nothing to say still holds a line, and a strip of
-            // empty chrome above the sentence is worse than the jump of one appearing when it has news.
-            Banner(_locked, _component.Editable ? "" : _component.LockedText, 1);
+            // The adders and the reason there are none share one line, so locking changes what the
+            // line says and not where anything stands.
+            for (int i = 0; i < _adderRows.Count; i++)
+                _adderRows[i].Collapsed = !editable;
+
+            _locked.Collapsed = editable;
+            if (!editable)
+                _locked.Text = _component.LockedText;
+
             // The same line either way; what changes is how loud it is. A warning in problem colours
             // would have somebody hunting for a broken block that is not there.
             if (wrong)
@@ -246,7 +258,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             int command = going ? _component.StopCommand : _component.RunCommand;
 
             _run.Symbol = going ? Symbols.Stop : Symbols.Play;
-            _run.Collapsed = command == 0;
+            _runSlot.Collapsed = command == 0;
             Widgets.Waiting(_run, command, going ? SequenceText.Stops() : SequenceText.Starts());
 
             Widgets.Waiting(_undo, _component.UndoCommand, _undoSays);
@@ -277,7 +289,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     row.Number.Text = step.Number.ToString();
                 }
                 row.Sentence.Update(Host.World, step);
+
+                // Quiet rather than gone, so a locked row is the same row. Not through Waiting, whose
+                // highlight would take the red off the one control here that destroys something.
+                //
+                // Which step it is takes no saying - the pointer is on its line. What the note is for
+                // is the difference between this and the bin in the tools above, which takes the lot.
                 row.Delete.Press = Deed.Sends(step.DeleteCommand);
+                row.Delete.Tint = step.DeleteCommand == 0 ? Palette.Dim : Palette.Faint;
+                row.Delete.Tip = step.DeleteCommand == 0 ? null : "Delete this step";
+                row.Grip.Color = editable ? Palette.Faint : Palette.Dim;
 
                 // Left alone while it is being carried. This runs every tick, and it would otherwise
                 // repaint the row being dragged in the colour it is not, sixty times a second.
@@ -499,7 +520,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         void Build()
         {
             _built = true;
-            _builtEditable = _component.Editable;
 
             _root.Children.Clear();
             _root.Children.Add(_header);
@@ -507,22 +527,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             BuildSteps();
             _root.Children.Add(_steps);
 
-            if (_component.Editable)
-            {
-                BuildAdders();
-                _root.Children.Add(_adders);
-            }
-
-            // Gone rather than greyed, so what is on screen while it runs is a view of a system
-            // working. Walking a change back is not something a running sequence can offer at all,
-            // so the two arrows go rather than sitting there dimmed as if they might yet answer.
-            // Safe to take away only because the switch stands to the right of them - see the order
-            // they were added in.
-            //
-            // The bin stays. Throwing a sequence away is not editing it, and wanting rid of one
-            // while it runs is exactly when somebody wants rid of it.
-            _undoSlot.Collapsed = !_component.Editable;
-            _redoSlot.Collapsed = !_component.Editable;
+            BuildAdders();
+            _root.Children.Add(_adders);
         }
 
         void BuildSteps()
@@ -540,14 +546,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 // anywhere that is not one" is a rule nobody can see. A handle says where to grab, and
                 // says that grabbing is a thing that can be done at all.
                 row.Grip = new Grip(Palette.Faint);
-                row.Grip.Collapsed = !_component.Editable;
 
                 row.Number = Widgets.Label("", Palette.Faint, Lettering.Small);
                 row.Number.Wraps = false;
 
                 var grip = new Sized(26f);
                 grip.Content = row.Grip;
-                grip.Collapsed = !_component.Editable;
 
                 var number = new Sized(34f);
                 number.Content = row.Number;
@@ -556,19 +560,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 handle.Children.Add(grip);
                 handle.Children.Add(number);
 
-                row.Sentence = new SentenceView(_component.Editable, step.Slots.Count);
+                row.Sentence = new SentenceView(step.Slots.Count);
                 // Washed red rather than the ordinary panel, because this is the one control on the row
                 // that destroys something. It is the only place on these screens where hovering says
                 // "careful" rather than "go on".
                 row.Delete = Widgets.Symbol(Symbols.Delete, Palette.Faint);
                 row.Delete.Highlight = Palette.ProblemWash;
-                row.Delete.Collapsed = !_component.Editable;
-
-                // Said here rather than per tick: a row's position is settled when the row is made,
-                // and the alternative is building this string sixty times a second for every step.
-                // Which step it is takes no saying - the pointer is on its line. What the note is for
-                // is the difference between this and the bin in the tools above, which takes the lot.
-                row.Delete.Tip = "Delete this step";
 
                 row.Line = new Bar();
                 row.Line.Spacing = Space.Item;
@@ -593,9 +590,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _adderRows.Add(adder);
                 _adders.Children.Add(adder);
             }
+
+            _adders.Children.Add(_locked);
         }
 
-        /// <summary>Shows a banner when it has something to say, and takes it out of the layout when not.</summary>
         /// <summary>What was asked for and did not happen, and why not.</summary>
         /// <remarks>
         /// Both reasons in one line when both happened, because they are one piece of news - this was
@@ -612,51 +610,5 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             return "skipped " + busy + "x while busy, " + off + "x while off";
         }
-
-        void Banner(Label banner, string text, int at)
-        {
-            bool wanted = !string.IsNullOrEmpty(text);
-            bool present = banner.Parent == _root;
-
-            if (wanted)
-                banner.Text = text;
-
-            if (wanted == present)
-                return;
-
-            if (!wanted)
-            {
-                _root.Children.Remove(banner);
-                return;
-            }
-
-            // Put back in its own place rather than on the end, so the two banners always read in the
-            // same order however they came and went.
-            var order = new List<Element>();
-            for (int i = 0; i < _root.Children.Count; i++)
-                order.Add(_root.Children[i]);
-
-            int index = at <= 1 ? 1 : Index(order, _locked) + 1;
-            if (index > order.Count)
-                index = order.Count;
-
-            order.Insert(index, banner);
-
-            _root.Children.Clear();
-            for (int i = 0; i < order.Count; i++)
-                _root.Children.Add(order[i]);
-        }
-
-        static int Index(List<Element> order, Element element)
-        {
-            for (int i = 0; i < order.Count; i++)
-            {
-                if (order[i] == element)
-                    return i;
-            }
-
-            return 0;
-        }
-
     }
 }

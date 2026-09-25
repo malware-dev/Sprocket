@@ -50,7 +50,7 @@ public class CompileTests
         var runner = new AutomationRunner(automation, ship.World);
         runner.Tick(1);
 
-        var fault = SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence));
+        var fault = SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence), sequence.System.First);
 
         Assert.Equal(SequenceProblem.Mistyped, fault.Problem);
         Assert.Equal(0, fault.Step);
@@ -251,7 +251,7 @@ public class CompileTests
         runner.Tick(1);
 
         Assert.Equal(SequenceProblem.Mistyped,
-            SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence)).Problem);
+            SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence), sequence.System.First).Problem);
 
         runner.Call(sequence);
         Assert.Null(remote.Handed);

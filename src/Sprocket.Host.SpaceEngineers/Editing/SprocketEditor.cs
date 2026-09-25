@@ -29,12 +29,20 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly Automation _program;
         readonly AutomationRunner _runner;
         string _author = "";
+        string _holder;
+        Habits _habits = new Habits();
         readonly List<EditorPage> _stack = new List<EditorPage>();
         readonly Dictionary<int, Action> _actions = new Dictionary<int, Action>();
         readonly Dictionary<int, Action<string>> _textActions = new Dictionary<int, Action<string>>();
         readonly Dictionary<int, Func<string, bool>> _textChecks = new Dictionary<int, Func<string, bool>>();
         readonly Dictionary<int, Action<bool>> _toggleActions = new Dictionary<int, Action<bool>>();
         readonly Dictionary<int, Action<int>> _numberActions = new Dictionary<int, Action<int>>();
+
+        /// <summary>
+        /// Which instance of each blueprint the editor shows its blocks through, by system id, where
+        /// somebody chose one.
+        /// </summary>
+        readonly Dictionary<int, int> _standIns = new Dictionary<int, int>();
         readonly EditorScreen _screen = new EditorScreen();
         readonly List<EditorComponent> _gathered = new List<EditorComponent>();
         readonly List<ChoiceEntry> _actionBar = new List<ChoiceEntry>();
@@ -67,6 +75,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// on are the same length and the same line. What a host hands over is its own business.
         /// </para>
         /// </remarks>
+        /// <summary>
+        /// Where running a sequence by hand, or stopping it, goes where it is not the runner here, or
+        /// null: the sequence, the one of its system, and whether it stops.
+        /// </summary>
+        /// <remarks>
+        /// Set on a copy a client is editing, whose runner runs nothing: the sequence runs where the
+        /// Sprocket is kept, on the server.
+        /// </remarks>
+        public Action<Sequence, SystemInstance, bool> Elsewhere { get; set; }
+
+        /// <summary>Who holds the Sprocket this editor shows, or null where this editor may change it.</summary>
+        /// <remarks>
+        /// Set on a copy lent to look at while somebody else edits it. Every command but the ones that
+        /// move around the editor is refused where it is registered, so a control that would change
+        /// something has no command and goes inert - the way a switched-on sequence locks itself.
+        /// The screen is built again on the next tick, since what was registered before is not.
+        /// </remarks>
+        public string Holder
+        {
+            get { return _holder; }
+            set
+            {
+                _holder = value;
+                _structureDirty = true;
+            }
+        }
+
         public string Author
         {
             get { return _author; }
@@ -135,7 +170,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             //
             // Its words only. The heading's shape was settled when the screen was made, and the target
             // has already built controls to match it.
-            if (_worded.Due(tick))
+            var retitled = Current.TakeRetitle();
+            if (_worded.Due(tick) || retitled)
                 Current.RefreshHeading(_screen.Heading);
 
             _screen.Subtitle = Current.Subtitle;
@@ -332,6 +368,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         void Said(List<EditorComponent> components)
         {
+            if (_holder != null && _program.Trouble.Length == 0)
+            {
+                Held(components);
+                return;
+            }
+
             if (_program.Trouble.Length == 0)
             {
                 if (_notice == null)
@@ -393,6 +435,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _mending.Clear();
             _mending.Add(new ChoiceEntry("Replace it", false,
                 Register(Cmd.Resolve, delegate { AskBeforeReplacing(delegate { }); })));
+            _notice.Actions.Reset(_mending);
+
+            components.Insert(0, _notice);
+        }
+
+        /// <summary>
+        /// Says, at the head of every page, who is editing the Sprocket this editor only shows.
+        /// </summary>
+        /// <remarks>
+        /// For as long as the editor is open, so it never comes or goes while somebody is looking. Not
+        /// a problem: nothing is wrong, the Sprocket is simply somebody else's for now.
+        /// </remarks>
+        void Held(List<EditorComponent> components)
+        {
+            if (_notice == null)
+                _notice = new NoticeComponent("", NoticeLevel.Info);
+
+            _notice.Leaving = false;
+            _notice.Level = NoticeLevel.Info;
+            _notice.Text = _holder + " is editing this block's automation.";
+            _notice.Detail = "Only one person can edit at a time. Reopen this once they're done to make changes.";
+            _notice.Diagnostic = "";
+
+            _notice.Expanded = _open;
+            _notice.ExpandCommand = Register(Cmd.Expand, delegate { _open = !_open; Invalidate(); });
+
+            _mending.Clear();
             _notice.Actions.Reset(_mending);
 
             components.Insert(0, _notice);
@@ -615,6 +684,25 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return !_textChecks.TryGetValue(command, out check) || check(value ?? "");
         }
 
+        /// <summary>How somebody is working in this editor; see <see cref="Editing.Habits" />.</summary>
+        /// <remarks>Replaced on a client's copy by the ones its earlier copies of the same block used.</remarks>
+        public Habits Habits
+        {
+            get { return _habits; }
+            set { _habits = value ?? new Habits(); }
+        }
+
+        /// <summary>Whether the list of what to do shows the block's own vocabulary rather than Sprocket's.</summary>
+        /// <remarks>
+        /// Held here rather than on the picker so that somebody who works in the block's own words
+        /// keeps working in them, rather than being put back a step at every sequence.
+        /// </remarks>
+        public bool ShowsTerminal
+        {
+            get { return Habits.ShowsTerminal; }
+            set { Habits.ShowsTerminal = value; }
+        }
+
         /// <summary>
         /// Reports a number somebody chose - a position to move something to, most of all.
         /// </summary>
@@ -627,52 +715,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Out of range is ignored rather than refused. A drop past the end of a list is an
         /// ordinary thing for a pointer to do.
         /// </remarks>
-        /// <summary>
-        /// The kind of block a picker is narrowed to, kept per place a picker opens from.
-        /// </summary>
-        /// <remarks>
-        /// Somebody wiring a row of lights opens the picker once per step, and a filter that reset
-        /// itself every time would be set again at every one of them. Held here because a page is
-        /// built afresh each time one opens and this has to outlive that.
-        /// <para>
-        /// <b>One per place and not one in total.</b> What starts a sequence and what it does are
-        /// different questions asked of different blocks - a button and a sensor start things, and
-        /// lights and doors are what gets done to - so a filter set while answering one has no
-        /// business narrowing the other.
-        /// </para>
-        /// <para>
-        /// Not saved with the program. It is how somebody is working right now rather than part of
-        /// what they are building, and a world reopened a week later should not still be hiding
-        /// blocks for a reason nobody remembers.
-        /// </para>
-        /// </remarks>
-        public string KindFor(bool forEvents)
-        {
-            return forEvents ? _whenKind : _doingKind;
-        }
-
-        public void RememberKind(bool forEvents, string kind)
-        {
-            if (forEvents)
-                _whenKind = kind ?? "";
-            else
-                _doingKind = kind ?? "";
-        }
-
-        string _whenKind = "";
-        string _doingKind = "";
-
-        /// <summary>Whether the list of what to do shows the block's own vocabulary rather than Sprocket's.</summary>
-        /// <remarks>
-        /// Kept the way the kind filter is: for as long as the editor is open, and not saved with the
-        /// program, because it is how somebody is working rather than part of what they are building.
-        /// <para>
-        /// Held here rather than on the picker so that somebody who works in the block's own words
-        /// keeps working in them, rather than being put back a step at every sequence.
-        /// </para>
-        /// </remarks>
-        public bool ShowsTerminal { get; set; }
-
         public void SetNumber(int command, int value)
         {
             Action<int> action;
@@ -761,6 +803,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         internal int Register(Cmd kind, int which, int part, Action action)
         {
+            if (Refuses(kind))
+                return 0;
+
             var id = CommandId.Of(kind, which, part);
             Claim(id, kind);
             _actions.Add(id, action);
@@ -780,6 +825,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>The same, for one part of a numbered thing - one slot of a sentence.</summary>
         internal int RegisterText(Cmd kind, int which, int part, Action<string> action)
         {
+            if (Refuses(kind))
+                return 0;
+
             var id = CommandId.Of(kind, which, part);
             Claim(id, kind);
             _textActions.Add(id, action);
@@ -789,13 +837,24 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>A text command that refuses whatever <paramref name="accepts" /> says no to.</summary>
         internal int RegisterText(Cmd kind, Action<string> action, Func<string, bool> accepts)
         {
-            var id = RegisterText(kind, 0, action);
-            _textChecks.Add(id, accepts);
+            return RegisterText(kind, 0, action, accepts);
+        }
+
+        /// <summary>The same, for one of a numbered thing.</summary>
+        internal int RegisterText(Cmd kind, int which, Action<string> action, Func<string, bool> accepts)
+        {
+            var id = RegisterText(kind, which, action);
+            if (id != 0)
+                _textChecks.Add(id, accepts);
+
             return id;
         }
 
         internal int RegisterNumber(Cmd kind, int which, Action<int> action)
         {
+            if (Refuses(kind))
+                return 0;
+
             var id = CommandId.Of(kind, which);
             Claim(id, kind);
             _numberActions.Add(id, action);
@@ -814,6 +873,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         internal int RegisterToggle(Cmd kind, int which, int part, Action<bool> action)
         {
+            if (Refuses(kind))
+                return 0;
+
             var id = CommandId.Of(kind, which, part);
             Claim(id, kind);
             _toggleActions.Add(id, action);
@@ -828,6 +890,29 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// doing the other's job, and the symptom - a button that does the wrong thing - would
         /// be blamed on anything but the numbering.
         /// </remarks>
+        /// <summary>Whether a command is refused because somebody else holds the Sprocket.</summary>
+        /// <remarks>Moving around is all a copy lent to look at may do.</remarks>
+        bool Refuses(Cmd kind)
+        {
+            if (Holder == null)
+                return false;
+
+            switch (kind)
+            {
+                case Cmd.Back:
+                case Cmd.Refresh:
+                case Cmd.Expand:
+                case Cmd.OpenSystem:
+                case Cmd.OpenSequence:
+                case Cmd.PageOn:
+                case Cmd.PageBack:
+                case Cmd.ShowScript:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
         void Claim(int id, Cmd kind)
         {
             if (_actions.ContainsKey(id) || _textActions.ContainsKey(id)
@@ -1037,6 +1122,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             if (_structureDirty)
                 Rebuild();
+
+            // A title that follows what is being chosen catches up with the command that chose it,
+            // rather than a frame later - after a rebuild too, since that made its words from the page
+            // as it stood before the choice was worded.
+            if (Current.TakeRetitle())
+                Current.RefreshHeading(_screen.Heading);
         }
 
         /// <summary>
@@ -1171,29 +1262,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>
-        /// Another instance of a system. Not built yet, and says so.
-        /// </summary>
-        /// <remarks>
-        /// It opens the same configurator loading does, because they are the same act: point a
-        /// system at the blocks it should use here. Neither exists until block slots do.
-        /// </remarks>
-        internal void OfferAnother(AutomationSystem system)
-        {
-            var page = new ChoicePage(this, "Add another");
-            page.EmptyText = "Not built yet. This would ask which of your blocks this one uses, "
-                + "and everything it does would stay the same as the others.";
-            Push(page);
-        }
-
-        /// <summary>
-        /// Loading a system somebody else made. Not built yet, and says so.
-        /// </summary>
-        /// <remarks>
-        /// Present rather than hidden because it is half of what the front door offers, and a
-        /// screen that grows an option later teaches itself twice. What it needs is the
-        /// configurator, which needs block slots.
-        /// </remarks>
-        /// <summary>
         /// Opens the listing of what this construct's automation is saved as.
         /// </summary>
         /// <remarks>
@@ -1211,10 +1279,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Push(new ScriptPage(this));
         }
 
+        /// <summary>
+        /// Loading a blueprint somebody else made. Not built yet, and says so.
+        /// </summary>
+        /// <remarks>
+        /// Present rather than hidden because it is half of what the front door offers, and a
+        /// screen that grows an option later teaches itself twice. What it needs is the blueprint's
+        /// own screen, where which of the construct's blocks fill each part is said.
+        /// </remarks>
         internal void OfferLoading()
         {
-            var page = new ChoicePage(this, "Load system");
-            page.EmptyText = "Not built yet. A system somebody sent you would be set up here, "
+            var page = new ChoicePage(this, "Load blueprint");
+            page.EmptyText = "Not built yet. A blueprint somebody sent you would be set up here, "
                 + "asking which of your blocks fill each part of it.";
             Push(page);
         }
@@ -1279,8 +1355,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                         // history for it and nothing to take back to - which is why the trigger
                         // losing the button here loses it outright, the way the bin on its row is
                         // the way back from making one at all.
-                        MomentTrigger made = Starter(answer);
-                        Unless(made, null, delegate(MomentTrigger taken)
+                        MomentTrigger made = Starter(system, answer);
+                        Unless(system, made, null, delegate(MomentTrigger taken)
                         {
                             if (taken != null)
                                 taken.Sources.Clear();
@@ -1353,37 +1429,54 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// itself.
         /// </para>
         /// </remarks>
-        void Unless(MomentTrigger made, Trigger except, Action<MomentTrigger> then, Action otherwise)
+        void Unless(AutomationSystem system, MomentTrigger made, Trigger except, Action<MomentTrigger> then,
+            Action otherwise)
         {
-            var taken = Holding(made, except) as MomentTrigger;
+            SystemInstance through;
+            var taken = Holding(Seen(system, made.Sources), made, except, out through) as MomentTrigger;
             if (taken == null)
             {
                 then(null);
                 return;
             }
 
-            AskHere(SequenceText.Taken(_runner.Bindings, taken));
+            AskHere(SequenceText.Taken(_runner.Bindings, taken, through));
             Answer("Leave it alone", otherwise);
             Answer("Take it over", delegate { then(taken); });
         }
 
-        /// <summary>What already answers that moment, or null.</summary>
-        Trigger Holding(MomentTrigger made, Trigger except)
+        /// <summary>
+        /// What already answers that moment on the blocks in <paramref name="blocks" />, or null; and
+        /// which one of its system holds it.
+        /// </summary>
+        /// <remarks>
+        /// Compared as blocks, through every one of every system: a toolbar slot belongs to a block, and
+        /// two systems can each have a part called Button Panel on different buttons.
+        /// </remarks>
+        Trigger Holding(IList<string> blocks, MomentTrigger made, Trigger except, out SystemInstance instance)
         {
+            instance = null;
             if (!(made is RequiredTrigger))
                 return null;
 
             for (var s = 0; s < _program.Systems.Count; s++)
             {
-                var triggers = _program.Systems[s].Triggers;
+                AutomationSystem each = _program.Systems[s];
+                var triggers = each.Triggers;
                 for (var i = 0; i < triggers.Count; i++)
                 {
                     var moment = triggers[i] as RequiredTrigger;
-                    if (moment == null || triggers[i] == except)
+                    if (moment == null || triggers[i] == except || moment.EventId != made.EventId)
                         continue;
 
-                    if (moment.EventId == made.EventId && Same(moment.Sources, made.Sources))
+                    for (var n = 0; n < each.Instances.Count; n++)
+                    {
+                        if (!Same(SystemInstance.Through(each.Instances[n], moment.Sources), blocks))
+                            continue;
+
+                        instance = each.Instances[n];
                         return moment;
+                    }
                 }
             }
 
@@ -1409,17 +1502,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return true;
         }
 
-        internal MomentTrigger Starter(PickAnswer answer)
+        internal MomentTrigger Starter(AutomationSystem system, PickAnswer answer)
         {
             MomentTrigger made = Vocabulary.Starter(
                 Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.All);
 
-            for (var i = 0; i < answer.Targets.Count; i++)
-            {
-                GridEntity entity = _world.FindEntity(answer.Targets[i]);
-                if (entity != null)
-                    made.Sources.Add(_program.Declare(_world, entity).Name);
-            }
+            var named = Named(system, answer.Targets);
+            for (var i = 0; i < named.Count; i++)
+                made.Sources.Add(named[i]);
 
             return made;
         }
@@ -1550,14 +1640,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 {
                     UnwindTo(origin);
 
-                    var rewrite = new Rewrite(doing, new ChangeStep(index, only, Named(answer.Targets),
+                    var rewrite = new Rewrite(doing, new ChangeStep(index, only, Named(system, answer.Targets),
                         answer.Chosen, answer.Form, answer.Values));
                     Do(system, start == null ? rewrite : (SystemEdit)new Retrigger(start, rewrite));
                 };
 
                 if (aim.Following == null)
                 {
-                    aim.Following = new PickPage(this, "Do something", false, Blocks(only.Targets),
+                    aim.Following = new PickPage(this, "Do something", false, Blocks(system, only.Targets),
                         only.ActionId, only.Form, delegate(PickAnswer answer) { aim.Finish(answer); },
                         values: only.Values, opens: aim.Opens, after: aim.Pick);
                 }
@@ -1572,12 +1662,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             {
                 var act = new Act(answer.Chosen);
                 act.Form = answer.Form;
-                for (var i = 0; i < answer.Targets.Count; i++)
-                {
-                    GridEntity entity = _world.FindEntity(answer.Targets[i]);
-                    if (entity != null)
-                        act.Targets.Add(_program.Declare(_world, entity).Name);
-                }
+                var named = Named(system, answer.Targets);
+                for (var i = 0; i < named.Count; i++)
+                    act.Targets.Add(named[i]);
 
                 for (var i = 0; i < answer.Values.Count; i++)
                     act.Values.Add(answer.Values[i]);
@@ -1601,18 +1688,95 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Push(aim.Following);
         }
 
-        /// <summary>What the program calls each of these blocks, declaring any it has not named yet.</summary>
-        List<string> Named(IList<long> targets)
+        /// <summary>
+        /// The parts of <paramref name="system" /> these blocks fill, as its stand-in has them: a part
+        /// taken for any block that fills none, and the block declared where the construct has not
+        /// named it yet.
+        /// </summary>
+        /// <remarks>
+        /// Where picking a block turns into naming one. What a sentence stores is a part, and which
+        /// block fills it belongs to each one of the system - so the same sentence acts on the port
+        /// airlock's door in one and the starboard's in another.
+        /// </remarks>
+        internal List<string> Named(AutomationSystem system, IList<long> blocks)
         {
+            SystemInstance instance = StandIn(system);
             var named = new List<string>();
-            for (var i = 0; i < targets.Count; i++)
+            for (var i = 0; i < blocks.Count; i++)
             {
-                GridEntity entity = _world.FindEntity(targets[i]);
-                if (entity != null)
-                    named.Add(_program.Declare(_world, entity).Name);
+                GridEntity entity = _world.FindEntity(blocks[i]);
+                if (entity == null)
+                    continue;
+
+                var declared = _program.Declare(_world, entity).Name;
+                named.Add(instance == null
+                    ? declared
+                    : system.Take(instance, declared, entity.Kind.DisplayName, Type(entity.Kind)));
             }
 
             return named;
+        }
+
+        /// <summary>
+        /// What these names in <paramref name="system" /> come to as its stand-in fills them: the
+        /// blocks, as the construct declares them.
+        /// </summary>
+        /// <remarks>A name that is not a part, or a part the stand-in leaves empty, comes through as it is.</remarks>
+        internal List<string> Seen(AutomationSystem system, IList<string> names)
+        {
+            return SystemInstance.Through(StandIn(system), names);
+        }
+
+        /// <summary>
+        /// The instance of <paramref name="system" /> whose blocks the editor shows, and picks blocks
+        /// through: the one last chosen, or the first.
+        /// </summary>
+        internal SystemInstance StandIn(AutomationSystem system)
+        {
+            if (system == null)
+                return null;
+
+            int number;
+            SystemInstance chosen = _standIns.TryGetValue(system.Id, out number) ? system.FindInstance(number) : null;
+            return chosen ?? system.First;
+        }
+
+        /// <summary>
+        /// Adds another instance of a blueprint, called <paramref name="name" />, and shows the blueprint
+        /// through it; or null where the name is empty or one of them already has it.
+        /// </summary>
+        /// <remarks>
+        /// Shown through the new one because the next thing to do is say which blocks it uses, and every
+        /// part of it is empty until somebody does.
+        /// </remarks>
+        internal SystemInstance Another(AutomationSystem system, string name)
+        {
+            name = Naming.Clean(name);
+            if (name.Length == 0 || system.FindInstance(name) != null)
+                return null;
+
+            SystemInstance made = system.AddInstance();
+            made.Name = name;
+            Choose(system, made);
+            return made;
+        }
+
+        /// <summary>Shows <paramref name="system" /> through <paramref name="instance" />'s blocks from now on.</summary>
+        internal void Choose(AutomationSystem system, SystemInstance instance)
+        {
+            if (system == null || instance == null)
+                return;
+
+            _standIns[system.Id] = instance.Number;
+            Invalidate();
+        }
+
+        /// <summary>The type a part filled by a block of <paramref name="kind" /> expects, with no subtype.</summary>
+        static string Type(EntityKind kind)
+        {
+            var sort = BlockKinds.Sort(kind.Id);
+            var slash = sort.IndexOf('/');
+            return slash < 0 ? sort : sort.Substring(0, slash);
         }
 
         /// <summary>
@@ -1686,11 +1850,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var was = moment as WhenTrigger;
 
             var picker = new PickPage(this, "When something happens", true,
-                Blocks(moment.Sources), moment.EventId, Form.Native,
+                Blocks(system, moment.Sources), moment.EventId, Form.Native,
                 delegate(PickAnswer answer)
                 {
-                    MomentTrigger made = Starter(answer);
-                    Unless(made, moment, delegate(MomentTrigger taken)
+                    MomentTrigger made = Starter(system, answer);
+                    Unless(system, made, moment, delegate(MomentTrigger taken)
                     {
                         var change = new ChangeTrigger(moment, made);
 
@@ -1715,17 +1879,23 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 picker.GoOn();
         }
 
-        /// <summary>What these declarations point at, as blocks, for a picker that shows blocks.</summary>
+        /// <summary>
+        /// What these names in <paramref name="system" /> point at, as blocks, for a control that shows
+        /// blocks.
+        /// </summary>
         /// <remarks>
-        /// A reference that points at nothing is left out rather than stood in for by a zero: the
-        /// picker shows what is on the ship, and what is gone is not.
+        /// The model points at claims; a picker and a sentence show things on the ship. This is where the
+        /// two meet. A reference that points at nothing is left out rather than stood in for by a zero:
+        /// what to say about the gap is the control's, and it can already see that fewer came back than
+        /// the sentence claims.
         /// </remarks>
-        List<long> Blocks(IList<string> names)
+        internal List<long> Blocks(AutomationSystem system, IList<string> names)
         {
+            var seen = Seen(system, names);
             var found = new List<long>();
-            for (var i = 0; i < names.Count; i++)
+            for (var i = 0; i < seen.Count; i++)
             {
-                GridEntity entity = _runner.Bindings.Entity(names[i]);
+                GridEntity entity = _runner.Bindings.Entity(seen[i]);
                 if (entity != null)
                     found.Add(entity.Id);
             }
@@ -1779,23 +1949,28 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         internal void StopNow(Sequence sequence)
         {
-            SequenceRunner state = _runner.Get(sequence, Only(sequence));
+            if (Elsewhere != null)
+            {
+                Elsewhere(sequence, StandIn(sequence.System), true);
+                return;
+            }
+
+            SequenceRunner state = _runner.Get(sequence, StandIn(sequence.System));
             if (state != null)
                 state.Stop();
         }
 
         internal void RunNow(Sequence sequence)
         {
+            if (Elsewhere != null)
+            {
+                Elsewhere(sequence, StandIn(sequence.System), false);
+                return;
+            }
+
             // By hand, which is what lets a parked sequence run at all: the switch keeps triggers
             // off it, and a person at the screen is not a trigger.
-            _runner.Call(sequence, Only(sequence), true);
-        }
-
-        /// <summary>The one of the system this screen is about, which is the first of them.</summary>
-        static SystemInstance Only(Sequence sequence)
-        {
-            AutomationSystem system = sequence.System;
-            return system == null || system.Instances.Count == 0 ? null : system.Instances[0];
+            _runner.Call(sequence, StandIn(sequence.System), true);
         }
 
         /// <summary>
@@ -1821,7 +1996,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         internal void DeleteSequence(Sequence sequence)
         {
             var page = new ChoicePage(this, "Delete this sequence?");
-            page.Caption = SequenceText.Doing(_runner.Bindings, sequence);
+            page.Caption = SequenceText.Doing(_runner.Bindings, sequence, StandIn(sequence.System));
 
             page.Add("Keep it", false, delegate { Pop(); });
 
