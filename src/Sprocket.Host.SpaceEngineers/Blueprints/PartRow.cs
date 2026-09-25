@@ -72,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
             if (ReferenceEquals(_worded, entry))
                 return;
 
-            // An empty part says so in the colour an unfilled slot of a sentence does, because it is
+            // An empty part says so in the color an unfilled slot of a sentence does, because it is
             // the same news: this logic system has nothing there yet, and will act on nothing.
             _worded = entry;
             _blocks.Text = SentenceText.Entities(world, entry.Blocks, true);
