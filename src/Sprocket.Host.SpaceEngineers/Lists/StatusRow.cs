@@ -1,8 +1,10 @@
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Words;
 
@@ -14,6 +16,14 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     {
         const float Inset = 32f;
 
+        readonly ComponentView _view;
+        readonly Relay _open;
+        readonly Relay _runs;
+        readonly Relay _changes;
+        readonly Relay _flips;
+        readonly Relay _copies;
+        readonly Relay _offers;
+        readonly Relay _bins;
         readonly HStack _line;
         readonly HStack _inside;
         readonly Glyph _light;
@@ -30,13 +40,29 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         readonly Glyph _below;
         string _opens;
         string _opensSays;
+        StatusEntry _entry;
 
-        /// <summary>An empty row, filled in by <see cref="Update" />.</summary>
-        public StatusRow()
+        /// <summary>What the light says for each thing it can show.</summary>
+        readonly Document _broken = Markdown.Parse("**Something needs mending**\nOpen it to see what.");
+        readonly Document _ran = Markdown.Parse("**Ran just now**");
+        readonly Document _idle = Markdown.Parse("**Idle**\nLights green when it runs, and red when something in it needs mending.");
+
+        /// <summary>An empty row belonging to <paramref name="view" />, filled in by <see cref="Update" />.</summary>
+        public StatusRow(ComponentView view)
         {
+            _view = view;
+            _open = new Relay(Open);
+            _runs = new Relay(Run);
+            _changes = new Relay(Change);
+            _flips = new Relay(Flip);
+            _copies = new Relay(Copy);
+            _offers = new Relay(Offer);
+            _bins = new Relay(Bin);
+
             _line = new HStack
             {
                 Style = Styles.Row,
+                Command = _open,
                 Children =
                 {
                     new HStack
@@ -66,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                                         Spacing = 8f,
                                         Children =
                                         {
-                                            new Button { Style = Styles.Status }.As(out _status),
+                                            new Button { Style = Styles.Status, Command = _changes }.As(out _status),
                                             new Label { Style = Styles.Detail, Wraps = true }.As(out _problem),
                                             new Label { Style = Styles.Detail }.As(out _lastRun)
                                         }
@@ -78,11 +104,11 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                                 Spacing = 8f,
                                 Children =
                                 {
-                                    new Glyph { Symbol = Symbols.Play, Style = Styles.Tool }.As(out _run),
-                                    new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Tool }.As(out _duplicate),
-                                    new Button { Style = Styles.Offer }.As(out _button),
-                                    new Switch { Style = Styles.Switch, IsSet = true }.As(out _switch),
-                                    new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin }.As(out _delete)
+                                    new Glyph { Symbol = Symbols.Play, Style = Styles.Tool, Command = _runs }.As(out _run),
+                                    new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Tool, Command = _copies }.As(out _duplicate),
+                                    new Button { Style = Styles.Offer, Command = _offers }.As(out _button),
+                                    new Switch { Style = Styles.Switch, IsSet = true, Command = _flips }.As(out _switch),
+                                    new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Command = _bins }.As(out _delete)
                                 }
                             }
                         }
@@ -97,11 +123,12 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         /// <summary>Shows <paramref name="entry" /> on this row.</summary>
         public void Update(StatusEntry entry)
         {
+            _entry = entry;
             _inside.Padding = new Thickness(entry.Depth > 0 ? Inset : 0f, 0f, 0f, 0f);
 
-            _line.Press = Deed.Asks(entry.Command, entry.Question);
-
             var pressable = entry.Command != 0;
+            _open.CanExecute = pressable;
+            _line.RichTip = entry.About;
             var wrong = entry.Problems > 0;
 
             _line.Style = wrong
@@ -131,6 +158,8 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                         ? Palette.Live
                         : Palette.Dim;
 
+            _light.RichTip = entry.IsAction ? null : wrong ? _broken : entry.JustRan ? _ran : _idle;
+
             _status.Text = entry.Status;
             _lastRun.Text = entry.LastRun;
 
@@ -138,10 +167,10 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             _run.Symbol = entry.Running ? Symbols.Stop : Symbols.Play;
             _run.Collapsed = doing == 0;
-            _run.Press = Deed.Sends(doing);
+            _runs.CanExecute = doing != 0;
             _run.Tip = doing != 0 ? (entry.Running ? SequenceText.Stops() : SequenceText.Starts()) : null;
 
-            _status.Press = Deed.Sends(entry.StatusCommand);
+            _changes.CanExecute = entry.StatusCommand != 0;
 
             if (entry.StatusCommand != 0 && !ReferenceEquals(_opens, entry.Status))
             {
@@ -176,9 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             _switch.IsOn = entry.SwitchIsOn;
             _switch.Style = entry.SwitchGovernsAll ? Styles.Governing : Styles.Switch;
 
-            _switch.Press = entry.CanSwitch
-                ? Deed.Switches(entry.SwitchCommand, !entry.SwitchIsOn)
-                : Deed.Nothing;
+            _flips.CanExecute = entry.CanSwitch;
 
             _switch.Tip = entry.CanSwitch
                 ? Switching(entry.SwitchGovernsAll, entry.SwitchIsOn)
@@ -186,20 +213,56 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             var copies = entry.DuplicateCommand != 0;
             _duplicate.Collapsed = !copies;
-            _duplicate.Press = Deed.Sends(entry.DuplicateCommand);
+            _copies.CanExecute = copies;
             _duplicate.Tip = copies ? entry.DuplicateText : null;
 
             var offers = entry.ButtonCommand != 0;
             _button.Collapsed = !offers;
-            _button.Press = Deed.Asks(entry.ButtonCommand, entry.ButtonQuestion);
+            _offers.CanExecute = offers;
+            _button.RichTip = offers ? entry.ButtonAbout : null;
 
             if (offers)
                 _button.Text = entry.ButtonText;
 
             var bins = entry.DeleteCommand != 0;
             _delete.Collapsed = !bins;
-            _delete.Press = Deed.Sends(entry.DeleteCommand);
+            _bins.CanExecute = bins;
             _delete.Tip = bins ? "Delete" : null;
+        }
+
+        void Open()
+        {
+            _view.Host.Send(_line, _entry.Command, _entry.Question);
+        }
+
+        void Run()
+        {
+            _view.Host.Send(_run, _entry.Running ? _entry.StopCommand : _entry.RunCommand, null);
+        }
+
+        void Change()
+        {
+            _view.Host.Send(_status, _entry.StatusCommand, null);
+        }
+
+        void Flip()
+        {
+            _view.Host.Switch(_switch, _entry.SwitchCommand, !_entry.SwitchIsOn);
+        }
+
+        void Copy()
+        {
+            _view.Host.Send(_duplicate, _entry.DuplicateCommand, null);
+        }
+
+        void Offer()
+        {
+            _view.Host.Send(_button, _entry.ButtonCommand, _entry.ButtonQuestion);
+        }
+
+        void Bin()
+        {
+            _view.Host.Send(_delete, _entry.DeleteCommand, null);
         }
 
         /// <summary>What pressing a switch would do, as a note on the switch.</summary>

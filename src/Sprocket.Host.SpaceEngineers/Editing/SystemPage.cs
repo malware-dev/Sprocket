@@ -100,6 +100,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override string RenamePrompt => "What is it?";
 
+        public override string NameAbout => "This logic system's name.\nPress to rename it.";
+
         /// <summary>
         /// A system has to be called something.
         /// </summary>

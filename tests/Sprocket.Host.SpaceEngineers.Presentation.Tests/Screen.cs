@@ -31,6 +31,15 @@ sealed class Screen
         return new Screen(frame);
     }
 
+    /// <summary>The editor on a block that already holds <paramref name="program" />, after <paramref name="script" />.</summary>
+    public static Screen Holding(string program, params string[] script)
+    {
+        var frame = new Offscreen(Width, Height, program);
+        frame.Play(Script.Parse(script, 0));
+
+        return new Screen(frame);
+    }
+
     /// <summary>Does more to the screen this one is already showing.</summary>
     public Screen Do(params string[] script)
     {

@@ -216,7 +216,7 @@ public class ActionTests
     [Fact]
     public void TheTabIsPressedWhereItIsDrawn()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
             + "70 200 200 509").Split(' '));
 
         PickStage what = screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
@@ -428,7 +428,7 @@ public class ActionTests
     [Fact]
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
             + "70 200 150 203 type Approach 200 360 800 587").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
@@ -454,7 +454,7 @@ public class ActionTests
     [Fact]
     public void AColourIsChosenByPressingOne()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
             + "70 200 200 485 800 587").Split(' '));
 
 
@@ -480,7 +480,7 @@ public class ActionTests
     [Fact]
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
             + "70 200 150 203 type Standby 200 360 800 413").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
@@ -512,7 +512,7 @@ public class ActionTests
     [Fact]
     public void MoreChoicesThanFitFoldIntoAList()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
             + "70 200 150 203 type Tug 200 360 800 587").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");

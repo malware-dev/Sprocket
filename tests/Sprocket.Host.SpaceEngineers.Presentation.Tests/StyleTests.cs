@@ -43,6 +43,18 @@ public class StyleTests
         Assert.Equal(Dim, row.Edge);
     }
 
+    /// <summary>An element that cannot be used is never hot, whatever the pointer rests on.</summary>
+    [Fact]
+    public void ADisabledElementTakesNoHotLayer()
+    {
+        var row = new HStack { Style = new ElementStyle { Hot = { Edge = Ink } } };
+
+        row.IsEnabled = false;
+        row.IsHot = true;
+
+        Assert.Equal(Color.Transparent, row.Edge);
+    }
+
     /// <summary>Leaving a state puts back what is beneath it, even a value only the state set.</summary>
     [Fact]
     public void LeavingAStatePutsBackWhatIsBeneathIt()

@@ -5,17 +5,17 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Button Panel  |  Airlock 2
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:145 W:1402 H:808}
-002  Sprite     Sprocket_Fill         {X:259 Y:145 W:1390 H:52}  #29363EFF
-003  Text       at {X:278 Y:159.282} scale 0.822  #DCF5FDFF  "Airlock Button"
-004  ClearClip  
-005  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:81}  #1B242AFF
-006  SetClip    {X:301 Y:56 W:140 H:33}
-007  Text       at {X:300.91 Y:56.30198} scale 1.156  #DCF5FDFF  "Button Panel"
-008  ClearClip  
-009  Text       at {X:259 Y:50.22493} scale 0.732  #A2C3CDFF  "<"
-010  Text       at {X:1625.09 Y:50.22493} scale 0.732  #A2C3CDFF  "s"
-011  Text       at {X:259 Y:94.19197} scale 0.732  #85A1A9FF  "Airlock 2"
-012  Sprite     Sprocket_Fill         {X:240 Y:125 W:1440 H:1}  #5B737BFF
-013  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-014  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:76}  #1B242AFF
+002  Text       at {X:256 Y:56.71198} scale 0.642  #A2C3CDFF  "<"
+003  SetClip    {X:296 Y:53 W:1329 H:40}
+004  Text       at {X:303.5 Y:56.71198} scale 1.111  #DCF5FDFF  "Button Panel"
+005  ClearClip  
+006  Text       at {X:1632.5 Y:56.71198} scale 0.642  #A2C3CDFF  "s"
+007  Text       at {X:256 Y:96.71198} scale 0.556  #85A1A9FF  "Airlock 2"
+008  Sprite     Sprocket_Fill         {X:240 Y:121 W:1440 H:1}  #5B737BFF
+009  SetClip    {X:256 Y:138 W:1408 H:825}
+010  Sprite     Sprocket_Fill         {X:256 Y:138 W:1396 H:52}  #29363EFF
+011  Text       at {X:275 Y:151.712} scale 0.822  #DCF5FDFF  "Airlock Button"
+012  ClearClip  
+013  Sprite     Sprocket_Fill         {X:240 Y:978 W:1440 H:1}  #5B737BFF
+014  Sprite     Sprocket_Fill         {X:240 Y:979 W:1440 H:56}  #1B242AFF

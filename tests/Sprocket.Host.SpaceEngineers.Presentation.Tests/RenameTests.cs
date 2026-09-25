@@ -76,13 +76,8 @@ public class RenameTests
     }
 
     /// <summary>
-    /// The heading and back sit on the same line.
+    /// The heading and back sit on the same line, by their middles.
     /// </summary>
-    /// <remarks>
-    /// Back used to be centred against the title and subtitle together, which put it half a line
-    /// below the title on every screen with no subtitle. Two pieces of text at different sizes share
-    /// a line by their middles, not by their tops.
-    /// </remarks>
     [Fact]
     public void TheHeadingLinesUpWithBack()
     {
@@ -95,13 +90,81 @@ public class RenameTests
         var back = screen.Marks(Symbols.Left)[0];
         var title = screen.Drawings.First(d => d.IsText && d.Scale > 0.8f);
 
-        // Centred, and then lifted. The lift is a correction for the game's own letters sitting high
-        // in their line - see Lettering.SymbolLift - so it is added back to ask the question this test
-        // is actually about, which is what the layout centred the arrow against.
-        float line = 2f * (screen.MiddleOf(back) - back.At.Y);
-
-        Assert.Equal(screen.MiddleOf(title), screen.MiddleOf(back) + line * Lettering.SymbolLift, 1);
+        Assert.Equal(screen.MiddleOf(title), screen.MiddleOf(back), 1);
     }
+
+    /// <summary>The pointer resting on the grid's name says what it is and that pressing it renames the grid.</summary>
+    [Fact]
+    public void TheGridsNameSaysWhatItIs()
+    {
+        var screen = Screen.Fresh();
+        screen.Run(5);
+
+        var name = screen.Text("Test Rig");
+        var at = Screen.Ui(name.At.X + 8f, screen.MiddleOf(name));
+        screen.Do("move", Say(at.X), Say(at.Y));
+
+        Assert.True(screen.Legible.Any(t => t.Contains("Press to rename the grid")), "resting on the grid's name said nothing about it");
+    }
+
+    /// <summary>Escape puts the box away and leaves the name as it was.</summary>
+    [Fact]
+    public void EscapeLeavesTheNameAsItWas()
+    {
+        var screen = Renaming();
+
+        screen.Do("clear", "type", "Hangar", "escape");
+        screen.Run(5);
+
+        Assert.Equal("Airlock", screen.Editor.Screen.Title());
+        Assert.False(IsEditing(screen), "the box is still up after Escape");
+    }
+
+    /// <summary>Pressing away from the box gives the name typed in it, as Enter does.</summary>
+    [Fact]
+    public void PressingAwayGivesTheName()
+    {
+        var screen = Renaming();
+
+        screen.Do("clear", "type", "Hangar", "700", "700");
+        screen.Run(5);
+
+        Assert.Equal("Hangar", screen.Editor.Screen.Title());
+        Assert.False(IsEditing(screen), "the box is still up after pressing away");
+    }
+
+    /// <summary>A press inside the open box puts the caret where it lands, in place of the whole name being selected.</summary>
+    [Fact]
+    public void APressInTheBoxPutsTheCaretThere()
+    {
+        var screen = Renaming();
+
+        var name = Title(screen);
+        var start = Screen.Ui(name.At.X, screen.MiddleOf(name));
+        screen.Do(Say(start.X), Say(start.Y), "type", "Main ", "enter");
+        screen.Run(5);
+
+        Assert.Equal("Main Airlock", screen.Editor.Screen.Title());
+    }
+
+    /// <summary>A logic system's screen with its heading pressed, so its name is in the box, all of it selected.</summary>
+    static Screen Renaming()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewSystem("Airlock");
+        screen.Run(5);
+
+        var name = Title(screen);
+        var at = Screen.Ui(name.At.X + 8f, screen.MiddleOf(name));
+        screen.Do(Say(at.X), Say(at.Y));
+
+        Assert.True(IsEditing(screen), "the heading did not turn into a box");
+        return screen;
+    }
+
+    /// <summary>The heading's name, drawn larger than anything else on the screen.</summary>
+    static Drawn Title(Screen screen) =>
+        screen.Drawings.First(d => d.IsText && d.Scale > 1f);
 
     /// <summary>
     /// How tall the bar across the top of the screen stands.

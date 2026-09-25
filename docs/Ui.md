@@ -120,8 +120,8 @@ The game's scale is worked out from it at the point where text is handed to the 
 
 ## Sizes
 
-Every size the framework and its views use comes from one scale: 4, 8, 16, 24, 32, 48, 64, and on
-up. Font sizes, spacing, padding and margins alike.
+Every size the framework and its views use is a multiple of 4: font sizes, spacing, padding and
+margins alike.
 
 ## Focus
 
@@ -141,6 +141,10 @@ until the last of them goes.
 - The glyph system is reworked.
 - Brushes: a background or edge painted with any material, not only the flat fill. Animating a color
   then means changing a mutable brush's color.
+- A bold weight, if one is ever needed: text drawn a second time a whole number of screen pixels to
+  the right, about its size divided by 20 and never less than 1, reads as a clean bold in the harness,
+  because the game starts text on a whole pixel. Two pixels at size 20 splits the strokes instead. Held
+  back because it draws the text twice.
 
 ## Open
 

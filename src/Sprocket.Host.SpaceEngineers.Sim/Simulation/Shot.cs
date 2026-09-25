@@ -20,8 +20,8 @@ namespace Sprocket.Sim.Simulation
             Save(path, width, height, null);
         }
 
-        /// <summary>Runs the script and writes what the last step left on screen.</summary>
-        public static string Save(string path, int width, int height, Script script)
+        /// <summary>Runs the script and writes what the last step left on screen; the block starts holding <paramref name="holding" />, or nothing.</summary>
+        public static string Save(string path, int width, int height, Script script, string holding = null)
         {
             // Drawn at exactly the size asked for, so a shot is the screen at that resolution rather
             // than a picture of it scaled to fit something else.
@@ -30,7 +30,7 @@ namespace Sprocket.Sim.Simulation
             // A construct that remembers nothing, the same as the suite uses. A shot that ran on the
             // playground both depended on what somebody last built by hand and wrote its own script
             // into it, so taking a picture quietly edited the thing being photographed.
-            var scene = EditorScene.Nowhere();
+            var scene = holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding);
             surface.Frame += scene.Draw;
 
             // Something behind it, or the bitmap is transparent - which reads as white and makes every

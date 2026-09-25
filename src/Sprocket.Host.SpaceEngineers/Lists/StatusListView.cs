@@ -84,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             for (int i = 0; i < _component.Entries.Count; i++)
             {
-                var row = new StatusRow();
+                var row = new StatusRow(this);
                 _rows.Add(row);
                 _stack.Children.Add(row.Root);
             }

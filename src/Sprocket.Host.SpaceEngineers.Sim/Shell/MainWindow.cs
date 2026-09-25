@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Sim.Simulation;
+using VRage.Input;
 using VRageMath;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;
@@ -332,6 +333,13 @@ namespace Sprocket.Sim.Shell
             if (string.IsNullOrEmpty(e.Text))
                 return;
 
+            if (!_showProbe && _editor.Input.Focused != null)
+            {
+                _editor.Type(e.Text);
+                Wake();
+                return;
+            }
+
             TextBox box = Typing();
             if (box == null)
                 return;
@@ -357,12 +365,18 @@ namespace Sprocket.Sim.Shell
                 return;
             }
 
+            bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
+            bool control = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
+
+            if (!_showProbe && Keyed(e.Key, shift, control))
+            {
+                Wake();
+                return;
+            }
+
             TextBox box = Typing();
             if (box == null)
                 return;
-
-            bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
-            bool control = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
 
             switch (e.Key)
             {
@@ -401,6 +415,34 @@ namespace Sprocket.Sim.Shell
             }
 
             Wake();
+        }
+
+        /// <summary>Hands a key to a new control holding the keyboard, as the game's screen does, answering whether one was.</summary>
+        bool Keyed(Key key, bool shift, bool control)
+        {
+            MyKeys game;
+
+            switch (key)
+            {
+                case Key.Enter: game = MyKeys.Enter; break;
+                case Key.Escape: game = MyKeys.Escape; break;
+                case Key.Tab: game = MyKeys.Tab; break;
+                case Key.Back: game = MyKeys.Back; break;
+                case Key.Delete: game = MyKeys.Delete; break;
+                case Key.Left: game = MyKeys.Left; break;
+                case Key.Right: game = MyKeys.Right; break;
+                case Key.Up: game = MyKeys.Up; break;
+                case Key.Down: game = MyKeys.Down; break;
+                case Key.Home: game = MyKeys.Home; break;
+                case Key.End: game = MyKeys.End; break;
+                case Key.A: game = MyKeys.A; break;
+                case Key.C: game = MyKeys.C; break;
+                case Key.X: game = MyKeys.X; break;
+                case Key.V: game = MyKeys.V; break;
+                default: return false;
+            }
+
+            return _editor.Key(game, shift, control);
         }
 
         /// <summary>

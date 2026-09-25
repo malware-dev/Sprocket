@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
 
@@ -53,12 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         protected override void Refresh()
         {
             Rebuild();
-
-            for (var i = 0; i < _rows.Count && i < _component.Options.Count; i++)
-            {
-                var option = _component.Options[i];
-                _rows[i].Press = Deed.Asks(option.Command, option.Question);
-            }
         }
 
         void Rebuild()
@@ -75,11 +69,24 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 var option = _component.Options[i];
 
                 // The ellipsis is the desktop convention for a button that asks something before it acts.
-                var button = new Button { Style = Styles.Way, Text = Plus + option.Label + (option.Asks ? "…" : "") };
+                var at = i;
+                var button = new Button
+                {
+                    Style = Styles.Way,
+                    Text = Plus + option.Label + (option.Asks ? "…" : ""),
+                    RichTip = option.About,
+                    Command = new Relay(() => Start(at))
+                };
 
                 _rows.Add(button);
                 _buttons.Children.Add(button);
             }
+        }
+
+        void Start(int at)
+        {
+            var option = _component.Options[at];
+            Host.Send(_rows[at], option.Command, option.Question);
         }
     }
 }

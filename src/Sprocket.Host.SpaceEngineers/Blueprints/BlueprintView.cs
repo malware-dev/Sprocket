@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
         readonly Stack _parts = Widgets.Column(0f);
         readonly Label _madeTitle = Widgets.Label("", Palette.Faint, Lettering.Small);
         readonly Label _partsTitle = Widgets.Label("", Palette.Faint, Lettering.Small);
-        readonly StatusRow _chosen = new StatusRow();
+        readonly StatusRow _chosen;
         readonly List<StatusRow> _members = new List<StatusRow>();
         readonly List<PartRow> _partRows = new List<PartRow>();
 
@@ -36,6 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
         public BlueprintView(BlueprintComponent component)
         {
             _component = component;
+            _chosen = new StatusRow(this);
 
             _madeTitle.Wraps = false;
             _madeTitle.Padding = new Thickness(Space.Line, Space.Item, 0f, 0f);
@@ -108,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
 
             for (var i = 0; i < _component.Members.Count; i++)
             {
-                var row = new StatusRow();
+                var row = new StatusRow(this);
                 _members.Add(row);
                 _made.Children.Add(row.Root);
             }

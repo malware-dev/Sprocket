@@ -19,35 +19,36 @@ public class InputRootTests
     [Fact]
     public void AReleaseOnAButtonCarriesOutItsCommand()
     {
-        var command = new Counted();
-        var button = new Button { Text = "Done", Command = command };
+        var count = 0;
+        var button = new Button { Text = "Done", Command = new Relay(() => count++) };
         var input = Laid(new VStack { Children = { button } });
 
         input.PointerDown(Middle(button), 1);
         input.PointerUp(Middle(button));
 
-        Assert.Equal(1, command.Count);
+        Assert.Equal(1, count);
     }
 
     /// <summary>A press dragged off a button before it is released carries out nothing.</summary>
     [Fact]
     public void AReleaseOffTheButtonCarriesOutNothing()
     {
-        var command = new Counted();
-        var button = new Button { Text = "Done", Command = command };
+        var count = 0;
+        var button = new Button { Text = "Done", Command = new Relay(() => count++) };
         var input = Laid(new VStack { Children = { button } });
 
         input.PointerDown(Middle(button), 1);
         input.PointerUp(new Vector2(Wide - 1f, High - 1f));
 
-        Assert.Equal(0, command.Count);
+        Assert.Equal(0, count);
     }
 
     /// <summary>A button whose command cannot be carried out is disabled, and a press on it does nothing.</summary>
     [Fact]
     public void ACommandThatCannotRunDisablesItsButton()
     {
-        var command = new Counted { CanExecute = false };
+        var count = 0;
+        var command = new Relay(() => count++) { CanExecute = false };
         var button = new Button { Text = "Done", Command = command };
         var input = Laid(new VStack { Children = { button } });
 
@@ -55,9 +56,9 @@ public class InputRootTests
 
         input.PointerDown(Middle(button), 1);
         input.PointerUp(Middle(button));
-        Assert.Equal(0, command.Count);
+        Assert.Equal(0, count);
 
-        command.Allow();
+        command.CanExecute = true;
         Assert.True(button.IsEnabled);
     }
 
@@ -100,6 +101,22 @@ public class InputRootTests
         Assert.Same(third, input.Focused);
     }
 
+    /// <summary>Moving the keyboard says so, and giving it to what already has it says nothing.</summary>
+    [Fact]
+    public void MovingTheFocusSaysSo()
+    {
+        var box = new TextBox { Placement = Fixed.Wide(200f) };
+        var input = Laid(new VStack { Children = { box } });
+        var moves = 0;
+        input.FocusChanged += () => moves++;
+
+        input.Focus(box);
+        input.Focus(box);
+        input.Focus(null);
+
+        Assert.Equal(2, moves);
+    }
+
     /// <summary>Escape lets the keyboard go.</summary>
     [Fact]
     public void EscapeLetsTheFocusGo()
@@ -127,6 +144,66 @@ public class InputRootTests
         Assert.Equal("hi", box.Text);
     }
 
+    /// <summary>Something inside a control that only has something to say is what a tip is read from, and a press on it reaches the control.</summary>
+    [Fact]
+    public void ATipInsideAControlLetsThePressThrough()
+    {
+        var light = new Glyph { Symbol = "o", Tip = "Idle" };
+        var row = new HStack { Command = new Relay(() => { }), Children = { light, new Label { Text = "Airlock" } } };
+        Laid(new VStack { Children = { row } });
+
+        var at = Middle(light);
+
+        Assert.Same(row, row.Under(at));
+        Assert.Same(light, row.SayingAt(at));
+    }
+
+    /// <summary>A transparent self passes a press to its container; transparent children pass it to the container that holds them.</summary>
+    [Theory]
+    [InlineData(InputTransparency.None, "button")]
+    [InlineData(InputTransparency.Self, "row")]
+    public void TransparencyOfTheElementItself(InputTransparency transparency, string reached)
+    {
+        var button = new Button { Text = "Go", Command = new Relay(() => { }), InputTransparency = transparency };
+        var row = new HStack { Command = new Relay(() => { }), Children = { button } };
+        Laid(new VStack { Children = { row } });
+
+        Assert.Same(reached == "button" ? button : row, row.Under(Middle(button)));
+    }
+
+    /// <summary>A container with transparent children takes the press itself; one transparent through and through lets it past entirely.</summary>
+    [Theory]
+    [InlineData(InputTransparency.Children, "row")]
+    [InlineData(InputTransparency.All, "nothing")]
+    public void TransparencyOfWhatIsInside(InputTransparency transparency, string reached)
+    {
+        var button = new Button { Text = "Go", Command = new Relay(() => { }) };
+        var row = new HStack { Command = new Relay(() => { }), InputTransparency = transparency, Children = { button } };
+        var root = new VStack { Children = { row } };
+        Laid(root);
+
+        Assert.Same(reached == "row" ? row : null, root.Under(Middle(button)));
+    }
+
+    /// <summary>Tab passes over a transparent box, and over every box inside a container whose children are transparent.</summary>
+    [Fact]
+    public void TabPassesOverWhatIsTransparent()
+    {
+        var first = new TextBox { Placement = Fixed.Wide(200f), InputTransparency = InputTransparency.Self };
+        var inner = new TextBox { Placement = Fixed.Wide(200f) };
+        var last = new TextBox { Placement = Fixed.Wide(200f) };
+        var input = Laid(new VStack
+        {
+            Children = { first, new HStack { InputTransparency = InputTransparency.Children, Children = { inner } }, last }
+        });
+
+        input.Key(MyKeys.Tab, false, false);
+        Assert.Same(last, input.Focused);
+
+        input.Key(MyKeys.Tab, false, false);
+        Assert.Same(last, input.Focused);
+    }
+
     static InputRoot Laid(Element root)
     {
         _ = new Easel(root, Wide, High);
@@ -137,26 +214,5 @@ public class InputRootTests
     {
         return new Vector2(element.Bounds.X + element.Bounds.Width / 2f, element.Bounds.Y + element.Bounds.Height / 2f);
     }
-
-    /// <summary>A command that counts how often it was carried out.</summary>
-    sealed class Counted : ICommand
-    {
-        public int Count { get; private set; }
-
-        public bool CanExecute { get; set; } = true;
-
-        public event Action? CanExecuteChanged;
-
-        public void Execute()
-        {
-            Count++;
-        }
-
-        /// <summary>Lets the command run, and says so.</summary>
-        public void Allow()
-        {
-            CanExecute = true;
-            CanExecuteChanged?.Invoke();
-        }
-    }
 }
+

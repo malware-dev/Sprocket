@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRageMath;
 
@@ -60,10 +59,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         internal override bool Passes => _openness >= 1f;
 
         /// <inheritdoc />
-        internal override void AddChildren(List<Element> into)
+        protected internal override int VisualChildCount => _child == null ? 0 : 1;
+
+        /// <inheritdoc />
+        protected internal override Element GetVisualChild(int index)
         {
-            if (_child != null)
-                into.Add(_child);
+            return _child;
         }
 
         /// <inheritdoc />

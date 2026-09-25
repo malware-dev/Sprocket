@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.World;
 using Ship = Sprocket.Sim.Machine.Simulation;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui;
@@ -9,6 +10,7 @@ using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 using VRage.Input;
 
 namespace Sprocket.Sim.Simulation
@@ -42,6 +44,14 @@ namespace Sprocket.Sim.Simulation
         public static EditorScene Nowhere()
         {
             return new EditorScene(Ship.Fresh());
+        }
+
+        /// <summary>A scene on a block that holds <paramref name="program" />, the way a world saved earlier leaves one.</summary>
+        public static EditorScene Holding(string program)
+        {
+            var store = Store.Nowhere();
+            store.SetValue(SprocketUnit.ProgramKey, program);
+            return new EditorScene(Ship.On(store));
         }
 
         EditorScene(Ship ship)
@@ -153,6 +163,10 @@ namespace Sprocket.Sim.Simulation
         /// <summary>The box that question is being answered in.</summary>
         public TextBox AskBox => _view.AskBox;
 
+        /// <summary>Where the new controls take the pointer and the keyboard.</summary>
+        public InputRoot Input => _view.Input;
+
+
         public bool CaretVisible
         {
             set => _view.CaretVisible = value;
@@ -175,8 +189,22 @@ namespace Sprocket.Sim.Simulation
 
         public void CommitAsk()
         {
+            if (Keyed(MyKeys.Enter))
+                return;
+
             _view.CommitAsk();
         }
+
+        /// <summary>Hands <paramref name="key" /> to a new control holding the keyboard, answering whether one was.</summary>
+        public bool Key(MyKeys key, bool shift, bool ctrl)
+        {
+            if (_view.Input.Focused == null)
+                return false;
+
+            _view.Input.Key(key, shift, ctrl);
+            return true;
+        }
+
 
         /// <summary>Takes what is typed in the box with the caret, as Enter in it does in the game.</summary>
         public bool TakeTyped()

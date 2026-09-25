@@ -29,7 +29,8 @@ namespace Sprocket.Sim.Simulation
         private readonly float _width;
         private readonly float _height;
 
-        public Offscreen(float windowWidth, float windowHeight)
+        /// <summary>A frame of the editor on a block holding <paramref name="holding" />, or nothing for null.</summary>
+        public Offscreen(float windowWidth, float windowHeight, string holding = null)
         {
             _width = windowWidth;
             _height = windowHeight;
@@ -52,7 +53,7 @@ namespace Sprocket.Sim.Simulation
             _device.ViewportSize = new Vector2(windowWidth, windowHeight);
 
             _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
-            _scene = EditorScene.Nowhere();
+            _scene = holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding);
         }
 
         /// <summary>One of the faces this mod requires, or null where the build did not carry it.</summary>

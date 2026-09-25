@@ -19,6 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         readonly List<string> _lines = new List<string>();
 
+        /// <summary>Where each word of the paragraph being wrapped ends, counting the spaces before it as its own.</summary>
+        readonly List<int> _breaks = new List<int>();
+
         readonly StringBuilder _measured = new StringBuilder(64);
         readonly StringBuilder _scratch = new StringBuilder(64);
 
@@ -122,6 +125,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 InvalidateMeasure();
             }
         }
+
+        /// <summary>The lines a wrapped or trimmed run was last laid out as.</summary>
+        internal IList<string> Lines => _lines;
 
         /// <summary>Whether a run too wide for its room is cut short with an ellipsis.</summary>
         /// <remarks>Ignored when <see cref="Wraps" /> is set.</remarks>
@@ -266,53 +272,112 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             _lines.Clear();
 
-            var line = FontSize;
             var widest = 0f;
-
-            _scratch.Clear();
-            var committed = 0f;
-
             var i = 0;
+
             while (i < _text.Length)
             {
-                // An empty line between two newlines is kept as a line of its own.
-                if (_text[i] == '\n')
-                {
-                    Commit(ref widest, committed);
-                    committed = 0f;
-                    i++;
-                    continue;
-                }
+                var end = _text.IndexOf('\n', i);
+                if (end < 0)
+                    end = _text.Length;
 
-                var end = NextBreak(i);
-                var length = end - i;
-
-                _scratch.Append(_text, i, length);
-                var candidate = g.MeasureText(Font, _scratch, FontSize).X;
-
-                if (candidate > width && committed > 0f)
-                {
-                    _scratch.Length -= length;
-                    Commit(ref widest, committed);
-
-                    _scratch.Append(_text, i, length);
-
-                    TrimLeading();
-                    committed = g.MeasureText(Font, _scratch, FontSize).X;
-                }
-                else
-                    committed = candidate;
-
-                i = end;
+                Paragraph(g, i, end, width, ref widest);
+                i = end + 1;
             }
 
-            if (_scratch.Length > 0)
-                Commit(ref widest, committed);
-
-            _wrapped = new Vector2(widest, _lines.Count * line);
+            _wrapped = new Vector2(widest, _lines.Count * FontSize);
         }
 
-        /// <summary>Cuts the run down, a character at a time, to something that fits with an ellipsis.</summary>
+        /// <summary>Breaks the text from <paramref name="start" /> to <paramref name="end" />, which holds no newline, into lines no wider than <paramref name="width" />.</summary>
+        /// <remarks>
+        ///     Each line is the furthest word end that fits, found by halving: a few measures a line, where
+        ///     trying one word after another took one a word. A word too wide for any line has one to itself,
+        ///     and an empty paragraph is an empty line.
+        /// </remarks>
+        void Paragraph(IGraphics g, int start, int end, float width, ref float widest)
+        {
+            _breaks.Clear();
+            for (var b = start; b < end;)
+            {
+                b = NextBreak(b);
+                _breaks.Add(b < end ? b : end);
+            }
+
+            if (_breaks.Count == 0)
+            {
+                _lines.Add("");
+                return;
+            }
+
+            var from = start;
+            var first = 0;
+
+            while (first < _breaks.Count)
+            {
+                var best = first;
+                var fits = Width(g, from, _breaks[first]);
+                var last = _breaks.Count - 1;
+
+                if (last > first)
+                {
+                    var whole = Width(g, from, _breaks[last]);
+                    if (whole <= width)
+                    {
+                        best = last;
+                        fits = whole;
+                    }
+                    else if (fits <= width)
+                    {
+                        var low = first + 1;
+                        var high = last - 1;
+
+                        while (low <= high)
+                        {
+                            var middle = (low + high) / 2;
+                            var measured = Width(g, from, _breaks[middle]);
+
+                            if (measured <= width)
+                            {
+                                best = middle;
+                                fits = measured;
+                                low = middle + 1;
+                            }
+                            else
+                                high = middle - 1;
+                        }
+                    }
+                }
+
+                _lines.Add(Line(from, _breaks[best]));
+                if (fits > widest)
+                    widest = fits;
+
+                from = _breaks[best];
+                first = best + 1;
+            }
+        }
+
+        /// <summary>How wide the text from <paramref name="from" /> to <paramref name="to" /> draws, without the spaces it starts with.</summary>
+        float Width(IGraphics g, int from, int to)
+        {
+            while (from < to && _text[from] == ' ')
+                from++;
+
+            _scratch.Clear();
+            _scratch.Append(_text, from, to - from);
+            return g.MeasureText(Font, _scratch, FontSize).X;
+        }
+
+        /// <summary>The text from <paramref name="from" /> to <paramref name="to" />, without the spaces it starts with.</summary>
+        string Line(int from, int to)
+        {
+            while (from < to && _text[from] == ' ')
+                from++;
+
+            return _text.Substring(from, to - from);
+        }
+
+        /// <summary>Cuts the run down to the most of it that fits with an ellipsis, found by halving.</summary>
         void Retrim(IGraphics g, float width)
         {
             if (!_dirty && _laidOutFor == width && _laidOutAt == FontSize && _laidOutIn == Font)
@@ -333,20 +398,28 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 return;
             }
 
-            var keep = _text.Length;
-            while (keep > 0)
+            var keep = 0;
+            var low = 1;
+            var high = _text.Length - 1;
+
+            while (low <= high)
             {
-                keep--;
+                var middle = (low + high) / 2;
 
                 _scratch.Clear();
-                _scratch.Append(_text, 0, keep);
+                _scratch.Append(_text, 0, middle);
                 _scratch.Append("…");
 
                 if (g.MeasureText(Font, _scratch, FontSize).X <= width)
-                    break;
+                {
+                    keep = middle;
+                    low = middle + 1;
+                }
+                else
+                    high = middle - 1;
             }
 
-            _lines.Add(_scratch.ToString());
+            _lines.Add(_text.Substring(0, keep) + "…");
             _wrapped = new Vector2(width, 0f);
         }
 
@@ -364,19 +437,5 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return i > from ? i : from + 1;
         }
 
-        void Commit(ref float widest, float width)
-        {
-            _lines.Add(_scratch.ToString());
-            _scratch.Clear();
-
-            if (width > widest)
-                widest = width;
-        }
-
-        void TrimLeading()
-        {
-            while (_scratch.Length > 0 && _scratch[0] == ' ')
-                _scratch.Remove(0, 1);
-        }
     }
 }

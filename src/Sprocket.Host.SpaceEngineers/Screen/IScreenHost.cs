@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
@@ -27,5 +28,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         /// <summary>Puts the caret in a box a view shows, as pressing the box would.</summary>
         void Take(TextBox box);
+
+        /// <summary>Carries out <paramref name="command" /> for a control pressed at <paramref name="from" />, asking <paramref name="question" /> first where there is one.</summary>
+        /// <remarks>The question hangs under <paramref name="from" />. A command of zero does nothing.</remarks>
+        void Send(Element from, int command, string question);
+
+        /// <summary>Sets a switch pressed at <paramref name="from" /> to <paramref name="on" />.</summary>
+        void Switch(Element from, int command, bool on);
     }
 }

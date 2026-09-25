@@ -107,6 +107,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>What Enter carries out while the box holds the keyboard, or null for nothing.</summary>
         public ICommand Submit { get; set; }
 
+        /// <summary>What Escape carries out while the box holds the keyboard, or null to let the keyboard go.</summary>
+        public ICommand Cancel { get; set; }
+
         /// <summary>What is in the box; setting it replaces the lot and keeps the caret and selection inside it.</summary>
         public string Text
         {
@@ -269,6 +272,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                     if (Submit != null && Submit.CanExecute)
                         Submit.Execute();
                     return true;
+                case MyKeys.Escape:
+                    if (Cancel == null || !Cancel.CanExecute)
+                        return false;
+
+                    Cancel.Execute();
+                    return true;
                 default:
                     return false;
             }
@@ -288,7 +297,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <summary>Measures where every boundary between characters falls, when the text or its font has changed since.</summary>
-        /// <remarks>One measure per character, once per change; nothing else about the box measures.</remarks>
+        /// <remarks>
+        ///     One measure per character, once per change; nothing else about the box measures. The box is never
+        ///     narrower than it is tall, so an empty one is still somewhere to type.
+        /// </remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             if (_edgesStale)
@@ -297,7 +309,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 _edgesStale = false;
             }
 
-            return new Vector2(_edges[_edges.Count - 1] + CaretWidth, _fontSize);
+            var width = _edges[_edges.Count - 1] + CaretWidth;
+            return new Vector2(width > _fontSize ? width : _fontSize, _fontSize);
         }
 
         /// <inheritdoc />

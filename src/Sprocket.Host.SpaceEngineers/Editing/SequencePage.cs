@@ -61,6 +61,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override string RenamePrompt => "What do you call this?";
 
+        public override string NameAbout => "This sequence's name.\nPress to rename it.";
+
         /// <summary>
         /// A sequence has to be called something, now that the name is what identifies it.
         /// </summary>
@@ -87,6 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             var does = new HeadingPart("");
             does.Prompt = RenamePrompt;
+            does.About = Note(NameAbout);
             does.NameRequired = NameRequired;
             does.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename);
 
@@ -218,22 +221,20 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             Editor.Ask("Switch this sequence on?");
 
-            // Leaving it parked first, because that is what pressing back already meant - the offer
-            // must not turn the safe answer into the one that takes a second press. And the one
-            // Enter takes, for the same reason: the key that gets pressed without reading must not
-            // switch something on.
-            Editor.Answer("Leave it off", delegate
-            {
-                _quiet = Editor.Program.Wiring;
-                Editor.Pop();
-            }, true);
-
             Editor.Answer("Switch it on", delegate
             {
                 _quiet = Editor.Program.Wiring;
                 SetEnabled(true);
                 Editor.Pop();
             });
+
+            // The one Enter takes: leaving it parked is what pressing back already meant, and the key
+            // that gets pressed without reading must not switch something on.
+            Editor.Answer("Leave it off", delegate
+            {
+                _quiet = Editor.Program.Wiring;
+                Editor.Pop();
+            }, true);
 
             return false;
         }

@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         /// <inheritdoc />
         protected override void LayStates(Element element)
         {
-            if (element.IsHot)
+            if (element.IsHot && element.IsEnabled)
                 Lay(Hot, element);
 
             var button = element as Button;

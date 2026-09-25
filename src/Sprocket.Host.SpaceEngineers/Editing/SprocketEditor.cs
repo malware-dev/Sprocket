@@ -244,6 +244,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>Adds a way to answer, in the order they are offered.</summary>
+        /// <remarks>The answer that does what was asked about comes first and the one that does not second, as Yes and No stand in the game's own message boxes.</remarks>
         internal void Answer(string text, Action chosen)
         {
             Answer(text, chosen, false);
@@ -581,9 +582,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             Ask("Replace the program this block holds? The one Sprocket could not read will be gone.");
 
-            // The safe answer first, so the reflex press lands on it, and the one Enter takes for
-            // the same reason: a key pressed without reading must not throw a program away.
-            Answer("Leave it alone", delegate { }, true);
             // Said here rather than at the save, because this press is the decision and everything
             // after it is ordinary editing. It also settles the banner: what it was warning about has
             // just stopped being true, and nothing else would have told it.
@@ -592,6 +590,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 Replace();
                 go();
             });
+
+            // The one Enter takes: a key pressed without reading must not throw a program away.
+            Answer("Leave it alone", delegate { }, true);
         }
 
         bool IsAnswer(int command)
@@ -1441,8 +1442,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
 
             AskHere(SequenceText.Taken(_runner.Bindings, taken, through));
-            Answer("Leave it alone", otherwise);
             Answer("Take it over", delegate { then(taken); });
+            Answer("Leave it alone", otherwise);
         }
 
         /// <summary>

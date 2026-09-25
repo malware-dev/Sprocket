@@ -19,6 +19,122 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Base = { Color = Palette.Muted, Padding = new Thickness(8f, 8f, 0f, 0f) }
         }.Frozen();
 
+        /// <summary>The note beside the pointer: quiet words, strong ones in the strong color and emphasized ones bright.</summary>
+        public static readonly RichTextStyle Tip = new RichTextStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                CodeFont = Lettering.Mono,
+                FontSize = 20f,
+                Heading1Size = 24f,
+                Heading2Size = 20f,
+                Heading3Size = 20f,
+                Color = Palette.Muted,
+                StrongColor = Palette.Strong,
+                EmphasisColor = Palette.Ink,
+                HeadingColor = Palette.Ink,
+                RuleColor = Palette.Line,
+                BlockSpacing = 8f,
+                Indent = 20f,
+                Background = Palette.Chrome,
+                Edge = Palette.Line,
+                Padding = new Thickness(12f, 8f)
+            }
+        }.Frozen();
+
+        /// <summary>A dialog: a panel in the middle of the screen, with the screen veiled behind it.</summary>
+        public static readonly WindowStyle Dialog = new WindowStyle
+        {
+            Base = { Background = Palette.Chrome, Edge = Palette.Line, Padding = new Thickness(24f), Backdrop = Palette.Veil }
+        }.Frozen();
+
+        /// <summary>What a dialog asks.</summary>
+        public static readonly RichTextStyle Question = new RichTextStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                CodeFont = Lettering.Mono,
+                FontSize = 24f,
+                Color = Palette.Ink,
+                StrongColor = Palette.Strong,
+                EmphasisColor = Palette.Ink,
+                BlockSpacing = 8f,
+                Indent = 24f
+            }
+        }.Frozen();
+
+        /// <summary>An answer to a dialog that is not the one Enter gives.</summary>
+        public static readonly ButtonStyle Answer = new ButtonStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, Edge = Palette.Dim, Padding = new Thickness(16f, 8f) },
+            Hot = { Background = Palette.PanelHot }
+        }.Frozen();
+
+        /// <summary>A screen's heading, in the largest words on it.</summary>
+        public static readonly TextStyle Title = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 32f, Color = Palette.Ink }
+        }.Frozen();
+
+        /// <summary>Words in a heading around a name, quieter than the name.</summary>
+        public static readonly TextStyle TitleLead = new TextStyle(Title)
+        {
+            Base = { Color = Palette.Muted }
+        }.Frozen();
+
+        /// <summary>A name in a heading, spaced as its box is so the box takes its place without moving it.</summary>
+        public static readonly TextStyle TitleName = new TextStyle(Title)
+        {
+            Base = { Padding = new Thickness(8f, 4f) }
+        }.Frozen();
+
+        /// <summary>The box a heading's name is typed in, a well on the chrome.</summary>
+        public static readonly TextBoxStyle TitleBox = new TextBoxStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 32f,
+                Color = Palette.Ink,
+                CaretColor = Palette.Ink,
+                SelectionColor = Palette.Line,
+                Background = Palette.PanelHot,
+                Padding = new Thickness(8f, 4f)
+            }
+        }.Frozen();
+
+        /// <summary>The same box holding a name that cannot be given.</summary>
+        public static readonly TextBoxStyle TitleRefused = new TextBoxStyle(TitleBox)
+        {
+            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
+        }.Frozen();
+
+        /// <summary>A heading's name with its pencil, lit under the pointer where pressing it renames.</summary>
+        public static readonly ElementStyle Plate = new ElementStyle
+        {
+            Hot = { Background = Palette.Panel }
+        }.Frozen();
+
+        /// <summary>The pencil beside a name that can be renamed, whose color the view sets while the name is typed.</summary>
+        public static readonly GlyphStyle Pen = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = 32f, Tint = Palette.Faint }
+        }.Frozen();
+
+        /// <summary>The arrow between two parts of a heading.</summary>
+        public static readonly GlyphStyle Join = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = 32f, Tint = Palette.Faint }
+        }.Frozen();
+
+        /// <summary>A section's name, over what it heads, with a name inside it in the bright ink.</summary>
+        public static readonly RichTextStyle Section = new RichTextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint, StrongColor = Palette.Ink }
+        }.Frozen();
+
         /// <summary>The quiet line under a name: what it is doing, and when it last did anything.</summary>
         public static readonly TextStyle Detail = new TextStyle
         {
@@ -127,6 +243,49 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public static readonly GlyphStyle Bin = new GlyphStyle(Tool)
         {
             Hot = { Background = Palette.ProblemWash, Tint = Palette.Problem }
+        }.Frozen();
+
+        /// <summary>A symbol in the header that does something to the screen it heads.</summary>
+        public static readonly GlyphStyle Furniture = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = 32f, Tint = Palette.Muted },
+            Hot = { Background = Palette.Panel },
+            Disabled = { Tint = Palette.Dim }
+        }.Frozen();
+
+        /// <summary>The button that finishes a screen, and none at all while there is nothing to finish, keeping its place.</summary>
+        public static readonly ButtonStyle Go = new ButtonStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 24f,
+                Color = Palette.Chrome,
+                Background = Palette.Accent,
+                Padding = new Thickness(16f, 8f)
+            },
+            Hot = { Background = Palette.Ink },
+            Disabled = { Color = Palette.None, Background = Palette.None }
+        }.Frozen();
+
+        /// <summary>One of the footer's ways to do something to the whole screen, in quiet words.</summary>
+        public static readonly ButtonStyle Action = new ButtonStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
+            Hot = { Background = Palette.Panel }
+        }.Frozen();
+
+        /// <summary>The footer's way that is already in effect.</summary>
+        public static readonly ButtonStyle Current = new ButtonStyle(Action)
+        {
+            Base = { Color = Palette.Ink }
+        }.Frozen();
+
+        /// <summary>A screen's scroll, whose bar is as wide as the one the game reserves for its own.</summary>
+        public static readonly ScrollStyle Scroll = new ScrollStyle
+        {
+            Base = { BarWidth = Sizes.Bar, Thumb = Palette.Thumb, LeastThumb = 32f },
+            Held = { Thumb = Palette.ThumbHeld }
         }.Frozen();
 
         /// <summary>A switch that governs one thing.</summary>

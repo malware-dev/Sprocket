@@ -44,6 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override string RenamePrompt => "What is the blueprint called?";
 
+        public override string NameAbout => "This blueprint's name.\nPress to rename it.";
+
         public override bool NameRequired => true;
 
         public override bool AcceptsName(string name)

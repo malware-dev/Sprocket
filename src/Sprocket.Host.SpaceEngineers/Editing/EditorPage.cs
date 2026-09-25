@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Screen;
 
@@ -64,6 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             var part = new HeadingPart(Title);
             part.Prompt = RenamePrompt;
+            part.About = Note(NameAbout);
             part.NameRequired = NameRequired;
 
             if (CanRename)
@@ -132,6 +134,15 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>What to ask when offering the rename.</summary>
         public virtual string RenamePrompt => "";
+
+        /// <summary>What the name in the heading is and what renaming it does, in markdown-lite, said where the pointer rests on it.</summary>
+        public virtual string NameAbout => "";
+
+        /// <summary>The note <paramref name="markdown" /> writes, or null where it writes nothing.</summary>
+        protected static Document Note(string markdown)
+        {
+            return string.IsNullOrEmpty(markdown) ? null : Markdown.Parse(markdown);
+        }
 
         /// <summary>
         /// Whether the name is the only thing this page has to be called by.

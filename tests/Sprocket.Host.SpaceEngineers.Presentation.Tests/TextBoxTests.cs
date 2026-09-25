@@ -93,12 +93,39 @@ public class TextBoxTests
     {
         var (box, _, input) = Laid("Airlock");
         var submitted = 0;
-        box.Submit = new Submits(() => submitted++);
+        box.Submit = new Relay(() => submitted++);
 
         input.Focus(box);
         input.Key(MyKeys.Enter, false, false);
 
         Assert.Equal(1, submitted);
+    }
+
+    /// <summary>Escape carries out the box's cancel command, and the box keeps the keyboard.</summary>
+    [Fact]
+    public void EscapeCancels()
+    {
+        var (box, _, input) = Laid("Airlock");
+        var cancelled = 0;
+        box.Cancel = new Relay(() => cancelled++);
+
+        input.Focus(box);
+        input.Key(MyKeys.Escape, false, false);
+
+        Assert.Equal(1, cancelled);
+        Assert.Same(box, input.Focused);
+    }
+
+    /// <summary>Escape lets the keyboard go from a box with no cancel command.</summary>
+    [Fact]
+    public void EscapeWithNothingToCancelLetsTheKeyboardGo()
+    {
+        var (box, _, input) = Laid("Airlock");
+
+        input.Focus(box);
+        input.Key(MyKeys.Escape, false, false);
+
+        Assert.Null(input.Focused);
     }
 
     /// <summary>Typing says the text was edited; setting it does not.</summary>
@@ -141,6 +168,16 @@ public class TextBoxTests
         Assert.Equal(settled, easel.Measured);
     }
 
+    /// <summary>An empty box is as wide as it is tall, so there is still somewhere to type.</summary>
+    [Fact]
+    public void AnEmptyBoxIsAsWideAsItIsTall()
+    {
+        var box = new TextBox { FontSize = 32f };
+        _ = new Easel(new HStack { Children = { box } }, Wide, High);
+
+        Assert.Equal(32f, box.Bounds.Width);
+    }
+
     /// <summary>Holding the keyboard takes the style's focused layer.</summary>
     [Fact]
     public void HoldingTheKeyboardTakesTheFocusedLayer()
@@ -169,21 +206,5 @@ public class TextBoxTests
         var x = box.ContentBounds.X + easel.WidthOf(run) / easel.Pixels;
         return new Vector2(x, box.Bounds.Y + box.Bounds.Height / 2f);
     }
-
-    /// <summary>A command that always runs, doing what it is given.</summary>
-    sealed class Submits(Action run) : ICommand
-    {
-        public bool CanExecute => true;
-
-        public event Action? CanExecuteChanged
-        {
-            add { }
-            remove { }
-        }
-
-        public void Execute()
-        {
-            run();
-        }
-    }
 }
+

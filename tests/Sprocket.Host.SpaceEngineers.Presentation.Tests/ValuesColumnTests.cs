@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class ValuesColumnTests
 {
     /// <summary>A sequence with a light picked in a step's picker, and nothing chosen for it yet.</summary>
-    const string ALight = "60 133 type Airlock enter 60 164 200 384 560 360 1353 314 70 200 200 485";
+    const string ALight = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 70 200 200 485";
 
     const string SetRadius = "800 679";
     const string SetColour = "800 587";
@@ -140,7 +140,7 @@ public class ValuesColumnTests
     [InlineData("270 182 800 587")]
     public void LeavingAsksAboutAnyChange(string change)
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 19 54");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 25 62");
 
         Assert.True(screen.Scene.IsQuestioning, "leaving asked nothing");
         Assert.True(screen.Shows("Keep your changes?"), "the question is not about changes");
@@ -150,7 +150,7 @@ public class ValuesColumnTests
     [Fact]
     public void LeavingAsksNothingWhereNothingChanged()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 447 192 escape 19 54");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 447 192 escape 25 62");
 
         Assert.False(screen.Scene.IsQuestioning, "leaving asked about 5 shown as 5.0");
         Assert.Equal("Sequence 1", screen.Ended);

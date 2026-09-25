@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VRage.Input;
 using VRageMath;
@@ -10,8 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
     {
         readonly Element _root;
 
-        /// <summary>Reused for walking the tree in order, so moving the focus allocates nothing once it has grown.</summary>
-        readonly List<Element> _walk = new List<Element>();
 
         readonly List<Element> _order = new List<Element>();
 
@@ -31,6 +30,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
         /// <summary>The text last copied or cut from anything under this root.</summary>
         public string Clipboard { get; set; }
 
+        /// <summary>Raised after the keyboard has moved to something else, or to nothing.</summary>
+        public event Action FocusChanged;
+
         /// <summary>Gives the keyboard to <paramref name="element" />, or takes it from everything for null.</summary>
         public void Focus(Element element)
         {
@@ -44,6 +46,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
 
             if (_focused != null)
                 _focused.IsFocused = true;
+
+            var changed = FocusChanged;
+            if (changed != null)
+                changed();
         }
 
         /// <summary>A press beginning at <paramref name="point" />, the <paramref name="presses" />th in quick succession; answers whether anything took it.</summary>
@@ -140,24 +146,21 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
             if (element.Collapsed)
                 return;
 
-            if (element.Focusable && element.IsEnabled)
+            if (element.Focusable && element.IsEnabled && (element.InputTransparency & InputTransparency.Self) == 0)
                 _order.Add(element);
 
-            var from = _walk.Count;
-            element.AddChildren(_walk);
-            var to = _walk.Count;
+            if ((element.InputTransparency & InputTransparency.Children) != 0)
+                return;
 
-            for (var i = from; i < to; i++)
-                Collect(_walk[i]);
-
-            _walk.RemoveRange(from, to - from);
+            for (var i = 0; i < element.VisualChildCount; i++)
+                Collect(element.GetVisualChild(i));
         }
 
         static Element FocusableFrom(Element element)
         {
             for (var at = element; at != null; at = at.Parent)
             {
-                if (at.Focusable && at.IsEnabled)
+                if (at.Focusable && at.IsEnabled && (at.InputTransparency & InputTransparency.Self) == 0)
                     return at;
             }
 

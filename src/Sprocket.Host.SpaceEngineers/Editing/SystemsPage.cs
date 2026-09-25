@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
@@ -70,6 +71,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override string RenamePrompt => "What is this called?";
 
+        public override string NameAbout => "This grid's name, the one the game shows for it everywhere.\nPress to rename the grid.";
+
         public override bool NameRequired => true;
 
         public override void Rename(string name)
@@ -93,8 +96,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _shape = Shape();
 
             var start = new StartComponent();
-            start.Add("New logic system", Editor.Register(Cmd.NewSystem, Make));
-            start.Add("Load blueprint", Editor.Register(Cmd.LoadSystem, delegate { Editor.OfferLoading(); }));
+            start.Add("New logic system", Editor.Register(Cmd.NewSystem, Make)).About =
+                Note("Start a new logic system on this grid.");
+            start.Add("Load blueprint", Editor.Register(Cmd.LoadSystem, delegate { Editor.OfferLoading(); })).About =
+                Note("Set up a **blueprint** made somewhere else, choosing which of this grid's blocks it uses.");
             components.Add(start);
 
             _shown.Clear();
@@ -169,6 +174,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // system becomes several, and a way to do that nobody finds is the problem this row solves.
             entry.ButtonText = "Make blueprint";
             entry.ButtonCommand = Editor.Register(Cmd.MakeBlueprint, system.Id, delegate { Made(system); });
+            entry.ButtonAbout = Note("Turn this into a **blueprint**, so more logic systems like it can be made, each using its own blocks.\n"
+                + "This one becomes the first of them.");
             return entry;
         }
 
@@ -202,6 +209,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var another = new StatusEntry("add another " + system.Name,
                 Editor.Register(Cmd.AddInstance, system.Id, delegate { Another(system); }));
             another.IsAction = true;
+            another.About = Note("Make another logic system from the **" + Markdown.Escape(system.Name)
+                + "** blueprint, and choose which blocks it uses.");
             another.Depth = 1;
             _gathered.Add(another);
 

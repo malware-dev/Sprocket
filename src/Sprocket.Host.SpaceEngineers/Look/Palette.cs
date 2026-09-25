@@ -53,6 +53,17 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// <remarks>Contrast 4.5:1 against <see cref="Panel" />, the floor for the smallest text on these screens.</remarks>
         public static readonly Color Faint = new Color(133, 161, 169);
 
+        /// <summary>What a dialog lays over the screen behind it: <see cref="Page" />, three parts in five opaque.</summary>
+        /// <remarks>Chosen rather than sampled.</remarks>
+        public static readonly Color Veil = new Color(20, 27, 32, 153);
+
+        /// <summary>Words given strong importance.</summary>
+        /// <remarks>
+        ///     Chosen rather than sampled: the hue opposite <see cref="Ink" />'s, 15°, at full saturation and 72%
+        ///     lightness, so it reads as more important than Ink rather than as a quieter shade of the same blue.
+        /// </remarks>
+        public static readonly Color Strong = new Color(255, 147, 112);
+
         /// <summary>DarkBlueBackground_focus.png: the fill of the control in hand.</summary>
         /// <remarks>Pale, so anything wearing it takes dark text.</remarks>
         public static readonly Color Accent = new Color(142, 188, 207);

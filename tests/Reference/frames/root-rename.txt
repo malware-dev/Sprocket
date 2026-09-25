@@ -5,22 +5,24 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Automation for Test Rig
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:121 W:1402 H:832}
-002  Text       at {X:275 Y:129.192} scale 0.833  #A2C3CDFF  "+ New logic system"
-003  Text       at {X:471.5567 Y:129.192} scale 0.833  #A2C3CDFF  "+ Load blueprint"
-004  Sprite     Sprocket_Fill         {X:259 Y:169 W:1390 H:1}  #5B737BFF
-005  Text       at {X:267 Y:186.192} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
-006  ClearClip  
-007  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
-008  Text       at {X:300.91 Y:56.30198} scale 1.156  #A2C3CDFF  "Automation for"
-009  SetClip    {X:476 Y:56 W:126 H:33}
-010  Sprite     Sprocket_Fill         {X:476 Y:56 W:86 H:33}  #3C4C52FF
-011  Sprite     Sprocket_Fill         {X:476 Y:56 W:86 H:33}  #5B737BFF
-012  Text       at {X:476.1367 Y:56.30198} scale 1.156  #DCF5FDFF  "Test Rig"
-013  Sprite     Sprocket_Fill         {X:562 Y:56 W:2 H:33}  #DCF5FDFF
-014  ClearClip  
-015  Text       at {X:259 Y:50.22493} scale 0.732  #A2C3CDFF  "<"
-016  Text       at {X:1625.09 Y:50.22493} scale 0.732  #A2C3CDFF  "s"
-017  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-018  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-019  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
+002  Text       at {X:256 Y:56.71198} scale 0.642  #A2C3CDFF  "<"
+003  SetClip    {X:296 Y:53 W:1329 H:40}
+004  Text       at {X:295.5 Y:56.71198} scale 1.111  #A2C3CDFF  "Automation for"
+005  Sprite     Sprocket_Fill         {X:462 Y:53 W:100 H:40}  #3C4C52FF
+006  SetClip    {X:462 Y:53 W:100 H:40}
+007  Sprite     Sprocket_Fill         {X:470 Y:57 W:82 H:32}  #5B737BFF
+008  Text       at {X:470.1234 Y:56.71198} scale 1.111  #DCF5FDFF  "Test Rig"
+009  Sprite     Sprocket_Fill         {X:552 Y:57 W:2 H:32}  #DCF5FDFF
+010  SetClip    {X:296 Y:53 W:1329 H:40}
+011  ClearClip  
+012  Text       at {X:1632.5 Y:56.71198} scale 0.642  #A2C3CDFF  "s"
+013  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+014  SetClip    {X:256 Y:118 W:1408 H:845}
+015  Text       at {X:272 Y:125.712} scale 0.833  #A2C3CDFF  "+ New logic system"
+016  Text       at {X:468.5567 Y:125.712} scale 0.833  #A2C3CDFF  "+ Load blueprint"
+017  Sprite     Sprocket_Fill         {X:256 Y:166 W:1396 H:1}  #5B737BFF
+018  Text       at {X:264 Y:182.712} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
+019  ClearClip  
+020  Sprite     Sprocket_Fill         {X:240 Y:978 W:1440 H:1}  #5B737BFF
+021  Sprite     Sprocket_Fill         {X:240 Y:979 W:1440 H:56}  #1B242AFF

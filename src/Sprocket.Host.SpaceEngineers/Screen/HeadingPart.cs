@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
+
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
     /// <summary>
@@ -121,6 +123,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         }
 
         string _prompt;
+
+        /// <summary>What this part is and what renaming it does, for whoever rests the pointer on it, or null for nothing to say.</summary>
+        public Document About
+        {
+            get { return _about; }
+            set { Set(ref _about, value, nameof(About)); }
+        }
+
+        Document _about;
 
         /// <summary>
         /// Whether an empty name is an answer here, or is not allowed to be given.

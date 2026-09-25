@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
@@ -181,16 +180,25 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             set { _press = value; }
         }
 
-        /// <summary>What to say while the pointer rests on this.</summary>
+        /// <summary>What to say while the pointer rests on this, as plain words.</summary>
         public string Tip { get; set; }
 
-        /// <summary>Whether the pointer has any business here: something to do, or something to say.</summary>
+        /// <summary>What to say while the pointer rests on this, with structure; said in place of <see cref="Tip" /> where it is set.</summary>
+        public Rich.Document RichTip { get; set; }
+
+        /// <summary>What of this lets presses, the hover and the keyboard pass through to what is beneath it.</summary>
+        public InputTransparency InputTransparency { get; set; }
+
+        /// <summary>Whether a press has business here: something to do.</summary>
         /// <remarks>
         ///     Reads the field rather than <see cref="Press" />, which would copy the whole struct, because
-        ///     <see cref="Under" /> asks this of every element it visits on every frame.
+        ///     <see cref="Under" /> asks this of every element it visits on every frame. A tip is not a reason:
+        ///     what the pointer rests on to read one is found by <see cref="SayingAt" />.
         /// </remarks>
-        bool Answers => _press.Means != Means.Nothing || !string.IsNullOrEmpty(Tip) || _command != null
-                        || Focusable || TakesPointer;
+        bool Answers => _press.Means != Means.Nothing || _command != null || Focusable || TakesPointer;
+
+        /// <summary>Whether this has something to say while the pointer rests on it.</summary>
+        bool Says => RichTip != null || !string.IsNullOrEmpty(Tip);
 
         /// <summary>How thick <see cref="Edge" /> is drawn.</summary>
         public float EdgeThickness { get; set; }
@@ -385,11 +393,35 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             if (ClipsContent && !Holds(point))
                 return null;
 
-            var inner = UnderContent(point);
-            if (inner != null)
-                return inner;
+            if ((InputTransparency & InputTransparency.Children) == 0)
+            {
+                var inner = UnderContent(point);
+                if (inner != null)
+                    return inner;
+            }
 
-            return Answers && Holds(point) ? this : null;
+            return (InputTransparency & InputTransparency.Self) == 0 && Answers && Hits(point) ? this : null;
+        }
+
+        /// <summary>The deepest element at <paramref name="point" /> with something to say, or null.</summary>
+        /// <remarks>
+        ///     Separate from <see cref="Under" />, because what a press reaches and what the pointer is resting on
+        ///     are different questions: a light inside a row says what it means while a press on it opens the row.
+        ///     Input transparency does not hide a tip.
+        /// </remarks>
+        public Element SayingAt(Vector2 point)
+        {
+            if (Collapsed || !Holds(point))
+                return null;
+
+            for (var i = VisualChildCount - 1; i >= 0; i--)
+            {
+                var found = GetVisualChild(i).SayingAt(point);
+                if (found != null)
+                    return found;
+            }
+
+            return Says ? this : null;
         }
 
         /// <summary>Whether <paramref name="point" /> is inside <see cref="Bounds" />.</summary>
@@ -397,6 +429,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         {
             return point.X >= Bounds.X && point.X <= Bounds.X + Bounds.Width
                                        && point.Y >= Bounds.Y && point.Y <= Bounds.Y + Bounds.Height;
+        }
+
+        /// <summary>Whether a press or a hover at <paramref name="point" />, where no child took it, reaches this: anywhere it holds, unless it says otherwise.</summary>
+        protected virtual bool Hits(Vector2 point)
+        {
+            return Holds(point);
         }
 
         /// <summary>
@@ -499,14 +537,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         {
         }
 
-        /// <summary>Adds every child of this to <paramref name="into" />, in the order they are drawn.</summary>
-        internal virtual void AddChildren(List<Element> into)
-        {
-            if (Contents == null)
-                return;
+        /// <summary>How many children this has, which <see cref="GetVisualChild" /> hands out in the order they are drawn.</summary>
+        protected internal virtual int VisualChildCount => Contents == null ? 0 : Contents.Count;
 
-            for (var i = 0; i < Contents.Count; i++)
-                into.Add(Contents[i]);
+        /// <summary>The child at <paramref name="index" />, counted in the order the children are drawn.</summary>
+        protected internal virtual Element GetVisualChild(int index)
+        {
+            return Contents[index];
         }
 
         /// <summary>Checks that this can place <paramref name="child" /> by <paramref name="placement" />, before it joins or changes.</summary>

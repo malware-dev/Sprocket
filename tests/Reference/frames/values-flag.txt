@@ -5,95 +5,95 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Set Chime On Approach on Approach Sensor
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:121 W:1402 H:832}
-002  Sprite     Sprocket_Fill         {X:259 Y:121 W:460 H:820}  #29363EFF
-003  Sprite     Sprocket_Fill         {X:259 Y:121 W:460 H:1}  #5B737BFF
-004  Sprite     Sprocket_Fill         {X:259 Y:941 W:460 H:1}  #5B737BFF
-005  Sprite     Sprocket_Fill         {X:259 Y:121 W:1 H:820}  #5B737BFF
-006  Sprite     Sprocket_Fill         {X:718 Y:121 W:1 H:820}  #5B737BFF
-007  SetClip    {X:275 Y:301 W:428 H:625}
-008  Text       at {X:378.8 Y:315.652} scale 0.822  #DCF5FDFF  "Approach Sensor"
-009  Text       at {X:378.8 Y:341.132} scale 0.642  #85A1A9FF  "Sensor   on"
-010  Sprite     Sprocket_Fill         {X:288 Y:329 W:17 H:1}  #3ACC00FF
-011  Sprite     Sprocket_Fill         {X:288 Y:345 W:17 H:1}  #3ACC00FF
-012  Sprite     Sprocket_Fill         {X:288 Y:329 W:1 H:17}  #3ACC00FF
-013  Sprite     Sprocket_Fill         {X:304 Y:329 W:1 H:17}  #3ACC00FF
-014  Text       at {X:285.8861 Y:327.0628} scale 0.425  #3ACC00FF  "c"
-015  Sprite     Sprocket_Fill         {X:315 Y:311 W:54 H:54}  #374851FF
-016  Sprite     MyObjectBuilder_SensorBlock/LargeBlockSensor{X:315 Y:311 W:54 H:54}  #FFFFFFFF
-017  SetClip    {X:259 Y:121 W:1402 H:832}
-018  Text       at {X:275 Y:137.192} scale 0.822  #DCF5FDFF  "BLOCKS"
-019  Text       at {X:275 Y:166.872} scale 0.642  #85A1A9FF  "1 picked"
-020  Sprite     Sprocket_Fill         {X:275 Y:191 W:428 H:37}  #141B20FF
-021  Sprite     Sprocket_Fill         {X:275 Y:191 W:428 H:1}  #5B737BFF
-022  Sprite     Sprocket_Fill         {X:275 Y:227 W:428 H:1}  #5B737BFF
-023  Sprite     Sprocket_Fill         {X:275 Y:191 W:1 H:37}  #5B737BFF
-024  Sprite     Sprocket_Fill         {X:702 Y:191 W:1 H:37}  #5B737BFF
-025  Text       at {X:287.8 Y:199.172} scale 0.732  #DCF5FDFF  "Approach"
-026  Text       at {X:660.69 Y:191.4771} scale 0.732  #85A1A9FF  "x"
-027  Text       at {X:287.8 Y:241.757} scale 0.732  #A2C3CDFF  "Anything"
-028  Text       at {X:369.97 Y:229.575} scale 0.732  #A2C3CDFF  "v"
-029  Text       at {X:275 Y:276.5421} scale 0.642  #85A1A9FF  "1 of 14"
-030  Sprite     Sprocket_Fill         {X:729 Y:121 W:460 H:820}  #29363EFF
-031  Sprite     Sprocket_Fill         {X:729 Y:121 W:460 H:1}  #5B737BFF
-032  Sprite     Sprocket_Fill         {X:729 Y:941 W:460 H:1}  #5B737BFF
-033  Sprite     Sprocket_Fill         {X:729 Y:121 W:1 H:820}  #5B737BFF
-034  Sprite     Sprocket_Fill         {X:1188 Y:121 W:1 H:820}  #5B737BFF
-035  SetClip    {X:745 Y:273 W:428 H:652}
-036  Sprite     Sprocket_Fill         {X:745 Y:273 W:416 H:82}  #374851FF
-037  Text       at {X:761 Y:282.752} scale 0.732  #A2C3CDFF  "Sprocket has not checked this block yet, so some of"
-038  Text       at {X:761 Y:303.842} scale 0.732  #A2C3CDFF  "what it offers may be doubled, missing or oddly"
-039  Text       at {X:761 Y:324.932} scale 0.732  #A2C3CDFF  "named."
-040  Text       at {X:757.8 Y:368.222} scale 0.822  #85A1A9FF  "POWER"
-041  Text       at {X:757.8 Y:404.502} scale 0.822  #DCF5FDFF  "Switch off"
-042  Text       at {X:757.8 Y:450.382} scale 0.822  #DCF5FDFF  "Switch on"
-043  Text       at {X:757.8 Y:496.2621} scale 0.822  #DCF5FDFF  "Toggle block On/Off"
-044  Text       at {X:757.8 Y:542.142} scale 0.822  #85A1A9FF  "OTHER"
-045  Sprite     Sprocket_Fill         {X:745 Y:569 W:416 H:43}  #5B737BFF
-046  Text       at {X:757.8 Y:578.422} scale 0.822  #DCF5FDFF  "Set Chime On Approach"
-047  SetClip    {X:259 Y:121 W:1402 H:832}
-048  Text       at {X:745 Y:137.192} scale 0.822  #DCF5FDFF  "WHAT TO DO"
-049  Sprite     Sprocket_Fill         {X:745 Y:191 W:428 H:37}  #141B20FF
-050  Sprite     Sprocket_Fill         {X:745 Y:191 W:428 H:1}  #5B737BFF
-051  Sprite     Sprocket_Fill         {X:745 Y:227 W:428 H:1}  #5B737BFF
-052  Sprite     Sprocket_Fill         {X:745 Y:191 W:1 H:37}  #5B737BFF
-053  Sprite     Sprocket_Fill         {X:1172 Y:191 W:1 H:37}  #5B737BFF
-054  Text       at {X:757.8 Y:199.172} scale 0.732  #85A1A9FF  "Search"
-055  Sprite     Sprocket_Fill         {X:745 Y:234 W:214 H:33}  #5B737BFF
-056  Sprite     Sprocket_Fill         {X:745 Y:234 W:214 H:1}  #5B737BFF
-057  Sprite     Sprocket_Fill         {X:745 Y:266 W:214 H:1}  #5B737BFF
-058  Sprite     Sprocket_Fill         {X:745 Y:234 W:1 H:33}  #5B737BFF
-059  Sprite     Sprocket_Fill         {X:958 Y:234 W:1 H:33}  #5B737BFF
-060  Text       at {X:815.7584 Y:240.062} scale 0.732  #A2C3CDFF  "Organized"
-061  Sprite     Sprocket_Fill         {X:959 Y:234 W:214 H:33}  #29363EFF
-062  Sprite     Sprocket_Fill         {X:959 Y:234 W:214 H:1}  #5B737BFF
-063  Sprite     Sprocket_Fill         {X:959 Y:266 W:214 H:1}  #5B737BFF
-064  Sprite     Sprocket_Fill         {X:959 Y:234 W:1 H:33}  #5B737BFF
-065  Sprite     Sprocket_Fill         {X:1172 Y:234 W:1 H:33}  #5B737BFF
-066  Text       at {X:1036.528 Y:240.062} scale 0.732  #A2C3CDFF  "Terminal"
-067  Sprite     Sprocket_Fill         {X:1199 Y:121 W:460 H:820}  #29363EFF
-068  Sprite     Sprocket_Fill         {X:1199 Y:121 W:460 H:1}  #5B737BFF
-069  Sprite     Sprocket_Fill         {X:1199 Y:941 W:460 H:1}  #5B737BFF
-070  Sprite     Sprocket_Fill         {X:1199 Y:121 W:1 H:820}  #5B737BFF
-071  Sprite     Sprocket_Fill         {X:1658 Y:121 W:1 H:820}  #5B737BFF
-072  Text       at {X:1215 Y:199.172} scale 0.732  #85A1A9FF  "Chime On Approach"
-073  Sprite     Sprocket_Fill         {X:1524 Y:191 W:119 H:1}  #5F7278FF
-074  Sprite     Sprocket_Fill         {X:1524 Y:227 W:119 H:1}  #5F7278FF
-075  Sprite     Sprocket_Fill         {X:1524 Y:191 W:1 H:37}  #5F7278FF
-076  Sprite     Sprocket_Fill         {X:1642 Y:191 W:1 H:37}  #5F7278FF
-077  Sprite     Sprocket_Fill         {X:1525 Y:192 W:117 H:35}  #060A0CFF
-078  Text       at {X:1541.933 Y:199.172} scale 0.732  #85A1A9FF  "ON"
-079  Text       at {X:1599.56 Y:199.172} scale 0.732  #85A1A9FF  "OFF"
-080  Sprite     Sprocket_Fill         {X:1567 Y:244 W:76 H:37}  #8EBCCFFF
-081  Text       at {X:1586.327 Y:251.862} scale 0.732  #1B242AFF  "Done"
-082  Text       at {X:1215 Y:137.192} scale 0.822  #DCF5FDFF  "VALUES"
-083  ClearClip  
-084  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
-085  SetClip    {X:301 Y:56 W:498 H:33}
-086  Text       at {X:300.91 Y:56.30198} scale 1.156  #DCF5FDFF  "Set Chime On Approach on Approach Sensor"
-087  ClearClip  
-088  Text       at {X:259 Y:50.22493} scale 0.732  #A2C3CDFF  "<"
-089  Text       at {X:1625.09 Y:50.22493} scale 0.732  #A2C3CDFF  "s"
-090  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-091  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-092  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
+002  Text       at {X:256 Y:56.71198} scale 0.642  #A2C3CDFF  "<"
+003  SetClip    {X:296 Y:53 W:1329 H:40}
+004  Text       at {X:303.5 Y:56.71198} scale 1.111  #DCF5FDFF  "Set Chime On Approach on Approach Sensor"
+005  ClearClip  
+006  Text       at {X:1632.5 Y:56.71198} scale 0.642  #A2C3CDFF  "s"
+007  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+008  SetClip    {X:256 Y:118 W:1408 H:845}
+009  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:833}  #29363EFF
+010  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:1}  #5B737BFF
+011  Sprite     Sprocket_Fill         {X:256 Y:949 W:460 H:1}  #5B737BFF
+012  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:833}  #5B737BFF
+013  Sprite     Sprocket_Fill         {X:715 Y:118 W:1 H:833}  #5B737BFF
+014  SetClip    {X:272 Y:298 W:428 H:637}
+015  Text       at {X:375.8 Y:312.172} scale 0.822  #DCF5FDFF  "Approach Sensor"
+016  Text       at {X:375.8 Y:337.6519} scale 0.642  #85A1A9FF  "Sensor   on"
+017  Sprite     Sprocket_Fill         {X:285 Y:326 W:17 H:1}  #3ACC00FF
+018  Sprite     Sprocket_Fill         {X:285 Y:342 W:17 H:1}  #3ACC00FF
+019  Sprite     Sprocket_Fill         {X:285 Y:326 W:1 H:17}  #3ACC00FF
+020  Sprite     Sprocket_Fill         {X:301 Y:326 W:1 H:17}  #3ACC00FF
+021  Text       at {X:282.8861 Y:323.5828} scale 0.425  #3ACC00FF  "c"
+022  Sprite     Sprocket_Fill         {X:312 Y:307 W:54 H:54}  #374851FF
+023  Sprite     MyObjectBuilder_SensorBlock/LargeBlockSensor{X:312 Y:307 W:54 H:54}  #FFFFFFFF
+024  SetClip    {X:256 Y:118 W:1408 H:845}
+025  Text       at {X:272 Y:133.712} scale 0.822  #DCF5FDFF  "BLOCKS"
+026  Text       at {X:272 Y:163.392} scale 0.642  #85A1A9FF  "1 picked"
+027  Sprite     Sprocket_Fill         {X:272 Y:188 W:428 H:37}  #141B20FF
+028  Sprite     Sprocket_Fill         {X:272 Y:188 W:428 H:1}  #5B737BFF
+029  Sprite     Sprocket_Fill         {X:272 Y:224 W:428 H:1}  #5B737BFF
+030  Sprite     Sprocket_Fill         {X:272 Y:188 W:1 H:37}  #5B737BFF
+031  Sprite     Sprocket_Fill         {X:699 Y:188 W:1 H:37}  #5B737BFF
+032  Text       at {X:284.8 Y:195.692} scale 0.732  #DCF5FDFF  "Approach"
+033  Text       at {X:657.69 Y:187.997} scale 0.732  #85A1A9FF  "x"
+034  Text       at {X:284.8 Y:238.277} scale 0.732  #A2C3CDFF  "Anything"
+035  Text       at {X:366.97 Y:226.0949} scale 0.732  #A2C3CDFF  "v"
+036  Text       at {X:272 Y:273.062} scale 0.642  #85A1A9FF  "1 of 14"
+037  Sprite     Sprocket_Fill         {X:726 Y:118 W:460 H:833}  #29363EFF
+038  Sprite     Sprocket_Fill         {X:726 Y:118 W:460 H:1}  #5B737BFF
+039  Sprite     Sprocket_Fill         {X:726 Y:949 W:460 H:1}  #5B737BFF
+040  Sprite     Sprocket_Fill         {X:726 Y:118 W:1 H:833}  #5B737BFF
+041  Sprite     Sprocket_Fill         {X:1185 Y:118 W:1 H:833}  #5B737BFF
+042  SetClip    {X:742 Y:270 W:428 H:665}
+043  Sprite     Sprocket_Fill         {X:742 Y:270 W:416 H:82}  #374851FF
+044  Text       at {X:758 Y:279.272} scale 0.732  #A2C3CDFF  "Sprocket has not checked this block yet, so some of"
+045  Text       at {X:758 Y:300.362} scale 0.732  #A2C3CDFF  "what it offers may be doubled, missing or oddly"
+046  Text       at {X:758 Y:321.452} scale 0.732  #A2C3CDFF  "named."
+047  Text       at {X:754.8 Y:364.742} scale 0.822  #85A1A9FF  "POWER"
+048  Text       at {X:754.8 Y:401.022} scale 0.822  #DCF5FDFF  "Switch off"
+049  Text       at {X:754.8 Y:446.902} scale 0.822  #DCF5FDFF  "Switch on"
+050  Text       at {X:754.8 Y:492.782} scale 0.822  #DCF5FDFF  "Toggle block On/Off"
+051  Text       at {X:754.8 Y:538.6619} scale 0.822  #85A1A9FF  "OTHER"
+052  Sprite     Sprocket_Fill         {X:742 Y:565 W:416 H:43}  #5B737BFF
+053  Text       at {X:754.8 Y:574.9419} scale 0.822  #DCF5FDFF  "Set Chime On Approach"
+054  SetClip    {X:256 Y:118 W:1408 H:845}
+055  Text       at {X:742 Y:133.712} scale 0.822  #DCF5FDFF  "WHAT TO DO"
+056  Sprite     Sprocket_Fill         {X:742 Y:188 W:428 H:37}  #141B20FF
+057  Sprite     Sprocket_Fill         {X:742 Y:188 W:428 H:1}  #5B737BFF
+058  Sprite     Sprocket_Fill         {X:742 Y:224 W:428 H:1}  #5B737BFF
+059  Sprite     Sprocket_Fill         {X:742 Y:188 W:1 H:37}  #5B737BFF
+060  Sprite     Sprocket_Fill         {X:1169 Y:188 W:1 H:37}  #5B737BFF
+061  Text       at {X:754.8 Y:195.692} scale 0.732  #85A1A9FF  "Search"
+062  Sprite     Sprocket_Fill         {X:742 Y:231 W:214 H:33}  #5B737BFF
+063  Sprite     Sprocket_Fill         {X:742 Y:231 W:214 H:1}  #5B737BFF
+064  Sprite     Sprocket_Fill         {X:742 Y:263 W:214 H:1}  #5B737BFF
+065  Sprite     Sprocket_Fill         {X:742 Y:231 W:1 H:33}  #5B737BFF
+066  Sprite     Sprocket_Fill         {X:955 Y:231 W:1 H:33}  #5B737BFF
+067  Text       at {X:812.7584 Y:236.582} scale 0.732  #A2C3CDFF  "Organized"
+068  Sprite     Sprocket_Fill         {X:956 Y:231 W:214 H:33}  #29363EFF
+069  Sprite     Sprocket_Fill         {X:956 Y:231 W:214 H:1}  #5B737BFF
+070  Sprite     Sprocket_Fill         {X:956 Y:263 W:214 H:1}  #5B737BFF
+071  Sprite     Sprocket_Fill         {X:956 Y:231 W:1 H:33}  #5B737BFF
+072  Sprite     Sprocket_Fill         {X:1169 Y:231 W:1 H:33}  #5B737BFF
+073  Text       at {X:1033.528 Y:236.582} scale 0.732  #A2C3CDFF  "Terminal"
+074  Sprite     Sprocket_Fill         {X:1196 Y:118 W:460 H:833}  #29363EFF
+075  Sprite     Sprocket_Fill         {X:1196 Y:118 W:460 H:1}  #5B737BFF
+076  Sprite     Sprocket_Fill         {X:1196 Y:949 W:460 H:1}  #5B737BFF
+077  Sprite     Sprocket_Fill         {X:1196 Y:118 W:1 H:833}  #5B737BFF
+078  Sprite     Sprocket_Fill         {X:1655 Y:118 W:1 H:833}  #5B737BFF
+079  Text       at {X:1212 Y:195.692} scale 0.732  #85A1A9FF  "Chime On Approach"
+080  Sprite     Sprocket_Fill         {X:1521 Y:188 W:119 H:1}  #5F7278FF
+081  Sprite     Sprocket_Fill         {X:1521 Y:224 W:119 H:1}  #5F7278FF
+082  Sprite     Sprocket_Fill         {X:1521 Y:188 W:1 H:37}  #5F7278FF
+083  Sprite     Sprocket_Fill         {X:1639 Y:188 W:1 H:37}  #5F7278FF
+084  Sprite     Sprocket_Fill         {X:1522 Y:189 W:117 H:35}  #060A0CFF
+085  Text       at {X:1538.933 Y:195.692} scale 0.732  #85A1A9FF  "ON"
+086  Text       at {X:1596.56 Y:195.692} scale 0.732  #85A1A9FF  "OFF"
+087  Sprite     Sprocket_Fill         {X:1564 Y:241 W:76 H:37}  #8EBCCFFF
+088  Text       at {X:1583.327 Y:248.382} scale 0.732  #1B242AFF  "Done"
+089  Text       at {X:1212 Y:133.712} scale 0.822  #DCF5FDFF  "VALUES"
+090  ClearClip  
+091  Sprite     Sprocket_Fill         {X:240 Y:978 W:1440 H:1}  #5B737BFF
+092  Sprite     Sprocket_Fill         {X:240 Y:979 W:1440 H:56}  #1B242AFF

@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class OpeningTests
 {
     /// <summary>A step that sets a light's radius to 5, on a trigger's new sequence.</summary>
-    const string ARadiusStep = "60 133 type Airlock enter 60 164 200 384 560 360 1353 314 "
+    const string ARadiusStep = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
         + "70 200 200 485 800 679 1315 209 type 5 enter";
 
     /// <summary>A stage of the page showing, counted from its first.</summary>

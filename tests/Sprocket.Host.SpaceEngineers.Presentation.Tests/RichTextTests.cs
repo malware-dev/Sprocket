@@ -1,0 +1,98 @@
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
+using VRageMath;
+using Xunit;
+
+namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
+
+/// <summary>A document drawn: wrapped to its room, each kind of run in its own color, and measured only when something about it changes.</summary>
+public class RichTextTests
+{
+    const float Wide = 400f;
+    const float High = 400f;
+
+    static readonly Color Body = new Color(162, 195, 205);
+    static readonly Color Bright = new Color(220, 245, 253);
+
+    /// <summary>Strong words take the strong color and the words around them the body color.</summary>
+    [Fact]
+    public void StrongWordsTakeTheStrongColor()
+    {
+        var (_, easel) = Laid("Made from **Airlock** blueprint", Wide);
+
+        Assert.Equal(Body, Word(easel, "Made from").Color);
+        Assert.Equal(Bright, Word(easel, "Airlock").Color);
+        Assert.Equal(Body, Word(easel, "blueprint").Color);
+    }
+
+    /// <summary>Words that do not fit the room carry on on the next line, and none is cut.</summary>
+    [Fact]
+    public void WordsThatDoNotFitWrap()
+    {
+        const string said = "one two three four five six seven eight nine ten";
+        var (text, easel) = Laid(said, 120f);
+
+        var lines = easel.Written.Select(c => c.Position.Y).Distinct().Count();
+
+        Assert.True(lines > 1, "nothing wrapped");
+        Assert.True(text.DesiredSize.X <= 120f, "a line is wider than the room");
+        Assert.Equal(said.Replace(" ", ""), string.Concat(easel.Written.Select(c => c.Text)).Replace(" ", ""));
+    }
+
+    /// <summary>A single newline starts a new line, and a blank line starts a new block below it.</summary>
+    [Fact]
+    public void ANewlineStartsALine()
+    {
+        var (_, easel) = Laid("one\ntwo", Wide);
+
+        Assert.True(Word(easel, "two").Position.Y > Word(easel, "one").Position.Y);
+    }
+
+    /// <summary>A bullet's words stand in, and a numbered item draws its number.</summary>
+    [Fact]
+    public void ListItemsStandIn()
+    {
+        var (_, easel) = Laid("plain\n\n- item\n\n3. counted", Wide);
+
+        Assert.True(Word(easel, "item").Position.X > Word(easel, "plain").Position.X);
+        Assert.Contains(easel.Written, c => c.Text == "3.");
+    }
+
+    /// <summary>Drawing again measures nothing, and nor does changing a color.</summary>
+    [Fact]
+    public void DrawingAgainMeasuresNothing()
+    {
+        var (text, easel) = Laid("# Title\nSome **strong** words, and *some* not.\n\n- one\n- two", Wide);
+
+        easel.Draw(Wide, High);
+        var settled = easel.Measured;
+
+        text.StrongColor = Color.Red;
+        easel.Draw(Wide, High);
+        easel.Draw(Wide, High);
+
+        Assert.Equal(settled, easel.Measured);
+    }
+
+    static (RichText, Easel) Laid(string markdown, float wide)
+    {
+        var text = new RichText
+        {
+            Document = Markdown.Parse(markdown),
+            FontSize = 20f,
+            Color = Body,
+            StrongColor = Bright,
+            EmphasisColor = Bright,
+            HeadingColor = Bright,
+            BlockSpacing = 8f,
+            Indent = 20f,
+            Placement = Fixed.Wide(wide)
+        };
+
+        var easel = new Easel(new VStack { Children = { text } }, Wide, High);
+        return (text, easel);
+    }
+
+    static Sim.Simulation.DrawCommand Word(Easel easel, string text) =>
+        Assert.Single(easel.Written, command => command.Text.Trim() == text);
+}

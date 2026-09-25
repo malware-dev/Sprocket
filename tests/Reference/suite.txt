@@ -18,9 +18,10 @@
 root
 root-hover          move 60 130
 root-ticked         tick 120
-root-rename         240 70
-root-rename-empty   240 70 clear
-root-blocked-hover  240 70 clear move 60 130
+root-rename         260 70
+root-rename-empty   260 70 clear
+root-rename-drag    260 70 drag 229 70 270 70
+root-blocked-hover  260 70 clear move 60 130
 root-naming         60 130
 root-naming-ready   60 130 type Airlock move 460 210
 

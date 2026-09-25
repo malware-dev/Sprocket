@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 
@@ -27,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly Reveal _more;
 
         readonly HStack _heading;
+        readonly Relay _expands;
         readonly Label _text;
         readonly Glyph _chevron;
         readonly Label _detail;
@@ -47,6 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         public NoticeView(NoticeComponent component)
         {
             _component = component;
+            _expands = new Relay(Expand);
 
             _reveal = new Reveal
             {
@@ -57,6 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                         new HStack
                         {
                             Spacing = 8f,
+                            Command = _expands,
                             Children =
                             {
                                 new Label { Style = Styles.Name, Wraps = true, Placement = Flex.Grow }.As(out _text),
@@ -115,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _chevron.Collapsed = _component.ExpandCommand == 0;
 
             // Reached only once the slide has finished, because a reveal answers nothing while it moves.
-            _heading.Press = Deed.Sends(_component.ExpandCommand);
+            _expands.CanExecute = _component.ExpandCommand != 0;
 
             Buttons(problem);
         }
@@ -163,7 +166,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
                 for (var i = 0; i < _component.Actions.Count; i++)
                 {
-                    var button = new Button();
+                    var at = i;
+                    var button = new Button { Command = new Relay(() => Act(at)) };
                     _buttons.Add(button);
                     _actions.Children.Add(button);
                 }
@@ -173,8 +177,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 _buttons[i].Style = style;
                 _buttons[i].Text = _component.Actions[i].Text;
-                _buttons[i].Press = Deed.Sends(_component.Actions[i].Command);
             }
+        }
+
+        void Expand()
+        {
+            Host.Send(_heading, _component.ExpandCommand, null);
+        }
+
+        void Act(int at)
+        {
+            Host.Send(_buttons[at], _component.Actions[at].Command, null);
         }
 
         static float Towards(float value, float wanted, float step)

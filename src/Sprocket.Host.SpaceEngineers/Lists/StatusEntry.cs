@@ -1,5 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Screen;
 
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
+
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
     /// <summary>One thing that is doing something, summarised to a line.</summary>
@@ -187,6 +189,23 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
         string _buttonQuestion = "";
 
+        /// <summary>What the row's button does, said where the pointer rests on it, or null for nothing to say.</summary>
+        public Document ButtonAbout
+        {
+            get { return _buttonAbout; }
+            set { Set(ref _buttonAbout, value, nameof(ButtonAbout)); }
+        }
+
+        Document _buttonAbout;
+
+        /// <summary>What pressing the row does, said where the pointer rests on it, or null for nothing to say.</summary>
+        public Document About
+        {
+            get { return _about; }
+            set { Set(ref _about, value, nameof(About)); }
+        }
+
+        Document _about;
         /// <summary>Whether this is the row of a list that the rest of its screen is about.</summary>
         /// <remarks>The logic system on a blueprint's screen whose blocks are being shown beside it.</remarks>
         public bool Chosen
