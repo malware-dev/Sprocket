@@ -29,8 +29,8 @@ on screen     Airlock
 022  Text       at {X:310 Y:370.432} scale 0.64  #DCF5FDFF  "Sequence 1"
 023  Text       at {X:310 Y:395.912} scale 0.5  #85A1A9FF  "switched off"
 024  Sprite     Sprocket_Fill         {X:278 Y:386 W:13 H:13}  #5F7278FF
-025  Sprite     Sprocket_Fill         {X:1472 Y:384 W:7 H:16}  #29363EFF
-026  Text       at {X:1472.1 Y:384.214} scale 0.57  #A2C3CDFF  "g"
+025  Text       at {X:1472.1 Y:384.214} scale 0.57  #A2C3CDFF  "g"
+026  Sprite     Sprocket_Fill         {X:1489 Y:384 W:7 H:16}  #3C4C52FF
 027  Text       at {X:1489.367 Y:384.214} scale 0.57  #85A1A9FF  "2"
 028  Sprite     Sprocket_Fill         {X:1506 Y:376 W:107 H:1}  #5F7278FF
 029  Sprite     Sprocket_Fill         {X:1506 Y:408 W:107 H:1}  #5F7278FF
@@ -62,9 +62,9 @@ on screen     Airlock
 055  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
 056  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
 057  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-058  Sprite     Sprocket_Fill         {X:1274 Y:408 W:194 H:33}  #1B242AFF
-059  Sprite     Sprocket_Fill         {X:1274 Y:408 W:194 H:1}  #5B737BFF
-060  Sprite     Sprocket_Fill         {X:1274 Y:440 W:194 H:1}  #5B737BFF
-061  Sprite     Sprocket_Fill         {X:1274 Y:408 W:1 H:33}  #5B737BFF
-062  Sprite     Sprocket_Fill         {X:1467 Y:408 W:1 H:33}  #5B737BFF
-063  Text       at {X:1286.523 Y:414} scale 0.57  #DCF5FDFF  "Run it now, as its trigger would"
+058  Sprite     Sprocket_Fill         {X:1048 Y:408 W:434 H:33}  #1B242AFF
+059  Sprite     Sprocket_Fill         {X:1048 Y:408 W:434 H:1}  #5B737BFF
+060  Sprite     Sprocket_Fill         {X:1048 Y:440 W:434 H:1}  #5B737BFF
+061  Sprite     Sprocket_Fill         {X:1048 Y:408 W:1 H:33}  #5B737BFF
+062  Sprite     Sprocket_Fill         {X:1481 Y:408 W:1 H:33}  #5B737BFF
+063  Text       at {X:1060.303 Y:414} scale 0.57  #DCF5FDFF  "Creates a copy of this sequence, switched off and with no trigger of its own"

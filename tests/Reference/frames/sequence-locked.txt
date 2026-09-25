@@ -20,12 +20,12 @@ on screen     Sequence 1
 013  Sprite     Sprocket_Fill         {X:1543 Y:119 W:52 H:31}  #1B2C33FF
 014  Text       at {X:1559.697 Y:124.012} scale 0.57  #DCF5FDFF  "ON"
 015  Text       at {X:1611.643 Y:124.012} scale 0.57  #85A1A9FF  "OFF"
-016  Sprite     Sprocket_Fill         {X:342 Y:169 W:76 H:36}  #1B242AFF
-017  Sprite     Sprocket_Fill         {X:342 Y:203 W:76 H:2}  #00000000
-018  Text       at {X:358 Y:174.902} scale 0.64  #DCF5FDFF  "reverse"
-019  Sprite     Sprocket_Fill         {X:428 Y:169 W:144 H:36}  #1B242AFF
-020  Sprite     Sprocket_Fill         {X:428 Y:203 W:144 H:2}  #00000000
-021  Text       at {X:443.89 Y:174.902} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
+016  Sprite     Sprocket_Fill         {X:342 Y:169 W:63 H:36}  #1B242AFF
+017  Sprite     Sprocket_Fill         {X:342 Y:203 W:63 H:2}  #00000000
+018  Text       at {X:358 Y:174.902} scale 0.64  #DCF5FDFF  "open"
+019  Sprite     Sprocket_Fill         {X:415 Y:169 W:144 H:36}  #1B242AFF
+020  Sprite     Sprocket_Fill         {X:415 Y:203 W:144 H:2}  #00000000
+021  Text       at {X:431.3567 Y:174.902} scale 0.64  #DCF5FDFF  "Airlock Inner Door"
 022  Sprite     Sprocket_Fill         {X:278 Y:179 W:3 H:3}  #5F7278FF
 023  Sprite     Sprocket_Fill         {X:278 Y:185 W:3 H:3}  #5F7278FF
 024  Sprite     Sprocket_Fill         {X:278 Y:191 W:3 H:3}  #5F7278FF

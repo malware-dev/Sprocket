@@ -65,18 +65,18 @@ public class HandoverTests : IDisposable
                     heard.Program = program;
                     heard.State = state;
                 },
-                (block, holder, program, state) =>
+                (_, holder, program, state) =>
                 {
                     heard.Refused.Add(holder);
                     heard.Program = program;
                     heard.State = state;
                 },
-                (block, program, switches) =>
+                (_, program, switches) =>
                 {
                     heard.Changed.Add(program);
                     heard.Switches = switches;
                 },
-                (block, program, switches) => heard.Stored.Add(program));
+                (_, program, _) => heard.Stored.Add(program));
 
             made.Listen(Network.Handover.Carry(NetworkChannel.Create("Sprocket.HandoverTests")).Build());
         });
@@ -86,7 +86,7 @@ public class HandoverTests : IDisposable
 
     Handover Client(Peer peer, Heard heard)
     {
-        return Handover(peer, id => null, heard);
+        return Handover(peer, _ => null, heard);
     }
 
     /// <summary>A system whose one trigger, a repeat, closes the outer door, so running it does something to see.</summary>
@@ -147,7 +147,7 @@ public class HandoverTests : IDisposable
     public void AHolderWhoHasGoneLosesIt()
     {
         Lent();
-        _wire.As(_server, () => _serving.Reclaim(id => false));
+        _wire.As(_server, () => _serving.Reclaim(_ => false));
 
         var bert = _wire.Client("Bert");
         var heard = new Heard();
@@ -162,7 +162,7 @@ public class HandoverTests : IDisposable
     public void AHolderStillHereKeepsIt()
     {
         Lent();
-        _wire.As(_server, () => _serving.Reclaim(id => true));
+        _wire.As(_server, () => _serving.Reclaim(_ => true));
 
         var bert = _wire.Client("Bert");
         var heard = new Heard();
