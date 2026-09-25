@@ -1,18 +1,28 @@
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using VRage.Game;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Styling
 {
     /// <summary>What a symbol looks like in one state, on top of what any element does.</summary>
     public class GlyphState : ElementState
     {
-        /// <summary>How tall the symbol font's line is when a style leaves it to the neutral values.</summary>
-        const float NeutralFontSize = 24f;
-
+        string _font;
         float? _fontSize;
         Color? _tint;
 
-        /// <summary>How tall the symbol font's line is, in UI units, or null to leave it to the layers beneath.</summary>
+        /// <summary>Which font the symbol is drawn from, or null to leave it to the layers beneath.</summary>
+        public string Font
+        {
+            get { return _font; }
+            set
+            {
+                Check();
+                _font = value;
+            }
+        }
+
+        /// <summary>How tall the font's line is, in UI units, or null to leave it to the layers beneath.</summary>
         public float? FontSize
         {
             get { return _fontSize; }
@@ -43,7 +53,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             if (glyph == null)
                 return;
 
-            glyph.FontSize = NeutralFontSize;
+            glyph.Font = MyFontEnum.White;
+            glyph.FontSize = TextState.NeutralFontSize;
             glyph.Tint = Color.White;
         }
 
@@ -55,6 +66,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             var glyph = element as Glyph;
             if (glyph == null)
                 return;
+
+            if (_font != null)
+                glyph.Font = _font;
 
             if (_fontSize.HasValue)
                 glyph.FontSize = _fontSize.Value;
@@ -72,6 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             if (glyph == null)
                 return;
 
+            _font = glyph._font;
             _fontSize = glyph._fontSize;
             _tint = glyph._tint;
         }

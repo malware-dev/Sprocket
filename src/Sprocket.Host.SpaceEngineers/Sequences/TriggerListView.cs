@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {

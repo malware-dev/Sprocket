@@ -8,6 +8,7 @@ using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -69,8 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         // The one mark anybody already knows, and the note on it says what it promises: started as
         // its trigger would start it, rather than tried out.
         readonly Glyph _run = Widgets.Symbol(Symbols.Play, Palette.Muted);
-        // Governing, because switching it off stops the whole of what the screen is showing.
-        readonly Switch _enable = new Switch { Style = Unconverted.Governing, IsSet = true };
+        readonly Switch _enable = new Switch(Lettering.Small);
         // The same bin the step rows use. Deleting a sequence and deleting a step out of one are the
         // same act at two sizes, and drawing them as a word and a picture said they were different kinds
         // of thing. What separates them is where they sit: this one is up in the tools row, apart from
@@ -210,7 +210,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _problem.Color = _component.ProblemIsWarning ? Palette.Notice : Palette.Problem;
             }
 
-            _enable.IsOn = _component.Enabled;
+            // Governs, because a sequence's switch is the only one on this screen and switching it off
+            // stops the whole of what the screen is showing.
+            _enable.Show(_component.Enabled, true);
 
             // Nothing on this screen needs asking whether the sequence can be edited. Core hands a
             // running one a command of zero for every act it cannot do - see SequencePage.Change - and a

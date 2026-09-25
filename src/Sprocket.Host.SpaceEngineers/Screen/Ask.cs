@@ -534,7 +534,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             while (_switches.Count <= at)
             {
-                var made = new Switch { Style = Unconverted.Field };
+                var made = new Switch(Lettering.Small, true);
                 Stack holder = Widgets.RowOf(0f);
                 holder.Children.Add(made);
 
@@ -542,7 +542,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _holders.Add(holder);
             }
 
-            _switches[at].Says(Widgets.Caps(_wanted[at].Words[0]), Widgets.Caps(_wanted[at].Words[1]));
+            _switches[at].Says(_wanted[at].Words[0], _wanted[at].Words[1]);
             return _holders[at];
         }
 
@@ -1350,9 +1350,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 if (i >= _switches.Count)
                     continue;
 
-                _switches[i].Collapsed = false;
-                _switches[i].IsSet = said == _wanted[i].Words[0] || said == _wanted[i].Words[1];
-                _switches[i].IsOn = said == _wanted[i].Words[0];
+                if (said == _wanted[i].Words[0])
+                    _switches[i].Show(true, false);
+                else if (said == _wanted[i].Words[1])
+                    _switches[i].Show(false, false);
+                else
+                    _switches[i].Unchosen();
             }
 
             bool refused = !string.IsNullOrEmpty(Refused);

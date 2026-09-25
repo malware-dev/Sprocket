@@ -8,6 +8,7 @@ using VRageMath;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
 
 namespace Sprocket.Host.SpaceEngineers.Picking
 {

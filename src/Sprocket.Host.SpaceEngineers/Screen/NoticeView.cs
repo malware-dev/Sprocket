@@ -5,7 +5,6 @@ using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -60,8 +59,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                             Spacing = 8f,
                             Children =
                             {
-                                new Label { Wraps = true, Placement = Flex.Grow }.As(out _text),
-                                new Glyph { Symbol = Symbols.Down }.As(out _chevron)
+                                new Label { Style = Styles.Name, Wraps = true, Placement = Flex.Grow }.As(out _text),
+                                new Glyph { Symbol = Symbols.Down, Style = Styles.Chevron }.As(out _chevron)
                             }
                         }.As(out _heading),
                         new Reveal
@@ -97,11 +96,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         protected override void Refresh()
         {
             var problem = _component.Level == NoticeLevel.Problem;
+            var ink = problem ? Palette.Problem : Palette.Notice;
 
-            _column.Style = problem ? Styles.Problem : Styles.Notice;
+            _column.Background = problem ? Palette.ProblemWash : Palette.NoticeWash;
             _heading.Style = problem ? Styles.ProblemStrip : Styles.NoticeStrip;
 
-            _text.Style = problem ? Styles.ProblemText : Styles.NoticeText;
+            _text.Color = ink;
             _text.Text = _component.Text;
 
             _detail.Text = _component.Detail;
@@ -111,7 +111,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _diagnostic.Collapsed = _component.Diagnostic.Length == 0;
 
             _chevron.Symbol = _component.Expanded ? Symbols.Up : Symbols.Down;
-            _chevron.Style = problem ? Styles.ProblemChevron : Styles.NoticeChevron;
+            _chevron.Tint = ink;
             _chevron.Collapsed = _component.ExpandCommand == 0;
 
             // Reached only once the slide has finished, because a reveal answers nothing while it moves.

@@ -5,7 +5,6 @@ using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Words;
-using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
@@ -17,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
         readonly HStack _line;
         readonly HStack _inside;
-        readonly Dot _light;
+        readonly Glyph _light;
         readonly Label _summary;
         readonly Button _status;
         readonly Glyph _run;
@@ -45,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new Dot { Placement = Fixed.Size(8f, 8f), Style = Styles.Off }.As(out _light),
+                            new Glyph { Symbol = Symbols.Disc, Style = Styles.Light }.As(out _light),
                             new VStack
                             {
                                 Spacing = 4f,
@@ -58,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                                         Children =
                                         {
                                             new Label { Style = Styles.Name, Wraps = true }.As(out _summary),
-                                            new Glyph { Symbol = Symbols.Warning, Style = Styles.Fails }.As(out _below)
+                                            new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag }.As(out _below)
                                         }
                                     },
                                     new HStack
@@ -67,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                                         Children =
                                         {
                                             new Button { Style = Styles.Status }.As(out _status),
-                                            new Label { Style = Styles.Wrong, Wraps = true }.As(out _problem),
+                                            new Label { Style = Styles.Detail, Wraps = true }.As(out _problem),
                                             new Label { Style = Styles.Detail }.As(out _lastRun)
                                         }
                                     }.As(out _detail)
@@ -116,15 +115,15 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                                 : Styles.Row;
 
             _summary.Text = entry.IsAction ? StartView.Plus + entry.Summary : entry.Summary;
-            _summary.Style = entry.IsAction ? Styles.Adding : Styles.Name;
+            _summary.Color = entry.IsAction ? Palette.Muted : Palette.Ink;
 
-            _light.Style = wrong
-                ? Styles.Fault
+            _light.Tint = wrong
+                ? Palette.Problem
                 : entry.IsAction
-                    ? Styles.Dark
+                    ? Palette.None
                     : entry.JustRan
-                        ? Styles.On
-                        : Styles.Off;
+                        ? Palette.Live
+                        : Palette.Dim;
 
             _status.Text = entry.Status;
             _lastRun.Text = entry.LastRun;
@@ -155,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             _problem.Text = entry.Problem;
             _problem.Collapsed = !saying;
-            _problem.Style = entry.ProblemIsWarning ? Styles.Warning : Styles.Wrong;
+            _problem.Color = entry.ProblemIsWarning ? Palette.Notice : Palette.Problem;
 
             var marked = !string.IsNullOrEmpty(entry.Problem) || entry.Problems > 0
                 || entry.Remarks > 0;
@@ -165,7 +164,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 : entry.ProblemIsWarning;
 
             _below.Collapsed = !marked;
-            _below.Style = quietly ? Styles.Warns : Styles.Fails;
+            _below.Tint = quietly ? Palette.Notice : Palette.Problem;
 
             _switch.Collapsed = !entry.CanSwitch;
             _switch.IsOn = entry.SwitchIsOn;

@@ -13,12 +13,6 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
         }.Frozen();
 
-        /// <summary>A way to add something, standing in a list among names.</summary>
-        public static readonly TextStyle Adding = new TextStyle(Name)
-        {
-            Base = { Color = Palette.Muted }
-        }.Frozen();
-
         /// <summary>What a list says while it has nothing in it.</summary>
         public static readonly TextStyle Empty = new TextStyle(Name)
         {
@@ -31,16 +25,16 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
         }.Frozen();
 
-        /// <summary>What is wrong, in place of the quiet line.</summary>
-        public static readonly TextStyle Wrong = new TextStyle(Detail)
+        /// <summary>The rest of what a banner says, once it is opened.</summary>
+        public static readonly TextStyle Opened = new TextStyle(Name)
         {
-            Base = { Color = Palette.Problem }
+            Base = { Color = Palette.Faint, Padding = new Thickness(16f, 0f, 16f, 8f) }
         }.Frozen();
 
-        /// <summary>What is worth reading, in place of the quiet line.</summary>
-        public static readonly TextStyle Warning = new TextStyle(Detail)
+        /// <summary>What went wrong, in the words of whatever found it, for whoever mends it.</summary>
+        public static readonly TextStyle Diagnostic = new TextStyle(Detail)
         {
-            Base = { Color = Palette.Notice }
+            Base = { Color = Palette.Dim, Padding = new Thickness(16f, 0f, 16f, 8f) }
         }.Frozen();
 
         /// <summary>A row of a list that opens what it names.</summary>
@@ -82,31 +76,25 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Hot = { Background = Palette.None }
         }.Frozen();
 
-        /// <summary>A state light that is off.</summary>
-        public static readonly ElementStyle Off = new ElementStyle
+        /// <summary>A state light, whose colour the view sets from the state.</summary>
+        public static readonly GlyphStyle Light = new GlyphStyle
         {
-            Base = { Background = Palette.Dim }
+            Base = { Font = Symbols.Font, FontSize = 16f, Tint = Palette.Dim }
         }.Frozen();
 
-        /// <summary>A state light that is on.</summary>
-        public static readonly ElementStyle On = new ElementStyle
+        /// <summary>A mark beside a name, whose colour the view sets from what it marks.</summary>
+        public static readonly GlyphStyle Flag = new GlyphStyle
         {
-            Base = { Background = Palette.Live }
+            Base = { Font = Symbols.Font, FontSize = 32f }
         }.Frozen();
 
-        /// <summary>A state light saying something is wrong.</summary>
-        public static readonly ElementStyle Fault = new ElementStyle
-        {
-            Base = { Background = Palette.Problem }
-        }.Frozen();
-
-        /// <summary>No state light, its room kept.</summary>
-        public static readonly ElementStyle Dark = new ElementStyle().Frozen();
+        /// <summary>The chevron that opens a banner, whose colour the view sets from the banner's.</summary>
+        public static readonly GlyphStyle Chevron = new GlyphStyle(Flag).Frozen();
 
         /// <summary>A symbol that does something to the row it stands on.</summary>
         public static readonly GlyphStyle Tool = new GlyphStyle
         {
-            Base = { FontSize = 32f, Tint = Palette.Faint },
+            Base = { Font = Symbols.Font, FontSize = 32f, Tint = Palette.Faint },
             Hot = { Background = Palette.PanelHot, Tint = Palette.Ink },
             Disabled = { Tint = Palette.Dim }
         }.Frozen();
@@ -115,18 +103,6 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public static readonly GlyphStyle Bin = new GlyphStyle(Tool)
         {
             Hot = { Background = Palette.ProblemWash, Tint = Palette.Problem }
-        }.Frozen();
-
-        /// <summary>The mark beside a name with something wrong under it.</summary>
-        public static readonly GlyphStyle Fails = new GlyphStyle
-        {
-            Base = { FontSize = 32f, Tint = Palette.Problem }
-        }.Frozen();
-
-        /// <summary>The mark beside a name with something worth reading under it.</summary>
-        public static readonly GlyphStyle Warns = new GlyphStyle(Fails)
-        {
-            Base = { Tint = Palette.Notice }
         }.Frozen();
 
         /// <summary>A switch that governs one thing.</summary>
@@ -166,19 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Hot = { Background = Palette.Panel }
         }.Frozen();
 
-        /// <summary>A banner saying something is wrong.</summary>
-        public static readonly ElementStyle Problem = new ElementStyle
-        {
-            Base = { Background = Palette.ProblemWash }
-        }.Frozen();
-
-        /// <summary>A banner saying something is worth reading.</summary>
-        public static readonly ElementStyle Notice = new ElementStyle
-        {
-            Base = { Background = Palette.NoticeWash }
-        }.Frozen();
-
-        /// <summary>The strip a banner is opened by, lit by an edge in its own colour.</summary>
+        /// <summary>The strip a banner saying something is wrong is opened by, lit by an edge in its colour.</summary>
         public static readonly ElementStyle ProblemStrip = new ElementStyle
         {
             Base = { Padding = new Thickness(16f, 8f) },
@@ -189,42 +153,6 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public static readonly ElementStyle NoticeStrip = new ElementStyle(ProblemStrip)
         {
             Hot = { Edge = Palette.Notice }
-        }.Frozen();
-
-        /// <summary>What a banner saying something is wrong says.</summary>
-        public static readonly TextStyle ProblemText = new TextStyle(Name)
-        {
-            Base = { Color = Palette.Problem }
-        }.Frozen();
-
-        /// <summary>What a banner worth reading says.</summary>
-        public static readonly TextStyle NoticeText = new TextStyle(Name)
-        {
-            Base = { Color = Palette.Notice }
-        }.Frozen();
-
-        /// <summary>The rest of what a banner says, once it is opened.</summary>
-        public static readonly TextStyle Opened = new TextStyle(Name)
-        {
-            Base = { Color = Palette.Faint, Padding = new Thickness(16f, 0f, 16f, 8f) }
-        }.Frozen();
-
-        /// <summary>What went wrong, in the words of whatever found it, for whoever mends it.</summary>
-        public static readonly TextStyle Diagnostic = new TextStyle(Detail)
-        {
-            Base = { Color = Palette.Dim, Padding = new Thickness(16f, 0f, 16f, 8f) }
-        }.Frozen();
-
-        /// <summary>The chevron that opens a banner saying something is wrong.</summary>
-        public static readonly GlyphStyle ProblemChevron = new GlyphStyle
-        {
-            Base = { FontSize = 32f, Tint = Palette.Problem }
-        }.Frozen();
-
-        /// <summary>The chevron that opens a banner worth reading.</summary>
-        public static readonly GlyphStyle NoticeChevron = new GlyphStyle(ProblemChevron)
-        {
-            Base = { Tint = Palette.Notice }
         }.Frozen();
 
         /// <summary>A way to mend what a banner saying something is wrong is about.</summary>
