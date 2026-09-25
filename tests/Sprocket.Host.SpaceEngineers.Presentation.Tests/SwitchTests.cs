@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>A switch: its words coloured by which half is in force, and its look from its style.</summary>
+/// <summary>A switch: its words colored by which half is in force, and its look from its style.</summary>
 public class SwitchTests
 {
     const float Wide = 400f;
@@ -23,9 +23,9 @@ public class SwitchTests
         Hot = { Edge = Muted }
     }.Frozen();
 
-    /// <summary>The word in force takes the style's colour and the other its quiet colour.</summary>
+    /// <summary>The word in force takes the style's color and the other its quiet color.</summary>
     [Fact]
-    public void TheWordInForceTakesTheColour()
+    public void TheWordInForceTakesTheColor()
     {
         var control = new Switch { Style = Plain, IsSet = true, IsOn = true };
         var easel = new Easel(new VStack { Children = { control } }, Wide, High);
@@ -74,7 +74,7 @@ public class SwitchTests
         Assert.Equal(16f, control.DesiredSize.Y, 3);
     }
 
-    /// <summary>Switching measures no text, since only colours change.</summary>
+    /// <summary>Switching measures no text, since only colors change.</summary>
     [Fact]
     public void SwitchingMeasuresNoText()
     {

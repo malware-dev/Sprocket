@@ -51,7 +51,7 @@ namespace Sprocket.Sim.Simulation
             _device.SafeArea = new RectangleF((windowWidth - safeWidth) / 2f, 0f, safeWidth, windowHeight);
             _device.ViewportSize = new Vector2(windowWidth, windowHeight);
 
-            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud);
+            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
             _scene = EditorScene.Nowhere();
         }
 

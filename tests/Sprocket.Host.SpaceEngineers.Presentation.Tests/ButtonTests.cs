@@ -28,9 +28,9 @@ public class ButtonTests
         Disabled = { Background = Well, Color = Faint }
     }.Frozen();
 
-    /// <summary>A button's style fills the button and colours its words.</summary>
+    /// <summary>A button's style fills the button and colors its words.</summary>
     [Fact]
-    public void ItsStyleFillsItAndColoursItsWords()
+    public void ItsStyleFillsItAndColorsItsWords()
     {
         var button = new Button { Text = "Done", Style = Go };
         var easel = new Easel(new VStack { Children = { button } }, Wide, High);
@@ -89,7 +89,7 @@ public class ButtonTests
         Assert.Same(button, button.Under(middle));
     }
 
-    /// <summary>Going hot and back measures no text, since only colours change.</summary>
+    /// <summary>Going hot and back measures no text, since only colors change.</summary>
     [Fact]
     public void GoingHotMeasuresNoText()
     {

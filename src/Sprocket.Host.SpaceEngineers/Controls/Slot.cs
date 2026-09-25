@@ -106,9 +106,9 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         {
             const float thickness = 2f;
 
-            g.DrawSprite(Solid,
+            g.Fill(
                 new RectangleF(Bounds.X, Bounds.Y + Bounds.Height - thickness, Bounds.Width, thickness),
-                Underline, 0f);
+                Underline);
 
             base.DrawContent(g);
 

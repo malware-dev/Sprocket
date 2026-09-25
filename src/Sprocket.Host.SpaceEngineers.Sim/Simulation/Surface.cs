@@ -219,7 +219,7 @@ namespace Sprocket.Sim.Simulation
             // Held across frames, as the mod holds one. Begin re-samples the area, so a resized window is
             // picked up without building another.
             if (_graphics == null)
-                _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud);
+                _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
 
             _graphics.Begin();
 

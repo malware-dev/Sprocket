@@ -76,19 +76,19 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Hot = { Background = Palette.None }
         }.Frozen();
 
-        /// <summary>A state light, whose colour the view sets from the state.</summary>
+        /// <summary>A state light, whose color the view sets from the state.</summary>
         public static readonly GlyphStyle Light = new GlyphStyle
         {
             Base = { Font = Symbols.Font, FontSize = 16f, Tint = Palette.Dim }
         }.Frozen();
 
-        /// <summary>A mark beside a name, whose colour the view sets from what it marks.</summary>
+        /// <summary>A mark beside a name, whose color the view sets from what it marks.</summary>
         public static readonly GlyphStyle Flag = new GlyphStyle
         {
             Base = { Font = Symbols.Font, FontSize = 32f }
         }.Frozen();
 
-        /// <summary>The chevron that opens a banner, whose colour the view sets from the banner's.</summary>
+        /// <summary>The chevron that opens a banner, whose color the view sets from the banner's.</summary>
         public static readonly GlyphStyle Chevron = new GlyphStyle(Flag).Frozen();
 
         /// <summary>A symbol that does something to the row it stands on.</summary>
@@ -142,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Hot = { Background = Palette.Panel }
         }.Frozen();
 
-        /// <summary>The strip a banner saying something is wrong is opened by, lit by an edge in its colour.</summary>
+        /// <summary>The strip a banner saying something is wrong is opened by, lit by an edge in its color.</summary>
         public static readonly ElementStyle ProblemStrip = new ElementStyle
         {
             Base = { Padding = new Thickness(16f, 8f) },

@@ -411,8 +411,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             var at = new Vector2(ContentBounds.X + _shift, ContentBounds.Y);
 
             if (HasSelection)
-                g.DrawSprite(Solid, new RectangleF(at.X + _selectionFrom, at.Y, _selectionTo - _selectionFrom, height),
-                    SelectionColor, 0f);
+                g.Fill(new RectangleF(at.X + _selectionFrom, at.Y, _selectionTo - _selectionFrom, height),
+                    SelectionColor);
 
             if (_text.Length > 0)
                 g.DrawText(Font, Written, at, FontSize, Color);
@@ -421,13 +421,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
             // After the text, so the caret shows inside a selection.
             if (IsEditing && CaretVisible)
-                g.DrawSprite(Solid, new RectangleF(at.X + _caretAt, at.Y, 1.5f, height), CaretColor, 0f);
+                g.Fill(new RectangleF(at.X + _caretAt, at.Y, 1.5f, height), CaretColor);
 
             if (Wrong && WrongEdge.A > 0)
             {
                 var box = ContentBounds;
-                g.DrawSprite(Solid, new RectangleF(box.X, box.Y + box.Height - Rule, box.Width, Rule),
-                    WrongEdge, 0f);
+                g.Fill(new RectangleF(box.X, box.Y + box.Height - Rule, box.Width, Rule),
+                    WrongEdge);
             }
 
             _clear?.Draw(g);

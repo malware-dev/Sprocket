@@ -21,8 +21,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         /// <summary>Drops the innermost clip and restores the one around it.</summary>
         void PopClip();
 
-        /// <summary>Draws <paramref name="material" /> to fill <paramref name="destination" />, rotated about its centre.</summary>
+        /// <summary>Draws <paramref name="material" /> to fill <paramref name="destination" />, rotated about its center.</summary>
         void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation);
+
+        /// <summary>Fills <paramref name="destination" /> with flat <paramref name="color" />, rotated about its center.</summary>
+        void Fill(RectangleF destination, Color color, float rotation = 0f);
 
         /// <summary>Draws one run of text with its top-left corner at <paramref name="position" />.</summary>
         /// <remarks><paramref name="size" /> is the height of one line, in UI units.</remarks>

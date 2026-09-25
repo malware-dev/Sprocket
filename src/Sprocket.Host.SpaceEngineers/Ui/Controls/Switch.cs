@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                     return;
 
                 _isOn = value;
-                Recolour();
+                Recolor();
             }
         }
 
@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                     return;
 
                 _isSet = value;
-                Recolour();
+                Recolor();
             }
         }
 
@@ -93,25 +93,25 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>The colour of the word in force.</summary>
+        /// <summary>The color of the word in force.</summary>
         public Color Color
         {
             get { return _color; }
             set
             {
                 _color = value;
-                Recolour();
+                Recolor();
             }
         }
 
-        /// <summary>The colour of a word not in force, and of both while neither is.</summary>
+        /// <summary>The color of a word not in force, and of both while neither is.</summary>
         public Color QuietColor
         {
             get { return _quiet; }
             set
             {
                 _quiet = value;
-                Recolour();
+                Recolor();
             }
         }
 
@@ -186,7 +186,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             // The unlit fill under the whole, then the lit half on top, rather than two halves side by
             // side: each rectangle is rounded on its own, so two halves on a fractional width overlap or
             // leave a gap.
-            g.DrawSprite(Solid, inner, _unlit, 0f);
+            g.Fill(inner, _unlit);
 
             if (!_isSet)
             {
@@ -196,16 +196,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
 
             var half = inner.Width * 0.5f;
-            g.DrawSprite(Solid, _isOn
+            g.Fill(_isOn
                     ? new RectangleF(inner.X, inner.Y, half, inner.Height)
                     : new RectangleF(inner.X + half, inner.Y, inner.Width - half, inner.Height),
-                _lit, 0f);
+                _lit);
 
             _on.Draw(g);
             _off.Draw(g);
         }
 
-        void Recolour()
+        void Recolor()
         {
             _on.Color = _isSet && _isOn ? _color : _quiet;
             _off.Color = _isSet && !_isOn ? _color : _quiet;

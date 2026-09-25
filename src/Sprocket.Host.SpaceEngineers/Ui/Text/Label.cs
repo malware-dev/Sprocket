@@ -204,7 +204,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         {
             if (_sample.HasValue)
             {
-                g.DrawSprite(Solid, ContentBounds, _sample.Value, 0f);
+                g.Fill(ContentBounds, _sample.Value);
                 Outline(g, ContentBounds, Palette.Line, Space.Hair);
                 return;
             }

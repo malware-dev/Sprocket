@@ -26,6 +26,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
         readonly ClipStack _clip = new ClipStack();
 
+        /// <summary>The material every flat fill is drawn with, tinted.</summary>
+        readonly MyStringId _fill;
+
         /// <summary>Each font's line height at a scale of one, in UI units, asked of the game once a font.</summary>
         readonly Dictionary<string, float> _lines = new Dictionary<string, float>();
 
@@ -53,12 +56,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         /// <summary>UI units to window pixels.</summary>
         float _scale = 1f;
 
-        /// <summary>Draws onto a layer, at a scale set by the height a layout is written against.</summary>
-        public ScreenSpaceGraphics(IScreenSpace screenSpace, MyScreenSpaceLayer layer,
+        /// <summary>Draws onto a layer with <paramref name="fill" /> for flat fills, at a scale set by the height a layout is written against.</summary>
+        /// <remarks>
+        ///     The fill is a plain white transparent material. The game declares none a mod can use, so the mod
+        ///     declares its own over <c>Textures\GUI\Blank.dds</c>.
+        /// </remarks>
+        public ScreenSpaceGraphics(IScreenSpace screenSpace, MyScreenSpaceLayer layer, MyStringId fill,
             float referenceHeight = GameReferenceHeight)
         {
             _screenSpace = screenSpace;
             _layer = layer;
+            _fill = fill;
             _referenceHeight = referenceHeight;
             Begin();
         }
@@ -102,6 +110,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
                 return;
 
             _screenSpace.DrawSprite(material, target, color, rotation, _layer);
+        }
+
+        /// <inheritdoc />
+        public void Fill(RectangleF destination, Color color, float rotation = 0f)
+        {
+            DrawSprite(_fill, destination, color, rotation);
         }
 
         /// <inheritdoc />

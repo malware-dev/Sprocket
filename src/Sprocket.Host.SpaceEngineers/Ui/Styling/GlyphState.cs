@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             }
         }
 
-        /// <summary>The colour the symbol is drawn in, or null to leave it to the layers beneath.</summary>
+        /// <summary>The color the symbol is drawn in, or null to leave it to the layers beneath.</summary>
         public Color? Tint
         {
             get { return _tint; }

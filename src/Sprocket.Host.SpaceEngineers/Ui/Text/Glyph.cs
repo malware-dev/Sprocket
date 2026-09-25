@@ -5,7 +5,7 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Text
 {
-    /// <summary>One character of a font, drawn as a symbol and centred in whatever room it is given.</summary>
+    /// <summary>One character of a font, drawn as a symbol and centered in whatever room it is given.</summary>
     public class Glyph : Element
     {
         readonly StringBuilder _measuring = new StringBuilder(2);
@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             }
         }
 
-        /// <summary>What colour to draw it, where transparent draws nothing but keeps the room.</summary>
+        /// <summary>What color to draw it, where transparent draws nothing but keeps the room.</summary>
         public Color Tint { get; set; }
 
         /// <summary>How much room the symbol wants, measured once per symbol, font and size.</summary>

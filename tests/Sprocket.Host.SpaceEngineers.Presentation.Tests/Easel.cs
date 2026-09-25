@@ -1,5 +1,6 @@
 using System.Text;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
@@ -51,7 +52,7 @@ sealed class Easel
         _device.SafeArea = new RectangleF(0f, 0f, width, height);
         _device.ViewportSize = new Vector2(width, height);
 
-        _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud);
+        _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
 
         Draw(width, height);
     }

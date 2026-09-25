@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>Makes a slider on a plain track.</summary>
         public Slider()
         {
-            Track = Solid;
+            Track = Materials.Fill;
             TrackTint = Palette.ControlHot;
             Edge = Palette.Line;
         }
@@ -68,9 +68,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             g.DrawSprite(Track, ContentBounds, TrackTint, 0f);
 
             var left = ContentBounds.X + (ContentBounds.Width - Grip) * _fraction;
-            g.DrawSprite(Solid,
+            g.Fill(
                 new RectangleF(left, ContentBounds.Y - Lip, Grip, ContentBounds.Height + Lip * 2f),
-                Palette.Ink, 0f);
+                Palette.Ink);
         }
     }
 }

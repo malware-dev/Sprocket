@@ -32,9 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            g.DrawSprite(Solid,
+            g.Fill(
                 new RectangleF(ContentBounds.X, ContentBounds.Y, ContentBounds.Width, Thickness),
-                Color, 0f);
+                Color);
         }
     }
 }

@@ -253,7 +253,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
                 if (Shows)
                     Line(g, centre, Degrees, 0f, reach - Quarter - Thin, hand, Needle);
 
-                g.DrawSprite(Solid, new RectangleF(centre.X - Hub / 2f, centre.Y - Hub / 2f, Hub, Hub), hand, 0f);
+                g.Fill(new RectangleF(centre.X - Hub / 2f, centre.Y - Hub / 2f, Hub, Hub), hand);
             }
 
             /// <summary>A stroke out from the middle at an angle, between two distances from it.</summary>
@@ -264,7 +264,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
                 var middle = centre + along * ((from + to) / 2f);
                 var length = to - from;
 
-                g.DrawSprite(Solid, new RectangleF(middle.X - thick / 2f, middle.Y - length / 2f, thick, length),
+                g.Fill(new RectangleF(middle.X - thick / 2f, middle.Y - length / 2f, thick, length),
                     colour, turned);
             }
         }

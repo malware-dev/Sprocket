@@ -306,8 +306,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
                     var thick = WrongEdgeThickness > 0f ? WrongEdgeThickness : 1f;
                     var box = Box.Bounds;
 
-                    g.DrawSprite(Solid, new RectangleF(
-                        box.X, box.Y + box.Height - thick, box.Width, thick), WrongEdge, 0f);
+                    g.Fill(new RectangleF(
+                        box.X, box.Y + box.Height - thick, box.Width, thick), WrongEdge);
                 }
             }
             else

@@ -4,7 +4,7 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Styling
 {
-    /// <summary>What a switch looks like in one state: its words, the colours either side, and the room round each word.</summary>
+    /// <summary>What a switch looks like in one state: its words, the colors either side, and the room round each word.</summary>
     /// <remarks><see cref="TextState.Color" /> is the word in force.</remarks>
     public class SwitchState : TextState
     {
@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         Color? _unlit;
         Thickness? _wordPadding;
 
-        /// <summary>The colour of a word not in force, or null to leave it to the layers beneath.</summary>
+        /// <summary>The color of a word not in force, or null to leave it to the layers beneath.</summary>
         public Color? QuietColor
         {
             get { return _quiet; }

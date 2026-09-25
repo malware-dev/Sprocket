@@ -491,7 +491,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
                 return;
 
             var thumb = Held == way && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
-            g.DrawSprite(Solid, Thumb(way), thumb, 0f);
+            g.Fill(Thumb(way), thumb);
         }
 
         bool HasBar(Way way)

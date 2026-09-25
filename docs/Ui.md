@@ -4,6 +4,10 @@ The target for `Ui/`: the framework every screen is built with. What is written 
 not yet built, or built in part. Once a piece is built, the code is the record and it leaves this
 file. Anything not written here is undecided.
 
+The framework can be copied as-is into another mod and used there, so nothing in it is Sprocket's:
+no Sprocket type, content or wording. What an application means by a press, or how it looks, it
+supplies through the framework's interfaces and styles.
+
 ## Views are one initializer
 
 A view is written as one object initializer, the way a XAML file is one tree. Containers take their
@@ -66,9 +70,9 @@ new Grid
 
 ## Styles
 
-Styles belong to the application, never to the framework, which ships no colours or sizes of its own.
+Styles belong to the application, never to the framework, which ships no colors or sizes of its own.
 
-A style holds simple visual properties only: colours, fonts, sizes, spacing. Nothing that moves.
+A style holds simple visual properties only: colors, fonts, sizes, spacing. Nothing that moves.
 
 A style is found by reference, never looked up. The application keeps its styles as static fields,
 each built with an initializer and frozen, after which any setter throws. A style based on another
@@ -97,12 +101,12 @@ style the view assigns.
 
 A style is for a control's own look and its own states, and each kind of a control, such as a default
 and a cancel button, is a style of its own. A value that carries the application's data,
-such as a state light's colour or the colour of a warning, is set on the element directly over a
+such as a state light's color or the color of a warning, is set on the element directly over a
 default style. A separate style earns its place only where it saves setting many properties at once;
 for one or two it is overkill.
 
 A control is composed rather than derived: a button has a label, and is not one. A control's style
-styles the parts it owns, so a button's style sets its own label's font, size and colour in each of
+styles the parts it owns, so a button's style sets its own label's font, size and color in each of
 its states. Nothing is inherited from what an element sits in.
 
 Any element can be pressed, by being given a press. `Button` is one control among others, with text
@@ -111,7 +115,7 @@ of its own, not the only thing that answers a press.
 ## Text
 
 A font size is a size in UI units, never a scale of the font's own size. The size is the font's line
-height, as the game's `GetLineHeight` reports it, so a label with a 24 font is one line of 24 units.
+height as the game draws it, so a label with a 24 font is one line of 24 units.
 The game's scale is worked out from it at the point where text is handed to the game.
 
 ## Sizes
@@ -124,11 +128,19 @@ up. Font sizes, spacing, padding and margins alike.
 Being focusable is part of the framework, not of each control. Keyboard support built into single
 controls in the meantime moves onto it.
 
+## Commands
+
+What pressing an element does is an `ICommand` the application implements, the way WPF's is. The
+framework never learns what a command means to the application. `Deed` stays with the old controls
+until the last of them goes.
+
 ## Later
 
 - `Offset` goes. Dragging a row and rows sliding aside use a render translate, applied at drawing
   and in hit testing but not in layout.
 - The glyph system is reworked.
+- Brushes: a background or edge painted with any material, not only the flat fill. Animating a color
+  then means changing a mutable brush's color.
 
 ## Open
 
@@ -143,3 +155,5 @@ controls in the meantime moves onto it.
 - An items control, with a row template, in place of the six lists of rows built by hand.
 - Whether rows and columns inside a grid can share its tracks through other containers.
 - How focus works: what owns it, how the focused element shows it, and where Tab order comes from.
+- The framework's own namespace, in place of `Sprocket.Host.SpaceEngineers.Ui`.
+- Where the old controls live until the port ends, since `Ui/Legacy` would be copied with `Ui/`.

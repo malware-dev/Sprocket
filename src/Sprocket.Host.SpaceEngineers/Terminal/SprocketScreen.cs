@@ -7,6 +7,7 @@ using VRage.Input;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Display;
 using VRage.Game.GUI.TextPanel;
@@ -68,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             // on the same layer. The scissor is pushed onto whatever layer this names, so the two must agree
             // or clipping silently does nothing.
             _screen = new GameScreenSpace();
-            _graphics = new ScreenSpaceGraphics(_screen, MyScreenSpaceLayer.BelowHud);
+            _graphics = new ScreenSpaceGraphics(_screen, MyScreenSpaceLayer.BelowHud, Materials.Fill);
 
             // Off, and the view draws its own cross instead. The harness lays its controls down before it
             // calls the mod - MyGuiScreenModHost.Draw is base.Draw then OnDraw - so the first opaque thing

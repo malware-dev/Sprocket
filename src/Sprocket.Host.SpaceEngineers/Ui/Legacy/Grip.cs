@@ -43,8 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             for (var x = 0; x < Across; x++)
             for (var y = 0; y < Down; y++)
             {
-                g.DrawSprite(Solid, new RectangleF(
-                    left + x * (Square + Gap), top + y * (Square + Gap), Square, Square), Color, 0f);
+                g.Fill(new RectangleF(
+                    left + x * (Square + Gap), top + y * (Square + Gap), Square, Square), Color);
             }
         }
     }

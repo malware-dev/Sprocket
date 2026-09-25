@@ -2,7 +2,6 @@ using System;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Styling;
-using VRage.Utils;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui
@@ -13,10 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         /// <summary>Room along an axis that stands for no limit at all, as a scroll gives its content.</summary>
         /// <remarks>Finite, because a stack subtracts from what it was offered as it goes.</remarks>
         public const float Unbounded = 1000000f;
-
-        /// <summary>A flat white texture, tinted to whatever colour is wanted.</summary>
-        /// <remarks>Declared in <c>Content/Data/TransparentMaterials.sbc</c>.</remarks>
-        protected static readonly MyStringId Solid = MyStringId.GetOrCompute("Sprocket_Fill");
 
         bool _arrangeDirty = true;
         RectangleF _arrangedTo;
@@ -298,7 +293,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
             var fill = IsHot && Highlight.A > 0 ? Highlight : Background;
             if (fill.A > 0)
-                g.DrawSprite(Solid, Bounds, fill, 0f);
+                g.Fill(Bounds, fill);
 
             var edge = IsHot && HighlightEdge.A > 0 ? HighlightEdge : Edge;
             if (edge.A > 0)
@@ -370,12 +365,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         /// <summary>Draws a hairline just inside <paramref name="bounds" />, as four thin rectangles.</summary>
         protected static void Outline(IGraphics g, RectangleF bounds, Color color, float thickness)
         {
-            g.DrawSprite(Solid, new RectangleF(bounds.X, bounds.Y, bounds.Width, thickness), color, 0f);
-            g.DrawSprite(Solid, new RectangleF(
-                bounds.X, bounds.Y + bounds.Height - thickness, bounds.Width, thickness), color, 0f);
-            g.DrawSprite(Solid, new RectangleF(bounds.X, bounds.Y, thickness, bounds.Height), color, 0f);
-            g.DrawSprite(Solid, new RectangleF(
-                bounds.X + bounds.Width - thickness, bounds.Y, thickness, bounds.Height), color, 0f);
+            g.Fill(new RectangleF(bounds.X, bounds.Y, bounds.Width, thickness), color);
+            g.Fill(new RectangleF(
+                bounds.X, bounds.Y + bounds.Height - thickness, bounds.Width, thickness), color);
+            g.Fill(new RectangleF(bounds.X, bounds.Y, thickness, bounds.Height), color);
+            g.Fill(new RectangleF(
+                bounds.X + bounds.Width - thickness, bounds.Y, thickness, bounds.Height), color);
         }
 
         /// <summary>How much room this wants.</summary>

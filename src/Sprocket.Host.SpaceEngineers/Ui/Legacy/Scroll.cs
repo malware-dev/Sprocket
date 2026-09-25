@@ -213,7 +213,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
             // No groove behind the thumb, as in the game's own scrollbars.
             var thumb = BarHeld && BarHeldColor.A > 0 ? BarHeldColor : BarColor;
-            g.DrawSprite(Solid, Thumb, thumb, 0f);
+            g.Fill(Thumb, thumb);
         }
 
         /// <summary>What is under a point in the content, or null.</summary>
