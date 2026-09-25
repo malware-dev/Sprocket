@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Controls
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Everything a value may be, laid out as a row of words or as a box that opens a list.</summary>
     public class Choices : Element

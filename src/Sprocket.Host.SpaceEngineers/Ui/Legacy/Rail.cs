@@ -1,4 +1,4 @@
-namespace Sprocket.Host.SpaceEngineers.Ui.Controls
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>One axis of scrolling: how much there is, how much is on show, and where along it the view sits.</summary>
     /// <remarks>

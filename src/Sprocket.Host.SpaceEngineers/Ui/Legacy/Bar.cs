@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Layout
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Something on the left, something on the right, and whatever is in the middle taking the slack.</summary>
     public class Bar : Element

@@ -1,9 +1,9 @@
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRage.Input;
 // VRage.Input also declares an IMyInput, the engine's own, which the whitelist rejects. MyAPIGateway.Input
 // returns this one.
 using IMyInput = VRage.ModAPI.IMyInput;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Input
 {

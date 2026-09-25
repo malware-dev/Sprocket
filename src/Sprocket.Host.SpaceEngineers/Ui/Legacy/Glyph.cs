@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Look;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Text
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>One symbol, centred in whatever room it is given.</summary>
     public class Glyph : Element

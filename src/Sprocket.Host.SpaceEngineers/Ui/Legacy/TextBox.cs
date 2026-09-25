@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRage.Game;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Text
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>One line of editable text, with a caret and a selection.</summary>
     public class TextBox : Element

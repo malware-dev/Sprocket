@@ -1,4 +1,4 @@
-namespace Sprocket.Host.SpaceEngineers.Ui.Controls
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Which way something moves.</summary>
     public enum Way

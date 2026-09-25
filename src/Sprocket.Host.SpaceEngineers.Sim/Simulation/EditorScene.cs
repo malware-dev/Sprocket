@@ -5,10 +5,10 @@ using Ship = Sprocket.Sim.Machine.Simulation;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Sim.Machine;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Sim.Simulation
 {

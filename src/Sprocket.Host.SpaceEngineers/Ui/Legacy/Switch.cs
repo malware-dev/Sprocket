@@ -2,7 +2,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Controls
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>
     ///     The game's own on/off control: two halves side by side, both words always readable, the half that

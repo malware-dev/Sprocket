@@ -2,7 +2,6 @@ using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sandbox.ModAPI;
 using VRage.Input;
 using IMyInput = VRage.ModAPI.IMyInput;
@@ -13,6 +12,7 @@ using Sprocket.Host.SpaceEngineers.Display;
 using VRage.Game.GUI.TextPanel;
 using IngameSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
 using IngameSurfaces = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Terminal
 {

@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Controls
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>A rectangle of one colour, shown so that the colour itself is the answer.</summary>
     /// <remarks>The colour is its <see cref="Element.Background" />.</remarks>

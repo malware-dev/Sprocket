@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Look;
 using VRage.Utils;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Controls
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>One number between nothing and everything, set by putting a grip where it goes.</summary>
     public class Slider : Element

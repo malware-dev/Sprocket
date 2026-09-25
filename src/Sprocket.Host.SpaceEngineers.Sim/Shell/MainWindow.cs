@@ -10,7 +10,7 @@ using Sprocket.Sim.Simulation;
 using VRageMath;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;
-using TextBox = Sprocket.Host.SpaceEngineers.Ui.Text.TextBox;
+using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 
 namespace Sprocket.Sim.Shell
 {

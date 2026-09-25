@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Layout
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Puts its children in a line and starts a new one when the line runs out.</summary>
     public class Wrap : Element

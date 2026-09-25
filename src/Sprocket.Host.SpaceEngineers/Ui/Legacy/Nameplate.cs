@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Controls
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>
     ///     A name that can be changed where it stands: the words, a pencil beside them, and the box that

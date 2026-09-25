@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRage.Game;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Text
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>A long piece of text, and a window onto it that moves both ways.</summary>
     /// <remarks>

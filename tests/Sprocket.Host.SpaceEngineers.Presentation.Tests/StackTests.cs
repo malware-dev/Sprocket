@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Sim.Simulation;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Layout
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>A band at the top, a band at the bottom, and everything left over in between.</summary>
     public class Dock : Element

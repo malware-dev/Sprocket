@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Styling
 {

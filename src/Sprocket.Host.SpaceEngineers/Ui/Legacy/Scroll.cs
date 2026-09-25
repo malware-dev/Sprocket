@@ -1,8 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Layout
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Shows part of something taller than the room available, and cuts the rest off.</summary>
     public class Scroll : Element

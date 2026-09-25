@@ -2,12 +2,10 @@ using System;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Ui.Controls
+namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Where an angle is chosen: a dial to turn, and what it is written as.</summary>
     /// <remarks>
