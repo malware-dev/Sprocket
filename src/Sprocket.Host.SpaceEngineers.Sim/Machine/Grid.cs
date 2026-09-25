@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Sim.Fakes;
+using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
+using VRageMath;
 
 namespace Sprocket.Sim.Machine;
 
 /// <summary>
-/// The rig's one grid: what it is called, what is welded to it, and when that changed.
+/// One of the rig's grids: what it is called, what is welded to it, and when that changed.
 /// </summary>
 /// <remarks>
 /// The mod walks the grid group for blocks and listens to the grid for blocks appearing and
@@ -19,11 +21,24 @@ sealed class Grid
     readonly List<Fitting> _fitted = new List<Fitting>();
     readonly Dictionary<Fitting, IMySlimBlock> _slim = new Dictionary<Fitting, IMySlimBlock>();
 
+    /// <summary>The tops of mechanical joints standing on this grid, which are blocks but not terminal ones.</summary>
+    readonly List<IMySlimBlock> _tops = new List<IMySlimBlock>();
+
+    /// <summary>The next cell handed to a block welded without one, along one row.</summary>
+    int _next;
+
     Action<IMySlimBlock> _added;
     Action<IMySlimBlock> _removed;
 
-    public Grid(string name)
+    public Grid(string name) : this(name, new List<string>())
     {
+    }
+
+    /// <summary>A grid writing what is done to its blocks into <paramref name="journal" />, which several grids can share.</summary>
+    public Grid(string name, List<string> journal)
+    {
+        Journal = journal;
+
         // Held by the block that answers for it rather than by this, because renaming a construct is
         // the mod writing to the grid: what it wrote is what the next read has to say.
         var called = name;
@@ -33,6 +48,7 @@ sealed class Grid
             .Takes("CustomName", value => called = (string)value)
             .Gives("DisplayName", () => called)
             .Does("GetBlocks", Blocks)
+            .Answers("GetCubeBlock", invocation => At((Vector3I)invocation.Arguments[0]))
             .Answers("add_OnBlockAdded", invocation => Listen(ref _added, invocation, true))
             .Answers("remove_OnBlockAdded", invocation => Listen(ref _added, invocation, false))
             .Answers("add_OnBlockRemoved", invocation => Listen(ref _removed, invocation, true))
@@ -45,12 +61,15 @@ sealed class Grid
     public IReadOnlyList<Fitting> Fitted => _fitted;
 
     /// <summary>What every block on this grid writes down, in the order it happened.</summary>
-    public List<string> Journal { get; } = new List<string>();
+    public List<string> Journal { get; private set; }
 
     public T Weld<T>(T fitting) where T : Fitting
     {
         fitting.Grid = Block;
         fitting.Journal = Journal;
+        if (fitting.Cell == null)
+            fitting.Cell = new Vector3I(_next++, 0, 0);
+
         _fitted.Add(fitting);
         _slim[fitting] = Pretend.To<IMySlimBlock>()
             .Gives("FatBlock", () => fitting.Block)
@@ -82,11 +101,52 @@ sealed class Grid
             _fitted[i].Tick();
     }
 
+    /// <summary>
+    /// Stands the top of <paramref name="under" /> on this grid, which is what makes this grid the
+    /// joint's other side.
+    /// </summary>
+    public void Top(IMyMechanicalConnectionBlock under)
+    {
+        var cell = new Vector3I(_next++, 0, 0);
+        IMyCubeGrid grid = Block;
+        IMyMotorRotor top = Pretend.To<IMyMotorRotor>()
+            .Gives("Base", () => under)
+            .Gives("Position", () => cell)
+            .Gives("CubeGrid", () => grid)
+            .Done();
+
+        _tops.Add(Pretend.To<IMySlimBlock>()
+            .Gives("FatBlock", () => top)
+            .Gives("CubeGrid", () => grid)
+            .Done());
+    }
+
     object Blocks(object[] arguments)
     {
         var into = (List<IMySlimBlock>)arguments[0];
         for (var i = 0; i < _fitted.Count; i++)
             into.Add(_slim[_fitted[i]]);
+
+        for (var i = 0; i < _tops.Count; i++)
+            into.Add(_tops[i]);
+
+        return null;
+    }
+
+    /// <summary>The block standing at <paramref name="cell" />, or null.</summary>
+    IMySlimBlock At(Vector3I cell)
+    {
+        for (var i = 0; i < _fitted.Count; i++)
+        {
+            if (_fitted[i].Cell == cell)
+                return _slim[_fitted[i]];
+        }
+
+        for (var i = 0; i < _tops.Count; i++)
+        {
+            if (_tops[i].FatBlock.Position == cell)
+                return _tops[i];
+        }
 
         return null;
     }

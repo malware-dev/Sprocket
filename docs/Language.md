@@ -38,7 +38,7 @@ an error.
 | Flag | `on`, `off` | |
 | Colour | `#FF8800`, `#FF8800CC` | |
 | Vector | `(3 0 -2)` | |
-| List | `[ 1, "two", three ]` | |
+| List | `[ 1, "two", three ]` | An item may be a list or a vector: `[ 7, [ (0 2 -1), (3 0 0) ] ]` |
 
 ## References
 
@@ -242,13 +242,18 @@ What this construct has, and which of the systems above it runs.
 One actual block on this construct. The quoted value is the block's type and subtype; the name after it
 is what the rest of the file calls this block, and nothing else in the file names a block.
 
-The list holds the ways to find the block again: its entity id, its name in the game, where it sits.
-The language does not read them, and a host may write whatever it recognises its own blocks by. Several
-of them, so a block that has been rebuilt or renamed can still be matched on what is left.
+The list holds the ways to find the block again - its entity id, where it sits, its name in the game -
+in the order they are to be tried: the first that finds a block decides. The language does not read
+them, and a host may write whatever it recognizes its own blocks by. Several of them, so a block that
+has been rebuilt, copied or renamed can still be matched on what is left.
 
 ```
-block 'Door/LargeBlockDoor' door1 [ 74857693847562934, "Airlock Inner Door" ]
+block 'Door/LargeBlockDoor' door1 [ 74857693847562934, [ (3 0 -2) ], "Airlock Inner Door" ]
+block 'Door/LargeBlockDoor' door2 [ 74857693847562935, [ (0 2 -1), (1 0 0) ], "Hangar Door" ]
 ```
+
+Where a block sits is a list of cells: the cell of each mechanical joint crossed from the grid the
+program runs on, then the block's own cell on its grid.
 
 ## Instances
 

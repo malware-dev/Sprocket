@@ -125,8 +125,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>The items of a list at a position, or none where there is no list there.</summary>
         public ValueRange Items(int index)
         {
-            var value = ValueAt(index);
-            return value.Form == ValueForm.List
+            return Within(ValueAt(index));
+        }
+
+        /// <summary>
+        /// What <paramref name="value" /> holds: a list's items or a vector's three numbers, or none where
+        /// it is neither.
+        /// </summary>
+        public ValueRange Within(Value value)
+        {
+            return value.Form == ValueForm.List || value.Form == ValueForm.Vector
                 ? new ValueRange(_reading.Items, value.From, value.Count)
                 : new ValueRange();
         }

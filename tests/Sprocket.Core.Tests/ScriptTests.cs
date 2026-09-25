@@ -838,6 +838,34 @@ public class ScriptTests
     /// The keys are how a block is found again, so one dropped on the way in is one missing from the
     /// next save: the block matches less than it did, and nothing said so.
     /// </remarks>
+    /// <summary>A block's path is a list of cells among its keys, and it comes back as it was written.</summary>
+    [Fact]
+    public void APathAmongABlocksKeysComesBackAsWritten()
+    {
+        const string written = "sprocket 1 alpha 7\n\nblock 'Door/LargeBlockDoor' door1 "
+            + "[ 74857693847562934, [ (0 2 -1), (3 0 0) ], \"Hangar Door\" ]\n";
+
+        var after = new Automation();
+        Assert.Equal("", Load(written, after));
+
+        var keys = after.FindRef("door1")!.Keys;
+        Assert.Equal(3, keys.Count);
+        Assert.Equal(new[] { new VRageMath.Vector3I(0, 2, -1), new VRageMath.Vector3I(3, 0, 0) }, keys[1].Cells);
+        Assert.Equal(written, Save(after));
+    }
+
+    /// <summary>A list among a block's keys that is not a list of cells is trouble rather than a path.</summary>
+    [Theory]
+    [InlineData("[ 1, 2 ]")]
+    [InlineData("[ (0 2 0.5) ]")]
+    [InlineData("[]")]
+    public void AListThatIsNotCellsIsTrouble(string key)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load("sprocket 1 alpha 7\n\nblock 'Door/LargeBlockDoor' door1 [ 7, " + key + " ]\n", after));
+        Assert.False(after.Intact);
+    }
+
     [Fact]
     public void AKeyThisBuildCannotHoldIsTrouble()
     {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using VRageMath;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -219,6 +220,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         static void WriteKey(Pen pen, Values values, EntityKey key)
         {
+            if (key.Cells != null)
+            {
+                pen.OpenList();
+                for (var i = 0; i < key.Cells.Length; i++)
+                    pen.Vector(key.Cells[i].X, key.Cells[i].Y, key.Cells[i].Z);
+
+                pen.CloseList();
+                return;
+            }
+
             if (key.Kind == ValueKind.Text)
             {
                 string text;
@@ -254,6 +265,31 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Real(real);
         }
 
+        /// <summary>A list of vectors of whole numbers as cells, or null where it is anything else.</summary>
+        static Vector3I[] Cells(ValueRange items, Statement statement)
+        {
+            if (items.Count == 0)
+                return null;
+
+            var cells = new Vector3I[items.Count];
+            for (var i = 0; i < items.Count; i++)
+            {
+                var numbers = statement.Within(items[i]);
+                if (items[i].Form != ValueForm.Vector || numbers.Count != 3)
+                    return null;
+
+                for (var n = 0; n < 3; n++)
+                {
+                    if (numbers[n].Form != ValueForm.Integer)
+                        return null;
+                }
+
+                cells[i] = new Vector3I((int)numbers[0].Whole, (int)numbers[1].Whole, (int)numbers[2].Whole);
+            }
+
+            return cells;
+        }
+
         static void ReadRef(Statement statement, Automation program, Values values, Trouble trouble)
         {
             var declared = new EntityRef(statement.Word(1), BlockKinds.Definition(statement.Word(0)));
@@ -268,17 +304,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// A key, or trouble where this build has no kind that could hold it.
         /// </summary>
         /// <remarks>
-        /// A vector is the one the language has and the model does not - a position survives
-        /// blueprinting where an id does not, so it is the key worth having, and it is waiting on a
-        /// kind wide enough to hold it. Said rather than dropped, because a key is how a block is
-        /// found again: dropping one quietly leaves the next save writing a block that matches less
-        /// than the one it replaces.
+        /// Said rather than dropped, because a key is how a block is found again: dropping one quietly
+        /// leaves the next save writing a block that matches less than the one it replaces.
         /// </remarks>
         static void ReadKey(Values values, Value key, IList<EntityKey> into, Statement statement,
             Trouble trouble)
         {
             switch (key.Form)
             {
+                case ValueForm.List:
+                    Vector3I[] cells = Cells(statement.Within(key), statement);
+                    if (cells == null)
+                    {
+                        trouble.Say(statement, "a list among a block's keys is a list of cells, like [ (0 2 -1), (3 0 0) ]");
+                        return;
+                    }
+
+                    into.Add(new EntityKey(cells));
+                    return;
+
                 case ValueForm.Integer:
                     into.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(key.Whole)));
                     return;
