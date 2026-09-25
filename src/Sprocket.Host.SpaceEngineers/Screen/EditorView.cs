@@ -13,6 +13,7 @@ using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
 using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -188,6 +189,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         string _focusTook = "";
         ComponentView _dragging;
 
+        /// <summary>Where the new controls on the screen's body take the pointer and the keyboard.</summary>
+        readonly InputRoot _input;
+
+        /// <summary>Whether the press under way began on a control <see cref="_input" /> takes.</summary>
+        bool _pressing;
+
+        /// <summary>Where the pointer last was during that press.</summary>
+        Vector2 _pressedAt;
+
         public EditorView(SprocketEditor editor)
         {
             _editor = editor;
@@ -258,6 +268,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             Widgets.Barred(_scroll);
             _scroll.Content = _body;
+            _input = new InputRoot(_body);
             _bodyDock.Padding = new Thickness(Space.PadX);
 
             var footerBar = new Bar();
@@ -524,6 +535,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 Ask given = Given;
                 if (given != null && given.Typing)
                     given.Box.CaretVisible = value;
+
+                var box = _input.Focused as Ui.Text.TextBox;
+                if (box != null)
+                    box.CaretVisible = value;
             }
         }
 
@@ -810,6 +825,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// leaves alone stays where it was, which is off the screen and therefore over nothing.
         /// </remarks>
         public Vector2 Pointer { get; set; }
+
+        /// <summary>Where the new controls on the screen's body take the pointer and the keyboard.</summary>
+        public InputRoot Input => _input;
 
         /// <summary>
         /// Lights the one thing the pointer is resting on, and puts out whatever was lit before.
@@ -1126,6 +1144,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>The same, and what Enter in it takes.</summary>
         void Typing(TextBox box, int command, int takes)
         {
+            _input.Focus(null);
             _focus = box;
             _focusCommand = command;
             _focusTakes = takes;
@@ -1202,7 +1221,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>
         /// Offers the press to whatever might want to be dragged, before anything treats it as a click.
         /// </summary>
-        public bool Grab(Vector2 point)
+        public bool Grab(Vector2 point, int presses = 1)
         {
             // A question owns the screen, so it is asked first rather than not at all. What it may
             // have to drag is a slider on a colour, and only inside its own bounds - a drag started
@@ -1214,6 +1233,19 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // typed. The same owner a press respects, asked the same way.
             if (Owner != null || IsAsking)
                 return false;
+
+            // A new control takes the whole press, down, moves and release, through the input root.
+            var target = Under(point);
+            if (target != null && target.TakesInput)
+            {
+                UnfocusBox();
+                _input.PointerDown(target, point, presses);
+                _pressing = true;
+                _pressedAt = point;
+                return true;
+            }
+
+            _input.Focus(null);
 
             // A dial or a colour in the values column, which is turned or mixed by dragging.
             Ask given = Given;
@@ -1248,6 +1280,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Where the thing being carried has got to. Ignored when nothing is being carried.</summary>
         public void Carry(Vector2 point)
         {
+            if (_pressing)
+            {
+                _pressedAt = point;
+                _input.PointerMove(point);
+                return;
+            }
+
             if (_ask.IsDragging)
             {
                 _ask.Carry(point);
@@ -1276,6 +1315,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Lets go of whatever was being carried.</summary>
         public void Drop()
         {
+            if (_pressing)
+            {
+                _pressing = false;
+                _input.PointerUp(_pressedAt);
+                return;
+            }
+
             _ask.Drop();
             _scroll.BarHeld = false;
 

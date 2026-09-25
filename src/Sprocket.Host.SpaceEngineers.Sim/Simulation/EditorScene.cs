@@ -9,6 +9,7 @@ using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using VRage.Input;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -180,18 +181,37 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Takes what is typed in the box with the caret, as Enter in it does in the game.</summary>
         public bool TakeTyped()
         {
+            if (Keyed(MyKeys.Enter))
+                return true;
+
             return _view.TakeTyped();
         }
 
         public void CancelAsk()
         {
+            if (Keyed(MyKeys.Escape))
+                return;
+
             _view.CancelAsk();
         }
 
         /// <summary>Moves the caret to the next field of a form, which Tab does in the game.</summary>
         public void NextField()
         {
+            if (Keyed(MyKeys.Tab))
+                return;
+
             _view.NextField();
+        }
+
+        /// <summary>Hands <paramref name="key" /> to the view's input root when a new control holds the keyboard, answering whether it did.</summary>
+        bool Keyed(MyKeys key, bool ctrl = false)
+        {
+            if (_view.Input.Focused == null)
+                return false;
+
+            _view.Input.Key(key, false, ctrl);
+            return true;
         }
 
         /// <summary>The box the keyboard is in, when something on the screen has taken it.</summary>
@@ -224,6 +244,12 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public void Clear()
         {
+            if (Keyed(MyKeys.A, true))
+            {
+                Keyed(MyKeys.Back);
+                return;
+            }
+
             TextBox box = Typing;
             if (box == null)
                 return;
@@ -236,6 +262,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>An arrow key, as the game's screen hands one over.</summary>
         public void Arrow(int across, int down)
         {
+            if (Keyed(across < 0 ? MyKeys.Left : across > 0 ? MyKeys.Right : down < 0 ? MyKeys.Up : MyKeys.Down))
+                return;
+
             _view.Arrow(across, down);
         }
 
@@ -243,6 +272,14 @@ namespace Sprocket.Sim.Simulation
         /// <remarks>A field answered by choosing takes each letter as a choice, as it does in the game.</remarks>
         public void Type(string text)
         {
+            if (_view.Input.Focused != null && !string.IsNullOrEmpty(text))
+            {
+                for (int i = 0; i < text.Length; i++)
+                    _view.Input.Text(text[i]);
+
+                return;
+            }
+
             if (_view.Chooses && !string.IsNullOrEmpty(text))
             {
                 for (int i = 0; i < text.Length; i++)
@@ -342,9 +379,9 @@ namespace Sprocket.Sim.Simulation
         }
 
         /// <summary>Offers the press as a grab first, so a drag is not also a click.</summary>
-        public bool Grab(Vector2 point)
+        public bool Grab(Vector2 point, int presses = 1)
         {
-            return _view.Grab(point);
+            return _view.Grab(point, presses);
         }
 
         public void Carry(Vector2 point)

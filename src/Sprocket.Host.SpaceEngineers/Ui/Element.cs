@@ -259,6 +259,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         /// <summary>Whether this handles the pointer itself, and so answers it with no command or tip.</summary>
         protected virtual bool TakesPointer => false;
 
+        /// <summary>Whether the pointer and keyboard reach this through an <see cref="InputRoot" />: it has a command, can hold the keyboard, or handles the pointer itself.</summary>
+        public bool TakesInput => _command != null || Focusable || TakesPointer;
+
         /// <summary>Says this needs measuring again, and everything above it with it.</summary>
         /// <remarks>
         ///     A property that changes how big this wants to be calls this; one that only changes where it

@@ -50,7 +50,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
         /// <remarks>Focus goes to the nearest focusable element at or above what was pressed, and leaves when nothing focusable was.</remarks>
         public bool PointerDown(Vector2 point, int presses)
         {
-            var target = _root.Under(point);
+            return PointerDown(_root.Under(point), point, presses);
+        }
+
+        /// <summary>The same, on a <paramref name="target" /> the host has already found, as one that layers other trees over this one does.</summary>
+        public bool PointerDown(Element target, Vector2 point, int presses)
+        {
             Focus(FocusableFrom(target));
 
             _captured = target;

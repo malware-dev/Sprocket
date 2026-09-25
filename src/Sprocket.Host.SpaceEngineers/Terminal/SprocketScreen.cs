@@ -44,6 +44,15 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         /// <summary>Frames the caret spends shown, then hidden.</summary>
         const int BlinkTicks = 30;
 
+        /// <summary>The keys that edit and repeat while held.</summary>
+        readonly MyKeys[] _editing =
+        {
+            MyKeys.Back, MyKeys.Delete, MyKeys.Left, MyKeys.Right, MyKeys.Home, MyKeys.End, MyKeys.Up, MyKeys.Down
+        };
+
+        /// <summary>The keys that mean something with Ctrl held.</summary>
+        readonly MyKeys[] _shortcuts = { MyKeys.A, MyKeys.C, MyKeys.X, MyKeys.V };
+
         readonly SprocketUnit _unit;
         readonly SprocketEditor _editor;
         readonly EditorView _view;
@@ -55,6 +64,15 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         bool _grabbed;
         bool _wasDown;
         int _lastClickFrame = int.MinValue;
+
+        /// <summary>When and where the button last went down, and how many times in quick succession.</summary>
+        int _lastDownFrame = int.MinValue;
+
+        Vector2 _lastDownAt;
+        int _presses;
+
+        /// <summary>Repeats a held key for the input root, the way the screen's keyboard repeats for the old boxes.</summary>
+        readonly KeyRepeater _repeat = new KeyRepeater();
         Vector2 _lastClickAt;
 
         /// <summary>When the caret's blink was last restarted, so typing never hides it mid-blink.</summary>
@@ -138,6 +156,13 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         /// </remarks>
         protected override bool OnCancelling()
         {
+            // A new control holding the keyboard takes Escape, which lets the keyboard go.
+            if (_view.Input.Focused != null)
+            {
+                _view.Input.Key(MyKeys.Escape, false, false);
+                return false;
+            }
+
             // A question with answers takes Escape first, and dismissing it means "I did not mean to
             // leave" rather than picking the answer that leaves. Before the retreat below, because
             // that would read Escape as back and act on the very thing being asked about.
@@ -280,7 +305,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             {
                 // Offered as a grab first, so that dragging a step out of a sequence is not also a click on
                 // whatever it was sitting on.
-                _grabbed = _view.Grab(_pointer);
+                _grabbed = _view.Grab(_pointer, Presses());
             }
             else if (down)
             {
@@ -331,6 +356,12 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
                 if (MyAPIGateway.Input.IsNewKeyPressed(MyKeys.Enter))
                     _view.TakeDefault();
 
+                return;
+            }
+
+            if (_view.Input.Focused != null)
+            {
+                KeysToInput();
                 return;
             }
 
@@ -450,6 +481,65 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         /// controls. Slack as well as time, because a double click that moved half the screen was two
         /// separate presses that happened to be quick.
         /// </remarks>
+        /// <summary>Sends the keys to the view's input root: typed characters, the editing keys repeating while held, and the shortcuts.</summary>
+        /// <remarks>Escape is not read here; it arrives at <see cref="OnCancelling" />.</remarks>
+        void KeysToInput()
+        {
+            IMyInput input = MyAPIGateway.Input;
+            var root = _view.Input;
+            var shift = input.IsAnyShiftKeyPressed();
+            var ctrl = input.IsAnyCtrlKeyPressed();
+            var now = Now();
+
+            if (ctrl)
+            {
+                for (var i = 0; i < _shortcuts.Length; i++)
+                {
+                    if (input.IsNewKeyPressed(_shortcuts[i]))
+                        root.Key(_shortcuts[i], shift, true);
+                }
+            }
+            else
+            {
+                var typed = input.TextInput;
+                for (var i = 0; i < typed.Count; i++)
+                    root.Text(typed[i]);
+
+                if (typed.Count > 0)
+                    _blinkFrom = now;
+            }
+
+            if (input.IsNewKeyPressed(MyKeys.Enter))
+                root.Key(MyKeys.Enter, shift, ctrl);
+
+            if (input.IsNewKeyPressed(MyKeys.Tab))
+                root.Key(MyKeys.Tab, shift, ctrl);
+
+            for (var i = 0; i < _editing.Length; i++)
+            {
+                var key = _editing[i];
+                if (!_repeat.Fires((int)key, input.IsNewKeyPressed(key), input.IsKeyPress(key), now))
+                    continue;
+
+                root.Key(key, shift, ctrl);
+                _blinkFrom = now;
+            }
+        }
+
+        /// <summary>How many presses in quick succession the one going down now is, counted where the button goes down.</summary>
+        int Presses()
+        {
+            var now = Now();
+
+            var again = now - _lastDownFrame <= DoubleClickFrames
+                        && Vector2.Distance(_lastDownAt, _pointer) <= DoubleClickSlack;
+
+            _presses = again ? _presses + 1 : 1;
+            _lastDownFrame = now;
+            _lastDownAt = _pointer;
+            return _presses;
+        }
+
         int Clicks()
         {
             int now = MyAPIGateway.Session == null ? 0 : MyAPIGateway.Session.GameplayFrameCounter;
