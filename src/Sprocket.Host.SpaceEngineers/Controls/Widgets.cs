@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
+using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 
 namespace Sprocket.Host.SpaceEngineers.Controls
 {

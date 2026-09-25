@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Styling;
+using VRage.Input;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui
@@ -19,7 +22,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         bool _measureDirty = true;
 
+        ICommand _command;
+
+        /// <summary>Held so that listening to a command allocates once in this element's life.</summary>
+        Action _commandChanged;
+
         bool _disabled;
+        bool _focused;
         bool _hot;
 
         Vector2 _measuredFor;
@@ -93,16 +102,59 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             }
         }
 
-        /// <summary>Whether this can be used now.</summary>
+        /// <summary>Whether this can be used now: not switched off, and its command, where it has one, can be carried out.</summary>
         public bool IsEnabled
         {
-            get { return !_disabled; }
+            get { return !_disabled && (_command == null || _command.CanExecute); }
             set
             {
                 if (_disabled == !value)
                     return;
 
                 _disabled = !value;
+                Restyle();
+            }
+        }
+
+        /// <summary>What using this does, or null for nothing.</summary>
+        /// <remarks>Carried out when a press begun on this is released on it, while it is enabled.</remarks>
+        public ICommand Command
+        {
+            get { return _command; }
+            set
+            {
+                if (_command == value)
+                    return;
+
+                if (_commandChanged == null)
+                    _commandChanged = Restyle;
+
+                if (_command != null)
+                    _command.CanExecuteChanged -= _commandChanged;
+
+                _command = value;
+
+                if (_command != null)
+                    _command.CanExecuteChanged += _commandChanged;
+
+                Restyle();
+            }
+        }
+
+        /// <summary>Whether this can hold the keyboard.</summary>
+        public bool Focusable { get; set; }
+
+        /// <summary>Whether this holds the keyboard right now.</summary>
+        /// <remarks>Set by the <see cref="InputRoot" /> this sits under.</remarks>
+        public bool IsFocused
+        {
+            get { return _focused; }
+            internal set
+            {
+                if (_focused == value)
+                    return;
+
+                _focused = value;
                 Restyle();
             }
         }
@@ -137,7 +189,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         ///     Reads the field rather than <see cref="Press" />, which would copy the whole struct, because
         ///     <see cref="Under" /> asks this of every element it visits on every frame.
         /// </remarks>
-        bool Answers => _press.Means != Means.Nothing || !string.IsNullOrEmpty(Tip);
+        bool Answers => _press.Means != Means.Nothing || !string.IsNullOrEmpty(Tip) || _command != null
+                        || Focusable || TakesPointer;
 
         /// <summary>How thick <see cref="Edge" /> is drawn.</summary>
         public float EdgeThickness { get; set; }
@@ -199,6 +252,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         /// <summary>Whether anything inside this may be reached at all.</summary>
         internal virtual bool Passes => true;
+
+        /// <summary>The children this holds in a collection, or null for none.</summary>
+        internal ElementCollection Contents { get; set; }
+
+        /// <summary>Whether this handles the pointer itself, and so answers it with no command or tip.</summary>
+        protected virtual bool TakesPointer => false;
 
         /// <summary>Says this needs measuring again, and everything above it with it.</summary>
         /// <remarks>
@@ -407,6 +466,44 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             }
 
             return null;
+        }
+
+        /// <summary>Told that a press has begun on this at <paramref name="point" />, the <paramref name="presses" />th in quick succession.</summary>
+        /// <remarks>The pointer's moves and its release come to this until it is released, wherever they are.</remarks>
+        protected internal virtual void OnPointerDown(Vector2 point, int presses)
+        {
+        }
+
+        /// <summary>Told that the pointer has moved to <paramref name="point" /> during a press begun on this.</summary>
+        protected internal virtual void OnPointerMove(Vector2 point)
+        {
+        }
+
+        /// <summary>Told that a press begun on this has been released at <paramref name="point" />.</summary>
+        protected internal virtual void OnPointerUp(Vector2 point)
+        {
+        }
+
+        /// <summary>Offered a key while this holds the keyboard, answering whether it took it.</summary>
+        /// <remarks>A key not taken goes to the <see cref="InputRoot" />, which moves focus on Tab and lets go of it on Escape.</remarks>
+        protected internal virtual bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        {
+            return false;
+        }
+
+        /// <summary>Given a typed character while this holds the keyboard.</summary>
+        protected internal virtual void OnText(char c)
+        {
+        }
+
+        /// <summary>Adds every child of this to <paramref name="into" />, in the order they are drawn.</summary>
+        internal virtual void AddChildren(List<Element> into)
+        {
+            if (Contents == null)
+                return;
+
+            for (var i = 0; i < Contents.Count; i++)
+                into.Add(Contents[i]);
         }
 
         /// <summary>Checks that this can place <paramref name="child" /> by <paramref name="placement" />, before it joins or changes.</summary>

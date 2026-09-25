@@ -13,6 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         internal ElementCollection(Element owner)
         {
             _owner = owner;
+            owner.Contents = this;
         }
 
         /// <summary>How many children there are.</summary>

@@ -154,6 +154,5 @@ until the last of them goes.
   along the top rather than on the middle.
 - An items control, with a row template, in place of the six lists of rows built by hand.
 - Whether rows and columns inside a grid can share its tracks through other containers.
-- How focus works: what owns it, how the focused element shows it, and where Tab order comes from.
 - The framework's own namespace, in place of `Sprocket.Host.SpaceEngineers.Ui`.
 - Where the old controls live until the port ends, since `Ui/Legacy` would be copied with `Ui/`.

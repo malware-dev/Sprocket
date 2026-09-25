@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRageMath;
 
@@ -57,6 +58,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
         /// <summary>Nothing inside this can be reached until all of it is in view.</summary>
         internal override bool Passes => _openness >= 1f;
+
+        /// <inheritdoc />
+        internal override void AddChildren(List<Element> into)
+        {
+            if (_child != null)
+                into.Add(_child);
+        }
 
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
