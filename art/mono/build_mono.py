@@ -31,7 +31,7 @@ import xml.sax.saxutils as esc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-FONTS = os.path.join(ROOT, "src", "Sprocket.Host.SpaceEngineers", "Content", "Fonts", "Maltek")
+FONTS = os.path.join(ROOT, "src", "Maltek.Mono", "Content", "Fonts", "Maltek")
 
 SOURCE = os.path.join(HERE, "RobotoMono-Regular.ttf")
 

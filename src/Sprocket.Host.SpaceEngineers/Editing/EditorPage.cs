@@ -139,6 +139,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public virtual string Subtitle => "";
 
+        /// <summary>Whether the heading's words have changed since this was last asked, which clears it.</summary>
+        /// <remarks>
+        /// For a page whose title follows what is being chosen on it, so the heading catches up the tick
+        /// the choice lands rather than on the heading's own cadence.
+        /// </remarks>
+        public virtual bool TakeRetitle()
+        {
+            return false;
+        }
+
         /// <summary>
         /// The obvious next move on this page, or empty for none.
         /// </summary>

@@ -70,6 +70,24 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
+        /// What is running, and nothing about what is switched off.
+        /// </summary>
+        /// <remarks>
+        /// For carrying the runs across when the program is rebuilt from somebody else's switches: a
+        /// client editing a Sprocket says what is off, and the server alone knows what is running.
+        /// </remarks>
+        public static string Running(Automation program, AutomationRunner runner)
+        {
+            var pen = new Pen();
+            var systems = program.Systems;
+
+            for (var i = 0; i < systems.Count; i++)
+                Runs(pen, runner, systems[i], systems[i].Identity.ToString("D"));
+
+            return pen.ToString();
+        }
+
+        /// <summary>
         /// What is part way through, one line per run.
         /// </summary>
         /// <remarks>

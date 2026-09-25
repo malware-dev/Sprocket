@@ -2,7 +2,7 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Do something
+on screen     Set Radius on Airlock Light
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:118 W:1402 H:836}
@@ -193,8 +193,8 @@ on screen     Do something
 186  Text       at {X:1215 Y:134.012} scale 0.64  #DCF5FDFF  "VALUES"
 187  ClearClip  
 188  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-189  SetClip    {X:276 Y:55 W:157 H:33}
-190  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+189  SetClip    {X:276 Y:55 W:295 H:33}
+190  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Set Radius on Airlock Light"
 191  ClearClip  
 192  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
 193  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"

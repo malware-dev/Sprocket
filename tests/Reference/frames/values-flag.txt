@@ -2,7 +2,7 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Do something
+on screen     Set Chime On Approach on Approach Sensor
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:118 W:1402 H:836}
@@ -89,8 +89,8 @@ on screen     Do something
 082  Text       at {X:1215 Y:134.012} scale 0.64  #DCF5FDFF  "VALUES"
 083  ClearClip  
 084  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-085  SetClip    {X:276 Y:55 W:157 H:33}
-086  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+085  SetClip    {X:276 Y:55 W:498 H:33}
+086  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Set Chime On Approach on Approach Sensor"
 087  ClearClip  
 088  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
 089  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"

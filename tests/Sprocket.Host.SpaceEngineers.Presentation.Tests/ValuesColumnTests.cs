@@ -64,7 +64,7 @@ public class ValuesColumnTests
     {
         var screen = Open(SetRadius + " " + Done);
 
-        Assert.Equal("Do something", screen.Ended);
+        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Shows("Radius needs a value."), "nothing said why it did not finish");
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
     }
@@ -75,7 +75,7 @@ public class ValuesColumnTests
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 50 " + Done);
 
-        Assert.Equal("Do something", screen.Ended);
+        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Shows("Radius has to be between 0.1 and 20."), "nothing said why");
     }
 
@@ -114,7 +114,7 @@ public class ValuesColumnTests
     {
         var screen = Open("double " + SetRadius);
 
-        Assert.Equal("Do something", screen.Ended);
+        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
     }
 
@@ -126,7 +126,7 @@ public class ValuesColumnTests
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " 447 185");
 
-        Assert.Equal("Do something", screen.Ended);
+        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
         Assert.False(screen.Scene.IsAsking, "a dialog was raised");
         Assert.True(screen.Scene.IsFilling, "the caret is not in the values");
         Assert.Equal("5.0", screen.Scene.Typing.Text);
@@ -163,7 +163,7 @@ public class ValuesColumnTests
         var screen = Open(SetRadius + " " + RadiusBox + " type 7 escape");
 
         Assert.False(screen.Scene.IsFilling, "the field kept the keyboard");
-        Assert.Equal("Do something", screen.Ended);
+        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Shows("7"), "what was typed was thrown away");
     }
 }

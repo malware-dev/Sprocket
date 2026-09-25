@@ -90,8 +90,8 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// same line height and baseline as the game's own faces, so a line of it stands exactly as
         /// tall as a line anywhere else and any of the sizes above apply to it unchanged.
         /// <para>
-        /// A subtype out of the definition registry, the same way <c>Symbols.Font</c> is, and it comes
-        /// from the same place - see <c>Content/Data/Fonts.sbc</c>.
+        /// A subtype out of the definition registry, the same way <c>Symbols.Font</c> is, declared by
+        /// the Maltek Mono mod this one requires.
         /// </para>
         /// </remarks>
         public const string Mono = "MaltekMono";

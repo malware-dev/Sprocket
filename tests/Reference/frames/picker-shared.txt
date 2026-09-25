@@ -2,7 +2,7 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Do something
+on screen     … Airlock Inner Door, Airlock Outer Door and 1 more
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:118 W:1402 H:836}
@@ -178,8 +178,8 @@ on screen     Do something
 171  Text       at {X:1036.528 Y:236.882} scale 0.57  #A2C3CDFF  "Terminal"
 172  ClearClip  
 173  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-174  SetClip    {X:276 Y:55 W:157 H:33}
-175  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+174  SetClip    {X:276 Y:55 W:581 H:33}
+175  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "… Airlock Inner Door, Airlock Outer Door and 1 more"
 176  ClearClip  
 177  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
 178  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"

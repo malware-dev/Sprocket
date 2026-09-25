@@ -2,7 +2,7 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Do something
+on screen     Set Color on Airlock Light
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:118 W:1402 H:836}
@@ -288,8 +288,8 @@ on screen     Do something
 281  Text       at {X:1215 Y:134.012} scale 0.64  #DCF5FDFF  "VALUES"
 282  ClearClip  
 283  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-284  SetClip    {X:276 Y:55 W:157 H:33}
-285  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Do something"
+284  SetClip    {X:276 Y:55 W:282 H:33}
+285  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "Set Color on Airlock Light"
 286  ClearClip  
 287  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
 288  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"

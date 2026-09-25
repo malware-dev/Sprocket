@@ -5,7 +5,6 @@ using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Drawing;
-using Sprocket.Host.SpaceEngineers.Layout;
 // Supplies Lettering, which the inspection does not see from every configuration it runs in.
 // ReSharper disable once RedundantUsingDirective
 using Sprocket.Host.SpaceEngineers.Look;
@@ -64,7 +63,7 @@ namespace Sprocket.Sim.Simulation
             _scene = EditorScene.Nowhere();
         }
 
-        /// <summary>One of the faces this mod ships, or null where the build did not carry it.</summary>
+        /// <summary>One of the faces this mod requires, or null where the build did not carry it.</summary>
         IFontMetrics Ours(string folder, string name)
         {
             return SeFontMetrics.LoadFrom(

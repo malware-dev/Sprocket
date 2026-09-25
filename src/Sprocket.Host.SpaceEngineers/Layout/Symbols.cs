@@ -15,8 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Layout
     {
         /// <summary>The font every symbol here is drawn in.</summary>
         /// <remarks>
-        /// Shipped as content, so it has to be declared in a <c>Fonts.sbc</c> the game loads. Nothing
-        /// about it is named for Sprocket.
+        /// Declared by the Maltek Symbols mod this one requires. Nothing about it is named for Sprocket.
         /// </remarks>
         public const string Font = "MaltekSymbols";
 

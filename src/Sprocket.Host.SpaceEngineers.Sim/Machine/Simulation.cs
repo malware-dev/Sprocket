@@ -121,6 +121,9 @@ sealed class Simulation
         Tick();
     }
 
+    /// <summary>The Sprocket the construct carries, as the machine keeping it holds it.</summary>
+    public SprocketUnit Unit => _unit;
+
     public SprocketEditor Editor => _unit.Editor;
 
     public GridWorld World => _unit.World;

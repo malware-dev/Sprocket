@@ -83,15 +83,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
         readonly List<EntityKind> _kinds = new List<EntityKind>();
 
-        string _blockSearch = "";
+        /// <summary>Where this sort of picker keeps how it was narrowed, so the next one opens the same way.</summary>
+        readonly Filter _filter;
+
+        string _blockSearch;
         string _kind;
 
         /// <summary>What is typed into the box that narrows the kinds, which narrows nothing else.</summary>
-        string _kindSearch = "";
+        string _kindSearch;
 
         /// <summary>The kinds actually offered, which is all of them until the box narrows them.</summary>
         readonly List<EntityKind> _shownKinds = new List<EntityKind>();
-        string _whatSearch = "";
+        string _whatSearch;
         readonly List<string> _names = new List<string>();
         readonly List<string> _ids = new List<string>();
         readonly List<int> _matched = new List<int>();
@@ -147,9 +150,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _all = all;
             _done = done;
 
-            // Opened the way the last one was left. What is on this construct is not known yet, so a
-            // kind it does not have is dropped later, where it is - see FillFilters.
-            _kind = editor.KindFor(forEvents);
+            // Opened the way the last one of its sort was left. What is on this construct is not known
+            // yet, so a kind it does not have is dropped later, where it is - see FillFilters.
+            _filter = editor.Habits.For(forEvents);
+            _kind = _filter.Kind;
+            _blockSearch = _filter.Blocks;
+            _kindSearch = _filter.Kinds;
+            _whatSearch = _filter.Choices;
 
             for (var i = 0; i < targets.Count; i++)
             {
@@ -165,7 +172,31 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         readonly List<long> _arrived = new List<long>();
 
-        public override string Title => _title;
+        /// <summary>The title as it was last worked out, or null before it has been.</summary>
+        string _said;
+
+        /// <summary>What the title was last worked out from.</summary>
+        readonly List<long> _saidBlocks = new List<long>();
+
+        string _saidChosen = "";
+        int _saidOffered;
+        bool _saidAll;
+
+        /// <summary>Whether the title has changed since the editor last asked.</summary>
+        bool _retitled;
+
+        /// <summary>The title as the answer stands, or the picker's own name where nothing is chosen.</summary>
+        public override string Title => _said ?? _title;
+
+        /// <inheritdoc />
+        public override bool TakeRetitle()
+        {
+            Reword();
+
+            var retitled = _retitled;
+            _retitled = false;
+            return retitled;
+        }
 
         /// <inheritdoc />
         /// <remarks>Nothing where what the trigger does goes on to a page of its own.</remarks>
@@ -799,6 +830,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         void NarrowKinds(string said)
         {
             _kindSearch = said ?? "";
+            _filter.Kinds = _kindSearch;
             Editor.Invalidate();
         }
 
@@ -853,6 +885,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _forms.Clear();
             _groups.Clear();
             _waits.Clear();
+            _sets.Clear();
             _ready.Clear();
             _why.Clear();
 
@@ -863,6 +896,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 {
                     _names.Add(events[i].Text);
                     _ids.Add(events[i].Id);
+                    _sets.Add(false);
                 }
             }
             else
@@ -916,7 +950,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _matched.Clear();
             for (var i = 0; i < _names.Count; i++)
             {
-                if (EntityQuery.MatchesText(_names[i], _whatSearch))
+                // What is chosen stays listed whatever the search, as a chosen block does: a search
+                // kept from an earlier picker must not hide the answer this one opened with.
+                if (EntityQuery.MatchesText(_names[i], _whatSearch) || _ids[i] == _chosen)
                     _matched.Add(i);
             }
 
@@ -1109,6 +1145,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _forms.Add(one.Form);
                 _groups.Add(group);
                 _waits.Add(one.Lasts);
+                _sets.Add(one.Sets);
                 _ready.Add(one.Readiness);
                 _why.Add(one.Why);
             }
@@ -1165,6 +1202,55 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// By the id and by which of the three ways it reaches the block, because the id alone can name
         /// more than one: a switch's value and the act that flips it share one.
         /// </remarks>
+        /// <summary>
+        /// Works the title out again where the answer has changed since it was last worked out.
+        /// </summary>
+        /// <remarks>
+        /// Asked after every command and every tick, so a pick shows in the title in the frame it lands,
+        /// and it compares before it builds: a tick where nothing was picked makes no string.
+        /// </remarks>
+        void Reword()
+        {
+            if (_said != null && _saidChosen == _chosen && _saidOffered == _ids.Count && _saidAll == _all
+                && Same(_saidBlocks, _selection))
+            {
+                return;
+            }
+
+            _saidChosen = _chosen;
+            _saidOffered = _ids.Count;
+            _saidAll = _all;
+            _saidBlocks.Clear();
+            _saidBlocks.AddRange(_selection);
+
+            var at = _chosen.Length == 0 ? -1 : At(_chosen, _chosenForm);
+            var chosen = at < 0 ? "" : _names[at];
+
+            // A step acts on every block it names, so its blocks are always joined with "and". Only
+            // what starts something can be any one of them, and then only where it was asked.
+            var blocks = SentenceText.Entities(Editor.World, _selection, !_forEvents || _all);
+
+            _said = _selection.Count == 0 && chosen.Length == 0
+                ? _title
+                : SentenceText.Picking(_forEvents, blocks, chosen, at >= 0 && _sets[at]);
+
+            _retitled = true;
+        }
+
+        static bool Same(List<long> one, List<long> other)
+        {
+            if (one.Count != other.Count)
+                return false;
+
+            for (var i = 0; i < one.Count; i++)
+            {
+                if (one[i] != other[i])
+                    return false;
+            }
+
+            return true;
+        }
+
         int At(string id, Form form)
         {
             for (var i = 0; i < _ids.Count; i++)
@@ -1228,6 +1314,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>Whether a step doing each thing on offer waits for it to finish.</summary>
         readonly List<bool> _waits = new List<bool>();
+
+        /// <summary>Whether each thing on offer sets one of the block's values.</summary>
+        readonly List<bool> _sets = new List<bool>();
 
         /// <summary>Whether each thing on offer can be made into a step.</summary>
         readonly List<Readiness> _ready = new List<Readiness>();
@@ -1521,6 +1610,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 return;
 
             _blockSearch = value;
+            _filter.Blocks = value;
             Editor.Invalidate();
         }
 
@@ -1531,6 +1621,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 return;
 
             _whatSearch = value;
+            _filter.Choices = value;
             Editor.Invalidate();
         }
 
@@ -1545,7 +1636,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             // Kept where it outlives this page, so the next picker of this sort opens the way this
             // one was left - and no other sort is touched by it.
-            Editor.RememberKind(_forEvents, kindId);
+            _filter.Kind = kindId ?? "";
             Editor.Invalidate();
         }
 

@@ -116,9 +116,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // The commands are simply not issued, so there is nothing for a target to invoke
             // by accident - and the screen keeps the same shape either way, so nothing appears
             // or disappears as somebody flips the switch.
-            _sentence.Editable = !_sequence.CanRun;
-            _sentence.LockedText = "Running. Stop it to make changes - whatever it has already "
-                + "done stays done.";
+            _sentence.Editable = !_sequence.CanRun && Editor.Holder == null;
+            _sentence.LockedText = Editor.Holder != null
+                ? "Read only while " + Editor.Holder + " edits it."
+                : "Switched on. Switch it off to make changes.";
             // Not held back by the switch, unlike everything that changes what this does. Throwing
             // it away is not editing it, and a sequence somebody wants rid of while it is running is
             // exactly when they want rid of it.

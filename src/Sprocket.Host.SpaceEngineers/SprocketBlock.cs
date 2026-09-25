@@ -13,10 +13,12 @@ namespace Sprocket.Host.SpaceEngineers
     /// Sits on every programmable block, and does two things once the block is properly alive.
     /// </summary>
     /// <remarks>
-    /// The terminal button is registered from here rather than from the session, because a control added
-    /// before the block type has fully spawned makes the vanilla controls vanish - Name, On/Off, Show On
-    /// HUD - both from the panel and from the list other mods are handed. A game logic component's first
-    /// update is the earliest point that is safe, and <c>Init</c> is not late enough.
+    /// The terminal button and the trigger action are registered from here rather than from the session,
+    /// because a control or an action added before the block type has fully spawned makes the vanilla
+    /// controls vanish - Name, On/Off, Custom Data - both from the panel and from the list other mods are
+    /// handed: the first addition creates the type's entry, and the game then takes the type as already
+    /// built. A game logic component's first update is the earliest point that is safe, and <c>Init</c> is
+    /// not late enough. See THDigi's terminal control examples.
     ///
     /// The second thing is why a Sprocket keeps running after a reload: a block carrying a program adopts
     /// itself into the session on load, so an airlock works without anybody opening the editor to wake it.
@@ -34,6 +36,8 @@ namespace Sprocket.Host.SpaceEngineers
         {
             if (MyAPIGateway.Utilities == null)
                 return;
+
+            TriggerAction.Register();
 
             // The button belongs to a terminal, and a dedicated server has none.
             if (!MyAPIGateway.Utilities.IsDedicated)

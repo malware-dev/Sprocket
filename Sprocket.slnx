@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Maltek.Mono/Maltek.Mono.csproj" />
+    <Project Path="src/Maltek.Symbols/Maltek.Symbols.csproj" />
     <Project Path="src/Sprocket.Host.SpaceEngineers/Sprocket.Host.SpaceEngineers.csproj" />
     <Project Path="src/Sprocket.Host.SpaceEngineers.Sim/Sprocket.Host.SpaceEngineers.Sim.csproj" />
   </Folder>

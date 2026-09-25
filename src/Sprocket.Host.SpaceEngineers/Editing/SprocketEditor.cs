@@ -29,6 +29,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly Automation _program;
         readonly AutomationRunner _runner;
         string _author = "";
+        string _holder;
+        Habits _habits = new Habits();
         readonly List<EditorPage> _stack = new List<EditorPage>();
         readonly Dictionary<int, Action> _actions = new Dictionary<int, Action>();
         readonly Dictionary<int, Action<string>> _textActions = new Dictionary<int, Action<string>>();
@@ -67,6 +69,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// on are the same length and the same line. What a host hands over is its own business.
         /// </para>
         /// </remarks>
+        /// <summary>
+        /// Where running a sequence by hand, or stopping it, goes where it is not the runner here, or
+        /// null: the sequence, the one of its system, and whether it stops.
+        /// </summary>
+        /// <remarks>
+        /// Set on a copy a client is editing, whose runner runs nothing: the sequence runs where the
+        /// Sprocket is kept, on the server.
+        /// </remarks>
+        public Action<Sequence, SystemInstance, bool> Elsewhere { get; set; }
+
+        /// <summary>Who holds the Sprocket this editor shows, or null where this editor may change it.</summary>
+        /// <remarks>
+        /// Set on a copy lent to look at while somebody else edits it. Every command but the ones that
+        /// move around the editor is refused where it is registered, so a control that would change
+        /// something has no command and goes inert - the way a switched-on sequence locks itself.
+        /// The screen is built again on the next tick, since what was registered before is not.
+        /// </remarks>
+        public string Holder
+        {
+            get { return _holder; }
+            set
+            {
+                _holder = value;
+                _structureDirty = true;
+            }
+        }
+
         public string Author
         {
             get { return _author; }
@@ -135,7 +164,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             //
             // Its words only. The heading's shape was settled when the screen was made, and the target
             // has already built controls to match it.
-            if (_worded.Due(tick))
+            var retitled = Current.TakeRetitle();
+            if (_worded.Due(tick) || retitled)
                 Current.RefreshHeading(_screen.Heading);
 
             _screen.Subtitle = Current.Subtitle;
@@ -332,6 +362,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         void Said(List<EditorComponent> components)
         {
+            if (_holder != null && _program.Trouble.Length == 0)
+            {
+                Held(components);
+                return;
+            }
+
             if (_program.Trouble.Length == 0)
             {
                 if (_notice == null)
@@ -393,6 +429,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _mending.Clear();
             _mending.Add(new ChoiceEntry("Replace it", false,
                 Register(Cmd.Resolve, delegate { AskBeforeReplacing(delegate { }); })));
+            _notice.Actions.Reset(_mending);
+
+            components.Insert(0, _notice);
+        }
+
+        /// <summary>
+        /// Says, at the head of every page, who is editing the Sprocket this editor only shows.
+        /// </summary>
+        /// <remarks>
+        /// For as long as the editor is open, so it never comes or goes while somebody is looking. Not
+        /// a problem: nothing is wrong, the Sprocket is simply somebody else's for now.
+        /// </remarks>
+        void Held(List<EditorComponent> components)
+        {
+            if (_notice == null)
+                _notice = new NoticeComponent("", NoticeLevel.Info);
+
+            _notice.Leaving = false;
+            _notice.Level = NoticeLevel.Info;
+            _notice.Text = _holder + " is editing this block's automation.";
+            _notice.Detail = "Only one person can edit at a time. Reopen this once they're done to make changes.";
+            _notice.Diagnostic = "";
+
+            _notice.Expanded = _open;
+            _notice.ExpandCommand = Register(Cmd.Expand, delegate { _open = !_open; Invalidate(); });
+
+            _mending.Clear();
             _notice.Actions.Reset(_mending);
 
             components.Insert(0, _notice);
@@ -615,6 +678,25 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return !_textChecks.TryGetValue(command, out check) || check(value ?? "");
         }
 
+        /// <summary>How somebody is working in this editor; see <see cref="Editing.Habits" />.</summary>
+        /// <remarks>Replaced on a client's copy by the ones its earlier copies of the same block used.</remarks>
+        public Habits Habits
+        {
+            get { return _habits; }
+            set { _habits = value ?? new Habits(); }
+        }
+
+        /// <summary>Whether the list of what to do shows the block's own vocabulary rather than Sprocket's.</summary>
+        /// <remarks>
+        /// Held here rather than on the picker so that somebody who works in the block's own words
+        /// keeps working in them, rather than being put back a step at every sequence.
+        /// </remarks>
+        public bool ShowsTerminal
+        {
+            get { return Habits.ShowsTerminal; }
+            set { Habits.ShowsTerminal = value; }
+        }
+
         /// <summary>
         /// Reports a number somebody chose - a position to move something to, most of all.
         /// </summary>
@@ -627,52 +709,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Out of range is ignored rather than refused. A drop past the end of a list is an
         /// ordinary thing for a pointer to do.
         /// </remarks>
-        /// <summary>
-        /// The kind of block a picker is narrowed to, kept per place a picker opens from.
-        /// </summary>
-        /// <remarks>
-        /// Somebody wiring a row of lights opens the picker once per step, and a filter that reset
-        /// itself every time would be set again at every one of them. Held here because a page is
-        /// built afresh each time one opens and this has to outlive that.
-        /// <para>
-        /// <b>One per place and not one in total.</b> What starts a sequence and what it does are
-        /// different questions asked of different blocks - a button and a sensor start things, and
-        /// lights and doors are what gets done to - so a filter set while answering one has no
-        /// business narrowing the other.
-        /// </para>
-        /// <para>
-        /// Not saved with the program. It is how somebody is working right now rather than part of
-        /// what they are building, and a world reopened a week later should not still be hiding
-        /// blocks for a reason nobody remembers.
-        /// </para>
-        /// </remarks>
-        public string KindFor(bool forEvents)
-        {
-            return forEvents ? _whenKind : _doingKind;
-        }
-
-        public void RememberKind(bool forEvents, string kind)
-        {
-            if (forEvents)
-                _whenKind = kind ?? "";
-            else
-                _doingKind = kind ?? "";
-        }
-
-        string _whenKind = "";
-        string _doingKind = "";
-
-        /// <summary>Whether the list of what to do shows the block's own vocabulary rather than Sprocket's.</summary>
-        /// <remarks>
-        /// Kept the way the kind filter is: for as long as the editor is open, and not saved with the
-        /// program, because it is how somebody is working rather than part of what they are building.
-        /// <para>
-        /// Held here rather than on the picker so that somebody who works in the block's own words
-        /// keeps working in them, rather than being put back a step at every sequence.
-        /// </para>
-        /// </remarks>
-        public bool ShowsTerminal { get; set; }
-
         public void SetNumber(int command, int value)
         {
             Action<int> action;
@@ -761,6 +797,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         internal int Register(Cmd kind, int which, int part, Action action)
         {
+            if (Refuses(kind))
+                return 0;
+
             var id = CommandId.Of(kind, which, part);
             Claim(id, kind);
             _actions.Add(id, action);
@@ -780,6 +819,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>The same, for one part of a numbered thing - one slot of a sentence.</summary>
         internal int RegisterText(Cmd kind, int which, int part, Action<string> action)
         {
+            if (Refuses(kind))
+                return 0;
+
             var id = CommandId.Of(kind, which, part);
             Claim(id, kind);
             _textActions.Add(id, action);
@@ -790,12 +832,17 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         internal int RegisterText(Cmd kind, Action<string> action, Func<string, bool> accepts)
         {
             var id = RegisterText(kind, 0, action);
-            _textChecks.Add(id, accepts);
+            if (id != 0)
+                _textChecks.Add(id, accepts);
+
             return id;
         }
 
         internal int RegisterNumber(Cmd kind, int which, Action<int> action)
         {
+            if (Refuses(kind))
+                return 0;
+
             var id = CommandId.Of(kind, which);
             Claim(id, kind);
             _numberActions.Add(id, action);
@@ -814,6 +861,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         internal int RegisterToggle(Cmd kind, int which, int part, Action<bool> action)
         {
+            if (Refuses(kind))
+                return 0;
+
             var id = CommandId.Of(kind, which, part);
             Claim(id, kind);
             _toggleActions.Add(id, action);
@@ -828,6 +878,29 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// doing the other's job, and the symptom - a button that does the wrong thing - would
         /// be blamed on anything but the numbering.
         /// </remarks>
+        /// <summary>Whether a command is refused because somebody else holds the Sprocket.</summary>
+        /// <remarks>Moving around is all a copy lent to look at may do.</remarks>
+        bool Refuses(Cmd kind)
+        {
+            if (Holder == null)
+                return false;
+
+            switch (kind)
+            {
+                case Cmd.Back:
+                case Cmd.Refresh:
+                case Cmd.Expand:
+                case Cmd.OpenSystem:
+                case Cmd.OpenSequence:
+                case Cmd.PageOn:
+                case Cmd.PageBack:
+                case Cmd.ShowScript:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
         void Claim(int id, Cmd kind)
         {
             if (_actions.ContainsKey(id) || _textActions.ContainsKey(id)
@@ -1037,6 +1110,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             if (_structureDirty)
                 Rebuild();
+
+            // A title that follows what is being chosen catches up with the command that chose it,
+            // rather than a frame later - after a rebuild too, since that made its words from the page
+            // as it stood before the choice was worded.
+            if (Current.TakeRetitle())
+                Current.RefreshHeading(_screen.Heading);
         }
 
         /// <summary>
@@ -1779,6 +1858,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         internal void StopNow(Sequence sequence)
         {
+            if (Elsewhere != null)
+            {
+                Elsewhere(sequence, Only(sequence), true);
+                return;
+            }
+
             SequenceRunner state = _runner.Get(sequence, Only(sequence));
             if (state != null)
                 state.Stop();
@@ -1786,6 +1871,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         internal void RunNow(Sequence sequence)
         {
+            if (Elsewhere != null)
+            {
+                Elsewhere(sequence, Only(sequence), false);
+                return;
+            }
+
             // By hand, which is what lets a parked sequence run at all: the switch keeps triggers
             // off it, and a person at the screen is not a trigger.
             _runner.Call(sequence, Only(sequence), true);

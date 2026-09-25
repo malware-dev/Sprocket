@@ -54,6 +54,16 @@ namespace Sprocket.Host.SpaceEngineers.World
 
 
         readonly IMyTerminalBlock _block;
+
+        /// <summary>
+        /// Whether this is a copy of a Sprocket another machine keeps, made to be edited here.
+        /// </summary>
+        /// <remarks>
+        /// A copy runs nothing, writes no toolbar and saves nothing: the server does all three, and a
+        /// client doing them too would be a second airlock opening the same doors a moment apart.
+        /// </remarks>
+        readonly bool _copy;
+
         readonly GridWorld _world;
         readonly Automation _program = new Automation();
         readonly AutomationRunner _runner;
@@ -76,17 +86,65 @@ namespace Sprocket.Host.SpaceEngineers.World
             return storage.TryGetValue(ProgramKey, out text) && !string.IsNullOrEmpty(text);
         }
 
+        /// <summary>The Sprocket a block carries, reading its program out of the block.</summary>
         /// <remarks>
         /// <paramref name="rota" /> is the world's, shared by every Sprocket in it. See <see cref="Rota" />.
         /// </remarks>
         public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota)
+            : this(block, settings, rota, false, Stored(block, ProgramKey), Stored(block, StateKey))
+        {
+        }
+
+        /// <summary>
+        /// A copy of the Sprocket another machine keeps on <paramref name="block" />, made from what that
+        /// machine wrote out, to be edited here.
+        /// </summary>
+        /// <remarks>
+        /// On a rota of its own that nothing turns, so every sequence it holds waits forever and none of
+        /// them acts. The editor is the same editor, which is what lets a client edit as a host does.
+        /// </remarks>
+        public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, string program, string state)
+        {
+            return new SprocketUnit(block, settings, new Rota(), true, program, state);
+        }
+
+        /// <summary>
+        /// This Sprocket built again from <paramref name="program" /> and <paramref name="switches" />,
+        /// carrying on with whatever it was running.
+        /// </summary>
+        /// <remarks>
+        /// What a client's edit becomes on the server. The runs are carried across the way a save and a
+        /// reload carries them, which is already built to meet a program changed in between: a step
+        /// that is no longer there, or a sequence that may no longer run, is not resumed.
+        /// <para>
+        /// This one is let go of: the caller puts the new one in its place and disposes of this.
+        /// </para>
+        /// </remarks>
+        public SprocketUnit Rebuilt(string program, string switches, Settings settings, Rota rota)
+        {
+            var running = StateText.Running(_program, _runner);
+            var rebuilt = new SprocketUnit(_block, settings, rota, false, program, switches + "\n" + running);
+            rebuilt.Showing = Showing;
+            rebuilt.Editor.Habits = Editor.Habits;
+
+            // What this one had wired goes with it. A Sprocket that believed it had just been loaded
+            // would write no slot, and would read a button the client has just added - and nobody has
+            // wired yet - as one somebody cleared, and drop it.
+            rebuilt._adopted = _adopted;
+            rebuilt._wanted.AddRange(_wanted);
+            return rebuilt;
+        }
+
+        SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, bool copy, string program,
+            string state)
         {
             _block = block;
+            _copy = copy;
             _world = new GridWorld(block);
             _runner = new AutomationRunner(_program, _world, rota);
 
             // Before the editor, which builds its first screen out of whatever the program already says.
-            Load();
+            Load(program, state);
 
             _editor = new SprocketEditor(_world, _program, _runner);
 
@@ -1118,6 +1176,20 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public void Tick(int frame)
         {
+            // A copy leaves the toolbars to the machine that keeps the Sprocket, which is the one that
+            // writes them and the one that knows whether they still hold what it wrote.
+            if (!_copy)
+                Touch();
+
+            _runner.Tick(frame);
+
+            if (Showing)
+                _editor.Tick(frame);
+        }
+
+        /// <summary>Brings the toolbars into line with the program, and reads them where something asked.</summary>
+        void Touch()
+        {
             Reconcile();
 
             // Only when something asks. Reading a toolbar is the expensive thing Sprocket does, and what
@@ -1132,11 +1204,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _read = true;
                 Reach();
             }
-
-            _runner.Tick(frame);
-
-            if (Showing)
-                _editor.Tick(frame);
         }
 
         /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
@@ -1146,21 +1213,24 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Showing { get; set; }
 
+        /// <summary>What a block holds under one of Sprocket's keys, or empty.</summary>
+        static string Stored(IMyTerminalBlock block, Guid key)
+        {
+            MyModStorageComponentBase storage = block.Storage;
+            string text;
+            return storage != null && storage.TryGetValue(key, out text) && text != null ? text : "";
+        }
+
         /// <summary>
-        /// Reads the program back out of the block.
+        /// Reads the program, and what is switched off, out of the text they were written as.
         /// </summary>
         /// <remarks>
-        /// A block with no storage, or storage with nothing of Sprocket's in it, is a Sprocket nobody has written
-        /// a program on yet, which is an empty ship rather than an error.
+        /// Nothing written is a Sprocket nobody has written a program on yet, which is an empty ship
+        /// rather than an error.
         /// </remarks>
-        void Load()
+        void Load(string text, string state)
         {
-            MyModStorageComponentBase storage = _block.Storage;
-            if (storage == null)
-                return;
-
-            string text;
-            if (!storage.TryGetValue(ProgramKey, out text) || string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
                 return;
 
             string warning;
@@ -1171,8 +1241,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // What is switched off, read after the program, because it names what the program
             // declared. A construct that has nothing parked has nothing here at all.
-            string state;
-            if (storage.TryGetValue(StateKey, out state) && !string.IsNullOrEmpty(state))
+            if (!string.IsNullOrEmpty(state))
             {
                 var wrong = StateText.Load(state, _program, _runner);
                 if (wrong.Length > 0)
@@ -1199,25 +1268,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public void Persist()
         {
-            MyModStorageComponentBase storage = _block.Storage;
-
-            // Shared with every other mod on this block, so one may already be here - and if it is, it is
-            // the one to use rather than one to replace. Assigning it is what registers it with the
-            // block's component container, which is what makes the game write it out at all; the getter
-            // only answers once that has happened, so it is worth asking again rather than assuming.
-            if (storage == null)
-            {
-                _block.Storage = new MyModStorageComponent();
-                storage = _block.Storage;
-            }
-
-            if (storage == null)
-            {
-                // Logged rather than thrown. This runs on the way out of a screen and from the world
-                // save, and taking the game down over it would cost far more than the program does.
-                Told.Say("mod storage would not attach to " + _block.CustomName + "; program not saved");
+            // The machine that keeps the Sprocket writes it; a copy is only somebody's view of it.
+            if (_copy)
                 return;
-            }
+
+            MyModStorageComponentBase storage = Attached(_block);
+            if (storage == null)
+                return;
 
             // A failed load is failed, and nothing is written over it. What lifts that is the person
             // answering the question their first edit raises - see SprocketEditor - so by the time
@@ -1225,8 +1282,93 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!_program.Intact)
                 return;
 
-            storage.SetValue(ProgramKey, ProgramText.Save(_program, _world.Values));
-            storage.SetValue(StateKey, StateText.Save(_program, _runner));
+            string program;
+            string state;
+            Written(out program, out state);
+            storage.SetValue(ProgramKey, program);
+            storage.SetValue(StateKey, state);
+        }
+
+        /// <summary>
+        /// Writes a program and its switches into a client's copy of a block, as the server wrote them.
+        /// </summary>
+        /// <remarks>
+        /// The game copies, pastes and blueprints a grid from the copy on the machine doing it, and it
+        /// does not carry a block's storage from the server to the clients. A client's copy of the block
+        /// holds what the server last sent here, so a grid a client copies takes its programs along.
+        /// </remarks>
+        public static void Store(IMyTerminalBlock block, string program, string switches)
+        {
+            MyModStorageComponentBase storage = Attached(block);
+            if (storage == null)
+                return;
+
+            storage.SetValue(ProgramKey, program);
+            storage.SetValue(StateKey, switches);
+        }
+
+        /// <summary>The storage on a block, attached where it has none yet; or null, which is logged.</summary>
+        static MyModStorageComponentBase Attached(IMyTerminalBlock block)
+        {
+            MyModStorageComponentBase storage = block.Storage;
+
+            // Shared with every other mod on this block, so one may already be here - and if it is, it is
+            // the one to use rather than one to replace. Assigning it is what registers it with the
+            // block's component container, which is what makes the game write it out at all; the getter
+            // only answers once that has happened, so it is worth asking again rather than assuming.
+            if (storage == null)
+            {
+                block.Storage = new MyModStorageComponent();
+                storage = block.Storage;
+            }
+
+            // Logged rather than thrown. This runs on the way out of a screen and from the world save,
+            // and taking the game down over it would cost far more than the program does.
+            if (storage == null)
+                Told.Say("mod storage would not attach to " + block.CustomName + "; program not saved");
+
+            return storage;
+        }
+
+        /// <summary>
+        /// Runs a sequence by hand, or stops it, named the way another machine names it: the system by
+        /// identity, and the one of it and the sequence by number.
+        /// </summary>
+        /// <remarks>
+        /// What a client running something from its copy arrives as. Nothing happens where what it names
+        /// is not here, which is a change of the client's the server has not built yet.
+        /// </remarks>
+        public void Order(Guid system, int instance, int sequence, bool stops)
+        {
+            AutomationSystem named = _program.FindSystem(system);
+            SystemInstance one = named == null ? null : named.FindInstance(instance);
+            Sequence which = named == null ? null : named.FindSequence(sequence);
+            if (one == null || which == null)
+            {
+                Told.Say(_block.CustomName + " has no " + (named == null ? "such system" : which == null ? "such sequence" : "such instance")
+                    + " for an order to " + (stops ? "stop" : "run"));
+                return;
+            }
+
+            if (!stops)
+            {
+                _runner.Call(which, one, true);
+                return;
+            }
+
+            var state = _runner.Get(which, one);
+            if (state != null)
+                state.Stop();
+        }
+
+        /// <summary>
+        /// The program, and what is switched off, as they are written into the block: what a copy on
+        /// another machine is made from.
+        /// </summary>
+        public void Written(out string program, out string state)
+        {
+            program = ProgramText.Save(_program, _world.Values);
+            state = StateText.Save(_program, _runner);
         }
 
         public void Dispose()

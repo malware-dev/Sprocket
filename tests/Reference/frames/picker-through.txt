@@ -2,7 +2,7 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     When something happens
+on screen     When Airlock Button, Airlock Inner Door or 1 more …
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:118 W:1402 H:836}
@@ -163,8 +163,8 @@ on screen     When something happens
 156  Text       at {X:757.8 Y:195.992} scale 0.57  #85A1A9FF  "Search"
 157  ClearClip  
 158  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-159  SetClip    {X:276 Y:55 W:290 H:33}
-160  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When something happens"
+159  SetClip    {X:276 Y:55 W:583 H:33}
+160  Text       at {X:275.8467 Y:54.71198} scale 0.9  #DCF5FDFF  "When Airlock Button, Airlock Inner Door or 1 more …"
 161  ClearClip  
 162  Text       at {X:259 Y:58.2229} scale 0.57  #A2C3CDFF  "<"
 163  Text       at {X:1654.273 Y:58.2229} scale 0.57  #A2C3CDFF  "s"
