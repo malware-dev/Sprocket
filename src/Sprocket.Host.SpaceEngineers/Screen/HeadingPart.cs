@@ -28,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Name = "";
             Prompt = "";
             Lead = "";
+            After = "";
         }
 
         /// <summary>
@@ -59,6 +60,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// A part always has something to read, which is what makes naming optional rather than a step
         /// somebody is quietly expected to complete.
         /// </remarks>
+        /// <summary>Words after the name, quieter than it, or empty: the <i>blueprint</i> of <i>Airlock blueprint</i>.</summary>
+        public string After
+        {
+            get { return _after; }
+            set { Set(ref _after, value ?? "", nameof(After)); }
+        }
+
+        string _after;
+
         public string Text
         {
             get { return _text; }

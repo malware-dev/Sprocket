@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// three different intentions - "I parked this rule", "I am rewiring the whole thing",
         /// "leave the port airlock alone while I weld" - and none may overwrite another.
         /// </remarks>
-        bool CanRun => _sequence.CanRun && (_instance == null || _instance.Enabled);
+        bool CanRun => _sequence.CanRun(_instance);
 
         /// <summary>
         /// Scratch for turning the system's parts into this one's blocks.

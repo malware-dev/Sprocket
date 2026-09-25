@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
@@ -9,10 +10,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// The parts are the system's vocabulary: its sequences act on <c>inner</c>, and which block that
     /// is on a given ship is one of that system's business. A part is kept whether or not anything
     /// currently acts on it, because deleting the last step that mentioned a door must not quietly
-    /// discard what its author wrote about it.
+    /// discard what its author wrote about it. The exception is a part the editor took for a picked
+    /// block that nobody has written anything about: see <see cref="Kept" />.
     /// </remarks>
     public sealed class Part
     {
+        /// <summary>What separates an annotation's label from what follows it, as the language writes it.</summary>
+        const string Break = "\n\n";
+
         readonly List<string> _expects = new List<string>();
 
         public Part(string id)
@@ -22,6 +27,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         public string Id { get; private set; }
+
+        /// <summary>Whether the editor took this part for a block that was picked, rather than it being declared.</summary>
+        public bool Picked { get; set; }
 
         /// <summary>
         /// The block types that may fill this part, or none for anything.
@@ -41,5 +49,47 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// which of their blocks to point at, so it is part of the model and round-trips like a name.
         /// </remarks>
         public string Annotation { get; set; }
+
+        /// <summary>What the part is called on screen: the annotation's label, or its id where it has none.</summary>
+        public string Label
+        {
+            get
+            {
+                if (Annotation.Length == 0)
+                    return Id;
+
+                var end = Annotation.IndexOf(Break, StringComparison.Ordinal);
+                return end < 0 ? Annotation : Annotation.Substring(0, end);
+            }
+        }
+
+        /// <summary>What the annotation says after its label, or empty.</summary>
+        public string About
+        {
+            get
+            {
+                var end = Annotation.IndexOf(Break, StringComparison.Ordinal);
+                return end < 0 ? "" : Annotation.Substring(end + Break.Length);
+            }
+        }
+
+        /// <summary>
+        /// Whether this part is saved, given whether anything uses it.
+        /// </summary>
+        /// <remarks>
+        /// A part the editor took for a block, which nothing uses and nobody has written about, is what
+        /// a deleted step leaves behind, and nothing is lost by letting it go.
+        /// </remarks>
+        public bool Kept(bool used)
+        {
+            return used || !Picked || Annotation.Length > 0;
+        }
+
+        /// <summary>Calls the part <paramref name="label" />, keeping whatever the annotation says after its label.</summary>
+        public void Relabel(string label)
+        {
+            var about = About;
+            Annotation = about.Length == 0 ? label : label + Break + about;
+        }
     }
 }

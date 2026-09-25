@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
@@ -129,13 +130,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return other == null || other == _system;
         }
 
-        public override bool CanSwitch => true;
+        /// <summary>A switch for a logic system, and none for a blueprint, which does not run: its logic systems do.</summary>
+        public override bool CanSwitch => !_system.IsBlueprint;
 
-        public override bool SwitchIsOn => _system.Enabled;
+        public override void Heading(List<HeadingPart> parts)
+        {
+            base.Heading(parts);
+            if (_system.IsBlueprint)
+                parts[0].After = "blueprint";
+        }
+
+        /// <summary>The switch of the one of the system being edited.</summary>
+        public override bool SwitchIsOn
+        {
+            get
+            {
+                SystemInstance shown = Editor.StandIn(_system);
+                return shown != null && shown.Enabled;
+            }
+        }
 
         public override void Switch(bool on)
         {
-            _system.Enabled = on;
+            SystemInstance shown = Editor.StandIn(_system);
+            if (shown == null)
+                return;
+
+            shown.Enabled = on;
             Editor.Invalidate();
         }
 
@@ -143,9 +164,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             Collect();
 
+            // A blueprint is edited through one of its logic systems, so whose blocks every sentence below
+            // names is said before any of them - see UsingComponent.
+            if (_system.IsBlueprint)
+                components.Add(Using());
+
             // Named, because this screen holds two lists of different things and the rows in them
             // read alike. Sprocket's own nouns rather than a phrase talking round them.
-            components.Add(new HeadingComponent("Triggers"));
+            var triggers = new HeadingComponent("Triggers");
+            triggers.Follows = _system.IsBlueprint;
+            components.Add(triggers);
 
             // The same shape as the ship's own screen: the ways to add something on top, then
             // what is already here. One screen learnt twice - and here it is learnt twice on one
@@ -289,7 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // again on a cadence rather than sixty times a second.
             if (SecondPassed())
             {
-                SequenceSummary.Word(_list.Entries, _sequences, Editor.Runner.Bindings);
+                SequenceSummary.Word(_list.Entries, _sequences, Editor.Runner.Bindings, Editor.StandIn(_system));
                 Mark();
             }
         }
@@ -398,8 +426,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         SequenceFault Fault(Sequence sequence)
         {
+            SystemInstance through = Editor.StandIn(_system);
             return SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, sequence,
-                Editor.Runner.Get(sequence));
+                Editor.Runner.Get(sequence, through), through);
         }
 
         /// <summary>
@@ -429,7 +458,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (moment != null)
             {
                 var when = moment as WhenTrigger;
-                sentence.Slots.Add(new EntitiesSlot(Resolved(moment.Sources),
+                sentence.Slots.Add(new EntitiesSlot(Editor.Blocks(_system, moment.Sources),
                     when != null && when.RequiresAll, Starts(which, 0, asked, Opening.Blocks)));
 
                 sentence.Slots.Add(new EventSlot(Happening(moment), Starts(which, 1, asked, Opening.What)));
@@ -465,7 +494,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         EntityEvent Happening(MomentTrigger moment)
         {
-            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, moment.Sources);
+            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, Editor.Seen(_system, moment.Sources));
             for (var i = 0; i < events.Count; i++)
             {
                 if (events[i].Id == moment.EventId)
@@ -507,13 +536,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 return;
             }
 
-            EntityAction chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, act.Targets));
+            EntityAction chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_system, act.Targets)));
 
             // Each part opens the trigger's picker on the page the action was made on, at its column.
             sentence.DoesLead = SentenceText.Then(sentence.Kind, trigger.Stops, false, act.Sets);
             sentence.Does.Add(new ActionSlot(chosen, Does(which, 0, target, Opening.What)));
 
-            sentence.Does.Add(new EntitiesSlot(Resolved(act.Targets), true, Does(which, 1, target, Opening.Blocks)));
+            sentence.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), true,
+                Does(which, 1, target, Opening.Blocks)));
 
             // What it was given, where it takes anything, so the line says all of what it does.
             // Pressing it reopens the whole choice, which opens on these values.
@@ -537,6 +567,38 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             return Editor.Register(Cmd.OpenTrigger, which, part,
                 delegate { Editor.ChangeTrigger(_system, trigger, opens, false); });
+        }
+
+        /// <summary>Whose blocks the blueprint is being edited through, and the way to choose another.</summary>
+        UsingComponent Using()
+        {
+            SystemInstance shown = Editor.StandIn(_system);
+
+            var line = new UsingComponent();
+            line.Lead = "Using the blocks of";
+            line.Name = shown == null ? "" : SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, shown);
+            line.Command = _system.Instances.Count < 2
+                ? 0
+                : Editor.Register(Cmd.ChooseInstance, _system.Id, delegate { Another(shown); });
+            return line;
+        }
+
+        /// <summary>Asks which of the blueprint's logic systems to edit it through instead.</summary>
+        void Another(SystemInstance shown)
+        {
+            var page = new ChoicePage(Editor, "Using the blocks of");
+            var instances = _system.Instances;
+            for (var i = 0; i < instances.Count; i++)
+            {
+                SystemInstance instance = instances[i];
+                page.Add(SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, instance), instance == shown, delegate
+                {
+                    Editor.Choose(_system, instance);
+                    Editor.Pop();
+                });
+            }
+
+            Editor.Push(page);
         }
 
         void Collect()

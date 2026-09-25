@@ -1,0 +1,62 @@
+window        1920 x 1080
+safe gui area {X:240 Y:0 W:1440 H:1080}
+UI size       {X:1440 Y:1080}
+screen bounds {X:-240 Y:0 W:1920 H:1080}
+on screen     Automation for Test Rig
+
+000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
+001  SetClip    {X:259 Y:118 W:1402 H:836}
+002  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ New logic system…"
+003  Text       at {X:437.7933 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load blueprint"
+004  Sprite     Sprocket_Fill         {X:259 Y:160 W:1390 H:1}  #5B737BFF
+005  Sprite     Sprocket_Fill         {X:259 Y:171 W:1390 H:61}  #29363EFF
+006  Text       at {X:310 Y:189.997} scale 0.64  #DCF5FDFF  "Airlock"
+007  Sprite     Sprocket_Fill         {X:278 Y:195 W:13 H:13}  #5F7278FF
+008  Sprite     Sprocket_Fill         {X:1396 Y:186 W:117 H:1}  #5F7278FF
+009  Sprite     Sprocket_Fill         {X:1396 Y:216 W:117 H:1}  #5F7278FF
+010  Sprite     Sprocket_Fill         {X:1396 Y:186 W:1 H:31}  #5F7278FF
+011  Sprite     Sprocket_Fill         {X:1512 Y:186 W:1 H:31}  #5F7278FF
+012  Text       at {X:1408.723 Y:191.292} scale 0.57  #A2C3CDFF  "Make blueprint…"
+013  Sprite     Sprocket_Fill         {X:1523 Y:185 W:107 H:1}  #85A1A9FF
+014  Sprite     Sprocket_Fill         {X:1523 Y:217 W:107 H:1}  #85A1A9FF
+015  Sprite     Sprocket_Fill         {X:1523 Y:185 W:1 H:33}  #85A1A9FF
+016  Sprite     Sprocket_Fill         {X:1629 Y:185 W:1 H:33}  #85A1A9FF
+017  Sprite     Sprocket_Fill         {X:1524 Y:186 W:105 H:31}  #060A0CFF
+018  Sprite     Sprocket_Fill         {X:1524 Y:186 W:52 H:31}  #1B2C33FF
+019  Text       at {X:1540.697 Y:191.292} scale 0.57  #DCF5FDFF  "ON"
+020  Text       at {X:1592.643 Y:191.292} scale 0.57  #85A1A9FF  "OFF"
+021  ClearClip  
+022  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
+023  Text       at {X:273.4433 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
+024  SetClip    {X:411 Y:55 W:75 H:33}
+025  Text       at {X:411.1767 Y:54.71198} scale 0.9  #DCF5FDFF  "Test Rig"
+026  Text       at {X:477.7367 Y:59.87884} scale 0.64  #85A1A9FF  "p"
+027  ClearClip  
+028  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
+029  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
+030  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
+031  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+032  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+033  Sprite     Sprocket_Fill         {X:684 Y:451 W:552 H:179}  #3C4C52FF
+034  Sprite     Sprocket_Fill         {X:684 Y:451 W:552 H:1}  #5B737BFF
+035  Sprite     Sprocket_Fill         {X:684 Y:628 W:552 H:1}  #5B737BFF
+036  Sprite     Sprocket_Fill         {X:684 Y:451 W:1 H:179}  #5B737BFF
+037  Sprite     Sprocket_Fill         {X:1235 Y:451 W:1 H:179}  #5B737BFF
+038  Text       at {X:700 Y:460.715} scale 0.5  #A2C3CDFF  "Make blueprint"
+039  Sprite     Sprocket_Fill         {X:865 Y:489 W:355 H:37}  #141B20FF
+040  Sprite     Sprocket_Fill         {X:865 Y:489 W:355 H:1}  #5B737BFF
+041  Sprite     Sprocket_Fill         {X:865 Y:525 W:355 H:1}  #5B737BFF
+042  Sprite     Sprocket_Fill         {X:865 Y:489 W:1 H:37}  #5B737BFF
+043  Sprite     Sprocket_Fill         {X:1219 Y:489 W:1 H:37}  #5B737BFF
+044  Text       at {X:877.7433 Y:497.015} scale 0.57  #DCF5FDFF  "Airlock"
+045  Sprite     Sprocket_Fill         {X:878 Y:497 W:2 H:21}  #DCF5FDFF
+046  Text       at {X:700 Y:497.015} scale 0.57  #85A1A9FF  "What is the blueprint called?"
+047  Sprite     Sprocket_Fill         {X:865 Y:536 W:355 H:37}  #141B20FF
+048  Sprite     Sprocket_Fill         {X:865 Y:536 W:355 H:1}  #5B737BFF
+049  Sprite     Sprocket_Fill         {X:865 Y:572 W:355 H:1}  #5B737BFF
+050  Sprite     Sprocket_Fill         {X:865 Y:536 W:1 H:37}  #5B737BFF
+051  Sprite     Sprocket_Fill         {X:1219 Y:536 W:1 H:37}  #5B737BFF
+052  Text       at {X:700 Y:543.705} scale 0.57  #85A1A9FF  "What is this one called?"
+053  Text       at {X:1070.503 Y:590.395} scale 0.57  #A2C3CDFF  "Cancel"
+054  Sprite     Sprocket_Fill         {X:1133 Y:583 W:87 H:37}  #374851FF
+055  Text       at {X:1151.55 Y:590.395} scale 0.57  #85A1A9FF  "Continue"

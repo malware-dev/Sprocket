@@ -43,7 +43,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Namespace = "";
             Name = "";
             Annotation = "";
-            Enabled = true;
         }
 
         /// <summary>
@@ -122,20 +121,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// anything, in any language - is the host's word and has no bearing on this one.
         /// </remarks>
         public string Annotation { get; set; }
-
-        /// <summary>
-        /// Whether this system may run at all.
-        /// </summary>
-        /// <remarks>
-        /// Separate from each sequence's own switch rather than a shortcut for setting them
-        /// all, so switching an airlock off to rewire it and switching it back on afterwards
-        /// leaves the one sequence somebody had deliberately parked still parked.
-        ///
-        /// Rewiring means stopping the system, not stopping three sequences one at a time -
-        /// and a half-stopped airlock, with the inner door's rule off and the outer door's
-        /// rule still live, is worse than either state.
-        /// </remarks>
-        public bool Enabled { get; set; }
 
         public IReadOnlyList<Sequence> Sequences => _sequences;
 
@@ -295,6 +280,41 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// somebody adds a step. The same thing acted on in five places is one part, listed once, so
         /// whoever fits this system answers "which is the inner door" exactly once.
         /// </remarks>
+        /// <summary>
+        /// The part <paramref name="instance" /> fills with <paramref name="declared" /> and nothing
+        /// else, made where there is none.
+        /// </summary>
+        /// <remarks>
+        /// A new part is named for the kind of block, numbered the way the game numbers blocks - Door,
+        /// Door 2 - and expects that type. The name is given once and kept: deriving it again would let
+        /// renaming a block rewrite the system's own vocabulary.
+        /// </remarks>
+        /// <param name="instance">The one of the system the block was picked through.</param>
+        /// <param name="declared">The block, as the construct declares it.</param>
+        /// <param name="kind">The block's kind by name, as a person reads it.</param>
+        /// <param name="type">The block's type, as a part expects one.</param>
+        public string Take(SystemInstance instance, string declared, string kind, string type)
+        {
+            for (var i = 0; i < _parts.Count; i++)
+            {
+                var filled = instance.FilledWith(_parts[i].Id);
+                if (filled != null && filled.Count == 1 && filled[0] == declared)
+                    return _parts[i].Id;
+            }
+
+            var name = kind;
+            for (var n = 2; FindPart(name) != null; n++)
+                name = kind + " " + n;
+
+            var part = PartFor(name);
+            part.Picked = true;
+            if (type.Length > 0)
+                part.Expects.Add(type);
+
+            instance.Fill(name, new[] { declared });
+            return name;
+        }
+
         public void Acted(List<string> into)
         {
             into.Clear();
@@ -331,6 +351,29 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The instances on this ship, which is none until the first one is made.</summary>
         public IReadOnlyList<SystemInstance> Instances => _instances;
 
+        /// <summary>The first of the instances, or null where there are none.</summary>
+        public SystemInstance First => _instances.Count > 0 ? _instances[0] : null;
+
+        /// <summary>Whether this is a blueprint, with its instances made from it, rather than one logic system.</summary>
+        /// <remarks>
+        /// Told by the instances having names. One logic system is its only instance and goes by the
+        /// system's own name; making a blueprint of it names the blueprint and that first instance, and
+        /// every instance added afterwards is named as it is made.
+        /// </remarks>
+        public bool IsBlueprint
+        {
+            get
+            {
+                for (var i = 0; i < _instances.Count; i++)
+                {
+                    if (_instances[i].HasName)
+                        return true;
+                }
+
+                return false;
+            }
+        }
+
         /// <summary>
         /// Adds another of this system, named after the system and its number.
         /// </summary>
@@ -352,6 +395,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _instances.Add(instance);
             Reshape();
             return instance;
+        }
+
+        /// <summary>The instance of this system called <paramref name="name" />, or null.</summary>
+        public SystemInstance FindInstance(string name)
+        {
+            for (var i = 0; i < _instances.Count; i++)
+            {
+                if (string.Equals(_instances[i].Name, name, StringComparison.Ordinal))
+                    return _instances[i];
+            }
+
+            return null;
         }
 
         /// <summary>The one of this system carrying a number, or null.</summary>

@@ -97,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Display
             var row = new Row();
             row.Name = system.Name;
             row.Instances = system.Instances.Count;
-            row.Parked = !system.Enabled;
+            row.Parked = Off(system);
             row.Status = SequenceStatus.Off;
 
             var sequences = system.Sequences;
@@ -109,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Display
                 if (Louder(SequenceSummary.Status(sequence, state), row.Status))
                     row.Status = SequenceSummary.Status(sequence, state);
 
-                var fault = SequenceSummary.Fault(world, runner.Bindings, sequence, state);
+                var fault = SequenceSummary.Fault(world, runner.Bindings, sequence, state, system.First);
                 if (!fault.Exists)
                     continue;
 
@@ -136,6 +136,19 @@ namespace Sprocket.Host.SpaceEngineers.Display
         /// and anything at all beats a rule somebody parked - which is the least interesting fact about
         /// a system where the others are running.
         /// </remarks>
+        /// <summary>Whether every one of <paramref name="system" /> is switched off.</summary>
+        static bool Off(AutomationSystem system)
+        {
+            var instances = system.Instances;
+            for (var i = 0; i < instances.Count; i++)
+            {
+                if (instances[i].Enabled)
+                    return false;
+            }
+
+            return instances.Count > 0;
+        }
+
         static bool Louder(SequenceStatus now, SequenceStatus than)
         {
             return Rank(now) > Rank(than);

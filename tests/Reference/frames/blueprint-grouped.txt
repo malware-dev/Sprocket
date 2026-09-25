@@ -1,0 +1,56 @@
+window        1920 x 1080
+safe gui area {X:240 Y:0 W:1440 H:1080}
+UI size       {X:1440 Y:1080}
+screen bounds {X:-240 Y:0 W:1920 H:1080}
+on screen     Automation for Test Rig
+
+000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
+001  SetClip    {X:259 Y:118 W:1402 H:836}
+002  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ New logic system…"
+003  Text       at {X:437.7933 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load blueprint"
+004  Sprite     Sprocket_Fill         {X:259 Y:160 W:1390 H:1}  #5B737BFF
+005  Text       at {X:262 Y:203.292} scale 0.57  #85A1A9FF  "Made from "
+006  Text       at {X:325.86 Y:203.292} scale 0.57  #DCF5FDFF  "Airlock"
+007  Text       at {X:363.1567 Y:203.292} scale 0.57  #85A1A9FF  " blueprint"
+008  Sprite     Sprocket_Fill         {X:259 Y:224 W:1390 H:61}  #29363EFF
+009  Text       at {X:345 Y:243.087} scale 0.64  #DCF5FDFF  "Main"
+010  Sprite     Sprocket_Fill         {X:313 Y:248 W:13 H:13}  #5F7278FF
+011  Sprite     Sprocket_Fill         {X:1488 Y:238 W:107 H:1}  #85A1A9FF
+012  Sprite     Sprocket_Fill         {X:1488 Y:270 W:107 H:1}  #85A1A9FF
+013  Sprite     Sprocket_Fill         {X:1488 Y:238 W:1 H:33}  #85A1A9FF
+014  Sprite     Sprocket_Fill         {X:1594 Y:238 W:1 H:33}  #85A1A9FF
+015  Sprite     Sprocket_Fill         {X:1489 Y:239 W:105 H:31}  #060A0CFF
+016  Sprite     Sprocket_Fill         {X:1489 Y:239 W:52 H:31}  #1B2C33FF
+017  Text       at {X:1505.697 Y:244.382} scale 0.57  #DCF5FDFF  "ON"
+018  Text       at {X:1557.643 Y:244.382} scale 0.57  #85A1A9FF  "OFF"
+019  Sprite     Sprocket_Fill         {X:259 Y:291 W:1390 H:61}  #29363EFF
+020  Text       at {X:345 Y:310.177} scale 0.64  #DCF5FDFF  "Cargo"
+021  Sprite     Sprocket_Fill         {X:313 Y:316 W:13 H:13}  #5F7278FF
+022  Sprite     Sprocket_Fill         {X:1488 Y:305 W:107 H:1}  #85A1A9FF
+023  Sprite     Sprocket_Fill         {X:1488 Y:338 W:107 H:1}  #85A1A9FF
+024  Sprite     Sprocket_Fill         {X:1488 Y:305 W:1 H:33}  #85A1A9FF
+025  Sprite     Sprocket_Fill         {X:1594 Y:305 W:1 H:33}  #85A1A9FF
+026  Sprite     Sprocket_Fill         {X:1489 Y:306 W:105 H:31}  #060A0CFF
+027  Sprite     Sprocket_Fill         {X:1489 Y:306 W:52 H:31}  #1B2C33FF
+028  Text       at {X:1505.697 Y:311.472} scale 0.57  #DCF5FDFF  "ON"
+029  Text       at {X:1557.643 Y:311.472} scale 0.57  #85A1A9FF  "OFF"
+030  Text       at {X:345 Y:372.562} scale 0.57  #A2C3CDFF  "+ add another Airlock…"
+031  ClearClip  
+032  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
+033  Text       at {X:273.4433 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
+034  SetClip    {X:411 Y:55 W:75 H:33}
+035  Text       at {X:411.1767 Y:54.71198} scale 0.9  #DCF5FDFF  "Test Rig"
+036  Text       at {X:477.7367 Y:59.87884} scale 0.64  #85A1A9FF  "p"
+037  ClearClip  
+038  Sprite     Sprocket_Fill         {X:259 Y:61 W:8 H:16}  #29363EFF
+039  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
+040  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
+041  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
+042  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+043  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+044  Sprite     Sprocket_Fill         {X:275 Y:78 W:112 H:33}  #1B242AFF
+045  Sprite     Sprocket_Fill         {X:275 Y:78 W:112 H:1}  #5B737BFF
+046  Sprite     Sprocket_Fill         {X:275 Y:110 W:112 H:1}  #5B737BFF
+047  Sprite     Sprocket_Fill         {X:275 Y:78 W:1 H:33}  #5B737BFF
+048  Sprite     Sprocket_Fill         {X:386 Y:78 W:1 H:33}  #5B737BFF
+049  Text       at {X:287.8 Y:84} scale 0.57  #DCF5FDFF  "Close the editor"

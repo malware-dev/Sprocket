@@ -115,6 +115,25 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// it goes on pointing at somebody else's door until it is told better, which is
         /// visible, rather than silently doing nothing.
         /// </remarks>
+        /// <summary>
+        /// What <paramref name="names" /> come to as <paramref name="instance" /> fills them, or the names
+        /// as they are where there is no instance.
+        /// </summary>
+        public static List<string> Through(SystemInstance instance, IList<string> names)
+        {
+            var seen = new List<string>();
+            if (instance != null)
+            {
+                instance.Resolve(names, seen);
+                return seen;
+            }
+
+            for (var i = 0; i < names.Count; i++)
+                seen.Add(names[i]);
+
+            return seen;
+        }
+
         public void Resolve(IList<string> slots, List<string> into)
         {
             for (var i = 0; i < slots.Count; i++)

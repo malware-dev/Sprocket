@@ -55,24 +55,21 @@ public class StateTests
         var after = Ship();
         Assert.Equal("", StateText.Load(text, after, null));
 
-        Assert.True(after.Systems[0].Enabled);
         Assert.True(after.Systems[0].Sequences[0].Enabled);
         Assert.False(after.Systems[0].Sequences[1].Enabled);
         Assert.True(after.Systems[0].Instances[0].Enabled);
         Assert.False(after.Systems[0].Instances[1].Enabled);
     }
 
+    /// <summary>A whole system switched off by its identity alone is every one of it switched off.</summary>
     [Fact]
-    public void AWholeSystemIsSwitchedOffByItsIdentityAlone()
+    public void AWholeSystemSwitchedOffIsEveryOneOfItOff()
     {
-        var before = Ship();
-        before.Systems[0].Enabled = false;
-
-        Assert.Equal("off \"" + Airlock + "\"\n", StateText.Save(before, null));
-
         var after = Ship();
-        Assert.Equal("", StateText.Load(StateText.Save(before, null), after, null));
-        Assert.False(after.Systems[0].Enabled);
+        Assert.Equal("", StateText.Load("off \"" + Airlock + "\"\n", after, null));
+
+        Assert.All(after.Systems[0].Instances, instance => Assert.False(instance.Enabled));
+        Assert.True(after.Systems[0].Sequences[0].Enabled);
     }
 
     /// <summary>
@@ -91,7 +88,6 @@ public class StateTests
         var after = Ship();
         Assert.Equal("", StateText.Load(line + "\n", after, null));
 
-        Assert.True(after.Systems[0].Enabled);
         Assert.True(after.Systems[0].Sequences[1].Enabled);
         Assert.True(after.Systems[0].Instances[1].Enabled);
     }
@@ -145,7 +141,6 @@ public class StateTests
     public void TheProgramSaysNothingAboutSwitches()
     {
         var program = Ship();
-        program.Systems[0].Enabled = false;
         program.Systems[0].Sequences[0].Enabled = false;
         program.Systems[0].Instances[0].Enabled = false;
 
@@ -157,7 +152,6 @@ public class StateTests
         // And a program read without its switches is a construct with everything running.
         var after = new Automation();
         Assert.Equal("", ProgramText.Load(text, after, new Values()));
-        Assert.True(after.Systems[0].Enabled);
         Assert.True(after.Systems[0].Sequences[0].Enabled);
         Assert.True(after.Systems[0].Instances[0].Enabled);
     }

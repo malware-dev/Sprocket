@@ -354,8 +354,9 @@ One system, set up on real blocks. Two airlocks at opposite ends of a ship are t
 instances of one airlock system: they share every sequence, and fixing the system fixes
 both. Every system has at least one, made with it.
 
-The player never meets the word. On screen an instance is called *Airlock 1* until they
-rename it, and making another one is *add another*.
+The player never meets the word. On screen a system with one instance is a *logic system*,
+named with the system's own name. Making a *blueprint* of it names the blueprint and that
+instance, and every instance added after is named as it is made: *add another Airlock*.
 
 ### Slot
 

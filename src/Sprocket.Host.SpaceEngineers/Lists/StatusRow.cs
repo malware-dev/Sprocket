@@ -40,6 +40,9 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         readonly Label _problem = Widgets.Label("", Palette.Problem, Lettering.Tiny);
         readonly Switch _switch = new Switch(Lettering.Small);
 
+        /// <summary>The row's one button in words, left of the switch. Absent where the row has none.</summary>
+        readonly Label _button = Widgets.Quiet("", Lettering.Small);
+
         /// <summary>Another of what this row is. Absent on rows where that means nothing.</summary>
         readonly Glyph _duplicate = Widgets.Centred(Symbols.Duplicate, Palette.Faint);
 
@@ -91,12 +94,19 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             // that acts on the machine rather than on the program.
             _tools.Children.Add(_run);
             _tools.Children.Add(_duplicate);
+            _tools.Children.Add(_button);
             _tools.Children.Add(_switch);
             _tools.Children.Add(_delete);
 
             // The red the per-step crosses use, because it is the same act: what this is on is gone
             // when it is pressed, and nothing else on a row is.
             _delete.Highlight = Palette.ProblemWash;
+
+            // Edged, because the row under it is already a panel: a fill would vanish into it, and the
+            // edge is how the game's own controls say they can be pressed.
+            _button.Edge = Palette.Dim;
+            _button.Highlight = Palette.PanelHot;
+
             _line.Right = _tools;
         }
 
@@ -114,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             // heading that answered to a press would be a promise it cannot keep. So it is not drawn as
             // a panel either: a panel says "press me", and the only way to find out it was inert would be
             // to press it. The light and the switch stay, because those are real.
-            _line.Press = Deed.Sends(entry.Command);
+            _line.Press = Deed.Asks(entry.Command, entry.Question);
 
             bool pressable = entry.Command != 0;
 
@@ -143,7 +153,13 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                     ? Palette.LiveWash
                     : entry.Parked
                         ? Palette.NoticeWash
-                        : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
+                        : entry.Chosen
+                            ? Palette.SlotFill
+                            : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
+
+            // Edged as well as filled where it is the one the screen is about, so being chosen still
+            // shows on a row that is washed for something else.
+            _line.Edge = entry.Chosen ? Palette.Accent : Palette.None;
 
             if (!pressable)
                 _line.Highlight = Palette.None;
@@ -156,7 +172,9 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             // The same plus the start block uses, for the same reason: this row adds something. Core marks
             // it as an action and leaves the drawing to the row.
-            _summary.Text = entry.IsAction ? StartView.Plus + entry.Summary : entry.Summary;
+            _summary.Text = entry.IsAction
+                ? StartView.Plus + entry.Summary + (entry.Question.Length > 0 ? "…" : "")
+                : entry.Summary;
             _summary.Color = entry.IsAction ? Palette.Muted : Palette.Ink;
             _summary.Scale = entry.IsAction ? Lettering.Small : Lettering.Body;
 
@@ -266,6 +284,14 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             _duplicate.Press = Deed.Sends(entry.DuplicateCommand);
             _duplicate.Highlight = copies ? Palette.PanelHot : Palette.None;
             _duplicate.Tip = copies ? entry.DuplicateText : null;
+
+            var offers = entry.ButtonCommand != 0;
+            _button.Collapsed = !offers;
+            _button.Press = entry.ButtonFields.Count > 0
+                ? Deed.Values(entry.ButtonCommand, entry.ButtonQuestion, entry.ButtonFields, entry.ButtonFilled)
+                : Deed.Asks(entry.ButtonCommand, entry.ButtonQuestion);
+            if (offers)
+                _button.Text = entry.ButtonText;
 
             var bins = entry.DeleteCommand != 0;
             _delete.Collapsed = !bins;

@@ -36,12 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var system = systems[i];
                 var identity = system.Identity.ToString("D");
 
-                if (!system.Enabled)
-                {
-                    pen.Start(Keyword.Off).Text(identity);
-                    pen.End();
-                }
-
                 var sequences = system.Sequences;
                 for (var s = 0; s < sequences.Count; s++)
                 {
@@ -269,9 +263,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system == null)
                 return;
 
+            // A system switched off as a whole, which is every one of it switched off.
             if (line.Count == 1)
             {
-                system.Enabled = false;
+                for (var i = 0; i < system.Instances.Count; i++)
+                    system.Instances[i].Enabled = false;
+
                 return;
             }
 

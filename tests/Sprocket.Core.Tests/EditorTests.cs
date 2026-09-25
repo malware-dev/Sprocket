@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -265,7 +266,7 @@ public class EditorTests
         // And the same question about a door, which the game announces nothing about.
         ship.Editor.GoToRoot();
         ship.Tick();
-        ship.Editor.PressRow(1);
+        ship.Editor.PressRow(0);
         ship.Editor.PressStart("When…");
         ship.Editor.PressBlock("Inner Door");
         ship.Editor.PressChoice("finishes closing");
@@ -312,6 +313,208 @@ public class EditorTests
         Assert.Single(ship.Automation.Systems[0].Triggers);
     }
 
+    /// <summary>
+    /// A block picked for a sentence becomes a part of the system, which the first of it fills with
+    /// that block, so another one of the system can fill it with its own.
+    /// </summary>
+    [Fact]
+    public void APickedBlockIsAPartTheFirstOneFills()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("Switch on");
+        editor.PressPrimary();
+        ship.Tick();
+
+        var system = ship.Automation.Systems[0];
+        var step = Assert.IsType<Act>(ship.Automation.Sequences[0].Steps[0]);
+        var trigger = Assert.IsAssignableFrom<MomentTrigger>(Assert.Single(system.Triggers));
+
+        foreach (var (part, block) in new[] { (step.Targets[0], "Airlock Light"), (trigger.Sources[0], "Airlock Button") })
+        {
+            Assert.NotNull(system.FindPart(part));
+            var filled = Assert.Single(system.First!.FilledWith(part));
+            Assert.Equal(block, ship.Runner.Bindings.Entity(filled)!.Name);
+        }
+    }
+
+    /// <summary>The same block picked again is the same part, not a second one filled by the same block.</summary>
+    [Fact]
+    public void PickingTheSameBlockAgainIsTheSamePart()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        for (var i = 0; i < 2; i++)
+        {
+            editor.PressAdd("do something");
+            editor.PressBlock("Airlock Light");
+            editor.PressChoice("Switch on");
+            editor.PressPrimary();
+            ship.Tick();
+        }
+
+        var steps = ship.Automation.Sequences[0].Steps.OfType<Act>().ToList();
+        Assert.Equal(2, steps.Count);
+        Assert.Equal(steps[0].Targets[0], steps[1].Targets[0]);
+        Assert.Equal(2, ship.Automation.Systems[0].Parts.Count);
+    }
+
+    /// <summary>
+    /// Making a blueprint names it and the logic system it was made of, opens it, and on the construct's
+    /// own list that logic system then stands under it.
+    /// </summary>
+    [Fact]
+    public void MakingABlueprintNamesItAndTheFirstMadeFromIt()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+        var row = OneLogicSystem(ship);
+
+        Assert.Equal("Make blueprint…", row.ButtonText);
+        Assert.Equal(2, row.ButtonFields.Count);
+        Assert.Equal("Airlock", row.ButtonFilled[0]);
+
+        editor.SetText(row.ButtonCommand, "\"Airlock\" \"Main airlock\"");
+        ship.Tick();
+
+        var system = ship.Automation.Systems[0];
+        Assert.True(system.IsBlueprint);
+        Assert.Equal("Airlock", system.Name);
+        Assert.Equal("Main airlock", system.First!.Name);
+        Assert.NotNull(editor.Component<BlueprintComponent>());
+
+        editor.GoToRoot();
+        ship.Tick();
+
+        var heading = editor.Screen.Components.OfType<Sprocket.Host.SpaceEngineers.Screen.HeadingComponent>().Single();
+        Assert.Equal("Airlock", heading.Name);
+        Assert.Equal("Main airlock", editor.Rows()[0].Summary);
+        Assert.True(editor.Rows()[1].IsAction);
+    }
+
+    /// <summary>A blueprint cannot take a name another system has, though it may keep its own.</summary>
+    [Fact]
+    public void ABlueprintCannotTakeAnotherSystemsName()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+        OneLogicSystem(ship);
+
+        editor.NewSystem("Hangar");
+        editor.GoToRoot();
+        ship.Tick();
+
+        var airlock = editor.Rows().First(r => r.Summary == "Airlock");
+        Assert.False(editor.Accepts(airlock.ButtonCommand, "\"Hangar\" \"Main airlock\""));
+        Assert.True(editor.Accepts(airlock.ButtonCommand, "\"Airlock\" \"Main airlock\""));
+    }
+
+    /// <summary>
+    /// Another logic system made from a blueprint is named as it is made, and a name one of them
+    /// already has is refused.
+    /// </summary>
+    [Fact]
+    public void AnotherFromABlueprintIsNamedAsItIsMade()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+        editor.SetText(OneLogicSystem(ship).ButtonCommand, "\"Airlock\" \"Main airlock\"");
+        editor.GoToRoot();
+        ship.Tick();
+
+        var add = editor.Rows().Last();
+        Assert.True(add.IsAction);
+        Assert.False(editor.Accepts(add.Command, "Main airlock"));
+
+        editor.SetText(add.Command, "Cargo airlock");
+        ship.Tick();
+
+        // Opened on the blueprint through the new one, which has blocks to be given.
+        Assert.True(editor.Component<BlueprintComponent>().Members[1].Chosen);
+
+        var system = ship.Automation.Systems[0];
+        Assert.Equal(2, system.Instances.Count);
+        Assert.Equal("Cargo airlock", system.Instances[1].Name);
+
+        editor.GoToRoot();
+        ship.Tick();
+        Assert.Equal("Cargo airlock", editor.Rows()[1].Summary);
+    }
+
+    /// <summary>
+    /// A blueprint is edited through one of the logic systems made from it, and its sentences show that
+    /// one's blocks: another shows nothing until its parts are filled, and then shows its own.
+    /// </summary>
+    [Fact]
+    public void ABlueprintIsEditedThroughTheBlocksOfOneMadeFromIt()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+        editor.SetText(OneLogicSystem(ship).ButtonCommand, "\"Airlock\" \"Main\"");
+        ship.Tick();
+
+        // Straight onto the blueprint, through the one it was made of.
+        var blueprint = editor.Component<BlueprintComponent>();
+        Assert.True(blueprint.Members[0].Chosen);
+        Assert.Single(Assert.Single(blueprint.Parts).Blocks);
+
+        editor.SetText(blueprint.Members.Last().Command, "Cargo");
+        ship.Tick();
+
+        blueprint = editor.Component<BlueprintComponent>();
+        Assert.True(blueprint.Members[1].Chosen);
+        Assert.Empty(blueprint.Parts[0].Blocks);
+
+        // Through the new one, the trigger names nothing yet.
+        editor.Invoke(blueprint.Chosen!.ButtonCommand);
+        ship.Tick();
+        Assert.Equal("Cargo", editor.Component<UsingComponent>().Name);
+        Assert.Empty(Assert.IsType<EntitiesSlot>(editor.Triggers()[0].Slots[0]).Entities);
+
+        // Filled with a button of its own, it names that one.
+        editor.Back();
+        ship.Tick();
+        editor.Invoke(editor.Component<BlueprintComponent>().Parts[0].Command);
+        ship.Tick();
+        editor.PressChoice("Airlock Button");
+        ship.Tick();
+
+        Assert.Single(editor.Component<BlueprintComponent>().Parts[0].Blocks);
+        var cargo = ship.Automation.Systems[0].FindInstance("Cargo")!;
+        Assert.Single(cargo.Filled);
+    }
+
+    /// <summary>A part is renamed on the blueprint, and the name is its annotation's label.</summary>
+    [Fact]
+    public void APartIsRenamedOnTheBlueprint()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+        editor.SetText(OneLogicSystem(ship).ButtonCommand, "\"Airlock\" \"Main\"");
+        ship.Tick();
+
+        editor.SetText(editor.Component<BlueprintComponent>().Parts[0].RenameCommand, "Call button");
+        ship.Tick();
+
+        Assert.Equal("Call button", editor.Component<BlueprintComponent>().Parts[0].Name);
+        Assert.Equal("Call button", Assert.Single(ship.Automation.Systems[0].Parts).Label);
+    }
+
+    /// <summary>A logic system with a trigger, and its row on the construct's own list.</summary>
+    static StatusEntry OneLogicSystem(Ship ship)
+    {
+        StartOnTheButton(ship.Editor);
+        ship.Editor.GoToRoot();
+        ship.Tick();
+        return ship.Editor.Rows()[0];
+    }
+
     static void StartOnTheButton(SprocketEditor editor)
     {
         editor.NewSystem("Airlock");
@@ -340,16 +543,16 @@ public class EditorTests
         ship.Tick();
 
         var sequence = ship.Automation.Sequences[0];
-        Assert.True(sequence.CanRun);
+        Assert.True(sequence.CanRun(sequence.System.First));
 
         // Deliberately park this one sequence.
         editor.SetToggle(editor.Sentence().ToggleCommand, false);
         ship.Tick();
-        Assert.False(sequence.CanRun);
+        Assert.False(sequence.CanRun(sequence.System.First));
 
         editor.SwitchOn();
         ship.Tick();
-        Assert.True(sequence.CanRun);
+        Assert.True(sequence.CanRun(sequence.System.First));
 
         // Now park the whole system from its own screen.
         editor.Back();
@@ -358,12 +561,12 @@ public class EditorTests
 
         editor.SetToggle(editor.Screen.SwitchCommand, false);
         ship.Tick();
-        Assert.False(sequence.CanRun);
+        Assert.False(sequence.CanRun(sequence.System.First));
         Assert.True(sequence.Enabled);
 
         editor.SetToggle(editor.Screen.SwitchCommand, true);
         ship.Tick();
-        Assert.True(sequence.CanRun);
+        Assert.True(sequence.CanRun(sequence.System.First));
     }
 
     /// <summary>
@@ -484,7 +687,8 @@ public class EditorTests
         ship.Tick();
         Assert.Equal(2, sequence.Steps.Count);
         var acted = Assert.IsType<Act>(sequence.Steps[0]);
-        Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(acted.Targets[0])!.Name);
+        var block = SystemInstance.Through(sequence.System.First, acted.Targets)[0];
+        Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(block)!.Name);
 
         // Walk back, then do something different: the road not taken is gone, because putting
         // a step back at an index that now means something else is worse than not offering.
@@ -688,7 +892,7 @@ public class EditorTests
 
         var system = ship.Automation.Systems[0];
         var sequence = ship.Automation.Sequences[0];
-        Assert.True(sequence.CanRun);
+        Assert.True(sequence.CanRun(sequence.System.First));
 
         editor.Back();
         ship.Tick();
@@ -713,8 +917,8 @@ public class EditorTests
         editor.SetToggle(heading.SwitchCommand, false);
         ship.Tick();
 
-        Assert.False(system.Enabled);
-        Assert.False(sequence.CanRun);
+        Assert.False(system.First!.Enabled);
+        Assert.False(sequence.CanRun(sequence.System.First));
         Assert.True(sequence.Enabled);
         Assert.False(editor.Rows()
             .First(e => e.Depth == 0 && !e.IsAction).SwitchIsOn);
@@ -877,8 +1081,8 @@ public class EditorTests
         ship.Editor.GoToRoot();
         ship.Tick();
 
-        // Row 0 is the system's heading, which is inert; row 1 is the one of it that opens.
-        ship.Editor.PressRow(1);
+        // Row 0 is the logic system, which opens.
+        ship.Editor.PressRow(0);
         ship.Editor.PressStart("When…");
         ship.Editor.PressBlock("Airlock Button");
         ship.Editor.PressChoice("is pressed");
@@ -1159,7 +1363,7 @@ public class EditorTests
         // Both ways in are offered. How a target asks for the name is its own business, so
         // there is nothing here about panels or dialogs.
         var start = ship.Editor.Component<StartComponent>();
-        Assert.Equal("New system, Load system", string.Join(", ", start.Options.Select(o => o.Label)));
+        Assert.Equal("New logic system, Load blueprint", string.Join(", ", start.Options.Select(o => o.Label)));
         Assert.Equal("What is it?", start.Options[0].Question);
     }
 

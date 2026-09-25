@@ -129,7 +129,7 @@ public class OverviewTests
         Assert.Equal(1, overview.Running);
     }
 
-    /// <summary>A system somebody switched off says so, and is not counted as anything else.</summary>
+    /// <summary>A system with every one of it switched off says so, and is not counted as anything else.</summary>
     [Fact]
     public void AParkedSystemSaysSo()
     {
@@ -137,7 +137,8 @@ public class OverviewTests
         AutomationSystem airlock = System(ship, "Airlock", 1, 2);
         ship.Tick(3);
 
-        airlock.Enabled = false;
+        foreach (var instance in airlock.Instances)
+            instance.Enabled = false;
         ship.Tick();
 
         var overview = new Overview();

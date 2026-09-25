@@ -50,7 +50,7 @@ public class ComponentSmokeTests
 
         // A question with a fixed set of answers. The starters used to be one of these and are not
         // any more, so the walk reaches for the loader instead.
-        editor.PressStart("Load system");
+        editor.PressStart("Load blueprint");
         Record(seen, screen);
 
         Assert.Contains(nameof(PickComponent), seen);

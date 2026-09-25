@@ -261,10 +261,10 @@ public class InstanceTests
     }
 
     /// <summary>
-    /// Three switches, and none of them overwrites another.
+    /// Two switches, and neither overwrites the other.
     /// </summary>
     [Fact]
-    public void TheThreeSwitchesAreIndependent()
+    public void TheTwoSwitchesAreIndependent()
     {
         var ship = Build();
         var port = ship.Airlock.AddInstance();
@@ -274,10 +274,8 @@ public class InstanceTests
         var front = ship.Airlock.Instances[0];
 
         port.Enabled = false;
-        ship.Airlock.Enabled = false;
-        ship.Airlock.Enabled = true;
 
-        // Starting the system again leaves the deliberately-parked one parked.
+        // Parking one leaves the other and the sequence as they were.
         Assert.False(port.Enabled);
         Assert.True(front.Enabled);
         Assert.True(cycle.Enabled);

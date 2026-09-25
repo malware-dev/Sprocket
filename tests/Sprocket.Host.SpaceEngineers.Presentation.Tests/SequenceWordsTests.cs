@@ -17,7 +17,7 @@ public class SequenceWordsTests
     [Fact]
     public void ATriggerTheShipAnswersSaysThatItIsOne()
     {
-        Assert.Equal("When something on this ship says so", SequenceText.Trigger(null!, new RequiredTrigger()));
+        Assert.Equal("When something on this ship says so", SequenceText.Trigger(null!, new RequiredTrigger(), null));
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class SequenceWordsTests
         var caller = program.AddSequence(system);
         caller.Steps.Add(new Run(called.Number));
 
-        Assert.Equal("run Let me out", SequenceText.Doing(null!, caller));
+        Assert.Equal("run Let me out", SequenceText.Doing(null!, caller, null));
     }
 
     [Fact]
@@ -45,6 +45,6 @@ public class SequenceWordsTests
         var caller = program.AddSequence(system);
         caller.Steps.Add(new Run(called.Number));
 
-        Assert.Equal("run Sequence " + called.Number, SequenceText.Doing(null!, caller));
+        Assert.Equal("run Sequence " + called.Number, SequenceText.Doing(null!, caller, null));
     }
 }

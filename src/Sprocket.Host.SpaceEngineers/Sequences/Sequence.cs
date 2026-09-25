@@ -87,14 +87,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public AutomationSystem System { get; internal set; }
 
         /// <summary>
-        /// Whether it may actually run, which needs its own switch and its system's.
+        /// Whether it may run on <paramref name="instance" />, which needs its own switch and that one's.
         /// </summary>
         /// <remarks>
-        /// The two are asked separately everywhere else, because "I parked this one rule" and
-        /// "I am rewiring the whole airlock" are different intentions and each has to survive
-        /// the other. This is the only place they meet.
+        /// The two are asked separately everywhere else, because "I parked this one rule" and "I am
+        /// rewiring the port airlock" are different intentions and each has to survive the other. A
+        /// half-stopped airlock, with the inner door's rule off and the outer door's still live, is
+        /// worse than either, which is why stopping one is its own switch rather than every rule's.
         /// </remarks>
-        public bool CanRun => Enabled && (System == null || System.Enabled);
+        public bool CanRun(SystemInstance instance)
+        {
+            return Enabled && (instance == null || instance.Enabled);
+        }
 
         /// <summary>Its one act, where waiting aside it holds exactly one, or null.</summary>
         /// <remarks>What a trigger doing a single action holds, in a sequence nobody named.</remarks>

@@ -54,7 +54,7 @@ public class PaperTargetTests
         editor.GoToRoot();
         Note(seen, ship);
 
-        editor.PressStart("Load system");
+        editor.PressStart("Load blueprint");
         Note(seen, ship);
 
         Assert.Contains(nameof(StartComponent), seen);

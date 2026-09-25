@@ -5,12 +5,12 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Automation for Test Rig
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:171 W:1402 H:782}
-002  Text       at {X:265 Y:177.292} scale 0.57  #A2C3CDFF  "Nothing automated here yet."
-003  ClearClip  
-004  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ New system…"
-005  Text       at {X:404.6033 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load system"
-006  Sprite     Sprocket_Fill         {X:259 Y:160 W:1402 H:1}  #5B737BFF
+001  SetClip    {X:259 Y:118 W:1402 H:836}
+002  Text       at {X:271.8 Y:122.812} scale 0.64  #A2C3CDFF  "+ New logic system…"
+003  Text       at {X:437.7933 Y:122.812} scale 0.64  #A2C3CDFF  "+ Load blueprint"
+004  Sprite     Sprocket_Fill         {X:259 Y:160 W:1390 H:1}  #5B737BFF
+005  Text       at {X:265 Y:177.292} scale 0.57  #A2C3CDFF  "Nothing automated here yet."
+006  ClearClip  
 007  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
 008  Text       at {X:273.4433 Y:54.71198} scale 0.9  #A2C3CDFF  "Automation for"
 009  SetClip    {X:411 Y:55 W:75 H:33}

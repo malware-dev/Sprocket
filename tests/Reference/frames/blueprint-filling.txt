@@ -1,0 +1,21 @@
+window        1920 x 1080
+safe gui area {X:240 Y:0 W:1440 H:1080}
+UI size       {X:1440 Y:1080}
+screen bounds {X:-240 Y:0 W:1920 H:1080}
+on screen     Button Panel  |  Cargo
+
+000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
+001  SetClip    {X:259 Y:142 W:1402 H:812}
+002  Sprite     Sprocket_Fill         {X:259 Y:142 W:1390 H:52}  #29363EFF
+003  Text       at {X:278 Y:156.102} scale 0.64  #DCF5FDFF  "Airlock Button"
+004  ClearClip  
+005  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:77}  #1B242AFF
+006  SetClip    {X:273 Y:55 W:109 H:33}
+007  Text       at {X:273.4433 Y:54.71198} scale 0.9  #DCF5FDFF  "Button Panel"
+008  ClearClip  
+009  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
+010  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
+011  Text       at {X:259 Y:91.01198} scale 0.57  #85A1A9FF  "Cargo"
+012  Sprite     Sprocket_Fill         {X:240 Y:122 W:1440 H:1}  #5B737BFF
+013  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+014  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

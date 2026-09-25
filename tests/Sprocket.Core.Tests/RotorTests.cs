@@ -303,7 +303,7 @@ public class RotorTests
         var runner = new AutomationRunner(automation, ship.World);
         runner.Tick(1);
 
-        var fault = SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence));
+        var fault = SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence), sequence.System.First);
 
         Assert.Equal(SequenceProblem.Unfilled, fault.Problem);
         Assert.Equal(0, fault.Step);
@@ -312,7 +312,7 @@ public class RotorTests
         // And with the speed it asks for, that is no longer what is wrong with it.
         turn.Values.Add(Literal.Of(1L));
         Assert.NotEqual(SequenceProblem.Unfilled,
-            SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence)).Problem);
+            SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence), sequence.System.First).Problem);
     }
 
     /// <summary>
@@ -473,7 +473,7 @@ public class RotorTests
 
     static SequenceFault Faulted(Rigged ship, AutomationRunner runner, Sequence sequence)
     {
-        return SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence));
+        return SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence), sequence.System.First);
     }
 
     /// <summary>A sequence that turns the rotor and waits for it.</summary>

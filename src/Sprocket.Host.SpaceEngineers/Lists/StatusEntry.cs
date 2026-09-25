@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Screen;
+
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
     /// <summary>One thing that is doing something, summarised to a line.</summary>
@@ -154,6 +157,63 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         }
 
         string _duplicateText = "";
+
+        /// <summary>What pressing the row's button does, or zero where the row has none.</summary>
+        /// <remarks>
+        /// One button in words, for the act on a row that is the way on to something new and has to be
+        /// found without being looked for: a mark with a note under it is only found by pointing at it.
+        /// </remarks>
+        public int ButtonCommand
+        {
+            get { return _buttonCommand; }
+            set { Set(ref _buttonCommand, value, nameof(ButtonCommand)); }
+        }
+
+        int _buttonCommand;
+
+        /// <summary>What the row's button says.</summary>
+        public string ButtonText
+        {
+            get { return _buttonText; }
+            set { Set(ref _buttonText, value ?? "", nameof(ButtonText)); }
+        }
+
+        string _buttonText = "";
+
+        /// <summary>What the row's button asks before it is done, or empty where it asks nothing.</summary>
+        public string ButtonQuestion
+        {
+            get { return _buttonQuestion; }
+            set { Set(ref _buttonQuestion, value ?? "", nameof(ButtonQuestion)); }
+        }
+
+        string _buttonQuestion = "";
+
+        /// <summary>The fields the row's button asks for, answered together; none for one answer.</summary>
+        public List<Field> ButtonFields { get; } = new List<Field>();
+
+        /// <summary>What <see cref="ButtonFields" /> open holding, or none for empty ones.</summary>
+        public List<string> ButtonFilled { get; } = new List<string>();
+
+        /// <summary>Whether this is the row of a list that the rest of its screen is about.</summary>
+        /// <remarks>The logic system on a blueprint's screen whose blocks are being shown beside it.</remarks>
+        public bool Chosen
+        {
+            get { return _chosen; }
+            set { Set(ref _chosen, value, nameof(Chosen)); }
+        }
+
+        bool _chosen;
+
+        /// <summary>What pressing the row asks before it is done, or empty where it asks nothing.</summary>
+        /// <remarks>For a row that adds something, which is named as it is made.</remarks>
+        public string Question
+        {
+            get { return _question; }
+            set { Set(ref _question, value ?? "", nameof(Question)); }
+        }
+
+        string _question = "";
 
         /// <summary>
         /// How far in this row sits: 0 for a thing, 1 for one of that thing.

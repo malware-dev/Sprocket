@@ -88,11 +88,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </para>
         /// </remarks>
         public static void Word(ObservableList<StatusEntry> entries, List<Sequence> sequences,
-            Bindings bindings)
+            Bindings bindings, SystemInstance through)
         {
             var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
             for (var i = 0; i < count; i++)
-                entries[i].Summary = SequenceText.Doing(bindings, sequences[i]);
+                entries[i].Summary = SequenceText.Doing(bindings, sequences[i], through);
         }
 
         /// <summary>
@@ -189,7 +189,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// is what <see cref="EditorPage.SecondPassed" /> is for. Nothing that breaks a sequence
         /// breaks it faster than a person can do it by hand, so a second is soon enough.
         /// </remarks>
-        static SequenceFault Stuck(Bindings bindings, Sequence sequence, SequenceRunner state)
+        static SequenceFault Stuck(Bindings bindings, Sequence sequence, SequenceRunner state,
+            SystemInstance through)
         {
             if (state == null)
                 return SequenceFault.None;
@@ -210,9 +211,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             for (var i = 0; i < outstanding.Count; i++)
             {
                 Act act = outstanding[i];
-                for (var t = 0; t < act.Targets.Count; t++)
+                var targets = SystemInstance.Through(through, act.Targets);
+                for (var t = 0; t < targets.Count; t++)
                 {
-                    GridEntity entity = bindings.Entity(act.Targets[t]);
+                    GridEntity entity = bindings.Entity(targets[t]);
                     if (entity == null)
                         continue;
 
@@ -236,8 +238,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return SequenceFault.None;
         }
 
+        /// <summary>What is wrong with a sequence, or none, asking about its blocks as <paramref name="through" /> fills them.</summary>
+        /// <remarks>A null <paramref name="through" /> asks about what the steps name as written.</remarks>
         public static SequenceFault Fault(GridWorld world, Bindings bindings, Sequence sequence,
-            SequenceRunner state)
+            SequenceRunner state, SystemInstance through)
         {
             if (state != null && state.HasMissingSources)
                 return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger);
@@ -250,9 +254,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 if (act == null)
                     continue;
 
-                for (var t = 0; t < act.Targets.Count; t++)
+                var targets = SystemInstance.Through(through, act.Targets);
+                for (var t = 0; t < targets.Count; t++)
                 {
-                    var points = bindings.State(act.Targets[t]);
+                    var points = bindings.State(targets[t]);
                     if (points == RefState.Lost)
                         return new SequenceFault(SequenceProblem.MissingTarget, i);
                     if (points == RefState.Adrift && !adrift.Exists)
@@ -265,15 +270,15 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (adrift.Exists)
                 return adrift;
 
-            SequenceFault unoffered = Unoffered(bindings, sequence);
+            SequenceFault unoffered = Unoffered(bindings, sequence, through);
             if (unoffered.Exists)
                 return unoffered;
 
-            SequenceFault unfilled = Unfilled(bindings, sequence);
+            SequenceFault unfilled = Unfilled(bindings, sequence, through);
             if (unfilled.Exists)
                 return unfilled;
 
-            SequenceFault mistyped = Mistyped(bindings, sequence);
+            SequenceFault mistyped = Mistyped(bindings, sequence, through);
             if (mistyped.Exists)
                 return mistyped;
 
@@ -284,7 +289,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // A step that is being waited on and cannot finish. Only the block knows - a vent with
             // nowhere to put the air looks exactly like one that is merely slow - so it is asked,
             // and what it says is what gets shown.
-            SequenceFault stuck = Stuck(bindings, sequence, state);
+            SequenceFault stuck = Stuck(bindings, sequence, state, through);
             if (stuck.Exists)
                 return stuck;
 
@@ -322,7 +327,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Asked of the action the blocks offer, because what is needed is the action's to declare and
         /// a block may have been replaced by one that declares otherwise.
         /// </remarks>
-        static SequenceFault Unfilled(Bindings bindings, Sequence sequence)
+        static SequenceFault Unfilled(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
@@ -330,9 +335,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 if (act == null || !act.HasAction)
                     continue;
 
-                for (var t = 0; t < act.Targets.Count; t++)
+                var targets = SystemInstance.Through(through, act.Targets);
+                for (var t = 0; t < targets.Count; t++)
                 {
-                    GridEntity entity = bindings.Entity(act.Targets[t]);
+                    GridEntity entity = bindings.Entity(targets[t]);
                     if (entity == null)
                         continue;
 
@@ -353,7 +359,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Asked of each block's own action, as <see cref="Unfilled" /> is: what a value has to be is
         /// the action's to declare.
         /// </remarks>
-        static SequenceFault Mistyped(Bindings bindings, Sequence sequence)
+        static SequenceFault Mistyped(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
@@ -361,9 +367,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 if (act == null || !act.HasAction || act.Values.Count == 0)
                     continue;
 
-                for (var t = 0; t < act.Targets.Count; t++)
+                var targets = SystemInstance.Through(through, act.Targets);
+                for (var t = 0; t < targets.Count; t++)
                 {
-                    GridEntity entity = bindings.Entity(act.Targets[t]);
+                    GridEntity entity = bindings.Entity(targets[t]);
                     if (entity == null)
                         continue;
 
@@ -382,7 +389,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// them. Asked of each block's own list rather than of a list built for the purpose, since
         /// this is worked out every time a fault is.
         /// </remarks>
-        static SequenceFault Unoffered(Bindings bindings, Sequence sequence)
+        static SequenceFault Unoffered(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
@@ -390,9 +397,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 if (act == null || !act.HasAction)
                     continue;
 
-                for (var t = 0; t < act.Targets.Count; t++)
+                var targets = SystemInstance.Through(through, act.Targets);
+                for (var t = 0; t < targets.Count; t++)
                 {
-                    GridEntity entity = bindings.Entity(act.Targets[t]);
+                    GridEntity entity = bindings.Entity(targets[t]);
                     if (entity != null && act.Names(entity.Kind.Actions) == null)
                         return new SequenceFault(SequenceProblem.Unoffered, i);
                 }

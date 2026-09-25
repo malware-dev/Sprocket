@@ -207,7 +207,7 @@ public class SwitchTests
     }
 
     /// <summary>
-    /// Switching the system off reaches everything under it, and leaves the sequences' own switches
+    /// Switching a logic system off reaches everything in it, and leaves the sequences' own switches
     /// alone.
     /// </summary>
     /// <remarks>
@@ -215,20 +215,21 @@ public class SwitchTests
     /// starting it again must not arm the one rule somebody had deliberately parked.
     /// </remarks>
     [Fact]
-    public void SwitchingTheSystemOffDoesNotDisturbTheSequenceSwitches()
+    public void SwitchingALogicSystemOffDoesNotDisturbTheSequenceSwitches()
     {
         var ship = Build();
         var warn = Called(ship, "Warn", BlockKinds.SwitchOff, ship.Ref(ship.Outer));
         warn.Enabled = false;
 
-        ship.Airlock.Enabled = false;
+        var airlock = ship.Airlock.First!;
+        airlock.Enabled = false;
 
-        Assert.False(ship.Secure.CanRun);
+        Assert.False(ship.Secure.CanRun(airlock));
         Assert.True(ship.Secure.Enabled);
 
-        ship.Airlock.Enabled = true;
+        airlock.Enabled = true;
 
-        Assert.True(ship.Secure.CanRun);
+        Assert.True(ship.Secure.CanRun(airlock));
         Assert.False(warn.Enabled);
     }
 }

@@ -8,83 +8,87 @@ Requirements are referred to by number, from [Requirements.md](Requirements.md).
 
 ## The root
 
-What you see when you open Sprocket is **the systems on this ship**, not a list of
+What you see when you open Sprocket is **the logic systems on this construct**, not a list of
 sequences. A player did not build a procedure, they built an airlock, and that is the thing
 they came looking for.
 
-A system is what a system *is*. The ones on the ship are what they *have*.
-
 ```
-   + New system
-   + Load system
+   + New logic system…   + Load blueprint
    ---------------------------------------------
-Airlock
-   Airlock 1                   cycling - waiting for the inner door
-   Port Airlock                idle
-   + add
+Drill Rig                      [Make blueprint…] [ON|OFF]
 
-Drill Rig                      stowed
-   + add
+Made from Airlock blueprint
+   Main airlock    cycling                       [ON|OFF]
+   Cargo airlock                                 [ON|OFF]
+   + add another Airlock…
 ```
 
-**A system with one of them on the ship shows as one row.** *Drill Rig > Drill Rig 1* is a
-fold that says the same thing twice, and the difference between what a thing is and the one
-you have is meaningless until there are two. The fold appears when the second arrives, which
-is the moment the distinction becomes true and the natural place to explain it.
+**A logic system is one row until a blueprint is made of it.** Nobody starting out has to meet
+the idea that one airlock's logic can serve several: they make an airlock, and it is a row. The
+idea arrives when somebody reaches for it.
 
-**Naming follows the game's own convention.** A new one is called *Airlock 1*, *Airlock 2*,
-exactly as the game calls a block *Interior Light 4*. It looks provisional, so it invites a
-rename without a dialog asking for one, it never collides with the name of the system, and
-it makes no assumption about how somebody pluralises their own words. Front and Port arrive
-when the player decides they care.
+**Making a blueprint is said in words on the row**, *Make blueprint…*, because a way to turn one
+airlock into several that nobody finds is the problem the screen exists to solve. It asks two
+things at once - what the blueprint is called, and what this one is called - and opens the
+blueprint. The logic system it was made of becomes the first made from it.
 
-**No word is needed for "one of them".** *Instance* is programmer vocabulary and is not
-used, and a system's own row says nothing about how many there are, because they are the rows
-directly beneath it. Where a count has to stand alone - a glanced-at display with one line per
-system and no room to list them - it is `x2` after the name. Setting one up again is the words
-for the act: *add another*, on the row that does it.
+**Logic systems made from a blueprint stand under it**, headed *Made from Airlock blueprint* with
+the blueprint's name in the bright ink. The heading is a sentence rather than in capitals, all of
+it, because the name is somebody's and is shown as they typed it. Logic systems of their own come
+first, so a row of its own is never read as belonging to the blueprint above it.
+
+**Every logic system has its own switch; a blueprint has none.** A blueprint does not run - the
+logic systems made from it do - and switching the port airlock off to weld on it must not stop
+the front one.
+
+**Names are given, not derived.** Every logic system made from a blueprint is named as it is
+made: *add another Airlock…* asks what this one is called. *Instance* is programmer vocabulary
+and is not used on screen; *blueprint* and *logic system* are the words.
 
 ## Getting started
 
 Both root actions are equally prominent. Most people will never author anything, and for
 them Sprocket is the thing where you load somebody's airlock and tell it which doors are
-yours - so **Load system** is not a secondary path.
+yours - so **Load blueprint** is not a secondary path.
 
-**New system asks what the system is, and then puts you on it.** It does not open an empty
+**New logic system asks what it is, and then puts you on it.** It does not open an empty
 container and it does not stop on a question of its own. The name is the one thing that
 cannot be worked out - it is what M says when something is stuck and what K sends to a friend
-- so it is asked, and after that you are standing on the system with the ways to start a
-sequence in front of you.
+- so it is asked, and after that you are standing on it with the ways to start a sequence in
+front of you.
 
-*There used to be a screen in between, asking "what should start it?" the moment a system
-was made. It bought nothing: two answers, no context, standing between somebody and the thing
-they came to build, and it kept the system's own screen off the way back, so leaving the
-first sequence dropped you out to the ship. The answers now live on the system, which is
-where they were always going to end up.*
-
-That is a sequencing decision, not a vocabulary one. *System* is an ordinary word and the
-audience can read it.
-
-**Labels are plain nouns, not sentences.** *New system*, not *build something new*. *Load
-system*, not *use one somebody made*. The softer forms were proposed and rejected: this
+**Labels are plain nouns, not sentences.** *New logic system*, not *build something new*. *Load
+blueprint*, not *use one somebody made*. The softer forms were proposed and rejected: this
 audience has never been taught programmer vocabulary, which is not the same as having been
 robbed of nouns, and a label rewritten into a friendly sentence buys nothing and reads as
 being handled.
 
-## The configurator
+## The blueprint
 
-Filling in which blocks a system uses. Reached from two directions and identical from both:
+A blueprint's own screen, headed *Airlock blueprint*: the logic systems made from it on the left,
+and on the right the chosen one's switch and the blueprint's **parts**, each with the blocks the
+chosen one fills it with. The parts' names are the blueprint's and read the same whichever logic
+system is chosen; only the blocks change. That difference, seen on one screen, is what tells a
+blueprint from the logic systems made from it.
 
-- **loading a system somebody sent**, where it makes the first one on your ship;
-- **+ another**, where it makes the next.
+**It is where a blueprint is set up.** Making a blueprint ends here, and so does *add another*,
+on the new one, whose parts are empty until somebody says which blocks fill them. A part's blocks
+are a slot, the chip a sentence fills, and pressing it offers the construct's blocks of the type
+the part expects. A part is renamed from the pencil beside its name.
 
-Derived from the system's slots with no effort from its author (R12), and improvable by an
-author who wants to name things in their own words, order the questions, or explain the one
-that always catches people out. The derived version has to be good enough to use, because
-most systems will never be polished by anybody.
+**It is the one way into what a blueprint does.** *Edit using these blocks* opens the familiar
+logic system screen headed *Airlock blueprint*, with **Using the blocks of Main airlock** above
+everything else on it: a sentence names blocks, only a logic system has any, and every block
+named below that line is the chosen one's. The name is a slot and is pressed to choose another,
+which reads the same sentences against another airlock's doors.
 
-Optional slots are shown as optional (R24), so somebody who has no vents skips them
-knowingly rather than wondering what they have broken.
+**Every sentence stores parts, a blueprint or not.** Picking a block takes a part of the system -
+named for the block's kind, *Door*, *Door 2* - and fills it on the logic system being edited, so
+making a blueprint names things and moves nothing.
+
+Derived from the sentences with no effort from the author (R12). What an author may add - an
+explanation of the one part that always catches people out, the order the parts are asked in -
+is still open, as are parts that may be left empty (R24).
 
 ## Copying, and not copying
 
