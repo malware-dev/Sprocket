@@ -1,10 +1,7 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Editing
 {
@@ -96,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _shape = Shape();
 
             var start = new StartComponent();
-            start.Add("New logic system", "What is it?", Editor.RegisterText(Cmd.NewSystem, Make, Free));
+            start.Add("New logic system", Editor.Register(Cmd.NewSystem, Make));
             start.Add("Load blueprint", Editor.Register(Cmd.LoadSystem, delegate { Editor.OfferLoading(); }));
             components.Add(start);
 
@@ -170,15 +167,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             // Said in words on the row, where it cannot be missed. Making a blueprint is how one logic
             // system becomes several, and a way to do that nobody finds is the problem this row solves.
-            entry.ButtonText = "Make blueprint…";
-            entry.ButtonQuestion = "Make blueprint";
-            entry.ButtonCommand = Editor.RegisterText(Cmd.MakeBlueprint, system.Id,
-                delegate(string answer) { Made(system, answer); },
-                delegate(string answer) { return Called(system, answer); });
-            entry.ButtonFields.Add(Named("What is the blueprint called?"));
-            entry.ButtonFields.Add(Named("What is this one called?"));
-            entry.ButtonFilled.Add(system.Name);
-            entry.ButtonFilled.Add("");
+            entry.ButtonText = "Make blueprint";
+            entry.ButtonCommand = Editor.Register(Cmd.MakeBlueprint, system.Id, delegate { Made(system); });
             return entry;
         }
 
@@ -210,12 +200,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
 
             var another = new StatusEntry("add another " + system.Name,
-                Editor.RegisterText(Cmd.AddInstance, system.Id,
-                    delegate(string name) { Another(system, name); },
-                    delegate(string name) { return Unused(system, name); }));
+                Editor.Register(Cmd.AddInstance, system.Id, delegate { Another(system); }));
             another.IsAction = true;
             another.Depth = 1;
-            another.Question = "What is this one called?";
             _gathered.Add(another);
 
             list.Entries.Reset(_gathered);
@@ -236,104 +223,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _shown.Add(new Shown { Entry = entry, System = system, Instance = instance });
         }
 
-        /// <summary>A field asking for a name, which has to be given.</summary>
-        static Field Named(string question)
+        /// <summary>Makes a logic system, numbered, and opens it with its name in hand to be given.</summary>
+        void Make()
         {
-            Field field = Field.Called(question);
-            field.Entry = Entry.Text;
-            field.Needed = true;
-            field.Above = true;
-            return field;
-        }
-
-        /// <summary>
-        /// Makes a logic system, once somebody has said what it is.
-        /// </summary>
-        /// <remarks>
-        /// The name is what M says when something is stuck, what J navigates by and what K
-        /// sends to a friend. Every attempt at working it out instead - block prefixes,
-        /// numbers - produced something worse than the question, and asking an adult what they
-        /// are building is not an imposition. Guessing badly on their behalf is.
-        /// </remarks>
-        void Make(string name)
-        {
-            name = Naming.Clean(name);
-            if (name.Length == 0 || !Free(name))
-                return;
-
             var system = Editor.Program.AddSystem();
             system.Namespace = Editor.Author;
-            system.Name = name;
 
-            // Straight to the system, and no further. Its screen is where the ways to start
-            // a sequence live, so there is nothing left to ask on the way.
-            Editor.Push(new SystemPage(Editor, system));
+            var page = new SystemPage(Editor, system);
+            page.NameOnArrival = true;
+            Editor.Push(page);
         }
 
-        /// <summary>
-        /// Makes a blueprint of a logic system: the blueprint named, and the logic system named as the
-        /// first made from it.
-        /// </summary>
-        void Made(AutomationSystem system, string answer)
+        /// <summary>Makes a blueprint of a logic system: the blueprint keeps the system's name, and so does the first logic system made from it.</summary>
+        void Made(AutomationSystem system)
         {
-            string blueprint;
-            string first;
-            if (!Names(answer, out blueprint, out first) || !Allowed(system, blueprint) || system.First == null)
+            if (system.First == null)
                 return;
 
-            system.Name = blueprint;
-            system.First.Name = first;
+            system.First.Name = system.Name;
             Editor.Choose(system, system.First);
             Editor.Push(new BlueprintPage(Editor, system));
         }
 
-        /// <summary>
-        /// Adds another logic system made from a blueprint, named as it is made, and opens the blueprint
-        /// on it to say which blocks it uses.
-        /// </summary>
-        void Another(AutomationSystem system, string name)
+        /// <summary>Adds another logic system made from a blueprint, numbered, and opens the blueprint on it to say which blocks it uses.</summary>
+        void Another(AutomationSystem system)
         {
-            if (Editor.Another(system, name) != null)
+            if (Editor.Another(system) != null)
                 Editor.Push(new BlueprintPage(Editor, system));
-        }
-
-        /// <summary>Whether no system by this author is called this yet.</summary>
-        bool Free(string name)
-        {
-            return Editor.Program.FindSystem(Editor.Author, Naming.Clean(name)) == null;
-        }
-
-        /// <summary>Whether a blueprint of <paramref name="system" /> may be called what the answer says.</summary>
-        /// <remarks>Its own name is allowed: making a blueprint of an airlock called Airlock keeps the name.</remarks>
-        bool Called(AutomationSystem system, string answer)
-        {
-            string blueprint;
-            string first;
-            return !Names(answer, out blueprint, out first) || Allowed(system, blueprint);
-        }
-
-        /// <summary>Whether <paramref name="system" /> may go by <paramref name="name" />: no other system has it.</summary>
-        bool Allowed(AutomationSystem system, string name)
-        {
-            var other = Editor.Program.FindSystem(Editor.Author, name);
-            return other == null || other == system;
-        }
-
-        /// <summary>Whether no logic system made from <paramref name="system" /> is called this yet.</summary>
-        static bool Unused(AutomationSystem system, string name)
-        {
-            return system.FindInstance(Naming.Clean(name)) == null;
-        }
-
-        /// <summary>The two names a blueprint is made with, read back out of the form's one answer.</summary>
-        static bool Names(string answer, out string blueprint, out string first)
-        {
-            var said = new List<Literal>();
-            ValueLine.Read(answer, said);
-
-            blueprint = said.Count > 0 && said[0].Kind == ValueKind.Text ? Naming.Clean(said[0].Text) : "";
-            first = said.Count > 1 && said[1].Kind == ValueKind.Text ? Naming.Clean(said[1].Text) : "";
-            return blueprint.Length > 0 && first.Length > 0;
         }
 
         /// <summary>What the page is built from, as one number: which systems, how many of each, and which are blueprints.</summary>

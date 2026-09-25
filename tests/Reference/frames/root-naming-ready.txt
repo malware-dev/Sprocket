@@ -2,38 +2,37 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Automation for Test Rig
+on screen     Logic system 1
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:121 W:1402 H:832}
-002  Text       at {X:275 Y:129.192} scale 0.833  #A2C3CDFF  "+ New logic system…"
-003  Text       at {X:484.78 Y:129.192} scale 0.833  #A2C3CDFF  "+ Load blueprint"
-004  Sprite     Sprocket_Fill         {X:259 Y:169 W:1390 H:1}  #5B737BFF
-005  Text       at {X:267 Y:186.192} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
-006  ClearClip  
-007  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
-008  Text       at {X:300.91 Y:56.30198} scale 1.156  #A2C3CDFF  "Automation for"
-009  SetClip    {X:476 Y:56 W:126 H:33}
-010  Text       at {X:476.1367 Y:56.30198} scale 1.156  #DCF5FDFF  "Test Rig"
-011  Text       at {X:561.65 Y:47.4339} scale 0.822  #85A1A9FF  "p"
-012  ClearClip  
-013  Text       at {X:259 Y:50.22493} scale 0.732  #A2C3CDFF  "<"
-014  Text       at {X:1625.09 Y:50.22493} scale 0.732  #A2C3CDFF  "s"
-015  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-016  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-017  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
-018  Sprite     Sprocket_Fill         {X:259 Y:163 W:512 H:85}  #3C4C52FF
-019  Sprite     Sprocket_Fill         {X:259 Y:163 W:512 H:1}  #5B737BFF
-020  Sprite     Sprocket_Fill         {X:259 Y:247 W:512 H:1}  #5B737BFF
-021  Sprite     Sprocket_Fill         {X:259 Y:163 W:1 H:85}  #5B737BFF
-022  Sprite     Sprocket_Fill         {X:770 Y:163 W:1 H:85}  #5B737BFF
-023  Text       at {X:275 Y:173.192} scale 0.642  #A2C3CDFF  "What is it?"
-024  Sprite     Sprocket_Fill         {X:275 Y:202 W:368 H:37}  #141B20FF
-025  Sprite     Sprocket_Fill         {X:275 Y:202 W:368 H:1}  #5B737BFF
-026  Sprite     Sprocket_Fill         {X:275 Y:237 W:368 H:1}  #5B737BFF
-027  Sprite     Sprocket_Fill         {X:275 Y:202 W:1 H:37}  #5B737BFF
-028  Sprite     Sprocket_Fill         {X:642 Y:202 W:1 H:37}  #5B737BFF
-029  Text       at {X:287.8 Y:209.492} scale 0.732  #DCF5FDFF  "Airlock"
-030  Sprite     Sprocket_Fill         {X:336 Y:209 W:2 H:21}  #DCF5FDFF
-031  Sprite     Sprocket_Fill         {X:653 Y:202 W:102 H:37}  #DCF5FDFF
-032  Text       at {X:672.4667 Y:209.492} scale 0.732  #1B242AFF  "Continue"
+002  Text       at {X:262 Y:131.192} scale 0.732  #85A1A9FF  "TRIGGERS"
+003  Text       at {X:275 Y:160.282} scale 0.833  #A2C3CDFF  "+ When…"
+004  Text       at {X:392.22 Y:160.282} scale 0.833  #A2C3CDFF  "+ Every…"
+005  Sprite     Sprocket_Fill         {X:259 Y:200 W:1390 H:1}  #5B737BFF
+006  Text       at {X:262 Y:241.282} scale 0.732  #85A1A9FF  "SEQUENCES"
+007  Text       at {X:275 Y:270.372} scale 0.833  #A2C3CDFF  "+ New sequence"
+008  Sprite     Sprocket_Fill         {X:259 Y:310 W:1390 H:1}  #5B737BFF
+009  Text       at {X:267 Y:327.372} scale 0.833  #A2C3CDFF  "No sequences yet."
+010  ClearClip  
+011  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
+012  SetClip    {X:301 Y:56 W:203 H:33}
+013  Sprite     Sprocket_Fill         {X:301 Y:56 W:163 H:33}  #3C4C52FF
+014  Text       at {X:300.91 Y:56.30198} scale 1.156  #DCF5FDFF  "Airlock"
+015  Sprite     Sprocket_Fill         {X:377 Y:56 W:2 H:33}  #DCF5FDFF
+016  ClearClip  
+017  Text       at {X:259 Y:50.22493} scale 0.732  #A2C3CDFF  "<"
+018  Text       at {X:1416.39 Y:50.22493} scale 0.732  #5F7278FF  "u"
+019  Text       at {X:1458.3 Y:50.22493} scale 0.732  #5F7278FF  "r"
+020  Sprite     Sprocket_Fill         {X:1500 Y:56 W:119 H:1}  #85A1A9FF
+021  Sprite     Sprocket_Fill         {X:1500 Y:88 W:119 H:1}  #85A1A9FF
+022  Sprite     Sprocket_Fill         {X:1500 Y:56 W:1 H:33}  #85A1A9FF
+023  Sprite     Sprocket_Fill         {X:1618 Y:56 W:1 H:33}  #85A1A9FF
+024  Sprite     Sprocket_Fill         {X:1501 Y:57 W:117 H:31}  #060A0CFF
+025  Sprite     Sprocket_Fill         {X:1501 Y:57 W:58 H:31}  #1B2C33FF
+026  Text       at {X:1518.023 Y:62.40697} scale 0.732  #DCF5FDFF  "ON"
+027  Text       at {X:1575.65 Y:62.40697} scale 0.732  #85A1A9FF  "OFF"
+028  Text       at {X:1625.09 Y:50.22493} scale 0.732  #A2C3CDFF  "s"
+029  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+030  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
+031  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF

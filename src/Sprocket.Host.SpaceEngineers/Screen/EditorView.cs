@@ -192,6 +192,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Where the new controls on the screen's body take the pointer and the keyboard.</summary>
         readonly InputRoot _input;
 
+        /// <summary>The heading part last opened to be named on arrival, so finishing its rename does not open it again.</summary>
+        HeadingPart _namedArrival;
+
         /// <summary>Whether the press under way began on a control <see cref="_input" /> takes.</summary>
         bool _pressing;
 
@@ -615,6 +618,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         void Dress(EditorScreen screen)
         {
             _title.Update(screen.Heading, _renaming);
+            NameArrival(screen);
 
             // Only the words. Whether there is room for them was settled when this screen went up - see
             // Rebuild - because changing it now would move the page under whoever is reading it.
@@ -1896,6 +1900,27 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _ask.Values(deed.Question, deed.Command, deed.Fields, deed.Filled);
             else
                 _ask.Open(deed.Question, control, deed.Command);
+        }
+
+        /// <summary>Begins renaming the part of the heading that arrives to be named, once for that part.</summary>
+        void NameArrival(EditorScreen screen)
+        {
+            if (_renaming >= 0)
+                return;
+
+            for (int i = 0; i < screen.Heading.Count && i < _title.Count; i++)
+            {
+                HeadingPart part = screen.Heading[i];
+                if (!part.NamedOnArrival || !part.CanRename || part == _namedArrival)
+                    continue;
+
+                _namedArrival = part;
+                _renaming = i;
+                _renameCommand = part.RenameCommand;
+                _title[i].Text = part.Name;
+                _title[i].Begin();
+                return;
+            }
         }
 
         void Close()

@@ -7,9 +7,9 @@ on screen     Airlock
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:121 W:1402 H:832}
 002  Text       at {X:262 Y:137.192} scale 0.822  #A2C3CDFF  "Using the blocks of"
-003  Sprite     Sprocket_Fill         {X:423 Y:131 W:71 H:36}  #1B242AFF
-004  Sprite     Sprocket_Fill         {X:423 Y:165 W:71 H:2}  #00000000
-005  Text       at {X:438.5533 Y:137.192} scale 0.822  #DCF5FDFF  "Main"
+003  Sprite     Sprocket_Fill         {X:423 Y:131 W:86 H:36}  #1B242AFF
+004  Sprite     Sprocket_Fill         {X:423 Y:165 W:86 H:2}  #00000000
+005  Text       at {X:438.5533 Y:137.192} scale 0.822  #DCF5FDFF  "Airlock"
 006  Text       at {X:262 Y:208.872} scale 0.732  #85A1A9FF  "TRIGGERS"
 007  Text       at {X:275 Y:237.962} scale 0.833  #A2C3CDFF  "+ When…"
 008  Text       at {X:392.22 Y:237.962} scale 0.833  #A2C3CDFF  "+ Every…"

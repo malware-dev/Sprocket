@@ -1741,6 +1741,17 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return chosen ?? system.First;
         }
 
+        /// <summary>Adds another logic system made from <paramref name="system" />, named for it with the first number free from two.</summary>
+        internal SystemInstance Another(AutomationSystem system)
+        {
+            for (var number = 2; ; number++)
+            {
+                var name = system.Name + " " + number;
+                if (system.FindInstance(name) == null)
+                    return Another(system, name);
+            }
+        }
+
         /// <summary>
         /// Adds another instance of a blueprint, called <paramref name="name" />, and shows the blueprint
         /// through it; or null where the name is empty or one of them already has it.

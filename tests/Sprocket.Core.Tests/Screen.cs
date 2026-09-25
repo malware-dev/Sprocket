@@ -78,13 +78,14 @@ static class Screen
     /// Makes a system with the custom name.
     /// </summary>
     /// <remarks>
-    /// How a target asks for the name is its own business, so a test says what the answer was
-    /// and nothing about the asking.
+    /// Pressing New logic system makes a numbered one and opens it, and the name is given where it is
+    /// renamed, in the heading.
     /// </remarks>
     public static void NewSystem(this SprocketEditor editor, string name)
     {
         var start = editor.Screen.Components.OfType<StartComponent>().First();
-        editor.SetText(start.Options.First(o => o.Asks).Command, name);
+        editor.Invoke(start.Options.First(o => o.Label == "New logic system").Command);
+        editor.SetText(editor.Screen.Heading[0].RenameCommand, name);
     }
 
     /// <summary>Presses one of the ways to start something on this screen.</summary>

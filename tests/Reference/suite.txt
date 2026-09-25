@@ -30,13 +30,11 @@ system-rename       60 130 type Airlock enter 80 68
 system-back         60 130 type Airlock enter 25 62
 
 # --- a blueprint made of a logic system, and another logic system made from it -------------------
-# The suite splits on spaces, so what is typed here is one word.
-blueprint-asked     60 130 type Airlock enter 25 62 1195 201
-blueprint-made      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600
-blueprint-another   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600 146 236 type Cargo enter
-blueprint-filling   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600 146 236 type Cargo enter 850 258
-blueprint-editing   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600 1176 148
-blueprint-grouped   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600 146 236 type Cargo enter 25 62
+blueprint-made      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201
+blueprint-another   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236
+blueprint-filling   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236 850 258
+blueprint-editing   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 1176 148
+blueprint-grouped   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236 25 62
 
 # --- a name another system has, refused where it is typed -----------------------------------------
 root-taken          60 130 type Airlock enter 25 62 60 130 type Airlock enter

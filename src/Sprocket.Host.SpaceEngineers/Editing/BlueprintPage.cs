@@ -82,11 +82,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _blueprint.Members.Add(Member(instances[i], instances[i] == chosen));
 
             var another = new StatusEntry("add another " + _system.Name,
-                Editor.RegisterText(Cmd.AddInstance, _system.Id,
-                    delegate(string name) { Editor.Another(_system, name); },
-                    delegate(string name) { return _system.FindInstance(Naming.Clean(name)) == null; }));
+                Editor.Register(Cmd.AddInstance, _system.Id, delegate { Editor.Another(_system); }));
             another.IsAction = true;
-            another.Question = "What is this one called?";
             _blueprint.Members.Add(another);
 
             if (chosen != null)

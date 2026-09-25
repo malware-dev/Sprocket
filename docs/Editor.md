@@ -13,24 +13,24 @@ sequences. A player did not build a procedure, they built an airlock, and that i
 they came looking for.
 
 ```
-   + New logic system…   + Load blueprint
+   + New logic system    + Load blueprint
    ---------------------------------------------
-Drill Rig                      [Make blueprint…] [ON|OFF]
+Drill Rig                      [Make blueprint] [ON|OFF]
 
 Made from Airlock blueprint
-   Main airlock    cycling                       [ON|OFF]
-   Cargo airlock                                 [ON|OFF]
-   + add another Airlock…
+   Airlock         cycling                       [ON|OFF]
+   Airlock 2                                     [ON|OFF]
+   + add another Airlock
 ```
 
 **A logic system is one row until a blueprint is made of it.** Nobody starting out has to meet
 the idea that one airlock's logic can serve several: they make an airlock, and it is a row. The
 idea arrives when somebody reaches for it.
 
-**Making a blueprint is said in words on the row**, *Make blueprint…*, because a way to turn one
-airlock into several that nobody finds is the problem the screen exists to solve. It asks two
-things at once - what the blueprint is called, and what this one is called - and opens the
-blueprint. The logic system it was made of becomes the first made from it.
+**Making a blueprint is said in words on the row**, *Make blueprint*, because a way to turn one
+airlock into several that nobody finds is the problem the screen exists to solve. It asks
+nothing: the blueprint keeps the logic system's name, the logic system it was made of becomes
+the first made from it under the same name, and the blueprint opens.
 
 **Logic systems made from a blueprint stand under it**, headed *Made from Airlock blueprint* with
 the blueprint's name in the bright ink. The heading is a sentence rather than in capitals, all of
@@ -41,9 +41,10 @@ first, so a row of its own is never read as belonging to the blueprint above it.
 logic systems made from it do - and switching the port airlock off to weld on it must not stop
 the front one.
 
-**Names are given, not derived.** Every logic system made from a blueprint is named as it is
-made: *add another Airlock…* asks what this one is called. *Instance* is programmer vocabulary
-and is not used on screen; *blueprint* and *logic system* are the words.
+**Names are numbered, and given in place.** Nothing is asked when something is made: another
+logic system made from a blueprint is *Airlock 2*, the first number free, the way the game
+numbers blocks. A name is given by renaming, where the name is shown. *Instance* is programmer
+vocabulary and is not used on screen; *blueprint* and *logic system* are the words.
 
 ## Getting started
 
@@ -51,11 +52,11 @@ Both root actions are equally prominent. Most people will never author anything,
 them Sprocket is the thing where you load somebody's airlock and tell it which doors are
 yours - so **Load blueprint** is not a secondary path.
 
-**New logic system asks what it is, and then puts you on it.** It does not open an empty
-container and it does not stop on a question of its own. The name is the one thing that
-cannot be worked out - it is what M says when something is stuck and what K sends to a friend
-- so it is asked, and after that you are standing on it with the ways to start a sequence in
-front of you.
+**New logic system makes one and puts you on it, with its name in hand.** It is *Logic system 1*,
+the first number free, and it opens with that name being edited in the heading: typing names it,
+and anything else keeps the number. After that you are standing on it with the ways to start a
+sequence in front of you. Whether numbered names stay unnamed in use is to be tried with the
+playtester.
 
 **Labels are plain nouns, not sentences.** *New logic system*, not *build something new*. *Load
 blueprint*, not *use one somebody made*. The softer forms were proposed and rejected: this

@@ -6,8 +6,8 @@ on screen     Automation for Test Rig
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  SetClip    {X:259 Y:121 W:1402 H:832}
-002  Text       at {X:275 Y:129.192} scale 0.833  #A2C3CDFF  "+ New logic system…"
-003  Text       at {X:484.78 Y:129.192} scale 0.833  #A2C3CDFF  "+ Load blueprint"
+002  Text       at {X:275 Y:129.192} scale 0.833  #A2C3CDFF  "+ New logic system"
+003  Text       at {X:471.5567 Y:129.192} scale 0.833  #A2C3CDFF  "+ Load blueprint"
 004  Sprite     Sprocket_Fill         {X:259 Y:169 W:1390 H:1}  #5B737BFF
 005  Text       at {X:267 Y:186.192} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
 006  ClearClip  

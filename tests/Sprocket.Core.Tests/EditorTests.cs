@@ -366,27 +366,26 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Making a blueprint names it and the logic system it was made of, opens it, and on the construct's
-    /// own list that logic system then stands under it.
+    /// Making a blueprint asks nothing: the blueprint keeps the logic system's name, and so does the first
+    /// made from it. It opens, and on the construct's own list that logic system then stands under it.
     /// </summary>
     [Fact]
-    public void MakingABlueprintNamesItAndTheFirstMadeFromIt()
+    public void MakingABlueprintKeepsTheSystemsName()
     {
         var ship = Build();
         var editor = ship.Editor;
         var row = OneLogicSystem(ship);
 
-        Assert.Equal("Make blueprint…", row.ButtonText);
-        Assert.Equal(2, row.ButtonFields.Count);
-        Assert.Equal("Airlock", row.ButtonFilled[0]);
+        Assert.Equal("Make blueprint", row.ButtonText);
+        Assert.Empty(row.ButtonQuestion);
 
-        editor.SetText(row.ButtonCommand, "\"Airlock\" \"Main airlock\"");
+        editor.Invoke(row.ButtonCommand);
         ship.Tick();
 
         var system = ship.Automation.Systems[0];
         Assert.True(system.IsBlueprint);
         Assert.Equal("Airlock", system.Name);
-        Assert.Equal("Main airlock", system.First!.Name);
+        Assert.Equal("Airlock", system.First!.Name);
         Assert.NotNull(editor.Component<BlueprintComponent>());
 
         editor.GoToRoot();
@@ -394,45 +393,26 @@ public class EditorTests
 
         var heading = editor.Screen.Components.OfType<Sprocket.Host.SpaceEngineers.Screen.HeadingComponent>().Single();
         Assert.Equal("Airlock", heading.Name);
-        Assert.Equal("Main airlock", editor.Rows()[0].Summary);
+        Assert.Equal("Airlock", editor.Rows()[0].Summary);
         Assert.True(editor.Rows()[1].IsAction);
     }
 
-    /// <summary>A blueprint cannot take a name another system has, though it may keep its own.</summary>
+
+    /// <summary>Another logic system made from a blueprint is numbered from two, the first number free.</summary>
     [Fact]
-    public void ABlueprintCannotTakeAnotherSystemsName()
+    public void AnotherFromABlueprintIsNumbered()
     {
         var ship = Build();
         var editor = ship.Editor;
-        OneLogicSystem(ship);
-
-        editor.NewSystem("Hangar");
-        editor.GoToRoot();
-        ship.Tick();
-
-        var airlock = editor.Rows().First(r => r.Summary == "Airlock");
-        Assert.False(editor.Accepts(airlock.ButtonCommand, "\"Hangar\" \"Main airlock\""));
-        Assert.True(editor.Accepts(airlock.ButtonCommand, "\"Airlock\" \"Main airlock\""));
-    }
-
-    /// <summary>
-    /// Another logic system made from a blueprint is named as it is made, and a name one of them
-    /// already has is refused.
-    /// </summary>
-    [Fact]
-    public void AnotherFromABlueprintIsNamedAsItIsMade()
-    {
-        var ship = Build();
-        var editor = ship.Editor;
-        editor.SetText(OneLogicSystem(ship).ButtonCommand, "\"Airlock\" \"Main airlock\"");
+        editor.Invoke(OneLogicSystem(ship).ButtonCommand);
         editor.GoToRoot();
         ship.Tick();
 
         var add = editor.Rows().Last();
         Assert.True(add.IsAction);
-        Assert.False(editor.Accepts(add.Command, "Main airlock"));
+        Assert.False(add.Question.Length > 0);
 
-        editor.SetText(add.Command, "Cargo airlock");
+        editor.Invoke(add.Command);
         ship.Tick();
 
         // Opened on the blueprint through the new one, which has blocks to be given.
@@ -440,11 +420,14 @@ public class EditorTests
 
         var system = ship.Automation.Systems[0];
         Assert.Equal(2, system.Instances.Count);
-        Assert.Equal("Cargo airlock", system.Instances[1].Name);
+        Assert.Equal("Airlock 2", system.Instances[1].Name);
 
         editor.GoToRoot();
         ship.Tick();
-        Assert.Equal("Cargo airlock", editor.Rows()[1].Summary);
+        Assert.Equal("Airlock 2", editor.Rows()[1].Summary);
+
+        editor.Invoke(editor.Rows().Last().Command);
+        Assert.Equal("Airlock 3", system.Instances[2].Name);
     }
 
     /// <summary>
@@ -456,7 +439,7 @@ public class EditorTests
     {
         var ship = Build();
         var editor = ship.Editor;
-        editor.SetText(OneLogicSystem(ship).ButtonCommand, "\"Airlock\" \"Main\"");
+        editor.Invoke(OneLogicSystem(ship).ButtonCommand);
         ship.Tick();
 
         // Straight onto the blueprint, through the one it was made of.
@@ -464,7 +447,7 @@ public class EditorTests
         Assert.True(blueprint.Members[0].Chosen);
         Assert.Single(Assert.Single(blueprint.Parts).Blocks);
 
-        editor.SetText(blueprint.Members.Last().Command, "Cargo");
+        editor.Invoke(blueprint.Members.Last().Command);
         ship.Tick();
 
         blueprint = editor.Component<BlueprintComponent>();
@@ -474,7 +457,7 @@ public class EditorTests
         // Through the new one, the trigger names nothing yet.
         editor.Invoke(blueprint.Chosen!.ButtonCommand);
         ship.Tick();
-        Assert.Equal("Cargo", editor.Component<UsingComponent>().Name);
+        Assert.Equal("Airlock 2", editor.Component<UsingComponent>().Name);
         Assert.Empty(Assert.IsType<EntitiesSlot>(editor.Triggers()[0].Slots[0]).Entities);
 
         // Filled with a button of its own, it names that one.
@@ -486,7 +469,7 @@ public class EditorTests
         ship.Tick();
 
         Assert.Single(editor.Component<BlueprintComponent>().Parts[0].Blocks);
-        var cargo = ship.Automation.Systems[0].FindInstance("Cargo")!;
+        var cargo = ship.Automation.Systems[0].FindInstance("Airlock 2")!;
         Assert.Single(cargo.Filled);
     }
 
@@ -496,7 +479,7 @@ public class EditorTests
     {
         var ship = Build();
         var editor = ship.Editor;
-        editor.SetText(OneLogicSystem(ship).ButtonCommand, "\"Airlock\" \"Main\"");
+        editor.Invoke(OneLogicSystem(ship).ButtonCommand);
         ship.Tick();
 
         editor.SetText(editor.Component<BlueprintComponent>().Parts[0].RenameCommand, "Call button");
@@ -1360,11 +1343,10 @@ public class EditorTests
         Assert.Equal("Automation for Test Rig", ship.Editor.Screen.Title());
         Assert.Empty(ship.Editor.Rows());
 
-        // Both ways in are offered. How a target asks for the name is its own business, so
-        // there is nothing here about panels or dialogs.
+        // Both ways in are offered, and neither asks anything first.
         var start = ship.Editor.Component<StartComponent>();
         Assert.Equal("New logic system, Load blueprint", string.Join(", ", start.Options.Select(o => o.Label)));
-        Assert.Equal("What is it?", start.Options[0].Question);
+        Assert.False(start.Options[0].Asks);
     }
 
     [Fact]
@@ -1876,30 +1858,20 @@ public class EditorTests
         Assert.True(Assert.Single(ship.Automation.Systems).Is("MalTek", "Airlock"));
     }
 
-    /// <summary>
-    /// A name another system already has is refused, and a target can ask before sending it.
-    /// </summary>
-    /// <remarks>
-    /// Asking first is what lets a screen say the name is taken while it is typed, rather than send it and
-    /// have nothing happen.
-    /// </remarks>
+    /// <summary>A new logic system is numbered, the first number free, and opens with its name in hand to be given.</summary>
     [Fact]
-    public void ANameAnotherSystemAlreadyHasIsRefused()
+    public void ANewSystemIsNumberedAndOpensToBeNamed()
     {
         var ship = Build();
-        ship.Editor.Author = "MalTek";
+        var editor = ship.Editor;
 
-        ship.Editor.NewSystem("Airlock");
-        ship.Editor.GoToRoot();
+        editor.PressStart("New logic system");
+        Assert.Equal("Logic system 1", ship.Automation.Systems[0].Name);
+        Assert.True(editor.Screen.Heading[0].NamedOnArrival);
 
-        var start = ship.Editor.Screen.Components.OfType<StartComponent>().First();
-        var make = start.Options.First(o => o.Asks).Command;
-        Assert.False(ship.Editor.Accepts(make, "Airlock"));
-        Assert.False(ship.Editor.Accepts(make, "  Airlock "));
-        Assert.True(ship.Editor.Accepts(make, "Hangar"));
-
-        ship.Editor.NewSystem("Airlock");
-        Assert.Single(ship.Automation.Systems);
+        editor.GoToRoot();
+        editor.PressStart("New logic system");
+        Assert.Equal("Logic system 2", ship.Automation.Systems[1].Name);
     }
 
     [Fact]

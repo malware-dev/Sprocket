@@ -104,6 +104,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         public bool CanRename => RenameCommand != 0;
 
+        /// <summary>Whether the screen opens with this part's name in hand to be given, as for something just made and numbered.</summary>
+        public bool NamedOnArrival
+        {
+            get { return _namedOnArrival; }
+            set { Set(ref _namedOnArrival, value, nameof(NamedOnArrival)); }
+        }
+
+        bool _namedOnArrival;
+
         /// <summary>What to ask when offering the rename.</summary>
         public string Prompt
         {

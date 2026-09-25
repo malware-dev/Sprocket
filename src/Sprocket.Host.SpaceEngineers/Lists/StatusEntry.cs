@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Screen;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
@@ -188,12 +186,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         }
 
         string _buttonQuestion = "";
-
-        /// <summary>The fields the row's button asks for, answered together; none for one answer.</summary>
-        public List<Field> ButtonFields { get; } = new List<Field>();
-
-        /// <summary>What <see cref="ButtonFields" /> open holding, or none for empty ones.</summary>
-        public List<string> ButtonFilled { get; } = new List<string>();
 
         /// <summary>Whether this is the row of a list that the rest of its screen is about.</summary>
         /// <remarks>The logic system on a blueprint's screen whose blocks are being shown beside it.</remarks>

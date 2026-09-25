@@ -69,6 +69,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (CanRename)
                 part.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename, AcceptsName);
 
+            part.NamedOnArrival = NameOnArrival;
+            NameOnArrival = false;
+
             parts.Add(part);
             RefreshHeading(parts);
         }
@@ -121,6 +124,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// to change it, or it opens a box holding a sentence nobody typed.
         /// </remarks>
         public virtual string CustomName => "";
+
+        /// <summary>Whether the page opens with its name in hand to be given, once, as it is first shown.</summary>
+        internal bool NameOnArrival { get; set; }
 
         public virtual bool CanRename => false;
 

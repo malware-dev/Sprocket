@@ -191,9 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             var offers = entry.ButtonCommand != 0;
             _button.Collapsed = !offers;
-            _button.Press = entry.ButtonFields.Count > 0
-                ? Deed.Values(entry.ButtonCommand, entry.ButtonQuestion, entry.ButtonFields, entry.ButtonFilled)
-                : Deed.Asks(entry.ButtonCommand, entry.ButtonQuestion);
+            _button.Press = Deed.Asks(entry.ButtonCommand, entry.ButtonQuestion);
 
             if (offers)
                 _button.Text = entry.ButtonText;
