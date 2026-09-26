@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -197,11 +198,132 @@ namespace Sprocket.Host.SpaceEngineers.World
             return asked;
         }
 
+        /// <summary>
+        /// The keys Sprocket writes for a block, in the order it wants them tried: its id, its path, its name.
+        /// </summary>
+        /// <remarks>
+        /// The path is the one that survives a copy. Pasting or blueprinting a grid gives every block a
+        /// new id and keeps where each block stands on its grid, so a copy's blocks are found by the
+        /// path while the id finds nothing - see <see cref="Path" />. A name is last, because two blocks
+        /// can share one.
+        /// </remarks>
         public void Identify(GridEntity entity, List<EntityKey> keys)
         {
             keys.Clear();
             keys.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id)));
+
+            Vector3I[] path = Path(entity);
+            if (path != null)
+                keys.Add(new EntityKey(path));
+
             keys.Add(new EntityKey(ValueKind.Text, Values.Text(entity.Name)));
+        }
+
+        /// <summary>
+        /// Gives the first id among <paramref name="keys" /> the id of <paramref name="entity" />, leaving
+        /// every key where the program put it.
+        /// </summary>
+        /// <remarks>
+        /// For a block found by its path after its id found nothing, which is a copy's block: from the
+        /// next save on, its id finds it first, as it does an original's.
+        /// </remarks>
+        public void Renumber(GridEntity entity, List<EntityKey> keys)
+        {
+            for (var i = 0; i < keys.Count; i++)
+            {
+                if (keys[i].Cells != null || keys[i].Kind != ValueKind.Integer)
+                    continue;
+
+                keys[i] = new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id));
+                return;
+            }
+        }
+
+        /// <summary>
+        /// How to reach <paramref name="entity" /> from the anchor's own grid: the cell of each
+        /// mechanical joint crossed, then the block's own cell. Null where no joint leads there.
+        /// </summary>
+        /// <remarks>
+        /// A cell is a block's <c>Position</c>, its anchor on its own grid, which a paste or a blueprint
+        /// keeps. A joint crossed from its base leads to its top's grid, and from its top to its base's,
+        /// so a programmable block on a rotor head reaches the grid the rotor stands on as easily as
+        /// the other way round. Worked out by searching the joints, which happens when a block is
+        /// declared and never on a tick.
+        /// </remarks>
+        Vector3I[] Path(GridEntity entity)
+        {
+            IMyCubeGrid home = _anchor == null ? null : _anchor.CubeGrid;
+            IMyCubeGrid target = entity.Block.CubeGrid;
+            if (home == null || target == null)
+                return null;
+
+            // Breadth first, so the path is the shortest: each grid reached remembers the grid it was
+            // reached from and the cell of the joint crossed to get there.
+            var from = new Dictionary<IMyCubeGrid, IMyCubeGrid>();
+            var through = new Dictionary<IMyCubeGrid, Vector3I>();
+            var waiting = new Queue<IMyCubeGrid>();
+            var blocks = new List<IMySlimBlock>();
+            from[home] = null;
+            waiting.Enqueue(home);
+
+            while (waiting.Count > 0 && !from.ContainsKey(target))
+            {
+                IMyCubeGrid grid = waiting.Dequeue();
+                blocks.Clear();
+                grid.GetBlocks(blocks);
+
+                for (var i = 0; i < blocks.Count; i++)
+                {
+                    IMyCubeGrid next = Across(blocks[i].FatBlock);
+                    if (next == null || from.ContainsKey(next))
+                        continue;
+
+                    from[next] = grid;
+                    through[next] = blocks[i].FatBlock.Position;
+                    waiting.Enqueue(next);
+                }
+            }
+
+            if (!from.ContainsKey(target))
+                return null;
+
+            var cells = new List<Vector3I> { entity.Block.Position };
+            for (IMyCubeGrid grid = target; from[grid] != null; grid = from[grid])
+                cells.Insert(0, through[grid]);
+
+            return cells.ToArray();
+        }
+
+        /// <summary>
+        /// The block a path of cells leads to from the anchor's own grid, or null where any step of it
+        /// finds no joint or no block.
+        /// </summary>
+        GridEntity Walk(Vector3I[] cells)
+        {
+            IMyCubeGrid grid = _anchor == null ? null : _anchor.CubeGrid;
+            for (var i = 0; grid != null && i < cells.Length - 1; i++)
+            {
+                IMySlimBlock joint = grid.GetCubeBlock(cells[i]);
+                grid = joint == null ? null : Across(joint.FatBlock);
+            }
+
+            IMySlimBlock found = grid == null ? null : grid.GetCubeBlock(cells[cells.Length - 1]);
+            var block = found == null ? null : found.FatBlock as IMyTerminalBlock;
+            return block == null ? null : FindEntity(block.EntityId);
+        }
+
+        /// <summary>
+        /// The grid on the other side of <paramref name="block" />, where it is one end of a mechanical
+        /// joint with something attached; otherwise null.
+        /// </summary>
+        static IMyCubeGrid Across(IMyCubeBlock block)
+        {
+            var bottom = block as IMyMechanicalConnectionBlock;
+            if (bottom != null)
+                return bottom.TopGrid;
+
+            var top = block as IMyAttachableTopBlock;
+            return top == null || top.Base == null ? null : top.Base.CubeGrid;
         }
 
         /// <summary>
@@ -236,6 +358,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         GridEntity Matching(EntityKey key)
         {
+            if (key.Cells != null)
+                return key.Cells.Length == 0 ? null : Walk(key.Cells);
+
             if (key.Kind == ValueKind.Integer)
             {
                 long id;

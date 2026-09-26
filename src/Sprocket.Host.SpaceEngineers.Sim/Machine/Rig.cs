@@ -26,6 +26,12 @@ sealed class Rig
 {
     readonly Grid _grid = new Grid("Test Rig");
 
+    /// <summary>Every grid of the construct, the one the block Sprocket runs in stands on first.</summary>
+    readonly List<Grid> _grids = new List<Grid>();
+
+    /// <summary>The grid a block is welded to next.</summary>
+    Grid _welding;
+
     /// <summary>
     /// A construct with nothing on it but the block Sprocket runs in.
     /// </summary>
@@ -46,6 +52,8 @@ sealed class Rig
     /// </remarks>
     public Rig(long sprocket)
     {
+        _grids.Add(_grid);
+        _welding = _grid;
         Sprocket = _grid.Weld(new Programmable(sprocket, "Automation",
             Type<MyObjectBuilder_MyProgrammableBlock>(), "LargeProgrammableBlock",
             "Programmable Block"));
@@ -127,7 +135,34 @@ sealed class Rig
     /// <summary>Welds a block on, as building one does.</summary>
     public T Weld<T>(T fitting) where T : Fitting
     {
-        return _grid.Weld(fitting);
+        return _welding.Weld(fitting);
+    }
+
+    /// <summary>
+    /// Welds what comes next onto the head of <paramref name="rotor" />, giving it a head on a grid of
+    /// its own where it has none.
+    /// </summary>
+    public void OnHeadOf(Rotor rotor)
+    {
+        if (rotor.TopGrid == null)
+        {
+            var head = new Grid(rotor.Name + " Head", _grid.Journal);
+            head.Top((IMyMechanicalConnectionBlock)rotor.Block);
+            rotor.TopGrid = head.Block;
+            _grids.Add(head);
+        }
+
+        for (var i = 0; i < _grids.Count; i++)
+        {
+            if (_grids[i].Block == rotor.TopGrid)
+                _welding = _grids[i];
+        }
+    }
+
+    /// <summary>Welds what comes next onto the grid the block Sprocket runs in stands on.</summary>
+    public void OnBase()
+    {
+        _welding = _grid;
     }
 
     /// <summary>
@@ -150,7 +185,8 @@ sealed class Rig
     /// <summary>Grinds one off, which leaves whatever named it pointing at nothing.</summary>
     public void Grind(Fitting fitting)
     {
-        _grid.Grind(fitting);
+        for (var i = 0; i < _grids.Count; i++)
+            _grids[i].Grind(fitting);
     }
 
     /// <summary>
@@ -235,7 +271,21 @@ sealed class Rig
     /// <summary>The block Sprocket runs in, which is what the mod is handed.</summary>
     public Programmable Sprocket { get; private set; }
 
-    public IReadOnlyList<Fitting> Fitted => _grid.Fitted;
+    /// <summary>Every block on every grid of the construct.</summary>
+    public IReadOnlyList<Fitting> Fitted
+    {
+        get
+        {
+            if (_grids.Count == 1)
+                return _grid.Fitted;
+
+            var all = new List<Fitting>();
+            for (var i = 0; i < _grids.Count; i++)
+                all.AddRange(_grids[i].Fitted);
+
+            return all;
+        }
+    }
 
     /// <summary>Everything the construct has been told to do, oldest first.</summary>
     public List<string> Log => _grid.Journal;
@@ -259,14 +309,15 @@ sealed class Rig
         // Every toolbar read and write the mod makes, answered over this rig's own slots.
         Toolbars.Use(new RigSlots(this));
 
-        IMyCubeGrid grid = _grid.Block;
-
         MyAPIGateway.GridGroups = Pretend.To<IMyGridGroups>()
             .Does("GetGroup", arguments =>
             {
                 var into = arguments[2] as List<IMyCubeGrid>;
                 if (into != null)
-                    into.Add(grid);
+                {
+                    for (var i = 0; i < _grids.Count; i++)
+                        into.Add(_grids[i].Block);
+                }
 
                 return null;
             })
@@ -290,7 +341,8 @@ sealed class Rig
     public void Tick()
     {
         Clock.Tick();
-        _grid.Tick();
+        for (var i = 0; i < _grids.Count; i++)
+            _grids[i].Tick();
     }
 
     static MyObjectBuilderType Type<T>()

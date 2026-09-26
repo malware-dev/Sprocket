@@ -31,7 +31,9 @@ sealed class Piston : Fitting
     public Piston(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
+        // No top: the rig's pistons carry nothing, so there is no grid on the other side.
         Fit(Pretend.To<IMyExtendedPistonBase>()
+            .Gives("TopGrid", () => null)
             .Gives("CurrentPosition", () => _position)
             .Gives("NormalizedPosition", () => (_position - Lowest) / (Highest - Lowest))
             .Gives("LowestPosition", () => Lowest)

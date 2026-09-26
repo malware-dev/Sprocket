@@ -10,10 +10,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
     /// </summary>
     public static class ByteData
     {
-        static readonly double[] _doubleBuffer = new double[1];
-        static readonly float[] _floatBuffer = new float[1];
-        static readonly UTF8Encoding _utf8 = new UTF8Encoding(false, false);
-        static readonly char[] _charBuffer = new char[1024]; // Reusable buffer for StringBuilder char extraction
+        static readonly double[] DoubleBuffer = new double[1];
+        static readonly float[] FloatBuffer = new float[1];
+        static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, false);
+        static readonly char[] CharBuffer = new char[1024]; // Reusable buffer for StringBuilder char extraction
 
         /// <summary>
         ///     Writes a 32-bit unsigned integer to the byte array using little-endian byte order.
@@ -140,10 +140,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 upon return.</param>
         public static void Write(float value, byte[] data, ref int pos)
         {
-            lock (_floatBuffer)
+            lock (FloatBuffer)
             {
-                _floatBuffer[0] = value;
-                Buffer.BlockCopy(_floatBuffer, 0, data, pos, 4);
+                FloatBuffer[0] = value;
+                Buffer.BlockCopy(FloatBuffer, 0, data, pos, 4);
             }
 
             pos += 4;
@@ -165,10 +165,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return false;
             }
 
-            lock (_floatBuffer)
+            lock (FloatBuffer)
             {
-                Buffer.BlockCopy(data, pos, _floatBuffer, 0, 4);
-                value = _floatBuffer[0];
+                Buffer.BlockCopy(data, pos, FloatBuffer, 0, 4);
+                value = FloatBuffer[0];
             }
 
             pos += 4;
@@ -184,10 +184,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <param name="pos">The starting position in <paramref name="data" />; incremented by 8 upon return.</param>
         public static void Write(double value, byte[] data, ref int pos)
         {
-            lock (_doubleBuffer)
+            lock (DoubleBuffer)
             {
-                _doubleBuffer[0] = value;
-                Buffer.BlockCopy(_doubleBuffer, 0, data, pos, 8);
+                DoubleBuffer[0] = value;
+                Buffer.BlockCopy(DoubleBuffer, 0, data, pos, 8);
             }
 
             pos += 8;
@@ -209,10 +209,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return false;
             }
 
-            lock (_doubleBuffer)
+            lock (DoubleBuffer)
             {
-                Buffer.BlockCopy(data, pos, _doubleBuffer, 0, 8);
-                value = _doubleBuffer[0];
+                Buffer.BlockCopy(data, pos, DoubleBuffer, 0, 8);
+                value = DoubleBuffer[0];
             }
 
             pos += 8;
@@ -311,14 +311,14 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             // Calculate total UTF-8 byte count by processing in chunks
             var totalByteCount = 0;
-            lock (_charBuffer)
+            lock (CharBuffer)
             {
                 var offset = 0;
                 while (offset < charCount)
                 {
-                    var chunkSize = Math.Min(_charBuffer.Length, charCount - offset);
-                    value.CopyTo(offset, _charBuffer, 0, chunkSize);
-                    totalByteCount += _utf8.GetByteCount(_charBuffer, 0, chunkSize);
+                    var chunkSize = Math.Min(CharBuffer.Length, charCount - offset);
+                    value.CopyTo(offset, CharBuffer, 0, chunkSize);
+                    totalByteCount += Utf8.GetByteCount(CharBuffer, 0, chunkSize);
                     offset += chunkSize;
                 }
 
@@ -329,9 +329,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 offset = 0;
                 while (offset < charCount)
                 {
-                    var chunkSize = Math.Min(_charBuffer.Length, charCount - offset);
-                    value.CopyTo(offset, _charBuffer, 0, chunkSize);
-                    var bytesWritten = _utf8.GetBytes(_charBuffer, 0, chunkSize, data, pos);
+                    var chunkSize = Math.Min(CharBuffer.Length, charCount - offset);
+                    value.CopyTo(offset, CharBuffer, 0, chunkSize);
+                    var bytesWritten = Utf8.GetBytes(CharBuffer, 0, chunkSize, data, pos);
                     pos += bytesWritten;
                     offset += chunkSize;
                 }
@@ -367,18 +367,18 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (pos + byteCount > data.Length)
                 return false;
 
-            lock (_charBuffer)
+            lock (CharBuffer)
             {
                 var bytesProcessed = 0;
                 while (bytesProcessed < byteCount)
                 {
                     var bytesRemaining = byteCount - bytesProcessed;
-                    var bytesToProcess = Math.Min(bytesRemaining, _charBuffer.Length * 3);
-                    var charsDecoded = _utf8.GetChars(data, pos + bytesProcessed, bytesToProcess, _charBuffer, 0);
+                    var bytesToProcess = Math.Min(bytesRemaining, CharBuffer.Length * 3);
+                    var charsDecoded = Utf8.GetChars(data, pos + bytesProcessed, bytesToProcess, CharBuffer, 0);
                     if (value.Capacity < value.Length + charsDecoded)
                         value.Capacity = value.Length + charsDecoded;
-                    value.Append(_charBuffer, 0, charsDecoded);
-                    var bytesConsumed = _utf8.GetByteCount(_charBuffer, 0, charsDecoded);
+                    value.Append(CharBuffer, 0, charsDecoded);
+                    var bytesConsumed = Utf8.GetByteCount(CharBuffer, 0, charsDecoded);
                     bytesProcessed += bytesConsumed;
                 }
             }
@@ -406,7 +406,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return;
             }
 
-            var bytes = _utf8.GetBytes(value);
+            var bytes = Utf8.GetBytes(value);
             Write(bytes.Length, data, ref pos);
             Array.Copy(bytes, 0, data, pos, bytes.Length);
             pos += bytes.Length;
@@ -436,7 +436,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (pos + byteCount > data.Length)
                 return false;
 
-            value = _utf8.GetString(data, pos, byteCount);
+            value = Utf8.GetString(data, pos, byteCount);
             pos += byteCount;
             return true;
         }
@@ -448,7 +448,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             if (value == null || value.Length == 0)
                 return 4;
-            return 4 + _utf8.GetByteCount(value);
+            return 4 + Utf8.GetByteCount(value);
         }
     }
 }

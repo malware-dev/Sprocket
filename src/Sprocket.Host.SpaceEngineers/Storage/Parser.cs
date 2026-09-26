@@ -20,6 +20,21 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         readonly Lexer _lexer;
         readonly Reading _reading = new Reading();
+
+        /// <summary>
+        /// A list's items as they are read, one buffer for each list open at once.
+        /// </summary>
+        /// <remarks>
+        /// Kept aside until the list closes, because a list or a vector inside it writes its own run
+        /// into <see cref="Reading.Items" /> first: held back, the outer list's items still land in one
+        /// unbroken run of their own. Kept for the life of the reading rather than made per list, since
+        /// a program is mostly lists and loading one lands inside a world load.
+        /// </remarks>
+        readonly List<List<Value>> _held = new List<List<Value>>();
+
+        /// <summary>How many lists are open, which is the buffer the next one reads into.</summary>
+        int _depth;
+
         Token _token;
 
         int _failures;
@@ -286,34 +301,38 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// A list, its items written straight into the reading's shared run.
+        /// A list, its items written into the reading's shared run once it closes.
         /// </summary>
         /// <remarks>
-        /// <b>A list may not hold a list.</b> Nothing in the model has a use for one and nothing writes one,
-        /// and refusing it is what keeps a list's items unbroken in <see cref="Reading.Items" />: a list
-        /// inside a list would have its items land in the middle of its parent's.
+        /// A list may hold lists and vectors, each of which is a run of its own: see <see cref="_held" />.
         /// </remarks>
         Value List()
         {
-            var items = _reading.Items;
-            var from = items.Count;
+            if (_depth == _held.Count)
+                _held.Add(new List<Value>());
+
+            List<Value> held = _held[_depth];
+            held.Clear();
+            _depth++;
             Step();
 
+            var value = Listed(held);
+            _depth--;
+            return value;
+        }
+
+        /// <summary>Reads a list's items into <paramref name="held" />, then writes them as one run.</summary>
+        Value Listed(List<Value> held)
+        {
             while (_token.Kind != TokenKind.ListClose)
             {
-                if (_token.Kind == TokenKind.ListOpen)
-                {
-                    Fail("a list cannot hold a list");
-                    return Value.None;
-                }
-
                 if (!Valuish())
                 {
                     Fail("a list holds values and ends with a ']'");
                     return Value.None;
                 }
 
-                items.Add(Next());
+                held.Add(Next());
                 if (_token.Kind != TokenKind.Comma)
                     break;
 
@@ -327,7 +346,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             Step();
-            return Value.Listed(from, items.Count - from);
+
+            var items = _reading.Items;
+            var from = items.Count;
+            for (var i = 0; i < held.Count; i++)
+                items.Add(held[i]);
+
+            return Value.Listed(from, held.Count);
         }
 
         /// <summary>
@@ -363,13 +388,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return Value.Qualified(from, parts.Count - from);
         }
 
+        /// <summary>A vector, its three numbers written into the reading's shared run.</summary>
         Value Vector()
         {
             Step();
 
+            var items = _reading.Items;
+            var from = items.Count;
             for (var i = 0; i < 3; i++)
             {
-                if (_token.Kind != TokenKind.Integer && _token.Kind != TokenKind.Real)
+                if (_token.Kind == TokenKind.Integer)
+                    items.Add(new Value(ValueForm.Integer, null, _token.Whole));
+                else if (_token.Kind == TokenKind.Real)
+                    items.Add(new Value(ValueForm.Real, null, 0, _token.Real));
+                else
                 {
                     Fail("a vector is three numbers in brackets");
                     return Value.None;
@@ -385,7 +417,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             Step();
-            return new Value(ValueForm.Vector);
+            return Value.Vectored(from);
         }
 
         /// <summary>

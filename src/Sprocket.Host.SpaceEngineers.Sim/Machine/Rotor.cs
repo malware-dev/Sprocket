@@ -2,6 +2,7 @@ using System;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
+using VRage.Game.ModAPI;
 using VRage.ObjectBuilders;
 using MyRotationDirection = Sandbox.ModAPI.Ingame.MyRotationDirection;
 
@@ -45,6 +46,7 @@ sealed class Rotor : Fitting
             .Gives("TargetVelocityRPM", () => _speed)
             .Gives("MaxRotorAngularVelocity", () => 30f * 2f * (float)Math.PI / 60f)
             .Gives("IsAttached", () => Attached)
+            .Gives("TopGrid", () => TopGrid)
             .Gives("RotorLock", () => Locked)
             .Gives("Torque", () => Torque)
             .Takes("LowerLimitRad", value => _lower = (float)value)
@@ -87,6 +89,9 @@ sealed class Rotor : Fitting
 
     /// <summary>Whether it has a head on it, without which it turns nothing.</summary>
     public bool Attached { get; set; } = true;
+
+    /// <summary>The grid its head stands on, or null where it has none.</summary>
+    public IMyCubeGrid TopGrid { get; set; }
 
     /// <summary>Whether its lock is on, which holds it where it stands.</summary>
     public bool Locked { get; set; }

@@ -17,7 +17,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         readonly StringBuilder _text = new StringBuilder();
         int _depth;
-        bool _inList;
+
+        /// <summary>How many lists are open, a list being able to hold one.</summary>
+        int _lists;
+
         bool _first;
         bool _fresh = true;
 
@@ -188,15 +191,32 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             Space();
             _text.Append('[');
-            _inList = true;
+            _lists++;
             _first = true;
             return this;
         }
 
         public Pen CloseList()
         {
-            _inList = false;
+            if (_lists > 0)
+                _lists--;
+
             _text.Append(_first ? "]" : " ]");
+
+            // The list just closed is an item of whatever list is still open, so what follows it is
+            // the next item there.
+            _first = false;
+            return this;
+        }
+
+        /// <summary>Three whole numbers in brackets: <c>(3 0 -2)</c>.</summary>
+        public Pen Vector(int x, int y, int z)
+        {
+            Space();
+            _text.Append('(')
+                .Append(x.ToString(CultureInfo.InvariantCulture)).Append(' ')
+                .Append(y.ToString(CultureInfo.InvariantCulture)).Append(' ')
+                .Append(z.ToString(CultureInfo.InvariantCulture)).Append(')');
             return this;
         }
 
@@ -238,7 +258,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         void Space()
         {
-            if (!_inList)
+            if (_lists == 0)
             {
                 _text.Append(' ');
                 return;

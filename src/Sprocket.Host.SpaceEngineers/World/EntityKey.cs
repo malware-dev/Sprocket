@@ -1,3 +1,5 @@
+using VRageMath;
+
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>
@@ -21,9 +23,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             Value = value;
         }
 
+        /// <summary>A key that is a list of cells, written as a list of vectors.</summary>
+        public EntityKey(Vector3I[] cells) : this()
+        {
+            Cells = cells;
+        }
+
         /// <summary>What sort of value this is, so it can be read back and written down.</summary>
         public ValueKind Kind { get; private set; }
 
         public EntityValue Value { get; private set; }
+
+        /// <summary>The cells, where this key is a list of them rather than a value; otherwise null.</summary>
+        public Vector3I[] Cells { get; private set; }
     }
 }

@@ -7,6 +7,7 @@ using VRage.Game.Components;
 using VRage.Game.Components.Interfaces;
 using VRage.Game.ModAPI;
 using VRage.ObjectBuilders;
+using VRageMath;
 
 namespace Sprocket.Sim.Machine;
 
@@ -70,6 +71,9 @@ abstract class Fitting
 
     public IMyCubeGrid Grid { get; set; }
 
+    /// <summary>Where the block stands on its grid, which the grid gives it as it is welded where nothing set one.</summary>
+    public Vector3I? Cell { get; set; }
+
     /// <summary>
     /// Where what this block is told to do gets written down, which is the rig's own journal.
     /// </summary>
@@ -128,6 +132,7 @@ abstract class Fitting
                 Told(Enabled ? "on" : "off");
             })
             .Gives("CubeGrid", () => Grid)
+            .Gives("Position", () => Cell ?? Vector3I.Zero)
             .Gives("Storage", () => Storage)
             .Takes("Storage", value => Storage = (MyModStorageComponentBase)value)
             .Gives("Components", () => container);

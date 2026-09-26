@@ -81,7 +81,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
 
                 _bound[declared.Name] = found;
-                _states[declared.Name] = matched == 0 ? RefState.Bound : RefState.Adrift;
+
+                // The keys are tried in the order the program lists them, and the first to find a block
+                // decides. Found by the first of them, it is the block the author put first. An id or a
+                // path found further down still says which block was meant; a name further down only
+                // proposes one, since two blocks can share it.
+                //
+                // Found by its path alone, it is a copy's block, and its id key takes the new id where it
+                // has one - in the place it already has, so the order the program was written in stands.
+                var key = declared.Keys[matched];
+                var sure = matched == 0 || key.Cells != null || key.Kind == ValueKind.Integer;
+                _states[declared.Name] = sure ? RefState.Bound : RefState.Adrift;
+                if (key.Cells != null)
+                    world.Renumber(found, declared.Keys);
             }
         }
 
