@@ -50,7 +50,6 @@ public class HandoverTests : IDisposable
         public string Switches = "";
     }
 
-    /// <summary>What the server heard of changes.</summary>
     readonly Heard _atServer = new Heard();
 
     Handover Handover(Peer peer, Func<long, SprocketUnit?> find, Heard heard)

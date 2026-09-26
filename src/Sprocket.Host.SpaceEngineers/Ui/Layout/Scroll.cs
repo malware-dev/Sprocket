@@ -14,7 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         Element _content;
         bool _held;
 
-        /// <summary>Where the pointer was when the thumb last moved under it.</summary>
         float _heldAt;
 
         /// <summary>An empty scroll, cut to its bounds.</summary>

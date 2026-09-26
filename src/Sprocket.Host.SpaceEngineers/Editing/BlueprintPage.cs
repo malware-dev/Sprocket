@@ -20,15 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     {
         readonly AutomationSystem _system;
 
-        /// <summary>The parts something uses, as the screen was built from them.</summary>
         readonly List<Part> _parts = new List<Part>();
 
-        /// <summary>Scratch for what the system's sentences name.</summary>
         readonly List<string> _used = new List<string>();
 
         BlueprintComponent _blueprint;
 
-        /// <summary>What the page was built from, so a change of shape rebuilds it.</summary>
         int _shape;
 
         public BlueprintPage(SprocketEditor editor, AutomationSystem system) : base(editor)

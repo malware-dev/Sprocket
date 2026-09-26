@@ -16,10 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>What to put in the layout.</summary>
         public abstract Element Root { get; }
 
-        /// <summary>What this view is showing, so it can hear when the values change.</summary>
         EditorComponent _watched;
 
-        /// <summary>Whether something has announced a change since this view last wrote its controls.</summary>
         bool _told = true;
 
         /// <summary>

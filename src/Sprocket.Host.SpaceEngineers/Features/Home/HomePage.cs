@@ -29,14 +29,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
     {
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
 
-        /// <summary>Which systems have rows and which have groups, gathered when the systems change.</summary>
         readonly List<AutomationSystem> _own = new List<AutomationSystem>();
         readonly List<AutomationSystem> _blueprints = new List<AutomationSystem>();
 
-        /// <summary>What the page was last shown from, so a change of shape shows it again.</summary>
         int _shape;
 
-        /// <summary>One row for each logic system of its own, and one group for each blueprint, kept by the system; null until the view is made.</summary>
         Keyed<AutomationSystem, StatusRow> _rows;
         Keyed<AutomationSystem, BlueprintGroup> _groups;
 

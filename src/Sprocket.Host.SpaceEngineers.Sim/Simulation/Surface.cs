@@ -32,7 +32,6 @@ namespace Sprocket.Sim.Simulation
         readonly ScreenSpaceDevice _device = new ScreenSpaceDevice();
         readonly FallbackFonts _shapes;
 
-        /// <summary>The desktop face this canvas draws letters with, where no game page is loaded.</summary>
         readonly Typeface _letters = new Typeface("Segoe UI");
         readonly SeFontMetrics _exact;
         readonly GlyphAtlas _atlas;

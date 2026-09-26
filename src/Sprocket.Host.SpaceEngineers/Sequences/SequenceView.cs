@@ -50,7 +50,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             public float Wanted;
         }
 
-        /// <summary>The gap under each step, which the drag arithmetic has to agree with.</summary>
         const float RowGap = Space.Row * 0.8f;
 
         readonly SequenceComponent _component;
@@ -69,7 +68,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         // its trigger would start it, rather than tried out.
         readonly Glyph _run = Widgets.Symbol(Symbols.Play, Palette.Muted);
 
-        /// <summary>The run mark's place, as wide for stop as for play.</summary>
         readonly Sized _runSlot;
         readonly Switch _enable = new Switch(Lettering.Small);
         // The same bin the step rows use. Deleting a sequence and deleting a step out of one are the
@@ -78,25 +76,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         // the steps, beside the switch that governs the whole sequence.
         readonly Glyph _delete = Widgets.Symbol(Symbols.Delete, Palette.Muted);
 
-        /// <summary>Why nothing here can be pressed, said on the line the adders stand on.</summary>
         readonly Label _locked = Widgets.Quiet("", Lettering.Small);
-        /// <summary>
-        /// What is wrong, where the state would otherwise be.
-        /// </summary>
-        /// <remarks>
-        /// The same line rather than a line of its own: a banner appearing pushes the whole sentence
-        /// down, and a card that changes height as a machine runs is a card nobody can read.
-        /// <para>
-        /// Its own label rather than the state's words in problem colours, because the two are not
-        /// the same thing and only one of them is ever true. What a sequence is doing is not news;
-        /// what is stopping it is, and it is said in the colour of news.
-        /// </para>
-        /// </remarks>
         readonly Label _problem = Widgets.Label("", Palette.Problem, Lettering.Small);
 
         readonly Dot _ranLight = new Dot();
 
-        /// <summary>What the two arrows were last told to say, and the words they were made from.</summary>
         string _undone;
         string _undoSays;
         string _redone;
@@ -110,7 +94,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         bool _built;
 
-        /// <summary>The step being carried, or -1.</summary>
         int _carrying = -1;
 
         float _grabbedAt;

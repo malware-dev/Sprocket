@@ -30,11 +30,6 @@ namespace Sprocket.Sim.Shell
         /// </remarks>
         public static bool OpensQuietly;
 
-        /// <summary>What one notch of the wheel scrolls, in UI units.</summary>
-        /// <remarks>
-        /// About three rows, which is what a list this size wants. The framework counts a notch as 120,
-        /// and the editor clamps the result, so pushing past either end simply stops.
-        /// </remarks>
         const float NotchUnits = 60f;
 
         const float PerNotch = 120f;

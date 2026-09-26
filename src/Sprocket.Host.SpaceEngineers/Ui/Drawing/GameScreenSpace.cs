@@ -9,11 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
     /// <summary>The game's own screen, and the only place the mod calls its screen-space API.</summary>
     public sealed class GameScreenSpace : IScreenSpace
     {
-        /// <summary>The scopes the game handed back, innermost last.</summary>
-        /// <remarks>
-        ///     Typed, because <c>MyScissorScope</c> is a struct and holding it as <c>IDisposable</c> would box
-        ///     one per push. Disposing a copy is safe: it reads its two fields and pops.
-        /// </remarks>
         readonly List<MyScreenSpace.MyScissorScope> _scissors =
             new List<MyScreenSpace.MyScissorScope>();
 
@@ -41,6 +36,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         /// </remarks>
         public void PushScissor(Rectangle pixels, MyScreenSpaceLayer layer)
         {
+            // Kept typed, because MyScissorScope is a struct and holding it as IDisposable would box one per push.
+            // Disposing a copy is safe: it reads its two fields and pops.
             _scissors.Add(MyScreenSpace.UsingScissorRectanglePixels(pixels, layer));
         }
 

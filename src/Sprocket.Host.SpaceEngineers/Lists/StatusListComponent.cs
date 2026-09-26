@@ -20,7 +20,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     {
         string _emptyText;
 
-        /// <summary>The rows this is repeating for, so each one can be let go of again.</summary>
         readonly List<StatusEntry> _heard = new List<StatusEntry>();
 
         public StatusListComponent()

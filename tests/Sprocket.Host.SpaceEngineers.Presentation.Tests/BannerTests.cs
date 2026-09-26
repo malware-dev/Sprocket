@@ -11,7 +11,6 @@ public class BannerTests
     const float Wide = 800f;
     const float High = 400f;
 
-    /// <summary>How many frames a slide takes.</summary>
     const int Frames = 12;
 
     /// <summary>A notice arrives by sliding in, part of the way after one frame and the whole way after a slide's worth.</summary>

@@ -40,7 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         readonly HStack _detail;
         readonly Glyph _below;
 
-        /// <summary>The summary and whether it asks, as last shown, so an action row's words are joined only when they change.</summary>
         string _said;
         bool _saidAsks;
 

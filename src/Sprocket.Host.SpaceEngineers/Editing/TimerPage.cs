@@ -18,12 +18,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly Aim _aim;
         readonly Action<int> _done;
 
-        /// <summary>The rate chosen so far, in ticks.</summary>
         int _ticks;
 
         PickComponent _pick;
 
-        /// <summary>Whether this goes straight on to the page after it once it is first built.</summary>
         bool _goesOn;
         PickStage _rates;
         PickStage _does;

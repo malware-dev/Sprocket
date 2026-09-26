@@ -15,7 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 sealed class Screen
 {
-    /// <summary>The size a letter actually lands at for a player. Layout does not depend on it.</summary>
     const float Width = 1920f;
     const float Height = 1080f;
 
@@ -204,15 +203,6 @@ readonly struct Drawn(DrawCommand command, RectangleF clip)
 
     public RectangleF Clip => clip;
 
-    /// <summary>
-    /// How far outside a clip a position may sit and still be inside it.
-    /// </summary>
-    /// <remarks>
-    /// A scissor is a rectangle of whole pixels and a drawn position is not, so a run laid out flush
-    /// against the edge of its own container lands up to half a pixel the wrong side of it once the
-    /// rectangle has been rounded. That is the two living in different units, not the screen cutting
-    /// anything off.
-    /// </remarks>
     const float Rounding = 0.5f;
 
     public bool IsInsideItsClip =>

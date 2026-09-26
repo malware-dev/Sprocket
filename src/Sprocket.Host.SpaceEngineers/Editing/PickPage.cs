@@ -32,37 +32,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         string _chosen;
 
-        /// <summary>Whether what is chosen is one of the blocks' values, which its id alone does not say.</summary>
         Form _chosenForm;
         bool _all;
 
         readonly List<GridEntity> _candidates = new List<GridEntity>();
         readonly List<GridEntity> _filtered = new List<GridEntity>();
 
-        /// <summary>
-        /// A small number per entity, handed out in the order they are first seen and kept for the life of
-        /// this page.
-        /// </summary>
-        /// <remarks>
-        /// A command's number is twelve bits, and an entity's id is whatever the game hands out. Space
-        /// Engineers gives blocks ids in the quintillions, so casting one into that field clamps every
-        /// block to the same number and the second one registered throws. The invented ship numbers its
-        /// blocks from zero, so only a real one shows it.
-        ///
-        /// A row's position would fit and would be wrong: narrowing the list, or a block being welded on,
-        /// would leave a held id pointing at a different block. That is the "which slot was it in" mistake the
-        /// numbering exists to prevent, so the map is by identity and outlives any rebuild.
-        /// </remarks>
         readonly Dictionary<long, int> _slots = new Dictionary<long, int>();
 
-        /// <summary>
-        /// Name first, then id.
-        /// </summary>
-        /// <remarks>
-        /// Ordinal rather than the player's culture, because the same ship has to list in the same order
-        /// wherever it is opened. The id breaks ties, and there are always ties: a ship carries a dozen
-        /// blocks called "Interior Light" and they must not swap places between one rebuild and the next.
-        /// </remarks>
         static readonly NameOrder ByName = new NameOrder();
 
         /// <remarks>
@@ -83,16 +60,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
         readonly List<EntityKind> _kinds = new List<EntityKind>();
 
-        /// <summary>Where this sort of picker keeps how it was narrowed, so the next one opens the same way.</summary>
         readonly Filter _filter;
 
         string _blockSearch;
         string _kind;
 
-        /// <summary>What is typed into the box that narrows the kinds, which narrows nothing else.</summary>
         string _kindSearch;
 
-        /// <summary>The kinds actually offered, which is all of them until the box narrows them.</summary>
         readonly List<EntityKind> _shownKinds = new List<EntityKind>();
         string _whatSearch;
         readonly List<string> _names = new List<string>();
@@ -165,24 +139,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
         }
 
-        /// <summary>What was already picked when this opened, to tell a change from a look.</summary>
-        /// <remarks>
-        /// Empty where the picker opened to start something and full where it opened to change
-        /// something, which is the whole of the difference between the two ways of being here.
-        /// </remarks>
         readonly List<long> _arrived = new List<long>();
 
-        /// <summary>The title as it was last worked out, or null before it has been.</summary>
         string _said;
 
-        /// <summary>What the title was last worked out from.</summary>
         readonly List<long> _saidBlocks = new List<long>();
 
         string _saidChosen = "";
         int _saidOffered;
         bool _saidAll;
 
-        /// <summary>Whether the title has changed since the editor last asked.</summary>
         bool _retitled;
 
         /// <summary>The title as the answer stands, or the picker's own name where nothing is chosen.</summary>
@@ -244,37 +210,26 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
         }
 
-        /// <summary>What the step being changed was already given, or empty where nothing is.</summary>
         readonly List<Literal> _arrivedValues = new List<Literal>();
 
-        /// <summary>The column this opens on, which is the part somebody pressed to come here.</summary>
         readonly Opening _opens;
 
-        /// <summary>Whether this goes straight on to the page after it once it is first built.</summary>
         bool _goesOn;
 
-        /// <summary>
-        /// Whether this page was opened straight onto rather than paged to, so going back leaves the
-        /// pick rather than paging through it.
-        /// </summary>
         bool _straight;
 
-        /// <summary>What the trigger does, chosen beside what starts it, or null where this is not a trigger.</summary>
         readonly Aim _aim;
 
-        /// <summary>Where this page's stages start in the pick, which is past those of the pages before it.</summary>
         readonly int _base;
 
         PickStage _does;
 
-        /// <summary>What the step being changed did, which is what its values were given to.</summary>
         readonly string _arrivedChosen;
 
         readonly Form _arrivedForm;
 
         readonly bool _arrivedAll;
 
-        /// <summary>What the values hold, as a program would write them, or null before they have said.</summary>
         string _entered;
 
         readonly List<string> _filled = new List<string>();
@@ -582,12 +537,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>The stages this page asks, which are the last in the pick while it is on top.</summary>
         int Own => (_blocks == null ? 0 : 1) + (_what == null ? 0 : 1) + (_does == null ? 0 : 1);
 
-        /// <summary>How often the ship is asked what its blocks are doing, in ticks.</summary>
-        /// <remarks>
-        /// Four times a second. A door opening is worth showing promptly and is not worth asking the
-        /// game about sixty times a second: on a construct of forty blocks that is a hundred and sixty
-        /// questions a tick, for a list whose fastest row takes the better part of a second to change.
-        /// </remarks>
         const int Looked = 15;
 
         Interval _looked = new Interval(Looked);
@@ -834,21 +783,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Editor.Invalidate();
         }
 
-        /// <summary>
-        /// Whether the choice between any one of the blocks and all of them is put on screen.
-        /// </summary>
-        /// <remarks>
-        /// <b>Off on purpose, and not because nothing is behind it.</b> A trigger that waits for all
-        /// of its blocks is built, sampled and tested - it fires as the last one arrives, and its
-        /// sentence joins the blocks with "and" rather than "or". What is not there is the rest of
-        /// what makes it usable: it is offered on every trigger, including the ones it cannot mean
-        /// anything for, and nothing on the way in explains the difference it is asking about.
-        /// <para>
-        /// One line here rather than at the four places that open a picker, so it comes back in one
-        /// line too. Nothing else changes: a trigger that already says "all of them" keeps saying it
-        /// and keeps firing that way.
-        /// </para>
-        /// </remarks>
         const bool AsksAll = false;
 
         /// <summary>
@@ -865,6 +799,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         bool FillOptions()
         {
+            // The choice between any one of the blocks and all of them stays off the screen. A trigger that waits
+            // for all of its blocks is built and tested, but the choice would be offered on triggers it means
+            // nothing for, and nothing on the way in explains it. A trigger already saying "all of them" keeps
+            // saying it and firing that way.
             var asks = _asksAll && AsksAll;
             var changed = Resize(_blocks.Options, asks ? 2 : 0);
             if (!asks)
@@ -1046,24 +984,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Editor.Invalidate();
         }
 
-        /// <summary>The heading over the block's own values, and the one over its actions.</summary>
-        /// <remarks>
-        /// Named for where somebody has already met them. Almost nobody arrives here without having
-        /// assigned a toolbar action by hand, so that is the half of the list that needs no
-        /// introduction - which is why it is the half that sits lower down.
-        /// </remarks>
         const string ValuesSaid = "Values";
         const string ActionsSaid = "Toolbar Actions";
 
-        /// <summary>What the two views are called.</summary>
-        /// <remarks>
-        /// Terminal is the game's own name for the surface it lists, and the one somebody has
-        /// already met wiring a toolbar by hand.
-        /// </remarks>
         const string OrganizedSaid = "Organized";
         const string TerminalSaid = "Terminal";
 
-        /// <summary>What the list of what to do says when the picked blocks do not all offer the same.</summary>
         const string NarrowedSaid = "Currently showing only what the selected blocks share";
 
         /// <summary>
@@ -1090,14 +1016,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         const string PartialSaid = "Sprocket has only partly checked this block, so some of what it offers "
             + "may still be doubled, missing or oddly named.";
 
-        /// <summary>What the mark on something a step waits for says when the pointer rests on it.</summary>
         const string WaitsSaid = "Holds the sequence until finished";
 
-        /// <summary>The terminal view's two groups: the block's own actions, and its values.</summary>
-        /// <remarks>
-        /// A heading sits in the list as the negative of one past its group, so that one list of
-        /// positions holds both the things and the words over them.
-        /// </remarks>
         const int Actions = 0;
         const int Values = 1;
 
@@ -1306,37 +1226,22 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return CategoryText.Of((Category)group);
         }
 
-        /// <summary>Which of the three ways each thing on offer reaches the blocks, one per entry in <c>_names</c>.</summary>
         readonly List<Form> _forms = new List<Form>();
 
-        /// <summary>Which group each thing on offer is listed in, one per entry in <c>_names</c>.</summary>
         readonly List<int> _groups = new List<int>();
 
-        /// <summary>Whether a step doing each thing on offer waits for it to finish.</summary>
         readonly List<bool> _waits = new List<bool>();
 
-        /// <summary>Whether each thing on offer sets one of the block's values.</summary>
         readonly List<bool> _sets = new List<bool>();
 
-        /// <summary>Whether each thing on offer can be made into a step.</summary>
         readonly List<Readiness> _ready = new List<Readiness>();
 
-        /// <summary>Why each thing on offer cannot be made into a step, or empty where it can.</summary>
         readonly List<string> _why = new List<string>();
 
-        /// <summary>
-        /// What to draw, in order: an index into the things on offer, or a heading.
-        /// </summary>
-        /// <remarks>
-        /// A heading is a negative, which is the cheapest way to say "not one of them" in a list of
-        /// positions - minus two for the values, minus one for the actions.
-        /// </remarks>
         readonly List<int> _rows = new List<int>();
 
-        /// <summary>By the words, because that is what somebody is scanning the list for.</summary>
         static readonly SaidOrder BySaid = new SaidOrder(false);
 
-        /// <summary>The same, by the block's own words, which are what the terminal view shows.</summary>
         static readonly SaidOrder ByDeclared = new SaidOrder(true);
 
         sealed class SaidOrder : IComparer<EntityAction>
@@ -1517,12 +1422,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Editor.Invalidate();
         }
 
-        /// <summary>
-        /// Where a run of blocks would start from: the last one taken on its own.
-        /// </summary>
-        /// <remarks>
-        /// Zero where nothing has been taken on this page yet, which no entity id ever is.
-        /// </remarks>
         long _anchor;
 
         void Toggle(long entityId)

@@ -11,7 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class AnsweringTests
 {
-    /// <summary>A sequence built and left while still switched off, which is what raises one.</summary>
     const string LeavingASequence =
         "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 70 200 "
         + "150 203 type Tug 200 360 800 587 1316 201 1316 319 enter 25 62";

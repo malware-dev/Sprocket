@@ -8,7 +8,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     {
         readonly ElementCollection _children;
 
-        /// <summary>Where along the content this sits.</summary>
         readonly Rail _rail = new Rail();
 
         float _across;

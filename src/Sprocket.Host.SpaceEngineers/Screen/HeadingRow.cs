@@ -18,16 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly HStack _row = new HStack { Spacing = 4f, Placement = Flex.Grow, ClipsContent = true };
         readonly List<Part> _parts = new List<Part>();
 
-        /// <summary>What the parts were last given, which the rename presses read.</summary>
         List<HeadingPart> _heading;
 
-        /// <summary>
-        /// How many parts are on show, which is not how many exist.
-        /// </summary>
-        /// <remarks>
-        /// The parts are a pool that only grows, so a screen with one part after a screen with two leaves a
-        /// spare behind.
-        /// </remarks>
         int _shown;
 
         int _shape = -1;

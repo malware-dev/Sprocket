@@ -57,7 +57,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly HeadingRow _title;
         readonly Switch _switch;
 
-        /// <summary>The header's "look again".</summary>
         readonly Glyph _refresh;
 
         readonly Glyph _undo;
@@ -69,22 +68,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly Relay _flips;
         readonly Relay _finishes;
 
-        /// <summary>What the two arrows' notes say is undone and redone, put in each note's slot.</summary>
         readonly Arguments _undone = new Arguments();
         readonly Arguments _redone = new Arguments();
         readonly Label _subtitle;
 
-        /// <summary>The body: what stands above the part that takes the room, that part, and what stands below it.</summary>
         readonly Grid _page;
         readonly Scroll _scroll;
 
-        /// <summary>Set by a press on the cross, and read once by whoever owns the window.</summary>
         bool _wantsClose;
         readonly VStack _body;
         readonly VStack _above;
 
-        /// <summary>What the editor needs said above whatever page is showing.</summary>
-        /// <remarks>Clear of the lane the page's scroll keeps for its bar, so its edge lines up with the page under it.</remarks>
         readonly Banner _banner = new Banner { Padding = new Thickness(0f, 0f, Sizes.Bar, 0f) };
         readonly VStack _below;
 
@@ -94,18 +88,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly Ask _ask = new Ask();
         readonly Confirm _question = new Confirm();
 
-        /// <summary>The windows open over the screen.</summary>
         readonly WindowLayer _windows = new WindowLayer();
 
-        /// <summary>A question with answers, asked in a dialog; on the root only until every screen is ported, and <see cref="_question" /> elsewhere.</summary>
         readonly MessageBox _dialog;
 
-        /// <summary>What was last pressed, so a question that press raises hangs under it.</summary>
         Element _raisedBy;
 
         readonly List<ComponentView> _views = new List<ComponentView>();
 
-        /// <summary>The page the body was last built for.</summary>
         EditorPage _shownPage;
 
         readonly List<EditorComponent> _shown = new List<EditorComponent>();
@@ -157,16 +147,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         int _wires;
 
-        /// <summary>What is lit right now, so it can be put out without searching for it.</summary>
         Element _lit;
 
-        /// <summary>What the thing the pointer rests on has to say, if anything.</summary>
         Document _saying;
 
-        /// <summary>The words for the slots in what it has to say, where that is a template.</summary>
         Arguments _sayingArguments;
 
-        /// <summary>The tip last read into a document, whether it was read as a template, and that document, so one is read only when the words change.</summary>
         string _tipSaid;
         bool _tipTemplated;
         Document _tipSaying;
@@ -175,53 +161,32 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         int _actionRevision = -1;
 
-        /// <summary>What an open rename will send its answer to.</summary>
         int _renameCommand;
 
-        /// <summary>The text and command core was last asked about, and whether it said the text was taken.</summary>
-        /// <remarks>
-        /// Asked every tick while a box is open, so the answer is kept until the text changes. A box hands back
-        /// the same string until somebody types, which is what makes comparing references enough.
-        /// </remarks>
         string _checkedText;
         int _checkedCommand;
         bool _checkedTaken;
-        /// <summary>Which part of the heading is being typed into, or -1 when none is.</summary>
         int _renaming = -1;
 
         readonly Overlay _overlay = new Overlay();
 
-        /// <summary>Which question is on screen, so a new one replaces it rather than hiding in it.</summary>
         int _asked;
 
-        /// <summary>
-        /// Whether a double press chose something that takes values, and the values column has yet to
-        /// be filled for it.
-        /// </summary>
-        /// <remarks>
-        /// Acted on once the views have caught up with the choice, since until then the column is
-        /// still showing what was chosen before.
-        /// </remarks>
         bool _movingOn;
 
         TextBox _focus;
         int _focusCommand;
         int _focusTakes;
 
-        /// <summary>What the box with the caret last held that its command took.</summary>
         string _focusTook = "";
         ComponentView _dragging;
 
-        /// <summary>Where the new controls on the screen's body take the pointer and the keyboard.</summary>
         readonly InputRoot _input;
 
-        /// <summary>The heading part last opened to be named on arrival, so finishing its rename does not open it again.</summary>
         HeadingPart _namedArrival;
 
-        /// <summary>Whether the press under way began on a control <see cref="_input" /> takes.</summary>
         bool _pressing;
 
-        /// <summary>Where the pointer last was during that press.</summary>
         Vector2 _pressedAt;
 
         public EditorView(SprocketEditor editor)
@@ -363,7 +328,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _shown.Clear();
         }
 
-        /// <summary>Whether this is listening to core right now.</summary>
         bool _listening;
 
         void Said(object sender, PropertyChangedEventArgs e)
@@ -377,14 +341,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _chromeStale = true;
         }
 
-        /// <summary>
-        /// Whether anything the chrome shows has changed since it was last written.
-        /// </summary>
-        /// <remarks>
-        /// Core's own values announce themselves. What does not is this target's own state - which part
-        /// of the heading is being typed into, and whether what is typed can be given - so the places
-        /// that change it say so.
-        /// </remarks>
         bool _chromeStale = true;
 
         /// <summary>
@@ -740,7 +696,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Act(_back, screen.CanGoBack ? Deed.Sends(screen.BackCommand) : Deed.Leaves(), 1);
         }
 
-        /// <summary>How wide a question's popup is, whatever it is hanging under.</summary>
         const float PopupWidth = Sizes.Popup;
 
         /// <summary>

@@ -10,7 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     /// <summary>Everything a value may be, laid out as a row of words or as a box that opens a list.</summary>
     public class Choices : Element
     {
-        /// <summary>The most words shown as a row.</summary>
         const int Few = 3;
 
         readonly Label _chosen;
@@ -18,7 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         readonly List<Label> _lines = new List<Label>();
         readonly Stack _list;
 
-        /// <summary>The mark on the shut box that says it opens.</summary>
         readonly Element _mark;
 
         readonly Wrap _row = new Wrap();

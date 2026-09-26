@@ -14,7 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     /// </remarks>
     public class Screed : Element
     {
-        /// <summary>Every line ending the text may arrive with.</summary>
         static readonly string[] Endings = { "\r\n", "\n", "\r" };
 
         readonly Rail _across = new Rail();
@@ -23,19 +22,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
         readonly List<string> _lines = new List<string>();
 
-        /// <summary>The numbers down the gutter, for the lines on screen and no others.</summary>
-        /// <remarks>
-        ///     Kept because <c>DrawText</c> takes a string and formatting a number allocates; refilled only
-        ///     when the band of lines on screen moves.
-        /// </remarks>
         readonly List<string> _numbers = new List<string>();
 
-        /// <summary>Holds one line at a time, because <c>MeasureText</c> takes only a <c>StringBuilder</c>.</summary>
         readonly StringBuilder _scratch = new StringBuilder(128);
 
         float _barWidth;
 
-        /// <summary>The widest of the ten digits, which the gutter's width is worked out from.</summary>
         float _digit;
 
         float _digitAt = -1f;
@@ -43,7 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
         string _font;
 
-        /// <summary>Where the hand was when it was last heard from, while something is being dragged.</summary>
         Vector2 _from;
 
         float _gutter;
@@ -52,21 +43,18 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
         bool _numbered;
 
-        /// <summary>Which band <see cref="_numbers" /> was filled for, so it is only filled again if it moved.</summary>
         int _numbersFrom = int.MaxValue;
 
         int _numbersTo = int.MinValue;
 
         float _fontSize;
 
-        /// <summary>The lines that were on screen last time it was drawn.</summary>
         int _shownFrom = int.MaxValue;
 
         int _shownTo = int.MinValue;
         float _tall;
         string _text = string.Empty;
 
-        /// <summary>The widest line seen so far, which is how far sideways there is to go.</summary>
         float _widest;
 
         /// <summary>An empty screed in white, with lines 24 units tall, clipped to its bounds.</summary>

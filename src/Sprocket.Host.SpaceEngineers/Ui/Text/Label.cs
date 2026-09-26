@@ -14,18 +14,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
     /// </remarks>
     public class Label : Element
     {
-        /// <summary>How wide a colour is drawn in place of words.</summary>
         const float SampleWide = 44f;
 
         readonly List<string> _lines = new List<string>();
 
-        /// <summary>Where each word of the paragraph being wrapped ends, counting the spaces before it as its own.</summary>
         readonly List<int> _breaks = new List<int>();
 
         readonly StringBuilder _measured = new StringBuilder(64);
         readonly StringBuilder _scratch = new StringBuilder(64);
 
-        /// <summary>The line last centred, kept with its width because drawing runs every frame.</summary>
         string _centred;
 
         float _centredAt = -1f;

@@ -35,14 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             get { return _stack; }
         }
 
-        /// <summary>
-        /// What is said when there is nothing on the list, while there is nothing on it.
-        /// </summary>
-        /// <remarks>
-        /// Held, because the words are a value core can change like any other and this view is told
-        /// rather than asked - and it is written where the rows are written rather than only where
-        /// they are built.
-        /// </remarks>
         Label _empty;
 
         protected override void Refresh()

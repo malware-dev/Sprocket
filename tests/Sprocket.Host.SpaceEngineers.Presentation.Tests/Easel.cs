@@ -96,7 +96,6 @@ sealed class Easel
 
     readonly StringBuilder _measuring = new StringBuilder(32);
 
-    /// <summary>The font size a text element starts at, read from one rather than written down again here.</summary>
     static readonly float Starting = new Label().FontSize;
 
     /// <summary>Lays out and draws again, which is what a frame is.</summary>

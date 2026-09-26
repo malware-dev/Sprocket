@@ -22,7 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class SalvageTests
 {
-    /// <summary>What the old format looked like, which is what his test world still held.</summary>
     const string Older = "sprocket 1 alpha 6\n"
         + "block|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:87472652339029116,t:Button Panel\n"
         + "system|1|on|Test|\n"

@@ -351,7 +351,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         int _default;
 
-        /// <summary>The parts this is repeating for, so each one can be let go of again.</summary>
         readonly List<HeadingPart> _heard = new List<HeadingPart>();
 
         /// <summary>

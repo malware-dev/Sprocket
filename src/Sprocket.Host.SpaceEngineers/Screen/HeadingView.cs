@@ -13,7 +13,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly VStack _line;
         readonly RichText _words;
 
-        /// <summary>What it was last given, so the words are made when they change.</summary>
         string _said;
 
         bool _follows;

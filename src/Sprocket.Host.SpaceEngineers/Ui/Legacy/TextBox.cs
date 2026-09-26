@@ -8,19 +8,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     /// <summary>One line of editable text, with a caret and a selection.</summary>
     public class TextBox : Element
     {
-        /// <summary>The room held for the way to empty it, where there is one.</summary>
-        /// <remarks>Matches the room the chips in a sentence hold for the same mark.</remarks>
         const float Clearing = 20f;
 
-        /// <summary>How thick the line under a box holding something that cannot be accepted is.</summary>
         const float Rule = 2f;
 
-        /// <summary>Room kept after the words for the caret, so it is inside the box at the end of a full one.</summary>
         const float CaretRoom = 2f;
 
         readonly ElementCollection _children;
 
-        /// <summary>Reused for measuring a run of the text, so a caret position costs no allocation.</summary>
         readonly StringBuilder _run = new StringBuilder(64);
 
         readonly StringBuilder _text = new StringBuilder(64);

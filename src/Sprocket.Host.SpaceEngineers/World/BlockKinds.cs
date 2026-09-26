@@ -19,7 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         internal const string SwitchOn = "on";
         internal const string SwitchOff = "off";
 
-        /// <summary>What the game puts in front of every type id, and a program never writes.</summary>
         const string GamePrefix = "MyObjectBuilder_";
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
@@ -220,7 +219,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 one.Withhold(Readiness.Pending, UnreadSaid);
         }
 
-        /// <summary>Why a value whose list the game would not hand over is set in the terminal.</summary>
         const string UnreadSaid = "Set this in the terminal for now: whether Sprocket can offer it is being looked at";
 
         /// <summary>

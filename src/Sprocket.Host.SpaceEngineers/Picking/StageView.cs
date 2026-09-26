@@ -37,14 +37,6 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             public int Counted = -1;
         }
 
-        /// <summary>
-        /// How big a thing's picture is drawn.
-        /// </summary>
-        /// <remarks>
-        /// Entirely this target's number. Core hands over a name and says nothing about size, which it
-        /// should not: Space Engineers draws recognisable artwork for every block type and it earns the
-        /// room, where a game whose things all look alike would want it smaller or absent.
-        /// </remarks>
         const float IconSize = Sizes.Icon;
 
         readonly Sized _root = new Sized(0f);
@@ -55,15 +47,12 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         readonly TextBox _narrow = Widgets.Box(Lettering.Small, Palette.Page);
         readonly Signpost _kindLine = new Signpost("", Symbols.Down);
 
-        /// <summary>Narrows the kinds themselves, which on a varied construct are as many as the blocks.</summary>
         readonly TextBox _kindNarrow = Widgets.Box(Lettering.Small, Palette.Page);
 
-        /// <summary>The way back to all of them, beside the line rather than inside the list.</summary>
         readonly Stack _kindHead = Widgets.RowOf(Space.Row);
 
         readonly Glyph _kindClear = Widgets.Centred(Symbols.Close, Palette.Faint);
 
-        /// <summary>The way to empty each search box, inside it at the right.</summary>
         readonly Glyph _narrowClear = Widgets.Centred(Symbols.Close, Palette.Faint);
         readonly Glyph _kindNarrowClear = Widgets.Centred(Symbols.Close, Palette.Faint);
         readonly Label _showing = Widgets.Label("", Palette.Faint, Lettering.Tiny);
@@ -86,37 +75,27 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             public Label Text;
         }
 
-        /// <summary>The room inside a row somebody can press.</summary>
         static readonly Thickness Pad = new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f);
 
-        /// <summary>The same for a heading, with nothing below it.</summary>
         static readonly Thickness HeadingPad =
             new Thickness(Space.ChipX * 0.8f, Space.ChipY * 1.6f, Space.ChipX * 0.8f, 0f);
 
         readonly Scroll _scroll = new Scroll();
         readonly Stack _rows = Widgets.Column(Space.Line);
 
-        /// <summary>What scrolls: the line saying the list is narrowed, and the rows themselves.</summary>
         readonly Stack _list = Widgets.Column(Space.Line);
 
-        /// <summary>
-        /// Under the rows, the way to finish where the pick is finished from this column, as the values
-        /// column carries its own under its fields.
-        /// </summary>
         readonly Bar _foot = new Bar();
 
-        /// <summary>Where the pointer was when the thumb last moved. Only meaningful while it is held.</summary>
         float _held;
         readonly List<RowVisual> _visible = new List<RowVisual>();
         readonly Label _empty = Widgets.Label("", Palette.Muted, Lettering.Small);
 
-        /// <summary>The line over the list saying it is narrowed by the selection.</summary>
         readonly Label _note = Widgets.Wash("", Palette.Muted, Palette.SlotFill);
 
         readonly Stack _kindList = Widgets.Column(Space.Hair * 2f);
         readonly List<KindVisual> _kindRows = new List<KindVisual>();
 
-        /// <summary>The ways of looking at the list, across the bottom of the head where there is more than one.</summary>
         readonly Stack _tabs = Widgets.RowOf(0f);
         readonly List<Label> _tabLabels = new List<Label>();
 

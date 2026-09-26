@@ -17,7 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
     /// </remarks>
     public sealed class PartRow
     {
-        /// <summary>How wide the name and what the part says about itself stand, so every part's blocks line up.</summary>
         const float NameWidth = 360f;
 
         readonly Bar _line = new Bar();
@@ -28,10 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
         readonly Label _about = Widgets.Label("", Palette.Faint, Lettering.Tiny);
         readonly Slot _blocks = new Slot();
 
-        /// <summary>The slot's row, so the slot is as wide as what it says rather than as the row.</summary>
         readonly Stack _slot = Widgets.RowOf(0f);
 
-        /// <summary>What was last worded, so the blocks' names are only looked up when the part changes.</summary>
         PartEntry _worded;
 
         public PartRow()

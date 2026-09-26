@@ -40,7 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
         int _revision = -1;
 
-        /// <summary>What is said while there is nothing to choose from, held so it can be said again.</summary>
         Label _empty;
 
         public ChoiceListView(ChoiceListComponent component)

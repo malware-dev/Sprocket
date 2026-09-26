@@ -12,7 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         readonly List<Entry> _entries = new List<Entry>();
         readonly bool _runsAcross;
 
-        /// <summary>Whether the last measure had a bound to share out, so the children that grow did grow.</summary>
         bool _sharing;
 
         float _spacing;

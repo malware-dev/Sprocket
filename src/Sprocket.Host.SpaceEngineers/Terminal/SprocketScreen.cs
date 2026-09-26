@@ -34,23 +34,18 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
     /// </remarks>
     public sealed class SprocketScreen : MyModScreen
     {
-        /// <summary>Frames within which a second press counts as a double, and how far it may wander.</summary>
         const int DoubleClickFrames = 20;
         const float DoubleClickSlack = 12f;
 
-        /// <summary>UI units per notch of the wheel, matching what the simulator's window uses.</summary>
         const float ScrollStep = 60f;
 
-        /// <summary>Frames the caret spends shown, then hidden.</summary>
         const int BlinkTicks = 30;
 
-        /// <summary>The keys that edit and repeat while held.</summary>
         readonly MyKeys[] _editing =
         {
             MyKeys.Back, MyKeys.Delete, MyKeys.Left, MyKeys.Right, MyKeys.Home, MyKeys.End, MyKeys.Up, MyKeys.Down
         };
 
-        /// <summary>The keys that mean something with Ctrl held.</summary>
         readonly MyKeys[] _shortcuts = { MyKeys.A, MyKeys.C, MyKeys.X, MyKeys.V };
 
         readonly SprocketUnit _unit;
@@ -65,20 +60,16 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         bool _wasDown;
         int _lastClickFrame = int.MinValue;
 
-        /// <summary>When and where the button last went down, and how many times in quick succession.</summary>
         int _lastDownFrame = int.MinValue;
 
         Vector2 _lastDownAt;
         int _presses;
 
-        /// <summary>Repeats a held key for the input root, the way the screen's keyboard repeats for the old boxes.</summary>
         readonly KeyRepeater _repeat = new KeyRepeater();
         Vector2 _lastClickAt;
 
-        /// <summary>When the caret's blink was last restarted, so typing never hides it mid-blink.</summary>
         int _blinkFrom;
 
-        /// <summary>What closing the screen hands back: the Sprocket, to whoever lent it.</summary>
         readonly Action _closed;
 
         /// <summary>The editor on <paramref name="unit" />, telling <paramref name="closed" /> each time it closes.</summary>

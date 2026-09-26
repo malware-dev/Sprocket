@@ -4,7 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
     /// <remarks>Not the operating system's clipboard, which the mod API does not offer.</remarks>
     public static class Clipboard
     {
-        /// <summary>The copied text, which has to outlive any one screen.</summary>
         static string _value = string.Empty;
 
         /// <summary>The copied text, or empty when nothing has been copied.</summary>

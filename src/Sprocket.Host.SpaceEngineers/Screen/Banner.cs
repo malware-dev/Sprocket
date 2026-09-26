@@ -14,12 +14,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
     /// </remarks>
     public class Banner : Reveal
     {
-        /// <summary>How many of the game's frames a slide takes, arriving, leaving or opening.</summary>
         const float Frames = 12f;
 
         readonly VStack _column;
 
-        /// <summary>The opening half, which slides on its own.</summary>
         readonly Reveal _more;
 
         readonly HStack _heading;
@@ -35,10 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         Notice _notice;
         int _stepped = -1;
 
-        /// <summary>How far along the slide is, before the easing is applied to it.</summary>
         float _progress;
 
-        /// <summary>The same for the opening, which moves at the same rate and is a separate thing.</summary>
         float _opening;
 
         /// <summary>A banner showing nothing, shut.</summary>

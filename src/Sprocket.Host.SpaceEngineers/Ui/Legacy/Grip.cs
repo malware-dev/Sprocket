@@ -9,7 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         const int Across = 2;
         const int Down = 3;
 
-        /// <summary>How big one square is.</summary>
         const float Square = 3f;
 
         const float Gap = 3f;

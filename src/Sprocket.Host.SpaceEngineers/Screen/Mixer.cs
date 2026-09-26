@@ -17,19 +17,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
     /// </remarks>
     public sealed class Mixer
     {
-        /// <summary>How big one of the player's colours is drawn.</summary>
-        /// <remarks>Fourteen of these and the room between them fit just inside the form's width.</remarks>
         const float SwatchWide = 31f;
 
         const float SwatchTall = 26f;
 
-        /// <summary>How much room the letter beside a slider takes.</summary>
         const float LetterWide = 18f;
 
-        /// <summary>How wide the colour being chosen is drawn.</summary>
         const float ChosenWide = 96f;
 
-        /// <summary>How much room the written colour takes: the hash and eight digits.</summary>
         const float WrittenWide = 148f;
 
         readonly VStack _root;
@@ -46,13 +41,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         Slider _held;
 
-        /// <summary>How solid the colour is, kept as it arrived.</summary>
-        /// <remarks>The game's terminal means nothing by it, so nothing here sets it.</remarks>
         byte _alpha = 255;
 
         Hsv _colour;
 
-        /// <summary>Whether a colour has been chosen, as against the one the grips rest on.</summary>
         bool _chose;
 
         /// <summary>A mixer with its grips resting on white and no colour chosen.</summary>

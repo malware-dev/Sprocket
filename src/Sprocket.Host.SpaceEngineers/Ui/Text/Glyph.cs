@@ -14,10 +14,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         float _fontSize = 24f;
         Vector2 _size;
 
-        /// <summary>What the held size was measured at, so it is measured again only when it moves.</summary>
         float _sizedAt = -1f;
 
-        /// <summary>The symbol the held size was measured from.</summary>
         string _sizedFor;
 
         string _symbol;

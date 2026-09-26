@@ -18,7 +18,6 @@ namespace Sprocket.Sim.Simulation;
 /// <remarks>At 1080 high, where one UI unit is one pixel, and cut to the text so the picture is as big as it is.</remarks>
 public static class RichShot
 {
-    /// <summary>A document the way a longer note or a help page would look: every kind of block and run told apart.</summary>
     static readonly RichTextStyle Page = new RichTextStyle
     {
         Base =

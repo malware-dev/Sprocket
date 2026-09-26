@@ -17,11 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Controls
     /// </remarks>
     public class Slot : Label
     {
-        /// <summary>The room held for the cross, where there is one.</summary>
-        /// <remarks>
-        /// A fixed number rather than the glyph's own width, so the words inside a slot do not shift
-        /// sideways because a symbol font measured a hair wider than the last one did.
-        /// </remarks>
         const float Clearing = 20f;
 
         readonly ElementCollection _children;
@@ -82,6 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             if (_clear == null)
                 return words;
 
+            // A fixed room for the cross rather than its own width, so the words in a slot do not shift sideways
+            // when a symbol font measures a hair wider.
             _clear.Measure(g, new Vector2(Clearing, words.Y));
             return words;
         }

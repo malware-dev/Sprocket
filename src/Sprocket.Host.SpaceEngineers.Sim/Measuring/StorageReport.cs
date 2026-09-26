@@ -25,13 +25,10 @@ namespace Sprocket.Sim.Measuring;
 /// </remarks>
 public static class StorageReport
 {
-    /// <summary>How many Sprockets a busy station might carry, for the column that multiplies.</summary>
     const int Sprockets = 50;
 
-    /// <summary>Long enough that the clock's own resolution stops mattering.</summary>
     const int MinimumMilliseconds = 60;
 
-    /// <summary>How many separate windows a figure is the median of.</summary>
     const int Windows = 7;
 
     public static string Render()

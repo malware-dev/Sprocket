@@ -33,13 +33,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Label _lead;
         readonly List<Slot> _slots = new List<Slot>();
 
-        /// <summary>The word before each slot, drawn like the lead and hidden where there is none.</summary>
         readonly List<Label> _joins = new List<Label>();
 
-        /// <summary>What each element was last given, so an unchanged one is not worded again.</summary>
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
 
-        /// <summary>The step the lead was last worked out from.</summary>
         SentenceStep _shownStep;
 
         public SentenceView(int slots)

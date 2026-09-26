@@ -14,7 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
     /// </remarks>
     public static class Template
     {
-        /// <summary>Unicode noncharacters, which never occur in text, marking a slot while the markdown is read.</summary>
         const char Mark = '﷐';
         const char Unmark = '﷑';
 

@@ -46,8 +46,6 @@ namespace Sprocket.Sim.Content
         /// <summary>What the game draws in place of a character it does not have.</summary>
         public const char Replacement = '□';
 
-        /// <summary>What the game takes as a font's usual glyph height when the font has no <c>a</c>.</summary>
-        /// <remarks>The game's default for <c>MyFont.AverageFontLineOffset</c>.</remarks>
         const int UsualGlyphHeight = 45;
 
         /// <summary>Where one glyph sits on the page, and what it costs to draw.</summary>
@@ -74,7 +72,6 @@ namespace Sprocket.Sim.Content
         readonly ScreenSpaceDevice _device;
         readonly int _lineHeight;
 
-        /// <summary>The game's <c>MyFont.AverageFontLineOffset</c>: the height of <c>a</c> less its height offset.</summary>
         int _usualHeight = UsualGlyphHeight;
 
         SeFontMetrics(ScreenSpaceDevice device, int lineHeight, string source, bool fromGame)
@@ -180,6 +177,8 @@ namespace Sprocket.Sim.Content
 
                     metrics._glyphs[character[0]] = cell;
 
+                    // The game's MyFont.AverageFontLineOffset: the height of "a" less its height offset, and 45 where a
+                    // font has no "a".
                     if (character[0] == 'a')
                         metrics._usualHeight = cell.Height - cell.HeightOffset;
                 }

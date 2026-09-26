@@ -45,11 +45,8 @@ namespace Sprocket.Host.SpaceEngineers.Display
         /// </remarks>
         internal const string Id = "Sprocket_Status";
 
-        /// <summary>The height the layout was designed against, which is a wide LCD's.</summary>
         const float DesignHeight = 320f;
 
-        /// <summary>How much of the foreground is left for anything the eye should pass over.</summary>
-        /// <remarks>Tuned here, once, because every faint thing on the panel uses it.</remarks>
         const byte Faint = 110;
 
         readonly Overview _overview = new Overview();

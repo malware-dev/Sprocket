@@ -9,7 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Localization
     {
         readonly IList<Phrase> _phrases;
 
-        /// <summary>Each text in the language loaded, by its index.</summary>
         readonly string[] _said;
 
         /// <summary>The texts in <paramref name="phrases" />, each at its own index, said as written until <see cref="Load" /> is given a language.</summary>

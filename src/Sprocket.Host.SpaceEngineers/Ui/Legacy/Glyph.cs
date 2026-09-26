@@ -16,7 +16,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
         float _sizedAt = -1f;
 
-        /// <summary>What the held size was measured from, so it is only measured again when it moves.</summary>
         string _sizedFor;
 
         string _symbol;

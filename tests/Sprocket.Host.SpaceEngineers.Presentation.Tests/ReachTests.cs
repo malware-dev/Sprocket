@@ -20,10 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ReachTests
 {
-    /// <summary>From an empty construct to the block picker: name a system, then ask what starts it.</summary>
     const string OpenThePicker = "60 130 type Airlock enter 60 161";
 
-    /// <summary>A program that is not this language and will not read.</summary>
     const string Older = "sprocket 1\nblock|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:21,t:B\n";
 
     /// <summary>

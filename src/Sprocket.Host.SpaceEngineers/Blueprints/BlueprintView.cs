@@ -12,7 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
     /// <summary>A blueprint's logic systems on the left, and the chosen one's parts on the right.</summary>
     public sealed class BlueprintView : ComponentView
     {
-        /// <summary>How wide the list of logic systems stands, which is wide enough for a name and no more.</summary>
         const float MadeWidth = 380f;
 
         readonly BlueprintComponent _component;
@@ -29,7 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
         int _membersRevision = -1;
         int _partsRevision = -1;
 
-        /// <summary>What the titles were last given, so the capitals are made when the words change.</summary>
         string _saidMade;
         string _saidParts;
 

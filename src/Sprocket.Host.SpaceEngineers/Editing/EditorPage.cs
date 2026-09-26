@@ -16,20 +16,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// </remarks>
     abstract class EditorPage
     {
-        /// <summary>
-        /// When <see cref="SecondPassed" /> last said yes.
-        /// </summary>
-        /// <remarks>
-        /// A page is refreshed the instant it is built, and that is when it most needs to know, so the
-        /// first ask is answered rather than held back - see <see cref="Interval" />, which keeps the
-        /// clock and the reasoning about where it starts.
-        /// </remarks>
         Interval _asked = new Interval(Second);
 
-        /// <summary>The page as it is drawn, once <see cref="CreateView" /> has made it.</summary>
         Element _view;
 
-        /// <summary>Ticks in a second, at the rate the game runs at.</summary>
         const int Second = 60;
 
         protected EditorPage(SprocketEditor editor)

@@ -17,7 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         readonly Dictionary<TKey, Entry> _kept = new Dictionary<TKey, Entry>();
         readonly List<TKey> _gone = new List<TKey>();
 
-        /// <summary>Counts the showings, so an entry can tell whether the latest one kept it.</summary>
         int _showing;
 
         /// <summary>Children of the container holding <paramref name="children" />, each made by <paramref name="make" /> the first time its key is shown.</summary>

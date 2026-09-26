@@ -26,34 +26,26 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
         readonly ClipStack _clip = new ClipStack();
 
-        /// <summary>The material every flat fill is drawn with, tinted.</summary>
         readonly MyStringId _fill;
 
-        /// <summary>Each font's line height at a scale of one, in UI units, asked of the game once a font.</summary>
         readonly Dictionary<string, float> _lines = new Dictionary<string, float>();
 
-        /// <summary>Nothing, measured to find how tall a line the game draws.</summary>
         readonly StringBuilder _nothing = new StringBuilder();
         readonly MyScreenSpaceLayer _layer;
         readonly float _referenceHeight;
 
         readonly IScreenSpace _screenSpace;
 
-        /// <summary>How many scissors this has pushed and not yet popped.</summary>
         int _clips;
 
-        /// <summary>The font last turned into a scale, kept with its line, so a run of text in one font asks nothing.</summary>
         string _lastFont;
 
         float _lastLine;
 
-        /// <summary>Applied to a font scale on the way out, to undo the game's own scaling and put back this instance's.</summary>
-        /// <remarks>The game multiplies every font scale it is handed by its own HUD scale.</remarks>
         float _fontScale = 1f;
 
         Vector2 _origin;
 
-        /// <summary>UI units to window pixels.</summary>
         float _scale = 1f;
 
         /// <summary>Draws onto a layer with <paramref name="fill" /> for flat fills, at a scale set by the height a layout is written against.</summary>

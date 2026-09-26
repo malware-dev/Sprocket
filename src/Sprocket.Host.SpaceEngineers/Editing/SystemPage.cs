@@ -26,36 +26,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<Trigger> _triggers = new List<Trigger>();
 
-        /// <summary>The rows being built, before they are published in one go.</summary>
         readonly List<StatusEntry> _gathered = new List<StatusEntry>();
 
-        /// <summary>The same, for the sentences above them.</summary>
         readonly List<SentenceTrigger> _sentences = new List<SentenceTrigger>();
 
-        /// <summary>What the program's wiring count was when these lists were gathered.</summary>
         int _wiring = -1;
 
-        /// <summary>What each trigger is about, resolved once when the rows are built.</summary>
-        /// <remarks>
-        /// So the tick that reads what a trigger's signal says does not walk the system's sequences
-        /// to find out which one it means. A trigger cannot change what it points at without the
-        /// program changing, and that rebuilds this screen.
-        /// </remarks>
         readonly List<Sequence> _runs = new List<Sequence>();
 
-        /// <summary>
-        /// What starts things, above what they are.
-        /// </summary>
-        /// <remarks>
-        /// Two lists rather than one, because they are two kinds of thing and somebody builds them
-        /// in that order: a sequence is what happens, a trigger is a reason for it to happen. One
-        /// list of both would have to say which each row was, on every row.
-        /// <para>
-        /// Each is under its own row of ways to add to it, and each is named, which is what tells
-        /// them apart on screen. They are drawn differently too, and that is the honest difference:
-        /// a sequence is a thing to open, and a trigger is a sentence changed in place.
-        /// </para>
-        /// </remarks>
         TriggerListComponent _starts;
 
         StatusListComponent _list;

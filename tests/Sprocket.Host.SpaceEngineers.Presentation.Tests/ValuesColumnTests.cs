@@ -13,7 +13,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ValuesColumnTests
 {
-    /// <summary>A sequence with a light picked in a step's picker, and nothing chosen for it yet.</summary>
     const string ALight = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 70 200 200 485";
 
     const string SetRadius = "800 679";

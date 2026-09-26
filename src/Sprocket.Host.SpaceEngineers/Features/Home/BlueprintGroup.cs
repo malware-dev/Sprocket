@@ -16,16 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly HomePage _page;
         readonly AutomationSystem _system;
 
-        /// <summary>The blueprint's name, which the heading and the way to add another both say.</summary>
         readonly Arguments _named = new Arguments();
 
-        /// <summary>The keys of the rows, in order: each logic system made from the blueprint, then the blueprint itself for the way to add another.</summary>
         readonly List<object> _keys = new List<object>();
 
-        /// <summary>One row for each key in <see cref="_keys" />.</summary>
         readonly Keyed<object, StatusRow> _rows;
 
-        /// <summary>The heading's words as last read, so they are read again only in another language.</summary>
         string _madeFrom;
 
         /// <summary>The group of <paramref name="system" /> on <paramref name="page" />, pressing through <paramref name="editor" />.</summary>

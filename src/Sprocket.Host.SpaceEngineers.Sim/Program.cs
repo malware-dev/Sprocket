@@ -176,7 +176,6 @@ namespace Sprocket.Sim
             new App().Run();
         }
 
-        /// <summary>The carriage return that a dump written for comparison does without.</summary>
         static readonly string Cr = ((char)13).ToString();
 
         /// <summary>The color an argument starting <paramref name="name" /> gives as six hex digits, or null where none does.</summary>

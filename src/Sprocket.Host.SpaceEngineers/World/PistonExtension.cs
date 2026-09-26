@@ -28,7 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         public const string Extend = "extend";
         public const string Retract = "retract";
 
-        /// <summary>How near a limit a piston counts as at it, in metres.</summary>
         const float Hair = 0.0001f;
 
         const string Out = "extended";

@@ -17,13 +17,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
     /// </remarks>
     public class TextBox : Element
     {
-        /// <summary>How wide the caret is drawn.</summary>
         const float CaretWidth = 2f;
 
-        /// <summary>Where each boundary between characters falls from the start of the text, one more than there are characters.</summary>
         readonly List<float> _edges = new List<float>();
 
-        /// <summary>Reused for measuring a run of the text, so measuring the boundaries allocates nothing once it has grown.</summary>
         readonly StringBuilder _run = new StringBuilder(64);
 
         readonly StringBuilder _text = new StringBuilder(64);
@@ -31,14 +28,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         int _anchor;
         int _caret;
 
-        /// <summary>Whether a press on this is being dragged across it, extending the selection.</summary>
         bool _dragging;
 
         bool _edgesStale = true;
         string _font = MyFontEnum.White;
         float _fontSize = 24f;
 
-        /// <summary>How far the text is moved left so the caret stays in view.</summary>
         float _scroll;
 
         string _written;

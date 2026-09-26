@@ -19,13 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     sealed class ValueChunks
     {
-        /// <summary>
-        /// 256 values to a chunk.
-        /// </summary>
-        /// <remarks>
-        /// Far enough under the large object threshold that a value could triple in size and still fit, and
-        /// small enough that a program of a few lines does not pay for a chunk it will never fill.
-        /// </remarks>
         const int Shift = 8;
 
         const int Size = 1 << Shift;

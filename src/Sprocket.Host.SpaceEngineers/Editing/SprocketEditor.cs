@@ -41,10 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly Dictionary<int, Action<bool>> _toggleActions = new Dictionary<int, Action<bool>>();
         readonly Dictionary<int, Action<int>> _numberActions = new Dictionary<int, Action<int>>();
 
-        /// <summary>
-        /// Which instance of each blueprint the editor shows its blocks through, by system id, where
-        /// somebody chose one.
-        /// </summary>
         readonly Dictionary<int, int> _standIns = new Dictionary<int, int>();
         readonly EditorScreen _screen = new EditorScreen();
         readonly List<EditorComponent> _gathered = new List<EditorComponent>();
@@ -212,10 +208,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         int _undoCommand;
         int _redoCommand;
 
-        /// <summary>Ticks in a second, at the rate the game runs at.</summary>
         const int Second = 60;
 
-        /// <summary>Reading the words in the heading again, which nothing announces.</summary>
         Interval _worded = new Interval(Second);
 
         /// <summary>
@@ -293,15 +287,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _screen.Default = command;
         }
 
-        /// <summary>
-        /// What the standing question's answers do, apart from the numbers they are offered under.
-        /// </summary>
-        /// <remarks>
-        /// A question can be raised by something that changed the screen - "what should this do" is
-        /// asked with the picker already unwound - and a rebuild hands back every command number the
-        /// screen was using. Without this the answers would still be on screen, pointing at numbers
-        /// nothing knows any more, which is a press that silently does nothing.
-        /// </remarks>
         readonly List<Answering> _answering = new List<Answering>();
 
         struct Answering
@@ -459,15 +444,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _notice.Offers = null;
         }
 
-        /// <summary>
-        /// The one banner, kept between builds; null where there is nothing to say.
-        /// </summary>
-        /// <remarks>
-        /// Held rather than made on every build, because the slide it is part way through belongs to it.
-        /// </remarks>
         Notice _notice;
 
-        /// <summary>Opening or closing the banner, and replacing the program it warns about, made the first time a banner needs them.</summary>
         ICommand _expands;
         ICommand _resolves;
 
@@ -480,10 +458,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         ICommand Resolves => _resolves ?? (_resolves = Act(Cmd.Resolve, delegate { AskBeforeReplacing(delegate { }); }));
 
-        /// <summary>Whether the banner is open, which is the person's choice and outlives a rebuild.</summary>
         bool _open;
 
-        /// <summary>Whether somebody has been told what their first edit would cost, and said go on.</summary>
         bool _told;
 
         /// <summary>
@@ -990,18 +966,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _structureDirty = true;
         }
 
-        /// <summary>What has been done to each sequence, so it can be taken back.</summary>
         readonly History<Sequence> _sequenceHistory = new History<Sequence>();
 
-        /// <summary>
-        /// And one for its system, because a trigger is not a sequence's to hold.
-        /// </summary>
-        /// <remarks>
-        /// Two stacks rather than one, so undo takes back the last thing done to the thing being
-        /// looked at. Somebody on a system's screen who has just repointed a button did not do the
-        /// last thing to any sequence in it, and a sequence's arrows offering to take that back
-        /// would be a control acting on something not on the screen.
-        /// </remarks>
         readonly History<AutomationSystem> _systemHistory = new History<AutomationSystem>();
 
         /// <summary>Makes a change to a sequence and remembers how to take it back.</summary>

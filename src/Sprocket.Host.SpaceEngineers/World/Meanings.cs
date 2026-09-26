@@ -321,10 +321,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>
-        /// Why these are set in the terminal: each is a list the block fills for itself, and a mod is
-        /// only ever handed the list a block does not fill for itself.
-        /// </summary>
         const string EventsSaid = "Set this in the terminal: the game keeps this block's events from mods";
 
         const string CameraSaid = "Set this in the terminal for now: choosing a camera here is planned";

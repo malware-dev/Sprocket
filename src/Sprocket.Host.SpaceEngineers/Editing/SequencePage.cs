@@ -239,14 +239,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return false;
         }
 
-        /// <summary>
-        /// What the program's edit count was when this last had nothing to ask about.
-        /// </summary>
-        /// <remarks>
-        /// Set on the way in and again whenever the question is put, so leaving a sequence somebody
-        /// only came to look at asks nothing at all - and so does leaving again after they have
-        /// already answered. Only a change since then earns another question.
-        /// </remarks>
         int _quiet;
 
         public override void Refresh()
@@ -363,7 +355,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return Running ? 0 : Editor.Register(kind, which, part, action);
         }
 
-        /// <summary>Where each row's step sits among the sequence's lines.</summary>
         readonly List<int> _shown = new List<int>();
 
         SentenceStep BuildStep(int row, int index, Step step)

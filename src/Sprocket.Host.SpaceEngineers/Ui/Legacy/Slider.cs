@@ -11,10 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>How tall a track is, matched to the boxes it stands among.</summary>
         public const float Thick = 24f;
 
-        /// <summary>How wide the grip is.</summary>
         const float Grip = 8f;
 
-        /// <summary>How far the grip stands out of the track, top and bottom.</summary>
         const float Lip = 3f;
 
         float _fraction;

@@ -28,16 +28,12 @@ namespace Sprocket.Host.SpaceEngineers.Network
         readonly Action<long, string, string> _changed;
         readonly Action<long, string, string> _stored;
 
-        /// <summary>What was last sent of each Sprocket this client is editing, so an unchanged one sends nothing.</summary>
         readonly Dictionary<long, Sent> _sent = new Dictionary<long, Sent>();
 
-        /// <summary>Who holds each Sprocket that is being edited, by the block that carries it. Kept on the server.</summary>
         readonly Dictionary<long, Holder> _held = new Dictionary<long, Holder>();
 
-        /// <summary>What every client was last told each block holds, so an unchanged one is not told again.</summary>
         readonly Dictionary<long, Sent> _told = new Dictionary<long, Sent>();
 
-        /// <summary>Scratch for the leases being taken back from players who have gone.</summary>
         readonly List<long> _gone = new List<long>();
 
         NetworkChannel _channel;

@@ -12,7 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class LayoutWorkTests
 {
-    /// <summary>What his test world held, which is not this language and will not read.</summary>
     const string Older = "sprocket 1\nblock|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:21,t:B\n";
 
     [Fact]

@@ -13,7 +13,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     {
         readonly Label _label = new Label();
 
-        /// <summary>The hint, held for measuring, since measuring from a builder allocates nothing.</summary>
         readonly StringBuilder _measuring = new StringBuilder(32);
 
         readonly Glyph _pen;

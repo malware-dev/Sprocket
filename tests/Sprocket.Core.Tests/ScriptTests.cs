@@ -18,7 +18,6 @@ public class ScriptTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    /// <summary>A program's first line and the start of a system with <see cref="Identity" />.</summary>
     const string Head = "sprocket 1 alpha 7\n\nsystem \"" + Identity + "\" as ";
 
     static readonly Values Store = new Values();

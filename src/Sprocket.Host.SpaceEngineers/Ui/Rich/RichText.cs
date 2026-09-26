@@ -18,10 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
         readonly List<Piece> _pieces = new List<Piece>();
         readonly List<Mark> _marks = new List<Mark>();
 
-        /// <summary>The piece being built, as it grows word by word.</summary>
         readonly StringBuilder _piece = new StringBuilder(64);
 
-        /// <summary>The piece with the next word on it, measured to see whether the word fits.</summary>
         readonly StringBuilder _probe = new StringBuilder(64);
 
         Document _document;
@@ -39,7 +37,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
         float _laidOutFor = -1f;
         Vector2 _laidOut;
 
-        /// <summary>Where the piece being built starts, and how it is set apart.</summary>
         float _pieceX;
         string _pieceFont;
         float _pieceSize;

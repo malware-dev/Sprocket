@@ -15,13 +15,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     /// </remarks>
     public sealed class Dial
     {
-        /// <summary>How far the dial counts either way at most: a whole turn, as far as the game turns a rotor.</summary>
         const float Most = 360f;
 
-        /// <summary>How far a dial drawn as a half circle turns either way.</summary>
         const float RightAngle = 90f;
 
-        /// <summary>How much room the written angle takes: a sign, three digits, and the caret after them.</summary>
         const float WrittenWide = 5f * Sizes.Digit;
 
         readonly Face _face = new Face();
@@ -158,7 +155,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>The dial itself: marks round the edge, and a needle from the middle.</summary>
         sealed class Face : Element
         {
-            /// <summary>How big the dial is drawn.</summary>
             const float Across = 96f;
 
             const float Mark = 6f;

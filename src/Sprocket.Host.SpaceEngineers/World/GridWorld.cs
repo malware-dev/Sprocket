@@ -23,22 +23,16 @@ namespace Sprocket.Host.SpaceEngineers.World
     public sealed class GridWorld : IDisposable
     {
         readonly IMyTerminalBlock _anchor;
-        /// <summary>
-        /// What anybody has said about the game's own actions, read once as this comes up.
-        /// </summary>
-        /// <remarks>
-        /// Sprocket's own descriptions go in first and are therefore the ones a mod may override,
-        /// which is the rule the mods themselves follow.
-        /// </remarks>
         readonly Catalogue _catalogue = Catalogue();
 
         readonly BlockKinds _kinds;
 
-        /// <summary>What is known about the kinds of block on this construct. See <see cref="BlockExtensions" />.</summary>
         readonly BlockExtensions _extensions = new BlockExtensions();
 
         static Catalogue Catalogue()
         {
+            // Sprocket's own descriptions go in first, so a mod may override them, which is the rule the mods
+            // themselves follow.
             var catalogue = new Catalogue();
             catalogue.Add(Known.Descriptions(), "");
             Mods.Read(catalogue);
@@ -151,35 +145,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 grid.CustomName = name;
         }
 
-        /// <summary>
-        /// An id and a name, in that order.
-        /// </summary>
-        /// <remarks>
-        /// The id is exact and dies with a blueprint; the name survives one and is the thing a player
-        /// edits casually. Grid position belongs between them, because a pasted copy keeps every
-        /// position and changes every id - it is not here yet because there is no value kind wide
-        /// enough to write one down. See "Still open about the script" in <c>docs/Design.md</c>.
-        /// </remarks>
-        /// <summary>
-        /// Sequences nothing can currently start, by id.
-        /// </summary>
-        /// <remarks>
-        /// Held rather than worked out, and held as the exceptions rather than the rule, because
-        /// almost nothing is ever in it: a sequence started by something the game pushes needs no
-        /// arranging at all, and a button that is wired stays wired. So the ordinary answer costs one
-        /// lookup in an empty set.
-        /// <para>
-        /// Filled in by whatever owns the wiring - it knows what it arranged and for which sequence,
-        /// which is exactly what makes the question answerable without reading a toolbar per ask.
-        /// </para>
-        /// </remarks>
         readonly HashSet<int> _unstartable = new HashSet<int>();
 
-        /// <summary>Which declarations are not arranged, per sequence that names them.</summary>
-        /// <remarks>
-        /// Only ever holds the broken ones, so it is empty on a working construct and costs a lookup
-        /// that fails immediately.
-        /// </remarks>
         readonly Dictionary<int, List<string>> _unarranged = new Dictionary<int, List<string>>();
 
         public void Unstartable(List<int> sequenceIds, Dictionary<int, List<string>> sources)

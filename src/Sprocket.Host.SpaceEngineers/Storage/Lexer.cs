@@ -22,16 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     sealed class Lexer
     {
-        /// <summary>
-        /// Where reading has got to.
-        /// </summary>
-        /// <remarks>
-        /// <b>Measured: a loop that walks the text walks a local copy and writes this back once.</b> A
-        /// <see cref="TextPtr" /> holds a string, so storing one into a field goes through the collector's
-        /// write barrier, and a loop doing <c>_ptr++</c> pays that on every character - and has to reload
-        /// the cursor from memory and bounds-check twice for the next one. Lexing was 54% slower than
-        /// stepping an integer; walking locals brought it to 11%, the rest being TextPtr's other costs.
-        /// </remarks>
         TextPtr _ptr;
 
         public Lexer(string text)
@@ -155,6 +145,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             // Walked as a local. Stepping the cursor in its field pays a write barrier per digit,
             // which is per digit of every colour in the file - see Run, which does the same.
+            // Walked as a local and written back once, measured: a TextPtr holds a string, so storing one into a
+            // field pays the collector's write barrier on every step. Stepping the field made lexing 54% slower
+            // than stepping an integer; walking a local brings it to 11%.
             var ptr = _ptr;
             while (digits < 8)
             {

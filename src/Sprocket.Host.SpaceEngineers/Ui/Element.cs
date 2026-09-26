@@ -23,7 +23,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         ICommand _command;
 
-        /// <summary>Held so that listening to a command allocates once in this element's life.</summary>
         Action _commandChanged;
 
         bool _disabled;
@@ -36,7 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         IPlacement _placement;
         IStyle _style;
 
-        /// <summary>Held so that listening to a placement allocates once in this element's life.</summary>
         Action _placementChanged;
 
         Deed _press;

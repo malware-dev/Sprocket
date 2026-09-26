@@ -40,13 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Spelling + button;
         }
 
-        /// <summary>
-        /// What a button's event is called, before its number.
-        /// </summary>
-        /// <remarks>
-        /// An underscore and not a dash, because a dash is subtraction: a name allowed to hold one would
-        /// make <c>a-1</c> a name and <c>a - 1</c> a subtraction. See <c>Keywords.Bare</c>.
-        /// </remarks>
         const string Spelling = "pressed_";
 
         /// <summary>
@@ -102,7 +95,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 && string.Equals(_read[0].Value as string, key, StringComparison.Ordinal);
         }
 
-        /// <summary>Reused: asked once per wired button per second, so it must not allocate.</summary>
         readonly List<TerminalActionParameter> _read = new List<TerminalActionParameter>();
 
         public void Describe(EntityKind kind, IMyTerminalBlock block)

@@ -8,7 +8,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>A mod's texts loaded into the game's own table of texts, in the game's own assemblies, and read back out.</summary>
 public class GameTextsTests
 {
-    /// <summary>The mod's texts, as the build copies them beside the tests.</summary>
     static readonly string Mod = Path.Combine(AppContext.BaseDirectory, "Content", "Localization");
 
     /// <summary>In English, a key says what the English file says.</summary>

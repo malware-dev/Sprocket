@@ -43,42 +43,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         internal static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
 
-        /// <summary>
-        /// Where what is switched off sits, beside the program.
-        /// </summary>
-        /// <remarks>
-        /// A second key rather than part of the program, because the program is what somebody shares
-        /// and a switch is this construct's business. Claimed in <c>EntityComponents.sbc</c> the same
-        /// way, and for the same reason: an unclaimed key works all session and vanishes on save.
-        /// </remarks>
         static readonly Guid StateKey = new Guid("C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3");
 
 
         readonly IMyTerminalBlock _block;
 
-        /// <summary>
-        /// Whether this is a copy of a Sprocket another machine keeps, made to be edited here.
-        /// </summary>
-        /// <remarks>
-        /// A copy runs nothing, writes no toolbar and saves nothing: the server does all three, and a
-        /// client doing them too would be a second airlock opening the same doors a moment apart.
-        /// </remarks>
         readonly bool _copy;
 
         readonly GridWorld _world;
         readonly Automation _program = new Automation();
         readonly AutomationRunner _runner;
 
-        /// <summary>What the editor says, who is at it, and whether it shows the developer tools, kept for when it is made.</summary>
         readonly Texts _texts;
         readonly string _author;
         readonly bool _developerMode;
 
-        /// <summary>The editor, made the first time something asks for it; null until then.</summary>
-        /// <remarks>
-        /// Only a screen needs one. A dedicated server shows nothing, and most Sprockets on any machine are
-        /// never opened, so an editor made with every unit would be a page built for nobody.
-        /// </remarks>
         SprocketEditor _editor;
 
         /// <summary>
@@ -222,13 +201,10 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public AutomationRunner Runner => _runner;
 
-        /// <summary>The wiring number the panels were last brought into line with.</summary>
         int _reconciled = -1;
 
-        /// <summary>Whether the panels have been looked at once, which is not the same as written to.</summary>
         bool _adopted;
 
-        /// <summary>Whether anything has asked for a reading yet. Nothing is read until something does.</summary>
         bool _read;
 
         /// <summary>What a key names: a sequence, which one of its system, and what to do to it.</summary>
@@ -239,26 +215,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             public bool Stops;
         }
 
-        /// <summary>
-        /// What each key in a toolbar slot names, on this construct.
-        /// </summary>
-        /// <remarks>
-        /// <b>Ordinal, and nothing is ever parsed.</b> The key arrives as a string the game already
-        /// holds, so a fire is one hash and one compare with no allocation - what was worth fearing
-        /// about "string lookup" was always the splitting and joining, never the lookup. A key Sprocket
-        /// did not build has nothing behind it to take apart anyway.
-        /// <para>
-        /// Held per construct, which is the scope the slot's other half establishes: the slot carries
-        /// the Sprocket block's entity id, so a key is only ever asked of the one program that block
-        /// owns.
-        /// </para>
-        /// <para>
-        /// Rebuilt from the program rather than remembered across a save, so a slot written in an
-        /// earlier session needs nothing done to it. A key naming something since deleted is simply
-        /// absent, and firing it does nothing - which is the right answer to a stale slot, and to a
-        /// slot somebody copied onto a button Sprocket never asked for.
-        /// </para>
-        /// </remarks>
         readonly Dictionary<string, Target> _byKey =
             new Dictionary<string, Target>(StringComparer.Ordinal);
 
@@ -396,14 +352,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>
-        /// What was asked for last time, and what is being asked for now.
-        /// </summary>
-        /// <remarks>
-        /// Two lists swapped rather than one rebuilt, so the comparison costs nothing and neither does
-        /// keeping it. <b>The previous set is the whole of what Sprocket remembers about wiring</b> -
-        /// what is actually in a panel is the panel's business, and the game's.
-        /// </remarks>
         List<Want> _wanted = new List<Want>();
 
         List<Want> _wanting = new List<Want>();
@@ -467,6 +415,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Mend();
             }
 
+            // Two lists swapped rather than one rebuilt, so comparing costs nothing. The previous set is all that is
+            // remembered about wiring: what a panel actually holds is the panel's business, and the game's.
             List<Want> was = _wanted;
             _wanted = _wanting;
             _wanting = was;
@@ -699,31 +649,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             return extension == null || extension.Raises(grid.Block, want.EventId, want.Key);
         }
 
-        /// <summary>
-        /// Tells the world which sequences nothing can currently start.
-        /// </summary>
-        /// <remarks>
-        /// <b>The whole picture in one pass, on a cadence, rather than a toolbar read per question.</b>
-        /// The editor asks about a sequence whenever a screen is refreshing, which is often; this is
-        /// asked once a second however many screens are open, and what they get back is a lookup in a
-        /// set that is almost always empty.
-        /// <para>
-        /// A sequence counts as startable if <i>any</i> of the buttons it names is wired to it, which
-        /// is the same "any of them" a trigger already means when it lists several blocks.
-        /// </para>
-        /// </remarks>
-        /// <summary>
-        /// How many slots on this construct claim each key.
-        /// </summary>
-        /// <remarks>
-        /// <b>Counted rather than remembered.</b> A system says it needs something to start a sequence;
-        /// which button, timer or sensor answers that is the construct's business and lives only in the
-        /// toolbars. So the answer is arrived at by looking, and two triggers running one sequence need
-        /// two slots running it.
-        /// </remarks>
         readonly Dictionary<string, int> _claims = new Dictionary<string, int>(StringComparer.Ordinal);
 
-        /// <summary>How many slots each key is asked for, while one sequence is being judged.</summary>
         readonly Dictionary<string, int> _needed = new Dictionary<string, int>(StringComparer.Ordinal);
 
         /// <summary>Which key a trigger's slot holds: Sprocket's, the stopping one, or the game's.</summary>
@@ -1321,6 +1248,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             string state;
             Written(out program, out state);
             storage.SetValue(ProgramKey, program);
+            // What is switched off is kept under a key of its own, apart from the program somebody shares. The key
+            // is claimed in EntityComponents.sbc, without which it would work all session and vanish on save.
             storage.SetValue(StateKey, state);
         }
 
