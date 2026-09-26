@@ -12,8 +12,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
     ///     Keeps a <c>StringBuilder</c> beside the string, because <c>MeasureText</c> measures from one
     ///     without allocating.
     /// </remarks>
-    public class Label : Element
+    public class Label : Element, IPadded, ITextual
     {
+        Thickness _padding;
         const float SampleWide = 44f;
 
         readonly List<string> _lines = new List<string>();
@@ -124,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <summary>The lines a wrapped or trimmed run was last laid out as.</summary>
-        internal IList<string> Lines => _lines;
+        public IReadOnlyList<string> Lines => _lines;
 
         /// <summary>Whether a run too wide for its room is cut short with an ellipsis.</summary>
         /// <remarks>Ignored when <see cref="Wraps" /> is set.</remarks>
@@ -158,6 +159,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
                 InvalidateMeasure();
             }
         }
+
+        /// <summary>Room held clear between the edge and the words.</summary>
+        public Thickness Padding
+        {
+            get { return _padding; }
+            set
+            {
+                if (_padding == value)
+                    return;
+
+                _padding = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override Thickness Inset => _padding;
 
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)

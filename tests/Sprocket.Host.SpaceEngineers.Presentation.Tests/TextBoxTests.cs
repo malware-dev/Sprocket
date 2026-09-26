@@ -183,7 +183,7 @@ public class TextBoxTests
     public void HoldingTheKeyboardTakesTheFocusedLayer()
     {
         var (box, _, input) = Laid("Airlock");
-        box.Style = new TextBoxStyle { Focused = { Edge = Focus } }.Frozen();
+        box.Style = new TextBoxStyle { Focused = { Edge = Focus } };
 
         input.Focus(box);
         Assert.Equal(Focus, box.Edge);

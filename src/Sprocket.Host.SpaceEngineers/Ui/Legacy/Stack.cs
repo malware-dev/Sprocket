@@ -4,7 +4,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Puts its children in a line, down the screen or across it.</summary>
-    public class Stack : Element
+    public class Stack : Box
     {
         bool _horizontal;
         float _spacing;
@@ -12,11 +12,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>An empty stack that runs down.</summary>
         public Stack()
         {
-            Children = new ElementCollection(this);
+            Children = new Collection(this);
         }
 
         /// <summary>What is in the line, in order.</summary>
-        public ElementCollection Children { get; }
+        public Collection Children { get; }
 
         /// <summary>Whether the children run across rather than down.</summary>
         public bool Horizontal
@@ -68,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
                 child.Measure(g, room);
 
-                if (child.Collapsed)
+                if (!child.IsVisible)
                     continue;
 
                 var childAlong = Horizontal ? child.DesiredSize.X : child.DesiredSize.Y;
@@ -97,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             {
                 var child = Children[i];
 
-                if (child.Collapsed)
+                if (!child.IsVisible)
                     continue;
 
                 if (placed)

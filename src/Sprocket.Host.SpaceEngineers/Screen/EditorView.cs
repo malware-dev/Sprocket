@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly Label _subtitle;
 
         readonly Grid _page;
-        readonly Scroll _scroll;
+        readonly ScrollView _scroll;
 
         bool _wantsClose;
         readonly VStack _body;
@@ -153,10 +153,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         Arguments _sayingArguments;
 
-        string _tipSaid;
-        bool _tipTemplated;
-        Document _tipSaying;
-
         readonly RichText _tip = new RichText { Style = Styles.Tip };
 
         int _actionRevision = -1;
@@ -200,7 +196,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _flips = new Relay(() => Switch(_switch, _editor.Screen.SwitchCommand, !_editor.Screen.SwitchIsOn));
             _finishes = new Relay(() => Act(_primary, Finishing(_editor.Screen), 1));
 
-            _scroll = new Scroll { Style = Styles.Scroll, Content = new VStack().As(out _body) };
+            _scroll = new ScrollView { Style = Styles.ScrollView, Content = new VStack().As(out _body) };
 
             _root = new VStack
             {
@@ -220,7 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                                 Children =
                                 {
                                     new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = new Relay(Back) }.As(out _back),
-                                    _title.Root,
+                                    _title,
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
                                     new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),
                                     new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
@@ -611,7 +607,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _title.Refuse(_renaming, wrong.Length > 0 ? wrong : null);
             }
 
-            _switch.Collapsed = !screen.HasSwitch;
+            _switch.IsVisible = screen.HasSwitch;
             _switch.IsOn = screen.SwitchIsOn;
             _switch.Says(Texts.SwitchOn, Texts.SwitchOff);
 
@@ -645,33 +641,31 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         void Wire(EditorScreen screen)
         {
-            _back.Tip = screen.CanGoBack ? Texts.ChromeBack : Texts.ChromeClose;
+            _back.Tip = Tip.For(_back.Tip, screen.CanGoBack ? Texts.ChromeBack : Texts.ChromeClose);
 
             // A comparison each when nothing has changed, and this runs sixty times a second.
             _undone.Set("action", screen.UndoText);
             _redone.Set("action", screen.RedoText);
-            _undo.TipArguments = _undone;
-            _redo.TipArguments = _redone;
 
-            _undo.Collapsed = !screen.HasHistory;
-            _redo.Collapsed = !screen.HasHistory;
+            _undo.IsVisible = screen.HasHistory;
+            _redo.IsVisible = screen.HasHistory;
 
             _undoes.CanExecute = screen.UndoCommand != 0;
-            _undo.Tip = screen.UndoCommand != 0 ? Texts.ChromeUndo : null;
+            _undo.Tip = Tip.For(_undo.Tip, screen.UndoCommand != 0 ? Texts.ChromeUndo : null, _undone);
             _redoes.CanExecute = screen.RedoCommand != 0;
-            _redo.Tip = screen.RedoCommand != 0 ? Texts.ChromeRedo : null;
+            _redo.Tip = Tip.For(_redo.Tip, screen.RedoCommand != 0 ? Texts.ChromeRedo : null, _redone);
 
             _refreshes.CanExecute = screen.RefreshCommand != 0;
-            _refresh.Tip = screen.RefreshCommand != 0
+            _refresh.Tip = Tip.For(_refresh.Tip, screen.RefreshCommand != 0
                 ? Texts.ChromeRefresh
-                : null;
+                : null);
 
             _flips.CanExecute = screen.HasSwitch;
 
             // A system's, always - core says so where it declares the command, and a sequence's switch
             // lives on the sentence rather than up here. The words say the act and its reach, not what
             // it is on: the heading directly above says that.
-            _switch.Tip = screen.HasSwitch ? StatusRow.Switching(Texts, true, screen.SwitchIsOn) : null;
+            _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? StatusRow.Switching(Texts, true, screen.SwitchIsOn) : null);
 
             Label carried = Carried;
             if (carried != null)
@@ -791,8 +785,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Element wanted = Under(Pointer);
 
             var speaker = SayingAt(Pointer);
-            _saying = Saying(speaker);
-            _sayingArguments = speaker == null || speaker.RichTip != null ? null : speaker.TipArguments;
+            var tip = speaker == null ? null : speaker.Tip;
+            _saying = tip == null ? null : tip.Document;
+            _sayingArguments = tip == null ? null : tip.Arguments;
 
             if (wanted == _lit)
                 return;
@@ -923,29 +918,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _tip.Arrange(new RectangleF(x, y, size.X, size.Y));
             _tip.Draw(g);
-        }
-
-        /// <summary>What <paramref name="element" /> says while the pointer rests on it: its rich tip, its tip read as markdown-lite or as a template, or null.</summary>
-        Document Saying(Element element)
-        {
-            if (element == null)
-                return null;
-
-            if (element.RichTip != null)
-                return element.RichTip;
-
-            if (string.IsNullOrEmpty(element.Tip))
-                return null;
-
-            var templated = element.TipArguments != null;
-            if (!ReferenceEquals(element.Tip, _tipSaid) || templated != _tipTemplated)
-            {
-                _tipSaid = element.Tip;
-                _tipTemplated = templated;
-                _tipSaying = templated ? Template.Read(element.Tip) : Markdown.Parse(element.Tip);
-            }
-
-            return _tipSaying;
         }
 
         /// <summary>
@@ -2048,7 +2020,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // Settled here, once, for the life of this screen: a page either says something under its
             // heading or it never does, and the header holds whichever shape that is.
-            _subtitle.Collapsed = string.IsNullOrEmpty(screen.Subtitle);
+            _subtitle.IsVisible = !string.IsNullOrEmpty(screen.Subtitle);
 
             for (int i = 0; i < screen.Components.Count; i++)
             {

@@ -6,15 +6,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
     /// <summary>Words to press, on a fill of their own.</summary>
     /// <remarks>Pressed as one thing: a press anywhere on it, its words included, reaches the button.</remarks>
-    public class Button : Element
+    public class Button : Element, IPadded, ITextual
     {
+        Thickness _padding;
         readonly Label _label = new Label();
         bool _pressed;
 
         /// <summary>A button with no words, in the neutral look.</summary>
         public Button()
         {
-            var children = new ElementCollection(this);
+            var children = new Collection(this);
             children.Add(_label);
         }
 
@@ -35,12 +36,47 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
                     return;
 
                 _pressed = value;
-                Restyle();
+                StateChanged();
             }
         }
 
-        /// <summary>The button's own label, which its style writes the text half of each state onto.</summary>
-        internal Label Label => _label;
+        /// <summary>Which face the words are drawn in.</summary>
+        public string Font
+        {
+            get { return _label.Font; }
+            set { _label.Font = value; }
+        }
+
+        /// <summary>How tall a line of the words is, in UI units.</summary>
+        public float FontSize
+        {
+            get { return _label.FontSize; }
+            set { _label.FontSize = value; }
+        }
+
+        /// <summary>The color the words are drawn in.</summary>
+        public Color Color
+        {
+            get { return _label.Color; }
+            set { _label.Color = value; }
+        }
+
+        /// <summary>Room held clear between the edge and the words.</summary>
+        public Thickness Padding
+        {
+            get { return _padding; }
+            set
+            {
+                if (_padding == value)
+                    return;
+
+                _padding = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override Thickness Inset => _padding;
 
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)

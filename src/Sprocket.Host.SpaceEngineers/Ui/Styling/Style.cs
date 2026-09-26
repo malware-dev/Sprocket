@@ -6,7 +6,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
     /// <summary>How an element looks: a base, and whatever states the style's own control has.</summary>
     /// <remarks>
     ///     Applying lays down the neutral values, then <see cref="Base" />, then the states the control is in, in the
-    ///     order <see cref="LayStates" /> lays them, so a later layer wins.
+    ///     order <see cref="LayStates" /> lays them, so a later layer wins. A change to a style shows on an element once
+    ///     the element is restyled.
     /// </remarks>
     public class Style<TState> : IStyle where TState : ElementState, new()
     {
@@ -16,49 +17,39 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         /// <summary>A style with nothing set, which applies as the neutral values.</summary>
         public Style()
         {
-            Base = Held();
+            Base = Layer();
         }
 
-        /// <summary>A style starting from a copy of everything <paramref name="basedOn" /> sets.</summary>
-        /// <remarks>Throws for a null base, which is what a static style declared above the one it is based on receives.</remarks>
+        /// <summary>A style that is everything <paramref name="basedOn" /> is, with whatever this sets laid over it.</summary>
+        /// <remarks>
+        ///     Reads through to <paramref name="basedOn" /> each time it is applied, so a change to that style shows
+        ///     here too. Throws for a null base, which is what a static style declared above the one it is based on
+        ///     receives.
+        /// </remarks>
         public Style(Style<TState> basedOn) : this()
         {
             if (basedOn == null)
                 throw new ArgumentNullException("basedOn", "A style's base must be declared before it.");
 
             _basedOn = basedOn;
-            Base.Copy(basedOn.Base);
         }
 
         /// <summary>How the element looks whatever state it is in.</summary>
         public TState Base { get; }
 
         /// <inheritdoc />
-        public bool IsFrozen { get; private set; }
-
-        /// <inheritdoc />
-        public void Freeze()
-        {
-            IsFrozen = true;
-        }
-
-        /// <inheritdoc />
         public void Apply(Element element)
         {
             Base.Neutral(element);
-            Base.Lay(element);
+            Lay(Base, element);
             LayStates(element);
         }
 
-        /// <summary>A state layer for a style type to declare, copied from the same layer of the style this is based on.</summary>
+        /// <summary>A state layer for a style type to declare, matched to the same layer of the style this is based on.</summary>
         /// <remarks>Layers are matched to the base's by the order they are declared in.</remarks>
         protected TState Layer()
         {
-            var layer = Held();
-
-            if (_basedOn != null && _layers.Count < _basedOn._layers.Count)
-                layer.Copy(_basedOn._layers[_layers.Count]);
-
+            var layer = new TState();
             _layers.Add(layer);
             return layer;
         }
@@ -68,17 +59,18 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         {
         }
 
-        /// <summary>Writes what <paramref name="layer" /> sets onto <paramref name="element" />, and nothing else.</summary>
-        protected static void Lay(TState layer, Element element)
+        /// <summary>Writes what <paramref name="layer" /> sets onto <paramref name="element" />, over what the same layer of the style this is based on sets.</summary>
+        protected void Lay(TState layer, Element element)
         {
-            layer.Lay(element);
+            LayAt(_layers.IndexOf(layer), element);
         }
 
-        TState Held()
+        void LayAt(int index, Element element)
         {
-            var state = new TState();
-            state.Owner = this;
-            return state;
+            if (_basedOn != null && index < _basedOn._layers.Count)
+                _basedOn.LayAt(index, element);
+
+            _layers[index].Lay(element);
         }
     }
 }

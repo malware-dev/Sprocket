@@ -26,7 +26,7 @@ public class ButtonTests
         Base = { Background = Accent, Color = Chrome, Padding = new Thickness(16f, 8f), FontSize = 24f },
         Hot = { Background = Ink },
         Disabled = { Background = Well, Color = Faint }
-    }.Frozen();
+    };
 
     /// <summary>A button's style fills the button and colors its words.</summary>
     [Fact]

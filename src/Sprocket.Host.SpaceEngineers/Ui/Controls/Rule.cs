@@ -8,8 +8,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
     ///     The line is drawn rather than set as the background, which would fill the padding too and turn
     ///     the rule into a band.
     /// </remarks>
-    public class Rule : Element
+    public class Rule : Element, IPadded
     {
+        Thickness _padding;
         /// <summary>Makes a line <paramref name="thickness" /> thick, in <paramref name="color" />.</summary>
         public Rule(float thickness, Color color)
         {
@@ -22,6 +23,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
         /// <summary>The colour of the line.</summary>
         public Color Color { get; set; }
+
+        /// <summary>Room held clear between the edge and the line.</summary>
+        public Thickness Padding
+        {
+            get { return _padding; }
+            set
+            {
+                if (_padding == value)
+                    return;
+
+                _padding = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override Thickness Inset => _padding;
 
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)

@@ -209,12 +209,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _entry.Fill = _column ? null : form ? (Element)_why : _boxes[0];
 
             _seen.Clear();
-            _form.Collapsed = !form;
+            _form.IsVisible = form;
 
             // The way out is the form's, and not every question's. A name is left by pressing away
             // or by Escape, the way it always has been, and a Cancel beside it would take width
             // from the box somebody is typing in. A column is left by pressing anything else.
-            _cancel.Collapsed = !form || _column;
+            _cancel.IsVisible = form && !_column;
 
             // The caret belongs to the field it is in, and to no other. Every box editing meant
             // every box drawing one, with only the real one blinking - which reads as three carets
@@ -1338,7 +1338,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _label.Text = _question;
             _label.Color = Palette.Muted;
             _why.Text = Refused ?? "";
-            _why.Collapsed = !refused;
+            _why.IsVisible = refused;
 
             // The field the reason is about wears it too, so a form of three says which one to mend. A
             // column given nothing at all is about its first field.

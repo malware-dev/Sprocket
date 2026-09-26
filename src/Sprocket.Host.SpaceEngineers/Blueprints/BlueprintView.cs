@@ -91,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
             for (var i = 0; i < _members.Count && i < _component.Members.Count; i++)
                 _members[i].Update(_component.Members[i]);
 
-            _chosen.Row.Collapsed = _component.Chosen == null;
+            _chosen.Row.IsVisible = _component.Chosen != null;
             if (_component.Chosen != null)
                 _chosen.Update(_component.Chosen);
 

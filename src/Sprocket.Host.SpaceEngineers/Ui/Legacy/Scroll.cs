@@ -4,9 +4,9 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Shows part of something taller than the room available, and cuts the rest off.</summary>
-    public class Scroll : Element
+    public class Scroll : Box
     {
-        readonly ElementCollection _children;
+        readonly Collection _children;
 
         readonly Rail _rail = new Rail();
 
@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>An empty scroll that runs down, cut to its bounds.</summary>
         public Scroll()
         {
-            _children = new ElementCollection(this);
+            _children = new Collection(this);
             ClipsContent = true;
         }
 

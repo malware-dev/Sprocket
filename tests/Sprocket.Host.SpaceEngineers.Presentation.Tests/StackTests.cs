@@ -165,11 +165,11 @@ public class StackTests
         Assert.Equal(settled, easel.Measured);
     }
 
-    /// <summary>Children of every kind the stacks meet: labels, padding, a background, and one collapsed.</summary>
-    static void Fill(ElementCollection children)
+    /// <summary>Children of every kind the stacks meet: labels, padding, a background, and one invisible.</summary>
+    static void Fill(Element.Collection children)
     {
         children.Add(new Label { Text = "First", Background = Palette(0) });
-        children.Add(new Label { Text = "Collapsed", Collapsed = true });
+        children.Add(new Label { Text = "Invisible", IsVisible = false });
         children.Add(new Label { Text = "Padded", Padding = new Thickness(6f, 3f), Background = Palette(1) });
         children.Add(new Label { Text = "Last of three, and longer" });
     }

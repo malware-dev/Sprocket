@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         {
         }
 
-        /// <summary>A style starting from a copy of everything <paramref name="basedOn" /> sets.</summary>
+        /// <summary>A style that is everything <paramref name="basedOn" /> is, with whatever this sets laid over it.</summary>
         public WindowStyle(WindowStyle basedOn) : base(basedOn)
         {
         }

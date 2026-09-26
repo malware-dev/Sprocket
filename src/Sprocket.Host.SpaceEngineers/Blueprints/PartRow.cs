@@ -64,9 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
         {
             _name.Text = entry.Name;
             _about.Text = entry.About;
-            _about.Collapsed = entry.About.Length == 0;
+            _about.IsVisible = entry.About.Length != 0;
 
-            _pencil.Collapsed = entry.RenameCommand == 0;
+            _pencil.IsVisible = entry.RenameCommand != 0;
             _pencil.Press = Deed.Asks(entry.RenameCommand, renaming);
 
             _blocks.Press = Deed.Sends(entry.Command);

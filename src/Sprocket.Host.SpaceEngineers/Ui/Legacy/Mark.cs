@@ -6,7 +6,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>The box or circle at the head of a row somebody is choosing from.</summary>
-    public class Mark : Element
+    public class Mark : Box
     {
         readonly Glyph _glyph = Widgets.Centred(Symbols.Ring, Palette.Faint);
 

@@ -6,7 +6,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>One line of editable text, with a caret and a selection.</summary>
-    public class TextBox : Element
+    public class TextBox : Box
     {
         const float Clearing = 20f;
 
@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
         const float CaretRoom = 2f;
 
-        readonly ElementCollection _children;
+        readonly Collection _children;
 
         readonly StringBuilder _run = new StringBuilder(64);
 
@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>An empty box in white, with lines 24 units tall, with its caret shown.</summary>
         public TextBox()
         {
-            _children = new ElementCollection(this);
+            _children = new Collection(this);
 
             Font = MyFontEnum.White;
             FontSize = 24f;

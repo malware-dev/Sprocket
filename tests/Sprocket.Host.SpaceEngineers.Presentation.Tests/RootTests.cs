@@ -61,8 +61,8 @@ public class RootTests
         sim.Tick();
 
         var rows = sim.Editor.RootRows();
-        Assert.Equal(sim.Texts.RowSwitchOff, rows[0].SwitchPart.Tip);
-        Assert.Equal(sim.Texts.RowSwitchOff, rows[1].SwitchPart.Tip);
+        Assert.Equal(sim.Texts.RowSwitchOff, rows[0].SwitchPart.Tip?.Text);
+        Assert.Equal(sim.Texts.RowSwitchOff, rows[1].SwitchPart.Tip?.Text);
     }
 
     /// <summary>While a question stands, a press on the root puts it away and does nothing else.</summary>

@@ -19,13 +19,13 @@ namespace Sprocket.Host.SpaceEngineers.Controls
     {
         const float Clearing = 20f;
 
-        readonly ElementCollection _children;
+        readonly Collection _children;
 
         Element _clear;
 
         public Slot()
         {
-            _children = new ElementCollection(this);
+            _children = new Collection(this);
 
             FontSize = Lettering.Body;
             Color = Palette.Ink;

@@ -36,7 +36,7 @@ public static class RichShot
             BlockSpacing = 12f,
             Indent = 24f
         }
-    }.Frozen();
+    };
 
     /// <summary>Writes <paramref name="markdown" />, laid out <paramref name="wide" /> across, to <paramref name="path" />, and answers how big the picture is.</summary>
     /// <remarks>A strong or emphasis color given here is tried in place of the style's, for comparing one against another.</remarks>

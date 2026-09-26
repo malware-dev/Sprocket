@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _offers = new Relay(delegate { Carry(_notice == null ? null : _notice.Offers); });
 
             Openness = 0f;
-            Child = new VStack
+            Content = new VStack
             {
                 Children =
                 {
@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                     }.As(out _heading),
                     new Reveal
                     {
-                        Child = new VStack
+                        Content = new VStack
                         {
                             Children =
                             {
@@ -87,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             if (notice != null)
             {
-                Collapsed = false;
+                IsVisible = true;
                 Say(notice);
             }
 
@@ -95,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // Out of the layout and the drawing altogether once there is nothing to say and nothing left to slide.
             if (notice == null && Shut)
-                Collapsed = true;
+                IsVisible = false;
         }
 
         void Say(Notice notice)
@@ -108,18 +108,18 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _text.Color = ink;
             _text.Text = notice.Text;
             _detail.Text = notice.Detail;
-            _detail.Collapsed = notice.Detail.Length == 0;
+            _detail.IsVisible = notice.Detail.Length != 0;
             _diagnostic.Text = notice.Diagnostic;
-            _diagnostic.Collapsed = notice.Diagnostic.Length == 0;
+            _diagnostic.IsVisible = notice.Diagnostic.Length != 0;
             _chevron.Symbol = notice.Expanded ? Symbols.Up : Symbols.Down;
             _chevron.Tint = ink;
-            _chevron.Collapsed = notice.Expands == null;
+            _chevron.IsVisible = notice.Expands != null;
 
             // Reached only once the slide has finished, because a reveal answers nothing while it moves.
             _expands.CanExecute = notice.Expands != null;
 
             var offers = notice.Offers != null;
-            _actions.Collapsed = !offers;
+            _actions.IsVisible = offers;
             _offers.CanExecute = offers;
             _offer.Text = notice.OfferText;
         }

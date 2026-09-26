@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,13 +8,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
     /// <remarks>A track past the last one defined is <see cref="Length.Auto" />.</remarks>
     public sealed class Tracks : IEnumerable<Length>
     {
+        readonly Action _changed;
         readonly List<Length> _lengths = new List<Length>();
-        readonly Element _owner;
 
-        /// <summary>No tracks yet, belonging to <paramref name="owner" />, which is laid out again whenever they change.</summary>
-        internal Tracks(Element owner)
+        /// <summary>No tracks yet, with <paramref name="changed" /> called whenever they change.</summary>
+        public Tracks(Action changed)
         {
-            _owner = owner;
+            _changed = changed;
         }
 
         /// <summary>How many tracks are defined.</summary>
@@ -29,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
                     _lengths.Add(Length.Auto);
 
                 _lengths[index] = value;
-                _owner.InvalidateMeasure();
+                _changed();
             }
         }
 
@@ -47,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         public void Add(Length length)
         {
             _lengths.Add(length);
-            _owner.InvalidateMeasure();
+            _changed();
         }
     }
 }

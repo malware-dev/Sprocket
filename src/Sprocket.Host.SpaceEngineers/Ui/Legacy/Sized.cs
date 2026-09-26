@@ -4,9 +4,9 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Something held to a width, whatever it would rather be.</summary>
-    public class Sized : Element
+    public class Sized : Box
     {
-        readonly ElementCollection _children;
+        readonly Collection _children;
 
         Element _content;
         float _width;
@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>Makes a holder <paramref name="width" /> wide, empty until given <see cref="Content" />.</summary>
         public Sized(float width)
         {
-            _children = new ElementCollection(this);
+            _children = new Collection(this);
             Width = width;
         }
 

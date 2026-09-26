@@ -5,7 +5,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>A state light.</summary>
-    public class Dot : Element
+    public class Dot : Box
     {
         /// <summary>How long each side of a dot is.</summary>
         public const float Size = Sizes.Dot;

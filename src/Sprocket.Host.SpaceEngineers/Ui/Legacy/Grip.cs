@@ -4,7 +4,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>The handle a row is dragged by: six small squares, two across and three down.</summary>
-    public class Grip : Element
+    public class Grip : Box
     {
         const int Across = 2;
         const int Down = 3;

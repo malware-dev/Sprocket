@@ -4,9 +4,9 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Something on the left, something on the right, and whatever is in the middle taking the slack.</summary>
-    public class Bar : Element
+    public class Bar : Box
     {
-        readonly ElementCollection _children;
+        readonly Collection _children;
         Element _fill;
 
         Element _left;
@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>An empty bar.</summary>
         public Bar()
         {
-            _children = new ElementCollection(this);
+            _children = new Collection(this);
         }
 
         /// <summary>The part at the left, given the width it asks for.</summary>
@@ -164,7 +164,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>Whether a part is there at all and is asking to be seen.</summary>
         static bool Shows(Element part)
         {
-            return part != null && !part.Collapsed;
+            return part != null && part.IsVisible;
         }
 
         /// <summary>Where a part goes: along the top where the bar says so, and on its middle otherwise.</summary>

@@ -8,6 +8,7 @@ using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Picking
 {
@@ -132,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _foldColumn.Highlight = Palette.PanelHot;
             _foldColumn.Padding = new Thickness(0f, Space.Region);
             _foldColumn.Fill = Widgets.Centred(Symbols.Left, Palette.Muted);
-            _foldColumn.Tip = "Back";
+            _foldColumn.Tip = Tip.For(_foldColumn.Tip, "Back");
             _fold.Content = _foldColumn;
 
             _nextColumn.Background = Palette.Panel;
@@ -140,7 +141,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _nextColumn.Highlight = Palette.PanelHot;
             _nextColumn.Padding = new Thickness(0f, Space.Region);
             _nextColumn.Fill = Widgets.Centred(Symbols.Right, Palette.Muted);
-            _nextColumn.Tip = "Next";
+            _nextColumn.Tip = Tip.For(_nextColumn.Tip, "Next");
             _next.Content = _nextColumn;
 
             // A window rather than a scroller: it is never moved, only made wider, and what it shows

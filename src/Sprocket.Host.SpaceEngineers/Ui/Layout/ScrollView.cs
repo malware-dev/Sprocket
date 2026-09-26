@@ -5,42 +5,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>Shows as much of something taller than its room as fits, moved up and down by a thumb on a bar at its side.</summary>
     /// <remarks>The bar takes the pointer itself: a press on the thumb drags it, and a press on the track puts the thumb there first.</remarks>
-    public class Scroll : Element
+    public class ScrollView : ContentControl
     {
-        readonly ElementCollection _children;
         readonly Rail _rail = new Rail();
 
         float _barWidth;
-        Element _content;
         bool _held;
 
         float _heldAt;
-
-        /// <summary>An empty scroll, cut to its bounds.</summary>
-        public Scroll()
-        {
-            _children = new ElementCollection(this);
-            ClipsContent = true;
-        }
-
-        /// <summary>The one thing scrolled.</summary>
-        public Element Content
-        {
-            get { return _content; }
-            set
-            {
-                if (_content == value)
-                    return;
-
-                if (_content != null)
-                    _children.Remove(_content);
-
-                if (value != null)
-                    _children.Add(value);
-
-                _content = value;
-            }
-        }
 
         /// <summary>How wide the bar is.</summary>
         public float BarWidth
@@ -76,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
                     return;
 
                 _held = value;
-                Restyle();
+                StateChanged();
             }
         }
 
@@ -135,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <inheritdoc />
-        protected internal override void OnPointerDown(Vector2 point, int presses)
+        public override void OnPointerDown(Vector2 point, int presses)
         {
             if (!Hits(point))
                 return;
@@ -148,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <inheritdoc />
-        protected internal override void OnPointerMove(Vector2 point)
+        public override void OnPointerMove(Vector2 point)
         {
             if (!_held)
                 return;
@@ -158,16 +130,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <inheritdoc />
-        protected internal override void OnPointerUp(Vector2 point)
+        public override void OnPointerUp(Vector2 point)
         {
             IsHeld = false;
         }
 
         /// <inheritdoc />
+        /// <remarks>Always: what it holds runs past its edges.</remarks>
+        protected override bool Clips => true;
+
+        /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            if (_content != null)
-                _content.Measure(g, new Vector2(Rail.Room(available.X, _barWidth), Unbounded));
+            if (Content != null)
+                Content.Measure(g, new Vector2(Rail.Room(available.X, _barWidth), Unbounded));
 
             return available;
         }
@@ -177,25 +153,25 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         {
             _rail.Viewport = bounds.Height;
 
-            if (_content == null)
+            if (Content == null)
             {
                 _rail.Extent = 0f;
                 _rail.Offset = 0f;
                 return;
             }
 
-            _rail.Extent = _content.DesiredSize.Y;
+            _rail.Extent = Content.DesiredSize.Y;
             _rail.Offset = _rail.Clamp(_rail.Offset);
 
-            _content.Arrange(new RectangleF(bounds.X, bounds.Y - _rail.Offset, Rail.Room(bounds.Width, _barWidth),
+            Content.Arrange(new RectangleF(bounds.X, bounds.Y - _rail.Offset, Rail.Room(bounds.Width, _barWidth),
                 _rail.Extent));
         }
 
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            if (_content != null)
-                _content.Draw(g);
+            if (Content != null)
+                Content.Draw(g);
 
             // A thumb on no groove, as the game draws its own.
             if (HasBar)
@@ -205,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         /// <inheritdoc />
         protected override Element UnderContent(Vector2 point)
         {
-            return _content != null ? _content.Under(point) : null;
+            return Content != null ? Content.Under(point) : null;
         }
 
         static bool Inside(RectangleF bounds, Vector2 point)

@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>Children in a line, each its own size along it, with the room left shared among those that grow.</summary>
     /// <remarks>Inside a scroll along the same axis there is nothing to share, and a child that grows is its natural size.</remarks>
-    public abstract class Stacking : Element
+    public abstract class Stacking : Panel
     {
         readonly List<Entry> _entries = new List<Entry>();
         readonly bool _runsAcross;
@@ -20,11 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         protected Stacking(bool runsAcross)
         {
             _runsAcross = runsAcross;
-            Children = new ElementCollection(this);
         }
-
-        /// <summary>What is in the line, in order.</summary>
-        public ElementCollection Children { get; }
 
         /// <summary>Blank room left between one child and the next.</summary>
         public float Spacing
@@ -64,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
                     child.Measure(g, Make(Given(entry.Along, left > 0f ? left : 0f), Given(entry.Across, roomAcross)));
                 }
 
-                if (child.Collapsed)
+                if (!child.IsVisible)
                     continue;
 
                 if (placed)
@@ -100,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
                 var child = Children[i];
                 child.Measure(g, Make(spare * entry.Grow / weight, Given(entry.Across, roomAcross)));
 
-                if (!child.Collapsed)
+                if (child.IsVisible)
                     across = Wider(across, Given(entry.Across, Across(child.DesiredSize)));
             }
 
@@ -119,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             for (var i = 0; i < Children.Count; i++)
             {
                 var child = Children[i];
-                if (child.Collapsed)
+                if (!child.IsVisible)
                     continue;
 
                 if (placed)
@@ -144,7 +140,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             for (var i = 0; i < Children.Count; i++)
             {
                 var child = Children[i];
-                if (child.Collapsed)
+                if (!child.IsVisible)
                     continue;
 
                 if (placed)
@@ -176,7 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <summary>Refuses a child whose placement is not <see cref="ISized" />.</summary>
-        internal override void Admit(Element child, IPlacement placement)
+        protected override void Admit(Element child, IPlacement placement)
         {
             if (placement != null && !(placement is ISized))
                 throw new InvalidOperationException(
@@ -184,19 +180,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <inheritdoc />
-        internal override void Joined(Element child, int index)
+        protected override void Joined(Element child, int index)
         {
             _entries.Insert(index, Resolve(child.Placement));
         }
 
         /// <inheritdoc />
-        internal override void Released(Element child, int index)
+        protected override void Released(Element child, int index)
         {
             _entries.RemoveAt(index);
         }
 
         /// <inheritdoc />
-        internal override void Replaced(Element child)
+        protected override void Replaced(Element child)
         {
             var index = Children.IndexOf(child);
             if (index >= 0)

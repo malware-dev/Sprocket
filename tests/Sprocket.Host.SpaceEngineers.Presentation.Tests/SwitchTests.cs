@@ -33,7 +33,7 @@ public class SwitchTests
             Edge = Dim
         },
         Hot = { Edge = Muted }
-    }.Frozen();
+    };
 
     /// <summary>Only the word for the state it is in is written.</summary>
     [Fact]

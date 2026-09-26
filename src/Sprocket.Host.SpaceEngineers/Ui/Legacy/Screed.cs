@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     ///     How far there is to go sideways is the widest line seen so far, so the sideways thumb settles as
     ///     the text is explored; see <see cref="Widen" />.
     /// </remarks>
-    public class Screed : Element
+    public class Screed : Box
     {
         static readonly string[] Endings = { "\r\n", "\n", "\r" };
 

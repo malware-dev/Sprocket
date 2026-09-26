@@ -8,7 +8,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Everything a value may be, laid out as a row of words or as a box that opens a list.</summary>
-    public class Choices : Element
+    public class Choices : Box
     {
         const int Few = 3;
 
@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         public Choices(float fontSize)
         {
             _scale = fontSize;
-            var children = new ElementCollection(this);
+            var children = new Collection(this);
 
             _row.ItemSpacing = Space.Row;
             _row.LineSpacing = Space.Row;
@@ -140,7 +140,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         {
             for (var i = 0; i < parts.Count; i++)
             {
-                if (!parts[i].Collapsed && parts[i].Holds(point))
+                if (parts[i].IsVisible && parts[i].Holds(point))
                     return parts[i];
             }
 
@@ -165,7 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         public bool Took(Vector2 point, out string word)
         {
             word = "";
-            if (Collapsed)
+            if (!IsVisible)
                 return false;
 
             if (_asRow)
@@ -205,8 +205,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
             _asRow = _shown <= Few && _row.DesiredSize.X <= available.X;
 
-            _row.Collapsed = !_asRow;
-            _closed.Collapsed = _asRow;
+            _row.IsVisible = _asRow;
+            _closed.IsVisible = !_asRow;
 
             if (_asRow)
                 return _row.DesiredSize;

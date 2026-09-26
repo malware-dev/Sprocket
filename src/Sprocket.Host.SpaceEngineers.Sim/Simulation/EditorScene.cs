@@ -111,7 +111,7 @@ namespace Sprocket.Sim.Simulation
         /// something the world does, and in the game a ship actually flies up to the sensor - so none of
         /// this is Sprocket, and none of it goes anywhere the mod can compile.
         /// </remarks>
-        internal IEnumerable<Panel> Panels()
+        internal IEnumerable<Machine.Panel> Panels()
         {
             return _ship.Panels();
         }

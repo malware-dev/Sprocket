@@ -86,7 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 row.Line.Press = Deed.Sends(entry.Command);
                 row.Text.Text = entry.Text;
                 row.Warning.Text = entry.Warning;
-                row.Warning.Collapsed = string.IsNullOrEmpty(entry.Warning);
+                row.Warning.IsVisible = !string.IsNullOrEmpty(entry.Warning);
                 row.Current.Text = entry.IsCurrent ? "*" : "";
                 // The one already chosen is drawn in the highlight tone at rest, so hovering it has to go
                 // a step further again or it would look like nothing happened.

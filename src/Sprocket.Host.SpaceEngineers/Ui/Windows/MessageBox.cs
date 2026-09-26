@@ -168,9 +168,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
         {
             _accepts.CanExecute = _default.HasValue;
 
-            _yes.Collapsed = _yesCommand == null;
-            _no.Collapsed = _noCommand == null;
-            _cancel.Collapsed = Cancel == null || !_showsCancel;
+            _yes.IsVisible = _yesCommand != null;
+            _no.IsVisible = _noCommand != null;
+            _cancel.IsVisible = Cancel != null && _showsCancel;
 
             _yes.Style = _default == MessageButton.Yes ? _defaultStyle : _buttonStyle;
             _no.Style = _default == MessageButton.No ? _defaultStyle : _buttonStyle;

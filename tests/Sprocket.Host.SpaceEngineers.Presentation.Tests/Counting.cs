@@ -1,4 +1,5 @@
 using System.Text;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRage.Utils;
 using VRageMath;
@@ -36,6 +37,14 @@ sealed class Counting : IGraphics
     }
 
     public void PopClip()
+    {
+    }
+
+    public void PushTransform(RenderTransform transform, Vector2 origin)
+    {
+    }
+
+    public void PopTransform()
     {
     }
 

@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     ///     is in force filled light and the other left dark.
     /// </summary>
     /// <remarks>Transcribed from the game's <c>MyGuiControlOnOffSwitch</c>.</remarks>
-    public class Switch : Element
+    public class Switch : Box
     {
         readonly Label _off;
         readonly Label _on;
@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <remarks><paramref name="field" /> stands it among the boxes a value is given in, as tall as one.</remarks>
         public Switch(float fontSize, bool field = false)
         {
-            var children = new ElementCollection(this);
+            var children = new Collection(this);
 
             _on = Half(Widgets.Caps("on"), fontSize, field);
             _off = Half(Widgets.Caps("off"), fontSize, field);
@@ -52,13 +52,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <remarks>Only for a switch that takes its own presses, as on a form; elsewhere the screen lights it.</remarks>
         public void Lit(Vector2 point)
         {
-            IsHot = !Collapsed && Holds(point);
+            IsHot = IsVisible && Holds(point);
         }
 
         /// <summary>Shows neither half in force, for a question nobody has answered.</summary>
         public void Unchosen()
         {
-            Collapsed = false;
+            IsVisible = true;
             IsSet = false;
             IsOn = false;
 
@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         public bool Chose(Vector2 point, out bool isOn)
         {
             isOn = false;
-            if (Collapsed || !Holds(point))
+            if (!IsVisible || !Holds(point))
                 return false;
 
             isOn = point.X < Bounds.X + Bounds.Width * 0.5f;
@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <param name="governs">Whether it switches more than one thing, which draws its edge brighter.</param>
         public void Show(bool isOn, bool governs)
         {
-            Collapsed = false;
+            IsVisible = true;
             IsSet = true;
             IsOn = isOn;
 
@@ -101,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>Takes the switch out of the layout, where there is nothing to switch.</summary>
         public void Hide()
         {
-            Collapsed = true;
+            IsVisible = false;
         }
 
         /// <inheritdoc />

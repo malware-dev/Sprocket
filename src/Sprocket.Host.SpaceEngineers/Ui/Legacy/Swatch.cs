@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>A rectangle of one colour, shown so that the colour itself is the answer.</summary>
     /// <remarks>The colour is its <see cref="Element.Background" />.</remarks>
-    public class Swatch : Element
+    public class Swatch : Box
     {
         Vector2 _size;
 

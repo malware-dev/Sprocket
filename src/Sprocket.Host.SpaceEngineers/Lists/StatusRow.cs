@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     /// </remarks>
     public class StatusRow : HStack
     {
-        const float Inset = 32f;
+        const float Indent = 32f;
 
         readonly Relay _opens;
         readonly Relay _runs;
@@ -226,12 +226,11 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         /// <remarks>Runs on every refresh of the list, so it writes what may have changed and joins no string that has not.</remarks>
         public void Show(Texts texts)
         {
-            _inside.Padding = new Thickness(Depth > 0 ? Inset : 0f, 0f, 0f, 0f);
+            _inside.Padding = new Thickness(Depth > 0 ? Indent : 0f, 0f, 0f, 0f);
 
             var pressable = Opens != null;
             _opens.CanExecute = pressable;
-            Tip = About;
-            TipArguments = AboutArguments;
+            Tip = Tip.For(Tip, About, AboutArguments);
             var wrong = Problems > 0;
 
             Style = wrong
@@ -267,13 +266,13 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                         ? Palette.Live
                         : Palette.Dim;
 
-            _light.Tip = IsAction
+            _light.Tip = Tip.For(_light.Tip, IsAction
                 ? null
                 : wrong
                     ? texts.RowBroken
                     : JustRan
                         ? texts.RowRan
-                        : texts.RowIdle;
+                        : texts.RowIdle);
 
             _status.Text = Status;
             _lastRun.Text = LastRun;
@@ -281,53 +280,53 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             var doing = Running ? Stops : Runs;
 
             _run.Symbol = Running ? Symbols.Stop : Symbols.Play;
-            _run.Collapsed = doing == null;
+            _run.IsVisible = doing != null;
             _runs.CanExecute = doing != null;
-            _run.Tip = doing != null ? (Running ? SequenceText.Stops() : SequenceText.Starts()) : null;
+            _run.Tip = Tip.For(_run.Tip, doing != null ? (Running ? SequenceText.Stops() : SequenceText.Starts()) : null);
 
             _changes.CanExecute = Changes != null;
-            _status.Tip = Changes != null ? texts.RowChange : null;
+            _status.Tip = Tip.For(_status.Tip, Changes != null ? texts.RowChange : null);
 
             var saying = !string.IsNullOrEmpty(Problem);
 
-            _detail.Collapsed = !saying && string.IsNullOrEmpty(Status) && string.IsNullOrEmpty(LastRun);
+            _detail.IsVisible = saying || !string.IsNullOrEmpty(Status) || !string.IsNullOrEmpty(LastRun);
 
-            _status.Collapsed = saying;
+            _status.IsVisible = !saying;
 
             _problem.Text = Problem;
-            _problem.Collapsed = !saying;
+            _problem.IsVisible = saying;
             _problem.Color = ProblemIsWarning ? Palette.Notice : Palette.Problem;
 
             var marked = saying || Problems > 0 || Remarks > 0;
             var quietly = saying ? ProblemIsWarning : Problems == 0;
 
-            _below.Collapsed = !marked;
+            _below.IsVisible = marked;
             _below.Tint = quietly ? Palette.Notice : Palette.Problem;
 
             var switches = Flips != null;
-            _switch.Collapsed = !switches;
+            _switch.IsVisible = switches;
             _switch.IsOn = SwitchIsOn;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
             _flips.CanExecute = switches;
-            _switch.Tip = switches ? Switching(texts, SwitchGovernsAll, SwitchIsOn) : null;
+            _switch.Tip = Tip.For(_switch.Tip, switches ? Switching(texts, SwitchGovernsAll, SwitchIsOn) : null);
 
             var copies = Copies != null;
-            _duplicate.Collapsed = !copies;
+            _duplicate.IsVisible = copies;
             _copies.CanExecute = copies;
-            _duplicate.Tip = copies ? DuplicateText : null;
+            _duplicate.Tip = Tip.For(_duplicate.Tip, copies ? DuplicateText : null);
 
             var offers = Offers != null;
-            _button.Collapsed = !offers;
+            _button.IsVisible = offers;
             _offers.CanExecute = offers;
-            _button.Tip = offers ? ButtonAbout : null;
+            _button.Tip = Tip.For(_button.Tip, offers ? ButtonAbout : null);
 
             if (offers)
                 _button.Text = ButtonText;
 
             var bins = Deletes != null;
-            _delete.Collapsed = !bins;
+            _delete.IsVisible = bins;
             _bins.CanExecute = bins;
-            _delete.Tip = bins ? texts.RowDelete : null;
+            _delete.Tip = Tip.For(_delete.Tip, bins ? texts.RowDelete : null);
         }
 
         static void Carry(ICommand command)

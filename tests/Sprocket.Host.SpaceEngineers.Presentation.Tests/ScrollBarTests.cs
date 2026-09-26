@@ -17,11 +17,11 @@ public class ScrollBarTests
     static readonly Color Thumb = new Color(95, 114, 120);
     static readonly Color Held = new Color(133, 161, 169);
 
-    static readonly ScrollStyle Barred = new ScrollStyle
+    static readonly ScrollViewStyle Barred = new ScrollViewStyle
     {
         Base = { BarWidth = Bar, Thumb = Thumb, LeastThumb = 32f },
         Held = { Thumb = Held }
-    }.Frozen();
+    };
 
     /// <summary>Scrolling moves the content up, and never past either end of it.</summary>
     [Fact]
@@ -107,10 +107,10 @@ public class ScrollBarTests
         Assert.Null(scroll.Under(new Vector2(Wide - Bar / 2f, 50f)));
     }
 
-    static (Scroll, Element, Easel, InputRoot) Laid(float tall)
+    static (ScrollView, Element, Easel, InputRoot) Laid(float tall)
     {
         var content = new VStack { Children = { new VStack { Placement = Fixed.High(tall) } } };
-        var scroll = new Scroll { Style = Barred, Content = content, Placement = Fixed.Size(Wide, High) };
+        var scroll = new ScrollView { Style = Barred, Content = content, Placement = Fixed.Size(Wide, High) };
         var root = new VStack { Children = { scroll } };
         var easel = new Easel(root, Wide, High);
         return (scroll, content, easel, new InputRoot(root));

@@ -114,6 +114,14 @@ public class WindowLayerTests
         {
         }
 
+        public void PushTransform(RenderTransform transform, Vector2 origin)
+        {
+        }
+
+        public void PopTransform()
+        {
+        }
+
         public void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation)
         {
         }

@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
     /// </remarks>
     public sealed class Keyed<TKey, TElement> where TElement : Element
     {
-        readonly ElementCollection _children;
+        readonly Element.Collection _children;
         readonly Func<TKey, TElement> _make;
         readonly Dictionary<TKey, Entry> _kept = new Dictionary<TKey, Entry>();
         readonly List<TKey> _gone = new List<TKey>();
@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         int _showing;
 
         /// <summary>Children of the container holding <paramref name="children" />, each made by <paramref name="make" /> the first time its key is shown.</summary>
-        public Keyed(ElementCollection children, Func<TKey, TElement> make)
+        public Keyed(Element.Collection children, Func<TKey, TElement> make)
         {
             _children = children;
             _make = make;

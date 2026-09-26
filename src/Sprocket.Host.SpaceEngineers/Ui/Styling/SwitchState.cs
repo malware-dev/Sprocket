@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using VRage.Game;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Styling
@@ -8,57 +7,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
     /// <remarks><see cref="TextState.Color" /> is the words.</remarks>
     public class SwitchState : TextState
     {
-        Color? _offTrack;
-        Color? _onTrack;
-        Color? _thumb;
-        Thickness? _wordPadding;
-
         /// <summary>What the room inside is filled with while on, or null to leave it to the layers beneath.</summary>
-        public Color? OnTrack
-        {
-            get { return _onTrack; }
-            set
-            {
-                Check();
-                _onTrack = value;
-            }
-        }
+        public Color? OnTrack { get; set; }
 
         /// <summary>What the room inside is filled with while off, or null to leave it to the layers beneath.</summary>
-        public Color? OffTrack
-        {
-            get { return _offTrack; }
-            set
-            {
-                Check();
-                _offTrack = value;
-            }
-        }
+        public Color? OffTrack { get; set; }
 
         /// <summary>The color of the thumb, or null to leave it to the layers beneath.</summary>
-        public Color? Thumb
-        {
-            get { return _thumb; }
-            set
-            {
-                Check();
-                _thumb = value;
-            }
-        }
+        public Color? Thumb { get; set; }
 
         /// <summary>The room held clear round the word, or null to leave it to the layers beneath.</summary>
-        public Thickness? WordPadding
-        {
-            get { return _wordPadding; }
-            set
-            {
-                Check();
-                _wordPadding = value;
-            }
-        }
+        public Thickness? WordPadding { get; set; }
 
         /// <inheritdoc />
-        internal override void Neutral(Element element)
+        public override void Neutral(Element element)
         {
             base.Neutral(element);
 
@@ -66,9 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             if (control == null)
                 return;
 
-            control.Font = MyFontEnum.White;
-            control.FontSize = NeutralFontSize;
-            control.Color = VRageMath.Color.White;
             control.OnTrack = VRageMath.Color.Transparent;
             control.OffTrack = VRageMath.Color.Transparent;
             control.Thumb = VRageMath.Color.White;
@@ -76,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         }
 
         /// <inheritdoc />
-        internal override void Lay(Element element)
+        public override void Lay(Element element)
         {
             base.Lay(element);
 
@@ -84,41 +43,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             if (control == null)
                 return;
 
-            if (Font != null)
-                control.Font = Font;
+            if (OnTrack.HasValue)
+                control.OnTrack = OnTrack.Value;
 
-            if (FontSize.HasValue)
-                control.FontSize = FontSize.Value;
+            if (OffTrack.HasValue)
+                control.OffTrack = OffTrack.Value;
 
-            if (Color.HasValue)
-                control.Color = Color.Value;
+            if (Thumb.HasValue)
+                control.Thumb = Thumb.Value;
 
-            if (_onTrack.HasValue)
-                control.OnTrack = _onTrack.Value;
-
-            if (_offTrack.HasValue)
-                control.OffTrack = _offTrack.Value;
-
-            if (_thumb.HasValue)
-                control.Thumb = _thumb.Value;
-
-            if (_wordPadding.HasValue)
-                control.WordPadding = _wordPadding.Value;
-        }
-
-        /// <inheritdoc />
-        internal override void Copy(ElementState other)
-        {
-            base.Copy(other);
-
-            var state = other as SwitchState;
-            if (state == null)
-                return;
-
-            _onTrack = state._onTrack;
-            _offTrack = state._offTrack;
-            _thumb = state._thumb;
-            _wordPadding = state._wordPadding;
+            if (WordPadding.HasValue)
+                control.WordPadding = WordPadding.Value;
         }
     }
 }

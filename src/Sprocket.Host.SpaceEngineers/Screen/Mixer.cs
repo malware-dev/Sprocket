@@ -151,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _palette.Children.Add(_swatches[i]);
             }
 
-            _palette.Collapsed = colours.Count == 0;
+            _palette.IsVisible = colours.Count != 0;
         }
 
         /// <summary>Takes the colour from whichever of the player's colours was pressed, if one was.</summary>

@@ -71,10 +71,10 @@ public class BannerTests
         banner.Show(notice, Frames);
 
         banner.Show(null, Frames + 1);
-        Assert.False(banner.Collapsed);
+        Assert.True(banner.IsVisible);
 
         banner.Show(null, Frames * 3);
-        Assert.True(banner.Collapsed);
+        Assert.False(banner.IsVisible);
     }
 
     /// <summary>Opened, it is taller: the rest of what it says slides down under its line.</summary>

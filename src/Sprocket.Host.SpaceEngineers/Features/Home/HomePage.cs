@@ -6,6 +6,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Words;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
@@ -222,9 +223,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         void Arrange(Texts texts)
         {
             _new.Text = StartView.Plus + texts.SystemsNew;
-            _new.Tip = texts.SystemsNewAbout;
+            _new.Tip = Tip.For(_new.Tip, texts.SystemsNewAbout);
             _load.Text = StartView.Plus + texts.SystemsLoad;
-            _load.Tip = texts.SystemsLoadAbout;
+            _load.Tip = Tip.For(_load.Tip, texts.SystemsLoadAbout);
 
             _own.Clear();
             _blueprints.Clear();
@@ -234,8 +235,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _rows.Show(_own);
             _groups.Show(_blueprints);
 
-            _plain.Collapsed = _own.Count == 0 && _systems.Count > 0;
-            _empty.Collapsed = _systems.Count > 0;
+            _plain.IsVisible = _own.Count > 0 || _systems.Count == 0;
+            _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
 
             for (var i = 0; i < _own.Count; i++)

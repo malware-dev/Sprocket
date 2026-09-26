@@ -34,6 +34,38 @@ No control is sealed. A control made of others, a user control, derives from the
 such as `HStack`, rather than from a base of its own: a `UserControl` comes only once one is proven
 necessary, since it costs an element per instance that does nothing but pass its room through.
 
+No control has a property that does not apply to it. What only some elements need lives on those
+elements, and what an element needs in order to work, such as clipping what it draws, is its own
+business rather than a switch somebody else can turn off.
+
+`Element` holds only what every element has: its placement and the layout passes, whether it is
+visible, its render transform, hit testing, the box it paints across its bounds (background, edge and
+their colors under the pointer), and what pressing, hovering over and styling it means.
+
+- **`IsVisible`.** An element that is not visible is out of the layout as well. There is no state that
+  is hidden but holds its place.
+- **`Tip`** is a thing of its own: a document, and the arguments for its slots where it has them, read
+  once when it is made and kept like a style. The screen draws every tip with its one rich text.
+- **`RenderTransform`**, a translate and a uniform scale, moves how an element is drawn and where it is
+  pressed, never where layout put it. Text scaled by it is drawn at sizes off the scale and may
+  shimmer while it moves, so scale is for animation rather than for anything that rests scaled. There
+  is no rotation: the game cannot draw rotated text.
+- **`Container`** is an element that holds content given to it from outside, and lays it out. Every
+  container has `Padding`, the room between its edge and what it holds, which is why it sits on the
+  base: whatever every container must support belongs there. A control builds its own parts instead,
+  so a button or a switch is not a container.
+  - **`Panel`** holds any number of `Children`. The stacks are panels.
+  - **`ContentControl`** holds one `Content`, laid out across the room inside its padding unless the kind
+    of control says otherwise. `ScrollView`, `Reveal` and `Window` are content controls.
+  - **`Grid`** holds its own `Cells`, and is a container and nothing more.
+- A container does not clip: what it holds may draw outside it. An element that has to clip to work,
+  such as a scroll view, a reveal or a text box, clips itself, and nothing outside it can switch that off.
+- **Padding on a leaf** belongs to the leaf that has a use for it, such as a label or a rule, and is set
+  by its style like any other property.
+- A user control is only a subtree: it derives from the layout it needs, and is what that layout is.
+- Legacy controls derive from `Ui/Legacy/Box`, a container with the `ClipsContent` they had, until they
+  are gone.
+
 ## Placement
 
 `Element` has no width and no height. What a container needs to know about how a child is placed
@@ -86,8 +118,11 @@ Styles belong to the application, never to the framework, which ships no colors 
 A style holds simple visual properties only: colors, fonts, sizes, spacing. Nothing that moves.
 
 A style is found by reference, never looked up. The application keeps its styles as static fields,
-each built with an initializer and frozen, after which any setter throws. A style based on another
-starts from a copy of it.
+each built with an initializer. A style can be changed at any time, and the change shows on an element
+once the element is restyled: `Restyle` on an element restyles it and everything inside it.
+
+A style based on another is that style with its own layers laid over it. It reads through to the
+other each time it is applied, so a change to a style shows in every style based on it.
 
 Every style has a `Base`. The states beyond it belong to the control the style is for, and its style
 type declares them as layers of its own: a switch's style has `On`, a text box's has `Editing`, and a
@@ -100,7 +135,7 @@ public static readonly SwitchStyle Toggle = new SwitchStyle
     Base = { Background = Palette.Page },
     On = { Background = Palette.Live },
     Hot = { Edge = Palette.Ink }
-}.Frozen();
+};
 ```
 
 Applying a style lays down neutral values the style type holds as constants, then `Base`, then the
@@ -116,9 +151,10 @@ such as a state light's color or the color of a warning, is set on the element d
 default style. A separate style earns its place only where it saves setting many properties at once;
 for one or two it is overkill.
 
-A control is composed rather than derived: a button has a label, and is not one. A control's style
-styles the parts it owns, so a button's style sets its own label's font, size and color in each of
-its states. Nothing is inherited from what an element sits in.
+A control is composed rather than derived: a button has a label, and is not one. A style sets the
+control's own properties, and the control passes them on to the parts that use them: a button's
+style sets the button's font, size and color, and the button hands them to its label. No style knows
+what a control is made of. Nothing is inherited from what an element sits in.
 
 Any element can be pressed, by being given a press. `Button` is one control among others, with text
 of its own, not the only thing that answers a press.
@@ -147,8 +183,6 @@ until the last of them goes.
 
 ## Later
 
-- `Offset` goes. Dragging a row and rows sliding aside use a render translate, applied at drawing
-  and in hit testing but not in layout.
 - The glyph system is reworked.
 - Brushes: a background or edge painted with any material, not only the flat fill. Animating a color
   then means changing a mutable brush's color.

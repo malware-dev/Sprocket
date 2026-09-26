@@ -22,7 +22,7 @@ public class GlyphTests
         Base = { FontSize = 32f, Tint = Faint },
         Hot = { Background = PanelHot, Tint = Ink },
         Disabled = { Tint = Dim }
-    }.Frozen();
+    };
 
     /// <summary>Its style sizes and tints the symbol.</summary>
     [Fact]

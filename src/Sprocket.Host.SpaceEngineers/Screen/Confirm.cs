@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _up = true;
             _anchor = anchor;
             _label.Text = question;
-            _label.Collapsed = string.IsNullOrEmpty(question);
+            _label.IsVisible = !string.IsNullOrEmpty(question);
 
             _rows.Children.Clear();
 

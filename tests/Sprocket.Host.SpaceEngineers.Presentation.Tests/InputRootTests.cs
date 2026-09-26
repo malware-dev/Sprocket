@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRage.Input;
 using VRageMath;
@@ -148,7 +149,7 @@ public class InputRootTests
     [Fact]
     public void ATipInsideAControlLetsThePressThrough()
     {
-        var light = new Glyph { Symbol = "o", Tip = "Idle" };
+        var light = new Glyph { Symbol = "o", Tip = new Tip("Idle") };
         var row = new HStack { Command = new Relay(() => { }), Children = { light, new Label { Text = "Airlock" } } };
         Laid(new VStack { Children = { row } });
 

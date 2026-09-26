@@ -4,9 +4,9 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>A band at the top, a band at the bottom, and everything left over in between.</summary>
-    public class Dock : Element
+    public class Dock : Box
     {
-        readonly ElementCollection _children;
+        readonly Collection _children;
         Element _bottom;
         Element _fill;
 
@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>An empty dock.</summary>
         public Dock()
         {
-            _children = new ElementCollection(this);
+            _children = new Collection(this);
         }
 
         /// <summary>The band at the top, given the height it asks for.</summary>

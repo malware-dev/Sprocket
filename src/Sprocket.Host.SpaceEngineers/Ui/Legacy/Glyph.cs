@@ -6,7 +6,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>One symbol, centred in whatever room it is given.</summary>
-    public class Glyph : Element
+    public class Glyph : Box
     {
         readonly StringBuilder _measuring = new StringBuilder(2);
 
@@ -95,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
                 : g.MeasureText(Symbols.Font, _measuring, FontSize);
 
             // Set while measuring because the lift is a fraction of a height only measuring knows.
-            Offset = new Vector2(Offset.X, -_size.Y * _lift);
+            RenderTransform = RenderTransform.Moved(new Vector2(0f, -_size.Y * _lift));
 
             return _size;
         }

@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
     ///     A name that can be changed where it stands: the words, a pencil beside them, and the box that
     ///     replaces the words while somebody is typing.
     /// </summary>
-    public class Nameplate : Element
+    public class Nameplate : Box
     {
         readonly Label _label = new Label();
 
@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// </summary>
         public Nameplate(string pen, float penSize)
         {
-            var children = new ElementCollection(this);
+            var children = new Collection(this);
 
             // A box cannot trim, so what is typed runs on past the end and the clip stops it.
             ClipsContent = true;

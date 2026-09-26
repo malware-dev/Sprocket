@@ -13,8 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
     ///     read by <see cref="Template.Read" /> has slots, which take their words from <see cref="Arguments" />:
     ///     changing one lays the words out again and reads nothing again.
     /// </remarks>
-    public class RichText : Element
+    public class RichText : Element, IPadded, ITextual
     {
+        Thickness _padding;
         readonly List<Piece> _pieces = new List<Piece>();
         readonly List<Mark> _marks = new List<Mark>();
 
@@ -171,6 +172,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
 
         /// <summary>The color of rules and of a bullet's mark.</summary>
         public Color RuleColor { get; set; }
+
+        /// <summary>Room held clear between the edge and the text.</summary>
+        public Thickness Padding
+        {
+            get { return _padding; }
+            set
+            {
+                if (_padding == value)
+                    return;
+
+                _padding = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override Thickness Inset => _padding;
 
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)

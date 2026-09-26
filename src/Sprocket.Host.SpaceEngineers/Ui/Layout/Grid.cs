@@ -7,10 +7,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>Elements in cells of rows and columns, each track sized outright, by its largest cell, or by a share of what is left.</summary>
     /// <remarks>One element to a cell, stretched across it and centred down it.</remarks>
-    public class Grid : Element
+    public class Grid : Container
     {
         readonly List<Cell> _cells = new List<Cell>();
-        readonly ElementCollection _children;
+        readonly Collection _children;
 
         int _columnCount;
         bool _columnsShare;
@@ -26,10 +26,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         /// <summary>An empty grid, every track of it auto.</summary>
         public Grid()
         {
-            _children = new ElementCollection(this);
-            Columns = new Tracks(this);
-            Rows = new Tracks(this);
-            Cells = new Cells(this);
+            _children = Hold();
+            Columns = new Tracks(InvalidateMeasure);
+            Rows = new Tracks(InvalidateMeasure);
+            Cells = new Cells(At, Place);
         }
 
         /// <summary>How wide each column is, left to right.</summary>
@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
                 cell.Element.Measure(g, new Vector2(Given(cell.Width, available.X), Given(cell.Height, available.Y)));
 
-                if (cell.Element.Collapsed)
+                if (!cell.Element.IsVisible)
                     continue;
 
                 var wanted = Given(cell.Width, cell.Element.DesiredSize.X);
@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 
                 cell.Element.Measure(g, new Vector2(Given(cell.Width, room), Given(cell.Height, available.Y)));
 
-                if (cell.Element.Collapsed)
+                if (!cell.Element.IsVisible)
                     continue;
 
                 var track = Rows[cell.Row];
@@ -160,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             for (var i = 0; i < _cells.Count; i++)
             {
                 var cell = _cells[i];
-                if (cell.Element.Collapsed)
+                if (!cell.Element.IsVisible)
                     continue;
 
                 var width = Span(_widths, cell.Column, cell.Columns, _columnSpacing);
@@ -199,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <summary>Refuses a child whose placement is not <see cref="ISized" />.</summary>
-        internal override void Admit(Element child, IPlacement placement)
+        protected override void Admit(Element child, IPlacement placement)
         {
             if (placement != null && !(placement is ISized))
                 throw new InvalidOperationException(
@@ -207,7 +207,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <inheritdoc />
-        internal override void Released(Element child, int index)
+        protected override void Released(Element child, int index)
         {
             for (var i = 0; i < _cells.Count; i++)
             {
@@ -220,15 +220,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
         }
 
         /// <inheritdoc />
-        internal override void Replaced(Element child)
+        protected override void Replaced(Element child)
         {
             for (var i = 0; i < _cells.Count; i++)
                 if (_cells[i].Element == child)
                     _cells[i].Resolve(child.Placement);
         }
 
-        /// <summary>The element in the cell covering <paramref name="row" /> and <paramref name="column" />, or null.</summary>
-        internal Element At(int row, int column)
+        Element At(int row, int column)
         {
             for (var i = 0; i < _cells.Count; i++)
                 if (_cells[i].Covers(row, column))
@@ -237,9 +236,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Layout
             return null;
         }
 
-        /// <summary>Puts <paramref name="child" /> in a cell, replacing whatever held exactly that cell, or empties it for null.</summary>
-        /// <remarks>Throws, leaving the grid as it was, where the cell would overlap another or the child cannot be placed.</remarks>
-        internal void Place(Element child, int row, int column, int rows, int columns)
+        void Place(Element child, int row, int column, int rows, int columns)
         {
             if (row < 0 || column < 0 || rows < 1 || columns < 1)
                 throw new ArgumentException("A cell needs a row and column from zero and a span of at least one.");

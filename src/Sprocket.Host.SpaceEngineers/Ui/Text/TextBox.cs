@@ -15,8 +15,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
     ///     changes, and the caret, the selection and the pointer read those, so moving the caret or selecting
     ///     measures nothing.
     /// </remarks>
-    public class TextBox : Element
+    public class TextBox : Element, IPadded, ITextual
     {
+        Thickness _padding;
         const float CaretWidth = 2f;
 
         readonly List<float> _edges = new List<float>();
@@ -42,7 +43,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         public TextBox()
         {
             Focusable = true;
-            ClipsContent = true;
             Color = Color.White;
             SelectionColor = new Color(40, 90, 150);
             CaretColor = Color.White;
@@ -204,7 +204,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <inheritdoc />
-        protected internal override void OnPointerDown(Vector2 point, int presses)
+        public override void OnPointerDown(Vector2 point, int presses)
         {
             var index = IndexAt(point.X);
 
@@ -225,20 +225,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <inheritdoc />
-        protected internal override void OnPointerMove(Vector2 point)
+        public override void OnPointerMove(Vector2 point)
         {
             if (_dragging)
                 MoveCaret(IndexAt(point.X), true);
         }
 
         /// <inheritdoc />
-        protected internal override void OnPointerUp(Vector2 point)
+        public override void OnPointerUp(Vector2 point)
         {
             _dragging = false;
         }
 
         /// <inheritdoc />
-        protected internal override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (ctrl)
                 return OnShortcut(input, key);
@@ -279,7 +279,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <inheritdoc />
-        protected internal override void OnText(char c)
+        public override void OnText(char c)
         {
             if (c < ' ' || c == (char)127)
                 return;
@@ -290,6 +290,27 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             Place(_caret + 1, _caret + 1);
             OnEdited();
         }
+
+        /// <inheritdoc />
+        /// <remarks>Always: text longer than the box moves along inside it.</remarks>
+        protected override bool Clips => true;
+
+        /// <summary>Room held clear between the edge and the text.</summary>
+        public Thickness Padding
+        {
+            get { return _padding; }
+            set
+            {
+                if (_padding == value)
+                    return;
+
+                _padding = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override Thickness Inset => _padding;
 
         /// <summary>Measures where every boundary between characters falls, when the text or its font has changed since.</summary>
         /// <remarks>

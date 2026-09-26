@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 Label join = Widgets.Label("", Palette.Muted, Lettering.Body);
                 join.Wraps = false;
-                join.Collapsed = true;
+                join.IsVisible = false;
                 _joins.Add(join);
                 _wrap.Children.Add(join);
 
@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 for (int i = 0; i < _joins.Count; i++)
                 {
                     _joins[i].Text = SentenceText.Joining(step.Slots, i);
-                    _joins[i].Collapsed = _joins[i].Text.Length == 0;
+                    _joins[i].IsVisible = _joins[i].Text.Length != 0;
                 }
             }
 

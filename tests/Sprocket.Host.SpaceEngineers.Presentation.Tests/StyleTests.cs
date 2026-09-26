@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>How a style is applied to an element, layer by layer, and held still once frozen.</summary>
+/// <summary>How a style is applied to an element, layer by layer, over the style it is based on.</summary>
 public class StyleTests
 {
     static readonly Color Panel = new Color(41, 54, 62);
@@ -68,28 +68,42 @@ public class StyleTests
         Assert.Equal(Color.Transparent, row.Edge);
     }
 
-    /// <summary>A frozen style refuses any change, to its base and to its states alike.</summary>
+    /// <summary>A style based on another is everything the other is, with its own layers laid over it, and leaves the other as it was.</summary>
     [Fact]
-    public void AFrozenStyleRefusesAChange()
-    {
-        var style = Row();
-
-        Assert.True(style.IsFrozen);
-        Assert.Throws<InvalidOperationException>(() => style.Base.Background = Dim);
-        Assert.Throws<InvalidOperationException>(() => style.Hot.Background = Panel);
-    }
-
-    /// <summary>A style based on another starts from a copy of its base and its states, and changing it leaves the base as it was.</summary>
-    [Fact]
-    public void AStyleBasedOnAnotherStartsFromACopy()
+    public void AStyleBasedOnAnotherLaysItsOwnOverIt()
     {
         var row = Row();
-        var quiet = new Pressable(row) { Base = { Background = Dim } }.Frozen();
+        var quiet = new Pressable(row) { Base = { Background = Dim } };
+        var element = new HStack { Style = quiet };
 
-        Assert.Equal(Dim, quiet.Base.Background);
-        Assert.Equal(PanelHot, quiet.Hot.Background);
-        Assert.Equal(Dim, quiet.Disabled.Edge);
+        Assert.Equal(Dim, element.Background);
+
+        element.IsHot = true;
+        Assert.Equal(PanelHot, element.Background);
+
+        element.IsEnabled = false;
+        Assert.Equal(Dim, element.Edge);
+        Assert.Null(row.Base.Edge);
         Assert.Equal(Panel, row.Base.Background);
+    }
+
+    /// <summary>A change to a style shows once the element is restyled, on elements given the style and on those given a style based on it.</summary>
+    [Fact]
+    public void AChangeToAStyleShowsOnceRestyled()
+    {
+        var row = Row();
+        var plain = new HStack { Style = row };
+        var quiet = new HStack { Style = new Pressable(row) { Base = { Edge = Dim } } };
+        var screen = new VStack { Children = { plain, quiet } };
+
+        row.Base.Background = Ink;
+        Assert.Equal(Panel, plain.Background);
+
+        screen.Restyle();
+
+        Assert.Equal(Ink, plain.Background);
+        Assert.Equal(Ink, quiet.Background);
+        Assert.Equal(Dim, quiet.Edge);
     }
 
     /// <summary>A style based on nothing is refused, which is what a style declared above its base receives.</summary>
@@ -132,7 +146,7 @@ public class StyleTests
             Base = { Background = Panel },
             Hot = { Background = PanelHot },
             Disabled = { Background = Color.Transparent, Edge = Dim }
-        }.Frozen();
+        };
     }
 
     /// <summary>A style whose element can be hot and disabled, the way a control's own style declares its states.</summary>

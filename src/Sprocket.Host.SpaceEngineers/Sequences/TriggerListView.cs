@@ -112,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 row.Joined = trigger.DoesLead;
                 row.Between.Text = trigger.DoesLead;
-                row.Between.Collapsed = trigger.DoesLead.Length == 0;
+                row.Between.IsVisible = trigger.DoesLead.Length != 0;
             }
 
             // Before the parts are filled, which is what records them as shown: a join is worked out
@@ -124,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
                 string join = SentenceText.Joining(trigger.Does, i);
                 row.Joins[i].Text = join;
-                row.Joins[i].Collapsed = join.Length == 0;
+                row.Joins[i].IsVisible = join.Length != 0;
             }
 
             Fill(row, row.Starts, trigger.Slots, 0);
@@ -132,10 +132,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             // Idle while the signal reads true is not a contradiction. It is the difference between a
             // moment and a situation, shown rather than explained.
-            row.Live.Collapsed = !trigger.IsLiveNow;
+            row.Live.IsVisible = trigger.IsLiveNow;
 
             row.Problem.Text = trigger.Problem;
-            row.Problem.Collapsed = trigger.Problem.Length == 0;
+            row.Problem.IsVisible = trigger.Problem.Length != 0;
 
             // The same wash a broken row in a list gets, so arriving here from one arrives at
             // something already recognised.
@@ -199,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 Label join = Widgets.Label("", Palette.Muted, Lettering.Body);
                 join.Wraps = false;
-                join.Collapsed = true;
+                join.IsVisible = false;
                 row.Joins.Add(join);
                 row.Sentence.Children.Add(join);
 

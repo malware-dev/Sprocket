@@ -4,7 +4,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>Puts its children in a line and starts a new one when the line runs out.</summary>
-    public class Wrap : Element
+    public class Wrap : Box
     {
         float _itemSpacing;
         float _lineSpacing;
@@ -12,11 +12,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         /// <summary>An empty wrap.</summary>
         public Wrap()
         {
-            Children = new ElementCollection(this);
+            Children = new Collection(this);
         }
 
         /// <summary>What is laid out, in order.</summary>
-        public ElementCollection Children { get; }
+        public Collection Children { get; }
 
         /// <summary>Blank room between one child and the next along a line.</summary>
         public float ItemSpacing
@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
                 var child = Children[i];
                 child.Measure(g, available);
 
-                if (child.Collapsed)
+                if (!child.IsVisible)
                     continue;
 
                 var width = child.DesiredSize.X;
@@ -103,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             {
                 var child = Children[i];
 
-                if (child.Collapsed)
+                if (!child.IsVisible)
                     continue;
 
                 var width = child.DesiredSize.X;
@@ -143,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             {
                 var child = Children[i];
 
-                if (child.Collapsed)
+                if (!child.IsVisible)
                     continue;
 
                 var height = child.DesiredSize.Y;
@@ -152,7 +152,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 
                 var placed = child.Bounds;
                 child.Arrange(new RectangleF(
-                    placed.X - child.Offset.X,
+                    placed.X,
                     y + (lineHeight - height) * 0.5f,
                     placed.Width,
                     height));

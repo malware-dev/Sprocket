@@ -153,7 +153,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         }
 
         /// <summary>The dial itself: marks round the edge, and a needle from the middle.</summary>
-        sealed class Face : Element
+        sealed class Face : Box
         {
             const float Across = 96f;
 

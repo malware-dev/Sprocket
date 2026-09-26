@@ -60,8 +60,8 @@ public class MessageBoxTests
     [Fact]
     public void TheDefaultStandsOut()
     {
-        var plain = new ButtonStyle { Base = { Edge = Color.Gray } }.Frozen();
-        var standing = new ButtonStyle { Base = { Background = Color.White } }.Frozen();
+        var plain = new ButtonStyle { Base = { Edge = Color.Gray } };
+        var standing = new ButtonStyle { Base = { Background = Color.White } };
         var box = Box(out _);
         box.ButtonStyle = plain;
         box.DefaultStyle = standing;
@@ -105,7 +105,7 @@ public class MessageBoxTests
 
     static void Collect(Element element, List<Button> found)
     {
-        if (element.Collapsed)
+        if (!element.IsVisible)
             return;
 
         if (element is Button button)

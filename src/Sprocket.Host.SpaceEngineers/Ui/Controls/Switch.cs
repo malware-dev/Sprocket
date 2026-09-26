@@ -8,12 +8,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
     /// <remarks>
     ///     The thumb is at the right when on and at the left when off, as tall as the room inside the switch
     ///     and as wide as it is tall. The body is the element's own <see cref="Element.Background" />, the room
-    ///     round the thumb and the word its <see cref="Element.Padding" />. The switch is as wide as the longer
+    ///     round the thumb and the word its <see cref="Padding" />. The switch is as wide as the longer
     ///     of its two words needs, whichever it is showing, so it keeps its size when switched and a longer
     ///     word in another language widens it rather than spilling out of it.
     /// </remarks>
-    public class Switch : Element
+    public class Switch : Element, IPadded, ITextual
     {
+        Thickness _padding;
         readonly Label _off = Word("OFF");
         readonly Label _on = Word("ON");
 
@@ -24,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         /// <summary>A switch that is off, in the neutral look.</summary>
         public Switch()
         {
-            var children = new ElementCollection(this);
+            var children = new Collection(this);
             children.Add(_on);
             children.Add(_off);
 
@@ -105,6 +106,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             _on.Text = on;
             _off.Text = off;
         }
+
+        /// <summary>Room held clear between the edge and the thumb and the word.</summary>
+        public Thickness Padding
+        {
+            get { return _padding; }
+            set
+            {
+                if (_padding == value)
+                    return;
+
+                _padding = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override Thickness Inset => _padding;
 
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)

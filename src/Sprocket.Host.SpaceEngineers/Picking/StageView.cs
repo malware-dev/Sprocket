@@ -10,6 +10,7 @@ using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
 using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Picking
 {
@@ -139,7 +140,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             // something to do without first opening the thing that set it.
             _kindClear.Padding = new Thickness(Space.Row, 0f);
             _kindClear.Highlight = Palette.PanelHot;
-            _kindClear.Tip = "Show every kind again";
+            _kindClear.Tip = Tip.For(_kindClear.Tip, "Show every kind again");
 
             // Next to the word it clears and not at the end of the row. A bar puts its right-hand
             // part against the far edge, which left the cross four hundred units from the filter it
@@ -325,7 +326,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
 
                 // Nothing to clear while nothing is narrowed, and a way out that does nothing is a
                 // control somebody presses twice before believing it.
-                _kindClear.Collapsed = !stage.IsNarrowed;
+                _kindClear.IsVisible = stage.IsNarrowed;
                 _kindClear.Press = stage.IsNarrowed
                     ? Deed.Sends(stage.ClearCommand)
                     : Deed.Nothing;
@@ -398,10 +399,10 @@ namespace Sprocket.Host.SpaceEngineers.Picking
         {
             bool anything = !string.IsNullOrEmpty(box.Text);
 
-            // Collapsed rather than taken out: the room for it is held by the box whether or not it
+            // Made invisible rather than taken out: the room for it is held by the box whether or not it
             // is showing, so nothing moves when the first character is typed.
-            clear.Collapsed = !anything;
-            clear.Tip = "Clear what is typed";
+            clear.IsVisible = anything;
+            clear.Tip = Tip.For(clear.Tip, "Clear what is typed");
             clear.Press = anything ? Deed.Empties(command, box) : Deed.Nothing;
         }
 
@@ -533,7 +534,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             Fit(_visible, _rows, stage.Entries.Count, stage.HasIcons);
 
             _note.Text = stage.Note ?? "";
-            _note.Collapsed = string.IsNullOrEmpty(stage.Note);
+            _note.IsVisible = !string.IsNullOrEmpty(stage.Note);
 
             if (stage.Entries.Count == 0)
             {
@@ -558,19 +559,19 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                 // is the same, and says why when the pointer rests on it.
                 bool inert = entry.IsHeading || entry.IsWithheld;
                 row.Line.Press = inert ? Deed.Nothing : Moving(entry, many);
-                row.Line.Tip = entry.IsWithheld ? entry.Tip : null;
+                row.Line.Tip = Tip.For(row.Line.Tip, entry.IsWithheld ? entry.Tip : null);
 
                 // No mark where one thing is settled on, only where several are collected: the row's own
                 // tone says which one it is, and the words then start where a heading does. A heading
                 // also sits against the first thing it names, with no room below it.
-                row.Left.Collapsed = entry.IsHeading || !many;
+                row.Left.IsVisible = !entry.IsHeading && many;
                 row.Line.Padding = entry.IsHeading ? HeadingPad : Pad;
 
                 // The one settled on sits on the highlight tone at rest, the way a chosen answer in a
                 // list of answers does, so lighting it has to go a step further again.
                 bool settled = entry.IsChosen && !many;
                 row.Line.Highlight = inert ? Palette.None : settled ? Palette.Line : Palette.PanelHot;
-                row.Mark.Collapsed = entry.IsHeading;
+                row.Mark.IsVisible = !entry.IsHeading;
 
                 // The box collects one at a time and says so whatever is held down, which is what it
                 // is for. Only where several are being collected: where one is being settled on, a
@@ -590,14 +591,14 @@ namespace Sprocket.Host.SpaceEngineers.Picking
                     row.Icon.Art = entry.Icon;
 
                 row.Name.Text = entry.IsHeading ? Widgets.Caps(entry.Text) : entry.Text;
-                row.Waits.Collapsed = !entry.Waits;
-                row.Waits.Tip = entry.Waits ? stage.WaitsTip : null;
+                row.Waits.IsVisible = entry.Waits;
+                row.Waits.Tip = Tip.For(row.Waits.Tip, entry.Waits ? stage.WaitsTip : null);
                 row.Name.Color = entry.IsHeading ? Palette.Faint : entry.IsWithheld ? Palette.Muted : Palette.Ink;
                 row.Line.Background = settled ? Palette.PanelHot : Palette.None;
 
                 string detail = DetailOf(entry);
                 row.Detail.Text = detail;
-                row.Detail.Collapsed = string.IsNullOrEmpty(detail);
+                row.Detail.IsVisible = !string.IsNullOrEmpty(detail);
             }
         }
 

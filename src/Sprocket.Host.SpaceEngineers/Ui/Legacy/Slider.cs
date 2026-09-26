@@ -6,7 +6,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
 {
     /// <summary>One number between nothing and everything, set by putting a grip where it goes.</summary>
-    public class Slider : Element
+    public class Slider : Box
     {
         /// <summary>How tall a track is, matched to the boxes it stands among.</summary>
         public const float Thick = 24f;

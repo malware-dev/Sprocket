@@ -40,12 +40,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
                 return;
 
             if (_focused != null)
-                _focused.IsFocused = false;
+                _focused.OnBlur();
 
             _focused = element;
 
             if (_focused != null)
-                _focused.IsFocused = true;
+                _focused.OnFocus();
 
             var changed = FocusChanged;
             if (changed != null)
@@ -143,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
 
         void Collect(Element element)
         {
-            if (element.Collapsed)
+            if (!element.IsVisible)
                 return;
 
             if (element.Focusable && element.IsEnabled && (element.InputTransparency & InputTransparency.Self) == 0)

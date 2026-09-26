@@ -5,17 +5,17 @@ using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
     /// <summary>A screen's heading: each part's name, renamed in place where it can be, with an arrow between parts.</summary>
-    public sealed class HeadingRow
+    public class HeadingRow : HStack
     {
         readonly IScreenHost _host;
         readonly ICommand _commit;
         readonly ICommand _cancel;
         readonly Action _edited;
-        readonly HStack _row = new HStack { Spacing = 4f, Placement = Flex.Grow, ClipsContent = true };
         readonly List<Part> _parts = new List<Part>();
 
         List<HeadingPart> _heading;
@@ -31,12 +31,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _commit = commit;
             _cancel = cancel;
             _edited = edited;
-        }
 
-        /// <summary>The row, for the header to hold.</summary>
-        public Element Root
-        {
-            get { return _row; }
+            Spacing = 4f;
+            Placement = Flex.Grow;
         }
 
         /// <summary>How many parts are on show.</summary>
@@ -57,18 +54,22 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 var shown = _parts[i];
 
                 shown.Name.Text = part.Text;
-                shown.Pen.Collapsed = !part.CanRename;
+                shown.Pen.IsVisible = part.CanRename;
                 shown.Pen.Tint = i == renaming ? Palette.None : Palette.Faint;
                 shown.Renames.CanExecute = part.CanRename && i != renaming;
 
                 // While a part is renamed, its plate says only why a name is refused. See Refuse.
                 if (i != renaming)
-                    shown.Plate.Tip = part.CanRename ? part.About : null;
+                    shown.Plate.Tip = Tip.For(shown.Plate.Tip, part.CanRename ? part.About : null);
 
                 shown.Lead.Text = part.Lead;
                 shown.After.Text = part.After;
             }
         }
+
+        /// <inheritdoc />
+        /// <remarks>Always: a heading longer than the header is cut off rather than drawn over the header's controls.</remarks>
+        protected override bool Clips => true;
 
         /// <summary>The box the part at <paramref name="index" /> is renamed in.</summary>
         public TextBox Box(int index)
@@ -90,8 +91,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             part.Pen.Tint = Palette.None;
             part.Renames.CanExecute = false;
             part.Plate.Tip = null;
-            part.Name.Collapsed = true;
-            part.Box.Collapsed = false;
+            part.Name.IsVisible = false;
+            part.Box.IsVisible = true;
             part.Box.Text = name;
             part.Box.SelectAll();
         }
@@ -101,8 +102,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             var part = _parts[index];
 
-            part.Name.Collapsed = false;
-            part.Box.Collapsed = true;
+            part.Name.IsVisible = true;
+            part.Box.IsVisible = false;
             Refuse(index, null);
         }
 
@@ -112,8 +113,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             var part = _parts[index];
 
             part.Box.Style = why == null ? Styles.TitleBox : Styles.TitleRefused;
-            part.Box.Tip = why;
-            part.Plate.Tip = why;
+            part.Box.Tip = Tip.For(part.Box.Tip, why);
+            part.Plate.Tip = Tip.For(part.Plate.Tip, why);
         }
 
         static int Shape(List<HeadingPart> heading)
@@ -139,7 +140,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _shape = shape;
             _shown = heading.Count;
-            _row.Children.Clear();
+            Children.Clear();
 
             while (_parts.Count < heading.Count)
                 _parts.Add(new Part(this, _parts.Count));
@@ -150,15 +151,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 var lead = !string.IsNullOrEmpty(heading[i].Lead);
 
                 if (i > 0 && !lead)
-                    _row.Children.Add(part.Join);
+                    Children.Add(part.Join);
 
                 if (lead)
-                    _row.Children.Add(part.Lead);
+                    Children.Add(part.Lead);
 
-                _row.Children.Add(part.Plate);
+                Children.Add(part.Plate);
 
                 if (!string.IsNullOrEmpty(heading[i].After))
-                    _row.Children.Add(part.After);
+                    Children.Add(part.After);
             }
         }
 
@@ -198,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                         new TextBox
                         {
                             Style = Styles.TitleBox,
-                            Collapsed = true,
+                            IsVisible = false,
                             Submit = row._commit,
                             Cancel = row._cancel
                         }.As(out Box),

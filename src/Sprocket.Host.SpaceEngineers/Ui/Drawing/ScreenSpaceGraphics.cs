@@ -36,6 +36,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
         readonly IScreenSpace _screenSpace;
 
+        readonly List<Vector3> _transforms = new List<Vector3>();
+
         int _clips;
 
         string _lastFont;
@@ -47,6 +49,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         Vector2 _origin;
 
         float _scale = 1f;
+
+        float _transformScale = 1f;
+        Vector2 _transformMove;
+        bool _transformed;
 
         /// <summary>Draws onto a layer with <paramref name="fill" /> for flat fills, at a scale set by the height a layout is written against.</summary>
         /// <remarks>
@@ -74,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         /// <remarks>A scissor applies only to the layer it is pushed on.</remarks>
         public void PushClip(RectangleF bounds)
         {
-            _clip.Push(bounds);
+            _clip.Push(Transformed(bounds));
             _screenSpace.PushScissor(ToPixels(_clip.Current), _layer);
             _clips++;
         }
@@ -92,12 +98,43 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         }
 
         /// <inheritdoc />
+        public void PushTransform(RenderTransform transform, Vector2 origin)
+        {
+            // The one in force is held as a scale and a move, a point p landing at p * scale + move, and the
+            // ones around it kept flat in a list that is reused, because this is on a frame's drawing path.
+            _transforms.Add(new Vector3(_transformScale, _transformMove.X, _transformMove.Y));
+
+            // The element's own transform, about its origin, as a scale and a move, and then the one around it.
+            var scale = transform.Scale;
+            var move = origin - origin * scale + transform.Translate;
+
+            _transformMove = move * _transformScale + _transformMove;
+            _transformScale *= scale;
+            _transformed = _transformScale != 1f || _transformMove.X != 0f || _transformMove.Y != 0f;
+        }
+
+        /// <inheritdoc />
+        public void PopTransform()
+        {
+            var last = _transforms.Count - 1;
+            if (last < 0)
+                return;
+
+            var held = _transforms[last];
+            _transforms.RemoveAt(last);
+
+            _transformScale = held.X;
+            _transformMove = new Vector2(held.Y, held.Z);
+            _transformed = _transformScale != 1f || _transformMove.X != 0f || _transformMove.Y != 0f;
+        }
+
+        /// <inheritdoc />
         public void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation)
         {
             if (destination.Width <= 0f || destination.Height <= 0f)
                 return;
 
-            var target = ToPixels(destination);
+            var target = ToPixels(Transformed(destination));
             if (target.Width <= 0 || target.Height <= 0)
                 return;
 
@@ -127,6 +164,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
             var placed = align == Align.Right
                 ? MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_TOP
                 : MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP;
+
+            if (_transformed)
+            {
+                position = position * _transformScale + _transformMove;
+                size *= _transformScale;
+            }
 
             _screenSpace.DrawText(font, text, position * _scale + _origin, ScaleOf(font, size) * _fontScale, color,
                 placed, float.PositiveInfinity, _layer);
@@ -173,6 +216,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
             CloseScissors();
             _clip.Clear();
+
+            _transforms.Clear();
+            _transformScale = 1f;
+            _transformMove = Vector2.Zero;
+            _transformed = false;
         }
 
         /// <summary>The scale that draws <paramref name="font" /> with lines <paramref name="size" /> tall.</summary>
@@ -219,6 +267,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         public Vector2 FromPixelSize(Vector2 pixels)
         {
             return _scale > 0f ? pixels / _scale : pixels;
+        }
+
+        /// <summary>Where <paramref name="bounds" /> are drawn under the transform in force.</summary>
+        RectangleF Transformed(RectangleF bounds)
+        {
+            if (!_transformed)
+                return bounds;
+
+            return new RectangleF(
+                bounds.X * _transformScale + _transformMove.X,
+                bounds.Y * _transformScale + _transformMove.Y,
+                bounds.Width * _transformScale,
+                bounds.Height * _transformScale);
         }
 
         /// <summary>Moves a rectangle from UI units into window pixels.</summary>
