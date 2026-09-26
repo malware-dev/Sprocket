@@ -247,7 +247,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             button.Tint = ready ? Palette.Muted : Palette.Dim;
             button.Highlight = ready ? Palette.Panel : Palette.None;
             button.Press = Deed.Sends(command);
-            button.Tip = Ui.Rich.Tip.For(button.Tip, ready ? says : null);
+            button.Tip = Ui.Tip.For(button.Tip, ready ? says : null);
         }
 
         public static Rule Line()

@@ -1,7 +1,12 @@
-using Sprocket.Host.SpaceEngineers.Controls;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using VRage.Game;
+using Sprocket.Host.SpaceEngineers.Ui.Controls;
+using Sprocket.Host.SpaceEngineers.Ui.Images;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Viewing;
+using Sprocket.Host.SpaceEngineers.Ui.Windows;
 
 namespace Sprocket.Host.SpaceEngineers.Look
 {

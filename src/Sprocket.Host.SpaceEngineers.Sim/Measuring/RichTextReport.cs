@@ -6,10 +6,10 @@ using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 
 namespace Sprocket.Sim.Measuring;
 

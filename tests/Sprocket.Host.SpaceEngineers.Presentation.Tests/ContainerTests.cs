@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Ui.Viewing;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

@@ -6,8 +6,8 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Words;
-using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Ui;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {

@@ -1,8 +1,8 @@
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using VRageMath;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

@@ -2,7 +2,6 @@ using System;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using VRage.Input;
 using VRageMath;

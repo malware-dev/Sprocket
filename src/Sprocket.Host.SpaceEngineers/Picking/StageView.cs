@@ -10,7 +10,6 @@ using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
 using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
-using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Picking
 {

@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRage.Input;
 using VRageMath;

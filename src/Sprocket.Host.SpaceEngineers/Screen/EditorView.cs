@@ -14,9 +14,10 @@ using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using Sprocket.Host.SpaceEngineers.Words;
+using Sprocket.Host.SpaceEngineers.Ui.Images;
+using Sprocket.Host.SpaceEngineers.Ui.Viewing;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
