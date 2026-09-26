@@ -63,7 +63,7 @@ public class ReachTests
         // A row that is both, which is the only kind where the two can disagree: a system's own row
         // carries no command, so pressing one has never done anything but work its switch.
         var sequence = Switchable(root);
-        Assert.NotEqual(0, sequence.Command);
+        Assert.NotNull(sequence.Opens);
         Assert.True(sequence.SwitchIsOn);
 
         var was = root.Ended;
@@ -252,7 +252,7 @@ public class ReachTests
         {
             screen.Scene.Load(Older);
             screen.Run(20);
-            screen.Editor.Invoke(Notice(screen).ExpandCommand);
+            Notice(screen).Expands.Execute();
             screen.Run(20);
         });
     }
@@ -328,8 +328,8 @@ public class ReachTests
         }
     }
 
-    static NoticeComponent Notice(Screen screen) =>
-        screen.Editor.Screen.Components.OfType<NoticeComponent>().First();
+    static Notice Notice(Screen screen) =>
+        screen.Editor.Notice!;
 
     /// <summary>Where to press for a row of the open list, which is drawn over everything else.</summary>
     static string[] Row(Screen screen, string text)
@@ -348,7 +348,7 @@ public class ReachTests
         screen.Editor.Component<PickComponent>().Stages[0];
 
     /// <summary>The one row on the root that both leads somewhere and carries a switch.</summary>
-    static StatusEntry Switchable(Screen screen) =>
-        screen.Editor.Component<StatusListComponent>().Entries
-            .First(e => e.CanSwitch && e.Command != 0);
+    static StatusRow Switchable(Screen screen) =>
+        screen.Editor.RootRows()
+            .First(row => row.Flips != null && row.Opens != null);
 }

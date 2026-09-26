@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
         public Slider()
         {
             Track = Materials.Fill;
-            TrackTint = Palette.ControlHot;
+            TrackTint = Palette.Well;
             Edge = Palette.Line;
         }
 

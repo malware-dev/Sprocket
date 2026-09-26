@@ -46,7 +46,7 @@ public class RunningTests
     {
         var screen = WithOneRunning();
 
-        Assert.True(screen.Editor.Rows().Entries[0].Running);
+        Assert.True(screen.Editor.Rows()[0].Running);
         Assert.True(Washed(screen, Palette.LiveWash), "a running sequence's row has no ground");
     }
 
@@ -64,7 +64,7 @@ public class RunningTests
         screen.Editor.GoToRoot();
         screen.Run(2);
 
-        var rows = screen.Editor.Rows().Entries;
+        var rows = screen.Editor.RootRows();
 
         Assert.True(rows[0].Running);
         Assert.True(Washed(screen, Palette.LiveWash), "a running airlock's row has no ground");
@@ -82,7 +82,7 @@ public class RunningTests
         screen.Editor.Back();
         screen.Run(2);
 
-        Assert.False(screen.Editor.Rows().Entries[0].Running);
+        Assert.False(screen.Editor.Rows()[0].Running);
         Assert.False(Washed(screen, Palette.LiveWash), "an idle sequence's row is wearing the live ground");
     }
 }

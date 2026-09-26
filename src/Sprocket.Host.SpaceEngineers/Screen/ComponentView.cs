@@ -214,10 +214,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (heading != null)
                 return new HeadingView(heading);
 
-            var notice = component as NoticeComponent;
-            if (notice != null)
-                return new NoticeView(notice);
-
             var start = component as StartComponent;
             if (start != null)
                 return new StartView(start);

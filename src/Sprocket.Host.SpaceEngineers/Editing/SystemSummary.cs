@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
+using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Editing
@@ -15,8 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// </remarks>
     static class SystemSummary
     {
-        const string Running = "running";
-        const string Idle = "";
 
         /// <summary>
         /// What to call this system: what the player called it, what its blocks suggest, or
@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Worked out when the screen is built, never on a tick: it walks names and splits
         /// strings, which is not something to do sixty times a second.
         /// </remarks>
-        public static string Describe(Bindings bindings, AutomationSystem system)
+        public static string Describe(Texts texts, Bindings bindings, AutomationSystem system)
         {
             if (system.HasName)
                 return system.Name;
@@ -43,16 +43,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (common.Length > 0)
                 return common;
 
-            return "System " + system.Id;
+            return Template.Fill(texts.SystemsNumbered, "number", system.Id.ToString());
         }
 
         /// <summary>What one of a system is called: Airlock 1, or whatever it was renamed to.</summary>
-        public static string DescribeInstance(Bindings bindings, AutomationSystem system, SystemInstance instance)
+        public static string DescribeInstance(Texts texts, Bindings bindings, AutomationSystem system,
+            SystemInstance instance)
         {
             if (instance.HasName)
                 return instance.Name;
 
-            return Describe(bindings, system) + " " + instance.Number;
+            var numbered = Template.Fill(texts.SystemsInstance, "number", instance.Number.ToString());
+            return Template.Fill(numbered, "name", Describe(texts, bindings, system));
         }
 
         /// <summary>
@@ -92,9 +94,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return false;
         }
 
-        public static string RunningText(bool running)
+        public static string RunningText(Texts texts, bool running)
         {
-            return running ? Running : Idle;
+            return running ? texts.SystemsRunning : "";
         }
 
         /// <summary>

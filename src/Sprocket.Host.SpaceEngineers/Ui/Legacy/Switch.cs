@@ -136,7 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             // The dark tone under the whole, then the lit half on top, rather than two halves side by
             // side: each rectangle is rounded on its own, so two halves on a fractional width overlap or
             // leave a gap.
-            g.Fill(inner, Palette.SwitchDark);
+            g.Fill(inner, Palette.Panel);
 
             if (!IsSet)
             {
@@ -149,7 +149,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             g.Fill(IsOn
                     ? new RectangleF(inner.X, inner.Y, half, inner.Height)
                     : new RectangleF(inner.X + half, inner.Y, inner.Width - half, inner.Height),
-                Palette.SwitchLit);
+                Palette.Line);
 
             _on.Draw(g);
             _off.Draw(g);

@@ -22,8 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
         readonly Stack _parts = Widgets.Column(0f);
         readonly Label _madeTitle = Widgets.Label("", Palette.Faint, Lettering.Small);
         readonly Label _partsTitle = Widgets.Label("", Palette.Faint, Lettering.Small);
-        readonly StatusRow _chosen;
-        readonly List<StatusRow> _members = new List<StatusRow>();
+        readonly EntryRow _chosen;
+        readonly List<EntryRow> _members = new List<EntryRow>();
         readonly List<PartRow> _partRows = new List<PartRow>();
 
         int _membersRevision = -1;
@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
         public BlueprintView(BlueprintComponent component)
         {
             _component = component;
-            _chosen = new StatusRow(this);
+            _chosen = new EntryRow(this);
 
             _madeTitle.Wraps = false;
             _madeTitle.Padding = new Thickness(Space.Line, Space.Item, 0f, 0f);
@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
             var made = new Sized(MadeWidth);
             made.Content = _made;
 
-            _right.Children.Add(_chosen.Root);
+            _right.Children.Add(_chosen.Row);
             _right.Children.Add(Widgets.Line());
             _right.Children.Add(_partsTitle);
             _right.Children.Add(_parts);
@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
             for (var i = 0; i < _members.Count && i < _component.Members.Count; i++)
                 _members[i].Update(_component.Members[i]);
 
-            _chosen.Root.Collapsed = _component.Chosen == null;
+            _chosen.Row.Collapsed = _component.Chosen == null;
             if (_component.Chosen != null)
                 _chosen.Update(_component.Chosen);
 
@@ -109,9 +109,9 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
 
             for (var i = 0; i < _component.Members.Count; i++)
             {
-                var row = new StatusRow(this);
+                var row = new EntryRow(this);
                 _members.Add(row);
-                _made.Children.Add(row.Root);
+                _made.Children.Add(row.Row);
             }
         }
 

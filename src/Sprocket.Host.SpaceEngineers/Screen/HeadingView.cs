@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
-    /// <summary>A section's name, in capitals, or a sentence with a name in it written as it was typed.</summary>
+    /// <summary>A section's name, in capitals.</summary>
     public sealed class HeadingView : ComponentView
     {
         readonly HeadingComponent _component;
@@ -15,8 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         /// <summary>What it was last given, so the words are made when they change.</summary>
         string _said;
-        string _saidName;
-        string _saidAfter;
 
         bool _follows;
 
@@ -54,20 +52,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (_follows != _component.Follows)
                 Spaced();
 
-            if (ReferenceEquals(_said, _component.Text) && ReferenceEquals(_saidName, _component.Name)
-                && ReferenceEquals(_saidAfter, _component.After))
+            if (ReferenceEquals(_said, _component.Text))
                 return;
 
             _said = _component.Text;
-            _saidName = _component.Name;
-            _saidAfter = _component.After;
-
-            var words = _component.Name.Length == 0
-                ? Markdown.Escape(Widgets.Caps(_component.Text))
-                : Markdown.Escape(_component.Text) + " **" + Markdown.Escape(_component.Name) + "**"
-                  + (_component.After.Length > 0 ? " " + Markdown.Escape(_component.After) : "");
-
-            _words.Document = Markdown.Parse(words);
+            _words.Document = Markdown.Parse(Markdown.Escape(Widgets.Caps(_component.Text)));
         }
 
         /// <summary>Room above a heading that follows other content, so it reads as the start of what comes after, and room below it before its rows.</summary>

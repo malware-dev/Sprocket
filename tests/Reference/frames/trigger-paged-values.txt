@@ -6,25 +6,25 @@ on screen     Set Radius on Airlock Light
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
-002  Text       at {X:256 Y:56.71198} scale 0.642  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1329 H:40}
-004  Text       at {X:303.5 Y:56.71198} scale 1.111  #DCF5FDFF  "Set Radius on Airlock Light"
+002  Text       at {X:262.1563 Y:62.71198} scale 0.401  #A2C3CDFF  "<"
+003  SetClip    {X:296 Y:53 W:1328 H:40}
+004  Text       at {X:304 Y:56.71198} scale 1.111  #DCF5FDFF  "Set Radius on Airlock Light"
 005  ClearClip  
-006  Text       at {X:1632.5 Y:56.71198} scale 0.642  #A2C3CDFF  "s"
+006  Text       at {X:1638.156 Y:62.71198} scale 0.401  #A2C3CDFF  "s"
 007  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-008  SetClip    {X:256 Y:118 W:1408 H:845}
-009  Sprite     Sprocket_Fill         {X:256 Y:118 W:56 H:833}  #29363EFF
+008  SetClip    {X:256 Y:118 W:1408 H:853}
+009  Sprite     Sprocket_Fill         {X:256 Y:118 W:56 H:841}  #29363EFF
 010  Sprite     Sprocket_Fill         {X:256 Y:118 W:56 H:1}  #5B737BFF
-011  Sprite     Sprocket_Fill         {X:256 Y:949 W:56 H:1}  #5B737BFF
-012  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:833}  #5B737BFF
-013  Sprite     Sprocket_Fill         {X:311 Y:118 W:1 H:833}  #5B737BFF
-014  Text       at {X:266.045 Y:515.76} scale 0.732  #A2C3CDFF  "<"
-015  Sprite     Sprocket_Fill         {X:322 Y:118 W:438 H:833}  #29363EFF
+011  Sprite     Sprocket_Fill         {X:256 Y:957 W:56 H:1}  #5B737BFF
+012  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:841}  #5B737BFF
+013  Sprite     Sprocket_Fill         {X:311 Y:118 W:1 H:841}  #5B737BFF
+014  Text       at {X:266.045 Y:519.76} scale 0.732  #A2C3CDFF  "<"
+015  Sprite     Sprocket_Fill         {X:322 Y:118 W:438 H:841}  #29363EFF
 016  Sprite     Sprocket_Fill         {X:322 Y:118 W:438 H:1}  #5B737BFF
-017  Sprite     Sprocket_Fill         {X:322 Y:949 W:438 H:1}  #5B737BFF
-018  Sprite     Sprocket_Fill         {X:322 Y:118 W:1 H:833}  #5B737BFF
-019  Sprite     Sprocket_Fill         {X:759 Y:118 W:1 H:833}  #5B737BFF
-020  SetClip    {X:338 Y:298 W:406 H:637}
+017  Sprite     Sprocket_Fill         {X:322 Y:957 W:438 H:1}  #5B737BFF
+018  Sprite     Sprocket_Fill         {X:322 Y:118 W:1 H:841}  #5B737BFF
+019  Sprite     Sprocket_Fill         {X:759 Y:118 W:1 H:841}  #5B737BFF
+020  SetClip    {X:338 Y:298 W:406 H:645}
 021  Text       at {X:441.8 Y:312.172} scale 0.822  #DCF5FDFF  "Airlock Button"
 022  Text       at {X:441.8 Y:337.6519} scale 0.642  #85A1A9FF  "Button Panel   not wired"
 023  Sprite     Sprocket_Fill         {X:351 Y:326 W:17 H:1}  #85A1A9FF
@@ -138,8 +138,8 @@ on screen     Set Radius on Airlock Light
 131  Sprite     Sprocket_Fill         {X:367 Y:1316 W:1 H:17}  #85A1A9FF
 132  Sprite     Sprocket_Fill         {X:378 Y:1298 W:54 H:54}  #374851FF
 133  Sprite     MyObjectBuilder_Beacon/LargeBlockBeacon{X:378 Y:1298 W:54 H:54}  #FFFFFFFF
-134  Sprite     Sprocket_Fill         {X:732 Y:298 W:12 H:381}  #5F7278FF
-135  SetClip    {X:256 Y:118 W:1408 H:845}
+134  Sprite     Sprocket_Fill         {X:732 Y:298 W:12 H:391}  #5F7278FF
+135  SetClip    {X:256 Y:118 W:1408 H:853}
 136  Text       at {X:338 Y:133.712} scale 0.822  #DCF5FDFF  "BLOCKS"
 137  Text       at {X:338 Y:163.392} scale 0.642  #85A1A9FF  "1 picked"
 138  Sprite     Sprocket_Fill         {X:338 Y:188 W:406 H:37}  #141B20FF
@@ -151,12 +151,12 @@ on screen     Set Radius on Airlock Light
 144  Text       at {X:350.8 Y:238.277} scale 0.732  #A2C3CDFF  "Anything"
 145  Text       at {X:432.97 Y:226.0949} scale 0.732  #A2C3CDFF  "v"
 146  Text       at {X:338 Y:273.062} scale 0.642  #85A1A9FF  "14 blocks"
-147  Sprite     Sprocket_Fill         {X:770 Y:118 W:438 H:833}  #29363EFF
+147  Sprite     Sprocket_Fill         {X:770 Y:118 W:438 H:841}  #29363EFF
 148  Sprite     Sprocket_Fill         {X:770 Y:118 W:438 H:1}  #5B737BFF
-149  Sprite     Sprocket_Fill         {X:770 Y:949 W:438 H:1}  #5B737BFF
-150  Sprite     Sprocket_Fill         {X:770 Y:118 W:1 H:833}  #5B737BFF
-151  Sprite     Sprocket_Fill         {X:1207 Y:118 W:1 H:833}  #5B737BFF
-152  SetClip    {X:786 Y:270 W:406 H:665}
+149  Sprite     Sprocket_Fill         {X:770 Y:957 W:438 H:1}  #5B737BFF
+150  Sprite     Sprocket_Fill         {X:770 Y:118 W:1 H:841}  #5B737BFF
+151  Sprite     Sprocket_Fill         {X:1207 Y:118 W:1 H:841}  #5B737BFF
+152  SetClip    {X:786 Y:270 W:406 H:673}
 153  Sprite     Sprocket_Fill         {X:786 Y:270 W:394 H:82}  #374851FF
 154  Text       at {X:802 Y:279.272} scale 0.732  #A2C3CDFF  "Sprocket has not checked this block yet, so some of"
 155  Text       at {X:802 Y:300.362} scale 0.732  #A2C3CDFF  "what it offers may be doubled, missing or oddly"
@@ -170,7 +170,7 @@ on screen     Set Radius on Airlock Light
 163  Text       at {X:798.8 Y:620.8219} scale 0.822  #DCF5FDFF  "Set Falloff"
 164  Sprite     Sprocket_Fill         {X:786 Y:657 W:394 H:43}  #5B737BFF
 165  Text       at {X:798.8 Y:666.7019} scale 0.822  #DCF5FDFF  "Set Radius"
-166  SetClip    {X:256 Y:118 W:1408 H:845}
+166  SetClip    {X:256 Y:118 W:1408 H:853}
 167  Text       at {X:786 Y:133.712} scale 0.822  #DCF5FDFF  "WHAT TO DO"
 168  Sprite     Sprocket_Fill         {X:786 Y:188 W:406 H:37}  #141B20FF
 169  Sprite     Sprocket_Fill         {X:786 Y:188 W:406 H:1}  #5B737BFF
@@ -190,11 +190,11 @@ on screen     Set Radius on Airlock Light
 183  Sprite     Sprocket_Fill         {X:989 Y:231 W:1 H:33}  #5B737BFF
 184  Sprite     Sprocket_Fill         {X:1191 Y:231 W:1 H:33}  #5B737BFF
 185  Text       at {X:1061.028 Y:236.582} scale 0.732  #A2C3CDFF  "Terminal"
-186  Sprite     Sprocket_Fill         {X:1218 Y:118 W:438 H:833}  #29363EFF
+186  Sprite     Sprocket_Fill         {X:1218 Y:118 W:438 H:841}  #29363EFF
 187  Sprite     Sprocket_Fill         {X:1218 Y:118 W:438 H:1}  #5B737BFF
-188  Sprite     Sprocket_Fill         {X:1218 Y:949 W:438 H:1}  #5B737BFF
-189  Sprite     Sprocket_Fill         {X:1218 Y:118 W:1 H:833}  #5B737BFF
-190  Sprite     Sprocket_Fill         {X:1655 Y:118 W:1 H:833}  #5B737BFF
+188  Sprite     Sprocket_Fill         {X:1218 Y:957 W:438 H:1}  #5B737BFF
+189  Sprite     Sprocket_Fill         {X:1218 Y:118 W:1 H:841}  #5B737BFF
+190  Sprite     Sprocket_Fill         {X:1655 Y:118 W:1 H:841}  #5B737BFF
 191  Text       at {X:1234 Y:195.692} scale 0.732  #85A1A9FF  "Radius (0.1 - 20)"
 192  Sprite     Sprocket_Fill         {X:1464 Y:188 W:176 H:37}  #141B20FF
 193  Sprite     Sprocket_Fill         {X:1464 Y:188 W:176 H:1}  #5B737BFF
@@ -205,5 +205,5 @@ on screen     Set Radius on Airlock Light
 198  Text       at {X:1583.327 Y:248.382} scale 0.732  #1B242AFF  "Done"
 199  Text       at {X:1234 Y:133.712} scale 0.822  #DCF5FDFF  "VALUES"
 200  ClearClip  
-201  Sprite     Sprocket_Fill         {X:240 Y:978 W:1440 H:1}  #5B737BFF
-202  Sprite     Sprocket_Fill         {X:240 Y:979 W:1440 H:56}  #1B242AFF
+201  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
+202  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

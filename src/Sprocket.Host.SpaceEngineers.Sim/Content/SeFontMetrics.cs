@@ -29,11 +29,8 @@ namespace Sprocket.Sim.Content
         /// <remarks>The game's <c>MyFont</c> constructor default, which every font definition takes.</remarks>
         public const int Spacing = 1;
 
-        /// <summary>What the game multiplies a scale by before it measures or draws text.</summary>
-        /// <remarks>
-        ///     The game's <c>MyRenderGuiConstants.FONT_SCALE</c>. Its screen-space <c>GetLineHeight</c> leaves it
-        ///     out, and so does <see cref="LineHeightPixels" />.
-        /// </remarks>
+        /// <summary>What the game multiplies a scale by before it measures, draws, or gives the height of a line of text.</summary>
+        /// <remarks>The game's <c>MyRenderGuiConstants.FONT_SCALE</c>.</remarks>
         public const float FontScale = 28.8f / 37f;
 
         /// <summary>How far below the top of its line the game draws a glyph's cell, in font units, before the glyph's own offsets.</summary>
@@ -268,10 +265,10 @@ namespace Sprocket.Sim.Content
             return new Vector2(widest * unit, (lines * _lineHeight + raised / 2f + below) * unit);
         }
 
-        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers, in pixels: without <see cref="FontScale" />.</summary>
+        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers, in pixels: the height of the line it draws.</summary>
         public float LineHeightPixels(string font, float scale)
         {
-            return _lineHeight * EffectiveScale(scale);
+            return _lineHeight * DrawScale(scale);
         }
 
         /// <summary>The run as the game shows it, with every character it would draw as the replacement replaced.</summary>

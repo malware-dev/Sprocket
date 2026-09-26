@@ -4,25 +4,24 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 {
-    /// <summary>
-    ///     The game's own on/off control: two halves side by side, both words always readable, the half that
-    ///     is in force filled and the other left dark.
-    /// </summary>
-    /// <remarks>Transcribed from the game's <c>MyGuiControlOnOffSwitch</c>.</remarks>
+    /// <summary>An on/off switch: a thumb at one end, and the word for the state it is in beside it.</summary>
+    /// <remarks>
+    ///     The thumb is at the right when on and at the left when off, as tall as the room inside the switch
+    ///     and as wide as it is tall. The body is the element's own <see cref="Element.Background" />, the room
+    ///     round the thumb and the word its <see cref="Element.Padding" />. The switch is as wide as the longer
+    ///     of its two words needs, whichever it is showing, so it keeps its size when switched and a longer
+    ///     word in another language widens it rather than spilling out of it.
+    /// </remarks>
     public class Switch : Element
     {
-        readonly Label _off = Half("OFF");
-        readonly Label _on = Half("ON");
+        readonly Label _off = Word("OFF");
+        readonly Label _on = Word("ON");
 
-        Color _color;
-        float _half;
-        bool _isOn;
-        bool _isSet;
-        Color _lit;
-        Color _quiet;
-        Color _unlit;
+        Color _offTrack;
+        Color _onTrack;
+        Color _thumb;
 
-        /// <summary>A switch with neither half in force, in the neutral look.</summary>
+        /// <summary>A switch that is off, in the neutral look.</summary>
         public Switch()
         {
             var children = new ElementCollection(this);
@@ -32,33 +31,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             EdgeThickness = 1f;
         }
 
-        /// <summary>Which half is in force, once <see cref="IsSet" /> says either is.</summary>
-        public bool IsOn
-        {
-            get { return _isOn; }
-            set
-            {
-                if (_isOn == value)
-                    return;
-
-                _isOn = value;
-                Recolor();
-            }
-        }
-
-        /// <summary>Whether either half is in force, which it is not until somebody chooses.</summary>
-        public bool IsSet
-        {
-            get { return _isSet; }
-            set
-            {
-                if (_isSet == value)
-                    return;
-
-                _isSet = value;
-                Recolor();
-            }
-        }
+        /// <summary>Whether it is on.</summary>
+        public bool IsOn { get; set; }
 
         /// <summary>Which face the words are drawn in.</summary>
         public string Font
@@ -82,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>The room held clear round each half's word.</summary>
+        /// <summary>The room held clear round the word.</summary>
         public Thickness WordPadding
         {
             get { return _on.Padding; }
@@ -93,65 +67,43 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             }
         }
 
-        /// <summary>The color of the word in force.</summary>
+        /// <summary>The color of the words.</summary>
         public Color Color
         {
-            get { return _color; }
+            get { return _on.Color; }
             set
             {
-                _color = value;
-                Recolor();
+                _on.Color = value;
+                _off.Color = value;
             }
         }
 
-        /// <summary>The color of a word not in force, and of both while neither is.</summary>
-        public Color QuietColor
+        /// <summary>What the room inside the switch is filled with while on, or transparent to leave the body showing.</summary>
+        public Color OnTrack
         {
-            get { return _quiet; }
-            set
-            {
-                _quiet = value;
-                Recolor();
-            }
+            get { return _onTrack; }
+            set { _onTrack = value; }
         }
 
-        /// <summary>What the half in force is filled with.</summary>
-        public Color LitColor
+        /// <summary>What the room inside the switch is filled with while off, or transparent to leave the body showing.</summary>
+        public Color OffTrack
         {
-            get { return _lit; }
-            set { _lit = value; }
+            get { return _offTrack; }
+            set { _offTrack = value; }
         }
 
-        /// <summary>What the half not in force is filled with, and both while neither is.</summary>
-        public Color UnlitColor
+        /// <summary>The color of the thumb.</summary>
+        public Color Thumb
         {
-            get { return _unlit; }
-            set { _unlit = value; }
+            get { return _thumb; }
+            set { _thumb = value; }
         }
 
-        /// <summary>Renames the two halves.</summary>
+        /// <summary>Renames the two states.</summary>
         public void Says(string on, string off)
         {
             _on.Text = on;
             _off.Text = off;
-        }
-
-        /// <summary>Lights this where the pointer is resting on it.</summary>
-        /// <remarks>Only for a switch that takes its own presses, as on a form; elsewhere the screen lights it.</remarks>
-        public void Lit(Vector2 point)
-        {
-            IsHot = !Collapsed && Holds(point);
-        }
-
-        /// <summary>Which half a point is on, and whether it is on the control at all.</summary>
-        public bool Chose(Vector2 point, out bool isOn)
-        {
-            isOn = false;
-            if (Collapsed || !Holds(point))
-                return false;
-
-            isOn = point.X < Bounds.X + Bounds.Width * 0.5f;
-            return true;
         }
 
         /// <inheritdoc />
@@ -160,64 +112,55 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             _on.Measure(g, available);
             _off.Measure(g, available);
 
-            // Both halves take the longer word's width, so the switch keeps its shape when switched.
-            _half = _on.DesiredSize.X > _off.DesiredSize.X ? _on.DesiredSize.X : _off.DesiredSize.X;
+            var tall = _on.DesiredSize.Y > _off.DesiredSize.Y ? _on.DesiredSize.Y : _off.DesiredSize.Y;
+            var wide = _on.DesiredSize.X > _off.DesiredSize.X ? _on.DesiredSize.X : _off.DesiredSize.X;
 
-            var height = _on.DesiredSize.Y > _off.DesiredSize.Y ? _on.DesiredSize.Y : _off.DesiredSize.Y;
-            return new Vector2(_half * 2f, height);
+            // The thumb is square, so it takes as much room across as the words take down.
+            return new Vector2(wide + tall, tall);
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        ///     Each word is centred here, from the width its measure already found, rather than by the label as it
+        ///     draws: a label centring itself measures its words the first time it draws them, and a switch draws
+        ///     one of its words for the first time on the frame it is flipped.
+        /// </remarks>
         protected override void ArrangeContent(RectangleF bounds)
         {
-            _on.Arrange(new RectangleF(bounds.X, bounds.Y, _half, bounds.Height));
-            _off.Arrange(new RectangleF(bounds.X + _half, bounds.Y, _half, bounds.Height));
+            var thumb = bounds.Height;
+            var room = bounds.Width - thumb;
+            Centre(_on, bounds.X, room, bounds);
+            Centre(_off, bounds.X + thumb, room, bounds);
         }
 
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            // Inside the border, so the fills do not cover it.
-            var inset = EdgeThickness;
-            var inner = new RectangleF(
-                Bounds.X + inset, Bounds.Y + inset,
-                Bounds.Width - inset * 2f, Bounds.Height - inset * 2f);
+            var inside = ContentBounds;
+            var track = IsOn ? _onTrack : _offTrack;
+            if (track.A > 0)
+                g.Fill(inside, track);
 
-            // The unlit fill under the whole, then the lit half on top, rather than two halves side by
-            // side: each rectangle is rounded on its own, so two halves on a fractional width overlap or
-            // leave a gap.
-            g.Fill(inner, _unlit);
+            var thumb = inside.Height;
+            var left = IsOn ? inside.X + inside.Width - thumb : inside.X;
+            g.Fill(new RectangleF(left, inside.Y, thumb, thumb), _thumb);
 
-            if (!_isSet)
-            {
-                _on.Draw(g);
-                _off.Draw(g);
-                return;
-            }
-
-            var half = inner.Width * 0.5f;
-            g.Fill(_isOn
-                    ? new RectangleF(inner.X, inner.Y, half, inner.Height)
-                    : new RectangleF(inner.X + half, inner.Y, inner.Width - half, inner.Height),
-                _lit);
-
-            _on.Draw(g);
-            _off.Draw(g);
+            (IsOn ? _on : _off).Draw(g);
         }
 
-        void Recolor()
+        /// <summary>Arranges <paramref name="word" /> in the middle of the room from <paramref name="left" />, <paramref name="room" /> across.</summary>
+        static void Centre(Label word, float left, float room, RectangleF bounds)
         {
-            _on.Color = _isSet && _isOn ? _color : _quiet;
-            _off.Color = _isSet && !_isOn ? _color : _quiet;
+            var wide = word.DesiredSize.X;
+            word.Arrange(new RectangleF(left + (room - wide) * 0.5f, bounds.Y, wide, bounds.Height));
         }
 
-        static Label Half(string text)
+        static Label Word(string text)
         {
-            var half = new Label();
-            half.Text = text;
-            half.Centres = true;
-            half.Wraps = false;
-            return half;
+            var word = new Label();
+            word.Text = text;
+            word.Wraps = false;
+            return word;
         }
     }
 }

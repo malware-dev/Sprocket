@@ -41,6 +41,13 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+    <!-- The mod's texts and their translations, read the way the game reads them. -->
+    <ItemGroup>
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\Localization\*.resx">
+            <Link>Content\Localization\%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
     <ItemGroup>
         <!-- The harness is a tool, and its own behaviour is worth a test or two: that a rig's wiring

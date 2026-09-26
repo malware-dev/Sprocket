@@ -22,4 +22,9 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\Sprocket.Host.SpaceEngineers.Sim\Sprocket.Host.SpaceEngineers.Sim.csproj" />
     </ItemGroup>
+
+    <!-- The editor driven the way a target drives it, in every test. -->
+    <ItemGroup>
+        <Using Include="Sprocket.Sim.Driving" />
+    </ItemGroup>
 </Project>

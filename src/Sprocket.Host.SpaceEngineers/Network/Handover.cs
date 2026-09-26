@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             string state;
             copy.Written(out program, out state);
 
-            var switches = StateText.Save(copy.Editor.Program, null);
+            var switches = StateText.Save(copy.Program, null);
 
             Sent sent;
             if (_sent.TryGetValue(block, out sent) && sent.Program == program && sent.Switches == switches)
@@ -169,7 +169,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             string program;
             string state;
             copy.Written(out program, out state);
-            _sent[block] = new Sent { Program = program, Switches = StateText.Save(copy.Editor.Program, null) };
+            _sent[block] = new Sent { Program = program, Switches = StateText.Save(copy.Program, null) };
         }
 
         /// <summary>
@@ -419,7 +419,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             {
                 string state;
                 unit.Written(out program, out state);
-                switches = StateText.Save(unit.Editor.Program, null);
+                switches = StateText.Save(unit.Program, null);
             }
 
             Told.Say(Who(sender) + " sent a change to block " + change.Block + ": "

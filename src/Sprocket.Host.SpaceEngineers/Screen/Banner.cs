@@ -1,0 +1,183 @@
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Controls;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+
+namespace Sprocket.Host.SpaceEngineers.Screen
+{
+    /// <summary>A notice as a banner that slides in, can be opened for the rest of it, and slides out when it is done.</summary>
+    /// <remarks>
+    ///     Its height is animated both ways, so nothing below it jumps under the pointer. The slide is stepped
+    ///     from the tick it is handed, so it takes the same time whatever the game's update rate is doing.
+    /// </remarks>
+    public class Banner : Reveal
+    {
+        /// <summary>How many of the game's frames a slide takes, arriving, leaving or opening.</summary>
+        const float Frames = 12f;
+
+        readonly VStack _column;
+
+        /// <summary>The opening half, which slides on its own.</summary>
+        readonly Reveal _more;
+
+        readonly HStack _heading;
+        readonly Relay _expands;
+        readonly Relay _offers;
+        readonly Label _text;
+        readonly Glyph _chevron;
+        readonly Label _detail;
+        readonly Label _diagnostic;
+        readonly HStack _actions;
+        readonly Button _offer;
+
+        Notice _notice;
+        int _stepped = -1;
+
+        /// <summary>How far along the slide is, before the easing is applied to it.</summary>
+        float _progress;
+
+        /// <summary>The same for the opening, which moves at the same rate and is a separate thing.</summary>
+        float _opening;
+
+        /// <summary>A banner showing nothing, shut.</summary>
+        public Banner()
+        {
+            _expands = new Relay(delegate { Carry(_notice == null ? null : _notice.Expands); });
+            _offers = new Relay(delegate { Carry(_notice == null ? null : _notice.Offers); });
+
+            Openness = 0f;
+            Child = new VStack
+            {
+                Children =
+                {
+                    new HStack
+                    {
+                        Spacing = 8f,
+                        Command = _expands,
+                        Children =
+                        {
+                            new Label { Style = Styles.Name, Wraps = true, Placement = Flex.Grow }.As(out _text),
+                            new Glyph { Symbol = Symbols.Down, Style = Styles.Chevron, Placement = Fixed.Size(32f, 32f) }.As(out _chevron)
+                        }
+                    }.As(out _heading),
+                    new Reveal
+                    {
+                        Child = new VStack
+                        {
+                            Children =
+                            {
+                                new Label { Style = Styles.Opened, Wraps = true }.As(out _detail),
+                                new Label { Style = Styles.Diagnostic, Wraps = true }.As(out _diagnostic),
+                                new HStack
+                                {
+                                    Spacing = 8f,
+                                    Padding = new Thickness(16f, 0f, 16f, 8f),
+                                    Children = { new Button { Style = Styles.Button, Command = _offers }.As(out _offer) }
+                                }.As(out _actions)
+                            }
+                        }
+                    }.As(out _more)
+                }
+            }.As(out _column);
+        }
+
+        /// <summary>Shows <paramref name="notice" />, or slides away where there is none, moved along to <paramref name="tick" />.</summary>
+        /// <remarks>Called every frame; costs a handful of comparisons once the slide has settled, because the controls it writes to change nothing when told what they already hold.</remarks>
+        public void Show(Notice notice, int tick)
+        {
+            _notice = notice;
+
+            if (notice != null)
+            {
+                Collapsed = false;
+                Say(notice);
+            }
+
+            Slide(tick);
+
+            // Out of the layout and the drawing altogether once there is nothing to say and nothing left to slide.
+            if (notice == null && Shut)
+                Collapsed = true;
+        }
+
+        void Say(Notice notice)
+        {
+            var problem = notice.Level == NoticeLevel.Problem;
+            var ink = problem ? Palette.Problem : Palette.Notice;
+
+            _column.Background = problem ? Palette.ProblemWash : Palette.NoticeWash;
+            _heading.Style = problem ? Styles.ProblemStrip : Styles.NoticeStrip;
+            _text.Color = ink;
+            _text.Text = notice.Text;
+            _detail.Text = notice.Detail;
+            _detail.Collapsed = notice.Detail.Length == 0;
+            _diagnostic.Text = notice.Diagnostic;
+            _diagnostic.Collapsed = notice.Diagnostic.Length == 0;
+            _chevron.Symbol = notice.Expanded ? Symbols.Up : Symbols.Down;
+            _chevron.Tint = ink;
+            _chevron.Collapsed = notice.Expands == null;
+
+            // Reached only once the slide has finished, because a reveal answers nothing while it moves.
+            _expands.CanExecute = notice.Expands != null;
+
+            var offers = notice.Offers != null;
+            _actions.Collapsed = !offers;
+            _offers.CanExecute = offers;
+            _offer.Text = notice.OfferText;
+        }
+
+        /// <summary>Moves the banner towards where it should be, by however many ticks have passed.</summary>
+        /// <remarks>Costs one comparison a tick once it is there: a reveal invalidates only when its openness changes.</remarks>
+        void Slide(int tick)
+        {
+            var since = _stepped < 0 ? 1 : tick - _stepped;
+            _stepped = tick;
+
+            if (since < 1)
+                return;
+
+            var step = since / Frames;
+            var shown = _notice != null && !_notice.Leaving;
+
+            _progress = Towards(_progress, shown ? 1f : 0f, step);
+            _opening = Towards(_opening, _notice != null && _notice.Expanded ? 1f : 0f, step);
+
+            Openness = Eased(_progress);
+            _more.Openness = Eased(_opening);
+
+            // Whoever raised the banner waits for this to drop it.
+            if (_notice != null && _notice.Leaving && Shut)
+                _notice.Closed = true;
+        }
+
+        static void Carry(ICommand command)
+        {
+            if (command != null && command.CanExecute)
+                command.Execute();
+        }
+
+        static float Towards(float value, float wanted, float step)
+        {
+            return value < wanted ? Least(value + step, wanted) : Most(value - step, wanted);
+        }
+
+        /// <summary>Most of the movement early, settling rather than stopping: the remaining distance, cubed.</summary>
+        static float Eased(float progress)
+        {
+            var left = 1f - progress;
+            return 1f - (left * left * left);
+        }
+
+        static float Least(float value, float bound)
+        {
+            return value < bound ? value : bound;
+        }
+
+        static float Most(float value, float bound)
+        {
+            return value > bound ? value : bound;
+        }
+    }
+}

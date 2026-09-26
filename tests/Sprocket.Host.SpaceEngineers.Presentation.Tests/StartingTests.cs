@@ -82,7 +82,7 @@ public class StartingTests
         screen.Run(120);
 
         // The row for it says the same thing, one screen out.
-        Assert.Equal("Nothing starts this yet.", screen.Editor.Rows().Entries[0].Problem);
+        Assert.Equal("Nothing starts this yet.", screen.Editor.Rows()[0].Problem);
 
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Button");
@@ -96,6 +96,6 @@ public class StartingTests
 
         // Mended. What the row says now is that it is switched off, which is the next thing to do
         // about it and not the thing that was wrong.
-        Assert.NotEqual("Nothing starts this yet.", screen.Editor.Rows().Entries[0].Problem);
+        Assert.NotEqual("Nothing starts this yet.", screen.Editor.Rows()[0].Problem);
     }
 }

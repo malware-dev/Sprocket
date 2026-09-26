@@ -27,7 +27,7 @@ public class DuplicatingTests
     }
 
     static StatusEntry Row(Screen screen, int which) =>
-        screen.Editor.Rows().Entries[which];
+        screen.Editor.Rows()[which];
 
     static void Duplicate(Screen screen, int which)
     {
@@ -116,7 +116,7 @@ public class DuplicatingTests
     public void OnlyASequenceRowOffersACopy()
     {
         var screen = AtTheList();
-        var rows = screen.Editor.Rows().Entries;
+        var rows = screen.Editor.Rows();
 
         Assert.NotEqual(0, rows[0].DuplicateCommand);
         for (var i = 1; i < rows.Count; i++)

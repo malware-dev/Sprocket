@@ -105,6 +105,6 @@ public class LayoutWorkTests
         Assert.DoesNotContain("cannot read", screen.Dump);
     }
 
-    static NoticeComponent Said(Screen screen) =>
-        screen.Editor.Screen.Components.OfType<NoticeComponent>().FirstOrDefault();
+    static Notice Said(Screen screen) =>
+        screen.Editor.Notice;
 }

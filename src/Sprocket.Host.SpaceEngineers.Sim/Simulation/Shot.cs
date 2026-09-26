@@ -20,8 +20,9 @@ namespace Sprocket.Sim.Simulation
             Save(path, width, height, null);
         }
 
-        /// <summary>Runs the script and writes what the last step left on screen; the block starts holding <paramref name="holding" />, or nothing.</summary>
-        public static string Save(string path, int width, int height, Script script, string holding = null)
+        /// <summary>Runs the script and writes what the last step left on screen; the block starts holding <paramref name="holding" />, or nothing, the screen speaks <paramref name="culture" />, or English, and offers the developer tools where <paramref name="developer" />.</summary>
+        public static string Save(string path, int width, int height, Script script, string holding = null,
+            string culture = null, bool developer = false)
         {
             // Drawn at exactly the size asked for, so a shot is the screen at that resolution rather
             // than a picture of it scaled to fit something else.
@@ -31,6 +32,16 @@ namespace Sprocket.Sim.Simulation
             // playground both depended on what somebody last built by hand and wrote its own script
             // into it, so taking a picture quietly edited the thing being photographed.
             var scene = holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding);
+            if (culture != null)
+                scene.Speak(culture);
+
+            // One frame passes while the screen is built again with the tools on it, as for a language.
+            if (developer)
+            {
+                scene.Editor.DeveloperMode = true;
+                scene.Tick();
+            }
+
             surface.Frame += scene.Draw;
 
             // Something behind it, or the bitmap is transparent - which reads as white and makes every

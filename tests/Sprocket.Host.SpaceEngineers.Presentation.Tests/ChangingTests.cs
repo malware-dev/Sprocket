@@ -136,7 +136,7 @@ public class ChangingTests
         // What it used to run stands on its own, so it stays behind rather than going with the
         // pointing.
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-        Assert.Single(screen.Editor.Rows().Entries);
+        Assert.Single(screen.Editor.Rows());
     }
 
     /// <summary>
@@ -747,7 +747,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.Invoke(screen.Editor.Rows().Entries[0].Command);
+        screen.Editor.Invoke(screen.Editor.Rows()[0].Command);
         screen.Run(2);
 
         Assert.NotNull(screen.Editor.Sentence());

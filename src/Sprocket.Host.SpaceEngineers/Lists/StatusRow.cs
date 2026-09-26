@@ -2,7 +2,6 @@ using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
@@ -11,20 +10,22 @@ using Sprocket.Host.SpaceEngineers.Words;
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
     /// <summary>One live thing on one line: what it is, what it is doing, and when it last did anything.</summary>
-    /// <remarks>Core never nests entries more than one level deep, so one fixed indent serves every row.</remarks>
-    public sealed class StatusRow
+    /// <remarks>
+    ///     Whoever holds it sets what it shows and what each press does, then calls <see cref="Show" />, which works
+    ///     out its look in one pass. A press it is given no command for is hidden or cannot be pressed. Rows never
+    ///     nest more than one level deep, so one fixed indent serves every row.
+    /// </remarks>
+    public class StatusRow : HStack
     {
         const float Inset = 32f;
 
-        readonly ComponentView _view;
-        readonly Relay _open;
+        readonly Relay _opens;
         readonly Relay _runs;
         readonly Relay _changes;
         readonly Relay _flips;
         readonly Relay _copies;
         readonly Relay _offers;
         readonly Relay _bins;
-        readonly HStack _line;
         readonly HStack _inside;
         readonly Glyph _light;
         readonly Label _summary;
@@ -38,65 +39,44 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         readonly Glyph _delete;
         readonly HStack _detail;
         readonly Glyph _below;
-        string _opens;
-        string _opensSays;
-        StatusEntry _entry;
 
-        /// <summary>What the light says for each thing it can show.</summary>
-        readonly Document _broken = Markdown.Parse("**Something needs mending**\nOpen it to see what.");
-        readonly Document _ran = Markdown.Parse("**Ran just now**");
-        readonly Document _idle = Markdown.Parse("**Idle**\nLights green when it runs, and red when something in it needs mending.");
+        /// <summary>The summary and whether it asks, as last shown, so an action row's words are joined only when they change.</summary>
+        string _said;
+        bool _saidAsks;
 
-        /// <summary>An empty row belonging to <paramref name="view" />, filled in by <see cref="Update" />.</summary>
-        public StatusRow(ComponentView view)
+        /// <summary>An empty row, filled in by setting what it shows and calling <see cref="Show" />.</summary>
+        public StatusRow()
         {
-            _view = view;
-            _open = new Relay(Open);
-            _runs = new Relay(Run);
-            _changes = new Relay(Change);
-            _flips = new Relay(Flip);
-            _copies = new Relay(Copy);
-            _offers = new Relay(Offer);
-            _bins = new Relay(Bin);
+            _opens = new Relay(delegate { Carry(Opens); });
+            _runs = new Relay(delegate { Carry(Running ? Stops : Runs); });
+            _changes = new Relay(delegate { Carry(Changes); });
+            _flips = new Relay(delegate { Carry(Flips); });
+            _copies = new Relay(delegate { Carry(Copies); });
+            _offers = new Relay(delegate { Carry(Offers); });
+            _bins = new Relay(delegate { Carry(Deletes); });
 
-            _line = new HStack
+            Style = Styles.Row;
+            Command = _opens;
+            Children.Add(new HStack
             {
-                Style = Styles.Row,
-                Command = _open,
+                Spacing = 16f,
+                Placement = Flex.Grow,
                 Children =
                 {
-                    new HStack
+                    new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = Fixed.Size(16f, 16f) }.As(out _light),
+                    new VStack
                     {
-                        Spacing = 16f,
+                        Spacing = 4f,
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new Glyph { Symbol = Symbols.Disc, Style = Styles.Light }.As(out _light),
-                            new VStack
+                            new HStack
                             {
-                                Spacing = 4f,
-                                Placement = Flex.Grow,
+                                Spacing = 8f,
                                 Children =
                                 {
-                                    new HStack
-                                    {
-                                        Spacing = 8f,
-                                        Children =
-                                        {
-                                            new Label { Style = Styles.Name, Wraps = true }.As(out _summary),
-                                            new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag }.As(out _below)
-                                        }
-                                    },
-                                    new HStack
-                                    {
-                                        Spacing = 8f,
-                                        Children =
-                                        {
-                                            new Button { Style = Styles.Status, Command = _changes }.As(out _status),
-                                            new Label { Style = Styles.Detail, Wraps = true }.As(out _problem),
-                                            new Label { Style = Styles.Detail }.As(out _lastRun)
-                                        }
-                                    }.As(out _detail)
+                                    new Label { Style = Styles.Name, Wraps = true }.As(out _summary),
+                                    new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = Fixed.Size(32f, 32f) }.As(out _below)
                                 }
                             },
                             new HStack
@@ -104,176 +84,257 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                                 Spacing = 8f,
                                 Children =
                                 {
-                                    new Glyph { Symbol = Symbols.Play, Style = Styles.Tool, Command = _runs }.As(out _run),
-                                    new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Tool, Command = _copies }.As(out _duplicate),
-                                    new Button { Style = Styles.Offer, Command = _offers }.As(out _button),
-                                    new Switch { Style = Styles.Switch, IsSet = true, Command = _flips }.As(out _switch),
-                                    new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Command = _bins }.As(out _delete)
+                                    new Button { Style = Styles.Plain, Command = _changes }.As(out _status),
+                                    new Label { Style = Styles.Detail, Wraps = true }.As(out _problem),
+                                    new Label { Style = Styles.Detail }.As(out _lastRun)
                                 }
-                            }
+                            }.As(out _detail)
                         }
-                    }.As(out _inside)
+                    },
+                    new HStack
+                    {
+                        Spacing = 8f,
+                        Children =
+                        {
+                            new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
+                            new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _copies }.As(out _duplicate),
+                            new Button { Style = Styles.Button, Command = _offers }.As(out _button),
+                            new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
+                            new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f), Command = _bins }.As(out _delete)
+                        }
+                    }
                 }
-            };
+            }.As(out _inside));
         }
 
-        /// <summary>The row itself, for the list to hold.</summary>
-        public Element Root => _line;
+        /// <summary>What pressing the row does, or null for a row that is not pressed.</summary>
+        public ICommand Opens { get; set; }
 
-        /// <summary>Shows <paramref name="entry" /> on this row.</summary>
-        public void Update(StatusEntry entry)
+        /// <summary>What starting it does, or null where it cannot be started from here.</summary>
+        public ICommand Runs { get; set; }
+
+        /// <summary>What stopping it does, or null where it cannot be stopped from here.</summary>
+        public ICommand Stops { get; set; }
+
+        /// <summary>What pressing its status does, or null where the status is only read.</summary>
+        public ICommand Changes { get; set; }
+
+        /// <summary>What its switch does, or null for a row with no switch.</summary>
+        public ICommand Flips { get; set; }
+
+        /// <summary>What copying it does, or null where it cannot be copied.</summary>
+        public ICommand Copies { get; set; }
+
+        /// <summary>What its button does, or null for a row with no button.</summary>
+        public ICommand Offers { get; set; }
+
+        /// <summary>What deleting it does, or null where it cannot be deleted.</summary>
+        public ICommand Deletes { get; set; }
+
+        /// <summary>How deep it stands under the row it belongs to: none, or one level.</summary>
+        public int Depth { get; set; }
+
+        /// <summary>What it is called.</summary>
+        public string Summary { get; set; }
+
+        /// <summary>Whether it is a way to add something rather than a thing that is there.</summary>
+        public bool IsAction { get; set; }
+
+        /// <summary>Whether pressing it asks something first, which an action row says with an ellipsis.</summary>
+        public bool Asks { get; set; }
+
+        /// <summary>What pressing it does, in markdown-lite, said where the pointer rests on it; null for nothing.</summary>
+        public string About { get; set; }
+
+        /// <summary>The words for the slots in <see cref="About" />, or null where it has none.</summary>
+        public Arguments AboutArguments { get; set; }
+
+        /// <summary>How many things in it are broken.</summary>
+        public int Problems { get; set; }
+
+        /// <summary>How many things in it are worth a remark without being broken.</summary>
+        public int Remarks { get; set; }
+
+        /// <summary>Whether it is running now.</summary>
+        public bool Running { get; set; }
+
+        /// <summary>Whether it is waiting for something before it can go on.</summary>
+        public bool Parked { get; set; }
+
+        /// <summary>Whether it is the row the rest of its screen is about.</summary>
+        public bool Chosen { get; set; }
+
+        /// <summary>Whether it ran a moment ago.</summary>
+        public bool JustRan { get; set; }
+
+        /// <summary>What it is doing, in a word or two, or empty.</summary>
+        public string Status { get; set; }
+
+        /// <summary>When it last ran, or empty.</summary>
+        public string LastRun { get; set; }
+
+        /// <summary>What is wrong with it, said in place of its status, or empty.</summary>
+        public string Problem { get; set; }
+
+        /// <summary>Whether <see cref="Problem" /> is a warning rather than something broken.</summary>
+        public bool ProblemIsWarning { get; set; }
+
+        /// <summary>Whether its switch is on.</summary>
+        public bool SwitchIsOn { get; set; }
+
+        /// <summary>Whether its switch governs a whole system rather than one thing in it.</summary>
+        public bool SwitchGovernsAll { get; set; }
+
+        /// <summary>What copying it does, said on the copy mark.</summary>
+        public string DuplicateText { get; set; }
+
+        /// <summary>What its button says.</summary>
+        public string ButtonText { get; set; }
+
+        /// <summary>What its button does, in markdown-lite, said where the pointer rests on it.</summary>
+        public string ButtonAbout { get; set; }
+
+        /// <summary>The status, for a press on it that has to hang something under it.</summary>
+        public Element StatusPart => _status;
+
+        /// <summary>The mark that starts or stops it, for a press on it that has to hang something under it.</summary>
+        public Element RunPart => _run;
+
+        /// <summary>The switch, for a press on it that has to hang something under it.</summary>
+        public Element SwitchPart => _switch;
+
+        /// <summary>The copy mark, for a press on it that has to hang something under it.</summary>
+        public Element CopyPart => _duplicate;
+
+        /// <summary>The button, for a press on it that has to hang something under it.</summary>
+        public Element ButtonPart => _button;
+
+        /// <summary>The bin, for a press on it that has to hang something under it.</summary>
+        public Element DeletePart => _delete;
+
+        /// <summary>What pressing a switch would do, as a note on the switch.</summary>
+        public static string Switching(Texts texts, bool governsAll, bool isOn)
         {
-            _entry = entry;
-            _inside.Padding = new Thickness(entry.Depth > 0 ? Inset : 0f, 0f, 0f, 0f);
+            if (!governsAll)
+                return isOn ? texts.RowSwitchOff : texts.RowSwitchOn;
 
-            var pressable = entry.Command != 0;
-            _open.CanExecute = pressable;
-            _line.RichTip = entry.About;
-            var wrong = entry.Problems > 0;
+            return isOn
+                ? texts.RowSwitchSystemOff
+                : texts.RowSwitchSystemOn;
+        }
 
-            _line.Style = wrong
-                ? (entry.Chosen ? Styles.BrokenChosen : Styles.Broken)
-                : entry.Running
-                    ? (entry.Chosen ? Styles.RunningChosen : Styles.Running)
-                    : entry.Parked
-                        ? (entry.Chosen ? Styles.ParkedChosen : Styles.Parked)
-                        : entry.Chosen
+        /// <summary>Shows what it has been told, saying its fixed words in <paramref name="texts" />.</summary>
+        /// <remarks>Runs on every refresh of the list, so it writes what may have changed and joins no string that has not.</remarks>
+        public void Show(Texts texts)
+        {
+            _inside.Padding = new Thickness(Depth > 0 ? Inset : 0f, 0f, 0f, 0f);
+
+            var pressable = Opens != null;
+            _opens.CanExecute = pressable;
+            Tip = About;
+            TipArguments = AboutArguments;
+            var wrong = Problems > 0;
+
+            Style = wrong
+                ? (Chosen ? Styles.BrokenChosen : Styles.Broken)
+                : Running
+                    ? (Chosen ? Styles.RunningChosen : Styles.Running)
+                    : Parked
+                        ? (Chosen ? Styles.ParkedChosen : Styles.Parked)
+                        : Chosen
                             ? Styles.Chosen
                             : !pressable
                                 ? Styles.Still
-                                : entry.IsAction
+                                : IsAction
                                     ? Styles.AddRow
                                     : Styles.Row;
 
-            _summary.Text = entry.IsAction
-                ? StartView.Plus + entry.Summary + (entry.Question.Length > 0 ? "…" : "")
-                : entry.Summary;
-            _summary.Color = entry.IsAction ? Palette.Muted : Palette.Ink;
+            if (!ReferenceEquals(_said, Summary) || _saidAsks != Asks)
+            {
+                _said = Summary;
+                _saidAsks = Asks;
+
+                // The ellipsis is the desktop convention for a button that asks something before it acts.
+                _summary.Text = IsAction ? StartView.Plus + Summary + (Asks ? "…" : "") : Summary;
+            }
+
+            _summary.Color = IsAction ? Palette.Muted : Palette.Ink;
 
             _light.Tint = wrong
                 ? Palette.Problem
-                : entry.IsAction
+                : IsAction
                     ? Palette.None
-                    : entry.JustRan
+                    : JustRan
                         ? Palette.Live
                         : Palette.Dim;
 
-            _light.RichTip = entry.IsAction ? null : wrong ? _broken : entry.JustRan ? _ran : _idle;
+            _light.Tip = IsAction
+                ? null
+                : wrong
+                    ? texts.RowBroken
+                    : JustRan
+                        ? texts.RowRan
+                        : texts.RowIdle;
 
-            _status.Text = entry.Status;
-            _lastRun.Text = entry.LastRun;
+            _status.Text = Status;
+            _lastRun.Text = LastRun;
 
-            var doing = entry.Running ? entry.StopCommand : entry.RunCommand;
+            var doing = Running ? Stops : Runs;
 
-            _run.Symbol = entry.Running ? Symbols.Stop : Symbols.Play;
-            _run.Collapsed = doing == 0;
-            _runs.CanExecute = doing != 0;
-            _run.Tip = doing != 0 ? (entry.Running ? SequenceText.Stops() : SequenceText.Starts()) : null;
+            _run.Symbol = Running ? Symbols.Stop : Symbols.Play;
+            _run.Collapsed = doing == null;
+            _runs.CanExecute = doing != null;
+            _run.Tip = doing != null ? (Running ? SequenceText.Stops() : SequenceText.Starts()) : null;
 
-            _changes.CanExecute = entry.StatusCommand != 0;
+            _changes.CanExecute = Changes != null;
+            _status.Tip = Changes != null ? texts.RowChange : null;
 
-            if (entry.StatusCommand != 0 && !ReferenceEquals(_opens, entry.Status))
-            {
-                _opens = entry.Status;
-                _opensSays = "Change what this does";
-            }
+            var saying = !string.IsNullOrEmpty(Problem);
 
-            _status.Tip = entry.StatusCommand != 0 ? _opensSays : null;
-
-            var saying = !string.IsNullOrEmpty(entry.Problem);
-
-            _detail.Collapsed = !saying
-                && string.IsNullOrEmpty(entry.Status) && string.IsNullOrEmpty(entry.LastRun);
+            _detail.Collapsed = !saying && string.IsNullOrEmpty(Status) && string.IsNullOrEmpty(LastRun);
 
             _status.Collapsed = saying;
 
-            _problem.Text = entry.Problem;
+            _problem.Text = Problem;
             _problem.Collapsed = !saying;
-            _problem.Color = entry.ProblemIsWarning ? Palette.Notice : Palette.Problem;
+            _problem.Color = ProblemIsWarning ? Palette.Notice : Palette.Problem;
 
-            var marked = !string.IsNullOrEmpty(entry.Problem) || entry.Problems > 0
-                || entry.Remarks > 0;
-
-            var quietly = string.IsNullOrEmpty(entry.Problem)
-                ? entry.Problems == 0
-                : entry.ProblemIsWarning;
+            var marked = saying || Problems > 0 || Remarks > 0;
+            var quietly = saying ? ProblemIsWarning : Problems == 0;
 
             _below.Collapsed = !marked;
             _below.Tint = quietly ? Palette.Notice : Palette.Problem;
 
-            _switch.Collapsed = !entry.CanSwitch;
-            _switch.IsOn = entry.SwitchIsOn;
-            _switch.Style = entry.SwitchGovernsAll ? Styles.Governing : Styles.Switch;
+            var switches = Flips != null;
+            _switch.Collapsed = !switches;
+            _switch.IsOn = SwitchIsOn;
+            _switch.Says(texts.SwitchOn, texts.SwitchOff);
+            _flips.CanExecute = switches;
+            _switch.Tip = switches ? Switching(texts, SwitchGovernsAll, SwitchIsOn) : null;
 
-            _flips.CanExecute = entry.CanSwitch;
-
-            _switch.Tip = entry.CanSwitch
-                ? Switching(entry.SwitchGovernsAll, entry.SwitchIsOn)
-                : null;
-
-            var copies = entry.DuplicateCommand != 0;
+            var copies = Copies != null;
             _duplicate.Collapsed = !copies;
             _copies.CanExecute = copies;
-            _duplicate.Tip = copies ? entry.DuplicateText : null;
+            _duplicate.Tip = copies ? DuplicateText : null;
 
-            var offers = entry.ButtonCommand != 0;
+            var offers = Offers != null;
             _button.Collapsed = !offers;
             _offers.CanExecute = offers;
-            _button.RichTip = offers ? entry.ButtonAbout : null;
+            _button.Tip = offers ? ButtonAbout : null;
 
             if (offers)
-                _button.Text = entry.ButtonText;
+                _button.Text = ButtonText;
 
-            var bins = entry.DeleteCommand != 0;
+            var bins = Deletes != null;
             _delete.Collapsed = !bins;
             _bins.CanExecute = bins;
-            _delete.Tip = bins ? "Delete" : null;
+            _delete.Tip = bins ? texts.RowDelete : null;
         }
 
-        void Open()
+        static void Carry(ICommand command)
         {
-            _view.Host.Send(_line, _entry.Command, _entry.Question);
-        }
-
-        void Run()
-        {
-            _view.Host.Send(_run, _entry.Running ? _entry.StopCommand : _entry.RunCommand, null);
-        }
-
-        void Change()
-        {
-            _view.Host.Send(_status, _entry.StatusCommand, null);
-        }
-
-        void Flip()
-        {
-            _view.Host.Switch(_switch, _entry.SwitchCommand, !_entry.SwitchIsOn);
-        }
-
-        void Copy()
-        {
-            _view.Host.Send(_duplicate, _entry.DuplicateCommand, null);
-        }
-
-        void Offer()
-        {
-            _view.Host.Send(_button, _entry.ButtonCommand, _entry.ButtonQuestion);
-        }
-
-        void Bin()
-        {
-            _view.Host.Send(_delete, _entry.DeleteCommand, null);
-        }
-
-        /// <summary>What pressing a switch would do, as a note on the switch.</summary>
-        internal static string Switching(bool governsAll, bool isOn)
-        {
-            if (!governsAll)
-                return isOn ? "Switch off" : "Switch on";
-
-            return isOn
-                ? "Switch the whole system off, stopping every sequence in it"
-                : "Switch the whole system on";
+            if (command != null && command.CanExecute)
+                command.Execute();
         }
     }
 }

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Norwegian (bokmål). Translates MyTexts.resx, where each text's note says what it is and what its slots
+    hold. Whatever is left out here is said in English.
+-->
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Sprocket.Chrome.Back" xml:space="preserve">
+    <value>Tilbake</value>
+  </data>
+  <data name="Sprocket.Chrome.Close" xml:space="preserve">
+    <value>Lukk redigeringen</value>
+  </data>
+  <data name="Sprocket.Chrome.Undo" xml:space="preserve">
+    <value>Angre {action}</value>
+  </data>
+  <data name="Sprocket.Chrome.Redo" xml:space="preserve">
+    <value>Gjør om {action}</value>
+  </data>
+  <data name="Sprocket.Chrome.Refresh" xml:space="preserve">
+    <value>Les skipet på nytt, i tilfelle noen har endret en knapp</value>
+  </data>
+
+  <data name="Sprocket.Rename.Empty" xml:space="preserve">
+    <value>Gi den et navn først</value>
+  </data>
+  <data name="Sprocket.Rename.Taken" xml:space="preserve">
+    <value>Det navnet er tatt</value>
+  </data>
+
+  <data name="Sprocket.Row.Broken" xml:space="preserve">
+    <value>**Noe må fikses**
+Åpne den for å se hva.</value>
+  </data>
+  <data name="Sprocket.Row.Ran" xml:space="preserve">
+    <value>**Kjørte nettopp**</value>
+  </data>
+  <data name="Sprocket.Row.Idle" xml:space="preserve">
+    <value>**I ro**
+Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
+  </data>
+  <data name="Sprocket.Row.Change" xml:space="preserve">
+    <value>Endre hva denne gjør</value>
+  </data>
+  <data name="Sprocket.Row.Delete" xml:space="preserve">
+    <value>Slett</value>
+  </data>
+  <data name="Sprocket.Switch.On" xml:space="preserve">
+    <value>PÅ</value>
+  </data>
+  <data name="Sprocket.Switch.Off" xml:space="preserve">
+    <value>AV</value>
+  </data>
+  <data name="Sprocket.Row.SwitchOn" xml:space="preserve">
+    <value>Slå på</value>
+  </data>
+  <data name="Sprocket.Row.SwitchOff" xml:space="preserve">
+    <value>Slå av</value>
+  </data>
+  <data name="Sprocket.Row.SwitchSystemOn" xml:space="preserve">
+    <value>Slå på hele systemet</value>
+  </data>
+  <data name="Sprocket.Row.SwitchSystemOff" xml:space="preserve">
+    <value>Slå av hele systemet, og stopp hver sekvens i det</value>
+  </data>
+
+  <data name="Sprocket.Systems.Title" xml:space="preserve">
+    <value>Automasjon for {name}</value>
+  </data>
+  <data name="Sprocket.Systems.RenamePrompt" xml:space="preserve">
+    <value>Hva heter dette?</value>
+  </data>
+  <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
+    <value>Navnet på dette gridet, det spillet viser for det overalt.
+Trykk for å gi gridet nytt navn.</value>
+  </data>
+  <data name="Sprocket.Systems.New" xml:space="preserve">
+    <value>Nytt logikksystem</value>
+  </data>
+  <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
+    <value>Start et nytt logikksystem på dette gridet.</value>
+  </data>
+  <data name="Sprocket.Systems.Load" xml:space="preserve">
+    <value>Last inn plantegning</value>
+  </data>
+  <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
+    <value>Sett opp en **plantegning** laget et annet sted, og velg hvilke av dette gridets blokker den bruker.</value>
+  </data>
+  <data name="Sprocket.Systems.Empty" xml:space="preserve">
+    <value>Ingenting er automatisert her ennå.</value>
+  </data>
+  <data name="Sprocket.Systems.MakeBlueprint" xml:space="preserve">
+    <value>Lag plantegning</value>
+  </data>
+  <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
+    <value>Gjør dette om til en **plantegning**, slik at flere logikksystemer som dette kan lages, hvert med sine egne blokker.
+Dette blir det første av dem.</value>
+  </data>
+  <data name="Sprocket.Systems.MadeFrom" xml:space="preserve">
+    <value>Laget fra **{name}**-plantegningen</value>
+  </data>
+  <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
+    <value>legg til enda en {name}</value>
+  </data>
+  <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
+    <value>Lag enda et logikksystem fra **{name}**-plantegningen, og velg hvilke blokker det bruker.</value>
+  </data>
+  <data name="Sprocket.Systems.Running" xml:space="preserve">
+    <value>kjører</value>
+  </data>
+  <data name="Sprocket.Systems.Numbered" xml:space="preserve">
+    <value>System {number}</value>
+  </data>
+  <data name="Sprocket.Systems.Instance" xml:space="preserve">
+    <value>{name} {number}</value>
+  </data>
+
+  <data name="Sprocket.Salvage.Different" xml:space="preserve">
+    <value>Denne blokken har et program fra en annen versjon.</value>
+  </data>
+  <data name="Sprocket.Salvage.DifferentDetail" xml:space="preserve">
+    <value>Denne versjonen kan ikke lese det, så skjermen starter tom. Blokken har det fortsatt til du endrer noe her - og da erstattes det for godt.</value>
+  </data>
+  <data name="Sprocket.Salvage.Partial" xml:space="preserve">
+    <value>Denne blokken har et program som bare delvis kunne leses.</value>
+  </data>
+  <data name="Sprocket.Salvage.PartialDetail" xml:space="preserve">
+    <value>Det som kunne leses, vises her. Blokken har fortsatt hele programmet til du endrer noe her - og da erstattes det med det du ser.</value>
+  </data>
+  <data name="Sprocket.Salvage.Trouble" xml:space="preserve">
+    <value>Lest som: {trouble}</value>
+  </data>
+  <data name="Sprocket.Salvage.Replace" xml:space="preserve">
+    <value>Erstatt det</value>
+  </data>
+  <data name="Sprocket.Salvage.Question" xml:space="preserve">
+    <value>Erstatte programmet denne blokken har? Det som ikke kunne leses, blir borte.</value>
+  </data>
+  <data name="Sprocket.Salvage.Keep" xml:space="preserve">
+    <value>La det være</value>
+  </data>
+
+  <data name="Sprocket.Lease.Holder" xml:space="preserve">
+    <value>{holder} redigerer automasjonen i denne blokken.</value>
+  </data>
+  <data name="Sprocket.Lease.Detail" xml:space="preserve">
+    <value>Bare én kan redigere om gangen. Åpne dette igjen når de er ferdige for å gjøre endringer.</value>
+  </data>
+</root>

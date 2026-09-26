@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             _closed.Spacing = Space.Item;
             _closed.Fill = _chosen;
             _closed.Right = _mark;
-            _closed.Background = Palette.ControlHot;
+            _closed.Background = Palette.Well;
             _closed.Highlight = Palette.Panel;
             _closed.HighlightEdge = Palette.Muted;
             _closed.Edge = Palette.Line;
@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             _closed.Padding = new Thickness(Space.ChipX, Space.FieldY);
 
             _list = Widgets.Column(0f);
-            _list.Background = Palette.ControlHot;
+            _list.Background = Palette.Well;
             _list.Edge = Palette.Line;
             _list.EdgeThickness = Space.Hair;
 
@@ -103,10 +103,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             {
                 var lit = _words[i].Text == chosen;
 
-                _words[i].Background = lit ? Palette.SwitchLit : Palette.SwitchDark;
+                _words[i].Background = lit ? Palette.Line : Palette.Panel;
                 _words[i].Color = lit ? Palette.Ink : Palette.Faint;
 
-                _words[i].Highlight = lit ? Palette.None : Palette.Panel;
+                _words[i].Highlight = lit ? Palette.None : Palette.PanelHot;
                 _lines[i].Color = lit ? Palette.Ink : Palette.Muted;
             }
 
@@ -292,7 +292,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Legacy
             var made = Widgets.Label("", Palette.Faint, _scale);
             made.Padding = new Thickness(Space.ChipX, Space.FieldY);
             made.Wraps = false;
-            made.Background = Palette.SwitchDark;
+            made.Background = Palette.Panel;
             made.Edge = Palette.Dim;
             made.EdgeThickness = Space.Hair;
             return made;

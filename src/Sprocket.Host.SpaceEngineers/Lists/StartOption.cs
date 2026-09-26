@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
@@ -11,9 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             Question = "";
             Command = command;
         }
-
-        /// <summary>What starting this does, said where the pointer rests on it, or null for nothing to say.</summary>
-        public Document About { get; set; }
 
         public string Label { get; set; }
 

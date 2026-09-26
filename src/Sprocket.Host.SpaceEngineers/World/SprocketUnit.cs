@@ -10,6 +10,7 @@ using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
 using Sprocket.Host.SpaceEngineers.Terminal;
+using Sprocket.Host.SpaceEngineers.Words;
 
 // The Ingame one, which is where action arguments live. Aliased rather than imported whole, the
 // way TriggerAction does, because the Ingame namespaces collide with the mod-side ones.
@@ -67,7 +68,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly GridWorld _world;
         readonly Automation _program = new Automation();
         readonly AutomationRunner _runner;
-        readonly SprocketEditor _editor;
+
+        /// <summary>What the editor says, who is at it, and whether it shows the developer tools, kept for when it is made.</summary>
+        readonly Texts _texts;
+        readonly string _author;
+        readonly bool _developerMode;
+
+        /// <summary>The editor, made the first time something asks for it; null until then.</summary>
+        /// <remarks>
+        /// Only a screen needs one. A dedicated server shows nothing, and most Sprockets on any machine are
+        /// never opened, so an editor made with every unit would be a page built for nobody.
+        /// </remarks>
+        SprocketEditor _editor;
 
         /// <summary>
         /// Whether this block already carries a program, without building anything to find out.
@@ -89,9 +101,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The Sprocket a block carries, reading its program out of the block.</summary>
         /// <remarks>
         /// <paramref name="rota" /> is the world's, shared by every Sprocket in it. See <see cref="Rota" />.
+        /// <paramref name="texts" /> are what its editor says, in the player's language.
         /// </remarks>
-        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota)
-            : this(block, settings, rota, false, Stored(block, ProgramKey), Stored(block, StateKey))
+        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts)
+            : this(block, settings, rota, texts, false, Stored(block, ProgramKey), Stored(block, StateKey))
         {
         }
 
@@ -103,9 +116,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// On a rota of its own that nothing turns, so every sequence it holds waits forever and none of
         /// them acts. The editor is the same editor, which is what lets a client edit as a host does.
         /// </remarks>
-        public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, string program, string state)
+        public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, Texts texts, string program,
+            string state)
         {
-            return new SprocketUnit(block, settings, new Rota(), true, program, state);
+            return new SprocketUnit(block, settings, new Rota(), texts, true, program, state);
         }
 
         /// <summary>
@@ -123,9 +137,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         public SprocketUnit Rebuilt(string program, string switches, Settings settings, Rota rota)
         {
             var running = StateText.Running(_program, _runner);
-            var rebuilt = new SprocketUnit(_block, settings, rota, false, program, switches + "\n" + running);
+            var rebuilt = new SprocketUnit(_block, settings, rota, _texts, false, program,
+                switches + "\n" + running);
             rebuilt.Showing = Showing;
-            rebuilt.Editor.Habits = Editor.Habits;
+            if (_editor != null)
+                rebuilt.Editor.Habits = _editor.Habits;
 
             // What this one had wired goes with it. A Sprocket that believed it had just been loaded
             // would write no slot, and would read a button the client has just added - and nobody has
@@ -135,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return rebuilt;
         }
 
-        SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, bool copy, string program,
+        SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, bool copy, string program,
             string state)
         {
             _block = block;
@@ -143,17 +159,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             _world = new GridWorld(block);
             _runner = new AutomationRunner(_program, _world, rota);
 
-            // Before the editor, which builds its first screen out of whatever the program already says.
-            Load(program, state);
-
-            _editor = new SprocketEditor(_world, _program, _runner);
+            _texts = texts;
+            _developerMode = settings != null && settings.DeveloperMode;
 
             // The player's own name is only where a namespace starts; choosing another is theirs to do.
             // What the game draws in front of it is not part of that name - see Player.Plain.
-            if (MyAPIGateway.Multiplayer != null)
-                _editor.Author = Player.Plain(MyAPIGateway.Multiplayer.MyName);
+            _author = MyAPIGateway.Multiplayer == null ? null : Player.Plain(MyAPIGateway.Multiplayer.MyName);
 
-            _editor.DeveloperMode = settings != null && settings.DeveloperMode;
+            Load(program, state);
 
             // Asked once and then listened for. Whether this machine is working decides whether the
             // automation runs at all, and it changes when the lights go out rather than on a tick -
@@ -181,7 +194,29 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The block this belongs to, for anything asking which construct it is on.</summary>
         internal IMyTerminalBlock Block => _block;
 
-        public SprocketEditor Editor => _editor;
+        /// <summary>The editor, made the first time it is asked for, building its first screen out of whatever the program says by then.</summary>
+        public SprocketEditor Editor
+        {
+            get
+            {
+                if (_editor != null)
+                    return _editor;
+
+                _editor = new SprocketEditor(_world, _program, _runner, _texts);
+
+                if (_author != null)
+                    _editor.Author = _author;
+
+                _editor.DeveloperMode = _developerMode;
+                return _editor;
+            }
+        }
+
+        /// <summary>The program this Sprocket runs and keeps.</summary>
+        public Automation Program => _program;
+
+        /// <summary>Whether anything has asked for the editor yet, and so made one.</summary>
+        public bool HasEditor => _editor != null;
 
         public GridWorld World => _world;
 
@@ -1183,7 +1218,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             _runner.Tick(frame);
 
-            if (Showing)
+            if (Showing && _editor != null)
                 _editor.Tick(frame);
         }
 
@@ -1369,6 +1404,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             program = ProgramText.Save(_program, _world.Values);
             state = StateText.Save(_program, _runner);
+        }
+
+        /// <summary>Has the editor build its words again, after the language changes; an editor not yet made builds them when it is.</summary>
+        public void Reword()
+        {
+            if (_editor != null)
+                _editor.Invalidate();
         }
 
         public void Dispose()

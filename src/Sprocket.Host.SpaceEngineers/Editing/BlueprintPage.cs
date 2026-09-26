@@ -114,14 +114,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             head.SwitchIsOn = chosen.Enabled;
 
             var going = SystemSummary.IsRunning(_system, Editor.Runner, chosen);
-            head.Status = SystemSummary.RunningText(going);
+            head.Status = SystemSummary.RunningText(Editor.Texts, going);
             head.Running = going;
         }
 
         /// <summary>One of the logic systems made from it, chosen by pressing it.</summary>
         StatusEntry Member(SystemInstance instance, bool chosen)
         {
-            var entry = new StatusEntry(SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, instance),
+            var entry = new StatusEntry(SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, instance),
                 Editor.Register(Cmd.ChooseInstance, _system.Id, instance.Number,
                     delegate { Editor.Choose(_system, instance); }));
             entry.Chosen = chosen;
@@ -134,7 +134,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </summary>
         StatusEntry Head(SystemInstance chosen)
         {
-            var head = new StatusEntry(SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, chosen), 0);
+            var head = new StatusEntry(SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, chosen), 0);
             head.SwitchCommand = Editor.RegisterToggle(Cmd.EnableInstance, _system.Id, chosen.Number,
                 delegate(bool on) { chosen.Enabled = on; });
             head.SwitchIsOn = chosen.Enabled;
@@ -180,7 +180,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         void Fill(Part part, SystemInstance chosen)
         {
             var page = new ChoicePage(Editor, part.Label);
-            page.Caption = SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, chosen);
+            page.Caption = SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, chosen);
             page.EmptyText = "Nothing on this construct can fill it.";
 
             var filled = chosen.FilledWith(part.Id);

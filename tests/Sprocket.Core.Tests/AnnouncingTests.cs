@@ -41,9 +41,6 @@ public class AnnouncingTests
                 if (setter == null || !setter.IsPublic)
                     continue;
 
-                if (Backwards(type, property))
-                    continue;
-
                 var next = Different(property.GetValue(subject, null), property.PropertyType);
                 if (next == null && property.PropertyType.IsValueType)
                     continue;
@@ -69,19 +66,6 @@ public class AnnouncingTests
         // A guard against the guard: a reflection sweep that matched nothing would pass in silence.
         Assert.True(looked > 30, $"only {looked} values were checked, which is too few to be right");
     }
-
-    /// <summary>
-    /// Whether this value is one a target writes and core reads, rather than the other way about.
-    /// </summary>
-    /// <remarks>
-    /// The rule is about what a screen shows: core writes it, and something drawing it has to be told.
-    /// A banner saying it has finished sliding out goes the other way - the target is the only thing
-    /// that knows, and core reads it when it next builds the screen - so there is nobody for it to
-    /// announce to. Named one by one on purpose: the exception is rare enough that the next one should
-    /// have to be argued for here.
-    /// </remarks>
-    static bool Backwards(Type type, PropertyInfo property) =>
-        type.Name == "NoticeComponent" && property.Name == "Closed";
 
     /// <summary>One of each, built with whatever its constructor insists on.</summary>
     static object Make(Type type)

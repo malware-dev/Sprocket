@@ -68,7 +68,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 shown.Pen.Collapsed = !part.CanRename;
                 shown.Pen.Tint = i == renaming ? Palette.None : Palette.Faint;
                 shown.Renames.CanExecute = part.CanRename && i != renaming;
-                shown.Plate.RichTip = part.CanRename && i != renaming ? part.About : null;
+
+                // While a part is renamed, its plate says only why a name is refused. See Refuse.
+                if (i != renaming)
+                    shown.Plate.Tip = part.CanRename ? part.About : null;
+
                 shown.Lead.Text = part.Lead;
                 shown.After.Text = part.After;
             }
@@ -93,6 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             part.Pen.Tint = Palette.None;
             part.Renames.CanExecute = false;
+            part.Plate.Tip = null;
             part.Name.Collapsed = true;
             part.Box.Collapsed = false;
             part.Box.Text = name;
@@ -187,7 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 Renames = new Relay(() => row.Rename(index));
 
-                Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join };
+                Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join, Placement = Fixed.Size(32f, 32f) };
                 Lead = new Label { Style = Styles.TitleLead };
                 After = new Label { Style = Styles.TitleLead };
 
@@ -205,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                             Submit = row._commit,
                             Cancel = row._cancel
                         }.As(out Box),
-                        new Glyph { Symbol = Symbols.Pencil, Style = Styles.Pen }.As(out Pen)
+                        new Glyph { Symbol = Symbols.Pencil, Style = Styles.Pen, Placement = Fixed.Size(32f, 32f) }.As(out Pen)
                     }
                 };
 

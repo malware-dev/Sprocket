@@ -244,7 +244,7 @@ public class OpeningTests
     public void AStepsTitleJoinsItsBlocksWithAnd()
     {
         var screen = WithOne();
-        screen.Editor.Invoke(screen.Editor.Rows().Entries[0].Command);
+        screen.Editor.Invoke(screen.Editor.Rows()[0].Command);
         screen.Run(2);
 
         screen.Editor.PressAdd("do something");

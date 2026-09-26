@@ -46,7 +46,7 @@ public class ParkedTests
     {
         var screen = WithOneParked();
 
-        Assert.True(screen.Editor.Rows().Entries[0].Parked);
+        Assert.True(screen.Editor.Rows()[0].Parked);
         Assert.True(Washed(screen, Palette.NoticeWash), "a parked sequence's row has no ground");
     }
 
@@ -69,8 +69,8 @@ public class ParkedTests
         var screen = WithOneParked();
 
         Assert.Equal("This is switched off, so nothing starts it on its own.",
-            screen.Editor.Rows().Entries[0].Problem);
-        Assert.Equal("switched off", screen.Editor.Rows().Entries[0].Status);
+            screen.Editor.Rows()[0].Problem);
+        Assert.Equal("switched off", screen.Editor.Rows()[0].Status);
 
         Assert.True(screen.Shows("This is switched off, so nothing starts it on its own."),
             "the row does not say what being switched off costs");
@@ -89,7 +89,7 @@ public class ParkedTests
     {
         var screen = WithOneParked();
 
-        Assert.Equal(0, screen.Editor.Rows().Entries[0].Problems);
+        Assert.Equal(0, screen.Editor.Rows()[0].Problems);
         Assert.False(Washed(screen, Palette.ProblemWash), "a parked sequence's row reads as broken");
     }
 
@@ -102,8 +102,8 @@ public class ParkedTests
         screen.Editor.Program.Sequences[0].Enabled = true;
         screen.Run(120);
 
-        Assert.False(screen.Editor.Rows().Entries[0].Parked);
-        Assert.Equal("ready", screen.Editor.Rows().Entries[0].Status);
+        Assert.False(screen.Editor.Rows()[0].Parked);
+        Assert.Equal("ready", screen.Editor.Rows()[0].Status);
         Assert.False(Washed(screen, Palette.NoticeWash), "a live sequence's row is wearing the parked ground");
     }
 
@@ -126,8 +126,8 @@ public class ParkedTests
         screen.Editor.Back();
         screen.Run(120);
 
-        Assert.False(screen.Editor.Rows().Entries[0].Parked);
-        Assert.Equal("switched off", screen.Editor.Rows().Entries[0].Status);
+        Assert.False(screen.Editor.Rows()[0].Parked);
+        Assert.Equal("switched off", screen.Editor.Rows()[0].Status);
         Assert.False(Washed(screen, Palette.NoticeWash), "an unwritten sequence is being remarked on");
     }
 }

@@ -23,6 +23,17 @@ Children =
 }
 ```
 
+A view lives in its owner's `<Owner>.View.cs`, a second half of the same partial class, and holds
+what a designer would write: the tree, its styles and sizes, and the named fields. Words, presses,
+kept lists and everything that changes are in the other half, which wires the named elements once
+the tree is made. There is no binding layer between the two.
+
+## Controls
+
+No control is sealed. A control made of others, a user control, derives from the layout it needs,
+such as `HStack`, rather than from a base of its own: a `UserControl` comes only once one is proven
+necessary, since it costs an element per instance that does nothing but pass its room through.
+
 ## Placement
 
 `Element` has no width and no height. What a container needs to know about how a child is placed

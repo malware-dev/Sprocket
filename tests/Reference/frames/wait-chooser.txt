@@ -6,13 +6,13 @@ on screen     How long should it wait?
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
-002  Text       at {X:256 Y:56.71198} scale 0.642  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1329 H:40}
-004  Text       at {X:303.5 Y:56.71198} scale 1.111  #DCF5FDFF  "How long should it wait?"
+002  Text       at {X:262.1563 Y:62.71198} scale 0.401  #A2C3CDFF  "<"
+003  SetClip    {X:296 Y:53 W:1328 H:40}
+004  Text       at {X:304 Y:56.71198} scale 1.111  #DCF5FDFF  "How long should it wait?"
 005  ClearClip  
-006  Text       at {X:1632.5 Y:56.71198} scale 0.642  #A2C3CDFF  "s"
+006  Text       at {X:1638.156 Y:62.71198} scale 0.401  #A2C3CDFF  "s"
 007  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-008  SetClip    {X:256 Y:118 W:1408 H:845}
+008  SetClip    {X:256 Y:118 W:1408 H:853}
 009  Sprite     Sprocket_Fill         {X:256 Y:118 W:1396 H:52}  #29363EFF
 010  Text       at {X:275 Y:131.712} scale 0.822  #DCF5FDFF  "1 second - 60 ticks"
 011  Sprite     Sprocket_Fill         {X:256 Y:175 W:1396 H:52}  #3C4C52FF
@@ -35,5 +35,5 @@ on screen     How long should it wait?
 028  Sprite     Sprocket_Fill         {X:1569 Y:479 W:64 H:37}  #374851FF
 029  Text       at {X:1588.087 Y:486.8869} scale 0.732  #85A1A9FF  "Use"
 030  ClearClip  
-031  Sprite     Sprocket_Fill         {X:240 Y:978 W:1440 H:1}  #5B737BFF
-032  Sprite     Sprocket_Fill         {X:240 Y:979 W:1440 H:56}  #1B242AFF
+031  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
+032  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

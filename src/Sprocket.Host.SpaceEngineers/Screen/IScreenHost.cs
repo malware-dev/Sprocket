@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -16,6 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// sentence needs the world the sentence is about.
         /// </remarks>
         GridWorld World { get; }
+
+        /// <summary>What the views say, in the player's language.</summary>
+        Texts Texts { get; }
 
         /// <summary>Sends a number to core. Reordering is the one thing a view answers with a position.</summary>
         void SetNumber(int command, int value);

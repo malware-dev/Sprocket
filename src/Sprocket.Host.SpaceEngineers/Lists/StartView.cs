@@ -72,9 +72,8 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 var at = i;
                 var button = new Button
                 {
-                    Style = Styles.Way,
+                    Style = Styles.Start,
                     Text = Plus + option.Label + (option.Asks ? "…" : ""),
-                    RichTip = option.About,
                     Command = new Relay(() => Start(at))
                 };
 

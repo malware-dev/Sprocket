@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     {
         readonly StatusListComponent _component;
         readonly VStack _stack = new VStack { Spacing = 8f };
-        readonly List<StatusRow> _rows = new List<StatusRow>();
+        readonly List<EntryRow> _rows = new List<EntryRow>();
 
         int _revision = -1;
 
@@ -84,9 +84,9 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
             for (int i = 0; i < _component.Entries.Count; i++)
             {
-                var row = new StatusRow(this);
+                var row = new EntryRow(this);
                 _rows.Add(row);
-                _stack.Children.Add(row.Root);
+                _stack.Children.Add(row.Row);
             }
         }
     }

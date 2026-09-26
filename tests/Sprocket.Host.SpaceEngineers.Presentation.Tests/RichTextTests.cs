@@ -74,11 +74,71 @@ public class RichTextTests
         Assert.Equal(settled, easel.Measured);
     }
 
-    static (RichText, Easel) Laid(string markdown, float wide)
+    /// <summary>A slot says its argument, set apart as the slot is.</summary>
+    [Fact]
+    public void ASlotSaysItsArgument()
+    {
+        var named = new Arguments();
+        named.Set("name", "Airlock");
+        var (_, easel) = Laid(Template.Read("Made from **{name}** blueprint"), Wide, named);
+
+        Assert.Equal(Bright, Word(easel, "Airlock").Color);
+        Assert.Equal(Body, Word(easel, "blueprint").Color);
+    }
+
+    /// <summary>A new argument lays the words out again from the same document, which is never read again.</summary>
+    [Fact]
+    public void ANewArgumentLaysOutAgainFromTheSameDocument()
+    {
+        var named = new Arguments();
+        named.Set("name", "Airlock");
+        var (text, easel) = Laid(Template.Read("Made from **{name}** blueprint"), Wide, named);
+        var document = text.Document;
+
+        named.Set("name", "Hangar Door");
+        easel.Draw(Wide, High);
+
+        Assert.Same(document, text.Document);
+        Assert.Contains(easel.Written, c => c.Text.Trim() == "Hangar Door");
+        Assert.DoesNotContain(easel.Written, c => c.Text.Trim() == "Airlock");
+    }
+
+    /// <summary>Setting an argument to what it already is lays nothing out.</summary>
+    [Fact]
+    public void TheSameArgumentLaysNothingOut()
+    {
+        var named = new Arguments();
+        named.Set("name", "Airlock");
+        var (_, easel) = Laid(Template.Read("Made from **{name}** blueprint"), Wide, named);
+
+        easel.Draw(Wide, High);
+        var settled = easel.Measured;
+
+        named.Set("name", "Airlock");
+        easel.Draw(Wide, High);
+
+        Assert.Equal(settled, easel.Measured);
+    }
+
+    /// <summary>An argument is words, never markdown.</summary>
+    [Fact]
+    public void AnArgumentIsNeverMarkdown()
+    {
+        var named = new Arguments();
+        named.Set("name", "*Test* rig");
+        var (_, easel) = Laid(Template.Read("Made from {name}"), Wide, named);
+
+        Assert.Contains(easel.Written, c => c.Text.Contains("*Test* rig"));
+    }
+
+    static (RichText, Easel) Laid(string markdown, float wide) => Laid(Markdown.Parse(markdown), wide, null);
+
+    static (RichText, Easel) Laid(Document document, float wide, Arguments? arguments)
     {
         var text = new RichText
         {
-            Document = Markdown.Parse(markdown),
+            Document = document,
+            Arguments = arguments,
             FontSize = 20f,
             Color = Body,
             StrongColor = Bright,

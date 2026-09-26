@@ -16,6 +16,7 @@ using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -48,6 +49,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             get { return _editor.World; }
         }
 
+        /// <inheritdoc />
+        public Texts Texts => _editor.Texts;
+
         readonly VStack _root;
         readonly Glyph _back;
         readonly HeadingRow _title;
@@ -65,11 +69,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         readonly Relay _flips;
         readonly Relay _finishes;
 
-        /// <summary>What the two arrows were last told to say, and the words they were made from.</summary>
-        string _undone;
-        string _undoSays;
-        string _redone;
-        string _redoSays;
+        /// <summary>What the two arrows' notes say is undone and redone, put in each note's slot.</summary>
+        readonly Arguments _undone = new Arguments();
+        readonly Arguments _redone = new Arguments();
         readonly Label _subtitle;
 
         /// <summary>The body: what stands above the part that takes the room, that part, and what stands below it.</summary>
@@ -80,6 +82,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         bool _wantsClose;
         readonly VStack _body;
         readonly VStack _above;
+
+        /// <summary>What the editor needs said above whatever page is showing.</summary>
+        /// <remarks>Clear of the lane the page's scroll keeps for its bar, so its edge lines up with the page under it.</remarks>
+        readonly Banner _banner = new Banner { Padding = new Thickness(0f, 0f, Sizes.Bar, 0f) };
         readonly VStack _below;
 
         readonly HStack _actions;
@@ -98,6 +104,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         Element _raisedBy;
 
         readonly List<ComponentView> _views = new List<ComponentView>();
+
+        /// <summary>The page the body was last built for.</summary>
+        EditorPage _shownPage;
+
         readonly List<EditorComponent> _shown = new List<EditorComponent>();
         readonly Dictionary<EditorComponent, ComponentView> _byComponent =
             new Dictionary<EditorComponent, ComponentView>();
@@ -153,10 +163,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>What the thing the pointer rests on has to say, if anything.</summary>
         Document _saying;
 
+        /// <summary>The words for the slots in what it has to say, where that is a template.</summary>
+        Arguments _sayingArguments;
 
-        /// <summary>The plain tip last made into a document, and that document, so one is made only when the words change.</summary>
-        string _plainSaid;
-        Document _plainSaying;
+        /// <summary>The tip last read into a document, whether it was read as a template, and that document, so one is read only when the words change.</summary>
+        string _tipSaid;
+        bool _tipTemplated;
+        Document _tipSaying;
 
         readonly RichText _tip = new RichText { Style = Styles.Tip };
 
@@ -241,12 +254,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                                 Spacing = 8f,
                                 Children =
                                 {
-                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Furniture, Command = new Relay(Back) }.As(out _back),
+                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = new Relay(Back) }.As(out _back),
                                     _title.Root,
-                                    new Glyph { Symbol = Symbols.Undo, Style = Styles.Furniture, Command = _undoes }.As(out _undo),
-                                    new Glyph { Symbol = Symbols.Redo, Style = Styles.Furniture, Command = _redoes }.As(out _redo),
-                                    new Switch { Style = Styles.Governing, IsSet = true, Command = _flips }.As(out _switch),
-                                    new Glyph { Symbol = Symbols.Refresh, Style = Styles.Furniture, Command = _refreshes }.As(out _refresh)
+                                    new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
+                                    new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),
+                                    new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
+                                    new Glyph { Symbol = Symbols.Refresh, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _refreshes }.As(out _refresh)
                                 }
                             },
                             new Label { Style = Styles.Detail }.As(out _subtitle)
@@ -261,7 +274,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                         Rows = { Length.Auto, Length.Flex(1f), Length.Auto },
                         Cells =
                         {
-                            [0, 0] = new VStack().As(out _above),
+                            [0, 0] = new VStack { Children = { _banner, new VStack().As(out _above) } },
                             [2, 0] = new VStack().As(out _below)
                         }
                     }.As(out _page),
@@ -274,7 +287,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                         Children =
                         {
                             new HStack { Spacing = 8f, Placement = Flex.Grow }.As(out _actions),
-                            new Button { Style = Styles.Go, Command = _finishes }.As(out _primary)
+                            new Button { Style = Styles.Primary, Command = _finishes }.As(out _primary)
                         }
                     }
                 }
@@ -285,8 +298,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 Style = Styles.Dialog,
                 Placement = Fixed.Wide(Sizes.Popup),
                 MessageStyle = Styles.Question,
-                ButtonStyle = Styles.Answer,
-                DefaultStyle = Styles.Go,
+                ButtonStyle = Styles.Button,
+                DefaultStyle = Styles.Primary,
                 Cancel = new Relay(() => _editor.Unask()),
                 ShowsCancel = false
             };
@@ -486,14 +499,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 // somebody to work out the cure; there is only one cure and it fits in three words.
                 string text = _title.Box(_renaming).Text;
                 if (parts[_renaming].NameRequired && string.IsNullOrEmpty(text.Trim()))
-                    return "Give it a name first";
+                    return Texts.RenameEmpty;
 
-                return Taken(_renameCommand, text) ? TakenSays : "";
+                return Taken(_renameCommand, text) ? Texts.RenameTaken : "";
             }
         }
-
-        /// <summary>What a box says while its name belongs to something else.</summary>
-        const string TakenSays = "That name is taken";
 
         /// <summary>Whether core would refuse this text for this command, asked once per change of text.</summary>
         bool Taken(int command, string text)
@@ -584,11 +594,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (_renaming >= 0 && !screen.CanRename)
                 CancelAsk();
 
-            if (!ShowingSameComponents(screen))
+            if (!ShowingSameComponents(screen) || _editor.Current != _shownPage)
                 Rebuild(screen);
 
             for (int i = 0; i < _views.Count; i++)
                 _views[i].Tick(_editor.CurrentTick);
+
+            _banner.Show(_editor.Notice, _editor.CurrentTick);
 
             // After the views, so the column is showing what is chosen now.
             DressGiven(screen);
@@ -605,7 +617,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 // A name something else already has first, because that is the reason this view can
                 // see and the form cannot. What a field will take is the form's own, and it says so.
-                _ask.Refused = Taken(_ask.Command, _ask.Answer) ? TakenSays : _ask.Wrong;
+                _ask.Refused = Taken(_ask.Command, _ask.Answer) ? Texts.RenameTaken : _ask.Wrong;
                 _ask.Dress(Pointer);
             }
 
@@ -645,6 +657,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _switch.Collapsed = !screen.HasSwitch;
             _switch.IsOn = screen.SwitchIsOn;
+            _switch.Says(Texts.SwitchOn, Texts.SwitchOff);
 
             // Where the screen is finished in a column of its own, that column's Done is the one.
             Label carried = Carried;
@@ -676,33 +689,25 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         void Wire(EditorScreen screen)
         {
-            _back.Tip = screen.CanGoBack ? "Back" : "Close the editor";
+            _back.Tip = screen.CanGoBack ? Texts.ChromeBack : Texts.ChromeClose;
 
-            // Built only when those words change. Joining two strings is cheap and this runs sixty
-            // times a second, for a note that is read when the pointer happens to rest on an arrow.
-            if (!ReferenceEquals(_undone, screen.UndoText))
-            {
-                _undone = screen.UndoText;
-                _undoSays = "Undo " + screen.UndoText;
-            }
-
-            if (!ReferenceEquals(_redone, screen.RedoText))
-            {
-                _redone = screen.RedoText;
-                _redoSays = "Redo " + screen.RedoText;
-            }
+            // A comparison each when nothing has changed, and this runs sixty times a second.
+            _undone.Set("action", screen.UndoText);
+            _redone.Set("action", screen.RedoText);
+            _undo.TipArguments = _undone;
+            _redo.TipArguments = _redone;
 
             _undo.Collapsed = !screen.HasHistory;
             _redo.Collapsed = !screen.HasHistory;
 
             _undoes.CanExecute = screen.UndoCommand != 0;
-            _undo.Tip = screen.UndoCommand != 0 ? _undoSays : null;
+            _undo.Tip = screen.UndoCommand != 0 ? Texts.ChromeUndo : null;
             _redoes.CanExecute = screen.RedoCommand != 0;
-            _redo.Tip = screen.RedoCommand != 0 ? _redoSays : null;
+            _redo.Tip = screen.RedoCommand != 0 ? Texts.ChromeRedo : null;
 
             _refreshes.CanExecute = screen.RefreshCommand != 0;
             _refresh.Tip = screen.RefreshCommand != 0
-                ? "Read the ship again, in case somebody has changed a button"
+                ? Texts.ChromeRefresh
                 : null;
 
             _flips.CanExecute = screen.HasSwitch;
@@ -710,7 +715,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // A system's, always - core says so where it declares the command, and a sequence's switch
             // lives on the sentence rather than up here. The words say the act and its reach, not what
             // it is on: the heading directly above says that.
-            _switch.Tip = screen.HasSwitch ? StatusRow.Switching(true, screen.SwitchIsOn) : null;
+            _switch.Tip = screen.HasSwitch ? StatusRow.Switching(Texts, true, screen.SwitchIsOn) : null;
 
             Label carried = Carried;
             if (carried != null)
@@ -830,7 +835,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             Element wanted = Under(Pointer);
 
-            _saying = Saying(SayingAt(Pointer));
+            var speaker = SayingAt(Pointer);
+            _saying = Saying(speaker);
+            _sayingArguments = speaker == null || speaker.RichTip != null ? null : speaker.TipArguments;
 
             if (wanted == _lit)
                 return;
@@ -937,6 +944,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return;
 
             _tip.Document = _saying;
+            _tip.Arguments = _sayingArguments;
             _tip.Measure(g, new Vector2(Sizes.Popup, bounds.Height));
 
             Vector2 size = _tip.DesiredSize;
@@ -962,7 +970,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _tip.Draw(g);
         }
 
-        /// <summary>What <paramref name="element" /> says while the pointer rests on it: its rich tip, its plain tip as a document, or null.</summary>
+        /// <summary>What <paramref name="element" /> says while the pointer rests on it: its rich tip, its tip read as markdown-lite or as a template, or null.</summary>
         Document Saying(Element element)
         {
             if (element == null)
@@ -974,13 +982,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (string.IsNullOrEmpty(element.Tip))
                 return null;
 
-            if (!ReferenceEquals(element.Tip, _plainSaid))
+            var templated = element.TipArguments != null;
+            if (!ReferenceEquals(element.Tip, _tipSaid) || templated != _tipTemplated)
             {
-                _plainSaid = element.Tip;
-                _plainSaying = Document.Plain(element.Tip);
+                _tipSaid = element.Tip;
+                _tipTemplated = templated;
+                _tipSaying = templated ? Template.Read(element.Tip) : Markdown.Parse(element.Tip);
             }
 
-            return _plainSaying;
+            return _tipSaying;
         }
 
         /// <summary>
@@ -1776,7 +1786,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <remarks>Escape puts it away without an answer, which has no button of its own.</remarks>
         void Ask(EditorScreen screen)
         {
-            _dialog.Message = Document.Plain(screen.Question);
+            _dialog.Message = Markdown.Parse(screen.Question);
 
             var yes = screen.Answers.Count > 0 ? screen.Answers[0] : null;
             var no = screen.Answers.Count > 1 ? screen.Answers[1] : null;
@@ -2079,6 +2089,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _views.Clear();
             _shown.Clear();
+            _shownPage = _editor.Current;
 
             // Settled here, once, for the life of this screen: a page either says something under its
             // heading or it never does, and the header holds whichever shape that is.
@@ -2150,10 +2161,16 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 }
             }
 
+            // A page that draws itself is its own body, and a page described in components is built of them.
+            var drawn = _shownPage.View;
+
             if (filler < 0)
             {
                 for (int i = 0; i < _views.Count; i++)
                     _body.Children.Add(_views[i].Root);
+
+                if (drawn != null)
+                    _body.Children.Add(drawn);
 
                 _page.Cells[1, 0] = _scroll;
                 return;
@@ -2189,7 +2206,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
                 _actions.Children.Add(new Button
                 {
-                    Style = entry.IsCurrent ? Styles.Current : Styles.Action,
+                    Style = entry.IsCurrent ? Styles.Current : Styles.Plain,
                     Text = Widgets.Caps(entry.Text),
                     Command = new Relay(() => Take(at))
                 });

@@ -185,8 +185,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
         /// <summary>The scale that draws <paramref name="font" /> with lines <paramref name="size" /> tall.</summary>
         /// <remarks>
-        ///     The line is measured rather than asked for: the game's <c>MyScreenSpaceText.GetLineHeight</c> leaves out
-        ///     the <c>FONT_SCALE</c> its drawing and measuring apply, and so answers 37/28.8 of the line it draws.
+        ///     The line is measured, by the same call that measures every run, so a line is laid out at exactly the
+        ///     height its text measures. Measured once per font.
         /// </remarks>
         float ScaleOf(string font, float size)
         {

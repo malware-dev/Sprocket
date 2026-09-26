@@ -17,24 +17,24 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public static readonly Color Chrome = new Color(27, 36, 42);
 
         /// <summary>DarkBlueBackground.png, button_default, textbox_center and rectangle_button_center, which are all this colour.</summary>
-        /// <remarks>
-        ///     Under the pointer the game lifts a panel to <see cref="PanelHot" /> and deepens a control to
-        ///     <see cref="ControlHot" />.
-        /// </remarks>
+        /// <remarks>Under the pointer the game lifts a panel and a control alike to <see cref="PanelHot" />.</remarks>
         public static readonly Color Panel = new Color(41, 54, 62);
 
         /// <summary>DarkBlueBackground_highlight.png: a panel under the pointer.</summary>
         public static readonly Color PanelHot = new Color(60, 76, 82);
 
-        /// <summary>DarkBlueBackground_active.png: a panel pressed, and the hairline colour.</summary>
+        /// <summary>DarkBlueBackground_active.png, button_default_active.dds and switch_on_off_*_checked.dds: a panel or control pressed, the half of a switch in force, and the hairline colour.</summary>
         public static readonly Color Line = new Color(91, 115, 123);
 
-        /// <summary>button_default_highlight.dds, textbox_center_highlight and every other control's highlight: a control under the pointer.</summary>
-        /// <remarks>
-        ///     Not for a row, which takes <see cref="PanelHot" />: the game's
-        ///     <c>MyGuiConstants.HIGHLIGHT_BACKGROUND_COLOR</c> is (60, 76, 82).
-        /// </remarks>
-        public static readonly Color ControlHot = new Color(12, 18, 22);
+        /// <summary>button_default.dds: the hairline round a control at rest.</summary>
+        public static readonly Color ControlEdge = new Color(63, 71, 79);
+
+        /// <summary>button_default_highlight.dds: the hairline round a control under the pointer.</summary>
+        public static readonly Color ControlEdgeHot = new Color(112, 117, 122);
+
+        /// <summary>The ground an on/off switch's halves sit in, and any other well a control is sunk into.</summary>
+        /// <remarks>Sampled from the terminal's own on/off switch, which draws it without a texture of its own.</remarks>
+        public static readonly Color Well = new Color(32, 39, 45);
 
         /// <summary>button_default_focus.dds: a control with the keyboard in it.</summary>
         public static readonly Color ControlFocus = new Color(69, 128, 157);
@@ -108,11 +108,5 @@ namespace Sprocket.Host.SpaceEngineers.Look
 
         /// <summary>No colour at all, for a fill, ink or highlight that is off.</summary>
         public static readonly Color None = new Color(0, 0, 0, 0);
-
-        /// <summary>switch_on_off_*_checked.dds and button_default_active: a control pressed.</summary>
-        public static readonly Color SwitchLit = new Color(27, 44, 51);
-
-        /// <summary>switch_on_off_*.dds: the half of a switch that is not checked.</summary>
-        public static readonly Color SwitchDark = new Color(6, 10, 12);
     }
 }

@@ -65,13 +65,6 @@ namespace Sprocket.Host.SpaceEngineers.Look
             }
         }.Frozen();
 
-        /// <summary>An answer to a dialog that is not the one Enter gives.</summary>
-        public static readonly ButtonStyle Answer = new ButtonStyle
-        {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, Edge = Palette.Dim, Padding = new Thickness(16f, 8f) },
-            Hot = { Background = Palette.PanelHot }
-        }.Frozen();
-
         /// <summary>A screen's heading, in the largest words on it.</summary>
         public static readonly TextStyle Title = new TextStyle
         {
@@ -120,13 +113,13 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// <summary>The pencil beside a name that can be renamed, whose color the view sets while the name is typed.</summary>
         public static readonly GlyphStyle Pen = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 32f, Tint = Palette.Faint }
+            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Faint }
         }.Frozen();
 
         /// <summary>The arrow between two parts of a heading.</summary>
         public static readonly GlyphStyle Join = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 32f, Tint = Palette.Faint }
+            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Faint }
         }.Frozen();
 
         /// <summary>A section's name, over what it heads, with a name inside it in the bright ink.</summary>
@@ -219,67 +212,17 @@ namespace Sprocket.Host.SpaceEngineers.Look
         /// <summary>A state light, whose color the view sets from the state.</summary>
         public static readonly GlyphStyle Light = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 16f, Tint = Palette.Dim }
+            Base = { Font = Symbols.Font, FontSize = 8f, Tint = Palette.Dim }
         }.Frozen();
 
         /// <summary>A mark beside a name, whose color the view sets from what it marks.</summary>
         public static readonly GlyphStyle Flag = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 32f }
+            Base = { Font = Symbols.Font, FontSize = 20f }
         }.Frozen();
 
         /// <summary>The chevron that opens a banner, whose color the view sets from the banner's.</summary>
         public static readonly GlyphStyle Chevron = new GlyphStyle(Flag).Frozen();
-
-        /// <summary>A symbol that does something to the row it stands on.</summary>
-        public static readonly GlyphStyle Tool = new GlyphStyle
-        {
-            Base = { Font = Symbols.Font, FontSize = 32f, Tint = Palette.Faint },
-            Hot = { Background = Palette.PanelHot, Tint = Palette.Ink },
-            Disabled = { Tint = Palette.Dim }
-        }.Frozen();
-
-        /// <summary>A symbol that throws something away.</summary>
-        public static readonly GlyphStyle Bin = new GlyphStyle(Tool)
-        {
-            Hot = { Background = Palette.ProblemWash, Tint = Palette.Problem }
-        }.Frozen();
-
-        /// <summary>A symbol in the header that does something to the screen it heads.</summary>
-        public static readonly GlyphStyle Furniture = new GlyphStyle
-        {
-            Base = { Font = Symbols.Font, FontSize = 32f, Tint = Palette.Muted },
-            Hot = { Background = Palette.Panel },
-            Disabled = { Tint = Palette.Dim }
-        }.Frozen();
-
-        /// <summary>The button that finishes a screen, and none at all while there is nothing to finish, keeping its place.</summary>
-        public static readonly ButtonStyle Go = new ButtonStyle
-        {
-            Base =
-            {
-                Font = MyFontEnum.White,
-                FontSize = 24f,
-                Color = Palette.Chrome,
-                Background = Palette.Accent,
-                Padding = new Thickness(16f, 8f)
-            },
-            Hot = { Background = Palette.Ink },
-            Disabled = { Color = Palette.None, Background = Palette.None }
-        }.Frozen();
-
-        /// <summary>One of the footer's ways to do something to the whole screen, in quiet words.</summary>
-        public static readonly ButtonStyle Action = new ButtonStyle
-        {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
-            Hot = { Background = Palette.Panel }
-        }.Frozen();
-
-        /// <summary>The footer's way that is already in effect.</summary>
-        public static readonly ButtonStyle Current = new ButtonStyle(Action)
-        {
-            Base = { Color = Palette.Ink }
-        }.Frozen();
 
         /// <summary>A screen's scroll, whose bar is as wide as the one the game reserves for its own.</summary>
         public static readonly ScrollStyle Scroll = new ScrollStyle
@@ -288,7 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Held = { Thumb = Palette.ThumbHeld }
         }.Frozen();
 
-        /// <summary>A switch that governs one thing.</summary>
+        /// <summary>An on/off switch: a square thumb and the word, sunk into a dark track while off, and edged under the pointer.</summary>
         public static readonly SwitchStyle Switch = new SwitchStyle
         {
             Base =
@@ -296,40 +239,78 @@ namespace Sprocket.Host.SpaceEngineers.Look
                 Font = MyFontEnum.White,
                 FontSize = 16f,
                 Color = Palette.Ink,
-                QuietColor = Palette.Faint,
-                LitColor = Palette.SwitchLit,
-                UnlitColor = Palette.SwitchDark,
-                WordPadding = new Thickness(16f, 8f),
-                Edge = Palette.Dim
+                Background = Palette.Line,
+                OffTrack = Palette.Well,
+                Thumb = Palette.Ink,
+                WordPadding = new Thickness(8f, 4f),
+                Padding = new Thickness(4f)
             },
-            Hot = { Edge = Palette.Muted }
+            Hot = { Edge = Palette.ControlEdgeHot }
         }.Frozen();
 
-        /// <summary>A switch that governs more than one thing, which draws its edge brighter.</summary>
-        public static readonly SwitchStyle Governing = new SwitchStyle(Switch)
+        /// <summary>The game's button: a panel with a hairline round it, lifted under the pointer and lit while pressed.</summary>
+        public static readonly ButtonStyle Button = new ButtonStyle
         {
-            Base = { Edge = Palette.Faint }
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 16f,
+                Color = Palette.Ink,
+                Background = Palette.Panel,
+                Edge = Palette.ControlEdge,
+                Padding = new Thickness(16f, 8f)
+            },
+            Hot = { Background = Palette.PanelHot, Edge = Palette.ControlEdgeHot },
+            Pressed = { Background = Palette.Line }
         }.Frozen();
 
-        /// <summary>A way to start something, offered in place: quiet words, and a panel under the pointer.</summary>
-        public static readonly ButtonStyle Way = new ButtonStyle
+        /// <summary>The button that finishes a screen or answers a dialog as Enter would, and none at all while there is nothing to finish, keeping its place.</summary>
+        public static readonly ButtonStyle Primary = new ButtonStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 16f,
+                Color = Palette.Chrome,
+                Background = Palette.Accent,
+                Padding = new Thickness(16f, 8f)
+            },
+            Hot = { Background = Palette.Ink },
+            Disabled = { Color = Palette.None, Background = Palette.None }
+        }.Frozen();
+
+        /// <summary>A way to start something, offered in place: a plus and quiet words, and a panel under the pointer.</summary>
+        public static readonly ButtonStyle Start = new ButtonStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
             Hot = { Background = Palette.Panel }
         }.Frozen();
 
-        /// <summary>A button in words on a row, edged because the row under it is already a panel.</summary>
-        public static readonly ButtonStyle Offer = new ButtonStyle
+        /// <summary>Words that do something when pressed, with no box round them, and a panel under the pointer.</summary>
+        public static readonly ButtonStyle Plain = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted, Edge = Palette.Dim, Padding = new Thickness(16f, 8f) },
-            Hot = { Background = Palette.PanelHot }
+            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
+            Hot = { Background = Palette.Panel }
         }.Frozen();
 
-        /// <summary>The quiet line under a name, where pressing it changes what it says.</summary>
-        public static readonly ButtonStyle Status = new ButtonStyle
+        /// <summary>One of a set of plain words that is already in effect.</summary>
+        public static readonly ButtonStyle Current = new ButtonStyle(Plain)
         {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint },
-            Hot = { Background = Palette.Panel }
+            Base = { Color = Palette.Ink }
+        }.Frozen();
+
+        /// <summary>A symbol that does something, lit under the pointer and dimmed while there is nothing for it to do.</summary>
+        public static readonly GlyphStyle Icon = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted },
+            Hot = { Background = Palette.PanelHot, Tint = Palette.Ink },
+            Disabled = { Tint = Palette.Dim }
+        }.Frozen();
+
+        /// <summary>A symbol that throws something away, lit in the color of something wrong under the pointer.</summary>
+        public static readonly GlyphStyle Bin = new GlyphStyle(Icon)
+        {
+            Hot = { Background = Palette.ProblemWash, Tint = Palette.Problem }
         }.Frozen();
 
         /// <summary>The strip a banner saying something is wrong is opened by, lit by an edge in its color.</summary>
@@ -345,24 +326,5 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Hot = { Edge = Palette.Notice }
         }.Frozen();
 
-        /// <summary>A way to mend what a banner saying something is wrong is about.</summary>
-        public static readonly ButtonStyle ProblemAction = new ButtonStyle
-        {
-            Base =
-            {
-                Font = MyFontEnum.White,
-                FontSize = 24f,
-                Color = Palette.Problem,
-                Background = Palette.Panel,
-                Padding = new Thickness(16f, 8f)
-            },
-            Hot = { Background = Palette.PanelHot }
-        }.Frozen();
-
-        /// <summary>A way to act on what a banner worth reading is about.</summary>
-        public static readonly ButtonStyle NoticeAction = new ButtonStyle(ProblemAction)
-        {
-            Base = { Color = Palette.Notice }
-        }.Frozen();
     }
 }

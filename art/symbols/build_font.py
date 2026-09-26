@@ -497,6 +497,13 @@ GLYPHS = [
 # to agree.
 EXTENT = 36.0 / 64.0
 
+# What a mark fills of its cell once it is finished, so a symbol asked for at 32 is a 32 by 32 icon.
+#
+# Every glyph is drawn at EXTENT and the whole set enlarged by the one factor, which keeps the weight
+# of every stroke in the same proportion to its mark. Two texels short of each edge, so the
+# antialiased rim of a mark has room inside the cell rather than being cut off by it.
+FILL = 60.0 / 64.0
+
 
 def fitted(make):
     """
@@ -585,7 +592,10 @@ def render(glyph):
                       ((size - (right - left)) // 2, (size - (bottom - top)) // 2))
         page = middled
 
-    return page.resize((CELL, CELL), Image.BOX)
+    # The middle of the page, sized so the mark drawn at EXTENT comes out at FILL.
+    side = size * EXTENT / FILL
+    edge = (size - side) / 2.0
+    return page.resize((CELL, CELL), Image.BOX, box=(edge, edge, edge + side, edge + side))
 
 
 def main():

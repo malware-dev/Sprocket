@@ -180,8 +180,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             set { _press = value; }
         }
 
-        /// <summary>What to say while the pointer rests on this, as plain words.</summary>
+        /// <summary>What to say while the pointer rests on this, in markdown-lite.</summary>
         public string Tip { get; set; }
+
+        /// <summary>The words for the slots in <see cref="Tip" />, which is then a template, or null where it is not one.</summary>
+        /// <remarks>See <see cref="Rich.Template.Read" />.</remarks>
+        public Rich.Arguments TipArguments { get; set; }
 
         /// <summary>What to say while the pointer rests on this, with structure; said in place of <see cref="Tip" /> where it is set.</summary>
         public Rich.Document RichTip { get; set; }

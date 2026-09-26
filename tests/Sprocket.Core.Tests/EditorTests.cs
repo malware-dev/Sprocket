@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
@@ -61,7 +62,7 @@ public class EditorTests
         ship.Rig.Light(4, "Airlock Light");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
         return ship;
     }
 
@@ -79,7 +80,7 @@ public class EditorTests
         ship.Rig.Panel(3, "Airlock Button");
         ship.Rig.Light(4, "Airlock Light").CarryingUnread("Pattern", "Pattern");
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -147,7 +148,7 @@ public class EditorTests
             .Carrying("AIBehavior", "AI Behavior", ValueKind.Flag)
             .Offering("AIBehavior", "AI Behavior On/Off");
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -183,7 +184,7 @@ public class EditorTests
         ship.Rig.Panel(3, "Airlock Button");
         ship.Rig.Light(4, "Airlock Light").Carrying("Mode", "Mode:", ValueKind.Flag);
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -213,7 +214,7 @@ public class EditorTests
         ship.Rig.Panel(3, "Airlock Button");
         var light = ship.Rig.Light(4, "Airlock Light").Carrying("Pattern", "Pattern", ValueKind.Flag);
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
         var editor = ship.Editor;
 
         // What a block's own knowledge says about it, the way the event controller's says it.
@@ -377,9 +378,9 @@ public class EditorTests
         var row = OneLogicSystem(ship);
 
         Assert.Equal("Make blueprint", row.ButtonText);
-        Assert.Empty(row.ButtonQuestion);
 
-        editor.Invoke(row.ButtonCommand);
+        row.Offers!.Execute();
+        Assert.False(editor.Screen.HasQuestion, "making a blueprint asked something");
         ship.Tick();
 
         var system = ship.Automation.Systems[0];
@@ -391,10 +392,9 @@ public class EditorTests
         editor.GoToRoot();
         ship.Tick();
 
-        var heading = editor.Screen.Components.OfType<Sprocket.Host.SpaceEngineers.Screen.HeadingComponent>().Single();
-        Assert.Equal("Airlock", heading.Name);
-        Assert.Equal("Airlock", editor.Rows()[0].Summary);
-        Assert.True(editor.Rows()[1].IsAction);
+        Assert.Contains("Airlock", editor.RootHeadingNames());
+        Assert.Equal("Airlock", editor.RootRows()[0].Summary);
+        Assert.True(editor.RootRows()[1].IsAction);
     }
 
 
@@ -404,15 +404,15 @@ public class EditorTests
     {
         var ship = Build();
         var editor = ship.Editor;
-        editor.Invoke(OneLogicSystem(ship).ButtonCommand);
+        OneLogicSystem(ship).Offers!.Execute();
         editor.GoToRoot();
         ship.Tick();
 
-        var add = editor.Rows().Last();
+        var add = editor.RootRows().Last();
         Assert.True(add.IsAction);
-        Assert.False(add.Question.Length > 0);
+        Assert.False(add.Asks);
 
-        editor.Invoke(add.Command);
+        add.Opens!.Execute();
         ship.Tick();
 
         // Opened on the blueprint through the new one, which has blocks to be given.
@@ -424,9 +424,9 @@ public class EditorTests
 
         editor.GoToRoot();
         ship.Tick();
-        Assert.Equal("Airlock 2", editor.Rows()[1].Summary);
+        Assert.Equal("Airlock 2", editor.RootRows()[1].Summary);
 
-        editor.Invoke(editor.Rows().Last().Command);
+        editor.RootRows().Last().Opens!.Execute();
         Assert.Equal("Airlock 3", system.Instances[2].Name);
     }
 
@@ -439,7 +439,7 @@ public class EditorTests
     {
         var ship = Build();
         var editor = ship.Editor;
-        editor.Invoke(OneLogicSystem(ship).ButtonCommand);
+        OneLogicSystem(ship).Offers!.Execute();
         ship.Tick();
 
         // Straight onto the blueprint, through the one it was made of.
@@ -479,7 +479,7 @@ public class EditorTests
     {
         var ship = Build();
         var editor = ship.Editor;
-        editor.Invoke(OneLogicSystem(ship).ButtonCommand);
+        OneLogicSystem(ship).Offers!.Execute();
         ship.Tick();
 
         editor.SetText(editor.Component<BlueprintComponent>().Parts[0].RenameCommand, "Call button");
@@ -490,12 +490,12 @@ public class EditorTests
     }
 
     /// <summary>A logic system with a trigger, and its row on the construct's own list.</summary>
-    static StatusEntry OneLogicSystem(Ship ship)
+    static StatusRow OneLogicSystem(Ship ship)
     {
         StartOnTheButton(ship.Editor);
         ship.Editor.GoToRoot();
         ship.Tick();
-        return ship.Editor.Rows()[0];
+        return ship.Editor.RootRows()[0];
     }
 
     static void StartOnTheButton(SprocketEditor editor)
@@ -820,7 +820,7 @@ public class EditorTests
         ship.Rig.Panel(1152921504607146976, "Airlock Button");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
 
         ship.Editor.NewSystem("Airlock");
 
@@ -891,19 +891,19 @@ public class EditorTests
         ship.Tick();
 
         // On the ship's list: the system's own row carries its switch.
-        var heading = editor.Rows()
+        var heading = editor.RootRows()
             .First(e => e.Depth == 0 && !e.IsAction);
 
-        Assert.True(heading.CanSwitch);
+        Assert.NotNull(heading.Flips);
         Assert.True(heading.SwitchIsOn);
 
-        editor.SetToggle(heading.SwitchCommand, false);
+        heading.Flips!.Execute();
         ship.Tick();
 
         Assert.False(system.First!.Enabled);
         Assert.False(sequence.CanRun(sequence.System.First));
         Assert.True(sequence.Enabled);
-        Assert.False(editor.Rows()
+        Assert.False(editor.RootRows()
             .First(e => e.Depth == 0 && !e.IsAction).SwitchIsOn);
     }
 
@@ -1341,12 +1341,10 @@ public class EditorTests
         // The same screen an established ship gets, with nothing in the list yet - not a
         // different screen that rearranges itself the moment anything is built.
         Assert.Equal("Automation for Test Rig", ship.Editor.Screen.Title());
-        Assert.Empty(ship.Editor.Rows());
+        Assert.Empty(ship.Editor.RootRows());
 
         // Both ways in are offered, and neither asks anything first.
-        var start = ship.Editor.Component<StartComponent>();
-        Assert.Equal("New logic system, Load blueprint", string.Join(", ", start.Options.Select(o => o.Label)));
-        Assert.False(start.Options[0].Asks);
+        Assert.Equal(new[] { "+ New logic system", "+ Load blueprint" }, ship.Editor.RootStarts());
     }
 
     [Fact]

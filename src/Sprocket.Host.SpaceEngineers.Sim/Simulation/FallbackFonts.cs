@@ -67,10 +67,10 @@ namespace Sprocket.Sim.Simulation
             return new Vector2((float)formatted.WidthIncludingTrailingWhitespace, line);
         }
 
-        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers, without <see cref="Content.SeFontMetrics.FontScale" />.</summary>
+        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers: the height of the line it draws, <see cref="Content.SeFontMetrics.FontScale" /> included.</summary>
         public float LineHeightPixels(string font, float scale)
         {
-            return GameLineHeight * EffectiveScale(scale);
+            return GameLineHeight * EffectiveScale(scale) * Content.SeFontMetrics.FontScale;
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Sprocket.Sim.Simulation
         /// <summary>How tall a line the game draws at <paramref name="scale" />, in pixels.</summary>
         float DrawnLineHeight(float scale)
         {
-            return LineHeightPixels(null, scale) * Content.SeFontMetrics.FontScale;
+            return LineHeightPixels(null, scale);
         }
     }
 }

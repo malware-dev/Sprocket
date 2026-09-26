@@ -9,7 +9,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
     /// <summary>A document, wrapped to the room it is given: its headings, paragraphs, list items and rules, each run set apart as its kind says.</summary>
     /// <remarks>
     ///     Laid out when the document, its sizes or the room change, into pieces that each draw in one call;
-    ///     drawing measures nothing. Colors are read as it draws, so changing one lays out nothing.
+    ///     drawing measures nothing. Colors are read as it draws, so changing one lays out nothing. A document
+    ///     read by <see cref="Template.Read" /> has slots, which take their words from <see cref="Arguments" />:
+    ///     changing one lays the words out again and reads nothing again.
     /// </remarks>
     public class RichText : Element
     {
@@ -23,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
         readonly StringBuilder _probe = new StringBuilder(64);
 
         Document _document;
+        Arguments _arguments;
         string _font = MyFontEnum.White;
         string _codeFont = MyFontEnum.White;
         float _fontSize = 24f;
@@ -62,6 +65,27 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
                     return;
 
                 _document = value;
+                Relayout();
+            }
+        }
+
+        /// <summary>The words that stand in the document's slots, or null for none; slots without words say nothing.</summary>
+        public Arguments Arguments
+        {
+            get { return _arguments; }
+            set
+            {
+                if (_arguments == value)
+                    return;
+
+                if (_arguments != null)
+                    _arguments.Changed -= Relayout;
+
+                _arguments = value;
+
+                if (_arguments != null)
+                    _arguments.Changed += Relayout;
+
                 Relayout();
             }
         }
@@ -296,7 +320,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Rich
                     : (run.Kind & RunKind.Emphasis) != 0 ? Tone.Emphasis
                     : Tone.Plain;
                 var font = (run.Kind & RunKind.Code) != 0 ? _codeFont : _font;
-                var text = run.Text;
+                var text = run.Slot == null ? run.Text : _arguments == null ? "" : _arguments.Of(run.Slot);
                 var i = 0;
 
                 while (i < text.Length)

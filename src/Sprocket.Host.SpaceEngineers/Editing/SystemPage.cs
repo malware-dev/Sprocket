@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _system = system;
         }
 
-        public override string Title => SystemSummary.Describe(Editor.Runner.Bindings, _system);
+        public override string Title => SystemSummary.Describe(Editor.Texts, Editor.Runner.Bindings, _system);
 
         /// <summary>
         /// What the author said this thing is.
@@ -578,7 +578,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             var line = new UsingComponent();
             line.Lead = "Using the blocks of";
-            line.Name = shown == null ? "" : SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, shown);
+            line.Name = shown == null ? "" : SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, shown);
             line.Command = _system.Instances.Count < 2
                 ? 0
                 : Editor.Register(Cmd.ChooseInstance, _system.Id, delegate { Another(shown); });
@@ -593,7 +593,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             for (var i = 0; i < instances.Count; i++)
             {
                 SystemInstance instance = instances[i];
-                page.Add(SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, instance), instance == shown, delegate
+                page.Add(SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, instance), instance == shown, delegate
                 {
                     Editor.Choose(_system, instance);
                     Editor.Pop();

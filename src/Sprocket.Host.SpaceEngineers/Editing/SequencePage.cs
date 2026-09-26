@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             var does = new HeadingPart("");
             does.Prompt = RenamePrompt;
-            does.About = Note(NameAbout);
+            does.About = NameAbout;
             does.NameRequired = NameRequired;
             does.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename);
 

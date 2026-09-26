@@ -65,18 +65,18 @@ public class HandoverTests : IDisposable
                     heard.Program = program;
                     heard.State = state;
                 },
-                (block, holder, program, state) =>
+                (_, holder, program, state) =>
                 {
                     heard.Refused.Add(holder);
                     heard.Program = program;
                     heard.State = state;
                 },
-                (block, program, switches) =>
+                (_, program, switches) =>
                 {
                     heard.Changed.Add(program);
                     heard.Switches = switches;
                 },
-                (block, program, switches) => heard.Stored.Add(program));
+                (_, program, _) => heard.Stored.Add(program));
 
             made.Listen(Network.Handover.Carry(NetworkChannel.Create("Sprocket.HandoverTests")).Build());
         });
@@ -86,7 +86,7 @@ public class HandoverTests : IDisposable
 
     Handover Client(Peer peer, Heard heard)
     {
-        return Handover(peer, id => null, heard);
+        return Handover(peer, _ => null, heard);
     }
 
     /// <summary>A system whose one trigger, a repeat, closes the outer door, so running it does something to see.</summary>
@@ -147,7 +147,7 @@ public class HandoverTests : IDisposable
     public void AHolderWhoHasGoneLosesIt()
     {
         Lent();
-        _wire.As(_server, () => _serving.Reclaim(id => false));
+        _wire.As(_server, () => _serving.Reclaim(_ => false));
 
         var bert = _wire.Client("Bert");
         var heard = new Heard();
@@ -162,7 +162,7 @@ public class HandoverTests : IDisposable
     public void AHolderStillHereKeepsIt()
     {
         Lent();
-        _wire.As(_server, () => _serving.Reclaim(id => true));
+        _wire.As(_server, () => _serving.Reclaim(_ => true));
 
         var bert = _wire.Client("Bert");
         var heard = new Heard();
@@ -184,13 +184,13 @@ public class HandoverTests : IDisposable
         {
             copy.Editor.Holder = "Bert";
             copy.Editor.Tick(1);
-            copy.Editor.Invoke(copy.Editor.Rows().Entries[0].Command);
+            copy.Editor.RootRows()[0].Opens!.Execute();
             copy.Editor.Tick(1);
 
             Assert.NotEmpty(copy.Editor.Triggers());
             Assert.All(copy.Editor.Triggers(), trigger => Assert.Equal(0, trigger.Does[0].Command));
 
-            var row = copy.Editor.Rows().Entries[0];
+            var row = copy.Editor.Rows()[0];
             Assert.Equal(0, row.SwitchCommand);
 
             copy.Editor.Invoke(row.Command);
@@ -338,7 +338,7 @@ public class HandoverTests : IDisposable
         SprocketUnit copy = null!;
         _wire.As(anna, () =>
         {
-            copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, heard.Program, heard.State);
+            copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Texts, heard.Program, heard.State);
             hers.Kept(_block, copy);
         });
 
@@ -365,6 +365,28 @@ public class HandoverTests : IDisposable
             rebuilt = _sim.Unit.Rebuilt(_atServer.Changed[0], _atServer.Switches, null, new Rota()));
 
         Assert.Equal("Hangar", Assert.Single(rebuilt.Editor.Program.Systems).Name);
+    }
+
+    /// <summary>The server lends, takes a change and rebuilds without ever making an editor: only the client edits.</summary>
+    [Fact]
+    public void TheServerMakesNoEditor()
+    {
+        var (anna, hers, copy) = Lent();
+
+        _wire.As(anna, () =>
+        {
+            copy.Editor.NewSystem("Hangar");
+            hers.Keep(_block, copy);
+        });
+        _wire.Settle();
+
+        SprocketUnit rebuilt = null!;
+        _wire.As(_server, () =>
+            rebuilt = _sim.Unit.Rebuilt(_atServer.Changed[0], _atServer.Switches, null, new Rota()));
+
+        Assert.False(_sim.Unit.HasEditor);
+        Assert.False(rebuilt.HasEditor);
+        Assert.Equal("Hangar", Assert.Single(rebuilt.Program.Systems).Name);
     }
 
     /// <summary>Both ends log what a change does, so a run in the game can be followed from its logs alone.</summary>
@@ -437,7 +459,7 @@ public class HandoverTests : IDisposable
         var his = Client(bert, new Heard());
         _wire.As(bert, () =>
         {
-            var copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, "", "");
+            var copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Texts, "", "");
             copy.Editor.NewSystem("Mine");
             his.Keep(_block, copy);
         });
@@ -562,7 +584,7 @@ public class HandoverTests : IDisposable
         _wire.As(anna, () =>
         {
             copy.Editor.Tick(1);
-            copy.Editor.Invoke(copy.Editor.Rows().Entries[0].Command);
+            copy.Editor.RootRows()[0].Opens!.Execute();
             copy.Editor.Tick(1);
             copy.Editor.PressStart("When…");
             copy.Editor.PressBlock("Airlock Button");
@@ -598,7 +620,7 @@ public class HandoverTests : IDisposable
         _sim.Unit.Written(out program, out state);
         var anna = _wire.Client("Anna");
         SprocketUnit copy = null!;
-        _wire.As(anna, () => copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, program, state));
+        _wire.As(anna, () => copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Texts, program, state));
 
         Assert.Single(copy.Editor.Program.Systems);
         Assert.Equal("Anna", copy.Editor.Author);

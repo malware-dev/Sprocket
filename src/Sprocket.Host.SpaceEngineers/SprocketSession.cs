@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -10,6 +11,8 @@ using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Terminal;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers
 {
@@ -98,6 +101,12 @@ namespace Sprocket.Host.SpaceEngineers
 
         Settings _settings;
 
+        /// <summary>What every Sprocket's editor says, in the player's language.</summary>
+        readonly Texts _texts = new Texts();
+
+        /// <summary>The mod's texts in the game's own table, where the player's language is loaded; null on a machine with no player.</summary>
+        GameTexts _gameTexts;
+
         /// <summary>
         /// What the player asked for, read the first time anything wants to know.
         /// </summary>
@@ -180,6 +189,8 @@ namespace Sprocket.Host.SpaceEngineers
         {
             _current = this;
 
+            Speak();
+
             _handover = new Handover(Found, Given, Refused, Changed, Stored);
             _channel = Handover.Carry(NetworkChannel.Create(GetType())).Build();
             _handover.Listen(_channel);
@@ -187,6 +198,44 @@ namespace Sprocket.Host.SpaceEngineers
             Told.Say(IsServer
                 ? "this machine runs the Sprockets"
                 : "this machine is a client; the Sprockets run on the server");
+        }
+
+        /// <summary>Loads the mod's texts in the player's language, and listens for the language to change.</summary>
+        /// <remarks>A dedicated server has nobody to read them, and says them as they were written.</remarks>
+        void Speak()
+        {
+            if (MyAPIGateway.Utilities == null || MyAPIGateway.Utilities.IsDedicated || MyAPIGateway.Gui == null
+                || MyAPIGateway.Session == null || MyAPIGateway.Session.Config == null)
+                return;
+
+            _gameTexts = new GameTexts(Path.Combine(ModContext.ModPath, "Data", "Localization"));
+            Relanguage();
+            MyAPIGateway.Gui.GuiControlRemoved += Closed;
+        }
+
+        /// <summary>Loads the texts again where the language has changed.</summary>
+        /// <remarks>
+        /// Asked whenever a screen closes, because the options screen closing is when a new language takes
+        /// and the game announces nothing more particular. One comparison each time.
+        /// </remarks>
+        void Closed(object screen)
+        {
+            if (_gameTexts != null && MyAPIGateway.Session != null && MyAPIGateway.Session.Config != null
+                && MyAPIGateway.Session.Config.Language != _gameTexts.Language)
+                Relanguage();
+        }
+
+        /// <summary>Reads the texts in the player's language, and has every editor build its words again.</summary>
+        void Relanguage()
+        {
+            _gameTexts.Load(MyAPIGateway.Session.Config.Language);
+            _texts.Book.Load(_gameTexts);
+
+            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
+                unit.Value.Reword();
+
+            if (_copy != null)
+                _copy.Reword();
         }
 
         /// <summary>The Sprocket a programmable block carries, by entity id, made where it has none; or null.</summary>
@@ -223,7 +272,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_copy != null)
                 _copy.Dispose();
 
-            var copy = SprocketUnit.Copy(block, Asked, program, state);
+            var copy = SprocketUnit.Copy(block, Asked, _texts, program, state);
             copy.Editor.Habits = HabitsFor(id);
             _copy = copy;
             _copyOf = id;
@@ -267,7 +316,7 @@ namespace Sprocket.Host.SpaceEngineers
             }
 
             SprocketUnit rebuilt = was.Rebuilt(program, switches, Asked, _rota);
-            if (!rebuilt.Editor.Program.Intact)
+            if (!rebuilt.Program.Intact)
             {
                 Told.Say("a change to " + was.Block.CustomName + " would not read, and was not taken");
                 rebuilt.Dispose();
@@ -302,13 +351,13 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         void Spread(SprocketUnit unit)
         {
-            if (!IsServer || !unit.Editor.Program.Intact)
+            if (!IsServer || !unit.Program.Intact)
                 return;
 
             string program;
             string state;
             unit.Written(out program, out state);
-            _handover.Tell(unit.Block.EntityId, program, StateText.Save(unit.Editor.Program, null));
+            _handover.Tell(unit.Block.EntityId, program, StateText.Save(unit.Program, null));
         }
 
         /// <summary>What the server wrote into a block, arriving at this client for its copy of the block.</summary>
@@ -358,7 +407,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _copy.Dispose();
 
             long id = block.EntityId;
-            var copy = SprocketUnit.Copy(block, Asked, program, state);
+            var copy = SprocketUnit.Copy(block, Asked, _texts, program, state);
             copy.Editor.Habits = HabitsFor(id);
             copy.Editor.Holder = holder;
             _copy = copy;
@@ -418,7 +467,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_units.TryGetValue(block.EntityId, out unit))
                 return unit;
 
-            unit = new SprocketUnit(block, Asked, _rota);
+            unit = new SprocketUnit(block, Asked, _rota, _texts);
             _units.Add(block.EntityId, unit);
             return unit;
         }
@@ -565,6 +614,11 @@ namespace Sprocket.Host.SpaceEngineers
         {
             if (MyAPIGateway.TerminalControls != null)
                 MyAPIGateway.TerminalControls.CustomControlGetter -= SprocketControls.Arrange;
+
+            if (_gameTexts != null && MyAPIGateway.Gui != null)
+                MyAPIGateway.Gui.GuiControlRemoved -= Closed;
+
+            _gameTexts = null;
 
             if (_screen != null)
                 _screen.CloseNow();

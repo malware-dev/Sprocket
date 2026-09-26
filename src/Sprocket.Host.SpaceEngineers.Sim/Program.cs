@@ -107,7 +107,20 @@ namespace Sprocket.Sim
                     from += 2;
                 }
 
-                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from), holding);
+                // The language the screen speaks, as the mod's translation files name it: "in no".
+                string culture = null;
+                if (args.Length > from + 1 && args[from] == "in")
+                {
+                    culture = args[from + 1];
+                    from += 2;
+                }
+
+                // The developer tools in the footer, as a Sprocket with developerMode on offers them: "developer".
+                var developer = args.Length > from && args[from] == "developer";
+                if (developer)
+                    from += 1;
+
+                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from), holding, culture, developer);
                 Console.WriteLine("wrote " + args[1] + "   " + width + "x" + height);
                 Console.WriteLine("ended on: " + ended);
                 return;

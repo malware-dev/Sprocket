@@ -4,49 +4,49 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Styling
 {
-    /// <summary>What a switch looks like in one state: its words, the colors either side, and the room round each word.</summary>
-    /// <remarks><see cref="TextState.Color" /> is the word in force.</remarks>
+    /// <summary>What a switch looks like in one state: its words, its thumb, and what the room inside it is filled with either way.</summary>
+    /// <remarks><see cref="TextState.Color" /> is the words.</remarks>
     public class SwitchState : TextState
     {
-        Color? _lit;
-        Color? _quiet;
-        Color? _unlit;
+        Color? _offTrack;
+        Color? _onTrack;
+        Color? _thumb;
         Thickness? _wordPadding;
 
-        /// <summary>The color of a word not in force, or null to leave it to the layers beneath.</summary>
-        public Color? QuietColor
+        /// <summary>What the room inside is filled with while on, or null to leave it to the layers beneath.</summary>
+        public Color? OnTrack
         {
-            get { return _quiet; }
+            get { return _onTrack; }
             set
             {
                 Check();
-                _quiet = value;
+                _onTrack = value;
             }
         }
 
-        /// <summary>What the half in force is filled with, or null to leave it to the layers beneath.</summary>
-        public Color? LitColor
+        /// <summary>What the room inside is filled with while off, or null to leave it to the layers beneath.</summary>
+        public Color? OffTrack
         {
-            get { return _lit; }
+            get { return _offTrack; }
             set
             {
                 Check();
-                _lit = value;
+                _offTrack = value;
             }
         }
 
-        /// <summary>What the half not in force is filled with, or null to leave it to the layers beneath.</summary>
-        public Color? UnlitColor
+        /// <summary>The color of the thumb, or null to leave it to the layers beneath.</summary>
+        public Color? Thumb
         {
-            get { return _unlit; }
+            get { return _thumb; }
             set
             {
                 Check();
-                _unlit = value;
+                _thumb = value;
             }
         }
 
-        /// <summary>The room held clear round each half's word, or null to leave it to the layers beneath.</summary>
+        /// <summary>The room held clear round the word, or null to leave it to the layers beneath.</summary>
         public Thickness? WordPadding
         {
             get { return _wordPadding; }
@@ -69,9 +69,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             control.Font = MyFontEnum.White;
             control.FontSize = NeutralFontSize;
             control.Color = VRageMath.Color.White;
-            control.QuietColor = VRageMath.Color.White;
-            control.LitColor = VRageMath.Color.Transparent;
-            control.UnlitColor = VRageMath.Color.Transparent;
+            control.OnTrack = VRageMath.Color.Transparent;
+            control.OffTrack = VRageMath.Color.Transparent;
+            control.Thumb = VRageMath.Color.White;
             control.WordPadding = new Thickness(0f);
         }
 
@@ -93,14 +93,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             if (Color.HasValue)
                 control.Color = Color.Value;
 
-            if (_quiet.HasValue)
-                control.QuietColor = _quiet.Value;
+            if (_onTrack.HasValue)
+                control.OnTrack = _onTrack.Value;
 
-            if (_lit.HasValue)
-                control.LitColor = _lit.Value;
+            if (_offTrack.HasValue)
+                control.OffTrack = _offTrack.Value;
 
-            if (_unlit.HasValue)
-                control.UnlitColor = _unlit.Value;
+            if (_thumb.HasValue)
+                control.Thumb = _thumb.Value;
 
             if (_wordPadding.HasValue)
                 control.WordPadding = _wordPadding.Value;
@@ -115,9 +115,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             if (state == null)
                 return;
 
-            _quiet = state._quiet;
-            _lit = state._lit;
-            _unlit = state._unlit;
+            _onTrack = state._onTrack;
+            _offTrack = state._offTrack;
+            _thumb = state._thumb;
             _wordPadding = state._wordPadding;
         }
     }

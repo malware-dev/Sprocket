@@ -12,6 +12,7 @@ using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using VRage.Input;
+using Sprocket.Sim.Content;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -68,6 +69,14 @@ namespace Sprocket.Sim.Simulation
         /// says so by coming through here instead of pressing coordinates.
         /// </remarks>
         public SprocketEditor Editor => _ship.Editor;
+
+        /// <summary>Says everything in <paramref name="culture" />, such as <c>no</c>, read from the mod's own texts; one frame passes while the screen is built again in it.</summary>
+        public void Speak(string culture)
+        {
+            _ship.Texts.Book.Load(new ResxTexts(ResxTexts.Beside, culture));
+            _ship.Editor.Invalidate();
+            Tick();
+        }
 
         /// <summary>
         /// Reads a program into the construct, the way loading a save does.

@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             FontSize = Lettering.Body;
             Color = Palette.Ink;
             Background = Palette.SlotFill;
-            Highlight = Palette.ControlHot;
+            Highlight = Palette.Well;
             Padding = new Thickness(Space.ChipX, Space.ChipY);
             Underline = Palette.SlotEdge;
 
