@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Editing;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
@@ -23,9 +24,10 @@ namespace Sprocket.Tests;
 /// </remarks>
 static class PaperTarget
 {
-    public static string Draw(GridWorld world, EditorScreen screen)
+    public static string Draw(GridWorld world, SprocketEditor editor)
     {
         var paper = new StringBuilder();
+        var screen = editor.Screen;
 
         foreach (var part in screen.Heading)
         {
@@ -44,6 +46,9 @@ static class PaperTarget
 
         if (Some(screen.Subtitle))
             paper.Append("  ").AppendLine(screen.Subtitle);
+
+        if (editor.Notice != null && !editor.Notice.Leaving)
+            paper.Append("notice (").Append(editor.Notice.Level).Append("): ").AppendLine(editor.Notice.Text);
 
         foreach (var component in screen.Components)
             paper.Append(Draw(world, component));
@@ -66,12 +71,6 @@ static class PaperTarget
         if (component is HeadingComponent heading)
         {
             paper.Append("heading: ").AppendLine(heading.Text);
-            return paper.ToString();
-        }
-
-        if (component is NoticeComponent notice)
-        {
-            paper.Append("notice (").Append(notice.Level).Append("): ").AppendLine(notice.Text);
             return paper.ToString();
         }
 

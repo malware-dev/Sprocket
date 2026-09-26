@@ -5,7 +5,8 @@ using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -15,10 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>What to put in the layout.</summary>
         public abstract Element Root { get; }
 
-        /// <summary>What this view is showing, so it can hear when the values change.</summary>
         EditorComponent _watched;
 
-        /// <summary>Whether something has announced a change since this view last wrote its controls.</summary>
         bool _told = true;
 
         /// <summary>
@@ -212,10 +211,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             var heading = component as HeadingComponent;
             if (heading != null)
                 return new HeadingView(heading);
-
-            var notice = component as NoticeComponent;
-            if (notice != null)
-                return new NoticeView(notice);
 
             var start = component as StartComponent;
             if (start != null)

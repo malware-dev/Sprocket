@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Developing;
+using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers.Editing
@@ -38,10 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly Dictionary<int, Action<bool>> _toggleActions = new Dictionary<int, Action<bool>>();
         readonly Dictionary<int, Action<int>> _numberActions = new Dictionary<int, Action<int>>();
 
-        /// <summary>
-        /// Which instance of each blueprint the editor shows its blocks through, by system id, where
-        /// somebody chose one.
-        /// </summary>
         readonly Dictionary<int, int> _standIns = new Dictionary<int, int>();
         readonly EditorScreen _screen = new EditorScreen();
         readonly List<EditorComponent> _gathered = new List<EditorComponent>();
@@ -50,17 +49,25 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         bool _structureDirty;
         bool _developerMode;
 
-        public SprocketEditor(GridWorld world, Automation program, AutomationRunner runner)
+        /// <summary>An editor of <paramref name="program" />, saying what it says in <paramref name="texts" />.</summary>
+        public SprocketEditor(GridWorld world, Automation program, AutomationRunner runner, Texts texts)
         {
             _world = world;
             _program = program;
             _runner = runner;
-            _stack.Add(new SystemsPage(this));
+            Texts = texts;
+            _stack.Add(new HomePage(this));
             Rebuild();
         }
 
         /// <summary>What to show right now.</summary>
         public EditorScreen Screen => _screen;
+
+        /// <summary>What the editor says, in the player's language.</summary>
+        public Texts Texts { get; }
+
+        /// <summary>What the person at the editor needs told above whatever page is showing, or null for nothing.</summary>
+        public Notice Notice => _notice;
 
         /// <summary>
         /// Who the systems made here are by: the namespace a new system gets.
@@ -201,10 +208,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         int _undoCommand;
         int _redoCommand;
 
-        /// <summary>Ticks in a second, at the rate the game runs at.</summary>
         const int Second = 60;
 
-        /// <summary>Reading the words in the heading again, which nothing announces.</summary>
         Interval _worded = new Interval(Second);
 
         /// <summary>
@@ -244,6 +249,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>Adds a way to answer, in the order they are offered.</summary>
+        /// <remarks>The answer that does what was asked about comes first and the one that does not second, as Yes and No stand in the game's own message boxes.</remarks>
         internal void Answer(string text, Action chosen)
         {
             Answer(text, chosen, false);
@@ -281,15 +287,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _screen.Default = command;
         }
 
-        /// <summary>
-        /// What the standing question's answers do, apart from the numbers they are offered under.
-        /// </summary>
-        /// <remarks>
-        /// A question can be raised by something that changed the screen - "what should this do" is
-        /// asked with the picker already unwound - and a rebuild hands back every command number the
-        /// screen was using. Without this the answers would still be on screen, pointing at numbers
-        /// nothing knows any more, which is a press that silently does nothing.
-        /// </remarks>
         readonly List<Answering> _answering = new List<Answering>();
 
         struct Answering
@@ -336,11 +333,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Release();
         }
 
-        void Released()
-        {
-            _answering.Clear();
-        }
-
         /// <summary>
         /// Gives back the command numbers the last set of answers was using.
         /// </summary>
@@ -350,6 +342,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// it can be raised, dismissed and raised again without the screen ever being rebuilt, so its
         /// numbers have to be handed back rather than held.
         /// </remarks>
+        void Released()
+        {
+            _answering.Clear();
+        }
+
         /// <summary>
         /// Says it on every screen where the block holds a program that would not read.
         /// </summary>
@@ -363,14 +360,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// in front of them. Afterwards it is the answer to "what happened to the old one".
         /// </para>
         /// <para>
-        /// First in the list, because a notice below the thing it is about is a footnote.
+        /// Above the page, because a notice below the thing it is about is a footnote.
         /// </para>
         /// </remarks>
-        void Said(List<EditorComponent> components)
+        void Said()
         {
             if (_holder != null && _program.Trouble.Length == 0)
             {
-                Held(components);
+                Held();
                 return;
             }
 
@@ -379,22 +376,18 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 if (_notice == null)
                     return;
 
-                // Told to go rather than dropped, and kept in the list until it says it has gone: a
-                // banner taken away between two frames is the jump this whole arrangement avoids.
+                // Told to go rather than dropped, and kept until it says it has gone: a banner taken away
+                // between two frames is the jump this whole arrangement avoids.
                 _notice.Leaving = true;
 
                 if (_notice.Closed)
-                {
                     _notice = null;
-                    return;
-                }
 
-                components.Insert(0, _notice);
                 return;
             }
 
             if (_notice == null)
-                _notice = new NoticeComponent("", NoticeLevel.Problem);
+                _notice = new Notice();
 
             _notice.Leaving = false;
             _notice.Level = NoticeLevel.Problem;
@@ -405,39 +398,27 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // version, and whatever did read of a damaged one.
             if (_program.Incompatible)
             {
-                _notice.Text = "This block holds a program from a different version of Sprocket.";
-
-                _notice.Detail = "This version cannot read it, so this screen starts empty. The block "
-                    + "still holds it until you change something here - and that replaces it for good.";
+                _notice.Text = Texts.SalvageDifferent;
+                _notice.Detail = Texts.SalvageDifferentDetail;
             }
             else
             {
-                _notice.Text = "This block holds a program Sprocket could only partly read.";
-
-                _notice.Detail = "What could be read is shown here. The block still holds the whole of "
-                    + "it until you change something here - and that replaces it with what you see.";
+                _notice.Text = Texts.SalvagePartial;
+                _notice.Detail = Texts.SalvagePartialDetail;
             }
 
             // The reader's own words, kept because somebody has to be able to say what happened to
             // whoever mends it, and because a person who can read it is better off than one who cannot.
-            _notice.Diagnostic = "Sprocket read it as: " + _program.Trouble;
+            _notice.Diagnostic = Template.Fill(Texts.SalvageTrouble, "trouble", _program.Trouble);
 
             _notice.Expanded = _open;
-            _notice.ExpandCommand = Register(Cmd.Expand, delegate { _open = !_open; Invalidate(); });
+            _notice.Expands = Expands;
 
             // The mending, on the thing that reports the fault, so somebody who has read what it costs
             // does not have to go and find an edit to make. It asks the same question the first edit
             // does, because it throws away the same program.
-            // Replaced rather than reached into. This banner is deliberately kept between builds, and
-            // the command it carries is issued again on every one of them - so writing the id into the
-            // entry that is already there would change what the button does while saying nothing, and
-            // the view showing it is told rather than asked.
-            _mending.Clear();
-            _mending.Add(new ChoiceEntry("Replace it", false,
-                Register(Cmd.Resolve, delegate { AskBeforeReplacing(delegate { }); })));
-            _notice.Actions.Reset(_mending);
-
-            components.Insert(0, _notice);
+            _notice.OfferText = Texts.SalvageReplace;
+            _notice.Offers = Resolves;
         }
 
         /// <summary>
@@ -447,56 +428,51 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// For as long as the editor is open, so it never comes or goes while somebody is looking. Not
         /// a problem: nothing is wrong, the Sprocket is simply somebody else's for now.
         /// </remarks>
-        void Held(List<EditorComponent> components)
+        void Held()
         {
             if (_notice == null)
-                _notice = new NoticeComponent("", NoticeLevel.Info);
+                _notice = new Notice();
 
             _notice.Leaving = false;
             _notice.Level = NoticeLevel.Info;
-            _notice.Text = _holder + " is editing this block's automation.";
-            _notice.Detail = "Only one person can edit at a time. Reopen this once they're done to make changes.";
+            _notice.Text = Template.Fill(Texts.LeaseHolder, "holder", _holder);
+            _notice.Detail = Texts.LeaseDetail;
             _notice.Diagnostic = "";
-
             _notice.Expanded = _open;
-            _notice.ExpandCommand = Register(Cmd.Expand, delegate { _open = !_open; Invalidate(); });
-
-            _mending.Clear();
-            _notice.Actions.Reset(_mending);
-
-            components.Insert(0, _notice);
+            _notice.Expands = Expands;
+            _notice.OfferText = "";
+            _notice.Offers = null;
         }
 
-        /// <summary>
-        /// The one banner, kept between builds.
-        /// </summary>
-        /// <remarks>
-        /// Held rather than made on every build, because a fresh one every tick is a fresh view every
-        /// tick: the slide would start over before a frame of it had been seen, and the openness it was
-        /// part way through would be thrown away with it.
-        /// </remarks>
-        NoticeComponent _notice;
+        Notice _notice;
 
-        /// <summary>Held so that saying what mends a fault allocates nothing on a build.</summary>
-        readonly List<ChoiceEntry> _mending = new List<ChoiceEntry>();
+        ICommand _expands;
+        ICommand _resolves;
 
-        /// <summary>Whether the banner is open, which is the person's choice and outlives a rebuild.</summary>
+        ICommand Expands => _expands ?? (_expands = Act(Cmd.Expand, delegate
+        {
+            _open = !_open;
+            if (_notice != null)
+                _notice.Expanded = _open;
+        }));
+
+        ICommand Resolves => _resolves ?? (_resolves = Act(Cmd.Resolve, delegate { AskBeforeReplacing(delegate { }); }));
+
         bool _open;
 
-        /// <summary>Whether somebody has been told what their first edit would cost, and said go on.</summary>
         bool _told;
 
         /// <summary>
-        /// Whether this command would be the edit that replaces a program Sprocket could not read.
+        /// Whether a press of <paramref name="kind" /> would be the edit that replaces a program Sprocket could not read.
         /// </summary>
         /// <remarks>
         /// Only ever true on a block whose program failed to load, and only until it is answered once.
         /// A failed load leaves what the block holds untouched, so the first edit is the moment that
         /// stops being reversible, and it is the moment to say so.
         /// </remarks>
-        bool Replacing(int command)
+        bool Replacing(Cmd kind)
         {
-            return !_program.Intact && !_told && !_screen.HasQuestion && Changes(CommandId.Kind(command));
+            return !_program.Intact && !_told && !_screen.HasQuestion && Changes(kind);
         }
 
         /// <summary>
@@ -579,19 +555,19 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         void AskBeforeReplacing(Action go)
         {
-            Ask("Replace the program this block holds? The one Sprocket could not read will be gone.");
+            Ask(Texts.SalvageQuestion);
 
-            // The safe answer first, so the reflex press lands on it, and the one Enter takes for
-            // the same reason: a key pressed without reading must not throw a program away.
-            Answer("Leave it alone", delegate { }, true);
             // Said here rather than at the save, because this press is the decision and everything
             // after it is ordinary editing. It also settles the banner: what it was warning about has
             // just stopped being true, and nothing else would have told it.
-            Answer("Replace it", delegate
+            Answer(Texts.SalvageReplace, delegate
             {
                 Replace();
                 go();
             });
+
+            // The one Enter takes: a key pressed without reading must not throw a program away.
+            Answer(Texts.SalvageKeep, delegate { }, true);
         }
 
         bool IsAnswer(int command)
@@ -621,7 +597,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (!_actions.TryGetValue(command, out action))
                 return;
 
-            if (Replacing(command))
+            if (Replacing(CommandId.Kind(command)))
             {
                 AskBeforeReplacing(delegate { Invoke(command); });
                 return;
@@ -642,6 +618,35 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Settle();
         }
 
+        /// <summary>A command that carries <paramref name="action" /> out as a press of <paramref name="kind" />, or null where the editor refuses that kind of press.</summary>
+        /// <remarks>
+        /// For a screen that makes its own controls. A press goes the way <see cref="Invoke" /> takes one: the
+        /// first edit of a program that could not be read asks first, a press while a question stands only puts
+        /// it away, and the editor settles after.
+        /// </remarks>
+        public ICommand Act(Cmd kind, Action action)
+        {
+            return Refuses(kind) ? null : new Relay(delegate { Carry(kind, action); });
+        }
+
+        void Carry(Cmd kind, Action action)
+        {
+            if (Replacing(kind))
+            {
+                AskBeforeReplacing(delegate { Carry(kind, action); });
+                return;
+            }
+
+            if (_screen.HasQuestion)
+            {
+                Unask();
+                return;
+            }
+
+            action();
+            Settle();
+        }
+
         /// <summary>What an action's values ask for, one per value, asked of the blocks it acts on.</summary>
         internal List<Field> Fields(IList<long> entityIds, string actionId, Form form)
         {
@@ -655,7 +660,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (!_textActions.TryGetValue(command, out action) || !Accepts(command, value))
                 return;
 
-            if (Replacing(command))
+            if (Replacing(CommandId.Kind(command)))
             {
                 AskBeforeReplacing(delegate { SetText(command, value); });
                 return;
@@ -721,7 +726,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (!_numberActions.TryGetValue(command, out action))
                 return;
 
-            if (Replacing(command))
+            if (Replacing(CommandId.Kind(command)))
             {
                 AskBeforeReplacing(delegate { SetNumber(command, value); });
                 return;
@@ -738,7 +743,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (!_toggleActions.TryGetValue(command, out action))
                 return;
 
-            if (Replacing(command))
+            if (Replacing(CommandId.Kind(command)))
             {
                 AskBeforeReplacing(delegate { SetToggle(command, on); });
                 return;
@@ -956,23 +961,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         }
 
         /// <summary>The shape of the screen has changed and must be rebuilt.</summary>
-        internal void Invalidate()
+        public void Invalidate()
         {
             _structureDirty = true;
         }
 
-        /// <summary>What has been done to each sequence, so it can be taken back.</summary>
         readonly History<Sequence> _sequenceHistory = new History<Sequence>();
 
-        /// <summary>
-        /// And one for its system, because a trigger is not a sequence's to hold.
-        /// </summary>
-        /// <remarks>
-        /// Two stacks rather than one, so undo takes back the last thing done to the thing being
-        /// looked at. Somebody on a system's screen who has just repointed a button did not do the
-        /// last thing to any sequence in it, and a sequence's arrows offering to take that back
-        /// would be a control acting on something not on the screen.
-        /// </remarks>
         readonly History<AutomationSystem> _systemHistory = new History<AutomationSystem>();
 
         /// <summary>Makes a change to a sequence and remembers how to take it back.</summary>
@@ -1190,7 +1185,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 Rebuild();
                 return;
             }
-            Said(_gathered);
+            Said();
 
             // Everything, not just what the cadence is due to say: the components above were made from
             // nothing a moment ago and hold nothing yet.
@@ -1441,8 +1436,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
 
             AskHere(SequenceText.Taken(_runner.Bindings, taken, through));
-            Answer("Leave it alone", otherwise);
             Answer("Take it over", delegate { then(taken); });
+            Answer("Leave it alone", otherwise);
         }
 
         /// <summary>
@@ -1739,6 +1734,17 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             int number;
             SystemInstance chosen = _standIns.TryGetValue(system.Id, out number) ? system.FindInstance(number) : null;
             return chosen ?? system.First;
+        }
+
+        /// <summary>Adds another logic system made from <paramref name="system" />, named for it with the first number free from two.</summary>
+        internal SystemInstance Another(AutomationSystem system)
+        {
+            for (var number = 2; ; number++)
+            {
+                var name = system.Name + " " + number;
+                if (system.FindInstance(name) == null)
+                    return Another(system, name);
+            }
         }
 
         /// <summary>

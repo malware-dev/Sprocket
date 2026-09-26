@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Runtime;
@@ -126,7 +127,7 @@ public class CompileTests
         sequence.Steps.Add(new Await());
 
         var runner = new AutomationRunner(automation, ship.World);
-        var editor = new SprocketEditor(ship.World, automation, runner);
+        var editor = new SprocketEditor(ship.World, automation, runner, new Texts());
         var frame = 0;
 
         frame = RunOut(ship, runner, sequence, frame);

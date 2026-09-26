@@ -1,8 +1,7 @@
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Controls;
-using Sprocket.Host.SpaceEngineers.Developing;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Xunit;
 
@@ -17,10 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ScriptPageTests
 {
-    /// <summary>What the footer draws it as.</summary>
     static readonly string Way = Widgets.Caps(ScriptPage.Called);
 
-    /// <summary>The way back out of a page, on the header.</summary>
     const string Back = Symbols.Left;
 
     /// <summary>

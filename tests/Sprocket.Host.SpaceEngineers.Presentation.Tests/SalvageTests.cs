@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -23,7 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class SalvageTests
 {
-    /// <summary>What the old format looked like, which is what his test world still held.</summary>
     const string Older = "sprocket 1 alpha 6\n"
         + "block|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:87472652339029116,t:Button Panel\n"
         + "system|1|on|Test|\n"
@@ -32,8 +30,8 @@ public class SalvageTests
         + "when|any|pressed_1|entity1\n";
 
     /// <summary>The notice on the screen, or null. The driving helper throws where there is none.</summary>
-    static NoticeComponent Said(Simulation rig) =>
-        rig.Editor.Screen.Components.OfType<NoticeComponent>().FirstOrDefault();
+    static Notice Said(Simulation rig) =>
+        rig.Editor.Notice;
 
     /// <summary>Answers the question the first edit raises, the way a player does.</summary>
     static void Answer(Simulation rig, string text) =>
@@ -79,14 +77,14 @@ public class SalvageTests
         Simulation rig = Simulation.On(Holding(Older));
         rig.Tick();
 
-        NoticeComponent said = Said(rig);
+        Notice said = Said(rig);
 
         Assert.NotNull(said);
         Assert.Equal(NoticeLevel.Problem, said.Level);
         Assert.Contains("different version", said.Text);
 
         // One line at a glance; why and what to do about it is what opening it gives.
-        Assert.NotEqual(0, said.ExpandCommand);
+        Assert.NotNull(said.Expands);
         Assert.Contains("replaces it for good", said.Detail);
 
         // And the reader's own words, which are what gets read back to whoever mends Sprocket.
@@ -104,10 +102,10 @@ public class SalvageTests
         Simulation rig = Simulation.On(Holding(Older.Replace("alpha 6", "alpha 7")));
         rig.Tick();
 
-        NoticeComponent said = Said(rig);
+        Notice said = Said(rig);
 
         Assert.NotNull(said);
-        Assert.Contains("only partly read", said.Text);
+        Assert.Contains("could only partly be read", said.Text);
         Assert.Contains("replaces it with what you see", said.Detail);
         Assert.Contains("means nothing here", said.Diagnostic);
     }
@@ -127,9 +125,11 @@ public class SalvageTests
 
         Simulation rig = Simulation.On(store);
 
-        // The first edit asks before it replaces anything, so this is a player pressing through it.
-        rig.Editor.NewSystem("Airlock");
+        // The first edit asks before it replaces anything, so this is a player pressing through it,
+        // then naming the logic system it made.
+        rig.Editor.PressStart("New logic system");
         Answer(rig, "Replace it");
+        rig.Editor.SetText(rig.Editor.Screen.Heading[0].RenameCommand, "Airlock");
         rig.Tick();
         rig.Save();
 
@@ -231,7 +231,7 @@ public class SalvageTests
         Simulation rig = Simulation.On(store);
         rig.Tick();
 
-        rig.Editor.Invoke(Said(rig).Actions.Single().Command);
+        Said(rig).Offers.Execute();
         rig.Tick();
         Answer(rig, "Leave it alone");
         rig.Tick();
@@ -257,13 +257,12 @@ public class SalvageTests
         Simulation rig = Simulation.On(store);
         rig.Tick();
 
-        NoticeComponent said = Said(rig);
-        ChoiceEntry replace = said.Actions.Single();
+        Notice said = Said(rig);
 
-        Assert.Equal("Replace it", replace.Text);
-        Assert.NotEqual(0, replace.Command);
+        Assert.Equal("Replace it", said.OfferText);
+        Assert.NotNull(said.Offers);
 
-        rig.Editor.Invoke(replace.Command);
+        said.Offers.Execute();
         rig.Tick();
 
         Assert.True(rig.Editor.Screen.HasQuestion, "the banner replaced the program without asking");

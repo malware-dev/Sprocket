@@ -37,14 +37,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         Token _token;
 
-        /// <summary>
-        /// How many things have gone wrong, where <see cref="Trouble" /> only keeps the first.
-        /// </summary>
-        /// <remarks>
-        /// A count rather than a check on whether trouble is empty, because a line is dropped when it goes
-        /// wrong itself - and once the first line of a file has gone wrong, trouble is never empty again, so
-        /// every later bad line would have been kept half-read.
-        /// </remarks>
         int _failures;
 
         public Parser(string text)

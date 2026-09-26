@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
-using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
@@ -50,21 +50,6 @@ namespace Sprocket.Sim.Simulation
             _scissors.Clear();
         }
 
-        /// <summary>
-        /// The colours the harness says this player paints with.
-        /// </summary>
-        /// <remarks>
-        /// A stand-in for somebody who has painted something, and chosen to be told apart in a
-        /// recorded frame: the game's own defaults are one grey and thirteen blacks, which is what a
-        /// player who has never opened the painter has, and a row of fourteen identical dark squares
-        /// holds nothing still.
-        /// <para>
-        /// Offsets rather than colours, because that is what a build colour slot is: the hue as it
-        /// stands, and the saturation and value shifted so that nought is unpainted armour. Written
-        /// here in the form the game keeps them in, so the mod does the same conversion on these as
-        /// it does on a real player's - see <c>Hsv.Painted</c>.
-        /// </para>
-        /// </remarks>
         static readonly List<Vector3> Painted = new List<Vector3>
         {
             new Vector3(0.000f, -0.800f, 0.170f), new Vector3(0.000f, -0.800f, -0.260f),
@@ -91,6 +76,9 @@ namespace Sprocket.Sim.Simulation
                 .Done();
 
             var player = Pretend.To<IMyPlayer>()
+                // Offsets rather than colors, in the form the game keeps a build color slot in: the hue as it stands, and
+                // saturation and value shifted so that nought is unpainted armor. The mod converts these as it would a
+                // real player's.
                 .Gives("BuildColorSlots", () => Painted)
                 .Done();
 

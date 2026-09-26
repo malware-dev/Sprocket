@@ -1,0 +1,85 @@
+using System.IO;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
+using Sprocket.Host.SpaceEngineers.Ui.Styling;
+using VRage.Game;
+using VRageMath;
+using Color = VRageMath.Color;
+using Size = System.Windows.Size;
+using Thickness = Sprocket.Host.SpaceEngineers.Ui.Thickness;
+
+namespace Sprocket.Sim.Simulation;
+
+/// <summary>Draws a piece of markdown-lite through the rich text element, on the editor's page, and writes the picture.</summary>
+/// <remarks>At 1080 high, where one UI unit is one pixel, and cut to the text so the picture is as big as it is.</remarks>
+public static class RichShot
+{
+    static readonly RichTextStyle Page = new RichTextStyle
+    {
+        Base =
+        {
+            Font = MyFontEnum.White,
+            CodeFont = Lettering.Mono,
+            FontSize = 20f,
+            Heading1Size = 32f,
+            Heading2Size = 24f,
+            Heading3Size = 20f,
+            Color = Palette.Muted,
+            StrongColor = Palette.Strong,
+            EmphasisColor = Palette.Ink,
+            HeadingColor = Palette.Ink,
+            RuleColor = Palette.Line,
+            BlockSpacing = 12f,
+            Indent = 24f
+        }
+    };
+
+    /// <summary>Writes <paramref name="markdown" />, laid out <paramref name="wide" /> across, to <paramref name="path" />, and answers how big the picture is.</summary>
+    /// <remarks>A strong or emphasis color given here is tried in place of the style's, for comparing one against another.</remarks>
+    public static Vector2 Save(string path, string markdown, float wide, bool tip, Color? strong, Color? emphasis)
+    {
+        var text = new RichText { Style = tip ? Styles.Tip : Page, Document = Markdown.Parse(markdown) };
+
+        if (strong.HasValue)
+            text.StrongColor = strong.Value;
+
+        if (emphasis.HasValue)
+            text.EmphasisColor = emphasis.Value;
+
+        var page = new VStack { Background = Palette.Page, Padding = new Thickness(24f), Children = { text } };
+
+        var surface = new Surface { Target = new PixelSize(1920, 1080) };
+        var drawn = Vector2.Zero;
+
+        surface.Frame += g =>
+        {
+            page.Measure(g, new Vector2(wide + 48f, 1080f));
+            drawn = page.DesiredSize;
+            page.Arrange(new RectangleF(0f, 0f, drawn.X, drawn.Y));
+            page.Draw(g);
+        };
+
+        var bitmap = new RenderTargetBitmap(1920, 1080, 96d, 96d, PixelFormats.Pbgra32);
+        var frame = new DrawingVisual();
+        using (DrawingContext context = frame.RenderOpen())
+            surface.Paint(context, new Size(1920, 1080));
+
+        bitmap.Render(frame);
+
+        var left = (1920 - 1440) / 2;
+        var width = (int)System.Math.Ceiling(drawn.X);
+        var height = (int)System.Math.Min(1080, System.Math.Ceiling(drawn.Y));
+        var cut = new CroppedBitmap(bitmap, new Int32Rect(left, 0, width, height));
+
+        var png = new PngBitmapEncoder();
+        png.Frames.Add(BitmapFrame.Create(cut));
+        using (FileStream file = File.Create(path))
+            png.Save(file);
+
+        return new Vector2(width, height);
+    }
+}

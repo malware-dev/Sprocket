@@ -30,37 +30,13 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     sealed class VentGas
     {
-        /// <summary>
-        /// The flow below which nothing is happening.
-        /// </summary>
-        /// <remarks>
-        /// Not zero: a vent set to empty a room draws a steady 0.1 of its own while it does it, and
-        /// a working vent moves 300, so anything between the two tells them apart.
-        /// </remarks>
         const float Trickle = 1f;
 
-        /// <summary>
-        /// How long a vent has to have moved nothing before it counts as finished, in frames.
-        /// </summary>
-        /// <remarks>
-        /// A sixth of a second, and it exists for one case: the moment between telling a vent to
-        /// fill a room and the vent beginning, which reads exactly like having stopped. Without it
-        /// a room already inside the band finishes before the vent has had a chance to take it the
-        /// rest of the way.
-        /// </remarks>
         const int Beat = 10;
 
         static readonly MyDefinitionId Oxygen =
             new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), MyStringHash.GetOrCompute("Oxygen"));
 
-        /// <summary>
-        /// When each vent was last seen moving gas.
-        /// </summary>
-        /// <remarks>
-        /// One entry per vent ever asked about, which is the vents on one construct. A vent that has
-        /// never been seen moving anything is treated as having moved something just now, so it is
-        /// given its beat to get started rather than being called finished before it has begun.
-        /// </remarks>
         readonly Dictionary<long, int> _stopped = new Dictionary<long, int>();
 
         /// <summary>

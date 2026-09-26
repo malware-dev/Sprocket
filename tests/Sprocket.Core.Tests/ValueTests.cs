@@ -14,15 +14,6 @@ public class ValueTests
 {
     readonly Values _values = new Values();
 
-    /// <summary>
-    /// Two entity ids that a double cannot tell apart.
-    /// </summary>
-    /// <remarks>
-    /// A double holds integers exactly only to 2^53, about 9.0x10^15. These two are 7.5x10^16 and one
-    /// apart, so they land on the same double - which is what an id looks like after a round trip
-    /// through a numeric type that is not wide enough. Nothing about that failure is visible: the id
-    /// resolves to nothing, or to the wrong block.
-    /// </remarks>
     const long OneId = 74857693847562934L;
 
     const long TheNextIdAlong = 74857693847562935L;

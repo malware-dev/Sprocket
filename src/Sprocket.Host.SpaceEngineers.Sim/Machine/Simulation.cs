@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Sim.Machine;
@@ -19,24 +20,16 @@ namespace Sprocket.Sim.Machine;
 /// </remarks>
 sealed class Simulation
 {
-    /// <summary>
-    /// How often the program is written out, in ticks.
-    /// </summary>
-    /// <remarks>
-    /// A second. Frequent enough that nothing anybody built is ever more than a moment from safety,
-    /// rare enough that it is not a file write per frame - and the write is skipped entirely when
-    /// the text has not changed, which is nearly always.
-    /// </remarks>
     const int SaveEvery = 60;
 
     readonly Rig _rig;
     readonly Store _store;
     readonly SprocketUnit _unit;
 
-    /// <summary>The world's rota, run after the unit on every frame the way the session runs it.</summary>
     readonly Rota _rota = new Rota();
 
-    /// <summary>How much the mod had said when this began.</summary>
+    readonly Texts _texts = new Texts();
+
     readonly int _saidBefore;
 
     int _frame;
@@ -101,7 +94,7 @@ sealed class Simulation
 
         // Said outright rather than read: the harness has no mod storage. A test that wants the
         // developer tools sets Editor.DeveloperMode on the way past.
-        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false), _rota);
+        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false), _rota, _texts);
 
         // The harness is always drawing the screen, which is what the unit ticks its editor for.
         _unit.Showing = true;
@@ -123,6 +116,9 @@ sealed class Simulation
 
     /// <summary>The Sprocket the construct carries, as the machine keeping it holds it.</summary>
     public SprocketUnit Unit => _unit;
+
+    /// <summary>What the editor says; loading a language into its book says it in that language.</summary>
+    public Texts Texts => _texts;
 
     public SprocketEditor Editor => _unit.Editor;
 

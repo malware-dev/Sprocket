@@ -84,3 +84,9 @@ The audience is people who have not programmed, which is not the same as people 
 learn a noun; talking round a word they will meet anyway reads as explaining a thing to a
 child. The pass decides where the noun is said plainly and where a phrase genuinely reads
 better.
+
+### 10. "Made from it"
+
+The blueprint screen heads the logic systems made from the blueprint with *Made from it*
+(`BlueprintPage`). The pronoun has nothing on the screen to point at, and the heading reads as
+the end of a sentence nobody started.

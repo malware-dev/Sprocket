@@ -16,7 +16,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     static class Keywords
     {
-        /// <summary>Indexed by <see cref="Keyword" />, so a word's text is one array read.</summary>
         static readonly string[] Names =
         {
             "",
@@ -26,15 +25,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "running", "step", "stop", "action", "with", "alpha"
         };
 
-        /// <summary>
-        /// The keywords of each length, so a word is only ever compared with the few it could be.
-        /// </summary>
-        /// <remarks>
-        /// <b>Measured.</b> Looking every bare word up in one list made the lexer 40% slower, because most
-        /// bare words are not keywords - declaration names, action ids - and a word that is nobody's keyword
-        /// was compared against all of them before it could be copied. By length, a name like
-        /// <c>entity123</c> has no keyword of its length at all and is turned away by one array read.
-        /// </remarks>
         static readonly Keyword[][] ByLength = Bucket();
 
         public static string Name(Keyword keyword)
@@ -52,6 +42,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         public static Keyword Find(StringSegment word)
         {
+            // By length, measured: looking every bare word up in one list made the lexer 40% slower, because most
+            // bare words are no keyword at all. A name like entity123 has no keyword of its length and is turned
+            // away by one array read.
             if (word.Length >= ByLength.Length)
                 return Keyword.None;
 

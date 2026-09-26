@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Ui;
 
 namespace Sprocket.Host.SpaceEngineers.Editing
 {
@@ -15,17 +16,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// </remarks>
     abstract class EditorPage
     {
-        /// <summary>
-        /// When <see cref="SecondPassed" /> last said yes.
-        /// </summary>
-        /// <remarks>
-        /// A page is refreshed the instant it is built, and that is when it most needs to know, so the
-        /// first ask is answered rather than held back - see <see cref="Interval" />, which keeps the
-        /// clock and the reasoning about where it starts.
-        /// </remarks>
         Interval _asked = new Interval(Second);
 
-        /// <summary>Ticks in a second, at the rate the game runs at.</summary>
+        Element _view;
+
         const int Second = 60;
 
         protected EditorPage(SprocketEditor editor)
@@ -64,10 +58,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             var part = new HeadingPart(Title);
             part.Prompt = RenamePrompt;
+            part.About = NameAbout;
             part.NameRequired = NameRequired;
 
             if (CanRename)
                 part.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename, AcceptsName);
+
+            part.NamedOnArrival = NameOnArrival;
+            NameOnArrival = false;
 
             parts.Add(part);
             RefreshHeading(parts);
@@ -122,10 +120,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         public virtual string CustomName => "";
 
+        /// <summary>Whether the page opens with its name in hand to be given, once, as it is first shown.</summary>
+        internal bool NameOnArrival { get; set; }
+
         public virtual bool CanRename => false;
 
         /// <summary>What to ask when offering the rename.</summary>
         public virtual string RenamePrompt => "";
+
+        /// <summary>What the name in the heading is and what renaming it does, in markdown-lite, said where the pointer rests on it; null for nothing.</summary>
+        public virtual string NameAbout => null;
 
         /// <summary>
         /// Whether the name is the only thing this page has to be called by.
@@ -239,6 +243,42 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// focus and caret somebody may be typing into.
         /// </remarks>
         public abstract void Build(List<EditorComponent> components);
+
+        /// <summary>The page as it is drawn, made the first time it is asked for; null for a page described in components.</summary>
+        /// <remarks>Made when the page is first shown, so a page nobody opens builds nothing to draw.</remarks>
+        public Element View
+        {
+            get
+            {
+                if (_view == null)
+                    Create();
+
+                return _view;
+            }
+        }
+
+        /// <summary>Makes the page as it is drawn, for a page that draws itself; null for one described in components.</summary>
+        /// <remarks>
+        /// The view definition and nothing else, as a designer would write it: the elements, their styles and
+        /// the names the page reaches them by. A page that draws itself keeps it in its own <c>.View.cs</c> file,
+        /// the same class in two halves.
+        /// </remarks>
+        protected virtual Element CreateView()
+        {
+            return null;
+        }
+
+        /// <summary>Gives the elements <see cref="CreateView" /> just made what they do and what they say, and fills them for the first time.</summary>
+        protected virtual void ViewCreated()
+        {
+        }
+
+        void Create()
+        {
+            _view = CreateView();
+            if (_view != null)
+                ViewCreated();
+        }
 
         /// <summary>
         /// True about once a second, for facts too dear to work out on a tick.

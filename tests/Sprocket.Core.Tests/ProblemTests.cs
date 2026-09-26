@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -168,7 +169,7 @@ public class ProblemTests
     public void TheFailingLogicSystemIsMarked()
     {
         var ship = Build();
-        var rows = ship.Editor.Rows();
+        var rows = ship.Editor.RootRows();
 
         Assert.Equal(0, rows[0].Problems);
 
@@ -178,7 +179,7 @@ public class ProblemTests
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
-        rows = ship.Editor.Rows();
+        rows = ship.Editor.RootRows();
         Assert.Equal(1, rows[0].Problems);
     }
 
@@ -397,7 +398,7 @@ public class ProblemTests
         ship.Rig.Door(2, "Inner Door");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
 
         ship.Editor.NewSystem("Airlock");
         ship.Editor.PressStart("When…");

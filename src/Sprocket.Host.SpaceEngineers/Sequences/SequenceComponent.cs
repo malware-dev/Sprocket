@@ -30,7 +30,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             AddOptions.Changed += Said;
         }
 
-        /// <summary>The steps this is repeating for, so each one can be let go of again.</summary>
         readonly List<SentenceStep> _heard = new List<SentenceStep>();
 
         /// <summary>

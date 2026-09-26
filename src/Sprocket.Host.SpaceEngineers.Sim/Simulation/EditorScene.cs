@@ -1,12 +1,18 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.World;
 using Ship = Sprocket.Sim.Machine.Simulation;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Sim.Machine;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using VRage.Input;
+using Sprocket.Sim.Content;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -41,6 +47,14 @@ namespace Sprocket.Sim.Simulation
             return new EditorScene(Ship.Fresh());
         }
 
+        /// <summary>A scene on a block that holds <paramref name="program" />, the way a world saved earlier leaves one.</summary>
+        public static EditorScene Holding(string program)
+        {
+            var store = Store.Nowhere();
+            store.SetValue(SprocketUnit.ProgramKey, program);
+            return new EditorScene(Ship.On(store));
+        }
+
         EditorScene(Ship ship)
         {
             _ship = ship;
@@ -55,6 +69,14 @@ namespace Sprocket.Sim.Simulation
         /// says so by coming through here instead of pressing coordinates.
         /// </remarks>
         public SprocketEditor Editor => _ship.Editor;
+
+        /// <summary>Says everything in <paramref name="culture" />, such as <c>no</c>, read from the mod's own texts; one frame passes while the screen is built again in it.</summary>
+        public void Speak(string culture)
+        {
+            _ship.Texts.Book.Load(new ResxTexts(ResxTexts.Beside, culture));
+            _ship.Editor.Invalidate();
+            Tick();
+        }
 
         /// <summary>
         /// Reads a program into the construct, the way loading a save does.
@@ -89,7 +111,7 @@ namespace Sprocket.Sim.Simulation
         /// something the world does, and in the game a ship actually flies up to the sensor - so none of
         /// this is Sprocket, and none of it goes anywhere the mod can compile.
         /// </remarks>
-        internal IEnumerable<Panel> Panels()
+        internal IEnumerable<Machine.Panel> Panels()
         {
             return _ship.Panels();
         }
@@ -150,6 +172,10 @@ namespace Sprocket.Sim.Simulation
         /// <summary>The box that question is being answered in.</summary>
         public TextBox AskBox => _view.AskBox;
 
+        /// <summary>Where the new controls take the pointer and the keyboard.</summary>
+        public InputRoot Input => _view.Input;
+
+
         public bool CaretVisible
         {
             set => _view.CaretVisible = value;
@@ -172,24 +198,57 @@ namespace Sprocket.Sim.Simulation
 
         public void CommitAsk()
         {
+            if (Keyed(MyKeys.Enter))
+                return;
+
             _view.CommitAsk();
         }
+
+        /// <summary>Hands <paramref name="key" /> to a new control holding the keyboard, answering whether one was.</summary>
+        public bool Key(MyKeys key, bool shift, bool ctrl)
+        {
+            if (_view.Input.Focused == null)
+                return false;
+
+            _view.Input.Key(key, shift, ctrl);
+            return true;
+        }
+
 
         /// <summary>Takes what is typed in the box with the caret, as Enter in it does in the game.</summary>
         public bool TakeTyped()
         {
+            if (Keyed(MyKeys.Enter))
+                return true;
+
             return _view.TakeTyped();
         }
 
         public void CancelAsk()
         {
+            if (Keyed(MyKeys.Escape))
+                return;
+
             _view.CancelAsk();
         }
 
         /// <summary>Moves the caret to the next field of a form, which Tab does in the game.</summary>
         public void NextField()
         {
+            if (Keyed(MyKeys.Tab))
+                return;
+
             _view.NextField();
+        }
+
+        /// <summary>Hands <paramref name="key" /> to the view's input root when a new control holds the keyboard, answering whether it did.</summary>
+        bool Keyed(MyKeys key, bool ctrl = false)
+        {
+            if (_view.Input.Focused == null)
+                return false;
+
+            _view.Input.Key(key, false, ctrl);
+            return true;
         }
 
         /// <summary>The box the keyboard is in, when something on the screen has taken it.</summary>
@@ -222,6 +281,12 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public void Clear()
         {
+            if (Keyed(MyKeys.A, true))
+            {
+                Keyed(MyKeys.Back);
+                return;
+            }
+
             TextBox box = Typing;
             if (box == null)
                 return;
@@ -234,6 +299,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>An arrow key, as the game's screen hands one over.</summary>
         public void Arrow(int across, int down)
         {
+            if (Keyed(across < 0 ? MyKeys.Left : across > 0 ? MyKeys.Right : down < 0 ? MyKeys.Up : MyKeys.Down))
+                return;
+
             _view.Arrow(across, down);
         }
 
@@ -241,6 +309,14 @@ namespace Sprocket.Sim.Simulation
         /// <remarks>A field answered by choosing takes each letter as a choice, as it does in the game.</remarks>
         public void Type(string text)
         {
+            if (_view.Input.Focused != null && !string.IsNullOrEmpty(text))
+            {
+                for (int i = 0; i < text.Length; i++)
+                    _view.Input.Text(text[i]);
+
+                return;
+            }
+
             if (_view.Chooses && !string.IsNullOrEmpty(text))
             {
                 for (int i = 0; i < text.Length; i++)
@@ -340,9 +416,9 @@ namespace Sprocket.Sim.Simulation
         }
 
         /// <summary>Offers the press as a grab first, so a drag is not also a click.</summary>
-        public bool Grab(Vector2 point)
+        public bool Grab(Vector2 point, int presses = 1)
         {
-            return _view.Grab(point);
+            return _view.Grab(point, presses);
         }
 
         public void Carry(Vector2 point)

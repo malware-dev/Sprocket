@@ -1,320 +1,338 @@
-using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Controls;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Controls;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
-    /// <summary>
-    /// One live thing, on one line: what it is, what it is doing, when it last did anything.
-    /// </summary>
+    /// <summary>One live thing on one line: what it is, what it is doing, and when it last did anything.</summary>
     /// <remarks>
-    /// Indented by <c>Depth</c>, which core promises is never more than one level, so a fixed indent is
-    /// right rather than lazy - there is no tree here to reinvent.
+    ///     Whoever holds it sets what it shows and what each press does, then calls <see cref="Show" />, which works
+    ///     out its look in one pass. A press it is given no command for is hidden or cannot be pressed. Rows never
+    ///     nest more than one level deep, so one fixed indent serves every row.
     /// </remarks>
-    public sealed class StatusRow
+    public class StatusRow : HStack
     {
-        /// <summary>
-        /// How far a nested row steps in, on both sides.
-        /// </summary>
-        /// <remarks>
-        /// Both, not just the left. The left edge already says "this belongs to the row above"; the right
-        /// edge did not, so a switch on a nested row landed in the same column as the switch governing it,
-        /// and nothing but reading the labels told them apart.
-        /// </remarks>
-        const float Inset = 35f;
+        const float Indent = 32f;
 
-        readonly Bar _line = new Bar();
-        readonly Dot _light = new Dot();
-        readonly Label _summary = Widgets.Label("", Palette.Ink, Lettering.Body);
-        readonly Label _status = Widgets.Label("", Palette.Faint, Lettering.Tiny);
+        readonly Relay _opens;
+        readonly Relay _runs;
+        readonly Relay _changes;
+        readonly Relay _flips;
+        readonly Relay _copies;
+        readonly Relay _offers;
+        readonly Relay _bins;
+        readonly HStack _inside;
+        readonly Glyph _light;
+        readonly Label _summary;
+        readonly Button _status;
+        readonly Glyph _run;
+        readonly Label _lastRun;
+        readonly Label _problem;
+        readonly Switch _switch;
+        readonly Glyph _duplicate;
+        readonly Button _button;
+        readonly Glyph _delete;
+        readonly HStack _detail;
+        readonly Glyph _below;
 
-        // The same mark the sequence's own screen uses for the same act, so one look is learnt
-        // once.
-        readonly Glyph _run = Widgets.Centred(Symbols.Play, Palette.Faint);
+        string _said;
+        bool _saidAsks;
 
-        /// <summary>What the second line was last told it opens, so a note is made when it changes.</summary>
-        string _opens;
-        string _opensSays;
-        readonly Label _lastRun = Widgets.Label("", Palette.Faint, Lettering.Tiny);
-        readonly Label _problem = Widgets.Label("", Palette.Problem, Lettering.Tiny);
-        readonly Switch _switch = new Switch(Lettering.Small);
-
-        /// <summary>The row's one button in words, left of the switch. Absent where the row has none.</summary>
-        readonly Label _button = Widgets.Quiet("", Lettering.Small);
-
-        /// <summary>Another of what this row is. Absent on rows where that means nothing.</summary>
-        readonly Glyph _duplicate = Widgets.Centred(Symbols.Duplicate, Palette.Faint);
-
-        /// <summary>Throwing this row away. Absent where the row is not somebody's to throw away.</summary>
-        readonly Glyph _delete = Widgets.Centred(Symbols.Delete, Palette.Faint);
-
-        /// <summary>The controls at the right edge, laid out leftwards from the switch.</summary>
-        readonly Stack _tools = Widgets.RowOf(Space.Item);
-        readonly Stack _text = Widgets.Column(Space.Line * 0.6f);
-        readonly Stack _detail = Widgets.RowOf(Space.Item);
-
-        /// <summary>
-        /// Says that something below this row is wrong, without saying what.
-        /// </summary>
-        /// <remarks>
-        /// Immediately after the name, rather than under it or at the far edge. A row that owns a
-        /// problem puts the sentence on its own line; a row that merely contains one has nothing to
-        /// say yet, and the point is to tell somebody which way to go rather than to explain here.
-        /// </remarks>
-        readonly Glyph _below = Widgets.Symbol(Symbols.Warning, Palette.Problem);
-
-        readonly Stack _heading = Widgets.RowOf(Space.Item);
-
+        /// <summary>An empty row, filled in by setting what it shows and calling <see cref="Show" />.</summary>
         public StatusRow()
         {
-            _detail.Children.Add(_status);
-            _detail.Children.Add(_problem);
-            _detail.Children.Add(_lastRun);
+            _opens = new Relay(delegate { Carry(Opens); });
+            _runs = new Relay(delegate { Carry(Running ? Stops : Runs); });
+            _changes = new Relay(delegate { Carry(Changes); });
+            _flips = new Relay(delegate { Carry(Flips); });
+            _copies = new Relay(delegate { Carry(Copies); });
+            _offers = new Relay(delegate { Carry(Offers); });
+            _bins = new Relay(delegate { Carry(Deletes); });
 
-            // Hugging the name, not filling the row. A mark at the far right lands beside the
-            // switch and reads as belonging to it, which is a different claim entirely.
-            _heading.Children.Add(_summary);
-            _heading.Children.Add(_below);
-
-            _text.Children.Add(_heading);
-            _text.Children.Add(_detail);
-
-            _line.Spacing = Space.PadX;
-            _line.Background = Palette.Panel;
-            _line.Left = _light;
-            _line.Fill = _text;
-
-            // The bin last, where it is on every other row that has one - a trigger's row has it at
-            // the right edge, and two lists on one screen must not put the same mark in two places.
-            // Nothing here comes and goes with a switch, so nothing moves out from under the pointer
-            // that is pressing it.
-            //
-            // Running it by hand is first, at the far end from the bin: it is the one thing here
-            // that acts on the machine rather than on the program.
-            _tools.Children.Add(_run);
-            _tools.Children.Add(_duplicate);
-            _tools.Children.Add(_button);
-            _tools.Children.Add(_switch);
-            _tools.Children.Add(_delete);
-
-            // The red the per-step crosses use, because it is the same act: what this is on is gone
-            // when it is pressed, and nothing else on a row is.
-            _delete.Highlight = Palette.ProblemWash;
-
-            // Edged, because the row under it is already a panel: a fill would vanish into it, and the
-            // edge is how the game's own controls say they can be pressed.
-            _button.Edge = Palette.Dim;
-            _button.Highlight = Palette.PanelHot;
-
-            _line.Right = _tools;
-        }
-
-        public Element Root
-        {
-            get { return _line; }
-        }
-
-        public void Update(StatusEntry entry)
-        {
-            float side = Space.PadX + (entry.Depth > 0 ? Inset : 0f);
-            _line.Padding = new Thickness(side, Space.PadY, side, Space.PadY);
-
-            // A system's row carries no command - it is a heading over the sequences under it, and a
-            // heading that answered to a press would be a promise it cannot keep. So it is not drawn as
-            // a panel either: a panel says "press me", and the only way to find out it was inert would be
-            // to press it. The light and the switch stay, because those are real.
-            _line.Press = Deed.Asks(entry.Command, entry.Question);
-
-            bool pressable = entry.Command != 0;
-
-            // A row leading to something wrong is washed rather than merely marked. A small glyph
-            // beside a name is something found by somebody who already suspects; the point of this is to
-            // be seen by somebody who does not yet know to look.
-            var wrong = entry.Problems > 0;
-
-            // And a row that is going right now is washed the same way, in the other colour, for the
-            // same reason: it is the row somebody scanning a list is looking for. The same green the
-            // step being run wears one screen in, so the two agree about what live looks like.
-            //
-            // Broken outranks running, which the two can only be at once for the instant between a
-            // block going away and the run abandoning the step that named it.
-            //
-            // A sequence somebody switched off washes too, in the third colour and under both of
-            // those, because it is the commonest reason a button does nothing and the one where
-            // everything else on the row reads as working. The ground is the whole of how it is said:
-            // it costs no room, so pressing the switch changes a colour and not a height.
-            //
-            // A row that adds something is the same button as the one under a sentence, because it is
-            // the same act: no fill, quiet words, and a highlight that says it answers to a press.
-            _line.Background = wrong
-                ? Palette.ProblemWash
-                : entry.Running
-                    ? Palette.LiveWash
-                    : entry.Parked
-                        ? Palette.NoticeWash
-                        : entry.Chosen
-                            ? Palette.SlotFill
-                            : (pressable && !entry.IsAction ? Palette.Panel : Palette.None);
-
-            // Edged as well as filled where it is the one the screen is about, so being chosen still
-            // shows on a row that is washed for something else.
-            _line.Edge = entry.Chosen ? Palette.Accent : Palette.None;
-
-            if (!pressable)
-                _line.Highlight = Palette.None;
-            else if (entry.IsAction)
-                // The quiet step, because this row has no fill to brighten. The same step the button
-                // under a sentence takes, since it is the same act.
-                _line.Highlight = Palette.Panel;
-            else
-                Widgets.Row(_line);
-
-            // The same plus the start block uses, for the same reason: this row adds something. Core marks
-            // it as an action and leaves the drawing to the row.
-            _summary.Text = entry.IsAction
-                ? StartView.Plus + entry.Summary + (entry.Question.Length > 0 ? "…" : "")
-                : entry.Summary;
-            _summary.Color = entry.IsAction ? Palette.Muted : Palette.Ink;
-            _summary.Scale = entry.IsAction ? Lettering.Small : Lettering.Body;
-
-            // A row that does something has no state to show, so it gets no light - only the space where
-            // one would be, which keeps its text lined up with its neighbours.
-            // Broken outranks recently-run. A green light on a row that cannot work is the screen
-            // contradicting itself, and the light is the first thing the eye lands on.
-            _light.Background = wrong
-                ? Palette.Problem
-                : (entry.IsAction ? Palette.None : (entry.JustRan ? Palette.Live : Palette.Dim));
-
-            _status.Text = entry.Status;
-            _lastRun.Text = entry.LastRun;
-
-            // Its own press where there is something of its own behind it, so changing what a trigger
-            // does is the words that say what it does. It lights like any other control, which is
-            // what says it is one at all.
-            // Absent rather than dead while it may not run, which is the switch on this same row.
-            // One control, two acts, the same as the sequence's own screen: a row that is going
-            // offers the way to stop it, and one that is not offers the way to start it.
-            int doing = entry.Running ? entry.StopCommand : entry.RunCommand;
-
-            _run.Symbol = entry.Running ? Symbols.Stop : Symbols.Play;
-            _run.Collapsed = doing == 0;
-            Widgets.Waiting(_run, doing, entry.Running ? SequenceText.Stops() : SequenceText.Starts());
-
-            _status.Press = Deed.Sends(entry.StatusCommand);
-            _status.Highlight = entry.StatusCommand != 0 ? Palette.Panel : Palette.None;
-
-            if (entry.StatusCommand != 0 && !ReferenceEquals(_opens, entry.Status))
+            Style = Styles.Row;
+            Command = _opens;
+            Children.Add(new HStack
             {
-                _opens = entry.Status;
-                _opensSays = "Change what this does";
-            }
-
-            _status.Tip = entry.StatusCommand != 0 ? _opensSays : null;
-
-            // In place of what it is doing rather than under it, so a row is the same height whether
-            // anything is wrong. A line that arrives pushes every row below it down the screen, which
-            // is a list rearranging itself while somebody reads it.
-            //
-            // What it is doing is the lesser reading of the two. A sequence held at a step it cannot
-            // finish is still waiting, so the state is true and says nothing anybody needs.
-            bool saying = !string.IsNullOrEmpty(entry.Problem);
-
-            // Out of the layout when there is nothing to say, not merely blank. A row that always
-            // reserved both of these would be three lines tall to show one, and a list of them would be
-            // a column of mostly empty panel.
-            _detail.Collapsed = !saying
-                && string.IsNullOrEmpty(entry.Status) && string.IsNullOrEmpty(entry.LastRun);
-
-            // What it is doing gives way; when it last ran does not. That is still worth knowing
-            // while something is wrong, and it is the answer to "has this ever worked".
-            _status.Collapsed = saying;
-
-            _problem.Text = entry.Problem;
-            _problem.Collapsed = !saying;
-
-            // A warning reads as a remark, not as an alarm. Same line, same place, quieter colour - the
-            // difference between "nothing starts this yet" and "this affects a block that is gone".
-            _problem.Color = entry.ProblemIsWarning ? Palette.Notice : Palette.Problem;
-
-            // Nothing wrong is the ordinary case, so it takes no room rather than drawing blank - a
-            // column of rows each reserving space for a mark reads as a column of marks. Keyed on there
-            // being words rather than on the count, because a warning has words and is not counted.
-            // Or something below it worth remarking on, which is how a system says one of its
-            // sequences gave up without claiming anything is broken.
-            bool marked = !string.IsNullOrEmpty(entry.Problem) || entry.Problems > 0
-                || entry.Remarks > 0;
-
-            bool quietly = string.IsNullOrEmpty(entry.Problem)
-                ? entry.Problems == 0
-                : entry.ProblemIsWarning;
-
-            _below.Collapsed = !marked;
-            _below.Tint = quietly ? Palette.Notice : Palette.Problem;
-
-            // Says what state it is in, the way the game's own on/off control does. The light on the
-            // left of this row says whether the thing is doing something right now; this says whether it
-            // has been left switched on, which is not the same question and is the one a switch answers.
-            if (entry.CanSwitch)
-                _switch.Show(entry.SwitchIsOn, entry.SwitchGovernsAll);
-            else
-                _switch.Hide();
-
-            _switch.Press = entry.CanSwitch
-                ? Deed.Switches(entry.SwitchCommand, !entry.SwitchIsOn)
-                : Deed.Nothing;
-
-            // Says the act and how far it reaches, and never which row it is on - the pointer is on
-            // that row. Scope is what a column of identical switches does not show: SwitchGovernsAll is
-            // core's answer to which of them stops a whole system, and reading the indent instead would
-            // be guessing from a layout this target chose itself.
-            //
-            // Only the off direction carries the consequence. Switching a system on does not start
-            // anything by itself, where switching it off stops everything in it at once, and a note that
-            // warned about both equally would be a note nobody finished reading.
-            _switch.Tip = entry.CanSwitch
-                ? Switching(entry.SwitchGovernsAll, entry.SwitchIsOn)
-                : null;
-
-            // Out of the layout where it is not offered, rather than dimmed. A system's heading row and
-            // a row that adds something are not things there can be another of, and a column of greyed
-            // controls beside the ones that work reads as a screen half broken.
-            bool copies = entry.DuplicateCommand != 0;
-            _duplicate.Collapsed = !copies;
-            _duplicate.Press = Deed.Sends(entry.DuplicateCommand);
-            _duplicate.Highlight = copies ? Palette.PanelHot : Palette.None;
-            _duplicate.Tip = copies ? entry.DuplicateText : null;
-
-            var offers = entry.ButtonCommand != 0;
-            _button.Collapsed = !offers;
-            _button.Press = entry.ButtonFields.Count > 0
-                ? Deed.Values(entry.ButtonCommand, entry.ButtonQuestion, entry.ButtonFields, entry.ButtonFilled)
-                : Deed.Asks(entry.ButtonCommand, entry.ButtonQuestion);
-            if (offers)
-                _button.Text = entry.ButtonText;
-
-            var bins = entry.DeleteCommand != 0;
-            _delete.Collapsed = !bins;
-            _delete.Press = Deed.Sends(entry.DeleteCommand);
-            _delete.Tip = bins ? "Delete" : null;
+                Spacing = 16f,
+                Placement = Flex.Grow,
+                Children =
+                {
+                    new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = Fixed.Size(16f, 16f) }.As(out _light),
+                    new VStack
+                    {
+                        Spacing = 4f,
+                        Placement = Flex.Grow,
+                        Children =
+                        {
+                            new HStack
+                            {
+                                Spacing = 8f,
+                                Children =
+                                {
+                                    new Label { Style = Styles.Name, Wraps = true }.As(out _summary),
+                                    new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = Fixed.Size(32f, 32f) }.As(out _below)
+                                }
+                            },
+                            new HStack
+                            {
+                                Spacing = 8f,
+                                Children =
+                                {
+                                    new Button { Style = Styles.Plain, Command = _changes }.As(out _status),
+                                    new Label { Style = Styles.Detail, Wraps = true }.As(out _problem),
+                                    new Label { Style = Styles.Detail }.As(out _lastRun)
+                                }
+                            }.As(out _detail)
+                        }
+                    },
+                    new HStack
+                    {
+                        Spacing = 8f,
+                        Children =
+                        {
+                            new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
+                            new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _copies }.As(out _duplicate),
+                            new Button { Style = Styles.Button, Command = _offers }.As(out _button),
+                            new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
+                            new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f), Command = _bins }.As(out _delete)
+                        }
+                    }
+                }
+            }.As(out _inside));
         }
 
-        /// <summary>
-        /// What pressing a switch would do.
-        /// </summary>
-        /// <remarks>
-        /// Two bools and nothing else, so these are constants rather than strings joined per row per
-        /// frame. That is a consequence of the note no longer naming what it is on: the name was the
-        /// only part that varied.
-        /// </remarks>
-        internal static string Switching(bool governsAll, bool isOn)
+        /// <summary>What pressing the row does, or null for a row that is not pressed.</summary>
+        public ICommand Opens { get; set; }
+
+        /// <summary>What starting it does, or null where it cannot be started from here.</summary>
+        public ICommand Runs { get; set; }
+
+        /// <summary>What stopping it does, or null where it cannot be stopped from here.</summary>
+        public ICommand Stops { get; set; }
+
+        /// <summary>What pressing its status does, or null where the status is only read.</summary>
+        public ICommand Changes { get; set; }
+
+        /// <summary>What its switch does, or null for a row with no switch.</summary>
+        public ICommand Flips { get; set; }
+
+        /// <summary>What copying it does, or null where it cannot be copied.</summary>
+        public ICommand Copies { get; set; }
+
+        /// <summary>What its button does, or null for a row with no button.</summary>
+        public ICommand Offers { get; set; }
+
+        /// <summary>What deleting it does, or null where it cannot be deleted.</summary>
+        public ICommand Deletes { get; set; }
+
+        /// <summary>How deep it stands under the row it belongs to: none, or one level.</summary>
+        public int Depth { get; set; }
+
+        /// <summary>What it is called.</summary>
+        public string Summary { get; set; }
+
+        /// <summary>Whether it is a way to add something rather than a thing that is there.</summary>
+        public bool IsAction { get; set; }
+
+        /// <summary>Whether pressing it asks something first, which an action row says with an ellipsis.</summary>
+        public bool Asks { get; set; }
+
+        /// <summary>What pressing it does, in markdown-lite, said where the pointer rests on it; null for nothing.</summary>
+        public string About { get; set; }
+
+        /// <summary>The words for the slots in <see cref="About" />, or null where it has none.</summary>
+        public Arguments AboutArguments { get; set; }
+
+        /// <summary>How many things in it are broken.</summary>
+        public int Problems { get; set; }
+
+        /// <summary>How many things in it are worth a remark without being broken.</summary>
+        public int Remarks { get; set; }
+
+        /// <summary>Whether it is running now.</summary>
+        public bool Running { get; set; }
+
+        /// <summary>Whether it is waiting for something before it can go on.</summary>
+        public bool Parked { get; set; }
+
+        /// <summary>Whether it is the row the rest of its screen is about.</summary>
+        public bool Chosen { get; set; }
+
+        /// <summary>Whether it ran a moment ago.</summary>
+        public bool JustRan { get; set; }
+
+        /// <summary>What it is doing, in a word or two, or empty.</summary>
+        public string Status { get; set; }
+
+        /// <summary>When it last ran, or empty.</summary>
+        public string LastRun { get; set; }
+
+        /// <summary>What is wrong with it, said in place of its status, or empty.</summary>
+        public string Problem { get; set; }
+
+        /// <summary>Whether <see cref="Problem" /> is a warning rather than something broken.</summary>
+        public bool ProblemIsWarning { get; set; }
+
+        /// <summary>Whether its switch is on.</summary>
+        public bool SwitchIsOn { get; set; }
+
+        /// <summary>Whether its switch governs a whole system rather than one thing in it.</summary>
+        public bool SwitchGovernsAll { get; set; }
+
+        /// <summary>What copying it does, said on the copy mark.</summary>
+        public string DuplicateText { get; set; }
+
+        /// <summary>What its button says.</summary>
+        public string ButtonText { get; set; }
+
+        /// <summary>What its button does, in markdown-lite, said where the pointer rests on it.</summary>
+        public string ButtonAbout { get; set; }
+
+        /// <summary>The status, for a press on it that has to hang something under it.</summary>
+        public Element StatusPart => _status;
+
+        /// <summary>The mark that starts or stops it, for a press on it that has to hang something under it.</summary>
+        public Element RunPart => _run;
+
+        /// <summary>The switch, for a press on it that has to hang something under it.</summary>
+        public Element SwitchPart => _switch;
+
+        /// <summary>The copy mark, for a press on it that has to hang something under it.</summary>
+        public Element CopyPart => _duplicate;
+
+        /// <summary>The button, for a press on it that has to hang something under it.</summary>
+        public Element ButtonPart => _button;
+
+        /// <summary>The bin, for a press on it that has to hang something under it.</summary>
+        public Element DeletePart => _delete;
+
+        /// <summary>What pressing a switch would do, as a note on the switch.</summary>
+        public static string Switching(Texts texts, bool governsAll, bool isOn)
         {
             if (!governsAll)
-                return isOn ? "Switch off" : "Switch on";
+                return isOn ? texts.RowSwitchOff : texts.RowSwitchOn;
 
             return isOn
-                ? "Switch the whole system off, stopping every sequence in it"
-                : "Switch the whole system on";
+                ? texts.RowSwitchSystemOff
+                : texts.RowSwitchSystemOn;
+        }
+
+        /// <summary>Shows what it has been told, saying its fixed words in <paramref name="texts" />.</summary>
+        /// <remarks>Runs on every refresh of the list, so it writes what may have changed and joins no string that has not.</remarks>
+        public void Show(Texts texts)
+        {
+            _inside.Padding = new Thickness(Depth > 0 ? Indent : 0f, 0f, 0f, 0f);
+
+            var pressable = Opens != null;
+            _opens.CanExecute = pressable;
+            Tip = Tip.For(Tip, About, AboutArguments);
+            var wrong = Problems > 0;
+
+            Style = wrong
+                ? (Chosen ? Styles.BrokenChosen : Styles.Broken)
+                : Running
+                    ? (Chosen ? Styles.RunningChosen : Styles.Running)
+                    : Parked
+                        ? (Chosen ? Styles.ParkedChosen : Styles.Parked)
+                        : Chosen
+                            ? Styles.Chosen
+                            : !pressable
+                                ? Styles.Still
+                                : IsAction
+                                    ? Styles.AddRow
+                                    : Styles.Row;
+
+            if (!ReferenceEquals(_said, Summary) || _saidAsks != Asks)
+            {
+                _said = Summary;
+                _saidAsks = Asks;
+
+                // The ellipsis is the desktop convention for a button that asks something before it acts.
+                _summary.Text = IsAction ? StartView.Plus + Summary + (Asks ? "…" : "") : Summary;
+            }
+
+            _summary.Color = IsAction ? Palette.Muted : Palette.Ink;
+
+            _light.Tint = wrong
+                ? Palette.Problem
+                : IsAction
+                    ? Palette.None
+                    : JustRan
+                        ? Palette.Live
+                        : Palette.Dim;
+
+            _light.Tip = Tip.For(_light.Tip, IsAction
+                ? null
+                : wrong
+                    ? texts.RowBroken
+                    : JustRan
+                        ? texts.RowRan
+                        : texts.RowIdle);
+
+            _status.Text = Status;
+            _lastRun.Text = LastRun;
+
+            var doing = Running ? Stops : Runs;
+
+            _run.Symbol = Running ? Symbols.Stop : Symbols.Play;
+            _run.IsVisible = doing != null;
+            _runs.CanExecute = doing != null;
+            _run.Tip = Tip.For(_run.Tip, doing != null ? (Running ? SequenceText.Stops() : SequenceText.Starts()) : null);
+
+            _changes.CanExecute = Changes != null;
+            _status.Tip = Tip.For(_status.Tip, Changes != null ? texts.RowChange : null);
+
+            var saying = !string.IsNullOrEmpty(Problem);
+
+            _detail.IsVisible = saying || !string.IsNullOrEmpty(Status) || !string.IsNullOrEmpty(LastRun);
+
+            _status.IsVisible = !saying;
+
+            _problem.Text = Problem;
+            _problem.IsVisible = saying;
+            _problem.Color = ProblemIsWarning ? Palette.Notice : Palette.Problem;
+
+            var marked = saying || Problems > 0 || Remarks > 0;
+            var quietly = saying ? ProblemIsWarning : Problems == 0;
+
+            _below.IsVisible = marked;
+            _below.Tint = quietly ? Palette.Notice : Palette.Problem;
+
+            var switches = Flips != null;
+            _switch.IsVisible = switches;
+            _switch.IsOn = SwitchIsOn;
+            _switch.Says(texts.SwitchOn, texts.SwitchOff);
+            _flips.CanExecute = switches;
+            _switch.Tip = Tip.For(_switch.Tip, switches ? Switching(texts, SwitchGovernsAll, SwitchIsOn) : null);
+
+            var copies = Copies != null;
+            _duplicate.IsVisible = copies;
+            _copies.CanExecute = copies;
+            _duplicate.Tip = Tip.For(_duplicate.Tip, copies ? DuplicateText : null);
+
+            var offers = Offers != null;
+            _button.IsVisible = offers;
+            _offers.CanExecute = offers;
+            _button.Tip = Tip.For(_button.Tip, offers ? ButtonAbout : null);
+
+            if (offers)
+                _button.Text = ButtonText;
+
+            var bins = Deletes != null;
+            _delete.IsVisible = bins;
+            _bins.CanExecute = bins;
+            _delete.Tip = Tip.For(_delete.Tip, bins ? texts.RowDelete : null);
+        }
+
+        static void Carry(ICommand command)
+        {
+            if (command != null && command.CanExecute)
+                command.Execute();
         }
     }
 }

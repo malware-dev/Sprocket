@@ -176,7 +176,7 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         private static void Clicked(EditorScene scene, Vector2 at, int clicks)
         {
-            if (scene.Grab(at))
+            if (scene.Grab(at, clicks))
             {
                 scene.Drop();
                 return;

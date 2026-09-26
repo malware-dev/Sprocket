@@ -26,36 +26,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<Trigger> _triggers = new List<Trigger>();
 
-        /// <summary>The rows being built, before they are published in one go.</summary>
         readonly List<StatusEntry> _gathered = new List<StatusEntry>();
 
-        /// <summary>The same, for the sentences above them.</summary>
         readonly List<SentenceTrigger> _sentences = new List<SentenceTrigger>();
 
-        /// <summary>What the program's wiring count was when these lists were gathered.</summary>
         int _wiring = -1;
 
-        /// <summary>What each trigger is about, resolved once when the rows are built.</summary>
-        /// <remarks>
-        /// So the tick that reads what a trigger's signal says does not walk the system's sequences
-        /// to find out which one it means. A trigger cannot change what it points at without the
-        /// program changing, and that rebuilds this screen.
-        /// </remarks>
         readonly List<Sequence> _runs = new List<Sequence>();
 
-        /// <summary>
-        /// What starts things, above what they are.
-        /// </summary>
-        /// <remarks>
-        /// Two lists rather than one, because they are two kinds of thing and somebody builds them
-        /// in that order: a sequence is what happens, a trigger is a reason for it to happen. One
-        /// list of both would have to say which each row was, on every row.
-        /// <para>
-        /// Each is under its own row of ways to add to it, and each is named, which is what tells
-        /// them apart on screen. They are drawn differently too, and that is the honest difference:
-        /// a sequence is a thing to open, and a trigger is a sentence changed in place.
-        /// </para>
-        /// </remarks>
         TriggerListComponent _starts;
 
         StatusListComponent _list;
@@ -66,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _system = system;
         }
 
-        public override string Title => SystemSummary.Describe(Editor.Runner.Bindings, _system);
+        public override string Title => SystemSummary.Describe(Editor.Texts, Editor.Runner.Bindings, _system);
 
         /// <summary>
         /// What the author said this thing is.
@@ -99,6 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         public override bool CanRename => true;
 
         public override string RenamePrompt => "What is it?";
+
+        public override string NameAbout => "This logic system's name.\nPress to rename it.";
 
         /// <summary>
         /// A system has to be called something.
@@ -576,7 +556,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             var line = new UsingComponent();
             line.Lead = "Using the blocks of";
-            line.Name = shown == null ? "" : SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, shown);
+            line.Name = shown == null ? "" : SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, shown);
             line.Command = _system.Instances.Count < 2
                 ? 0
                 : Editor.Register(Cmd.ChooseInstance, _system.Id, delegate { Another(shown); });
@@ -591,7 +571,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             for (var i = 0; i < instances.Count; i++)
             {
                 SystemInstance instance = instances[i];
-                page.Add(SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, instance), instance == shown, delegate
+                page.Add(SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, instance), instance == shown, delegate
                 {
                     Editor.Choose(_system, instance);
                     Editor.Pop();

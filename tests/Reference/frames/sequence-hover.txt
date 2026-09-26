@@ -5,32 +5,32 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Sequence 1
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  SetClip    {X:259 Y:118 W:1402 H:836}
-002  Sprite     Sprocket_Fill         {X:259 Y:128 W:13 H:13}  #5F7278FF
-003  Text       at {X:282 Y:124.012} scale 0.57  #A2C3CDFF  "switched off"
-004  Text       at {X:1371.387 Y:124.3298} scale 0.57  #A2C3CDFF  "g"
-005  Text       at {X:1429.528 Y:124.3298} scale 0.57  #5F7278FF  "u"
-006  Text       at {X:1488.875 Y:124.3298} scale 0.57  #5F7278FF  "r"
-007  Text       at {X:1525.02 Y:124.3298} scale 0.57  #A2C3CDFF  "d"
-008  Sprite     Sprocket_Fill         {X:1542 Y:118 W:107 H:1}  #85A1A9FF
-009  Sprite     Sprocket_Fill         {X:1542 Y:150 W:107 H:1}  #85A1A9FF
-010  Sprite     Sprocket_Fill         {X:1542 Y:118 W:1 H:33}  #85A1A9FF
-011  Sprite     Sprocket_Fill         {X:1648 Y:118 W:1 H:33}  #85A1A9FF
-012  Sprite     Sprocket_Fill         {X:1543 Y:119 W:105 H:31}  #060A0CFF
-013  Sprite     Sprocket_Fill         {X:1596 Y:119 W:52 H:31}  #1B2C33FF
-014  Text       at {X:1559.697 Y:124.012} scale 0.57  #85A1A9FF  "ON"
-015  Text       at {X:1611.643 Y:124.012} scale 0.57  #DCF5FDFF  "OFF"
-016  Sprite     Sprocket_Fill         {X:291 Y:181 W:113 H:31}  #29363EFF
-017  Text       at {X:303.8 Y:185.902} scale 0.57  #A2C3CDFF  "+ do something"
-018  Text       at {X:427.0634 Y:185.902} scale 0.57  #A2C3CDFF  "+ wait"
-019  ClearClip  
-020  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:53}  #1B242AFF
-021  SetClip    {X:273 Y:55 W:107 H:33}
-022  Text       at {X:273.4433 Y:54.71198} scale 0.9  #DCF5FDFF  "Sequence 1"
-023  Text       at {X:372.7467 Y:59.87884} scale 0.64  #85A1A9FF  "p"
-024  ClearClip  
-025  Text       at {X:259 Y:61.13481} scale 0.57  #A2C3CDFF  "<"
-026  Text       at {X:1655.763 Y:61.13481} scale 0.57  #A2C3CDFF  "s"
-027  Sprite     Sprocket_Fill         {X:240 Y:98 W:1440 H:1}  #5B737BFF
-028  Sprite     Sprocket_Fill         {X:240 Y:973 W:1440 H:1}  #5B737BFF
-029  Sprite     Sprocket_Fill         {X:240 Y:974 W:1440 H:62}  #1B242AFF
+001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
+002  Text       at {X:262.1563 Y:62.71198} scale 0.401  #A2C3CDFF  "<"
+003  SetClip    {X:296 Y:53 W:1328 H:40}
+004  Text       at {X:304 Y:56.71198} scale 1.111  #DCF5FDFF  "Sequence 1"
+005  Text       at {X:440.7496 Y:62.71198} scale 0.401  #85A1A9FF  "p"
+006  ClearClip  
+007  Text       at {X:1638.156 Y:62.71198} scale 0.401  #A2C3CDFF  "s"
+008  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+009  SetClip    {X:256 Y:118 W:1408 H:853}
+010  Sprite     Sprocket_Fill         {X:256 Y:129 W:13 H:13}  #5F7278FF
+011  Text       at {X:279 Y:125.407} scale 0.732  #A2C3CDFF  "switched off"
+012  Text       at {X:1319.255 Y:113.2249} scale 0.732  #A2C3CDFF  "g"
+013  Text       at {X:1377.255 Y:113.2249} scale 0.732  #5F7278FF  "u"
+014  Text       at {X:1435.255 Y:113.2249} scale 0.732  #5F7278FF  "r"
+015  Text       at {X:1487.21 Y:113.2249} scale 0.732  #A2C3CDFF  "d"
+016  Sprite     Sprocket_Fill         {X:1533 Y:119 W:119 H:1}  #85A1A9FF
+017  Sprite     Sprocket_Fill         {X:1533 Y:151 W:119 H:1}  #85A1A9FF
+018  Sprite     Sprocket_Fill         {X:1533 Y:119 W:1 H:33}  #85A1A9FF
+019  Sprite     Sprocket_Fill         {X:1651 Y:119 W:1 H:33}  #85A1A9FF
+020  Sprite     Sprocket_Fill         {X:1534 Y:120 W:117 H:31}  #29363EFF
+021  Sprite     Sprocket_Fill         {X:1593 Y:120 W:58 H:31}  #5B737BFF
+022  Text       at {X:1550.933 Y:125.407} scale 0.732  #85A1A9FF  "ON"
+023  Text       at {X:1608.56 Y:125.407} scale 0.732  #DCF5FDFF  "OFF"
+024  Sprite     Sprocket_Fill         {X:288 Y:184 W:138 H:31}  #29363EFF
+025  Text       at {X:300.8 Y:188.992} scale 0.732  #A2C3CDFF  "+ do something"
+026  Text       at {X:449.0233 Y:188.992} scale 0.732  #A2C3CDFF  "+ wait"
+027  ClearClip  
+028  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
+029  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

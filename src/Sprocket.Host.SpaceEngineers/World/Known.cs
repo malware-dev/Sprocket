@@ -21,13 +21,10 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     static class Known
     {
-        /// <summary>What the game's handlers take a number with a fraction as: a float, the type of every such value it holds.</summary>
         const string Real = "single";
 
-        /// <summary>What the game's handlers take a whole number as: they accept either width, and this is the one its own toolbar dialog sends.</summary>
         const string Integer = "int32";
 
-        /// <summary>The game's actions that take one real number and declare it as text.</summary>
         static readonly string[] Reals =
         {
             "SetBlinkInterval", "SetGravityAcceleration", "SetPropulsionOverride", "SetSteerOverride",
@@ -46,6 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             said.Actions.Add(Action("SetColorMin", Colour()));
             said.Actions.Add(Action("SetColorMax", Colour()));
 
+            // The game's handlers take a number with a fraction as a float, the type of every such value it holds,
+            // and a whole number as either width; int32 is what its own toolbar dialog sends.
             said.Actions.Add(Action("SetRadius", Parameter("Radius", Real)));
 
             // A rotor turned to an angle at a speed, which way round as the game numbers it.

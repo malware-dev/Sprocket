@@ -34,41 +34,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     public static class ProgramText
     {
-        /// <summary>
-        /// The version of the language this build writes.
-        /// </summary>
-        /// <remarks>
-        /// <b>Raising this obliges a conversion.</b> It says a change would stop existing programs
-        /// working, so a reader meeting an earlier one has to convert it rather than turn it away. That
-        /// is why nothing done during development raises it, and why it is still one: nothing outside
-        /// this repository has ever been asked to read a program, so there is nothing to convert from.
-        /// </remarks>
         const int Version = 1;
 
-        /// <summary>
-        /// Which draft of that format this build writes, while it is not finished.
-        /// </summary>
-        /// <remarks>
-        /// <b>Raising this obliges nothing.</b> A program from another draft is read as far as it goes and
-        /// marked not to be written back, so nothing on disk is lost and the refusal is loud and at the
-        /// first line rather than confusing and deep in the file. That is the whole of what it buys, and it
-        /// is worth having because the format changes most while several worlds are being developed against
-        /// it.
-        /// <para>
-        /// So it is raised in the same change as anything written or read differently, the way
-        /// <c>docs/Language.md</c> is kept in step. A number nobody raises is worse than none, because it
-        /// claims a compatibility it does not have.
-        /// </para>
-        /// </remarks>
         const int Draft = 7;
 
-        /// <summary>
-        /// How a <c>changed</c> time may be written: ISO 8601, and nothing else.
-        /// </summary>
-        /// <remarks>
-        /// Quoted rather than bare because a bare date is two subtractions once expressions exist. A time with
-        /// no offset is UTC. The writer always uses the first.
-        /// </remarks>
         static readonly string[] Times =
         {
             "yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'",

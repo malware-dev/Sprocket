@@ -16,13 +16,6 @@ namespace Sprocket.Sim.Content
     /// </remarks>
     public static class Extract
     {
-        /// <summary>
-        /// What the simulator wants from the game, and why each one is worth having.
-        /// </summary>
-        /// <remarks>
-        /// A list rather than a sweep of the Content folder. Everything here is small and named, and a
-        /// tool that copied whatever it found would be a tool nobody could reason about the output of.
-        /// </remarks>
         static readonly string[][] Wanted =
         {
             new[] { "Fonts/white/FontDataPA-0.dds", "the letterforms themselves" },

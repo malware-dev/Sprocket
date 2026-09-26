@@ -27,12 +27,10 @@ public sealed class Wire : INetworkProxy
     readonly List<Peer> _peers = new List<Peer>();
     readonly List<Parcel> _flying = new List<Parcel>();
 
-    /// <summary>How many ticks it has been ticked.</summary>
     int _now;
 
     ulong _next = 76561190000000001UL;
 
-    /// <summary>The gateway the wire stood in for, put back when it is taken away.</summary>
     IMyMultiplayer _was;
 
     sealed class Parcel

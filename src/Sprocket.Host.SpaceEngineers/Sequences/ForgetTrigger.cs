@@ -27,7 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         int _at;
 
-        /// <summary>What it said when it went, to know the same thing is not there twice over.</summary>
         readonly List<string> _sources;
         readonly string _eventId;
 

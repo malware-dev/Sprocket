@@ -18,26 +18,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     sealed class AirVentExtension : IBlockExtension
     {
-        /// <summary>
-        /// How close to empty and to full a room has to get before the vent has finished with it.
-        /// </summary>
-        /// <remarks>
-        /// <b>A bet on how near a real room gets, and not a reading of anything.</b> A sealed room
-        /// with gas to spare settles below full and stays there - 95.4% on an airlock, measured in
-        /// game - because a room's capacity counts space the game will not fill. No constant
-        /// anywhere says where a given room stops, so this is a band rather than a limit.
-        /// <para>
-        /// Five percent. Too generous costs a door opening on a room five percent thinner than
-        /// ideal, which is nothing to a person: the game's own bar for standing somewhere without a
-        /// helmet is half, and it only calls oxygen low at a fifth. Too strict costs a sequence
-        /// that waits for a level the room will never reach.
-        /// </para>
-        /// <para>
-        /// The game's own status cannot replace this. It calls a room pressurized only at a level of
-        /// one or more, and an airtight room that is empty reports as depressurizing rather than
-        /// depressurized, so it is stricter than this in one direction and silent in the other.
-        /// </para>
-        /// </remarks>
         const float Emptied = 0.05f;
 
         const float Filled = 0.95f;
@@ -47,7 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         public const string Level = "level";
         public const string Sealed = "sealed";
 
-        /// <summary>What this world's vents were last seen doing. See <see cref="VentGas" />.</summary>
         readonly VentGas _gas = new VentGas();
 
         public bool Claims(IMyTerminalBlock block)
@@ -107,6 +86,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                         && !_gas.Working(vent, false));
                     return true;
                 case Empty:
+                    // Emptied is a band rather than a reading. A sealed room with gas to spare settles below full, 95.4% on
+                    // an airlock measured in game, and nothing says where a given room stops. The game's own status cannot
+                    // stand in: it calls a room pressurized only at a level of one or more, and reports an empty airtight
+                    // room as depressurizing.
                     value = EntityValue.Of(vent.IsWorking && vent.GetOxygenLevel() <= Emptied
                         && !_gas.Working(vent, true));
                     return true;

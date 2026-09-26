@@ -1,10 +1,14 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Words;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Picking
 {
@@ -26,158 +30,93 @@ namespace Sprocket.Host.SpaceEngineers.Picking
     {
         public const float ColumnWidth = Sizes.Column;
 
-        /// <summary>How wide the way back to the page before is, standing where its last column was.</summary>
         const float FoldWidth = 56f;
 
-        /// <summary>
-        /// How wide a column is on a page after the first, which makes room for the way back beside
-        /// three of them in the width three columns take on the first.
-        /// </summary>
         const float PagedWidth = (ColumnWidth * 3f - FoldWidth - Space.Item) / 3f;
 
-        /// <summary>How many ticks a page takes to slide in, which is a third of a second.</summary>
         const int SlideTicks = 20;
 
         readonly PickComponent _component;
         readonly Stack _columns = Widgets.RowOf(Space.Item);
         readonly Scroll _strip = new Scroll();
 
-        /// <summary>What <see cref="_grabbed" /> says when the strip's own bar is the one being held.</summary>
         const int Strip = -2;
 
         const int None = -1;
 
-        /// <summary>Which column's bar is being dragged, or <see cref="Strip" />, or nothing.</summary>
         int _grabbed = None;
 
-        /// <summary>Where the pointer was when the strip last moved.</summary>
         float _held;
         readonly List<StageView> _stages = new List<StageView>();
 
         int _revision = -1;
         int _built = -1;
 
-        /// <summary>The page the columns were last built for, or minus one before they have been.</summary>
         int _paged = -1;
 
-        /// <summary>The pages that have been shown, which is when each one gave its column the caret.</summary>
         readonly List<int> _arrived = new List<int>();
 
-        /// <summary>
-        /// The way back to the page before, where the last column of that page stood, drawn narrow
-        /// because what it was about is answered.
-        /// </summary>
         readonly Sized _fold = new Sized(FoldWidth);
         readonly Dock _foldColumn = new Dock();
 
-        /// <summary>
-        /// The way on to the page after, at the right of the last column, where something chosen has a
-        /// page after it.
-        /// </summary>
         readonly Sized _next = new Sized(FoldWidth);
         readonly Dock _nextColumn = new Dock();
 
-        /// <summary>Whether the way on stands at the right of the strip.</summary>
         bool _onward;
 
-        /// <summary>How far into making room for the way on or taking it away, or minus one where neither is under way.</summary>
         int _squeeze = -1;
 
         float _squeezeFrom;
         float _squeezeTo;
 
-        /// <summary>
-        /// The column coming back out of the way back, drawn only as wide as the way back has grown, so
-        /// what is in it is there all the way and nothing is put in its place at the end.
-        /// </summary>
         readonly Sized _reveal = new Sized(FoldWidth);
         readonly Scroll _revealWindow = new Scroll();
 
-        /// <summary>What grows or shrinks as a page turns: the way back folding, or a column coming back out of it.</summary>
         Sized _resized;
 
-        /// <summary>The columns of the page being left, sliding out of sight, and nothing otherwise.</summary>
         readonly List<Element> _leaving = new List<Element>();
 
-        /// <summary>
-        /// Room past the last column while a page turns, a page wide, so the strip can scroll as far as
-        /// the slide goes.
-        /// </summary>
-        /// <remarks>
-        /// A scroller stops where its content ends, and a page turning forward has only its first
-        /// column yet - so without this the slide stops short of the page and jumps the rest at the end.
-        /// </remarks>
         readonly Sized _room = new Sized(ColumnWidth * 3f + Space.Item * 2f);
 
-        /// <summary>How far into a slide from one page to another, or minus one where none is under way.</summary>
         int _slide = -1;
 
         float _slideFrom;
         float _slideTo;
 
-        /// <summary>How wide what grows or shrinks as a page turns starts the slide, and ends it.</summary>
         float _resizedFrom;
 
         float _resizedTo;
 
-        /// <summary>What the strip held before a page turned, kept only while the new page is laid out.</summary>
         readonly List<Element> _old = new List<Element>();
 
-        /// <summary>
-        /// The values the chosen thing takes, and the way to finish, once a page of the pick gives any.
-        /// </summary>
-        /// <remarks>Made when first wanted, at the width of the page that wants it.</remarks>
         Ask _given;
 
-        /// <summary>
-        /// The way to finish where there are no values to give, under the rows of the column the pick is
-        /// finished from, as the values column carries its own under its fields.
-        /// </summary>
         readonly Label _done = Widgets.Label("Done", Palette.Ink, Lettering.Small);
 
         readonly Sized _givenRoot = new Sized(ColumnWidth);
         readonly Dock _givenColumn = new Dock();
         readonly Stack _givenHead = Widgets.Column(Space.Row);
 
-        /// <summary>The heading on the left, and Done on the right of it while there are no fields.</summary>
         readonly Bar _givenTop = new Bar();
         readonly Label _givenTitle = Widgets.Label("", Palette.Ink, Lettering.Body);
 
-        /// <summary>
-        /// The line under the heading, where a stage says what it holds, kept so the first field lines
-        /// up with the search boxes beside it.
-        /// </summary>
         readonly Label _givenUnder = Widgets.Label("", Palette.Faint, Lettering.Tiny);
 
-        /// <summary>The fields, and the line under them.</summary>
         readonly Stack _givenBody = Widgets.Column(Space.Region);
 
-        /// <summary>Under the fields: why nothing can be finished yet, and Done on the right of it.</summary>
         readonly Bar _givenFoot = new Bar();
 
-        /// <summary>
-        /// What was entered for each chosen thing while the pick is open, by what it is for and then by
-        /// field.
-        /// </summary>
-        /// <remarks>
-        /// Kept by the view because what is typed is the view's until it is finished, and for as long as
-        /// the view lives, which is as long as the pick is open. Each field as its own control spells it,
-        /// so going back to something refills its controls the way opening on a step does.
-        /// </remarks>
         readonly Dictionary<string, Dictionary<string, string>> _entered =
             new Dictionary<string, Dictionary<string, string>>();
 
-        /// <summary>Which chosen thing the fields are showing, or null before they have shown anything.</summary>
         string _shown;
 
         int _restated = -1;
 
-        /// <summary>Whether the fields have been filled for the first time, which is when they may take the caret on opening.</summary>
         bool _opened;
 
         readonly List<string> _filling = new List<string>();
 
-        /// <summary>What core was last told the values hold.</summary>
         string _reported;
 
         public PickView(PickComponent component)
@@ -194,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _foldColumn.Highlight = Palette.PanelHot;
             _foldColumn.Padding = new Thickness(0f, Space.Region);
             _foldColumn.Fill = Widgets.Centred(Symbols.Left, Palette.Muted);
-            _foldColumn.Tip = "Back";
+            _foldColumn.Tip = Tip.For(_foldColumn.Tip, "Back");
             _fold.Content = _foldColumn;
 
             _nextColumn.Background = Palette.Panel;
@@ -202,7 +141,7 @@ namespace Sprocket.Host.SpaceEngineers.Picking
             _nextColumn.Highlight = Palette.PanelHot;
             _nextColumn.Padding = new Thickness(0f, Space.Region);
             _nextColumn.Fill = Widgets.Centred(Symbols.Right, Palette.Muted);
-            _nextColumn.Tip = "Next";
+            _nextColumn.Tip = Tip.For(_nextColumn.Tip, "Next");
             _next.Content = _nextColumn;
 
             // A window rather than a scroller: it is never moved, only made wider, and what it shows

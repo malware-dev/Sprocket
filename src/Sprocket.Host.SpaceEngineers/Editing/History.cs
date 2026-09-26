@@ -25,26 +25,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// </remarks>
     sealed class History<T> where T : class
     {
-        /// <summary>
-        /// How far back one thing can be walked.
-        /// </summary>
-        /// <remarks>
-        /// Deep enough that nobody reaches the end of it while fixing a mistake, shallow enough
-        /// that a long session cannot grow without bound. Sprocket runs inside a game.
-        /// </remarks>
         const int Depth = 50;
 
         readonly Dictionary<T, List<Edit<T>>> _done = new Dictionary<T, List<Edit<T>>>();
 
-        /// <summary>
-        /// What has been taken back and could be put back again.
-        /// </summary>
-        /// <remarks>
-        /// Emptied by the next edit, which is the standard behaviour and the right one: once
-        /// somebody has walked back three steps and then done something different, the three they
-        /// walked back are a road not taken. Offering to redo into a sequence that has moved on
-        /// since would put back a step at an index that means something else now.
-        /// </remarks>
         readonly Dictionary<T, List<Edit<T>>> _undone = new Dictionary<T, List<Edit<T>>>();
 
         /// <summary>

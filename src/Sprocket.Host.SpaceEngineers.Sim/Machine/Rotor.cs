@@ -24,7 +24,6 @@ namespace Sprocket.Sim.Machine;
 /// </remarks>
 sealed class Rotor : Fitting
 {
-    /// <summary>How far short of a limit a rotor held against it rests, in radians.</summary>
     const float Short = 0.00005f;
 
     float _angle;

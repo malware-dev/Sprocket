@@ -20,14 +20,6 @@ namespace Sprocket.Sim.Shell
     /// </remarks>
     public static class WindowPlace
     {
-        /// <summary>
-        /// How much of the window has to land on a screen for the remembered place to be used.
-        /// </summary>
-        /// <remarks>
-        /// Monitors come and go - a laptop leaves its dock, somebody unplugs the second screen - and a
-        /// window restored onto one that is no longer there is a window nobody can reach. Checking that a
-        /// decent corner of it is visible is cheaper than being clever about which screen it was on.
-        /// </remarks>
         const int MustBeVisible = 120;
 
         static string File

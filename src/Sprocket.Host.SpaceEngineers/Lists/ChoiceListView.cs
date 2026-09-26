@@ -1,8 +1,12 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
-using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
@@ -36,7 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
         int _revision = -1;
 
-        /// <summary>What is said while there is nothing to choose from, held so it can be said again.</summary>
         Label _empty;
 
         public ChoiceListView(ChoiceListComponent component)
@@ -83,7 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 row.Line.Press = Deed.Sends(entry.Command);
                 row.Text.Text = entry.Text;
                 row.Warning.Text = entry.Warning;
-                row.Warning.Collapsed = string.IsNullOrEmpty(entry.Warning);
+                row.Warning.IsVisible = !string.IsNullOrEmpty(entry.Warning);
                 row.Current.Text = entry.IsCurrent ? "*" : "";
                 // The one already chosen is drawn in the highlight tone at rest, so hovering it has to go
                 // a step further again or it would look like nothing happened.

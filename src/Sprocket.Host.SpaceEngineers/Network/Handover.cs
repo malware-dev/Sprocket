@@ -28,16 +28,12 @@ namespace Sprocket.Host.SpaceEngineers.Network
         readonly Action<long, string, string> _changed;
         readonly Action<long, string, string> _stored;
 
-        /// <summary>What was last sent of each Sprocket this client is editing, so an unchanged one sends nothing.</summary>
         readonly Dictionary<long, Sent> _sent = new Dictionary<long, Sent>();
 
-        /// <summary>Who holds each Sprocket that is being edited, by the block that carries it. Kept on the server.</summary>
         readonly Dictionary<long, Holder> _held = new Dictionary<long, Holder>();
 
-        /// <summary>What every client was last told each block holds, so an unchanged one is not told again.</summary>
         readonly Dictionary<long, Sent> _told = new Dictionary<long, Sent>();
 
-        /// <summary>Scratch for the leases being taken back from players who have gone.</summary>
         readonly List<long> _gone = new List<long>();
 
         NetworkChannel _channel;
@@ -130,7 +126,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             string state;
             copy.Written(out program, out state);
 
-            var switches = StateText.Save(copy.Editor.Program, null);
+            var switches = StateText.Save(copy.Program, null);
 
             Sent sent;
             if (_sent.TryGetValue(block, out sent) && sent.Program == program && sent.Switches == switches)
@@ -169,7 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             string program;
             string state;
             copy.Written(out program, out state);
-            _sent[block] = new Sent { Program = program, Switches = StateText.Save(copy.Editor.Program, null) };
+            _sent[block] = new Sent { Program = program, Switches = StateText.Save(copy.Program, null) };
         }
 
         /// <summary>
@@ -419,7 +415,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             {
                 string state;
                 unit.Written(out program, out state);
-                switches = StateText.Save(unit.Editor.Program, null);
+                switches = StateText.Save(unit.Program, null);
             }
 
             Told.Say(Who(sender) + " sent a change to block " + change.Block + ": "

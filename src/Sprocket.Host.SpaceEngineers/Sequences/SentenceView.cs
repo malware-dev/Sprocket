@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Controls;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Words;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
@@ -30,13 +33,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Label _lead;
         readonly List<Slot> _slots = new List<Slot>();
 
-        /// <summary>The word before each slot, drawn like the lead and hidden where there is none.</summary>
         readonly List<Label> _joins = new List<Label>();
 
-        /// <summary>What each element was last given, so an unchanged one is not worded again.</summary>
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
 
-        /// <summary>The step the lead was last worked out from.</summary>
         SentenceStep _shownStep;
 
         public SentenceView(int slots)
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 Label join = Widgets.Label("", Palette.Muted, Lettering.Body);
                 join.Wraps = false;
-                join.Collapsed = true;
+                join.IsVisible = false;
                 _joins.Add(join);
                 _wrap.Children.Add(join);
 
@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 for (int i = 0; i < _joins.Count; i++)
                 {
                     _joins[i].Text = SentenceText.Joining(step.Slots, i);
-                    _joins[i].Collapsed = _joins[i].Text.Length == 0;
+                    _joins[i].IsVisible = _joins[i].Text.Length != 0;
                 }
             }
 

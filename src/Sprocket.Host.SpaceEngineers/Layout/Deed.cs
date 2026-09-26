@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 namespace Sprocket.Host.SpaceEngineers.Layout
 {
     /// <summary>What a press on one element does.</summary>

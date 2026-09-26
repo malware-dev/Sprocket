@@ -57,21 +57,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public bool Enabled { get; set; }
 
-        /// <summary>
-        /// What this one has slotted into each of the system's block slots.
-        /// </summary>
-        /// <remarks>
-        /// The whole of what makes one of a system different from another. The system's
-        /// sequences all point at the blocks its author used; this says "where they used that
-        /// door, I use this one". The first one of a system slots in nothing at all, because
-        /// the blocks the author built with are its blocks - which is why every system built
-        /// before block slots existed keeps working untouched.
-        ///
-        /// A slot may hold several blocks, and needs no new rule to read correctly: several
-        /// blocks on a trigger already means <em>any of them</em> and several in a condition
-        /// already means <em>all of them</em>, so a wide airlock with two inner doors says the
-        /// right thing in both places without anybody deciding it should.
-        /// </remarks>
         readonly Dictionary<string, List<string>> _fills = new Dictionary<string, List<string>>();
 
         public IEnumerable<string> Filled => _fills.Keys;

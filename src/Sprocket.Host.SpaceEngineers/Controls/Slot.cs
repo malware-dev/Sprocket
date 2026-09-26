@@ -1,7 +1,8 @@
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Drawing;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Controls
 {
@@ -16,25 +17,20 @@ namespace Sprocket.Host.SpaceEngineers.Controls
     /// </remarks>
     public class Slot : Label
     {
-        /// <summary>The room held for the cross, where there is one.</summary>
-        /// <remarks>
-        /// A fixed number rather than the glyph's own width, so the words inside a slot do not shift
-        /// sideways because a symbol font measured a hair wider than the last one did.
-        /// </remarks>
         const float Clearing = 20f;
 
-        readonly ElementCollection _children;
+        readonly Collection _children;
 
         Element _clear;
 
         public Slot()
         {
-            _children = new ElementCollection(this);
+            _children = new Collection(this);
 
-            Scale = Lettering.Body;
+            FontSize = Lettering.Body;
             Color = Palette.Ink;
             Background = Palette.SlotFill;
-            Highlight = Palette.ControlHot;
+            Highlight = Palette.Well;
             Padding = new Thickness(Space.ChipX, Space.ChipY);
             Underline = Palette.SlotEdge;
 
@@ -81,6 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             if (_clear == null)
                 return words;
 
+            // A fixed room for the cross rather than its own width, so the words in a slot do not shift sideways
+            // when a symbol font measures a hair wider.
             _clear.Measure(g, new Vector2(Clearing, words.Y));
             return words;
         }
@@ -105,9 +103,9 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         {
             const float thickness = 2f;
 
-            g.DrawSprite(Solid,
+            g.Fill(
                 new RectangleF(Bounds.X, Bounds.Y + Bounds.Height - thickness, Bounds.Width, thickness),
-                Underline, 0f);
+                Underline);
 
             base.DrawContent(g);
 

@@ -61,7 +61,6 @@ abstract class Fitting
 
     bool _enabled = true;
 
-    /// <summary>Whoever is listening for this block starting or stopping working.</summary>
     readonly List<Action<IMyCubeBlock>> _watching = new List<Action<IMyCubeBlock>>();
 
     /// <summary>What the mod holds: the block, as the game's own interface.</summary>

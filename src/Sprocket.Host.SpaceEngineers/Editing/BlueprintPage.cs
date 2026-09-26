@@ -20,15 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     {
         readonly AutomationSystem _system;
 
-        /// <summary>The parts something uses, as the screen was built from them.</summary>
         readonly List<Part> _parts = new List<Part>();
 
-        /// <summary>Scratch for what the system's sentences name.</summary>
         readonly List<string> _used = new List<string>();
 
         BlueprintComponent _blueprint;
 
-        /// <summary>What the page was built from, so a change of shape rebuilds it.</summary>
         int _shape;
 
         public BlueprintPage(SprocketEditor editor, AutomationSystem system) : base(editor)
@@ -43,6 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         public override bool CanRename => true;
 
         public override string RenamePrompt => "What is the blueprint called?";
+
+        public override string NameAbout => "This blueprint's name.\nPress to rename it.";
 
         public override bool NameRequired => true;
 
@@ -82,11 +81,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 _blueprint.Members.Add(Member(instances[i], instances[i] == chosen));
 
             var another = new StatusEntry("add another " + _system.Name,
-                Editor.RegisterText(Cmd.AddInstance, _system.Id,
-                    delegate(string name) { Editor.Another(_system, name); },
-                    delegate(string name) { return _system.FindInstance(Naming.Clean(name)) == null; }));
+                Editor.Register(Cmd.AddInstance, _system.Id, delegate { Editor.Another(_system); }));
             another.IsAction = true;
-            another.Question = "What is this one called?";
             _blueprint.Members.Add(another);
 
             if (chosen != null)
@@ -115,14 +111,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             head.SwitchIsOn = chosen.Enabled;
 
             var going = SystemSummary.IsRunning(_system, Editor.Runner, chosen);
-            head.Status = SystemSummary.RunningText(going);
+            head.Status = SystemSummary.RunningText(Editor.Texts, going);
             head.Running = going;
         }
 
         /// <summary>One of the logic systems made from it, chosen by pressing it.</summary>
         StatusEntry Member(SystemInstance instance, bool chosen)
         {
-            var entry = new StatusEntry(SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, instance),
+            var entry = new StatusEntry(SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, instance),
                 Editor.Register(Cmd.ChooseInstance, _system.Id, instance.Number,
                     delegate { Editor.Choose(_system, instance); }));
             entry.Chosen = chosen;
@@ -135,7 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </summary>
         StatusEntry Head(SystemInstance chosen)
         {
-            var head = new StatusEntry(SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, chosen), 0);
+            var head = new StatusEntry(SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, chosen), 0);
             head.SwitchCommand = Editor.RegisterToggle(Cmd.EnableInstance, _system.Id, chosen.Number,
                 delegate(bool on) { chosen.Enabled = on; });
             head.SwitchIsOn = chosen.Enabled;
@@ -181,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         void Fill(Part part, SystemInstance chosen)
         {
             var page = new ChoicePage(Editor, part.Label);
-            page.Caption = SystemSummary.DescribeInstance(Editor.Runner.Bindings, _system, chosen);
+            page.Caption = SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, chosen);
             page.EmptyText = "Nothing on this construct can fill it.";
 
             var filled = chosen.FilledWith(part.Id);

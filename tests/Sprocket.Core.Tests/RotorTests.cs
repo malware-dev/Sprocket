@@ -16,7 +16,6 @@ namespace Sprocket.Tests;
 /// </summary>
 public class RotorTests
 {
-    /// <summary>Directly, clockwise and counter-clockwise, as the game numbers them.</summary>
     const long Directly = 0;
     const long Clockwise = 1;
 

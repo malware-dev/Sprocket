@@ -32,17 +32,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Turning to an angle, which is Sprocket's own and waits until it gets there.</summary>
         public const string RotateTo = "rotate-to";
 
-        /// <summary>How near a limit a rotor counts as at it, in radians. Transcribed from the game's own test.</summary>
         const float Hair = 0.0001f;
 
         const string Arrived = "arrived";
         const string There = "is-there";
 
-        /// <summary>What this world's rotors were last seen doing. See <see cref="RotorTurn" />.</summary>
         readonly RotorTurn _turn = new RotorTurn();
 
-        /// <summary>The game's own names for the three directions, which are the values the game is told.</summary>
-        /// <remarks>Transcribed from the game's <c>MyRotationDirection</c>: shortest way, then clockwise, then counter-clockwise.</remarks>
         static readonly string[] Directions = { "0", "1", "2" };
 
         static readonly string[] Ways = { "directly", "clockwise", "counter-clockwise" };
@@ -134,6 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         static Field Way()
         {
+            // The game's own values for MyRotationDirection: shortest way, then clockwise, then counter-clockwise.
             var way = Field.Among("direction", Ways, Directions);
             way.Entry = Entry.Whole;
             way.Needed = true;
@@ -205,6 +202,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var speed = rotor.TargetVelocityRPM;
             if (speed > 0)
+                // Hair is how near a limit counts as at it, in radians, transcribed from the game's own test.
                 return rotor.Angle > rotor.UpperLimitRad - Hair;
 
             if (speed < 0)

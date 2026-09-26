@@ -35,11 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly List<Shift>[] _tens = Lists(Ten);
         readonly List<Shift>[] _hundreds = Lists(Hundred);
 
-        /// <summary>What falls due on the tick being run, gathered before any of it is done.</summary>
-        /// <remarks>
-        /// Doing a shift can move others - a sequence starting another one puts that one's work on
-        /// the rota - so the lists are never walked while anything is being done.
-        /// </remarks>
         readonly List<Shift> _due = new List<Shift>();
 
         int _next;

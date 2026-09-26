@@ -15,7 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class DragTests
 {
-    /// <summary>How tall the six dots of one grip stand.</summary>
     const float GripHeight = 15f;
 
     [Fact]

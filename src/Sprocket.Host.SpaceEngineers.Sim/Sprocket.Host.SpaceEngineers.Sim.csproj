@@ -15,6 +15,8 @@
         <RootNamespace>Sprocket.Sim</RootNamespace>
         <AssemblyName>Sprocket.Host.SpaceEngineers.Sim</AssemblyName>
         <Platforms>x64</Platforms>
+
+        <!-- Picks DirectXTexNet's 64-bit native half, which the game's 64-bit assemblies need. -->
         <PlatformTarget>x64</PlatformTarget>
         <Configurations>Debug;Release</Configurations>
 
@@ -36,6 +38,13 @@
     <ItemGroup>
         <None Include="..\Maltek.Symbols\Content\Fonts\Maltek\**\*;..\Maltek.Mono\Content\Fonts\Maltek\**\*">
             <Link>Content\Fonts\Maltek\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <!-- The mod's texts and their translations, read the way the game reads them. -->
+    <ItemGroup>
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\Localization\*.resx">
+            <Link>Content\Localization\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>

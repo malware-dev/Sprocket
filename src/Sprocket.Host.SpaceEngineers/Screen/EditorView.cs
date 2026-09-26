@@ -4,10 +4,19 @@ using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
-using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Controls;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
+using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -40,53 +49,55 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             get { return _editor.World; }
         }
 
-        readonly Dock _root = new Dock();
-        readonly Bar _headerBar = new Bar();
-        // The chevron alone. A word beside it would cost most of the room between the left edge and the
-        // heading to say what the arrow already says. The hover tip carries it instead, which is where a
-        // control that cannot speak for itself says what it is.
-        readonly Glyph _back = Widgets.Symbol(Symbols.Left, Palette.Muted);
-        readonly HeadingRow _title = new HeadingRow();
+        /// <inheritdoc />
+        public Texts Texts => _editor.Texts;
 
-        readonly Switch _switch = new Switch(Lettering.Small);
+        readonly VStack _root;
+        readonly Glyph _back;
+        readonly HeadingRow _title;
+        readonly Switch _switch;
 
-        /// <summary>The header's "look again".</summary>
-        readonly Glyph _refresh = Widgets.Symbol(Symbols.Refresh, Palette.Muted);
+        readonly Glyph _refresh;
 
-        // Not chevrons. An arrow that turns back on itself is what undo is; a chevron is where a
-        // press goes, and Back already owns that shape in this very row.
-        readonly Glyph _undo = Widgets.Symbol(Symbols.Undo, Palette.Muted);
-        readonly Glyph _redo = Widgets.Symbol(Symbols.Redo, Palette.Muted);
+        readonly Glyph _undo;
+        readonly Glyph _redo;
 
-        /// <summary>What the two arrows were last told to say, and the words they were made from.</summary>
-        string _undone;
-        string _undoSays;
-        string _redone;
-        string _redoSays;
-        readonly Label _subtitle = Widgets.Label("", Palette.Faint, Lettering.Small);
+        readonly Relay _undoes;
+        readonly Relay _redoes;
+        readonly Relay _refreshes;
+        readonly Relay _flips;
+        readonly Relay _finishes;
 
-        readonly Dock _bodyDock = new Dock();
-        readonly Scroll _scroll = new Scroll();
+        readonly Arguments _undone = new Arguments();
+        readonly Arguments _redone = new Arguments();
+        readonly Label _subtitle;
 
-        /// <summary>Where the pointer was when this screen's own thumb last moved.</summary>
-        float _held;
+        readonly Grid _page;
+        readonly ScrollView _scroll;
 
-        /// <summary>Set by a press on the cross, and read once by whoever owns the window.</summary>
         bool _wantsClose;
-        readonly Stack _body = Widgets.Column(0f);
-        readonly Stack _above = Widgets.Column(0f);
-        readonly Stack _below = Widgets.Column(0f);
+        readonly VStack _body;
+        readonly VStack _above;
 
-        readonly Stack _actions = Widgets.RowOf(Space.Item);
-        readonly Label _primary = Widgets.Label("", Palette.Chrome, Lettering.Body);
+        readonly Banner _banner = new Banner { Padding = new Thickness(0f, 0f, Sizes.Bar, 0f) };
+        readonly VStack _below;
+
+        readonly HStack _actions;
+        readonly Button _primary;
 
         readonly Ask _ask = new Ask();
         readonly Confirm _question = new Confirm();
 
-        /// <summary>What was last pressed, so a question that press raises hangs under it.</summary>
+        readonly WindowLayer _windows = new WindowLayer();
+
+        readonly MessageBox _dialog;
+
         Element _raisedBy;
 
         readonly List<ComponentView> _views = new List<ComponentView>();
+
+        EditorPage _shownPage;
+
         readonly List<EditorComponent> _shown = new List<EditorComponent>();
         readonly Dictionary<EditorComponent, ComponentView> _byComponent =
             new Dictionary<EditorComponent, ComponentView>();
@@ -136,143 +147,128 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         int _wires;
 
-        /// <summary>What is lit right now, so it can be put out without searching for it.</summary>
         Element _lit;
 
-        /// <summary>What the lit thing had to say, if anything.</summary>
-        string _saying;
+        Document _saying;
 
-        readonly Label _tip = Widgets.Tip();
+        Arguments _sayingArguments;
+
+        readonly RichText _tip = new RichText { Style = Styles.Tip };
 
         int _actionRevision = -1;
 
-        /// <summary>What an open rename will send its answer to.</summary>
         int _renameCommand;
 
-        /// <summary>The text and command core was last asked about, and whether it said the text was taken.</summary>
-        /// <remarks>
-        /// Asked every tick while a box is open, so the answer is kept until the text changes. A box hands back
-        /// the same string until somebody types, which is what makes comparing references enough.
-        /// </remarks>
         string _checkedText;
         int _checkedCommand;
         bool _checkedTaken;
-        /// <summary>Which part of the heading is being typed into, or -1 when none is.</summary>
         int _renaming = -1;
 
         readonly Overlay _overlay = new Overlay();
 
-        /// <summary>Which question is on screen, so a new one replaces it rather than hiding in it.</summary>
         int _asked;
 
-        /// <summary>
-        /// Whether a double press chose something that takes values, and the values column has yet to
-        /// be filled for it.
-        /// </summary>
-        /// <remarks>
-        /// Acted on once the views have caught up with the choice, since until then the column is
-        /// still showing what was chosen before.
-        /// </remarks>
         bool _movingOn;
 
         TextBox _focus;
         int _focusCommand;
         int _focusTakes;
 
-        /// <summary>What the box with the caret last held that its command took.</summary>
         string _focusTook = "";
         ComponentView _dragging;
+
+        readonly InputRoot _input;
+
+        HeadingPart _namedArrival;
+
+        bool _pressing;
+
+        Vector2 _pressedAt;
 
         public EditorView(SprocketEditor editor)
         {
             _editor = editor;
+            _title = new HeadingRow(this, new Relay(CommitAsk), new Relay(CancelAsk), Retyped);
+
+            _undoes = new Relay(() => Send(_undo, _editor.Screen.UndoCommand, null));
+            _redoes = new Relay(() => Send(_redo, _editor.Screen.RedoCommand, null));
+            _refreshes = new Relay(() => Send(_refresh, _editor.Screen.RefreshCommand, null));
+            _flips = new Relay(() => Switch(_switch, _editor.Screen.SwitchCommand, !_editor.Screen.SwitchIsOn));
+            _finishes = new Relay(() => Act(_primary, Finishing(_editor.Screen), 1));
+
+            _scroll = new ScrollView { Style = Styles.ScrollView, Content = new VStack().As(out _body) };
+
+            _root = new VStack
+            {
+                Background = Palette.Page,
+                Children =
+                {
+                    new VStack
+                    {
+                        Background = Palette.Chrome,
+                        Padding = new Thickness(16f, 8f),
+                        Spacing = 4f,
+                        Children =
+                        {
+                            new HStack
+                            {
+                                Spacing = 8f,
+                                Children =
+                                {
+                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = new Relay(Back) }.As(out _back),
+                                    _title,
+                                    new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
+                                    new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),
+                                    new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
+                                    new Glyph { Symbol = Symbols.Refresh, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _refreshes }.As(out _refresh)
+                                }
+                            },
+                            new Label { Style = Styles.Detail }.As(out _subtitle)
+                        }
+                    },
+                    new Rule(1f, Palette.Line),
+                    new Grid
+                    {
+                        Padding = new Thickness(16f),
+                        Placement = Flex.Grow,
+                        Columns = { Length.Flex(1f) },
+                        Rows = { Length.Auto, Length.Flex(1f), Length.Auto },
+                        Cells =
+                        {
+                            [0, 0] = new VStack { Children = { _banner, new VStack().As(out _above) } },
+                            [2, 0] = new VStack().As(out _below)
+                        }
+                    }.As(out _page),
+                    new Rule(1f, Palette.Line),
+                    new HStack
+                    {
+                        Background = Palette.Chrome,
+                        Padding = new Thickness(16f, 8f),
+                        Spacing = 16f,
+                        Children =
+                        {
+                            new HStack { Spacing = 8f, Placement = Flex.Grow }.As(out _actions),
+                            new Button { Style = Styles.Primary, Command = _finishes }.As(out _primary)
+                        }
+                    }
+                }
+            };
+
+            _dialog = new MessageBox
+            {
+                Style = Styles.Dialog,
+                Placement = Fixed.Wide(Sizes.Popup),
+                MessageStyle = Styles.Question,
+                ButtonStyle = Styles.Button,
+                DefaultStyle = Styles.Primary,
+                Cancel = new Relay(() => _editor.Unask()),
+                ShowsCancel = false
+            };
+
+            _input = new InputRoot(_root);
+            _input.FocusChanged += Refocused;
 
             Attach();
-
-            // Inside a stack that takes the slack, because Fill stretches whatever it is given and a
-            // heading lit across the whole header would be a highlight the size of the screen. A
-            // horizontal stack hands each child its own width, which is exactly the hug wanted here.
-            // Lit on every screen, the root included, where it leaves the editor rather than
-            // retreating a page. Not two controls: a chevron means "leave what I am looking at", and on
-            // the front door what is being looked at is the editor. That is the rule Escape follows
-            // here, and nobody has ever found Escape confusing.
-            //
-            // Set once. Neither of these has ever depended on anything, and writing them on every frame
-            // was the same reading habit this whole arrangement is here to break.
-            _back.Tint = Palette.Muted;
-            _back.Highlight = Palette.Panel;
-
-            // The other glyph in the header, and it answers a press, so it lights like the first one. A
-            // control that can be pressed and cannot be lit is the pair of rules in Highlight and Press
-            // disagreeing with each other.
-            _refresh.Highlight = Palette.Panel;
-
-            var titleLane = Widgets.RowOf(0f);
-            titleLane.Children.Add(_title.Root);
-
-            // No slot holding it to a width any more. A switch showing both of its positions is already
-            // the width of the longer word twice over whichever way it is set, so the title cannot be
-            // shifted sideways by somebody stopping a system.
-            // The switch and the refresh sit together on the right, in that order, so the switch stays
-            // where it has always been and the refresh reads as furniture rather than as part of it.
-            // The way back sits with the rest of the furniture rather than in a row of its own: it
-            // is done to the screen it sits on, like Back and the switch, and a strip holding
-            // nothing but two arrows is most of a line spent on them.
-            //
-            // Left of the switch, and both hold their place on a screen that has a history at all, so
-            // the switch cannot be moved sideways by somebody making their first edit.
-            var rightLane = Widgets.RowOf(Space.Row);
-            rightLane.Children.Add(_undo);
-            rightLane.Children.Add(_redo);
-            rightLane.Children.Add(_switch);
-            rightLane.Children.Add(_refresh);
-
-            _headerBar.Spacing = Space.Row;
-            _headerBar.Left = _back;
-            _headerBar.Fill = titleLane;
-            _headerBar.Right = rightLane;
-
-            // The subtitle's line is held for a screen that has one and not for a screen that does not,
-            // decided once as the screen goes up. <b>The header never changes size while a screen is
-            // up.</b> Everything under it is placed from the bottom of this block, so a line arriving
-            // or leaving takes the whole page with it, and a page that moves under the pointer loses
-            // whoever was reading it.
-            Stack headerBlock = Widgets.Column(Space.Line);
-            headerBlock.Background = Palette.Chrome;
-
-            // Less than a row's down the screen, because the title inside it now carries its own - it is
-            // a control since the pencil joined it, and the two paddings stack. Eighteen units of chrome
-            // above a heading was most of why the header looked like a banner.
-            headerBlock.Padding = new Thickness(Space.PadX, Space.Item);
-            headerBlock.Children.Add(_headerBar);
-            headerBlock.Children.Add(_subtitle);
-
-            Stack header = Widgets.Column(0f);
-            header.Children.Add(headerBlock);
-            header.Children.Add(Widgets.Line());
-
-            Widgets.Barred(_scroll);
-            _scroll.Content = _body;
-            _bodyDock.Padding = new Thickness(Space.PadX);
-
-            var footerBar = new Bar();
-            footerBar.Spacing = Space.Region;
-            footerBar.Left = _actions;
-            footerBar.Right = _primary;
-
-            Stack footerBlock = Widgets.Column(0f);
-            footerBlock.Background = Palette.Chrome;
-            footerBlock.Padding = new Thickness(Space.Region, Space.PadY * 0.8f);
-            footerBlock.Children.Add(footerBar);
-
-            Stack footer = Widgets.Column(0f);
-            footer.Children.Add(Widgets.Line());
-            footer.Children.Add(footerBlock);
-
-            _root.Background = Palette.Page;
-            _root.Top = header;
-            _root.Fill = _bodyDock;
-            _root.Bottom = footer;
         }
 
         /// <summary>
@@ -328,7 +324,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _shown.Clear();
         }
 
-        /// <summary>Whether this is listening to core right now.</summary>
         bool _listening;
 
         void Said(object sender, PropertyChangedEventArgs e)
@@ -342,14 +337,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _chromeStale = true;
         }
 
-        /// <summary>
-        /// Whether anything the chrome shows has changed since it was last written.
-        /// </summary>
-        /// <remarks>
-        /// Core's own values announce themselves. What does not is this target's own state - which part
-        /// of the heading is being typed into, and whether what is typed can be given - so the places
-        /// that change it say so.
-        /// </remarks>
         bool _chromeStale = true;
 
         /// <summary>
@@ -462,16 +449,13 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
                 // Says what to do rather than what is wrong. "Needs a name" is a diagnosis and leaves
                 // somebody to work out the cure; there is only one cure and it fits in three words.
-                string text = AskBox.Text;
+                string text = _title.Box(_renaming).Text;
                 if (parts[_renaming].NameRequired && string.IsNullOrEmpty(text.Trim()))
-                    return "Give it a name first";
+                    return Texts.RenameEmpty;
 
-                return Taken(_renameCommand, text) ? TakenSays : "";
+                return Taken(_renameCommand, text) ? Texts.RenameTaken : "";
             }
         }
-
-        /// <summary>What a box says while its name belongs to something else.</summary>
-        const string TakenSays = "That name is taken";
 
         /// <summary>Whether core would refuse this text for this command, asked once per change of text.</summary>
         bool Taken(int command, string text)
@@ -500,7 +484,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>The box a question is being answered in. Only meaningful while <see cref="IsAsking" />.</summary>
         public TextBox AskBox
         {
-            get { return _renaming >= 0 ? _title[_renaming].Box : _ask.Box; }
+            get { return _ask.Box; }
         }
 
         /// <summary>Whether the caret is drawn this frame. The blink belongs to whoever owns a clock.</summary>
@@ -510,15 +494,16 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 _ask.Box.CaretVisible = value;
 
-                for (int i = 0; i < _title.Count; i++)
-                    _title[i].Box.CaretVisible = value;
-
                 if (_focus != null)
                     _focus.CaretVisible = value;
 
                 Ask given = Given;
                 if (given != null && given.Typing)
                     given.Box.CaretVisible = value;
+
+                var box = _input.Focused as Ui.Text.TextBox;
+                if (box != null)
+                    box.CaretVisible = value;
             }
         }
 
@@ -536,24 +521,38 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // Opened again where a different question has been raised, and not only where none was
             // up. One question answered by raising another kept the first one's words and the first
             // one's answers, which is a lie the moment any two follow each other.
-            if (screen.HasQuestion && (!_question.IsUp || _asked != screen.Asked))
+            if (screen.HasQuestion && !screen.CanGoBack)
+            {
+                if (!_windows.IsOpen(_dialog) || _asked != screen.Asked)
+                {
+                    _asked = screen.Asked;
+                    Ask(screen);
+                }
+            }
+            else if (screen.HasQuestion && (!_question.IsUp || _asked != screen.Asked))
             {
                 _asked = screen.Asked;
                 _question.Open(screen.Question, screen.Answers,
                     screen.QuestionIsHere ? _raisedBy : null, screen.Default);
             }
-            else if (!screen.HasQuestion && _question.IsUp)
+
+            if (!screen.HasQuestion && _question.IsUp)
                 _question.Close();
+
+            if (!screen.HasQuestion && _windows.IsOpen(_dialog))
+                _windows.Close(_dialog);
 
             // A screen that cannot be renamed while the box is open takes the box away with it.
             if (_renaming >= 0 && !screen.CanRename)
                 CancelAsk();
 
-            if (!ShowingSameComponents(screen))
+            if (!ShowingSameComponents(screen) || _editor.Current != _shownPage)
                 Rebuild(screen);
 
             for (int i = 0; i < _views.Count; i++)
                 _views[i].Tick(_editor.CurrentTick);
+
+            _banner.Show(_editor.Notice, _editor.CurrentTick);
 
             // After the views, so the column is showing what is chosen now.
             DressGiven(screen);
@@ -570,7 +569,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 // A name something else already has first, because that is the reason this view can
                 // see and the form cannot. What a field will take is the form's own, and it says so.
-                _ask.Refused = Taken(_ask.Command, _ask.Answer) ? TakenSays : _ask.Wrong;
+                _ask.Refused = Taken(_ask.Command, _ask.Answer) ? Texts.RenameTaken : _ask.Wrong;
                 _ask.Dress(Pointer);
             }
 
@@ -595,30 +594,28 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         void Dress(EditorScreen screen)
         {
             _title.Update(screen.Heading, _renaming);
+            NameArrival(screen);
 
             // Only the words. Whether there is room for them was settled when this screen went up - see
             // Rebuild - because changing it now would move the page under whoever is reading it.
             _subtitle.Text = screen.Subtitle;
 
-            // Which part wears the pencil is the row's business now, because it is a per-part answer.
+            // While the name in hand is one that cannot be given, the box says so, in its look and in its note.
             if (_renaming >= 0)
-                _title[_renaming].Wrong = Blocked.Length > 0;
+            {
+                string wrong = Blocked;
+                _title.Refuse(_renaming, wrong.Length > 0 ? wrong : null);
+            }
 
-            // Governs everything on the screen under it, which is what a switch in the header means.
-            if (screen.HasSwitch)
-                _switch.Show(screen.SwitchIsOn, true);
-            else
-                _switch.Hide();
+            _switch.IsVisible = screen.HasSwitch;
+            _switch.IsOn = screen.SwitchIsOn;
+            _switch.Says(Texts.SwitchOn, Texts.SwitchOff);
 
             // Where the screen is finished in a column of its own, that column's Done is the one.
             Label carried = Carried;
             bool here = screen.HasPrimary && Given == null && carried == null;
             _primary.Text = here ? Widgets.Caps(screen.PrimaryText) : "";
-
-            if (here)
-                Widgets.Go(_primary);
-            else
-                Widgets.Absent(_primary);
+            _finishes.CanExecute = here;
 
             if (carried == null)
                 return;
@@ -644,90 +641,55 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         void Wire(EditorScreen screen)
         {
-            // One control, two acts: a command while there is somewhere to retreat to, and the door once
-            // there is not. Which of the two it is gets said in the note rather than in the picture - a
-            // symbol that changed as somebody walked back up the pages would be a control moving under
-            // the pointer without moving.
-            //
-            // It earns a note at all because it has no word beside it any more, which is the case the
-            // note exists for exactly. The wording is this target's own: core publishes none for Back,
-            // and putting one there is Design decision 11.
-            _back.Press = screen.CanGoBack ? Deed.Sends(screen.BackCommand) : Deed.Leaves();
-            _back.Tip = screen.CanGoBack ? "Back" : "Close the editor";
+            _back.Tip = Tip.For(_back.Tip, screen.CanGoBack ? Texts.ChromeBack : Texts.ChromeClose);
 
-            string wrong = Blocked;
+            // A comparison each when nothing has changed, and this runs sixty times a second.
+            _undone.Set("action", screen.UndoText);
+            _redone.Set("action", screen.RedoText);
 
-            // Renaming hangs off the heading, because the heading is what the name is for - and off the
-            // part of it that the name belongs to, which is the whole reason a heading is several things.
-            // Not the part being typed into: that box is not a control to be pressed while it is open.
-            for (int i = 0; i < _title.Count; i++)
-            {
-                bool named = i < screen.Heading.Count;
+            _undo.IsVisible = screen.HasHistory;
+            _redo.IsVisible = screen.HasHistory;
 
-                _title[i].Press = named && screen.Heading[i].CanRename && i != _renaming
-                    ? Deed.Asks(screen.Heading[i].RenameCommand, screen.Heading[i].Prompt)
-                    : Deed.Nothing;
+            _undoes.CanExecute = screen.UndoCommand != 0;
+            _undo.Tip = Tip.For(_undo.Tip, screen.UndoCommand != 0 ? Texts.ChromeUndo : null, _undone);
+            _redoes.CanExecute = screen.RedoCommand != 0;
+            _redo.Tip = Tip.For(_redo.Tip, screen.RedoCommand != 0 ? Texts.ChromeRedo : null, _redone);
 
-                // While the name in hand is one that cannot be given, that part says so instead of
-                // saying what it usually says. Not a timer and not a thing of its own: the ordinary
-                // note, on the ordinary control, carrying different words for exactly as long as they
-                // are true. Nothing else on the screen has to know that an error can exist.
-                _title[i].Tip = i == _renaming && wrong.Length > 0 ? wrong : null;
-            }
+            _refreshes.CanExecute = screen.RefreshCommand != 0;
+            _refresh.Tip = Tip.For(_refresh.Tip, screen.RefreshCommand != 0
+                ? Texts.ChromeRefresh
+                : null);
 
-            // Built only when those words change. Joining two strings is cheap and this runs sixty
-            // times a second, for a note that is read when the pointer happens to rest on an arrow.
-            if (!ReferenceEquals(_undone, screen.UndoText))
-            {
-                _undone = screen.UndoText;
-                _undoSays = "Undo " + screen.UndoText;
-            }
-
-            if (!ReferenceEquals(_redone, screen.RedoText))
-            {
-                _redone = screen.RedoText;
-                _redoSays = "Redo " + screen.RedoText;
-            }
-
-            _undo.Collapsed = !screen.HasHistory;
-            _redo.Collapsed = !screen.HasHistory;
-
-            Widgets.Waiting(_undo, screen.UndoCommand, _undoSays);
-            Widgets.Waiting(_redo, screen.RedoCommand, _redoSays);
-
-            _refresh.Press = Deed.Sends(screen.RefreshCommand);
-            _refresh.Tip = screen.RefreshCommand != 0
-                ? "Read the ship again, in case somebody has changed a button"
-                : null;
-
-            _switch.Press = screen.HasSwitch
-                ? Deed.Switches(screen.SwitchCommand, !screen.SwitchIsOn)
-                : Deed.Nothing;
+            _flips.CanExecute = screen.HasSwitch;
 
             // A system's, always - core says so where it declares the command, and a sequence's switch
             // lives on the sentence rather than up here. The words say the act and its reach, not what
             // it is on: the heading directly above says that.
-            _switch.Tip = screen.HasSwitch ? StatusRow.Switching(true, screen.SwitchIsOn) : null;
-
-            for (int i = 0; i < _actions.Children.Count && i < screen.Actions.Count; i++)
-                _actions.Children[i].Press = Deed.Sends(screen.Actions[i].Command);
-
-            // Asking rather than sending where the screen cannot finish without a value: the field
-            // opens under this button, which is the one somebody just pressed to finish.
-            Deed finish = !screen.HasPrimary
-                ? Deed.Nothing
-                : screen.PrimaryAsks
-                    ? Deed.Values(screen.PrimaryCommand, screen.PrimaryQuestion,
-                        screen.PrimaryFields, screen.PrimaryFilled)
-                    : Deed.Sends(screen.PrimaryCommand);
+            _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? StatusRow.Switching(Texts, true, screen.SwitchIsOn) : null);
 
             Label carried = Carried;
-            _primary.Press = Given != null || carried != null ? Deed.Nothing : finish;
             if (carried != null)
-                carried.Press = finish;
+                carried.Press = Finishing(screen);
         }
 
-        /// <summary>How wide a question's popup is, whatever it is hanging under.</summary>
+        /// <summary>What finishing <paramref name="screen" /> does: asking, where it cannot finish without a value, and sending otherwise.</summary>
+        static Deed Finishing(EditorScreen screen)
+        {
+            if (!screen.HasPrimary)
+                return Deed.Nothing;
+
+            return screen.PrimaryAsks
+                ? Deed.Values(screen.PrimaryCommand, screen.PrimaryQuestion, screen.PrimaryFields, screen.PrimaryFilled)
+                : Deed.Sends(screen.PrimaryCommand);
+        }
+
+        /// <summary>Retreats a page, or leaves the editor from the front page.</summary>
+        void Back()
+        {
+            EditorScreen screen = _editor.Screen;
+            Act(_back, screen.CanGoBack ? Deed.Sends(screen.BackCommand) : Deed.Leaves(), 1);
+        }
+
         const float PopupWidth = Sizes.Popup;
 
         /// <summary>
@@ -792,6 +754,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 given.DrawHanging(g);
 
             DrawPopup(g, bounds);
+            _windows.Draw(g, bounds);
             DrawOverlay(g, bounds);
             DrawTip(g, bounds);
         }
@@ -806,6 +769,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         public Vector2 Pointer { get; set; }
 
+        /// <summary>Where the new controls on the screen's body take the pointer and the keyboard.</summary>
+        public InputRoot Input => _input;
+
         /// <summary>
         /// Lights the one thing the pointer is resting on, and puts out whatever was lit before.
         /// </summary>
@@ -818,7 +784,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             Element wanted = Under(Pointer);
 
-            _saying = wanted != null ? wanted.Tip : null;
+            var speaker = SayingAt(Pointer);
+            var tip = speaker == null ? null : speaker.Tip;
+            _saying = tip == null ? null : tip.Document;
+            _sayingArguments = tip == null ? null : tip.Arguments;
 
             if (wanted == _lit)
                 return;
@@ -857,11 +826,22 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // An unfinishable edit owns the screen as firmly as a popup does: the press path answers
             // nothing but the box being typed into, so nothing else may light up either.
             if (Blocked.Length > 0)
-                return _title[_renaming].Under(point);
+                return _title.Plate(_renaming).Under(point);
 
             Element owner = Owner;
 
             return owner != null ? owner.Under(point) : _root.Under(point);
+        }
+
+        /// <summary>What the pointer at <paramref name="point" /> rests on that has something to say, or null, looked for in whatever owns the screen.</summary>
+        internal Element SayingAt(Vector2 point)
+        {
+            if (Blocked.Length > 0)
+                return _title.Plate(_renaming).SayingAt(point);
+
+            Element owner = Owner;
+
+            return owner != null ? owner.SayingAt(point) : _root.SayingAt(point);
         }
 
         /// <summary>
@@ -881,6 +861,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             get
             {
+                Window modal = _windows.Modal;
+                if (modal != null)
+                    return modal;
+
                 if (_question.IsUp)
                     return _question.Root;
 
@@ -906,10 +890,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         void DrawTip(IGraphics g, RectangleF bounds)
         {
-            if (string.IsNullOrEmpty(_saying))
+            if (_saying == null)
                 return;
 
-            _tip.Text = _saying;
+            _tip.Document = _saying;
+            _tip.Arguments = _sayingArguments;
             _tip.Measure(g, new Vector2(Sizes.Popup, bounds.Height));
 
             Vector2 size = _tip.DesiredSize;
@@ -1121,6 +1106,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>The same, and what Enter in it takes.</summary>
         void Typing(TextBox box, int command, int takes)
         {
+            _input.Focus(null);
             _focus = box;
             _focusCommand = command;
             _focusTakes = takes;
@@ -1197,7 +1183,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>
         /// Offers the press to whatever might want to be dragged, before anything treats it as a click.
         /// </summary>
-        public bool Grab(Vector2 point)
+        public bool Grab(Vector2 point, int presses = 1)
         {
             // A question owns the screen, so it is asked first rather than not at all. What it may
             // have to drag is a slider on a colour, and only inside its own bounds - a drag started
@@ -1205,10 +1191,29 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (_ask.IsUp && _renaming < 0)
                 return _ask.Covers(point) && _ask.Grab(point);
 
-            // Nothing is carried out from under a popup, and nothing at all while a name is being
-            // typed. The same owner a press respects, asked the same way.
-            if (Owner != null || IsAsking)
+            // A new control takes the whole press, down, moves and release, through the input root: the box a
+            // name is typed in, a dialog's answers, and any other control, which moving the keyboard off that box
+            // gives the name. Found the way a press is, so whatever owns the screen is asked first.
+            var target = Under(point);
+            if (target != null && target.TakesInput)
+            {
+                UnfocusBox();
+                _input.PointerDown(target, point, presses);
+                _pressing = true;
+                _pressedAt = point;
+                return true;
+            }
+
+            // Nothing else is carried out from under a popup. The same owner a press respects, asked the same way.
+            if (Owner != null)
                 return false;
+
+            // Nothing else is carried while a name is being typed.
+            if (IsAsking)
+                return false;
+
+            _input.Focus(null);
+
 
             // A dial or a colour in the values column, which is turned or mixed by dragging.
             Ask given = Given;
@@ -1227,22 +1232,19 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return true;
             }
 
-            // After the views, not before. A picker fills the body with its own columns and their bars sit
-            // inside this one's track; offering the screen's bar first would take every one of them.
-            if (_scroll.Parent == null || !_scroll.OnBar(point))
-                return false;
-
-            if (!_scroll.OnThumb(point))
-                _scroll.ThumbTo(point.Y);
-
-            _scroll.BarHeld = true;
-            _held = point.Y;
-            return true;
+            return false;
         }
 
         /// <summary>Where the thing being carried has got to. Ignored when nothing is being carried.</summary>
         public void Carry(Vector2 point)
         {
+            if (_pressing)
+            {
+                _pressedAt = point;
+                _input.PointerMove(point);
+                return;
+            }
+
             if (_ask.IsDragging)
             {
                 _ask.Carry(point);
@@ -1257,12 +1259,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 return;
             }
 
-            if (_scroll.BarHeld)
-            {
-                _scroll.DragBy(point.Y - _held);
-                _held = point.Y;
-                return;
-            }
 
             if (_dragging != null)
                 _dragging.Carry(point);
@@ -1271,8 +1267,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Lets go of whatever was being carried.</summary>
         public void Drop()
         {
+            if (_pressing)
+            {
+                _pressing = false;
+                _input.PointerUp(_pressedAt);
+                return;
+            }
+
             _ask.Drop();
-            _scroll.BarHeld = false;
 
             Ask given = Given;
             if (given != null)
@@ -1294,7 +1296,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             get
             {
                 Ask given = Given;
-                return _dragging != null || _scroll.BarHeld || _ask.IsDragging
+                return _dragging != null || _pressing || _ask.IsDragging
                     || given != null && given.IsDragging;
             }
         }
@@ -1324,6 +1326,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // A question with answers owns the screen absolutely: nothing outside it responds, and
             // pressing away does not dismiss it. Every answer leads somewhere, so there is nothing to
             // escape from, and a question that can be shrugged off is one that gets shrugged off.
+            // A dialog owns the screen: a press on its answers is taken through the input root, and a press
+            // anywhere else does nothing at all.
+            if (_windows.Modal != null)
+                return true;
+
             if (_question.IsUp && !_question.Covers(point))
             {
                 _editor.Unask();
@@ -1367,7 +1374,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             //
             // Blunt, and the screen is already saying why in the box itself. Escape is the way out.
             if (Blocked.Length > 0)
-                return _title[_renaming].Reaches(point);
+                return _title.Plate(_renaming).Reaches(point);
 
             // An overlay owns the screen the same way a question does, except that what is inside it is
             // ordinary and is pressed the ordinary way.
@@ -1384,8 +1391,26 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (target == null)
                 return PressedNothing(point);
 
-            Deed deed = target.Press;
+            return Act(target, target.Press, clicks);
+        }
 
+        /// <inheritdoc />
+        public void Send(Element from, int command, string question)
+        {
+            if (command != 0)
+                Act(from, Deed.Asks(command, question), 1);
+        }
+
+        /// <inheritdoc />
+        public void Switch(Element from, int command, bool on)
+        {
+            if (command != 0)
+                Act(from, Deed.Switches(command, on), 1);
+        }
+
+        /// <summary>Carries out <paramref name="deed" /> for <paramref name="target" />, pressed <paramref name="clicks" /> times in quick succession.</summary>
+        bool Act(Element target, Deed deed, int clicks)
+        {
             if (deed.Means == Means.Open)
             {
                 Unfocus();
@@ -1471,7 +1496,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             if (deed.Means == Means.Ask)
             {
-                BeginAsk(target);
+                BeginAsk(target, deed);
                 return true;
             }
 
@@ -1530,7 +1555,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         bool PressedNothing(Vector2 point)
         {
-            if (_renaming >= 0 && _title[_renaming].Reaches(point))
+            if (_renaming >= 0 && _title.Plate(_renaming).Reaches(point))
                 return true;
 
             if (_renaming >= 0)
@@ -1574,7 +1599,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // The whole answer, not the field the caret happens to be in. A form of three fields
             // sent one of them, which is how three values became one - and it looked like the other
             // two had been thrown away, because they had.
-            string answer = _renaming >= 0 ? AskBox.Text : _ask.Answer;
+            string answer = _renaming >= 0 ? _title.Box(_renaming).Text : _ask.Answer;
 
             // Carried from when the box opened, which is safe: an id is derived from what a command is
             // for rather than counted out, so a rebuild between opening the box and answering it hands
@@ -1623,7 +1648,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Whether a question with answers is waiting, which owns Escape.</summary>
         public bool IsQuestioning
         {
-            get { return _question.IsUp; }
+            get { return _question.IsUp || _windows.IsOpen(_dialog); }
         }
 
         /// <summary>
@@ -1635,8 +1660,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         public bool TakeDefault()
         {
+            if (_windows.IsOpen(_dialog))
+                return _dialog.TakeAccept();
+
+            return _question.IsUp && Default();
+        }
+
+        /// <summary>Gives the answer the page named for Enter, and says whether it named one.</summary>
+        bool Default()
+        {
             EditorScreen screen = _editor.Screen;
-            if (!_question.IsUp || screen.Default == 0)
+            if (screen.Default == 0)
                 return false;
 
             // The same detour a press on it takes. A key that finished differently from the row it
@@ -1663,10 +1697,47 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         public void Dismiss()
         {
+            if (_windows.IsOpen(_dialog))
+            {
+                _dialog.TakeCancel();
+                return;
+            }
+
             if (!_question.IsUp)
                 return;
 
             _editor.Unask();
+        }
+
+        /// <summary>Puts <paramref name="screen" />'s question in the dialog, its first answer as Yes and its second as No, and opens it.</summary>
+        /// <remarks>Escape puts it away without an answer, which has no button of its own.</remarks>
+        void Ask(EditorScreen screen)
+        {
+            _dialog.Message = Markdown.Parse(screen.Question);
+
+            var yes = screen.Answers.Count > 0 ? screen.Answers[0] : null;
+            var no = screen.Answers.Count > 1 ? screen.Answers[1] : null;
+
+            _dialog.YesText = yes != null ? yes.Text : "";
+            _dialog.YesCommand = Answering(yes);
+            _dialog.NoText = no != null ? no.Text : "";
+            _dialog.NoCommand = Answering(no);
+
+            _dialog.Default = yes != null && yes.Command == screen.Default ? MessageButton.Yes
+                : no != null && no.Command == screen.Default ? MessageButton.No
+                : (MessageButton?)null;
+
+            _windows.Open(_dialog);
+        }
+
+        /// <summary>The command that gives <paramref name="answer" />, the way pressing it would, or null for none.</summary>
+        ICommand Answering(ChoiceEntry answer)
+        {
+            if (answer == null)
+                return null;
+
+            int command = answer.Command;
+            return new Relay(() => Send(_dialog, command, null));
         }
 
         /// <summary>
@@ -1816,9 +1887,8 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             given.Dress(Pointer);
         }
 
-        void BeginAsk(Element control)
+        void BeginAsk(Element control, Deed deed)
         {
-            Deed deed = control.Press;
             Close();
             _chromeStale = true;
 
@@ -1833,10 +1903,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
                 // The words become the box, in the words' own place. What that takes is the plate's
                 // business, not this one's.
-                _renaming = i;
-                _renameCommand = deed.Command;
-                _title[i].Text = parts[i].Name;
-                _title[i].Begin();
+                Rename(i, deed.Command, parts[i].Name);
                 return;
             }
 
@@ -1847,16 +1914,72 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 _ask.Open(deed.Question, control, deed.Command);
         }
 
+        /// <summary>Begins renaming the part of the heading that arrives to be named, once for that part.</summary>
+        void NameArrival(EditorScreen screen)
+        {
+            if (_renaming >= 0)
+                return;
+
+            for (int i = 0; i < screen.Heading.Count && i < _title.Count; i++)
+            {
+                HeadingPart part = screen.Heading[i];
+                if (!part.NamedOnArrival || !part.CanRename || part == _namedArrival)
+                    continue;
+
+                _namedArrival = part;
+                Rename(i, part.RenameCommand, part.Name);
+                return;
+            }
+        }
+
+        /// <summary>Opens the box of the heading's part at <paramref name="index" /> on <paramref name="name" />, to be sent to <paramref name="command" />.</summary>
+        void Rename(int index, int command, string name)
+        {
+            _renaming = index;
+            _renameCommand = command;
+            _title.Begin(index, name);
+            _input.Focus(_title.Box(index));
+        }
+
+        /// <summary>Says the name in hand changed, which decides whether it can be given.</summary>
+        void Retyped()
+        {
+            _chromeStale = true;
+        }
+
+        /// <summary>
+        /// Takes the keyboard leaving a name being typed as the press away it is, which gives the name.
+        /// </summary>
+        /// <remarks>A name that cannot be given keeps the keyboard, because the box is already saying why.</remarks>
+        void Refocused()
+        {
+            if (_renaming < 0)
+                return;
+
+            var box = _title.Box(_renaming);
+            if (_input.Focused == box)
+                return;
+
+            CommitAsk();
+
+            if (_renaming >= 0)
+                _input.Focus(box);
+        }
+
         void Close()
         {
             _chromeStale = true;
 
             if (_renaming >= 0)
             {
-                _title[_renaming].End();
-                _title[_renaming].Wrong = false;
+                var renamed = _renaming;
                 _renaming = -1;
+                _title.End(renamed);
+
+                if (_input.Focused == _title.Box(renamed))
+                    _input.Focus(null);
             }
+
 
             _renameCommand = 0;
             _ask.Close();
@@ -1893,10 +2016,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _views.Clear();
             _shown.Clear();
+            _shownPage = _editor.Current;
 
             // Settled here, once, for the life of this screen: a page either says something under its
             // heading or it never does, and the header holds whichever shape that is.
-            _subtitle.Collapsed = string.IsNullOrEmpty(screen.Subtitle);
+            _subtitle.IsVisible = !string.IsNullOrEmpty(screen.Subtitle);
 
             for (int i = 0; i < screen.Components.Count; i++)
             {
@@ -1964,14 +2088,18 @@ namespace Sprocket.Host.SpaceEngineers.Screen
                 }
             }
 
+            // A page that draws itself is its own body, and a page described in components is built of them.
+            var drawn = _shownPage.View;
+
             if (filler < 0)
             {
                 for (int i = 0; i < _views.Count; i++)
                     _body.Children.Add(_views[i].Root);
 
-                _bodyDock.Top = null;
-                _bodyDock.Bottom = null;
-                _bodyDock.Fill = _scroll;
+                if (drawn != null)
+                    _body.Children.Add(drawn);
+
+                _page.Cells[1, 0] = _scroll;
                 return;
             }
 
@@ -1981,19 +2109,16 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             for (int i = filler + 1; i < _views.Count; i++)
                 _below.Children.Add(_views[i].Root);
 
-            _bodyDock.Top = _above;
-            _bodyDock.Bottom = _below;
-
             // A component that scrolls itself is handed the space directly. Wrapping it would put a
             // second scroller around the first, and the two would fight over one gesture.
             if (_views[filler].ScrollsItself)
             {
-                _bodyDock.Fill = _views[filler].Root;
+                _page.Cells[1, 0] = _views[filler].Root;
             }
             else
             {
                 _body.Children.Add(_views[filler].Root);
-                _bodyDock.Fill = _scroll;
+                _page.Cells[1, 0] = _scroll;
             }
         }
 
@@ -2004,13 +2129,21 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             for (int i = 0; i < screen.Actions.Count; i++)
             {
                 ChoiceEntry entry = screen.Actions[i];
+                int at = i;
 
-                Label action = Widgets.Ghost(Widgets.Caps(entry.Text));
-                if (entry.IsCurrent)
-                    action.Color = Palette.Ink;
-
-                _actions.Children.Add(action);
+                _actions.Children.Add(new Button
+                {
+                    Style = entry.IsCurrent ? Styles.Current : Styles.Plain,
+                    Text = Widgets.Caps(entry.Text),
+                    Command = new Relay(() => Take(at))
+                });
             }
+        }
+
+        /// <summary>Carries out the footer's action at <paramref name="index" />.</summary>
+        void Take(int index)
+        {
+            Send(_actions.Children[index], _editor.Screen.Actions[index].Command, null);
         }
     }
 }

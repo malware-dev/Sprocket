@@ -29,11 +29,8 @@ namespace Sprocket.Sim.Content
         /// <remarks>The game's <c>MyFont</c> constructor default, which every font definition takes.</remarks>
         public const int Spacing = 1;
 
-        /// <summary>What the game multiplies a scale by before it measures or draws text.</summary>
-        /// <remarks>
-        ///     The game's <c>MyRenderGuiConstants.FONT_SCALE</c>. Its screen-space <c>GetLineHeight</c> leaves it
-        ///     out, and so does <see cref="LineHeightPixels" />.
-        /// </remarks>
+        /// <summary>What the game multiplies a scale by before it measures, draws, or gives the height of a line of text.</summary>
+        /// <remarks>The game's <c>MyRenderGuiConstants.FONT_SCALE</c>.</remarks>
         public const float FontScale = 28.8f / 37f;
 
         /// <summary>How far below the top of its line the game draws a glyph's cell, in font units, before the glyph's own offsets.</summary>
@@ -43,8 +40,12 @@ namespace Sprocket.Sim.Content
         /// <summary>The reference height the game's HUD scaling is defined against.</summary>
         public const float GameReferenceHeight = 1080f;
 
-        /// <summary>What the game takes as a font's usual glyph height when the font has no <c>a</c>.</summary>
-        /// <remarks>The game's default for <c>MyFont.AverageFontLineOffset</c>.</remarks>
+        /// <summary>Left alone, since a line break is not a character the font is asked for.</summary>
+        public const char Newline = (char)10;
+
+        /// <summary>What the game draws in place of a character it does not have.</summary>
+        public const char Replacement = '□';
+
         const int UsualGlyphHeight = 45;
 
         /// <summary>Where one glyph sits on the page, and what it costs to draw.</summary>
@@ -71,7 +72,6 @@ namespace Sprocket.Sim.Content
         readonly ScreenSpaceDevice _device;
         readonly int _lineHeight;
 
-        /// <summary>The game's <c>MyFont.AverageFontLineOffset</c>: the height of <c>a</c> less its height offset.</summary>
         int _usualHeight = UsualGlyphHeight;
 
         SeFontMetrics(ScreenSpaceDevice device, int lineHeight, string source, bool fromGame)
@@ -84,6 +84,17 @@ namespace Sprocket.Sim.Content
 
         /// <summary>Which page the glyphs are on, as the font file names it.</summary>
         public string PageFile { get; private set; }
+
+        public bool IsExact => true;
+
+        /// <summary>Where the numbers came from, for the line in the window that says how true this is.</summary>
+        public string Source { get; private set; }
+
+        /// <summary>Whether they were read from an installed game rather than from the cache.</summary>
+        public bool FromGame { get; private set; }
+
+        /// <summary>The height of a line in font units, which is what every advance is relative to.</summary>
+        public int FontLineHeight => _lineHeight;
 
         /// <summary>How far below the top of its line the game draws <paramref name="glyph" />'s cell, in font units.</summary>
         public static float CellTop(Glyph glyph)
@@ -110,17 +121,6 @@ namespace Sprocket.Sim.Content
             int adjust;
             return _kerning.TryGetValue(Key(left, right), out adjust) ? adjust : 0;
         }
-
-        public bool IsExact => true;
-
-        /// <summary>Where the numbers came from, for the line in the window that says how true this is.</summary>
-        public string Source { get; private set; }
-
-        /// <summary>Whether they were read from an installed game rather than from the cache.</summary>
-        public bool FromGame { get; private set; }
-
-        /// <summary>The height of a line in font units, which is what every advance is relative to.</summary>
-        public int FontLineHeight => _lineHeight;
 
         /// <summary>
         /// Loads the font the game's white UI text uses, from the game or the cache. Null when neither has
@@ -177,6 +177,8 @@ namespace Sprocket.Sim.Content
 
                     metrics._glyphs[character[0]] = cell;
 
+                    // The game's MyFont.AverageFontLineOffset: the height of "a" less its height offset, and 45 where a
+                    // font has no "a".
                     if (character[0] == 'a')
                         metrics._usualHeight = cell.Height - cell.HeightOffset;
                 }
@@ -262,17 +264,11 @@ namespace Sprocket.Sim.Content
             return new Vector2(widest * unit, (lines * _lineHeight + raised / 2f + below) * unit);
         }
 
-        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers, in pixels: without <see cref="FontScale" />.</summary>
+        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers, in pixels: the height of the line it draws.</summary>
         public float LineHeightPixels(string font, float scale)
         {
-            return _lineHeight * EffectiveScale(scale);
+            return _lineHeight * DrawScale(scale);
         }
-
-        /// <summary>Left alone, since a line break is not a character the font is asked for.</summary>
-        public const char Newline = (char)10;
-
-        /// <summary>What the game draws in place of a character it does not have.</summary>
-        public const char Replacement = '□';
 
         /// <summary>The run as the game shows it, with every character it would draw as the replacement replaced.</summary>
         /// <remarks>For the desktop face drawn where the page is missing, which has glyphs the game does not.</remarks>

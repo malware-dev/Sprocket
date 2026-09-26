@@ -18,7 +18,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     sealed class Statement
     {
-        /// <summary>An array rather than a list, so adding to what a bodiless statement hands back throws.</summary>
         static readonly Statement[] Nothing = new Statement[0];
 
         readonly Reading _reading;

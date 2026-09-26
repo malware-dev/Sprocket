@@ -27,10 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly int _nowRuns;
         readonly bool _nowStops;
 
-        /// <summary>What pointing away from the old one left with nothing to run it, or null.</summary>
         Sequence _orphan;
 
-        /// <summary>What starts it, which this does not touch and must not walk back over.</summary>
         readonly List<string> _sources;
         readonly string _eventId;
 

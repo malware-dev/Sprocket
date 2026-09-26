@@ -291,18 +291,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>
-        /// The first <c>System n</c> nobody is using.
+        /// The first <c>Logic system n</c> nobody is using.
         /// </summary>
         /// <remarks>
         /// The first free number rather than a running count, so deleting the second of three and
-        /// adding another gives "System 2" back - the same rule a new sequence is named by, and the
+        /// adding another gives "Logic system 2" back - the same rule a new sequence is named by, and the
         /// same rule the game names a block by.
         /// </remarks>
         string FreeName()
         {
             for (var number = 1; ; number++)
             {
-                var wanted = "System " + number;
+                var wanted = "Logic system " + number;
 
                 var taken = false;
                 for (var i = 0; i < _systems.Count && !taken; i++)

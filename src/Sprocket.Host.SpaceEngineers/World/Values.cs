@@ -26,13 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class Values
     {
-        /// <summary>
-        /// Wide values, one list per kind. Only text so far.
-        /// </summary>
-        /// <remarks>
-        /// A slot is an index into the list for its own kind, so two kinds never collide and neither
-        /// list has to hold anything but its own sort of thing.
-        /// </remarks>
         readonly List<string> _texts = new List<string>();
 
         /// <summary>Text, in a slot of its own. For a literal, which is written once and kept.</summary>

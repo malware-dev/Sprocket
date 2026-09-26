@@ -22,7 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly MomentTrigger _was;
         readonly MomentTrigger _now;
 
-        /// <summary>What each of the two said when this was made, to know it still says it.</summary>
         readonly List<string> _wasSources;
         readonly List<string> _nowSources;
         readonly string _wasEvent;

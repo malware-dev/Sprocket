@@ -1,5 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -16,6 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         GridWorld World { get; }
 
+        /// <summary>What the views say, in the player's language.</summary>
+        Texts Texts { get; }
+
         /// <summary>Sends a number to core. Reordering is the one thing a view answers with a position.</summary>
         void SetNumber(int command, int value);
 
@@ -27,5 +32,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         /// <summary>Puts the caret in a box a view shows, as pressing the box would.</summary>
         void Take(TextBox box);
+
+        /// <summary>Carries out <paramref name="command" /> for a control pressed at <paramref name="from" />, asking <paramref name="question" /> first where there is one.</summary>
+        /// <remarks>The question hangs under <paramref name="from" />. A command of zero does nothing.</remarks>
+        void Send(Element from, int command, string question);
+
+        /// <summary>Sets a switch pressed at <paramref name="from" /> to <paramref name="on" />.</summary>
+        void Switch(Element from, int command, bool on);
     }
 }

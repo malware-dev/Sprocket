@@ -1,7 +1,13 @@
 using VRage.Game;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
+using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 
 namespace Sprocket.Host.SpaceEngineers.Controls
 {
@@ -16,11 +22,11 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         /// "Hangar door - outer, port side" has to be readable in a 250-unit column, and the alternative
         /// is a row that silently says something shorter than what is there.
         /// </remarks>
-        public static Label Label(string text, Color color, float scale)
+        public static Label Label(string text, Color color, float fontSize)
         {
             var label = new Label();
             label.Font = MyFontEnum.White;
-            label.Scale = scale;
+            label.FontSize = fontSize;
             label.Color = color;
             label.Wraps = true;
             label.Text = text;
@@ -42,7 +48,6 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             line.Highlight = Palette.PanelHot;
         }
 
-        /// <summary>What a button holds clear inside itself, whichever kind of button it is.</summary>
         static readonly Thickness Inside = new Thickness(Space.PadX, Space.ChipY * 1.3f);
 
         /// <summary>A word that answers a question, or runs an operation: a panel, and it lights.</summary>
@@ -103,21 +108,6 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             button.Padding = Inside;
             button.Background = Palette.SlotFill;
             button.Color = Palette.Faint;
-            button.Highlight = Palette.None;
-        }
-
-        /// <summary>
-        /// The same button on a screen that has nowhere to go on to: gone, but its place kept.
-        /// </summary>
-        /// <remarks>
-        /// Not collapsed. The footer stands the same height on every screen, and one that changed
-        /// height as somebody walked through the editor would move the list above it.
-        /// </remarks>
-        public static void Absent(Label button)
-        {
-            button.Padding = Inside;
-            button.Background = Palette.None;
-            button.Color = Palette.None;
             button.Highlight = Palette.None;
         }
 
@@ -183,11 +173,11 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         /// to be drawn. A box made anywhere else keeps them, which puts three colours on screen that the
         /// palette was never asked about.
         /// </remarks>
-        public static TextBox Box(float scale, Color background)
+        public static TextBox Box(float fontSize, Color background)
         {
             var box = new TextBox();
             box.Font = MyFontEnum.White;
-            box.Scale = scale;
+            box.FontSize = fontSize;
             box.Color = Palette.Ink;
             box.Background = background;
             box.Edge = Palette.Line;
@@ -217,59 +207,6 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             scroll.BarColor = Palette.Thumb;
             scroll.BarHeldColor = Palette.ThumbHeld;
             return scroll;
-        }
-
-        /// <summary>
-        /// A name somebody can change where it stands.
-        /// </summary>
-        /// <remarks>
-        /// The pencil goes a step above the size a symbol usually gets, because it stands beside the
-        /// largest text on a screen rather than beside a row. At the ordinary size it read as a speck
-        /// somebody had dropped on the heading.
-        /// </remarks>
-        public static Nameplate Nameplate(float scale)
-        {
-            var plate = new Nameplate(Symbols.Pencil, Lettering.Body);
-
-            plate.Font = MyFontEnum.White;
-            plate.Scale = scale;
-            plate.PenLift = Lettering.SymbolLift;
-            // None at all, because the pencil brings its own. A symbol advances a full square cell and
-            // this one fills about half of it, so at heading size there are already ten units of empty
-            // cell between the name and the first ink of the pencil - and ten more after it. Anything
-            // added here is on top of that.
-            plate.Gap = 0f;
-            plate.LeastWidth = Sizes.Name;
-
-            plate.Color = Palette.Ink;
-            plate.PenColor = Palette.Faint;
-
-            // No hint, deliberately. A hint says what a blank box is for, and a heading is never a blank
-            // box: it stands where the name stands, in the largest text on the screen, with a pencil on it
-            // that somebody pressed to get here. There is nothing left to explain.
-            //
-            // Not the rename prompt either. That is written to be asked - "What is it?" - which reads
-            // oddly with no question mark, and it is far longer than a box sized to a name, so it clips
-            // in every case that matters. It has a home already: the popup that asks it, where the box
-            // really is blank and really is unlabelled.
-
-            // The hot panel tone rather than a control's well, because a heading is not sunk into the
-            // chrome - it sits on it, and the fill is here to say "this is a field now" rather than to
-            // make a hole for it.
-            plate.Well = Palette.PanelHot;
-
-            // Red-brown in place of the blue-grey well, and a rule under it in the loud red. The fill says
-            // "this one" at a glance across the screen; the rule is the part that survives being looked at
-            // on a dim monitor, because a red wash cannot get far enough from the chrome to do it alone.
-            plate.WrongWell = Palette.WrongFill;
-            plate.WrongEdge = Palette.Problem;
-            plate.WrongEdgeThickness = 2f;
-
-            // A mid tone rather than the focus blue, for the reason a search box takes the same one: the
-            // words keep their own colour while they are selected, and pale ink on the pale focus fill is
-            // two things the same brightness.
-            plate.SelectionColor = Palette.Line;
-            return plate;
         }
 
         /// <summary>Something said against a coloured ground, because it needs reading.</summary>
@@ -310,7 +247,7 @@ namespace Sprocket.Host.SpaceEngineers.Controls
             button.Tint = ready ? Palette.Muted : Palette.Dim;
             button.Highlight = ready ? Palette.Panel : Palette.None;
             button.Press = Deed.Sends(command);
-            button.Tip = ready ? says : null;
+            button.Tip = Ui.Rich.Tip.For(button.Tip, ready ? says : null);
         }
 
         public static Rule Line()

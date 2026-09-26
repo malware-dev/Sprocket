@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Screen;
-using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Controls;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Lists
 {
@@ -10,8 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     public sealed class StatusListView : ComponentView
     {
         readonly StatusListComponent _component;
-        readonly Stack _stack = Widgets.Column(Space.Row);
-        readonly List<StatusRow> _rows = new List<StatusRow>();
+        readonly VStack _stack = new VStack { Spacing = 8f };
+        readonly List<EntryRow> _rows = new List<EntryRow>();
 
         int _revision = -1;
 
@@ -34,14 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             get { return _stack; }
         }
 
-        /// <summary>
-        /// What is said when there is nothing on the list, while there is nothing on it.
-        /// </summary>
-        /// <remarks>
-        /// Held, because the words are a value core can change like any other and this view is told
-        /// rather than asked - and it is written where the rows are written rather than only where
-        /// they are built.
-        /// </remarks>
         Label _empty;
 
         protected override void Refresh()
@@ -76,17 +69,16 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 if (_component.EmptyText.Length == 0)
                     return;
 
-                _empty = Widgets.Label(_component.EmptyText, Palette.Muted, Lettering.Small);
-                _empty.Padding = new Thickness(Space.Row, Space.Row, 0f, 0f);
+                _empty = new Label { Style = Styles.Empty, Wraps = true, Text = _component.EmptyText };
                 _stack.Children.Add(_empty);
                 return;
             }
 
             for (int i = 0; i < _component.Entries.Count; i++)
             {
-                var row = new StatusRow();
+                var row = new EntryRow(this);
                 _rows.Add(row);
-                _stack.Children.Add(row.Root);
+                _stack.Children.Add(row.Row);
             }
         }
     }

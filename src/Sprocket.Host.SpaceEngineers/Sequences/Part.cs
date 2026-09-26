@@ -15,7 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class Part
     {
-        /// <summary>What separates an annotation's label from what follows it, as the language writes it.</summary>
         const string Break = "\n\n";
 
         readonly List<string> _expects = new List<string>();

@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
     /// <summary>
@@ -104,6 +105,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         public bool CanRename => RenameCommand != 0;
 
+        /// <summary>Whether the screen opens with this part's name in hand to be given, as for something just made and numbered.</summary>
+        public bool NamedOnArrival
+        {
+            get { return _namedOnArrival; }
+            set { Set(ref _namedOnArrival, value, nameof(NamedOnArrival)); }
+        }
+
+        bool _namedOnArrival;
+
         /// <summary>What to ask when offering the rename.</summary>
         public string Prompt
         {
@@ -112,6 +122,15 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         }
 
         string _prompt;
+
+        /// <summary>What this part is and what renaming it does, for whoever rests the pointer on it, in markdown-lite, or null for nothing to say.</summary>
+        public string About
+        {
+            get { return _about; }
+            set { Set(ref _about, value, nameof(About)); }
+        }
+
+        string _about;
 
         /// <summary>
         /// Whether an empty name is an answer here, or is not allowed to be given.

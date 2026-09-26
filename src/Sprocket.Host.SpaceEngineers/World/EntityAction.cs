@@ -18,13 +18,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
         }
 
-        /// <summary>What the value it writes is called, and what it will take.</summary>
         Field _writes;
 
-        /// <summary>What kind the value it writes is.</summary>
         ValueKind _holds;
 
-        /// <summary>What type each value of one of the game's actions is taken as, or null for anything else.</summary>
         IList<Primitive> _takes;
 
         public EntityAction(string id, string text, string leadsToStateId, string gameActionId,
@@ -242,14 +239,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>
-        /// What each value it wants asks for, one per value, told nothing where nobody has said.
-        /// </summary>
-        /// <remarks>
-        /// One per value, in order, because the form asks for them one at a time whatever the
-        /// grouping says. A group's parameters are asked for individually until there is an editor
-        /// for that group's kind, at which point the group is asked for as one thing instead.
-        /// </remarks>
         readonly List<Field> _described = new List<Field>();
 
         /// <summary>Says what type each of the values it is handed is taken as, one per value.</summary>
@@ -275,7 +264,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>The fields an action of Sprocket's own asks with, or null.</summary>
         IList<Field> _asks;
 
         /// <summary>Whether a value it cannot do without is among the ones it has not been given.</summary>
@@ -297,7 +285,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
-        /// <summary>What it asks for, while it is being asked whether it has it. Reused, never held.</summary>
         readonly List<Field> _wanted = new List<Field>();
 
         /// <summary>Whether every value a step was given is one this can take.</summary>

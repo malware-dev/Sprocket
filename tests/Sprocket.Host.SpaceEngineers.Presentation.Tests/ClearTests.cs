@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
 using VRageMath;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ClearTests
 {
-    const string OpenTheMenu = "60 130 type Airlock enter 60 161 60 238 60 276 type door";
+    const string OpenTheMenu = "60 133 type Airlock enter 60 164 60 244 60 285 type door";
     const string SearchTheBlocks = "60 130 type Airlock enter 60 161 150 200 type door";
 
     [Fact]
@@ -23,7 +24,7 @@ public class ClearTests
 
         Assert.True(picker.Shows("door"), "the menu was not narrowed to begin with");
 
-        picker.Do("165", "292");
+        picker.Do("155", "297");
 
         Assert.False(picker.Shows("door"), "the cross did not empty the box");
         Assert.True(picker.Shows("Button Panel"), "the kinds did not come back");

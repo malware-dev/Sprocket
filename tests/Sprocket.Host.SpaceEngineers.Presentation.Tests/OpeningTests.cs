@@ -14,9 +14,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class OpeningTests
 {
-    /// <summary>A step that sets a light's radius to 5, on a trigger's new sequence.</summary>
-    const string ARadiusStep = "60 130 type Airlock enter 60 161 200 375 560 357 1353 311 "
-        + "70 193 200 476 800 676 1315 206 type 5 enter";
+    const string ARadiusStep = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
+        + "70 200 200 485 800 679 1315 209 type 5 enter";
 
     /// <summary>A stage of the page showing, counted from its first.</summary>
     static PickStage Stage(Screen screen, int at)
@@ -244,7 +243,7 @@ public class OpeningTests
     public void AStepsTitleJoinsItsBlocksWithAnd()
     {
         var screen = WithOne();
-        screen.Editor.Invoke(screen.Editor.Rows().Entries[0].Command);
+        screen.Editor.Invoke(screen.Editor.Rows()[0].Command);
         screen.Run(2);
 
         screen.Editor.PressAdd("do something");

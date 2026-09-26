@@ -16,15 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         int _stepIndex = -1;
 
-        /// <summary>How long the wait being entered lasts, until it is pinned to a tick.</summary>
         int _waitTicks;
 
-        /// <summary>The tick the wait under way ends on, or negative while none is pinned.</summary>
-        /// <remarks>
-        /// A tick of the game's rather than a count of calls, so a wait lasts as long as it says however
-        /// often the runner is woken. Pinned on the first tick the step is reached rather than when it
-        /// is entered, because a run resumed from a save is entered before it knows what tick it is.
-        /// </remarks>
         int _waitUntil = -1;
 
         /// <summary>
@@ -76,23 +69,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         bool CanRun => _sequence.CanRun(_instance);
 
-        /// <summary>
-        /// Scratch for turning the system's parts into this one's blocks.
-        /// </summary>
-        /// <remarks>
-        /// Two, because the trigger is sampled on the same tick a step is acting and one
-        /// buffer would have them overwrite each other. Reused rather than allocated, because
-        /// this happens for every running sequence on every tick and core sits inside the
-        /// game's update loop.
-        /// </remarks>
-        /// <summary>
-        /// What the program's names point at, for the length of this tick.
-        /// </summary>
-        /// <remarks>
-        /// Held rather than passed down, because every private step of a tick wants it and threading
-        /// it through eight signatures says nothing the field does not. Set by the two public entry
-        /// points, so nothing below them can read one from a previous tick.
-        /// </remarks>
         Bindings _bindings;
 
         readonly List<string> _actedOn = new List<string>();
@@ -148,23 +124,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public string Quit { get; private set; }
 
-        /// <summary>How often a held run asks whether it has been overruled.</summary>
         Interval _conflicts = new Interval(60);
 
         readonly AutomationRunner _owner;
         readonly Rota _rota;
 
-        /// <summary>Samples the triggers and keeps an eye on a run. See <see cref="Sample" />.</summary>
         readonly Shift _sampling;
 
-        /// <summary>Takes the run on when what it is waiting for is due. See <see cref="Continued" />.</summary>
         readonly Shift _busy;
 
-        /// <summary>The await being held on, and how often it is looked at. Meaningful while <c>_holding</c>.</summary>
         Hold _hold;
         bool _holding;
 
-        /// <summary>The tick this runner last saw, for the things it does on a cadence.</summary>
         int _tick;
 
         /// <summary>
@@ -348,6 +319,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         void Enter(int tick)
         {
             _tick = tick;
+            // Held for the tick rather than passed down, because every step of a tick wants it. Both entry points
+            // set it, so nothing reads one left from a previous tick.
             _bindings = _owner.Current;
         }
 
@@ -472,13 +445,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Start(world, tick);
         }
 
-        /// <summary>
-        /// Whether the run going on now was asked for by a person rather than by a trigger.
-        /// </summary>
-        /// <remarks>
-        /// It decides one thing: that the switch does not stop it on the next tick. Cleared when the
-        /// run ends however it ends, so the next one is judged on its own.
-        /// </remarks>
         bool _byHand;
 
         /// <summary>
@@ -751,6 +717,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
 
                 if (_waitUntil < 0)
+                    // A tick of the game's rather than a count of calls, so a wait lasts as long as it says however often
+                    // the runner is woken. Pinned when the step is first reached rather than entered, because a run resumed
+                    // from a save is entered before it knows what tick it is.
                     _waitUntil = _tick + _waitTicks;
 
                 if (_tick < _waitUntil)
@@ -835,7 +804,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return true;
         }
 
-        /// <summary>What has been started and not yet waited for.</summary>
         readonly List<Act> _outstanding = new List<Act>();
 
         void Execute(GridWorld world, Act step)
@@ -865,10 +833,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public readonly List<Order> Orders = new List<Order>();
         }
 
-        /// <summary>Every act worked out so far, until the program or what its names point at changes.</summary>
         readonly Dictionary<Act, Compiled> _compiled = new Dictionary<Act, Compiled>();
 
-        /// <summary>The <see cref="Bindings.Revision" /> and <see cref="Automation.Edits" /> the acts were worked out at.</summary>
         int _boundAt = -1;
         int _editedAt = -1;
 

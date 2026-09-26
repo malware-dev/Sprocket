@@ -17,17 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public sealed class AutomationRunner
     {
-        /// <summary>
-        /// One runner per sequence <em>per one of a system</em>.
-        /// </summary>
-        /// <remarks>
-        /// Two airlocks are the same sequences run twice, each resolving the author's parts
-        /// into its own doors, so each needs its own place to be mid-cycle. One runner per
-        /// sequence meant the second of anything did nothing at all: the ones of a system were
-        /// a name and a number that the runtime never saw.
-        ///
-        /// Keyed by both, packed, so the lookup stays a single dictionary hit on every tick.
-        /// </remarks>
         readonly Dictionary<long, SequenceRunner> _runners = new Dictionary<long, SequenceRunner>();
         readonly List<long> _stale = new List<long>();
         readonly List<long> _live = new List<long>();
@@ -36,13 +25,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Bindings _bindings = new Bindings();
         readonly Rota _rota;
 
-        /// <summary>Switches off what cannot work. See <see cref="ParkBroken" />.</summary>
         readonly Shift _parking;
 
-        /// <summary>Whether this runner's rota is its own to run, rather than the world's.</summary>
         readonly bool _runsRota;
 
-        /// <summary>Whether the program has gained or lost a sequence, or one of a system, since the runners were matched to it.</summary>
         bool _reshaped = true;
 
         /// <summary>

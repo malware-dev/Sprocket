@@ -4,10 +4,10 @@ using System.IO;
 using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Sprocket.Host.SpaceEngineers.Look;
 // Supplies Lettering, which the inspection does not see from every configuration it runs in.
 // ReSharper disable once RedundantUsingDirective
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Sim.Content;
 
 namespace Sprocket.Sim.Simulation
@@ -29,29 +29,22 @@ namespace Sprocket.Sim.Simulation
         private readonly float _width;
         private readonly float _height;
 
-        public Offscreen(float windowWidth, float windowHeight)
+        /// <summary>A frame of the editor on a block holding <paramref name="holding" />, or nothing for null.</summary>
+        public Offscreen(float windowWidth, float windowHeight, string holding = null)
         {
             _width = windowWidth;
             _height = windowHeight;
 
             _device = new ScreenSpaceDevice();
 
-            // The letters are a stand-in, because the game's own widths need the game. The monospace
-            // face is not: it is in the build output, so it is measured exactly and a frame holding a
-            // listing reproduces on a machine that has never had Space Engineers. It matters more for
-            // that face than for any other, because a fixed-width one measured with a proportional
-            // stand-in reports columns lining up when they do not.
-            //
-            // <b>The symbol font is deliberately left on the stand-in, and that is a known
-            // disagreement.</b> The window measures it exactly and this does not, so a symbol occupies
-            // a different box in a recorded frame than it does in the game - the symbol font declares a
-            // line of 53 where the stand-in answers 37 for everything. Putting it right moves every
-            // recorded frame that holds a symbol and changes where the back arrow sits against a
-            // heading, which is a question about the heading rather than about fonts.
+            // The letters are a stand-in, because the game's own widths need the game. The mod's own two
+            // faces are not: they are in the build output, so they are measured exactly and a frame
+            // reproduces on a machine that has never had Space Engineers.
             string maltek = Path.Combine(AppContext.BaseDirectory, "Content", "Fonts", "Maltek");
 
             _device.Fonts = new FontSet(new FallbackFonts(_device, "Segoe UI"))
-                .And(Lettering.Mono, Ours(maltek, "MaltekMono"));
+                .And(Lettering.Mono, Ours(maltek, "MaltekMono"))
+                .And(Symbols.Font, Ours(maltek, "MaltekSymbols"));
 
             _device.Install();
 
@@ -59,8 +52,8 @@ namespace Sprocket.Sim.Simulation
             _device.SafeArea = new RectangleF((windowWidth - safeWidth) / 2f, 0f, safeWidth, windowHeight);
             _device.ViewportSize = new Vector2(windowWidth, windowHeight);
 
-            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud);
-            _scene = EditorScene.Nowhere();
+            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
+            _scene = holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding);
         }
 
         /// <summary>One of the faces this mod requires, or null where the build did not carry it.</summary>
@@ -78,10 +71,10 @@ namespace Sprocket.Sim.Simulation
         /// <summary>How many times anything has asked for the width of a string. See the device.</summary>
         public int Measured => _device.Measured;
 
-        /// <summary>How tall a line of this font stands, in the units the screen lays out in.</summary>
+        /// <summary>How tall a line of this font stands at a scale the game was handed, in the units the screen lays out in.</summary>
         public float LineHeight(string font, float scale)
         {
-            return _graphics.LineHeight(font, scale);
+            return _device.LineHeight(font, scale) / (_height / ScreenSpaceGraphics.GameReferenceHeight);
         }
 
         public void Draw()

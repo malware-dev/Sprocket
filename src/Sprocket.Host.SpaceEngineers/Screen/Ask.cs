@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Layout;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Controls;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
@@ -36,17 +40,14 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         private readonly List<Hsv> _colours = new List<Hsv>();
         private readonly List<string> _parts = new List<string>();
 
-        /// <summary>Which of <see cref="_parts" /> are text, and so quoted whatever they spell.</summary>
         private readonly List<bool> _texts = new List<bool>();
         private readonly List<Bar> _lines = new List<Bar>();
         private readonly List<Label> _numbers = new List<Label>();
         private readonly Label _confirm = Widgets.Label("Continue", Palette.Ink, Lettering.Small);
         private readonly Label _cancel = Widgets.Label("Cancel", Palette.Muted, Lettering.Small);
 
-        /// <summary>Why what is filled in cannot be sent, beside the way out rather than over the question.</summary>
         private readonly Label _why = Widgets.Label("", Palette.Problem, Lettering.Small);
 
-        /// <summary>Which fields the caret has been in, so an empty one is not called wrong before it is reached.</summary>
         private readonly List<bool> _seen = new List<bool>();
 
         private readonly Sized _form = new Sized(FormWidth);
@@ -57,13 +58,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         private bool _up;
         private int _at;
 
-        /// <summary>Whether this is a column of a screen rather than a question hanging over one.</summary>
         private readonly bool _column;
 
-        /// <summary>Whether a field has the keyboard, which a question always has and a column only once a field is pressed.</summary>
         private bool _typing = true;
 
-        /// <summary>Whether what is filled in is being held to what it takes, which a column only is once finishing it has been tried.</summary>
         private bool _judged = true;
 
         public Ask() : this(false, FormWidth)
@@ -211,12 +209,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _entry.Fill = _column ? null : form ? (Element)_why : _boxes[0];
 
             _seen.Clear();
-            _form.Collapsed = !form;
+            _form.IsVisible = form;
 
             // The way out is the form's, and not every question's. A name is left by pressing away
             // or by Escape, the way it always has been, and a Cancel beside it would take width
             // from the box somebody is typing in. A column is left by pressing anything else.
-            _cancel.Collapsed = !form || _column;
+            _cancel.IsVisible = form && !_column;
 
             // The caret belongs to the field it is in, and to no other. Every box editing meant
             // every box drawing one, with only the real one blinking - which reads as three carets
@@ -235,29 +233,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             Editing();
         }
 
-        /// <summary>
-        /// How wide the form is, in screen units.
-        /// </summary>
-        /// <remarks>
-        /// A width of its own, because the fields in it are empty when it opens and a box is as
-        /// wide as what is in it: sized to their contents they would open as slivers nobody would
-        /// take for somewhere to type. Wide enough for a sentence, since a value can be text.
-        /// </remarks>
         const float FormWidth = 520f;
 
-        /// <summary>
-        /// How wide every number box in a column is: a sign, six digits, a point and two places, and
-        /// the caret after them.
-        /// </summary>
         const float Numbers = 11f * Sizes.Digit;
 
-        /// <summary>
-        /// The least room a label takes, in screen units, before anything is measured.
-        /// </summary>
-        /// <remarks>
-        /// Enough for a digit, which is what a value nobody has named shows. A named one is wider
-        /// than this and says so - see <see cref="Inset" />.
-        /// </remarks>
         const float LeastLabel = 28f;
 
         /// <summary>
@@ -434,6 +413,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             _measure = false;
 
+            // Room for a digit, which is what a value nobody has named shows.
             var widest = LeastLabel;
             for (var i = 0; i < Count && i < _numbers.Count; i++)
             {
@@ -710,7 +690,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             get { return _typing && Dialled(_at); }
         }
 
-        /// <summary>How far one step turns a dial, in degrees.</summary>
         const float Notch = 5f;
 
         /// <summary>
@@ -1359,7 +1338,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _label.Text = _question;
             _label.Color = Palette.Muted;
             _why.Text = Refused ?? "";
-            _why.Collapsed = !refused;
+            _why.IsVisible = refused;
 
             // The field the reason is about wears it too, so a form of three says which one to mend. A
             // column given nothing at all is about its first field.

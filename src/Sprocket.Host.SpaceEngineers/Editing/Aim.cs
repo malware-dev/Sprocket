@@ -18,7 +18,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     {
         readonly SprocketEditor _editor;
 
-        /// <summary>The sequences it may run or stop: the ones that stand on their own.</summary>
         readonly List<Sequence> _offered = new List<Sequence>();
 
         readonly Outcome _was;

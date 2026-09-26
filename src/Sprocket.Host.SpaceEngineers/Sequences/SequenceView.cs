@@ -1,10 +1,15 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Controls;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Words;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Glyph = Sprocket.Host.SpaceEngineers.Ui.Legacy.Glyph;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -46,7 +51,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             public float Wanted;
         }
 
-        /// <summary>The gap under each step, which the drag arithmetic has to agree with.</summary>
         const float RowGap = Space.Row * 0.8f;
 
         readonly SequenceComponent _component;
@@ -65,7 +69,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         // its trigger would start it, rather than tried out.
         readonly Glyph _run = Widgets.Symbol(Symbols.Play, Palette.Muted);
 
-        /// <summary>The run mark's place, as wide for stop as for play.</summary>
         readonly Sized _runSlot;
         readonly Switch _enable = new Switch(Lettering.Small);
         // The same bin the step rows use. Deleting a sequence and deleting a step out of one are the
@@ -74,25 +77,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         // the steps, beside the switch that governs the whole sequence.
         readonly Glyph _delete = Widgets.Symbol(Symbols.Delete, Palette.Muted);
 
-        /// <summary>Why nothing here can be pressed, said on the line the adders stand on.</summary>
         readonly Label _locked = Widgets.Quiet("", Lettering.Small);
-        /// <summary>
-        /// What is wrong, where the state would otherwise be.
-        /// </summary>
-        /// <remarks>
-        /// The same line rather than a line of its own: a banner appearing pushes the whole sentence
-        /// down, and a card that changes height as a machine runs is a card nobody can read.
-        /// <para>
-        /// Its own label rather than the state's words in problem colours, because the two are not
-        /// the same thing and only one of them is ever true. What a sequence is doing is not news;
-        /// what is stopping it is, and it is said in the colour of news.
-        /// </para>
-        /// </remarks>
         readonly Label _problem = Widgets.Label("", Palette.Problem, Lettering.Small);
 
         readonly Dot _ranLight = new Dot();
 
-        /// <summary>What the two arrows were last told to say, and the words they were made from.</summary>
         string _undone;
         string _undoSays;
         string _redone;
@@ -106,7 +95,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         bool _built;
 
-        /// <summary>The step being carried, or -1.</summary>
         int _carrying = -1;
 
         float _grabbedAt;
@@ -188,8 +176,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             // One of the two, never both and never neither, so the row is the same height whatever
             // is happening.
             bool wrong = !string.IsNullOrEmpty(_component.Problem);
-            _status.Collapsed = wrong;
-            _problem.Collapsed = !wrong;
+            _status.IsVisible = !wrong;
+            _problem.IsVisible = wrong;
 
             _status.Text = _component.Status;
             _lastRun.Text = _component.LastRun;
@@ -197,16 +185,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _ranLight.Background = _component.JustRan ? Palette.Live : Palette.Dim;
 
             bool skipping = _component.SkippedCount > 0 || _component.RefusedCount > 0;
-            _skipped.Collapsed = !skipping;
+            _skipped.IsVisible = skipping;
             if (skipping)
                 _skipped.Text = Skips(_component.SkippedCount, _component.RefusedCount);
 
             // The adders and the reason there are none share one line, so locking changes what the
             // line says and not where anything stands.
             for (int i = 0; i < _adderRows.Count; i++)
-                _adderRows[i].Collapsed = !editable;
+                _adderRows[i].IsVisible = editable;
 
-            _locked.Collapsed = editable;
+            _locked.IsVisible = !editable;
             if (!editable)
                 _locked.Text = _component.LockedText;
 
@@ -254,7 +242,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             int command = going ? _component.StopCommand : _component.RunCommand;
 
             _run.Symbol = going ? Symbols.Stop : Symbols.Play;
-            _runSlot.Collapsed = command == 0;
+            _runSlot.IsVisible = command != 0;
             Widgets.Waiting(_run, command, going ? SequenceText.Stops() : SequenceText.Starts());
 
             Widgets.Waiting(_undo, _component.UndoCommand, _undoSays);
@@ -267,9 +255,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             //
             // The one control here that a running sequence keeps, because stopping it is the act.
             _enable.Press = Deed.Switches(_component.ToggleCommand, !_component.Enabled);
-            _enable.Tip = _component.ToggleCommand == 0 ? null : _component.Enabled
+            _enable.Tip = Tip.For(_enable.Tip, _component.ToggleCommand == 0 ? null : _component.Enabled
                 ? "Switch off"
-                : "Switch on";
+                : "Switch on");
 
             for (int i = 0; i < _adderRows.Count && i < _component.AddOptions.Count; i++)
                 _adderRows[i].Press = Deed.Sends(_component.AddOptions[i].Command);
@@ -293,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 // is the difference between this and the bin in the tools above, which takes the lot.
                 row.Delete.Press = Deed.Sends(step.DeleteCommand);
                 row.Delete.Tint = step.DeleteCommand == 0 ? Palette.Dim : Palette.Faint;
-                row.Delete.Tip = step.DeleteCommand == 0 ? null : "Delete this step";
+                row.Delete.Tip = Tip.For(row.Delete.Tip, step.DeleteCommand == 0 ? null : "Delete this step");
                 row.Grip.Color = editable ? Palette.Faint : Palette.Dim;
 
                 // Left alone while it is being carried. This runs every tick, and it would otherwise
@@ -371,7 +359,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             // for it, so the rebuild that follows changes nothing anybody can see. Putting it all back
             // first was the obvious thing and it flashed: the model does not change until the command is
             // sent, so for one frame the list would render in its old order.
-            _stepRows[from].Shift = Landing(from, to) - _stepRows[from].Line.Bounds.Y + _stepRows[from].Shift;
+            _stepRows[from].Shift = Landing(from, to) - _stepRows[from].Line.Bounds.Y;
             _stepRows[from].Wanted = _stepRows[from].Shift;
 
             Host.SetNumber(_component.Steps[from].MoveToCommand, to);
@@ -429,7 +417,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 return 0;
 
             RectangleF carried = _stepRows[_carrying].Line.Bounds;
-            float middle = carried.Y - _stepRows[_carrying].Shift + carried.Height * 0.5f + moved;
+            float middle = carried.Y + carried.Height * 0.5f + moved;
 
             int index = 0;
             for (int i = 0; i < _stepRows.Count; i++)
@@ -438,7 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     continue;
 
                 RectangleF bounds = _stepRows[i].Line.Bounds;
-                float top = bounds.Y - _stepRows[i].Shift;
+                float top = bounds.Y;
 
                 if (middle > top + bounds.Height * 0.5f)
                     index++;
@@ -456,7 +444,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         float Landing(int from, int to)
         {
-            float top = _stepRows[0].Line.Bounds.Y - _stepRows[0].Shift;
+            float top = _stepRows[0].Line.Bounds.Y;
             int placed = 0;
 
             for (int i = 0; i < _stepRows.Count && placed < to; i++)
@@ -494,7 +482,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (row.Shift < 0.5f && row.Shift > -0.5f && target == 0f)
                     row.Shift = 0f;
 
-                row.Line.Offset = new Vector2(0f, row.Shift);
+                row.Line.RenderTransform = RenderTransform.Moved(new Vector2(0f, row.Shift));
             }
         }
 

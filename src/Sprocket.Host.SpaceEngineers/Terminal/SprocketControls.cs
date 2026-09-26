@@ -19,10 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
     /// </remarks>
     static class SprocketControls
     {
-        /// <summary>The terminal's own id for the Custom Data button, which the three stand under.</summary>
         const string CustomData = "CustomData";
 
-        /// <summary>Whether the controls are up, since the game offers no way to ask.</summary>
         static bool _done;
 
         static IMyTerminalControlSeparator _above;

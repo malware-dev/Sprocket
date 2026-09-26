@@ -1,155 +1,214 @@
+using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Rich;
 
 namespace Sprocket.Host.SpaceEngineers.Screen
 {
-    /// <summary>
-    /// A screen's heading: one nameplate per part, with something drawn between them.
-    /// </summary>
-    /// <remarks>
-    /// Core hands over a list rather than a sentence, and this is why: each part answers for itself
-    /// whether it can be renamed, so each one gets a control of its own and wears its own pencil. A
-    /// heading drawn as one string would have to pick one answer for the whole line, which is exactly
-    /// what a sequence cannot do - what starts it is not somebody's to name, and what it then does is.
-    /// <para>
-    /// What goes between the parts is this target's word and not core's. An arrow, because the two halves
-    /// of a sequence's heading are a cause and its consequence - which is what the same arrow already
-    /// means everywhere else on these screens.
-    /// </para>
-    /// </remarks>
-    public sealed class HeadingRow
+    /// <summary>A screen's heading: each part's name, renamed in place where it can be, with an arrow between parts.</summary>
+    public class HeadingRow : HStack
     {
-        readonly Stack _row = Widgets.RowOf(Space.Row);
-        readonly List<Nameplate> _plates = new List<Nameplate>();
-        readonly List<Glyph> _joins = new List<Glyph>();
-        readonly List<Label> _leads = new List<Label>();
-        readonly List<Label> _afters = new List<Label>();
+        readonly IScreenHost _host;
+        readonly ICommand _commit;
+        readonly ICommand _cancel;
+        readonly Action _edited;
+        readonly List<Part> _parts = new List<Part>();
 
-        /// <summary>
-        /// How many parts are on show, which is not how many plates exist.
-        /// </summary>
-        /// <remarks>
-        /// The plates are a pool and it only ever grows, so a screen with one part after a screen with two
-        /// leaves a spare behind. Walking the pool instead of the parts is what that spare is for, and it
-        /// read one part past the end of the list the first time somebody backed out of a sequence.
-        /// </remarks>
+        List<HeadingPart> _heading;
+
         int _shown;
 
-        /// <summary>What the row was last built for, so it is only rebuilt when it would differ.</summary>
         int _shape = -1;
 
-        public Element Root
+        /// <summary>A heading whose rename presses go to <paramref name="host" />, and whose boxes take <paramref name="commit" /> on Enter, <paramref name="cancel" /> on Escape, and say each edit to <paramref name="edited" />.</summary>
+        public HeadingRow(IScreenHost host, ICommand commit, ICommand cancel, Action edited)
         {
-            get { return _row; }
+            _host = host;
+            _commit = commit;
+            _cancel = cancel;
+            _edited = edited;
+
+            Spacing = 4f;
+            Placement = Flex.Grow;
         }
 
+        /// <summary>How many parts are on show.</summary>
         public int Count
         {
             get { return _shown; }
         }
 
-        public Nameplate this[int index]
+        /// <summary>Shows <paramref name="heading" />, leaving the words of the part at <paramref name="renaming" /> to its box.</summary>
+        public void Update(List<HeadingPart> heading, int renaming)
         {
-            get { return _plates[index]; }
-        }
+            _heading = heading;
+            Build(heading);
 
-        /// <summary>
-        /// Brings the plates into line with the parts, making or dropping them if the count changed.
-        /// </summary>
-        /// <remarks>
-        /// The part being renamed is left alone. Whatever is in that box is the truth for as long as
-        /// somebody is typing into it, and writing core's answer back over it every tick would fight the
-        /// caret for it - the same rule the search boxes follow.
-        /// </remarks>
-        public void Update(List<HeadingPart> parts, int renaming)
-        {
-            Build(parts);
-
-            for (int i = 0; i < _shown; i++)
+            for (var i = 0; i < _shown; i++)
             {
-                HeadingPart part = parts[i];
-                Nameplate plate = _plates[i];
+                var part = heading[i];
+                var shown = _parts[i];
 
+                shown.Name.Text = part.Text;
+                shown.Pen.IsVisible = part.CanRename;
+                shown.Pen.Tint = i == renaming ? Palette.None : Palette.Faint;
+                shown.Renames.CanExecute = part.CanRename && i != renaming;
+
+                // While a part is renamed, its plate says only why a name is refused. See Refuse.
                 if (i != renaming)
-                    plate.Text = part.Text;
+                    shown.Plate.Tip = Tip.For(shown.Plate.Tip, part.CanRename ? part.About : null);
 
-                // Lit only where there is something to press. A pencil on a part nobody can rename would
-                // name an act and then refuse it, and the trigger half of a sequence is exactly that part.
-                plate.PenColor = part.CanRename ? Palette.Faint : Palette.None;
-                plate.Highlight = part.CanRename && i != renaming ? Palette.Panel : Palette.None;
-
-                _leads[i].Text = part.Lead;
-                _afters[i].Text = part.After;
+                shown.Lead.Text = part.Lead;
+                shown.After.Text = part.After;
             }
         }
 
-        /// <summary>
-        /// A number that changes whenever the row has to be built differently.
-        /// </summary>
-        /// <remarks>
-        /// The count alone is not enough: two parts joined by an arrow and two parts where the second
-        /// brings its own words are the same count and a different row. Rebuilding is cheap and rare, so
-        /// the cheapest honest key is the shape rather than a comparison of everything in it.
-        /// </remarks>
-        static int Shape(List<HeadingPart> parts)
+        /// <inheritdoc />
+        /// <remarks>Always: a heading longer than the header is cut off rather than drawn over the header's controls.</remarks>
+        protected override bool Clips => true;
+
+        /// <summary>The box the part at <paramref name="index" /> is renamed in.</summary>
+        public TextBox Box(int index)
         {
-            int shape = parts.Count;
-            for (int i = 0; i < parts.Count; i++)
+            return _parts[index].Box;
+        }
+
+        /// <summary>The name and pencil of the part at <paramref name="index" />, which a press on renames it.</summary>
+        public Element Plate(int index)
+        {
+            return _parts[index].Plate;
+        }
+
+        /// <summary>Puts <paramref name="name" /> in the part's box, all of it selected, in place of its words and its pencil.</summary>
+        public void Begin(int index, string name)
+        {
+            var part = _parts[index];
+
+            part.Pen.Tint = Palette.None;
+            part.Renames.CanExecute = false;
+            part.Plate.Tip = null;
+            part.Name.IsVisible = false;
+            part.Box.IsVisible = true;
+            part.Box.Text = name;
+            part.Box.SelectAll();
+        }
+
+        /// <summary>Puts the part's words back in place of its box.</summary>
+        public void End(int index)
+        {
+            var part = _parts[index];
+
+            part.Name.IsVisible = true;
+            part.Box.IsVisible = false;
+            Refuse(index, null);
+        }
+
+        /// <summary>Marks the part's box as holding a name that cannot be given, saying <paramref name="why" /> on the box and its pencil's place, or clears the mark for null.</summary>
+        public void Refuse(int index, string why)
+        {
+            var part = _parts[index];
+
+            part.Box.Style = why == null ? Styles.TitleBox : Styles.TitleRefused;
+            part.Box.Tip = Tip.For(part.Box.Tip, why);
+            part.Plate.Tip = Tip.For(part.Plate.Tip, why);
+        }
+
+        static int Shape(List<HeadingPart> heading)
+        {
+            var shape = heading.Count;
+
+            for (var i = 0; i < heading.Count; i++)
             {
-                shape = shape * 2 + (string.IsNullOrEmpty(parts[i].Lead) ? 0 : 1);
-                shape = shape * 2 + (string.IsNullOrEmpty(parts[i].After) ? 0 : 1);
+                shape = shape * 2 + (string.IsNullOrEmpty(heading[i].Lead) ? 0 : 1);
+                shape = shape * 2 + (string.IsNullOrEmpty(heading[i].After) ? 0 : 1);
             }
 
             return shape;
         }
 
-        void Build(List<HeadingPart> parts)
+        /// <summary>Lays the row out again where the parts, or which of them have words before or after, have changed.</summary>
+        /// <remarks>An arrow joins two parts only where the second has no words of its own to lead with.</remarks>
+        void Build(List<HeadingPart> heading)
         {
-            int shape = Shape(parts);
+            var shape = Shape(heading);
             if (_shape == shape)
                 return;
 
             _shape = shape;
-            _shown = parts.Count;
-            _row.Children.Clear();
+            _shown = heading.Count;
+            Children.Clear();
 
-            while (_plates.Count < parts.Count)
+            while (_parts.Count < heading.Count)
+                _parts.Add(new Part(this, _parts.Count));
+
+            for (var i = 0; i < heading.Count; i++)
             {
-                _plates.Add(Widgets.Nameplate(Lettering.Title));
-                _joins.Add(Widgets.Symbol(Symbols.Arrow, Palette.Faint));
+                var part = _parts[i];
+                var lead = !string.IsNullOrEmpty(heading[i].Lead);
 
-                // Quieter than the name it leads into, and the same size. It is the part of the heading
-                // nobody chose - saying it as loudly as the name would make the boilerplate the subject.
-                _leads.Add(Widgets.Label("", Palette.Muted, Lettering.Title));
-                _afters.Add(Widgets.Label("", Palette.Muted, Lettering.Title));
-            }
-
-            for (int i = 0; i < parts.Count; i++)
-            {
-                bool lead = !string.IsNullOrEmpty(parts[i].Lead);
-
-                // One connective, never two. A part that brings its own words does not also get an arrow.
                 if (i > 0 && !lead)
-                    _row.Children.Add(_joins[i]);
+                    Children.Add(part.Join);
 
                 if (lead)
-                {
-                    // One line, like everything else on this row. It does not have to ask for that any
-                    // more - a label is a line tall whatever is written in it, which is what lets a lead
-                    // and the name beside it share a baseline without either knowing about the other.
-                    _leads[i].Wraps = false;
-                    _row.Children.Add(_leads[i]);
-                }
+                    Children.Add(part.Lead);
 
-                _row.Children.Add(_plates[i]);
+                Children.Add(part.Plate);
 
-                if (!string.IsNullOrEmpty(parts[i].After))
+                if (!string.IsNullOrEmpty(heading[i].After))
+                    Children.Add(part.After);
+            }
+        }
+
+        void Rename(int index)
+        {
+            var part = _heading[index];
+            _host.Send(_parts[index].Plate, part.RenameCommand, part.Prompt);
+        }
+
+        /// <summary>The elements that show one part of the heading.</summary>
+        sealed class Part
+        {
+            public readonly Glyph Join;
+            public readonly Label Lead;
+            public readonly HStack Plate;
+            public readonly Label Name;
+            public readonly TextBox Box;
+            public readonly Glyph Pen;
+            public readonly Label After;
+            public readonly Relay Renames;
+
+            public Part(HeadingRow row, int index)
+            {
+                Renames = new Relay(() => row.Rename(index));
+
+                Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join, Placement = Fixed.Size(32f, 32f) };
+                Lead = new Label { Style = Styles.TitleLead };
+                After = new Label { Style = Styles.TitleLead };
+
+                Plate = new HStack
                 {
-                    _afters[i].Wraps = false;
-                    _row.Children.Add(_afters[i]);
-                }
+                    Style = Styles.Plate,
+                    Command = Renames,
+                    Children =
+                    {
+                        new Label { Style = Styles.TitleName }.As(out Name),
+                        new TextBox
+                        {
+                            Style = Styles.TitleBox,
+                            IsVisible = false,
+                            Submit = row._commit,
+                            Cancel = row._cancel
+                        }.As(out Box),
+                        new Glyph { Symbol = Symbols.Pencil, Style = Styles.Pen, Placement = Fixed.Size(32f, 32f) }.As(out Pen)
+                    }
+                };
+
+                Box.Edited += row._edited;
+
             }
         }
     }

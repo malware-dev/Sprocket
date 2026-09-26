@@ -164,12 +164,6 @@ public class RepeatedTickTests
         AssertQuiet(screen, "a sequence");
     }
 
-    /// <summary>How many questions a screen may ask the game on an idle tick.</summary>
-    /// <remarks>
-    /// The picker, the only screen that asks at all, averages three - twelve blocks every fifteen
-    /// ticks. Five leaves room for a block or two more on the rig without leaving room for the fault:
-    /// asking on every tick again is forty-six.
-    /// </remarks>
     const int Asks = 5;
 
     static void AssertQuiet(Screen screen, string what)

@@ -18,9 +18,10 @@
 root
 root-hover          move 60 130
 root-ticked         tick 120
-root-rename         240 70
-root-rename-empty   240 70 clear
-root-blocked-hover  240 70 clear move 60 130
+root-rename         260 70
+root-rename-empty   260 70 clear
+root-rename-drag    260 70 drag 229 70 270 70
+root-blocked-hover  260 70 clear move 60 130
 root-naming         60 130
 root-naming-ready   60 130 type Airlock move 460 210
 
@@ -30,13 +31,11 @@ system-rename       60 130 type Airlock enter 80 68
 system-back         60 130 type Airlock enter 25 62
 
 # --- a blueprint made of a logic system, and another logic system made from it -------------------
-# The suite splits on spaces, so what is typed here is one word.
-blueprint-asked     60 130 type Airlock enter 25 62 1195 201
-blueprint-made      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600
-blueprint-another   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600 146 236 type Cargo enter
-blueprint-filling   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600 146 236 type Cargo enter 850 258
-blueprint-editing   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600 1176 148
-blueprint-grouped   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 818 554 type Main 933 600 146 236 type Cargo enter 25 62
+blueprint-made      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201
+blueprint-another   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236
+blueprint-filling   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236 850 258
+blueprint-editing   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 1176 148
+blueprint-grouped   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236 25 62
 
 # --- a name another system has, refused where it is typed -----------------------------------------
 root-taken          60 130 type Airlock enter 25 62 60 130 type Airlock enter
@@ -55,7 +54,7 @@ picker-picked       60 130 type Airlock enter 60 161 200 351
 # than lighting the row it sits in. The rest of the row chooses: plainly it is the whole answer and
 # whatever was taken before is dropped, and with something held down it joins or reaches back.
 picker-replaced     60 130 type Airlock enter 60 161 200 351 200 427
-picker-also         60 130 type Airlock enter 60 161 200 351 55 404
+picker-also         60 130 type Airlock enter 60 161 200 351 55 413
 picker-through      60 130 type Airlock enter 60 161 200 351 through 200 503
 picker-box-hover    60 130 type Airlock enter 60 161 move 55 328
 
@@ -68,8 +67,8 @@ picker-box-hover    60 130 type Airlock enter 60 161 move 55 328
 # opening anything.
 picker-kinds        60 130 type Airlock enter 60 161 60 238
 picker-kinds-ready  60 130 type Airlock enter 60 161 60 238 type door
-picker-kinds-typed  60 130 type Airlock enter 60 161 60 238 60 276 type door
-picker-kind-chosen  60 130 type Airlock enter 60 161 60 238 60 276 type door 60 364
+picker-kinds-typed  60 130 type Airlock enter 60 161 60 238 60 285 type door
+picker-kind-chosen  60 130 type Airlock enter 60 161 60 238 60 285 type door 60 364
 picker-chosen       60 130 type Airlock enter 60 161 200 351 560 333
 
 # And backing out of one that has been filled in asks what to do with it.
@@ -105,7 +104,7 @@ sequence-ticked     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 ti
 # The words on a step are the host's, not core's: core says which blocks and which action, and this
 # target says "open" and joins them. A step that read right before the words moved out and wrong
 # after would show up nowhere else, because nothing else in the suite gets as far as a step.
-sequence-step       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 400 396 800 610 1365 159
+sequence-step       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 400 396 800 650 1365 159
 sequence-wait       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 255
 
 # --- the same step, switched on ----------------------------------------------------------------
@@ -113,7 +112,7 @@ sequence-wait       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 21
 # Locked, and every grip, chip, bin and arrow in the place it had in sequence-step: only colors and
 # words differ, and the adders' line says why there is nothing to add. A frame here that differs from
 # sequence-step by a position is the page moving under somebody who switched a sequence on.
-sequence-locked     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 400 396 800 610 1365 159 1311 140 move 700 600
+sequence-locked     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 400 396 800 650 1365 159 1311 140 move 700 600
 wait-chooser        60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193
 wait-typed          60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 490 type 90 enter
 wait-refused        60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 490 type 2s
@@ -128,7 +127,7 @@ wait-used           60 130 type Airlock enter 60 161 200 351 560 333 1353 311 21
 # it is whatever the reason says.
 values              60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 200 476 800 676
 picker-terminal     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 200 476 820 244
-picker-shared       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 56 404 56 556 56 480
+picker-shared       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 56 413 56 565 56 489
 values-refused      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 200 476 800 676 1315 206 type 300 1365 260
 
 # And the same column asking for the thing nobody should be typing.
@@ -182,7 +181,7 @@ sequence-colour     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70
 # on it - its switch, and the copy button beside it - are drawn nowhere else in the suite. The
 # second entry holds the button's own note, which names the row it belongs to.
 system-filled       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62
-system-copying      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 move 1252 392
+system-copying      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 move 1223 398
 
 # --- a trigger's own sentence, with one of its parts under the pointer ----------------------------
 #
@@ -202,7 +201,7 @@ system-running      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25
 # Made from the list, where the button is, and the state worth holding still is the one the copy
 # lands in: the same steps, the switch off, and an ellipsis where its trigger will go. A copy that
 # arrived live, or with the trigger it came from, would claim a toolbar slot that is already taken.
-sequence-copied     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 1252 392
+sequence-copied     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 1223 398
 
 # --- swapping a choice, which nothing else here covers ------------------------------------------
 #

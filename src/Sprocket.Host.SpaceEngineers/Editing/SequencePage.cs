@@ -61,6 +61,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public override string RenamePrompt => "What do you call this?";
 
+        public override string NameAbout => "This sequence's name.\nPress to rename it.";
+
         /// <summary>
         /// A sequence has to be called something, now that the name is what identifies it.
         /// </summary>
@@ -87,6 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             var does = new HeadingPart("");
             does.Prompt = RenamePrompt;
+            does.About = NameAbout;
             does.NameRequired = NameRequired;
             does.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename);
 
@@ -218,16 +221,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             Editor.Ask("Switch this sequence on?");
 
-            // Leaving it parked first, because that is what pressing back already meant - the offer
-            // must not turn the safe answer into the one that takes a second press. And the one
-            // Enter takes, for the same reason: the key that gets pressed without reading must not
-            // switch something on.
-            Editor.Answer("Leave it off", delegate
-            {
-                _quiet = Editor.Program.Wiring;
-                Editor.Pop();
-            }, true);
-
             Editor.Answer("Switch it on", delegate
             {
                 _quiet = Editor.Program.Wiring;
@@ -235,17 +228,17 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 Editor.Pop();
             });
 
+            // The one Enter takes: leaving it parked is what pressing back already meant, and the key
+            // that gets pressed without reading must not switch something on.
+            Editor.Answer("Leave it off", delegate
+            {
+                _quiet = Editor.Program.Wiring;
+                Editor.Pop();
+            }, true);
+
             return false;
         }
 
-        /// <summary>
-        /// What the program's edit count was when this last had nothing to ask about.
-        /// </summary>
-        /// <remarks>
-        /// Set on the way in and again whenever the question is put, so leaving a sequence somebody
-        /// only came to look at asks nothing at all - and so does leaving again after they have
-        /// already answered. Only a change since then earns another question.
-        /// </remarks>
         int _quiet;
 
         public override void Refresh()
@@ -362,7 +355,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return Running ? 0 : Editor.Register(kind, which, part, action);
         }
 
-        /// <summary>Where each row's step sits among the sequence's lines.</summary>
         readonly List<int> _shown = new List<int>();
 
         SentenceStep BuildStep(int row, int index, Step step)

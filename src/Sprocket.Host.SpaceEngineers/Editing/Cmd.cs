@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// R47 says the same thing everywhere else - references are by identity, and an edit carries what
     /// it points at.
     /// </remarks>
-    enum Cmd
+    public enum Cmd
     {
         None = 0,
 

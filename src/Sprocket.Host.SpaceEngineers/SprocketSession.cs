@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -10,6 +11,8 @@ using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Terminal;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Words;
 
 namespace Sprocket.Host.SpaceEngineers
 {
@@ -27,76 +30,44 @@ namespace Sprocket.Host.SpaceEngineers
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
     public class SprocketSession : MySessionComponentBase
     {
-        /// <summary>
-        /// How often the copy is compared with what was last sent, in ticks: twice a second.
-        /// </summary>
-        /// <remarks>
-        /// Not every tick, because comparing writes the whole program out, and a change applied on this
-        /// client at once can reach the server a moment later without anybody waiting on it. Closing the
-        /// editor sends whatever is left.
-        /// </remarks>
         const int Keeping = 30;
 
-        /// <summary>
-        /// How often the server looks for holders who have gone, in ticks: every five seconds.
-        /// </summary>
-        /// <remarks>
-        /// A Sprocket left held by somebody who crashed waits this long at most, which is far less than
-        /// anybody takes to walk over and try it. Only while something is held.
-        /// </remarks>
         const int Reclaiming = 300;
 
-        /// <summary>The session component the game made, for the callers that have no instance of it.</summary>
-        /// <remarks>
-        /// A session component is constructed by Space Engineers and handed to nothing: a terminal
-        /// control, a screen host and a block's own component are all reached through statics of the
-        /// game's own. This holds the one instance so those can find the units it owns, and holds an
-        /// ordinary object rather than being one.
-        /// </remarks>
         static SprocketSession _current;
 
         readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();
 
-        /// <summary>The world's turn, shared by every Sprocket in it, so their waits spread across the ticks.</summary>
         readonly Rota _rota = new Rota();
 
         SprocketScreen _screen;
         long _open;
 
-        /// <summary>The Sprocket the open screen shows, which a screen kept for a block may no longer.</summary>
         SprocketUnit _shown;
 
-        /// <summary>
-        /// The mod's one channel between machines.
-        /// </summary>
-        /// <remarks>
-        /// Built as the session loads, on every machine, because a machine hears only what arrives after
-        /// its handler is registered, and the first claim can come as soon as a client is in the world.
-        /// </remarks>
         NetworkChannel _channel;
 
         Handover _handover;
 
-        /// <summary>The copy of a Sprocket the server keeps, being edited on this client, or null.</summary>
         SprocketUnit _copy;
 
-        /// <summary>The block the copy is of, by entity id.</summary>
         long _copyOf;
 
-        /// <summary>How this player works in each block's editor, carried from one copy to the next.</summary>
         readonly Dictionary<long, Habits> _habits = new Dictionary<long, Habits>();
 
         Interval _keeping = new Interval(Keeping);
 
         Interval _reclaiming = new Interval(Reclaiming);
 
-        /// <summary>Scratch for the players connected, read when leases are checked.</summary>
         readonly List<IMyPlayer> _players = new List<IMyPlayer>();
 
-        /// <summary>Scratch for the construct walk. Reused, because a display asks on a cadence.</summary>
         readonly List<IMyCubeGrid> _group = new List<IMyCubeGrid>();
 
         Settings _settings;
+
+        readonly Texts _texts = new Texts();
+
+        GameTexts _gameTexts;
 
         /// <summary>
         /// What the player asked for, read the first time anything wants to know.
@@ -178,7 +149,12 @@ namespace Sprocket.Host.SpaceEngineers
 
         public override void LoadData()
         {
+            // Static because Space Engineers constructs a session component and hands it to nothing: a terminal
+            // control, a screen host and a block's own component reach it only through statics. It holds the one
+            // instance, which is an ordinary object.
             _current = this;
+
+            Speak();
 
             _handover = new Handover(Found, Given, Refused, Changed, Stored);
             _channel = Handover.Carry(NetworkChannel.Create(GetType())).Build();
@@ -187,6 +163,44 @@ namespace Sprocket.Host.SpaceEngineers
             Told.Say(IsServer
                 ? "this machine runs the Sprockets"
                 : "this machine is a client; the Sprockets run on the server");
+        }
+
+        /// <summary>Loads the mod's texts in the player's language, and listens for the language to change.</summary>
+        /// <remarks>A dedicated server has nobody to read them, and says them as they were written.</remarks>
+        void Speak()
+        {
+            if (MyAPIGateway.Utilities == null || MyAPIGateway.Utilities.IsDedicated || MyAPIGateway.Gui == null
+                || MyAPIGateway.Session == null || MyAPIGateway.Session.Config == null)
+                return;
+
+            _gameTexts = new GameTexts(Path.Combine(ModContext.ModPath, "Data", "Localization"));
+            Relanguage();
+            MyAPIGateway.Gui.GuiControlRemoved += Closed;
+        }
+
+        /// <summary>Loads the texts again where the language has changed.</summary>
+        /// <remarks>
+        /// Asked whenever a screen closes, because the options screen closing is when a new language takes
+        /// and the game announces nothing more particular. One comparison each time.
+        /// </remarks>
+        void Closed(object screen)
+        {
+            if (_gameTexts != null && MyAPIGateway.Session != null && MyAPIGateway.Session.Config != null
+                && MyAPIGateway.Session.Config.Language != _gameTexts.Language)
+                Relanguage();
+        }
+
+        /// <summary>Reads the texts in the player's language, and has every editor build its words again.</summary>
+        void Relanguage()
+        {
+            _gameTexts.Load(MyAPIGateway.Session.Config.Language);
+            _texts.Book.Load(_gameTexts);
+
+            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
+                unit.Value.Reword();
+
+            if (_copy != null)
+                _copy.Reword();
         }
 
         /// <summary>The Sprocket a programmable block carries, by entity id, made where it has none; or null.</summary>
@@ -223,7 +237,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_copy != null)
                 _copy.Dispose();
 
-            var copy = SprocketUnit.Copy(block, Asked, program, state);
+            var copy = SprocketUnit.Copy(block, Asked, _texts, program, state);
             copy.Editor.Habits = HabitsFor(id);
             _copy = copy;
             _copyOf = id;
@@ -267,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers
             }
 
             SprocketUnit rebuilt = was.Rebuilt(program, switches, Asked, _rota);
-            if (!rebuilt.Editor.Program.Intact)
+            if (!rebuilt.Program.Intact)
             {
                 Told.Say("a change to " + was.Block.CustomName + " would not read, and was not taken");
                 rebuilt.Dispose();
@@ -302,13 +316,13 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         void Spread(SprocketUnit unit)
         {
-            if (!IsServer || !unit.Editor.Program.Intact)
+            if (!IsServer || !unit.Program.Intact)
                 return;
 
             string program;
             string state;
             unit.Written(out program, out state);
-            _handover.Tell(unit.Block.EntityId, program, StateText.Save(unit.Editor.Program, null));
+            _handover.Tell(unit.Block.EntityId, program, StateText.Save(unit.Program, null));
         }
 
         /// <summary>What the server wrote into a block, arriving at this client for its copy of the block.</summary>
@@ -358,7 +372,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _copy.Dispose();
 
             long id = block.EntityId;
-            var copy = SprocketUnit.Copy(block, Asked, program, state);
+            var copy = SprocketUnit.Copy(block, Asked, _texts, program, state);
             copy.Editor.Habits = HabitsFor(id);
             copy.Editor.Holder = holder;
             _copy = copy;
@@ -418,7 +432,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_units.TryGetValue(block.EntityId, out unit))
                 return unit;
 
-            unit = new SprocketUnit(block, Asked, _rota);
+            unit = new SprocketUnit(block, Asked, _rota, _texts);
             _units.Add(block.EntityId, unit);
             return unit;
         }
@@ -565,6 +579,11 @@ namespace Sprocket.Host.SpaceEngineers
         {
             if (MyAPIGateway.TerminalControls != null)
                 MyAPIGateway.TerminalControls.CustomControlGetter -= SprocketControls.Arrange;
+
+            if (_gameTexts != null && MyAPIGateway.Gui != null)
+                MyAPIGateway.Gui.GuiControlRemoved -= Closed;
+
+            _gameTexts = null;
 
             if (_screen != null)
                 _screen.CloseNow();

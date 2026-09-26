@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 
@@ -15,7 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 sealed class Screen
 {
-    /// <summary>The size a letter actually lands at for a player. Layout does not depend on it.</summary>
     const float Width = 1920f;
     const float Height = 1080f;
 
@@ -26,6 +25,15 @@ sealed class Screen
     public static Screen Fresh(params string[] script)
     {
         var frame = new Offscreen(Width, Height);
+        frame.Play(Script.Parse(script, 0));
+
+        return new Screen(frame);
+    }
+
+    /// <summary>The editor on a block that already holds <paramref name="program" />, after <paramref name="script" />.</summary>
+    public static Screen Holding(string program, params string[] script)
+    {
+        var frame = new Offscreen(Width, Height, program);
         frame.Play(Script.Parse(script, 0));
 
         return new Screen(frame);
@@ -132,9 +140,23 @@ sealed class Screen
 
     public Drawn Text(string text) => Drawings.First(d => d.IsText && d.Text == text);
 
-    /// <summary>Every drawn mark of one kind, in the order they were asked for.</summary>
+    /// <summary>Every drawn mark of one kind that is on show, in the order they were asked for.</summary>
+    /// <remarks>
+    /// Judged by the middle of its line rather than its top. The symbol font's line is taller than the
+    /// row a symbol is centred in, so the top of a symbol's line sits above the row's clip while the
+    /// symbol itself is inside it, and a clip cuts pixels rather than lines.
+    /// </remarks>
     public IReadOnlyList<Drawn> Marks(string symbol) =>
-        Drawings.Where(d => d.IsSymbol && d.Text == symbol && d.IsInsideItsClip).ToList();
+        Drawings.Where(d => d.IsSymbol && d.Text == symbol && OnShow(d)).ToList();
+
+    bool OnShow(Drawn mark)
+    {
+        var middle = MiddleOf(mark);
+        var clip = mark.Clip;
+
+        return mark.At.X >= clip.X && mark.At.X <= clip.X + clip.Width
+            && middle >= clip.Y && middle <= clip.Y + clip.Height;
+    }
 
     public bool HasMark(string symbol) => Marks(symbol).Count > 0;
 
@@ -181,15 +203,6 @@ readonly struct Drawn(DrawCommand command, RectangleF clip)
 
     public RectangleF Clip => clip;
 
-    /// <summary>
-    /// How far outside a clip a position may sit and still be inside it.
-    /// </summary>
-    /// <remarks>
-    /// A scissor is a rectangle of whole pixels and a drawn position is not, so a run laid out flush
-    /// against the edge of its own container lands up to half a pixel the wrong side of it once the
-    /// rectangle has been rounded. That is the two living in different units, not the screen cutting
-    /// anything off.
-    /// </remarks>
     const float Rounding = 0.5f;
 
     public bool IsInsideItsClip =>

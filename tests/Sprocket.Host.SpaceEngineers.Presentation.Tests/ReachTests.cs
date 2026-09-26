@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Lists;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
 using VRageMath;
@@ -19,10 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ReachTests
 {
-    /// <summary>From an empty construct to the block picker: name a system, then ask what starts it.</summary>
     const string OpenThePicker = "60 130 type Airlock enter 60 161";
 
-    /// <summary>A program that is not this language and will not read.</summary>
     const string Older = "sprocket 1\nblock|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:21,t:B\n";
 
     /// <summary>
@@ -62,7 +61,7 @@ public class ReachTests
         // A row that is both, which is the only kind where the two can disagree: a system's own row
         // carries no command, so pressing one has never done anything but work its switch.
         var sequence = Switchable(root);
-        Assert.NotEqual(0, sequence.Command);
+        Assert.NotNull(sequence.Opens);
         Assert.True(sequence.SwitchIsOn);
 
         var was = root.Ended;
@@ -251,7 +250,7 @@ public class ReachTests
         {
             screen.Scene.Load(Older);
             screen.Run(20);
-            screen.Editor.Invoke(Notice(screen).ExpandCommand);
+            Notice(screen).Expands.Execute();
             screen.Run(20);
         });
     }
@@ -272,7 +271,7 @@ public class ReachTests
             if (found.Press.Means == Means.Nothing || found.Press.Means == Means.Type)
                 continue;
 
-            if (found.Highlight.A > 0 || found.HighlightEdge.A > 0)
+            if (Lights(found))
                 continue;
 
             var said = found.GetType().Name + " " + found.Press.Means + " at " + found.Bounds;
@@ -282,6 +281,23 @@ public class ReachTests
 
         Assert.True(dark.Count == 0,
             $"at {where}, these answer a press and cannot be lit: " + string.Join(", ", dark));
+    }
+
+    /// <summary>Whether being under the pointer changes how <paramref name="element" /> is filled or edged.</summary>
+    static bool Lights(Element element)
+    {
+        if (element.Highlight.A > 0 || element.HighlightEdge.A > 0)
+            return true;
+
+        var was = element.IsHot;
+        var fill = element.Background.PackedValue;
+        var edge = element.Edge.PackedValue;
+
+        element.IsHot = !was;
+        var changed = element.Background.PackedValue != fill || element.Edge.PackedValue != edge;
+        element.IsHot = was;
+
+        return changed;
     }
 
     /// <summary>Everything the pointer can reach, by asking at every point on the screen.</summary>
@@ -310,8 +326,8 @@ public class ReachTests
         }
     }
 
-    static NoticeComponent Notice(Screen screen) =>
-        screen.Editor.Screen.Components.OfType<NoticeComponent>().First();
+    static Notice Notice(Screen screen) =>
+        screen.Editor.Notice!;
 
     /// <summary>Where to press for a row of the open list, which is drawn over everything else.</summary>
     static string[] Row(Screen screen, string text)
@@ -330,7 +346,7 @@ public class ReachTests
         screen.Editor.Component<PickComponent>().Stages[0];
 
     /// <summary>The one row on the root that both leads somewhere and carries a switch.</summary>
-    static StatusEntry Switchable(Screen screen) =>
-        screen.Editor.Component<StatusListComponent>().Entries
-            .First(e => e.CanSwitch && e.Command != 0);
+    static StatusRow Switchable(Screen screen) =>
+        screen.Editor.RootRows()
+            .First(row => row.Flips != null && row.Opens != null);
 }

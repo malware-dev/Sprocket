@@ -4,10 +4,12 @@
     <Project Path="src/Maltek.Symbols/Maltek.Symbols.csproj" />
     <Project Path="src/Sprocket.Host.SpaceEngineers/Sprocket.Host.SpaceEngineers.csproj" />
     <Project Path="src/Sprocket.Host.SpaceEngineers.Sim/Sprocket.Host.SpaceEngineers.Sim.csproj" />
+    <Project Path="src/Sprocket.Localization.Generator/Sprocket.Localization.Generator.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sprocket.Core.Tests/Sprocket.Core.Tests.csproj" />
     <Project Path="tests/Sprocket.Host.SpaceEngineers.Tests/Sprocket.Host.SpaceEngineers.Tests.csproj" />
     <Project Path="tests/Sprocket.Host.SpaceEngineers.Presentation.Tests/Sprocket.Host.SpaceEngineers.Presentation.Tests.csproj" />
+    <Project Path="tests/Sprocket.Localization.Generator.Tests/Sprocket.Localization.Generator.Tests.csproj" />
   </Folder>
 </Solution>

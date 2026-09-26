@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -82,7 +83,7 @@ public class PaperTargetTests
         editor.PressChoice("Close");
         editor.PressPrimary();
 
-        var paper = PaperTarget.Draw(ship.World, editor.Screen);
+        var paper = PaperTarget.Draw(ship.World, editor);
 
         Assert.Contains("1. close Inner Door", paper);
     }
@@ -97,7 +98,7 @@ public class PaperTargetTests
         editor.NewSystem("Airlock");
         editor.PressStart("When…");
 
-        var paper = PaperTarget.Draw(ship.World, editor.Screen);
+        var paper = PaperTarget.Draw(ship.World, editor);
 
         Assert.Contains("pick:", paper);
         Assert.Contains("[ ] Airlock Button", paper);
@@ -107,7 +108,7 @@ public class PaperTargetTests
     {
         // Drawn every time, not only at the end: the refusal is what is being exercised, and a walk
         // that renders once would step straight past whatever it could not have written down.
-        Assert.NotEqual("", PaperTarget.Draw(ship.World, ship.Editor.Screen));
+        Assert.NotEqual("", PaperTarget.Draw(ship.World, ship.Editor));
 
         foreach (var component in ship.Editor.Screen.Components)
             seen.Add(component.GetType().Name);
@@ -122,7 +123,7 @@ public class PaperTargetTests
         ship.Rig.Light(4, "Airlock Light");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
-        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
         return ship;
     }
 

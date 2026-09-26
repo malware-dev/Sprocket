@@ -17,7 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// </remarks>
     static class SequenceSummary
     {
-        /// <summary>How long after firing a sequence still counts as having just run.</summary>
         const int JustRanTicks = 10;
 
         public static bool References(Sequence sequence, string name)

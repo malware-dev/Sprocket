@@ -1,9 +1,11 @@
 using VRage.Game;
 using VRage.Utils;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Drawing;
-using Sprocket.Host.SpaceEngineers.Input;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -33,7 +35,7 @@ namespace Sprocket.Sim.Simulation
             _panel.Background = new Color(16, 22, 30, 230);
             _panel.Children.Add(Heading("The editor, out of the game"));
 
-            _box.Scale = 0.7f;
+            _box.FontSize = 25.9f;
             _box.Background = new Color(20, 34, 48, 235);
             _box.Text = "Hangar door";
             _box.IsEditing = true;
@@ -98,7 +100,7 @@ namespace Sprocket.Sim.Simulation
             // Four and a half rows tall, deliberately. The half is the point: the bottom edge has to fall
             // through the middle of a line of text, so that a scissor which only cut whole rows would be
             // visibly not what we asked for.
-            float line = g.LineHeight(MyFontEnum.White, 0.6f);
+            float line = 22.2f;
             float clippedHeight = line * 4.5f + 4f * 4f;
             float clippedTop = _panel.Bounds.Y + _panel.Bounds.Height + 24f;
 
@@ -131,7 +133,7 @@ namespace Sprocket.Sim.Simulation
         {
             var label = new Label();
             label.Font = MyFontEnum.White;
-            label.Scale = 0.9f;
+            label.FontSize = 33.3f;
             label.Text = text;
             return label;
         }
@@ -140,7 +142,7 @@ namespace Sprocket.Sim.Simulation
         {
             var label = new Label();
             label.Font = MyFontEnum.White;
-            label.Scale = 0.6f;
+            label.FontSize = 22.2f;
             label.Color = new Color(190, 205, 220);
             label.Text = text;
             return label;

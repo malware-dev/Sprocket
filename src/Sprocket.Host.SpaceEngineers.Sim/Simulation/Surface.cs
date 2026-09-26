@@ -13,9 +13,8 @@ using Matrix = System.Windows.Media.Matrix;
 using Point = System.Windows.Point;
 using Rect = System.Windows.Rect;
 using Ink = System.Windows.Media.Color;
-using Sprocket.Host.SpaceEngineers.Drawing;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Layout;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -33,7 +32,6 @@ namespace Sprocket.Sim.Simulation
         readonly ScreenSpaceDevice _device = new ScreenSpaceDevice();
         readonly FallbackFonts _shapes;
 
-        /// <summary>The desktop face this canvas draws letters with, where no game page is loaded.</summary>
         readonly Typeface _letters = new Typeface("Segoe UI");
         readonly SeFontMetrics _exact;
         readonly GlyphAtlas _atlas;
@@ -220,7 +218,7 @@ namespace Sprocket.Sim.Simulation
             // Held across frames, as the mod holds one. Begin re-samples the area, so a resized window is
             // picked up without building another.
             if (_graphics == null)
-                _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud);
+                _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
 
             _graphics.Begin();
 

@@ -12,10 +12,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class PageTurnTests
 {
-    /// <summary>A trigger's picker, and then "A single action…" chosen, which goes on to its page.</summary>
     const string Chosen = "60 130 type Airlock enter 60 161 200 351 560 333 1000 207";
 
-    /// <summary>The narrow way back at the left of the action's page.</summary>
     const string Fold = "47 500";
 
     static List<float> Followed(Screen screen, string heading, int ticks)

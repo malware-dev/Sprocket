@@ -1,7 +1,8 @@
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Screen;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Developing
 {
@@ -22,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Developing
             // Fixed width, because a listing is read as columns: the indentation of a step under its
             // sequence, and the line numbers beside it, only line up if every character is one width.
             _screed.Font = Lettering.Mono;
-            _screed.Scale = Lettering.Small;
+            _screed.FontSize = Lettering.Small;
             _screed.Color = Palette.Ink;
 
             // A listing is talked about by line number - a parser says which line it could not read -

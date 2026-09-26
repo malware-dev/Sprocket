@@ -8,24 +8,28 @@ of Sprocket and would be wrong anywhere else.
 
 ## How this repository is put together
 
-Two projects, and the first one is the mod:
+Three projects of code, and the first one is the mod:
 
 - **`src/Sprocket.Host.SpaceEngineers`** is everything that runs in the game, in one tree, one folder
   per capability and each holding the whole of it: a sequence's model, the slots a screen is asked to
   show for it and the views that draw them all sit in `Sequences/`. `Words/` decides how a sentence is
-  composed, which is not the same as holding the English - see below. `Layout/`, `Drawing/` and `Look/` know nothing of Sprocket and sit beside the
-  features that use them. Files are globbed, so a new file is in the build by being in the folder.
+  composed, which is not the same as holding the English - see below. `Ui/` is the UI framework, kept apart
+  from the features built on it, and sits beside them. Files are globbed, so a new file is in the build by being in the folder.
 
   **What a screen is asked to show carries structure and never words** - stated on
   `Screen/EditorComponent` and proved by `PaperTarget` in the tests. That rule used to be a folder
   boundary and is now a rule about types, which is the one thing flattening the tree gave up.
 - **`src/Sprocket.Host.SpaceEngineers.Sim`** is the harness. It references the mod and drives it over
   blocks it makes up, answering the game's own interfaces.
+- **`src/Sprocket.Localization.Generator`** writes the mod's `Texts` class from its `MyTexts.resx` at
+  build time, and reports every text that cannot be said. A Roslyn source generator, so `netstandard2.0`.
 
-The three test projects reference the mod, or the harness where they need a screen.
+The mod's three test projects reference the mod, or the harness where they need a screen, and drive the
+editor the way a target would through the harness's `Driving/Target`. The generator has a test project
+of its own, which runs it as the compiler does and needs nothing of the game.
 
 **Two things only the game can do, and each is an interface the mod asks through.**
-`Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers
+`Ui/Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers
 both, which is how a frame is recorded rather than drawn and how a toolbar slot is read without one.
 Everything else - mod storage, the grid's events, the block interfaces - the harness uses for real,
 through Castle proxies over the game's own types. See `Fakes/Pretend.cs`.
@@ -61,7 +65,7 @@ after every file rather than at the end.
 ## Building and running
 
 ```
-dotnet test                                     # all three test projects
+dotnet test                                     # every test project
 dotnet build src/Sprocket.Host.SpaceEngineers    # builds AND DEPLOYS the mod
 dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 ```

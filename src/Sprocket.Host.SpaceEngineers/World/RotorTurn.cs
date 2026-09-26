@@ -23,42 +23,12 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     sealed class RotorTurn
     {
-        /// <summary>
-        /// How far a rotor has to move to count as moving, in radians.
-        /// </summary>
-        /// <remarks>
-        /// A rotor held against a limit is not perfectly still, and the slowest turn the game allows -
-        /// a tenth of a revolution a minute - covers a hundred times this between two looks a second
-        /// apart. Anything smaller is the block settling rather than travelling.
-        /// </remarks>
         const float Stir = 0.0005f;
 
-        /// <summary>
-        /// How long a rotor has to have moved nothing before it counts as held, in frames.
-        /// </summary>
-        /// <remarks>
-        /// A second, which is longer than the moment between a turn being asked for and the physics
-        /// taking it up. Being held is reported rather than acted on, so late and right beats early
-        /// and wrong.
-        /// </remarks>
         const int Beat = 60;
 
-        /// <summary>
-        /// How long ago a look has to have been for it to say nothing about now, in frames.
-        /// </summary>
-        /// <remarks>
-        /// A rotor is watched only while a sequence waits on it, so the look before this one may be
-        /// from the last time it was waited on - minutes ago, at the same angle it happens to be at
-        /// again. Read as a look just taken, that would call a rotor held before it had moved.
-        /// </remarks>
         const int Stale = 600;
 
-        /// <summary>Where each rotor was when it was last seen moving, and when that was.</summary>
-        /// <remarks>
-        /// One entry per rotor ever asked about, which is the rotors a sequence waits on. A rotor never
-        /// seen moving is treated as having moved just now, so it is given its beat to get going rather
-        /// than being called held before it has begun.
-        /// </remarks>
         readonly Dictionary<long, Went> _went = new Dictionary<long, Went>();
 
         /// <summary>

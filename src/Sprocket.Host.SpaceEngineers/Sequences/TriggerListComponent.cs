@@ -20,7 +20,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Triggers.Changed += Listed;
         }
 
-        /// <summary>The ones being repeated for, so each can be let go of again.</summary>
         readonly List<SentenceTrigger> _heard = new List<SentenceTrigger>();
 
         /// <summary>

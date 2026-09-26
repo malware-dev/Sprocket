@@ -40,6 +40,8 @@ namespace Sprocket.Sim
             {
                 Console.Write(StorageReport.Render());
                 Console.WriteLine();
+                Console.Write(RichTextReport.Render());
+                Console.WriteLine();
                 Console.Write(BindingReport.Render());
                 return;
             }
@@ -64,6 +66,19 @@ namespace Sprocket.Sim
                 return;
             }
 
+            // A markdown file drawn by the rich text element, in the game's font, for looking at what it can do:
+            // --rich <file.md> <picture.png> <width> [tip] [strong=RRGGBB] [emphasis=RRGGBB]
+            if (args.Length > 3 && args[0] == "--rich")
+            {
+                var wide = float.Parse(args[3], CultureInfo.InvariantCulture);
+                var tip = Array.IndexOf(args, "tip") > 3;
+                var size = RichShot.Save(args[2], File.ReadAllText(args[1]), wide, tip, Hex(args, "strong="),
+                    Hex(args, "emphasis="));
+                Console.WriteLine("wrote " + args[2] + "   " + size.X.ToString(CultureInfo.InvariantCulture) + "x"
+                                  + size.Y.ToString(CultureInfo.InvariantCulture));
+                return;
+            }
+
             if (args.Length > 1 && args[0] == "--shot")
             {
 
@@ -84,7 +99,28 @@ namespace Sprocket.Sim
                     from = 5;
                 }
 
-                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from));
+                // A program for the block to hold before the script starts, read from a file: "holding <file>".
+                string holding = null;
+                if (args.Length > from + 1 && args[from] == "holding")
+                {
+                    holding = File.ReadAllText(args[from + 1]);
+                    from += 2;
+                }
+
+                // The language the screen speaks, as the mod's translation files name it: "in no".
+                string culture = null;
+                if (args.Length > from + 1 && args[from] == "in")
+                {
+                    culture = args[from + 1];
+                    from += 2;
+                }
+
+                // The developer tools in the footer, as a Sprocket with developerMode on offers them: "developer".
+                var developer = args.Length > from && args[from] == "developer";
+                if (developer)
+                    from += 1;
+
+                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from), holding, culture, developer);
                 Console.WriteLine("wrote " + args[1] + "   " + width + "x" + height);
                 Console.WriteLine("ended on: " + ended);
                 return;
@@ -140,8 +176,18 @@ namespace Sprocket.Sim
             new App().Run();
         }
 
-        /// <summary>The carriage return that a dump written for comparison does without.</summary>
         static readonly string Cr = ((char)13).ToString();
+
+        /// <summary>The color an argument starting <paramref name="name" /> gives as six hex digits, or null where none does.</summary>
+        static VRageMath.Color? Hex(string[] args, string name)
+        {
+            var given = Array.Find(args, a => a.StartsWith(name, StringComparison.Ordinal));
+            if (given == null)
+                return null;
+
+            var rgb = int.Parse(given.Substring(name.Length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            return new VRageMath.Color((rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255);
+        }
 
         /// <summary>Whether a word begins a script step rather than naming a file.</summary>
         static bool IsStep(string word)

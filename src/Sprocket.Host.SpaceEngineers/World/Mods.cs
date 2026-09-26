@@ -24,13 +24,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     static class Mods
     {
-        /// <summary>
-        /// Where a mod puts it, which is a promise: every mod that ever ships one spells it this way.
-        /// </summary>
-        /// <remarks>
-        /// Not under <c>Data/Scripts</c>, and it could not be: the game refuses to read anything
-        /// there through this API, because modders objected to other mods reading their code.
-        /// </remarks>
         const string File = "Data/SprocketDefinitions.xml";
 
         public static void Read(Catalogue into)

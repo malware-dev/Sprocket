@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Every text the mod says, in English, which is the language the others are translated from.
+
+    A text is markdown-lite: **strong**, *emphasis*, `code`, a single newline breaks the line and a blank
+    line starts a new paragraph. A name in braces, {name}, is filled in by the mod; keep it as it is,
+    wherever the sentence needs it.
+
+    A translation is a copy of this file named for its language, such as MyTexts.no.resx, holding the
+    texts it translates. Whatever it leaves out is said in English.
+-->
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Sprocket.Chrome.Back" xml:space="preserve">
+    <value>Back</value>
+    <comment>Note on the arrow that goes back to the screen before.</comment>
+  </data>
+  <data name="Sprocket.Chrome.Close" xml:space="preserve">
+    <value>Close the editor</value>
+    <comment>Note on the same arrow on the first screen, where there is nothing to go back to.</comment>
+  </data>
+  <data name="Sprocket.Chrome.Undo" xml:space="preserve">
+    <value>Undo {action}</value>
+    <comment>Note on the undo arrow. {action} is what undoing takes back, such as "rename".</comment>
+  </data>
+  <data name="Sprocket.Chrome.Redo" xml:space="preserve">
+    <value>Redo {action}</value>
+    <comment>Note on the redo arrow. {action} is what redoing does again, such as "rename".</comment>
+  </data>
+  <data name="Sprocket.Chrome.Refresh" xml:space="preserve">
+    <value>Read the ship again, in case somebody has changed a button</value>
+    <comment>Note on the button that reads the blocks again.</comment>
+  </data>
+
+  <data name="Sprocket.Rename.Empty" xml:space="preserve">
+    <value>Give it a name first</value>
+    <comment>Said under a name being typed, when it is empty and the thing must have a name.</comment>
+  </data>
+  <data name="Sprocket.Rename.Taken" xml:space="preserve">
+    <value>That name is taken</value>
+    <comment>Said under a name being typed, when something else already has it.</comment>
+  </data>
+
+  <data name="Sprocket.Row.Broken" xml:space="preserve">
+    <value>**Something needs mending**
+Open it to see what.</value>
+    <comment>Note on a row's light when it is red.</comment>
+  </data>
+  <data name="Sprocket.Row.Ran" xml:space="preserve">
+    <value>**Ran just now**</value>
+    <comment>Note on a row's light while it flashes, just after the thing ran.</comment>
+  </data>
+  <data name="Sprocket.Row.Idle" xml:space="preserve">
+    <value>**Idle**
+Lights green when it runs, and red when something in it needs mending.</value>
+    <comment>Note on a row's light when it is dark.</comment>
+  </data>
+  <data name="Sprocket.Row.Change" xml:space="preserve">
+    <value>Change what this does</value>
+    <comment>Note on the part of a row that opens what it does.</comment>
+  </data>
+  <data name="Sprocket.Row.Delete" xml:space="preserve">
+    <value>Delete</value>
+    <comment>Note on a row's bin.</comment>
+  </data>
+  <data name="Sprocket.Switch.On" xml:space="preserve">
+    <value>ON</value>
+    <comment>The half of an on/off switch that turns something on. Short: it shares the switch with the next.</comment>
+  </data>
+  <data name="Sprocket.Switch.Off" xml:space="preserve">
+    <value>OFF</value>
+    <comment>The half of an on/off switch that turns something off.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchOn" xml:space="preserve">
+    <value>Switch on</value>
+    <comment>Note on a switch that is off.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchOff" xml:space="preserve">
+    <value>Switch off</value>
+    <comment>Note on a switch that is on.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchSystemOn" xml:space="preserve">
+    <value>Switch the whole system on</value>
+    <comment>Note on a logic system's switch when it is off.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchSystemOff" xml:space="preserve">
+    <value>Switch the whole system off, stopping every sequence in it</value>
+    <comment>Note on a logic system's switch when it is on.</comment>
+  </data>
+
+  <data name="Sprocket.Systems.Title" xml:space="preserve">
+    <value>Automation for {name}</value>
+    <comment>Heading of the first screen. {name} is the grid's name, which is pressed to rename it, so the words either side of it are drawn around it, and the name is always shown exactly as it is.</comment>
+  </data>
+  <data name="Sprocket.Systems.RenamePrompt" xml:space="preserve">
+    <value>What is this called?</value>
+    <comment>Asked when the grid is renamed.</comment>
+  </data>
+  <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
+    <value>This grid's name, the one the game shows for it everywhere.
+Press to rename the grid.</value>
+    <comment>Note on the grid's name in the heading.</comment>
+  </data>
+  <data name="Sprocket.Systems.New" xml:space="preserve">
+    <value>New logic system</value>
+    <comment>Button that starts a new logic system. A logic system is a set of sequences that work together, such as an airlock's.</comment>
+  </data>
+  <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
+    <value>Start a new logic system on this grid.</value>
+    <comment>Note on the button above.</comment>
+  </data>
+  <data name="Sprocket.Systems.Load" xml:space="preserve">
+    <value>Load blueprint</value>
+    <comment>Button that sets up a blueprint made on another grid. A blueprint is a logic system that more can be made from, each using its own blocks.</comment>
+  </data>
+  <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
+    <value>Set up a **blueprint** made somewhere else, choosing which of this grid's blocks it uses.</value>
+    <comment>Note on the button above.</comment>
+  </data>
+  <data name="Sprocket.Systems.Empty" xml:space="preserve">
+    <value>Nothing automated here yet.</value>
+    <comment>Said where the list of logic systems would be, when there are none.</comment>
+  </data>
+  <data name="Sprocket.Systems.MakeBlueprint" xml:space="preserve">
+    <value>Make blueprint</value>
+    <comment>Button on a logic system's row that makes it a blueprint.</comment>
+  </data>
+  <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
+    <value>Turn this into a **blueprint**, so more logic systems like it can be made, each using its own blocks.
+This one becomes the first of them.</value>
+    <comment>Note on the button above.</comment>
+  </data>
+  <data name="Sprocket.Systems.MadeFrom" xml:space="preserve">
+    <value>Made from **{name}** blueprint</value>
+    <comment>Heading over the logic systems made from one blueprint. {name} is the blueprint's name, as the player gave it.</comment>
+  </data>
+  <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
+    <value>add another {name}</value>
+    <comment>Row under the logic systems made from a blueprint, which makes one more. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
+    <value>Make another logic system from the **{name}** blueprint, and choose which blocks it uses.</value>
+    <comment>Note on the row above. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Systems.Running" xml:space="preserve">
+    <value>running</value>
+    <comment>Said on a logic system's row while any of its sequences runs.</comment>
+  </data>
+  <data name="Sprocket.Systems.Numbered" xml:space="preserve">
+    <value>System {number}</value>
+    <comment>What a logic system is called when it has no name and its blocks share none. {number} is its number.</comment>
+  </data>
+  <data name="Sprocket.Systems.Instance" xml:space="preserve">
+    <value>{name} {number}</value>
+    <comment>What one of the logic systems made from a blueprint is called when it has no name of its own. {name} is the blueprint's, {number} which one it is.</comment>
+  </data>
+
+  <data name="Sprocket.Salvage.Different" xml:space="preserve">
+    <value>This block holds a program from a different version.</value>
+    <comment>Banner on the first screen when the block's program was written by a version that cannot be read.</comment>
+  </data>
+  <data name="Sprocket.Salvage.DifferentDetail" xml:space="preserve">
+    <value>This version cannot read it, so this screen starts empty. The block still holds it until you change something here - and that replaces it for good.</value>
+    <comment>Shown when the banner above is opened.</comment>
+  </data>
+  <data name="Sprocket.Salvage.Partial" xml:space="preserve">
+    <value>This block holds a program that could only partly be read.</value>
+    <comment>Banner on the first screen when only part of the block's program could be read.</comment>
+  </data>
+  <data name="Sprocket.Salvage.PartialDetail" xml:space="preserve">
+    <value>What could be read is shown here. The block still holds the whole of it until you change something here - and that replaces it with what you see.</value>
+    <comment>Shown when the banner above is opened.</comment>
+  </data>
+  <data name="Sprocket.Salvage.Trouble" xml:space="preserve">
+    <value>Read as: {trouble}</value>
+    <comment>Shown under the banner's detail. {trouble} is what went wrong, in the reader's own words, which are not translated.</comment>
+  </data>
+  <data name="Sprocket.Salvage.Replace" xml:space="preserve">
+    <value>Replace it</value>
+    <comment>Button that replaces the program that could not be read, on the banner and as an answer to the question below.</comment>
+  </data>
+  <data name="Sprocket.Salvage.Question" xml:space="preserve">
+    <value>Replace the program this block holds? The one that could not be read will be gone.</value>
+    <comment>Asked before the first change that replaces a program that could not be read.</comment>
+  </data>
+  <data name="Sprocket.Salvage.Keep" xml:space="preserve">
+    <value>Leave it alone</value>
+    <comment>Answer to the question above that changes nothing.</comment>
+  </data>
+
+  <data name="Sprocket.Lease.Holder" xml:space="preserve">
+    <value>{holder} is editing this block's automation.</value>
+    <comment>Banner when somebody else is editing the same block. {holder} is their name.</comment>
+  </data>
+  <data name="Sprocket.Lease.Detail" xml:space="preserve">
+    <value>Only one person can edit at a time. Reopen this once they're done to make changes.</value>
+    <comment>Shown when the banner above is opened.</comment>
+  </data>
+</root>

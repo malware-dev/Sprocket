@@ -30,14 +30,6 @@ namespace Sprocket.Sim.Simulation
         /// <summary>The height the game's own UI, and its font scaling, are designed against.</summary>
         public const float GameReferenceHeight = 1080f;
 
-        /// <summary>
-        /// One pixel per unit.
-        /// </summary>
-        /// <remarks>
-        /// The harness lays out in window pixels and so does the game, so a measurement must not be
-        /// scaled by whatever the monitor this happens to run on is set to - a frame recorded on one
-        /// machine has to be the frame recorded on another.
-        /// </remarks>
         const double PerPixel = 1d;
 
         readonly Typeface _typeface;
@@ -67,16 +59,10 @@ namespace Sprocket.Sim.Simulation
             return new Vector2((float)formatted.WidthIncludingTrailingWhitespace, line);
         }
 
-        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers, without <see cref="Content.SeFontMetrics.FontScale" />.</summary>
+        /// <summary>What the game's screen-space <c>GetLineHeight</c> answers: the height of the line it draws, <see cref="Content.SeFontMetrics.FontScale" /> included.</summary>
         public float LineHeightPixels(string font, float scale)
         {
-            return GameLineHeight * EffectiveScale(scale);
-        }
-
-        /// <summary>How tall a line the game draws at <paramref name="scale" />, in pixels.</summary>
-        float DrawnLineHeight(float scale)
-        {
-            return LineHeightPixels(null, scale) * Content.SeFontMetrics.FontScale;
+            return GameLineHeight * EffectiveScale(scale) * Content.SeFontMetrics.FontScale;
         }
 
         /// <summary>
@@ -109,6 +95,12 @@ namespace Sprocket.Sim.Simulation
         {
             return new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                 _typeface, size, Brushes.White, PerPixel);
+        }
+
+        /// <summary>How tall a line the game draws at <paramref name="scale" />, in pixels.</summary>
+        float DrawnLineHeight(float scale)
+        {
+            return LineHeightPixels(null, scale);
         }
     }
 }
