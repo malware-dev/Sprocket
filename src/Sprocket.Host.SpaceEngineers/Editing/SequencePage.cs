@@ -4,6 +4,7 @@ using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.World;
@@ -355,6 +356,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return Running ? 0 : Editor.Register(kind, which, part, action);
         }
 
+        ICommand Changes(Cmd kind, Action action)
+        {
+            return Running ? null : Editor.Act(kind, action);
+        }
+
         readonly List<int> _shown = new List<int>();
 
         SentenceStep BuildStep(int row, int index, Step step)
@@ -373,7 +379,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (wait != null)
             {
                 built.Slots.Add(new DurationSlot(wait.Ticks,
-                    Change(Cmd.StepSlot, position, 0, delegate { EditWait(wait); })));
+                    Changes(Cmd.StepSlot, delegate { EditWait(wait); })));
                 return built;
             }
 
@@ -383,7 +389,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 // Read only, with no command on the slot: nothing in the editor makes one of these
                 // yet, and a slot that opens nothing must still show what the step does.
                 var called = _sequence.System == null ? null : _sequence.System.FindSequence(run.Number);
-                built.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name, 0));
+                built.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name, null));
                 return built;
             }
 
@@ -397,10 +403,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, act.Targets)));
 
             built.Slots.Add(new ActionSlot(chosen,
-                Change(Cmd.StepSlot, position, 0, delegate { EditStep(act, Opening.What); })));
+                Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.What); })));
 
             built.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), true,
-                Change(Cmd.StepSlot, position, 1, delegate { EditStep(act, Opening.Blocks); })));
+                Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Blocks); })));
 
             // Last, because the blocks are what somebody scanning a list of steps is looking for
             // and the values are the detail. Pressing it opens the step where its values are given,
@@ -411,7 +417,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 chosen.Fields(fields);
 
                 built.Slots.Add(new ValuesSlot(act.Values, fields,
-                    Change(Cmd.StepSlot, position, 2, delegate { EditStep(act, Opening.Values); })));
+                    Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Values); })));
             }
 
             return built;

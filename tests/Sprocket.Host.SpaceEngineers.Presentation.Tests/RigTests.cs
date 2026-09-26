@@ -481,11 +481,7 @@ public class RigTests
         rig.Machine.Panel(31, "Stop Button");
         rig.Tick();
 
-        rig.Editor.NewSystem("Airlock");
-        rig.Editor.PressStart("When…");
-        rig.Editor.PressBlock("Airlock Button");
-        rig.Editor.PressChoice("is pressed");
-        rig.Editor.PressPrimary();
+        rig.Editor.NewButtonSystem("Airlock");
         // A wait, so the run lasts long enough to be stopped.
         rig.Editor.PressAdd("wait");
         rig.Editor.PressChoice(Words.TimeText.WaitChoice(600));
@@ -574,11 +570,7 @@ public class RigTests
     {
         Simulation rig = Simulation.Fresh();
 
-        rig.Editor.NewSystem("Airlock");
-        rig.Editor.PressStart("When…");
-        rig.Editor.PressBlock("Airlock Button");
-        rig.Editor.PressChoice("is pressed");
-        rig.Editor.PressPrimary();
+        rig.Editor.NewButtonSystem("Airlock");
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
@@ -770,11 +762,7 @@ public class RigTests
 
     static void Airlock(SprocketEditor editor)
     {
-        editor.NewSystem("Airlock");
-        editor.PressStart("When…");
-        editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
-        editor.PressPrimary();
+        editor.NewButtonSystem("Airlock");
     }
 
     static bool Running(Simulation rig, Sequence sequence)

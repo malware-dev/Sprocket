@@ -208,21 +208,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         public static ComponentView For(EditorComponent component)
         {
-            var heading = component as HeadingComponent;
-            if (heading != null)
-                return new HeadingView(heading);
-
-            var start = component as StartComponent;
-            if (start != null)
-                return new StartView(start);
-
             var choices = component as ChoiceListComponent;
             if (choices != null)
                 return new ChoiceListView(choices);
-
-            var status = component as StatusListComponent;
-            if (status != null)
-                return new StatusListView(status);
 
             var pick = component as PickComponent;
             if (pick != null)
@@ -232,10 +220,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (sequence != null)
                 return new SequenceView(sequence);
 
-            var triggers = component as TriggerListComponent;
-            if (triggers != null)
-                return new TriggerListView(triggers);
-
             var script = component as ScriptComponent;
             if (script != null)
                 return new ScriptView(script);
@@ -243,10 +227,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             var blueprint = component as BlueprintComponent;
             if (blueprint != null)
                 return new BlueprintView(blueprint);
-
-            var usingBlocks = component as UsingComponent;
-            if (usingBlocks != null)
-                return new UsingView(usingBlocks);
 
             // Everything else, drawn loudly. A component this target has not learned to draw must not be
             // silently absent: a screen missing its picker looks exactly like a screen with nothing to

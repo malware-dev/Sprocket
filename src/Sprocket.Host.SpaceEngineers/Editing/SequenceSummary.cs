@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Words;
 
@@ -17,35 +15,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// </remarks>
     static class SequenceSummary
     {
-        const int JustRanTicks = 10;
-
         public static bool References(Sequence sequence, string name)
         {
             return Automation.References(sequence, name);
-        }
-
-        /// <summary>Updates one entry per sequence, in place.</summary>
-        public static void Fill(ObservableList<StatusEntry> entries, List<Sequence> sequences,
-            AutomationRunner runner, int tick)
-        {
-            var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
-            for (var i = 0; i < count; i++)
-            {
-                var sequence = sequences[i];
-                var entry = entries[i];
-                var running = Live(runner, sequence);
-
-                // What it is doing, plainly. Being switched off is said as the warning it is, in
-                // the same place and in its own colour - the row shows one or the other, never both.
-                entry.Status = SequenceText.Status(Status(sequence, running));
-                entry.Running = running != null && running.IsRunning;
-                entry.JustRan = running != null && running.LastFiredTick >= 0
-                    && tick - running.LastFiredTick < JustRanTicks;
-
-                // Every tick, and it costs nothing: every answer comes out of a table built once -
-                // see TimeText.Ago, which was written to be called exactly like this.
-                entry.LastRun = TimeText.Ago(TicksSinceRun(running, tick));
-            }
         }
 
         /// <summary>
@@ -57,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// particular - and a row that only ever read the first would sit still while the port airlock
         /// cycled.
         /// </remarks>
-        static SequenceRunner Live(AutomationRunner runner, Sequence sequence)
+        public static SequenceRunner Live(AutomationRunner runner, Sequence sequence)
         {
             var system = sequence.System;
             if (system == null)
@@ -72,26 +44,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
 
             return runner.Get(sequence);
-        }
-
-        /// <summary>
-        /// What each row calls its sequence: its name, or what it does where it has none.
-        /// </summary>
-        /// <remarks>
-        /// Not what starts it. That is a row of its own now, directly above this list, and a row
-        /// saying both would say the trigger twice on the one screen where both are shown.
-        /// <para>
-        /// Separate from <see cref="Fill" /> because it is made of words rather than read off a state:
-        /// joining a sentence out of a sequence's blocks and actions allocates, and the sentence changes
-        /// when somebody edits it or renames a block it names - never on its own, and never per tick.
-        /// </para>
-        /// </remarks>
-        public static void Word(ObservableList<StatusEntry> entries, List<Sequence> sequences,
-            Bindings bindings, SystemInstance through)
-        {
-            var count = entries.Count < sequences.Count ? entries.Count : sequences.Count;
-            for (var i = 0; i < count; i++)
-                entries[i].Summary = SequenceText.Doing(bindings, sequences[i], through);
         }
 
         /// <summary>

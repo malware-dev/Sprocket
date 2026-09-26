@@ -28,11 +28,7 @@ public class ActionTests
     static Screen WithASequence()
     {
         var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
+        screen.Editor.NewButtonSystem("Airlock");
         return screen.Run(2);
     }
 
@@ -362,11 +358,7 @@ public class ActionTests
     {
         var rig = Simulation.On(Store.Nowhere());
 
-        rig.Editor.NewSystem("Lights");
-        rig.Editor.PressStart("When…");
-        rig.Editor.PressBlock("Airlock Button");
-        rig.Editor.PressChoice("is pressed");
-        rig.Editor.PressPrimary();
+        rig.Editor.NewButtonSystem("Lights");
 
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Airlock Light");
@@ -393,11 +385,7 @@ public class ActionTests
     {
         var rig = Simulation.On(Store.Nowhere());
 
-        rig.Editor.NewSystem("Airlock");
-        rig.Editor.PressStart("When…");
-        rig.Editor.PressBlock("Airlock Button");
-        rig.Editor.PressChoice("is pressed");
-        rig.Editor.PressPrimary();
+        rig.Editor.NewButtonSystem("Airlock");
 
         rig.Editor.PressAdd("do something");
         rig.Editor.PressBlock("Hydrogen Tank");

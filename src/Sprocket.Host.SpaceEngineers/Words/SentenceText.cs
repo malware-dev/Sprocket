@@ -37,16 +37,16 @@ namespace Sprocket.Host.SpaceEngineers.Words
         public const string Missing = "something that's gone";
 
 
-        /// <summary>The word a trigger's line opens with.</summary>
-        public static string Lead(SentenceTrigger trigger)
+        /// <summary>The word a trigger's line opens with, for a trigger of <paramref name="kind" /> started by <paramref name="parts" /> parts.</summary>
+        public static string Lead(TriggerKind kind, int parts)
         {
-            if (trigger.Kind == TriggerKind.Every)
+            if (kind == TriggerKind.Every)
                 return "Every";
 
             // A required trigger with slots names its block, so it reads like any other moment: how
             // it reaches Sprocket is not what the sentence is about. Only one naming nothing has to
             // say that out loud, because it has nothing else to show.
-            return trigger.Kind == TriggerKind.Required && trigger.Slots.Count == 0
+            return kind == TriggerKind.Required && parts == 0
                 ? "When something on this ship says so"
                 : "When";
         }
@@ -89,6 +89,13 @@ namespace Sprocket.Host.SpaceEngineers.Words
                 return TimeText.Rate(duration.Ticks);
 
             return Of(world, slot);
+        }
+
+        /// <summary>The same, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
+        public static void InTrigger(GridWorld world, SentenceSlot slot, List<Mention> into)
+        {
+            if (!Blocks(world, slot, into))
+                into.Add(new Mention(InTrigger(world, slot), null));
         }
 
 
@@ -148,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.Words
         /// <see cref="Empty" />, so the title of the picker reads as the row it is making.
         /// </remarks>
         /// <param name="forEvents">Whether it is what starts something rather than what is done.</param>
-        /// <param name="blocks">The blocks as <see cref="Entities" /> says them.</param>
+        /// <param name="blocks">The blocks as <see cref="Entities(GridWorld, IList{long}, bool)" /> says them.</param>
         /// <param name="chosen">What is chosen, in the words its list shows it in, or empty.</param>
         /// <param name="sets">Whether what is chosen sets a value, which reads "set it on the blocks".</param>
         public static string Picking(bool forEvents, string blocks, string chosen, bool sets)
@@ -174,6 +181,41 @@ namespace Sprocket.Host.SpaceEngineers.Words
                 return TimeText.Duration(duration.Ticks);
 
             return Of(world, slot);
+        }
+
+        /// <summary>The same, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
+        public static void InStep(GridWorld world, SentenceSlot slot, List<Mention> into)
+        {
+            if (!Blocks(world, slot, into))
+                into.Add(new Mention(InStep(world, slot), null));
+        }
+
+        /// <summary>
+        /// Names a selection as pieces added to <paramref name="into" />, each block with its icon, joined the way
+        /// <see cref="Entities(GridWorld, IList{long}, bool)" /> joins their names.
+        /// </summary>
+        public static void Entities(GridWorld world, IList<long> entityIds, bool requiresAll, List<Mention> into)
+        {
+            if (entityIds.Count == 0)
+            {
+                into.Add(new Mention(Empty, null));
+                return;
+            }
+
+            var joiner = requiresAll ? " and " : " or ";
+            var named = entityIds.Count > 2 ? 2 : entityIds.Count;
+
+            for (var i = 0; i < named; i++)
+            {
+                if (i > 0)
+                    into.Add(new Mention(entityIds.Count == 2 ? joiner : ", ", null));
+
+                var entity = world.FindEntity(entityIds[i]);
+                into.Add(entity == null ? new Mention(Missing, null) : new Mention(entity.Name, entity.Kind.Icon));
+            }
+
+            if (entityIds.Count > 2)
+                into.Add(new Mention(joiner + (entityIds.Count - 2) + " more", null));
         }
 
 
@@ -275,6 +317,16 @@ namespace Sprocket.Host.SpaceEngineers.Words
             var field = fields[at];
             var said = filled + (field.Unit ?? "");
             return string.IsNullOrEmpty(field.Lead) ? said : field.Lead + " " + said;
+        }
+
+        static bool Blocks(GridWorld world, SentenceSlot slot, List<Mention> into)
+        {
+            var entities = slot as EntitiesSlot;
+            if (entities == null)
+                return false;
+
+            Entities(world, entities.Entities, entities.RequiresAll, into);
+            return true;
         }
 
         static string Of(GridWorld world, SentenceSlot slot)

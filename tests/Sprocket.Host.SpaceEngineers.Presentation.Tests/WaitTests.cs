@@ -67,11 +67,7 @@ public class WaitTests
     static Screen WithASequence()
     {
         var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
+        screen.Editor.NewButtonSystem("Airlock");
         return screen.Run(2);
     }
 }

@@ -68,45 +68,12 @@ static class PaperTarget
     {
         var paper = new StringBuilder();
 
-        if (component is HeadingComponent heading)
-        {
-            paper.Append("heading: ").AppendLine(heading.Text);
-            return paper.ToString();
-        }
-
-        if (component is StartComponent start)
-        {
-            paper.AppendLine("start:");
-
-            foreach (var option in start.Options)
-                paper.Append("  ").Append(option.Label).AppendLine(option.Asks ? " (asks)" : "");
-
-            return paper.ToString();
-        }
-
         if (component is ChoiceListComponent choices)
         {
             paper.AppendLine("choices:");
 
             foreach (var entry in choices.Entries)
                 paper.Append("  ").Append(entry.IsCurrent ? "* " : "- ").AppendLine(entry.Text);
-
-            return paper.ToString();
-        }
-
-        if (component is StatusListComponent statuses)
-        {
-            paper.AppendLine("statuses:");
-
-            foreach (var entry in statuses.Entries)
-            {
-                paper.Append(new string(' ', 2 + entry.Depth * 2)).Append(entry.Summary);
-
-                if (Some(entry.Status))
-                    paper.Append(" - ").Append(entry.Status);
-
-                paper.AppendLine();
-            }
 
             return paper.ToString();
         }
@@ -137,16 +104,6 @@ static class PaperTarget
             return paper.ToString();
         }
 
-        if (component is TriggerListComponent triggers)
-        {
-            paper.AppendLine("triggers:");
-
-            foreach (SentenceTrigger trigger in triggers.Triggers)
-                paper.Append("  ").AppendLine(Say(world, trigger));
-
-            return paper.ToString();
-        }
-
         if (component is SequenceComponent sequence)
         {
             paper.Append("sequence ").Append(sequence.SequenceId).AppendLine(":");
@@ -164,30 +121,6 @@ static class PaperTarget
             $"Core produced a {component.GetType().Name} and nothing here knows what a target should "
             + "show for one. Say what it looks like on paper before shipping it to a real target, or "
             + "the first anybody hears of it is a blank space in the game.");
-    }
-
-    /// <summary>
-    /// One trigger, in this target's own words.
-    /// </summary>
-    /// <remarks>
-    /// Both halves on one line, because that is the sentence: when it happens, and what it then
-    /// does.
-    /// </remarks>
-    static string Say(GridWorld world, SentenceTrigger trigger)
-    {
-        var line = new StringBuilder();
-        line.Append(trigger.Kind == TriggerKind.Every ? "Every" : "When");
-
-        foreach (var slot in trigger.Slots)
-            line.Append(' ').Append(Say(world, slot));
-
-        if (trigger.DoesLead.Length > 0)
-            line.Append(' ').Append(trigger.DoesLead);
-
-        foreach (var slot in trigger.Does)
-            line.Append(' ').Append(Say(world, slot));
-
-        return line.ToString();
     }
 
     /// <summary>

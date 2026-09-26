@@ -1,13 +1,11 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Ui.Legacy;
-using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -36,6 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Label> _joins = new List<Label>();
 
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
+        readonly List<Mention> _pieces = new List<Mention>();
 
         SentenceStep _shownStep;
 
@@ -89,55 +88,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             for (int i = 0; i < _slots.Count && i < step.Slots.Count; i++)
             {
-                // Every tick, unlike the words: a slot core handed back unchanged can still have
-                // stopped being something to press, which is how a sequence locks itself while it runs.
+                // A part that stops being something to press, as every part does when a sequence locks
+                // itself to run, is handed over as a new part, so an unchanged one needs nothing.
                 SentenceSlot model = step.Slots[i];
-                _slots[i].Press = Deed.Sends(model.Command);
+                if (ReferenceEquals(_shown[i], model))
+                    continue;
 
-                if (!ReferenceEquals(_shown[i], model))
-                {
-                    _shown[i] = model;
-                    Apply(_slots[i], model, SentenceText.InStep(world, model));
-                }
-
-                // The bright fill is what says a chip can be pressed. One that cannot keeps its place and
-                // its shape, lifted only a notch off the page so the words still read as one part.
-                bool pressable = model.Command != 0;
-                _slots[i].Background = pressable ? Palette.SlotFill : Palette.Chrome;
-                _slots[i].Underline = pressable ? Edge(model) : Palette.None;
+                _shown[i] = model;
+                _pieces.Clear();
+                SentenceText.InStep(world, model, _pieces);
+                _slots[i].Show(model, _pieces);
             }
-        }
-
-        static Color Edge(SentenceSlot model)
-        {
-            return model.IsEmpty ? Palette.Notice : Palette.SlotEdge;
-        }
-
-        /// <summary>
-        /// Puts a slot's words on it, and says whether it is still waiting to be filled.
-        /// </summary>
-        /// <remarks>
-        /// Colour alone marks an unfilled slot, because the game ships one weight and there is no italic
-        /// to lean it into. That is why the empty ones take the warning colour rather than a paler ink.
-        /// </remarks>
-        public static void Apply(Element element, SentenceSlot model, string text)
-        {
-            var slot = element as Slot;
-            if (slot != null)
-            {
-                slot.Text = text;
-                slot.Sample = model.Sample;
-                slot.Color = model.IsEmpty ? Palette.Notice : Palette.Ink;
-                slot.Underline = Edge(model);
-                return;
-            }
-
-            var word = element as Label;
-            if (word == null)
-                return;
-
-            word.Text = text;
-            word.Sample = model.Sample;
         }
     }
 }

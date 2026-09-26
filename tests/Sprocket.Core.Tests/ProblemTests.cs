@@ -400,11 +400,7 @@ public class ProblemTests
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
 
-        ship.Editor.NewSystem("Airlock");
-        ship.Editor.PressStart("When…");
-        ship.Editor.PressBlock("Airlock Button");
-        ship.Editor.PressChoice("is pressed");
-        ship.Editor.PressPrimary();
+        ship.Editor.NewButtonSystem("Airlock");
 
         ship.Editor.PressAdd("do something");
         ship.Editor.PressBlock("Inner Door");

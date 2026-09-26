@@ -181,7 +181,7 @@ sequence-colour     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70
 # on it - its switch, and the copy button beside it - are drawn nowhere else in the suite. The
 # second entry holds the button's own note, which names the row it belongs to.
 system-filled       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62
-system-copying      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 move 1223 398
+system-copying      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 move 1263 413
 
 # --- a trigger's own sentence, with one of its parts under the pointer ----------------------------
 #
@@ -201,7 +201,7 @@ system-running      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25
 # Made from the list, where the button is, and the state worth holding still is the one the copy
 # lands in: the same steps, the switch off, and an ellipsis where its trigger will go. A copy that
 # arrived live, or with the trigger it came from, would claim a toolbar slot that is already taken.
-sequence-copied     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 1223 398
+sequence-copied     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 1263 413
 
 # --- swapping a choice, which nothing else here covers ------------------------------------------
 #

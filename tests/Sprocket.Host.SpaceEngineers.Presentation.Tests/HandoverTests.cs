@@ -187,12 +187,12 @@ public class HandoverTests : IDisposable
             copy.Editor.Tick(1);
 
             Assert.NotEmpty(copy.Editor.Triggers());
-            Assert.All(copy.Editor.Triggers(), trigger => Assert.Equal(0, trigger.Does[0].Command));
+            Assert.All(copy.Editor.Triggers(), trigger => Assert.Null(trigger.Does[0].Opens));
 
             var row = copy.Editor.Rows()[0];
-            Assert.Equal(0, row.SwitchCommand);
+            Assert.Null(row.Flips);
 
-            copy.Editor.Invoke(row.Command);
+            row.Opens!.Execute();
             copy.Editor.Tick(1);
 
             var sentence = copy.Editor.Sentence();
@@ -474,11 +474,7 @@ public class HandoverTests : IDisposable
     [Fact]
     public void WhatIsRunningCarriesOnThroughARebuild()
     {
-        _sim.Editor.NewSystem("Airlock");
-        _sim.Editor.PressStart("When…");
-        _sim.Editor.PressBlock("Airlock Button");
-        _sim.Editor.PressChoice("is pressed");
-        _sim.Editor.PressPrimary();
+        _sim.Editor.NewButtonSystem("Airlock");
 
         var sequence = _sim.Editor.Program.Sequences[0];
         sequence.Steps.Add(new Wait(600));
@@ -516,11 +512,7 @@ public class HandoverTests : IDisposable
     /// <summary>A sequence on the server that waits, so it is still going when it is looked at.</summary>
     Sequence Waiting()
     {
-        _sim.Editor.NewSystem("Airlock");
-        _sim.Editor.PressStart("When…");
-        _sim.Editor.PressBlock("Airlock Button");
-        _sim.Editor.PressChoice("is pressed");
-        _sim.Editor.PressPrimary();
+        _sim.Editor.NewButtonSystem("Airlock");
 
         var sequence = _sim.Editor.Program.Sequences[0];
         sequence.Steps.Add(new Wait(600));

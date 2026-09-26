@@ -85,11 +85,7 @@ public class VanillaTests
     {
         Simulation rig = Simulation.Fresh();
 
-        rig.Editor.NewSystem("Airlock");
-        rig.Editor.PressStart("When…");
-        rig.Editor.PressBlock("Airlock Button");
-        rig.Editor.PressChoice("is pressed");
-        rig.Editor.PressPrimary();
+        rig.Editor.NewButtonSystem("Airlock");
 
         for (var i = 0; i < 5; i++)
             rig.Tick();

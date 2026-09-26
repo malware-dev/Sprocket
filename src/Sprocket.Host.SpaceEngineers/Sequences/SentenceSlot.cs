@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
@@ -18,9 +19,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public abstract class SentenceSlot
     {
-        protected SentenceSlot(int command)
+        /// <summary>A part pressed by <paramref name="opens" />, or one that cannot be pressed for null.</summary>
+        protected SentenceSlot(ICommand opens)
         {
-            Command = command;
+            Opens = opens;
         }
 
         /// <summary>Nothing chosen yet, so it should read as an invitation.</summary>
@@ -40,7 +42,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             get { return null; }
         }
 
-        public int Command { get; private set; }
+        /// <summary>What pressing this part does, or null where it cannot be pressed.</summary>
+        public ICommand Opens { get; }
 
         /// <summary>
         /// What each value it asks for wants, one per value, or null where it asks for none.

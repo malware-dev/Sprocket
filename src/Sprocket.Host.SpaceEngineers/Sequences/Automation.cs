@@ -501,6 +501,23 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Wiring++;
         }
 
+        /// <summary>Takes <paramref name="system" /> out of the program, with its sequences, its triggers and every one of it, and says whether it was here.</summary>
+        /// <remarks>What it was running stops, and the toolbar slots its triggers claimed are let go of, once the program is looked at again.</remarks>
+        public bool RemoveSystem(AutomationSystem system)
+        {
+            if (!_systems.Remove(system))
+                return false;
+
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+                _sequences.Remove(sequences[i]);
+
+            system.Reshaped = null;
+            Reshape();
+            Wiring++;
+            return true;
+        }
+
         /// <summary>
         /// Puts a removed sequence back, as the sequence it was.
         /// </summary>

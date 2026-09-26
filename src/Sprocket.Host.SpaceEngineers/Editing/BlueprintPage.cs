@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 
 namespace Sprocket.Host.SpaceEngineers.Editing
 {
@@ -139,7 +140,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
             head.ButtonText = "Edit using these blocks";
             head.ButtonCommand = Editor.Register(Cmd.EditBlueprint, _system.Id,
-                delegate { Editor.Push(new SystemPage(Editor, _system)); });
+                delegate { Editor.Push(new LogicSystemPage(Editor, _system)); });
             return head;
         }
 

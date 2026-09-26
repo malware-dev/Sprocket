@@ -17,11 +17,7 @@ public class TargetTests
     static Screen WithOne()
     {
         var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
+        screen.Editor.NewButtonSystem("Airlock");
         screen.Editor.Name("Cycle");
         screen.Editor.Back();
         return screen.Run(2);
@@ -164,7 +160,7 @@ public class TargetTests
 
         Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
 
-        screen.Editor.Invoke(screen.Editor.Triggers()[1].DeleteCommand);
+        screen.Editor.Triggers()[1].Deletes!.Execute();
         screen.Run(2);
 
         Assert.Single(screen.Editor.Triggers());
@@ -177,7 +173,7 @@ public class TargetTests
     {
         var screen = WithOne();
 
-        screen.Editor.Invoke(screen.Editor.Triggers()[0].DeleteCommand);
+        screen.Editor.Triggers()[0].Deletes!.Execute();
         screen.Run(2);
 
         Assert.Empty(screen.Editor.Triggers());

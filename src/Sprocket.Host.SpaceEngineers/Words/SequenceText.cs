@@ -352,7 +352,7 @@ namespace Sprocket.Host.SpaceEngineers.Words
             // in a list of steps and the values are the detail.
             var fields = new List<Field>();
             named.Fields(fields);
-            var given = SentenceText.Given(new ValuesSlot(step.Values, fields, 0));
+            var given = SentenceText.Given(new ValuesSlot(step.Values, fields, null));
 
             if (step.Sets)
                 return SentenceText.Setting(named.Named, blocks, given);

@@ -1,122 +1,187 @@
-using VRageMath;
+using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Words;
+using VRage.Game;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Controls
 {
-    /// <summary>
-    /// A fillable part of a sentence.
-    /// </summary>
+    /// <summary>A fillable part of a sentence, saying what it holds in pieces: each block it names with its icon, and the words around them.</summary>
     /// <remarks>
-    /// The only thing on screen that changes what a sequence means, so nothing else may borrow this
-    /// look. The line under it is what distinguishes it from a row at a glance, and it is drawn rather
-    /// than being a border because the seam has no borders - a rectangle of colour is all either target
-    /// can be asked for.
+    /// The only thing on screen that changes what a sequence means, so nothing else may borrow this look. The line
+    /// under it is what distinguishes it from a row at a glance, and it is drawn rather than being a border because
+    /// a rectangle of color is all the game can be asked for.
     /// </remarks>
-    public class Slot : Label
+    public class Slot : HStack, ITextual
     {
-        const float Clearing = 20f;
+        const float UnderlineThickness = 2f;
 
-        readonly Collection _children;
+        readonly List<Mention> _said = new List<Mention>();
 
-        Element _clear;
+        bool _empty;
+        string _font = MyFontEnum.White;
+        float _fontSize = TextState.NeutralFontSize;
+        Color _color = Color.White;
 
+        /// <summary>An empty part, pressable where it is given a command, in the look every part of a sentence has.</summary>
         public Slot()
         {
-            _children = new Collection(this);
-
-            FontSize = Lettering.Body;
-            Color = Palette.Ink;
-            Background = Palette.SlotFill;
-            Highlight = Palette.Well;
-            Padding = new Thickness(Space.ChipX, Space.ChipY);
-            Underline = Palette.SlotEdge;
-
-            // A slot is one thing named, and a wrapped one would stop reading as a single chip.
-            Wraps = false;
+            Style = Styles.Slot;
         }
 
-        /// <summary>The colour of the line along the bottom.</summary>
+        /// <summary>The color of the line along the bottom.</summary>
         public Color Underline { get; set; }
 
-        /// <summary>
-        /// The way to empty this slot, drawn inside it at the right, or nothing.
-        /// </summary>
-        /// <remarks>
-        /// Inside the chip rather than beside it, because what it empties is this slot. Outside, in
-        /// the gap between two parts of a sentence, it reads as belonging to the whole line - and the
-        /// line has its own mark at the end of the row, which destroys rather than empties.
-        /// </remarks>
-        public Element Clear
+        /// <summary>Whether nothing fills the part yet, so it reads as an invitation.</summary>
+        public bool IsEmpty
         {
-            get { return _clear; }
+            get { return _empty; }
             set
             {
-                if (_clear == value)
+                if (_empty == value)
                     return;
 
-                if (_clear != null)
-                    _children.Remove(_clear);
-
-                if (value != null)
-                    _children.Add(value);
-
-                _clear = value;
-
-                // The words are measured against the room left over, which this changes.
-                Padding = new Thickness(Space.ChipX, Space.ChipY,
-                    value == null ? Space.ChipX : Space.ChipX + Clearing, Space.ChipY);
+                _empty = value;
+                StateChanged();
             }
         }
 
-        protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
+        /// <summary>What it says, its pieces joined as they read.</summary>
+        public string Text
         {
-            Vector2 words = base.MeasureContent(g, available);
-            if (_clear == null)
-                return words;
+            get
+            {
+                var said = "";
+                for (var i = 0; i < _said.Count; i++)
+                    said += _said[i].Text;
 
-            // A fixed room for the cross rather than its own width, so the words in a slot do not shift sideways
-            // when a symbol font measures a hair wider.
-            _clear.Measure(g, new Vector2(Clearing, words.Y));
-            return words;
+                return said;
+            }
         }
 
-        protected override void ArrangeContent(RectangleF bounds)
+        /// <inheritdoc />
+        public string Font
         {
-            base.ArrangeContent(bounds);
-
-            if (_clear == null)
-                return;
-
-            // In the room the padding held for it: against the right edge of the chip, centred on the
-            // line the words sit on.
-            Vector2 wanted = _clear.DesiredSize;
-            float x = Bounds.X + Bounds.Width - Space.ChipX * 0.5f - wanted.X;
-            float y = bounds.Y + (bounds.Height - wanted.Y) * 0.5f;
-
-            _clear.Arrange(new RectangleF(x, y, wanted.X, wanted.Y));
+            get { return _font; }
+            set
+            {
+                _font = value;
+                Dress();
+            }
         }
 
+        /// <inheritdoc />
+        public float FontSize
+        {
+            get { return _fontSize; }
+            set
+            {
+                _fontSize = value;
+                Dress();
+            }
+        }
+
+        /// <inheritdoc />
+        public Color Color
+        {
+            get { return _color; }
+            set
+            {
+                _color = value;
+                Dress();
+            }
+        }
+
+        /// <summary>Says <paramref name="words" />, and nothing else.</summary>
+        public void Say(string words)
+        {
+            _said.Clear();
+            _said.Add(new Mention(words, null));
+            Lay(null);
+        }
+
+        /// <summary>Says <paramref name="pieces" />, in order.</summary>
+        public void Say(IList<Mention> pieces)
+        {
+            _said.Clear();
+            for (var i = 0; i < pieces.Count; i++)
+                _said.Add(pieces[i]);
+
+            Lay(null);
+        }
+
+        /// <summary>Shows <paramref name="part" /> as <paramref name="pieces" />, pressed by the part's own command.</summary>
+        /// <remarks>A part standing for a color shows the color in place of its words.</remarks>
+        public void Show(SentenceSlot part, IList<Mention> pieces)
+        {
+            _said.Clear();
+            for (var i = 0; i < pieces.Count; i++)
+                _said.Add(pieces[i]);
+
+            Lay(part.Sample);
+            IsEmpty = part.IsEmpty;
+            Command = part.Opens;
+        }
+
+        /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            const float thickness = 2f;
-
             g.Fill(
-                new RectangleF(Bounds.X, Bounds.Y + Bounds.Height - thickness, Bounds.Width, thickness),
+                new RectangleF(Bounds.X, Bounds.Y + Bounds.Height - UnderlineThickness, Bounds.Width, UnderlineThickness),
                 Underline);
 
             base.DrawContent(g);
-
-            if (_clear != null)
-                _clear.Draw(g);
         }
 
-        /// <summary>The cross answers before the chip it sits in, so it can be pressed at all.</summary>
-        protected override Element UnderContent(Vector2 point)
+        void Lay(Color? sample)
         {
-            return _clear == null ? null : _clear.Under(point);
+            // Each piece keeps the element it had where it is still the same kind, so saying new words over the
+            // same blocks makes nothing new.
+            for (var i = 0; i < _said.Count; i++)
+            {
+                var piece = _said[i];
+                var block = piece.Icon != null;
+
+                if (i < Children.Count && (Children[i] is BlockName) != block)
+                    Children.Remove(Children[i]);
+
+                if (i >= Children.Count || (Children[i] is BlockName) != block)
+                    Children.Insert(i, block ? (Element)new BlockName() : new Label());
+
+                if (block)
+                {
+                    var named = (BlockName)Children[i];
+                    named.Name = piece.Text;
+                    named.Icon = piece.Icon;
+                    continue;
+                }
+
+                var words = (Label)Children[i];
+                words.Text = piece.Text;
+                words.Sample = _said.Count == 1 ? sample : null;
+            }
+
+            while (Children.Count > _said.Count)
+                Children.Remove(Children[Children.Count - 1]);
+
+            Dress();
+        }
+
+        void Dress()
+        {
+            for (var i = 0; i < Children.Count; i++)
+            {
+                var text = (ITextual)Children[i];
+                text.Font = _font;
+                text.FontSize = _fontSize;
+                text.Color = _color;
+            }
         }
     }
 }

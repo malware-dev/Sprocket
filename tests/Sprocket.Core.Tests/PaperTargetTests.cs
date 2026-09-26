@@ -58,8 +58,6 @@ public class PaperTargetTests
         editor.PressStart("Load blueprint");
         Note(seen, ship);
 
-        Assert.Contains(nameof(StartComponent), seen);
-        Assert.Contains(nameof(StatusListComponent), seen);
         Assert.Contains(nameof(PickComponent), seen);
         Assert.Contains(nameof(ChoiceListComponent), seen);
         Assert.Contains(nameof(SequenceComponent), seen);
@@ -72,11 +70,7 @@ public class PaperTargetTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.NewSystem("Airlock");
-        editor.PressStart("When…");
-        editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
-        editor.PressPrimary();
+        editor.NewButtonSystem("Airlock");
 
         editor.PressAdd("do something");
         editor.PressBlock("Inner Door");

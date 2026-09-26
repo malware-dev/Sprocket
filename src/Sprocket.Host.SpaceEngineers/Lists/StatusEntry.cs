@@ -67,23 +67,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
         int _runCommand;
 
-        /// <summary>
-        /// Opens what the row's second line says, where that is a thing of its own to change.
-        /// </summary>
-        /// <remarks>
-        /// A trigger's row reads as two sentences - when it happens, and what it then does - and
-        /// either may be what somebody came to change. Two presses on one row rather than a question
-        /// asking which they meant: the answer to that question is already on the row, in the words
-        /// they are looking at.
-        /// </remarks>
-        public int StatusCommand
-        {
-            get { return _statusCommand; }
-            set { Set(ref _statusCommand, value, nameof(StatusCommand)); }
-        }
-
-        int _statusCommand;
-
         public int DeleteCommand
         {
             get { return _deleteCommand; }

@@ -23,11 +23,7 @@ public class ParkedTests
     static Screen WithOneParked()
     {
         var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
+        screen.Editor.NewButtonSystem("Airlock");
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Close");
@@ -118,11 +114,7 @@ public class ParkedTests
     public void ASequenceWithNoStepsIsNotRemarkedOn()
     {
         var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
+        screen.Editor.NewButtonSystem("Airlock");
         screen.Editor.Back();
         screen.Run(120);
 

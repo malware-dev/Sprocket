@@ -1100,6 +1100,36 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Forgets a sequence: its way back, and any page showing it, so deleting one never
         /// leaves somebody staring at something that no longer exists.
         /// </summary>
+        void Deleting(string named, string warning, Action delete)
+        {
+            var page = new ChoicePage(this, Texts.DeleteSystem);
+            page.Caption = named;
+
+            page.Add(Texts.DeleteKeep, false, delegate { Pop(); });
+
+            // The question goes first, so nobody is left standing on a question about something that no longer exists.
+            page.Add(Texts.DeleteConfirm, false, delegate
+            {
+                Pop();
+                delete();
+            });
+
+            page.WarnOnLast(warning);
+            Push(page);
+        }
+
+        void Drop(AutomationSystem system)
+        {
+            var sequences = system.Sequences;
+            for (var i = sequences.Count - 1; i >= 0; i--)
+                ForgetSequence(sequences[i]);
+
+            _program.RemoveSystem(system);
+            _systemHistory.Forget(system);
+            _standIns.Remove(system.Id);
+            _structureDirty = true;
+        }
+
         internal void ForgetSequence(Sequence sequence)
         {
             _sequenceHistory.Forget(sequence);
@@ -1288,31 +1318,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             page.EmptyText = "Not built yet. A blueprint somebody sent you would be set up here, "
                 + "asking which of your blocks fill each part of it.";
             Push(page);
-        }
-
-        /// <summary>
-        /// The ways a sequence can begin, offered on the system's own screen.
-        /// </summary>
-        /// <remarks>
-        /// At the top of the system, in the same place and the same shape as the construct's own
-        /// "new system", because it is the same question either way: what to add here.
-        /// <para>
-        /// The catalogue lives here rather than on the page, so a third way to start something is one
-        /// line in one place.
-        /// </para>
-        /// <para>
-        /// Each label is the first word of the sentence it makes: "When…" becomes "When the airlock
-        /// button is pressed", "Every…" becomes "Every 30 seconds". The ellipsis is the promise that
-        /// the rest gets filled in.
-        /// </para>
-        /// </remarks>
-        internal void AddStarters(StartComponent start, AutomationSystem system)
-        {
-            start.Add("When…",
-                Register(Cmd.StartWhen, delegate { StartSequence(system, new WhenTrigger("")); }));
-
-            start.Add("Every…", Register(Cmd.StartEvery,
-                delegate { StartSequence(system, new EveryTrigger(Cadences.Default)); }));
         }
 
         /// <summary>
@@ -2004,9 +2009,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var page = new ChoicePage(this, "Delete this sequence?");
             page.Caption = SequenceText.Doing(_runner.Bindings, sequence, StandIn(sequence.System));
 
-            page.Add("Keep it", false, delegate { Pop(); });
+            page.Add(Texts.DeleteKeep, false, delegate { Pop(); });
 
-            page.Add("Delete it", false, delegate
+            page.Add(Texts.DeleteConfirm, false, delegate
             {
                 // The question goes first. Forgetting the sequence drops any page showing it, but
                 // not this one on top of it, which would leave somebody standing on a question about
@@ -2016,9 +2021,30 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 ForgetSequence(sequence);
             });
 
-            page.WarnOnLast("This cannot be undone.");
+            page.WarnOnLast(Texts.DeleteFinal);
 
             Push(page);
+        }
+
+        /// <summary>Asks before taking <paramref name="system" /> out of the program, with its sequences, its triggers and every one of it.</summary>
+        internal void DeleteSystem(AutomationSystem system)
+        {
+            Deleting(system.Name, Texts.DeleteFinal, delegate { Drop(system); });
+        }
+
+        /// <summary>Asks before taking <paramref name="instance" />, one of the logic systems made from a blueprint, out of it.</summary>
+        /// <remarks>The blueprint stays, the last one taken or not: a blueprint is only ever deleted from where blueprints are kept.</remarks>
+        internal void DeleteInstance(AutomationSystem system, SystemInstance instance)
+        {
+            var named = SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instance);
+
+            Deleting(named, Texts.DeleteFinal, delegate
+            {
+                system.RemoveInstance(instance);
+                _standIns.Remove(system.Id);
+                _program.Rewire();
+                _structureDirty = true;
+            });
         }
 
         /// <summary>

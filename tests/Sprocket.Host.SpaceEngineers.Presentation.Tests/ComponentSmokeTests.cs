@@ -55,9 +55,7 @@ public class ComponentSmokeTests
 
         Assert.Contains(nameof(PickComponent), seen);
         Assert.Contains(nameof(ChoiceListComponent), seen);
-        Assert.Contains(nameof(StartComponent), seen);
         Assert.Contains(nameof(SequenceComponent), seen);
-        Assert.Contains(nameof(StatusListComponent), seen);
 
         // Heading and Notice are not asserted: nothing produces one at the moment.
     }

@@ -457,8 +457,8 @@ public class EditorTests
         // Through the new one, the trigger names nothing yet.
         editor.Invoke(blueprint.Chosen!.ButtonCommand);
         ship.Tick();
-        Assert.Equal("Airlock 2", editor.Component<UsingComponent>().Name);
-        Assert.Empty(Assert.IsType<EntitiesSlot>(editor.Triggers()[0].Slots[0]).Entities);
+        Assert.Equal("Airlock 2", editor.UsingName());
+        Assert.Empty(Assert.IsType<EntitiesSlot>(editor.Triggers()[0].Starts[0]).Entities);
 
         // Filled with a button of its own, it names that one.
         editor.Back();
@@ -500,11 +500,7 @@ public class EditorTests
 
     static void StartOnTheButton(SprocketEditor editor)
     {
-        editor.NewSystem("Airlock");
-        editor.PressStart("When…");
-        editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
-        editor.PressPrimary();
+        editor.NewButtonSystem("Airlock");
     }
 
     /// <summary>
@@ -737,7 +733,6 @@ public class EditorTests
         var before = editor.Sentence();
         var toggle = before.ToggleCommand;
         var firstStepMove = before.Steps[0].MoveToCommand;
-        var firstStepSlot = before.Steps[0].Slots[0].Command;
 
         editor.PressAdd("do something");
         editor.PressBlock("Outer Door");
@@ -749,7 +744,6 @@ public class EditorTests
         Assert.Equal(2, after.Steps.Count);
         Assert.Equal(toggle, after.ToggleCommand);
         Assert.Equal(firstStepMove, after.Steps[0].MoveToCommand);
-        Assert.Equal(firstStepSlot, after.Steps[0].Slots[0].Command);
 
         // And an id held from before the rebuild still does what it did.
         Assert.True(ship.Automation.Sequences[0].Enabled == false);
@@ -932,10 +926,10 @@ public class EditorTests
         ship.Tick();
 
         var row = editor.Rows()[0];
-        Assert.True(row.CanSwitch);
+        Assert.NotNull(row.Flips);
         Assert.True(row.SwitchIsOn);
 
-        editor.SetToggle(row.SwitchCommand, false);
+        row.Flips!.Execute();
         ship.Tick();
 
         Assert.False(sequence.Enabled);
@@ -1438,9 +1432,9 @@ public class EditorTests
         ship.Tick();
 
         var row = editor.Rows()[0];
-        Assert.NotEqual(0, row.RunCommand);
+        Assert.NotNull(row.Runs);
 
-        editor.Invoke(row.RunCommand);
+        row.Runs!.Execute();
         ship.Tick(3);
 
         Assert.Contains("Airlock Light:on", ship.Log);
@@ -1695,11 +1689,7 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.NewSystem("Airlock");
-        editor.PressStart("When…");
-        editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
-        editor.PressPrimary();
+        editor.NewButtonSystem("Airlock");
 
         ship.Tick();
         Assert.Equal("Sequence 1", editor.Screen.Title());
@@ -1814,11 +1804,7 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.NewSystem("Airlock");
-        editor.PressStart("When…");
-        editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
-        editor.PressPrimary();
+        editor.NewButtonSystem("Airlock");
 
         editor.SwitchOn();
         ship.Tick();

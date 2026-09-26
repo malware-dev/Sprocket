@@ -223,21 +223,13 @@ public class ReachTests
 
         AssertEverythingLights("a system with a sequence in it", screen =>
         {
-            screen.Editor.NewSystem("Airlock");
-            screen.Editor.PressStart("When…");
-            screen.Editor.PressBlock("Airlock Button");
-            screen.Editor.PressChoice("is pressed");
-            screen.Editor.PressPrimary();
+            screen.Editor.NewButtonSystem("Airlock");
             screen.Editor.Back();
         });
 
         AssertEverythingLights("a sequence", screen =>
         {
-            screen.Editor.NewSystem("Airlock");
-            screen.Editor.PressStart("When…");
-            screen.Editor.PressBlock("Airlock Button");
-            screen.Editor.PressChoice("is pressed");
-            screen.Editor.PressPrimary();
+            screen.Editor.NewButtonSystem("Airlock");
         });
 
         AssertEverythingLights("a banner that has arrived", screen =>

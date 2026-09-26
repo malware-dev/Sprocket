@@ -51,9 +51,6 @@
     <value>**I ro**
 Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
-  <data name="Sprocket.Row.Change" xml:space="preserve">
-    <value>Endre hva denne gjør</value>
-  </data>
   <data name="Sprocket.Row.Delete" xml:space="preserve">
     <value>Slett</value>
   </data>

@@ -1,0 +1,128 @@
+using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using VRageMath;
+using Xunit;
+using Wrap = Sprocket.Host.SpaceEngineers.Ui.Legacy.Wrap;
+
+namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
+
+/// <summary>How a flow lays its children along lines, and that it draws what the wrap it replaces drew.</summary>
+public class FlowTests
+{
+    /// <summary>Children that fit share a line, spaced apart, and the next one that does not starts another below it.</summary>
+    [Fact]
+    public void AChildThatDoesNotFitStartsTheNextLine()
+    {
+        var first = Box(100f, 20f);
+        var second = Box(100f, 20f);
+        var third = Box(100f, 20f);
+        var flow = new Flow { Spacing = 10f, LineSpacing = 5f, Children = { first, second, third } };
+
+        _ = new Easel(new VStack { Children = { flow } }, 250f, 200f);
+
+        Assert.Equal(new RectangleF(0f, 0f, 100f, 20f), first.Bounds);
+        Assert.Equal(new RectangleF(110f, 0f, 100f, 20f), second.Bounds);
+        Assert.Equal(new RectangleF(0f, 25f, 100f, 20f), third.Bounds);
+        Assert.Equal(new Vector2(210f, 45f), flow.DesiredSize);
+    }
+
+    /// <summary>A child shorter than its line sits on the line's middle.</summary>
+    [Fact]
+    public void AShorterChildIsCenteredDownItsLine()
+    {
+        var tall = Box(50f, 40f);
+        var low = Box(50f, 20f);
+        var flow = new Flow { Children = { tall, low } };
+
+        _ = new Easel(new VStack { Children = { flow } }, 250f, 200f);
+
+        Assert.Equal(10f, low.Bounds.Y);
+        Assert.Equal(40f, flow.DesiredSize.Y);
+    }
+
+    /// <summary>A child that is not visible takes no room and no spacing.</summary>
+    [Fact]
+    public void AnInvisibleChildTakesNoRoom()
+    {
+        var first = Box(50f, 20f);
+        var hidden = Box(50f, 20f);
+        hidden.IsVisible = false;
+        var last = Box(50f, 20f);
+        var flow = new Flow { Spacing = 10f, Children = { first, hidden, last } };
+
+        _ = new Easel(new VStack { Children = { flow } }, 250f, 200f);
+
+        Assert.Equal(60f, last.Bounds.X);
+        Assert.Equal(110f, flow.DesiredSize.X);
+    }
+
+    /// <summary>A child wider than the room has a line to itself at its own width, and the others carry on after it.</summary>
+    [Fact]
+    public void AChildWiderThanTheRoomHasALineToItself()
+    {
+        var wide = Box(300f, 20f);
+        var next = Box(50f, 20f);
+        var flow = new Flow { Children = { wide, next } };
+
+        _ = new Easel(new VStack { Children = { flow } }, 250f, 200f);
+
+        Assert.Equal(new RectangleF(0f, 0f, 300f, 20f), wide.Bounds);
+        Assert.Equal(new RectangleF(0f, 20f, 50f, 20f), next.Bounds);
+    }
+
+    /// <summary>A placement a flow cannot honour is refused when the child is added.</summary>
+    [Fact]
+    public void APlacementItCannotHonourIsRefused()
+    {
+        var flow = new Flow();
+
+        Assert.Throws<InvalidOperationException>(() => flow.Children.Add(new Label { Placement = new Elsewhere() }));
+    }
+
+    /// <summary>A flow of words and chips draws exactly what a wrap drew, across more than one line.</summary>
+    [Fact]
+    public void AFlowDrawsWhatAWrapDrew()
+    {
+        var wrap = new Wrap { ItemSpacing = 8f, LineSpacing = 12f };
+        Fill(wrap.Children);
+
+        var flow = new Flow { Spacing = 8f, LineSpacing = 12f };
+        Fill(flow.Children);
+
+        Assert.Equal(Drawn(wrap), Drawn(flow));
+    }
+
+    static Label Box(float width, float height)
+    {
+        return new Label { Placement = Fixed.Size(width, height) };
+    }
+
+    static void Fill(Element.Collection children)
+    {
+        children.Add(new Label { Text = "When" });
+        children.Add(new Label { Text = "Airlock Button", Padding = new Thickness(8f, 4f), Background = new Color(40, 50, 60) });
+        children.Add(new Label { Text = "hidden", IsVisible = false });
+        children.Add(new Label { Text = "is pressed", Padding = new Thickness(8f, 4f), Background = new Color(40, 50, 60) });
+        children.Add(new Label { Text = "then open" });
+        children.Add(new Label { Text = "Airlock Outer Door", Padding = new Thickness(8f, 4f), Background = new Color(40, 50, 60) });
+    }
+
+    static string[] Drawn(Element root)
+    {
+        var easel = new Easel(new VStack { Children = { root } }, 300f, 200f);
+        return easel.Commands.Select(command => string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3} {4}",
+            command.Kind, command.Destination, command.Position, command.Text, command.Color)).ToArray();
+    }
+
+    /// <summary>A placement no flow understands.</summary>
+    sealed class Elsewhere : IPlacement
+    {
+        public event Action? Changed
+        {
+            add { }
+            remove { }
+        }
+    }
+}

@@ -92,7 +92,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             var row = new StatusRow
             {
                 Depth = 1,
-                Opens = _editor.Act(Cmd.OpenSystem, delegate { _page.Open(_system, instance); })
+                Opens = _editor.Act(Cmd.OpenSystem, delegate { _page.Open(_system, instance); }),
+                Deletes = _editor.Act(Cmd.DeleteInstance, delegate { _editor.DeleteInstance(_system, instance); })
             };
 
             _page.Switched(row, instance);

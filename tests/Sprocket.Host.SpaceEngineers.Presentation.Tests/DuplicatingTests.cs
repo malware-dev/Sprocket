@@ -17,21 +17,17 @@ public class DuplicatingTests
     static Screen AtTheList()
     {
         var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
+        screen.Editor.NewButtonSystem("Airlock");
         screen.Editor.Back();
         return screen.Run(2);
     }
 
-    static StatusEntry Row(Screen screen, int which) =>
+    static StatusRow Row(Screen screen, int which) =>
         screen.Editor.Rows()[which];
 
     static void Duplicate(Screen screen, int which)
     {
-        screen.Editor.Invoke(Row(screen, which).DuplicateCommand);
+        Row(screen, which).Copies!.Execute();
         screen.Run(2);
     }
 
@@ -61,9 +57,9 @@ public class DuplicatingTests
         var screen = AtTheList();
 
         var row = Row(screen, 0);
-        Assert.NotEqual(0, row.DeleteCommand);
+        Assert.NotNull(row.Deletes);
 
-        screen.Editor.Invoke(row.DeleteCommand);
+        row.Deletes!.Execute();
         screen.Run(2);
 
         Assert.Equal("Delete this sequence?", screen.Editor.Screen.Title());
@@ -74,7 +70,7 @@ public class DuplicatingTests
 
         Assert.Single(screen.Editor.Program.Sequences);
 
-        screen.Editor.Invoke(Row(screen, 0).DeleteCommand);
+        Row(screen, 0).Deletes!.Execute();
         screen.Editor.PressChoice("Delete it");
         screen.Run(2);
 
@@ -95,10 +91,10 @@ public class DuplicatingTests
         var screen = AtTheList();
 
         var row = Row(screen, 0);
-        screen.Editor.SetToggle(row.SwitchCommand, true);
+        row.Flips!.Execute();
         screen.Run(2);
 
-        screen.Editor.Invoke(Row(screen, 0).DeleteCommand);
+        Row(screen, 0).Deletes!.Execute();
         screen.Editor.PressChoice("Delete it");
         screen.Run(2);
 
@@ -109,8 +105,8 @@ public class DuplicatingTests
     /// The button is on the row, and only on a row there can be another of.
     /// </summary>
     /// <remarks>
-    /// The row that adds a sequence is a button, not a thing, so duplicating it means nothing. A
-    /// command there would draw a control that does something unsayable.
+    /// The way to add a sequence is a button of its own, not a row, so every row in the list is a
+    /// sequence and offers a copy of itself.
     /// </remarks>
     [Fact]
     public void OnlyASequenceRowOffersACopy()
@@ -118,9 +114,8 @@ public class DuplicatingTests
         var screen = AtTheList();
         var rows = screen.Editor.Rows();
 
-        Assert.NotEqual(0, rows[0].DuplicateCommand);
-        for (var i = 1; i < rows.Count; i++)
-            Assert.Equal(0, rows[i].DuplicateCommand);
+        Assert.NotNull(rows[0].Copies);
+        Assert.All(rows, row => Assert.False(row.IsAction));
     }
 
     /// <summary>
@@ -159,7 +154,7 @@ public class DuplicatingTests
     public void ARunningSequenceCanBeCopied()
     {
         var screen = AtTheList();
-        screen.Editor.SetToggle(Row(screen, 0).SwitchCommand, true);
+        Row(screen, 0).Flips!.Execute();
         screen.Run(2);
 
         Duplicate(screen, 0);

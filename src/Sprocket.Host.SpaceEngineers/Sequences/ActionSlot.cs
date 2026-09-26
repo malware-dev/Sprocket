@@ -1,11 +1,12 @@
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What the step does to the things it names.</summary>
     public sealed class ActionSlot : SentenceSlot
     {
-        public ActionSlot(EntityAction chosen, int command) : base(command)
+        public ActionSlot(EntityAction chosen, ICommand opens) : base(opens)
         {
             Action = chosen;
         }

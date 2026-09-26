@@ -28,18 +28,14 @@ public class OpeningTests
     static Screen WithOne()
     {
         var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
+        screen.Editor.NewButtonSystem("Airlock");
         screen.Editor.Back();
         return screen.Run(2);
     }
 
     static void PressStep(Screen screen, int part)
     {
-        screen.Editor.Invoke(screen.Editor.Component<SequenceComponent>().Steps[0].Slots[part].Command);
+        screen.Editor.Component<SequenceComponent>().Steps[0].Slots[part].Opens!.Execute();
         screen.Run(2);
     }
 
@@ -81,7 +77,7 @@ public class OpeningTests
     {
         var screen = WithOne();
 
-        screen.Editor.Invoke(screen.Editor.Triggers()[0].Slots[1].Command);
+        screen.Editor.Triggers()[0].Starts[1].Opens!.Execute();
         screen.Run(2);
         screen.Do("type", "pre");
 
@@ -107,7 +103,7 @@ public class OpeningTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        screen.Editor.Invoke(screen.Editor.Triggers()[1].Does[0].Command);
+        screen.Editor.Triggers()[1].Does[0].Opens!.Execute();
         screen.Run(2);
 
         var pick = screen.Editor.Component<PickComponent>();
@@ -142,7 +138,7 @@ public class OpeningTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        screen.Editor.Invoke(screen.Editor.Triggers()[1].Does[0].Command);
+        screen.Editor.Triggers()[1].Does[0].Opens!.Execute();
         screen.Run(2);
 
         screen.Editor.Invoke(screen.Editor.Component<PickComponent>().Returns);
@@ -173,7 +169,7 @@ public class OpeningTests
 
         Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
 
-        screen.Editor.Invoke(screen.Editor.Triggers()[1].Does[1].Command);
+        screen.Editor.Triggers()[1].Does[1].Opens!.Execute();
         screen.Run(2);
         screen.Do("type", "Air");
 
@@ -243,7 +239,7 @@ public class OpeningTests
     public void AStepsTitleJoinsItsBlocksWithAnd()
     {
         var screen = WithOne();
-        screen.Editor.Invoke(screen.Editor.Rows()[0].Command);
+        screen.Editor.Rows()[0].Opens!.Execute();
         screen.Run(2);
 
         screen.Editor.PressAdd("do something");

@@ -1,11 +1,12 @@
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What happens to the things the trigger watches.</summary>
     public sealed class EventSlot : SentenceSlot
     {
-        public EventSlot(EntityEvent chosen, int command) : base(command)
+        public EventSlot(EntityEvent chosen, ICommand opens) : base(opens)
         {
             Event = chosen;
         }

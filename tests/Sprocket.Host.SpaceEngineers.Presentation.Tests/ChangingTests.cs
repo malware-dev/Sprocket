@@ -18,11 +18,7 @@ public class ChangingTests
     static Screen WithOne()
     {
         var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressPrimary();
+        screen.Editor.NewButtonSystem("Airlock");
         screen.Editor.Back();
         return screen.Run(2);
     }
@@ -513,7 +509,7 @@ public class ChangingTests
 
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
 
-        screen.Editor.Invoke(screen.Editor.Triggers()[1].DeleteCommand);
+        screen.Editor.Triggers()[1].Deletes!.Execute();
         screen.Run(2);
 
         Assert.Single(screen.Editor.Triggers());
@@ -747,7 +743,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.Invoke(screen.Editor.Rows()[0].Command);
+        screen.Editor.Rows()[0].Opens!.Execute();
         screen.Run(2);
 
         Assert.NotNull(screen.Editor.Sentence());

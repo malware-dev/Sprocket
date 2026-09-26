@@ -356,14 +356,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>Whether this is a blueprint, with its instances made from it, rather than one logic system.</summary>
         /// <remarks>
-        /// Told by the instances having names. One logic system is its only instance and goes by the
-        /// system's own name; making a blueprint of it names the blueprint and that first instance, and
-        /// every instance added afterwards is named as it is made.
+        /// Told by the instances. One logic system is its only instance and goes by the system's own name;
+        /// making a blueprint of it names the blueprint and that first instance, and every instance added
+        /// afterwards is named as it is made. A system with no instance at all is a blueprint with nothing
+        /// made from it, since one logic system is made with its first.
         /// </remarks>
         public bool IsBlueprint
         {
             get
             {
+                if (_instances.Count == 0)
+                    return true;
+
                 for (var i = 0; i < _instances.Count; i++)
                 {
                     if (_instances[i].HasName)
@@ -395,6 +399,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _instances.Add(instance);
             Reshape();
             return instance;
+        }
+
+        /// <summary>Takes <paramref name="instance" /> out of this system, with the blocks it was filled with, and says whether it was here.</summary>
+        /// <remarks>What it was running stops, and the toolbar slots it claimed are let go of, once the program is looked at again.</remarks>
+        public bool RemoveInstance(SystemInstance instance)
+        {
+            if (!_instances.Remove(instance))
+                return false;
+
+            Reshape();
+            return true;
         }
 
         /// <summary>The instance of this system called <paramref name="name" />, or null.</summary>

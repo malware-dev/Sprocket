@@ -120,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Blueprints
 
             for (var i = 0; i < _component.Parts.Count; i++)
             {
-                var row = new PartRow();
+                var row = new PartRow(this);
                 _partRows.Add(row);
                 _parts.Children.Add(row.Root);
             }

@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
@@ -10,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class SequenceSlot : SentenceSlot
     {
-        public SequenceSlot(int number, string name, int command) : base(command)
+        public SequenceSlot(int number, string name, ICommand opens) : base(opens)
         {
             Number = number;
             Name = name ?? "";

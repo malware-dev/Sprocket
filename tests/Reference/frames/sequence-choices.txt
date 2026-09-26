@@ -28,28 +28,29 @@ on screen     Sequence 1
 021  Sprite     Sprocket_Fill         {X:1593 Y:120 W:58 H:31}  #5B737BFF
 022  Text       at {X:1550.933 Y:125.407} scale 0.732  #85A1A9FF  "ON"
 023  Text       at {X:1608.56 Y:125.407} scale 0.732  #DCF5FDFF  "OFF"
-024  Text       at {X:339 Y:178.392} scale 0.822  #A2C3CDFF  "set"
-025  Sprite     Sprocket_Fill         {X:372 Y:172 W:139 H:36}  #374851FF
-026  Sprite     Sprocket_Fill         {X:372 Y:206 W:139 H:2}  #8EBCCFFF
-027  Text       at {X:387.8967 Y:178.392} scale 0.822  #DCF5FDFF  "Charge Mode"
-028  Text       at {X:521.1267 Y:178.392} scale 0.822  #A2C3CDFF  "on"
-029  Sprite     Sprocket_Fill         {X:552 Y:172 W:156 H:36}  #374851FF
-030  Sprite     Sprocket_Fill         {X:552 Y:206 W:156 H:2}  #8EBCCFFF
-031  Text       at {X:567.6367 Y:178.392} scale 0.822  #DCF5FDFF  "Standby Battery"
-032  Text       at {X:717.57 Y:178.392} scale 0.822  #A2C3CDFF  "to"
-033  Sprite     Sprocket_Fill         {X:744 Y:172 W:105 H:36}  #374851FF
-034  Sprite     Sprocket_Fill         {X:744 Y:206 W:105 H:2}  #8EBCCFFF
-035  Text       at {X:760.0367 Y:178.392} scale 0.822  #DCF5FDFF  "Recharge"
-036  Sprite     Sprocket_Fill         {X:275 Y:183 W:3 H:3}  #85A1A9FF
-037  Sprite     Sprocket_Fill         {X:275 Y:189 W:3 H:3}  #85A1A9FF
-038  Sprite     Sprocket_Fill         {X:275 Y:195 W:3 H:3}  #85A1A9FF
-039  Sprite     Sprocket_Fill         {X:281 Y:183 W:3 H:3}  #85A1A9FF
-040  Sprite     Sprocket_Fill         {X:281 Y:189 W:3 H:3}  #85A1A9FF
-041  Sprite     Sprocket_Fill         {X:281 Y:195 W:3 H:3}  #85A1A9FF
-042  Text       at {X:295 Y:179.687} scale 0.732  #85A1A9FF  "1"
-043  Text       at {X:1606.09 Y:167.5049} scale 0.732  #85A1A9FF  "d"
-044  Text       at {X:300.8 Y:241.072} scale 0.732  #A2C3CDFF  "+ do something"
-045  Text       at {X:449.0233 Y:241.072} scale 0.732  #A2C3CDFF  "+ wait"
-046  ClearClip  
-047  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
-048  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF
+024  Text       at {X:339 Y:180.152} scale 0.822  #A2C3CDFF  "set"
+025  Sprite     Sprocket_Fill         {X:372 Y:172 W:141 H:40}  #374851FF
+026  Sprite     Sprocket_Fill         {X:372 Y:210 W:141 H:2}  #8EBCCFFF
+027  Text       at {X:387.8967 Y:179.992} scale 0.833  #DCF5FDFF  "Charge Mode"
+028  Text       at {X:522.58 Y:180.152} scale 0.822  #A2C3CDFF  "on"
+029  Sprite     Sprocket_Fill         {X:553 Y:172 W:190 H:40}  #374851FF
+030  Sprite     Sprocket_Fill         {X:553 Y:210 W:190 H:2}  #8EBCCFFF
+031  Sprite     MyObjectBuilder_BatteryBlock/LargeBlockBatteryBlock{X:569 Y:180 W:24 H:24}  #FFFFFFFF
+032  Text       at {X:601.09 Y:179.992} scale 0.833  #DCF5FDFF  "Standby Battery"
+033  Text       at {X:752.6934 Y:180.152} scale 0.822  #A2C3CDFF  "to"
+034  Sprite     Sprocket_Fill         {X:779 Y:172 W:106 H:40}  #374851FF
+035  Sprite     Sprocket_Fill         {X:779 Y:210 W:106 H:2}  #8EBCCFFF
+036  Text       at {X:795.16 Y:179.992} scale 0.833  #DCF5FDFF  "Recharge"
+037  Sprite     Sprocket_Fill         {X:275 Y:184 W:3 H:3}  #85A1A9FF
+038  Sprite     Sprocket_Fill         {X:275 Y:190 W:3 H:3}  #85A1A9FF
+039  Sprite     Sprocket_Fill         {X:275 Y:196 W:3 H:3}  #85A1A9FF
+040  Sprite     Sprocket_Fill         {X:281 Y:184 W:3 H:3}  #85A1A9FF
+041  Sprite     Sprocket_Fill         {X:281 Y:190 W:3 H:3}  #85A1A9FF
+042  Sprite     Sprocket_Fill         {X:281 Y:196 W:3 H:3}  #85A1A9FF
+043  Text       at {X:295 Y:181.447} scale 0.732  #85A1A9FF  "1"
+044  Text       at {X:1606.09 Y:169.2649} scale 0.732  #85A1A9FF  "d"
+045  Text       at {X:300.8 Y:244.592} scale 0.732  #A2C3CDFF  "+ do something"
+046  Text       at {X:449.0233 Y:244.592} scale 0.732  #A2C3CDFF  "+ wait"
+047  ClearClip  
+048  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
+049  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -20,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Field> _fields = new List<Field>();
         readonly List<string> _filled = new List<string>();
 
-        public ValuesSlot(IList<Literal> values, IList<Field> fields, int command) : base(command)
+        public ValuesSlot(IList<Literal> values, IList<Field> fields, ICommand opens) : base(opens)
         {
             for (var i = 0; i < values.Count; i++)
                 _values.Add(values[i]);

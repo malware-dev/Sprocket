@@ -116,7 +116,7 @@ public class ListeningTests
     [Fact]
     public void AViewLetsGoOfWhatItWasShowing()
     {
-        var component = new StartComponent();
+        var component = new ChoiceListComponent();
         var view = ComponentView.For(component);
 
         Assert.Equal(0, component.Listeners);
@@ -128,7 +128,7 @@ public class ListeningTests
         Assert.Equal(0, component.Listeners);
 
         // Twice over, because a view handed a second component has to let go of the first by itself.
-        var another = new StartComponent();
+        var another = new ChoiceListComponent();
         view.Watch(component);
         view.Watch(another);
 

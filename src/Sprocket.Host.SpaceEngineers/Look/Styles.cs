@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using VRage.Game;
@@ -128,10 +129,62 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint, StrongColor = Palette.Ink }
         };
 
+        /// <summary>A section's name, in capitals, over what it heads.</summary>
+        public static readonly TextStyle Heading = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint, Padding = new Thickness(4f, 8f, 0f, 8f) }
+        };
+
+        /// <summary>The same, following other content, with room above it so it reads as the start of what comes after.</summary>
+        public static readonly TextStyle NextHeading = new TextStyle(Heading)
+        {
+            Base = { Padding = new Thickness(4f, 32f, 0f, 8f) }
+        };
+
         /// <summary>The quiet line under a name: what it is doing, and when it last did anything.</summary>
         public static readonly TextStyle Detail = new TextStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
+        };
+
+        /// <summary>What is wrong with a thing, on its own line under it.</summary>
+        public static readonly TextStyle Problem = new TextStyle(Detail)
+        {
+            Base = { Color = Palette.Problem }
+        };
+
+        /// <summary>The words of a sentence around the parts somebody chose.</summary>
+        public static readonly TextStyle Phrase = new TextStyle(Name)
+        {
+            Base = { Color = Palette.Muted }
+        };
+
+        /// <summary>A part of a sentence: a chip with a line along its bottom, the one look nothing else may borrow.</summary>
+        /// <remarks>
+        /// One that cannot be pressed keeps its place and its shape, lifted only a notch off the page so the words still
+        /// read as one part. Color alone marks one still waiting to be filled, because the game ships one weight and
+        /// there is no italic to lean it into.
+        /// </remarks>
+        public static readonly SlotStyle Slot = new SlotStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Background = Palette.SlotFill,
+                Padding = new Thickness(16f, 8f), Underline = Palette.SlotEdge
+            },
+            Empty = { Color = Palette.Notice, Underline = Palette.Notice },
+            Still = { Background = Palette.Chrome, Underline = Palette.None },
+            Hot = { Background = Palette.Well }
+        };
+
+        /// <summary>A word on a green wash, saying something is true at this instant.</summary>
+        public static readonly TextStyle Live = new TextStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Live, Background = Palette.LiveWash,
+                Padding = new Thickness(16f, 8f)
+            }
         };
 
         /// <summary>The rest of what a banner says, once it is opened.</summary>

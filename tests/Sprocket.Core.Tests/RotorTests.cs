@@ -499,9 +499,9 @@ public class RotorTests
         action.Fields(fields);
 
         Assert.Equal("directly to 90° at 10 rpm",
-            SentenceText.Given(new ValuesSlot([Literal.Of(Directly), Literal.Of(90L), Literal.Of(10L)], fields, 0)));
+            SentenceText.Given(new ValuesSlot([Literal.Of(Directly), Literal.Of(90L), Literal.Of(10L)], fields, null)));
         Assert.Equal("clockwise to 45° at 2 rpm",
-            SentenceText.Given(new ValuesSlot([Literal.Of(Clockwise), Literal.Of(45L), Literal.Of(2L)], fields, 0)));
+            SentenceText.Given(new ValuesSlot([Literal.Of(Clockwise), Literal.Of(45L), Literal.Of(2L)], fields, null)));
     }
 
     static Literal Written(double number)

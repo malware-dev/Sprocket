@@ -2,13 +2,13 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Sequence 1
+on screen     Sequence 2
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:62.71198} scale 0.401  #A2C3CDFF  "<"
 003  SetClip    {X:296 Y:53 W:1328 H:40}
-004  Text       at {X:304 Y:56.71198} scale 1.111  #DCF5FDFF  "Sequence 1"
+004  Text       at {X:304 Y:56.71198} scale 1.111  #DCF5FDFF  "Sequence 2"
 005  Text       at {X:440.7496 Y:62.71198} scale 0.401  #85A1A9FF  "p"
 006  ClearClip  
 007  Text       at {X:1638.156 Y:62.71198} scale 0.401  #A2C3CDFF  "s"

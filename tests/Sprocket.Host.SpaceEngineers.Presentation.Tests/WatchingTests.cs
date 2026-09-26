@@ -153,10 +153,6 @@ public class WatchingTests
 
     static void Sequence(SprocketEditor editor)
     {
-        editor.NewSystem("Airlock");
-        editor.PressStart("When…");
-        editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
-        editor.PressPrimary();
+        editor.NewButtonSystem("Airlock");
     }
 }

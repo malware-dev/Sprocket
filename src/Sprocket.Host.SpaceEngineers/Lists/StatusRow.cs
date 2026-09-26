@@ -17,11 +17,16 @@ namespace Sprocket.Host.SpaceEngineers.Lists
     /// </remarks>
     public class StatusRow : HStack
     {
+        /// <summary>What goes before the words of anything that adds.</summary>
+        public const string Plus = "+ ";
+
         const float Indent = 32f;
+
+        static readonly Fixed ThingHeight = Fixed.High(68f);
+        static readonly Fixed ActionHeight = Fixed.High(48f);
 
         readonly Relay _opens;
         readonly Relay _runs;
-        readonly Relay _changes;
         readonly Relay _flips;
         readonly Relay _copies;
         readonly Relay _offers;
@@ -29,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         readonly HStack _inside;
         readonly Glyph _light;
         readonly Label _summary;
-        readonly Button _status;
+        readonly Label _status;
         readonly Glyph _run;
         readonly Label _lastRun;
         readonly Label _problem;
@@ -48,7 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         {
             _opens = new Relay(delegate { Carry(Opens); });
             _runs = new Relay(delegate { Carry(Running ? Stops : Runs); });
-            _changes = new Relay(delegate { Carry(Changes); });
             _flips = new Relay(delegate { Carry(Flips); });
             _copies = new Relay(delegate { Carry(Copies); });
             _offers = new Relay(delegate { Carry(Offers); });
@@ -72,19 +76,21 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                             new HStack
                             {
                                 Spacing = 8f,
+                                Placement = Fixed.High(32f),
                                 Children =
                                 {
-                                    new Label { Style = Styles.Name, Wraps = true }.As(out _summary),
+                                    new Label { Style = Styles.Name, Trims = true }.As(out _summary),
                                     new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = Fixed.Size(32f, 32f) }.As(out _below)
                                 }
                             },
                             new HStack
                             {
                                 Spacing = 8f,
+                                Placement = Fixed.High(16f),
                                 Children =
                                 {
-                                    new Button { Style = Styles.Plain, Command = _changes }.As(out _status),
-                                    new Label { Style = Styles.Detail, Wraps = true }.As(out _problem),
+                                    new Label { Style = Styles.Detail }.As(out _status),
+                                    new Label { Style = Styles.Detail, Trims = true }.As(out _problem),
                                     new Label { Style = Styles.Detail }.As(out _lastRun)
                                 }
                             }.As(out _detail)
@@ -114,9 +120,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
 
         /// <summary>What stopping it does, or null where it cannot be stopped from here.</summary>
         public ICommand Stops { get; set; }
-
-        /// <summary>What pressing its status does, or null where the status is only read.</summary>
-        public ICommand Changes { get; set; }
 
         /// <summary>What its switch does, or null for a row with no switch.</summary>
         public ICommand Flips { get; set; }
@@ -193,9 +196,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         /// <summary>What its button does, in markdown-lite, said where the pointer rests on it.</summary>
         public string ButtonAbout { get; set; }
 
-        /// <summary>The status, for a press on it that has to hang something under it.</summary>
-        public Element StatusPart => _status;
-
         /// <summary>The mark that starts or stops it, for a press on it that has to hang something under it.</summary>
         public Element RunPart => _run;
 
@@ -228,6 +228,10 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         {
             _inside.Padding = new Thickness(Depth > 0 ? Indent : 0f, 0f, 0f, 0f);
 
+            // One height for every row of a kind, so no row moves the rows under it; one with nothing to say under its
+            // name has the name on its middle.
+            Placement = IsAction ? ActionHeight : ThingHeight;
+
             var pressable = Opens != null;
             _opens.CanExecute = pressable;
             Tip = Tip.For(Tip, About, AboutArguments);
@@ -253,7 +257,7 @@ namespace Sprocket.Host.SpaceEngineers.Lists
                 _saidAsks = Asks;
 
                 // The ellipsis is the desktop convention for a button that asks something before it acts.
-                _summary.Text = IsAction ? StartView.Plus + Summary + (Asks ? "…" : "") : Summary;
+                _summary.Text = IsAction ? Plus + Summary + (Asks ? "…" : "") : Summary;
             }
 
             _summary.Color = IsAction ? Palette.Muted : Palette.Ink;
@@ -283,9 +287,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             _run.IsVisible = doing != null;
             _runs.CanExecute = doing != null;
             _run.Tip = Tip.For(_run.Tip, doing != null ? (Running ? SequenceText.Stops() : SequenceText.Starts()) : null);
-
-            _changes.CanExecute = Changes != null;
-            _status.Tip = Tip.For(_status.Tip, Changes != null ? texts.RowChange : null);
 
             var saying = !string.IsNullOrEmpty(Problem);
 

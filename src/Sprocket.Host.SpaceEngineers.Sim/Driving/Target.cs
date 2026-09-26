@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
@@ -98,8 +100,18 @@ namespace Sprocket.Sim.Driving
         /// </remarks>
         public static void NewSystem(this SprocketEditor editor, string name)
         {
-            PressRootButton(editor, "New logic system");
+            PressButton(editor, "New logic system");
             editor.SetText(editor.Screen.Heading[0].RenameCommand, name);
+        }
+
+        /// <summary>Makes a system with the custom name whose one trigger is the Airlock Button being pressed, and leaves the editor on the sequence it starts.</summary>
+        public static void NewButtonSystem(this SprocketEditor editor, string name)
+        {
+            editor.NewSystem(name);
+            editor.PressStart("When…");
+            editor.PressBlock("Airlock Button");
+            editor.PressChoice("is pressed");
+            editor.PressPrimary();
         }
 
         /// <summary>Answers the question this screen is asking, wherever it sits.</summary>
@@ -109,34 +121,14 @@ namespace Sprocket.Sim.Driving
         /// </remarks>
         public static void Typed(this SprocketEditor editor, string said)
         {
-            if (editor.Screen.PrimaryAsks)
-            {
-                editor.SetText(editor.Screen.PrimaryCommand, said);
-                return;
-            }
+            if (!editor.Screen.PrimaryAsks)
+                throw new InvalidOperationException($"'{editor.Screen.Title()}' asks nothing to be typed.");
 
-            var option = editor.Screen.Components.OfType<StartComponent>()
-                .SelectMany(s => s.Options)
-                .First(o => o.Asks);
-
-            editor.SetText(option.Command, said);
+            editor.SetText(editor.Screen.PrimaryCommand, said);
         }
 
         /// <summary>Presses one of the ways to start something on this screen, wherever it sits.</summary>
-        public static void PressStart(this SprocketEditor editor, string label)
-        {
-            if (editor.Current is HomePage)
-            {
-                PressRootButton(editor, label);
-                return;
-            }
-
-            var option = editor.Screen.Components.OfType<StartComponent>()
-                .SelectMany(s => s.Options)
-                .First(o => o.Label == label);
-
-            editor.Invoke(option.Command);
-        }
+        public static void PressStart(this SprocketEditor editor, string label) => PressButton(editor, label);
 
         /// <summary>
         /// Switches a sequence on, which a new one is not.
@@ -197,20 +189,19 @@ namespace Sprocket.Sim.Driving
             editor.Screen.Components.OfType<ChoiceListComponent>().Any(l => l.Entries.Any(e => e.Text == text))
             || editor.Stages().Any(p => p.Options.Any(e => e.Text == text) || p.Entries.Any(e => e.Text == text));
 
-        /// <summary>
-        /// The rows of the things on this screen, below whatever starts them.
-        /// </summary>
-        /// <remarks>
-        /// The last list, because a system's screen holds two: what starts things above, and the things
-        /// themselves below. Positional because the screen is - a test reading a screen is allowed to
-        /// know what is on it.
-        /// </remarks>
-        public static ObservableList<StatusEntry> Rows(this SprocketEditor editor) =>
-            editor.Screen.Components.OfType<StatusListComponent>().Last().Entries;
+        /// <summary>The rows of a logic system's sequences, as its page draws them, in the order they stand.</summary>
+        /// <remarks>Positional because the screen is: a test reading a screen is allowed to know what is on it.</remarks>
+        public static List<StatusRow> Rows(this SprocketEditor editor) =>
+            Within(LogicSystem(editor).View).OfType<StatusRow>().ToList();
 
-        /// <summary>The sentences of what starts things, where the screen has them.</summary>
-        public static ObservableList<SentenceTrigger> Triggers(this SprocketEditor editor) =>
-            editor.Component<TriggerListComponent>().Triggers;
+        /// <summary>The name of the logic system a blueprint's page is edited through.</summary>
+        /// <remarks>The first part on the page, above every trigger's sentence.</remarks>
+        public static string UsingName(this SprocketEditor editor) =>
+            Within(LogicSystem(editor).View).OfType<Slot>().First().Text;
+
+        /// <summary>The sentences of what starts things, as the rows the logic system's page draws them in.</summary>
+        public static List<TriggerRow> Triggers(this SprocketEditor editor) =>
+            Within(LogicSystem(editor).View).OfType<TriggerRow>().ToList();
 
         /// <summary>
         /// What a trigger's row reads as, joined the way a target draws it.
@@ -221,10 +212,10 @@ namespace Sprocket.Sim.Driving
         /// </remarks>
         public static string Says(this SprocketEditor editor, int which)
         {
-            SentenceTrigger trigger = editor.Triggers()[which];
-            var line = SentenceText.Lead(trigger);
+            var trigger = editor.Triggers()[which];
+            var line = SentenceText.Lead(trigger.Kind, trigger.Starts.Count);
 
-            foreach (SentenceSlot slot in trigger.Slots)
+            foreach (SentenceSlot slot in trigger.Starts)
                 line += " " + SentenceText.InTrigger(editor.World, slot);
 
             return line;
@@ -233,7 +224,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>And what the second half of it reads as, with the words that join its parts.</summary>
         public static string Doing(this SprocketEditor editor, int which)
         {
-            SentenceTrigger trigger = editor.Triggers()[which];
+            var trigger = editor.Triggers()[which];
             var line = trigger.DoesLead;
 
             for (var i = 0; i < trigger.Does.Count; i++)
@@ -250,11 +241,11 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>Presses the part of a trigger that says when it happens.</summary>
         public static void PressWhen(this SprocketEditor editor, int which) =>
-            editor.Invoke(editor.Triggers()[which].Slots[0].Command);
+            editor.Triggers()[which].Starts[0].Opens!.Execute();
 
         /// <summary>And the part that says what it does.</summary>
         public static void PressDoes(this SprocketEditor editor, int which) =>
-            editor.Invoke(editor.Triggers()[which].Does[0].Command);
+            editor.Triggers()[which].Does[0].Opens!.Execute();
 
         /// <summary>The way back on a screen that carries one, which is screen furniture.</summary>
         public static EditorScreen Steps(this SprocketEditor editor) => editor.Screen;
@@ -266,10 +257,8 @@ namespace Sprocket.Sim.Driving
         /// </remarks>
         public static void PressRow(this SprocketEditor editor, int row)
         {
-            if (editor.Current is HomePage)
-                editor.RootRows()[row].Opens!.Execute();
-            else
-                editor.Invoke(editor.Rows()[row].Command);
+            var rows = editor.Current is HomePage ? editor.RootRows() : editor.Rows();
+            rows[row].Opens!.Execute();
         }
 
         /// <summary>The short question hanging over the screen, or empty.</summary>
@@ -289,7 +278,7 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>Presses one part of one step of the sequence the screen shows.</summary>
         public static void PressStepSlot(this SprocketEditor editor, int step, int slot) =>
-            editor.Invoke(editor.Sentence().Steps[step].Slots[slot].Command);
+            editor.Sentence().Steps[step].Slots[slot].Opens!.Execute();
 
         /// <summary>Presses the screen's move-on action - "Next" or "Done".</summary>
         public static void PressPrimary(this SprocketEditor editor)
@@ -389,21 +378,28 @@ namespace Sprocket.Sim.Driving
                     ?? throw new InvalidOperationException($"No block '{name}' on '{editor.Screen.Title()}'.")).Command;
         }
 
-        /// <summary>Presses the root's button saying <paramref name="label" />.</summary>
-        static void PressRootButton(SprocketEditor editor, string label)
+        /// <summary>Presses the button saying <paramref name="label" />, after the plus of anything that adds, on the page the editor is on.</summary>
+        static void PressButton(SprocketEditor editor, string label)
         {
-            var button = Within(Root(editor).View).OfType<Button>()
-                .First(b => b.Text == StartView.Plus + label);
+            var view = editor.Current.View
+                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is described in components and has no buttons.");
+
+            var button = Within(view).OfType<Button>().FirstOrDefault(b => b.Text == StatusRow.Plus + label)
+                         ?? throw new InvalidOperationException($"No button '{label}' on '{editor.Screen.Title()}'.");
 
             button.Command!.Execute();
         }
+
+        /// <summary>The page of the logic system the editor is on.</summary>
+        static LogicSystemPage LogicSystem(SprocketEditor editor) =>
+            editor.Current as LogicSystemPage ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a logic system's page.");
 
         /// <summary>The root, which is where the editor is.</summary>
         static HomePage Root(SprocketEditor editor) =>
             editor.Current as HomePage ?? throw new InvalidOperationException("the editor is not on its root");
 
         /// <summary>Every element under <paramref name="element" />, its own first, in the order they are drawn.</summary>
-        static IEnumerable<Element> Within(Element element)
+        public static IEnumerable<Element> Within(this Element element)
         {
             yield return element;
 

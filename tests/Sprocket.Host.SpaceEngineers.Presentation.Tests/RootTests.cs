@@ -85,8 +85,8 @@ public class RootTests
     }
 
     /// <summary>
-    /// A question raised by a press on the root stands in the middle of the screen, as the dialog, rather
-    /// than hanging under anything: the root's presses record nothing to hang it under.
+    /// A question the editor asks as the dialog stands in the middle of the screen, rather than hanging
+    /// under the press that raised it.
     /// </summary>
     [Fact]
     public void AQuestionFromTheRootIsTheDialog()
@@ -144,11 +144,7 @@ public class RootTests
     /// <summary>A logic system named <paramref name="name" />, started by the airlock's button, and the root shown again.</summary>
     static void Built(Simulation sim, string name)
     {
-        sim.Editor.NewSystem(name);
-        sim.Editor.PressStart("When…");
-        sim.Editor.PressBlock("Airlock Button");
-        sim.Editor.PressChoice("is pressed");
-        sim.Editor.PressPrimary();
+        sim.Editor.NewButtonSystem(name);
         sim.Editor.GoToRoot();
         sim.Tick();
     }

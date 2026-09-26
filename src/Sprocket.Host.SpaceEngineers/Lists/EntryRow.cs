@@ -14,7 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
         readonly Relay _opens;
         readonly Relay _runs;
         readonly Relay _stops;
-        readonly Relay _changes;
         readonly Relay _flips;
         readonly Relay _copies;
         readonly Relay _offers;
@@ -28,7 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             _opens = new Relay(delegate { Send(_row, e => e.Command, e => e.Question); });
             _runs = new Relay(delegate { Send(_row.RunPart, e => e.RunCommand, null); });
             _stops = new Relay(delegate { Send(_row.RunPart, e => e.StopCommand, null); });
-            _changes = new Relay(delegate { Send(_row.StatusPart, e => e.StatusCommand, null); });
             _flips = new Relay(Flip);
             _copies = new Relay(delegate { Send(_row.CopyPart, e => e.DuplicateCommand, null); });
             _offers = new Relay(delegate { Send(_row.ButtonPart, e => e.ButtonCommand, e => e.ButtonQuestion); });
@@ -46,7 +44,6 @@ namespace Sprocket.Host.SpaceEngineers.Lists
             _row.Opens = entry.Command != 0 ? _opens : null;
             _row.Runs = entry.RunCommand != 0 ? _runs : null;
             _row.Stops = entry.StopCommand != 0 ? _stops : null;
-            _row.Changes = entry.StatusCommand != 0 ? _changes : null;
             _row.Flips = entry.CanSwitch ? _flips : null;
             _row.Copies = entry.DuplicateCommand != 0 ? _copies : null;
             _row.Offers = entry.ButtonCommand != 0 ? _offers : null;

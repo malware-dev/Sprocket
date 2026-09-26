@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -12,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class EntitiesSlot : SentenceSlot
     {
-        public EntitiesSlot(IList<long> entities, bool requiresAll, int command) : base(command)
+        public EntitiesSlot(IList<long> entities, bool requiresAll, ICommand opens) : base(opens)
         {
             Entities = new List<long>(entities);
             RequiresAll = requiresAll;

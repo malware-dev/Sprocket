@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Ui.Rich;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
@@ -222,9 +223,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <remarks>Walks the systems' blocks for their names, which is why it runs only when the systems change or the page is come back to.</remarks>
         void Arrange(Texts texts)
         {
-            _new.Text = StartView.Plus + texts.SystemsNew;
+            _new.Text = StatusRow.Plus + texts.SystemsNew;
             _new.Tip = Tip.For(_new.Tip, texts.SystemsNewAbout);
-            _load.Text = StartView.Plus + texts.SystemsLoad;
+            _load.Text = StatusRow.Plus + texts.SystemsLoad;
             _load.Tip = Tip.For(_load.Tip, texts.SystemsLoadAbout);
 
             _own.Clear();
@@ -260,7 +261,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             var row = new StatusRow
             {
                 Opens = Editor.Act(Cmd.OpenSystem, delegate { Open(system); }),
-                Offers = Editor.Act(Cmd.MakeBlueprint, delegate { Made(system); })
+                Offers = Editor.Act(Cmd.MakeBlueprint, delegate { Made(system); }),
+                Deletes = Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(system); })
             };
 
             Switched(row, system.First);
@@ -273,7 +275,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             var system = Editor.Program.AddSystem();
             system.Namespace = Editor.Author;
 
-            var page = new SystemPage(Editor, system);
+            var page = new LogicSystemPage(Editor, system);
             page.NameOnArrival = true;
             Editor.Push(page);
         }
@@ -292,7 +294,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>Opens a logic system of its own.</summary>
         void Open(AutomationSystem system)
         {
-            Editor.Push(new SystemPage(Editor, system));
+            Editor.Push(new LogicSystemPage(Editor, system));
         }
 
         /// <summary>What the page is shown from, as one number: which systems, how many of each, and which are blueprints.</summary>

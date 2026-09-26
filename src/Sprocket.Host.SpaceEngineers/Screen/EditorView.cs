@@ -1198,6 +1198,9 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (target != null && target.TakesInput)
             {
                 UnfocusBox();
+
+                // What a question this press raises hangs under, as for a press carried by a deed.
+                _raisedBy = target;
                 _input.PointerDown(target, point, presses);
                 _pressing = true;
                 _pressedAt = point;

@@ -28,21 +28,22 @@ on screen     Sequence 1
 021  Sprite     Sprocket_Fill         {X:1534 Y:120 W:58 H:31}  #5B737BFF
 022  Text       at {X:1550.933 Y:125.407} scale 0.732  #DCF5FDFF  "ON"
 023  Text       at {X:1608.56 Y:125.407} scale 0.732  #85A1A9FF  "OFF"
-024  Sprite     Sprocket_Fill         {X:339 Y:172 W:72 H:36}  #1B242AFF
-025  Sprite     Sprocket_Fill         {X:339 Y:206 W:72 H:2}  #00000000
-026  Text       at {X:355 Y:178.392} scale 0.822  #DCF5FDFF  "open"
-027  Sprite     Sprocket_Fill         {X:421 Y:172 W:175 H:36}  #1B242AFF
-028  Sprite     Sprocket_Fill         {X:421 Y:206 W:175 H:2}  #00000000
-029  Text       at {X:437.2867 Y:178.392} scale 0.822  #DCF5FDFF  "Airlock Inner Door"
-030  Sprite     Sprocket_Fill         {X:275 Y:183 W:3 H:3}  #5F7278FF
-031  Sprite     Sprocket_Fill         {X:275 Y:189 W:3 H:3}  #5F7278FF
-032  Sprite     Sprocket_Fill         {X:275 Y:195 W:3 H:3}  #5F7278FF
-033  Sprite     Sprocket_Fill         {X:281 Y:183 W:3 H:3}  #5F7278FF
-034  Sprite     Sprocket_Fill         {X:281 Y:189 W:3 H:3}  #5F7278FF
-035  Sprite     Sprocket_Fill         {X:281 Y:195 W:3 H:3}  #5F7278FF
-036  Text       at {X:295 Y:179.687} scale 0.732  #85A1A9FF  "1"
-037  Text       at {X:1606.09 Y:167.5049} scale 0.732  #5F7278FF  "d"
-038  Text       at {X:300.8 Y:241.072} scale 0.732  #A2C3CDFF  "Switched on. Switch it off to make changes."
-039  ClearClip  
-040  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
-041  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF
+024  Sprite     Sprocket_Fill         {X:339 Y:172 W:73 H:40}  #1B242AFF
+025  Sprite     Sprocket_Fill         {X:339 Y:210 W:73 H:2}  #00000000
+026  Text       at {X:355 Y:179.992} scale 0.833  #DCF5FDFF  "open"
+027  Sprite     Sprocket_Fill         {X:422 Y:172 W:209 H:40}  #1B242AFF
+028  Sprite     Sprocket_Fill         {X:422 Y:210 W:209 H:2}  #00000000
+029  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:438 Y:180 W:24 H:24}  #FFFFFFFF
+030  Text       at {X:469.8267 Y:179.992} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
+031  Sprite     Sprocket_Fill         {X:275 Y:184 W:3 H:3}  #5F7278FF
+032  Sprite     Sprocket_Fill         {X:275 Y:190 W:3 H:3}  #5F7278FF
+033  Sprite     Sprocket_Fill         {X:275 Y:196 W:3 H:3}  #5F7278FF
+034  Sprite     Sprocket_Fill         {X:281 Y:184 W:3 H:3}  #5F7278FF
+035  Sprite     Sprocket_Fill         {X:281 Y:190 W:3 H:3}  #5F7278FF
+036  Sprite     Sprocket_Fill         {X:281 Y:196 W:3 H:3}  #5F7278FF
+037  Text       at {X:295 Y:181.447} scale 0.732  #85A1A9FF  "1"
+038  Text       at {X:1606.09 Y:169.2649} scale 0.732  #5F7278FF  "d"
+039  Text       at {X:300.8 Y:244.592} scale 0.732  #A2C3CDFF  "Switched on. Switch it off to make changes."
+040  ClearClip  
+041  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
+042  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

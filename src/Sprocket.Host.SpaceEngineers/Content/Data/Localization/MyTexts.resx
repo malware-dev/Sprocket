@@ -67,10 +67,6 @@ Open it to see what.</value>
 Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Note on a row's light when it is dark.</comment>
   </data>
-  <data name="Sprocket.Row.Change" xml:space="preserve">
-    <value>Change what this does</value>
-    <comment>Note on the part of a row that opens what it does.</comment>
-  </data>
   <data name="Sprocket.Row.Delete" xml:space="preserve">
     <value>Delete</value>
     <comment>Note on a row's bin.</comment>
@@ -165,6 +161,81 @@ This one becomes the first of them.</value>
   <data name="Sprocket.Systems.Instance" xml:space="preserve">
     <value>{name} {number}</value>
     <comment>What one of the logic systems made from a blueprint is called when it has no name of its own. {name} is the blueprint's, {number} which one it is.</comment>
+  </data>
+
+  <data name="Sprocket.Delete.System" xml:space="preserve">
+    <value>Delete this logic system?</value>
+    <comment>Asked before a logic system is deleted, with its name under it.</comment>
+  </data>
+  <data name="Sprocket.Delete.Keep" xml:space="preserve">
+    <value>Keep it</value>
+    <comment>The answer that deletes nothing.</comment>
+  </data>
+  <data name="Sprocket.Delete.Confirm" xml:space="preserve">
+    <value>Delete it</value>
+    <comment>The answer that deletes it.</comment>
+  </data>
+  <data name="Sprocket.Delete.Final" xml:space="preserve">
+    <value>This cannot be undone.</value>
+    <comment>Said on the answer that deletes.</comment>
+  </data>
+
+  <data name="Sprocket.System.RenamePrompt" xml:space="preserve">
+    <value>What is it?</value>
+    <comment>Asked when a logic system's name is pressed to rename it.</comment>
+  </data>
+  <data name="Sprocket.System.NameAbout" xml:space="preserve">
+    <value>This logic system's name.
+Press to rename it.</value>
+    <comment>Note on a logic system's name, in the heading of its own screen.</comment>
+  </data>
+  <data name="Sprocket.System.Blueprint" xml:space="preserve">
+    <value>blueprint</value>
+    <comment>Said after a blueprint's name in the heading of its screen.</comment>
+  </data>
+  <data name="Sprocket.System.Using" xml:space="preserve">
+    <value>Using the blocks of</value>
+    <comment>Leads the name of the logic system a blueprint is edited through, whose blocks every sentence on the screen names. Also the title of the list that chooses another.</comment>
+  </data>
+  <data name="Sprocket.System.Triggers" xml:space="preserve">
+    <value>Triggers</value>
+    <comment>Heading over a logic system's triggers: what starts its sequences.</comment>
+  </data>
+  <data name="Sprocket.System.When" xml:space="preserve">
+    <value>When…</value>
+    <comment>Button that adds a trigger started by something happening to a block.</comment>
+  </data>
+  <data name="Sprocket.System.Every" xml:space="preserve">
+    <value>Every…</value>
+    <comment>Button that adds a trigger started on a timer.</comment>
+  </data>
+  <data name="Sprocket.System.Sequences" xml:space="preserve">
+    <value>Sequences</value>
+    <comment>Heading over a logic system's sequences: the named runs of steps its triggers start.</comment>
+  </data>
+  <data name="Sprocket.System.NewSequence" xml:space="preserve">
+    <value>New sequence</value>
+    <comment>Button that adds a sequence with nothing to start it yet.</comment>
+  </data>
+  <data name="Sprocket.System.NoSequences" xml:space="preserve">
+    <value>No sequences yet.</value>
+    <comment>Said in place of the list of sequences while a logic system has none.</comment>
+  </data>
+  <data name="Sprocket.System.Copy" xml:space="preserve">
+    <value>Creates a copy of this sequence, switched off and with no trigger of its own</value>
+    <comment>Note on the copy mark of a sequence that a trigger starts.</comment>
+  </data>
+  <data name="Sprocket.System.CopyUnstarted" xml:space="preserve">
+    <value>Creates a copy of this sequence, switched off</value>
+    <comment>Note on the copy mark of a sequence nothing starts.</comment>
+  </data>
+  <data name="Sprocket.Trigger.Live" xml:space="preserve">
+    <value>true right now</value>
+    <comment>Badge on a trigger while what it watches for is true at this instant, such as a door standing open.</comment>
+  </data>
+  <data name="Sprocket.Trigger.Delete" xml:space="preserve">
+    <value>Delete this trigger</value>
+    <comment>Note on the bin at the end of a trigger's row.</comment>
   </data>
 
   <data name="Sprocket.Salvage.Different" xml:space="preserve">

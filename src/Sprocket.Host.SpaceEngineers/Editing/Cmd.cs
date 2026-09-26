@@ -32,6 +32,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         AddInstance,
         MakeBlueprint,
         ChooseInstance,
+        DeleteSystem,
+        DeleteInstance,
         EditBlueprint,
         FillPart,
         RenamePart,
