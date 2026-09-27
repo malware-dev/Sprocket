@@ -170,6 +170,24 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
         };
 
+        /// <summary>What a thing is doing, said in a line of its own tools rather than under its name.</summary>
+        public static readonly TextStyle Status = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted }
+        };
+
+        /// <summary>The quieter words beside a status: when it last did anything, a step's number, why nothing can be added.</summary>
+        public static readonly TextStyle Aside = new TextStyle(Status)
+        {
+            Base = { Color = Palette.Faint }
+        };
+
+        /// <summary>A word on an amber wash, saying something asked for did not happen.</summary>
+        public static readonly TextStyle Skipped = new TextStyle(Status)
+        {
+            Base = { Color = Palette.Notice, Background = Palette.NoticeWash, Padding = new Thickness(16f, 8f) }
+        };
+
         /// <summary>What is wrong with a thing, on its own line under it.</summary>
         public static readonly TextStyle Problem = new TextStyle(Detail)
         {

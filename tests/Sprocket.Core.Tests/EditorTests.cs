@@ -525,7 +525,7 @@ public class EditorTests
         Assert.True(sequence.CanRun(sequence.System.First));
 
         // Deliberately park this one sequence.
-        editor.SetToggle(editor.Sentence().ToggleCommand, false);
+        editor.SwitchSequence(false);
         ship.Tick();
         Assert.False(sequence.CanRun(sequence.System.First));
 
@@ -563,7 +563,7 @@ public class EditorTests
         // Parked while it is being built, so the sentence is open for work.
         var sentence = editor.Sentence();
         Assert.True(sentence.Editable);
-        Assert.NotEqual(0, sentence.AddOptions[0].Command);
+        Assert.NotNull(editor.Adders()[0].Command);
 
         editor.SwitchOn();
         ship.Tick();
@@ -573,12 +573,12 @@ public class EditorTests
         sentence = editor.Sentence();
         Assert.False(sentence.Editable);
         Assert.NotEmpty(sentence.LockedText);
-        Assert.Equal(2, sentence.AddOptions.Count);
-        Assert.Equal(0, sentence.AddOptions[0].Command);
+        Assert.Equal(2, editor.Adders().Count);
+        Assert.All(editor.Adders(), adder => Assert.Null(adder.Command));
 
         // The bin is the exception, and deliberately: throwing a sequence away is not editing it,
         // and wanting rid of one while it runs is exactly when somebody wants rid of it.
-        Assert.NotEqual(0, sentence.DeleteCommand);
+        Assert.NotNull(sentence.Bar.Deletes);
 
         // Renaming is exempt: it changes nothing about what the system does.
         Assert.True(editor.Screen.CanRename);
@@ -653,16 +653,16 @@ public class EditorTests
         Assert.Equal(2, sequence.Steps.Count);
 
         // Nothing has been walked back, so there is nothing to put back.
-        Assert.NotEqual(0, editor.Sentence().UndoCommand);
-        Assert.Equal(0, editor.Sentence().RedoCommand);
-        Assert.Equal("adding a step", editor.Sentence().UndoText);
+        Assert.NotNull(editor.Sentence().Bar.Undoes);
+        Assert.Null(editor.Sentence().Bar.Redoes);
+        Assert.Equal("adding a step", editor.Sentence().Bar.UndoText);
 
-        editor.Invoke(editor.Sentence().UndoCommand);
+        editor.Sentence().Bar.Undoes!.Execute();
         ship.Tick();
         Assert.Empty(sequence.Steps);
-        Assert.Equal("adding a step", editor.Sentence().RedoText);
+        Assert.Equal("adding a step", editor.Sentence().Bar.RedoText);
 
-        editor.Invoke(editor.Sentence().RedoCommand);
+        editor.Sentence().Bar.Redoes!.Execute();
         ship.Tick();
         Assert.Equal(2, sequence.Steps.Count);
         var acted = Assert.IsType<Act>(sequence.Steps[0]);
@@ -671,13 +671,13 @@ public class EditorTests
 
         // Walk back, then do something different: the road not taken is gone, because putting
         // a step back at an index that now means something else is worse than not offering.
-        editor.Invoke(editor.Sentence().UndoCommand);
+        editor.Sentence().Bar.Undoes!.Execute();
         ship.Tick();
         editor.Name("Let me out");
         ship.Tick();
 
-        Assert.Equal(0, editor.Sentence().RedoCommand);
-        Assert.Equal("renaming", editor.Sentence().UndoText);
+        Assert.Null(editor.Sentence().Bar.Redoes);
+        Assert.Equal("renaming", editor.Sentence().Bar.UndoText);
     }
 
     /// <summary>
@@ -694,29 +694,20 @@ public class EditorTests
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
-        editor.Invoke(editor.Sentence().UndoCommand);
+        editor.Sentence().Bar.Undoes!.Execute();
         ship.Tick();
 
-        Assert.NotEqual(0, editor.Sentence().RedoCommand);
+        Assert.NotNull(editor.Sentence().Bar.Redoes);
 
         editor.SwitchOn();
         ship.Tick();
 
-        Assert.Equal(0, editor.Sentence().UndoCommand);
-        Assert.Equal(0, editor.Sentence().RedoCommand);
+        Assert.Null(editor.Sentence().Bar.Undoes);
+        Assert.Null(editor.Sentence().Bar.Redoes);
     }
 
-    /// <summary>
-    /// A command id says what it is, so the same control keeps it across a rebuild.
-    /// </summary>
-    /// <remarks>
-    /// It used to be a counter reset on every rebuild - id 7 meant "the seventh thing this page
-    /// registered this time round". Stable only while nothing about the page's shape changed,
-    /// with nothing enforcing that and nothing noticing when it stopped being true. Anything
-    /// holding an id went quietly dead, because Invoke ignores what it does not recognise.
-    ///
-    /// The case that matters is the one that used to break it: the shape changing underneath.
-    /// </remarks>
+    /// <summary>A control keeps its press across a rebuild, and a press held from before it still does what it did.</summary>
+    /// <remarks>The case that matters is the shape changing underneath: a step added between holding it and pressing it.</remarks>
     [Fact]
     public void ACommandKeepsItsIdentityAcrossARebuild()
     {
@@ -730,9 +721,7 @@ public class EditorTests
         editor.PressPrimary();
         ship.Tick();
 
-        var before = editor.Sentence();
-        var toggle = before.ToggleCommand;
-        var firstStepMove = before.Steps[0].MoveToCommand;
+        var toggle = editor.Sentence().Bar.Flips;
 
         editor.PressAdd("do something");
         editor.PressBlock("Outer Door");
@@ -740,14 +729,11 @@ public class EditorTests
         editor.PressPrimary();
         ship.Tick();
 
-        var after = editor.Sentence();
-        Assert.Equal(2, after.Steps.Count);
-        Assert.Equal(toggle, after.ToggleCommand);
-        Assert.Equal(firstStepMove, after.Steps[0].MoveToCommand);
+        Assert.Equal(2, editor.StepRows().Count);
+        Assert.Same(toggle, editor.Sentence().Bar.Flips);
 
-        // And an id held from before the rebuild still does what it did.
         Assert.True(ship.Automation.Sequences[0].Enabled == false);
-        editor.SetToggle(toggle, true);
+        toggle!.Execute();
         ship.Tick();
         Assert.True(ship.Automation.Sequences[0].Enabled);
     }
@@ -952,7 +938,7 @@ public class EditorTests
         ship.Tick();
 
         var sentence = ship.Editor.Sentence();
-        ship.Editor.Invoke(sentence.DeleteCommand);
+        sentence.Bar.Deletes!.Execute();
         ship.Tick();
 
         // Nothing has gone yet, and the question names what it is about.
@@ -969,7 +955,7 @@ public class EditorTests
         Assert.Single(ship.Automation.Sequences);
         Assert.Equal("Sequence 1", ship.Editor.Screen.Title());
 
-        ship.Editor.Invoke(ship.Editor.Sentence().DeleteCommand);
+        ship.Editor.Sentence().Bar.Deletes!.Execute();
         ship.Tick();
         ship.Editor.PressChoice("Delete it");
         ship.Tick();
@@ -1177,7 +1163,7 @@ public class EditorTests
     {
         var ship = Built();
 
-        var before = (ActionSlot)ship.Editor.Sentence().Steps[0].Slots[0];
+        var before = (ActionSlot)ship.Editor.StepRows()[0].Slots[0];
         Assert.Equal("close", before.Action.Text);
 
         ship.Editor.PressStepSlot(0, 0);
@@ -1186,7 +1172,7 @@ public class EditorTests
         ship.Editor.PressPrimary();
         ship.Tick();
 
-        var after = (ActionSlot)ship.Editor.Sentence().Steps[0].Slots[0];
+        var after = (ActionSlot)ship.Editor.StepRows()[0].Slots[0];
         Assert.Equal("open", after.Action.Text);
 
         // A new object, because a target words a slot once and skips it while it is the same one.
@@ -1399,7 +1385,7 @@ public class EditorTests
         editor.PressChoice("Close");
         editor.PressPrimary();
 
-        var targets = Assert.IsType<EntitiesSlot>(editor.Sentence().Steps[0].Slots[1]);
+        var targets = Assert.IsType<EntitiesSlot>(editor.StepRows()[0].Slots[1]);
         Assert.Equal(2, targets.Entities.Count);
         Assert.True(targets.RequiresAll);
     }
@@ -1467,10 +1453,10 @@ public class EditorTests
 
         Assert.False(ship.Automation.Sequences[0].Enabled);
 
-        var run = editor.Sentence().RunCommand;
-        Assert.NotEqual(0, run);
+        var run = editor.Sentence().Bar.Runs;
+        Assert.NotNull(run);
 
-        editor.Invoke(run);
+        run.Execute();
         ship.Tick(3);
 
         Assert.Contains("Airlock Light:on", ship.Log);
@@ -1503,7 +1489,7 @@ public class EditorTests
         editor.PressPrimary();
         ship.Tick();
 
-        editor.Invoke(editor.Sentence().RunCommand);
+        editor.Sentence().Bar.Runs!.Execute();
         ship.Tick(3);
 
         // Still going, on the wait, with the switch off throughout.
@@ -1724,12 +1710,11 @@ public class EditorTests
         editor.PressChoice("steady - every 100 ticks");
         editor.PressPrimary();
 
-        // The component instances must survive, or a target rebuilds its controls
-        // and the field loses focus and the caret mid-word.
-        var before = editor.Sentence();
+        // The view must survive, or its controls are made again and the field loses focus and the caret mid-word.
+        var before = editor.Sentence().View;
         editor.Name("Housekeeping");
 
-        Assert.Same(before, editor.Sentence());
+        Assert.Same(before, editor.Sentence().View);
     }
 
     [Fact]
@@ -1750,10 +1735,10 @@ public class EditorTests
         editor.PressPrimary();
 
         // One row, even though the sequence has the step and the await after it.
-        Assert.Single(editor.Sentence().Steps);
-        Assert.Equal("close", Assert.IsType<ActionSlot>(editor.Sentence().Steps[0].Slots[0]).Action.Text);
+        Assert.Single(editor.StepRows());
+        Assert.Equal("close", Assert.IsType<ActionSlot>(editor.StepRows()[0].Slots[0]).Action.Text);
 
-        var targets = Assert.IsType<EntitiesSlot>(editor.Sentence().Steps[0].Slots[1]);
+        var targets = Assert.IsType<EntitiesSlot>(editor.StepRows()[0].Slots[1]);
         Assert.Equal(Door(ship, "Inner Door").Id, Assert.Single(targets.Entities));
     }
 
@@ -1768,7 +1753,7 @@ public class EditorTests
         editor.PressBlock("Inner Door");
         editor.Back();
 
-        Assert.Empty(editor.Sentence().Steps);
+        Assert.Empty(editor.StepRows());
     }
 
     [Fact]
@@ -1785,7 +1770,7 @@ public class EditorTests
 
         editor.PressChoice("5 seconds - 300 ticks");
 
-        var step = Assert.Single(editor.Sentence().Steps);
+        var step = Assert.Single(editor.StepRows());
         Assert.Equal(StepKind.Wait, step.Kind);
         Assert.Equal(300, Assert.IsType<DurationSlot>(step.Slots[0]).Ticks);
     }
@@ -1808,20 +1793,20 @@ public class EditorTests
 
         editor.SwitchOn();
         ship.Tick();
-        Assert.Equal("", editor.Sentence().LastRun);
+        Assert.Equal("", editor.Sentence().Bar.LastRun);
 
         ship.Fire();
         ship.Tick(2);
-        Assert.Equal("just now", editor.Sentence().LastRun);
+        Assert.Equal("just now", editor.Sentence().Bar.LastRun);
 
         // Time passes and nothing else happens, but the reading has moved on.
         ship.Tick(300);
-        Assert.Equal("less than a minute ago", editor.Sentence().LastRun);
+        Assert.Equal("less than a minute ago", editor.Sentence().Bar.LastRun);
 
         // It fires again, so the count starts over rather than carrying on.
         ship.Fire();
         ship.Tick(2);
-        Assert.Equal("just now", editor.Sentence().LastRun);
+        Assert.Equal("just now", editor.Sentence().Bar.LastRun);
     }
 
     /// <summary>

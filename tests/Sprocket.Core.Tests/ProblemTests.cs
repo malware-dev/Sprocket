@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -133,8 +134,8 @@ public class ProblemTests
         ship.Editor.Tick(1800);
 
         var sentence = ship.Editor.Sentence();
-        Assert.Equal("Nothing starts this yet.", sentence.Problem);
-        Assert.True(sentence.ProblemIsWarning);
+        Assert.Equal("Nothing starts this yet.", sentence.Bar.Problem);
+        Assert.True(sentence.Bar.ProblemIsWarning);
     }
 
     /// <summary>
@@ -248,8 +249,8 @@ public class ProblemTests
         ship.Editor.PressRow(0);
 
         var sentence = ship.Editor.Sentence();
-        Assert.Equal("Nothing can start this.", sentence.Problem);
-        Assert.All(sentence.Steps, step => Assert.False(step.HasProblem));
+        Assert.Equal("Nothing can start this.", sentence.Bar.Problem);
+        Assert.All(ship.Editor.StepRows(), step => Assert.False(step.HasProblem));
     }
 
     /// <summary>
@@ -313,8 +314,8 @@ public class ProblemTests
         ship.Editor.Tick(600);
 
         var sentence = ship.Editor.Sentence();
-        Assert.True(sentence.Steps[0].HasProblem);
-        Assert.NotEmpty(sentence.Problem);
+        Assert.True(ship.Editor.StepRows()[0].HasProblem);
+        Assert.NotEmpty(sentence.Bar.Problem);
     }
 
     /// <summary>A mended trigger stops being marked, which is the half that is easy to forget.</summary>

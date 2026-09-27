@@ -14,52 +14,48 @@ on screen     Sequence 1
 007  Text       at {X:1638.156 Y:62.71198} scale 0.401  #A2C3CDFF  "s"
 008  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 009  SetClip    {X:256 Y:118 W:1408 H:853}
-010  Sprite     Sprocket_Fill         {X:256 Y:129 W:13 H:13}  #5F7278FF
-011  Text       at {X:279 Y:125.407} scale 0.732  #F0AC28FF  "This is switched off, so nothing starts it on its own."
-012  Text       at {X:1319.255 Y:113.2249} scale 0.732  #A2C3CDFF  "g"
-013  Text       at {X:1377.255 Y:113.2249} scale 0.732  #A2C3CDFF  "u"
-014  Text       at {X:1435.255 Y:113.2249} scale 0.732  #5F7278FF  "r"
-015  Text       at {X:1487.21 Y:113.2249} scale 0.732  #A2C3CDFF  "d"
-016  Sprite     Sprocket_Fill         {X:1533 Y:119 W:119 H:1}  #85A1A9FF
-017  Sprite     Sprocket_Fill         {X:1533 Y:151 W:119 H:1}  #85A1A9FF
-018  Sprite     Sprocket_Fill         {X:1533 Y:119 W:1 H:33}  #85A1A9FF
-019  Sprite     Sprocket_Fill         {X:1651 Y:119 W:1 H:33}  #85A1A9FF
-020  Sprite     Sprocket_Fill         {X:1534 Y:120 W:117 H:31}  #29363EFF
-021  Sprite     Sprocket_Fill         {X:1593 Y:120 W:58 H:31}  #5B737BFF
-022  Text       at {X:1550.933 Y:125.407} scale 0.732  #85A1A9FF  "ON"
-023  Text       at {X:1608.56 Y:125.407} scale 0.732  #DCF5FDFF  "OFF"
-024  Text       at {X:339 Y:180.152} scale 0.822  #A2C3CDFF  "set"
-025  Sprite     Sprocket_Fill         {X:372 Y:172 W:174 H:40}  #374851FF
-026  Sprite     Sprocket_Fill         {X:372 Y:210 W:174 H:2}  #8EBCCFFF
-027  Text       at {X:387.8967 Y:179.992} scale 0.833  #DCF5FDFF  "Forward Direction"
-028  Text       at {X:555.95 Y:180.152} scale 0.822  #A2C3CDFF  "on"
-029  Sprite     Sprocket_Fill         {X:586 Y:172 W:174 H:40}  #374851FF
-030  Sprite     Sprocket_Fill         {X:586 Y:210 W:174 H:2}  #8EBCCFFF
-031  Sprite     MyObjectBuilder_RemoteControl/LargeBlockRemoteControl{X:602 Y:180 W:24 H:24}  #FFFFFFFF
-032  Text       at {X:634.46 Y:179.992} scale 0.833  #DCF5FDFF  "Tug Autopilot"
-033  Text       at {X:770.2634 Y:180.152} scale 0.822  #A2C3CDFF  "to"
-034  Sprite     Sprocket_Fill         {X:797 Y:172 W:62 H:40}  #374851FF
-035  Sprite     Sprocket_Fill         {X:797 Y:210 W:62 H:2}  #8EBCCFFF
-036  Text       at {X:812.73 Y:179.992} scale 0.833  #DCF5FDFF  "Left"
-037  Sprite     Sprocket_Fill         {X:275 Y:184 W:3 H:3}  #85A1A9FF
-038  Sprite     Sprocket_Fill         {X:275 Y:190 W:3 H:3}  #85A1A9FF
-039  Sprite     Sprocket_Fill         {X:275 Y:196 W:3 H:3}  #85A1A9FF
-040  Sprite     Sprocket_Fill         {X:281 Y:184 W:3 H:3}  #85A1A9FF
-041  Sprite     Sprocket_Fill         {X:281 Y:190 W:3 H:3}  #85A1A9FF
-042  Sprite     Sprocket_Fill         {X:281 Y:196 W:3 H:3}  #85A1A9FF
-043  Text       at {X:295 Y:181.447} scale 0.732  #85A1A9FF  "1"
-044  Text       at {X:1606.09 Y:169.2649} scale 0.732  #85A1A9FF  "d"
-045  Text       at {X:300.8 Y:244.592} scale 0.732  #A2C3CDFF  "+ do something"
-046  Text       at {X:449.0233 Y:244.592} scale 0.732  #A2C3CDFF  "+ wait"
-047  ClearClip  
-048  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
-049  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF
-050  Sprite     Sprocket_Fill         {X:867 Y:485 W:185 H:111}  #3C4C52FF
-051  Sprite     Sprocket_Fill         {X:867 Y:485 W:185 H:1}  #5B737BFF
-052  Sprite     Sprocket_Fill         {X:867 Y:594 W:185 H:1}  #5B737BFF
-053  Sprite     Sprocket_Fill         {X:867 Y:485 W:1 H:111}  #5B737BFF
-054  Sprite     Sprocket_Fill         {X:1052 Y:485 W:1 H:111}  #5B737BFF
-055  Text       at {X:883.385 Y:496.57} scale 0.642  #A2C3CDFF  "Switch this sequence on?"
-056  Text       at {X:883.385 Y:524.07} scale 0.822  #A2C3CDFF  "Switch it on"
-057  Sprite     Sprocket_Fill         {X:867 Y:554 W:185 H:36}  #8EBCCFFF
-058  Text       at {X:883.385 Y:559.75} scale 0.822  #1B242AFF  "Leave it off"
+010  Text       at {X:260.0625 Y:129.712} scale 0.161  #5F7278FF  "0"
+011  Text       at {X:280 Y:123.712} scale 0.694  #F0AC28FF  "This is switched off, so nothing starts it on its own."
+012  Text       at {X:1429.34 Y:123.712} scale 0.401  #A2C3CDFF  "g"
+013  Text       at {X:1469.34 Y:123.712} scale 0.401  #A2C3CDFF  "u"
+014  Text       at {X:1509.34 Y:123.712} scale 0.401  #5F7278FF  "r"
+015  Text       at {X:1549.34 Y:123.712} scale 0.401  #A2C3CDFF  "d"
+016  Sprite     Sprocket_Fill         {X:1583 Y:118 W:69 H:32}  #5B737BFF
+017  Sprite     Sprocket_Fill         {X:1587 Y:122 W:61 H:24}  #20272DFF
+018  Sprite     Sprocket_Fill         {X:1587 Y:122 W:24 H:24}  #DCF5FDFF
+019  Text       at {X:1619.183 Y:125.712} scale 0.556  #DCF5FDFF  "OFF"
+020  Sprite     Sprocket_Fill         {X:276 Y:182 W:3 H:3}  #85A1A9FF
+021  Sprite     Sprocket_Fill         {X:276 Y:188 W:3 H:3}  #85A1A9FF
+022  Sprite     Sprocket_Fill         {X:276 Y:194 W:3 H:3}  #85A1A9FF
+023  Sprite     Sprocket_Fill         {X:282 Y:182 W:3 H:3}  #85A1A9FF
+024  Sprite     Sprocket_Fill         {X:282 Y:188 W:3 H:3}  #85A1A9FF
+025  Sprite     Sprocket_Fill         {X:282 Y:194 W:3 H:3}  #85A1A9FF
+026  Text       at {X:296 Y:179.712} scale 0.694  #85A1A9FF  "1"
+027  Text       at {X:344 Y:177.712} scale 0.833  #A2C3CDFF  "set"
+028  Sprite     Sprocket_Fill         {X:375 Y:170 W:174 H:40}  #374851FF
+029  Sprite     Sprocket_Fill         {X:375 Y:208 W:174 H:2}  #8EBCCFFF
+030  Text       at {X:391.2067 Y:177.712} scale 0.833  #DCF5FDFF  "Forward Direction"
+031  Text       at {X:557.26 Y:177.712} scale 0.833  #A2C3CDFF  "on"
+032  Sprite     Sprocket_Fill         {X:586 Y:170 W:174 H:40}  #374851FF
+033  Sprite     Sprocket_Fill         {X:586 Y:208 W:174 H:2}  #8EBCCFFF
+034  Sprite     MyObjectBuilder_RemoteControl/LargeBlockRemoteControl{X:602 Y:178 W:24 H:24}  #FFFFFFFF
+035  Text       at {X:634.0433 Y:177.712} scale 0.833  #DCF5FDFF  "Tug Autopilot"
+036  Text       at {X:767.8467 Y:177.712} scale 0.833  #A2C3CDFF  "to"
+037  Sprite     Sprocket_Fill         {X:793 Y:170 W:62 H:40}  #374851FF
+038  Sprite     Sprocket_Fill         {X:793 Y:208 W:62 H:2}  #8EBCCFFF
+039  Text       at {X:808.5333 Y:177.712} scale 0.833  #DCF5FDFF  "Left"
+040  Text       at {X:1614.156 Y:179.712} scale 0.401  #A2C3CDFF  "d"
+041  Text       at {X:308 Y:237.712} scale 0.833  #A2C3CDFF  "+ do something"
+042  Text       at {X:476.17 Y:237.712} scale 0.833  #A2C3CDFF  "+ wait"
+043  ClearClip  
+044  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
+045  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF
+046  Sprite     Sprocket_Fill         {X:867 Y:485 W:185 H:111}  #3C4C52FF
+047  Sprite     Sprocket_Fill         {X:867 Y:485 W:185 H:1}  #5B737BFF
+048  Sprite     Sprocket_Fill         {X:867 Y:594 W:185 H:1}  #5B737BFF
+049  Sprite     Sprocket_Fill         {X:867 Y:485 W:1 H:111}  #5B737BFF
+050  Sprite     Sprocket_Fill         {X:1052 Y:485 W:1 H:111}  #5B737BFF
+051  Text       at {X:883.385 Y:496.57} scale 0.642  #A2C3CDFF  "Switch this sequence on?"
+052  Text       at {X:883.385 Y:524.07} scale 0.822  #A2C3CDFF  "Switch it on"
+053  Sprite     Sprocket_Fill         {X:867 Y:554 W:185 H:36}  #8EBCCFFF
+054  Text       at {X:883.385 Y:559.75} scale 0.822  #1B242AFF  "Leave it off"

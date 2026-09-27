@@ -1,0 +1,46 @@
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Controls;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+
+namespace Sprocket.Host.SpaceEngineers.Features.Sequences
+{
+    sealed partial class SequencePage
+    {
+        SequenceBar _bar;
+        StepList _steps;
+        Button _doSomething;
+        Button _wait;
+        Label _locked;
+
+        /// <inheritdoc />
+        protected override Element CreateView()
+        {
+            return new VStack
+            {
+                Spacing = 12f,
+                Children =
+                {
+                    new SequenceBar().As(out _bar),
+                    new StepList().As(out _steps),
+
+                    // The ways to add a step and the reason there are none share one line, so locking changes what the
+                    // line says and not where anything stands. The reason is padded as the buttons are, so its words
+                    // start where theirs did.
+                    new HStack
+                    {
+                        Spacing = 8f,
+                        Padding = new Thickness(36f, 0f, 0f, 0f),
+                        Children =
+                        {
+                            new Button { Style = Styles.Start }.As(out _doSomething),
+                            new Button { Style = Styles.Start }.As(out _wait),
+                            new Label { Style = Styles.Aside, Padding = new Thickness(16f, 8f), IsVisible = false }.As(out _locked)
+                        }
+                    }
+                }
+            };
+        }
+    }
+}

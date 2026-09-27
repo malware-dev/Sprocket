@@ -1,5 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Picking;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -53,7 +53,7 @@ public class ComponentSmokeTests
         Record(seen, screen);
 
         Assert.Contains(nameof(PickComponent), seen);
-        Assert.Contains(nameof(SequenceComponent), seen);
+        Assert.Contains(nameof(SequencePage), seen);
 
         // Heading and Notice are not asserted: nothing produces one at the moment.
     }
@@ -62,6 +62,8 @@ public class ComponentSmokeTests
     static void Record(HashSet<string> seen, Screen screen)
     {
         screen.Run(1);
+
+        seen.Add(screen.Editor.Current.GetType().Name);
 
         foreach (var component in screen.Editor.Screen.Components)
             seen.Add(component.GetType().Name);

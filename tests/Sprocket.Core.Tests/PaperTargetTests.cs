@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Picking;
@@ -58,7 +59,7 @@ public class PaperTargetTests
         Note(seen, ship);
 
         Assert.Contains(nameof(PickComponent), seen);
-        Assert.Contains(nameof(SequenceComponent), seen);
+        Assert.Contains(nameof(SequencePage), seen);
     }
 
     /// <summary>The sentence survives the trip to paper, because the sentence is the product.</summary>
@@ -101,6 +102,8 @@ public class PaperTargetTests
         // Drawn every time, not only at the end: the refusal is what is being exercised, and a walk
         // that renders once would step straight past whatever it could not have written down.
         Assert.NotEqual("", PaperTarget.Draw(ship.World, ship.Editor));
+
+        seen.Add(ship.Editor.Current.GetType().Name);
 
         foreach (var component in ship.Editor.Screen.Components)
             seen.Add(component.GetType().Name);

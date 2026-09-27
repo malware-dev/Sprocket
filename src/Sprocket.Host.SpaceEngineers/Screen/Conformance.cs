@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             new ConformancePoint(
                 "reorder-steps",
-                "Some way to move a step to another position, using SentenceStep.MoveToCommand.",
+                "Some way to move a step to another position, using StepList.Moves.",
                 "A procedure written in the wrong order is the ordinary case, not the "
                 + "exception. A host with no way to reorder makes somebody delete and retype "
                 + "the rest of their sequence."),
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             new ConformancePoint(
                 "say-when-it-cannot-be-changed",
-                "Show SequenceComponent.LockedText whenever Editable is false.",
+                "Show SequencePage.LockedText whenever Editable is false.",
                 "The editing commands are withheld while a sequence can run, so the controls "
                 + "genuinely do nothing. Somebody hunting for the add button concludes it was "
                 + "removed rather than that it is waiting.")

@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Picking;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -35,7 +34,7 @@ public class OpeningTests
 
     static void PressStep(Screen screen, int part)
     {
-        screen.Editor.Component<SequenceComponent>().Steps[0].Slots[part].Opens!.Execute();
+        screen.Editor.StepRows()[0].Slots[part].Opens!.Execute();
         screen.Run(2);
     }
 

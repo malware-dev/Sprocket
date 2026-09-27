@@ -20,7 +20,7 @@ public class RenameTests
         screen.Run(5);
 
         var before = Header(screen);
-        var heading = screen.Drawings.Last(d => d.IsText && d.Scale > 0.8f);
+        var heading = screen.Text(editor.Screen.CustomName());
 
         Assert.True(screen.HasMark(Symbols.Pencil), "nothing said the heading could be renamed");
 

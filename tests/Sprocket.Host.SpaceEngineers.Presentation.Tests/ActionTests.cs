@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -334,7 +335,7 @@ public class ActionTests
         screen.Editor.Typed("255 136 0");
         screen.Run(2);
 
-        SentenceStep step = screen.Editor.Sentence().Steps[0];
+        StepRow step = screen.Editor.StepRows()[0];
         ValuesSlot given = step.Slots.OfType<ValuesSlot>().Single();
 
         Assert.Equal(new Color(255, 136, 0), given.Sample);

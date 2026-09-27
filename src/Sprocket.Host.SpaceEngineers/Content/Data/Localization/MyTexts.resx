@@ -238,6 +238,80 @@ Press to rename it.</value>
     <comment>Note on the bin at the end of a trigger's row.</comment>
   </data>
 
+  <data name="Sprocket.Sequence.RenamePrompt" xml:space="preserve">
+    <value>What do you call this?</value>
+    <comment>Asked when a sequence's name is pressed to rename it.</comment>
+  </data>
+  <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
+    <value>This sequence's name.
+Press to rename it.</value>
+    <comment>Note on a sequence's name, in the heading of its own screen.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DoSomething" xml:space="preserve">
+    <value>do something</value>
+    <comment>Button under a sequence's steps that adds a step acting on blocks.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Wait" xml:space="preserve">
+    <value>wait</value>
+    <comment>Button under a sequence's steps that adds a step waiting a length of time.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Locked" xml:space="preserve">
+    <value>Switched on. Switch it off to make changes.</value>
+    <comment>Said in place of the buttons that add steps while the sequence is switched on.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Held" xml:space="preserve">
+    <value>Read only while {holder} edits it.</value>
+    <comment>Said in place of the buttons that add steps while another player is editing. {holder} is that player's name.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Delete" xml:space="preserve">
+    <value>Delete this sequence</value>
+    <comment>Note on the bin beside a sequence's switch.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DeleteQuestion" xml:space="preserve">
+    <value>Delete this sequence?</value>
+    <comment>Asked before a sequence is deleted, with what it does under it.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DeleteStep" xml:space="preserve">
+    <value>Delete this step</value>
+    <comment>Note on the bin at the end of a step's row.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Undo" xml:space="preserve">
+    <value>Undo {what}</value>
+    <comment>Note on the undo arrow of a sequence. {what} is the change it takes back, such as "adding a step".</comment>
+  </data>
+  <data name="Sprocket.Sequence.Redo" xml:space="preserve">
+    <value>Redo {what}</value>
+    <comment>Note on the redo arrow of a sequence. {what} is the change it puts back.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SkippedBusy" xml:space="preserve">
+    <value>skipped {busy}x while busy</value>
+    <comment>Said while a sequence was started and did not run because it was already running. {busy} is how many times.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SkippedOff" xml:space="preserve">
+    <value>skipped {off}x while off</value>
+    <comment>Said while a sequence was started and did not run because it was switched off. {off} is how many times.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SkippedBoth" xml:space="preserve">
+    <value>skipped {busy}x while busy, {off}x while off</value>
+    <comment>The two above at once.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SwitchOnQuestion" xml:space="preserve">
+    <value>Switch this sequence on?</value>
+    <comment>Asked on leaving a sequence that was changed and is still switched off.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SwitchItOn" xml:space="preserve">
+    <value>Switch it on</value>
+    <comment>The answer that switches the sequence on.</comment>
+  </data>
+  <data name="Sprocket.Sequence.LeaveItOff" xml:space="preserve">
+    <value>Leave it off</value>
+    <comment>The answer that leaves the sequence switched off.</comment>
+  </data>
+  <data name="Sprocket.Sequence.WaitQuestion" xml:space="preserve">
+    <value>How long should it wait?</value>
+    <comment>Title of the question that chooses how long a waiting step waits.</comment>
+  </data>
+
   <data name="Sprocket.Salvage.Different" xml:space="preserve">
     <value>This block holds a program from a different version.</value>
     <comment>Banner on the first screen when the block's program was written by a version that cannot be read.</comment>

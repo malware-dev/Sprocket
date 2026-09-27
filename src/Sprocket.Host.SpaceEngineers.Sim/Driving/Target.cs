@@ -4,6 +4,7 @@ using System.Linq;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
@@ -39,9 +40,23 @@ namespace Sprocket.Sim.Driving
                 string.Join(", ", editor.Screen.Components.Select(c => c.GetType().Name)));
         }
 
-        /// <summary>The sequence the screen shows.</summary>
-        public static SequenceComponent Sentence(this SprocketEditor editor) =>
-            editor.Component<SequenceComponent>();
+        /// <summary>The page of the sequence the editor is on, its view made.</summary>
+        /// <remarks>Asks the page for its view first, which is what makes it where nothing has drawn the page yet.</remarks>
+        internal static SequencePage Sentence(this SprocketEditor editor)
+        {
+            var page = editor.Current as SequencePage
+                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a sequence's page.");
+            _ = page.View;
+            return page;
+        }
+
+        /// <summary>The ways to add a step to the sequence the editor is on, in the order they stand, shown or not.</summary>
+        public static List<Button> Adders(this SprocketEditor editor) =>
+            Within(editor.Sentence().View).OfType<Button>().Where(b => b.Text.StartsWith(StatusRow.Plus, StringComparison.Ordinal)).ToList();
+
+        /// <summary>The rows of the steps of the sequence the editor is on, in the order they stand.</summary>
+        public static List<StepRow> StepRows(this SprocketEditor editor) =>
+            editor.Sentence().Rows.OfType<StepRow>().ToList();
 
         /// <summary>Presses a block's row, which takes that block and drops whatever was taken before.</summary>
         public static void PressBlock(this SprocketEditor editor, string name)
@@ -137,8 +152,15 @@ namespace Sprocket.Sim.Driving
         /// Building and running are separate acts. A sequence is parked while it is written, both
         /// so a half-built one never fires and so its own switch is what makes it safe to edit.
         /// </remarks>
-        public static void SwitchOn(this SprocketEditor editor) =>
-            editor.SetToggle(editor.Sentence().ToggleCommand, true);
+        public static void SwitchOn(this SprocketEditor editor) => SwitchSequence(editor, true);
+
+        /// <summary>Switches the sequence the editor is on to <paramref name="on" />, pressing its switch only where it says otherwise.</summary>
+        public static void SwitchSequence(this SprocketEditor editor, bool on)
+        {
+            var bar = editor.Sentence().Bar;
+            if (bar.SwitchIsOn != on)
+                bar.Flips!.Execute();
+        }
 
         /// <summary>Presses whatever on the screen says <paramref name="text" />: an answer, a choice, or an option or block in a picker.</summary>
         /// <remarks>
@@ -289,12 +311,11 @@ namespace Sprocket.Sim.Driving
             editor.Invoke(editor.Screen.Answers.First(a => a.Text == text).Command);
 
         /// <summary>Presses one of the ways to add a step to the sequence the screen shows.</summary>
-        public static void PressAdd(this SprocketEditor editor, string text) =>
-            editor.Invoke(editor.Sentence().AddOptions.First(o => o.Text == text).Command);
+        public static void PressAdd(this SprocketEditor editor, string text) => PressButton(editor, text);
 
         /// <summary>Presses one part of one step of the sequence the screen shows.</summary>
         public static void PressStepSlot(this SprocketEditor editor, int step, int slot) =>
-            editor.Sentence().Steps[step].Slots[slot].Opens!.Execute();
+            editor.StepRows()[step].Slots[slot].Opens!.Execute();
 
         /// <summary>Presses the screen's move-on action - "Next" or "Done".</summary>
         public static void PressPrimary(this SprocketEditor editor)

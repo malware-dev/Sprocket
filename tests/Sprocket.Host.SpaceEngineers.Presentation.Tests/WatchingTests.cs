@@ -39,7 +39,7 @@ public class WatchingTests
         Assert.False(screen.Shows("+ do something"), "add button still offered while locked");
         Assert.Equal(adders, screen.Text(editor.Sentence().LockedText).At.Y);
 
-        editor.SetToggle(editor.Sentence().ToggleCommand, false);
+        editor.SwitchSequence(false);
         screen.Run(5);
 
         Assert.Equal(parked, Places(screen));
@@ -126,7 +126,7 @@ public class WatchingTests
         Assert.Equal(placed[0], undo.At);
         Assert.Equal(placed[1], redo.At);
 
-        editor.Invoke(editor.Sentence().UndoCommand);
+        editor.Sentence().Bar.Undoes!.Execute();
         screen.Run(5);
 
         undo = screen.Marks(Symbols.Undo)[0];

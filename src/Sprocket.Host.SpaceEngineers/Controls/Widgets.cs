@@ -131,24 +131,6 @@ namespace Sprocket.Host.SpaceEngineers.Controls
         }
 
         /// <summary>
-        /// A button offered in place: quiet words, no panel, and it lights.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="Quiet" /> wearing a highlight, which is the whole of the difference between words
-        /// and a button: a thing that lights up had better do something when it is pressed.
-        /// <para>
-        /// The one under a sentence, the one under an instance, and the verbs in the footer. Something
-        /// available without being the point, which is what the size says.
-        /// </para>
-        /// </remarks>
-        public static Label Ghost(string text)
-        {
-            Label ghost = Quiet(text, Lettering.Small);
-            ghost.Highlight = Palette.Panel;
-            return ghost;
-        }
-
-        /// <summary>
         /// The same button where adding something is the main act of the screen.
         /// </summary>
         /// <remarks>

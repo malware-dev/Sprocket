@@ -106,15 +106,15 @@ namespace Sprocket.Host.SpaceEngineers.Words
         /// Ordinarily nothing. A step reads as "close the inner door" and the list being a list is
         /// what says when it happens.
         /// </remarks>
-        public static string Lead(GridWorld world, SentenceStep step)
+        public static string Lead(StepKind kind)
         {
-            if (step.Kind == StepKind.Run)
+            if (kind == StepKind.Run)
                 return "run";
 
-            if (step.Kind == StepKind.Set)
+            if (kind == StepKind.Set)
                 return SetWord;
 
-            return step.Kind == StepKind.Wait ? "wait" : "";
+            return kind == StepKind.Wait ? "wait" : "";
         }
 
 

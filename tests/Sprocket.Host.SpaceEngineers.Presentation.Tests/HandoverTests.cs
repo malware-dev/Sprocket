@@ -198,9 +198,9 @@ public class HandoverTests : IDisposable
             var sentence = copy.Editor.Sentence();
             Assert.False(sentence.Editable);
             Assert.Equal("Read only while Bert edits it.", sentence.LockedText);
-            Assert.Equal(0, sentence.ToggleCommand);
-            Assert.Equal(0, sentence.RunCommand);
-            Assert.Equal(0, sentence.DeleteCommand);
+            Assert.Null(sentence.Bar.Flips);
+            Assert.Null(sentence.Bar.Runs);
+            Assert.Null(sentence.Bar.Deletes);
         });
     }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
@@ -2007,7 +2008,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         internal void DeleteSequence(Sequence sequence)
         {
-            var page = new ChoicePage(this, "Delete this sequence?");
+            var page = new ChoicePage(this, Texts.SequenceDeleteQuestion);
             page.Caption = SequenceText.Doing(_runner.Bindings, sequence, StandIn(sequence.System));
 
             page.Add(Texts.DeleteKeep, false, delegate { Pop(); });

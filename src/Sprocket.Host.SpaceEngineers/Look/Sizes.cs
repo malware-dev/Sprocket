@@ -3,9 +3,6 @@ namespace Sprocket.Host.SpaceEngineers.Look
     /// <summary>Things that are a size rather than a gap.</summary>
     public static class Sizes
     {
-        /// <summary>A state light.</summary>
-        public const float Dot = 13f;
-
         /// <summary>A block's picture.</summary>
         public const float Icon = 54f;
 

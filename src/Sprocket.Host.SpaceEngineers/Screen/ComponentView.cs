@@ -2,7 +2,6 @@ using System.ComponentModel;
 using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Picking;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
@@ -210,10 +209,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             var pick = component as PickComponent;
             if (pick != null)
                 return new PickView(pick);
-
-            var sequence = component as SequenceComponent;
-            if (sequence != null)
-                return new SequenceView(sequence);
 
             var script = component as ScriptComponent;
             if (script != null)

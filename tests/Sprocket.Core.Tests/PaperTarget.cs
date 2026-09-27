@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
@@ -52,6 +53,9 @@ static class PaperTarget
         foreach (var component in screen.Components)
             paper.Append(Draw(world, component));
 
+        if (editor.Current is SequencePage sequence)
+            paper.Append(Draw(world, editor, sequence));
+
         return paper.ToString();
     }
 
@@ -93,23 +97,25 @@ static class PaperTarget
             return paper.ToString();
         }
 
-        if (component is SequenceComponent sequence)
-        {
-            paper.Append("sequence ").Append(sequence.SequenceId).AppendLine(":");
-
-            foreach (var step in sequence.Steps)
-                paper.Append("  ").Append(step.Number).Append(". ").AppendLine(Say(world, step));
-
-            paper.Append("  undo: ").Append(Blank(sequence.UndoText))
-                .Append("  redo: ").AppendLine(Blank(sequence.RedoText));
-
-            return paper.ToString();
-        }
-
         throw new InvalidOperationException(
             $"Core produced a {component.GetType().Name} and nothing here knows what a target should "
             + "show for one. Say what it looks like on paper before shipping it to a real target, or "
             + "the first anybody hears of it is a blank space in the game.");
+    }
+
+    /// <summary>A sequence's page: its steps, one numbered line each, and what undo and redo would do.</summary>
+    static string Draw(GridWorld world, SprocketEditor editor, SequencePage page)
+    {
+        var paper = new StringBuilder();
+        paper.Append("sequence ").Append(page.SequenceId).AppendLine(":");
+
+        foreach (var step in editor.StepRows())
+            paper.Append("  ").Append(step.Number).Append(". ").AppendLine(Say(world, step));
+
+        paper.Append("  undo: ").Append(Blank(page.Bar.UndoText))
+            .Append("  redo: ").AppendLine(Blank(page.Bar.RedoText));
+
+        return paper.ToString();
     }
 
     /// <summary>
@@ -124,7 +130,7 @@ static class PaperTarget
     /// front of them.
     /// </para>
     /// </remarks>
-    static string Say(GridWorld world, SentenceStep step)
+    static string Say(GridWorld world, StepRow step)
     {
         var line = new StringBuilder();
 
