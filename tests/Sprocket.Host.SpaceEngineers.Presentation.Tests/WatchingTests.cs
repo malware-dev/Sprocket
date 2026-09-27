@@ -28,7 +28,7 @@ public class WatchingTests
         screen.Run(5);
 
         var parked = Places(screen);
-        var adders = screen.Text("+ do something").At.Y;
+        var adders = screen.TopOf(screen.Text("+ do something"));
 
         editor.SwitchOn();
         screen.Run(5);
@@ -37,7 +37,7 @@ public class WatchingTests
 
         // The adders' line says why there are none, on the same line.
         Assert.False(screen.Shows("+ do something"), "add button still offered while locked");
-        Assert.Equal(adders, screen.Text(editor.Sentence().LockedText).At.Y);
+        Assert.Equal(adders, screen.TopOf(screen.Text(editor.Sentence().LockedText)), 3);
 
         editor.SwitchSequence(false);
         screen.Run(5);

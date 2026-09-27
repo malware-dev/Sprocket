@@ -7,36 +7,36 @@ on screen     Automation for Test Rig
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Sprite     Sprocket_Fill         {X:256 Y:57 W:32 H:32}  #3C4C52FF
-003  Text       at {X:262.1563 Y:62.71198} scale 0.401  #DCF5FDFF  "<"
+003  Text       at {X:262.1563 Y:59.01406} scale 0.401  #DCF5FDFF  "<"
 004  SetClip    {X:296 Y:53 W:1328 H:40}
-005  Text       at {X:296 Y:56.71198} scale 1.111  #A2C3CDFF  "Automation for"
-006  Text       at {X:470.6234 Y:56.71198} scale 1.111  #DCF5FDFF  "Test Rig"
-007  Text       at {X:566.9529 Y:62.71198} scale 0.401  #85A1A9FF  "p"
+005  Text       at {X:296 Y:53.39666} scale 1.111  #A2C3CDFF  "Automation for"
+006  Text       at {X:470.6234 Y:53.39666} scale 1.111  #DCF5FDFF  "Test Rig"
+007  Text       at {X:566.9529 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 008  ClearClip  
-009  Text       at {X:1638.156 Y:62.71198} scale 0.401  #A2C3CDFF  "s"
+009  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
 010  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 011  SetClip    {X:256 Y:118 W:1408 H:853}
-012  Text       at {X:272 Y:125.712} scale 0.833  #A2C3CDFF  "+ New logic system"
-013  Text       at {X:468.5567 Y:125.712} scale 0.833  #A2C3CDFF  "+ Load blueprint"
+012  Text       at {X:272 Y:123.2255} scale 0.833  #A2C3CDFF  "+ New logic system"
+013  Text       at {X:468.5567 Y:123.2255} scale 0.833  #A2C3CDFF  "+ Load blueprint"
 014  Sprite     Sprocket_Fill         {X:256 Y:166 W:1396 H:1}  #5B737BFF
-015  Text       at {X:260 Y:206.712} scale 0.694  #85A1A9FF  "Made from "
-016  Text       at {X:337.8033 Y:206.712} scale 0.694  #DCF5FDFF  "Airlock "
-017  Text       at {X:387.3667 Y:206.712} scale 0.694  #85A1A9FF  "blueprint"
+015  Text       at {X:260 Y:204.6399} scale 0.694  #85A1A9FF  "Made from "
+016  Text       at {X:337.8033 Y:204.6399} scale 0.694  #DCF5FDFF  "Airlock "
+017  Text       at {X:387.3667 Y:204.6399} scale 0.694  #85A1A9FF  "blueprint"
 018  Sprite     Sprocket_Fill         {X:256 Y:235 W:1396 H:68}  #29363EFF
-019  Text       at {X:308.0625 Y:264.712} scale 0.161  #5F7278FF  "0"
-020  Text       at {X:336 Y:256.712} scale 0.833  #DCF5FDFF  "Airlock"
+019  Text       at {X:308.0625 Y:264.2328} scale 0.161  #5F7278FF  "0"
+020  Text       at {X:336 Y:254.2255} scale 0.833  #DCF5FDFF  "Airlock"
 021  Sprite     Sprocket_Fill         {X:1527 Y:253 W:69 H:32}  #5B737BFF
 022  Sprite     Sprocket_Fill         {X:1568 Y:257 W:24 H:24}  #DCF5FDFF
-023  Text       at {X:1540.557 Y:260.712} scale 0.556  #DCF5FDFF  "ON"
-024  Text       at {X:1610.156 Y:258.712} scale 0.401  #A2C3CDFF  "d"
+023  Text       at {X:1540.557 Y:259.0543} scale 0.556  #DCF5FDFF  "ON"
+024  Text       at {X:1610.156 Y:257.5141} scale 0.401  #A2C3CDFF  "d"
 025  Sprite     Sprocket_Fill         {X:256 Y:311 W:1396 H:68}  #29363EFF
-026  Text       at {X:308.0625 Y:340.712} scale 0.161  #5F7278FF  "0"
-027  Text       at {X:336 Y:332.712} scale 0.833  #DCF5FDFF  "Airlock 2"
+026  Text       at {X:308.0625 Y:340.2328} scale 0.161  #5F7278FF  "0"
+027  Text       at {X:336 Y:330.2255} scale 0.833  #DCF5FDFF  "Airlock 2"
 028  Sprite     Sprocket_Fill         {X:1527 Y:329 W:69 H:32}  #5B737BFF
 029  Sprite     Sprocket_Fill         {X:1568 Y:333 W:24 H:24}  #DCF5FDFF
-030  Text       at {X:1540.557 Y:336.712} scale 0.556  #DCF5FDFF  "ON"
-031  Text       at {X:1610.156 Y:334.712} scale 0.401  #A2C3CDFF  "d"
-032  Text       at {X:336 Y:398.712} scale 0.833  #A2C3CDFF  "+ add another Airlock"
+030  Text       at {X:1540.557 Y:335.0543} scale 0.556  #DCF5FDFF  "ON"
+031  Text       at {X:1610.156 Y:333.5141} scale 0.401  #A2C3CDFF  "d"
+032  Text       at {X:336 Y:396.2255} scale 0.833  #A2C3CDFF  "+ add another Airlock"
 033  ClearClip  
 034  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
 035  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF
@@ -45,4 +45,4 @@ on screen     Automation for Test Rig
 038  Sprite     Sprocket_Fill         {X:275 Y:113 W:129 H:1}  #5B737BFF
 039  Sprite     Sprocket_Fill         {X:275 Y:78 W:1 H:36}  #5B737BFF
 040  Sprite     Sprocket_Fill         {X:403 Y:78 W:1 H:36}  #5B737BFF
-041  Text       at {X:287 Y:86} scale 0.694  #A2C3CDFF  "Close the editor"
+041  Text       at {X:287 Y:83.92793} scale 0.694  #A2C3CDFF  "Close the editor"

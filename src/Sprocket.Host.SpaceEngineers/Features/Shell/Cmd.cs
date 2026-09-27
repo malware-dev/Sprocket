@@ -77,6 +77,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         ChoiceTaken,
 
         /// <summary>Tools for working on Sprocket itself. Only ever registered in developer mode.</summary>
-        ShowScript
+        ShowScript,
+
+        /// <summary>Tools for working on Sprocket itself. Only ever registered in developer mode.</summary>
+        ShowAlignment
     }
 }

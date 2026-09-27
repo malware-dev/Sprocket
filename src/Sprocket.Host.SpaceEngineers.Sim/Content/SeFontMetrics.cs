@@ -96,6 +96,12 @@ namespace Sprocket.Sim.Content
         /// <summary>The height of a line in font units, which is what every advance is relative to.</summary>
         public int FontLineHeight => _lineHeight;
 
+        /// <inheritdoc />
+        public int LineUnits(string font)
+        {
+            return _lineHeight;
+        }
+
         /// <summary>How far below the top of its line the game draws <paramref name="glyph" />'s cell, in font units.</summary>
         public static float CellTop(Glyph glyph)
         {

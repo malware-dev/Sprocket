@@ -112,6 +112,12 @@ namespace Sprocket.Sim.Simulation
             return Fonts.MeasurePixels(font, text.ToString(), scale);
         }
 
+        /// <inheritdoc />
+        public int LineUnits(string font)
+        {
+            return Fonts == null ? 0 : Fonts.LineUnits(font);
+        }
+
         /// <summary>The height of a line in pixels, which is what the screen answers in.</summary>
         public float LineHeight(string font, float scale)
         {

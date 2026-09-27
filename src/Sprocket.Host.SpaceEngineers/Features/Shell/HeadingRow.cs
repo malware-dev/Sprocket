@@ -199,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                             Submit = row._commit,
                             Cancel = row._cancel
                         }.As(out Box),
-                        new Glyph { Symbol = Symbols.Pencil, Style = Styles.Pen, Placement = Fixed.Size(32f, 32f) }.As(out Pen)
+                        new Glyph { Symbol = Symbols.Pencil, Style = Styles.Pen, Placement = Fixed.Size(32f, 32f), Padding = EditorView.LevelWithCapitals }.As(out Pen)
                     }
                 };
 

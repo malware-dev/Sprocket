@@ -38,6 +38,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>How tall one of the game's own screens is, as a share of the safe area; see <see cref="ScreenWidth" />.</summary>
         public const float ScreenHeight = 0.9172f;
 
+        /// <summary>Lifts a symbol in the heading so its middle is level with the middle of the heading's capitals.</summary>
+        /// <remarks>
+        /// A symbol is centered in its room like any image, and the heading's capitals sit above the middle of their line,
+        /// where the face leaves room for accents. Measured on the alignment page.
+        /// </remarks>
+        public static readonly Thickness LevelWithCapitals = new Thickness(0f, -2.5f, 0f, 2.5f);
+
         readonly SprocketEditor _editor;
 
         readonly VStack _root;
@@ -119,7 +126,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 Spacing = 8f,
                                 Children =
                                 {
-                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = new Relay(Back) }.As(out _back),
+                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
                                     _title,
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
                                     new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),

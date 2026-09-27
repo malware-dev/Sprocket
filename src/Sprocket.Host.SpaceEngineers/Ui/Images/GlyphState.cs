@@ -25,9 +25,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Images
             if (glyph == null)
                 return;
 
-            glyph.Font = MyFontEnum.White;
-            glyph.FontSize = TextState.NeutralFontSize;
-            glyph.Tint = Color.White;
+            if (Font != null)
+                glyph.Font = MyFontEnum.White;
+
+            if (FontSize.HasValue)
+                glyph.FontSize = TextState.NeutralFontSize;
+
+            if (Tint.HasValue)
+                glyph.Tint = Color.White;
         }
 
         /// <inheritdoc />
@@ -47,6 +52,33 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Images
 
             if (Tint.HasValue)
                 glyph.Tint = Tint.Value;
+        }
+
+        /// <inheritdoc />
+        public override void Clear()
+        {
+            base.Clear();
+            Font = null;
+            FontSize = null;
+            Tint = null;
+        }
+
+        /// <inheritdoc />
+        public override void Gather(ElementState layer)
+        {
+            base.Gather(layer);
+            var other = layer as GlyphState;
+            if (other == null)
+                return;
+
+            if (Font == null)
+                Font = other.Font;
+
+            if (!FontSize.HasValue)
+                FontSize = other.FontSize;
+
+            if (!Tint.HasValue)
+                Tint = other.Tint;
         }
     }
 }

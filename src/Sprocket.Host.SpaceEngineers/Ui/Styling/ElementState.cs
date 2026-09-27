@@ -14,14 +14,39 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         /// <summary>The room held clear inside the element, or null to leave it to the layers beneath.</summary>
         public Thickness? Padding { get; set; }
 
-        /// <summary>Writes the values every style starts from onto <paramref name="element" />.</summary>
+        /// <summary>Writes the neutral value of each property this sets onto <paramref name="element" />, and nothing else.</summary>
         public virtual void Neutral(Element element)
         {
-            element.Background = Color.Transparent;
-            element.Edge = Color.Transparent;
+            if (Background.HasValue)
+                element.Background = Color.Transparent;
+
+            if (Edge.HasValue)
+                element.Edge = Color.Transparent;
+
             var padded = element as IPadded;
-            if (padded != null)
+            if (padded != null && Padding.HasValue)
                 padded.Padding = new Thickness(0f);
+        }
+
+        /// <summary>Sets nothing, leaving every property to the layers beneath.</summary>
+        public virtual void Clear()
+        {
+            Background = null;
+            Edge = null;
+            Padding = null;
+        }
+
+        /// <summary>Takes each property <paramref name="layer" /> sets that this does not, so this ends up setting whatever any layer gathered sets.</summary>
+        public virtual void Gather(ElementState layer)
+        {
+            if (!Background.HasValue)
+                Background = layer.Background;
+
+            if (!Edge.HasValue)
+                Edge = layer.Edge;
+
+            if (!Padding.HasValue)
+                Padding = layer.Padding;
         }
 
         /// <summary>Writes what this state sets onto <paramref name="element" />, and nothing else.</summary>

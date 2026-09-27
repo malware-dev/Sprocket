@@ -5,14 +5,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
 {
     /// <summary>How an element looks: a base, and whatever states the style's own control has.</summary>
     /// <remarks>
-    ///     Applying lays down the neutral values, then <see cref="Base" />, then the states the control is in, in the
-    ///     order <see cref="LayStates" /> lays them, so a later layer wins. A change to a style shows on an element once
+    ///     Applying lays down the neutral value of everything the style sets, then <see cref="Base" />, then the states
+    ///     the control is in, in the order <see cref="LayStates" /> lays them, so a later layer wins. What no layer sets
+    ///     is never touched. A change to a style shows on an element once
     ///     the element is restyled.
     /// </remarks>
     public class Style<TState> : IStyle where TState : ElementState, new()
     {
         readonly Style<TState> _basedOn;
         readonly List<TState> _layers = new List<TState>();
+        readonly TState _declared = new TState();
 
         /// <summary>A style with nothing set, which applies as the neutral values.</summary>
         public Style()
@@ -38,11 +40,26 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         public TState Base { get; }
 
         /// <inheritdoc />
+        /// <remarks>
+        ///     Only what some layer of this style, or of the style it is based on, sets is ever written: each of those
+        ///     is put back to its neutral value first, so a state that has ended takes what it set with it, and
+        ///     everything else is left as the element's own.
+        /// </remarks>
         public void Apply(Element element)
         {
-            Base.Neutral(element);
+            _declared.Clear();
+            Declare(_declared);
+            _declared.Neutral(element);
             Lay(Base, element);
             LayStates(element);
+        }
+
+        /// <inheritdoc />
+        public void Withdraw(Element element)
+        {
+            _declared.Clear();
+            Declare(_declared);
+            _declared.Neutral(element);
         }
 
         /// <summary>A state layer for a style type to declare, matched to the same layer of the style this is based on.</summary>
@@ -63,6 +80,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
         protected void Lay(TState layer, Element element)
         {
             LayAt(_layers.IndexOf(layer), element);
+        }
+
+        /// <summary>Gathers into <paramref name="declared" /> everything any layer of this style, or of its base, sets.</summary>
+        void Declare(TState declared)
+        {
+            for (var i = 0; i < _layers.Count; i++)
+                declared.Gather(_layers[i]);
+
+            if (_basedOn != null)
+                _basedOn.Declare(declared);
         }
 
         void LayAt(int index, Element element)

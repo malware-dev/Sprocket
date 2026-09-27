@@ -26,9 +26,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
             if (text == null)
                 return;
 
-            text.Font = MyFontEnum.White;
-            text.FontSize = NeutralFontSize;
-            text.Color = VRageMath.Color.White;
+            if (Font != null)
+                text.Font = MyFontEnum.White;
+
+            if (FontSize.HasValue)
+                text.FontSize = NeutralFontSize;
+
+            if (Color.HasValue)
+                text.Color = VRageMath.Color.White;
         }
 
         /// <inheritdoc />
@@ -48,6 +53,33 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Styling
 
             if (Color.HasValue)
                 text.Color = Color.Value;
+        }
+
+        /// <inheritdoc />
+        public override void Clear()
+        {
+            base.Clear();
+            Font = null;
+            FontSize = null;
+            Color = null;
+        }
+
+        /// <inheritdoc />
+        public override void Gather(ElementState layer)
+        {
+            base.Gather(layer);
+            var other = layer as TextState;
+            if (other == null)
+                return;
+
+            if (Font == null)
+                Font = other.Font;
+
+            if (!FontSize.HasValue)
+                FontSize = other.FontSize;
+
+            if (!Color.HasValue)
+                Color = other.Color;
         }
     }
 }

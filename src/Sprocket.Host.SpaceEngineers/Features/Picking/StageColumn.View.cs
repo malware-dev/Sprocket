@@ -6,6 +6,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Viewing;
 using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
@@ -75,7 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         Children =
                         {
                             new Label { Style = Styles.OptionWord }.As(out _kindWord),
-                            new Glyph { Symbol = Symbols.Down, Style = Styles.Waits, Placement = Fixed.Size(20f, 20f) }
+                            ListField.Fold()
                         }
                     }.As(out _kindLine),
                     new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(28f, 28f), IsVisible = false }

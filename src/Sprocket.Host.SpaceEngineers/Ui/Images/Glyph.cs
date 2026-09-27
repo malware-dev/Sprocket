@@ -6,12 +6,13 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Ui.Images
 {
     /// <summary>One character of a font, drawn as a symbol and centered in whatever room it is given.</summary>
-    public class Glyph : Element
+    public class Glyph : Element, IPadded
     {
         readonly StringBuilder _measuring = new StringBuilder(2);
 
         string _font = MyFontEnum.White;
         float _fontSize = 24f;
+        Thickness _padding;
         Vector2 _size;
 
         float _sizedAt = -1f;
@@ -72,6 +73,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Images
                 InvalidateMeasure();
             }
         }
+
+        /// <summary>Room held clear between the edge and the symbol, which is centered within.</summary>
+        public Thickness Padding
+        {
+            get { return _padding; }
+            set
+            {
+                if (_padding == value)
+                    return;
+
+                _padding = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override Thickness Inset => _padding;
 
         /// <summary>What color to draw it, where transparent draws nothing but keeps the room.</summary>
         public Color Tint { get; set; }

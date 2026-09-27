@@ -421,6 +421,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Tint = Palette.Dim }
         };
 
+        /// <summary>The mark a drop-down line ends with, smaller than a symbol pressed on its own.</summary>
+        public static readonly GlyphStyle ListMark = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = 12f, Tint = Palette.Muted }
+        };
+
         /// <summary>A symbol that throws something away, lit in the color of something wrong under the pointer.</summary>
         public static readonly GlyphStyle Bin = new GlyphStyle(Icon)
         {

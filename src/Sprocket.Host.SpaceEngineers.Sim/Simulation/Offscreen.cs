@@ -72,6 +72,12 @@ namespace Sprocket.Sim.Simulation
         public int Measured => _device.Measured;
 
         /// <summary>How tall a line of this font stands at a scale the game was handed, in the units the screen lays out in.</summary>
+        /// <summary>How tall one line of <paramref name="font" /> is in the font's own units.</summary>
+        public int LineUnits(string font)
+        {
+            return _device.LineUnits(font);
+        }
+
         public float LineHeight(string font, float scale)
         {
             return _device.LineHeight(font, scale) / (_height / ScreenSpaceGraphics.GameReferenceHeight);

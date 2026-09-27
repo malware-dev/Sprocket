@@ -137,7 +137,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         public bool IsFocused => _focused;
 
         /// <summary>How this looks, applied onto its own properties now and again whenever its state changes.</summary>
-        /// <remarks>A property set after the style is kept only until a change of state applies the style again.</remarks>
+        /// <remarks>
+        ///     A style writes only what it sets. A property it sets and a place sets as well is kept only until a change
+        ///     of state applies the style again; one it leaves alone stays as the place set it. Replacing the style
+        ///     takes back what the old one set first.
+        /// </remarks>
         public IStyle Style
         {
             get { return _style; }
@@ -145,6 +149,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             {
                 if (_style == value)
                     return;
+
+                if (_style != null)
+                    _style.Withdraw(this);
 
                 _style = value;
                 StateChanged();

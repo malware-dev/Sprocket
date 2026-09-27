@@ -76,7 +76,7 @@ public class RenameTests
     }
 
     /// <summary>
-    /// The heading and back sit on the same line, by their middles.
+    /// Back sits level with the heading's capitals: the middle of the heading's line, lifted as the heading lifts it.
     /// </summary>
     [Fact]
     public void TheHeadingLinesUpWithBack()
@@ -90,7 +90,7 @@ public class RenameTests
         var back = screen.Marks(Symbols.Left)[0];
         var title = screen.Drawings.First(d => d.IsText && d.Scale > 0.8f);
 
-        Assert.Equal(screen.MiddleOf(title), screen.MiddleOf(back), 1);
+        Assert.Equal(screen.MiddleOf(title) + EditorView.LevelWithCapitals.Top, screen.MiddleOf(back), 1);
     }
 
     /// <summary>The pointer resting on the grid's name says what it is and that pressing it renames the grid.</summary>

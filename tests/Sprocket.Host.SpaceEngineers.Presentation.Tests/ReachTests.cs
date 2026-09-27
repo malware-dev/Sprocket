@@ -37,7 +37,7 @@ public class ReachTests
         picker.Do("scroll", "250", "600", "300");
 
         var row = picker.Text("Airlock Inner Door");
-        Assert.False(row.IsInsideItsClip,
+        Assert.False(picker.IsInsideItsClip(row),
             "the row is still on show, so pressing it proves nothing");
 
         picker.Do(At(Screen.Ui(row.At.X, row.At.Y)));

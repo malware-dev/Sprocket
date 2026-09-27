@@ -2,6 +2,7 @@ using Sprocket.Sim.Simulation;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -123,7 +124,10 @@ sealed class Screen
 
     /// <summary>The words somebody can actually read.</summary>
     public IReadOnlyList<string> Legible =>
-        Drawings.Where(d => d.IsText && d.IsInsideItsClip).Select(d => d.Text).ToList();
+        Drawings.Where(d => d.IsText && IsInsideItsClip(d)).Select(d => d.Text).ToList();
+
+    /// <summary>Whether a drawing's line starts inside the clip it was drawn under.</summary>
+    public bool IsInsideItsClip(Drawn drawing) => drawing.IsInsideItsClip(TopOf(drawing));
 
     public bool Shows(string text) => Legible.Contains(text);
 
@@ -157,7 +161,22 @@ sealed class Screen
     /// is the whole of what lining a heading up with the mark beside it means.
     /// </remarks>
     public float MiddleOf(Drawn drawing) =>
-        drawing.At.Y + _frame.LineHeight(drawing.Font, drawing.Scale) / 2f;
+        TopOf(drawing) + _frame.LineHeight(drawing.Font, drawing.Scale) / 2f;
+
+    /// <summary>
+    /// The top of the line a drawing sits on.
+    /// </summary>
+    /// <remarks>
+    /// Below where the text was drawn by the game's own bearing, which the renderer adds to every glyph and
+    /// the screen takes off before drawing - so the line sits where the layout put it, and the drawing is
+    /// that bearing above it.
+    /// </remarks>
+    public float TopOf(Drawn drawing)
+    {
+        var units = _frame.LineUnits(drawing.Font);
+        var line = _frame.LineHeight(drawing.Font, drawing.Scale);
+        return units > 0 ? drawing.At.Y + line * ScreenSpaceGraphics.TopSideBearing / units : drawing.At.Y;
+    }
 
     /// <summary>
     /// A point the frame reported, in the units a script presses in.
@@ -194,7 +213,8 @@ readonly struct Drawn(DrawCommand command, RectangleF clip)
 
     const float Rounding = 0.5f;
 
-    public bool IsInsideItsClip =>
+    /// <summary>Whether the drawing starts inside its clip, its line beginning at <paramref name="top" />.</summary>
+    public bool IsInsideItsClip(float top) =>
         At.X >= clip.X - Rounding && At.X <= clip.X + clip.Width + Rounding
-        && At.Y >= clip.Y - Rounding && At.Y <= clip.Y + clip.Height + Rounding;
+        && top >= clip.Y - Rounding && top <= clip.Y + clip.Height + Rounding;
 }

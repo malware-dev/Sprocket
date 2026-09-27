@@ -30,6 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             children.Add(_off);
 
             EdgeThickness = 1f;
+            Thumb = Color.White;
         }
 
         /// <summary>Whether it is on.</summary>

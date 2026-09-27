@@ -28,10 +28,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             if (control == null)
                 return;
 
-            control.OnTrack = VRageMath.Color.Transparent;
-            control.OffTrack = VRageMath.Color.Transparent;
-            control.Thumb = VRageMath.Color.White;
-            control.WordPadding = new Thickness(0f);
+            if (OnTrack.HasValue)
+                control.OnTrack = VRageMath.Color.Transparent;
+
+            if (OffTrack.HasValue)
+                control.OffTrack = VRageMath.Color.Transparent;
+
+            if (Thumb.HasValue)
+                control.Thumb = VRageMath.Color.White;
+
+            if (WordPadding.HasValue)
+                control.WordPadding = new Thickness(0f);
         }
 
         /// <inheritdoc />
@@ -54,6 +61,37 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
 
             if (WordPadding.HasValue)
                 control.WordPadding = WordPadding.Value;
+        }
+
+        /// <inheritdoc />
+        public override void Clear()
+        {
+            base.Clear();
+            OnTrack = null;
+            OffTrack = null;
+            Thumb = null;
+            WordPadding = null;
+        }
+
+        /// <inheritdoc />
+        public override void Gather(ElementState layer)
+        {
+            base.Gather(layer);
+            var other = layer as SwitchState;
+            if (other == null)
+                return;
+
+            if (!OnTrack.HasValue)
+                OnTrack = other.OnTrack;
+
+            if (!OffTrack.HasValue)
+                OffTrack = other.OffTrack;
+
+            if (!Thumb.HasValue)
+                Thumb = other.Thumb;
+
+            if (!WordPadding.HasValue)
+                WordPadding = other.WordPadding;
         }
     }
 }

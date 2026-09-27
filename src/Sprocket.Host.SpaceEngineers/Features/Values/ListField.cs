@@ -26,7 +26,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
     /// </remarks>
     public class ListField : HStack, IField
     {
-        const float Mark = 20f;
+        const float Mark = 12f;
+
+        /// <summary>Lifts the mark so its middle is level with the middle of the capitals of the word before it.</summary>
+        /// <remarks>Measured on the alignment page.</remarks>
+        static readonly Thickness Level = new Thickness(0f, -0.5f, 0f, 0.5f);
 
         readonly List<string> _words = new List<string>();
         readonly List<StringBuilder> _spelled = new List<StringBuilder>();
@@ -45,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             Focusable = true;
 
             Children.Add(new Label { Style = Styles.ListWord }.As(out _said));
-            Children.Add(new Glyph { Symbol = Symbols.Down, Style = Styles.Icon, Placement = Fixed.Size(Mark, Mark) });
+            Children.Add(Fold());
 
             var rows = new VStack();
             for (var i = 0; i < words.Count; i++)
@@ -92,6 +96,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
                 var layer = windows();
                 if (layer != null)
                     layer.Close(list);
+            };
+        }
+
+        /// <summary>The mark a drop-down line ends with, placed as every drop-down places it.</summary>
+        public static Glyph Fold()
+        {
+            return new Glyph
+            {
+                Symbol = Symbols.Down, Style = Styles.ListMark, Placement = Fixed.Size(Mark, Mark), Padding = Level
             };
         }
 

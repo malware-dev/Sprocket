@@ -46,16 +46,35 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             if (text == null)
                 return;
 
-            text.StrongColor = VRageMath.Color.White;
-            text.EmphasisColor = VRageMath.Color.White;
-            text.HeadingColor = VRageMath.Color.White;
-            text.RuleColor = VRageMath.Color.White;
-            text.CodeFont = MyFontEnum.White;
-            text.Heading1Size = NeutralFontSize;
-            text.Heading2Size = NeutralFontSize;
-            text.Heading3Size = NeutralFontSize;
-            text.BlockSpacing = 0f;
-            text.Indent = NeutralFontSize;
+            if (StrongColor.HasValue)
+                text.StrongColor = VRageMath.Color.White;
+
+            if (EmphasisColor.HasValue)
+                text.EmphasisColor = VRageMath.Color.White;
+
+            if (HeadingColor.HasValue)
+                text.HeadingColor = VRageMath.Color.White;
+
+            if (RuleColor.HasValue)
+                text.RuleColor = VRageMath.Color.White;
+
+            if (CodeFont != null)
+                text.CodeFont = MyFontEnum.White;
+
+            if (Heading1Size.HasValue)
+                text.Heading1Size = NeutralFontSize;
+
+            if (Heading2Size.HasValue)
+                text.Heading2Size = NeutralFontSize;
+
+            if (Heading3Size.HasValue)
+                text.Heading3Size = NeutralFontSize;
+
+            if (BlockSpacing.HasValue)
+                text.BlockSpacing = 0f;
+
+            if (Indent.HasValue)
+                text.Indent = NeutralFontSize;
         }
 
         /// <inheritdoc />
@@ -96,6 +115,61 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             if (Indent.HasValue)
                 text.Indent = Indent.Value;
+        }
+
+        /// <inheritdoc />
+        public override void Clear()
+        {
+            base.Clear();
+            StrongColor = null;
+            EmphasisColor = null;
+            HeadingColor = null;
+            RuleColor = null;
+            CodeFont = null;
+            Heading1Size = null;
+            Heading2Size = null;
+            Heading3Size = null;
+            BlockSpacing = null;
+            Indent = null;
+        }
+
+        /// <inheritdoc />
+        public override void Gather(ElementState layer)
+        {
+            base.Gather(layer);
+            var other = layer as RichTextState;
+            if (other == null)
+                return;
+
+            if (!StrongColor.HasValue)
+                StrongColor = other.StrongColor;
+
+            if (!EmphasisColor.HasValue)
+                EmphasisColor = other.EmphasisColor;
+
+            if (!HeadingColor.HasValue)
+                HeadingColor = other.HeadingColor;
+
+            if (!RuleColor.HasValue)
+                RuleColor = other.RuleColor;
+
+            if (CodeFont == null)
+                CodeFont = other.CodeFont;
+
+            if (!Heading1Size.HasValue)
+                Heading1Size = other.Heading1Size;
+
+            if (!Heading2Size.HasValue)
+                Heading2Size = other.Heading2Size;
+
+            if (!Heading3Size.HasValue)
+                Heading3Size = other.Heading3Size;
+
+            if (!BlockSpacing.HasValue)
+                BlockSpacing = other.BlockSpacing;
+
+            if (!Indent.HasValue)
+                Indent = other.Indent;
         }
     }
 }

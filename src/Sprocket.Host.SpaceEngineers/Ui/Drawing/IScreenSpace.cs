@@ -43,6 +43,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         /// <remarks>An empty run measures as one line, as tall as the game draws a line.</remarks>
         Vector2 MeasureText(string font, StringBuilder text, float scale);
 
+        /// <summary>How tall one line of <paramref name="font" /> is in the font's own units, as its file says, or zero where that cannot be read.</summary>
+        int LineUnits(string font);
+
         /// <summary>Where the pointer is in pixels, or false where the game is not showing one.</summary>
         bool TryCursorPixels(out Vector2 pixels);
 

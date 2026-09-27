@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
             base.Neutral(element);
 
             var window = element as Window;
-            if (window != null)
+            if (window != null && Backdrop.HasValue)
                 window.Backdrop = Color.Transparent;
         }
 
@@ -27,6 +27,25 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
             var window = element as Window;
             if (window != null && Backdrop.HasValue)
                 window.Backdrop = Backdrop.Value;
+        }
+
+        /// <inheritdoc />
+        public override void Clear()
+        {
+            base.Clear();
+            Backdrop = null;
+        }
+
+        /// <inheritdoc />
+        public override void Gather(ElementState layer)
+        {
+            base.Gather(layer);
+            var other = layer as WindowState;
+            if (other == null)
+                return;
+
+            if (!Backdrop.HasValue)
+                Backdrop = other.Backdrop;
         }
     }
 }

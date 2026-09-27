@@ -45,6 +45,12 @@ namespace Sprocket.Sim.Simulation
             return For(font).LineHeightPixels(font, scale);
         }
 
+        /// <inheritdoc />
+        public int LineUnits(string font)
+        {
+            return For(font).LineUnits(font);
+        }
+
         IFontMetrics For(string font)
         {
             IFontMetrics found;

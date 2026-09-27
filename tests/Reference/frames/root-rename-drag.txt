@@ -6,23 +6,23 @@ on screen     Automation for Test Rig
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
-002  Text       at {X:262.1563 Y:62.71198} scale 0.401  #A2C3CDFF  "<"
+002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
 003  SetClip    {X:296 Y:53 W:1328 H:40}
-004  Text       at {X:296 Y:56.71198} scale 1.111  #A2C3CDFF  "Automation for"
+004  Text       at {X:296 Y:53.39666} scale 1.111  #A2C3CDFF  "Automation for"
 005  Sprite     Sprocket_Fill         {X:463 Y:53 W:100 H:40}  #3C4C52FF
 006  SetClip    {X:463 Y:53 W:100 H:40}
 007  Sprite     Sprocket_Fill         {X:471 Y:57 W:41 H:32}  #5B737BFF
-008  Text       at {X:470.6234 Y:56.71198} scale 1.111  #DCF5FDFF  "Test Rig"
+008  Text       at {X:470.6234 Y:53.39666} scale 1.111  #DCF5FDFF  "Test Rig"
 009  Sprite     Sprocket_Fill         {X:512 Y:57 W:2 H:32}  #DCF5FDFF
 010  SetClip    {X:296 Y:53 W:1328 H:40}
 011  ClearClip  
-012  Text       at {X:1638.156 Y:62.71198} scale 0.401  #A2C3CDFF  "s"
+012  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
 013  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 014  SetClip    {X:256 Y:118 W:1408 H:853}
-015  Text       at {X:272 Y:125.712} scale 0.833  #A2C3CDFF  "+ New logic system"
-016  Text       at {X:468.5567 Y:125.712} scale 0.833  #A2C3CDFF  "+ Load blueprint"
+015  Text       at {X:272 Y:123.2255} scale 0.833  #A2C3CDFF  "+ New logic system"
+016  Text       at {X:468.5567 Y:123.2255} scale 0.833  #A2C3CDFF  "+ Load blueprint"
 017  Sprite     Sprocket_Fill         {X:256 Y:166 W:1396 H:1}  #5B737BFF
-018  Text       at {X:264 Y:182.712} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
+018  Text       at {X:264 Y:180.2255} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
 019  ClearClip  
 020  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
 021  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

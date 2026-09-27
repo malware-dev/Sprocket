@@ -1,6 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
+using Sandbox.Definitions;
 using Sandbox.ModAPI;
+using VRage.Game;
+using VRage.Game.Definitions;
 using VRage.Utils;
 using VRageMath;
 
@@ -11,6 +15,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
     {
         readonly List<MyScreenSpace.MyScissorScope> _scissors =
             new List<MyScreenSpace.MyScissorScope>();
+
+        readonly Dictionary<string, int> _lineUnits = new Dictionary<string, int>();
 
         /// <inheritdoc />
         public RectangleF SafeArea => MyScreenSpace.GetSafeGuiArea();
@@ -73,6 +79,23 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        ///     Read from the file the font's definition names, in the game's content or in the mod that
+        ///     declares it, and kept: the game holds the same number on its loaded font, where a mod may not
+        ///     read it. Once per font.
+        /// </remarks>
+        public int LineUnits(string font)
+        {
+            var units = 0;
+            if (font == null || _lineUnits.TryGetValue(font, out units))
+                return units;
+
+            units = Read(font);
+            _lineUnits[font] = units;
+            return units;
+        }
+
+        /// <inheritdoc />
         public bool TryCursorPixels(out Vector2 pixels)
         {
             return MyScreenSpace.TryGetCursorPositionPixels(out pixels);
@@ -88,6 +111,63 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         public Vector2 NormalizedSizeToPixels(Vector2 size)
         {
             return MyScreenSpace.NormalizedSizeToPixels(size);
+        }
+
+        /// <summary>The <c>height</c> on the font file's <c>font</c> element, or zero where the file will not give one.</summary>
+        static int Read(string font)
+        {
+            var definitions = MyDefinitionManager.Static;
+            if (definitions == null)
+                return 0;
+
+            var definition = definitions.GetDefinition(
+                new MyDefinitionId(typeof(MyObjectBuilder_FontDefinition), font)) as MyFontDefinition;
+            if (definition == null)
+                return 0;
+
+            var path = definition.CompatibilityPath;
+            foreach (var resource in definition.Resources)
+            {
+                path = resource.Path;
+                break;
+            }
+
+            if (string.IsNullOrEmpty(path))
+                return 0;
+
+            string text;
+            try
+            {
+                var context = definition.Context;
+                using (var reader = context == null || context.IsBaseGame
+                           ? MyAPIGateway.Utilities.ReadFileInGameContent(path)
+                           : MyAPIGateway.Utilities.ReadFileInModLocation(path, context.ModItem))
+                    text = reader.ReadToEnd();
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+
+            return Height(text);
+        }
+
+        /// <summary>The whole number in the first <c>height</c> attribute after <c>&lt;font</c>, or zero.</summary>
+        static int Height(string text)
+        {
+            var element = text.IndexOf("<font", StringComparison.Ordinal);
+            if (element < 0)
+                return 0;
+
+            const string attribute = " height=\"";
+            var at = text.IndexOf(attribute, element, StringComparison.Ordinal);
+            if (at < 0)
+                return 0;
+
+            at += attribute.Length;
+            var end = text.IndexOf('"', at);
+            int height;
+            return end > at && int.TryParse(text.Substring(at, end - at), out height) ? height : 0;
         }
     }
 }

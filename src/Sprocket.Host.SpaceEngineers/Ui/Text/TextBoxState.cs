@@ -24,9 +24,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             if (box == null)
                 return;
 
-            box.SelectionColor = new Color(40, 90, 150);
-            box.CaretColor = VRageMath.Color.White;
-            box.HintColor = VRageMath.Color.Gray;
+            if (SelectionColor.HasValue)
+                box.SelectionColor = new Color(40, 90, 150);
+
+            if (CaretColor.HasValue)
+                box.CaretColor = VRageMath.Color.White;
+
+            if (HintColor.HasValue)
+                box.HintColor = VRageMath.Color.Gray;
         }
 
         /// <inheritdoc />
@@ -46,6 +51,33 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
             if (HintColor.HasValue)
                 box.HintColor = HintColor.Value;
+        }
+
+        /// <inheritdoc />
+        public override void Clear()
+        {
+            base.Clear();
+            SelectionColor = null;
+            CaretColor = null;
+            HintColor = null;
+        }
+
+        /// <inheritdoc />
+        public override void Gather(ElementState layer)
+        {
+            base.Gather(layer);
+            var other = layer as TextBoxState;
+            if (other == null)
+                return;
+
+            if (!SelectionColor.HasValue)
+                SelectionColor = other.SelectionColor;
+
+            if (!CaretColor.HasValue)
+                CaretColor = other.CaretColor;
+
+            if (!HintColor.HasValue)
+                HintColor = other.HintColor;
         }
     }
 }

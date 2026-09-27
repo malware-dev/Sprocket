@@ -24,11 +24,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         /// <summary>Pass as the reference height to work in real window pixels, with nothing scaled.</summary>
         public const float NativePixels = 0f;
 
+        /// <summary>How far below where it is told the game draws every glyph, in the font's own units.</summary>
+        /// <remarks>
+        ///     Transcribed from the game's <c>MyRenderGuiConstants.FONT_TOP_SIDE_BEARING</c>, which the renderer
+        ///     adds to every glyph whatever the font. Taken back off here, so a font's line sits where its
+        ///     own file puts it.
+        /// </remarks>
+        public const float TopSideBearing = 3f * 23f / 18f;
+
         readonly ClipStack _clip = new ClipStack();
 
         readonly MyStringId _fill;
 
         readonly Dictionary<string, float> _lines = new Dictionary<string, float>();
+        readonly Dictionary<string, float> _lifts = new Dictionary<string, float>();
 
         readonly StringBuilder _nothing = new StringBuilder();
         readonly MyScreenSpaceLayer _layer;
@@ -43,6 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
         string _lastFont;
 
         float _lastLine;
+
+        float _lastLift;
 
         float _fontScale = 1f;
 
@@ -171,7 +182,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
                 size *= _transformScale;
             }
 
-            _screenSpace.DrawText(font, text, position * _scale + _origin, ScaleOf(font, size) * _fontScale, color,
+            var scale = ScaleOf(font, size);
+            position.Y -= size * _lastLift;
+
+            _screenSpace.DrawText(font, text, position * _scale + _origin, scale * _fontScale, color,
                 placed, float.PositiveInfinity, _layer);
         }
 
@@ -241,9 +255,31 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 
                 _lastFont = font;
                 _lastLine = line;
+                _lastLift = Lift(font);
             }
 
             return _lastLine > 0f ? size / _lastLine : 0f;
+        }
+
+        /// <summary>The game's <see cref="TopSideBearing" /> for <paramref name="font" />, as a share of one of its lines.</summary>
+        /// <remarks>
+        ///     A share of the line because the line is what a size is: the game scales the bearing and the line
+        ///     alike, so a run <c>size</c> tall is drawn <c>size</c> times this too low. Nothing for a font
+        ///     whose line cannot be read. Kept per font, since reading one opens its file.
+        /// </remarks>
+        float Lift(string font)
+        {
+            if (font == null)
+                return 0f;
+
+            float lift;
+            if (_lifts.TryGetValue(font, out lift))
+                return lift;
+
+            var units = _screenSpace.LineUnits(font);
+            lift = units > 0 ? TopSideBearing / units : 0f;
+            _lifts[font] = lift;
+            return lift;
         }
 
         /// <summary>Ends every scissor still standing, innermost first.</summary>

@@ -6,45 +6,45 @@ on screen     Airlock
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
-002  Text       at {X:262.1563 Y:62.71198} scale 0.401  #A2C3CDFF  "<"
+002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
 003  SetClip    {X:296 Y:53 W:1328 H:40}
-004  Text       at {X:304 Y:56.71198} scale 1.111  #DCF5FDFF  "Airlock"
-005  Text       at {X:390.8629 Y:62.71198} scale 0.401  #85A1A9FF  "p"
-006  Text       at {X:420.7067 Y:56.71198} scale 1.111  #A2C3CDFF  "blueprint"
+004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Airlock"
+005  Text       at {X:390.8629 Y:59.01406} scale 0.401  #85A1A9FF  "p"
+006  Text       at {X:420.7067 Y:53.39666} scale 1.111  #A2C3CDFF  "blueprint"
 007  ClearClip  
-008  Text       at {X:1638.156 Y:62.71198} scale 0.401  #A2C3CDFF  "s"
+008  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
 009  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 010  SetClip    {X:256 Y:118 W:1408 H:853}
-011  Text       at {X:260 Y:125.712} scale 0.694  #85A1A9FF  "MADE FROM IT"
+011  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "MADE FROM IT"
 012  Sprite     Sprocket_Fill         {X:256 Y:158 W:380 H:68}  #29363EFF
-013  Text       at {X:276.0625 Y:187.712} scale 0.161  #5F7278FF  "0"
-014  Text       at {X:304 Y:179.712} scale 0.833  #DCF5FDFF  "Airlock"
+013  Text       at {X:276.0625 Y:187.2328} scale 0.161  #5F7278FF  "0"
+014  Text       at {X:304 Y:177.2255} scale 0.833  #DCF5FDFF  "Airlock"
 015  Sprite     Sprocket_Fill         {X:256 Y:230 W:380 H:68}  #3C4C52FF
 016  Sprite     Sprocket_Fill         {X:256 Y:230 W:380 H:1}  #8EBCCFFF
 017  Sprite     Sprocket_Fill         {X:256 Y:297 W:380 H:1}  #8EBCCFFF
 018  Sprite     Sprocket_Fill         {X:256 Y:230 W:1 H:68}  #8EBCCFFF
 019  Sprite     Sprocket_Fill         {X:635 Y:230 W:1 H:68}  #8EBCCFFF
-020  Text       at {X:276.0625 Y:259.712} scale 0.161  #5F7278FF  "0"
-021  Text       at {X:304 Y:251.712} scale 0.833  #DCF5FDFF  "Airlock 2"
-022  Text       at {X:304 Y:313.712} scale 0.833  #A2C3CDFF  "+ add another Airlock"
-023  Text       at {X:688.0625 Y:147.712} scale 0.161  #5F7278FF  "0"
-024  Text       at {X:716 Y:139.712} scale 0.833  #DCF5FDFF  "Airlock 2"
+020  Text       at {X:276.0625 Y:259.2328} scale 0.161  #5F7278FF  "0"
+021  Text       at {X:304 Y:249.2255} scale 0.833  #DCF5FDFF  "Airlock 2"
+022  Text       at {X:304 Y:311.2255} scale 0.833  #A2C3CDFF  "+ add another Airlock"
+023  Text       at {X:688.0625 Y:147.2328} scale 0.161  #5F7278FF  "0"
+024  Text       at {X:716 Y:137.2255} scale 0.833  #DCF5FDFF  "Airlock 2"
 025  Sprite     Sprocket_Fill         {X:1406 Y:136 W:153 H:32}  #29363EFF
 026  Sprite     Sprocket_Fill         {X:1406 Y:136 W:153 H:1}  #3F474FFF
 027  Sprite     Sprocket_Fill         {X:1406 Y:167 W:153 H:1}  #3F474FFF
 028  Sprite     Sprocket_Fill         {X:1406 Y:136 W:1 H:32}  #3F474FFF
 029  Sprite     Sprocket_Fill         {X:1558 Y:136 W:1 H:32}  #3F474FFF
-030  Text       at {X:1422.177 Y:143.712} scale 0.556  #DCF5FDFF  "Edit using these blocks"
+030  Text       at {X:1422.177 Y:142.0543} scale 0.556  #DCF5FDFF  "Edit using these blocks"
 031  Sprite     Sprocket_Fill         {X:1567 Y:136 W:69 H:32}  #5B737BFF
 032  Sprite     Sprocket_Fill         {X:1608 Y:140 W:24 H:24}  #DCF5FDFF
-033  Text       at {X:1580.557 Y:143.712} scale 0.556  #DCF5FDFF  "ON"
+033  Text       at {X:1580.557 Y:142.0543} scale 0.556  #DCF5FDFF  "ON"
 034  Sprite     Sprocket_Fill         {X:668 Y:198 W:984 H:1}  #5B737BFF
-035  Text       at {X:672 Y:218.712} scale 0.694  #85A1A9FF  "PARTS"
-036  Text       at {X:688 Y:266.712} scale 0.833  #DCF5FDFF  "Button Panel"
-037  Text       at {X:799.3496 Y:268.712} scale 0.401  #85A1A9FF  "p"
+035  Text       at {X:672 Y:216.6399} scale 0.694  #85A1A9FF  "PARTS"
+036  Text       at {X:688 Y:264.2255} scale 0.833  #DCF5FDFF  "Button Panel"
+037  Text       at {X:799.3496 Y:267.5141} scale 0.401  #85A1A9FF  "p"
 038  Sprite     Sprocket_Fill         {X:1068 Y:259 W:45 H:40}  #374851FF
 039  Sprite     Sprocket_Fill         {X:1068 Y:297 W:45 H:2}  #F0AC28FF
-040  Text       at {X:1084 Y:266.712} scale 0.833  #F0AC28FF  "…"
+040  Text       at {X:1084 Y:264.2255} scale 0.833  #F0AC28FF  "…"
 041  ClearClip  
 042  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
 043  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

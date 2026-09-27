@@ -24,9 +24,14 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
             if (scroll == null)
                 return;
 
-            scroll.BarWidth = 0f;
-            scroll.Thumb = Color.Transparent;
-            scroll.LeastThumb = 0f;
+            if (BarWidth.HasValue)
+                scroll.BarWidth = 0f;
+
+            if (Thumb.HasValue)
+                scroll.Thumb = Color.Transparent;
+
+            if (LeastThumb.HasValue)
+                scroll.LeastThumb = 0f;
         }
 
         /// <inheritdoc />
@@ -46,6 +51,33 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
 
             if (LeastThumb.HasValue)
                 scroll.LeastThumb = LeastThumb.Value;
+        }
+
+        /// <inheritdoc />
+        public override void Clear()
+        {
+            base.Clear();
+            BarWidth = null;
+            Thumb = null;
+            LeastThumb = null;
+        }
+
+        /// <inheritdoc />
+        public override void Gather(ElementState layer)
+        {
+            base.Gather(layer);
+            var other = layer as ScrollViewState;
+            if (other == null)
+                return;
+
+            if (!BarWidth.HasValue)
+                BarWidth = other.BarWidth;
+
+            if (!Thumb.HasValue)
+                Thumb = other.Thumb;
+
+            if (!LeastThumb.HasValue)
+                LeastThumb = other.LeastThumb;
         }
     }
 }

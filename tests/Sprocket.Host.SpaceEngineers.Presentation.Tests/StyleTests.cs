@@ -2,7 +2,6 @@ using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
-using VRage.Game;
 using VRageMath;
 using Xunit;
 
@@ -16,17 +15,60 @@ public class StyleTests
     static readonly Color Ink = new Color(220, 245, 253);
     static readonly Color Dim = new Color(95, 114, 120);
 
-    /// <summary>A style applies its base, and the neutral values fill in what it leaves out.</summary>
+    /// <summary>A style writes what it sets and nothing else, so what a place sets that the style leaves alone stays.</summary>
     [Fact]
-    public void AStyleFillsWhatItLeavesOutWithTheNeutralValues()
+    public void AStyleLeavesAloneWhatItDoesNotSet()
     {
-        var label = new Label { Padding = new Thickness(5f), Style = new TextStyle { Base = { Color = Ink } } };
+        var label = new Label
+        {
+            Font = "Monospace", Padding = new Thickness(5f), Style = new TextStyle { Base = { Color = Ink } }
+        };
 
         Assert.Equal(Ink, label.Color);
-        Assert.Equal(MyFontEnum.White, label.Font);
+        Assert.Equal("Monospace", label.Font);
         Assert.Equal(24f, label.FontSize);
+        Assert.Equal(new Thickness(5f), label.Padding);
+    }
+
+    /// <summary>What a place sets and the style leaves alone outlasts a change of state, which applies the style again.</summary>
+    [Fact]
+    public void WhatAPlaceSetsOutlastsAChangeOfState()
+    {
+        var row = new HStack { Style = Row(), Padding = new Thickness(0f, 0f, 0f, 4f) };
+
+        row.IsHot = true;
+        row.IsHot = false;
+
+        Assert.Equal(new Thickness(0f, 0f, 0f, 4f), row.Padding);
+    }
+
+    /// <summary>A state that has ended takes back what it set, where the base sets nothing of its own.</summary>
+    [Fact]
+    public void AnEndedStateTakesBackWhatItSet()
+    {
+        var row = new HStack { Style = Row() };
+
+        row.IsHot = true;
+        row.IsHot = false;
+
+        Assert.Equal(Panel, row.Background);
+
+        row.IsEnabled = false;
+        row.IsEnabled = true;
+
+        Assert.Equal(Color.Transparent, row.Edge);
+    }
+
+    /// <summary>An element given another style loses what the old one set and the new one does not.</summary>
+    [Fact]
+    public void AReplacedStyleTakesBackWhatItSet()
+    {
+        var label = new Label { Style = new TextStyle { Base = { Color = Ink, Background = Panel } } };
+
+        label.Style = new TextStyle { Base = { Color = Dim } };
+
+        Assert.Equal(Dim, label.Color);
         Assert.Equal(Color.Transparent, label.Background);
-        Assert.True(label.Padding.IsEmpty);
     }
 
     /// <summary>A state the element is in is laid over the base, and a later state wins over an earlier one.</summary>

@@ -971,8 +971,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // The listing is the exception that proves it: a way to look at something, reachable from
             // anywhere, belonging to the screen rather than to what is on it.
             if (DeveloperMode)
+            {
                 _actionBar.Add(new ChoiceEntry(ScriptPage.Called, Current is ScriptPage,
                     Act(Cmd.ShowScript, ShowScript)));
+                _actionBar.Add(new ChoiceEntry(AlignmentPage.Called, Current is AlignmentPage,
+                    Act(Cmd.ShowAlignment, ShowAlignment)));
+            }
 
             _screen.ShowActions(_actionBar);
         }
@@ -993,6 +997,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
 
             Push(new ScriptPage(this));
+        }
+
+        /// <summary>Opens the page of glyphs and text in boxes, each box's middle drawn over it.</summary>
+        /// <remarks>A developer tool, offered only where <see cref="DeveloperMode" /> says so, as the script is.</remarks>
+        internal void ShowAlignment()
+        {
+            if (Current is AlignmentPage)
+                return;
+
+            Push(new AlignmentPage(this));
         }
 
         /// <summary>

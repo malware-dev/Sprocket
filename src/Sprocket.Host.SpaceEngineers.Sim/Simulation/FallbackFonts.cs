@@ -65,6 +65,12 @@ namespace Sprocket.Sim.Simulation
             return GameLineHeight * EffectiveScale(scale) * Content.SeFontMetrics.FontScale;
         }
 
+        /// <summary>The game's line, in its font's units, since this face has no file of its own to say.</summary>
+        public int LineUnits(string font)
+        {
+            return (int)GameLineHeight;
+        }
+
         /// <summary>
         /// The scale the game would actually draw at, which is the one it was handed multiplied by its own
         /// HUD scale. Reproduced here rather than ignored, because the backend under test corrects for it

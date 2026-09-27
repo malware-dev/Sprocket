@@ -136,8 +136,11 @@ public static readonly SwitchStyle Toggle = new SwitchStyle
 };
 ```
 
-Applying a style lays down neutral values the style type holds as constants, then `Base`, then the
-states its control is in. An element given no style starts from the same neutral values.
+A style writes only what it sets. Applying one puts each property that any of its layers sets back to
+the neutral value the style type holds as a constant, then lays `Base`, then the states its control is in,
+so a state that has ended takes back what it set. A property no layer sets is left as the element's own,
+which is how padding set where an element is placed survives every change of state. Replacing an
+element's style takes back everything the old one set first.
 
 The framework decides only two states about any element: hot, being what a press would reach, and
 enabled. A state that only the application knows, such as a button waiting to be ready, is a different

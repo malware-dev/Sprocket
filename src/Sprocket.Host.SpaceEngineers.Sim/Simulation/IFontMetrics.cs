@@ -10,5 +10,8 @@ namespace Sprocket.Sim.Simulation
 
         /// <summary>The height of one line, in window pixels, including leading.</summary>
         float LineHeightPixels(string font, float scale);
+
+        /// <summary>The height of one line in the font's own units, as its file says.</summary>
+        int LineUnits(string font);
     }
 }
