@@ -40,8 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Look
         ///     of its capitals on a 3840-wide screen, four and a half units. Only the game can check this; the
         ///     simulator places glyphs by its own rule, and a recorded frame cannot see it.
         ///     <para>
-        ///         Not for a symbol centred in a row (<c>Widgets.Centred</c>), which lands on the row's middle
-        ///         unaided, measured to within two pixels.
+        ///         Not for a symbol centered in a row of its own, which lands on the row's middle unaided, measured to
+        ///         within two pixels.
         ///     </para>
         /// </remarks>
         public const float SymbolLift = 0.123f;

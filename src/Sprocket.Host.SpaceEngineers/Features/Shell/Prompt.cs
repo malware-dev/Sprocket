@@ -33,9 +33,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _box.Edited += Judge;
         }
 
-        /// <summary>What is typed so far.</summary>
-        public string Text => _box.Text;
-
         /// <summary>The box the name is typed into.</summary>
         public TextBox Box => _box;
 

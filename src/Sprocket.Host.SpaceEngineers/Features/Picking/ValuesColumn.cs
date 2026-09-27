@@ -15,7 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public class ValuesColumn : VStack
     {
-        readonly Label _title;
         readonly HStack _head;
         readonly HStack _foot;
         readonly Label _why;
@@ -44,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new Label { Style = Styles.ColumnTitle, Text = title.ToUpperInvariant() }.As(out _title),
+                            new Label { Style = Styles.ColumnTitle, Text = title.ToUpperInvariant() },
                             new Label { Style = Styles.ColumnNote }
                         }
                     }
@@ -77,9 +76,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Placement = Fixed.Wide(value);
             }
         }
-
-        /// <summary>What the column is headed.</summary>
-        public string Title => _title.Text;
 
         /// <summary>Where the values are given.</summary>
         public FieldSet Form => _form;

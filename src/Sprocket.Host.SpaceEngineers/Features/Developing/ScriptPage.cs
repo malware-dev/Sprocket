@@ -30,9 +30,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         /// <summary>The listing is the whole of the page and scrolls both ways by itself.</summary>
         public override bool ScrollsItself => true;
 
-        /// <summary>What the listing shows.</summary>
-        public string Text => _listing == null ? "" : _listing.Text;
-
         /// <summary>Fills the listing, where it has been made.</summary>
         public override void Build()
         {

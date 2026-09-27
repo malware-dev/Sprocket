@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Lists;
@@ -188,10 +188,8 @@ public class ReachTests
     /// Everything a press can reach lights up when the pointer rests on it.
     /// </summary>
     /// <remarks>
-    /// The rule stated on <c>Element.Highlight</c>, read the other way round, and held by sweeping the
-    /// whole screen rather than by anybody remembering to look: every point on it, on every screen the
-    /// editor has, and whatever answers has to say so under the pointer. A control that cannot be lit is
-    /// one a person has no way to find.
+    /// Held by sweeping the whole screen rather than by anybody remembering to look: every point on it, on every
+    /// screen the editor has. A control that cannot be lit is one a person has no way to find.
     /// </remarks>
     [Fact]
     public void EverythingAPressCanReachLightsUp()
@@ -257,16 +255,15 @@ public class ReachTests
 
         foreach (var found in Everything(screen))
         {
-            // A box to type in is the one exception, and deliberately: it says "words go here" with
-            // its own well, its edge and a caret, and a field that lit like a button would be
-            // promising a press.
-            if (found.Press.Means == Means.Nothing || found.Press.Means == Means.Type)
+            // Only what a press would carry out. A box to type in is the exception, and deliberately: it says "words go here"
+            // with its own well, its edge and a caret, and a field that lit like a button would be promising a press.
+            if (found.Command == null || !found.IsEnabled || found is TextBox)
                 continue;
 
             if (Lights(found))
                 continue;
 
-            var said = found.GetType().Name + " " + found.Press.Means + " at " + found.Bounds;
+            var said = found.GetType().Name + " at " + found.Bounds;
             if (!dark.Contains(said))
                 dark.Add(said);
         }
@@ -278,7 +275,7 @@ public class ReachTests
     /// <summary>Whether being under the pointer changes how <paramref name="element" /> is filled or edged.</summary>
     static bool Lights(Element element)
     {
-        if (element.Highlight.A > 0 || element.HighlightEdge.A > 0)
+        if (element.HighlightEdge.A > 0)
             return true;
 
         var was = element.IsHot;

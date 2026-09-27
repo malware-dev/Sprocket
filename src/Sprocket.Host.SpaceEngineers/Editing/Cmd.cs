@@ -1,16 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.Editing
 {
-    /// <summary>
-    /// What a command is for. Half of a command's identity; the rest is which one it is.
-    /// </summary>
-    /// <remarks>
-    /// An id is a reference and never a position. A counter reset on every rebuild would mean "the
-    /// seventh thing this page registered this time round", which is stable only by coincidence: every
-    /// id a target had captured would go dead the moment anything moved, and
-    /// <see cref="SprocketEditor.Invoke"/> ignores an id it does not know, so it would fail invisibly.
-    /// R47 says the same thing everywhere else - references are by identity, and an edit carries what
-    /// it points at.
-    /// </remarks>
+    /// <summary>What a press is for, which decides whether a copy lent to look at may make it and whether it changes the program.</summary>
     public enum Cmd
     {
         None = 0,
@@ -75,7 +65,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         OneKind,
         RequireAny,
         RequireAll,
-        EnterValues,
         TriggerRuns,
         TriggerStops,
         TriggerDoes,
@@ -84,11 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         // A list of answers.
         Choice,
-        ChoiceTyped,
         ChoiceTaken,
-
-        /// <summary>Where the values an action asked for are typed.</summary>
-        GiveValues,
 
         /// <summary>Tools for working on Sprocket itself. Only ever registered in developer mode.</summary>
         ShowScript

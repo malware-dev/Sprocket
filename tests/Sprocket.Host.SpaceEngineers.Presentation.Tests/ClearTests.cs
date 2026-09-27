@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Images;
 using Sprocket.Host.SpaceEngineers.Ui;
 using VRageMath;
 using Xunit;
@@ -53,7 +53,6 @@ public class ClearTests
 
         Element? at = picker.Scene.Under(new Vector2(452f, 230f));
 
-        Assert.True(at == null || at.Press.Means != Means.Empty,
-            "the cross is offered over an empty box");
+        Assert.False(at is Glyph, "the cross is offered over an empty box");
     }
 }

@@ -1,5 +1,4 @@
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Look;
 using Xunit;
@@ -15,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ScriptPageTests
 {
-    static readonly string Way = Widgets.Caps(ScriptPage.Called);
+    static readonly string Way = ScriptPage.Called.ToUpperInvariant();
 
     const string Back = Symbols.Left;
 

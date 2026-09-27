@@ -1,75 +1,15 @@
-using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Sim.Simulation;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>How HStack and VStack lay out their children, and that they draw what the containers they replace drew.</summary>
+/// <summary>How HStack and VStack lay out their children.</summary>
 public class StackTests
 {
     const float Wide = 400f;
     const float High = 200f;
-
-    /// <summary>A VStack draws exactly what a Stack running down drew.</summary>
-    [Fact]
-    public void VStackDrawsWhatAStackDownDrew()
-    {
-        var old = new Stack { Spacing = 4f };
-        Fill(old.Children);
-
-        var fresh = new VStack { Spacing = 4f };
-        Fill(fresh.Children);
-
-        Assert.Equal(Drawn(old), Drawn(fresh));
-    }
-
-    /// <summary>An HStack draws exactly what a Stack running across drew.</summary>
-    [Fact]
-    public void AnHStackDrawsWhatAStackAcrossDrew()
-    {
-        var old = new Stack { Spacing = 4f, Horizontal = true };
-        Fill(old.Children);
-
-        var fresh = new HStack { Spacing = 4f };
-        Fill(fresh.Children);
-
-        Assert.Equal(Drawn(old), Drawn(fresh));
-    }
-
-    /// <summary>An HStack whose middle grows draws what a Bar drew, in its own order.</summary>
-    [Fact]
-    public void AnHStackWithAGrowingMiddleDrawsWhatABarDrew()
-    {
-        var bar = new Bar
-        {
-            Spacing = 5f,
-            Left = new Label { Text = "Left" },
-            Fill = new Label { Text = "The middle", Background = Palette(1) },
-            Right = new Label { Text = "Right" }
-        };
-
-        var stack = new HStack
-        {
-            Spacing = 5f,
-            Children =
-            {
-                new Label { Text = "Left" },
-                new Label { Text = "The middle", Background = Palette(1), Placement = Flex.Grow },
-                new Label { Text = "Right" }
-            }
-        };
-
-        var fromBar = Drawn(bar);
-        var fromStack = Drawn(stack);
-        fromBar.Sort();
-        fromStack.Sort();
-
-        Assert.Equal(fromBar, fromStack);
-    }
 
     /// <summary>Children that grow share the room left by weight.</summary>
     [Fact]
@@ -163,33 +103,6 @@ public class StackTests
         easel.Draw(Wide, High);
 
         Assert.Equal(settled, easel.Measured);
-    }
-
-    /// <summary>Children of every kind the stacks meet: labels, padding, a background, and one invisible.</summary>
-    static void Fill(Element.Collection children)
-    {
-        children.Add(new Label { Text = "First", Background = Palette(0) });
-        children.Add(new Label { Text = "Invisible", IsVisible = false });
-        children.Add(new Label { Text = "Padded", Padding = new Thickness(6f, 3f), Background = Palette(1) });
-        children.Add(new Label { Text = "Last of three, and longer" });
-    }
-
-    static VRageMath.Color Palette(int which)
-    {
-        return which == 0 ? new VRageMath.Color(10, 20, 30) : new VRageMath.Color(40, 50, 60);
-    }
-
-    /// <summary>Every call a frame of <paramref name="root" /> makes, written out so two frames can be compared.</summary>
-    static List<string> Drawn(Element root)
-    {
-        var easel = new Easel(root, Wide, High);
-        return easel.Commands.Select(Written).ToList();
-    }
-
-    static string Written(DrawCommand command)
-    {
-        return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3} {4} {5}",
-            command.Kind, command.Destination, command.Position, command.Text, command.Color, command.Clip);
     }
 
     /// <summary>A placement no stack understands.</summary>

@@ -1,10 +1,8 @@
-using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
 using Xunit;
-using Wrap = Sprocket.Host.SpaceEngineers.Ui.Legacy.Wrap;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -81,39 +79,9 @@ public class FlowTests
         Assert.Throws<InvalidOperationException>(() => flow.Children.Add(new Label { Placement = new Elsewhere() }));
     }
 
-    /// <summary>A flow of words and chips draws exactly what a wrap drew, across more than one line.</summary>
-    [Fact]
-    public void AFlowDrawsWhatAWrapDrew()
-    {
-        var wrap = new Wrap { ItemSpacing = 8f, LineSpacing = 12f };
-        Fill(wrap.Children);
-
-        var flow = new Flow { Spacing = 8f, LineSpacing = 12f };
-        Fill(flow.Children);
-
-        Assert.Equal(Drawn(wrap), Drawn(flow));
-    }
-
     static Label Box(float width, float height)
     {
         return new Label { Placement = Fixed.Size(width, height) };
-    }
-
-    static void Fill(Element.Collection children)
-    {
-        children.Add(new Label { Text = "When" });
-        children.Add(new Label { Text = "Airlock Button", Padding = new Thickness(8f, 4f), Background = new Color(40, 50, 60) });
-        children.Add(new Label { Text = "hidden", IsVisible = false });
-        children.Add(new Label { Text = "is pressed", Padding = new Thickness(8f, 4f), Background = new Color(40, 50, 60) });
-        children.Add(new Label { Text = "then open" });
-        children.Add(new Label { Text = "Airlock Outer Door", Padding = new Thickness(8f, 4f), Background = new Color(40, 50, 60) });
-    }
-
-    static string[] Drawn(Element root)
-    {
-        var easel = new Easel(new VStack { Children = { root } }, 300f, 200f);
-        return easel.Commands.Select(command => string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3} {4}",
-            command.Kind, command.Destination, command.Position, command.Text, command.Color)).ToArray();
     }
 
     /// <summary>A placement no flow understands.</summary>

@@ -9,19 +9,17 @@ is drawn together, because a change to how a sentence works should be a change i
 
 | | |
 |---|---|
+| `Features/` | the screens, one folder each, and the chrome around them in `Shell/` |
 | `Sequences/` | what a sequence is, and the sentence somebody reads and presses |
 | `Editing/` | moving through the editor: pages, commands, undo, what may go in a slot |
-| `Picking/` | choosing blocks and what happens to them |
 | `Lists/` | rows of things to choose or watch |
 | `Runtime/` | running a sequence, and waiting for what it started |
 | `Storage/` | the script: the language, read and written |
 | `World/` | the game's blocks, what they can do, and their toolbars |
 | `Words/` | how a sentence is composed: word order, capitals, and the words that join phrases |
-| `Screen/` | the editor's surface, and the screen that draws it |
 | `Ui/` | the UI framework: elements at its root, then layout, text, controls, drawing and input |
-| `Layout/` | what pressing a control means, and what a question's fields take |
+| `Layout/` | what a value's field takes, and what is held down with a press |
 | `Look/` | Sprocket's look: palette, lettering, spacing, sizes, symbols and icons |
-| `Controls/` | the house style, and the slot in a sentence |
 | `Terminal/` | the control that opens the editor, and the screen it opens |
 | `Content/` | materials, fonts, and the mod's own metadata |
 

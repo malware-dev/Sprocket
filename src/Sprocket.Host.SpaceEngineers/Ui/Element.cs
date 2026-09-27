@@ -1,5 +1,4 @@
 using System;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Styling;
@@ -31,7 +30,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui
         Element _parent;
         IPlacement _placement;
         Action _placementChanged;
-        Deed _press;
         Action<Element, int> _released;
         Action<Element> _replaced;
         IStyle _style;
@@ -73,9 +71,6 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         /// <summary>A hairline drawn around <see cref="Bounds" />, inside it.</summary>
         public Color Edge { get; set; }
-
-        /// <summary>Painted instead of <see cref="Background" /> while the pointer is resting on this.</summary>
-        public Color Highlight { get; set; }
 
         /// <summary>Drawn instead of <see cref="Edge" /> while the pointer is resting on this.</summary>
         public Color HighlightEdge { get; set; }
@@ -156,26 +151,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui
             }
         }
 
-        /// <summary>What pressing this means.</summary>
-        public Deed Press
-        {
-            get { return _press; }
-            set { _press = value; }
-        }
-
         /// <summary>What this says while the pointer rests on it, or null for nothing.</summary>
         public Tip Tip { get; set; }
 
         /// <summary>What of this lets presses, the hover and the keyboard pass through to what is beneath it.</summary>
         public InputTransparency InputTransparency { get; set; }
-
-        /// <summary>Whether a press has business here: something to do.</summary>
-        /// <remarks>
-        ///     Reads the field rather than <see cref="Press" />, which would copy the whole struct, because
-        ///     <see cref="Under" /> asks this of every element it visits on every frame. A tip is not a reason:
-        ///     what the pointer rests on to read one is found by <see cref="SayingAt" />.
-        /// </remarks>
-        bool Pressable => _press.Means != Means.Nothing || _command != null || Focusable || TakesPointer;
 
         /// <summary>Whether this has something to say while the pointer rests on it.</summary>
         bool Says => Tip != null;
@@ -353,9 +333,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         void DrawBox(IGraphics g)
         {
-            var fill = IsHot && Highlight.A > 0 ? Highlight : Background;
-            if (fill.A > 0)
-                g.Fill(Bounds, fill);
+            if (Background.A > 0)
+                g.Fill(Bounds, Background);
 
             var edge = IsHot && HighlightEdge.A > 0 ? HighlightEdge : Edge;
             if (edge.A > 0)
@@ -394,7 +373,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui
                     return inner;
             }
 
-            return (InputTransparency & InputTransparency.Self) == 0 && Pressable && Hits(point) ? this : null;
+            return (InputTransparency & InputTransparency.Self) == 0 && TakesInput && Hits(point) ? this : null;
         }
 
         /// <summary>The deepest element at <paramref name="point" /> with something to say, or null.</summary>

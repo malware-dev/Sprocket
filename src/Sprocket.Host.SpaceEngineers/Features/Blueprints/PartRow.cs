@@ -67,9 +67,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>The pencil, which a question about the part's name hangs under.</summary>
         public Element Pencil => _pencil;
 
-        /// <summary>The blocks, as a sentence would say them.</summary>
-        public string Said => _blocks.Text;
-
         /// <summary>Says the blocks, naming them as <paramref name="world" /> calls them.</summary>
         /// <remarks>Walks the blocks for their names, so it is for whoever holds it to call only when they change.</remarks>
         public void Show(GridWorld world)

@@ -63,8 +63,6 @@ their colors under the pointer), and what pressing, hovering over and styling it
 - **Padding on a leaf** belongs to the leaf that has a use for it, such as a label or a rule, and is set
   by its style like any other property.
 - A user control is only a subtree: it derives from the layout it needs, and is what that layout is.
-- Legacy controls derive from `Ui/Legacy/Box`, a container with the `ClipsContent` they had, until they
-  are gone.
 
 ## Placement
 
@@ -172,14 +170,12 @@ margins alike.
 
 ## Focus
 
-Being focusable is part of the framework, not of each control. Keyboard support built into single
-controls in the meantime moves onto it.
+Being focusable is part of the framework, not of each control.
 
 ## Commands
 
 What pressing an element does is an `ICommand` the application implements, the way WPF's is. The
-framework never learns what a command means to the application. `Deed` stays with the old controls
-until the last of them goes.
+framework never learns what a command means to the application.
 
 ## Later
 
@@ -198,10 +194,6 @@ until the last of them goes.
 - The name of the `As` extension.
 - What a property the view sets on an element does when a style's state later changes the same
   property: whether the state wins, or the view's value is kept.
-- What `Bar` still does that HStack does not, before the last of them fold in: `Tight`, where the
-  middle may shrink but the bar reports only what its parts need, and `Tops`, where the parts sit
-  along the top rather than on the middle.
 - An items control, with a row template, in place of the six lists of rows built by hand.
 - Whether rows and columns inside a grid can share its tracks through other containers.
 - The framework's own namespace, in place of `Sprocket.Host.SpaceEngineers.Ui`.
-- Where the old controls live until the port ends, since `Ui/Legacy` would be copied with `Ui/`.

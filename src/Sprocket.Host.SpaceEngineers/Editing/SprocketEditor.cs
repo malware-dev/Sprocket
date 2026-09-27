@@ -247,14 +247,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Answer(text, chosen, false);
         }
 
-        /// <summary>Finishes the page on top the way its own Done does, for a page that finishes where it stands.</summary>
-        internal void FinishInPlace()
-        {
-            var finish = Act(Cmd.Primary, delegate { Current.Primary(); });
-            if (finish != null)
-                finish.Execute();
-        }
-
         /// <summary>An answer that finishes the page on top, the way its own way on does.</summary>
         internal void AnswerPrimary(string text, bool byDefault)
         {

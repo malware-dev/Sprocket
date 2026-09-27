@@ -10,7 +10,6 @@ using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Sim.Machine;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRage.Input;
 using Sprocket.Sim.Content;
@@ -184,9 +183,6 @@ namespace Sprocket.Sim.Simulation
                 return null;
             }
         }
-
-        /// <summary>Where the controls take the pointer and the keyboard.</summary>
-        public InputRoot Input => _view.Input;
 
         /// <summary>Whether the caret is drawn this frame.</summary>
         public bool CaretVisible

@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
     /// where a bounded one keeps to the right-hand edge.
     /// <para>
     /// Nothing is held against what is filled in until finishing is tried: <see cref="Judge" /> starts holding every field to
-    /// what it takes, and <see cref="Unjudge" /> stops, for a form given something else to ask.
+    /// what it takes, until the form is given something else to ask.
     /// </para>
     /// <para>
     /// A press on a part of it with no box of its own, such as a word or a color, gives the form the keyboard, and Enter
@@ -262,13 +262,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             for (var i = 0; i < _seen.Count; i++)
                 _seen[i] = true;
 
-            Mark();
-        }
-
-        /// <summary>Stops holding the values to anything until finishing is tried again.</summary>
-        public void Unjudge()
-        {
-            _judged = false;
             Mark();
         }
 
