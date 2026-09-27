@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -14,12 +14,12 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class OpeningTests
 {
     const string ARadiusStep = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
-        + "70 200 200 485 800 679 1315 209 type 5 enter";
+        + "70 200 200 485 800 653 1315 209 type 5 enter";
 
     /// <summary>A stage of the page showing, counted from its first.</summary>
-    static PickStage Stage(Screen screen, int at)
+    static StageColumn Stage(Screen screen, int at)
     {
-        var pick = screen.Editor.Component<PickComponent>();
+        var pick = screen.Editor.Pick();
         return pick.Stages[pick.Page + at];
     }
 
@@ -105,10 +105,10 @@ public class OpeningTests
         screen.Editor.Triggers()[1].Does[0].Opens!.Execute();
         screen.Run(2);
 
-        var pick = screen.Editor.Component<PickComponent>();
+        var pick = screen.Editor.Pick();
         Assert.Equal("Close Airlock Outer Door", screen.Editor.Screen.Title());
         Assert.True(pick.Page > 0, "the picker opened on the trigger's own page");
-        Assert.Contains(Stage(screen, 0).Entries, e => e.Text == "Airlock Outer Door" && e.IsChosen);
+        Assert.Contains(Stage(screen, 0).Entries(), e => e.Text == "Airlock Outer Door" && e.IsChosen);
 
         screen.Do("type", "Op");
         Assert.Equal("Op", Stage(screen, 1).NarrowText);
@@ -140,11 +140,11 @@ public class OpeningTests
         screen.Editor.Triggers()[1].Does[0].Opens!.Execute();
         screen.Run(2);
 
-        screen.Editor.Invoke(screen.Editor.Component<PickComponent>().Returns);
+        screen.Editor.Pick().Returns!.Execute();
         screen.Run(2);
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
 
-        screen.Editor.Invoke(screen.Editor.Component<PickComponent>().Onward);
+        screen.Editor.Pick().Onward!.Execute();
         screen.Run(2);
         Assert.Equal("Close Airlock Outer Door", screen.Editor.Screen.Title());
 
@@ -173,7 +173,7 @@ public class OpeningTests
         screen.Do("type", "Air");
 
         Assert.Equal("Close Airlock Outer Door", screen.Editor.Screen.Title());
-        Assert.Equal(2, screen.Editor.Component<PickComponent>().Page);
+        Assert.Equal(2, screen.Editor.Pick().Page);
         Assert.Equal("Air", Stage(screen, 0).NarrowText);
 
         screen.Editor.Back();
@@ -189,7 +189,7 @@ public class OpeningTests
     public void ADoublePressOnAnotherBlockFinishes()
     {
         const string anOpenStep = "60 130 type Airlock enter 60 161 200 351 560 333 1353 311 "
-            + "70 193 400 396 800 650 1365 159";
+            + "70 193 400 396 800 626 1365 159";
 
         // The step's blocks, then the outer door pressed twice.
         var screen = Screen.Fresh((anOpenStep + " 270 187 tick 2 double 138 545 tick 2").Split(' '));
@@ -223,7 +223,7 @@ public class OpeningTests
 
         screen.Editor.PressStart("When…");
         screen.Run(2);
-        screen.Editor.SetText(Stage(screen, 0).NarrowCommand, "Air");
+        Stage(screen, 0).Search("Air");
         screen.Editor.Back();
         screen.Run(2);
 

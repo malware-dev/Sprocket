@@ -440,5 +440,269 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Hot = { Edge = Palette.Notice }
         };
 
+        /// <summary>A box a value is typed into, in a form of values.</summary>
+        public static readonly TextBoxStyle Value = new TextBoxStyle(Field)
+        {
+            Base = { FontSize = 20f, Padding = new Thickness(12f, 8f) }
+        };
+
+        /// <summary>The same box holding something its value will not take.</summary>
+        public static readonly TextBoxStyle ValueWrong = new TextBoxStyle(Value)
+        {
+            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
+        };
+
+        /// <summary>What a value in a form is, beside where it is given.</summary>
+        public static readonly TextStyle ValueLabel = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint }
+        };
+
+        /// <summary>Why a form cannot be finished as it stands, beside the way to finish it.</summary>
+        public static readonly TextStyle Refusal = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Problem }
+        };
+
+        /// <summary>One of a few words a value may be, pressed to give it.</summary>
+        public static readonly ButtonStyle Word = new ButtonStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 20f,
+                Color = Palette.Muted,
+                Background = Palette.Well,
+                Edge = Palette.Line,
+                Padding = new Thickness(12f, 4f)
+            },
+            Hot = { Background = Palette.Panel, Edge = Palette.Muted }
+        };
+
+        /// <summary>The word a value has been given.</summary>
+        public static readonly ButtonStyle WordChosen = new ButtonStyle(Word)
+        {
+            Base = { Color = Palette.Ink, Background = Palette.Line }
+        };
+
+        /// <summary>The line a list hangs from, saying what is chosen in it, edged while it holds the keyboard.</summary>
+        public static readonly ElementStyle ListLine = new ElementStyle
+        {
+            Base = { Background = Palette.Well, Edge = Palette.Line, Padding = new Thickness(12f, 8f) },
+            Hot = { Background = Palette.Panel, Edge = Palette.Muted }
+        };
+
+        /// <summary>The same line saying a word its value will not take.</summary>
+        public static readonly ElementStyle ListLineWrong = new ElementStyle(ListLine)
+        {
+            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
+        };
+
+        /// <summary>A list hanging open under what opened it.</summary>
+        public static readonly WindowStyle List = new WindowStyle
+        {
+            Base = { Background = Palette.Well, Edge = Palette.Line, Padding = new Thickness(4f) }
+        };
+
+        /// <summary>A menu hanging open under the line it narrows, on the highlight tone.</summary>
+        public static readonly WindowStyle Menu = new WindowStyle
+        {
+            Base = { Background = Palette.PanelHot, Edge = Palette.Line, Padding = new Thickness(8f) }
+        };
+
+        /// <summary>One entry of a menu, lit a step past the menu's own tone under the pointer.</summary>
+        public static readonly ElementStyle MenuRow = new ElementStyle
+        {
+            Base = { Padding = new Thickness(12f, 8f) },
+            Hot = { Background = Palette.Line }
+        };
+
+        /// <summary>One entry of a list hanging open, lit under the pointer.</summary>
+        public static readonly ElementStyle ListRow = new ElementStyle
+        {
+            Base = { Padding = new Thickness(12f, 8f) },
+            Hot = { Background = Palette.Panel }
+        };
+
+        /// <summary>The words of an entry in a list hanging open.</summary>
+        public static readonly TextStyle ListWord = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Ink }
+        };
+
+        /// <summary>One column of a pick: a panel with a hairline round it.</summary>
+        public static readonly ElementStyle Column = new ElementStyle
+        {
+            Base = { Background = Palette.Panel, Edge = Palette.Line, Padding = new Thickness(16f) }
+        };
+
+        /// <summary>A column standing for a page of a pick, pressed anywhere down its length to turn to it.</summary>
+        public static readonly ElementStyle Fold = new ElementStyle
+        {
+            Base = { Background = Palette.Panel, Edge = Palette.Line, Padding = new Thickness(0f, 16f) },
+            Hot = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>What a column of a pick asks.</summary>
+        public static readonly TextStyle ColumnTitle = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
+        };
+
+        /// <summary>A quiet line under what a column asks, or about what it lists.</summary>
+        public static readonly TextStyle ColumnNote = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
+        };
+
+        /// <summary>A box a list is narrowed by typing into.</summary>
+        public static readonly TextBoxStyle Search = new TextBoxStyle(Value);
+
+        /// <summary>A line over a list saying what it is narrowed by, on a wash of its own.</summary>
+        public static readonly TextStyle Note = new TextStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 20f,
+                Color = Palette.Muted,
+                Background = Palette.SlotFill,
+                Padding = new Thickness(16f, 8f)
+            }
+        };
+
+        /// <summary>What a list says where it has nothing in it.</summary>
+        public static readonly TextStyle Nothing = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted, Padding = new Thickness(4f, 8f, 0f, 0f) }
+        };
+
+        /// <summary>One way of looking at a list, as the game draws the tabs across its terminal.</summary>
+        public static readonly ButtonStyle Tab = new ButtonStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 20f,
+                Color = Palette.Muted,
+                Background = Palette.Panel,
+                Edge = Palette.Line,
+                Padding = new Thickness(8f, 8f)
+            },
+            Hot = { Background = Palette.PanelHot, Color = Palette.Ink }
+        };
+
+        /// <summary>The way of looking at a list that is showing, the lightest plate as the game has it.</summary>
+        public static readonly ButtonStyle TabCurrent = new ButtonStyle(Tab)
+        {
+            Base = { Background = Palette.Line },
+            Hot = { Background = Palette.Line }
+        };
+
+        /// <summary>A thing to choose in a column, lit under the pointer.</summary>
+        public static readonly ElementStyle Pick = new ElementStyle
+        {
+            Base = { Padding = new Thickness(12f, 8f) },
+            Hot = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>The one thing settled on in a column, on the highlight tone at rest and a step past it under the pointer.</summary>
+        public static readonly ElementStyle Settled = new ElementStyle(Pick)
+        {
+            Base = { Background = Palette.PanelHot },
+            Hot = { Background = Palette.Line }
+        };
+
+        /// <summary>A thing listed to be read about and not chosen, or a heading over a group of them.</summary>
+        public static readonly ElementStyle Unpicked = new ElementStyle(Pick)
+        {
+            Hot = { Background = Palette.None }
+        };
+
+        /// <summary>A heading over a group of things to choose, against the first of them.</summary>
+        public static readonly ElementStyle PickHeading = new ElementStyle(Unpicked)
+        {
+            Base = { Padding = new Thickness(12f, 8f, 12f, 0f) }
+        };
+
+        /// <summary>The name of a thing to choose, at the size the game writes a block list in.</summary>
+        public static readonly TextStyle PickName = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
+        };
+
+        /// <summary>The name of a thing listed only to be read about.</summary>
+        public static readonly TextStyle PickWithheld = new TextStyle(PickName)
+        {
+            Base = { Color = Palette.Muted }
+        };
+
+        /// <summary>A heading over a group of things to choose.</summary>
+        public static readonly TextStyle PickGroup = new TextStyle(PickName)
+        {
+            Base = { Color = Palette.Faint }
+        };
+
+        /// <summary>A block's picture beside its name in a column, on a well of its own.</summary>
+        public static readonly ElementStyle Picture = new ElementStyle
+        {
+            Base = { Background = Palette.SlotFill }
+        };
+
+        /// <summary>A mark saying something has not been chosen: a ring for one of several, a box for any of them.</summary>
+        public static readonly GlyphStyle Mark = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = 16f, Tint = Palette.Faint }
+        };
+
+        /// <summary>The same mark where it is pressed by itself, lit under the pointer.</summary>
+        public static readonly GlyphStyle MarkPressed = new GlyphStyle(Mark)
+        {
+            Hot = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>A mark saying something has been chosen.</summary>
+        public static readonly GlyphStyle MarkOn = new GlyphStyle(Mark)
+        {
+            Base = { Tint = Palette.Live }
+        };
+
+        /// <summary>The same mark where it is pressed by itself.</summary>
+        public static readonly GlyphStyle MarkOnPressed = new GlyphStyle(MarkOn)
+        {
+            Hot = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>The mark of something done that a step waits for.</summary>
+        public static readonly GlyphStyle Waits = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted }
+        };
+
+        /// <summary>A choice about the picking itself, lit under the pointer.</summary>
+        public static readonly ElementStyle Option = new ElementStyle
+        {
+            Base = { Padding = new Thickness(12f, 4f) },
+            Hot = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>The words of a choice about the picking itself.</summary>
+        public static readonly TextStyle OptionWord = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted }
+        };
+
+        /// <summary>The words of the choice about the picking that holds.</summary>
+        public static readonly TextStyle OptionChosen = new TextStyle(OptionWord)
+        {
+            Base = { Color = Palette.Ink }
+        };
+
+        /// <summary>A count beside what it counts, quieter than it.</summary>
+        public static readonly TextStyle Count = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
+        };
+
     }
 }

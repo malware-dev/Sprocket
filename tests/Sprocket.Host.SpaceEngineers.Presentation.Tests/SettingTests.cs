@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -38,7 +38,7 @@ public class SettingTests
         Assert.True(screen.Shows("APPEARANCE"), "a light's colour is not grouped with how it looks");
 
         // And the block's own division is what the terminal view groups by instead.
-        screen.Editor.Invoke(What(screen).Views[1].Command);
+        What(screen).Views[1].Command!.Execute();
         screen.Run(2);
 
         Assert.True(screen.Shows("VALUES"), "the values are not grouped");
@@ -272,7 +272,7 @@ public class SettingTests
         screen.Editor.PressBlock("Approach Sensor");
         screen.Run(2);
 
-        var entries = What(screen).Entries;
+        var entries = What(screen).Entries();
         var other = entries.ToList().FindIndex(entry => entry.IsHeading && entry.Text == "Other");
         var power = entries.ToList().FindIndex(entry => entry.IsHeading && entry.Text == "Power");
 
@@ -281,8 +281,8 @@ public class SettingTests
         Assert.True(screen.Shows("Set Chime On Approach"), "the unknown member is not offered at all");
     }
 
-    static PickStage What(Screen screen)
+    static StageColumn What(Screen screen)
     {
-        return screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
+        return screen.Editor.Pick().Stages.Last();
     }
 }

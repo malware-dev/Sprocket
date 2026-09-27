@@ -14,10 +14,10 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class KeepingTests
 {
     const string ARadiusStep = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
-        + "70 200 200 485 800 679 1315 209 type 5 enter";
+        + "70 200 200 485 800 653 1315 209 type 5 enter";
 
     const string AColourStep = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
-        + "70 200 200 485 800 587 1049 374 type #FF8800 enter";
+        + "70 200 200 485 800 565 1049 374 type #FF8800 enter";
 
     const string Again = "270 182";
 

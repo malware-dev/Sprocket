@@ -1,5 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Features.Values;
 using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using VRage.Input;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -8,9 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// A value answered by choosing is chosen from the keyboard as well as with the pointer.
 /// </summary>
 /// <remarks>
-/// A field of words has a box only to hold the word, so keys that would type into it choose instead:
-/// the arrows step through the words and a letter goes to the next word starting with it. A dial is
-/// typed into, and turned a notch at a time by up and down.
+/// A field of words has no box to type into, so keys that would type choose instead: the arrows step through the words and
+/// a letter goes to the next word starting with it. A dial is typed into, and turned a notch at a time by up and down.
 /// </remarks>
 public class ChoosingKeysTests
 {
@@ -24,92 +26,95 @@ public class ChoosingKeysTests
         return new Field { Name = "Angle", Edits = Editor.Angle, Least = "-90", Most = "90", Entry = Entry.Decimal };
     }
 
-    /// <summary>A column holding the fields, with the keyboard in the first.</summary>
-    static Ask Form(params Field[] fields)
+    /// <summary>A form holding the fields, with the keyboard in the first.</summary>
+    static FieldSet Form(out InputRoot input, params Field[] fields)
     {
-        var form = Ask.Column(400f);
-        form.Values("", 1, fields, new[] { "", "", "" });
-        form.Take();
+        var form = new FieldSet();
+        form.Show(fields, new[] { "", "", "" }, new Hsv[0]);
+
+        input = new InputRoot(form);
+        form.Take(input);
         return form;
     }
+
+    static void Press(InputRoot input, MyKeys key) => input.Key(key, false, false);
 
     [Fact]
     public void ArrowsStepThroughTheWords()
     {
-        var form = Form(Words("Mode", "Standby", "Ready", "Fire"));
+        var form = Form(out var input, Words("Mode", "Standby", "Ready", "Fire"));
 
-        Assert.True(form.Chooses, "a field of words did not choose");
+        Assert.Same(form.Fields[0].Keyboard, input.Focused);
 
-        Assert.True(form.Step(1));
+        Press(input, MyKeys.Right);
         Assert.Equal("Standby", form.Answer);
 
-        Assert.True(form.Step(1));
+        Press(input, MyKeys.Right);
         Assert.Equal("Ready", form.Answer);
 
-        form.Step(1);
-        Assert.False(form.Step(1), "the words went past the last one");
+        Press(input, MyKeys.Right);
+        Press(input, MyKeys.Right);
         Assert.Equal("Fire", form.Answer);
 
-        form.Step(-1);
+        Press(input, MyKeys.Left);
         Assert.Equal("Ready", form.Answer);
     }
 
     [Fact]
     public void ALetterGoesToTheNextWordStartingWithIt()
     {
-        var form = Form(Words("Mode", "Standby", "Ready", "Stop"));
+        var form = Form(out var input, Words("Mode", "Standby", "Ready", "Stop"));
 
-        Assert.True(form.Letter('s'));
+        input.Text('s');
         Assert.Equal("Standby", form.Answer);
 
-        Assert.True(form.Letter('S'));
+        input.Text('S');
         Assert.Equal("Stop", form.Answer);
 
-        Assert.True(form.Letter('s'));
+        input.Text('s');
         Assert.Equal("Standby", form.Answer);
 
-        Assert.False(form.Letter('x'));
+        input.Text('x');
         Assert.Equal("Standby", form.Answer);
     }
 
     [Fact]
     public void ASwitchIsSteppedLikeAnyTwoWords()
     {
-        var form = Form(Words("Power", "On", "Off"));
+        var form = Form(out var input, Words("Power", "On", "Off"));
 
-        form.Step(1);
+        Press(input, MyKeys.Right);
         Assert.Equal("On", form.Answer);
 
-        form.Step(1);
+        Press(input, MyKeys.Right);
         Assert.Equal("Off", form.Answer);
     }
 
     [Fact]
     public void TabComesToAFieldOfWordsAndChoosingKeepsTheOthers()
     {
-        var form = Form(Angle(), Words("Mode", "Standby", "Ready"));
+        var form = Form(out var input, Angle(), Words("Mode", "Standby", "Ready"));
 
-        Assert.False(form.Chooses, "the dial was taken for words");
-        Assert.True(form.Turns, "the dial did not turn");
+        Assert.Same(form.Fields[0].Keyboard, input.Focused);
 
-        form.Next();
-        Assert.True(form.Chooses, "Tab did not come to the words");
+        Press(input, MyKeys.Tab);
+        Assert.Same(form.Fields[1].Keyboard, input.Focused);
 
-        form.Letter('r');
-        Assert.Equal("Ready", form.Answer);
+        input.Text('r');
+        Assert.Equal("Ready", form.Fields[1].Text);
     }
 
     [Fact]
     public void UpAndDownTurnTheDialANotchWithinItsBounds()
     {
-        var form = Form(Angle());
+        var form = Form(out var input, Angle());
 
-        form.Step(1);
-        form.Step(1);
+        Press(input, MyKeys.Up);
+        Press(input, MyKeys.Up);
         Assert.Equal("10.0", form.Answer);
 
         for (var i = 0; i < 40; i++)
-            form.Step(-1);
+            Press(input, MyKeys.Down);
 
         Assert.Equal("-90.0", form.Answer);
     }

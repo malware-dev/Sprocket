@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
@@ -12,6 +13,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Editing
@@ -67,6 +69,12 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         /// <summary>What the editor says, in the player's language.</summary>
         public Texts Texts { get; }
+
+        /// <summary>Where the screen showing the editor takes the keyboard and the pointer, or null while nothing shows it.</summary>
+        public InputRoot Input { get; set; }
+
+        /// <summary>The windows open over the screen showing the editor, or null while nothing shows it.</summary>
+        public WindowLayer Windows { get; set; }
 
         /// <summary>What the person at the editor needs told above whatever page is showing, or null for nothing.</summary>
         public Notice Notice => _notice;
@@ -255,6 +263,14 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         internal void Answer(string text, Action chosen)
         {
             Answer(text, chosen, false);
+        }
+
+        /// <summary>Finishes the page on top the way its own Done does, for a page that finishes where it stands.</summary>
+        internal void FinishInPlace()
+        {
+            var finish = Act(Cmd.Primary, delegate { Current.Primary(); });
+            if (finish != null)
+                finish.Execute();
         }
 
         /// <summary>

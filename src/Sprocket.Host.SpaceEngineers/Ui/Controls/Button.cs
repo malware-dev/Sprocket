@@ -1,3 +1,4 @@
+using System;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRageMath;
@@ -85,10 +86,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             return _label.DesiredSize;
         }
 
-        /// <inheritdoc />
+        /// <summary>Puts the words in the middle of the room the button is given, wider than they need or not.</summary>
         protected override void ArrangeContent(RectangleF bounds)
         {
-            _label.Arrange(bounds);
+            var width = Math.Min(_label.DesiredSize.X, bounds.Width);
+            _label.Arrange(new RectangleF(bounds.X + (bounds.Width - width) * 0.5f, bounds.Y, width, bounds.Height));
         }
 
         /// <inheritdoc />

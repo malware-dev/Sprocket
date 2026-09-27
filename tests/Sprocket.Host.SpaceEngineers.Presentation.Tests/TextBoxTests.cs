@@ -21,7 +21,7 @@ public class TextBoxTests
     {
         var (box, easel, input) = Laid("Airlock door");
 
-        input.PointerDown(At(box, easel, "Air"), 1);
+        input.PointerDown(At(box, easel, "Air"), 1, false, false);
         input.PointerUp(At(box, easel, "Air"));
 
         Assert.Equal(3, box.Caret);
@@ -34,7 +34,7 @@ public class TextBoxTests
     {
         var (box, easel, input) = Laid("Airlock door");
 
-        input.PointerDown(At(box, easel, "Air"), 1);
+        input.PointerDown(At(box, easel, "Air"), 1, false, false);
         input.PointerMove(At(box, easel, "Airlock"));
         input.PointerUp(At(box, easel, "Airlock"));
 
@@ -47,7 +47,7 @@ public class TextBoxTests
     {
         var (box, easel, input) = Laid("Airlock door");
 
-        input.PointerDown(At(box, easel, "Airlock do"), 2);
+        input.PointerDown(At(box, easel, "Airlock do"), 2, false, false);
         input.PointerUp(At(box, easel, "Airlock do"));
 
         Assert.Equal("door", box.SelectedText());
@@ -159,7 +159,7 @@ public class TextBoxTests
         easel.Draw(Wide, High);
         input.Key(MyKeys.Left, false, false);
         input.Key(MyKeys.Home, true, false);
-        input.PointerDown(from, 1);
+        input.PointerDown(from, 1, false, false);
         input.PointerMove(to);
         input.PointerUp(to);
         easel.Draw(Wide, High);

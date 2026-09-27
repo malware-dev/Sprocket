@@ -1,10 +1,11 @@
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -87,18 +88,18 @@ public class EditorTests
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
 
-        PickStage What() => editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
-            .Single(s => s.Entries.Any(e => e.Text == "Set Pattern"));
+        StageColumn What() => editor.Pick().Stages
+            .Single(s => s.Entries().Any(e => e.Text == "Set Pattern"));
 
-        var pattern = What().Entries.Single(e => e.Text == "Set Pattern");
+        var pattern = What().Entries().Single(e => e.Text == "Set Pattern");
         Assert.True(pattern.IsWithheld);
         Assert.Equal("pending", pattern.Status);
-        Assert.False(What().Entries.Single(e => e.Text == "Switch on").IsWithheld);
+        Assert.False(What().Entries().Single(e => e.Text == "Switch on").IsWithheld);
 
         // It says why where the pointer rests, and gives a press nothing to do.
-        Assert.StartsWith("Set this in the terminal", pattern.Tip);
-        Assert.Equal(0, pattern.Command);
-        Assert.Null(What().Entries.Single(e => e.Text == "Switch on").Tip);
+        Assert.StartsWith("Set this in the terminal", pattern.Why);
+        Assert.False(pattern.IsPickable);
+        Assert.Null(What().Entries().Single(e => e.Text == "Switch on").Why);
     }
 
     /// <summary>
@@ -118,8 +119,8 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("do something");
 
-        PickStage What() => editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
-            .Single(s => s.Entries.Any(e => e.Text == "Switch on"));
+        StageColumn What() => editor.Pick().Stages
+            .Single(s => s.Entries().Any(e => e.Text == "Switch on"));
 
         editor.PressBlock("Airlock Light");
         Assert.StartsWith("Sprocket has not checked this block yet", What().Note);
@@ -155,8 +156,8 @@ public class EditorTests
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
 
-        IEnumerable<PickOption> Offered() =>
-            editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages).SelectMany(s => s.Entries);
+        IEnumerable<PickRow> Offered() =>
+            editor.Pick().Stages.SelectMany(s => s.Entries());
 
         editor.PressChoice("AI Behavior On/Off");
         Assert.True(Offered().Single(e => e.Text == "AI Behavior On/Off").IsChosen);
@@ -191,13 +192,13 @@ public class EditorTests
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
 
-        IEnumerable<PickStage> Stages() => editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages);
+        IEnumerable<StageColumn> Stages() => editor.Pick().Stages;
 
-        Assert.Contains(Stages().SelectMany(s => s.Entries), e => e.Text == "Set Mode");
-        Assert.DoesNotContain(Stages().SelectMany(s => s.Entries), e => e.Text == "Set Mode:");
+        Assert.Contains(Stages().SelectMany(s => s.Entries()), e => e.Text == "Set Mode");
+        Assert.DoesNotContain(Stages().SelectMany(s => s.Entries()), e => e.Text == "Set Mode:");
 
-        editor.Invoke(Stages().SelectMany(s => s.Views).Single(v => v.Text == "Terminal").Command);
-        Assert.Contains(Stages().SelectMany(s => s.Entries), e => e.Text == "Mode:");
+        Stages().Single(s => s.Views.Count > 0).PressView("Terminal");
+        Assert.Contains(Stages().SelectMany(s => s.Entries()), e => e.Text == "Mode:");
     }
 
     /// <summary>
@@ -228,17 +229,16 @@ public class EditorTests
         editor.PressAdd("do something");
         editor.PressBlock("Airlock Light");
 
-        IEnumerable<PickOption> Offered() =>
-            editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages).SelectMany(s => s.Entries);
+        IEnumerable<PickRow> Offered() =>
+            editor.Pick().Stages.SelectMany(s => s.Entries());
 
         Assert.DoesNotContain(Offered(), e => e.Text == "Pattern" || e.Text == "Set Pattern");
 
-        editor.Invoke(editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
-            .SelectMany(s => s.Views).Single(v => v.Text == "Terminal").Command);
+        editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
         var pattern = Offered().Single(e => e.Text == "Pattern");
         Assert.True(pattern.IsWithheld);
         Assert.Equal("not supported", pattern.Status);
-        Assert.Equal(0, pattern.Command);
+        Assert.False(pattern.IsPickable);
     }
 
     /// <summary>
@@ -738,18 +738,10 @@ public class EditorTests
         Assert.True(ship.Automation.Sequences[0].Enabled);
     }
 
-    /// <summary>
-    /// Narrowing a list does not renumber the commands after it.
-    /// </summary>
-    /// <remarks>
-    /// This is the case that actually used to break, and the reason the search box went dead
-    /// weeks ago. Under a counter, an id was a position in this rebuild's registration order,
-    /// so filtering the entity list to fewer rows shifted every command registered after it -
-    /// including everything in the next stage. A target holding one was then pressing
-    /// somebody else's button, or nothing at all.
-    /// </remarks>
+    /// <summary>Narrowing a list keeps what comes after it: the box being typed into, the kinds, and the next column's rows.</summary>
+    /// <remarks>A control made again under somebody would take the caret and the pointer's place with it.</remarks>
     [Fact]
-    public void NarrowingAListDoesNotRenumberWhatComesAfterIt()
+    public void NarrowingAListKeepsWhatComesAfterIt()
     {
         var ship = Build();
         var editor = ship.Editor;
@@ -759,22 +751,22 @@ public class EditorTests
         editor.PressBlock("Inner Door");
         ship.Tick();
 
-        var stages = editor.Component<PickComponent>().Stages;
-        var narrow = stages[0].NarrowCommand;
-        var kinds = stages[0].Filters[0].Command;
-        var firstChoice = stages[1].Entries[0].Command;
-        var rows = stages[0].Entries.Count;
+        var stages = editor.Pick().Stages;
+        var narrow = stages[0].Narrow;
+        var kinds = stages[0].Kinds()[0];
+        var firstChoice = stages[1].Entries()[0];
+        var rows = stages[0].Entries().Count;
 
         // Type something that leaves fewer rows in the first stage.
-        editor.SetText(narrow, "inner");
+        stages[0].Search("inner");
         ship.Tick();
 
-        stages = editor.Component<PickComponent>().Stages;
-        Assert.True(stages[0].Entries.Count < rows, "the search did not narrow anything");
+        stages = editor.Pick().Stages;
+        Assert.True(stages[0].Entries().Count < rows, "the search did not narrow anything");
 
-        Assert.Equal(narrow, stages[0].NarrowCommand);
-        Assert.Equal(kinds, stages[0].Filters[0].Command);
-        Assert.Equal(firstChoice, stages[1].Entries[0].Command);
+        Assert.Same(narrow, stages[0].Narrow);
+        Assert.Same(kinds, stages[0].Kinds()[0]);
+        Assert.Same(firstChoice, stages[1].Entries()[0]);
     }
 
     /// <summary>
@@ -809,12 +801,16 @@ public class EditorTests
 
         // Four rows for three blocks: the construct's own programmable block is a block on the
         // grid like any other, and it has a switch, so it is offered like any other.
-        var rows = ship.Editor.Component<PickComponent>().Stages[0].Entries;
+        var rows = ship.Editor.Pick().Stages[0].Entries();
         Assert.Equal(4, rows.Count);
 
-        var seen = new HashSet<int>();
+        // Each row takes its own block, and only that one.
         for (var i = 0; i < rows.Count; i++)
-            Assert.True(seen.Add(rows[i].Command), $"row {i} shares a command id with an earlier row");
+        {
+            rows[i].Pick(Held.Alone, 1);
+            Assert.True(rows[i].IsChosen, $"row {i} did not take its own block");
+            Assert.Single(rows, r => r.IsChosen);
+        }
     }
 
     /// <summary>
@@ -1305,13 +1301,13 @@ public class EditorTests
         ship.Editor.PressBlock("Airlock Button");
         ship.Editor.TickBlock("Inner Door");
 
-        var what = ship.Editor.Component<PickComponent>().Stages[1];
-        Assert.Empty(what.Entries);
+        var what = ship.Editor.Pick().Stages[1];
+        Assert.Empty(what.Entries());
         Assert.NotEqual("", what.EmptyText);
     }
 
     static string Listed(SprocketEditor editor) =>
-        string.Join(", ", editor.Component<PickComponent>().Stages[0].Entries.Select(e => e.Text));
+        string.Join(", ", editor.Pick().Stages[0].Entries().Select(e => e.Text));
 
     [Fact]
     public void ItOpensOnTheMachines_NotOnAListOfBlocks()
@@ -1337,20 +1333,20 @@ public class EditorTests
         editor.PressStart("When…");
 
         // One pane to begin with; the second appears once it has something to be about.
-        Assert.Single(editor.Component<PickComponent>().Stages);
+        Assert.Single(editor.Pick().Stages);
         Assert.False(editor.Screen.HasPrimary);
 
         editor.PressBlock("Airlock Button");
-        Assert.Equal(2, editor.Component<PickComponent>().Stages.Count);
+        Assert.Equal(2, editor.Pick().Stages.Count);
 
         // Still nothing to move on to - the path is not finished.
         Assert.False(editor.Screen.HasPrimary);
 
         // What happens, and then beside it what the trigger does.
         editor.PressChoice("is pressed");
-        var stages = editor.Component<PickComponent>().Stages;
+        var stages = editor.Pick().Stages;
         Assert.Equal(3, stages.Count);
-        Assert.Contains(stages[2].Entries, e => e.Text == "A new sequence" && e.IsChosen);
+        Assert.Contains(stages[2].Entries(), e => e.Text == "A new sequence" && e.IsChosen);
         Assert.True(editor.Screen.HasPrimary);
 
         // A new sequence is what a trigger usually does, so finishing lands on its sentence.
@@ -1726,10 +1722,10 @@ public class EditorTests
 
         editor.PressAdd("do something");
         Assert.Equal("Do something", editor.Screen.Title());
-        Assert.Single(editor.Component<PickComponent>().Stages);
+        Assert.Single(editor.Pick().Stages);
 
         editor.PressBlock("Inner Door");
-        Assert.Equal(2, editor.Component<PickComponent>().Stages.Count);
+        Assert.Equal(2, editor.Pick().Stages.Count);
 
         editor.PressChoice("Close");
         editor.PressPrimary();
@@ -1926,7 +1922,7 @@ public class EditorTests
     /// </remarks>
     static string[] Taken(SprocketEditor editor)
     {
-        return editor.Component<PickComponent>().Stages[0].Entries
+        return editor.Pick().Stages[0].Entries()
             .Where(e => e.IsChosen).Select(e => e.Text).ToArray();
     }
 }

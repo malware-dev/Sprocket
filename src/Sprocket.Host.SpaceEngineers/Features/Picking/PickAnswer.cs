@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.World;
 
-namespace Sprocket.Host.SpaceEngineers.Editing
+namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>
     /// What somebody settled on: the things to act on, and what should happen to them.

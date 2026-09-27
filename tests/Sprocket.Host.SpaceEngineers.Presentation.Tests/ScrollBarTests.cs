@@ -58,7 +58,7 @@ public class ScrollBarTests
         var (scroll, content, easel, input) = Laid(1000f);
         var top = new Vector2(Wide - Bar / 2f, 10f);
 
-        input.PointerDown(scroll.Under(top), top, 1);
+        input.PointerDown(scroll.Under(top), top, 1, false, false);
         Assert.True(scroll.IsHeld);
         Assert.Equal(Held, scroll.Thumb);
 
@@ -80,7 +80,7 @@ public class ScrollBarTests
         var (scroll, content, easel, input) = Laid(1000f);
         var bottom = new Vector2(Wide - Bar / 2f, High - 1f);
 
-        input.PointerDown(scroll.Under(bottom), bottom, 1);
+        input.PointerDown(scroll.Under(bottom), bottom, 1, false, false);
         input.PointerUp(bottom);
         easel.Draw(Wide, High);
 

@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Picking;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -41,8 +40,8 @@ public class TargetTests
         screen.Editor.PressChoice("is pressed");
         screen.Run(2);
 
-        var does = screen.Editor.Component<PickComponent>().Stages[2];
-        Assert.Equal(new[] { "A single action…", "A new sequence" }, does.Entries.Select(e => e.Text));
+        var does = screen.Editor.Pick().Stages[2];
+        Assert.Equal(new[] { "A single action…", "A new sequence" }, does.Entries().Select(e => e.Text));
         Assert.Empty(does.Options);
     }
 
@@ -88,10 +87,10 @@ public class TargetTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Button");
 
-        Assert.Equal(2, screen.Editor.Component<PickComponent>().Stages.Count);
+        Assert.Equal(2, screen.Editor.Pick().Stages.Count);
 
         screen.Editor.PressChoice("is pressed");
-        Assert.Equal(3, screen.Editor.Component<PickComponent>().Stages.Count);
+        Assert.Equal(3, screen.Editor.Pick().Stages.Count);
     }
 
     /// <summary>Stopping lists only what there is to stop, and nothing is finished until one is chosen.</summary>
@@ -104,17 +103,17 @@ public class TargetTests
         screen.Editor.PressChoice("stop");
         screen.Run(2);
 
-        var does = screen.Editor.Component<PickComponent>().Stages[2];
-        Assert.Equal(new[] { "Cycle" }, does.Entries.Select(e => e.Text));
+        var does = screen.Editor.Pick().Stages[2];
+        Assert.Equal(new[] { "Cycle" }, does.Entries().Select(e => e.Text));
         Assert.False(screen.Editor.Screen.HasPrimary, "stopping finished without saying what");
 
         // And back to running offers the two that make something again, a new sequence already chosen,
         // with the sequences under their own heading after them.
         screen.Editor.PressChoice("run");
         Assert.Equal(new[] { "A single action…", "A new sequence", "Sequences", "Cycle" },
-            does.Entries.Select(e => e.Text));
-        Assert.Contains(does.Entries, e => e.Text == "A new sequence" && e.IsChosen);
-        Assert.True(does.Entries[2].IsHeading, "the sequences are not set apart");
+            does.Entries().Select(e => e.Text));
+        Assert.Contains(does.Entries(), e => e.Text == "A new sequence" && e.IsChosen);
+        Assert.True(does.Entries()[2].IsHeading, "the sequences are not set apart");
     }
 
     /// <summary>

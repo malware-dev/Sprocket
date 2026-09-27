@@ -2,7 +2,7 @@ using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
 using VRageMath;
 using Xunit;
@@ -43,7 +43,7 @@ public class ReachTests
 
         picker.Do(At(Screen.Ui(row.At.X, row.At.Y)));
 
-        Assert.DoesNotContain(Blocks(picker).Entries, e => e.IsChosen);
+        Assert.DoesNotContain(Blocks(picker).Entries(), e => e.IsChosen);
     }
 
     /// <summary>
@@ -92,8 +92,8 @@ public class ReachTests
     {
         var picker = Screen.Fresh(OpenThePicker.Split(' '));
 
-        var first = Blocks(picker).Filters[0].Label;
-        var other = Blocks(picker).Filters[1].Label;
+        var first = Blocks(picker).Kinds()[0].Text;
+        var other = Blocks(picker).Kinds()[1].Text;
 
         // The line the list hangs from. Pressing it opens the list, and pressing it again puts the
         // list away, which is what a thing that opens downward is expected to do.
@@ -131,7 +131,7 @@ public class ReachTests
     {
         var picker = Screen.Fresh(OpenThePicker.Split(' '));
 
-        var first = Blocks(picker).Filters[0].Label;
+        var first = Blocks(picker).Kinds()[0].Text;
         var line = picker.Text(first);
 
         // The list hangs open, and the pointer rests on the line that opened it.
@@ -217,7 +217,7 @@ public class ReachTests
             screen.Editor.PressStart("When…");
             screen.Run(2);
 
-            var line = screen.Text(Blocks(screen).Filters[0].Label);
+            var line = screen.Text(Blocks(screen).Kinds()[0].Text);
             screen.Do(At(Screen.Ui(line.At.X, line.At.Y)));
         });
 
@@ -332,10 +332,10 @@ public class ReachTests
         new[] { ((int)point.X).ToString(), ((int)point.Y).ToString() };
 
     static string Current(Screen screen) =>
-        Blocks(screen).Filters.First(f => f.IsCurrent).Label;
+        Blocks(screen).Kinds().First(f => f.IsCurrent).Text;
 
-    static PickStage Blocks(Screen screen) =>
-        screen.Editor.Component<PickComponent>().Stages[0];
+    static StageColumn Blocks(Screen screen) =>
+        screen.Editor.Pick().Stages[0];
 
     /// <summary>The one row on the root that both leads somewhere and carries a switch.</summary>
     static StatusRow Switchable(Screen screen) =>

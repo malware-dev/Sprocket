@@ -7,7 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui;
@@ -59,10 +59,7 @@ namespace Sprocket.Sim.Driving
             editor.Sentence().Rows.OfType<StepRow>().ToList();
 
         /// <summary>Presses a block's row, which takes that block and drops whatever was taken before.</summary>
-        public static void PressBlock(this SprocketEditor editor, string name)
-        {
-            editor.SetNumber(Row(editor, name), (int)Held.Alone);
-        }
+        public static void PressBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Alone, 1);
 
         /// <summary>
         /// Ticks a block's box, which takes it as well as whatever was already taken.
@@ -71,10 +68,7 @@ namespace Sprocket.Sim.Driving
         /// The other of the two acts a row offers. A test building a set of blocks up is doing what the
         /// box is for, and pressing the rows would leave it with the last one only.
         /// </remarks>
-        public static void TickBlock(this SprocketEditor editor, string name)
-        {
-            editor.SetNumber(Row(editor, name), (int)Held.Also);
-        }
+        public static void TickBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Also, 1);
 
         /// <summary>
         /// Reaches from the last block taken on its own to this one, taking everything between.
@@ -83,9 +77,41 @@ namespace Sprocket.Sim.Driving
         /// In the order the blocks are listed rather than the order they were pressed, because a run is
         /// what somebody drew down the screen.
         /// </remarks>
-        public static void ThroughBlock(this SprocketEditor editor, string name)
+        public static void ThroughBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Through, 1);
+
+        /// <summary>The strip of the pick the editor is on, or an exception naming the screen.</summary>
+        public static PickStrip Pick(this SprocketEditor editor)
         {
-            editor.SetNumber(Row(editor, name), (int)Held.Through);
+            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip;
+            return strip ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a pick.");
+        }
+
+        /// <summary>The things a column offers, in the order they stand.</summary>
+        public static List<PickRow> Entries(this StageColumn column) => column.Rows.OfType<PickRow>().ToList();
+
+        /// <summary>The choices about the picking a column offers, in the order they stand.</summary>
+        public static List<OptionRow> Choices(this StageColumn column) => column.Options.OfType<OptionRow>().ToList();
+
+        /// <summary>The kinds a column can be narrowed to, in the order they stand.</summary>
+        public static List<KindRow> Kinds(this StageColumn column) => column.Kinds.OfType<KindRow>().ToList();
+
+        /// <summary>Types <paramref name="words" /> over whatever is in the box that narrows a column, as a keyboard would.</summary>
+        public static void Search(this StageColumn column, string words) => Retype(column.Narrow, words);
+
+        /// <summary>Types <paramref name="words" /> over whatever is in the box that narrows a column's kinds, as a keyboard would.</summary>
+        public static void SearchKinds(this StageColumn column, string words) => Retype(column.KindNarrow, words);
+
+        /// <summary>Presses the tab of a column's view saying <paramref name="text" />.</summary>
+        public static void PressView(this StageColumn column, string text) =>
+            column.Views.First(v => v.Text == text).Command!.Execute();
+
+        static void Retype(TextBox box, string words)
+        {
+            box.SelectAll();
+            if (string.IsNullOrEmpty(words))
+                box.Backspace();
+            else
+                box.Insert(words);
         }
 
         /// <summary>
@@ -185,17 +211,17 @@ namespace Sprocket.Sim.Driving
 
             foreach (var pane in editor.Stages())
             {
-                var option = pane.Options.FirstOrDefault(e => e.Text == text);
+                var option = pane.Choices().FirstOrDefault(e => e.Text == text);
                 if (option != null)
                 {
-                    editor.Invoke(option.Command);
+                    option.Command!.Execute();
                     return;
                 }
 
-                var entry = pane.Entries.FirstOrDefault(e => e.Text == text);
+                var entry = pane.Entries().FirstOrDefault(e => e.Text == text);
                 if (entry != null)
                 {
-                    editor.Invoke(entry.Command);
+                    entry.Pick(Held.Alone, 1);
                     return;
                 }
             }
@@ -206,7 +232,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen.</summary>
         public static bool HasChoice(this SprocketEditor editor, string text) =>
             editor.Choices().Any(r => r.Text == text)
-            || editor.Stages().Any(p => p.Options.Any(e => e.Text == text) || p.Entries.Any(e => e.Text == text));
+            || editor.Stages().Any(p => p.Choices().Any(e => e.Text == text) || p.Entries().Any(e => e.Text == text));
 
         /// <summary>The answers on a question's page, in the order they are offered, or none where the page asks nothing.</summary>
         /// <remarks>Asks the page for its view first, which is what makes it where nothing has drawn the page yet.</remarks>
@@ -404,15 +430,18 @@ namespace Sprocket.Sim.Driving
         public static void Name(this SprocketEditor editor, string name) =>
             editor.SetText(editor.Screen.RenameCommand(), name);
 
-        /// <summary>The panes of any picker on the screen, from the page it is on.</summary>
-        static IEnumerable<PickStage> Stages(this SprocketEditor editor) =>
-            editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages.Skip(p.Page));
-
-        /// <summary>The command of the block row saying <paramref name="name" /> in a picker, or an exception naming the screen.</summary>
-        static int Row(SprocketEditor editor, string name)
+        /// <summary>The columns of any pick on the screen, from the page it is on.</summary>
+        static IEnumerable<StageColumn> Stages(this SprocketEditor editor)
         {
-            return (editor.Stages().SelectMany(p => p.Entries).FirstOrDefault(e => e.Text == name)
-                    ?? throw new InvalidOperationException($"No block '{name}' on '{editor.Screen.Title()}'.")).Command;
+            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip;
+            return strip == null ? Enumerable.Empty<StageColumn>() : strip.Stages.Skip(strip.Page);
+        }
+
+        /// <summary>The row saying <paramref name="name" /> in a pick, or an exception naming the screen.</summary>
+        static PickRow Row(SprocketEditor editor, string name)
+        {
+            return editor.Stages().SelectMany(p => p.Entries()).FirstOrDefault(e => e.Text == name)
+                   ?? throw new InvalidOperationException($"No block '{name}' on '{editor.Screen.Title()}'.");
         }
 
         /// <summary>Presses the button saying <paramref name="label" />, after the plus of anything that adds, on the page the editor is on.</summary>

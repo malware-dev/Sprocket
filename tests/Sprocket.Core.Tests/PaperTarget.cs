@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using System.Text;
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -51,10 +51,13 @@ static class PaperTarget
             paper.Append("notice (").Append(editor.Notice.Level).Append("): ").AppendLine(editor.Notice.Text);
 
         foreach (var component in screen.Components)
-            paper.Append(Draw(world, component));
+            paper.Append(Draw(component));
 
         if (editor.Current is SequencePage sequence)
             paper.Append(Draw(world, editor, sequence));
+
+        if (editor.Current is PickPage || editor.Current is TimerPage)
+            paper.Append(Draw(editor.Pick()));
 
         return paper.ToString();
     }
@@ -67,40 +70,40 @@ static class PaperTarget
     /// forgetting to say how a target shows it is silent everywhere else; here it stops the build's
     /// tests until somebody has answered.
     /// </remarks>
-    static string Draw(GridWorld world, EditorComponent component)
+    static string Draw(EditorComponent component)
     {
-        var paper = new StringBuilder();
-
-        if (component is PickComponent pick)
-        {
-            foreach (var stage in pick.Stages)
-            {
-                paper.Append("pick: ").AppendLine(stage.Title);
-
-                if (Some(stage.Subtitle))
-                    paper.Append("  ").AppendLine(stage.Subtitle);
-
-                foreach (var option in stage.Options)
-                    paper.Append("  option ").AppendLine(option.Text);
-
-                foreach (var entry in stage.Entries)
-                {
-                    paper.Append("  ").Append(entry.IsChosen ? "[x] " : "[ ] ").Append(entry.Text);
-
-                    if (Some(entry.Secondary))
-                        paper.Append(" - ").Append(entry.Secondary);
-
-                    paper.AppendLine();
-                }
-            }
-
-            return paper.ToString();
-        }
-
         throw new InvalidOperationException(
             $"Core produced a {component.GetType().Name} and nothing here knows what a target should "
             + "show for one. Say what it looks like on paper before shipping it to a real target, or "
             + "the first anybody hears of it is a blank space in the game.");
+    }
+
+    /// <summary>A pick's columns on the page showing: what each asks, its choices about the picking, and what it offers, chosen or not.</summary>
+    static string Draw(PickStrip pick)
+    {
+        var paper = new StringBuilder();
+        foreach (var stage in pick.Stages.Skip(pick.Page))
+        {
+            paper.Append("pick: ").AppendLine(stage.Title);
+
+            if (Some(stage.Subtitle))
+                paper.Append("  ").AppendLine(stage.Subtitle);
+
+            foreach (var option in stage.Choices())
+                paper.Append("  option ").AppendLine(option.Text);
+
+            foreach (var entry in stage.Entries())
+            {
+                paper.Append("  ").Append(entry.IsChosen ? "[x] " : "[ ] ").Append(entry.Text);
+
+                if (Some(entry.Secondary))
+                    paper.Append(" - ").Append(entry.Secondary);
+
+                paper.AppendLine();
+            }
+        }
+
+        return paper.ToString();
     }
 
     /// <summary>A sequence's page: its steps, one numbered line each, and what undo and redo would do.</summary>

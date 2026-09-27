@@ -24,7 +24,7 @@ public class InputRootTests
         var button = new Button { Text = "Done", Command = new Relay(() => count++) };
         var input = Laid(new VStack { Children = { button } });
 
-        input.PointerDown(Middle(button), 1);
+        input.PointerDown(Middle(button), 1, false, false);
         input.PointerUp(Middle(button));
 
         Assert.Equal(1, count);
@@ -38,7 +38,7 @@ public class InputRootTests
         var button = new Button { Text = "Done", Command = new Relay(() => count++) };
         var input = Laid(new VStack { Children = { button } });
 
-        input.PointerDown(Middle(button), 1);
+        input.PointerDown(Middle(button), 1, false, false);
         input.PointerUp(new Vector2(Wide - 1f, High - 1f));
 
         Assert.Equal(0, count);
@@ -55,7 +55,7 @@ public class InputRootTests
 
         Assert.False(button.IsEnabled);
 
-        input.PointerDown(Middle(button), 1);
+        input.PointerDown(Middle(button), 1, false, false);
         input.PointerUp(Middle(button));
         Assert.Equal(0, count);
 
@@ -70,11 +70,11 @@ public class InputRootTests
         var box = new TextBox { Placement = Fixed.Wide(200f) };
         var input = Laid(new VStack { Children = { box } });
 
-        input.PointerDown(Middle(box), 1);
+        input.PointerDown(Middle(box), 1, false, false);
         Assert.Same(box, input.Focused);
         Assert.True(box.IsFocused);
 
-        input.PointerDown(new Vector2(Wide - 1f, High - 1f), 1);
+        input.PointerDown(new Vector2(Wide - 1f, High - 1f), 1, false, false);
         Assert.Null(input.Focused);
         Assert.False(box.IsFocused);
     }

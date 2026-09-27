@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Developing;
-using Sprocket.Host.SpaceEngineers.Picking;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
@@ -206,10 +205,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         public static ComponentView For(EditorComponent component)
         {
-            var pick = component as PickComponent;
-            if (pick != null)
-                return new PickView(pick);
-
             var script = component as ScriptComponent;
             if (script != null)
                 return new ScriptView(script);

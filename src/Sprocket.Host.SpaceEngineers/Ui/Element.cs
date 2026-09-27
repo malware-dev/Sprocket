@@ -523,10 +523,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui
 
         /// <summary>
         ///     Told that a press has begun on this at <paramref name="point" />, the <paramref name="presses" />th in quick
-        ///     succession.
+        ///     succession, with <paramref name="shift" /> and <paramref name="ctrl" /> saying whether those keys were held.
         /// </summary>
         /// <remarks>The pointer's moves and its release come to this until it is released, wherever they are.</remarks>
-        public virtual void OnPointerDown(Vector2 point, int presses)
+        public virtual void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
         }
 

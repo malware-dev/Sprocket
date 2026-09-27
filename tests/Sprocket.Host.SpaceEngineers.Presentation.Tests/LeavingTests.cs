@@ -17,7 +17,7 @@ public class LeavingTests
     const string Back = "25 62";
 
     const string WantsValues = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
-        + "70 200 200 485 800 679";
+        + "70 200 200 485 800 653";
 
     [Fact]
     public void LeavingAFilledPickerAsksFirst()

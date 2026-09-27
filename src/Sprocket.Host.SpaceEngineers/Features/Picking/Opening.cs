@@ -1,4 +1,4 @@
-namespace Sprocket.Host.SpaceEngineers.Editing
+namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>
     /// Which column a picker opens on: the one standing for the part pressed to open it, with the

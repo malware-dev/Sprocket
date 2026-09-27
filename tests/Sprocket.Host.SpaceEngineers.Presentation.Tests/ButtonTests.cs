@@ -2,7 +2,6 @@ using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 using Xunit;
@@ -44,10 +43,21 @@ public class ButtonTests
     public void ItsWordsSitInsideItsPadding()
     {
         var button = new Button { Text = "Done", Style = Go };
-        var easel = new Easel(new VStack { Children = { button } }, Wide, High);
+        var easel = new Easel(new HStack { Children = { button } }, Wide, High);
 
         Assert.Equal(24f + 16f, button.DesiredSize.Y, 3);
         Assert.Equal(button.Bounds.X + 16f, Words(easel).Position.X / easel.Pixels, 2);
+    }
+
+    /// <summary>Given more room than its words need, it puts them in the middle of it.</summary>
+    [Fact]
+    public void ItsWordsSitInTheMiddleOfMoreRoom()
+    {
+        var button = new Button { Text = "Done", Style = Go };
+        var easel = new Easel(new VStack { Children = { button } }, Wide, High);
+
+        var words = button.DesiredSize.X - 32f;
+        Assert.Equal(button.Bounds.X + (button.Bounds.Width - words) / 2f, Words(easel).Position.X / easel.Pixels, 2);
     }
 
     /// <summary>Hot, it takes its hot fill; left, it goes back.</summary>

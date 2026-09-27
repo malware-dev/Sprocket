@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using VRage.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Input
@@ -52,15 +53,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
                 changed();
         }
 
-        /// <summary>A press beginning at <paramref name="point" />, the <paramref name="presses" />th in quick succession; answers whether anything took it.</summary>
+        /// <summary>
+        ///     A press beginning at <paramref name="point" />, the <paramref name="presses" />th in quick succession, with
+        ///     <paramref name="shift" /> and <paramref name="ctrl" /> saying whether those keys were held; answers whether
+        ///     anything took it.
+        /// </summary>
         /// <remarks>Focus goes to the nearest focusable element at or above what was pressed, and leaves when nothing focusable was.</remarks>
-        public bool PointerDown(Vector2 point, int presses)
+        public bool PointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
-            return PointerDown(_root.Under(point), point, presses);
+            return PointerDown(_root.Under(point), point, presses, shift, ctrl);
         }
 
         /// <summary>The same, on a <paramref name="target" /> the host has already found, as one that layers other trees over this one does.</summary>
-        public bool PointerDown(Element target, Vector2 point, int presses)
+        public bool PointerDown(Element target, Vector2 point, int presses, bool shift, bool ctrl)
         {
             Focus(FocusableFrom(target));
 
@@ -68,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
             if (target == null)
                 return false;
 
-            target.OnPointerDown(point, presses);
+            target.OnPointerDown(point, presses, shift, ctrl);
             return true;
         }
 
@@ -95,11 +100,17 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
         }
 
         /// <summary>A key going down; answers whether anything took it.</summary>
-        /// <remarks>What holds the keyboard is offered it first. Tab then moves the focus on, or back with shift, and Escape lets it go.</remarks>
+        /// <remarks>
+        /// What holds the keyboard is offered it first, and then whatever holds that, out to the root. Tab then moves the
+        /// focus on, or back with shift, and Escape lets it go.
+        /// </remarks>
         public bool Key(MyKeys key, bool shift, bool ctrl)
         {
-            if (_focused != null && _focused.OnKey(this, key, shift, ctrl))
-                return true;
+            for (var at = _focused; at != null; at = Above(at))
+            {
+                if (at.OnKey(this, key, shift, ctrl))
+                    return true;
+            }
 
             if (key == MyKeys.Tab)
                 return FocusNext(shift);
@@ -156,9 +167,19 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Input
                 Collect(element.GetVisualChild(i));
         }
 
+        /// <summary>What holds <paramref name="element" />: its parent, or for a popup, what it hangs from.</summary>
+        static Element Above(Element element)
+        {
+            if (element.Parent != null)
+                return element.Parent;
+
+            var popup = element as Popup;
+            return popup == null ? null : popup.Anchor;
+        }
+
         static Element FocusableFrom(Element element)
         {
-            for (var at = element; at != null; at = at.Parent)
+            for (var at = element; at != null; at = Above(at))
             {
                 if (at.Focusable && at.IsEnabled && (at.InputTransparency & InputTransparency.Self) == 0)
                     return at;

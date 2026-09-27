@@ -269,6 +269,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             _input = new InputRoot(_root);
             _input.FocusChanged += Refocused;
 
+            // What a page opens over the screen or gives the keyboard to, it reaches through its editor.
+            _editor.Input = _input;
+            _editor.Windows = _windows;
+
             Attach();
         }
 
@@ -614,7 +618,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // Where the screen is finished in a column of its own, that column's Done is the one.
             Label carried = Carried;
-            bool here = screen.HasPrimary && Given == null && carried == null;
+            bool here = screen.HasPrimary && Given == null && carried == null && !_editor.Current.FinishesInPlace;
             _primary.Text = here ? Widgets.Caps(screen.PrimaryText) : "";
             _finishes.CanExecute = here;
 
@@ -829,6 +833,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             if (Blocked.Length > 0)
                 return _title.Plate(_renaming).Under(point);
 
+            bool stopped;
+            var windowed = _windows.Under(point, out stopped);
+            if (stopped)
+                return windowed;
+
             Element owner = Owner;
 
             return owner != null ? owner.Under(point) : _root.Under(point);
@@ -839,6 +848,11 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         {
             if (Blocked.Length > 0)
                 return _title.Plate(_renaming).SayingAt(point);
+
+            bool stopped;
+            var windowed = _windows.SayingAt(point, out stopped);
+            if (stopped)
+                return windowed;
 
             Element owner = Owner;
 
@@ -1168,13 +1182,29 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             // Nothing behind a popup is moved, for the same reason nothing behind one is pressed. A
             // wheel that reached through took the rows out from under a pointer that was on the list
             // hanging over them, and left somebody somewhere else when it closed.
-            if (Owner != null || IsAsking)
+            if (Owner != null || IsAsking || _windows.Count > 0)
                 return;
 
             for (int i = 0; i < _views.Count; i++)
             {
                 if (_views[i].ScrollBy(point, amount))
                     return;
+            }
+
+            // A page that scrolls itself moves whichever of its scrolls the pointer is over, where it has anywhere to go.
+            if (_shownPage != null && _shownPage.ScrollsItself)
+            {
+                for (var at = _root.Under(point); at != null; at = at.Parent)
+                {
+                    var scroll = at as ScrollView;
+                    if (scroll == null || !scroll.CanScroll)
+                        continue;
+
+                    scroll.ScrollBy(amount);
+                    return;
+                }
+
+                return;
             }
 
             if (_scroll.Parent != null)
@@ -1186,6 +1216,10 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         public bool Grab(Vector2 point, int presses = 1)
         {
+            // A press that closes a list hanging open is that and nothing more.
+            if (_windows.Dismiss(point))
+                return true;
+
             // A question owns the screen, so it is asked first rather than not at all. What it may
             // have to drag is a slider on a colour, and only inside its own bounds - a drag started
             // outside one is a press that dismisses it, which is the press path's business.
@@ -1202,7 +1236,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
                 // What a question this press raises hangs under, as for a press carried by a deed.
                 _raisedBy = target;
-                _input.PointerDown(target, point, presses);
+                _input.PointerDown(target, point, presses, Held == Held.Through, Held == Held.Also);
                 _pressing = true;
                 _pressedAt = point;
                 return true;
@@ -1754,6 +1788,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </remarks>
         void Moving(Element target)
         {
+            if (_editor.Current.FinishesInPlace)
+            {
+                _editor.FinishInPlace();
+                return;
+            }
+
             EditorScreen screen = _editor.Screen;
             if (!screen.PrimaryAsks)
             {
@@ -1784,6 +1824,12 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// </summary>
         void Finish(Element target)
         {
+            if (_editor.Current.FinishesInPlace)
+            {
+                _editor.FinishInPlace();
+                return;
+            }
+
             if (Given != null)
             {
                 FinishGiven();
@@ -2094,6 +2140,17 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
             // A page that draws itself is its own body, and a page described in components is built of them.
             var drawn = _shownPage.View;
+
+            // A page that scrolls what it has itself is handed the room directly, as a component that does is: a second
+            // scroller around the first would fight it over one gesture.
+            if (drawn != null && _shownPage.ScrollsItself)
+            {
+                for (int i = 0; i < _views.Count; i++)
+                    _body.Children.Add(_views[i].Root);
+
+                _page.Cells[1, 0] = drawn;
+                return;
+            }
 
             if (filler < 0)
             {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
 using Ship = Sprocket.Sim.Machine.Simulation;
@@ -166,8 +167,24 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Whether a question is open and wants the keyboard.</summary>
         public bool IsAsking => _view.IsAsking;
 
-        /// <summary>Whether a field shown as part of the screen has the keyboard.</summary>
-        public bool IsFilling => _view.IsFilling;
+        /// <summary>Whether a box of a form of values has the keyboard.</summary>
+        public bool IsFilling => Filling != null;
+
+        /// <summary>The box of a form of values that has the keyboard, or null where none has it.</summary>
+        public Host.SpaceEngineers.Ui.Text.TextBox? Filling
+        {
+            get
+            {
+                var box = _view.Input.Focused as Host.SpaceEngineers.Ui.Text.TextBox;
+                for (Element? at = box; at != null; at = at.Parent)
+                {
+                    if (at is FieldSet)
+                        return box;
+                }
+
+                return null;
+            }
+        }
 
         /// <summary>The box that question is being answered in.</summary>
         public TextBox AskBox => _view.AskBox;

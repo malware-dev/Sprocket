@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 
@@ -58,7 +58,7 @@ public class PaperTargetTests
         editor.PressStart("Load blueprint");
         Note(seen, ship);
 
-        Assert.Contains(nameof(PickComponent), seen);
+        Assert.Contains(nameof(PickPage), seen);
         Assert.Contains(nameof(SequencePage), seen);
     }
 

@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.Layout;
@@ -94,14 +94,14 @@ public class ActionTests
 
         Assert.False(screen.Shows("Turn block On"), "what switch on stands in for is showing");
 
-        screen.Editor.Invoke(Terminal(screen).Command);
+        Terminal(screen).Command!.Execute();
         screen.Run(2);
 
         Assert.True(screen.Shows("Turn block On"), "the block's own switch is not in its own view");
         Assert.False(screen.Shows("Switch on"), "Sprocket's wording is in the block's own view");
-        Assert.True(Terminal(screen).IsCurrent);
+        Assert.True(What(screen).ViewShown == 1);
 
-        screen.Editor.Invoke(Organized(screen).Command);
+        Organized(screen).Command!.Execute();
         screen.Run(2);
 
         Assert.False(screen.Shows("Turn block On"), "going back did not put it away again");
@@ -127,7 +127,7 @@ public class ActionTests
 
         Assert.False(screen.Shows("Name"), "a sequence is offered the block's own name");
 
-        screen.Editor.Invoke(Terminal(screen).Command);
+        Terminal(screen).Command!.Execute();
         screen.Run(2);
 
         Assert.True(screen.Shows("Name"), "the block's own view has lost what the block carries");
@@ -149,9 +149,8 @@ public class ActionTests
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
-        Assert.NotEqual(0, Organized(screen).Command);
-        Assert.NotEqual(0, Terminal(screen).Command);
-        Assert.True(Organized(screen).IsCurrent, "the picker did not open on Sprocket's own words");
+        Assert.NotNull(Terminal(screen).Command);
+        Assert.True(What(screen).ViewShown == 0, "the picker did not open on Sprocket's own words");
         Assert.True(screen.Shows("Switch on"));
     }
 
@@ -163,7 +162,7 @@ public class ActionTests
         screen.Editor.PressAdd("do something");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
-        screen.Editor.Invoke(Terminal(screen).Command);
+        Terminal(screen).Command!.Execute();
         screen.Editor.Back();
         screen.Run(2);
 
@@ -171,7 +170,7 @@ public class ActionTests
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
-        Assert.True(Terminal(screen).IsCurrent, "the picker forgot which view was being shown");
+        Assert.True(What(screen).ViewShown == 1, "the picker forgot which view was being shown");
         Assert.True(screen.Shows("Turn block On"));
     }
 
@@ -204,7 +203,7 @@ public class ActionTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Run(2);
 
-        var entries = What(screen).Entries;
+        var entries = What(screen).Entries();
         Assert.True(entries.Single(entry => entry.Text == "Open").Waits, "opening a door is not marked");
         Assert.False(entries.Single(entry => entry.Text == "Switch on").Waits, "switching on is marked, and holds nothing");
     }
@@ -216,25 +215,28 @@ public class ActionTests
         var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
             + "70 200 200 509").Split(' '));
 
-        PickStage what = screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
-        Assert.NotEqual(0, what.Views[1].Command);
+        StageColumn what = screen.Editor.Pick().Stages.Last();
+        Assert.NotNull(what.Views[1].Command);
 
         screen.Do("820", "247");
         Assert.True(screen.Editor.ShowsTerminal, "pressing the tab did not change the view");
         Assert.True(screen.Shows("Toggle block On/Off"), "the block's own words are not listed");
     }
 
-    static PickStage What(Screen screen)
+    /// <summary>What the first value in the column of values holds.</summary>
+    static string Given(Screen screen) => screen.Editor.Pick().Values!.Form.Fields[0].Text;
+
+    static StageColumn What(Screen screen)
     {
-        return screen.Editor.Screen.Components.OfType<PickComponent>().Single().Stages.Last();
+        return screen.Editor.Pick().Stages.Last();
     }
 
-    static ChoiceEntry Organized(Screen screen)
+    static Button Organized(Screen screen)
     {
         return What(screen).Views[0];
     }
 
-    static ChoiceEntry Terminal(Screen screen)
+    static Button Terminal(Screen screen)
     {
         return What(screen).Views[1];
     }
@@ -246,8 +248,7 @@ public class ActionTests
     /// </remarks>
     static void ShowTerminal(SprocketEditor editor)
     {
-        editor.Invoke(editor.Screen.Components.OfType<PickComponent>().SelectMany(p => p.Stages)
-            .SelectMany(s => s.Views).Single(v => v.Text == "Terminal").Command);
+        editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
     }
 
     /// <summary>
@@ -418,18 +419,22 @@ public class ActionTests
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
         var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
-            + "70 200 150 203 type Approach 200 360 800 587").Split(' '));
+            + "70 200 150 203 type Approach 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
         Assert.Equal(2, screen.Editor.Screen.PrimaryFields.Single().Words.Count);
 
-        // The half that was pressed, not a toggle: the control shows both of its positions.
-        screen.Do("1313", "201");
-        Assert.Equal("on", screen.Scene.Typing.Text);
+        // A switch says the word it is on, and pressing it gives the other one.
+        var word = screen.Text("off");
+        var middle = Screen.Ui(word.At.X, screen.MiddleOf(word));
+        var at = new[] { ((int)middle.X).ToString(), ((int)middle.Y).ToString() };
 
-        screen.Do("1373", "201");
-        Assert.Equal("off", screen.Scene.Typing.Text);
+        screen.Do(at);
+        Assert.Equal("on", Given(screen));
+
+        screen.Do(at);
+        Assert.Equal("off", Given(screen));
     }
 
     /// <summary>
@@ -444,17 +449,17 @@ public class ActionTests
     public void AColourIsChosenByPressingOne()
     {
         var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
-            + "70 200 200 485 800 587").Split(' '));
+            + "70 200 200 485 800 565").Split(' '));
 
 
         // The third of the fourteen. They are the harness's stand-in for a player who has painted.
         screen.Do("1064", "198");
-        Assert.Equal("#386285", screen.Scene.Typing.Text);
+        Assert.Equal("#386285", Given(screen));
 
         // And the far left of the hue track is red, at whatever saturation and value were already
         // chosen: one slider owns one axis and leaves the other two where they stood.
         screen.Do("1000", "265");
-        Assert.Equal("#853838", screen.Scene.Typing.Text);
+        Assert.Equal("#853838", Given(screen));
     }
 
     /// <summary>
@@ -470,13 +475,13 @@ public class ActionTests
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
         var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
-            + "70 200 150 203 type Standby 200 360 800 413").Split(' '));
+            + "70 200 150 203 type Standby 200 360 800 397").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
             "the column does not show what the value may be");
 
         screen.Do("1247", "201");
-        Assert.Equal("Recharge", screen.Scene.Typing.Text);
+        Assert.Equal("Recharge", Given(screen));
 
         screen.Do("enter");
 
@@ -502,7 +507,7 @@ public class ActionTests
     public void MoreChoicesThanFitFoldIntoAList()
     {
         var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
-            + "70 200 150 203 type Tug 200 360 800 587").Split(' '));
+            + "70 200 150 203 type Tug 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");
 
@@ -514,7 +519,7 @@ public class ActionTests
             "pressing the box did not open the list");
 
         screen.Do("1316", "319");
-        Assert.Equal("Left", screen.Scene.Typing.Text);
+        Assert.Equal("Left", Given(screen));
         Assert.False(screen.Shows("Down"), "choosing did not put the list away");
 
         screen.Do("enter");

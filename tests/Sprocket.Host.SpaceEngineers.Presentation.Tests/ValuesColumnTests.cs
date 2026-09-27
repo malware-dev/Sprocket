@@ -15,8 +15,8 @@ public class ValuesColumnTests
 {
     const string ALight = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 70 200 200 485";
 
-    const string SetRadius = "800 679";
-    const string SetColour = "800 587";
+    const string SetRadius = "800 653";
+    const string SetColour = "800 565";
     const string RadiusBox = "1315 209";
     const string Done = "1365 263";
 
@@ -100,7 +100,7 @@ public class ValuesColumnTests
     [Fact]
     public void ADoublePressOnSomethingThatTakesNothingFinishes()
     {
-        var screen = Open("double 800 460");
+        var screen = Open("double 800 441");
 
         Assert.Equal("Sequence 1", screen.Ended);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
@@ -128,7 +128,7 @@ public class ValuesColumnTests
         Assert.Equal("Set Radius on Airlock Light", screen.Ended);
         Assert.False(screen.Scene.IsAsking, "a dialog was raised");
         Assert.True(screen.Scene.IsFilling, "the caret is not in the values");
-        Assert.Equal("5.0", screen.Scene.Typing.Text);
+        Assert.Equal("5.0", screen.Scene.Filling!.Text);
     }
 
     /// <summary>
@@ -136,7 +136,7 @@ public class ValuesColumnTests
     /// </summary>
     [Theory]
     [InlineData("474 192 type 7 escape")]
-    [InlineData("270 182 800 587")]
+    [InlineData("270 182 800 565")]
     public void LeavingAsksAboutAnyChange(string change)
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 25 62");

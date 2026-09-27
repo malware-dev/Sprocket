@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         protected override bool TakesPointer => CanCarry;
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses)
+        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             var taken = Taken;
             if (taken != null)

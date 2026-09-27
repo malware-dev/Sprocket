@@ -1,5 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Features.Values;
 using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Look;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -103,57 +104,67 @@ public class FieldTests
         Assert.Equal("", odd.Refuses("Mood", "livid"));
     }
 
-    /// <summary>The form is refused in the words of the field that is wrong, and stays open.</summary>
+    /// <summary>The form is refused in the words of the field that is wrong.</summary>
     [Fact]
     public void TheFormSaysWhichFieldIsWrong()
     {
-        Ask ask = Asking();
+        var form = Asking();
 
-        ask.Box.Text = "255";
-        Assert.Equal("", ask.Wrong);
+        form.Fields[0].Text = "255";
+        form.Judge();
+        Assert.Equal("", form.Wrong);
 
-        ask.Next();
-        ask.Box.Text = "300";
-        Assert.Equal("Green has to be between 0 and 255.", ask.Wrong);
+        form.Fields[1].Text = "300";
+        Assert.Equal("Green has to be between 0 and 255.", form.Wrong);
     }
 
     /// <summary>The first one, because one reason is what there is room to say.</summary>
     [Fact]
     public void AndSaysOneReasonAtATime()
     {
-        Ask ask = Asking();
+        var form = Asking();
 
-        ask.Box.Text = "300";
-        ask.Next();
-        ask.Box.Text = "400";
+        form.Fields[0].Text = "300";
+        form.Fields[1].Text = "400";
+        form.Judge();
 
-        Assert.Equal("Red has to be between 0 and 255.", ask.Wrong);
+        Assert.Equal("Red has to be between 0 and 255.", form.Wrong);
     }
 
     /// <summary>A value nobody named is refused by its place in the order, which is what is beside it.</summary>
     [Fact]
     public void AValueWithNoNameIsRefusedByItsNumber()
     {
-        var ask = new Ask();
-        ask.Values("This needs two values.", 1,
-            new[] { Field.Unnamed(), Field.Between("", "0", "255") }, null);
+        var form = new FieldSet();
+        form.Show(new[] { Field.Unnamed(), Field.Between("", "0", "255") }, new string[0], new Hsv[0]);
 
-        ask.Next();
-        ask.Box.Text = "900";
+        form.Fields[1].Text = "900";
+        form.Judge();
 
-        Assert.Equal("Value 2 has to be between 0 and 255.", ask.Wrong);
+        Assert.Equal("Value 2 has to be between 0 and 255.", form.Wrong);
     }
 
-    static Ask Asking()
+    /// <summary>Nothing is held against what is typed until finishing is tried.</summary>
+    [Fact]
+    public void NothingIsRefusedBeforeFinishingIsTried()
     {
-        var ask = new Ask();
-        ask.Values("This needs three values.", 1, new[]
+        var form = Asking();
+
+        form.Fields[0].Text = "300";
+
+        Assert.Equal("", form.Wrong);
+    }
+
+    static FieldSet Asking()
+    {
+        var form = new FieldSet();
+        form.Show(new[]
         {
             Field.Between("Red", "0", "255"),
             Field.Between("Green", "0", "255"),
             Field.Between("Blue", "0", "255")
-        }, null);
+        }, new string[0], new Hsv[0]);
 
-        return ask;
+        return form;
     }
 }

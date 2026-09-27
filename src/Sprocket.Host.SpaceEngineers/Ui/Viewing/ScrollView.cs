@@ -107,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
         }
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses)
+        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             if (!Hits(point))
                 return;

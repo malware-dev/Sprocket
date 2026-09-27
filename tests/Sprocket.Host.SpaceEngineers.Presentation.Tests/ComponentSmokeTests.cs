@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -52,7 +52,7 @@ public class ComponentSmokeTests
         editor.PressStart("Load blueprint");
         Record(seen, screen);
 
-        Assert.Contains(nameof(PickComponent), seen);
+        Assert.Contains(nameof(PickPage), seen);
         Assert.Contains(nameof(SequencePage), seen);
 
         // Heading and Notice are not asserted: nothing produces one at the moment.

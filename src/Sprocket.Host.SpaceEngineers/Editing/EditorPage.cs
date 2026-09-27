@@ -257,6 +257,13 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
         }
 
+        /// <summary>Whether the page finishes where it stands, with a way to finish of its own, rather than from the foot of the screen.</summary>
+        /// <remarks>Finished any other way, such as by an answer that keeps what was changed, it is <see cref="Primary()" /> that finishes it, as its own way would.</remarks>
+        public virtual bool FinishesInPlace => false;
+
+        /// <summary>Whether the page's view is given the whole of the screen's room, scrolling whatever it has to itself.</summary>
+        public virtual bool ScrollsItself => false;
+
         /// <summary>Makes the page as it is drawn, for a page that draws itself; null for one described in components.</summary>
         /// <remarks>
         /// The view definition and nothing else, as a designer would write it: the elements, their styles and

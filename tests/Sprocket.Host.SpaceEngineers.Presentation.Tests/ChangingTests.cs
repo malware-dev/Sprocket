@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
@@ -198,8 +197,8 @@ public class ChangingTests
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Screen.Title());
         Assert.Equal("", screen.Editor.Screen.Question);
 
-        var does = screen.Editor.Component<PickComponent>().Stages[2];
-        Assert.Contains(does.Entries, e => e.Text == "Sequence 1" && e.IsChosen);
+        var does = screen.Editor.Pick().Stages[2];
+        Assert.Contains(does.Entries(), e => e.Text == "Sequence 1" && e.IsChosen);
 
         screen.Editor.PressChoice("Seal up");
         screen.Editor.PressPrimary();
@@ -231,16 +230,16 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal("Do something", screen.Editor.Screen.Title());
-        Assert.Equal(3, screen.Editor.Component<PickComponent>().Page);
+        Assert.Equal(3, screen.Editor.Pick().Page);
 
         screen.Editor.Back();
         screen.Run(2);
 
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
-        var pick = screen.Editor.Component<PickComponent>();
+        var pick = screen.Editor.Pick();
         Assert.Equal(0, pick.Page);
         Assert.Equal(3, pick.Stages.Count);
-        Assert.Contains(pick.Stages[2].Entries, e => e.Text == "A single action…" && e.IsChosen);
+        Assert.Contains(pick.Stages[2].Entries(), e => e.Text == "A single action…" && e.IsChosen);
         Assert.Same(was, System(screen).Triggers[0]);
 
         // Nothing to finish here while a single action is chosen: choosing it again goes on.
@@ -303,8 +302,8 @@ public class ChangingTests
         screen.Editor.PressChoice("A single action…");
         screen.Run(2);
 
-        var pick = screen.Editor.Component<PickComponent>();
-        Assert.Contains(pick.Stages[pick.Page].Entries, e => e.Text == "Airlock Outer Door" && e.IsChosen);
+        var pick = screen.Editor.Pick();
+        Assert.Contains(pick.Stages[pick.Page].Entries(), e => e.Text == "Airlock Outer Door" && e.IsChosen);
 
         screen.Editor.PressChoice("Open");
         screen.Editor.PressPrimary();
@@ -326,23 +325,23 @@ public class ChangingTests
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        Assert.Equal(0, screen.Editor.Component<PickComponent>().Onward);
+        Assert.Null(screen.Editor.Pick().Onward);
 
         screen.Editor.PressChoice("A single action…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.Back();
         screen.Run(2);
 
-        var pick = screen.Editor.Component<PickComponent>();
+        var pick = screen.Editor.Pick();
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
-        Assert.NotEqual(0, pick.Onward);
+        Assert.NotNull(pick.Onward);
 
-        screen.Editor.Invoke(pick.Onward);
+        pick.Onward!.Execute();
         screen.Run(2);
 
-        pick = screen.Editor.Component<PickComponent>();
+        pick = screen.Editor.Pick();
         Assert.Equal("… Airlock Outer Door", screen.Editor.Screen.Title());
-        Assert.Contains(pick.Stages[pick.Page].Entries, e => e.Text == "Airlock Outer Door" && e.IsChosen);
+        Assert.Contains(pick.Stages[pick.Page].Entries(), e => e.Text == "Airlock Outer Door" && e.IsChosen);
     }
 
     /// <summary>Choosing something else for the trigger to do lets the action's page go.</summary>
@@ -360,13 +359,13 @@ public class ChangingTests
         screen.Editor.PressChoice("A new sequence");
         screen.Run(2);
 
-        Assert.Equal(0, screen.Editor.Component<PickComponent>().Onward);
+        Assert.Null(screen.Editor.Pick().Onward);
 
         screen.Editor.PressChoice("A single action…");
         screen.Run(2);
 
-        var pick = screen.Editor.Component<PickComponent>();
-        Assert.DoesNotContain(pick.Stages[pick.Page].Entries, e => e.IsChosen);
+        var pick = screen.Editor.Pick();
+        Assert.DoesNotContain(pick.Stages[pick.Page].Entries(), e => e.IsChosen);
     }
 
     /// <summary>

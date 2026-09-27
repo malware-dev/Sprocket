@@ -353,4 +353,173 @@ Press to rename it.</value>
     <value>Only one person can edit at a time. Reopen this once they're done to make changes.</value>
     <comment>Shown when the banner above is opened.</comment>
   </data>
+
+  <data name="Sprocket.Pick.Search" xml:space="preserve">
+    <value>Search</value>
+    <comment>Hint in the box that narrows a column of a pick, or its list of kinds, by typing.</comment>
+  </data>
+  <data name="Sprocket.Pick.Done" xml:space="preserve">
+    <value>Done</value>
+    <comment>Button that finishes a pick.</comment>
+  </data>
+  <data name="Sprocket.Pick.Back" xml:space="preserve">
+    <value>Back</value>
+    <comment>Note on the column that turns a pick back to its page before.</comment>
+  </data>
+  <data name="Sprocket.Pick.Next" xml:space="preserve">
+    <value>Next</value>
+    <comment>Note on the column that turns a pick on to its page after.</comment>
+  </data>
+  <data name="Sprocket.Pick.ClearTyped" xml:space="preserve">
+    <value>Clear what is typed</value>
+    <comment>Note on the cross that empties a box that narrows a list.</comment>
+  </data>
+  <data name="Sprocket.Pick.EveryKind" xml:space="preserve">
+    <value>Show every kind again</value>
+    <comment>Note on the cross that takes away the kind a list of blocks is narrowed to.</comment>
+  </data>
+  <data name="Sprocket.Pick.AllShown" xml:space="preserve">
+    <value>{count} blocks</value>
+    <comment>Line over a list of blocks showing every one. {count} is how many.</comment>
+  </data>
+  <data name="Sprocket.Pick.SomeShown" xml:space="preserve">
+    <value>{shown} of {count}</value>
+    <comment>Line over a list of blocks narrowed to some of them. {shown} is how many are shown, {count} how many there are.</comment>
+  </data>
+  <data name="Sprocket.Pick.Anything" xml:space="preserve">
+    <value>Anything</value>
+    <comment>The entry in the list of kinds that narrows to no kind at all.</comment>
+  </data>
+  <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
+    <value>Keep your changes?</value>
+    <comment>Asked on leaving a pick that has changed what it opened on.</comment>
+  </data>
+  <data name="Sprocket.Pick.KeepThem" xml:space="preserve">
+    <value>Keep them</value>
+    <comment>Answer to the question above that finishes the pick.</comment>
+  </data>
+  <data name="Sprocket.Pick.DiscardThem" xml:space="preserve">
+    <value>Discard them</value>
+    <comment>Answer to the question above that leaves without finishing.</comment>
+  </data>
+  <data name="Sprocket.Pick.Blocks" xml:space="preserve">
+    <value>Blocks</value>
+    <comment>Title of the column of blocks in a pick.</comment>
+  </data>
+  <data name="Sprocket.Pick.NoBlocksHappen" xml:space="preserve">
+    <value>Nothing here has anything that can happen to it.</value>
+    <comment>Where the column of blocks is empty, picking what starts something.</comment>
+  </data>
+  <data name="Sprocket.Pick.NoBlocksDone" xml:space="preserve">
+    <value>Nothing here has anything that can be done to it.</value>
+    <comment>Where the column of blocks is empty, picking what a step does.</comment>
+  </data>
+  <data name="Sprocket.Pick.WhatHappens" xml:space="preserve">
+    <value>What happens</value>
+    <comment>Title of the column of what can happen to the blocks picked.</comment>
+  </data>
+  <data name="Sprocket.Pick.WhatToDo" xml:space="preserve">
+    <value>What to do</value>
+    <comment>Title of the column of what can be done to the blocks picked.</comment>
+  </data>
+  <data name="Sprocket.Pick.NothingHappens" xml:space="preserve">
+    <value>Those blocks have nothing in common that can happen to them.</value>
+    <comment>Where the column of what happens is empty.</comment>
+  </data>
+  <data name="Sprocket.Pick.NothingDone" xml:space="preserve">
+    <value>Those blocks have nothing in common that can be done to them.</value>
+    <comment>Where the column of what to do is empty.</comment>
+  </data>
+  <data name="Sprocket.Pick.WhatItDoes" xml:space="preserve">
+    <value>What it does</value>
+    <comment>Title of the column choosing what a trigger does.</comment>
+  </data>
+  <data name="Sprocket.Pick.NonePicked" xml:space="preserve">
+    <value>none picked</value>
+    <comment>Under the column of blocks, where none is picked.</comment>
+  </data>
+  <data name="Sprocket.Pick.OnePicked" xml:space="preserve">
+    <value>1 picked</value>
+    <comment>Under the column of blocks, where one is picked.</comment>
+  </data>
+  <data name="Sprocket.Pick.SomePicked" xml:space="preserve">
+    <value>{count} picked</value>
+    <comment>Under the column of blocks, where several are picked. {count} is how many.</comment>
+  </data>
+  <data name="Sprocket.Pick.AnyOne" xml:space="preserve">
+    <value>any one</value>
+    <comment>Choice over the blocks that any one of them is enough.</comment>
+  </data>
+  <data name="Sprocket.Pick.AllOfThem" xml:space="preserve">
+    <value>all of them</value>
+    <comment>Choice over the blocks that all of them are needed together.</comment>
+  </data>
+  <data name="Sprocket.Pick.Values" xml:space="preserve">
+    <value>Values</value>
+    <comment>Heading over a block's values, in the terminal's way of listing what it offers.</comment>
+  </data>
+  <data name="Sprocket.Pick.ToolbarActions" xml:space="preserve">
+    <value>Toolbar Actions</value>
+    <comment>Heading over a block's actions, in the terminal's way of listing what it offers.</comment>
+  </data>
+  <data name="Sprocket.Pick.Organized" xml:space="preserve">
+    <value>Organized</value>
+    <comment>Tab showing what a block offers as Sprocket groups and words it.</comment>
+  </data>
+  <data name="Sprocket.Pick.Terminal" xml:space="preserve">
+    <value>Terminal</value>
+    <comment>Tab showing what a block offers as the block itself declares it.</comment>
+  </data>
+  <data name="Sprocket.Pick.Shared" xml:space="preserve">
+    <value>Currently showing only what the selected blocks share</value>
+    <comment>Note over what several blocks offer.</comment>
+  </data>
+  <data name="Sprocket.Pick.Pending" xml:space="preserve">
+    <value>Sprocket has not checked this block yet, so some of what it offers may be doubled, missing or oddly named.</value>
+    <comment>Note over what a block offers, before the block has been checked.</comment>
+  </data>
+  <data name="Sprocket.Pick.Partial" xml:space="preserve">
+    <value>Sprocket has only partly checked this block, so some of what it offers may still be doubled, missing or oddly named.</value>
+    <comment>Note over what a block offers, where the block has been checked in part.</comment>
+  </data>
+  <data name="Sprocket.Pick.Waits" xml:space="preserve">
+    <value>Holds the sequence until finished</value>
+    <comment>Note on the mark beside something done that a step waits for.</comment>
+  </data>
+  <data name="Sprocket.Pick.Run" xml:space="preserve">
+    <value>run</value>
+    <comment>Choice that a trigger runs the sequence chosen.</comment>
+  </data>
+  <data name="Sprocket.Pick.Stop" xml:space="preserve">
+    <value>stop</value>
+    <comment>Choice that a trigger stops the sequence chosen.</comment>
+  </data>
+  <data name="Sprocket.Pick.SingleAction" xml:space="preserve">
+    <value>A single action…</value>
+    <comment>Choice that a trigger does one thing to some blocks, chosen on the page after.</comment>
+  </data>
+  <data name="Sprocket.Pick.NewSequence" xml:space="preserve">
+    <value>A new sequence</value>
+    <comment>Choice that a trigger runs a sequence made for it.</comment>
+  </data>
+  <data name="Sprocket.Pick.Sequences" xml:space="preserve">
+    <value>Sequences</value>
+    <comment>Heading over the sequences a trigger may run or stop.</comment>
+  </data>
+  <data name="Sprocket.Pick.HowOftenQuestion" xml:space="preserve">
+    <value>How often?</value>
+    <comment>Title of the page choosing how often a timer fires.</comment>
+  </data>
+  <data name="Sprocket.Pick.HowOften" xml:space="preserve">
+    <value>How often</value>
+    <comment>Title of the column of rates a timer fires at.</comment>
+  </data>
+  <data name="Sprocket.Pick.EveryTick" xml:space="preserve">
+    <value>every tick</value>
+    <comment>The fastest rate a timer fires at.</comment>
+  </data>
+  <data name="Sprocket.Pick.Rate" xml:space="preserve">
+    <value>{name} - every {ticks} ticks</value>
+    <comment>A rate a timer fires at. {name} is its word, such as steady; {ticks} how many ticks apart.</comment>
+  </data>
 </root>

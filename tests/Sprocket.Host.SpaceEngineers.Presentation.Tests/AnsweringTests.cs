@@ -13,7 +13,7 @@ public class AnsweringTests
 {
     const string LeavingASequence =
         "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 70 200 "
-        + "150 203 type Tug 200 360 800 587 1316 201 1316 319 enter 25 62";
+        + "150 203 type Tug 200 360 800 565 1316 201 1316 319 enter 25 62";
 
     [Fact]
     public void EnterTakesTheAnswerThePageNamed()

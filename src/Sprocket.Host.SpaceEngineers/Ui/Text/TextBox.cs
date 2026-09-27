@@ -215,7 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         }
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses)
+        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             var index = IndexAt(point.X);
 

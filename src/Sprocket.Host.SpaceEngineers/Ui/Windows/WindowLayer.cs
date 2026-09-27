@@ -72,6 +72,24 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
             }
         }
 
+        /// <summary>Closes every popup a press at <paramref name="point" /> misses, from the top down to the first window it lands in, and answers whether any closed.</summary>
+        /// <remarks>For whoever takes presses to ask before anything else, since a press that closes a popup goes no further.</remarks>
+        public bool Dismiss(Vector2 point)
+        {
+            var closed = false;
+            for (var i = _open.Count - 1; i >= 0; i--)
+            {
+                var window = _open[i];
+                if (window.Under(point) != null || !(window is Popup))
+                    break;
+
+                _open.RemoveAt(i);
+                closed = true;
+            }
+
+            return closed;
+        }
+
         /// <summary>What a press at <paramref name="point" /> reaches in the windows, or null; <paramref name="stopped" /> says whether a modal window keeps it from the screen beneath.</summary>
         public Element Under(Vector2 point, out bool stopped)
         {
