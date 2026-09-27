@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {

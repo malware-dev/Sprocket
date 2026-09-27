@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Layout;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 
 namespace Sprocket.Sim.Simulation
 {

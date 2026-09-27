@@ -1,8 +1,8 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

@@ -5,11 +5,11 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Sim.Simulation;
 using VRage.Input;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;
 

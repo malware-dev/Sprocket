@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Terminal;
 using VRage.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {

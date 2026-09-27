@@ -1,10 +1,9 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Sim.Machine;
 using VRage.Utils;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Ui.Images;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

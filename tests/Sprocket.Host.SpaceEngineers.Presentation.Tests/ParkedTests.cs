@@ -1,6 +1,6 @@
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Look;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

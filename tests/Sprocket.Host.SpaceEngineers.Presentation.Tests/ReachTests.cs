@@ -1,11 +1,10 @@
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using VRageMath;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

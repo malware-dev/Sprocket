@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Windows
 {
     /// <summary>One of the buttons a message box can show, by the part it plays.</summary>

@@ -14,7 +14,7 @@ using Point = System.Windows.Point;
 using Rect = System.Windows.Rect;
 using Ink = System.Windows.Media.Color;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Sim.Simulation
 {

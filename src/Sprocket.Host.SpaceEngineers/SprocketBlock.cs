@@ -3,8 +3,8 @@ using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.ModAPI;
 using VRage.ObjectBuilders;
-using Sprocket.Host.SpaceEngineers.Terminal;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
 
 
 namespace Sprocket.Host.SpaceEngineers

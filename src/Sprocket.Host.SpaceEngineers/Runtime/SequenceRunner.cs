@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 

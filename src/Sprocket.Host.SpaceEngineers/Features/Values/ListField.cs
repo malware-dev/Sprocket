@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Images;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
@@ -11,6 +10,7 @@ using System.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRage.Input;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Values
 {

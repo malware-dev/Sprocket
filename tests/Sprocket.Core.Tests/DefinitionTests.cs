@@ -2,9 +2,9 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 
 namespace Sprocket.Tests;
 

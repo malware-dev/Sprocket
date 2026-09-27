@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>Children in a line across, centered down the line's height.</summary>

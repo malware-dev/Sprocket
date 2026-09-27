@@ -1,6 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Features.Values;
-using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using VRage.Input;
 using Xunit;

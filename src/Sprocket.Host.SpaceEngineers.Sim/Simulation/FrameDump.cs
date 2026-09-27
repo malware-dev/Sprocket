@@ -1,5 +1,6 @@
 
 
+
 namespace Sprocket.Sim.Simulation
 {
     /// <summary>Runs a script with nobody watching and writes out the frame it ended on.</summary>

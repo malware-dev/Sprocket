@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>Which of the three ways a step reaches a block.</summary>

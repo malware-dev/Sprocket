@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>What a trigger does, as chosen in the column beside what starts it.</summary>

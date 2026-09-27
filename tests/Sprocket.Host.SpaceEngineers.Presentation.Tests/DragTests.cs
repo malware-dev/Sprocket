@@ -1,8 +1,8 @@
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

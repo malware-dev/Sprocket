@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui
 {
     /// <summary>A container holding any number of children, laid out by the kind of panel it is.</summary>

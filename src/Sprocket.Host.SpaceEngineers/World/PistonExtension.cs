@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 
 // The status lives in the Ingame namespace, which cannot be imported whole: IMyPistonBase is declared
 // in both, and the mod-side one is the one with the events on it.

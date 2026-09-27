@@ -1,7 +1,4 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
@@ -13,6 +10,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Viewing;
 using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using VRage.Input;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {

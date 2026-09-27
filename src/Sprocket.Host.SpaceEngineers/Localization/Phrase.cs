@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Localization
 {
     /// <summary>One text a program says: its key, and its words in the language it was written in.</summary>

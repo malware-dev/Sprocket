@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui
 {
     /// <summary>An element that holds others, which may draw outside it, with room held clear between its edge and what is inside.</summary>

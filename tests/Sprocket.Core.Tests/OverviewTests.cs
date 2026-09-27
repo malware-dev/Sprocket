@@ -1,5 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Display;
-using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;

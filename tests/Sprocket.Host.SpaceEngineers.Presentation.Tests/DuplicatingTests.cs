@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Lists;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

@@ -1,13 +1,14 @@
-using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

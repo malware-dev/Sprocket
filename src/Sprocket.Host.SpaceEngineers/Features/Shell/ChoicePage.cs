@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell

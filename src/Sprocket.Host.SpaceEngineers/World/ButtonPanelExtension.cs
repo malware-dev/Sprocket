@@ -1,9 +1,9 @@
 using VRage.Game.ModAPI;
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Terminal;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
 // are declared in both, and the mod-side ones are the ones with the events on them.

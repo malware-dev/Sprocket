@@ -1,6 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Features.Values;
-using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Look;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

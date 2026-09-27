@@ -1,7 +1,7 @@
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Editing;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

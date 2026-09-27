@@ -1,6 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Words;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Tests;
 

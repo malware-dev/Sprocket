@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui
 {
     /// <summary>Keeping hold of an element while it is built inside an initializer.</summary>

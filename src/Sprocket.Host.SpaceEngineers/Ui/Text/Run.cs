@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Text
 {
     /// <summary>A stretch of words inside a block that are all set apart the same way, a slot whose words are given later, or a line break.</summary>

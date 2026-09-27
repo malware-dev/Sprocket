@@ -1,12 +1,13 @@
-using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.Terminal;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -484,7 +485,7 @@ public class RigTests
         rig.Editor.NewButtonSystem("Airlock");
         // A wait, so the run lasts long enough to be stopped.
         rig.Editor.PressAdd("wait");
-        rig.Editor.PressChoice(Words.TimeText.WaitChoice(600));
+        rig.Editor.PressChoice(TimeText.WaitChoice(600));
         rig.Editor.SwitchOn();
 
         Sequence sequence = rig.Editor.Program.Sequences[0];

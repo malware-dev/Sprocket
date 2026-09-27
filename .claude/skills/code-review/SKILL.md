@@ -92,8 +92,8 @@ Then the structural questions, in this order, because the early ones invalidate 
 1. **Was an existing surface reinvented?** A new fault, status, reading or question about a block is
    a new *kind of thing*, never a new *mechanism*. `SequenceFault` and `SequenceProblem` report what
    is wrong with a sequence and which step. `IBlockExtension` holds knowledge about a kind of block.
-   `Offer` is what a block declares. `Field` is what a value asks for. `Words/` decides how a sentence
-   is composed. The tell is the feeling of designing a way to carry information from A to B.
+   `Offer` is what a block declares. `Field` is what a value asks for. `Features/Sentences/` decides how a
+   sentence is composed. The tell is the feeling of designing a way to carry information from A to B.
 2. **Does anything new run every tick?** It must answer both: is this worth a tick, and can the same
    thing be had at a lower cadence. `Interval` is how a cadence is expressed. A reading behind a
    short-circuit is cheap and the comment should say so; a reading on its own is not.

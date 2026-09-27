@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Drawing
 {
     /// <summary>Which end of a run of text a position names.</summary>

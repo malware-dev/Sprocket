@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>What a piece of script text is, before anything knows what it means.</summary>

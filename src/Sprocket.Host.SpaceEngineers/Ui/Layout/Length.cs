@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>How big a grid's column or row is: a fixed size, as big as its largest cell, or a share of what is left.</summary>

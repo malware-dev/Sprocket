@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
 {
     /// <summary>One axis of scrolling: how much there is, how much is on show, and where along it the view sits.</summary>

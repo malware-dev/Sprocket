@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Words;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

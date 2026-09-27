@@ -1,3 +1,4 @@
+
 namespace Sprocket.Sim.Machine;
 
 /// <summary>

@@ -2,7 +2,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using VRage.Game;
 using VRageMath;
@@ -10,6 +9,7 @@ using Color = VRageMath.Color;
 using Size = System.Windows.Size;
 using Thickness = Sprocket.Host.SpaceEngineers.Ui.Thickness;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Sim.Simulation;
 

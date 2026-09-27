@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Styling
 {
     /// <summary>How any element looks, and how it changes while hot and while it cannot be used.</summary>

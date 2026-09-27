@@ -4,7 +4,7 @@ using System.Globalization;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Layout;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 
 // The direction lives in the Ingame namespace, which cannot be imported whole: IMyMotorStator is
 // declared in both, and the mod-side one is the one with the event on it.

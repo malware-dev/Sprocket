@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Look;
 using VRage.Game;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Text
 {

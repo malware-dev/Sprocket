@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Layout;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {

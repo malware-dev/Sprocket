@@ -4,23 +4,20 @@ The mod: all of it, in one project. Space Engineers compiles a mod from loose `.
 loading an assembly, so this project's sources *are* the mod, and the packer copies them into a folder
 the game will load.
 
-One folder per capability, each holding the whole of it - what a screen is asked to show and how it
-is drawn together, because a change to how a sentence works should be a change in one place:
+One folder per capability, each holding the whole of it. Everything that belongs to the editor's
+user interface lives in `Features/`, and the code outside it reaches in there:
 
 | | |
 |---|---|
-| `Features/` | the screens, one folder each, and the chrome around them in `Shell/` |
-| `Sequences/` | what a sequence is, and the sentence somebody reads and presses |
-| `Editing/` | moving through the editor: pages, commands, undo, what may go in a slot |
-| `Lists/` | rows of things to choose or watch |
-| `Runtime/` | running a sequence, and waiting for what it started |
+| `Features/` | the editor, one folder per screen, with the frame, the editor itself and its page stack in `Shell/`, the sentence as drawn in `Sentences/`, the house look in `Look/`, and the block's own terminal controls in `Terminal/` |
+| `Sequences/` | what a sequence is: triggers, steps, and the edits made to them |
+| `Runtime/` | running a sequence, waiting for what it started, and what is wrong with one |
 | `Storage/` | the script: the language, read and written |
 | `World/` | the game's blocks, what they can do, and their toolbars |
-| `Words/` | how a sentence is composed: word order, capitals, and the words that join phrases |
+| `LcdApps/` | apps for the game's screens, one folder each: the status panel in `StatusPanel/` |
+| `Localization/` | the phrasebook, and the `Texts` generated from the mod's resx |
+| `Network/` | lending a Sprocket to the machine that edits it, and the channel that carries it there |
 | `Ui/` | the UI framework: elements at its root, then layout, text, controls, drawing and input |
-| `Layout/` | what a value's field takes, and what is held down with a press |
-| `Look/` | Sprocket's look: palette, lettering, spacing, sizes, symbols and icons |
-| `Terminal/` | the control that opens the editor, and the screen it opens |
 | `Content/` | materials, fonts, and the mod's own metadata |
 
 `SprocketSession` and `SprocketBlock`, at the root, are the game's lifetime.

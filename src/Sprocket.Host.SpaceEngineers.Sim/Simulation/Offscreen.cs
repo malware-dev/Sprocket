@@ -5,10 +5,10 @@ using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Look;
 // Supplies Lettering, which the inspection does not see from every configuration it runs in.
 // ReSharper disable once RedundantUsingDirective
 using Sprocket.Sim.Content;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Sim.Simulation
 {

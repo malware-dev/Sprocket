@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Terminal;
 using Sprocket.Sim.Fakes;
 using VRage.Game.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 using VRage.ObjectBuilders;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Sim.Machine;

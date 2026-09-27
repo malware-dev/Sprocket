@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>Whether a member can be made into a step, and where it cannot, which of two reasons.</summary>

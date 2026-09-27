@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Localization
 {
     /// <summary>Where the texts in the player's language are read from.</summary>

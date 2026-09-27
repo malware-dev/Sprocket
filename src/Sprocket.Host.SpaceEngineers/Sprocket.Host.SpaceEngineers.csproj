@@ -26,10 +26,10 @@
     <Configurations>Release;Debug</Configurations>
     <Platforms>x64</Platforms>
 
-    <!-- The texts in Content\Data\Localization\MyTexts.resx become the class Words.Texts. Every key
+    <!-- The texts in Content\Data\Localization\MyTexts.resx become the class Localization.Texts. Every key
          starts with the prefix, because the game keeps every mod's texts in one table with its own. -->
     <LocalizationPrefix>Sprocket.</LocalizationPrefix>
-    <LocalizationNamespace>Sprocket.Host.SpaceEngineers.Words</LocalizationNamespace>
+    <LocalizationNamespace>Sprocket.Host.SpaceEngineers.Localization</LocalizationNamespace>
   </PropertyGroup>
   <ItemGroup>
     <CompilerVisibleProperty Include="RootNamespace" />

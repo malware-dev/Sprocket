@@ -1,8 +1,8 @@
 using System.IO;
 using System.Xml.Linq;
-using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Sim.Content;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

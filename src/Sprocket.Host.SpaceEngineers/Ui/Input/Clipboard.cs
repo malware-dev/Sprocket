@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Input
 {
     /// <summary>Copied text, for as long as the game is running.</summary>

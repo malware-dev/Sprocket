@@ -11,10 +11,11 @@ of Sprocket and would be wrong anywhere else.
 Three projects of code, and the first one is the mod:
 
 - **`src/Sprocket.Host.SpaceEngineers`** is everything that runs in the game, in one tree, one folder
-  per capability and each holding the whole of it: a sequence's model, the slots a screen is asked to
-  show for it and the views that draw them all sit in `Sequences/`. `Words/` decides how a sentence is
-  composed, which is not the same as holding the English - see below. `Ui/` is the UI framework, kept apart
-  from the features built on it, and sits beside them. Files are globbed, so a new file is in the build by being in the folder.
+  per capability and each holding the whole of it. **Anything that belongs to the user interface lives
+  within `Features/`, and code outside it reaches in there.** A sequence's model sits in `Sequences/`, and
+  the sentence as drawn in `Features/Sentences/`, which also decides how a sentence is composed - not the
+  same as holding the English, see below. `Ui/` is the UI framework, kept apart from the features built on
+  it, and sits beside them. Files are globbed, so a new file is in the build by being in the folder.
 
   **What a screen is asked to show carries structure and never words** - stated on
   `Screen/EditorComponent` and proved by `PaperTarget` in the tests. That rule used to be a folder
@@ -110,7 +111,7 @@ afterwards as the UI regression tests.
 
 ## Values that are transcriptions, not choices
 
-The palette in `Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
+The palette in `Features/Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
 taken from the game's own textures and constants. **They are never adjusted by eye and never
 "improved".** Each carries a citation saying where it came from; that citation is the reason it may
 not be touched, and it is why the values need no further comment.

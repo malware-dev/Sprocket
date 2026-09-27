@@ -1,6 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 
 namespace Sprocket.Tests;
 

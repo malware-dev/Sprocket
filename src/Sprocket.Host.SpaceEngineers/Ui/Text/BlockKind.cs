@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Text
 {
     /// <summary>What a block of a document is.</summary>

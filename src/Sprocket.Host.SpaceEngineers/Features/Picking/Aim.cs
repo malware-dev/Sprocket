@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {

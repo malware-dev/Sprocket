@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>How far Sprocket has checked a kind of block.</summary>

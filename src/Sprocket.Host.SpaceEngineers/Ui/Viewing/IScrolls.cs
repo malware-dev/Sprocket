@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
 {
     /// <summary>Something that shows part of what it holds and moves up and down over the rest, as a wheel moves it.</summary>

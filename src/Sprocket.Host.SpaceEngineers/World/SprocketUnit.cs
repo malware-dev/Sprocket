@@ -2,15 +2,15 @@ using SpaceEngineers.Game.ModAPI;
 using VRage.Game.ModAPI;
 using System.Collections.Generic;
 using System;
-using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
-using Sprocket.Host.SpaceEngineers.Terminal;
-using Sprocket.Host.SpaceEngineers.Words;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 // The Ingame one, which is where action arguments live. Aliased rather than imported whole, the
 // way TriggerAction does, because the Ingame namespaces collide with the mod-side ones.

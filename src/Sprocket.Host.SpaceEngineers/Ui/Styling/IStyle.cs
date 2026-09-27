@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Styling
 {
     /// <summary>How an element looks, applied onto the element's own properties.</summary>

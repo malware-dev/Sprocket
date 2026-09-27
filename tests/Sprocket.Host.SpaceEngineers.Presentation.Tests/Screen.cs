@@ -1,7 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Sim.Simulation;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

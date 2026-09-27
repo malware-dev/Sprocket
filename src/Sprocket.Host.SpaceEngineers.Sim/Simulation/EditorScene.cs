@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.Values;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -8,11 +7,11 @@ using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRage.Input;
 using Sprocket.Sim.Content;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 
 namespace Sprocket.Sim.Simulation
 {

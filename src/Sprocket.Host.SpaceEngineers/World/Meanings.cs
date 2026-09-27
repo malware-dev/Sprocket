@@ -1,6 +1,6 @@
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
-using Sprocket.Host.SpaceEngineers.Terminal;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {

@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>What sort of reading a property gives.</summary>

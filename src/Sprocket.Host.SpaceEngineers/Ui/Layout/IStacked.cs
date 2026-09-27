@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Ui.Layout
 {
     /// <summary>A placement in a stack, which can ask for a share of the room the other children leave.</summary>

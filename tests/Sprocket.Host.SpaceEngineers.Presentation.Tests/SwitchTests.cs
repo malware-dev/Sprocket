@@ -1,7 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using VRageMath;
 using Xunit;
 
