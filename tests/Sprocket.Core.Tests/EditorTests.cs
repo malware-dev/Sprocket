@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Words;
-using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Runtime;
@@ -387,7 +386,7 @@ public class EditorTests
         Assert.True(system.IsBlueprint);
         Assert.Equal("Airlock", system.Name);
         Assert.Equal("Airlock", system.First!.Name);
-        Assert.NotNull(editor.Component<BlueprintComponent>());
+        Assert.NotNull(editor.Blueprint());
 
         editor.GoToRoot();
         ship.Tick();
@@ -416,7 +415,7 @@ public class EditorTests
         ship.Tick();
 
         // Opened on the blueprint through the new one, which has blocks to be given.
-        Assert.True(editor.Component<BlueprintComponent>().Members[1].Chosen);
+        Assert.True(editor.Made()[1].Chosen);
 
         var system = ship.Automation.Systems[0];
         Assert.Equal(2, system.Instances.Count);
@@ -443,19 +442,17 @@ public class EditorTests
         ship.Tick();
 
         // Straight onto the blueprint, through the one it was made of.
-        var blueprint = editor.Component<BlueprintComponent>();
-        Assert.True(blueprint.Members[0].Chosen);
-        Assert.Single(Assert.Single(blueprint.Parts).Blocks);
+        Assert.True(editor.Made()[0].Chosen);
+        Assert.Single(Assert.Single(editor.Parts()).Blocks);
 
-        editor.Invoke(blueprint.Members.Last().Command);
+        editor.Blueprint().Another.Opens!.Execute();
         ship.Tick();
 
-        blueprint = editor.Component<BlueprintComponent>();
-        Assert.True(blueprint.Members[1].Chosen);
-        Assert.Empty(blueprint.Parts[0].Blocks);
+        Assert.True(editor.Made()[1].Chosen);
+        Assert.Empty(editor.Parts()[0].Blocks);
 
         // Through the new one, the trigger names nothing yet.
-        editor.Invoke(blueprint.Chosen!.ButtonCommand);
+        editor.Blueprint().Chosen.Offers!.Execute();
         ship.Tick();
         Assert.Equal("Airlock 2", editor.UsingName());
         Assert.Empty(Assert.IsType<EntitiesSlot>(editor.Triggers()[0].Starts[0]).Entities);
@@ -463,12 +460,12 @@ public class EditorTests
         // Filled with a button of its own, it names that one.
         editor.Back();
         ship.Tick();
-        editor.Invoke(editor.Component<BlueprintComponent>().Parts[0].Command);
+        editor.Parts()[0].Fills!.Execute();
         ship.Tick();
         editor.PressChoice("Airlock Button");
         ship.Tick();
 
-        Assert.Single(editor.Component<BlueprintComponent>().Parts[0].Blocks);
+        Assert.Single(editor.Parts()[0].Blocks);
         var cargo = ship.Automation.Systems[0].FindInstance("Airlock 2")!;
         Assert.Single(cargo.Filled);
     }
@@ -482,10 +479,10 @@ public class EditorTests
         OneLogicSystem(ship).Offers!.Execute();
         ship.Tick();
 
-        editor.SetText(editor.Component<BlueprintComponent>().Parts[0].RenameCommand, "Call button");
+        editor.RenamePart(0, "Call button");
         ship.Tick();
 
-        Assert.Equal("Call button", editor.Component<BlueprintComponent>().Parts[0].Name);
+        Assert.Equal("Call button", editor.Parts()[0].Name);
         Assert.Equal("Call button", Assert.Single(ship.Automation.Systems[0].Parts).Label);
     }
 

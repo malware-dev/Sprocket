@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Screen;

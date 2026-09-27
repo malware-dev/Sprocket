@@ -33,7 +33,7 @@ system-back         60 130 type Airlock enter 25 62
 # --- a blueprint made of a logic system, and another logic system made from it -------------------
 blueprint-made      60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201
 blueprint-another   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236
-blueprint-filling   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236 850 258
+blueprint-filling   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236 850 279
 blueprint-editing   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 1176 148
 blueprint-grouped   60 130 type Airlock enter 60 161 200 351 560 333 1353 311 25 62 25 62 1195 201 146 236 25 62
 

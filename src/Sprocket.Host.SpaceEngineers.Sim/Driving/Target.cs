@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sprocket.Host.SpaceEngineers.Editing;
+using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
@@ -53,6 +54,31 @@ namespace Sprocket.Sim.Driving
         /// <summary>The ways to add a step to the sequence the editor is on, in the order they stand, shown or not.</summary>
         public static List<Button> Adders(this SprocketEditor editor) =>
             Within(editor.Sentence().View).OfType<Button>().Where(b => b.Text.StartsWith(StatusRow.Plus, StringComparison.Ordinal)).ToList();
+
+        /// <summary>The page of the blueprint the editor is on, its view made.</summary>
+        internal static BlueprintPage Blueprint(this SprocketEditor editor)
+        {
+            var page = editor.Current as BlueprintPage
+                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a blueprint's page.");
+            _ = page.View;
+            return page;
+        }
+
+        /// <summary>The logic systems made from the blueprint the editor is on, one row each.</summary>
+        public static List<StatusRow> Made(this SprocketEditor editor) => editor.Blueprint().Members.OfType<StatusRow>().ToList();
+
+        /// <summary>The parts of the blueprint the editor is on, one row each.</summary>
+        public static List<PartRow> Parts(this SprocketEditor editor) =>
+            editor.Blueprint().Parts.OfType<PartRow>().ToList();
+
+        /// <summary>Renames a part of the blueprint the editor is on, through its pencil, as somebody typing the name would.</summary>
+        public static void RenamePart(this SprocketEditor editor, int at, string name)
+        {
+            editor.Parts()[at].Renames!.Execute();
+            var prompt = editor.Blueprint().Prompt!;
+            Retype(prompt.Box, name);
+            prompt.Take();
+        }
 
         /// <summary>The rows of the steps of the sequence the editor is on, in the order they stand.</summary>
         public static List<StepRow> StepRows(this SprocketEditor editor) =>

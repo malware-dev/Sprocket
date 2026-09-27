@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Blueprints;
+using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Xunit;
 
@@ -116,7 +116,7 @@ public class ListeningTests
     [Fact]
     public void AViewLetsGoOfWhatItWasShowing()
     {
-        var component = new BlueprintComponent();
+        var component = new ScriptComponent();
         var view = ComponentView.For(component);
 
         Assert.Equal(0, component.Listeners);
@@ -128,7 +128,7 @@ public class ListeningTests
         Assert.Equal(0, component.Listeners);
 
         // Twice over, because a view handed a second component has to let go of the first by itself.
-        var another = new BlueprintComponent();
+        var another = new ScriptComponent();
         view.Watch(component);
         view.Watch(another);
 

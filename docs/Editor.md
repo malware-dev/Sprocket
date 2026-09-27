@@ -654,5 +654,5 @@ its controls inside the parent's.
 says which is nested; weight says which is the bigger act. Stopping a whole airlock is not the
 same as stopping one of them, and the louder control should be the one with more behind it.
 
-Core says which is which - `StatusEntry.SwitchGovernsAll` - because only core knows. A target
-reading it off the indent would be guessing from a layout it chose itself.
+The page says which is which - `StatusRow.SwitchGovernsAll` - because only the page knows. A row
+reading it off the indent would be guessing from a layout it was given.

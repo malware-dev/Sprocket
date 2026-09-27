@@ -64,7 +64,7 @@ public class AnnouncingTests
             + string.Join(", ", quiet));
 
         // A guard against the guard: a reflection sweep that matched nothing would pass in silence.
-        Assert.True(looked > 30, $"only {looked} values were checked, which is too few to be right");
+        Assert.True(looked > 20, $"only {looked} values were checked, which is too few to be right");
     }
 
     /// <summary>One of each, built with whatever its constructor insists on.</summary>

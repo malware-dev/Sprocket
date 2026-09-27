@@ -498,6 +498,12 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
+        /// <summary>A question asked in a box hanging under what raised it.</summary>
+        public static readonly WindowStyle Prompt = new WindowStyle
+        {
+            Base = { Background = Palette.PanelHot, Edge = Palette.Line, Padding = new Thickness(16f, 8f) }
+        };
+
         /// <summary>A list hanging open under what opened it.</summary>
         public static readonly WindowStyle List = new WindowStyle
         {

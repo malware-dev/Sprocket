@@ -522,4 +522,41 @@ Press to rename it.</value>
     <value>{name} - every {ticks} ticks</value>
     <comment>A rate a timer fires at. {name} is its word, such as steady; {ticks} how many ticks apart.</comment>
   </data>
+  <data name="Sprocket.Blueprint.RenamePrompt" xml:space="preserve">
+    <value>What is the blueprint called?</value>
+    <comment>Asked when a blueprint's name is pressed to rename it.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
+    <value>This blueprint's name.
+Press to rename it.</value>
+    <comment>Note on a blueprint's name at the head of its screen.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.Made" xml:space="preserve">
+    <value>Made from it</value>
+    <comment>Heading over the logic systems made from a blueprint.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.Parts" xml:space="preserve">
+    <value>Parts</value>
+    <comment>Heading over a blueprint's parts.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.RenamePart" xml:space="preserve">
+    <value>What is this part called?</value>
+    <comment>Asked when a part's pencil is pressed to rename it.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.Another" xml:space="preserve">
+    <value>add another {name}</value>
+    <comment>Row under a blueprint's logic systems that makes one more. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.EditUsing" xml:space="preserve">
+    <value>Edit using these blocks</value>
+    <comment>Button that opens what a blueprint does, through the logic system chosen.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NoneFits" xml:space="preserve">
+    <value>Nothing on this construct can fill it.</value>
+    <comment>Where no block on the construct can fill a part.</comment>
+  </data>
+  <data name="Sprocket.Prompt.Continue" xml:space="preserve">
+    <value>Continue</value>
+    <comment>Button beside a box a name is typed into, that gives it.</comment>
+  </data>
 </root>

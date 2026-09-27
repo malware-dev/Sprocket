@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Developing;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui;
@@ -208,10 +207,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             var script = component as ScriptComponent;
             if (script != null)
                 return new ScriptView(script);
-
-            var blueprint = component as BlueprintComponent;
-            if (blueprint != null)
-                return new BlueprintView(blueprint);
 
             // Everything else, drawn loudly. A component this target has not learned to draw must not be
             // silently absent: a screen missing its picker looks exactly like a screen with nothing to
