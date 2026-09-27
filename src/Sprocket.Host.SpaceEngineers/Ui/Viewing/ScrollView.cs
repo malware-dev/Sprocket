@@ -1,18 +1,23 @@
+using System;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
 {
     /// <summary>Shows as much of something taller than its room as fits, moved up and down by a thumb on a bar at its side.</summary>
-    /// <remarks>The bar takes the pointer itself: a press on the thumb drags it, and a press on the track puts the thumb there first.</remarks>
+    /// <remarks>
+    /// The bar takes the pointer itself: a press on the thumb drags it, and a press on the track puts the thumb there first.
+    /// </remarks>
     public class ScrollView : ContentControl, IScrolls
     {
         readonly Rail _rail = new Rail();
 
         float _barWidth;
         bool _held;
+        bool _fits;
 
         float _heldAt;
+        Element _bringing;
 
         /// <summary>How wide the bar is.</summary>
         public float BarWidth
@@ -24,6 +29,21 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
                     return;
 
                 _barWidth = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <summary>Whether it asks only for the room its content needs, up to what it is given, rather than all it is given.</summary>
+        /// <remarks>For one hanging open, which is as tall as its content until that runs past the room there is.</remarks>
+        public bool FitsContent
+        {
+            get { return _fits; }
+            set
+            {
+                if (_fits == value)
+                    return;
+
+                _fits = value;
                 InvalidateMeasure();
             }
         }
@@ -100,6 +120,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
             Scrolled = _rail.Moved(amount);
         }
 
+        /// <summary>Scrolls as little as it takes to show all of <paramref name="element" />, somewhere inside what this shows, when it is next placed.</summary>
+        public void BringIntoView(Element element)
+        {
+            _bringing = element;
+            InvalidateArrange();
+        }
+
         /// <inheritdoc />
         protected override bool Hits(Vector2 point)
         {
@@ -142,10 +169,16 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            if (Content != null)
-                Content.Measure(g, new Vector2(Rail.Room(available.X, _barWidth), Unbounded));
+            if (Content == null)
+                return _fits ? Vector2.Zero : available;
 
-            return available;
+            Content.Measure(g, new Vector2(Rail.Room(available.X, _barWidth), Unbounded));
+            if (!_fits)
+                return available;
+
+            var wanted = Content.DesiredSize;
+            var runsPast = wanted.Y > available.Y;
+            return new Vector2(Math.Min(wanted.X + (runsPast ? _barWidth : 0f), available.X), Math.Min(wanted.Y, available.Y));
         }
 
         /// <inheritdoc />
@@ -162,7 +195,32 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
 
             _rail.Extent = Content.DesiredSize.Y;
             _rail.Offset = _rail.Clamp(_rail.Offset);
+            Place(bounds);
 
+            var bringing = _bringing;
+            _bringing = null;
+            if (bringing == null)
+                return;
+
+            // Where it stands in the content, known only once the content has been placed.
+            var top = bringing.Bounds.Y - (bounds.Y - _rail.Offset);
+            var offset = _rail.Offset;
+            if (top < offset)
+                offset = top;
+            else if (top + bringing.Bounds.Height > offset + bounds.Height)
+                offset = top + bringing.Bounds.Height - bounds.Height;
+
+            offset = _rail.Clamp(offset);
+            if (offset == _rail.Offset)
+                return;
+
+            _rail.Offset = offset;
+            Place(bounds);
+        }
+
+        /// <summary>Places the content at the height it is scrolled to, inside <paramref name="bounds" /> less the bar.</summary>
+        void Place(RectangleF bounds)
+        {
             Content.Arrange(new RectangleF(bounds.X, bounds.Y - _rail.Offset, Rail.Room(bounds.Width, _barWidth),
                 _rail.Extent));
         }

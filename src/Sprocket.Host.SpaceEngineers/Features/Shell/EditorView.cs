@@ -316,13 +316,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Moves whatever is under <paramref name="point" /> by <paramref name="amount" />, if anything there can move.</summary>
         /// <remarks>
-        /// Nothing behind something hanging open is moved, for the same reason nothing behind one is pressed: a wheel that
+        /// While something hangs open, only what is open moves, for the same reason nothing behind it is pressed: a wheel that
         /// reached through took the rows out from under a pointer that was on the list hanging over them.
         /// </remarks>
         public void ScrollBy(Vector2 point, float amount)
         {
-            if (_windows.Count > 0 || _renaming >= 0)
+            if (_renaming >= 0)
                 return;
+
+            if (_windows.Count > 0)
+            {
+                bool stopped;
+                Scroll(_windows.Under(point, out stopped), amount);
+                return;
+            }
 
             if (_shownPage == null || !_shownPage.ScrollsItself)
             {
@@ -330,15 +337,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
             }
 
-            for (var at = _root.Under(point); at != null; at = at.Parent)
-            {
-                var scroll = at as IScrolls;
-                if (scroll == null || !scroll.CanScroll)
-                    continue;
-
-                scroll.ScrollBy(amount);
-                return;
-            }
+            Scroll(_root.Under(point), amount);
         }
 
         /// <summary>A key going down, answering whether anything took it.</summary>
@@ -788,6 +787,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             if (_renaming >= 0)
                 _input.Focus(box);
+        }
+
+        /// <summary>Moves the nearest thing at or above <paramref name="from" /> that has anywhere to go.</summary>
+        static void Scroll(Element from, float amount)
+        {
+            for (var at = from; at != null; at = at.Parent)
+            {
+                var scroll = at as IScrolls;
+                if (scroll == null || !scroll.CanScroll)
+                    continue;
+
+                scroll.ScrollBy(amount);
+                return;
+            }
         }
 
         /// <summary>Carries out <paramref name="command" />, where there is one that can be.</summary>

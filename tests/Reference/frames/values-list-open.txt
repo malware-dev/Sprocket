@@ -109,9 +109,11 @@ on screen     Set Forward Direction on Tug Autopilot
 102  Sprite     Sprocket_Fill         {X:1521 Y:449 W:95 H:1}  #5B737BFF
 103  Sprite     Sprocket_Fill         {X:1521 Y:226 W:1 H:224}  #5B737BFF
 104  Sprite     Sprocket_Fill         {X:1615 Y:226 W:1 H:224}  #5B737BFF
-105  Text       at {X:1536.713 Y:237.712} scale 0.694  #DCF5FDFF  "Forward"
-106  Text       at {X:1536.713 Y:273.712} scale 0.694  #DCF5FDFF  "Backward"
-107  Text       at {X:1536.713 Y:309.712} scale 0.694  #DCF5FDFF  "Left"
-108  Text       at {X:1536.713 Y:345.712} scale 0.694  #DCF5FDFF  "Right"
-109  Text       at {X:1536.713 Y:381.712} scale 0.694  #DCF5FDFF  "Up"
-110  Text       at {X:1536.713 Y:417.712} scale 0.694  #DCF5FDFF  "Down"
+105  SetClip    {X:1525 Y:230 W:87 H:216}
+106  Text       at {X:1536.713 Y:237.712} scale 0.694  #DCF5FDFF  "Forward"
+107  Text       at {X:1536.713 Y:273.712} scale 0.694  #DCF5FDFF  "Backward"
+108  Text       at {X:1536.713 Y:309.712} scale 0.694  #DCF5FDFF  "Left"
+109  Text       at {X:1536.713 Y:345.712} scale 0.694  #DCF5FDFF  "Right"
+110  Text       at {X:1536.713 Y:381.712} scale 0.694  #DCF5FDFF  "Up"
+111  Text       at {X:1536.713 Y:417.712} scale 0.694  #DCF5FDFF  "Down"
+112  ClearClip  

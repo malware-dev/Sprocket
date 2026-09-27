@@ -1,11 +1,9 @@
-using System.Text;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Viewing;
 using Sprocket.Host.SpaceEngineers.Ui.Windows;
-using VRage.Utils;
 using VRageMath;
 using Xunit;
 
@@ -59,7 +57,7 @@ public class WindowLayerTests
     [Fact]
     public void AModalWindowPaintsItsBackdropFirst()
     {
-        var graphics = new Recording();
+        var graphics = new Recording(Area);
         var layer = new WindowLayer();
         layer.Open(new Dialog { Backdrop = Color.Black, Background = Color.White, Content = new Button { Text = "Go" } });
 
@@ -82,56 +80,87 @@ public class WindowLayerTests
         Assert.Equal(0, layer.Count);
     }
 
+    /// <summary>A long list hanging under something near the top stops at the foot of the area and scrolls, rather than running off it.</summary>
+    [Fact]
+    public void ALongListHangingOpenStopsAtTheEdgeAndScrolls()
+    {
+        var (layer, popup, scroll, rows) = Hanging(73, 100f);
+
+        Assert.True(popup.Bounds.Y >= 140f, "the list is not under what it hangs from");
+        Assert.True(popup.Bounds.Y + popup.Bounds.Height <= Area.Y + Area.Height, "the list runs off the area");
+        Assert.True(scroll.CanScroll, "a list longer than its room does not scroll");
+        Assert.Equal(1, layer.Count);
+        Assert.True(rows[72].Bounds.Y > popup.Bounds.Y + popup.Bounds.Height, "the last word is on show without scrolling");
+    }
+
+    /// <summary>A short list is as tall as its words, with nothing to scroll.</summary>
+    [Fact]
+    public void AShortListIsAsTallAsItsWords()
+    {
+        var (_, popup, scroll, rows) = Hanging(3, 100f);
+
+        Assert.False(scroll.CanScroll);
+        Assert.Equal(rows[2].Bounds.Y + rows[2].Bounds.Height, popup.Bounds.Y + popup.Bounds.Height, 1);
+    }
+
+    /// <summary>Asked to show one of its words, a list scrolls just far enough to bring it into view.</summary>
+    [Fact]
+    public void AListBringsAWordIntoView()
+    {
+        var (layer, popup, scroll, rows) = Hanging(73, 100f);
+
+        scroll.BringIntoView(rows[60]);
+        layer.Draw(new Recording(Area), Area);
+
+        Assert.True(rows[60].Bounds.Y >= popup.Bounds.Y, "the word is above what is on show");
+        Assert.True(rows[60].Bounds.Y + rows[60].Bounds.Height <= popup.Bounds.Y + popup.Bounds.Height,
+            "the word is below what is on show");
+    }
+
+    /// <summary>A list opened on something near the foot hangs over it instead, in the room above.</summary>
+    [Fact]
+    public void AListNearTheFootHangsAboveInTheRoomThere()
+    {
+        var (_, popup, scroll, _) = Hanging(73, 700f);
+
+        Assert.True(popup.Bounds.Y + popup.Bounds.Height <= 700f, "the list is not over what it hangs from");
+        Assert.True(popup.Bounds.Y >= Area.Y, "the list runs off the top");
+        Assert.True(scroll.CanScroll);
+    }
+
+    static (WindowLayer, Popup, ScrollView, List<Button>) Hanging(int count, float at)
+    {
+        var anchor = new Button { Text = "Anchor" };
+        anchor.Measure(new Recording(Area), new Vector2(200f, 40f));
+        anchor.Arrange(new RectangleF(0f, at, 200f, 40f));
+
+        var rows = new List<Button>();
+        var stack = new VStack();
+        for (var i = 0; i < count; i++)
+        {
+            var row = new Button { Text = "Word " + i, Command = new Relay(() => { }) };
+            rows.Add(row);
+            stack.Children.Add(row);
+        }
+
+        var scroll = new ScrollView { BarWidth = 12f, Thumb = Color.White, FitsContent = true, Content = stack };
+        var popup = new Popup { Anchor = anchor, Content = scroll };
+        var layer = new WindowLayer();
+        layer.Open(popup);
+        layer.Draw(new Recording(Area), Area);
+        return (layer, popup, scroll, rows);
+    }
+
     static (WindowLayer, Window, Button) Opened(bool modal)
     {
         var button = new Button { Text = "Go", Command = new Relay(() => { }) };
         var window = new Window { IsModal = modal, Placement = Fixed.Wide(300f), Content = new VStack { Children = { button } } };
         var layer = new WindowLayer();
         layer.Open(window);
-        layer.Draw(new Recording(), Area);
+        layer.Draw(new Recording(Area), Area);
         return (layer, window, button);
     }
 
     static Vector2 Middle(Element element) =>
         new Vector2(element.Bounds.X + element.Bounds.Width / 2f, element.Bounds.Y + element.Bounds.Height / 2f);
-
-    /// <summary>A graphics that measures every character as half its size wide, and keeps where it was asked to fill.</summary>
-    sealed class Recording : IGraphics
-    {
-        public List<RectangleF> Fills { get; } = new List<RectangleF>();
-
-        public Vector2 Size => new Vector2(Area.Width, Area.Height);
-
-        public Vector2 MeasureText(string font, StringBuilder text, float size) => new Vector2(text.Length * size * 0.5f, size);
-
-        public void Fill(RectangleF destination, Color color, float rotation = 0f) => Fills.Add(destination);
-
-        public void PushClip(RectangleF bounds)
-        {
-        }
-
-        public void PopClip()
-        {
-        }
-
-        public void PushTransform(RenderTransform transform, Vector2 origin)
-        {
-        }
-
-        public void PopTransform()
-        {
-        }
-
-        public void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation)
-        {
-        }
-
-        public void DrawText(string font, string text, Vector2 position, float size, Color color)
-        {
-        }
-
-        public void DrawText(string font, string text, Vector2 position, float size, Color color, Align align)
-        {
-        }
-    }
 }

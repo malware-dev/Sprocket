@@ -15,6 +15,12 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
         /// <summary>What a modal window paints over everything beneath it.</summary>
         public Color Backdrop { get; set; }
 
+        /// <summary>The room <paramref name="area" /> gives the window to be measured in: all of it, unless a kind of window says otherwise.</summary>
+        public virtual Vector2 Room(RectangleF area)
+        {
+            return new Vector2(area.Width, area.Height);
+        }
+
         /// <summary>Where the window stands in <paramref name="area" /> at <paramref name="size" />: in the middle, unless a kind of window says otherwise.</summary>
         public virtual RectangleF Place(RectangleF area, Vector2 size)
         {

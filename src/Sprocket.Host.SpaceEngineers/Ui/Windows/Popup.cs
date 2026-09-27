@@ -12,6 +12,20 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
         /// <summary>How far it hangs from what it hangs from.</summary>
         public float Gap { get; set; }
 
+        /// <summary>As much of the area as there is on the side of the anchor with more of it, so what hangs open never runs off the area.</summary>
+        public override Vector2 Room(RectangleF area)
+        {
+            if (Anchor == null)
+                return base.Room(area);
+
+            var from = Anchor.Bounds;
+            var below = area.Y + area.Height - (from.Y + from.Height + Gap);
+            var above = from.Y - Gap - area.Y;
+            var tall = below > above ? below : above;
+
+            return new Vector2(area.Width, tall > 0f ? tall : 0f);
+        }
+
         /// <summary>Under the anchor, or over it where the area has no room below, and kept inside the area either way.</summary>
         public override RectangleF Place(RectangleF area, Vector2 size)
         {

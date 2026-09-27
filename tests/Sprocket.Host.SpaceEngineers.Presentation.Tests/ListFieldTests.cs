@@ -1,0 +1,58 @@
+using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using VRageMath;
+using Xunit;
+
+namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
+
+/// <summary>A value chosen from more words than fit on a line, from a list hanging under it.</summary>
+public class ListFieldTests
+{
+    static readonly RectangleF Area = new RectangleF(0f, 0f, 1000f, 800f);
+
+    /// <summary>A list of as many words as a sound block has opens on the word already given, however far down it is.</summary>
+    [Fact]
+    public void AListOpensOnTheWordGiven()
+    {
+        var shown = Opened(73, "Sound 60");
+
+        Assert.Contains("Sound 60", shown);
+        Assert.DoesNotContain("Sound 0", shown);
+    }
+
+    /// <summary>With nothing given yet, it opens at the top.</summary>
+    [Fact]
+    public void WithNothingGivenItOpensAtTheTop()
+    {
+        var shown = Opened(73, "");
+
+        Assert.Contains("Sound 0", shown);
+        Assert.DoesNotContain("Sound 72", shown);
+    }
+
+    /// <summary>The words a press reaches down the list hanging under a field holding <paramref name="given" />.</summary>
+    static List<string> Opened(int count, string given)
+    {
+        var graphics = new Recording(Area);
+        var layer = new WindowLayer();
+        var words = Enumerable.Range(0, count).Select(i => "Sound " + i).ToList();
+        var field = new ListField(words, () => layer) { Text = given };
+
+        field.Measure(graphics, new Vector2(300f, 40f));
+        field.Arrange(new RectangleF(0f, 100f, 300f, 40f));
+        field.Command!.Execute();
+        layer.Draw(graphics, Area);
+
+        var shown = new List<string>();
+        for (var y = 140f; y < Area.Height; y += 4f)
+        {
+            var row = layer.Under(new Vector2(20f, y), out _) as HStack;
+            if (row?.Children[0] is Label word && !shown.Contains(word.Text))
+                shown.Add(word.Text);
+        }
+
+        return shown;
+    }
+}

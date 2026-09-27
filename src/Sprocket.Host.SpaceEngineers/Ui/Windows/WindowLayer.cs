@@ -61,7 +61,8 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
                 var sized = window.Placement as ISized;
                 var held = sized != null && !float.IsNaN(sized.Width);
 
-                window.Measure(g, new Vector2(held ? sized.Width : area.Width, area.Height));
+                var room = window.Room(area);
+                window.Measure(g, new Vector2(held ? sized.Width : room.X, room.Y));
 
                 var size = window.DesiredSize;
                 if (held)

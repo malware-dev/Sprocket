@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Images;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Viewing;
 using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
@@ -19,6 +20,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
     /// While it holds the keyboard an arrow steps to the next word and a letter to the next word starting with it, round to
     /// the start, so pressing one letter again walks every word it starts. Words stop at either end under the arrows, so
     /// holding one comes to rest on the last.
+    /// <para>
+    /// A list longer than the room on either side of the line scrolls, and opens with the word given in view.
+    /// </para>
     /// </remarks>
     public class ListField : HStack, IField
     {
@@ -26,6 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
 
         readonly List<string> _words = new List<string>();
         readonly List<StringBuilder> _spelled = new List<StringBuilder>();
+        readonly List<Element> _rows = new List<Element>();
         readonly Label _said;
         readonly Action _close;
 
@@ -49,15 +54,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
                 _words.Add(word);
                 _spelled.Add(new StringBuilder(word));
 
-                rows.Children.Add(new HStack
+                var row = new HStack
                 {
                     Style = Styles.ListRow,
                     Command = new Relay(delegate { Choose(word); }),
                     Children = { new Label { Style = Styles.ListWord, Text = word } }
-                });
+                };
+
+                _rows.Add(row);
+                rows.Children.Add(row);
             }
 
-            var list = new Popup { Style = Styles.List, Anchor = this, Content = rows };
+            var scroll = new ScrollView { Style = Styles.ScrollView, FitsContent = true, Content = rows };
+            var list = new Popup { Style = Styles.List, Anchor = this, Content = scroll };
 
             Command = new Relay(delegate
             {
@@ -66,9 +75,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
                     return;
 
                 if (layer.IsOpen(list))
+                {
                     layer.Close(list);
-                else
-                    layer.Open(list);
+                    return;
+                }
+
+                layer.Open(list);
+
+                var given = _words.IndexOf(_text);
+                if (given >= 0)
+                    scroll.BringIntoView(_rows[given]);
             });
 
             _close = delegate
