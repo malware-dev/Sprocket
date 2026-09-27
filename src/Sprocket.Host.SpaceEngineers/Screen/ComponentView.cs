@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Sprocket.Host.SpaceEngineers.Developing;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
@@ -204,11 +203,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         public static ComponentView For(EditorComponent component)
         {
-            var script = component as ScriptComponent;
-            if (script != null)
-                return new ScriptView(script);
-
-            // Everything else, drawn loudly. A component this target has not learned to draw must not be
+            // Everything, drawn loudly. A component this target has not learned to draw must not be
             // silently absent: a screen missing its picker looks exactly like a screen with nothing to
             // pick, and the second is a thing that legitimately happens.
             return new UnsupportedView(component);

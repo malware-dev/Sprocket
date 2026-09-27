@@ -1,7 +1,7 @@
 using System.Text;
 using VRageMath;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Ui.Legacy;
+using Sprocket.Host.SpaceEngineers.Ui.Viewing;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// The defect this guards against draws the right picture: every line issued as a call, the scissor
 /// throwing away all but a screenful. Nothing on screen says it is happening, so it is counted.
 /// </remarks>
-public class ScreedTests
+public class ListingTests
 {
     const float Width = 800f;
     const float Height = 600f;
@@ -26,9 +26,9 @@ public class ScreedTests
         return text.ToString(0, text.Length - 1);
     }
 
-    static Screed Long(int count)
+    static Listing Long(int count)
     {
-        return new Screed { Text = Lines(count) };
+        return new Listing { Text = Lines(count) };
     }
 
     /// <summary>
@@ -38,9 +38,9 @@ public class ScreedTests
     /// A control has no bounds until it has been arranged, so anything that presses at one has to
     /// have drawn it first even where the frame is not what is being asked about.
     /// </remarks>
-    static void Laid(Screed screed)
+    static void Laid(Listing listing)
     {
-        new Easel(screed, Width, Height).Draw(Width, Height);
+        new Easel(listing, Width, Height).Draw(Width, Height);
     }
 
     [Fact]
@@ -53,21 +53,21 @@ public class ScreedTests
     [Fact]
     public void ItStandsAsTallAsItsLines()
     {
-        Screed screed = Long(200);
-        var easel = new Easel(screed, Width, Height);
+        Listing listing = Long(200);
+        var easel = new Easel(listing, Width, Height);
 
-        Assert.Equal(200 * easel.LineHeight, screed.Extent, 2);
+        Assert.Equal(200 * easel.LineHeight, listing.Extent, 2);
     }
 
     /// <summary>It takes the room it is given rather than growing to the text.</summary>
     [Fact]
     public void ItIsAWindowAndNotAColumn()
     {
-        Screed screed = Long(5000);
-        var easel = new Easel(screed, Width, Height);
+        Listing listing = Long(5000);
+        var easel = new Easel(listing, Width, Height);
 
-        Assert.Equal(Height, screed.DesiredSize.Y, 2);
-        Assert.True(screed.Extent > Height, "the listing is shorter than its own window, so this proves nothing");
+        Assert.Equal(Height, listing.DesiredSize.Y, 2);
+        Assert.True(listing.Extent > Height, "the listing is shorter than its own window, so this proves nothing");
         Assert.True(easel.Written.Count() * easel.LineHeight <= Height + easel.LineHeight,
             "it drew more lines than the window is tall");
     }
@@ -114,12 +114,12 @@ public class ScreedTests
     [Fact]
     public void ScrollingMeasuresOnlyWhatComesIntoView()
     {
-        Screed screed = Long(1000);
-        var easel = new Easel(screed, Width, Height);
+        Listing listing = Long(1000);
+        var easel = new Easel(listing, Width, Height);
 
         int settled = easel.Measured;
 
-        screed.Scrolled = easel.LineHeight;
+        listing.Scrolled = easel.LineHeight;
         easel.Draw(Width, Height);
 
         Assert.Equal(settled + 1, easel.Measured);
@@ -129,24 +129,24 @@ public class ScreedTests
     [Fact]
     public void TheReachGrowsAsLongerLinesAreMet()
     {
-        var screed = new Screed { Text = Lines(500) + "\n" + new string('x', 400) + "\n" + Lines(500) };
-        var easel = new Easel(screed, Width, Height);
+        var listing = new Listing { Text = Lines(500) + "\n" + new string('x', 400) + "\n" + Lines(500) };
+        var easel = new Easel(listing, Width, Height);
 
-        float known = screed.Widest;
-        Assert.False(screed.CanMove(Way.Across), "the short lines at the top already reach past the window");
+        float known = listing.Widest;
+        Assert.False(listing.CanShift, "the short lines at the top already reach past the window");
 
-        screed.Scrolled = 500f * easel.LineHeight;
+        listing.Scrolled = 500f * easel.LineHeight;
         easel.Draw(Width, Height);
 
-        Assert.True(screed.Widest > known, "meeting the long line taught it nothing");
-        Assert.True(screed.CanMove(Way.Across), "the long line is on screen and still cannot be reached");
+        Assert.True(listing.Widest > known, "meeting the long line taught it nothing");
+        Assert.True(listing.CanShift, "the long line is on screen and still cannot be reached");
 
-        float met = screed.Widest;
+        float met = listing.Widest;
 
-        screed.Scrolled = 0f;
+        listing.Scrolled = 0f;
         easel.Draw(Width, Height);
 
-        Assert.Equal(met, screed.Widest);
+        Assert.Equal(met, listing.Widest);
     }
 
     /// <summary>The whole point: the calls are what the window shows and nothing more.</summary>
@@ -164,13 +164,13 @@ public class ScreedTests
     [Fact]
     public void ScrollingShowsOtherLinesAndNoMoreOfThem()
     {
-        Screed screed = Long(5000);
-        var easel = new Easel(screed, Width, Height);
+        Listing listing = Long(5000);
+        var easel = new Easel(listing, Width, Height);
 
         int before = easel.Written.Count();
         Assert.Contains(easel.Written, c => c.Text == "line 0");
 
-        screed.Scrolled = 4000f * easel.LineHeight;
+        listing.Scrolled = 4000f * easel.LineHeight;
         easel.Draw(Width, Height);
 
         Assert.DoesNotContain(easel.Written, c => c.Text == "line 0");
@@ -182,15 +182,15 @@ public class ScreedTests
     [Fact]
     public void ALineTooWideForTheRoomCanBeReached()
     {
-        var screed = new Screed { Text = new string('x', 400) };
-        var easel = new Easel(screed, Width, Height);
+        var listing = new Listing { Text = new string('x', 400) };
+        var easel = new Easel(listing, Width, Height);
 
-        Assert.True(screed.Widest > Width, "the line fits, so there is nothing to reach");
-        Assert.True(screed.CanMove(Way.Across), "it cannot be moved sideways");
+        Assert.True(listing.Widest > Width, "the line fits, so there is nothing to reach");
+        Assert.True(listing.CanShift, "it cannot be moved sideways");
 
         float first = easel.Written.First().Position.X;
 
-        screed.MoveBy(Way.Across, screed.Widest);
+        listing.ShiftBy(listing.Widest);
         easel.Draw(Width, Height);
 
         Assert.True(easel.Written.First().Position.X < first, "moving sideways drew it in the same place");
@@ -200,33 +200,33 @@ public class ScreedTests
     [Fact]
     public void SidewaysStopsAtTheLongestLine()
     {
-        var screed = new Screed { Text = new string('x', 400) };
-        var easel = new Easel(screed, Width, Height);
+        var listing = new Listing { Text = new string('x', 400) };
+        var easel = new Easel(listing, Width, Height);
 
-        screed.MoveBy(Way.Across, 100000f);
+        listing.ShiftBy(100000f);
         easel.Draw(Width, Height);
 
-        Assert.Equal(screed.Widest - Width, screed.Shifted, 1);
+        Assert.Equal(listing.Widest - Width, listing.Shifted, 1);
     }
 
     /// <summary>A thumb is drawn for each direction that has something out of sight, and no others.</summary>
     [Fact]
     public void AThumbIsDrawnForEachDirectionThatHasSomewhereToGo()
     {
-        var screed = new Screed
+        var listing = new Listing
         {
             Text = Lines(500),
             BarWidth = 8f,
-            BarColor = Color.White
+            Thumb = Color.White
         };
 
-        var easel = new Easel(screed, Width, Height);
+        var easel = new Easel(listing, Width, Height);
 
         Assert.Single(easel.Sprites);
 
         // Put a line longer than the window at the top, where it is met straight away. Down at the
         // bottom it would not be, and that is the point of the test above rather than this one.
-        screed.Text = new string('x', 400) + "\n" + Lines(500);
+        listing.Text = new string('x', 400) + "\n" + Lines(500);
         easel.Draw(Width, Height);
 
         Assert.Equal(2, easel.Sprites.Count());
@@ -242,67 +242,69 @@ public class ScreedTests
     [Fact]
     public void TheTextCanBeDraggedAbout()
     {
-        Screed screed = Long(5000);
-        var easel = new Easel(screed, Width, Height);
+        Listing listing = Long(5000);
+        var easel = new Easel(listing, Width, Height);
 
-        Assert.True(screed.Take(new Vector2(100f, 100f)), "it refused to be taken hold of");
-        Assert.True(screed.IsPanning);
+        listing.OnPointerDown(new Vector2(100f, 100f), 1, false, false);
+        Assert.True(listing.IsPanning);
 
-        screed.Carry(new Vector2(100f, 40f));
+        listing.OnPointerMove(new Vector2(100f, 40f));
         easel.Draw(Width, Height);
 
-        Assert.Equal(60f, screed.Scrolled, 1);
+        Assert.Equal(60f, listing.Scrolled, 1);
 
-        screed.Drop();
-        Assert.False(screed.IsPanning);
+        listing.OnPointerUp(new Vector2(100f, 40f));
+        Assert.False(listing.IsPanning);
 
-        screed.Carry(new Vector2(100f, 10f));
-        Assert.Equal(60f, screed.Scrolled, 1);
+        listing.OnPointerMove(new Vector2(100f, 10f));
+        Assert.Equal(60f, listing.Scrolled, 1);
     }
 
     /// <summary>Dragging sideways moves it sideways, and stops where the longest line stops.</summary>
     [Fact]
     public void DraggingSidewaysMovesItSideways()
     {
-        var screed = new Screed { Text = new string('x', 400) };
-        Laid(screed);
+        var listing = new Listing { Text = new string('x', 400) };
+        Laid(listing);
 
-        screed.Take(new Vector2(100f, 10f));
-        screed.Carry(new Vector2(40f, 10f));
+        listing.OnPointerDown(new Vector2(100f, 10f), 1, false, false);
+        listing.OnPointerMove(new Vector2(40f, 10f));
 
-        Assert.Equal(60f, screed.Shifted, 1);
+        Assert.Equal(60f, listing.Shifted, 1);
 
-        screed.Carry(new Vector2(-100000f, 10f));
-        Assert.Equal(screed.Widest - Width, screed.Shifted, 1);
+        listing.OnPointerMove(new Vector2(-100000f, 10f));
+        Assert.Equal(listing.Widest - Width, listing.Shifted, 1);
     }
 
     /// <summary>A press on a thumb is the thumb being dragged, not the text.</summary>
     [Fact]
     public void APressOnAThumbTakesTheThumb()
     {
-        var screed = new Screed { Text = Lines(5000), BarWidth = 20f, BarColor = Color.White };
-        Laid(screed);
+        var listing = new Listing { Text = Lines(5000), BarWidth = 20f, Thumb = Color.White };
+        Laid(listing);
 
-        Assert.True(screed.Take(new Vector2(Width - 10f, 10f)));
+        listing.OnPointerDown(new Vector2(Width - 10f, 10f), 1, false, false);
+        Assert.False(listing.IsPanning);
 
-        Assert.False(screed.IsPanning);
-        Assert.Equal(Way.Down, screed.Held);
+        // Carried down, a thumb goes down with the hand, where the text would have gone the other way.
+        listing.OnPointerMove(new Vector2(Width - 10f, 30f));
+        Assert.True(listing.Scrolled > 0f, "the thumb did not move the listing down");
     }
 
-    /// <summary>Text with nowhere to go is not taken hold of, so the press belongs to somebody else.</summary>
+    /// <summary>Text with nowhere to go is not dragged about.</summary>
     [Fact]
-    public void TextThatFitsIsNotTakenHoldOf()
+    public void TextThatFitsIsNotDraggedAbout()
     {
-        var screed = new Screed { Text = "one\ntwo" };
-        _ = new Easel(screed, Width, Height);
+        var listing = new Listing { Text = "one\ntwo" };
+        _ = new Easel(listing, Width, Height);
 
-        Assert.False(screed.Take(new Vector2(100f, 10f)));
-        Assert.False(screed.IsPanning);
+        listing.OnPointerDown(new Vector2(100f, 10f), 1, false, false);
+        Assert.False(listing.IsPanning);
     }
 
-    static Screed Numbered(string text)
+    static Listing Numbered(string text)
     {
-        return new Screed { Text = text, Numbered = true, NumberColor = Color.White };
+        return new Listing { Text = text, Numbered = true, NumberColor = Color.White };
     }
 
     static float WhereIs(Easel easel, string said)
@@ -341,8 +343,8 @@ public class ScreedTests
     [Fact]
     public void TheNumbersAreFlushAgainstTheWords()
     {
-        Screed screed = Numbered(Lines(5000));
-        var easel = new Easel(screed, Width, Height);
+        Listing listing = Numbered(Lines(5000));
+        var easel = new Easel(listing, Width, Height);
 
         float nine = WhereIs(easel, "9");
         float digit = nine - WhereIs(easel, "10");
@@ -350,7 +352,7 @@ public class ScreedTests
         Assert.True(digit > 0f, "a two-digit number did not start further left than a one-digit one");
 
         // Line 100 is not on the first screenful, so go and find it.
-        screed.Scrolled = 95f * easel.LineHeight;
+        listing.Scrolled = 95f * easel.LineHeight;
         easel.Draw(Width, Height);
 
         Assert.Equal(nine - 2f * digit, WhereIs(easel, "100"), 1);
@@ -391,13 +393,13 @@ public class ScreedTests
     [Fact]
     public void TheGutterHoldsStillWhileTheWordsMove()
     {
-        Screed screed = Numbered(new string('x', 400) + "\n" + Lines(500));
-        var easel = new Easel(screed, Width, Height);
+        Listing listing = Numbered(new string('x', 400) + "\n" + Lines(500));
+        var easel = new Easel(listing, Width, Height);
 
         float gutter = WhereIs(easel, "2");
         float words = WhereIs(easel, "line 0");
 
-        screed.MoveBy(Way.Across, 120f);
+        listing.ShiftBy(120f);
         easel.Draw(Width, Height);
 
         Assert.Equal(gutter, WhereIs(easel, "2"), 2);
@@ -410,24 +412,24 @@ public class ScreedTests
     {
         var wide = new string('x', 400);
 
-        var plain = new Screed { Text = wide };
+        var plain = new Listing { Text = wide };
         var withGutter = Numbered(wide);
 
         var first = new Easel(plain, Width, Height);
         var second = new Easel(withGutter, Width, Height);
 
         Assert.True(WhereIs(second, wide) > WhereIs(first, wide), "the words did not move over for it");
-        Assert.True(withGutter.CanMove(Way.Across));
+        Assert.True(withGutter.CanShift);
     }
 
     /// <summary>An empty one draws nothing and still stands a line tall, so a box is not zero high.</summary>
     [Fact]
     public void EmptyItHasOneLineOfExtent()
     {
-        var screed = new Screed();
-        var easel = new Easel(screed, Width, Height);
+        var listing = new Listing();
+        var easel = new Easel(listing, Width, Height);
 
         Assert.Empty(easel.Written);
-        Assert.Equal(easel.LineHeight, screed.Extent, 2);
+        Assert.Equal(easel.LineHeight, listing.Extent, 2);
     }
 }

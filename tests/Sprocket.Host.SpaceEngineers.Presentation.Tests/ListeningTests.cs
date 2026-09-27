@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Developing;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Xunit;
 
@@ -116,7 +115,7 @@ public class ListeningTests
     [Fact]
     public void AViewLetsGoOfWhatItWasShowing()
     {
-        var component = new ScriptComponent();
+        var component = new Probe();
         var view = ComponentView.For(component);
 
         Assert.Equal(0, component.Listeners);
@@ -128,12 +127,17 @@ public class ListeningTests
         Assert.Equal(0, component.Listeners);
 
         // Twice over, because a view handed a second component has to let go of the first by itself.
-        var another = new ScriptComponent();
+        var another = new Probe();
         view.Watch(component);
         view.Watch(another);
 
         Assert.Equal(0, component.Listeners);
         Assert.Equal(1, another.Listeners);
+    }
+
+    /// <summary>A component of no kind any page makes, which is all a view's listening needs to be tried on.</summary>
+    sealed class Probe : EditorComponent
+    {
     }
 
     static void AssertListening(Screen screen, string where)

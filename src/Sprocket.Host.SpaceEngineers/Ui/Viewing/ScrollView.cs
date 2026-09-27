@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
 {
     /// <summary>Shows as much of something taller than its room as fits, moved up and down by a thumb on a bar at its side.</summary>
     /// <remarks>The bar takes the pointer itself: a press on the thumb drags it, and a press on the track puts the thumb there first.</remarks>
-    public class ScrollView : ContentControl
+    public class ScrollView : ContentControl, IScrolls
     {
         readonly Rail _rail = new Rail();
 
@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
             }
         }
 
-        /// <summary>Whether any of the content is out of sight.</summary>
+        /// <inheritdoc />
         public bool CanScroll => _rail.CanMove;
 
         /// <inheritdoc />
@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Viewing
             }
         }
 
-        /// <summary>Moves the content by <paramref name="amount" /> and keeps it inside itself.</summary>
+        /// <inheritdoc />
         public void ScrollBy(float amount)
         {
             Scrolled = _rail.Moved(amount);

@@ -1196,7 +1196,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
             {
                 for (var at = _root.Under(point); at != null; at = at.Parent)
                 {
-                    var scroll = at as ScrollView;
+                    var scroll = at as IScrolls;
                     if (scroll == null || !scroll.CanScroll)
                         continue;
 

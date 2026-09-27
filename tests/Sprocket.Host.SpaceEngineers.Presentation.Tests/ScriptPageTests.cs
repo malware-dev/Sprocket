@@ -1,8 +1,7 @@
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Controls;
+using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Developing;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -109,9 +108,8 @@ public class ScriptPageTests
     /// The listing claims the body and does its own scrolling.
     /// </summary>
     /// <remarks>
-    /// Both halves or neither. A component that does not claim the height is wrapped in the screen's
-    /// own scroller, which puts a second bar around the screed's and lets the two fight over one
-    /// gesture - and it draws a thumb on a page that has nothing to scroll.
+    /// A page that does not claim the height is wrapped in the screen's own scroller, which puts a second bar around the
+    /// listing's and lets the two fight over one gesture, and draws a thumb on a page that has nothing to scroll.
     /// </remarks>
     [Fact]
     public void TheListingIsTheWholeBodyAndScrollsItself()
@@ -119,10 +117,8 @@ public class ScriptPageTests
         Screen screen = Press(Developing(), Way);
         screen.Run(1);
 
-        ScriptComponent listing = screen.Editor.Screen.Components.OfType<ScriptComponent>().Single();
-
-        Assert.True(listing.Fills, "the listing did not claim the body");
-        Assert.True(ComponentView.For(listing).ScrollsItself, "the listing does not scroll itself");
+        var page = Assert.IsType<ScriptPage>(screen.Editor.Current);
+        Assert.True(page.ScrollsItself, "the listing does not scroll itself");
 
         // Nothing to scroll on a program this short, so no thumb belongs anywhere on the screen.
         Assert.DoesNotContain(screen.Drawings, d => !d.IsText && d.Ink == Palette.Thumb);
