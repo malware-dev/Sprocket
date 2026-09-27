@@ -124,6 +124,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return said;
         }
 
+        /// <summary>Whether the action these blocks share by that id and form takes time to finish.</summary>
+        /// <remarks>Which is whether a step doing it is followed by a wait for it.</remarks>
+        public static bool Lasts(GridWorld world, IList<long> entityIds, string actionId, Form form)
+        {
+            var actions = ActionsOf(world, entityIds);
+            for (var i = 0; i < actions.Count; i++)
+            {
+                if (actions[i].Id == actionId && actions[i].Form == form)
+                    return actions[i].Lasts;
+            }
+
+            return false;
+        }
+
         /// <summary>Whether any of the blocks offers something the others do not, which the shared list leaves out.</summary>
         /// <remarks>Asked of the view showing, because each lists a different set.</remarks>
         public static bool Narrowed(GridWorld world, IList<long> entityIds, bool terminal)

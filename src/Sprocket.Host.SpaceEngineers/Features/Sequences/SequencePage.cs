@@ -263,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Puts a row in place for each step with the parts of its sentence, and offers what may be done now.</summary>
         /// <remarks>
         /// Walks the steps' blocks for their names, which is why it runs only when the program changes. A wait for a step
-        /// to finish is not a row: each row stands for a step and the wait after it, moved and deleted as one.
+        /// to finish is not a row: each row stands for a step and any wait after it, moved and deleted as one.
         /// </remarks>
         void Arrange(Texts texts)
         {
@@ -434,7 +434,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 {
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, Editor.Named(_sequence.System, answer.Targets), answer.Chosen,
-                            answer.Form, answer.Values));
+                            answer.Form, answer.Values,
+                            Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)));
                     Editor.Pop();
                 }, values: step.Values, opens: opens));
         }
@@ -461,9 +462,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     for (var i = 0; i < answer.Values.Count; i++)
                         step.Values.Add(answer.Values[i]);
 
-                    // With a wait for it after it, because a numbered list is read as one thing after another; one edit,
-                    // so one press takes the pair back.
-                    Editor.Do(_sequence, new AddStep("adding a step", _sequence.Steps.Count, step, new Await()));
+                    // With a wait for it after it where what it does takes time to finish, because a numbered list is
+                    // read as one thing after another; one edit, so one press takes the pair back.
+                    Editor.Do(_sequence, Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)
+                        ? new AddStep("adding a step", _sequence.Steps.Count, step, new Await())
+                        : new AddStep("adding a step", _sequence.Steps.Count, step));
                     Editor.UnwindTo(origin);
                 }));
         }

@@ -471,7 +471,7 @@ Press to rename it.</value>
     <comment>Note over what a block offers, where the block has been checked in part.</comment>
   </data>
   <data name="Sprocket.Pick.Waits" xml:space="preserve">
-    <value>Holds the sequence until finished</value>
+    <value>This takes time to finish. The sequence waits until it is done before going on to the next step.</value>
     <comment>Note on the mark beside something done that a step waits for.</comment>
   </data>
   <data name="Sprocket.Pick.Run" xml:space="preserve">

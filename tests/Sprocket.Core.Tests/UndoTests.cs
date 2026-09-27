@@ -159,7 +159,25 @@ public class UndoTests
     public void ChangingAStepReversesExactly()
     {
         Sequence sequence = Build();
-        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", Form.Native, new[] { Literal.Of(4L) }));
+        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", Form.Native, new[] { Literal.Of(4L) }, true));
+    }
+
+    /// <summary>A step changed to something that takes no time loses the wait after it, and undoing puts that wait back.</summary>
+    [Fact]
+    public void ChangingAStepToOneThatTakesNoTimeDropsItsAwait()
+    {
+        Sequence sequence = Build();
+        var awaited = new Await();
+        sequence.Steps.Insert(1, awaited);
+        var before = Shape(sequence);
+
+        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "on", Form.Native, new Literal[0], false);
+        edit.Apply(sequence);
+        Assert.IsNotType<Await>(sequence.Steps[1]);
+
+        edit.Undo(sequence);
+        Assert.Same(awaited, sequence.Steps[1]);
+        Assert.Equal(before, Shape(sequence));
     }
 
     [Fact]
@@ -297,7 +315,7 @@ public class UndoTests
     {
         Sequence sequence = Build();
 
-        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", Form.Native, new Literal[0]).Changes);
+        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", Form.Native, new Literal[0], true).Changes);
         Assert.False(new Rename("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
     }

@@ -262,6 +262,27 @@ sealed class Rig
         return Weld(new Beacon(id, name, Type<MyObjectBuilder_Beacon>(), "LargeBlockBeacon", "Beacon"));
     }
 
+    /// <summary>A battery, named, empty and on auto.</summary>
+    public Battery Battery(long id, string name)
+    {
+        return Weld(new Battery(id, name, Type<MyObjectBuilder_BatteryBlock>(), "LargeBlockBatteryBlock",
+            "Battery"));
+    }
+
+    /// <summary>A hydrogen tank, named, empty and not stockpiling.</summary>
+    public Tank Tank(long id, string name)
+    {
+        return Weld(new Tank(id, name, Type<MyObjectBuilder_OxygenTank>(), "LargeHydrogenTank",
+            "Hydrogen Tank"));
+    }
+
+    /// <summary>A sound block, named, with no sound chosen.</summary>
+    public Speaker Speaker(long id, string name)
+    {
+        return Weld(new Speaker(id, name, Type<MyObjectBuilder_SoundBlock>(), "LargeBlockSoundBlock",
+            "Sound Block"));
+    }
+
     public Lamp Light(long id, string name)
     {
         return Weld(new Lamp(id, name, Type<MyObjectBuilder_InteriorLight>(),
