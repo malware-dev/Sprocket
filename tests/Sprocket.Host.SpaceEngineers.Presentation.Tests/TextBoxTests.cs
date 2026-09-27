@@ -191,6 +191,44 @@ public class TextBoxTests
         Assert.Equal(Color.Transparent, box.Edge);
     }
 
+    /// <summary>
+    /// An edit the box does not accept is undone as it is made, whether typed, pasted or deleted, with the caret where
+    /// it was, and nothing is told it was edited.
+    /// </summary>
+    [Fact]
+    public void AnEditItDoesNotAcceptIsUndone()
+    {
+        var (box, _, _) = Laid("12");
+        box.Accepts = said => said.Length == 0 || said.All(char.IsDigit);
+        box.MoveCaret(1, false);
+
+        var edits = 0;
+        box.Edited += () => edits++;
+
+        box.OnText('x');
+        box.Insert("3a");
+        Assert.Equal("12", box.Text);
+        Assert.Equal(1, box.Caret);
+        Assert.Equal(0, edits);
+
+        box.OnText('5');
+        Assert.Equal("152", box.Text);
+        Assert.Equal(1, edits);
+    }
+
+    /// <summary>A box accepting only something non-empty refuses to be emptied.</summary>
+    [Fact]
+    public void ABoxThatMustHoldSomethingCannotBeEmptied()
+    {
+        var (box, _, _) = Laid("7");
+        box.Accepts = said => said.Length > 0;
+        box.MoveCaret(1, false);
+
+        box.Backspace();
+
+        Assert.Equal("7", box.Text);
+    }
+
     static (TextBox, Easel, InputRoot) Laid(string text)
     {
         var box = new TextBox { Text = text, Placement = Fixed.Wide(300f) };

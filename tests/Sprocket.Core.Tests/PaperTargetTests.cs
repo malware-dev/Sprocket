@@ -2,7 +2,6 @@ using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
@@ -59,7 +58,6 @@ public class PaperTargetTests
         Note(seen, ship);
 
         Assert.Contains(nameof(PickComponent), seen);
-        Assert.Contains(nameof(ChoiceListComponent), seen);
         Assert.Contains(nameof(SequenceComponent), seen);
     }
 

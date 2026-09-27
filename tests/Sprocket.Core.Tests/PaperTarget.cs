@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Editing;
 using System.Text;
-using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -67,16 +66,6 @@ static class PaperTarget
     static string Draw(GridWorld world, EditorComponent component)
     {
         var paper = new StringBuilder();
-
-        if (component is ChoiceListComponent choices)
-        {
-            paper.AppendLine("choices:");
-
-            foreach (var entry in choices.Entries)
-                paper.Append("  ").Append(entry.IsCurrent ? "* " : "- ").AppendLine(entry.Text);
-
-            return paper.ToString();
-        }
 
         if (component is PickComponent pick)
         {

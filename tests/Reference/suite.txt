@@ -114,10 +114,10 @@ sequence-wait       60 130 type Airlock enter 60 161 200 351 560 333 1353 311 21
 # sequence-step by a position is the page moving under somebody who switched a sequence on.
 sequence-locked     60 130 type Airlock enter 60 161 200 351 560 333 1353 311 70 193 400 396 800 650 1365 159 1311 140 move 700 600
 wait-chooser        60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193
-wait-typed          60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 490 type 90 enter
-wait-refused        60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 490 type 2s
-wait-ready          60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 490 type 90
-wait-used           60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 490 type 90 1360 494
+wait-typed          60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 537 type 90 enter
+wait-refused        60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 537 type 2s
+wait-ready          60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 537 type 90
+wait-used           60 130 type Airlock enter 60 161 200 351 560 333 1353 311 212 193 100 537 type 90 1370 537
 
 # --- the column an action's values are given in ---------------------------------------------------
 #

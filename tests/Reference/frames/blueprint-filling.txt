@@ -14,8 +14,8 @@ on screen     Button Panel  |  Airlock 2
 007  Text       at {X:256 Y:96.71198} scale 0.556  #85A1A9FF  "Airlock 2"
 008  Sprite     Sprocket_Fill         {X:240 Y:121 W:1440 H:1}  #5B737BFF
 009  SetClip    {X:256 Y:138 W:1408 H:833}
-010  Sprite     Sprocket_Fill         {X:256 Y:138 W:1396 H:52}  #29363EFF
-011  Text       at {X:275 Y:151.712} scale 0.822  #DCF5FDFF  "Airlock Button"
+010  Sprite     Sprocket_Fill         {X:256 Y:138 W:1396 H:56}  #29363EFF
+011  Text       at {X:276 Y:153.712} scale 0.833  #DCF5FDFF  "Airlock Button"
 012  ClearClip  
 013  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
 014  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

@@ -961,7 +961,7 @@ public class EditorTests
         Assert.Equal("Sequence 1", ship.Editor.Screen.Subtitle);
 
         // The safe answer comes first, so a reflex press lands on it.
-        var options = ship.Editor.Component<ChoiceListComponent>().Entries;
+        var options = ship.Editor.Choices();
         Assert.Equal("Keep it, Delete it", string.Join(", ", options.Select(e => e.Text)));
 
         ship.Editor.PressChoice("Keep it");

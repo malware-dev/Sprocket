@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using Sprocket.Host.SpaceEngineers.Blueprints;
 using Sprocket.Host.SpaceEngineers.Developing;
-using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
@@ -208,10 +207,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         public static ComponentView For(EditorComponent component)
         {
-            var choices = component as ChoiceListComponent;
-            if (choices != null)
-                return new ChoiceListView(choices);
-
             var pick = component as PickComponent;
             if (pick != null)
                 return new PickView(pick);

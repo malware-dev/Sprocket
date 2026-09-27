@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -135,7 +134,7 @@ public class DeletingSystemsTests
     }
 
     static string Warning(Simulation sim) =>
-        sim.Editor.Component<ChoiceListComponent>().Entries.Last().Warning;
+        sim.Editor.Choices().Last().Caution;
 
     static Panel Button(Simulation sim) =>
         sim.Panels().Single(panel => panel.Name == "Airlock Button");

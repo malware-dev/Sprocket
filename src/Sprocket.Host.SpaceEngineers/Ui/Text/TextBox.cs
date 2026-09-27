@@ -26,6 +26,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
 
         readonly StringBuilder _text = new StringBuilder(64);
 
+        string _before;
+        int _beforeCaret;
+        int _beforeAnchor;
+
         int _anchor;
         int _caret;
 
@@ -102,6 +106,10 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>What Enter carries out while the box holds the keyboard, or null for nothing.</summary>
         public ICommand Submit { get; set; }
 
+        /// <summary>Whether the box may hold what is typed, or null for anything.</summary>
+        /// <remarks>Asked after every edit made by typing, cutting, pasting or deleting; one it refuses is undone as it is made.</remarks>
+        public Func<string, bool> Accepts { get; set; }
+
         /// <summary>What Escape carries out while the box holds the keyboard, or null to let the keyboard go.</summary>
         public ICommand Cancel { get; set; }
 
@@ -161,6 +169,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             if (string.IsNullOrEmpty(words))
                 return;
 
+            Hold();
             DeleteSelection();
             _text.Insert(_caret, words);
             Rewritten();
@@ -171,6 +180,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>Deletes the selection, or else the character before the caret.</summary>
         public void Backspace()
         {
+            Hold();
             if (DeleteSelection())
             {
                 OnEdited();
@@ -189,6 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
         /// <summary>Deletes the selection, or else the character after the caret.</summary>
         public void DeleteForward()
         {
+            Hold();
             if (DeleteSelection())
             {
                 OnEdited();
@@ -284,6 +295,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             if (c < ' ' || c == (char)127)
                 return;
 
+            Hold();
             DeleteSelection();
             _text.Insert(_caret, c);
             Rewritten();
@@ -484,8 +496,27 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             InvalidateMeasure();
         }
 
+        void Hold()
+        {
+            if (Accepts == null)
+                return;
+
+            _before = _text.ToString();
+            _beforeCaret = _caret;
+            _beforeAnchor = _anchor;
+        }
+
         void OnEdited()
         {
+            if (Accepts != null && !Accepts(_text.ToString()))
+            {
+                _text.Clear();
+                _text.Append(_before);
+                Rewritten();
+                Place(_beforeCaret, _beforeAnchor);
+                return;
+            }
+
             var edited = Edited;
             if (edited != null)
                 edited();

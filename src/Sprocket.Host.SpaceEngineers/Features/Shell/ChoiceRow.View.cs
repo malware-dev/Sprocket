@@ -1,0 +1,36 @@
+using Sprocket.Host.SpaceEngineers.Look;
+using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Images;
+using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+
+namespace Sprocket.Host.SpaceEngineers.Features.Shell
+{
+    partial class ChoiceRow
+    {
+        Label _words;
+        Label _caution;
+        Glyph _given;
+
+        /// <summary>Makes the answer's words with the caution under them, and the mark of the answer already given.</summary>
+        void CreateView()
+        {
+            Spacing = 16f;
+            Style = Styles.Answer;
+
+            Children.Add(new VStack
+            {
+                Spacing = 4f,
+                Placement = Flex.Grow,
+                Children =
+                {
+                    new Label { Style = Styles.Name }.As(out _words),
+
+                    // Told as well as shown, and told before the answer is given rather than after.
+                    new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _caution)
+                }
+            });
+            Children.Add(new Glyph { Symbol = Symbols.Check, Style = Styles.Icon, Placement = Fixed.Size(24f, 24f), IsVisible = false }.As(out _given));
+        }
+    }
+}

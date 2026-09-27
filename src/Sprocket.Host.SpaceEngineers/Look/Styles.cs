@@ -104,6 +104,24 @@ namespace Sprocket.Host.SpaceEngineers.Look
             }
         };
 
+        /// <summary>A box a value is typed into, in a list of answers.</summary>
+        public static readonly TextBoxStyle Field = new TextBoxStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 24f,
+                Color = Palette.Ink,
+                CaretColor = Palette.Ink,
+                SelectionColor = Palette.Line,
+                HintColor = Palette.Faint,
+                Background = Palette.Page,
+                Edge = Palette.Line,
+                Padding = new Thickness(12f, 8f)
+            },
+            Focused = { Edge = Palette.ControlEdgeHot }
+        };
+
         /// <summary>The same box holding a name that cannot be given.</summary>
         public static readonly TextBoxStyle TitleRefused = new TextBoxStyle(TitleBox)
         {
@@ -156,6 +174,26 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public static readonly TextStyle Problem = new TextStyle(Detail)
         {
             Base = { Color = Palette.Problem }
+        };
+
+        /// <summary>What an answer does that somebody should know before giving it, on its own line under it.</summary>
+        public static readonly TextStyle Caution = new TextStyle(Detail)
+        {
+            Base = { Color = Palette.Notice }
+        };
+
+        /// <summary>One answer in a list of them, pressed to give it.</summary>
+        public static readonly ElementStyle Answer = new ElementStyle
+        {
+            Base = { Background = Palette.Panel, Padding = new Thickness(20f, 16f) },
+            Hot = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>The answer already given, lit a step at rest, so it goes a step further again under the pointer.</summary>
+        public static readonly ElementStyle Given = new ElementStyle(Answer)
+        {
+            Base = { Background = Palette.PanelHot },
+            Hot = { Background = Palette.Line }
         };
 
         /// <summary>The words of a sentence around the parts somebody chose.</summary>
