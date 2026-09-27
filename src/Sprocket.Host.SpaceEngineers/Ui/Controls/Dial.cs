@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            var centre = Pivot;
+            var center = Pivot;
             var reach = Reach;
 
             // A mark every fifteen degrees, longer on each quarter; a half dial has only the ones it reaches.
@@ -138,22 +138,22 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
             for (var i = from; i <= to; i++)
             {
                 var quarter = i % 6 == 0;
-                Line(g, centre, i * 15f, reach - (quarter ? Quarter : Mark), reach, quarter ? QuarterColor : MarkColor, Thin);
+                Line(g, center, i * 15f, reach - (quarter ? Quarter : Mark), reach, quarter ? QuarterColor : MarkColor, Thin);
             }
 
             var hand = IsTurning || IsHot ? HeldColor : NeedleColor;
             if (Shows)
-                Line(g, centre, _degrees, 0f, reach - Quarter - Thin, hand, Needle);
+                Line(g, center, _degrees, 0f, reach - Quarter - Thin, hand, Needle);
 
-            g.Fill(new RectangleF(centre.X - Hub / 2f, centre.Y - Hub / 2f, Hub, Hub), hand);
+            g.Fill(new RectangleF(center.X - Hub / 2f, center.Y - Hub / 2f, Hub, Hub), hand);
         }
 
         /// <summary>Turns the needle the short way from where it stands towards <paramref name="point" />, in whole degrees.</summary>
         void Follow(Vector2 point)
         {
-            var centre = Pivot;
-            var dx = point.X - centre.X;
-            var dy = point.Y - centre.Y;
+            var center = Pivot;
+            var dx = point.X - center.X;
+            var dy = point.Y - center.Y;
             if (dx * dx + dy * dy < Hub * Hub)
                 return;
 
@@ -175,11 +175,11 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Controls
         }
 
         /// <summary>A stroke out from the middle at an angle, between two distances from it.</summary>
-        static void Line(IGraphics g, Vector2 centre, float degrees, float from, float to, Color color, float thick)
+        static void Line(IGraphics g, Vector2 center, float degrees, float from, float to, Color color, float thick)
         {
             var turned = MathHelper.ToRadians(degrees);
             var along = new Vector2((float)Math.Sin(turned), -(float)Math.Cos(turned));
-            var middle = centre + along * ((from + to) / 2f);
+            var middle = center + along * ((from + to) / 2f);
             var length = to - from;
 
             g.Fill(new RectangleF(middle.X - thick / 2f, middle.Y - length / 2f, thick, length), color, turned);

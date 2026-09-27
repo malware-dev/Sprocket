@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Ui;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Values
 {
-    /// <summary>Where one value of a form is given, whatever it is given with: a box, a switch, a few words, a colour or a dial.</summary>
+    /// <summary>Where one value of a form is given, whatever it is given with: a box, a switch, a few words, a color or a dial.</summary>
     public interface IField
     {
         /// <summary>Raised when somebody has changed the value, and never when <see cref="Text" /> is set.</summary>

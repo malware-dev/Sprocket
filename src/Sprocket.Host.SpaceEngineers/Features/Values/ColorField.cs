@@ -14,38 +14,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
     /// <remarks>
     /// Laid out as the game's own color picker is: sliders lettered H, S and V, only hue with a track drawn, and the written
     /// color under them. Every way of giving it moves the others with it. The elements it is drawn with are declared in
-    /// <c>ColourField.View.cs</c>, and nothing else is.
+    /// <c>ColorField.View.cs</c>, and nothing else is.
     /// </remarks>
-    public partial class ColourField : VStack, IField
+    public partial class ColorField : VStack, IField
     {
-        Hsv _colour = Hsv.Of(0f, 0f, 1f);
+        Hsv _color = Hsv.Of(0f, 0f, 1f);
         byte _alpha = 255;
         bool _chose;
 
-        /// <summary>A field resting on white with no color given, offering the player's <paramref name="colours" />, whose Enter carries out <paramref name="submit" />.</summary>
-        public ColourField(IList<Hsv> colours, ICommand submit)
+        /// <summary>A field resting on white with no color given, offering the player's <paramref name="colors" />, whose Enter carries out <paramref name="submit" />.</summary>
+        public ColorField(IList<Hsv> colors, ICommand submit)
         {
             CreateView();
             _written.Submit = submit;
 
-            for (var i = 0; i < colours.Count; i++)
+            for (var i = 0; i < colors.Count; i++)
             {
-                var colour = colours[i];
+                var color = colors[i];
                 _palette.Children.Add(new Swatch
                 {
-                    Background = colour.Colour,
+                    Background = color.Colour,
                     Edge = Palette.Chrome,
                     HighlightEdge = Palette.Ink,
                     Placement = Fixed.Size(32f, 28f),
-                    Command = new Relay(delegate { Give(colour); })
+                    Command = new Relay(delegate { Give(color); })
                 });
             }
 
-            _palette.IsVisible = colours.Count != 0;
+            _palette.IsVisible = colors.Count != 0;
 
-            _hue.Moved += delegate { Give(_colour.Hued(_hue.Fraction)); };
-            _saturation.Moved += delegate { Give(_colour.Saturated(_saturation.Fraction)); };
-            _value.Moved += delegate { Give(_colour.Valued(_value.Fraction)); };
+            _hue.Moved += delegate { Give(_color.Hued(_hue.Fraction)); };
+            _saturation.Moved += delegate { Give(_color.Saturated(_saturation.Fraction)); };
+            _value.Moved += delegate { Give(_color.Valued(_value.Fraction)); };
             _written.Edited += delegate
             {
                 Reread();
@@ -83,16 +83,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         {
             get
             {
-                var rgb = _colour.Colour;
+                var rgb = _color.Colour;
                 var said = "#" + Hex(rgb.R) + Hex(rgb.G) + Hex(rgb.B);
                 return _alpha == 255 ? said : said + Hex(_alpha);
             }
         }
 
-        /// <summary>Takes <paramref name="colour" /> as the one given, moving the sliders, the swatch and the written color with it.</summary>
-        void Give(Hsv colour)
+        /// <summary>Takes <paramref name="color" /> as the one given, moving the sliders, the swatch and the written color with it.</summary>
+        void Give(Hsv color)
         {
-            _colour = colour;
+            _color = color;
             _chose = true;
             Shown();
             _written.Text = Spelling;
@@ -119,17 +119,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             }
 
             _alpha = alpha;
-            _colour = Hsv.Of(said);
+            _color = Hsv.Of(said);
             _chose = true;
             Shown();
         }
 
         void Shown()
         {
-            _hue.Fraction = _colour.Hue;
-            _saturation.Fraction = _colour.Saturation;
-            _value.Fraction = _colour.Value;
-            _chosen.Background = _chose ? _colour.Colour : Palette.Page;
+            _hue.Fraction = _color.Hue;
+            _saturation.Fraction = _color.Saturation;
+            _value.Fraction = _color.Value;
+            _chosen.Background = _chose ? _color.Colour : Palette.Page;
         }
 
         void Raise()

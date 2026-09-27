@@ -650,18 +650,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _givenFields.AddRange(fields);
 
             // Read once, where a color is asked for: these are the colors this player paints with, only ever read.
-            var colours = new List<Hsv>();
+            var colors = new List<Hsv>();
             for (var i = 0; i < fields.Count; i++)
             {
                 if (fields[i].Edits != Layout.Editor.Colour)
                     continue;
 
-                Player.Colours(colours);
+                Player.Colours(colors);
                 break;
             }
 
             var made = _strip.Values == null;
-            var values = _strip.Restate(given, fields, PrimaryFilled, colours);
+            var values = _strip.Restate(given, fields, PrimaryFilled, colors);
             if (made)
             {
                 values.Form.Edited += delegate
@@ -901,7 +901,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (!_forEvents && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsTerminal))
                 note = note.Length == 0 ? texts.PickShared : note + " " + texts.PickShared + ".";
 
-            // A choice the blocks can no longer honour is dropped rather than left showing, so Done never appears over a
+            // A choice the blocks can no longer honor is dropped rather than left showing, so Done never appears over a
             // sentence that could not run.
             var chosen = _chosen;
             if (At(chosen, _chosenForm) < 0)

@@ -209,10 +209,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
 
         /// <summary>Asks for <paramref name="fields" />, one line each, holding <paramref name="filled" /> or what each says is usual.</summary>
         /// <remarks>
-        /// Made again whole, because it is asked only when what the values are for changes. <paramref name="colours" /> are
+        /// Made again whole, because it is asked only when what the values are for changes. <paramref name="colors" /> are
         /// the player's own, offered on any color among them.
         /// </remarks>
-        public void Show(IList<Field> fields, IList<string> filled, IList<Hsv> colours)
+        public void Show(IList<Field> fields, IList<string> filled, IList<Hsv> colors)
         {
             for (var i = 0; i < _placed.Count; i++)
                 Cells[_placed[i].Row, _placed[i].Column, 1, _placed[i].Columns] = null;
@@ -228,7 +228,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
 
             for (var i = 0; i < _wanted.Count; i++)
             {
-                var field = Make(_wanted[i], colours);
+                var field = Make(_wanted[i], colors);
                 _fields.Add(field);
                 _seen.Add(false);
 
@@ -336,10 +336,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         }
 
         /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, or a box.</summary>
-        IField Make(Field field, IList<Hsv> colours)
+        IField Make(Field field, IList<Hsv> colors)
         {
             if (field.Edits == Editor.Colour)
-                return new ColourField(colours, _submit);
+                return new ColorField(colors, _submit);
 
             if (field.Edits == Editor.Angle)
                 return new AngleField(field.Least, field.Most, _submit);
@@ -367,13 +367,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         void Lay(int at, IField field)
         {
             var element = (Element)field;
-            var colour = _wanted[at].Edits == Editor.Colour;
+            var color = _wanted[at].Edits == Editor.Colour;
 
-            var label = colour ? "" : Label(at);
+            var label = color ? "" : Label(at);
             if (label.Length > 0)
                 Place(new Label { Style = Styles.ValueLabel, Text = label }, at, 0, 1);
 
-            if (colour)
+            if (color)
                 Place(element, at, 0, 3);
             else if (field is TypedField && !Bounded(_wanted[at]))
                 Place(element, at, 1, 2);

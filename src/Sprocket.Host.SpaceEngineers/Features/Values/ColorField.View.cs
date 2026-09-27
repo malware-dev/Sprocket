@@ -7,7 +7,7 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Values
 {
-    partial class ColourField
+    partial class ColorField
     {
         Flow _palette;
         Slider _hue;

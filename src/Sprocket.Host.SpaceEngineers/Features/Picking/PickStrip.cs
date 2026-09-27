@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </summary>
         /// <remarks>What was given for what was chosen before is kept, so choosing it again gives it back.</remarks>
         /// <returns>The column the values are asked for in.</returns>
-        public ValuesColumn Restate(string given, IList<Field> fields, IList<string> filled, IList<Hsv> colours)
+        public ValuesColumn Restate(string given, IList<Field> fields, IList<string> filled, IList<Hsv> colors)
         {
             if (_values == null)
             {
@@ -161,7 +161,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     filling.Add(i < filled.Count ? filled[i] : "");
             }
 
-            _values.Form.Show(fields, filling, colours);
+            _values.Form.Show(fields, filling, colors);
             _values.Why = "";
             _values.Place();
             return _values;
