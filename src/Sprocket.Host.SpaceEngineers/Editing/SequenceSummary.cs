@@ -281,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (mistyped.Exists)
                 return mistyped;
 
-            SequenceFault unawaited = Unawaited(sequence);
+            SequenceFault unawaited = Unawaited(bindings, sequence, through);
             if (unawaited.Exists)
                 return unawaited;
 
@@ -308,17 +308,39 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return SequenceFault.None;
         }
 
-        /// <summary>The first action that is not followed by a wait for it, or none.</summary>
-        static SequenceFault Unawaited(Sequence sequence)
+        /// <summary>The first action that takes time to finish and is not followed by a wait for it, or none.</summary>
+        static SequenceFault Unawaited(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             var steps = sequence.Steps;
             for (var i = 0; i < steps.Count; i++)
             {
-                if (steps[i] is Act && (i + 1 == steps.Count || !(steps[i + 1] is Await)))
+                var act = steps[i] as Act;
+                if (act != null && (i + 1 == steps.Count || !(steps[i + 1] is Await))
+                    && Lasts(bindings, act, through))
+                {
                     return new SequenceFault(SequenceProblem.Unawaited, i);
+                }
             }
 
             return SequenceFault.None;
+        }
+
+        /// <summary>Whether what the step does to any of its blocks takes time to finish.</summary>
+        static bool Lasts(Bindings bindings, Act act, SystemInstance through)
+        {
+            var targets = SystemInstance.Through(through, act.Targets);
+            for (var t = 0; t < targets.Count; t++)
+            {
+                GridEntity entity = bindings.Entity(targets[t]);
+                if (entity == null)
+                    continue;
+
+                EntityAction doing = act.Names(entity.Kind.Actions);
+                if (doing != null && doing.Lasts)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>The first step that has not been given a value its action needs, or none.</summary>

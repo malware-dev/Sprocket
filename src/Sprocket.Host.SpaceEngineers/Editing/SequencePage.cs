@@ -150,9 +150,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _redoCommand = Change(Cmd.Redo, delegate { Editor.Redo(_sequence); });
 
             // An await is not a line on screen. Concurrency is not a feature yet, so a row saying
-            // "wait for it to finish" after every step would be noise about something nobody can
-            // change - and the editor writes one after every step anyway. Each row therefore stands
-            // for a step and the await that follows it, and the two are moved and deleted as one.
+            // "wait for it to finish" after every step that takes time would be noise about something
+            // nobody can change - and the editor writes one after each of those anyway. Each row
+            // therefore stands for a step and any await that follows it, and the two are moved and
+            // deleted as one.
             _shown.Clear();
             for (var i = 0; i < _sequence.Steps.Count; i++)
             {
@@ -449,7 +450,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 {
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, Editor.Named(_sequence.System, answer.Targets), answer.Chosen,
-                            answer.Form, answer.Values));
+                            answer.Form, answer.Values,
+                            Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)));
                     Editor.Pop();
                 }, values: step.Values, opens: opens));
         }
@@ -486,22 +488,24 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     for (var i = 0; i < answer.Values.Count; i++)
                         step.Values.Add(answer.Values[i]);
 
-                    Added(step, origin);
+                    Added(step, Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form),
+                        origin);
                 }));
         }
 
         /// <summary>
-        /// Puts the step in, with an await after it.
+        /// Puts the step in, with an await after it where what it does takes time to finish.
         /// </summary>
         /// <remarks>
         /// Because a numbered list is read as one thing after another. Overlapping steps means
         /// deleting the await, which is something somebody does on purpose rather than a default
         /// they never asked for. One edit, so one press takes the pair back.
         /// </remarks>
-        void Added(Act step, int origin)
+        void Added(Act step, bool lasts, int origin)
         {
-            Editor.Do(_sequence,
-                new AddStep("adding a step", _sequence.Steps.Count, step, new Await()));
+            Editor.Do(_sequence, lasts
+                ? new AddStep("adding a step", _sequence.Steps.Count, step, new Await())
+                : new AddStep("adding a step", _sequence.Steps.Count, step));
             Editor.UnwindTo(origin);
         }
 

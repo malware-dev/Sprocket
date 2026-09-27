@@ -47,10 +47,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         Mistyped,
 
-        /// <summary>One of its steps goes straight on without waiting for what it started.</summary>
+        /// <summary>One of its steps goes straight on without waiting for what it started, which takes time.</summary>
         /// <remarks>
-        /// A program from anywhere but the editor can hold one, and the editor draws every step as one
-        /// that waits, so what it would show is not what runs. Said rather than drawn as if it waited.
+        /// A program from anywhere but the editor can hold one, and the editor draws every step that takes
+        /// time as one that waits, so what it would show is not what runs. Said rather than drawn as if it
+        /// waited.
         /// </remarks>
         Unawaited,
 

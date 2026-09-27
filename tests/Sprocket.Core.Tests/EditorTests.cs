@@ -639,6 +639,36 @@ public class EditorTests
     /// that survives the round-trip tests survives this too.
     /// </remarks>
     [Fact]
+    public void AStepThatTakesTimeIsWaitedForAndOneThatDoesNotIsNot()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("do something");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("Switch on");
+        editor.PressPrimary();
+        ship.Tick();
+
+        editor.PressAdd("do something");
+        editor.PressBlock("Outer Door");
+        editor.PressChoice("Open");
+        editor.PressPrimary();
+        ship.Tick();
+
+        var sequence = ship.Automation.Sequences[0];
+        Assert.Equal(3, sequence.Steps.Count);
+        Assert.IsType<Act>(sequence.Steps[0]);
+        Assert.IsType<Act>(sequence.Steps[1]);
+        Assert.IsType<Await>(sequence.Steps[2]);
+
+        // A step with nothing to wait for goes straight on, and that is no fault.
+        Assert.NotEqual(SequenceProblem.Unawaited, SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence,
+            null, sequence.System.First).Problem);
+    }
+
+    [Fact]
     public void UndoAndRedoWalkTheSameList()
     {
         var ship = Build();
@@ -653,8 +683,8 @@ public class EditorTests
 
         var sequence = ship.Automation.Sequences[0];
 
-        // The step and the await after it, added as one edit.
-        Assert.Equal(2, sequence.Steps.Count);
+        // Switching a light on takes no time, so nothing waits for it.
+        Assert.Single(sequence.Steps);
 
         // Nothing has been walked back, so there is nothing to put back.
         Assert.NotEqual(0, editor.Sentence().UndoCommand);
@@ -668,7 +698,7 @@ public class EditorTests
 
         editor.Invoke(editor.Sentence().RedoCommand);
         ship.Tick();
-        Assert.Equal(2, sequence.Steps.Count);
+        Assert.Single(sequence.Steps);
         var acted = Assert.IsType<Act>(sequence.Steps[0]);
         var block = SystemInstance.Through(sequence.System.First, acted.Targets)[0];
         Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(block)!.Name);

@@ -1636,7 +1636,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                     UnwindTo(origin);
 
                     var rewrite = new Rewrite(doing, new ChangeStep(index, only, Named(system, answer.Targets),
-                        answer.Chosen, answer.Form, answer.Values));
+                        answer.Chosen, answer.Form, answer.Values,
+                        Vocabulary.Lasts(World, answer.Targets, answer.Chosen, answer.Form)));
                     Do(system, start == null ? rewrite : (SystemEdit)new Retrigger(start, rewrite));
                 };
 
@@ -1666,7 +1667,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
                 var sequence = _program.AddSequence(system);
                 sequence.Steps.Add(act);
-                sequence.Steps.Add(new Await());
+                if (Vocabulary.Lasts(World, answer.Targets, answer.Chosen, answer.Form))
+                    sequence.Steps.Add(new Await());
 
                 UnwindTo(origin);
                 Points(system, trigger, sequence, false, fresh, sequence, start);

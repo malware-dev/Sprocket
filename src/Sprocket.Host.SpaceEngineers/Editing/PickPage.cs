@@ -1016,7 +1016,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         const string PartialSaid = "Sprocket has only partly checked this block, so some of what it offers "
             + "may still be doubled, missing or oddly named.";
 
-        const string WaitsSaid = "Holds the sequence until finished";
+        const string WaitsSaid = "This takes time to finish. The sequence waits until it is done before going on to the next step.";
 
         const int Actions = 0;
         const int Values = 1;
