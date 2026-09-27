@@ -137,9 +137,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 HideToggle(kind, "ThrowOut");
             }
 
-            // Charge mode says all of these, one value and three words.
+            // Charge mode says all of these, one value and three words. Recharge On is left to the
+            // recharge that waits until the battery is full, which stands in for it by its id.
             if (block is IMyBatteryBlock)
-                kind.Hiding("Recharge", "Recharge_On", "Recharge_Off", "Discharge", "Discharge_On", "Discharge_Off", "Auto");
+                kind.Hiding("Recharge", "Recharge_Off", "Discharge", "Discharge_On", "Discharge_Off", "Auto");
 
             // What starts a programmable block's own script. A step runs a script by running the block,
             // and the argument and Sprocket's own toolbar action are the wiring of the thing.

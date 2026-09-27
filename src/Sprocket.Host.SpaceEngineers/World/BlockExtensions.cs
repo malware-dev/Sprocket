@@ -18,7 +18,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             new AirVentExtension(),
             new ButtonPanelExtension(),
             new RotorExtension(),
-            new PistonExtension()
+            new PistonExtension(),
+            new BatteryExtension(),
+            new TankExtension(),
+            new SoundExtension()
         };
 
         public IBlockExtension For(IMyTerminalBlock block)

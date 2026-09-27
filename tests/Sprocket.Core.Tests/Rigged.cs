@@ -73,6 +73,21 @@ sealed class Rigged
         return Rig.Piston(id, name);
     }
 
+    public Battery Battery(long id, string name)
+    {
+        return Rig.Battery(id, name);
+    }
+
+    public Tank Tank(long id, string name)
+    {
+        return Rig.Tank(id, name);
+    }
+
+    public Speaker Speaker(long id, string name)
+    {
+        return Rig.Speaker(id, name);
+    }
+
     /// <summary>What Sprocket sees of a block, which is what a program refers to.</summary>
     public GridEntity Entity(long id)
     {
