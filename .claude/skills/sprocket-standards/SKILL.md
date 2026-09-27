@@ -17,9 +17,8 @@ Three projects of code, and the first one is the mod:
   same as holding the English, see below. `Ui/` is the UI framework, kept apart from the features built on
   it, and sits beside them. Files are globbed, so a new file is in the build by being in the folder.
 
-  **What a screen is asked to show carries structure and never words** - stated on
-  `Screen/EditorComponent` and proved by `PaperTarget` in the tests. That rule used to be a folder
-  boundary and is now a rule about types, which is the one thing flattening the tree gave up.
+  **The model and the runtime hold ids and never words.** Every word a player reads comes from `Texts`,
+  put there by the page that shows it.
 - **`src/Sprocket.Host.SpaceEngineers.Sim`** is the harness. It references the mod and drives it over
   blocks it makes up, answering the game's own interfaces.
 - **`src/Sprocket.Localization.Generator`** writes the mod's `Texts` class from its `MyTexts.resx` at
