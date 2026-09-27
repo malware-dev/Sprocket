@@ -7,27 +7,25 @@ using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Images;
 
-namespace Sprocket.Host.SpaceEngineers.Screen
+namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>A screen's heading: each part's name, renamed in place where it can be, with an arrow between parts.</summary>
     public class HeadingRow : HStack
     {
-        readonly IScreenHost _host;
+        readonly Action<int> _renames;
         readonly ICommand _commit;
         readonly ICommand _cancel;
         readonly Action _edited;
         readonly List<Part> _parts = new List<Part>();
 
-        List<HeadingPart> _heading;
-
         int _shown;
 
         int _shape = -1;
 
-        /// <summary>A heading whose rename presses go to <paramref name="host" />, and whose boxes take <paramref name="commit" /> on Enter, <paramref name="cancel" /> on Escape, and say each edit to <paramref name="edited" />.</summary>
-        public HeadingRow(IScreenHost host, ICommand commit, ICommand cancel, Action edited)
+        /// <summary>A heading whose parts are renamed by <paramref name="renames" />, handed the part's place, and whose boxes take <paramref name="commit" /> on Enter, <paramref name="cancel" /> on Escape, and say each edit to <paramref name="edited" />.</summary>
+        public HeadingRow(Action<int> renames, ICommand commit, ICommand cancel, Action edited)
         {
-            _host = host;
+            _renames = renames;
             _commit = commit;
             _cancel = cancel;
             _edited = edited;
@@ -45,7 +43,6 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         /// <summary>Shows <paramref name="heading" />, leaving the words of the part at <paramref name="renaming" /> to its box.</summary>
         public void Update(List<HeadingPart> heading, int renaming)
         {
-            _heading = heading;
             Build(heading);
 
             for (var i = 0; i < _shown; i++)
@@ -165,8 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Screen
 
         void Rename(int index)
         {
-            var part = _heading[index];
-            _host.Send(_parts[index].Plate, part.RenameCommand, part.Prompt);
+            _renames(index);
         }
 
         /// <summary>The elements that show one part of the heading.</summary>

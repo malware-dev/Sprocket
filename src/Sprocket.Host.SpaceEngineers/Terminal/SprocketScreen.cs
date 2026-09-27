@@ -1,6 +1,6 @@
 using System;
 using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sandbox.Game;
@@ -8,14 +8,12 @@ using Sandbox.ModAPI;
 using VRage.Input;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Display;
 using VRage.Game.GUI.TextPanel;
 using IngameSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
 using IngameSurfaces = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
-using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 
 namespace Sprocket.Host.SpaceEngineers.Terminal
 {
@@ -49,24 +47,18 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         readonly MyKeys[] _shortcuts = { MyKeys.A, MyKeys.C, MyKeys.X, MyKeys.V };
 
         readonly SprocketUnit _unit;
-        readonly SprocketEditor _editor;
         readonly EditorView _view;
         readonly IScreenSpace _screen;
         readonly ScreenSpaceGraphics _graphics;
-        readonly ScreenKeyboard _keyboard = new ScreenKeyboard();
 
         Vector2 _pointer;
-        bool _grabbed;
         bool _wasDown;
-        int _lastClickFrame = int.MinValue;
-
         int _lastDownFrame = int.MinValue;
 
         Vector2 _lastDownAt;
         int _presses;
 
         readonly KeyRepeater _repeat = new KeyRepeater();
-        Vector2 _lastClickAt;
 
         int _blinkFrom;
 
@@ -78,8 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         {
             _unit = unit;
             _closed = closed;
-            _editor = unit.Editor;
-            _view = new EditorView(_editor);
+            _view = new EditorView(unit.Editor);
 
             // BelowHud because that is where a mod screen's own content goes; the demo mod draws its screen
             // on the same layer. The scissor is pushed onto whatever layer this names, so the two must agree
@@ -108,9 +99,6 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
 
         protected override void OnOpened()
         {
-            // Shown again, which is not the same as made again: this screen and its view are kept per
-            // Sprocket and reopened. Whatever it was told while it was away, it was not listening.
-            _view.Attach();
             _unit.Showing = true;
             Hud(false);
 
@@ -122,10 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             // re-pointed since this screen was last open, by this player or another one.
             _unit.World.LookAgain();
 
-            _grabbed = false;
             _wasDown = false;
-
-            _keyboard.Clear();
             _blinkFrom = Now();
         }
 
@@ -147,40 +132,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         /// </remarks>
         protected override bool OnCancelling()
         {
-            // A new control holding the keyboard takes Escape, which lets the keyboard go.
-            if (_view.Input.Focused != null)
-            {
-                _view.Input.Key(MyKeys.Escape, false, false);
-                return false;
-            }
-
-            // A question with answers takes Escape first, and dismissing it means "I did not mean to
-            // leave" rather than picking the answer that leaves. Before the retreat below, because
-            // that would read Escape as back and act on the very thing being asked about.
-            if (_view.IsQuestioning)
-            {
-                _view.Dismiss();
-                return false;
-            }
-
-            if (_view.IsAsking || _view.IsFilling)
-            {
-                _view.CancelAsk();
-                return false;
-            }
-
-            // Escape is the key everybody already reads as "back", so it does what back does: retreats
-            // one page at a time and only shuts the editor once there is nowhere left to retreat to.
-            // Closing the whole thing from three pages deep is
-            // never what somebody backing out of a picker meant.
-            EditorScreen screen = _editor.Screen;
-            if (screen.CanGoBack)
-            {
-                _editor.Invoke(screen.BackCommand);
-                return false;
-            }
-
-            return true;
+            return _view.Escape();
         }
 
         /// <summary>
@@ -215,8 +167,6 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
 
         protected override void OnClosed(bool isUnloading)
         {
-            // Let go of core before anything else. This screen is going away and core's is not.
-            _view.Release();
             _unit.Showing = false;
             Hud(true);
 
@@ -284,41 +234,24 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
                 _view.ScrollBy(_pointer, -wheel / 120f * ScrollStep);
             }
 
-            // Read every frame rather than at the press, because the press path is shared with the
-            // simulator and the scripts, which have no keyboard to ask.
-            _view.Held = input.IsAnyShiftKeyPressed() ? Held.Through
-                : input.IsAnyCtrlKeyPressed() ? Held.Also
-                : Held.Alone;
-
             bool down = input.IsLeftMousePressed();
 
             if (input.IsNewLeftMousePressed())
             {
-                // Offered as a grab first, so that dragging a step out of a sequence is not also a click on
-                // whatever it was sitting on.
-                _grabbed = _view.Grab(_pointer, Presses());
+                _view.PointerDown(_pointer, Presses(), input.IsAnyShiftKeyPressed(), input.IsAnyCtrlKeyPressed());
             }
             else if (down)
             {
-                if (_grabbed)
-                    _view.Carry(_pointer);
+                _view.PointerMove(_pointer);
             }
             else if (_wasDown)
             {
-                if (_grabbed)
-                    _view.Drop();
-                else
-                    _view.Press(_pointer, Clicks());
-
-                _grabbed = false;
+                _view.PointerUp(_pointer);
 
                 // Straight out, and deliberately not down the road Escape takes. The cross is the quick
                 // exit: it does not retreat a page, it does not put a question away and wait to be pressed
-                // again, it leaves. Somebody four screens deep who wants to be gone has asked to be gone.
-                //
-                // What that abandons is a question or a rename in progress, and abandoning those costs
-                // nothing: neither is sent to core until it is committed, so there is no half-finished
-                // edit to strand. The program itself is written out on the way through OnClosed.
+                // again, it leaves. What that abandons is a question or a rename in progress, and neither is
+                // sent to core until it is committed, so there is no half-finished edit to strand.
                 if (_view.TakeClose())
                     Close();
             }
@@ -328,20 +261,14 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             Type();
         }
 
-        /// <summary>
-        /// Sends the keyboard wherever the screen says it belongs.
-        /// </summary>
+        /// <summary>Sends the keyboard wherever the screen says it belongs.</summary>
         /// <remarks>
-        /// A question owns the keyboard while it is open; otherwise it goes to whatever was focused, which
-        /// is how a search box narrows a list as somebody types. Asked of the view rather than worked out
-        /// here, because the simulator has to arrive at the same answer and two hosts guessing separately is
-        /// how they drift.
+        /// A question with answers has no box, so Enter is the whole of what it wants: the page said which answer that
+        /// takes. Otherwise the keys go to whatever holds the keyboard, which is how a search box narrows a list as
+        /// somebody types.
         /// </remarks>
         void Type()
         {
-            // A question with answers has no box, so the keyboard below never runs for one. Enter is
-            // the whole of what it wants: the page said which answer that takes, and a page that
-            // named none is left alone.
             if (_view.IsQuestioning)
             {
                 if (MyAPIGateway.Input.IsNewKeyPressed(MyKeys.Enter))
@@ -351,85 +278,7 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             }
 
             if (_view.Input.Focused != null)
-            {
                 KeysToInput();
-                return;
-            }
-
-            TextBox box = _view.IsAsking ? _view.AskBox : _view.Focus;
-            if (box == null)
-                return;
-
-            if (Chose())
-            {
-                _blinkFrom = Now();
-                return;
-            }
-
-            KeyboardOutcome outcome = _keyboard.HandleInput(box);
-
-            if (outcome.Commit && _view.IsAsking)
-            {
-                _view.CommitAsk();
-                _blinkFrom = Now();
-                return;
-            }
-
-            if (outcome.Commit && _view.TakeTyped())
-            {
-                _blinkFrom = Now();
-                return;
-            }
-
-            if (outcome.Onward && (_view.IsAsking || _view.IsFilling))
-            {
-                _view.NextField();
-                _blinkFrom = Now();
-                return;
-            }
-
-            if (!outcome.Changed)
-                return;
-
-            // Every keystroke, not just the last. A search that only narrowed once somebody stopped typing
-            // would feel broken.
-            _view.Typed();
-            _blinkFrom = Now();
-        }
-
-        /// <summary>
-        /// Takes the keys a field answered by choosing, or a dial, takes for itself, and answers whether
-        /// that was all there was to take.
-        /// </summary>
-        /// <remarks>
-        /// Before the box is typed into, because a field of words has a box only to hold the word, and
-        /// letters typed into it would be a word nobody chose. So a field of words takes Tab and Enter
-        /// here as well, and every other key goes to choosing.
-        /// </remarks>
-        bool Chose()
-        {
-            IMyInput input = MyAPIGateway.Input;
-            var across = input.IsNewKeyPressed(MyKeys.Right) ? 1 : input.IsNewKeyPressed(MyKeys.Left) ? -1 : 0;
-            var down = input.IsNewKeyPressed(MyKeys.Down) ? 1 : input.IsNewKeyPressed(MyKeys.Up) ? -1 : 0;
-            if ((across != 0 || down != 0) && _view.Arrow(across, down))
-                return true;
-
-            if (!_view.Chooses)
-                return false;
-
-            if (input.IsNewKeyPressed(MyKeys.Tab))
-                _view.NextField();
-            else if (input.IsNewKeyPressed(MyKeys.Enter))
-                _view.TakeTyped();
-
-            var typed = input.TextInput;
-            for (var i = 0; i < typed.Count; i++)
-            {
-                if (char.IsLetterOrDigit(typed[i]))
-                    _view.Letter(typed[i]);
-            }
-
-            return true;
         }
 
         static int Now()
@@ -464,14 +313,6 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             return new RectangleF(origin.X, origin.Y, extent.X, extent.Y);
         }
 
-        /// <summary>
-        /// One click, or two when the last one was recent and near enough.
-        /// </summary>
-        /// <remarks>
-        /// Counted here rather than asked of the game, which reports double clicks only for its own
-        /// controls. Slack as well as time, because a double click that moved half the screen was two
-        /// separate presses that happened to be quick.
-        /// </remarks>
         /// <summary>Sends the keys to the view's input root: typed characters, the editing keys repeating while held, and the shortcuts.</summary>
         /// <remarks>Escape is not read here; it arrives at <see cref="OnCancelling" />.</remarks>
         void KeysToInput()
@@ -518,6 +359,10 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
         }
 
         /// <summary>How many presses in quick succession the one going down now is, counted where the button goes down.</summary>
+        /// <remarks>
+        /// Counted here rather than asked of the game, which reports double clicks only for its own controls. Slack as well
+        /// as time, because a double click that moved half the screen was two separate presses that happened to be quick.
+        /// </remarks>
         int Presses()
         {
             var now = Now();
@@ -529,19 +374,6 @@ namespace Sprocket.Host.SpaceEngineers.Terminal
             _lastDownFrame = now;
             _lastDownAt = _pointer;
             return _presses;
-        }
-
-        int Clicks()
-        {
-            int now = MyAPIGateway.Session == null ? 0 : MyAPIGateway.Session.GameplayFrameCounter;
-
-            bool doubled = now - _lastClickFrame <= DoubleClickFrames
-                && Vector2.Distance(_lastClickAt, _pointer) <= DoubleClickSlack;
-
-            _lastClickFrame = doubled ? int.MinValue : now;
-            _lastClickAt = _pointer;
-
-            return doubled ? 2 : 1;
         }
     }
 }

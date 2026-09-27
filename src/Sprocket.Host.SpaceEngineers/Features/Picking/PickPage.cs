@@ -4,7 +4,6 @@ using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
@@ -169,17 +168,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// Nearly nothing wants values, so this is empty nearly always. When it is not, the count is the whole of what can
         /// honestly be asked: the game declares how many values an action takes and nothing about what any of them is for.
         /// </remarks>
-        public override string PrimaryQuestion
+        public string Question
         {
             get
             {
-                var fields = Fields();
+                var fields = Wanted();
                 return fields.Count > 0 ? SequenceText.Wants(fields) : "";
             }
         }
 
-        /// <inheritdoc />
-        public override IList<Field> PrimaryFields => Fields();
+        /// <summary>What each value the chosen action takes wants, one field each, and empty where it takes none.</summary>
+        public IList<Field> Fields => Wanted();
 
         /// <summary>What the values open holding, where this opened on something that has values.</summary>
         /// <remarks>
@@ -187,13 +186,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// make somebody type them again to keep them. Only for what the step did: another action's values are not these,
         /// whatever their count happens to be.
         /// </remarks>
-        public override IList<string> PrimaryFilled
+        public IList<string> Filled
         {
             get
             {
                 _filled.Clear();
                 if (_arrivedValues.Count > 0 && _chosen == _arrivedChosen && _chosenForm == _arrivedForm)
-                    Channels.Shown(_arrivedValues, Fields(), _filled);
+                    Channels.Shown(_arrivedValues, Wanted(), _filled);
 
                 return _filled;
             }
@@ -319,11 +318,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
             }
 
-            Primary(form.Answer);
+            Give(form.Answer);
         }
 
-        /// <inheritdoc />
-        public override void Primary(string said)
+        /// <summary>Finishes with the values <paramref name="said" /> gives, written as a line of values.</summary>
+        public void Give(string said)
         {
             var values = new List<Literal>();
             ValueLine.Read(said, values);
@@ -331,7 +330,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <inheritdoc />
-        public override void Build(List<EditorComponent> components)
+        public override void Build()
         {
             Collect();
 
@@ -617,7 +616,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return false;
         }
 
-        List<Field> Fields()
+        List<Field> Wanted()
         {
             return IsComplete ? Editor.Fields(_selection, _chosen, _chosenForm) : _nothing;
         }
@@ -641,7 +640,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var given = IsComplete ? _chosenForm + " " + _chosen : "";
             _strip.ShowsValues = _what != null && given.Length != 0;
 
-            var fields = Fields();
+            var fields = Wanted();
             if (_given == given && Same(_givenFields, fields))
                 return;
 
@@ -661,7 +660,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             var made = _strip.Values == null;
-            var values = _strip.Restate(given, fields, PrimaryFilled, colors);
+            var values = _strip.Restate(given, fields, Filled, colors);
             if (made)
             {
                 values.Form.Edited += delegate

@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -35,7 +35,7 @@ public class SalvageTests
 
     /// <summary>Answers the question the first edit raises, the way a player does.</summary>
     static void Answer(Simulation rig, string text) =>
-        rig.Editor.Invoke(rig.Editor.Screen.Answers.First(a => a.Text == text).Command);
+        rig.Editor.Screen.Answers.First(a => a.Text == text).Command!.Execute();
 
     static Store Holding(string program)
     {
@@ -129,7 +129,7 @@ public class SalvageTests
         // then naming the logic system it made.
         rig.Editor.PressStart("New logic system");
         Answer(rig, "Replace it");
-        rig.Editor.SetText(rig.Editor.Screen.Heading[0].RenameCommand, "Airlock");
+        rig.Editor.Screen.Heading[0].Renames!("Airlock");
         rig.Tick();
         rig.Save();
 

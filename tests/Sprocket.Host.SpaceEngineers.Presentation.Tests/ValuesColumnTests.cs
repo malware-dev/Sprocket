@@ -43,7 +43,7 @@ public class ValuesColumnTests
         Assert.True(screen.Shows("VALUES"), "there is no values column");
         Assert.True(screen.Shows("Radius (0.1 - 20)"), "the column asks for nothing");
         Assert.False(screen.Shows("This needs"), "the column says what its fields already show");
-        Assert.False(screen.Scene.IsAsking, "a dialog was raised over the picker");
+        Assert.False(screen.Scene.IsQuestioning, "a dialog was raised over the picker");
         Assert.False(screen.Scene.IsFilling, "a field took the keyboard before it was pressed");
     }
 
@@ -126,7 +126,7 @@ public class ValuesColumnTests
         var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " 474 192");
 
         Assert.Equal("Set Radius on Airlock Light", screen.Ended);
-        Assert.False(screen.Scene.IsAsking, "a dialog was raised");
+        Assert.False(screen.Scene.IsQuestioning, "a dialog was raised");
         Assert.True(screen.Scene.IsFilling, "the caret is not in the values");
         Assert.Equal("5.0", screen.Scene.Filling!.Text);
     }

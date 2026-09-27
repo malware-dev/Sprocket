@@ -161,30 +161,6 @@ namespace Sprocket.Sim.Simulation
                 float.Parse(args[at + 1], CultureInfo.InvariantCulture));
         }
 
-        /// <summary>
-        /// A press where it lands, the way the host delivers one.
-        /// </summary>
-        /// <remarks>
-        /// <b>Offered as a grab first.</b> The host asks the screen to take hold of whatever is under
-        /// the pointer before it treats the button going down as a click, and lets go on the way up
-        /// without ever pressing. So a click on something that is dragged - a scrollbar, a step being
-        /// reordered, a slider on a colour - reaches it as a grab and a drop, and never as a press.
-        /// <para>
-        /// A script that went straight to the press could not reach any of those at all, and worse,
-        /// the whole grab path was invisible to every frame and every test that runs one.
-        /// </para>
-        /// </remarks>
-        private static void Clicked(EditorScene scene, Vector2 at, int clicks)
-        {
-            if (scene.Grab(at, clicks))
-            {
-                scene.Drop();
-                return;
-            }
-
-            scene.Press(at, clicks);
-        }
-
         private static void Run(EditorScene scene, Step step, Action drawn)
         {
             if (step.Kind == Step.Press)
@@ -197,7 +173,7 @@ namespace Sprocket.Sim.Simulation
                 // Held for the press and let go afterwards, which is what a key does. Left set, one
                 // shifted press would make every press after it a run.
                 scene.Held = step.Held;
-                Clicked(scene, step.At, 1);
+                scene.Press(step.At, 1);
                 scene.Held = Held.Alone;
 
                 drawn();
@@ -209,7 +185,7 @@ namespace Sprocket.Sim.Simulation
             // Not the same as pressing twice, so a script cannot say it any other way.
             if (step.Kind == Step.Onward)
             {
-                scene.NextField();
+                scene.Tab();
                 drawn();
                 return;
             }
@@ -224,7 +200,7 @@ namespace Sprocket.Sim.Simulation
             if (step.Kind == Step.Double)
             {
                 scene.MoveTo(step.At);
-                Clicked(scene, step.At, 2);
+                scene.Press(step.At, 2);
                 drawn();
                 return;
             }
@@ -257,26 +233,17 @@ namespace Sprocket.Sim.Simulation
 
             // A question with answers owns both keys, the same way the game's own screen gives them
             // to it: Enter takes the answer the page named and Escape dismisses, which is not the
-            // same as answering. A script that went to the typed question instead would be reaching
-            // past what is actually on the screen.
+            // same as answering.
             if (step.Kind == Step.Enter)
             {
-                if (scene.IsQuestioning)
-                    scene.TakeDefault();
-                else if (scene.IsAsking || !scene.TakeTyped())
-                    scene.CommitAsk();
-
+                scene.Enter();
                 drawn();
                 return;
             }
 
             if (step.Kind == Step.Escape)
             {
-                if (scene.IsQuestioning)
-                    scene.Dismiss();
-                else
-                    scene.CancelAsk();
-
+                scene.Escape();
                 drawn();
                 return;
             }
@@ -311,20 +278,20 @@ namespace Sprocket.Sim.Simulation
 
             // Carried in several small moves rather than one, because the sliding is worked out a frame
             // at a time and a single jump would land before anything had moved out of the way.
-            scene.Grab(step.At);
+            scene.Down(step.At);
 
             for (int i = 1; i <= 12; i++)
             {
                 float t = i / 12f;
 
-                scene.Carry(new Vector2(
+                scene.Move(new Vector2(
                     step.At.X + (step.To.X - step.At.X) * t,
                     step.At.Y + (step.To.Y - step.At.Y) * t));
 
                 drawn();
             }
 
-            scene.Drop();
+            scene.Up();
             drawn();
         }
     }

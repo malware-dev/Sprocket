@@ -5,13 +5,13 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
 using Sprocket.Sim.Simulation;
 using VRage.Input;
 using VRageMath;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;
-using TextBox = Sprocket.Host.SpaceEngineers.Ui.Legacy.TextBox;
 
 namespace Sprocket.Sim.Shell
 {
@@ -36,12 +36,10 @@ namespace Sprocket.Sim.Shell
 
         readonly Surface _surface = new Surface();
         readonly EditorScene _editor = new EditorScene();
-        readonly ProbeScene _probe = new ProbeScene();
         readonly TextBlock _status = new TextBlock();
 
         Point _pointer;
         bool _caretVisible = true;
-        bool _showProbe;
         string _lastStatus;
 
         // The last frame's window-pixels-to-UI-units scale, kept so a click can be placed without
@@ -119,18 +117,12 @@ namespace Sprocket.Sim.Shell
             _surface.MouseDown += OnMouseDown;
             _surface.MouseWheel += delegate(object _, MouseWheelEventArgs e)
             {
-                if (!_showProbe)
-                {
-                    _editor.ScrollBy(ToUi(e.GetPosition(_surface)),
-                        -e.Delta / PerNotch * NotchUnits);
-                }
-
+                _editor.ScrollBy(ToUi(e.GetPosition(_surface)), -e.Delta / PerNotch * NotchUnits);
                 _surface.InvalidateVisual();
             };
             _surface.MouseUp += delegate
             {
-                _probe.SetPressed(false);
-                _editor.Drop();
+                _editor.Up();
                 _surface.InvalidateVisual();
             };
 
@@ -166,26 +158,15 @@ namespace Sprocket.Sim.Shell
             // journey is ToTarget's business and belongs in one place.
             _scale = _screen.Width > 0f ? _surface.Target.Width / _screen.Width : 1f;
 
-            if (_showProbe)
-            {
-                _probe.CaretVisible = _caretVisible;
-                _probe.MovePointer(ToUi(_pointer), _screen);
-                _probe.Draw(g);
-            }
-            else
-            {
-                _editor.CaretVisible = _caretVisible;
-                _editor.Draw(g);
-            }
+            _editor.CaretVisible = _caretVisible;
+            _editor.Draw(g);
 
             Vector2 size = g.Size;
             string status = string.Format(
-                "{0}   UI {1:0}x{2:0}   drawn at {3}x{4}   shown at {5:0}%   text: {6}   [F1] {7}",
-                _showProbe ? "probe" : "Sprocket",
+                "UI {0:0}x{1:0}   drawn at {2}x{3}   shown at {4:0}%   text: {5}",
                 size.X, size.Y, _surface.Target.Width, _surface.Target.Height,
                 _surface.Target.Width > 0 ? _surface.Viewport.Width / _surface.Target.Width * 100d : 0d,
-                _surface.MetricsSource,
-                _showProbe ? "show Sprocket" : "show the drawing probe");
+                _surface.MetricsSource);
 
             // Posted rather than assigned. This runs inside the render pass, and touching another
             // control's properties there invalidates a visual that has already been walked.
@@ -286,19 +267,10 @@ namespace Sprocket.Sim.Shell
             // the screen is showing.
             _surface.Focus();
 
-            if (_showProbe)
-            {
-                _probe.SetPressed(true);
-            }
-            else
-            {
-                Vector2 at = ToUi(e.GetPosition(_surface));
-
-                // A grab first. Something that can be picked up must not also count as a press on
-                // whatever was underneath it.
-                if (!_editor.Grab(at))
-                    _editor.Press(at, e.ClickCount);
-            }
+            _editor.Held = (Keyboard.Modifiers & ModifierKeys.Shift) != 0 ? Held.Through
+                : (Keyboard.Modifiers & ModifierKeys.Control) != 0 ? Held.Also
+                : Held.Alone;
+            _editor.Down(ToUi(e.GetPosition(_surface)), e.ClickCount);
 
             _surface.InvalidateVisual();
         }
@@ -308,17 +280,10 @@ namespace Sprocket.Sim.Shell
             _pointer = e.GetPosition(_surface);
             _editor.MoveTo(ToUi(_pointer));
 
-            if (_showProbe)
-            {
-                _surface.InvalidateVisual();
-                return;
-            }
+            if (e.LeftButton == MouseButtonState.Pressed)
+                _editor.Move(ToUi(_pointer));
 
-            if (_editor.IsDragging)
-            {
-                _editor.Carry(ToUi(_pointer));
-                _surface.InvalidateVisual();
-            }
+            _surface.InvalidateVisual();
         }
 
         protected override void OnTextInput(TextCompositionEventArgs e)
@@ -328,24 +293,7 @@ namespace Sprocket.Sim.Shell
             if (string.IsNullOrEmpty(e.Text))
                 return;
 
-            if (!_showProbe && _editor.Input.Focused != null)
-            {
-                _editor.Type(e.Text);
-                Wake();
-                return;
-            }
-
-            TextBox box = Typing();
-            if (box == null)
-                return;
-
-            for (int i = 0; i < e.Text.Length; i++)
-            {
-                char c = e.Text[i];
-                if (c >= ' ')
-                    box.InsertChar(c);
-            }
-
+            _editor.Type(e.Text);
             Wake();
         }
 
@@ -353,9 +301,9 @@ namespace Sprocket.Sim.Shell
         {
             base.OnKeyDown(e);
 
-            if (e.Key == Key.F1)
+            if (e.Key == Key.Escape)
             {
-                _showProbe = !_showProbe;
+                _editor.Escape();
                 Wake();
                 return;
             }
@@ -363,53 +311,8 @@ namespace Sprocket.Sim.Shell
             bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
             bool control = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
 
-            if (!_showProbe && Keyed(e.Key, shift, control))
-            {
+            if (Keyed(e.Key, shift, control))
                 Wake();
-                return;
-            }
-
-            TextBox box = Typing();
-            if (box == null)
-                return;
-
-            switch (e.Key)
-            {
-                case Key.Enter:
-                    if (!_showProbe)
-                        _editor.CommitAsk();
-                    break;
-                case Key.Escape:
-                    if (!_showProbe)
-                        _editor.CancelAsk();
-                    break;
-                case Key.Back:
-                    box.Backspace();
-                    break;
-                case Key.Delete:
-                    box.DeleteForward();
-                    break;
-                case Key.Left:
-                    box.MoveCaretLeft(shift);
-                    break;
-                case Key.Right:
-                    box.MoveCaretRight(shift);
-                    break;
-                case Key.Home:
-                    box.MoveCaretHome(shift);
-                    break;
-                case Key.End:
-                    box.MoveCaretEnd(shift);
-                    break;
-                case Key.A:
-                    if (control)
-                        box.SelectAll();
-                    break;
-                default:
-                    return;
-            }
-
-            Wake();
         }
 
         /// <summary>Hands a key to a new control holding the keyboard, as the game's screen does, answering whether one was.</summary>
@@ -420,7 +323,6 @@ namespace Sprocket.Sim.Shell
             switch (key)
             {
                 case Key.Enter: game = MyKeys.Enter; break;
-                case Key.Escape: game = MyKeys.Escape; break;
                 case Key.Tab: game = MyKeys.Tab; break;
                 case Key.Back: game = MyKeys.Back; break;
                 case Key.Delete: game = MyKeys.Delete; break;
@@ -440,24 +342,9 @@ namespace Sprocket.Sim.Shell
             return _editor.Key(game, shift, control);
         }
 
-        /// <summary>
-        /// Whichever box is currently taking keys, or null when nothing is. The probe always has one; the
-        /// editor only while a question is open, so typing does not silently land somewhere invisible.
-        /// </summary>
-        TextBox Typing()
-        {
-            if (_showProbe)
-                return _probe.Box;
-
-            return _editor.Typing;
-        }
-
         /// <summary>Shows the caret immediately after an edit, so typing never hides it mid-blink.</summary>
         void Wake()
         {
-            if (!_showProbe)
-                _editor.Typed();
-
             _caretVisible = true;
             _surface.InvalidateVisual();
         }

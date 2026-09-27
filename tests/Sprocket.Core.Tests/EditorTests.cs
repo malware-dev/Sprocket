@@ -161,7 +161,7 @@ public class EditorTests
         editor.PressChoice("AI Behavior On/Off");
         Assert.True(Offered().Single(e => e.Text == "AI Behavior On/Off").IsChosen);
         Assert.False(Offered().Single(e => e.Text == "Set AI Behavior").IsChosen);
-        Assert.Equal("", editor.Screen.PrimaryQuestion);
+        Assert.Equal("", editor.Picking().Question);
 
         editor.PressPrimary();
         var step = ship.Automation.Sequences[0].Steps.OfType<Act>().Last();
@@ -535,12 +535,12 @@ public class EditorTests
         ship.Tick();
         Assert.True(editor.Screen.HasSwitch);
 
-        editor.SetToggle(editor.Screen.SwitchCommand, false);
+        editor.Screen.Flip!.Execute();
         ship.Tick();
         Assert.False(sequence.CanRun(sequence.System.First));
         Assert.True(sequence.Enabled);
 
-        editor.SetToggle(editor.Screen.SwitchCommand, true);
+        editor.Screen.Flip!.Execute();
         ship.Tick();
         Assert.True(sequence.CanRun(sequence.System.First));
     }
@@ -811,24 +811,6 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Two controls may not share one identity, and saying so is the point.
-    /// </summary>
-    /// <remarks>
-    /// Under the old counter this mistake could not be detected at all - two controls that
-    /// ought to be distinguishable simply were not, and the symptom was a button doing another
-    /// button's job.
-    /// </remarks>
-    [Fact]
-    public void TwoCommandsCannotClaimTheSameIdentity()
-    {
-        var ship = Build();
-        ship.Editor.Register(Cmd.Undo, delegate { });
-
-        Assert.Throws<InvalidOperationException>(
-            () => ship.Editor.Register(Cmd.Undo, delegate { }));
-    }
-
-    /// <summary>
     /// A system can be stopped from the list it appears in, and renamed from its own heading.
     /// </summary>
     /// <remarks>
@@ -856,7 +838,7 @@ public class EditorTests
         // On its own screen: renameable, the same way a sequence is.
         Assert.True(editor.Screen.CanRename);
         Assert.Equal("Airlock", editor.Screen.CustomName());
-        editor.SetText(editor.Screen.RenameCommand(), "Front Airlock");
+        editor.Name("Front Airlock");
         ship.Tick();
         Assert.Equal("Front Airlock", system.Name);
 
@@ -1846,11 +1828,11 @@ public class EditorTests
         ship.Editor.GoToRoot();
         ship.Editor.NewSystem("Hangar");
 
-        var rename = ship.Editor.Screen.Heading[0].RenameCommand;
-        Assert.False(ship.Editor.Accepts(rename, "Airlock"));
-        Assert.True(ship.Editor.Accepts(rename, "Hangar"));
+        var part = ship.Editor.Screen.Heading[0];
+        Assert.False(part.Takes("Airlock"));
+        Assert.True(part.Takes("Hangar"));
 
-        ship.Editor.SetText(rename, "Airlock");
+        part.Renames!("Airlock");
         Assert.Equal("Hangar", ship.Automation.Systems[1].Name);
     }
 

@@ -295,13 +295,12 @@ public class ActionTests
         screen.Run(2);
 
         // Asked on the button that finishes the picking, rather than on a screen of its own.
-        Assert.True(screen.Editor.Screen.PrimaryAsks, "finishing does not ask for the values");
-        Assert.Equal("This needs a colour.", screen.Editor.Screen.PrimaryQuestion);
+        Assert.Equal("This needs a colour.", screen.Editor.Picking().Question);
 
         // One field over all three, because somebody described these three as one colour - which for
         // a light is Sprocket itself, since these are the game's own blocks. The action still says
         // nothing about them, and a block nobody has described still gets a box for each.
-        Field asked = Assert.Single(screen.Editor.Screen.PrimaryFields);
+        Field asked = Assert.Single(screen.Editor.Picking().Fields);
         Assert.Equal(Editor.Colour, asked.Edits);
         Assert.Equal(3, asked.Covers);
 
@@ -422,8 +421,8 @@ public class ActionTests
             + "70 200 150 203 type Approach 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
-        Assert.Equal(Editor.Chosen, screen.Editor.Screen.PrimaryFields.Single().Edits);
-        Assert.Equal(2, screen.Editor.Screen.PrimaryFields.Single().Words.Count);
+        Assert.Equal(Editor.Chosen, screen.Editor.Picking().Fields.Single().Edits);
+        Assert.Equal(2, screen.Editor.Picking().Fields.Single().Words.Count);
 
         // A switch says the word it is on, and pressing it gives the other one.
         var word = screen.Text("off");

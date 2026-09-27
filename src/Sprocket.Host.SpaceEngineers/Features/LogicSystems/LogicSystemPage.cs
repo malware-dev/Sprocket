@@ -6,7 +6,6 @@ using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Look;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
@@ -56,9 +55,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <summary>A logic system is renamed on its heading, the same act as renaming a sequence on its own.</summary>
         public override bool CanRename => true;
-
-        /// <inheritdoc />
-        public override string RenamePrompt => Editor.Texts.SystemRenamePrompt;
 
         /// <inheritdoc />
         public override string NameAbout => Editor.Texts.SystemNameAbout;
@@ -154,9 +150,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Editor.Redo(_system);
         }
 
-        /// <summary>Describes no components: the page is drawn by its own view, which this brings up to date, words and all.</summary>
+        /// <summary>Brings the view up to date, words and all.</summary>
         /// <remarks>Called when the editor builds the screen: on arriving at the page, coming back to it, a change to the program, and a change of language.</remarks>
-        public override void Build(List<EditorComponent> components)
+        public override void Build()
         {
             Collect();
             Show(true);

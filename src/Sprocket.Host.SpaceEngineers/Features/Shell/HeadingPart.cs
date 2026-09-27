@@ -1,5 +1,7 @@
+using System;
+using System.Collections.Generic;
 
-namespace Sprocket.Host.SpaceEngineers.Screen
+namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>
     /// One piece of a screen's heading: some words, and whether they are somebody's to change.
@@ -11,25 +13,27 @@ namespace Sprocket.Host.SpaceEngineers.Screen
     /// starts it, recoverable only by typing the trigger into the name by hand.
     /// <para>
     /// So a heading is several of these, in order, and each one answers for itself whether it can be
-    /// renamed. There is deliberately no joined-up version of the whole thing on
-    /// <see cref="EditorScreen" />: a target handed one string would draw one string, and the one thing a
-    /// heading has to say now is <b>which part of it can be changed</b>.
-    /// </para>
-    /// <para>
-    /// Words between the parts are the target's, not core's - an arrow, a dot, a line break on something
-    /// narrow. A heading that genuinely needs a connective word can carry it as a part with no rename
-    /// command, which is the same mechanism rather than a second one.
+    /// renamed. Words between the parts are the target's, not core's - an arrow, a dot, a line break on
+    /// something narrow.
     /// </para>
     /// </remarks>
-    public sealed class HeadingPart : Observable
+    public sealed class HeadingPart
     {
+        string _lead = "";
+        string _after = "";
+        string _text;
+        string _name = "";
+        Action<string> _renames;
+        Func<string, bool> _accepts;
+        bool _namedOnArrival;
+        string _about;
+        bool _nameRequired;
+        EditorScreen _on;
+
+        /// <summary>A part reading <paramref name="text" />.</summary>
         public HeadingPart(string text)
         {
-            Text = text ?? "";
-            Name = "";
-            Prompt = "";
-            Lead = "";
-            After = "";
+            _text = text ?? "";
         }
 
         /// <summary>
@@ -48,39 +52,29 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         public string Lead
         {
             get { return _lead; }
-            set { Set(ref _lead, value, nameof(Lead)); }
+            set { Set(ref _lead, value ?? ""); }
         }
 
-        string _lead;
+        /// <summary>Words after the name, quieter than it, or empty: the <i>blueprint</i> of <i>Airlock blueprint</i>.</summary>
+        public string After
+        {
+            get { return _after; }
+            set { Set(ref _after, value ?? ""); }
+        }
 
-        /// <summary>
-        /// What this part reads as. Never empty.
-        /// </summary>
+        /// <summary>What this part reads as. Never empty.</summary>
         /// <remarks>
         /// The name where somebody gave one, and whatever the thing says about itself where they did not.
         /// A part always has something to read, which is what makes naming optional rather than a step
         /// somebody is quietly expected to complete.
         /// </remarks>
-        /// <summary>Words after the name, quieter than it, or empty: the <i>blueprint</i> of <i>Airlock blueprint</i>.</summary>
-        public string After
-        {
-            get { return _after; }
-            set { Set(ref _after, value ?? "", nameof(After)); }
-        }
-
-        string _after;
-
         public string Text
         {
             get { return _text; }
-            set { Set(ref _text, value, nameof(Text)); }
+            set { Set(ref _text, value ?? ""); }
         }
 
-        string _text;
-
-        /// <summary>
-        /// What somebody actually typed, or empty where nobody has.
-        /// </summary>
+        /// <summary>What somebody actually typed, or empty where nobody has.</summary>
         /// <remarks>
         /// <b>Not the same as <see cref="Text" /> and the difference is load-bearing.</b> A target opens
         /// its rename box on this; opening it on the text would hand somebody a generated sentence and
@@ -89,52 +83,42 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         public string Name
         {
             get { return _name; }
-            set { Set(ref _name, value, nameof(Name)); }
+            set { Set(ref _name, value ?? ""); }
         }
 
-        string _name;
-
-        /// <summary>Where a new name for this part is sent, or zero when it cannot be renamed.</summary>
-        public int RenameCommand
+        /// <summary>Gives this part a new name, or null when it cannot be renamed.</summary>
+        public Action<string> Renames
         {
-            get { return _renameCommand; }
-            set { Set(ref _renameCommand, value, nameof(RenameCommand)); }
+            get { return _renames; }
+            set { Set(ref _renames, value); }
         }
 
-        int _renameCommand;
+        /// <summary>Whether a name can be given, asked before it is: false where something else already has it.</summary>
+        /// <remarks>Null where every name is taken. An empty name is <see cref="NameRequired" />'s business, not this.</remarks>
+        public Func<string, bool> Accepts
+        {
+            get { return _accepts; }
+            set { Set(ref _accepts, value); }
+        }
 
-        public bool CanRename => RenameCommand != 0;
+        /// <summary>Whether this part can be renamed.</summary>
+        public bool CanRename => _renames != null;
 
         /// <summary>Whether the screen opens with this part's name in hand to be given, as for something just made and numbered.</summary>
         public bool NamedOnArrival
         {
             get { return _namedOnArrival; }
-            set { Set(ref _namedOnArrival, value, nameof(NamedOnArrival)); }
+            set { Set(ref _namedOnArrival, value); }
         }
-
-        bool _namedOnArrival;
-
-        /// <summary>What to ask when offering the rename.</summary>
-        public string Prompt
-        {
-            get { return _prompt; }
-            set { Set(ref _prompt, value, nameof(Prompt)); }
-        }
-
-        string _prompt;
 
         /// <summary>What this part is and what renaming it does, for whoever rests the pointer on it, in markdown-lite, or null for nothing to say.</summary>
         public string About
         {
             get { return _about; }
-            set { Set(ref _about, value, nameof(About)); }
+            set { Set(ref _about, value); }
         }
 
-        string _about;
-
-        /// <summary>
-        /// Whether an empty name is an answer here, or is not allowed to be given.
-        /// </summary>
+        /// <summary>Whether an empty name is refused here, rather than handing the part back to what the thing says about itself.</summary>
         /// <remarks>
         /// Nearly everywhere an empty name means "go back to whatever this thing says about itself", which
         /// is what makes naming optional. Where there is nothing for it to say, clearing the name has to be
@@ -144,9 +128,30 @@ namespace Sprocket.Host.SpaceEngineers.Screen
         public bool NameRequired
         {
             get { return _nameRequired; }
-            set { Set(ref _nameRequired, value, nameof(NameRequired)); }
+            set { Set(ref _nameRequired, value); }
         }
 
-        bool _nameRequired;
+        /// <summary>Whether <paramref name="name" /> can be given here.</summary>
+        public bool Takes(string name)
+        {
+            return _accepts == null || _accepts(name ?? "");
+        }
+
+        /// <summary>Says this is part of the heading <paramref name="on" /> shows, which is told whenever it changes.</summary>
+        public void Show(EditorScreen on)
+        {
+            _on = on;
+        }
+
+        /// <summary>Writes <paramref name="value" /> into <paramref name="field" />, telling the screen showing this where it differs.</summary>
+        void Set<T>(ref T field, T value)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return;
+
+            field = value;
+            if (_on != null)
+                _on.Touch();
+        }
     }
 }

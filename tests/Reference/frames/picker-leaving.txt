@@ -190,12 +190,18 @@ on screen     When Airlock Button is pressed
 183  ClearClip  
 184  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
 185  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF
-186  Sprite     Sprocket_Fill         {X:883 Y:485 W:155 H:111}  #3C4C52FF
-187  Sprite     Sprocket_Fill         {X:883 Y:485 W:155 H:1}  #5B737BFF
-188  Sprite     Sprocket_Fill         {X:883 Y:594 W:155 H:1}  #5B737BFF
-189  Sprite     Sprocket_Fill         {X:883 Y:485 W:1 H:111}  #5B737BFF
-190  Sprite     Sprocket_Fill         {X:1036 Y:485 W:1 H:111}  #5B737BFF
-191  Text       at {X:898.6733 Y:496.57} scale 0.642  #A2C3CDFF  "Keep your changes?"
-192  Sprite     Sprocket_Fill         {X:883 Y:518 W:155 H:36}  #8EBCCFFF
-193  Text       at {X:898.6733 Y:524.07} scale 0.822  #1B242AFF  "Keep them"
-194  Text       at {X:898.6733 Y:559.75} scale 0.822  #A2C3CDFF  "Discard them"
+186  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B2099
+187  Sprite     Sprocket_Fill         {X:704 Y:476 W:512 H:128}  #1B242AFF
+188  Sprite     Sprocket_Fill         {X:704 Y:476 W:512 H:1}  #5B737BFF
+189  Sprite     Sprocket_Fill         {X:704 Y:603 W:512 H:1}  #5B737BFF
+190  Sprite     Sprocket_Fill         {X:704 Y:476 W:1 H:128}  #5B737BFF
+191  Sprite     Sprocket_Fill         {X:1215 Y:476 W:1 H:128}  #5B737BFF
+192  Text       at {X:728 Y:500} scale 0.833  #DCF5FDFF  "Keep your changes?"
+193  Sprite     Sprocket_Fill         {X:860 Y:548 W:89 H:32}  #8EBCCFFF
+194  Text       at {X:876.2367 Y:556} scale 0.556  #1B242AFF  "Keep them"
+195  Sprite     Sprocket_Fill         {X:958 Y:548 W:102 H:32}  #29363EFF
+196  Sprite     Sprocket_Fill         {X:958 Y:548 W:102 H:1}  #3F474FFF
+197  Sprite     Sprocket_Fill         {X:958 Y:579 W:102 H:1}  #3F474FFF
+198  Sprite     Sprocket_Fill         {X:958 Y:548 W:1 H:32}  #3F474FFF
+199  Sprite     Sprocket_Fill         {X:1059 Y:548 W:1 H:32}  #3F474FFF
+200  Text       at {X:973.54 Y:556} scale 0.556  #DCF5FDFF  "Discard them"

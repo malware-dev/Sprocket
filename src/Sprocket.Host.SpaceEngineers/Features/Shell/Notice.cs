@@ -1,6 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 
-namespace Sprocket.Host.SpaceEngineers.Screen
+namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>
     /// Something the person at the editor needs told, above whatever page is showing, and what they can do about it.

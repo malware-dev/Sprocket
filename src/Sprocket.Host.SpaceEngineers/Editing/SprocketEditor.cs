@@ -7,8 +7,6 @@ using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Words;
@@ -23,8 +21,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// </summary>
     /// <remarks>
     /// Navigation, page contents, slot filling and search live here rather than in the screens.
-    /// What is drawn renders <see cref="Screen" /> and sends back command ids; it decides nothing
-    /// about what the editor means or does, and nothing it draws has to be worked out twice.
+    /// What is drawn renders <see cref="Screen" /> and each page's view, and carries out the commands they hand it; it
+    /// decides nothing about what the editor means or does, and nothing it draws has to be worked out twice.
     ///
     /// The wording is the one thing this does not own - see <see cref="Words.SequenceText" />, which
     /// decides word order, capitals and every other thing that is a language's business rather than
@@ -39,15 +37,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         string _holder;
         Habits _habits = new Habits();
         readonly List<EditorPage> _stack = new List<EditorPage>();
-        readonly Dictionary<int, Action> _actions = new Dictionary<int, Action>();
-        readonly Dictionary<int, Action<string>> _textActions = new Dictionary<int, Action<string>>();
-        readonly Dictionary<int, Func<string, bool>> _textChecks = new Dictionary<int, Func<string, bool>>();
-        readonly Dictionary<int, Action<bool>> _toggleActions = new Dictionary<int, Action<bool>>();
-        readonly Dictionary<int, Action<int>> _numberActions = new Dictionary<int, Action<int>>();
 
         readonly Dictionary<int, int> _standIns = new Dictionary<int, int>();
         readonly EditorScreen _screen = new EditorScreen();
-        readonly List<EditorComponent> _gathered = new List<EditorComponent>();
         readonly List<ChoiceEntry> _actionBar = new List<ChoiceEntry>();
 
         bool _structureDirty;
@@ -182,7 +174,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // grid's own name, and the name of a block inside a sentence. Nothing in the game's own
             // interface announces either, so they are read again on a cadence - a second, the same
             // cadence the rest of this class already keeps time by. A name changed here shows at once,
-            // because SetText reads them back the moment it lands; somebody else's shows within a
+            // because renaming reads them back the moment it lands; somebody else's shows within a
             // second, which nobody can tell from at once.
             //
             // Its words only. The heading's shape was settled when the screen was made, and the target
@@ -207,16 +199,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             var page = Current;
 
             var canUndo = page.CanUndo;
-            _screen.UndoCommand = canUndo ? _undoCommand : 0;
+            _screen.Undo = canUndo ? _undo : null;
             _screen.UndoText = canUndo ? page.UndoText : "";
 
             var canRedo = page.CanRedo;
-            _screen.RedoCommand = canRedo ? _redoCommand : 0;
+            _screen.Redo = canRedo ? _redo : null;
             _screen.RedoText = canRedo ? page.RedoText : "";
         }
 
-        int _undoCommand;
-        int _redoCommand;
+        ICommand _undo;
+        ICommand _redo;
 
         const int Second = 60;
 
@@ -231,12 +223,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         internal void Ask(string question)
         {
-            Release();
-            _screen.Question = question;
-            _screen.QuestionIsHere = false;
-            _screen.Default = 0;
-            _screen.Finishing = 0;
-            _screen.Asked++;
+            _screen.Ask(question, false);
         }
 
         /// <summary>
@@ -250,12 +237,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         internal void AskHere(string question)
         {
-            Release();
-            _screen.Question = question;
-            _screen.QuestionIsHere = true;
-            _screen.Default = 0;
-            _screen.Finishing = 0;
-            _screen.Asked++;
+            _screen.Ask(question, true);
         }
 
         /// <summary>Adds a way to answer, in the order they are offered.</summary>
@@ -273,18 +255,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
                 finish.Execute();
         }
 
-        /// <summary>
-        /// An answer that means "finish this page", the way its own button would.
-        /// </summary>
-        /// <remarks>
-        /// Not just an answer that happens to call <c>Primary</c>. Finishing can need a question of
-        /// its own - values an action will not work without - and that one is a target's to open, so
-        /// the answer has to be pointed at the same place the button is rather than at half of it.
-        /// </remarks>
+        /// <summary>An answer that finishes the page on top, the way its own way on does.</summary>
         internal void AnswerPrimary(string text, bool byDefault)
         {
             Answer(text, delegate { Current.Primary(); }, byDefault);
-            _screen.Finishing = _screen.Answers[_screen.Answers.Count - 1].Command;
         }
 
         /// <summary>
@@ -296,42 +270,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// </remarks>
         internal void Answer(string text, Action chosen, bool byDefault)
         {
-            _answering.Add(new Answering(text, chosen));
-
-            int command = Register(Cmd.Answer, _screen.Answers.Count, chosen);
-            _screen.Answers.Add(new ChoiceEntry(text, false, command));
-
-            if (byDefault)
-                _screen.Default = command;
+            var command = Refuses(Cmd.Answer) ? null : new Relay(delegate { Reply(chosen); });
+            _screen.Answer(new ChoiceEntry(text, false, command), byDefault);
         }
 
-        readonly List<Answering> _answering = new List<Answering>();
-
-        struct Answering
+        /// <summary>Carries out an answer to the standing question, which takes the question away first.</summary>
+        void Reply(Action chosen)
         {
-            public readonly string Text;
-            public readonly Action Chosen;
-
-            public Answering(string text, Action chosen)
-            {
-                Text = text;
-                Chosen = chosen;
-            }
-        }
-
-        /// <summary>Offers the standing question's answers again, under this screen's numbers.</summary>
-        void Reask()
-        {
-            if (!_screen.HasQuestion || _answering.Count == 0)
-                return;
-
-            _screen.Answers.Clear();
-
-            for (var i = 0; i < _answering.Count; i++)
-            {
-                _screen.Answers.Add(new ChoiceEntry(_answering[i].Text, false,
-                    Register(Cmd.Answer, i, _answering[i].Chosen)));
-            }
+            Unask();
+            chosen();
+            Settle();
         }
 
         /// <summary>
@@ -347,23 +295,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             if (!_screen.HasQuestion)
                 return;
 
-            _screen.Question = "";
-            Release();
+            _screen.Unask();
         }
 
-        /// <summary>
-        /// Gives back the command numbers the last set of answers was using.
-        /// </summary>
-        /// <remarks>
-        /// A command number is claimed for the life of a screen and refused twice, which is what
-        /// catches a page registering the same control twice over. A question outlives none of that:
-        /// it can be raised, dismissed and raised again without the screen ever being rebuilt, so its
-        /// numbers have to be handed back rather than held.
-        /// </remarks>
-        void Released()
-        {
-            _answering.Clear();
-        }
 
         /// <summary>
         /// Says it on every screen where the block holds a program that would not read.
@@ -588,59 +522,10 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             Answer(Texts.SalvageKeep, delegate { }, true);
         }
 
-        bool IsAnswer(int command)
-        {
-            foreach (ChoiceEntry answer in _screen.Answers)
-            {
-                if (answer.Command == command)
-                    return true;
-            }
-
-            return false;
-        }
-
-        void Release()
-        {
-            foreach (ChoiceEntry answer in _screen.Answers)
-                _actions.Remove(answer.Command);
-
-            _screen.Answers.Clear();
-            Released();
-        }
-
-        /// <summary>Acts on a button, a row, or anything else that was pressed.</summary>
-        public void Invoke(int command)
-        {
-            Action action;
-            if (!_actions.TryGetValue(command, out action))
-                return;
-
-            if (Replacing(CommandId.Kind(command)))
-            {
-                AskBeforeReplacing(delegate { Invoke(command); });
-                return;
-            }
-
-            // While a question stands, only its own answers are honoured. Anything else dismisses it
-            // and goes no further - the press that puts a question away is not also a press on
-            // whatever was behind it, and back in particular must not raise the same question again.
-            if (_screen.HasQuestion && !IsAnswer(command))
-            {
-                Unask();
-                return;
-            }
-
-            Unask();
-
-            action();
-            Settle();
-        }
-
         /// <summary>A command that carries <paramref name="action" /> out as a press of <paramref name="kind" />, or null where the editor refuses that kind of press.</summary>
         /// <remarks>
-        /// For a screen that makes its own controls. A press goes the way <see cref="Invoke" /> takes one: the
-        /// first edit of a program that could not be read asks first, a press while a question stands only puts
-        /// it away, and the editor settles after.
+        /// The first edit of a program that could not be read asks first, a press while a question stands only puts it
+        /// away, and the editor settles after.
         /// </remarks>
         public ICommand Act(Cmd kind, Action action)
         {
@@ -671,40 +556,39 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return Vocabulary.Fields(_world, entityIds, actionId, form);
         }
 
-        /// <summary>Reports new text for a search box or any other field, unless the field refuses it.</summary>
-        public void SetText(int command, string value)
-        {
-            Action<string> action;
-            if (!_textActions.TryGetValue(command, out action) || !Accepts(command, value))
-                return;
-
-            if (Replacing(CommandId.Kind(command)))
-            {
-                AskBeforeReplacing(delegate { SetText(command, value); });
-                return;
-            }
-
-            action(value ?? "");
-
-            // What was just typed may be a name the heading is showing, and a rename that took a
-            // moment to appear would read as one that had not worked.
-            Current.RefreshHeading(_screen.Heading);
-            Settle();
-        }
-
         /// <summary>
-        /// Whether a field would take this text, asked before it is sent.
+        /// What gives a name through <paramref name="rename" />, where <paramref name="accepts" /> takes it, or null where
+        /// the editor refuses renaming.
         /// </summary>
         /// <remarks>
-        /// So a target can say a name is taken while it is still being typed, instead of sending it and
-        /// having nothing happen. The same check guards <see cref="SetText" />, so a target that never asks
-        /// still cannot get past it. Only a field with a rule refuses anything; an empty required name is
-        /// the target's to catch, through <see cref="HeadingPart.NameRequired" />.
+        /// The heading's words are read back the moment a name lands, because a rename that took a moment to appear would
+        /// read as one that had not worked. A name refused is dropped here too, so a target that never asked still cannot
+        /// get past it.
         /// </remarks>
-        public bool Accepts(int command, string value)
+        public Action<string> Renaming(Action<string> rename, Func<string, bool> accepts)
         {
-            Func<string, bool> check;
-            return !_textChecks.TryGetValue(command, out check) || check(value ?? "");
+            if (Refuses(Cmd.Rename))
+                return null;
+
+            Action<string> gives = null;
+            gives = delegate(string name)
+            {
+                name = name ?? "";
+                if (accepts != null && !accepts(name))
+                    return;
+
+                if (Replacing(Cmd.Rename))
+                {
+                    AskBeforeReplacing(delegate { gives(name); });
+                    return;
+                }
+
+                rename(name);
+                Current.RefreshHeading(_screen.Heading);
+                Settle();
+            };
+
+            return gives;
         }
 
         /// <summary>How somebody is working in this editor; see <see cref="Editing.Habits" />.</summary>
@@ -724,51 +608,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         {
             get { return Habits.ShowsTerminal; }
             set { Habits.ShowsTerminal = value; }
-        }
-
-        /// <summary>
-        /// Reports a number somebody chose - a position to move something to, most of all.
-        /// </summary>
-        /// <remarks>
-        /// The third shape of answer, beside text and a toggle. Without it core could only
-        /// offer a step "up" and "down", which is a widget rather than a capability: a target
-        /// that wanted dragging had to synthesise a run of single moves and one with a number
-        /// field could not express itself at all.
-        ///
-        /// Out of range is ignored rather than refused. A drop past the end of a list is an
-        /// ordinary thing for a pointer to do.
-        /// </remarks>
-        public void SetNumber(int command, int value)
-        {
-            Action<int> action;
-            if (!_numberActions.TryGetValue(command, out action))
-                return;
-
-            if (Replacing(CommandId.Kind(command)))
-            {
-                AskBeforeReplacing(delegate { SetNumber(command, value); });
-                return;
-            }
-
-            action(value);
-            Settle();
-        }
-
-        /// <summary>Reports a toggle being flipped.</summary>
-        public void SetToggle(int command, bool on)
-        {
-            Action<bool> action;
-            if (!_toggleActions.TryGetValue(command, out action))
-                return;
-
-            if (Replacing(CommandId.Kind(command)))
-            {
-                AskBeforeReplacing(delegate { SetToggle(command, on); });
-                return;
-            }
-
-            action(on);
-            Settle();
         }
 
         /// <summary>
@@ -802,117 +641,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             _structureDirty = true;
         }
 
-        /// <summary>
-        /// Gives a command an id that says what it is.
-        /// </summary>
-        /// <remarks>
-        /// The same control gets the same id on every rebuild, by construction. An id derived from
-        /// registration order would instead go stale the moment a page changed shape, and silently,
-        /// because <see cref="Invoke"/> ignores what it does not recognise.
-        /// <para>
-        /// Registering the same identity twice is a mistake and says so, which is what stops two
-        /// controls that ought to be distinguishable ending up indistinguishable.
-        /// </para>
-        /// </remarks>
-        internal int Register(Cmd kind, Action action)
-        {
-            return Register(kind, 0, 0, action);
-        }
-
-        internal int Register(Cmd kind, int which, Action action)
-        {
-            return Register(kind, which, 0, action);
-        }
-
-        internal int Register(Cmd kind, int which, int part, Action action)
-        {
-            if (Refuses(kind))
-                return 0;
-
-            var id = CommandId.Of(kind, which, part);
-            Claim(id, kind);
-            _actions.Add(id, action);
-            return id;
-        }
-
-        internal int RegisterText(Cmd kind, Action<string> action)
-        {
-            return RegisterText(kind, 0, action);
-        }
-
-        internal int RegisterText(Cmd kind, int which, Action<string> action)
-        {
-            return RegisterText(kind, which, 0, action);
-        }
-
-        /// <summary>The same, for one part of a numbered thing - one slot of a sentence.</summary>
-        internal int RegisterText(Cmd kind, int which, int part, Action<string> action)
-        {
-            if (Refuses(kind))
-                return 0;
-
-            var id = CommandId.Of(kind, which, part);
-            Claim(id, kind);
-            _textActions.Add(id, action);
-            return id;
-        }
-
-        /// <summary>A text command that refuses whatever <paramref name="accepts" /> says no to.</summary>
-        internal int RegisterText(Cmd kind, Action<string> action, Func<string, bool> accepts)
-        {
-            return RegisterText(kind, 0, action, accepts);
-        }
-
-        /// <summary>The same, for one of a numbered thing.</summary>
-        internal int RegisterText(Cmd kind, int which, Action<string> action, Func<string, bool> accepts)
-        {
-            var id = RegisterText(kind, which, action);
-            if (id != 0)
-                _textChecks.Add(id, accepts);
-
-            return id;
-        }
-
-        internal int RegisterNumber(Cmd kind, int which, Action<int> action)
-        {
-            if (Refuses(kind))
-                return 0;
-
-            var id = CommandId.Of(kind, which);
-            Claim(id, kind);
-            _numberActions.Add(id, action);
-            return id;
-        }
-
-        internal int RegisterToggle(Cmd kind, Action<bool> action)
-        {
-            return RegisterToggle(kind, 0, action);
-        }
-
-        internal int RegisterToggle(Cmd kind, int which, Action<bool> action)
-        {
-            return RegisterToggle(kind, which, 0, action);
-        }
-
-        internal int RegisterToggle(Cmd kind, int which, int part, Action<bool> action)
-        {
-            if (Refuses(kind))
-                return 0;
-
-            var id = CommandId.Of(kind, which, part);
-            Claim(id, kind);
-            _toggleActions.Add(id, action);
-            return id;
-        }
-
-        /// <summary>
-        /// Refuses to let two commands share one identity.
-        /// </summary>
-        /// <remarks>
-        /// Loud, and on purpose. A page that hands the same id to two controls has one of them
-        /// doing the other's job, and the symptom - a button that does the wrong thing - would
-        /// be blamed on anything but the numbering.
-        /// </remarks>
         /// <summary>Whether a command is refused because somebody else holds the Sprocket.</summary>
         /// <remarks>Moving around is all a copy lent to look at may do.</remarks>
         bool Refuses(Cmd kind)
@@ -936,16 +664,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
         }
 
-        void Claim(int id, Cmd kind)
-        {
-            if (_actions.ContainsKey(id) || _textActions.ContainsKey(id)
-                || _toggleActions.ContainsKey(id) || _numberActions.ContainsKey(id))
-            {
-                throw new InvalidOperationException(
-                    "Two commands were registered as " + kind + " with the same number. "
-                    + "A command's identity has to be unique on its screen.");
-            }
-        }
 
         internal void Push(EditorPage page)
         {
@@ -1177,54 +895,33 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Rebuilds the screen from the page on top of the stack.
         /// </summary>
         /// <remarks>
-        /// The component list is gathered first and published in one go. Clearing and
-        /// re-adding would announce a half-built screen to anything watching, and a
-        /// target would draw it.
-        ///
-        /// Pages hand back the same component instances wherever they can, so a
-        /// target that keys its controls on identity keeps them - along with focus,
-        /// carets and scroll positions - even though this ran.
+        /// Every command the chrome shows is made afresh. The page keeps its own view, and with it whatever has the
+        /// keyboard and wherever it was scrolled to.
         /// </remarks>
         void Rebuild()
         {
-            _actions.Clear();
-            _textActions.Clear();
-            _textChecks.Clear();
-            _toggleActions.Clear();
-            _numberActions.Clear();
-
             var page = Current;
 
             // Rebuilt in place rather than swapped, because a target holds this list across a refresh and
             // compares what is in it to decide whether its own controls need making again.
             _screen.Heading.Clear();
             page.Heading(_screen.Heading);
-            _screen.Renamed();
+            _screen.Reheaded();
 
             _screen.CanGoBack = _stack.Count > 1;
-            _screen.BackCommand = _screen.CanGoBack ? Register(Cmd.Back, Leave) : 0;
-            _screen.RefreshCommand = Register(Cmd.Refresh, Look);
-            _screen.SwitchCommand = page.CanSwitch ? RegisterToggle(Cmd.Switch, page.Switch) : 0;
+            _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
+            _screen.Refresh = Act(Cmd.Refresh, Look);
+            _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
 
-            // Registered whether or not there is anything to walk back, because issuing a command
-            // needs the numbering only a rebuild does - and what there is to walk back changes
-            // without one. So this decides whether the command may exist at all, and the tick
-            // decides whether it is offered.
+            // Made whether or not there is anything to walk back, because what there is to walk back changes without a
+            // rebuild. So this decides whether the command may exist at all, and the tick decides whether it is offered.
             _screen.HasHistory = page.HasHistory;
-            _undoCommand = page.HasHistory ? Register(Cmd.Undo, page.Undo) : 0;
-            _redoCommand = page.HasHistory ? Register(Cmd.Redo, page.Redo) : 0;
+            _undo = page.HasHistory ? Act(Cmd.Undo, page.Undo) : null;
+            _redo = page.HasHistory ? Act(Cmd.Redo, page.Redo) : null;
             _screen.PrimaryText = page.PrimaryText;
-            _screen.PrimaryQuestion = page.PrimaryQuestion;
-            _screen.PrimaryFields.Reset(page.PrimaryFields);
-            _screen.PrimaryFilled.Reset(page.PrimaryFilled);
-            _screen.PrimaryCommand = !_screen.HasPrimary
-                ? 0
-                : _screen.PrimaryAsks
-                    ? RegisterText(Cmd.Primary, page.Primary)
-                    : Register(Cmd.Primary, page.Primary);
+            _screen.Primary = _screen.HasPrimary ? Act(Cmd.Primary, page.Primary) : null;
 
-            _gathered.Clear();
-            page.Build(_gathered);
+            page.Build();
 
             // A page that went straight on to another as it was built is never shown: the one it went
             // on to is, built from the start.
@@ -1235,35 +932,19 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             }
             Said();
 
-            // Everything, not just what the cadence is due to say: the components above were made from
-            // nothing a moment ago and hold nothing yet.
+            // Everything, not just what the cadence is due to say: what the page shows may have been made from nothing a
+            // moment ago.
             page.Resay();
             page.Refresh();
-
-            if (!SameComponents(_gathered))
-                _screen.Components.Reset(_gathered);
 
             _screen.Subtitle = page.Subtitle;
             _screen.SwitchIsOn = page.SwitchIsOn;
             Walking();
             BuildActions();
-            Reask();
 
             _structureDirty = false;
         }
 
-        bool SameComponents(List<EditorComponent> gathered)
-        {
-            if (gathered.Count != _screen.Components.Count)
-                return false;
-
-            for (var i = 0; i < gathered.Count; i++)
-            {
-                if (!ReferenceEquals(gathered[i], _screen.Components[i]))
-                    return false;
-            }
-            return true;
-        }
 
         /// <summary>
         /// Everything the host learns by looking, read again.
@@ -1299,9 +980,9 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             // anywhere, belonging to the screen rather than to what is on it.
             if (DeveloperMode)
                 _actionBar.Add(new ChoiceEntry(ScriptPage.Called, Current is ScriptPage,
-                    Register(Cmd.ShowScript, ShowScript)));
+                    Act(Cmd.ShowScript, ShowScript)));
 
-            _screen.Actions.Reset(_actionBar);
+            _screen.ShowActions(_actionBar);
         }
 
         /// <summary>

@@ -587,37 +587,9 @@ one. The picker's abstraction already permits it - `PickStage` never says "list"
 retrofitted, and because it argues for keeping the window small even when a target could afford
 to sprawl.*
 
-## What a target must provide, and how little of that can be enforced
+## Reordering steps
 
-Core states capabilities and leaves presentation alone. That is the right split and it leaves
-a hole: nothing stops a host simply never drawing one of them, and the omission looks like a
-design choice rather than a gap.
-
-`Sprocket.Ui.Conformance` is a list of the things a target has to answer for - a way to reorder
-a step, a way to narrow a long list, a way back, and saying why a running sequence cannot be
-edited. Each host carries one test that walks the list and writes down what it does about
-every entry. **Adding a point breaks every host until a person has looked at it.**
-
-It is self-reported and proves nothing about the result. No test knows whether a drag target
-is big enough to hit or whether a controller can reach it; that is review. What it closes is
-*forgetting* - it turns "nobody thought about it" into "somebody decided", which is the same
-trade the undo round-trip tests make. Answering "not yet" is allowed and is the point: a known
-gap beats an unknown one.
-
-Nothing reads it at runtime. It is a handful of strings built once and touched only by tests,
-because core runs inside a game's frame and must not spend any of it checking itself.
-
-### Reordering, as the worked example
-
-Core used to hand a target `MoveUpCommand` and `MoveDownCommand`. That is a control, not a
-capability: a host that wanted dragging would have had to synthesise a run of single-step
-moves, and one with a number field could not express itself at all. Worse, it made the
-cumbersome answer the one you get by doing nothing.
-
-It is one `MoveToCommand` now, carrying a position - which needed a third shape of answer
-beside text and a toggle, `SetNumber`, and that is also the shape a move will need on a wire.
-
-This host answers it with **a grip at the left of each line**, dragged to where the line
+This host reorders with **a grip at the left of each line**, dragged to where the line
 should go. A grip rather than the whole row being draggable: the row is full of buttons, so
 "press anywhere that is not a chip" is a rule nobody can see and one that makes an accidental
 drag easy for somebody aiming just past a word. A handle says where to take hold, and says
@@ -633,9 +605,8 @@ pop - a row jumping between two places reads as the list glitching, where a row 
 the way reads as the list responding. The line being carried is the one row with no easing on
 it, because it has to track the pointer exactly.
 
-*The arrows are gone.* Keeping both was clutter, and the drag is strictly better on a pointer.
-It does leave this host with no way to reorder without one, which its conformance answer says
-out loud - a real gap for a target that may one day be driven from a controller.
+There is no way to reorder without a pointer - a real gap for a target that may one day be driven
+from a controller.
 
 ## Two switches in one column
 

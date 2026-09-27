@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -95,7 +95,7 @@ public class LayoutWorkTests
 
         // Through the question, the way a person resolves it.
         screen.Editor.NewSystem("Airlock");
-        screen.Editor.Invoke(screen.Editor.Screen.Answers.First(a => a.Text == "Replace it").Command);
+        screen.Editor.Screen.Answers.First(a => a.Text == "Replace it").Command!.Execute();
         screen.Run(20);
 
         // Finished going, and nothing of it on the screen. The component may sit in the list at

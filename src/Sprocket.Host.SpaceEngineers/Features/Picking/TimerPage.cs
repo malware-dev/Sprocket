@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
@@ -65,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <inheritdoc />
-        public override void Build(List<EditorComponent> components)
+        public override void Build()
         {
             if (_strip == null)
             {

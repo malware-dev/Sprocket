@@ -100,10 +100,6 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Automation for {name}</value>
     <comment>Heading of the first screen. {name} is the grid's name, which is pressed to rename it, so the words either side of it are drawn around it, and the name is always shown exactly as it is.</comment>
   </data>
-  <data name="Sprocket.Systems.RenamePrompt" xml:space="preserve">
-    <value>What is this called?</value>
-    <comment>Asked when the grid is renamed.</comment>
-  </data>
   <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
     <value>This grid's name, the one the game shows for it everywhere.
 Press to rename the grid.</value>
@@ -180,10 +176,6 @@ This one becomes the first of them.</value>
     <comment>Said on the answer that deletes.</comment>
   </data>
 
-  <data name="Sprocket.System.RenamePrompt" xml:space="preserve">
-    <value>What is it?</value>
-    <comment>Asked when a logic system's name is pressed to rename it.</comment>
-  </data>
   <data name="Sprocket.System.NameAbout" xml:space="preserve">
     <value>This logic system's name.
 Press to rename it.</value>
@@ -238,10 +230,6 @@ Press to rename it.</value>
     <comment>Note on the bin at the end of a trigger's row.</comment>
   </data>
 
-  <data name="Sprocket.Sequence.RenamePrompt" xml:space="preserve">
-    <value>What do you call this?</value>
-    <comment>Asked when a sequence's name is pressed to rename it.</comment>
-  </data>
   <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
     <value>This sequence's name.
 Press to rename it.</value>
@@ -521,10 +509,6 @@ Press to rename it.</value>
   <data name="Sprocket.Pick.Rate" xml:space="preserve">
     <value>{name} - every {ticks} ticks</value>
     <comment>A rate a timer fires at. {name} is its word, such as steady; {ticks} how many ticks apart.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.RenamePrompt" xml:space="preserve">
-    <value>What is the blueprint called?</value>
-    <comment>Asked when a blueprint's name is pressed to rename it.</comment>
   </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
     <value>This blueprint's name.

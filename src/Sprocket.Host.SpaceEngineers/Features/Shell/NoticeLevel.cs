@@ -1,4 +1,4 @@
-namespace Sprocket.Host.SpaceEngineers.Screen
+namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     public enum NoticeLevel
     {

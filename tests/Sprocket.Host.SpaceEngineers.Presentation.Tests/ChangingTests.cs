@@ -167,7 +167,7 @@ public class ChangingTests
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(1));
 
         // One step back puts the plain sequence back with what the trigger did.
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
@@ -253,7 +253,7 @@ public class ChangingTests
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(0));
         Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(0));
 
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
@@ -392,13 +392,13 @@ public class ChangingTests
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(0));
         Assert.Equal("then run Seal up", screen.Editor.Doing(0));
 
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
 
-        screen.Editor.Invoke(screen.Editor.Steps().RedoCommand);
+        screen.Editor.Steps().Redo!.Execute();
         screen.Run(2);
 
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(0));
@@ -437,7 +437,7 @@ public class ChangingTests
         // And it walks back from here, because the sequence it changed has nowhere else to offer it.
         Assert.Equal("changing a step", screen.Editor.Steps().UndoText);
 
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
         Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
@@ -457,8 +457,8 @@ public class ChangingTests
         var screen = WithOne();
 
         // Nothing done to this system yet, so both arrows are quiet and holding their place.
-        Assert.Equal(0, screen.Editor.Steps().UndoCommand);
-        Assert.Equal(0, screen.Editor.Steps().RedoCommand);
+        Assert.Null(screen.Editor.Steps().Undo);
+        Assert.Null(screen.Editor.Steps().Redo);
 
         screen.Editor.PressWhen(0);
         screen.Editor.PressBlock("Airlock Button");
@@ -469,7 +469,7 @@ public class ChangingTests
 
         Assert.Equal("changing when it runs", screen.Editor.Steps().UndoText);
 
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
         var back = Assert.IsType<RequiredTrigger>(System(screen).Triggers[0]);
@@ -478,7 +478,7 @@ public class ChangingTests
 
         // And forward again, into the same change rather than a rebuilt one that reads the same.
         Assert.Equal("changing when it runs", screen.Editor.Steps().RedoText);
-        screen.Editor.Invoke(screen.Editor.Steps().RedoCommand);
+        screen.Editor.Steps().Redo!.Execute();
         screen.Run(2);
 
         Assert.Equal("closed", Assert.IsType<WhenTrigger>(System(screen).Triggers[0]).EventId);
@@ -515,7 +515,7 @@ public class ChangingTests
         Assert.Single(screen.Editor.Program.Sequences);
         Assert.Equal("deleting a trigger", screen.Editor.Steps().UndoText);
 
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
         // Back where it was, with what it did, and in the place it had among the others.
@@ -545,14 +545,14 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.NotEqual(0, screen.Editor.Steps().UndoCommand);
+        Assert.NotNull(screen.Editor.Steps().Undo);
 
         // What the host does when the button somebody named is cleared or pointed elsewhere.
         var trigger = (MomentTrigger)System(screen).Triggers[0];
         trigger.Sources.Clear();
         screen.Run(2);
 
-        Assert.Equal(0, screen.Editor.Steps().UndoCommand);
+        Assert.Null(screen.Editor.Steps().Undo);
         Assert.Equal("", screen.Editor.Steps().UndoText);
 
         // And the trigger is left as the game left it.
@@ -676,7 +676,7 @@ public class ChangingTests
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(1));
         Assert.Equal("taking a button over", screen.Editor.Steps().UndoText);
 
-        screen.Editor.Invoke(screen.Editor.Steps().UndoCommand);
+        screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));

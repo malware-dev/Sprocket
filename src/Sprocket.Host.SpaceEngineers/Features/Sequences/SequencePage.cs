@@ -6,7 +6,6 @@ using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
@@ -72,9 +71,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public override bool CanRename => true;
 
         /// <inheritdoc />
-        public override string RenamePrompt => Editor.Texts.SequenceRenamePrompt;
-
-        /// <inheritdoc />
         public override string NameAbout => Editor.Texts.SequenceNameAbout;
 
         /// <summary>A sequence has to be called something, because the name is what identifies it.</summary>
@@ -116,10 +112,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public override void Heading(List<HeadingPart> parts)
         {
             var does = new HeadingPart("");
-            does.Prompt = RenamePrompt;
             does.About = NameAbout;
             does.NameRequired = NameRequired;
-            does.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename);
+            does.Renames = Editor.Renaming(Rename, null);
 
             parts.Add(does);
             RefreshHeading(parts);
@@ -135,8 +130,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             parts[0].Text = SequenceText.Doing(Editor.Runner.Bindings, _sequence, Editor.StandIn(_sequence.System));
         }
 
-        /// <summary>Describes no components: the page is drawn by its own view, which this brings up to date, parts and all.</summary>
-        public override void Build(List<EditorComponent> components)
+        /// <summary>Brings the view up to date, parts and all.</summary>
+        public override void Build()
         {
             Show(true);
         }

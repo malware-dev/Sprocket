@@ -4,7 +4,6 @@ using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Lists;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
@@ -46,9 +45,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         /// <inheritdoc />
         public override bool CanRename => true;
-
-        /// <inheritdoc />
-        public override string RenamePrompt => Editor.Texts.BlueprintRenamePrompt;
 
         /// <inheritdoc />
         public override string NameAbout => Editor.Texts.BlueprintNameAbout;
@@ -95,8 +91,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             parts[0].After = Editor.Texts.SystemBlueprint;
         }
 
-        /// <summary>Describes no components: the page is drawn by its own view, which this brings up to date.</summary>
-        public override void Build(List<EditorComponent> components)
+        /// <summary>Brings the view up to date.</summary>
+        public override void Build()
         {
             _shape = -1;
             Show();

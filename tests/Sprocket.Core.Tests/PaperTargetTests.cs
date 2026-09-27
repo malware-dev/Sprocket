@@ -10,22 +10,12 @@ using Xunit;
 namespace Sprocket.Tests;
 
 /// <summary>
-/// Everything the editor puts on a screen can be shown.
+/// Everything the editor puts on a screen can be written down.
 /// </summary>
-/// <remarks>
-/// The editor states what is on screen as components and decides nothing about how they look. The
-/// risk in that is a component that nothing shows: the screens lay out what they know and pass
-/// silently over what they do not, so the failure is invisible exactly where it matters.
-/// <para>
-/// The pressure is in <see cref="PaperTarget" /> refusing to write down a component it has not been
-/// told about. These tests walk the editor through every component type there is, so a new one
-/// arrives here before it arrives in front of anybody.
-/// </para>
-/// </remarks>
 public class PaperTargetTests
 {
     [Fact]
-    public void EveryComponentCoreProducesCanBeWrittenDown()
+    public void EveryPageCanBeWrittenDown()
     {
         var ship = Build();
         var editor = ship.Editor;
@@ -99,14 +89,11 @@ public class PaperTargetTests
 
     static void Note(HashSet<string> seen, Ship ship)
     {
-        // Drawn every time, not only at the end: the refusal is what is being exercised, and a walk
-        // that renders once would step straight past whatever it could not have written down.
+        // Written every time, not only at the end: a walk that wrote once would step straight past whatever it
+        // could not have written down.
         Assert.NotEqual("", PaperTarget.Draw(ship.World, ship.Editor));
 
         seen.Add(ship.Editor.Current.GetType().Name);
-
-        foreach (var component in ship.Editor.Screen.Components)
-            seen.Add(component.GetType().Name);
     }
 
     static Ship Build()

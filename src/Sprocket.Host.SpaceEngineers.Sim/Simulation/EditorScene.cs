@@ -7,11 +7,11 @@ using Ship = Sprocket.Sim.Machine.Simulation;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Sim.Machine;
-using Sprocket.Host.SpaceEngineers.Ui.Legacy;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using VRage.Input;
 using Sprocket.Sim.Content;
 
@@ -29,6 +29,8 @@ namespace Sprocket.Sim.Simulation
     {
         readonly Ship _ship;
         readonly EditorView _view;
+
+        Vector2 _at;
 
         public EditorScene() : this(new Ship())
         {
@@ -164,18 +166,15 @@ namespace Sprocket.Sim.Simulation
             }
         }
 
-        /// <summary>Whether a question is open and wants the keyboard.</summary>
-        public bool IsAsking => _view.IsAsking;
-
         /// <summary>Whether a box of a form of values has the keyboard.</summary>
         public bool IsFilling => Filling != null;
 
         /// <summary>The box of a form of values that has the keyboard, or null where none has it.</summary>
-        public Host.SpaceEngineers.Ui.Text.TextBox? Filling
+        public TextBox? Filling
         {
             get
             {
-                var box = _view.Input.Focused as Host.SpaceEngineers.Ui.Text.TextBox;
+                var box = _view.Input.Focused as TextBox;
                 for (Element? at = box; at != null; at = at.Parent)
                 {
                     if (at is FieldSet)
@@ -186,13 +185,10 @@ namespace Sprocket.Sim.Simulation
             }
         }
 
-        /// <summary>The box that question is being answered in.</summary>
-        public TextBox AskBox => _view.AskBox;
-
-        /// <summary>Where the new controls take the pointer and the keyboard.</summary>
+        /// <summary>Where the controls take the pointer and the keyboard.</summary>
         public InputRoot Input => _view.Input;
 
-
+        /// <summary>Whether the caret is drawn this frame.</summary>
         public bool CaretVisible
         {
             set => _view.CaretVisible = value;
@@ -213,151 +209,64 @@ namespace Sprocket.Sim.Simulation
             _view.Dismiss();
         }
 
-        public void CommitAsk()
+        /// <summary>Enter, as the game's screen hands it over: the answer a question names, or whatever holds the keyboard.</summary>
+        public void Enter()
         {
-            if (Keyed(MyKeys.Enter))
-                return;
-
-            _view.CommitAsk();
+            _view.Key(MyKeys.Enter, false, false);
         }
 
-        /// <summary>Hands <paramref name="key" /> to a new control holding the keyboard, answering whether one was.</summary>
-        public bool Key(MyKeys key, bool shift, bool ctrl)
+        /// <summary>Escape, short of going back: a question is dismissed, and otherwise whatever holds the keyboard lets it go.</summary>
+        public void Escape()
         {
-            if (_view.Input.Focused == null)
-                return false;
-
-            _view.Input.Key(key, shift, ctrl);
-            return true;
-        }
-
-
-        /// <summary>Takes what is typed in the box with the caret, as Enter in it does in the game.</summary>
-        public bool TakeTyped()
-        {
-            if (Keyed(MyKeys.Enter))
-                return true;
-
-            return _view.TakeTyped();
-        }
-
-        public void CancelAsk()
-        {
-            if (Keyed(MyKeys.Escape))
-                return;
-
-            _view.CancelAsk();
-        }
-
-        /// <summary>Moves the caret to the next field of a form, which Tab does in the game.</summary>
-        public void NextField()
-        {
-            if (Keyed(MyKeys.Tab))
-                return;
-
-            _view.NextField();
-        }
-
-        /// <summary>Hands <paramref name="key" /> to the view's input root when a new control holds the keyboard, answering whether it did.</summary>
-        bool Keyed(MyKeys key, bool ctrl = false)
-        {
-            if (_view.Input.Focused == null)
-                return false;
-
-            _view.Input.Key(key, false, ctrl);
-            return true;
-        }
-
-        /// <summary>The box the keyboard is in, when something on the screen has taken it.</summary>
-        public TextBox Focus => _view.Focus;
-
-        /// <summary>Sends what was just typed wherever it belongs.</summary>
-        public void Typed()
-        {
-            _view.Typed();
-        }
-
-        /// <summary>
-        /// The box keystrokes belong in, or null when nothing on screen is being typed into.
-        /// </summary>
-        /// <remarks>
-        /// Asked here rather than worked out by each caller. A question owns the keyboard while it is
-        /// open; otherwise it goes to whatever was focused, which is how a search box narrows a list as
-        /// somebody types. The window and the headless harness both need that answer and must not be
-        /// allowed to arrive at different ones.
-        /// </remarks>
-        public TextBox Typing => _view.IsAsking ? _view.AskBox : _view.Focus;
-
-        /// <summary>
-        /// Empties whatever has the keyboard, the way holding backspace would.
-        /// </summary>
-        /// <remarks>
-        /// Here because a script had no way to reach an empty box, and an empty box is where most of what
-        /// is interesting about a text field happens - a hint appearing, a name being refused, a search
-        /// giving a list back. Typing could only ever add.
-        /// </remarks>
-        public void Clear()
-        {
-            if (Keyed(MyKeys.A, true))
+            if (_view.IsQuestioning)
             {
-                Keyed(MyKeys.Back);
+                _view.Dismiss();
                 return;
             }
 
-            TextBox box = Typing;
-            if (box == null)
-                return;
-
-            box.SelectAll();
-            box.Backspace();
-            Typed();
+            _view.Input.Key(MyKeys.Escape, false, false);
         }
 
-        /// <summary>An arrow key, as the game's screen hands one over.</summary>
+        /// <summary>A key going down, as the game's screen hands one over, answering whether anything took it.</summary>
+        public bool Key(MyKeys key, bool shift, bool ctrl)
+        {
+            return _view.Key(key, shift, ctrl);
+        }
+
+        /// <summary>Tab, which moves the keyboard to the next thing that takes it.</summary>
+        public void Tab()
+        {
+            _view.Key(MyKeys.Tab, false, false);
+        }
+
+        /// <summary>An arrow key: one across for right, minus one for left, and down the same way.</summary>
         public void Arrow(int across, int down)
         {
-            if (Keyed(across < 0 ? MyKeys.Left : across > 0 ? MyKeys.Right : down < 0 ? MyKeys.Up : MyKeys.Down))
-                return;
-
-            _view.Arrow(across, down);
+            _view.Key(across < 0 ? MyKeys.Left : across > 0 ? MyKeys.Right : down < 0 ? MyKeys.Up : MyKeys.Down, false, false);
         }
 
         /// <summary>Types <paramref name="text" /> into whatever has the keyboard.</summary>
-        /// <remarks>A field answered by choosing takes each letter as a choice, as it does in the game.</remarks>
         public void Type(string text)
         {
-            if (_view.Input.Focused != null && !string.IsNullOrEmpty(text))
-            {
-                for (int i = 0; i < text.Length; i++)
-                    _view.Input.Text(text[i]);
-
-                return;
-            }
-
-            if (_view.Chooses && !string.IsNullOrEmpty(text))
-            {
-                for (int i = 0; i < text.Length; i++)
-                {
-                    if (char.IsLetterOrDigit(text[i]))
-                        _view.Letter(text[i]);
-                }
-
-                return;
-            }
-
-            TextBox box = Typing;
-            if (box == null || string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
                 return;
 
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (text[i] >= ' ')
-                    box.InsertChar(text[i]);
-            }
+            for (var i = 0; i < text.Length; i++)
+                _view.Text(text[i]);
+        }
 
-            // Every keystroke, not just the last. A search that only narrowed once somebody stopped
-            // typing would feel broken, and this is the path that proves it.
-            Typed();
+        /// <summary>Empties whatever has the keyboard, as selecting everything and deleting it would.</summary>
+        /// <remarks>
+        /// Here because a script had no other way to reach an empty box, and an empty box is where most of what is
+        /// interesting about a text field happens - a hint appearing, a name being refused, a search giving a list back.
+        /// </remarks>
+        public void Clear()
+        {
+            if (_view.Input.Focused == null)
+                return;
+
+            _view.Key(MyKeys.A, false, true);
+            _view.Key(MyKeys.Back, false, false);
         }
 
         /// <summary>
@@ -378,26 +287,11 @@ namespace Sprocket.Sim.Simulation
             _view.ScrollBy(point, amount);
         }
 
-        /// <summary>How many times the screen has written what its controls mean onto them.</summary>
+        /// <summary>How many times the screen has written what the editor says onto its controls.</summary>
         public int Wires => _view.Wires;
-
-        /// <summary>How many views are listening to a component right now.</summary>
-        public int Watching => _view.Watching;
 
         /// <summary>How many questions the mod has asked the game, in total.</summary>
         public int Asked => Fakes.Pretend.Asked;
-
-        /// <summary>Puts the screen away, as a host closing it does.</summary>
-        public void PutAway()
-        {
-            _view.Release();
-        }
-
-        /// <summary>Shows it again, as a host reopening the same one does.</summary>
-        public void ShowAgain()
-        {
-            _view.Attach();
-        }
 
         /// <summary>
         /// What a press or a hover at <paramref name="point" /> would reach, without touching it.
@@ -411,44 +305,41 @@ namespace Sprocket.Sim.Simulation
             return _view.Under(point);
         }
 
-        /// <summary>
-        /// What is being held down, which the game's own screen reads off the keyboard every frame.
-        /// </summary>
-        public Held Held
+        /// <summary>What is held down with the pointer, which the game's own screen reads off the keyboard as a press lands.</summary>
+        public Held Held { get; set; }
+
+        /// <summary>Presses at <paramref name="point" />, in UI units, the <paramref name="presses" />th time in quick succession.</summary>
+        public void Press(Vector2 point, int presses)
         {
-            get { return _view.Held; }
-            set { _view.Held = value; }
+            Down(point, presses);
+            Up();
         }
 
-        /// <summary>Presses whatever is at <paramref name="point" />, in UI units.</summary>
-        public bool Press(Vector2 point, int clicks)
+        /// <summary>The button going down at <paramref name="point" />, the <paramref name="presses" />th time in quick succession.</summary>
+        public void Down(Vector2 point, int presses = 1)
         {
-            bool hit = _view.Press(point, clicks);
+            _at = point;
+            _view.PointerDown(point, presses, Held == Held.Through, Held == Held.Also);
+        }
 
-            // Taken and dropped on the floor, on purpose. There is no window here to close - the editor is
-            // the whole of what this program draws - and leaving the request standing would mean the next
-            // host to ask got a yes for a press somebody made minutes ago.
+        /// <summary>The pointer moving to <paramref name="point" /> with the button down.</summary>
+        public void Move(Vector2 point)
+        {
+            _at = point;
+            _view.PointerMove(point);
+        }
+
+        /// <summary>The button coming up where the pointer last was.</summary>
+        /// <remarks>
+        /// A request to leave is taken and dropped on the floor, on purpose. There is no window here to close - the editor
+        /// is the whole of what this program draws - and leaving the request standing would mean the next host to ask got a
+        /// yes for a press somebody made minutes ago.
+        /// </remarks>
+        public void Up()
+        {
+            _view.PointerUp(_at);
             _view.TakeClose();
-            return hit;
         }
-
-        /// <summary>Offers the press as a grab first, so a drag is not also a click.</summary>
-        public bool Grab(Vector2 point, int presses = 1)
-        {
-            return _view.Grab(point, presses);
-        }
-
-        public void Carry(Vector2 point)
-        {
-            _view.Carry(point);
-        }
-
-        public void Drop()
-        {
-            _view.Drop();
-        }
-
-        public bool IsDragging => _view.IsDragging;
 
         public void Draw(ScreenSpaceGraphics g)
         {

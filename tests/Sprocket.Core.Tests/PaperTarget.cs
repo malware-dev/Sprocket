@@ -2,7 +2,6 @@ using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -12,15 +11,8 @@ namespace Sprocket.Tests;
 /// A screen written down as text.
 /// </summary>
 /// <remarks>
-/// <b>A completeness check on the component surface, not a second product.</b> The editor says what
-/// is on screen as components; the screens draw them. A component nothing draws is a component
-/// nobody sees, and the drawing code is a long way from saying so - it lays out what it knows and
-/// passes silently over what it does not.
-/// <para>
-/// So this is handed a screen and writes down what is on it, knowing nothing of layout or drawing,
-/// and refuses anything it has not been told about - see the component-drawing method. A new
-/// component type stops the tests until somebody has said what is shown for one.
-/// </para>
+/// Knows nothing of layout or drawing: it writes down what the heading, the notice and each page say,
+/// in its own words, so a test can hold what is on screen still without holding where it is drawn.
 /// </remarks>
 static class PaperTarget
 {
@@ -50,9 +42,6 @@ static class PaperTarget
         if (editor.Notice != null && !editor.Notice.Leaving)
             paper.Append("notice (").Append(editor.Notice.Level).Append("): ").AppendLine(editor.Notice.Text);
 
-        foreach (var component in screen.Components)
-            paper.Append(Draw(component));
-
         if (editor.Current is SequencePage sequence)
             paper.Append(Draw(world, editor, sequence));
 
@@ -60,22 +49,6 @@ static class PaperTarget
             paper.Append(Draw(editor.Pick()));
 
         return paper.ToString();
-    }
-
-    /// <summary>
-    /// Writes down one component.
-    /// </summary>
-    /// <remarks>
-    /// The refusal at the end is the whole point of this class. Adding a component type to core and
-    /// forgetting to say how a target shows it is silent everywhere else; here it stops the build's
-    /// tests until somebody has answered.
-    /// </remarks>
-    static string Draw(EditorComponent component)
-    {
-        throw new InvalidOperationException(
-            $"Core produced a {component.GetType().Name} and nothing here knows what a target should "
-            + "show for one. Say what it looks like on paper before shipping it to a real target, or "
-            + "the first anybody hears of it is a blank space in the game.");
     }
 
     /// <summary>A pick's columns on the page showing: what each asks, its choices about the picking, and what it offers, chosen or not.</summary>

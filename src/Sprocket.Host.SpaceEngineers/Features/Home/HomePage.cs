@@ -4,7 +4,7 @@ using Sprocket.Host.SpaceEngineers.Editing;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
@@ -71,8 +71,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// </remarks>
         public override bool CanRename => Editor.World.CanRename;
 
-        public override string RenamePrompt => Editor.Texts.SystemsRenamePrompt;
-
         public override string NameAbout => Editor.Texts.SystemsNameAbout;
 
         public override bool NameRequired => true;
@@ -100,9 +98,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             parts[0].After = at < 0 ? "" : title.Substring(at + slot.Length).TrimStart();
         }
 
-        /// <summary>Describes no components: the page is drawn by its own view, which this brings up to date, names and all.</summary>
+        /// <summary>Brings the view up to date, names and all.</summary>
         /// <remarks>Called when the editor builds the screen: on arriving at the page, coming back to it, and a change of language.</remarks>
-        public override void Build(List<EditorComponent> components)
+        public override void Build()
         {
             Collect();
             _shape = Shape();

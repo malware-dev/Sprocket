@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Layout;
-using Sprocket.Host.SpaceEngineers.Screen;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Ui;
 
 namespace Sprocket.Host.SpaceEngineers.Editing
@@ -9,10 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
     /// One screen's worth of editor.
     /// </summary>
     /// <remarks>
-    /// A page builds its components once, when the shape of the screen changes, and
-    /// then updates their values in place every tick. Rebuilding on every tick would
-    /// force targets to recreate native controls sixty times a second, which is
-    /// exactly what they cannot afford.
+    /// A page makes its view once, is built again when the shape of the screen changes, and brings what it shows up to
+    /// date in place every tick. Making controls afresh on every tick is exactly what a screen cannot afford.
     /// </remarks>
     abstract class EditorPage
     {
@@ -49,20 +46,21 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// separate, and only the second is somebody's to name.
         /// <para>
         /// Paired with <see cref="RefreshHeading" /> exactly the way <see cref="Build" /> is paired with
-        /// <see cref="Refresh" />, and for the same reason: this one runs when the screen is made and may
-        /// claim command ids, which can only be claimed once; the other runs every tick and may only change
-        /// words. A page that overrides one nearly always has to override the other.
+        /// <see cref="Refresh" />: this one runs when the screen is made and says what can be renamed; the other runs on
+        /// a cadence and may only change words. A page that overrides one nearly always has to override the other.
         /// </para>
         /// </remarks>
         public virtual void Heading(List<HeadingPart> parts)
         {
             var part = new HeadingPart(Title);
-            part.Prompt = RenamePrompt;
             part.About = NameAbout;
             part.NameRequired = NameRequired;
 
             if (CanRename)
-                part.RenameCommand = Editor.RegisterText(Cmd.Rename, Rename, AcceptsName);
+            {
+                part.Renames = Editor.Renaming(Rename, AcceptsName);
+                part.Accepts = AcceptsName;
+            }
 
             part.NamedOnArrival = NameOnArrival;
             NameOnArrival = false;
@@ -124,9 +122,6 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         internal bool NameOnArrival { get; set; }
 
         public virtual bool CanRename => false;
-
-        /// <summary>What to ask when offering the rename.</summary>
-        public virtual string RenamePrompt => "";
 
         /// <summary>What the name in the heading is and what renaming it does, in markdown-lite, said where the pointer rests on it; null for nothing.</summary>
         public virtual string NameAbout => null;
@@ -199,52 +194,16 @@ namespace Sprocket.Host.SpaceEngineers.Editing
 
         public virtual string PrimaryText => "";
 
-        /// <summary>
-        /// What pressing the primary asks for first, or empty when it asks nothing.
-        /// </summary>
-        /// <remarks>
-        /// A page that needs a value to finish gets it on the button that finishes it. What is typed
-        /// arrives at <see cref="Primary(string)" />, and <see cref="Primary()" /> is never called.
-        /// </remarks>
-        public virtual string PrimaryQuestion => "";
-
-        /// <summary>
-        /// What each value it asks for wants, one per value, and empty when it asks for none.
-        /// </summary>
-        /// <remarks>
-        /// One field each, named and bounded where anybody has said what the value is - which
-        /// nothing but a description can say, since an action declares how many values it takes and
-        /// no more.
-        /// </remarks>
-        public virtual IList<Field> PrimaryFields => null;
-
-        /// <summary>
-        /// What each of those fields opens holding, or null to open them empty.
-        /// </summary>
-        /// <remarks>
-        /// A page that is changing something already has the answers to its own question. Opening
-        /// empty would make somebody retype what they already gave, and a box left alone would then
-        /// mean "no value" rather than "the one that was there".
-        /// </remarks>
-        public virtual IList<string> PrimaryFilled => null;
-
         public virtual void Primary() { }
 
-        /// <summary>The same, with what was typed into the question the button asked.</summary>
-        public virtual void Primary(string said) { }
-
-        /// <summary>
-        /// Adds this page's components, in order, and registers their commands.
-        /// </summary>
+        /// <summary>Brings the page to the shape the program is in now, whenever the screen is built.</summary>
         /// <remarks>
-        /// Called again whenever the page changes shape. Hand back the same component
-        /// instances wherever possible and change their contents instead of making
-        /// new ones - that is what lets a target keep its controls, and with them the
-        /// focus and caret somebody may be typing into.
+        /// Called again whenever the page changes shape. Keep what is already made wherever possible and change what it
+        /// says - that is what keeps the focus and caret somebody may be typing into.
         /// </remarks>
-        public abstract void Build(List<EditorComponent> components);
+        public abstract void Build();
 
-        /// <summary>The page as it is drawn, made the first time it is asked for; null for a page described in components.</summary>
+        /// <summary>The page as it is drawn, made the first time it is asked for.</summary>
         /// <remarks>Made when the page is first shown, so a page nobody opens builds nothing to draw.</remarks>
         public Element View
         {
@@ -264,11 +223,11 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// <summary>Whether the page's view is given the whole of the screen's room, scrolling whatever it has to itself.</summary>
         public virtual bool ScrollsItself => false;
 
-        /// <summary>Makes the page as it is drawn, for a page that draws itself; null for one described in components.</summary>
+        /// <summary>Makes the page as it is drawn.</summary>
         /// <remarks>
         /// The view definition and nothing else, as a designer would write it: the elements, their styles and
-        /// the names the page reaches them by. A page that draws itself keeps it in its own <c>.View.cs</c> file,
-        /// the same class in two halves.
+        /// the names the page reaches them by. A page keeps it in its own <c>.View.cs</c> file, the same class in two
+        /// halves.
         /// </remarks>
         protected virtual Element CreateView()
         {
@@ -305,9 +264,8 @@ namespace Sprocket.Host.SpaceEngineers.Editing
         /// Says this page has just been built and has told nobody anything yet.
         /// </summary>
         /// <remarks>
-        /// A page's components are made afresh when the screen is rebuilt, so everything it only says
-        /// on a cadence has to be said again at once - a row whose words arrive a second after it
-        /// appears is a row that appears blank.
+        /// A page is built again when the screen is rebuilt, so everything it only says on a cadence has to be said
+        /// again at once - a row whose words arrive a second after it appears is a row that appears blank.
         /// </remarks>
         internal virtual void Resay()
         {
@@ -337,7 +295,7 @@ namespace Sprocket.Host.SpaceEngineers.Editing
             return true;
         }
 
-        /// <summary>Updates live values on components that already exist.</summary>
+        /// <summary>Brings what the page shows up to date, every tick.</summary>
         public virtual void Refresh() { }
     }
 }

@@ -523,6 +523,13 @@ namespace Sprocket.Host.SpaceEngineers.Look
             Hot = { Background = Palette.Line }
         };
 
+        /// <summary>The entry of a menu that Enter takes, drawn the way every other thing that carries on is drawn.</summary>
+        public static readonly ElementStyle MenuRowTaken = new ElementStyle(MenuRow)
+        {
+            Base = { Background = Palette.Accent },
+            Hot = { Background = Palette.Ink }
+        };
+
         /// <summary>One entry of a list hanging open, lit under the pointer.</summary>
         public static readonly ElementStyle ListRow = new ElementStyle
         {
@@ -534,6 +541,12 @@ namespace Sprocket.Host.SpaceEngineers.Look
         public static readonly TextStyle ListWord = new TextStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Ink }
+        };
+
+        /// <summary>The words of the entry Enter takes, on its accent.</summary>
+        public static readonly TextStyle ListWordTaken = new TextStyle(ListWord)
+        {
+            Base = { Color = Palette.Chrome }
         };
 
         /// <summary>One column of a pick: a panel with a hairline round it.</summary>

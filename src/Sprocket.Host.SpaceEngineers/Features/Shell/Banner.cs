@@ -7,7 +7,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Images;
 using Sprocket.Host.SpaceEngineers.Ui.Viewing;
 
-namespace Sprocket.Host.SpaceEngineers.Screen
+namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>A notice as a banner that slides in, can be opened for the rest of it, and slides out when it is done.</summary>
     /// <remarks>

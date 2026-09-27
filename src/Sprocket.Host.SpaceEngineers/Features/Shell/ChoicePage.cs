@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
@@ -82,8 +81,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _options[_options.Count - 1].Warning = warning;
         }
 
-        /// <summary>Describes no components: the page is drawn by its own view.</summary>
-        public override void Build(List<EditorComponent> components)
+        /// <summary>Builds nothing: the rows are made with the view.</summary>
+        public override void Build()
         {
         }
 

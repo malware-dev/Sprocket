@@ -5,17 +5,16 @@ using Xunit;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// Walks the screens through every component, with nobody looking.
+/// Walks the screens through every kind of page, with nobody looking.
 /// </summary>
 /// <remarks>
-/// The editor's own behaviour is covered in Sprocket.Core.Tests. What is left to check here is this
-/// target's half of the bargain: that every component actually gets drawn by something, and that
-/// nothing throws while it is measured, arranged and drawn.
+/// The editor's own behaviour is covered in Sprocket.Core.Tests. What is left to check here is that
+/// nothing throws while each page is measured, arranged and drawn.
 /// </remarks>
-public class ComponentSmokeTests
+public class PageSmokeTests
 {
     [Fact]
-    public void EveryComponentDrawsAndLaysOut()
+    public void EveryPageDrawsAndLaysOut()
     {
         var screen = Screen.Fresh();
         var editor = screen.Editor;
@@ -64,8 +63,5 @@ public class ComponentSmokeTests
         screen.Run(1);
 
         seen.Add(screen.Editor.Current.GetType().Name);
-
-        foreach (var component in screen.Editor.Screen.Components)
-            seen.Add(component.GetType().Name);
     }
 }

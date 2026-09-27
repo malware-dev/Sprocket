@@ -9,38 +9,24 @@ using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Layout;
 using Sprocket.Host.SpaceEngineers.Lists;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Words;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Sim.Driving
 {
     /// <summary>Reads and drives the editor the way a target would.</summary>
     /// <remarks>
-    /// Through exactly the surface a renderer sees - components out, command ids back, and a ported page's
-    /// own view - so anything done from here, a Space Engineers host can do too. If a flow cannot be
-    /// exercised from here, it cannot be implemented there.
+    /// Through exactly the surface a renderer sees - the screen's chrome, its commands, and each page's own
+    /// view - so anything done from here, a Space Engineers host can do too. If a flow cannot be exercised
+    /// from here, it cannot be implemented there.
     /// </remarks>
     public static class Target
     {
-        /// <summary>The first component of its kind on the screen, or an exception naming what is there.</summary>
-        public static T Component<T>(this SprocketEditor editor) where T : EditorComponent
-        {
-            foreach (var component in editor.Screen.Components)
-            {
-                if (component is T match)
-                    return match;
-            }
-
-            throw new InvalidOperationException(
-                $"No {typeof(T).Name} on '{editor.Screen.Title()}'. Present: " +
-                string.Join(", ", editor.Screen.Components.Select(c => c.GetType().Name)));
-        }
-
         /// <summary>The page of the sequence the editor is on, its view made.</summary>
         /// <remarks>Asks the page for its view first, which is what makes it where nothing has drawn the page yet.</remarks>
         internal static SequencePage Sentence(this SprocketEditor editor)
@@ -54,6 +40,10 @@ namespace Sprocket.Sim.Driving
         /// <summary>The ways to add a step to the sequence the editor is on, in the order they stand, shown or not.</summary>
         public static List<Button> Adders(this SprocketEditor editor) =>
             Within(editor.Sentence().View).OfType<Button>().Where(b => b.Text.StartsWith(StatusRow.Plus, StringComparison.Ordinal)).ToList();
+
+        /// <summary>The picking page the editor is on, or an exception naming the screen.</summary>
+        internal static PickPage Picking(this SprocketEditor editor) =>
+            editor.Current as PickPage ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not picking.");
 
         /// <summary>The page of the blueprint the editor is on, its view made.</summary>
         internal static BlueprintPage Blueprint(this SprocketEditor editor)
@@ -168,7 +158,7 @@ namespace Sprocket.Sim.Driving
         public static void NewSystem(this SprocketEditor editor, string name)
         {
             PressButton(editor, "New logic system");
-            editor.SetText(editor.Screen.Heading[0].RenameCommand, name);
+            editor.Screen.Heading[0].Renames!(name);
         }
 
         /// <summary>Makes a system with the custom name whose one trigger is the Airlock Button being pressed, and leaves the editor on the sequence it starts.</summary>
@@ -188,10 +178,11 @@ namespace Sprocket.Sim.Driving
         /// </remarks>
         public static void Typed(this SprocketEditor editor, string said)
         {
-            if (!editor.Screen.PrimaryAsks)
+            var pick = editor.Current as PickPage;
+            if (pick == null || pick.Question.Length == 0)
                 throw new InvalidOperationException($"'{editor.Screen.Title()}' asks nothing to be typed.");
 
-            editor.SetText(editor.Screen.PrimaryCommand, said);
+            Run(editor.Act(Cmd.Primary, () => pick.Give(said)));
         }
 
         /// <summary>Presses one of the ways to start something on this screen, wherever it sits.</summary>
@@ -224,7 +215,7 @@ namespace Sprocket.Sim.Driving
             var answer = editor.Screen.Answers.FirstOrDefault(e => e.Text == text);
             if (answer != null)
             {
-                editor.Invoke(answer.Command);
+                Run(answer.Command);
                 return;
             }
 
@@ -360,7 +351,7 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>Answers the question hanging over the screen.</summary>
         public static void PressAnswer(this SprocketEditor editor, string text) =>
-            editor.Invoke(editor.Screen.Answers.First(a => a.Text == text).Command);
+            Run(editor.Screen.Answers.First(a => a.Text == text).Command);
 
         /// <summary>Presses one of the ways to add a step to the sequence the screen shows.</summary>
         public static void PressAdd(this SprocketEditor editor, string text) => PressButton(editor, text);
@@ -375,7 +366,7 @@ namespace Sprocket.Sim.Driving
             if (!editor.Screen.HasPrimary)
                 throw new InvalidOperationException($"'{editor.Screen.Title()}' has nothing to move on to.");
 
-            editor.Invoke(editor.Screen.PrimaryCommand);
+            Run(editor.Screen.Primary);
         }
 
         /// <summary>Back out to the front door, however deep the editor is.</summary>
@@ -392,16 +383,16 @@ namespace Sprocket.Sim.Driving
                 editor.Back();
 
                 if (editor.Screen.HasQuestion)
-                    editor.Invoke(editor.Screen.Answers.First().Command);
+                    Run(editor.Screen.Answers.First().Command);
             }
         }
 
         /// <summary>Presses one of the actions along the foot of the screen.</summary>
         public static void PressAction(this SprocketEditor editor, string text) =>
-            editor.Invoke(editor.Screen.Actions.First(a => a.Text == text).Command);
+            Run(editor.Screen.Actions.First(a => a.Text == text).Command);
 
         /// <summary>Presses back.</summary>
-        public static void Back(this SprocketEditor editor) => editor.Invoke(editor.Screen.BackCommand);
+        public static void Back(this SprocketEditor editor) => Run(editor.Screen.Back);
 
         /// <summary>
         /// The whole heading as one string, for an assertion that does not care how it is made of parts.
@@ -446,15 +437,19 @@ namespace Sprocket.Sim.Driving
         /// <summary>What somebody typed for the part of the heading that takes a name.</summary>
         public static string CustomName(this EditorScreen screen) => screen.Nameable()?.Name ?? "";
 
-        /// <summary>The command that renames the part of the heading that takes a name, or zero where none does.</summary>
-        public static int RenameCommand(this EditorScreen screen) => screen.Nameable()?.RenameCommand ?? 0;
-
         /// <summary>Whether the part of the heading that takes a name has to have one.</summary>
         public static bool NameRequired(this EditorScreen screen) => screen.Nameable()?.NameRequired ?? false;
 
         /// <summary>Types a name into the part of the heading that takes one.</summary>
         public static void Name(this SprocketEditor editor, string name) =>
-            editor.SetText(editor.Screen.RenameCommand(), name);
+            editor.Screen.Nameable()?.Renames?.Invoke(name);
+
+        /// <summary>Carries out <paramref name="command" />, as pressing what carries it would, where there is one that can be.</summary>
+        static void Run(ICommand? command)
+        {
+            if (command != null && command.CanExecute)
+                command.Execute();
+        }
 
         /// <summary>The columns of any pick on the screen, from the page it is on.</summary>
         static IEnumerable<StageColumn> Stages(this SprocketEditor editor)

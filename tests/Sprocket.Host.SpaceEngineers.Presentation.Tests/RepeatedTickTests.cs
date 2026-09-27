@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Screen;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -248,16 +247,12 @@ public class RepeatedTickTests
     {
         screen.Run(5);
 
-        var before = new List<EditorComponent>(screen.Editor.Screen.Components);
+        // Every build makes the chrome's commands afresh, so the same one sixty frames later is a screen not built again.
+        var before = screen.Editor.Screen.Refresh;
         screen.Run(60);
-        var after = screen.Editor.Screen.Components;
 
-        var same = before.Count == after.Count;
-        for (var i = 0; same && i < before.Count; i++)
-            same = ReferenceEquals(before[i], after[i]);
-
-        Assert.True(same,
-            $"{what} replaced its components while nothing was happening, so a target rebuilds "
-            + "everything sixty times a second and the pointer never keeps hold of anything.");
+        Assert.True(ReferenceEquals(before, screen.Editor.Screen.Refresh),
+            $"{what} was built again while nothing was happening, so everything on it is made afresh "
+            + "sixty times a second and the pointer never keeps hold of anything.");
     }
 }

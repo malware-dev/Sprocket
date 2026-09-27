@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Editing;
-using Sprocket.Host.SpaceEngineers.Screen;
 using Sprocket.Host.SpaceEngineers.Storage;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Developing
@@ -35,8 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         /// <summary>What the listing shows.</summary>
         public string Text => _listing == null ? "" : _listing.Text;
 
-        /// <summary>Describes no components: the page is drawn by its own view, which this fills.</summary>
-        public override void Build(List<EditorComponent> components)
+        /// <summary>Fills the listing, where it has been made.</summary>
+        public override void Build()
         {
             if (_listing != null)
                 _listing.Text = Written();
