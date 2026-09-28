@@ -21,9 +21,7 @@ quoted name is never a keyword, so an action called `every` is written `'every'`
 
 A statement the language does not know is dropped, with the block under it.
 
-An annotation is the display text for the statement below it. Its first `#` line is the label; a
-blank `#` line separates the label from longer instructions. An annotation with nothing under it is
-an error.
+An annotation describes the statement below it. An annotation with nothing under it is an error.
 
 ## Names, text and values
 
@@ -166,7 +164,7 @@ them leaves that state.
 
 `every <duration> run <sequence>` is a clock.
 
-A trigger has no name. Its label is its annotation.
+A trigger has no name.
 
 ## Sequences
 
