@@ -420,8 +420,8 @@ public class EditorTests
         Assert.Equal(2, system.Instances.Count);
         Assert.Equal("Airlock 2", system.Instances[1].Name);
 
-        // Something done to it, so it stays when the panel is left.
-        editor.Screen.Flip!.Execute();
+        // Something done to it, switched off, so it stays when the panel is left.
+        ship.Automation.Systems[0].Instances[ship.Automation.Systems[0].Instances.Count - 1].Enabled = false;
         ship.Tick();
 
         editor.GoToRoot();
@@ -488,8 +488,8 @@ public class EditorTests
         Assert.Equal("Airlock 2", editor.Blueprint().Title);
         Assert.Empty(editor.Parts()[0].Blocks);
 
-        // Something done to it, so it stays when the panel is left.
-        editor.Screen.Flip!.Execute();
+        // Something done to it, switched off, so it stays when the panel is left.
+        ship.Automation.Systems[0].Instances[ship.Automation.Systems[0].Instances.Count - 1].Enabled = false;
         ship.Tick();
 
         // Through the new one, the trigger names nothing yet.
@@ -689,8 +689,8 @@ public class EditorTests
         Assert.IsType<Await>(sequence.Steps[2]);
 
         // A step with nothing to wait for goes straight on, and that is no fault.
-        Assert.NotEqual(SequenceProblem.Unawaited, SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence,
-            null, sequence.System.First).Problem);
+        Assert.NotEqual(SequenceProblem.Unawaited, SequenceSummary.Checked(ship.World, ship.Runner.Bindings, sequence,
+            sequence.System.First).Problem);
     }
 
     [Fact]
@@ -960,12 +960,10 @@ public class EditorTests
 
         // Nothing has gone yet, and the question names what it is about.
         Assert.Single(ship.Automation.Sequences);
-        Assert.Equal("Delete this sequence?", ship.Editor.Screen.Title());
-        Assert.Equal("Sequence 1", ship.Editor.Screen.Subtitle);
+        Assert.StartsWith("Delete this sequence?\n\nSequence 1\n\n", ship.Editor.Question());
 
         // The safe answer comes first, so a reflex press lands on it.
-        var options = ship.Editor.Choices();
-        Assert.Equal("Keep it, Delete it", string.Join(", ", options.Select(e => e.Text)));
+        Assert.Equal("Keep it, Delete it", string.Join(", ", ship.Editor.Screen.Answers.Select(e => e.Text)));
 
         ship.Editor.PressChoice("Keep it");
         ship.Tick();

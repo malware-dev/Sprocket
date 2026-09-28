@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -56,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override bool CanSwitch => !_editing && Blockset != null;
 
         /// <inheritdoc />
-        public override bool SwitchIsOn => Blockset != null && Blockset.Enabled;
+        public override bool SwitchIsOn => Blockset != null && _system.Enabled && Blockset.Enabled;
 
         /// <summary>The blockset's switch stops that one and nothing else made from the blueprint.</summary>
         public override string SwitchAbout => StatusRow.Switching(Editor.Texts, false, SwitchIsOn);
@@ -66,7 +68,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             get
             {
-                return _made != null && _made.Name == _madeName && _made.Enabled == _madeOn && _made.IsEmpty;
+                // Switched off by Sprocket for its empty slots is not somebody touching it.
+                return _made != null && _made.Name == _madeName && (_made.Enabled == _madeOn || _made.Halt != null)
+                    && _made.IsEmpty;
             }
         }
 
@@ -106,15 +110,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return system == _system;
         }
 
-        /// <summary>Switches the blockset being filled on or off, and nothing else made from the blueprint.</summary>
+        /// <summary>Switches the blockset being filled on or off, and nothing else made from the blueprint; on while the blueprint is off, it asks about the blueprint.</summary>
         public override void Switch(bool on)
         {
             var chosen = Blockset;
-            if (chosen == null)
-                return;
-
-            chosen.Enabled = on;
-            Editor.Invalidate();
+            if (chosen != null)
+                Editor.SwitchInstance(_system, chosen, on);
         }
 
         /// <inheritdoc />
@@ -184,6 +185,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Brings the view up to date.</summary>
         public override void Build()
         {
+            // A box just left is written first: the rows filled below would otherwise put back what it replaced, and the
+            // write that follows would read that back.
+            Refocused();
             _shape = -1;
             Show();
         }
@@ -198,7 +202,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Refocused();
 
             if (Shape(Editor.StandIn(_system)) != _shape)
+            {
                 Editor.Invalidate();
+                return;
+            }
+
+            if (SecondPassed())
+                Troubled(Blockset);
         }
 
         /// <summary>Keeps the rows by slot, and fills the view.</summary>
@@ -232,6 +242,48 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             }
 
             Needs(chosen, unfilled);
+            Troubled(chosen);
+        }
+
+        /// <summary>Says what is wrong with the blockset being filled, and offers the sequence at fault where that is where it is mended.</summary>
+        /// <remarks>Why Sprocket switched it off where it did, and otherwise what is wrong now; nothing while setting up the panel.</remarks>
+        void Troubled(SystemInstance chosen)
+        {
+            Sequence sequence = null;
+            var said = "";
+            var mended = false;
+            var empty = false;
+
+            if (!_editing && chosen != null && !chosen.Enabled && chosen.Halt != null)
+            {
+                said = SequenceText.Stopped(chosen.Halt, _system);
+                sequence = _system.FindSequence(chosen.Halt.Sequence);
+                empty = chosen.Halt.Problem == Runtime.SequenceProblem.EmptySlot;
+                mended = true;
+            }
+            else if (!_editing && chosen != null)
+            {
+                Runtime.SequenceFault fault;
+                sequence = SystemSummary.Failing(Editor.Runner, _system, chosen, out fault);
+                said = sequence == null ? "" : SequenceText.Failing(fault, sequence);
+                empty = fault.Problem == Runtime.SequenceProblem.EmptySlot;
+            }
+
+            _troubled.IsVisible = said.Length > 0;
+            _trouble.Text = said;
+            _trouble.Style = mended ? Styles.Caution : Styles.Problem;
+
+            // An empty slot is filled on this page, so there is nowhere else to go.
+            var opens = sequence != null && !empty;
+            _openTrouble.IsVisible = opens;
+            _openTrouble.Text = opens ? Template.Fill(Editor.Texts.BlueprintOpenSequence, "name", sequence.Name) : "";
+            _openTrouble.Command = opens
+                ? Editor.Act(Cmd.OpenSequence, delegate
+                {
+                    Editor.Choose(_system, chosen);
+                    Editor.Push(new SequencePage(Editor, sequence));
+                })
+                : null;
         }
 
         /// <summary>Shows what the blueprint's author wrote about it, parsed again only when it has changed.</summary>
@@ -302,15 +354,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 var row = _partRows[part];
                 if (box == row.NameBox)
                 {
+                    // Refused where another slot has the name, since the name is what tells the two apart.
                     var name = Naming.Clean(row.NameBox.Text);
-                    if (name.Length > 0)
-                        Editor.Do(_system, new AnnotatePart(part, part.Labelled(name), "renaming a slot"));
+                    var other = _system.FindPart(name);
+                    if (name.Length > 0 && (other == null || other == part))
+                        Editor.Do(_system, new RenamePart(part, name));
                     return;
                 }
 
                 if (box == row.About.Box)
                 {
-                    Editor.Do(_system, new AnnotatePart(part, part.Described(row.About.Text), "describing a slot"));
+                    Editor.Do(_system, new AnnotatePart(part, row.About.Text, "describing a slot"));
                     return;
                 }
             }
@@ -344,8 +398,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (_editing)
                 Authored(row, part);
 
-            row.Name = part.Label;
-            row.Described = part.About;
+            row.Name = part.Id;
+            row.Described = part.Annotation;
             row.Optional = part.Optional ? Editor.Texts.BlueprintOptional : null;
             row.Blocks.Clear();
             _gone.Clear();
@@ -382,14 +436,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             var texts = Editor.Texts;
             if (!row.NameBox.IsFocused)
-                row.NameBox.Text = part.Label;
+                row.NameBox.Text = part.Id;
 
             row.NameBox.Submit = new Ui.Input.Relay(delegate { Editor.Input.Focus(null); });
 
             row.About.Show(texts);
             row.About.Hint = texts.BlueprintAboutHint;
             if (!row.About.Box.IsFocused)
-                row.About.Text = part.About;
+                row.About.Text = part.Annotation;
             row.Required.Says(texts.BlueprintOptional, texts.BlueprintRequired);
             row.Required.IsOn = part.Optional;
             row.Required.Command = Editor.Act(Cmd.MakeOptional, delegate
@@ -420,7 +474,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     targets.Add(block.Id);
             }
 
-            Editor.Push(new PickPage(Editor, part.Label, targets, delegate(GridEntity block) { return Fits(part, block); },
+            Editor.Push(new PickPage(Editor, part.Id, targets, delegate(GridEntity block) { return Fits(part, block); },
                 delegate(PickAnswer answer) { Filled(part, chosen, answer.Targets); }));
         }
 

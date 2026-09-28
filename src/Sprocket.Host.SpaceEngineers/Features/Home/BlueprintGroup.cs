@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 Deletes = _editor.Act(Cmd.DeleteInstance, delegate { _editor.DeleteInstance(_system, instance); })
             };
 
-            _page.Switched(row, instance);
+            _page.Switched(row, _system, instance);
             return row;
         }
     }

@@ -30,6 +30,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// </remarks>
     public sealed class SprocketEditor
     {
+        /// <summary>The most lines a list in a question shows, the last of them counting the rest where there are more.</summary>
+        const int Listed = 5;
+
         readonly GridWorld _world;
         readonly Automation _program;
         readonly AutomationRunner _runner;
@@ -174,6 +177,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
             }
 
+            // Somebody is looking, so the construct is looked at for them: what a run would only find at the step that
+            // needs it is shown before anything runs into it. See AutomationRunner.Look for what it costs.
+            if (_looked.Due(tick))
+                _runner.Look();
+
             Current.Refresh();
 
             // The heading's words are made of things that can change without anything saying so: the
@@ -221,17 +229,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         const int Second = 60;
 
         Interval _worded = new Interval(Second);
+        Interval _looked = new Interval(Second);
 
         /// <summary>
         /// Puts a short question on the screen, to be answered before anything else.
         /// </summary>
         /// <remarks>
-        /// For a question that is small enough to hang over the screen. A choice that needs a caption,
-        /// a warning and room to think is a page - see the one that asks before deleting a sequence.
+        /// For a question that is small enough to hang over the screen.
         /// </remarks>
         internal void Ask(string question)
         {
             _screen.Ask(question, false);
+        }
+
+        /// <summary>The same, <paramref name="question" /> a template whose named slots take their words from <paramref name="arguments" />.</summary>
+        internal void Ask(string question, Arguments arguments)
+        {
+            _screen.Ask(question, arguments, false);
         }
 
         /// <summary>
@@ -241,11 +255,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// A menu rather than a dialog: it hangs under what was pressed, because the answers are
         /// about that thing and the row it is on has to stay in sight. A question about the screen -
         /// whether to switch a sequence on, whether to replace a program - belongs to no control
-        /// and goes in the middle, which is <see cref="Ask" />.
+        /// and goes in the middle, which is <see cref="Ask(string)" />.
         /// </remarks>
         internal void AskHere(string question)
         {
             _screen.Ask(question, true);
+        }
+
+        /// <summary>The same, <paramref name="question" /> a template whose named slots take their words from <paramref name="arguments" />.</summary>
+        internal void AskHere(string question, Arguments arguments)
+        {
+            _screen.Ask(question, arguments, true);
         }
 
         /// <summary>Adds a way to answer, in the order they are offered.</summary>
@@ -841,26 +861,49 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Invalidate();
         }
 
-        /// <summary>
-        /// Forgets a sequence: its way back, and any page showing it, so deleting one never
-        /// leaves somebody staring at something that no longer exists.
-        /// </summary>
-        void Deleting(string question, string named, string warning, Action delete)
+        /// <summary>Asks <paramref name="question" /> about <paramref name="named" />, with <paramref name="warning" /> under it, and deletes only on the answer that says so.</summary>
+        /// <remarks>
+        /// Keeping is the first answer and the one Enter takes, so the press made without reading keeps what is there. The
+        /// warning's own slots take their words from <paramref name="arguments" />, and it has none where that is null.
+        /// </remarks>
+        void Deleting(string question, string named, string warning, Arguments arguments, Action delete)
         {
-            var page = new ChoicePage(this, question);
-            page.Caption = named;
+            arguments = arguments ?? new Arguments();
+            arguments.Set("named", named ?? "");
 
-            page.Add(Texts.DeleteKeep, false, delegate { Pop(); });
+            Ask(question + "\n\n**{named}**\n\n" + warning, arguments);
+            Answer(Texts.DeleteKeep, delegate { }, true);
+            Answer(Texts.DeleteConfirm, delete);
+        }
 
-            // The question goes first, so nobody is left standing on a question about something that no longer exists.
-            page.Add(Texts.DeleteConfirm, false, delegate
+        /// <summary>
+        /// A bulleted list of <paramref name="count" /> names for a question, each in its own slot of
+        /// <paramref name="arguments" /> so it is said as it was written.
+        /// </summary>
+        /// <remarks>
+        /// A construct can hold any number of anything, so past <see cref="Listed" /> lines the last one counts the
+        /// rest, and only the names shown are asked of <paramref name="name" />.
+        /// </remarks>
+        string Bullets(int count, Func<int, string> name, Arguments arguments)
+        {
+            var shown = count <= Listed ? count : Listed - 1;
+            var list = new System.Text.StringBuilder();
+
+            for (var i = 0; i < shown; i++)
             {
-                Pop();
-                delete();
-            });
+                var slot = "item" + i.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                arguments.Set(slot, name(i));
+                list.Append("\n- {").Append(slot).Append('}');
+            }
 
-            page.WarnOnLast(warning);
-            Push(page);
+            if (shown < count)
+            {
+                arguments.Set("more", Template.Fill(Texts.DialogMore, "count",
+                    (count - shown).ToString(System.Globalization.CultureInfo.InvariantCulture)));
+                list.Append("\n- {more}");
+            }
+
+            return list.ToString();
         }
 
         void Drop(AutomationSystem system)
@@ -918,6 +961,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void Rebuild()
         {
             Rebuilds++;
+
+            // What is wrong is read by the page below, so an edit just made is checked first rather than on the next tick.
+            _runner.Checking();
+
             var page = Current;
 
             // Rebuilt in place rather than swapped, because a target holds this list across a refresh and
@@ -1005,8 +1052,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 _actionBar.Add(new ChoiceEntry(ScriptPage.Called, Current is ScriptPage,
                     Act(Cmd.ShowScript, ShowScript)));
-                _actionBar.Add(new ChoiceEntry(AlignmentPage.Called, Current is AlignmentPage,
-                    Act(Cmd.ShowAlignment, ShowAlignment)));
             }
 
             _screen.ShowActions(_actionBar);
@@ -1028,16 +1073,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
 
             Push(new ScriptPage(this));
-        }
-
-        /// <summary>Opens the page of glyphs and text in boxes, each box's middle drawn over it.</summary>
-        /// <remarks>A developer tool, offered only where <see cref="DeveloperMode" /> says so, as the script is.</remarks>
-        internal void ShowAlignment()
-        {
-            if (Current is AlignmentPage)
-                return;
-
-            Push(new AlignmentPage(this));
         }
 
         /// <summary>
@@ -1749,23 +1784,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         internal void DeleteSequence(Sequence sequence)
         {
-            var page = new ChoicePage(this, Texts.SequenceDeleteQuestion);
-            page.Caption = SequenceText.Doing(_runner.Bindings, sequence, StandIn(sequence.System));
-
-            page.Add(Texts.DeleteKeep, false, delegate { Pop(); });
-
-            page.Add(Texts.DeleteConfirm, false, delegate
-            {
-                // The question goes first. Forgetting the sequence drops any page showing it, but
-                // not this one on top of it, which would leave somebody standing on a question about
-                // something that no longer exists.
-                Pop();
-                TakeOut(sequence);
-            });
-
-            page.WarnOnLast(Texts.DeleteFinal);
-
-            Push(page);
+            Deleting(Texts.SequenceDeleteQuestion, SequenceText.Doing(_runner.Bindings, sequence, StandIn(sequence.System)),
+                Texts.DeleteFinal, null, delegate { TakeOut(sequence); });
         }
 
         /// <summary>Asks before taking <paramref name="system" /> out of the program, with its sequences, its triggers and every one of it.</summary>
@@ -1777,7 +1797,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             if (!system.IsBlueprint)
             {
-                Deleting(Texts.DeleteSystem, system.Name, Texts.DeleteFinal, delegate { Drop(system); });
+                Deleting(Texts.DeleteSystem, system.Name, Texts.DeleteFinal, null, delegate { Drop(system); });
                 return;
             }
 
@@ -1799,8 +1819,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var named = SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instance);
 
-            Deleting(Texts.DeleteInstance, named, Template.Fill(Texts.DeleteInstanceKept, "name", system.Name),
-                delegate { TakeOut(system, instance); });
+            var arguments = new Arguments();
+            arguments.Set("name", system.Name);
+
+            Deleting(Texts.DeleteInstance, named, Texts.DeleteInstanceKept, arguments, delegate { TakeOut(system, instance); });
         }
 
         /// <summary>Switches <paramref name="system" /> on or off; a blueprint off only after asking, since that stops every logic system made from it.</summary>
@@ -1814,25 +1836,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
 
             var instances = system.Instances;
-            var names = new string[instances.Count];
-            for (var i = 0; i < instances.Count; i++)
-                names[i] = SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instances[i]);
+            var arguments = new Arguments();
+            arguments.Set("name", system.Name);
 
-            var page = new ChoicePage(this, Template.Fill(Texts.BlueprintSwitchOffQuestion, "name", system.Name));
-            page.Caption = Template.Fill(Texts.BlueprintSwitchOffStops, "names", string.Join(", ", names));
+            var listed = Bullets(instances.Count,
+                delegate(int i) { return SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instances[i]); }, arguments);
+            var running = SystemSummary.IsRunning(system, _runner, null);
+            Ask(Texts.BlueprintSwitchOffQuestion + "\n\n" + Texts.BlueprintSwitchOffStops + listed
+                + (running ? "\n\n" + Texts.BlueprintSwitchOffRunning : ""), arguments);
 
-            page.Add(Texts.BlueprintKeepRunning, false, delegate { Pop(); });
-            page.Add(Texts.BlueprintSwitchThemOff, false, delegate
+            // Keeping them running is the one Enter takes.
+            Answer(Texts.BlueprintKeepRunning, delegate { }, true);
+            Answer(Texts.BlueprintSwitchThemOff, delegate
             {
-                Pop();
                 system.Enabled = false;
                 Invalidate();
             });
+        }
 
-            if (SystemSummary.IsRunning(system, _runner, null))
-                page.WarnOnLast(Texts.BlueprintSwitchOffRunning);
+        /// <summary>Switches <paramref name="instance" /> of <paramref name="system" /> on or off; on while the system is off, it asks to switch the system on as well.</summary>
+        /// <remarks>Leaving it off is the answer Enter takes, since the key pressed without reading must not start a machine.</remarks>
+        internal void SwitchInstance(AutomationSystem system, SystemInstance instance, bool on)
+        {
+            if (!on || system.Enabled)
+            {
+                instance.Enabled = on;
+                return;
+            }
 
-            Push(page);
+            var arguments = new Arguments();
+            arguments.Set("name", system.Name);
+
+            AskHere(Texts.SystemOffQuestion, arguments);
+            Answer(Texts.SystemSwitchItOn, delegate
+            {
+                instance.Enabled = true;
+                SwitchSystem(system, true);
+            });
+            Answer(Texts.SystemLeaveItOff, delegate { }, true);
         }
 
         /// <summary>What pressing the switch of <paramref name="system" /> would do, said as a note on it.</summary>

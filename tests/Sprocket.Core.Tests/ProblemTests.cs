@@ -245,6 +245,7 @@ public class ProblemTests
     {
         var ship = Build();
         ship.Rig.CannotStart(ship.Sequence);
+        ship.Runner.Tick(ship.Runner.CurrentTick + 1);
 
         ship.Editor.PressRow(0);
         ship.Editor.PressRow(0);
@@ -389,9 +390,18 @@ public class ProblemTests
 
     static SequenceFault Fault(Ship ship) => Fault(ship, ship.Sequence);
 
-    static SequenceFault Fault(Ship ship, Sequence sequence) =>
-        SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence,
-            ship.Runner.Get(sequence), sequence.System.First);
+    /// <summary>What a screen would say is wrong with <paramref name="sequence" />, with the construct looked at as an open editor does.</summary>
+    /// <remarks>
+    /// The tests change the program by hand rather than through the editor, so it is said to be edited, as an edit says
+    /// it, and a tick passes for the program to be checked.
+    /// </remarks>
+    static SequenceFault Fault(Ship ship, Sequence sequence)
+    {
+        ship.Automation.Edited();
+        ship.Runner.Tick(ship.Runner.CurrentTick + 1);
+        ship.Runner.Look();
+        return SequenceSummary.Fault(ship.Runner.Get(sequence));
+    }
 
     static Ship Build()
     {
@@ -450,12 +460,12 @@ public class ProblemTests
         // Nothing on this construct claims it, which is what the host says by this.
         ship.Rig.CannotStart(sequence);
 
-        var fault = SequenceSummary.Fault(ship.World, ship.Runner.Bindings, sequence, null, sequence.System.First);
+        var fault = SequenceSummary.Checked(ship.World, ship.Runner.Bindings, sequence, sequence.System.First);
         Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
 
         // And a sequence nothing is supposed to start is not scolded: it may be there to be run.
         var called = ship.Automation.AddSequence(system);
         ship.Rig.CannotStart(called);
-        Assert.False(SequenceSummary.Fault(ship.World, ship.Runner.Bindings, called, null, called.System.First).Exists);
+        Assert.False(SequenceSummary.Checked(ship.World, ship.Runner.Bindings, called, called.System.First).Exists);
     }
 }

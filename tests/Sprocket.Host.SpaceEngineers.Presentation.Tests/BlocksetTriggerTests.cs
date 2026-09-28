@@ -25,13 +25,12 @@ public class BlocksetTriggerTests
         Assert.False(sim.World.CanStart(sequence, system.Instances[1]));
     }
 
-    /// <summary>With the blueprint switched on, a blockset with a slot left empty is switched off alone, saying which slot.</summary>
+    /// <summary>A blockset made with its slots empty is switched off alone as the program is checked, saying which slot.</summary>
     [Fact]
     public void ABlocksetWithAnEmptySlotIsSwitchedOffAlone()
     {
         var sim = TwoBlocksets();
         var system = sim.Editor.Program.Systems.Single();
-        system.Instances[1].Enabled = true;
 
         sim.Editor.SwitchOn();
         for (var i = 0; i < 120; i++)
@@ -69,7 +68,7 @@ public class BlocksetTriggerTests
 
         sim.Editor.RootRows().Single(row => row.IsAction).Opens!.Execute();
         sim.Tick();
-        sim.Editor.Screen.Flip!.Execute();
+        sim.Editor.Screen.Heading[0].Renames!("Port airlock");
         sim.Editor.GoToRoot();
         sim.Tick();
 

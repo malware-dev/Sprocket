@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -8,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>A logic system's switch, which is also what keeps it from being changed while it may run.</summary>
 public class SystemSwitchTests
 {
-    /// <summary>Switched on, a logic system offers nothing that changes it, says why, and is switched off from where it says so.</summary>
+    /// <summary>Switched on, a logic system offers nothing that changes it, and says why.</summary>
     [Fact]
     public void ASystemSwitchedOnIsLockedAndSaysHowToUnlockIt()
     {
@@ -25,11 +24,11 @@ public class SystemSwitchTests
         sim.Tick();
 
         Assert.False(page.Editable);
-        Assert.Equal("Airlock is switched on.", page.LockedText);
+        Assert.Equal("Airlock is switched on. Switch it off to change it.", page.LockedText);
         Assert.Null(sim.Editor.Triggers()[0].Deletes);
         Assert.False(page.CanUndo);
 
-        sim.Editor.PressStart("Switch it off to edit");
+        sim.Editor.Screen.Flip!.Execute();
         sim.Tick();
 
         Assert.True(page.Editable);
@@ -53,8 +52,8 @@ public class SystemSwitchTests
         sim.Editor.Screen.Flip!.Execute();
         sim.Tick();
 
-        Assert.Equal("Switch off the Airlock blueprint?", sim.Editor.Screen.Title());
-        Assert.Contains("Airlock 2", Assert.IsType<ChoicePage>(sim.Editor.Current).Caption);
+        Assert.StartsWith("Switch off the Airlock blueprint?", sim.Editor.Question());
+        Assert.Contains("Airlock 2", sim.Editor.Question());
 
         sim.Editor.PressChoice("Keep them running");
         sim.Tick();
@@ -68,6 +67,53 @@ public class SystemSwitchTests
 
         Assert.False(system.Enabled);
         Assert.IsType<LogicSystemPage>(sim.Editor.Current);
+    }
+
+    /// <summary>The question before a blueprint is switched off lists its blocksets a line each, and past five counts the rest.</summary>
+    [Fact]
+    public void SwitchingOffABlueprintWithManyBlocksetsListsSomeAndCountsTheRest()
+    {
+        var sim = Blueprinted();
+        var system = sim.Editor.Program.Systems.Single();
+        for (var i = 1; i <= 5; i++)
+            system.AddInstance().Name = "Extra " + i;
+
+        sim.Editor.OpenBlueprintSystem(0);
+        sim.Tick();
+        sim.Editor.SwitchOn();
+        sim.Tick();
+        sim.Editor.Screen.Flip!.Execute();
+        sim.Tick();
+
+        var question = sim.Editor.Question();
+        Assert.Contains("\n- Airlock 2\n- Extra 1\n- Extra 2\n- and 3 more", question);
+        Assert.DoesNotContain("Extra 3", question);
+    }
+
+    /// <summary>With the blueprint off, its blocksets show off, and switching one on asks about the blueprint first.</summary>
+    [Fact]
+    public void SwitchingOnABlocksetOfABlueprintSwitchedOffAsksAboutTheBlueprint()
+    {
+        var sim = Blueprinted();
+        var system = sim.Editor.Program.Systems.Single();
+        system.Enabled = false;
+        sim.Editor.Tick(1000);
+
+        var row = sim.Editor.RootRows()[0];
+        Assert.True(system.Instances[0].Enabled);
+        Assert.False(row.SwitchIsOn);
+
+        row.Flips!.Execute();
+        sim.Editor.Tick(1001);
+        Assert.Equal("Airlock is switched off. Switch it on?", sim.Editor.Question());
+        Assert.False(system.Enabled);
+
+        sim.Editor.PressAnswer("Switch it on");
+        sim.Editor.Tick(1002);
+
+        Assert.True(system.Enabled);
+        Assert.True(system.Instances[0].Enabled);
+        Assert.True(sim.Editor.RootRows()[0].SwitchIsOn);
     }
 
     /// <summary>A logic system with a button, made a blueprint, with a second logic system made from it.</summary>
@@ -85,8 +131,8 @@ public class SystemSwitchTests
         sim.Editor.RootRows().Single(row => row.IsAction).Opens!.Execute();
         sim.Tick();
 
-        // Something done to it, so it stays when the panel is left.
-        sim.Editor.Screen.Flip!.Execute();
+        // Something done to it, switched off, so it stays when the panel is left.
+        sim.Editor.Program.Systems[0].Instances[sim.Editor.Program.Systems[0].Instances.Count - 1].Enabled = false;
         sim.Editor.GoToRoot();
         sim.Tick();
 

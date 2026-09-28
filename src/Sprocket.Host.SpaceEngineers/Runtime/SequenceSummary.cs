@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Runtime
 {
@@ -66,11 +65,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// both dearer and weaker, since it could only ask whether <i>something</i> was wired there.
         /// </para>
         /// </remarks>
-        static SequenceProblem StartTrouble(GridWorld world, Sequence sequence, SystemInstance through)
+        static SequenceFault StartTrouble(GridWorld world, Bindings bindings, Sequence sequence, SystemInstance through)
         {
             var system = sequence.System;
             if (system == null)
-                return SequenceProblem.None;
+                return SequenceFault.None;
 
             var starts = 0;
             var triggers = system.Triggers;
@@ -91,7 +90,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 if (moment.Sources.Count == 0 || string.IsNullOrEmpty(moment.EventId))
-                    return sequence.Steps.Count > 0 ? SequenceProblem.NeverTriggered : SequenceProblem.None;
+                {
+                    if (sequence.Steps.Count == 0)
+                        return SequenceFault.None;
+
+                    if (moment.Sources.Count == 0)
+                        return SequenceFault.Unstarted(Unwired.NoBlock, null);
+
+                    var named = SystemInstance.Through(through, moment.Sources);
+                    var entity = named.Count == 0 ? null : bindings.Entity(named[0]);
+                    return SequenceFault.Unstarted(Unwired.NoMoment, entity == null ? null : entity.Name);
+                }
             }
 
             // Nothing starts it at all, which is a warning rather than a fault - and nothing to say
@@ -99,11 +108,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (starts == 0)
             {
                 return sequence.Steps.Count > 0 && !system.Called(sequence.Number)
-                    ? SequenceProblem.NothingStarts
-                    : SequenceProblem.None;
+                    ? new SequenceFault(SequenceProblem.NothingStarts, SequenceFault.Trigger)
+                    : SequenceFault.None;
             }
 
-            return world.CanStart(sequence, through) ? SequenceProblem.None : SequenceProblem.NeverTriggered;
+            if (world.CanStart(sequence, through))
+                return SequenceFault.None;
+
+            var why = world.Why(sequence, through);
+            return why == null ? SequenceFault.Unstarted(Unwired.Unknown, null) : SequenceFault.Unstarted(why.Why, why.Block);
         }
 
         /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
@@ -131,100 +144,24 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return state.LastFiredTick < 0 ? SequenceStatus.NeverRun : SequenceStatus.Waiting;
         }
 
-        /// <summary>
-        /// What is wrong with this sequence and where, or <see cref="SequenceFault.None" />.
-        /// </summary>
-        /// <remarks>
-        /// <b>Not free, and not for a tick.</b> Reachability can send a host off to read something
-        /// expensive - a toolbar, in Space Engineers - so every screen asks this on a cadence, which
-        /// is what <see cref="EditorPage.SecondPassed" /> is for. Nothing that breaks a sequence
-        /// breaks it faster than a person can do it by hand, so a second is soon enough.
-        /// </remarks>
-        static SequenceFault Stuck(Bindings bindings, Sequence sequence, SequenceRunner state,
-            SystemInstance through)
+        /// <summary>What is known to be wrong with a sequence on one of its system, as its runner holds it, or none.</summary>
+        /// <remarks>A lookup: the faults are found where they happen, and nothing is worked out here.</remarks>
+        public static SequenceFault Fault(SequenceRunner state)
         {
-            if (state == null)
-                return SequenceFault.None;
-
-            // What ended the last run, which outlives the run itself: a sequence that gave up is
-            // not running and has nothing outstanding to be asked, so this is the only record of
-            // it. It stands until the sequence runs again.
-            if (!string.IsNullOrEmpty(state.Quit))
-                return new SequenceFault(SequenceProblem.Conflicted, SequenceFault.Trigger,
-                    state.Quit);
-
-            if (!state.IsWaiting)
-                return SequenceFault.None;
-
-            IList<Act> outstanding = state.Outstanding;
-
-
-            for (var i = 0; i < outstanding.Count; i++)
-            {
-                Act act = outstanding[i];
-                var targets = SystemInstance.Through(through, act.Targets);
-                for (var t = 0; t < targets.Count; t++)
-                {
-                    GridEntity entity = bindings.Entity(targets[t]);
-                    if (entity == null)
-                        continue;
-
-                    // About the state this step is waiting for, not about the block. One vent
-                    // serves the cycle out and the cycle in, and they are waiting for opposite
-                    // things of it - so "what is wrong with the vent" has two answers and only the
-                    // step knows which one it is owed.
-                    EntityAction doing = act.Names(entity.Kind.Actions);
-                    if (doing == null || string.IsNullOrEmpty(doing.LeadsToStateId))
-                        continue;
-
-                    Trouble said = entity.Trouble(doing.LeadsToStateId);
-                    if (!said.Exists)
-                        continue;
-
-                    return new SequenceFault(SequenceProblem.Stuck, sequence.Steps.IndexOf(act),
-                        said.Said);
-                }
-            }
-
-            return SequenceFault.None;
+            return state == null ? SequenceFault.None : state.Fault;
         }
 
-        /// <summary>What is wrong with a sequence, or none, asking about its blocks as <paramref name="through" /> fills them.</summary>
-        /// <remarks>A null <paramref name="through" /> asks about what the steps name as written.</remarks>
-        public static SequenceFault Fault(GridWorld world, Bindings bindings, Sequence sequence,
-            SequenceRunner state, SystemInstance through)
+        /// <summary>What the program says is wrong with a sequence on <paramref name="through" />, or none.</summary>
+        /// <remarks>
+        /// What can be told without running it: a slot left empty, a step its blocks do not offer or cannot be given its
+        /// values, one that does not wait for what it starts, and a trigger nothing can start. Asked when the program or its
+        /// wiring changes, and on no tick; what the construct has become since is found by a run, at the step it matters.
+        /// </remarks>
+        public static SequenceFault Checked(GridWorld world, Bindings bindings, Sequence sequence, SystemInstance through)
         {
-            if (state != null && state.HasMissingSources)
-                return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger);
-
-            // Before what is missing, because an empty slot names no block and would read as one that is gone.
             SequenceFault empty = Empty(sequence, through);
             if (empty.Exists)
                 return empty;
-
-            var adrift = SequenceFault.None;
-
-            for (var i = 0; i < sequence.Steps.Count; i++)
-            {
-                var act = sequence.Steps[i] as Act;
-                if (act == null)
-                    continue;
-
-                var targets = SystemInstance.Through(through, act.Targets);
-                for (var t = 0; t < targets.Count; t++)
-                {
-                    var points = bindings.State(targets[t]);
-                    if (points == RefState.Lost)
-                        return new SequenceFault(SequenceProblem.MissingTarget, i, null, targets[t]);
-                    if (points == RefState.Adrift && !adrift.Exists)
-                        adrift = new SequenceFault(SequenceProblem.Adrift, i, null, targets[t]);
-                }
-            }
-
-            // Reported only once nothing is outright missing, because being gone is the worse news
-            // and a line can only say one thing.
-            if (adrift.Exists)
-                return adrift;
 
             SequenceFault unoffered = Unoffered(bindings, sequence, through);
             if (unoffered.Exists)
@@ -242,20 +179,49 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (unawaited.Exists)
                 return unawaited;
 
-            // A step that is being waited on and cannot finish. Only the block knows - a vent with
-            // nowhere to put the air looks exactly like one that is merely slow - so it is asked,
-            // and what it says is what gets shown.
-            SequenceFault stuck = Stuck(bindings, sequence, state, through);
-            if (stuck.Exists)
-                return stuck;
+            // Last, because it is about the sequence as a whole rather than about something it names.
+            return StartTrouble(world, bindings, sequence, through);
+        }
 
-            // These last, because they are the ones about the sequence as a whole rather than about
-            // something it names, and anything missing is the more useful thing to say.
-            var trouble = StartTrouble(world, sequence, through);
-            if (trouble != SequenceProblem.None)
-                return new SequenceFault(trouble, SequenceFault.Trigger);
+        /// <summary>The first block a sequence's steps name on <paramref name="through" /> that is gone, or may have been swapped for another, or none.</summary>
+        /// <remarks>
+        /// For an open editor to show before anything runs into it. A slot left empty is the program's to report, and one that
+        /// may be left empty is skipped.
+        /// </remarks>
+        public static SequenceFault Looked(Bindings bindings, Sequence sequence, SystemInstance through)
+        {
+            var system = sequence.System;
+            var adrift = SequenceFault.None;
 
-            return SequenceFault.None;
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var act = sequence.Steps[i] as Act;
+                if (act == null)
+                    continue;
+
+                for (var s = 0; s < act.Targets.Count; s++)
+                {
+                    var slot = act.Targets[s];
+                    var part = system == null ? null : system.FindPart(slot);
+                    var filled = through == null ? null : through.FilledWith(slot);
+                    if (part != null && through != null && (filled == null || filled.Count == 0))
+                        continue;
+
+                    var count = filled == null ? 1 : filled.Count;
+                    for (var n = 0; n < count; n++)
+                    {
+                        var name = filled == null ? slot : filled[n];
+                        var points = bindings.State(name);
+                        if (points == RefState.Lost && (part == null || !part.Optional))
+                            return new SequenceFault(SequenceProblem.MissingTarget, i, null, name);
+                        if (points == RefState.Adrift && !adrift.Exists)
+                            adrift = new SequenceFault(SequenceProblem.Adrift, i, null, name);
+                    }
+                }
+            }
+
+            // Only once nothing is outright missing, because being gone is the worse news and a line can only say one thing.
+            return adrift;
         }
 
         /// <summary>The first slot, of what starts it and then what its steps act on, that <paramref name="through" /> leaves empty and may not, or none.</summary>

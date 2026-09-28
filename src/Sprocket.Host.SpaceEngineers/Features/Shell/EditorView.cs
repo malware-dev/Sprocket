@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Lifts a symbol in the heading so its middle is level with the middle of the heading's capitals.</summary>
         /// <remarks>
         /// A symbol is centered in its room like any image, and the heading's capitals sit above the middle of their line,
-        /// where the face leaves room for accents. Measured on the alignment page.
+        /// where the face leaves room for accents. Measured in the game.
         /// </remarks>
         public static readonly Thickness LevelWithCapitals = new Thickness(0f, -2.5f, 0f, 2.5f);
 
@@ -570,7 +570,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var yes = screen.Answers.Count > 0 ? screen.Answers[0] : null;
             var no = screen.Answers.Count > 1 ? screen.Answers[1] : null;
 
-            _dialog.Message = Markdown.Parse(screen.Question);
+            _dialog.Message = screen.QuestionArguments == null ? Markdown.Parse(screen.Question) : Template.Read(screen.Question);
+            _dialog.MessageArguments = screen.QuestionArguments;
             _dialog.YesText = yes != null ? yes.Text : "";
             _dialog.YesCommand = yes != null ? yes.Command : null;
             _dialog.NoText = no != null ? no.Text : "";

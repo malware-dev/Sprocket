@@ -249,9 +249,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>A block fired one of the actions Sprocket put in it.</summary>
         public void Fire(string key)
         {
+            // Said every time, because a press that does nothing is otherwise invisible: this says whether it arrived.
             Target target;
             if (!_byKey.TryGetValue(key, out target))
+            {
+                Told.Say("a button fired " + key + ", which nothing here answers");
                 return;
+            }
+
+            Told.Say("a button fired " + key + ", " + (target.Stops ? "stopping " : "running ") + target.Sequence.Name
+                + (target.Instance == null ? "" : " on " + target.Instance.Number));
 
             if (target.Stops)
                 _runner.Halt(target.Sequence, target.Instance);
@@ -771,7 +778,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             _unstartable.Clear();
             _reachable.Clear();
-            _broken.Clear();
+            _why.Clear();
             Claims();
 
             // What the construct has to provide, counted. A sequence nothing answers is reported the
@@ -790,8 +797,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                             continue;
 
                         var start = GridWorld.Start(sequences[q].Id, instances[n]);
-                        if (!_unstartable.Contains(start))
-                            _unstartable.Add(start);
+                        if (_unstartable.Contains(start))
+                            continue;
+
+                        _unstartable.Add(start);
+                        _why[start] = Unanswer(system, instances[n], sequences[q]);
                     }
                 }
             }
@@ -821,16 +831,75 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var w = 0; w < _wanted.Count; w++)
             {
                 Want want = _wanted[w];
-                if (!_reachable.Contains(want.Start) && !_unstartable.Contains(want.Start))
-                    _unstartable.Add(want.Start);
+                if (_reachable.Contains(want.Start) || _unstartable.Contains(want.Start))
+                    continue;
+
+                _unstartable.Add(want.Start);
+                _why[want.Start] = Unanswer(ToolbarOf(want.PanelId), want.Slot, want.Key, want.Reference);
             }
 
-            _world.Unstartable(_unstartable, _broken);
+            _world.Unstartable(_unstartable, _why);
+        }
+
+        /// <summary>Whose button leaves <paramref name="sequence" /> unstarted on <paramref name="instance" />, and what its slot holds instead.</summary>
+        /// <remarks>Asked only of a sequence already found unanswered, which is after the wiring changes and never on a tick.</remarks>
+        Unanswered Unanswer(AutomationSystem system, SystemInstance instance, Sequence sequence)
+        {
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var needed = triggers[i] as RequiredTrigger;
+                if (needed == null || needed.Runs != sequence.Number)
+                    continue;
+
+                var slot = ButtonPanelExtension.ButtonOf(needed.EventId);
+                var wanted = Wanting(system, instance, sequence, needed);
+
+                _sources.Clear();
+                instance.Resolve(needed.Sources, _sources);
+                for (var s = 0; s < _sources.Count; s++)
+                {
+                    var why = Unanswer(ToolbarOf(_sources[s]), slot, wanted, _sources[s]);
+                    if (why.Why != Unwired.Unknown)
+                        return why;
+                }
+            }
+
+            return new Unanswered(null, Unwired.Unknown);
+        }
+
+        /// <summary>What the slot of the button of <paramref name="reference" /> holds, where it is not <paramref name="wanted" />.</summary>
+        Unanswered Unanswer(IMyToolbar toolbar, int slot, string wanted, string reference)
+        {
+            var block = _program.Called(reference, _world.Values);
+            if (toolbar == null || slot < 0 || slot >= toolbar.SlotCount)
+                return new Unanswered(block, Unwired.Unknown);
+
+            MyToolbarItemInfo present;
+            if (!toolbar.TryGetItem(slot, out present))
+                return new Unanswered(block, Unwired.Cleared);
+
+            return new Unanswered(block, KeyIn(toolbar, slot, present) == wanted ? Unwired.Unknown : Unwired.Taken);
+        }
+
+        /// <summary>The key a slot holds, Sprocket's or the game's own action's, or null where it holds neither.</summary>
+        string KeyIn(IMyToolbar toolbar, int slot, MyToolbarItemInfo present)
+        {
+            if (!Mine(present))
+            {
+                return present.Kind == MyToolbarItemKind.BlockAction && !string.IsNullOrEmpty(present.ActionId)
+                    ? PlainKey(present.BlockEntityId, present.ActionId)
+                    : null;
+            }
+
+            _arguments.Clear();
+            Toolbars.Parameters(toolbar, slot, _arguments);
+            return _arguments.Count == 0 ? null : _arguments[0].Value as string;
         }
 
         readonly List<long> _unstartable = new List<long>();
         readonly HashSet<long> _reachable = new HashSet<long>();
-        readonly Dictionary<int, List<string>> _broken = new Dictionary<int, List<string>>();
+        readonly Dictionary<long, Unanswered> _why = new Dictionary<long, Unanswered>();
         readonly List<Want> _dropped = new List<Want>();
 
         /// <summary>

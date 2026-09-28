@@ -162,5 +162,5 @@ sealed class Rigged
 
     readonly List<long> _unstartable = new List<long>();
 
-    readonly Dictionary<int, List<string>> _unarranged = new Dictionary<int, List<string>>();
+    readonly Dictionary<long, Unanswered> _unarranged = new Dictionary<long, Unanswered>();
 }

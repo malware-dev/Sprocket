@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             MyKeys.Back, MyKeys.Delete, MyKeys.Left, MyKeys.Right, MyKeys.Home, MyKeys.End, MyKeys.Up, MyKeys.Down
         };
 
-        readonly MyKeys[] _shortcuts = { MyKeys.A, MyKeys.C, MyKeys.X, MyKeys.V };
+        readonly MyKeys[] _shortcuts = { MyKeys.A, MyKeys.C, MyKeys.X, MyKeys.V, MyKeys.Z, MyKeys.Y };
 
         readonly SprocketUnit _unit;
         readonly EditorView _view;

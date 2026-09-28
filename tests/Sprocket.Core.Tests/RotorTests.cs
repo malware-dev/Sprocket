@@ -301,7 +301,7 @@ public class RotorTests
         var runner = new AutomationRunner(automation, ship.World);
         runner.Tick(1);
 
-        var fault = SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence), sequence.System.First);
+        var fault = SequenceSummary.Checked(ship.World, runner.Bindings, sequence, sequence.System.First);
 
         Assert.Equal(SequenceProblem.Unfilled, fault.Problem);
         Assert.Equal(0, fault.Step);
@@ -310,7 +310,7 @@ public class RotorTests
         // And with the speed it asks for, that is no longer what is wrong with it.
         turn.Values.Add(Literal.Of(1L));
         Assert.NotEqual(SequenceProblem.Unfilled,
-            SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence), sequence.System.First).Problem);
+            SequenceSummary.Checked(ship.World, runner.Bindings, sequence, sequence.System.First).Problem);
     }
 
     /// <summary>
@@ -390,7 +390,7 @@ public class RotorTests
             runner.Tick(frame + 1);
         }
 
-        Assert.NotEqual(SequenceProblem.Stuck, Faulted(ship, runner, sequence).Problem);
+        Assert.NotEqual(SequenceProblem.Stuck, Faulted(runner, sequence).Problem);
 
         // Something leans on it: the speed and the torque say nothing, and the angle stops.
         rotor.Held = true;
@@ -402,7 +402,7 @@ public class RotorTests
 
         // Waited through: the sequence says what is wrong and holds, so a cleared obstruction lets it
         // finish by itself.
-        var fault = Faulted(ship, runner, sequence);
+        var fault = Faulted(runner, sequence);
         Assert.Equal(SequenceProblem.Stuck, fault.Problem);
         Assert.Equal("cannot turn - something is holding it", fault.Because);
         Assert.True(runner.Get(sequence)!.IsRunning);
@@ -464,14 +464,15 @@ public class RotorTests
             runner.Tick(frame);
         }
 
-        var fault = Faulted(ship, runner, sequence);
+        var fault = Faulted(runner, sequence);
         Assert.Equal(SequenceProblem.Stuck, fault.Problem);
         Assert.Equal(said, fault.Because);
     }
 
-    static SequenceFault Faulted(Rigged ship, AutomationRunner runner, Sequence sequence)
+    static SequenceFault Faulted(AutomationRunner runner, Sequence sequence)
     {
-        return SequenceSummary.Fault(ship.World, runner.Bindings, sequence, runner.Get(sequence), sequence.System.First);
+        runner.Look();
+        return SequenceSummary.Fault(runner.Get(sequence));
     }
 
     /// <summary>A sequence that turns the rotor and waits for it.</summary>

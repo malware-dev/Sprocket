@@ -306,11 +306,17 @@ public class UndoTests
     /// <summary>A system with one slot that has a label and says what it is for, as a blueprint's author leaves it.</summary>
     static Part Slot(out AutomationSystem system)
     {
-        system = new Automation().AddSystem();
+        var program = new Automation();
+        system = program.AddSystem();
         system.Annotation = "Cycles an airlock.";
 
         var part = system.PartFor("inner");
-        part.Annotation = "Inner door\n\nThe door to the inside of the ship.";
+        part.Annotation = "The door to the inside of the ship.";
+
+        var close = new Act("close");
+        close.Targets.Add("inner");
+        program.AddSequence(system).Steps.Add(close);
+        system.First!.Fill("inner", new[] { "entity1" });
         return part;
     }
 
@@ -335,30 +341,34 @@ public class UndoTests
         RoundTrip(system, new Annotate(system.Annotation, "Cycles an airlock with **one button**."), () => system.Annotation);
     }
 
+    /// <summary>Renaming a slot renames it everywhere its system names it, keeps what it says, and reverses exactly.</summary>
     [Fact]
-    public void RenamingASlotKeepsWhatItSaysAndReversesExactly()
+    public void RenamingASlotRenamesItEverywhereAndReversesExactly()
     {
         var part = Slot(out var system);
-        var edit = new AnnotatePart(part, part.Labelled("Hatch"), "renaming a slot");
+        var close = (Act)system.Sequences[0].Steps[0];
+        var edit = new RenamePart(part, "Hatch");
 
-        RoundTrip(system, edit, () => part.Annotation);
+        RoundTrip(system, edit, () => part.Id + " " + close.Targets[0]);
 
         edit.Apply(system);
-        Assert.Equal("Hatch", part.Label);
-        Assert.Equal("The door to the inside of the ship.", part.About);
+        Assert.Same(part, system.FindPart("Hatch"));
+        Assert.Equal("Hatch", close.Targets[0]);
+        Assert.Equal(new[] { "entity1" }, system.First!.FilledWith("Hatch"));
+        Assert.Null(system.First!.FilledWith("inner"));
+        Assert.Equal("The door to the inside of the ship.", part.Annotation);
     }
 
     [Fact]
-    public void DescribingASlotKeepsItsLabelAndReversesExactly()
+    public void DescribingASlotReversesExactly()
     {
         var part = Slot(out var system);
-        var edit = new AnnotatePart(part, part.Described("The door to the **inside** of the ship."), "describing a slot");
+        var edit = new AnnotatePart(part, "The door to the **inside** of the ship.", "describing a slot");
 
         RoundTrip(system, edit, () => part.Annotation);
 
         edit.Apply(system);
-        Assert.Equal("Inner door", part.Label);
-        Assert.Equal("The door to the **inside** of the ship.", part.About);
+        Assert.Equal("inner", part.Id);
     }
 
     [Fact]
@@ -398,7 +408,8 @@ public class UndoTests
 
         var part = Slot(out var system);
         Assert.False(new Annotate(system.Annotation, system.Annotation).Changes);
-        Assert.False(new AnnotatePart(part, part.Labelled("Inner door"), "renaming a slot").Changes);
+        Assert.False(new RenamePart(part, "inner").Changes);
+        Assert.False(new AnnotatePart(part, part.Annotation, "describing a slot").Changes);
         Assert.False(new SetOptional(part, false).Changes);
     }
 }

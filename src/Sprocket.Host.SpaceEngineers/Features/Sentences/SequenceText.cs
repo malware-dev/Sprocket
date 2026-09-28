@@ -275,10 +275,41 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         internal static string Problem(SequenceFault fault, Sequence sequence)
         {
             if (fault.Problem == SequenceProblem.EmptySlot)
-                return "The " + Slot(sequence == null ? null : sequence.System, fault.Which)
-                    + " slot is empty. Fill it on the configuration panel.";
+                return "The " + fault.Which + " slot is empty. Fill it on the configuration panel.";
+
+            if (fault.Problem == SequenceProblem.NeverTriggered)
+                return Unstarted(fault.Unwired, fault.Which);
 
             return string.IsNullOrEmpty(fault.Because) ? Problem(fault.Problem) : fault.Because;
+        }
+
+        /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
+        internal static string Failing(SequenceFault fault, Sequence sequence)
+        {
+            var row = Row(sequence, fault.Step);
+            var named = sequence.HasName ? sequence.Name : "";
+            var at = row > 0 ? (named.Length > 0 ? ", step " : "Step ") + row.ToString(CultureInfo.InvariantCulture) : "";
+
+            return named + at + (named.Length + at.Length > 0 ? ": " : "") + Problem(fault, sequence);
+        }
+
+        /// <summary>Why nothing can start a sequence, naming the block whose button it is where that is known.</summary>
+        static string Unstarted(Unwired why, string block)
+        {
+            if (why == Unwired.NoBlock)
+                return "No block starts this. Choose one.";
+            if (why == Unwired.NoMoment)
+                return string.IsNullOrEmpty(block)
+                    ? "Choose what the block must do to start this."
+                    : "Choose what " + block + " must do to start this.";
+            if (string.IsNullOrEmpty(block))
+                return "Nothing can start this.";
+            if (why == Unwired.Cleared)
+                return block + "'s button was cleared, so it can't start this.";
+            if (why == Unwired.Taken)
+                return block + "'s button does something else, so it can't start this.";
+
+            return block + "'s button isn't set to start this.";
         }
 
         /// <summary>Why Sprocket switched off <paramref name="system" />, or one of it, as <paramref name="halt" /> recorded it.</summary>
@@ -295,17 +326,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return "Stopped" + at + of + ": " + (string.IsNullOrEmpty(halt.Said) ? Because(halt.Problem, halt.Block) : halt.Said);
         }
 
-        /// <summary>What a slot is called: its label where it has one.</summary>
-        static string Slot(AutomationSystem system, string slot)
-        {
-            var part = system == null || slot == null ? null : system.FindPart(slot);
-            return part == null ? slot : part.Label;
-        }
-
         static string Because(SequenceProblem problem, string block)
         {
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.EmptySlot)
                 return "the " + block + " slot was empty.";
+            if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.NeverTriggered)
+                return block + "'s button couldn't start it.";
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.MissingTarget)
                 return block + " was gone.";
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Adrift)

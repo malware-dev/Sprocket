@@ -48,6 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<IMySlimBlock> _slim = new List<IMySlimBlock>();
 
         bool _stale = true;
+        int _revision;
 
         public GridWorld(IMyTerminalBlock anchor)
         {
@@ -73,20 +74,34 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Bumped by <see cref="Rebuild" />, which is the only place the set changes.
+        /// Bumped by <see cref="Rebuild" />, which is the only place the set changes, and rebuilt first where the grid said it changed.
         /// </summary>
         /// <remarks>
+        /// Read to decide whether anything that resolves names against the set must do it again, so a change the grid
+        /// reported has to count here before the set is next read, or a block ground off goes on resolving as present.
+        /// One flag read when nothing changed.
+        /// <para>
         /// <b>Only as truthful as the staleness that drives it, and that is known to be incomplete.</b>
         /// A rotor or piston head detaching takes a whole subgrid out of this construct without adding
         /// or removing a single block, and a grid splitting or merging does the same. None of those
         /// raises the events this listens to, so both this and <see cref="Entities" /> can be wrong
         /// after one - a sequence going on cycling a door that floated away.
+        /// </para>
         /// <para>
         /// Deferred rather than unknown, and must be closed before release: see
         /// <c>docs/ApiUnknowns.md</c>, question 3.
         /// </para>
         /// </remarks>
-        public int Revision { get; private set; }
+        public int Revision
+        {
+            get
+            {
+                if (_stale)
+                    Rebuild();
+
+                return _revision;
+            }
+        }
 
         /// <summary>
         /// Everything on this construct right now, rebuilt when the grid says it changed rather than
@@ -148,31 +163,29 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly HashSet<long> _unstartable = new HashSet<long>();
 
-        readonly Dictionary<int, List<string>> _unarranged = new Dictionary<int, List<string>>();
+        readonly Dictionary<long, Unanswered> _why = new Dictionary<long, Unanswered>();
 
-        /// <summary>Which sequences nothing can start on which one of their system, each as <see cref="Start" /> gives it, and which sources each has left unarranged.</summary>
-        public void Unstartable(List<long> starts, Dictionary<int, List<string>> sources)
+        /// <summary>How many times what nothing can start has been told again, so what reads it knows to read it again.</summary>
+        public int Unstarted { get; private set; }
+
+        /// <summary>Which sequences nothing can start on which one of their system, each as <see cref="Start" /> gives it, and why, where that is known.</summary>
+        public void Unstartable(List<long> starts, Dictionary<long, Unanswered> why)
         {
+            Unstarted++;
             _unstartable.Clear();
             for (var i = 0; i < starts.Count; i++)
                 _unstartable.Add(starts[i]);
 
-            _unarranged.Clear();
-            foreach (var pair in sources)
-                _unarranged[pair.Key] = pair.Value;
+            _why.Clear();
+            foreach (var pair in why)
+                _why[pair.Key] = pair.Value;
         }
 
-        public void Unarranged(Sequence sequence, List<string> sources)
+        /// <summary>Why nothing can start <paramref name="sequence" /> on <paramref name="instance" />, or null where that is not known.</summary>
+        public Unanswered Why(Sequence sequence, SystemInstance instance)
         {
-            if (_unarranged.Count == 0)
-                return;
-
-            List<string> broken;
-            if (!_unarranged.TryGetValue(sequence.Id, out broken))
-                return;
-
-            for (var i = 0; i < broken.Count; i++)
-                sources.Add(broken[i]);
+            Unanswered why;
+            return _why.TryGetValue(Start(sequence.Id, instance), out why) ? why : null;
         }
 
         /// <summary>Whether anything on the construct can start <paramref name="sequence" /> on <paramref name="instance" />.</summary>
@@ -441,7 +454,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         void Rebuild()
         {
             _stale = false;
-            Revision++;
+            _revision++;
             _entities.Clear();
             _byId.Clear();
             if (_anchor == null || _anchor.CubeGrid == null || MyAPIGateway.GridGroups == null)

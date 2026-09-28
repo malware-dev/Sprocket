@@ -38,11 +38,5 @@ on screen     Sequence 1
 031  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:445 Y:166 W:24 H:24}  #FFFFFFFF
 032  Text       at {X:476.8267 Y:163.2255} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
 033  Text       at {X:1610.156 Y:166.5141} scale 0.401  #5F7278FF  "d"
-034  Text       at {X:272 Y:223.6399} scale 0.694  #85A1A9FF  "Airlock is switched on."
-035  Sprite     Sprocket_Fill         {X:443 Y:220 W:133 H:32}  #29363EFF
-036  Sprite     Sprocket_Fill         {X:443 Y:220 W:133 H:1}  #3F474FFF
-037  Sprite     Sprocket_Fill         {X:443 Y:251 W:133 H:1}  #3F474FFF
-038  Sprite     Sprocket_Fill         {X:443 Y:220 W:1 H:32}  #3F474FFF
-039  Sprite     Sprocket_Fill         {X:574 Y:220 W:1 H:32}  #3F474FFF
-040  Text       at {X:458.5667 Y:226.0543} scale 0.556  #DCF5FDFF  "Switch it off to edit"
-041  ClearClip  
+034  Text       at {X:272 Y:223.6399} scale 0.694  #85A1A9FF  "Airlock is switched on. Switch it off to change it."
+035  ClearClip  

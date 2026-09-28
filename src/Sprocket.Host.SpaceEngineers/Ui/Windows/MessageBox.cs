@@ -63,6 +63,13 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
             set { _message.Document = value; }
         }
 
+        /// <summary>The words for the message's named slots, or null where it has none.</summary>
+        public Arguments MessageArguments
+        {
+            get { return _message.Arguments; }
+            set { _message.Arguments = value; }
+        }
+
         /// <summary>How the message looks.</summary>
         public IStyle MessageStyle
         {

@@ -202,8 +202,8 @@ public class RotaTests
         Then(sequence, "close", automation.Declare(ship.World, ship.Entity(inner.Id)).Name);
         Then(sequence, "depressurize", automation.Declare(ship.World, ship.Entity(vent.Id)).Name);
 
-        // The runner's own work joins the turn first, so the sequence takes place one and is due on
-        // every tick ending in one.
+        // The sequence is the first to join the turn, so it takes place nought and is due on every
+        // tick ending in nought.
         var runner = new AutomationRunner(automation, ship.World);
 
         var frame = 0;
@@ -226,7 +226,7 @@ public class RotaTests
         }
 
         Assert.True(shut > 0, "the door never shut");
-        Assert.Equal(1, frame % Rota.Ten);
+        Assert.Equal(0, frame % Rota.Ten);
         Assert.InRange(frame - shut, 0, Rota.Ten - 1);
     }
 
@@ -285,7 +285,7 @@ public class RotaTests
             runner.Tick(++frame);
         }
 
-        Assert.Equal(31, frame);
+        Assert.Equal(30, frame);
     }
 
     /// <summary>
@@ -438,10 +438,10 @@ public class RotaTests
             most = Math.Max(most, rota.Done - was);
         }
 
-        // Per thousand ticks: 30 door sequences sampled 100 times, 30 button ones 10 times, and 3
-        // programs checked 10 times.
+        // Per thousand ticks: 30 door sequences sampled 100 times and 30 button ones 10 times. A
+        // program is checked when it changes and on no tick, so an idle one costs nothing here.
         var total = rota.Done - before;
-        Assert.Equal(30 * 100 + 30 * 10 + 3 * 10, total);
+        Assert.Equal(30 * 100 + 30 * 10, total);
 
         // No tick carries more than twice its even share. Places are handed out in turn to
         // everything, so what is looked at every ten and what is looked at every hundred interleave

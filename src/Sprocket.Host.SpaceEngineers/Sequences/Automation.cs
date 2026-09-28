@@ -175,6 +175,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public event Action Reshaped;
 
+        /// <summary>Bumped whenever a system is switched on, which is when what it does is checked again for the start it is given.</summary>
+        public int Starts { get; private set; }
+
+        void Start()
+        {
+            Starts++;
+        }
+
         void Reshape()
         {
             var reshaped = Reshaped;
@@ -301,6 +309,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             var system = new AutomationSystem(_nextSystemId++, Guid.NewGuid());
             system.Reshaped = Reshape;
+            system.Started = Start;
             system.Name = FreeName();
             system.AddInstance();
             _systems.Add(system);
@@ -344,6 +353,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             var system = new AutomationSystem(_nextSystemId++, identity);
             system.Reshaped = Reshape;
+            system.Started = Start;
             system.Namespace = space ?? "";
             system.Name = name ?? "";
             _systems.Add(system);
@@ -529,6 +539,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _sequences.Remove(sequences[i]);
 
             system.Reshaped = null;
+            system.Started = null;
             Reshape();
             Wiring++;
             return true;

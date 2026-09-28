@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
@@ -15,8 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class Part
     {
-        const string Break = "\n\n";
-
         readonly List<string> _expects = new List<string>();
 
         public Part(string id)
@@ -25,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Annotation = "";
         }
 
+        /// <summary>The part's name, which is the slot's name wherever it is shown.</summary>
         public string Id { get; private set; }
 
         /// <summary>Whether the editor took this part for a block that was picked, rather than it being declared.</summary>
@@ -44,36 +42,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public IList<string> Expects => _expects;
 
         /// <summary>
-        /// What somebody wrote about this part, in their own words, or empty.
+        /// What somebody wrote about this part, in their own words, or empty; never its name.
         /// </summary>
         /// <remarks>
         /// Data somebody typed, not a comment: it is what a player setting the system up reads to know
         /// which of their blocks to point at, so it is part of the model and round-trips like a name.
         /// </remarks>
         public string Annotation { get; set; }
-
-        /// <summary>What the part is called on screen: the annotation's label, or its id where it has none.</summary>
-        public string Label
-        {
-            get
-            {
-                if (Annotation.Length == 0)
-                    return Id;
-
-                var end = Annotation.IndexOf(Break, StringComparison.Ordinal);
-                return end < 0 ? Annotation : Annotation.Substring(0, end);
-            }
-        }
-
-        /// <summary>What the annotation says after its label, or empty.</summary>
-        public string About
-        {
-            get
-            {
-                var end = Annotation.IndexOf(Break, StringComparison.Ordinal);
-                return end < 0 ? "" : Annotation.Substring(end + Break.Length);
-            }
-        }
 
         /// <summary>
         /// Whether this part is saved, given whether anything uses it.
@@ -87,18 +62,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return used || !Picked || Annotation.Length > 0;
         }
 
-        /// <summary>The annotation saying <paramref name="about" /> after the part's label, keeping the label.</summary>
-        public string Described(string about)
+        /// <summary>Calls the part <paramref name="id" />, and nothing else: <see cref="AutomationSystem.RenamePart" /> renames what names it.</summary>
+        public void Rename(string id)
         {
-            var label = Label;
-            return string.IsNullOrEmpty(about) ? label : label + Break + about;
-        }
-
-        /// <summary>The annotation calling the part <paramref name="label" />, keeping whatever it says after its label.</summary>
-        public string Labelled(string label)
-        {
-            var about = About;
-            return about.Length == 0 ? label : label + Break + about;
+            Id = id;
         }
     }
 }

@@ -335,7 +335,9 @@ public class AirlockTests
         a.Tick();                       // lets the runner pick the new sequence up
         a.Log.Clear();
 
-        a.Runner.Call(sequence);
+        // By hand: a step that takes time and is not waited for is a fault, so the check switches this
+        // off, and running it by hand is how somebody sees what it does all the same.
+        a.Runner.Call(sequence, sequence.System.First, true);
 
         // Both doors are moving together, which would not happen by default.
         Assert.Equal(["Inner Door:close", "Outer Door:close"], a.Log);

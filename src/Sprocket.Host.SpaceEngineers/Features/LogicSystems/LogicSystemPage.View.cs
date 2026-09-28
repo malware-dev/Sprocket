@@ -16,7 +16,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Label _halted;
         HStack _locked;
         Label _lockedText;
-        Button _unlock;
         Label _triggersHeading;
         VStack _addTriggers;
         Button _when;
@@ -53,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     // Why Sprocket switched it off, said before anything it is about.
                     new Label { Style = Styles.Caution, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _halted),
 
-                    // Why nothing below can be changed, and the way to change that, said before any of it.
+                    // Why nothing below can be changed, and how to change that, said before any of it.
                     new HStack
                     {
                         Spacing = 8f,
@@ -61,8 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         IsVisible = false,
                         Children =
                         {
-                            new Label { Style = Styles.Aside }.As(out _lockedText),
-                            new Button { Style = Styles.Button }.As(out _unlock)
+                            new Label { Style = Styles.Aside }.As(out _lockedText)
                         }
                     }.As(out _locked),
 

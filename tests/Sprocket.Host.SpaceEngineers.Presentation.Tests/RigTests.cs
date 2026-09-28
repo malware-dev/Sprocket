@@ -142,6 +142,7 @@ public class RigTests
         var close = new Act("close");
         close.Targets.Add(Named(sim, frontDoor));
         cycle.Steps.Add(close);
+        cycle.Steps.Add(new Await());
 
         // The same system fitted to the port airlock: where it used those blocks, it uses these.
         SystemInstance second = system.AddInstance();
@@ -750,6 +751,10 @@ public class RigTests
 
         Sequence sequence = pasted.Editor.Program.Sequences[0];
         Assert.False(pasted.World.CanStart(sequence, sequence.System.First), "it claimed a button somebody else holds");
+
+        // And it says whose button, and why.
+        var fault = SequenceSummary.Fault(pasted.Runner.Get(sequence, sequence.System.First));
+        Assert.Equal("Airlock Button's button does something else, so it can't start this.", SequenceText.Problem(fault, sequence));
 
         Panel panel = null!;
         foreach (Panel found in pasted.Panels())

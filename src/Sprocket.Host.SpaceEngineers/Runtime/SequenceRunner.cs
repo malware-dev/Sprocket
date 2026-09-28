@@ -123,6 +123,42 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public string Quit { get; private set; }
 
+        /// <summary>What was wrong with the program for this sequence when it was last built, or none.</summary>
+        /// <remarks>Set by the runner of the whole program when the program or its wiring changes, and on no tick.</remarks>
+        internal SequenceFault Found { get; private set; }
+
+        /// <summary>What an open editor last saw gone, or possibly swapped, among the blocks this names, or none.</summary>
+        internal SequenceFault Looked { get; set; }
+
+        /// <summary>The one of its system this runs on, or null where the system has none.</summary>
+        internal SystemInstance Instance => _instance;
+
+        /// <summary>What is known to be wrong with this sequence on the one of its system it runs on, or none.</summary>
+        /// <remarks>
+        /// Read, never worked out: what a run met, what an open editor saw, what the program said when it was built, and
+        /// what the blocks of a step being waited on said. The worst news first, because a line can only say one thing.
+        /// </remarks>
+        internal SequenceFault Fault
+        {
+            get
+            {
+                if (HasMissingSources)
+                    return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger);
+                if (_met.Exists)
+                    return _met;
+                if (Looked.Exists)
+                    return Looked;
+                if (Found.Exists && !Found.IsWarning)
+                    return Found;
+                if (_stuck.Exists && IsWaiting)
+                    return _stuck;
+                if (!string.IsNullOrEmpty(Quit))
+                    return new SequenceFault(SequenceProblem.Conflicted, SequenceFault.Trigger, Quit);
+
+                return Found;
+            }
+        }
+
         Interval _conflicts = new Interval(60);
 
         readonly AutomationRunner _owner;
@@ -135,18 +171,28 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         Hold _hold;
         bool _holding;
 
+        SequenceFault _met;
+        SequenceFault _stuck;
+
         int _tick;
 
         /// <summary>
-        /// What a block being waited on says has taken it out of this sequence's hands, or null.
+        /// What a block being waited on says has taken it out of this sequence's hands, or null; and keeps what one says
+        /// stops it finishing.
         /// </summary>
         /// <remarks>
         /// Asked of a run that is already held, and only of the blocks of the steps holding it -
         /// which for an airlock is one vent. Each answer costs the block a component lookup and a
         /// comparison, which is why it is asked on a cadence rather than on the tick.
+        /// <para>
+        /// About the state the step is waiting for, not about the block. One vent serves the cycle out and the cycle in,
+        /// and they wait for opposite things of it - so what is wrong with the vent has two answers, and only the step
+        /// knows which it is owed.
+        /// </para>
         /// </remarks>
-        string Conflicted()
+        string Troubled()
         {
+            _stuck = SequenceFault.None;
             for (var i = 0; i < _outstanding.Count; i++)
             {
                 var compiled = Compile(_outstanding[i]);
@@ -159,6 +205,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     Trouble said = compiled.Entities[t].Trouble(doing.LeadsToStateId);
                     if (said.Ends)
                         return said.Said;
+
+                    if (said.Exists && !_stuck.Exists)
+                        _stuck = new SequenceFault(SequenceProblem.Stuck, _sequence.Steps.IndexOf(_outstanding[i]), said.Said);
                 }
             }
 
@@ -168,11 +217,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// The acts this is held waiting on, empty unless it is waiting.
         /// </summary>
-        /// <remarks>
-        /// Read by <c>SequenceSummary.Fault</c>, which asks the blocks of these steps whether they
-        /// can finish at all. The runner does not ask: what is wrong with a sequence is one
-        /// question with one answer, and it already has somewhere to live.
-        /// </remarks>
         public IList<Act> Outstanding
         {
             get { return _outstanding; }
@@ -604,6 +648,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // What stopped the last run is about the last run. Somebody starting this one has
             // either mended it or is about to find out again.
             Quit = null;
+            _met = SequenceFault.None;
+            _stuck = SequenceFault.None;
             _stepIndex = 0;
             EnterStep();
             Advance(world);
@@ -641,6 +687,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (act != null)
                 {
                     IsWaiting = false;
+
+                    // A block the step needs that is gone, or may have been swapped, is found here, where the run needs
+                    // it; the working-out it rests on is already done once per change.
+                    var needed = act.HasAction ? Compile(act) : null;
+                    if (needed != null && needed.Problem != SequenceProblem.None)
+                    {
+                        Meet(new SequenceFault(needed.Problem, _stepIndex, null, needed.Which));
+                        return;
+                    }
+
                     Execute(world, act);
 
                     // Kept so an await below knows what it is waiting for. Nothing with a
@@ -674,13 +730,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     // as though it had - which for an airlock means opening the outer door because
                     // the inner one is no longer there to be shut.
                     //
-                    // Holding is all this does. A missing block is a fault, and a sequence at fault
-                    // is switched off within the second by AutomationRunner.ParkBroken, which is what
-                    // stops the run and marks it. The same road a step that cannot act at all
-                    // already travels.
-                    // Looked at the moment it is reached, so what has already arrived passes in the same
-                    // tick, and from then on when the hold's pace brings it round.
-                    if (Missing() || !Finished(world))
+                    // A block gone while it is waited on ends the run there, the same as one gone when its step
+                    // is reached. Looked at the moment the wait is reached, so what has already arrived passes in
+                    // the same tick, and from then on when the hold's pace brings it round.
+                    var gone = Gone();
+                    if (gone.Exists)
+                    {
+                        Meet(gone);
+                        return;
+                    }
+
+                    if (!Finished(world))
                     {
                         if (!_holding)
                         {
@@ -696,7 +756,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         // something or a trigger firing, so it cannot arrive faster than that, and
                         // giving up a second later than it could have is a second nobody can
                         // measure against a machine that has already stopped moving.
-                        string quit = _conflicts.Due(_tick) ? Conflicted() : null;
+                        string quit = _conflicts.Due(_tick) ? Troubled() : null;
                         if (quit != null)
                         {
                             Stop();
@@ -710,6 +770,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     _outstanding.Clear();
                     _holding = false;
+                    _stuck = SequenceFault.None;
                     IsWaiting = false;
                     Step();
                     continue;
@@ -740,31 +801,46 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             EnterStep();
         }
 
-        /// <summary>
-        /// Whether anything still being waited for names a block that is not there.
-        /// </summary>
+        /// <summary>The first block still being waited for that is gone, or may have been swapped, or none.</summary>
         /// <remarks>
-        /// Unbound rather than unsettled: the question is not whether the door has shut, it is
-        /// whether there is still a door. A block that has not loaded yet counts too, and holding is
-        /// the right answer for both - one of them arrives, and the other gets the sequence switched
-        /// off for being at fault.
+        /// Unbound rather than unsettled: the question is not whether the door has shut, it is whether there is still a
+        /// door. What the step's blocks come to is worked out once per change, so this is a lookup per step waited on.
         /// </remarks>
-        bool Missing()
+        SequenceFault Gone()
         {
             for (var i = 0; i < _outstanding.Count; i++)
             {
                 if (!_outstanding[i].HasAction)
                     continue;
 
-                var waiting = ActedOn(_outstanding[i].Targets);
-                for (var q = 0; q < waiting.Count; q++)
-                {
-                    if (_bindings.Entity(waiting[q]) == null)
-                        return true;
-                }
+                var compiled = Compile(_outstanding[i]);
+                if (compiled.Problem != SequenceProblem.None)
+                    return new SequenceFault(compiled.Problem, _sequence.Steps.IndexOf(_outstanding[i]), null, compiled.Which);
             }
 
-            return false;
+            return SequenceFault.None;
+        }
+
+        /// <summary>Asks the blocks being waited on whether they can finish, for an open editor to show, changing nothing about the run.</summary>
+        internal void Glance()
+        {
+            if (IsWaiting && _outstanding.Count > 0 && _bindings != null)
+                Troubled();
+        }
+
+        /// <summary>Ends the run at a step it cannot do, keeping why, and has what it runs on switched off.</summary>
+        void Meet(SequenceFault fault)
+        {
+            Stop();
+            _met = fault;
+            _owner.Faulted(_sequence, _instance, fault);
+        }
+
+        /// <summary>Takes what the program says is wrong, now it has been built again, forgetting what the last run met.</summary>
+        internal void Checked(SequenceFault found)
+        {
+            Found = found;
+            _met = SequenceFault.None;
         }
 
         /// <summary>How many ticks the slowest of what is being waited on should take, or unknown if any cannot say.</summary>
@@ -830,6 +906,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public readonly List<EntityAction> Actions = new List<EntityAction>();
             public readonly List<IList<Literal>> Values = new List<IList<Literal>>();
             public readonly List<Order> Orders = new List<Order>();
+
+            /// <summary>Why the act cannot be done, gone or possibly swapped, or none.</summary>
+            public SequenceProblem Problem;
+
+            /// <summary>The block that is so, by its reference.</summary>
+            public string Which;
         }
 
         readonly Dictionary<Act, Compiled> _compiled = new Dictionary<Act, Compiled>();
@@ -869,6 +951,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             Compilations++;
             compiled = new Compiled();
+            Needed(compiled, step);
             var acting = ActedOn(step.Targets);
             for (var i = 0; i < acting.Count; i++)
             {
@@ -892,6 +975,41 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _compiled[step] = compiled;
             return compiled;
+        }
+
+        /// <summary>Finds the first block the act needs and cannot have: a slot left empty, a block gone, or one possibly swapped for another.</summary>
+        /// <remarks>A slot that may be left empty is skipped, and so is a block gone from one.</remarks>
+        void Needed(Compiled compiled, Act step)
+        {
+            var system = _sequence.System;
+            for (var s = 0; s < step.Targets.Count; s++)
+            {
+                var slot = step.Targets[s];
+                var part = system == null ? null : system.FindPart(slot);
+                var filled = _instance == null ? null : _instance.FilledWith(slot);
+                if (part != null && _instance != null && (filled == null || filled.Count == 0))
+                {
+                    if (part.Optional)
+                        continue;
+
+                    compiled.Problem = SequenceProblem.EmptySlot;
+                    compiled.Which = slot;
+                    return;
+                }
+
+                var count = filled == null ? 1 : filled.Count;
+                for (var n = 0; n < count; n++)
+                {
+                    var name = filled == null ? slot : filled[n];
+                    var points = _bindings.State(name);
+                    if (points == RefState.Bound || (points == RefState.Lost && part != null && part.Optional))
+                        continue;
+
+                    compiled.Problem = points == RefState.Lost ? SequenceProblem.MissingTarget : SequenceProblem.Adrift;
+                    compiled.Which = name;
+                    return;
+                }
+            }
         }
 
         /// <summary>

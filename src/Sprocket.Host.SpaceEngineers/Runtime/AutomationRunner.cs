@@ -24,11 +24,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Bindings _bindings = new Bindings();
         readonly Rota _rota;
 
-        readonly Shift _parking;
-
         readonly bool _runsRota;
 
         bool _reshaped = true;
+        int _checkedEdits = -1;
+        int _checkedWiring = -1;
+        int _checkedUnstarted = -1;
+        int _checkedStarts = -1;
+        int _lookedBindings = -1;
+        int _lookedEdits = -1;
+        int _lookedRunners = -1;
 
         /// <summary>
         /// A runner with a rota of its own, which it runs itself, for a program that shares its world
@@ -48,9 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Live = true;
 
             _automation.Reshaped += delegate { _reshaped = true; };
-
-            _parking = new Shift(_rota.Join(), ParkBroken);
-            _rota.Every(_parking, Rota.Hundred);
         }
 
         /// <summary>
@@ -105,14 +107,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             CurrentTick = tick;
 
-            if (_reshaped)
-            {
-                _reshaped = false;
-                Reconcile();
-            }
-
             // Two integer comparisons on an ordinary tick. See Bindings.Refresh.
             _bindings.Refresh(_world, _automation);
+
+            Checking();
 
             // The sequences are not visited here: each is on the rota for what it is doing, and the
             // rota calls what is due. A world's rota is run by the session once every Sprocket in it
@@ -124,10 +122,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Takes everything this program put on the rota off it, when its Sprocket goes away.</summary>
         public void Retire()
         {
-            _rota.Leave(_parking);
             foreach (var runner in _runners.Values)
                 runner.Retire();
         }
+
+        /// <summary>How many times the program has been checked.</summary>
+        /// <remarks>Counted so it can be shown that a program nothing changes is checked once.</remarks>
+        internal int Checks { get; private set; }
+
+        /// <summary>How many times an open editor's look has looked at the construct.</summary>
+        /// <remarks>Counted so it can be shown that an idle editor looks at nothing.</remarks>
+        internal int Looks { get; private set; }
 
         /// <summary>How many times the runners have been matched to the program.</summary>
         /// <remarks>Counted so it can be shown that an ordinary tick matches nothing.</remarks>
@@ -338,84 +343,142 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        /// <summary>
-        /// Switches off what cannot work, with why: a logic system as a whole, and one of a blueprint's on its own.
-        /// </summary>
+        /// <summary>Matches the runners to the program where it gained or lost something, and checks it where it or its wiring changed; nothing otherwise.</summary>
         /// <remarks>
-        /// On the world's rota every hundred ticks, and whether or not anybody has a screen open,
-        /// because a sequence that cannot work is not made safer by nobody looking at it.
-        /// <para>
-        /// A sequence nothing can start never fires, and one whose blocks are gone can only get part way
-        /// through - which is worse than not starting, because it leaves a machine half-way. The switch that
-        /// goes off is the one a person sees, so nothing is stopped behind a switch that says on; and one of a
-        /// blueprint's goes off alone, so the port airlock missing a door leaves the front one working.
-        /// </para>
-        /// <para>
-        /// <b>Never switched back on by Sprocket.</b> Mending it leaves it off, and starting it again is
-        /// somebody's decision - Sprocket starting a machine on its own judgement is the one direction that
-        /// can hurt.
-        /// </para>
+        /// A flag and four integer comparisons. Asked on every tick, and by an editor about to show what is wrong, so a
+        /// screen built straight after an edit reads it checked.
         /// </remarks>
-        void ParkBroken(int tick)
+        public void Checking()
         {
-            var systems = _automation.Systems;
-            for (var i = 0; i < systems.Count; i++)
+            if (_reshaped)
             {
-                AutomationSystem system = systems[i];
-                if (!system.Enabled)
-                    continue;
+                _reshaped = false;
+                Reconcile();
 
-                if (!system.IsBlueprint)
-                {
-                    var halt = Broken(system, system.First);
-                    if (halt != null)
-                    {
-                        system.Enabled = false;
-                        system.Halt = halt;
-                    }
+                // Runners just made have been told nothing yet.
+                _checkedEdits = -1;
+            }
 
-                    continue;
-                }
+            if (_automation.Edits != _checkedEdits || _automation.Wiring != _checkedWiring || _world.Unstarted != _checkedUnstarted
+                || _automation.Starts != _checkedStarts)
+            {
+                Check();
+            }
+        }
 
+        /// <summary>What the program says is wrong with each sequence, on every system and every blockset of a blueprint, with what cannot work switched off.</summary>
+        /// <remarks>
+        /// What a program can tell about itself without running, the way a compiler does: on the tick after it or its
+        /// wiring changes, and on no other. What the construct has become since is found by a run, at the step it matters,
+        /// and by an open editor for somebody looking.
+        /// </remarks>
+        void Check()
+        {
+            Checks++;
+            _checkedEdits = _automation.Edits;
+            _checkedWiring = _automation.Wiring;
+            _checkedUnstarted = _world.Unstarted;
+            _checkedStarts = _automation.Starts;
+
+            var systems = _automation.Systems;
+            for (var s = 0; s < systems.Count; s++)
+            {
+                var system = systems[s];
                 var instances = system.Instances;
+                var sequences = system.Sequences;
+
                 for (var n = 0; n < instances.Count; n++)
                 {
-                    if (!instances[n].Enabled)
+                    for (var q = 0; q < sequences.Count; q++)
+                    {
+                        var runner = Get(sequences[q], instances[n]);
+                        if (runner != null)
+                            runner.Checked(SequenceSummary.Checked(_world, Bindings, sequences[q], instances[n]));
+                    }
+                }
+
+                SwitchOffBroken(system);
+            }
+        }
+
+        /// <summary>Switches off the system, or each one of a blueprint's, where the program says a sequence of it cannot work.</summary>
+        /// <remarks>Faults only: a sequence nothing starts yet is not broken, and switching it off would make the step somebody is about to point at it fail for a second reason.</remarks>
+        void SwitchOffBroken(AutomationSystem system)
+        {
+            var instances = system.Instances;
+            var sequences = system.Sequences;
+
+            for (var n = 0; n < instances.Count && system.Enabled; n++)
+            {
+                if (!instances[n].Enabled)
+                    continue;
+
+                for (var q = 0; q < sequences.Count; q++)
+                {
+                    var runner = Get(sequences[q], instances[n]);
+                    if (runner == null || !runner.Found.Parks)
                         continue;
 
-                    var halt = Broken(system, instances[n]);
-                    if (halt == null)
-                        continue;
-
-                    instances[n].Enabled = false;
-                    instances[n].Halt = halt;
+                    Faulted(sequences[q], instances[n], runner.Found);
+                    break;
                 }
             }
         }
 
-        /// <summary>Why <paramref name="system" /> cannot work on <paramref name="instance" />, or null where it can.</summary>
+        /// <summary>Switches off what <paramref name="sequence" /> runs on, with why, where it is switched on.</summary>
         /// <remarks>
-        /// Faults only. A sequence nothing starts yet is not broken, and switching it off would make the step somebody is
-        /// about to point at it fail for a second reason.
+        /// A logic system of its own as a whole, and one of a blueprint's alone, so the port airlock missing a door leaves
+        /// the front one working. Never switched back on here: starting a machine again is somebody's decision.
         /// </remarks>
-        Halt Broken(AutomationSystem system, SystemInstance instance)
+        internal void Faulted(Sequence sequence, SystemInstance instance, SequenceFault fault)
         {
-            var sequences = system.Sequences;
-            for (var q = 0; q < sequences.Count; q++)
+            var system = sequence.System;
+            if (system == null || !system.Enabled)
+                return;
+
+            var block = fault.Which == null || fault.Problem == SequenceProblem.EmptySlot
+                ? fault.Which
+                : _automation.Called(fault.Which, _world.Values);
+            var halt = new Halt(fault.Problem, sequence.Number, fault.Step, fault.Because, block);
+
+            if (system.IsBlueprint && instance != null)
             {
-                var fault = SequenceSummary.Fault(_world, Bindings, sequences[q], Get(sequences[q], instance), instance);
-                if (!fault.Parks)
-                    continue;
+                if (!instance.Enabled)
+                    return;
 
-                var block = fault.Which == null ? null
-                    : system.FindPart(fault.Which) != null && fault.Problem == SequenceProblem.EmptySlot
-                        ? system.FindPart(fault.Which).Label
-                        : _automation.Called(fault.Which, _world.Values);
-
-                return new Halt(fault.Problem, sequences[q].Number, fault.Step, fault.Because, block);
+                instance.Enabled = false;
+                instance.Halt = halt;
+                return;
             }
 
-            return null;
+            system.Enabled = false;
+            system.Halt = halt;
+        }
+
+        /// <summary>Looks at the construct for each sequence, on every system and every blockset of a blueprint, for an open editor to show what is gone or may have been swapped.</summary>
+        /// <remarks>
+        /// Only for somebody looking, and nothing is switched off here: a run finds the same at the step that needs it. The
+        /// blocks are looked at only where what the names point at, or the program, has changed since the last look, so an
+        /// idle editor costs a pass over the runners asking which are waiting, however large the construct.
+        /// </remarks>
+        public void Look()
+        {
+            // What a step being waited on says about finishing changes without anything saying so, so it is asked each
+            // look - of the few runs that are waiting, and of their blocks alone.
+            foreach (var runner in _runners.Values)
+                runner.Glance();
+
+            var bindings = Bindings;
+            if (bindings.Revision == _lookedBindings && _automation.Edits == _lookedEdits && Reconciled == _lookedRunners)
+                return;
+
+            Looks++;
+            _lookedBindings = bindings.Revision;
+            _lookedEdits = _automation.Edits;
+            _lookedRunners = Reconciled;
+
+            foreach (var runner in _runners.Values)
+                runner.Looked = SequenceSummary.Looked(bindings, runner.Sequence, runner.Instance);
         }
     }
 }

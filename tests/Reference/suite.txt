@@ -37,9 +37,9 @@ blueprint-filling   60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25
 blueprint-picking   60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25 62 25 62 1195 201 25 62 130 272 700 200
 blueprint-editing   60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25 62 25 62 1195 201 25 62 1343 215 1330 144
 blueprint-another   60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25 62 25 62 1195 201 25 62 198 338
-blueprint-grouped   60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25 62 25 62 1195 201 25 62 198 338 1389 73 25 62
+blueprint-grouped   60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25 62 25 62 1195 201 25 62 198 338 type Port enter 25 62
 blueprint-system    60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25 62 25 62 1195 201 25 62 1343 215
-blueprint-blocksets 60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25 62 25 62 1195 201 25 62 198 338 1389 73 25 62 1343 215 220 143
+blueprint-blocksets 60 130 type Airlock enter 60 237 200 351 560 333 1353 311 25 62 25 62 1195 201 25 62 198 338 type Port enter 25 62 1343 215 220 143
 
 # --- a name another system has, refused where it is typed -----------------------------------------
 root-taken          60 130 type Airlock enter 25 62 60 130 type Airlock enter

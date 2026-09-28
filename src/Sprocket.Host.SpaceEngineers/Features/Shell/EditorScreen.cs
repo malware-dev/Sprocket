@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 
@@ -42,6 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _primaryText = "";
         ICommand _primary;
         string _question = "";
+        Arguments _questionArguments;
         bool _questionIsHere;
         ChoiceEntry _default;
 
@@ -253,6 +255,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public string Question => _question;
 
+        /// <summary>The words for the question's named slots, or null where it has none and is read as it is.</summary>
+        public Arguments QuestionArguments => _questionArguments;
+
         /// <summary>Whether a question is waiting.</summary>
         public bool HasQuestion => !string.IsNullOrEmpty(_question);
 
@@ -303,7 +308,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Raises <paramref name="question" />, with no answers yet; <paramref name="here" /> says it belongs to what was pressed.</summary>
         public void Ask(string question, bool here)
         {
+            Ask(question, null, here);
+        }
+
+        /// <summary>The same, with the words for its named slots in <paramref name="arguments" />, so a name is shown as it was written.</summary>
+        public void Ask(string question, Arguments arguments, bool here)
+        {
             _question = question ?? "";
+            _questionArguments = arguments;
             _questionIsHere = here;
             _answers.Clear();
             _default = null;
@@ -325,6 +337,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void Unask()
         {
             _question = "";
+            _questionArguments = null;
             _questionIsHere = false;
             _answers.Clear();
             _default = null;

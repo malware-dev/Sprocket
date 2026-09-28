@@ -180,7 +180,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (_system.Enabled || Editor.Program.Wiring == _quiet || !HasSteps())
                 return true;
 
-            Editor.Ask(Template.Fill(Editor.Texts.SystemSwitchOnQuestion, "name", _system.Name));
+            var arguments = new Arguments();
+            arguments.Set("name", _system.Name);
+            Editor.Ask(Editor.Texts.SystemSwitchOnQuestion, arguments);
 
             Editor.Answer(Editor.Texts.SystemSwitchItOn, delegate
             {
@@ -329,7 +331,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             // Walks the triggers' blocks for their names, which is why it runs only when the page is built.
 
             ArrangeUsing(texts);
-            ArrangeLock(texts);
+            ArrangeLock();
 
             _triggersHeading.Text = texts.SystemTriggers.ToUpperInvariant();
             _triggersHeading.Style = Styles.NextHeading;
@@ -367,8 +369,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
         }
 
-        /// <summary>Hides the ways to add something while the system may run, and says why in their place, with the way to switch it off.</summary>
-        void ArrangeLock(Texts texts)
+        /// <summary>Hides the ways to add something while the system may run, and says why in their place.</summary>
+        void ArrangeLock()
         {
             var editable = Editable;
 
@@ -377,9 +379,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _locked.IsVisible = !editable;
             _lockedText.Text = LockedText;
-            _unlock.IsVisible = Editor.Holder == null;
-            _unlock.Text = texts.SystemSwitchOffToEdit;
-            _unlock.Command = Editor.Act(Cmd.Switch, delegate { Editor.SwitchSystem(_system, false); });
         }
 
         /// <summary>Says why Sprocket switched off the system, or the blockset shown, where it did.</summary>
@@ -424,7 +423,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _usingName.IsVisible = !blueprint;
 
             _usingChoice.IsVisible = blueprint && shown != null;
-            _editPanel.IsVisible = blueprint;
+            _editPanel.IsVisible = blueprint && Editable;
             _editPanel.Text = texts.SystemEditPanel;
             _editPanel.Command = blueprint ? Changes(Cmd.EditBlueprint, delegate { Editor.Push(new BlueprintPage(Editor, _system, true)); }) : null;
 
@@ -521,8 +520,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         SequenceFault Fault(Sequence sequence, SystemInstance through)
         {
-            return SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, sequence,
-                Editor.Runner.Get(sequence, through), through);
+            return SequenceSummary.Fault(Editor.Runner.Get(sequence, through));
         }
 
         void Word(TriggerRow row, Trigger trigger)

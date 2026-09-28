@@ -97,6 +97,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _fills.Remove(slot);
         }
 
+        /// <summary>Moves what fills slot <paramref name="was" /> to the slot's new name, <paramref name="now" />.</summary>
+        public void RenameSlot(string was, string now)
+        {
+            List<string> chosen;
+            if (!_fills.TryGetValue(was, out chosen))
+                return;
+
+            _fills.Remove(was);
+            _fills[now] = chosen;
+        }
+
         public IList<string> FilledWith(string slot)
         {
             List<string> chosen;

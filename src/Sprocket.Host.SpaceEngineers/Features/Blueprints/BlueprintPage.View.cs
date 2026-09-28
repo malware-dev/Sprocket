@@ -10,6 +10,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     sealed partial class BlueprintPage
     {
         RichText _description;
+        HStack _troubled;
+        Label _trouble;
+        Button _openTrouble;
         VStack _writing;
         Label _writingHeading;
         Composer _composer;
@@ -26,6 +29,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 Children =
                 {
                     new RichText { Style = Styles.Description, IsVisible = false }.As(out _description),
+
+                    // What is wrong with the blockset being filled, and the way to where it is mended.
+                    new HStack
+                    {
+                        Spacing = 8f,
+                        Padding = new Thickness(0f, 0f, 0f, 8f),
+                        IsVisible = false,
+                        Children =
+                        {
+                            new Label { Style = Styles.Problem, Wraps = true, Placement = Flex.Grow }.As(out _trouble),
+                            new Button { Style = Styles.Button }.As(out _openTrouble)
+                        }
+                    }.As(out _troubled),
 
                     new VStack
                     {

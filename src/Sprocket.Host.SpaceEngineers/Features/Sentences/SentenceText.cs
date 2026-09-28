@@ -28,6 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         const string OnWord = "on";
         const string ToWord = "to";
 
+        /// <summary>How many blocks a sentence names before it counts the rest.</summary>
+        const int Said = 2;
+
 
         /// <summary>A slot nobody has filled in yet.</summary>
         public const string Empty = "…";
@@ -231,14 +234,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (entityIds.Count == 0)
                 return Empty;
 
-            var names = new List<string>();
-            for (var i = 0; i < entityIds.Count; i++)
+            var names = new List<string>(Said);
+            for (var i = 0; i < entityIds.Count && i < Said; i++)
             {
                 var entity = world.FindEntity(entityIds[i]);
                 names.Add(entity == null ? Missing : entity.Name);
             }
 
-            return Joined(names, requiresAll);
+            return Joined(names, entityIds.Count, requiresAll);
         }
 
         /// <summary>
@@ -253,28 +256,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (refs.Count == 0)
                 return Empty;
 
-            var names = new List<string>();
-            for (var i = 0; i < refs.Count; i++)
+            var names = new List<string>(Said);
+            for (var i = 0; i < refs.Count && i < Said; i++)
             {
                 var entity = bindings.Entity(refs[i]);
                 names.Add(entity == null ? Missing : entity.Name);
             }
 
-            return Joined(names, requiresAll);
+            return Joined(names, refs.Count, requiresAll);
         }
 
-        static string Joined(List<string> names, bool requiresAll)
+        /// <summary>The first <see cref="Said" /> of <paramref name="count" /> blocks by <paramref name="names" />, and how many more there are.</summary>
+        static string Joined(List<string> names, int count, bool requiresAll)
         {
             var joiner = requiresAll ? " and " : " or ";
 
-            if (names.Count == 1)
+            if (count == 1)
                 return names[0];
-            if (names.Count == 2)
+            if (count == 2)
                 return names[0] + joiner + names[1];
 
             var builder = new StringBuilder();
             builder.Append(names[0]).Append(", ").Append(names[1]);
-            builder.Append(joiner).Append(names.Count - 2);
+            builder.Append(joiner).Append(count - 2);
             builder.Append(" more");
             return builder.ToString();
         }

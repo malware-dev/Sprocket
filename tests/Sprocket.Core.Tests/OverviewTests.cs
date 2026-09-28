@@ -179,9 +179,11 @@ public class OverviewTests
         Assert.Equal(1, overview.Warnings);
         Assert.Equal(1, overview.Rows[0].Warnings);
 
-        // And a rule whose blocks are gone is the other kind.
+        // And a rule whose blocks are gone is the other kind, once something has run into it or an open
+        // editor has looked.
         ship.Rig.Grind(2);
         ship.Tick(3);
+        ship.Runner.Look();
 
         overview.Fill(ship.World, ship.Program, ship.Runner);
 

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -99,25 +98,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return running ? texts.SystemsRunning : "";
         }
 
+        /// <summary>The first of a system's sequences with something wrong with it on <paramref name="instance" />, and what, or null where none has.</summary>
+        /// <remarks>A lookup per sequence: what is wrong is found where it happens and kept by each sequence's runner.</remarks>
+        internal static Sequence Failing(AutomationRunner runner, AutomationSystem system, SystemInstance instance,
+            out SequenceFault fault)
+        {
+            var sequences = system.Sequences;
+            var through = instance ?? system.First;
+
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                fault = SequenceSummary.Fault(runner.Get(sequences[i], through));
+                if (fault.Exists && !fault.IsWarning)
+                    return sequences[i];
+            }
+
+            fault = SequenceFault.None;
+            return null;
+        }
+
         /// <summary>
         /// How many of a system's sequences have something wrong with them.
         /// </summary>
-        /// <remarks>
-        /// On a cadence rather than on a tick: <see cref="SequenceSummary.Fault" /> may send a host
-        /// off to read something expensive.
-        /// </remarks>
-        public static int Problems(GridWorld world, Bindings bindings, AutomationRunner runner,
-            AutomationSystem system, SystemInstance instance)
+        /// <remarks>A lookup per sequence, as <see cref="Failing" /> is.</remarks>
+        public static int Problems(AutomationRunner runner, AutomationSystem system, SystemInstance instance)
         {
             var count = 0;
             var sequences = system.Sequences;
 
             for (var i = 0; i < sequences.Count; i++)
             {
-                SystemInstance through = instance ?? system.First;
-                SequenceRunner state = runner.Get(sequences[i], through);
-
-                var fault = SequenceSummary.Fault(world, bindings, sequences[i], state, through);
+                var fault = SequenceSummary.Fault(runner.Get(sequences[i], instance ?? system.First));
                 if (fault.Exists && !fault.IsWarning)
                     count++;
             }
@@ -138,18 +149,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// otherwise, and it is the case where not saying is worse than saying too much.
         /// </para>
         /// </remarks>
-        public static int Remarks(GridWorld world, Bindings bindings, AutomationRunner runner,
-            AutomationSystem system, SystemInstance instance)
+        public static int Remarks(AutomationRunner runner, AutomationSystem system, SystemInstance instance)
         {
             var count = 0;
             var sequences = system.Sequences;
 
             for (var i = 0; i < sequences.Count; i++)
             {
-                SystemInstance through = instance ?? system.First;
-                SequenceRunner state = runner.Get(sequences[i], through);
-
-                var fault = SequenceSummary.Fault(world, bindings, sequences[i], state, through);
+                var fault = SequenceSummary.Fault(runner.Get(sequences[i], instance ?? system.First));
                 if (fault.Problem == SequenceProblem.Conflicted)
                     count++;
             }

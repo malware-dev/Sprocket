@@ -139,6 +139,7 @@ public class SwitchTests
         var ship = Build();
         ship.Secure.Steps.Add(new Wait(600));
         ship.Secure.Steps.Add(Do("open", ship.Ref(ship.Outer)));
+        ship.Secure.Steps.Add(new Await());
 
         ship.Tick(Rota.Ten);
         ship.Inner.ForceOpen();
@@ -159,30 +160,30 @@ public class SwitchTests
     }
 
     /// <summary>
-    /// Switching a logic system on, or one of it, forgets why Sprocket switched it off, and leaves the other switch alone.
+    /// Switching a logic system on starts it again: it forgets why Sprocket switched it off, and switches back on each one
+    /// of it Sprocket switched off, while one a person switched off stays off.
     /// </summary>
-    /// <remarks>
-    /// Starting the machine must not start the one of it somebody had stopped.
-    /// </remarks>
     [Fact]
-    public void SwitchingOnForgetsWhyItWentOff()
+    public void SwitchingOnStartsEverythingSprocketStopped()
     {
         var ship = Build();
-        var airlock = ship.Airlock.First!;
-        airlock.Enabled = false;
-        airlock.Halt = new Halt(SequenceProblem.MissingTarget, ship.Secure.Number, 0, null, "Outer Door");
+        var stopped = ship.Airlock.First!;
+        stopped.Enabled = false;
+        stopped.Halt = new Halt(SequenceProblem.MissingTarget, ship.Secure.Number, 0, null, "Outer Door");
+
+        var parked = ship.Airlock.AddInstance();
+        parked.Enabled = false;
+
         ship.Airlock.Enabled = false;
         ship.Airlock.Halt = new Halt(SequenceProblem.NeverTriggered, ship.Secure.Number, -1, null, null);
+        var starts = ship.Program.Starts;
 
         ship.Airlock.Enabled = true;
 
         Assert.Null(ship.Airlock.Halt);
-        Assert.NotNull(airlock.Halt);
-        Assert.False(ship.Secure.CanRun(airlock));
-
-        airlock.Enabled = true;
-
-        Assert.Null(airlock.Halt);
-        Assert.True(ship.Secure.CanRun(airlock));
+        Assert.Null(stopped.Halt);
+        Assert.True(ship.Secure.CanRun(stopped));
+        Assert.False(ship.Secure.CanRun(parked));
+        Assert.Equal(starts + 1, ship.Program.Starts);
     }
 }

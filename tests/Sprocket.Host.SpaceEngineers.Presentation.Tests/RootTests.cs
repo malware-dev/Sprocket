@@ -60,6 +60,10 @@ public class RootTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
+        // On, so its one shows the switch as it stands: a blueprint switched off shows every one of it off.
+        sim.Editor.Program.Systems.First(system => system.IsBlueprint).Enabled = true;
+        sim.Tick();
+
         var rows = sim.Editor.RootRows();
         Assert.Equal(sim.Texts.RowSwitchOff, rows[0].SwitchPart.Tip?.Text);
         Assert.Equal(sim.Texts.RowSwitchOff, rows[1].SwitchPart.Tip?.Text);

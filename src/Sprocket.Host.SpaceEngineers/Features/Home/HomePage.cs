@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
@@ -104,6 +105,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <remarks>Called when the editor builds the screen: on arriving at the page, coming back to it, and a change of language.</remarks>
         public override void Build()
         {
+            // Arriving at the construct's own list is the moment somebody wants to know how everything on it stands.
+            Editor.Runner.Look();
             Collect();
             _shape = Shape();
             Show(true);
@@ -126,12 +129,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         }
 
         /// <summary>Gives a row the switch of one of the logic systems made from a blueprint, which stops that one and nothing else.</summary>
-        public void Switched(StatusRow row, SystemInstance instance)
+        /// <remarks>Shown off while the blueprint is off, whatever its own switch holds, and switching it on then asks about the blueprint.</remarks>
+        public void Switched(StatusRow row, AutomationSystem system, SystemInstance instance)
         {
             if (instance == null)
                 return;
 
-            row.Flips = Editor.Act(Cmd.EnableInstance, delegate { instance.Enabled = !instance.Enabled; });
+            row.Flips = Editor.Act(Cmd.EnableInstance, delegate
+            {
+                Editor.SwitchInstance(system, instance, !(system.Enabled && instance.Enabled));
+            });
         }
 
         /// <summary>
@@ -145,8 +152,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         public void Live(StatusRow row, AutomationSystem system, SystemInstance instance, bool recount, bool shown,
             Texts texts)
         {
-            Live(row, system, instance, instance != null && instance.Enabled, instance == null ? null : instance.Halt, recount, shown,
-                texts);
+            Live(row, system, instance, instance != null && system.Enabled && instance.Enabled, instance == null ? null : instance.Halt,
+                recount, shown, texts);
         }
 
         /// <summary>Brings a row up to what its logic system is doing now, its switch showing <paramref name="on" /> and why Sprocket switched it off where it did.</summary>
@@ -159,13 +166,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             {
                 if (recount)
                 {
-                    var problems = SystemSummary.Problems(Editor.World, Editor.Runner.Bindings, Editor.Runner, system, instance);
-                    var remarks = SystemSummary.Remarks(Editor.World, Editor.Runner.Bindings, Editor.Runner, system, instance);
+                    var problems = SystemSummary.Problems(Editor.Runner, system, instance);
+                    var remarks = SystemSummary.Remarks(Editor.Runner, system, instance);
                     var stopped = on || halt == null ? "" : SequenceText.Stopped(halt, system);
-                    changed |= row.Problems != problems || row.Remarks != remarks || row.Problem != stopped;
+                    var said = stopped.Length > 0 || problems == 0 ? stopped : Failing(system, instance);
+                    changed |= row.Problems != problems || row.Remarks != remarks || row.Problem != said;
                     row.Problems = problems;
                     row.Remarks = remarks;
-                    row.Problem = stopped;
+                    row.Problem = said;
                     row.ProblemIsWarning = problems == 0;
                     row.Parked = stopped.Length > 0;
                 }
@@ -179,6 +187,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             if (changed)
                 row.Show(texts);
+        }
+
+        /// <summary>What is wrong with <paramref name="system" /> on <paramref name="instance" />, said in place of what it is doing.</summary>
+        string Failing(AutomationSystem system, SystemInstance instance)
+        {
+            SequenceFault fault;
+            var sequence = SystemSummary.Failing(Editor.Runner, system, instance, out fault);
+            return sequence == null ? "" : SequenceText.Failing(fault, sequence);
         }
 
         /// <summary>Adds another logic system made from a blueprint, numbered, and opens its configuration panel on it with its name in hand to be given.</summary>

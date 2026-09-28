@@ -31,6 +31,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Told whenever a sequence or one of this system comes or goes. See <see cref="Automation.Reshaped" />.</summary>
         internal Action Reshaped;
 
+        /// <summary>Told whenever the system is switched on, so the program is checked for the start it is given. See <see cref="Automation.Starts" />.</summary>
+        internal Action Started;
+
         void Reshape()
         {
             if (Reshaped != null)
@@ -47,16 +50,31 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>Whether the system may run, which is also what keeps what it does from being changed while it does.</summary>
-        /// <remarks>One switch for everything the system does. Switching it on forgets why Sprocket switched it off.</remarks>
+        /// <remarks>
+        /// One switch for everything the system does, and switching it on is starting the machine again: it forgets why
+        /// Sprocket switched it off, and switches back on each one of it Sprocket switched off. One somebody switched off
+        /// stays off, because starting the machine must not start what a person stopped.
+        /// </remarks>
         public bool Enabled
         {
             get { return _enabled; }
             set
             {
                 if (value)
+                {
                     Halt = null;
+                    for (var i = 0; i < _instances.Count; i++)
+                    {
+                        if (_instances[i].Halt != null)
+                            _instances[i].Enabled = true;
+                    }
+                }
 
+                var started = value && !_enabled;
                 _enabled = value;
+
+                if (started && Started != null)
+                    Started();
             }
         }
 
@@ -267,6 +285,44 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// both have to survive deleting the last step that mentioned it.
         /// </remarks>
         public IReadOnlyList<Part> Parts => _parts;
+
+        /// <summary>Renames <paramref name="part" /> to <paramref name="name" />, everywhere the system names it.</summary>
+        public void RenamePart(Part part, string name)
+        {
+            var was = part.Id;
+
+            for (var i = 0; i < _triggers.Count; i++)
+            {
+                var moment = _triggers[i] as MomentTrigger;
+                if (moment != null)
+                    Rename(moment.Sources, was, name);
+            }
+
+            for (var s = 0; s < _sequences.Count; s++)
+            {
+                var steps = _sequences[s].Steps;
+                for (var i = 0; i < steps.Count; i++)
+                {
+                    var act = steps[i] as Act;
+                    if (act != null)
+                        Rename(act.Targets, was, name);
+                }
+            }
+
+            for (var i = 0; i < _instances.Count; i++)
+                _instances[i].RenameSlot(was, name);
+
+            part.Rename(name);
+        }
+
+        static void Rename(IList<string> names, string was, string now)
+        {
+            for (var i = 0; i < names.Count; i++)
+            {
+                if (names[i] == was)
+                    names[i] = now;
+            }
+        }
 
         public Part FindPart(string name)
         {

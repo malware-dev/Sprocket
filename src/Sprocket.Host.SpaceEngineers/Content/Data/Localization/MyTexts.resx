@@ -192,7 +192,7 @@ This one becomes the first of them.</value>
     <comment>Asked before one of the logic systems made from a blueprint is deleted, with its name under it. Only that one goes.</comment>
   </data>
   <data name="Sprocket.Delete.InstanceKept" xml:space="preserve">
-    <value>The {name} blueprint and the other logic systems made from it are kept. This cannot be undone.</value>
+    <value>The **{name}** blueprint and the other logic systems made from it are kept. This cannot be undone.</value>
     <comment>Said on the answer that deletes one of the logic systems made from a blueprint. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
@@ -613,20 +613,24 @@ Press to rename it.</value>
     <value>optional</value>
     <comment>After the name of a slot that may be left without a block.</comment>
   </data>
+  <data name="Sprocket.Blueprint.OpenSequence" xml:space="preserve">
+    <value>Open {name}</value>
+    <comment>Button beside what is wrong with a blockset, opening the sequence at fault as that blockset runs it. {name} is the sequence's name.</comment>
+  </data>
   <data name="Sprocket.Blueprint.NoneFits" xml:space="preserve">
     <value>Nothing on this construct can fill it.</value>
     <comment>Where no block on the construct can fill a part.</comment>
   </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
-    <value>{name} is switched on.</value>
+    <value>{name} is switched on. Switch it off to change it.</value>
     <comment>Said in place of the buttons that change a logic system, or a sequence in it, while it is switched on. {name} is the logic system's name.</comment>
   </data>
-  <data name="Sprocket.System.SwitchOffToEdit" xml:space="preserve">
-    <value>Switch it off to edit</value>
-    <comment>Button beside the words above, that switches the logic system off so it can be changed.</comment>
+  <data name="Sprocket.System.OffQuestion" xml:space="preserve">
+    <value>**{name}** is switched off. Switch it on?</value>
+    <comment>Asked on switching on one of a blueprint's logic systems while the blueprint is switched off. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.System.SwitchOnQuestion" xml:space="preserve">
-    <value>Switch {name} on?</value>
+    <value>Switch **{name}** on?</value>
     <comment>Asked on leaving a logic system that was changed and is still switched off. {name} is its name.</comment>
   </data>
   <data name="Sprocket.System.SwitchItOn" xml:space="preserve">
@@ -638,12 +642,16 @@ Press to rename it.</value>
     <comment>The answer that leaves the logic system switched off.</comment>
   </data>
   <data name="Sprocket.Blueprint.SwitchOffQuestion" xml:space="preserve">
-    <value>Switch off the {name} blueprint?</value>
+    <value>Switch off the **{name}** blueprint?</value>
     <comment>Asked before a blueprint is switched off. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.Blueprint.SwitchOffStops" xml:space="preserve">
-    <value>This stops every logic system made from it on this construct: {names}.</value>
-    <comment>Under the question above. {names} lists the logic systems made from the blueprint.</comment>
+    <value>This stops every logic system made from it on this construct:</value>
+    <comment>Under the question above, over the list of the logic systems made from the blueprint.</comment>
+  </data>
+  <data name="Sprocket.Dialog.More" xml:space="preserve">
+    <value>and {count} more</value>
+    <comment>Last line of a list in a question, standing for the names too many to show. {count} is how many, always more than one.</comment>
   </data>
   <data name="Sprocket.Blueprint.KeepRunning" xml:space="preserve">
     <value>Keep them running</value>

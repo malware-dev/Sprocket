@@ -20,7 +20,8 @@ public class AnsweringTests
     {
         var screen = Screen.Fresh(LeavingASystem.Split(' '));
 
-        Assert.True(screen.Shows("Switch Airlock on?"), "leaving did not ask");
+        Assert.Equal("Switch Airlock on?", screen.Editor.Question());
+        Assert.True(screen.Shows("Airlock"), "the question is not drawn");
         Assert.True(screen.Scene.IsQuestioning, "the question is not the thing owning the screen");
 
         Assert.True(screen.Scene.TakeDefault(), "Enter took no answer");

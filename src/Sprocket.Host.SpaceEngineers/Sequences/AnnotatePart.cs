@@ -1,7 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>What a part says about itself: its label, and what it is for after it.</summary>
-    /// <remarks>Both are the part's one annotation, so renaming a slot and describing it are the same change in different words.</remarks>
+    /// <summary>What a part says about itself.</summary>
     sealed class AnnotatePart : SystemEdit
     {
         readonly Part _part;
@@ -18,6 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         public override string Label => _label;
+
+        /// <summary>Only what the slot says changes, and its box already says it.</summary>
+        public override bool ChangesShape => false;
 
         public override bool Changes => _was != _now;
 

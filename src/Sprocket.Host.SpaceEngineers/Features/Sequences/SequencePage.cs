@@ -310,9 +310,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _wait.IsVisible = editable;
             _locked.IsVisible = !editable;
             _locked.Text = LockedText;
-            _unlock.IsVisible = !editable && Editor.Holder == null && _sequence.System != null;
-            _unlock.Text = texts.SystemSwitchOffToEdit;
-            _unlock.Command = _sequence.System == null ? null : Editor.Act(Cmd.Switch, delegate { Editor.SwitchSystem(_sequence.System, false); });
 
             _keys.Clear();
             _shown.Clear();
@@ -349,8 +346,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void Mark()
         {
             var through = Editor.StandIn(_sequence.System);
-            var fault = SequenceSummary.Fault(Editor.World, Editor.Runner.Bindings, _sequence,
-                Editor.Runner.Get(_sequence, through), through);
+            var fault = SequenceSummary.Fault(Editor.Runner.Get(_sequence, through));
 
             _bar.Problem = fault.Exists ? SequenceText.Problem(fault, _sequence) : "";
             _bar.ProblemIsWarning = fault.IsWarning;

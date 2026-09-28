@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.World;
+
 namespace Sprocket.Host.SpaceEngineers.Runtime
 {
     /// <summary>
@@ -19,6 +21,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public const int Trigger = -1;
 
         public static readonly SequenceFault None = new SequenceFault(SequenceProblem.None, Trigger);
+
+        /// <summary>Nothing can start the sequence, for <paramref name="why" />, on the button of <paramref name="block" /> where one is known.</summary>
+        public static SequenceFault Unstarted(Unwired why, string block)
+        {
+            var fault = new SequenceFault(SequenceProblem.NeverTriggered, Trigger, null, block);
+            fault.Unwired = why;
+            return fault;
+        }
 
         public SequenceFault(SequenceProblem problem, int step) : this(problem, step, null)
         {
@@ -43,8 +53,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Which = which;
         }
 
-        /// <summary>The reference of the one block at fault, or null where no one block is.</summary>
+        /// <summary>The reference of the one block at fault, or null where no one block is; for a trigger nothing can start, the name of the block whose button it is.</summary>
         public string Which { get; private set; }
+
+        /// <summary>Why nothing can start the sequence, for a <see cref="SequenceProblem.NeverTriggered" /> fault.</summary>
+        public Unwired Unwired { get; private set; }
 
         public string Because { get; private set; }
 

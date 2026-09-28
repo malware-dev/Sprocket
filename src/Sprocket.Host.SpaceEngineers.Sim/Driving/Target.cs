@@ -334,8 +334,31 @@ namespace Sprocket.Sim.Driving
             rows[row].Opens!.Execute();
         }
 
-        /// <summary>The short question hanging over the screen, or empty.</summary>
-        public static string Question(this SprocketEditor editor) => editor.Screen.Question;
+        /// <summary>The short question hanging over the screen as it reads, or empty: its blocks a blank line apart, a list's items a line each and led by "- ".</summary>
+        public static string Question(this SprocketEditor editor)
+        {
+            var arguments = editor.Screen.QuestionArguments;
+            var question = editor.Screen.Question;
+            var document = arguments == null ? Markdown.Parse(question) : Template.Read(question);
+
+            var said = new System.Text.StringBuilder();
+            Block last = null;
+            foreach (var block in document.Blocks)
+            {
+                var listed = block.Kind == BlockKind.Bullet;
+                if (last != null)
+                    said.Append(listed && last.Kind == BlockKind.Bullet ? "\n" : "\n\n");
+                if (listed)
+                    said.Append("- ");
+
+                foreach (var run in block.Runs)
+                    said.Append(run.IsBreak ? "\n" : run.Slot != null ? arguments?.Of(run.Slot) : run.Text);
+
+                last = block;
+            }
+
+            return said.ToString();
+        }
 
         /// <summary>Whether the question hanging over the screen offers that answer.</summary>
         public static bool HasAnswer(this SprocketEditor editor, string text) =>

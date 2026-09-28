@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -14,7 +13,7 @@ public class DeletingSystemsTests
         var sim = Built();
 
         sim.Editor.RootRows()[0].Deletes!.Execute();
-        Assert.Equal(sim.Texts.DeleteSystem, sim.Editor.Screen.Title());
+        Assert.StartsWith(sim.Texts.DeleteSystem, sim.Editor.Question());
 
         sim.Editor.PressChoice(sim.Texts.DeleteKeep);
         sim.Tick();
@@ -51,8 +50,9 @@ public class DeletingSystemsTests
 
         // Asked as the one going, and told that the blueprint and the rest are kept.
         sim.Editor.RootRows()[1].Deletes!.Execute();
-        Assert.Equal(sim.Texts.DeleteInstance, sim.Editor.Screen.Title());
-        Assert.Equal(Template.Fill(sim.Texts.DeleteInstanceKept, "name", system.Name), Warning(sim));
+        Assert.StartsWith(sim.Texts.DeleteInstance, sim.Editor.Question());
+        Assert.EndsWith("The " + system.Name + " blueprint and the other logic systems made from it are kept. This cannot be undone.",
+            sim.Editor.Question());
 
         sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         sim.Tick();
@@ -102,7 +102,7 @@ public class DeletingSystemsTests
 
         Assert.Equal(sim.Texts.SystemDelete, sim.Editor.Screen.DeleteAbout);
         sim.Editor.Screen.Deletes!.Execute();
-        Assert.Equal(sim.Texts.DeleteSystem, sim.Editor.Screen.Title());
+        Assert.StartsWith(sim.Texts.DeleteSystem, sim.Editor.Question());
 
         sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         sim.Tick();
@@ -186,16 +186,13 @@ public class DeletingSystemsTests
         add.Opens!.Execute();
         sim.Tick();
 
-        // Something done to it, so it stays when the panel is left.
-        sim.Editor.Screen.Flip!.Execute();
+        // Something done to it, switched off, so it stays when the panel is left.
+        sim.Editor.Program.Systems[0].Instances[sim.Editor.Program.Systems[0].Instances.Count - 1].Enabled = false;
         sim.Editor.GoToRoot();
         sim.Tick();
 
         return sim;
     }
-
-    static string Warning(Simulation sim) =>
-        sim.Editor.Choices().Last().Caution;
 
     static Panel Button(Simulation sim) =>
         sim.Panels().Single(panel => panel.Name == "Airlock Button");

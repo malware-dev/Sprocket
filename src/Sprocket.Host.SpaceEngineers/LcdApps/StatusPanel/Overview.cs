@@ -88,10 +88,10 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         {
             var systems = program.Systems;
             for (var i = 0; i < systems.Count; i++)
-                _rows.Add(Line(world, runner, systems[i]));
+                _rows.Add(Line(runner, systems[i]));
         }
 
-        Row Line(GridWorld world, AutomationRunner runner, AutomationSystem system)
+        Row Line(AutomationRunner runner, AutomationSystem system)
         {
             var row = new Row();
             row.Name = system.Name;
@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 if (Louder(SequenceSummary.Status(sequence, state), row.Status))
                     row.Status = SequenceSummary.Status(sequence, state);
 
-                var fault = SequenceSummary.Fault(world, runner.Bindings, sequence, state, system.First);
+                var fault = SequenceSummary.Fault(state);
                 if (!fault.Exists)
                     continue;
 

@@ -62,7 +62,7 @@ public class DuplicatingTests
         row.Deletes!.Execute();
         screen.Run(2);
 
-        Assert.Equal("Delete this sequence?", screen.Editor.Screen.Title());
+        Assert.StartsWith("Delete this sequence?", screen.Editor.Question());
 
         // The safe answer first, and taking it leaves the sequence where it was.
         screen.Editor.PressChoice("Keep it");
