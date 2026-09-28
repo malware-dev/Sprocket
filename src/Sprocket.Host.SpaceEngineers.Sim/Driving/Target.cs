@@ -12,6 +12,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 
 namespace Sprocket.Sim.Driving
 {
@@ -50,21 +51,14 @@ namespace Sprocket.Sim.Driving
             return page;
         }
 
-        /// <summary>The logic systems made from the blueprint the editor is on, one row each.</summary>
-        public static List<StatusRow> Made(this SprocketEditor editor) => editor.Blueprint().Members.OfType<StatusRow>().ToList();
+
+        /// <summary>Opens what the blueprint under the root's heading number <paramref name="group" /> does, through the button beside that heading.</summary>
+        public static void OpenBlueprintSystem(this SprocketEditor editor, int group) =>
+            Within(Root(editor).View).OfType<Button>().Where(button => button.Text == editor.Texts.SystemsEdit).ElementAt(group).Command!.Execute();
 
         /// <summary>The parts of the blueprint the editor is on, one row each.</summary>
         public static List<PartRow> Parts(this SprocketEditor editor) =>
             editor.Blueprint().Parts.OfType<PartRow>().ToList();
-
-        /// <summary>Renames a part of the blueprint the editor is on, through its pencil, as somebody typing the name would.</summary>
-        public static void RenamePart(this SprocketEditor editor, int at, string name)
-        {
-            editor.Parts()[at].Renames!.Execute();
-            var prompt = editor.Blueprint().Prompt!;
-            Retype(prompt.Box, name);
-            prompt.Take();
-        }
 
         /// <summary>The rows of the steps of the sequence the editor is on, in the order they stand.</summary>
         public static List<StepRow> StepRows(this SprocketEditor editor) =>
@@ -153,7 +147,7 @@ namespace Sprocket.Sim.Driving
         /// </remarks>
         public static void NewSystem(this SprocketEditor editor, string name)
         {
-            PressButton(editor, "New logic system");
+            PressButton(editor, "Logic system");
             editor.Screen.Heading[0].Renames!(name);
         }
 
@@ -196,9 +190,9 @@ namespace Sprocket.Sim.Driving
         /// <summary>Switches the sequence the editor is on to <paramref name="on" />, pressing its switch only where it says otherwise.</summary>
         public static void SwitchSequence(this SprocketEditor editor, bool on)
         {
-            var bar = editor.Sentence().Bar;
-            if (bar.SwitchIsOn != on)
-                bar.Flips!.Execute();
+            _ = editor.Sentence();
+            if (editor.Screen.SwitchIsOn != on)
+                editor.Screen.Flip!.Execute();
         }
 
         /// <summary>Presses whatever on the screen says <paramref name="text" />: an answer, a choice, or an option or block in a picker.</summary>
@@ -271,10 +265,10 @@ namespace Sprocket.Sim.Driving
         public static List<StatusRow> Rows(this SprocketEditor editor) =>
             Within(LogicSystem(editor).View).OfType<StatusRow>().ToList();
 
-        /// <summary>The name of the logic system a blueprint's page is edited through.</summary>
-        /// <remarks>The first part on the page, above every trigger's sentence.</remarks>
+        /// <summary>The blockset whose blocks a blueprint's logic system screen names, as its list says.</summary>
+        /// <remarks>The list at the top of the page, above every trigger's sentence.</remarks>
         public static string UsingName(this SprocketEditor editor) =>
-            Within(LogicSystem(editor).View).OfType<Slot>().First().Text;
+            Within(LogicSystem(editor).View).OfType<ListField>().First().Text;
 
         /// <summary>The sentences of what starts things, as the rows the logic system's page draws them in.</summary>
         public static List<TriggerRow> Triggers(this SprocketEditor editor) =>
@@ -454,6 +448,9 @@ namespace Sprocket.Sim.Driving
             return strip == null ? Enumerable.Empty<StageColumn>() : strip.Stages.Skip(strip.Page);
         }
 
+        /// <summary>The blocks the first column of the pick on the screen offers, as their rows.</summary>
+        public static List<PickRow> Offered(this SprocketEditor editor) => editor.Stages().First().Entries().ToList();
+
         /// <summary>The row saying <paramref name="name" /> in a pick, or an exception naming the screen.</summary>
         static PickRow Row(SprocketEditor editor, string name)
         {
@@ -467,7 +464,7 @@ namespace Sprocket.Sim.Driving
             var view = editor.Current.View
                        ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is described in components and has no buttons.");
 
-            var button = Within(view).OfType<Button>().FirstOrDefault(b => b.Text == StatusRow.Plus + label)
+            var button = Within(view).OfType<Button>().FirstOrDefault(b => b.Text == StatusRow.Plus + label || b.Text == label)
                          ?? throw new InvalidOperationException($"No button '{label}' on '{editor.Screen.Title()}'.");
 
             button.Command!.Execute();

@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ValuesColumnTests
 {
-    const string ALight = "60 133 type Airlock enter 60 164 200 384 560 340 1353 314 70 200 200 485";
+    const string ALight = "60 133 type Airlock enter 60 237 200 384 560 340 1353 314 70 200 200 485";
 
     const string SetRadius = "800 653";
     const string SetColour = "800 565";
@@ -149,19 +149,20 @@ public class ValuesColumnTests
     [Fact]
     public void LeavingAsksNothingWhereNothingChanged()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 474 192 escape 25 62");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 474 192 escape");
 
         Assert.False(screen.Scene.IsQuestioning, "leaving asked about 5 shown as 5.0");
         Assert.Equal("Sequence 1", screen.Ended);
     }
 
-    /// <summary>Escape puts a field down and leaves what is in it.</summary>
+    /// <summary>Escape goes back, keeping what was typed in a field, so leaving a changed pick asks first.</summary>
     [Fact]
-    public void EscapeLeavesTheField()
+    public void EscapeKeepsTheFieldAndAsksBeforeLeaving()
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 7 escape");
 
         Assert.False(screen.Scene.IsFilling, "the field kept the keyboard");
+        Assert.True(screen.Scene.IsQuestioning, "leaving a changed pick did not ask first");
         Assert.Equal("Set Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Shows("7"), "what was typed was thrown away");
     }

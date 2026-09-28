@@ -89,8 +89,8 @@ static class PaperTarget
         foreach (var step in editor.StepRows())
             paper.Append("  ").Append(step.Number).Append(". ").AppendLine(Say(world, step));
 
-        paper.Append("  undo: ").Append(Blank(page.Bar.UndoText))
-            .Append("  redo: ").AppendLine(Blank(page.Bar.RedoText));
+        paper.Append("  undo: ").Append(Blank(editor.Screen.UndoText))
+            .Append("  redo: ").AppendLine(Blank(editor.Screen.RedoText));
 
         return paper.ToString();
     }

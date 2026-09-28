@@ -74,10 +74,10 @@ public class RootTests
         var sim = Simulation.On(store);
         sim.Tick();
 
-        sim.Editor.PressStart("New logic system");
+        sim.Editor.PressStart("Logic system");
         Assert.True(sim.Editor.Screen.HasQuestion, "replacing an unreadable program asked nothing");
 
-        sim.Editor.PressStart("New logic system");
+        sim.Editor.PressStart("Logic system");
 
         Assert.False(sim.Editor.Screen.HasQuestion);
         Assert.IsType<HomePage>(sim.Editor.Current);
@@ -93,7 +93,7 @@ public class RootTests
     {
         var screen = Screen.Holding(Older, "tick", "2");
 
-        screen.Editor.PressStart("New logic system");
+        screen.Editor.PressStart("Logic system");
         screen.Run(2);
 
         var keep = screen.Text(screen.Editor.Texts.SalvageKeep);
@@ -131,7 +131,7 @@ public class RootTests
         sim.Editor.Invalidate();
         sim.Tick();
 
-        Assert.Equal(new[] { "+ Nytt logikksystem", "+ Last inn plantegning" }, sim.Editor.RootStarts());
+        Assert.Equal(new[] { "+ Logikksystem", "Plantegninger" }, sim.Editor.RootStarts());
     }
 
     const string Older = "sprocket 1 alpha 6\n"

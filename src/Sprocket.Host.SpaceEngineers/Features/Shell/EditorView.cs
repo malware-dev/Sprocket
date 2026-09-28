@@ -11,6 +11,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using VRage.Input;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
@@ -54,19 +55,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Glyph _redo;
         readonly Switch _switch;
         readonly Glyph _refresh;
+        readonly Glyph _run;
+        readonly Glyph _delete;
         readonly Label _subtitle;
         readonly Banner _banner = new Banner { Padding = new Thickness(0f, 0f, Sizes.Bar, 0f) };
         readonly Grid _page;
         readonly ScrollView _scroll;
         readonly VStack _body;
+        readonly VStack _foot;
         readonly HStack _actions;
-        readonly Button _primary;
 
         readonly Relay _undoes;
         readonly Relay _redoes;
         readonly Relay _refreshes;
         readonly Relay _flips;
-        readonly Relay _finishes;
+        readonly Relay _runs;
+        readonly Relay _deletes;
 
         readonly Arguments _undone = new Arguments();
         readonly Arguments _redone = new Arguments();
@@ -105,7 +109,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _redoes = new Relay(() => Run(_editor.Screen.Redo));
             _refreshes = new Relay(() => Run(_editor.Screen.Refresh));
             _flips = new Relay(() => Run(_editor.Screen.Flip));
-            _finishes = new Relay(Finish);
+            _runs = new Relay(() => Run(_editor.Screen.Running ? _editor.Screen.Stops : _editor.Screen.Runs));
+            _deletes = new Relay(() => Run(_editor.Screen.Deletes));
 
             _scroll = new ScrollView { Style = Styles.ScrollView, Content = new VStack().As(out _body) };
 
@@ -128,10 +133,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 {
                                     new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
                                     _title,
+                                    // Quietest first and the switch last: the row stands against the right edge, so a control's
+                                    // place depends only on what stands to its right, and the last cannot be moved by anything.
+                                    new Glyph { Symbol = Symbols.Refresh, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _refreshes }.As(out _refresh),
+                                    new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
                                     new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),
-                                    new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
-                                    new Glyph { Symbol = Symbols.Refresh, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _refreshes }.As(out _refresh)
+                                    new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f), Command = _deletes }.As(out _delete),
+                                    new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch)
                                 }
                             },
                             new Label { Style = Styles.Detail }.As(out _subtitle)
@@ -146,18 +155,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         Rows = { Length.Auto, Length.Flex(1f) },
                         Cells = { [0, 0] = _banner }
                     }.As(out _page),
-                    new Rule(1f, Palette.Line),
-                    new HStack
+                    // Only while the screen has actions, which only developer mode gives it, so everybody else has the room.
+                    new VStack
                     {
-                        Background = Palette.Chrome,
-                        Padding = new Thickness(16f, 8f),
-                        Spacing = 16f,
+                        IsVisible = false,
                         Children =
                         {
-                            new HStack { Spacing = 8f, Placement = Flex.Grow }.As(out _actions),
-                            new Button { Style = Styles.Primary, Command = _finishes }.As(out _primary)
+                            new Rule(1f, Palette.Line),
+                            new HStack { Background = Palette.Chrome, Padding = new Thickness(16f, 8f), Spacing = 8f }.As(out _actions)
                         }
-                    }
+                    }.As(out _foot)
                 }
             };
 
@@ -365,22 +372,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Escape, answering whether the host should close the editor.</summary>
         /// <remarks>
-        /// Whatever holds the keyboard lets it go first, then a standing question is put away, then the page goes back; only
-        /// the first page with nothing open closes. Escape is the key everybody already reads as "back".
+        /// Escape is the key everybody already reads as "back", so it closes what is open over the page, a standing question
+        /// or else the window on top, and otherwise goes back; only the first page with nothing open closes. Holding the
+        /// keyboard is not being open: a box keeps what was typed in it, as pressing elsewhere does, and a name being typed
+        /// into the heading is given, since it is only the name shown so it can be typed into.
         /// </remarks>
         public bool Escape()
         {
-            if (_input.Focused != null)
-            {
-                _input.Key(MyKeys.Escape, false, false);
-                return false;
-            }
-
             if (IsQuestioning)
             {
                 Dismiss();
                 return false;
             }
+
+            var top = _windows.Top;
+            if (top != null)
+            {
+                _windows.Close(top);
+                return false;
+            }
+
+            if (_renaming >= 0)
+            {
+                CommitRename();
+                EndRename();
+            }
+
+            _input.Focus(null);
 
             if (!_editor.Screen.CanGoBack)
                 return true;
@@ -621,29 +639,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _redoes.CanExecute = screen.Redo != null;
             _redo.Tip = Tip.For(_redo.Tip, screen.Redo != null ? texts.ChromeRedo : null, _redone);
 
+            _refresh.IsVisible = screen.Refresh != null;
             _refreshes.CanExecute = screen.Refresh != null;
             _refresh.Tip = Tip.For(_refresh.Tip, screen.Refresh != null ? texts.ChromeRefresh : null);
 
-            // A system's, always: a sequence's switch lives on the sentence rather than up here. The words say the act and
-            // its reach, not what it is on - the heading directly above says that.
+            // One mark, two acts, and never both at once: a subject that is going is one to stop and one that is not is
+            // one to start.
+            var doing = screen.Running ? screen.Stops : screen.Runs;
+            _run.IsVisible = doing != null;
+            _run.Symbol = screen.Running ? Symbols.Stop : Symbols.Play;
+            _runs.CanExecute = doing != null;
+            _run.Tip = Tip.For(_run.Tip, doing == null ? null : screen.Running ? SequenceText.Stops() : SequenceText.Starts());
+
+            _delete.IsVisible = screen.Deletes != null;
+            _deletes.CanExecute = screen.Deletes != null;
+            _delete.Tip = Tip.For(_delete.Tip, screen.Deletes != null ? screen.DeleteAbout : null);
+
+            // The words say the act and its reach, not what it is on - the heading directly above says that.
             _switch.IsVisible = screen.HasSwitch;
             _switch.IsOn = screen.SwitchIsOn;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
             _flips.CanExecute = screen.HasSwitch;
-            _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? StatusRow.Switching(texts, true, screen.SwitchIsOn) : null);
-
-            // A page that finishes where it stands has a way to finish of its own.
-            var here = screen.HasPrimary && !_editor.Current.FinishesInPlace;
-            _primary.Text = here ? Caps(screen.PrimaryText) : "";
-            _finishes.CanExecute = here;
+            _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? StatusRow.Switching(texts, screen.SwitchGovernsAll, screen.SwitchIsOn) : null);
 
             ShowActions(screen);
         }
 
-        /// <summary>Puts a button at the foot for each of the screen's actions, where they are not the ones already there.</summary>
+        /// <summary>Puts a button at the foot for each of the screen's actions, where they are not the ones already there, and the foot away where there are none.</summary>
         void ShowActions(EditorScreen screen)
         {
             var actions = screen.Actions;
+            _foot.IsVisible = actions.Count > 0;
             if (Same(actions))
                 return;
 
@@ -698,12 +724,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Run(screen.Back);
             else
                 _wantsClose = true;
-        }
-
-        /// <summary>Makes the screen's next move, the way its way on at the foot does.</summary>
-        void Finish()
-        {
-            Run(_editor.Screen.Primary);
         }
 
         /// <summary>Begins renaming the part of the heading at <paramref name="index" />.</summary>

@@ -26,13 +26,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                     {
                         Children =
                         {
+                            // What adds stands on the left with its plus; the way to the library goes somewhere, so it stands on
+                            // the right as a button of its own, ending where the rows' controls do.
                             new HStack
                             {
                                 Spacing = 8f,
+                                Padding = new Thickness(0f, 0f, 16f, 0f),
                                 Children =
                                 {
                                     new Button { Style = Styles.Start }.As(out _new),
-                                    new Button { Style = Styles.Start }.As(out _load)
+                                    new HStack { Placement = Flex.Grow },
+                                    new Button { Style = Styles.Button }.As(out _load)
                                 }
                             },
                             new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }

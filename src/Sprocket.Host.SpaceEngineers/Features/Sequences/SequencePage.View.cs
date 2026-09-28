@@ -27,11 +27,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
                     // The ways to add a step and the reason there are none share one line, so locking changes what the
                     // line says and not where anything stands. The reason is padded as the buttons are, so its words
-                    // start where theirs did.
+                    // start where theirs did, and the plus stands in the column the steps' grips do.
                     new HStack
                     {
                         Spacing = 8f,
-                        Padding = new Thickness(36f, 0f, 0f, 0f),
                         Children =
                         {
                             new Button { Style = Styles.Start }.As(out _doSomething),

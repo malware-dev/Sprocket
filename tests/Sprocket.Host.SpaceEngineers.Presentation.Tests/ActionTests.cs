@@ -39,7 +39,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -69,7 +69,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -89,7 +89,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -122,7 +122,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
@@ -146,7 +146,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
@@ -160,14 +160,14 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
         Terminal(screen).Command!.Execute();
         screen.Editor.Back();
         screen.Run(2);
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -180,7 +180,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.TickBlock("Airlock Inner Door");
         screen.Editor.TickBlock("Airlock Outer Door");
         screen.Run(2);
@@ -200,7 +200,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Run(2);
 
@@ -213,7 +213,7 @@ public class ActionTests
     [Fact]
     public void TheTabIsPressedWhereItIsDrawn()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 237 200 384 560 340 1353 314 "
             + "70 200 200 509").Split(' '));
 
         StageColumn what = screen.Editor.Pick().Stages.Last();
@@ -264,7 +264,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -285,7 +285,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Light");
         ShowTerminal(screen.Editor);
         screen.Run(2);
@@ -329,7 +329,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Light");
         ShowTerminal(screen.Editor);
         screen.Editor.PressChoice("Set Color");
@@ -362,7 +362,7 @@ public class ActionTests
 
         rig.Editor.NewButtonSystem("Lights");
 
-        rig.Editor.PressAdd("do something");
+        rig.Editor.PressAdd("Action…");
         rig.Editor.PressBlock("Airlock Light");
         ShowTerminal(rig.Editor);
         rig.Editor.PressChoice("Set Color");
@@ -389,7 +389,7 @@ public class ActionTests
 
         rig.Editor.NewButtonSystem("Airlock");
 
-        rig.Editor.PressAdd("do something");
+        rig.Editor.PressAdd("Action…");
         rig.Editor.PressBlock("Hydrogen Tank");
         rig.Editor.PressChoice("Stockpile On");
         rig.Editor.PressPrimary();
@@ -418,7 +418,7 @@ public class ActionTests
     [Fact]
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 237 200 384 560 340 1353 314 "
             + "70 200 150 203 type Approach 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
@@ -448,7 +448,7 @@ public class ActionTests
     [Fact]
     public void AColourIsChosenByPressingOne()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 237 200 384 560 340 1353 314 "
             + "70 200 200 485 800 565").Split(' '));
 
 
@@ -474,7 +474,7 @@ public class ActionTests
     [Fact]
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 237 200 384 560 340 1353 314 "
             + "70 200 150 203 type Standby 200 360 800 397").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
@@ -506,7 +506,7 @@ public class ActionTests
     [Fact]
     public void MoreChoicesThanFitFoldIntoAList()
     {
-        var screen = Screen.Fresh(("60 133 type Airlock enter 60 164 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 133 type Airlock enter 60 237 200 384 560 340 1353 314 "
             + "70 200 150 203 type Tug 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");

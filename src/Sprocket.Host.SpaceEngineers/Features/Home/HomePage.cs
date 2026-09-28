@@ -59,6 +59,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         public override string CustomName => Editor.World.Name;
 
+        /// <summary>Which of the logic systems nothing starts is read from the toolbars.</summary>
+        public override bool CanRefresh => true;
+
         /// <summary>
         /// Reaching outside the automation to rename the machine itself, which is deliberate.
         /// </summary>
@@ -166,18 +169,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Show(texts);
         }
 
-        /// <summary>Adds another logic system made from a blueprint, numbered, and opens the blueprint on it to say which blocks it uses.</summary>
+        /// <summary>Adds another logic system made from a blueprint, numbered, and opens its configuration panel on it with its name in hand to be given.</summary>
         public void Another(AutomationSystem system)
         {
             if (Editor.Another(system) != null)
-                Editor.Push(new BlueprintPage(Editor, system));
+                Editor.PushMade(new BlueprintPage(Editor, system, false));
         }
 
         /// <summary>Opens the blueprint on one of the logic systems made from it.</summary>
         public void Open(AutomationSystem system, SystemInstance instance)
         {
             Editor.Choose(system, instance);
-            Editor.Push(new BlueprintPage(Editor, system));
+            Editor.Push(new BlueprintPage(Editor, system, false));
         }
 
         /// <summary>Gives the two buttons their presses, keeps the rows and groups by system, and fills the view from the systems as they are.</summary>
@@ -222,7 +225,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             _new.Text = StatusRow.Plus + texts.SystemsNew;
             _new.Tip = Tip.For(_new.Tip, texts.SystemsNewAbout);
-            _load.Text = StatusRow.Plus + texts.SystemsLoad;
+            _load.Text = texts.SystemsLoad;
             _load.Tip = Tip.For(_load.Tip, texts.SystemsLoadAbout);
 
             _own.Clear();
@@ -272,12 +275,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             var system = Editor.Program.AddSystem();
             system.Namespace = Editor.Author;
 
-            var page = new LogicSystemPage(Editor, system);
-            page.NameOnArrival = true;
-            Editor.Push(page);
+            Editor.PushMade(new LogicSystemPage(Editor, system));
         }
 
-        /// <summary>Makes a blueprint of a logic system: the blueprint keeps the system's name, and so does the first logic system made from it.</summary>
+        /// <summary>Makes a blueprint of a logic system, and opens it to be written: the blueprint keeps the system's name, and so does the first logic system made from it.</summary>
         void Made(AutomationSystem system)
         {
             if (system.First == null)
@@ -285,11 +286,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             system.First.Name = system.Name;
             Editor.Choose(system, system.First);
-            Editor.Push(new BlueprintPage(Editor, system));
+            Editor.Push(new BlueprintPage(Editor, system, true));
         }
 
-        /// <summary>Opens a logic system of its own.</summary>
-        void Open(AutomationSystem system)
+        /// <summary>Opens what <paramref name="system" /> does, on the logic system screen.</summary>
+        public void Open(AutomationSystem system)
         {
             Editor.Push(new LogicSystemPage(Editor, system));
         }

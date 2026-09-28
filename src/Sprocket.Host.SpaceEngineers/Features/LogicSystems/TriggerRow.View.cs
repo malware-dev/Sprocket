@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         void CreateView()
         {
             Spacing = 8f;
-            Padding = new Thickness(8f);
+            Padding = new Thickness(16f, 8f);
 
             Children.Add(new VStack
             {

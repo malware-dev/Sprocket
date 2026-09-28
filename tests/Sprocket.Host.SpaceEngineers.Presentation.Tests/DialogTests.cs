@@ -84,7 +84,7 @@ public class DialogTests
     static Screen Asked()
     {
         var screen = Screen.Holding(Older, "tick", "30");
-        Press(screen, "+ New logic system");
+        Press(screen, "+ Logic system");
         screen.Run(5);
         return screen;
     }

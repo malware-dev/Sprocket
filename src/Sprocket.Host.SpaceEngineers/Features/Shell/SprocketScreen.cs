@@ -145,13 +145,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _view.CaretVisible = (Now() - _blinkFrom) / BlinkTicks % 2 == 0;
         }
 
-        /// <summary>
-        /// Writes the program back to the block on the way out.
-        /// </summary>
-        /// <remarks>
-        /// Closing the editor is the moment somebody has finished saying something, so it is the cheapest
-        /// honest place to put the program where a world save will find it.
-        /// </remarks>
         /// <summary>Hides the game's HUD while this is open, and gives it back as it closes.</summary>
         /// <remarks>
         /// Forced to its minimum rather than switched off, which leaves the player's own HUD setting
@@ -163,6 +156,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             MyVisualScriptLogicProvider.ShowHud(shown, 0);
         }
 
+        /// <summary>
+        /// Writes the program back to the block on the way out.
+        /// </summary>
+        /// <remarks>
+        /// Closing the editor is the moment somebody has finished saying something, so it is the cheapest
+        /// honest place to put the program where a world save will find it.
+        /// </remarks>
         protected override void OnClosed(bool isUnloading)
         {
             _unit.Showing = false;

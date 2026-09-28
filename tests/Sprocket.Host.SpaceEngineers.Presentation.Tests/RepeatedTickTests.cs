@@ -32,7 +32,7 @@ public class RepeatedTickTests
         editor.PressPrimary();
         screen.Run(60);
 
-        editor.PressAdd("do something");
+        editor.PressAdd("Action…");
         screen.Run(60);
 
         editor.Back();
@@ -74,7 +74,7 @@ public class RepeatedTickTests
         editor.PressPrimary();
         AssertStill(screen, "the sequence");
 
-        editor.PressAdd("do something");
+        editor.PressAdd("Action…");
         AssertStill(screen, "picking what to do");
 
         editor.Back();
@@ -117,7 +117,7 @@ public class RepeatedTickTests
         editor.PressPrimary();
         AssertIdle(screen, "a sequence");
 
-        editor.PressAdd("do something");
+        editor.PressAdd("Action…");
         AssertIdle(screen, "picking what happens");
 
         editor.Back();
@@ -247,11 +247,10 @@ public class RepeatedTickTests
     {
         screen.Run(5);
 
-        // Every build makes the chrome's commands afresh, so the same one sixty frames later is a screen not built again.
-        var before = screen.Editor.Screen.Refresh;
+        var before = screen.Editor.Rebuilds;
         screen.Run(60);
 
-        Assert.True(ReferenceEquals(before, screen.Editor.Screen.Refresh),
+        Assert.True(before == screen.Editor.Rebuilds,
             $"{what} was built again while nothing was happening, so everything on it is made afresh "
             + "sixty times a second and the pointer never keeps hold of anything.");
     }

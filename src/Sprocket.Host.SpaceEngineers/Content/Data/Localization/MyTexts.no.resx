@@ -81,16 +81,16 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
 Trykk for å gi gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Systems.New" xml:space="preserve">
-    <value>Nytt logikksystem</value>
+    <value>Logikksystem</value>
   </data>
   <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
     <value>Start et nytt logikksystem på dette gridet.</value>
   </data>
   <data name="Sprocket.Systems.Load" xml:space="preserve">
-    <value>Last inn plantegning</value>
+    <value>Plantegninger</value>
   </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
-    <value>Sett opp en **plantegning** laget et annet sted, og velg hvilke av dette gridets blokker den bruker.</value>
+    <value>Biblioteket med **plantegninger**, der de importeres og eksporteres.</value>
   </data>
   <data name="Sprocket.Systems.Empty" xml:space="preserve">
     <value>Ingenting er automatisert her ennå.</value>
@@ -106,7 +106,7 @@ Dette blir det første av dem.</value>
     <value>Laget fra **{name}**-plantegningen</value>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
-    <value>legg til enda en {name}</value>
+    <value>Én til</value>
   </data>
   <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
     <value>Lag enda et logikksystem fra **{name}**-plantegningen, og velg hvilke blokker det bruker.</value>

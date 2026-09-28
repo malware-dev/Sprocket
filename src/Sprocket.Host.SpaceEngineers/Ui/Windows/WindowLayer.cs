@@ -13,6 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Windows
         /// <summary>How many windows are open.</summary>
         public int Count => _open.Count;
 
+        /// <summary>The window opened last, which is drawn over the rest, or null where none is open.</summary>
+        public Window Top => _open.Count > 0 ? _open[_open.Count - 1] : null;
+
         /// <summary>The topmost modal window, which takes all input, or null where none is open.</summary>
         public Window Modal
         {

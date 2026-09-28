@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void CreateView()
         {
             Spacing = 12f;
-            Padding = new Thickness(12f, 8f);
+            Padding = new Thickness(16f, 8f);
 
             Children.Add(new HStack
             {

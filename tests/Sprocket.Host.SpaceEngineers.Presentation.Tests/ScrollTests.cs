@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ScrollTests
 {
-    const string OpenThePicker = "60 130 type Airlock enter 60 161";
+    const string OpenThePicker = "60 130 type Airlock enter 60 237";
 
     [Fact]
     public void TheBlocksListIsTallerThanTheColumnItSitsIn()

@@ -30,6 +30,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Whether the editor took this part for a block that was picked, rather than it being declared.</summary>
         public bool Picked { get; set; }
 
+        /// <summary>Whether a construct may leave this part unfilled.</summary>
+        public bool Optional { get; set; }
+
         /// <summary>
         /// The block types that may fill this part, or none for anything.
         /// </summary>
@@ -84,11 +87,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return used || !Picked || Annotation.Length > 0;
         }
 
-        /// <summary>Calls the part <paramref name="label" />, keeping whatever the annotation says after its label.</summary>
-        public void Relabel(string label)
+        /// <summary>The annotation saying <paramref name="about" /> after the part's label, keeping the label.</summary>
+        public string Described(string about)
+        {
+            var label = Label;
+            return string.IsNullOrEmpty(about) ? label : label + Break + about;
+        }
+
+        /// <summary>The annotation calling the part <paramref name="label" />, keeping whatever it says after its label.</summary>
+        public string Labelled(string label)
         {
             var about = About;
-            Annotation = about.Length == 0 ? label : label + Break + about;
+            return about.Length == 0 ? label : label + Break + about;
         }
     }
 }

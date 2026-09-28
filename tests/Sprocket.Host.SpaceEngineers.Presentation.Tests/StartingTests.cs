@@ -21,8 +21,8 @@ public class StartingTests
         screen.Editor.NewSystem("Airlock");
         screen.Run(2);
 
-        screen.Editor.PressStart("New sequence");
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressStart("Sequence");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();

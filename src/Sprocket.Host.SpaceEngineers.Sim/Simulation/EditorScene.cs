@@ -210,16 +210,11 @@ namespace Sprocket.Sim.Simulation
             _view.Key(MyKeys.Enter, false, false);
         }
 
-        /// <summary>Escape, short of going back: a question is dismissed, and otherwise whatever holds the keyboard lets it go.</summary>
+        /// <summary>Escape, as the game's screen hands it over: closing what is open over the page, or else going back.</summary>
+        /// <remarks>The editor's own answer, as the game's screen asks it; on the first page, where the game would close the editor, nothing happens.</remarks>
         public void Escape()
         {
-            if (_view.IsQuestioning)
-            {
-                _view.Dismiss();
-                return;
-            }
-
-            _view.Input.Key(MyKeys.Escape, false, false);
+            _view.Escape();
         }
 
         /// <summary>A key going down, as the game's screen hands one over, answering whether anything took it.</summary>

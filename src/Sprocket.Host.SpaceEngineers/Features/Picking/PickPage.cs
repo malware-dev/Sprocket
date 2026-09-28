@@ -69,6 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<string> _filled = new List<string>();
         readonly List<Field> _nothing = new List<Field>();
         readonly List<Field> _givenFields = new List<Field>();
+        readonly Func<GridEntity, bool> _fits;
 
         string _chosen;
         Form _chosenForm;
@@ -157,6 +158,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
+        /// <summary>Asks which blocks fill a slot: the blocks alone, only those <paramref name="fits" /> allows, starting from <paramref name="targets" />.</summary>
+        /// <remarks>
+        /// Narrowed afresh each time rather than the way the last pick was left, since the blocks a slot is offered are already
+        /// only the ones it can take, and a kind remembered from choosing what a step does would hide them.
+        /// </remarks>
+        public PickPage(SprocketEditor editor, string title, IList<long> targets, Func<GridEntity, bool> fits,
+            Action<PickAnswer> done)
+            : this(editor, title, false, targets, "", Form.Native, done)
+        {
+            _fits = fits;
+            _filter = new Filter();
+            _kind = "";
+            _blockSearch = "";
+            _kindSearch = "";
+            _whatSearch = "";
+        }
+
         /// <summary>The title as the answer stands, or the picker's own name where nothing is chosen.</summary>
         public override string Title => _said ?? _title;
 
@@ -198,9 +216,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return _filled;
             }
         }
-
-        /// <inheritdoc />
-        public override bool FinishesInPlace => true;
 
         /// <inheritdoc />
         public override bool ScrollsItself => true;
@@ -256,9 +271,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
-        bool IsComplete => _selection.Count > 0 && !string.IsNullOrEmpty(_chosen)
+        bool IsComplete => _selection.Count > 0 && (_fits != null || !string.IsNullOrEmpty(_chosen)
             && ReadinessOf(_chosen, _chosenForm) == Readiness.Ready
-            && (_aim == null || _aim.Chosen);
+            && (_aim == null || _aim.Chosen));
 
         /// <summary>The stages this page asks, which are the last in the pick while it is on top.</summary>
         int Own => (_blocks == null ? 0 : 1) + (_what == null ? 0 : 1) + (_does == null ? 0 : 1);
@@ -362,8 +377,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             FillBlocks();
 
-            // The second stage exists only once there is something for it to be about.
-            var wanted = _selection.Count > 0;
+            // A slot's pick is finished from the only column it has.
+            if (_fits != null)
+            {
+                // ReSharper disable once PossibleNullReferenceException - made above where it had not been, by MakeBlocks.
+                _blocks.Finishes = true;
+                _blocks.Done.Command = _finish;
+                _blocks.Done.IsEnabled = PrimaryText.Length != 0;
+            }
+
+            // The second stage exists only once there is something for it to be about, and never where only blocks are asked.
+            var wanted = _selection.Count > 0 && _fits == null;
             if (wanted && _what == null)
             {
                 MakeWhat();
@@ -476,7 +500,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _blocks = new StageColumn(_strip.Width, true, null, Editor.Texts, Windows);
             _blocks.Title = Editor.Texts.PickBlocks;
-            _blocks.EmptyText = _forEvents ? Editor.Texts.PickNoBlocksHappen : Editor.Texts.PickNoBlocksDone;
+            _blocks.EmptyText = _fits != null
+                ? Editor.Texts.BlueprintNoneFits
+                : _forEvents ? Editor.Texts.PickNoBlocksHappen : Editor.Texts.PickNoBlocksDone;
 
             // For the whole life of the column, so the line does not come and go as the list of kinds is narrowed.
             _blocks.HasKinds = _kinds.Count > 0;
@@ -1093,6 +1119,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <remarks>Asked after every command and every tick, so it compares before it builds: a tick where nothing was picked makes no string.</remarks>
         void Reword()
         {
+            // A slot's pick keeps the slot's name: the blocks chosen for it are the whole answer, and they are marked in its column.
+            if (_fits != null)
+                return;
+
             if (_said != null && _saidChosen == _chosen && _saidOffered == _ids.Count && _saidAll == _all
                 && Same(_saidBlocks, _selection))
             {
@@ -1200,9 +1230,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _candidates.Clear();
 
-            var capable = Vocabulary.Capable(Editor.World, _forEvents);
-            for (var i = 0; i < capable.Count; i++)
-                _candidates.Add(capable[i]);
+            if (_fits != null)
+            {
+                var entities = Editor.World.Entities;
+                for (var i = 0; i < entities.Count; i++)
+                {
+                    if (_fits(entities[i]))
+                        _candidates.Add(entities[i]);
+                }
+            }
+            else
+            {
+                var capable = Vocabulary.Capable(Editor.World, _forEvents);
+                for (var i = 0; i < capable.Count; i++)
+                    _candidates.Add(capable[i]);
+            }
 
             _candidates.Sort(ByName);
 

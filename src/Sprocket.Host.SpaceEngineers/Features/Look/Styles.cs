@@ -49,6 +49,56 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             }
         };
 
+        /// <summary>What the author of a blueprint wrote about it, read by whoever fills it in.</summary>
+        public static readonly RichTextStyle Description = new RichTextStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                CodeFont = Lettering.Mono,
+                FontSize = 20f,
+                Heading1Size = 24f,
+                Heading2Size = 20f,
+                Heading3Size = 20f,
+                Color = Palette.Muted,
+                StrongColor = Palette.Strong,
+                EmphasisColor = Palette.Ink,
+                HeadingColor = Palette.Ink,
+                RuleColor = Palette.Line,
+                BlockSpacing = 8f,
+                Indent = 20f,
+                Padding = new Thickness(20f, 4f)
+            }
+        };
+
+        /// <summary>What the author of a blueprint wrote about one of its slots, under the slot's name.</summary>
+        public static readonly RichTextStyle SlotDescription = new RichTextStyle(Description)
+        {
+            Base =
+            {
+                FontSize = 16f,
+                Heading1Size = 20f,
+                Heading2Size = 16f,
+                Heading3Size = 16f,
+                Color = Palette.Faint,
+                BlockSpacing = 4f,
+                Indent = 16f,
+                Padding = new Thickness(0f)
+            }
+        };
+
+        /// <summary>A formatting example as it reads, beside the marks that make it.</summary>
+        public static readonly RichTextStyle Example = new RichTextStyle(Description)
+        {
+            Base = { Padding = new Thickness(0f) }
+        };
+
+        /// <summary>A formatting example as it is typed.</summary>
+        public static readonly TextStyle Markup = new TextStyle
+        {
+            Base = { Font = Lettering.Mono, FontSize = 16f, Color = Palette.Faint }
+        };
+
         /// <summary>A dialog: a panel in the middle of the screen, with the screen veiled behind it.</summary>
         public static readonly WindowStyle Dialog = new WindowStyle
         {
@@ -165,6 +215,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         };
 
         /// <summary>The quiet line under a name: what it is doing, and when it last did anything.</summary>
+        public static readonly TextStyle Needs = new TextStyle(Heading)
+        {
+            Base = { Color = Palette.Notice }
+        };
+
+        /// <summary>A small note under or beside something, in the faint tone.</summary>
         public static readonly TextStyle Detail = new TextStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
@@ -299,30 +355,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.None }
         };
 
-        /// <summary>The row a screen is about, edged so being chosen shows whatever else the row is.</summary>
-        public static readonly ElementStyle Chosen = new ElementStyle(Row)
-        {
-            Base = { Background = Palette.SlotFill, Edge = Palette.Accent }
-        };
-
-        /// <summary>The chosen row, with something wrong in it.</summary>
-        public static readonly ElementStyle BrokenChosen = new ElementStyle(Broken)
-        {
-            Base = { Edge = Palette.Accent }
-        };
-
-        /// <summary>The chosen row, running.</summary>
-        public static readonly ElementStyle RunningChosen = new ElementStyle(Running)
-        {
-            Base = { Edge = Palette.Accent }
-        };
-
-        /// <summary>The chosen row, stopped where it is waiting to be let on.</summary>
-        public static readonly ElementStyle ParkedChosen = new ElementStyle(Parked)
-        {
-            Base = { Edge = Palette.Accent }
-        };
-
         /// <summary>A state light, whose color the view sets from the state.</summary>
         public static readonly GlyphStyle Light = new GlyphStyle
         {
@@ -343,6 +375,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base = { BarWidth = Sizes.Bar, Thumb = Palette.Thumb, LeastThumb = 32f },
             Held = { Thumb = Palette.ThumbHeld }
+        };
+
+        /// <summary>Text shown as it will read in place of the box it is written in, framed as that box is so the editor keeps its edge.</summary>
+        public static readonly ScrollViewStyle Preview = new ScrollViewStyle(ScrollView)
+        {
+            Base = { Background = Palette.Page, Edge = Palette.Line, Padding = new Thickness(8f, 6f) }
         };
 
         /// <summary>An on/off switch: a square thumb and the word, sunk into a dark track while off, and edged under the pointer.</summary>

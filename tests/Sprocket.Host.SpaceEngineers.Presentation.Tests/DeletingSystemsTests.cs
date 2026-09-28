@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -48,8 +49,10 @@ public class DeletingSystemsTests
         var system = sim.Editor.Program.Systems.Single();
         Assert.Equal(2, system.Instances.Count);
 
+        // Asked as the one going, and told that the blueprint and the rest are kept.
         sim.Editor.RootRows()[1].Deletes!.Execute();
-        Assert.Equal(sim.Texts.DeleteFinal, Warning(sim));
+        Assert.Equal(sim.Texts.DeleteInstance, sim.Editor.Screen.Title());
+        Assert.Equal(Template.Fill(sim.Texts.DeleteInstanceKept, "name", system.Name), Warning(sim));
 
         sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         sim.Tick();
@@ -87,6 +90,60 @@ public class DeletingSystemsTests
 
         Assert.True(reread.Editor.Program.Systems.Single().IsBlueprint);
         Assert.True(reread.Editor.RootRows().Single().IsAction, "the blueprint came back as something else");
+    }
+
+    /// <summary>A logic system's own screen has a bin too, which asks the same question and leaves for the home page once it has gone.</summary>
+    [Fact]
+    public void ALogicSystemIsDeletedFromItsOwnScreen()
+    {
+        var sim = Built();
+        sim.Editor.RootRows()[0].Opens!.Execute();
+        sim.Tick();
+
+        Assert.Equal(sim.Texts.SystemDelete, sim.Editor.Screen.DeleteAbout);
+        sim.Editor.Screen.Deletes!.Execute();
+        Assert.Equal(sim.Texts.DeleteSystem, sim.Editor.Screen.Title());
+
+        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
+        sim.Tick();
+
+        Assert.Empty(sim.Editor.Program.Systems);
+        Assert.Empty(sim.Editor.RootRows());
+    }
+
+    /// <summary>
+    /// A blueprint goes only once its name is typed, whatever its case, since every logic system made from it goes too; a
+    /// press on the way on before then does nothing.
+    /// </summary>
+    [Fact]
+    public void ABlueprintGoesOnlyOnceItsNameIsTyped()
+    {
+        var sim = Blueprinted();
+        var system = sim.Editor.Program.Systems.Single();
+        sim.Editor.OpenBlueprintSystem(0);
+        sim.Tick();
+
+        Assert.Equal(sim.Texts.SystemDeleteBlueprint, sim.Editor.Screen.DeleteAbout);
+        sim.Editor.Screen.Deletes!.Execute();
+        var asking = sim.Editor.Asking!;
+
+        asking.Take();
+        sim.Tick();
+        Assert.Same(system, sim.Editor.Program.Systems.Single());
+
+        asking.Box.SelectAll();
+        asking.Box.Insert("Airloc");
+        asking.Take();
+        sim.Tick();
+        Assert.Same(system, sim.Editor.Program.Systems.Single());
+
+        asking.Box.SelectAll();
+        asking.Box.Insert(system.Name.ToUpperInvariant());
+        asking.Take();
+        sim.Tick();
+
+        Assert.Empty(sim.Editor.Program.Systems);
+        Assert.Empty(sim.Editor.RootRows());
     }
 
     /// <summary>A lent editor, which may only look, offers no bin.</summary>
@@ -127,6 +184,10 @@ public class DeletingSystemsTests
 
         var add = sim.Editor.RootRows().Single(row => row.IsAction);
         add.Opens!.Execute();
+        sim.Tick();
+
+        // Something done to it, so it stays when the panel is left.
+        sim.Editor.Screen.Flip!.Execute();
         sim.Editor.GoToRoot();
         sim.Tick();
 

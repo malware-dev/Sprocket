@@ -127,7 +127,7 @@ public class SalvageTests
 
         // The first edit asks before it replaces anything, so this is a player pressing through it,
         // then naming the logic system it made.
-        rig.Editor.PressStart("New logic system");
+        rig.Editor.PressStart("Logic system");
         Answer(rig, "Replace it");
         rig.Editor.Screen.Heading[0].Renames!("Airlock");
         rig.Tick();

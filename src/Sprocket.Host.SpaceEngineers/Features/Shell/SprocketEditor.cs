@@ -68,6 +68,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>The windows open over the screen showing the editor, or null while nothing shows it.</summary>
         public WindowLayer Windows { get; set; }
 
+        /// <summary>How many times the screen has been built from its page, which a screen standing still never adds to.</summary>
+        public int Rebuilds { get; private set; }
+
+        /// <summary>The box a blueprint's name is typed into to delete it, where one has been asked for.</summary>
+        public Prompt Asking => _asking;
+
         /// <summary>What the person at the editor needs told above whatever page is showing, or null for nothing.</summary>
         public Notice Notice => _notice;
 
@@ -185,6 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _screen.Subtitle = Current.Subtitle;
             _screen.SwitchIsOn = Current.SwitchIsOn;
+            _screen.Running = Current.IsRunning;
 
             Walking();
         }
@@ -405,6 +412,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         bool _open;
 
         bool _told;
+
+        Prompt _asking;
 
         /// <summary>
         /// Whether a press of <paramref name="kind" /> would be the edit that replaces a program Sprocket could not read.
@@ -682,10 +691,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// a sequence pops from its own answers, and the one on the way out of a picker does the
         /// same.
         /// </remarks>
+        /// <summary>Goes back a page, where the page lets it go, taking back what it was opened on where that was made and left untouched.</summary>
+        /// <remarks>Pressing to add something and backing straight out adds nothing.</remarks>
         void Leave()
         {
-            if (Current.Leaving())
-                Pop();
+            var page = Current;
+            if (!page.Leaving())
+                return;
+
+            Pop();
+            if (page.IsMade && page.Untouched)
+                page.Unmake();
         }
 
         /// <summary>The shape of the screen has changed and must be rebuilt.</summary>
@@ -828,9 +844,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Forgets a sequence: its way back, and any page showing it, so deleting one never
         /// leaves somebody staring at something that no longer exists.
         /// </summary>
-        void Deleting(string named, string warning, Action delete)
+        void Deleting(string question, string named, string warning, Action delete)
         {
-            var page = new ChoicePage(this, Texts.DeleteSystem);
+            var page = new ChoicePage(this, question);
             page.Caption = named;
 
             page.Add(Texts.DeleteKeep, false, delegate { Pop(); });
@@ -855,6 +871,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _program.RemoveSystem(system);
             _systemHistory.Forget(system);
             _standIns.Remove(system.Id);
+
+            // Nobody is left looking at something that no longer exists.
+            for (var i = _stack.Count - 1; i > 0; i--)
+            {
+                if (_stack[i].IsAbout(system))
+                    _stack.RemoveAt(i);
+            }
+
             _structureDirty = true;
         }
 
@@ -892,6 +916,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         void Rebuild()
         {
+            Rebuilds++;
             var page = Current;
 
             // Rebuilt in place rather than swapped, because a target holds this list across a refresh and
@@ -902,8 +927,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _screen.CanGoBack = _stack.Count > 1;
             _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
-            _screen.Refresh = Act(Cmd.Refresh, Look);
+            _screen.Refresh = page.CanRefresh ? Act(Cmd.Refresh, Look) : null;
             _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
+            _screen.SwitchGovernsAll = page.SwitchGovernsAll;
+            _screen.Runs = page.Runs;
+            _screen.Stops = page.Stops;
+            _screen.Deletes = page.Deletes;
+            _screen.DeleteAbout = page.DeleteAbout;
 
             // Made whether or not there is anything to walk back, because what there is to walk back changes without a
             // rebuild. So this decides whether the command may exist at all, and the tick decides whether it is offered.
@@ -1010,18 +1040,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Loading a blueprint somebody else made. Not built yet, and says so.
+        /// The blueprint library, where blueprints are imported and exported. Not built yet, and says so.
         /// </summary>
         /// <remarks>
-        /// Present rather than hidden because it is half of what the front door offers, and a
-        /// screen that grows an option later teaches itself twice. What it needs is the blueprint's
-        /// own screen, where which of the construct's blocks fill each part is said.
+        /// Present rather than hidden because a screen that grows an option later teaches itself twice.
         /// </remarks>
         internal void OfferLoading()
         {
-            var page = new ChoicePage(this, "Load blueprint");
-            page.EmptyText = "Not built yet. A blueprint somebody sent you would be set up here, "
-                + "asking which of your blocks fill each part of it.";
+            var page = new ChoicePage(this, Texts.SystemsLoad);
+            page.EmptyText = Texts.SystemsLibraryUnbuilt;
             Push(page);
         }
 
@@ -1104,7 +1131,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             sequence.Name = Name(sequence);
 
             Invalidate();
-            Push(new SequencePage(this, sequence));
+            PushMade(new SequencePage(this, sequence));
+        }
+
+        /// <summary>Opens <paramref name="page" /> on something just made and given a name of its own, with that name in hand to be given.</summary>
+        /// <remarks>A made-up name, "Sequence 3", is one somebody means to replace, so the box is open for it before anything else is pressed.</remarks>
+        internal void PushNamed(EditorPage page)
+        {
+            page.NameOnArrival = true;
+            Push(page);
+        }
+
+        /// <summary>Opens <paramref name="page" /> on something just made, with its name in hand; left without anything done to it, it goes again.</summary>
+        internal void PushMade(EditorPage page)
+        {
+            page.Made();
+            PushNamed(page);
         }
 
         /// <summary>
@@ -1311,7 +1353,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             Points(system, trigger, sequence, false, fresh, sequence, start);
 
-            Push(new SequencePage(this, sequence));
+            PushNamed(new SequencePage(this, sequence));
         }
 
         /// <summary>
@@ -1724,8 +1766,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 // not this one on top of it, which would leave somebody standing on a question about
                 // something that no longer exists.
                 Pop();
-                _program.RemoveSequence(sequence);
-                ForgetSequence(sequence);
+                TakeOut(sequence);
             });
 
             page.WarnOnLast(Texts.DeleteFinal);
@@ -1734,24 +1775,61 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Asks before taking <paramref name="system" /> out of the program, with its sequences, its triggers and every one of it.</summary>
+        /// <remarks>
+        /// A blueprint only once its name is typed, in a box whose way on is dead until it is: every logic system made from
+        /// it goes with it, which is too much to lose to a press that landed on the wrong answer.
+        /// </remarks>
         internal void DeleteSystem(AutomationSystem system)
         {
-            Deleting(system.Name, Texts.DeleteFinal, delegate { Drop(system); });
+            if (!system.IsBlueprint)
+            {
+                Deleting(Texts.DeleteSystem, system.Name, Texts.DeleteFinal, delegate { Drop(system); });
+                return;
+            }
+
+            _asking = new Prompt(Texts.DeleteConfirm);
+            _asking.Ask(Template.Fill(Texts.DeleteBlueprint, "name", system.Name), "", null,
+                delegate(string typed) { return string.Equals(typed.Trim(), system.Name, StringComparison.OrdinalIgnoreCase); },
+                delegate
+                {
+                    var drop = Act(Cmd.DeleteSystem, delegate { Drop(system); });
+                    if (drop != null)
+                        drop.Execute();
+                },
+                Windows, Input);
         }
 
         /// <summary>Asks before taking <paramref name="instance" />, one of the logic systems made from a blueprint, out of it.</summary>
-        /// <remarks>The blueprint stays, the last one taken or not: a blueprint is only ever deleted from where blueprints are kept.</remarks>
+        /// <remarks>The blueprint stays, the last one taken or not: it goes only from its own logic system screen, by name.</remarks>
         internal void DeleteInstance(AutomationSystem system, SystemInstance instance)
         {
             var named = SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instance);
 
-            Deleting(named, Texts.DeleteFinal, delegate
-            {
-                system.RemoveInstance(instance);
-                _standIns.Remove(system.Id);
-                _program.Rewire();
-                _structureDirty = true;
-            });
+            Deleting(Texts.DeleteInstance, named, Template.Fill(Texts.DeleteInstanceKept, "name", system.Name),
+                delegate { TakeOut(system, instance); });
+        }
+
+        /// <summary>Takes <paramref name="sequence" /> out of the program without asking, and any page showing it.</summary>
+        internal void TakeOut(Sequence sequence)
+        {
+            _program.RemoveSequence(sequence);
+            ForgetSequence(sequence);
+        }
+
+        /// <summary>Takes <paramref name="system" /> out of the program without asking, with everything in it and any page showing it.</summary>
+        internal void TakeOut(AutomationSystem system)
+        {
+            Drop(system);
+        }
+
+        /// <summary>Takes <paramref name="instance" /> out of <paramref name="system" /> without asking.</summary>
+        /// <remarks>For a question already answered, or for one made a moment ago that was left without anything done to it.</remarks>
+        internal void TakeOut(AutomationSystem system, SystemInstance instance)
+        {
+            system.RemoveInstance(instance);
+            _standIns.Remove(system.Id);
+            _program.Rewire();
+            _structureDirty = true;
         }
 
         /// <summary>
@@ -1767,7 +1845,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var copy = _program.Duplicate(sequence);
             copy.Name = Name(copy);
 
-            Push(new SequencePage(this, copy));
+            PushMade(new SequencePage(this, copy));
         }
 
         /// <summary>

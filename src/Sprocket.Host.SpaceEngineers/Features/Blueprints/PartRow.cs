@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Writing;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
@@ -18,11 +22,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     {
         readonly List<Mention> _pieces = new List<Mention>();
 
-        /// <summary>A part saying nothing yet.</summary>
-        public PartRow()
+        string _said = "";
+
+        /// <summary>A part saying nothing yet, whose description's guide opens in <paramref name="windows" />.</summary>
+        public PartRow(Func<WindowLayer> windows)
         {
             Blocks = new List<long>();
-            CreateView();
+            CreateView(windows);
         }
 
         /// <summary>What the part is called.</summary>
@@ -32,14 +38,68 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set { _name.Text = value; }
         }
 
-        /// <summary>What the author wrote about the part beyond its name, or empty.</summary>
-        public string About
+        /// <summary>What the author wrote about the part beyond its name, as markup read into rich text, or empty.</summary>
+        public string Described
         {
-            get { return _about.Text; }
+            get { return _said; }
             set
             {
-                _about.Text = value ?? "";
-                _about.IsVisible = _about.Text.Length != 0;
+                var said = value ?? "";
+                if (said != _said)
+                {
+                    _said = said;
+                    _about.Document = Markdown.Parse(said);
+                }
+
+                _about.IsVisible = said.Length != 0 && !Editing;
+            }
+        }
+
+        /// <summary>The word after the name of a slot that may be left without a block, or null for one that needs a block.</summary>
+        public string Optional
+        {
+            get { return _optional.Text.Length != 0 ? _optional.Text : null; }
+            set
+            {
+                _optional.Text = value ?? "";
+                _optional.IsVisible = value != null && !Editing;
+            }
+        }
+
+        /// <summary>Whether the slot is being written rather than filled: its name and what it is for in boxes, and a switch for whether it needs a block.</summary>
+        public bool Editing
+        {
+            get { return _nameBox.IsVisible; }
+            set
+            {
+                _name.IsVisible = !value;
+                _about.IsVisible = !value && _said.Length != 0;
+                _optional.IsVisible = !value && _optional.Text.Length != 0;
+                _blocks.IsVisible = !value;
+                _problem.IsVisible = !value && _problem.Text.Length != 0;
+                _nameBox.IsVisible = value;
+                _aboutComposer.IsVisible = value;
+                _required.IsVisible = value;
+            }
+        }
+
+        /// <summary>The box the slot's name is written in.</summary>
+        public TextBox NameBox => _nameBox;
+
+        /// <summary>Where what the slot is for is written.</summary>
+        public Composer About => _aboutComposer;
+
+        /// <summary>The switch that says whether the slot may be left without a block, on for optional.</summary>
+        public Switch Required => _required;
+
+        /// <summary>What is wrong with the slot's block, said beside it, or null where nothing is.</summary>
+        public string Problem
+        {
+            get { return _problem.Text.Length != 0 ? _problem.Text : null; }
+            set
+            {
+                _problem.Text = value ?? "";
+                _problem.IsVisible = value != null && !Editing;
             }
         }
 
@@ -53,19 +113,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set { _blocks.Command = value; }
         }
 
-        /// <summary>What pressing the pencil does, which is asking the part's new name, or null where it cannot be renamed.</summary>
-        public ICommand Renames
+        /// <summary>Says <paramref name="words" /> in place of blocks, marked as a slot still to be filled where <paramref name="unfilled" /> is true.</summary>
+        public void Say(string words, bool unfilled)
         {
-            get { return _pencil.Command; }
-            set
-            {
-                _pencil.Command = value;
-                _pencil.IsVisible = value != null;
-            }
+            _pieces.Clear();
+            _pieces.Add(new Mention(words, null));
+            _blocks.Say(_pieces);
+            _blocks.IsEmpty = unfilled;
         }
-
-        /// <summary>The pencil, which a question about the part's name hangs under.</summary>
-        public Element Pencil => _pencil;
 
         /// <summary>Says the blocks, naming them as <paramref name="world" /> calls them.</summary>
         /// <remarks>Walks the blocks for their names, so it is for whoever holds it to call only when they change.</remarks>

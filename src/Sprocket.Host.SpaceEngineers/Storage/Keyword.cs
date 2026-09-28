@@ -60,6 +60,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         With,
 
         /// <summary>Which draft of an unfinished format a program was written against.</summary>
-        Alpha
+        Alpha,
+
+        /// <summary>A part the construct may leave unfilled.</summary>
+        Optional
     }
 }

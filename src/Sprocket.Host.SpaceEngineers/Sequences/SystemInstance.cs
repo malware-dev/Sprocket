@@ -61,6 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         public IEnumerable<string> Filled => _fills.Keys;
 
+        /// <summary>Whether no slot has been filled.</summary>
+        public bool IsEmpty => _fills.Count == 0;
+
         /// <summary>Slots this one's own blocks into one of the system's block slots.</summary>
         public void Fill(string slot, IList<string> entities)
         {

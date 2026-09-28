@@ -419,7 +419,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var inner = body[i];
                 if (inner.Key == Keyword.Required && inner.Says(0, Keyword.Trigger))
                     ReadTrigger(inner, system, trouble);
-                else if (inner.Key == Keyword.Required)
+                else if (inner.Key == Keyword.Required || inner.Key == Keyword.Optional)
                     ReadPart(inner, system, trouble);
                 else if (inner.Key == Keyword.When || inner.Key == Keyword.Every)
                     ReadTrigger(inner, system, trouble);
@@ -463,12 +463,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>required block inner expects Door</c>: something the construct has to provide.
+        /// <c>required block inner expects Door</c>: something the construct has to provide, or may
+        /// leave out where it is <c>optional</c>.
         /// </summary>
         /// <remarks>
-        /// <c>required</c> heads it, so every line that starts with that word is something the ship
-        /// answers rather than something Sprocket does. What a part expects is written only when the
-        /// author said it; nothing means anything may fill it.
+        /// <c>required</c> or <c>optional</c> heads it, so every line that starts with either word is
+        /// something the ship answers rather than something Sprocket does. What a part expects is written
+        /// only when the author said it; nothing means anything may fill it.
         /// </remarks>
         static void WritePart(Pen pen, Part part)
         {
@@ -476,7 +477,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 pen.Blank();
 
             pen.Note(part.Annotation);
-            pen.Start(Keyword.Required).Says(Keyword.Block).Word(part.Id);
+            pen.Start(part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Block).Word(part.Id);
 
             if (part.Expects.Count == 1)
                 pen.Says(Keyword.Expects).Word(part.Expects[0]);
@@ -488,15 +489,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         static void ReadPart(Statement statement, AutomationSystem system, Trouble trouble)
         {
+            var optional = statement.Key == Keyword.Optional;
             if (!statement.Says(0, Keyword.Block))
             {
-                trouble.Say(statement,
-                    "'required' is followed by what sort of thing is required: block, trigger");
+                trouble.Say(statement, optional
+                    ? "'optional' is followed by block"
+                    : "'required' is followed by what sort of thing is required: block, trigger");
                 return;
             }
 
             var part = system.PartFor(statement.Word(1));
             part.Annotation = statement.Annotation;
+            part.Optional = optional;
 
             var expects = statement.Find(Keyword.Expects);
             if (expects < 0)

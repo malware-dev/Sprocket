@@ -1,48 +1,71 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
-    /// <summary>A blueprint: the logic systems made from it, and which blocks the chosen one fills each part with.</summary>
+    /// <summary>A blueprint's configuration panel: one blockset's slots filled with its blocks, or, in edit mode, the panel itself set up.</summary>
     /// <remarks>
-    /// Where a blueprint is set up, and the one way into what it does. Its sentences are edited through one of its logic
-    /// systems, because a sentence names blocks and only a logic system has any, so the way in says whose blocks it is using,
-    /// from the one place that shows the choice. The two lists stand side by side: pointing at another logic system on the
-    /// left, with its blocks changing on the right while the parts stay put, is the difference between a blueprint and what
-    /// is made from it, seen rather than explained. The elements it is drawn with are declared in <c>BlueprintPage.View.cs</c>.
+    /// Filling, each slot says what it is for in the words its author gave it, and pressing its blocks chooses others. In edit
+    /// mode the panel's words and slots are written, for everyone who fills a blockset made from the blueprint. The elements it
+    /// is drawn with are declared in <c>BlueprintPage.View.cs</c>.
     /// </remarks>
     sealed partial class BlueprintPage : EditorPage
     {
         readonly AutomationSystem _system;
         readonly List<Part> _parts = new List<Part>();
         readonly List<string> _used = new List<string>();
-        readonly List<SystemInstance> _instances = new List<SystemInstance>();
+        readonly List<Mention> _gone = new List<Mention>();
+        readonly bool _editing;
 
+        SystemInstance _made;
+        string _madeName;
+        bool _madeOn;
         int _shape = -1;
-        Keyed<SystemInstance, StatusRow> _memberRows;
+        string _described;
+        Ui.Element _focused;
         Keyed<Part, PartRow> _partRows;
-        Prompt _prompt;
 
-        /// <summary>The page of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
-        public BlueprintPage(SprocketEditor editor, AutomationSystem system) : base(editor)
+        /// <summary>The configuration panel of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />, filling a blockset's slots or, where <paramref name="editing" />, setting up the panel.</summary>
+        public BlueprintPage(SprocketEditor editor, AutomationSystem system, bool editing) : base(editor)
         {
             _system = system;
+            _editing = editing;
         }
 
-        /// <inheritdoc />
-        public override string Title => _system.Name;
+        /// <summary>The blockset whose blocks fill the slots, or, in edit mode, the panel itself.</summary>
+        public override string Title => _editing ? Editor.Texts.BlueprintPanel : Blockset == null ? _system.Name : Blockset.Name;
 
         /// <inheritdoc />
-        public override string CustomName => _system.Name;
+        public override string CustomName => Title;
+
+        /// <summary>The blockset can be renamed here; the panel is named for its blueprint, which is renamed on its logic system screen.</summary>
+        public override bool CanRename => !_editing && Blockset != null;
+
+        /// <summary>In edit mode, who reads what is written here.</summary>
+        public override string Subtitle => _editing ? Editor.Texts.BlueprintPanelAbout : "";
+
+        /// <summary>The blockset has a switch, filling; the panel itself does not.</summary>
+        public override bool CanSwitch => !_editing && Blockset != null;
 
         /// <inheritdoc />
-        public override bool CanRename => true;
+        public override bool SwitchIsOn => Blockset != null && Blockset.Enabled;
+
+        /// <summary>The blockset just made is as it was made: its name, its switch, and not one slot filled.</summary>
+        public override bool Untouched
+        {
+            get
+            {
+                return _made != null && _made.Name == _madeName && _made.Enabled == _madeOn && _made.IsEmpty;
+            }
+        }
 
         /// <inheritdoc />
         public override string NameAbout => Editor.Texts.BlueprintNameAbout;
@@ -50,43 +73,109 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>A blueprint has to be called something, since it is told from the others by its name.</summary>
         public override bool NameRequired => true;
 
-        /// <summary>The logic systems made from the blueprint, one row each, in the order they were made.</summary>
-        public Ui.Element.Collection Members => _made.Children;
+        /// <summary>While the blueprint is being written, whose way back is the system's own, since a blueprint is a system.</summary>
+        public override bool HasHistory => _editing;
 
-        /// <summary>The row that makes another logic system from the blueprint.</summary>
-        public StatusRow Another => _another;
+        /// <inheritdoc />
+        public override bool CanUndo => _editing && Editor.CanUndo(_system);
 
-        /// <summary>The chosen logic system at the head of its blocks: its switch, and the way into what the blueprint does.</summary>
-        public StatusRow Chosen => _chosen;
+        /// <inheritdoc />
+        public override string UndoText => Editor.UndoLabel(_system);
+
+        /// <inheritdoc />
+        public override bool CanRedo => _editing && Editor.CanRedo(_system);
+
+        /// <inheritdoc />
+        public override string RedoText => Editor.RedoLabel(_system);
 
         /// <summary>The blueprint's parts, one row each, with the chosen logic system's blocks for each.</summary>
         public Ui.Element.Collection Parts => _partList.Children;
 
-        /// <summary>The question a part's new name is typed into, where one has been asked.</summary>
-        public Prompt Prompt => _prompt;
+        /// <summary>The logic system whose blocks fill the slots, or null before there is one.</summary>
+        SystemInstance Blockset => Editor.StandIn(_system);
+
+        /// <summary>Whether the panel is being set up rather than its slots filled.</summary>
+        public bool IsEditing => _editing;
+
+        /// <inheritdoc />
+        public override bool IsAbout(AutomationSystem system)
+        {
+            return system == _system;
+        }
+
+        /// <summary>Switches the blockset being filled on or off, and nothing else made from the blueprint.</summary>
+        public override void Switch(bool on)
+        {
+            var chosen = Blockset;
+            if (chosen == null)
+                return;
+
+            chosen.Enabled = on;
+            Editor.Invalidate();
+        }
 
         /// <inheritdoc />
         public override bool AcceptsName(string name)
         {
-            var other = Editor.Program.FindSystem(_system.Namespace, Naming.Clean(name));
-            return other == null || other == _system;
+            return Naming.Clean(name).Length > 0;
         }
 
         /// <inheritdoc />
         public override void Rename(string name)
         {
             var wanted = Naming.Clean(name);
-            if (wanted.Length == 0 || !AcceptsName(wanted))
+            if (!AcceptsName(wanted))
                 return;
 
-            _system.Name = wanted;
+            if (Blockset != null)
+                Blockset.Name = wanted;
         }
 
         /// <inheritdoc />
         public override void Heading(List<HeadingPart> parts)
         {
             base.Heading(parts);
-            parts[0].After = Editor.Texts.SystemBlueprint;
+            parts[0].After = Template.Fill(_editing ? Editor.Texts.BlueprintPanelFor : Editor.Texts.BlueprintFrom, "name", _system.Name);
+        }
+
+        /// <summary>Writes what is still being typed into the blueprint before going.</summary>
+        public override bool Leaving()
+        {
+            Written(_focused);
+            _focused = null;
+            return true;
+        }
+
+        /// <inheritdoc />
+        public override void Unmake()
+        {
+            if (_made != null)
+                Editor.TakeOut(_system, _made);
+        }
+
+        /// <summary>Notes the blockset just made, as it was made.</summary>
+        protected override void Remember()
+        {
+            _made = Blockset;
+            if (_made == null)
+                return;
+
+            _madeName = _made.Name;
+            _madeOn = _made.Enabled;
+        }
+
+        /// <inheritdoc />
+        public override void Undo()
+        {
+            Settle();
+            Editor.Undo(_system);
+        }
+
+        /// <inheritdoc />
+        public override void Redo()
+        {
+            Settle();
+            Editor.Redo(_system);
         }
 
         /// <summary>Brings the view up to date.</summary>
@@ -96,118 +185,167 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Show();
         }
 
-        /// <summary>Brings what the chosen logic system is doing up to date, and builds the screen again where how many there are or which is chosen has changed.</summary>
+        /// <summary>Writes a box the keyboard has left, and builds the screen again where how many blocksets there are or which is chosen has changed.</summary>
         /// <remarks>
         /// Every tick, and it walks nothing: the parts change only through this page, which rebuilds itself when they do, and a
         /// sentence changes only on the screens under it, which rebuild it on the way back.
         /// </remarks>
         public override void Refresh()
         {
-            if (Shape(Editor.StandIn(_system)) != _shape)
-            {
-                Editor.Invalidate();
-                return;
-            }
+            Refocused();
 
-            Live();
+            if (Shape(Editor.StandIn(_system)) != _shape)
+                Editor.Invalidate();
         }
 
-        /// <summary>Gives the row that makes another its press, keeps the rows by logic system and by part, and fills the view.</summary>
+        /// <summary>Keeps the rows by slot, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            _another.Opens = Editor.Act(Cmd.AddInstance, delegate { Editor.Another(_system); });
-            _another.IsAction = true;
-            _memberRows = new Keyed<SystemInstance, StatusRow>(_made.Children, Member);
             _partRows = new Keyed<Part, PartRow>(_partList.Children, PartRow);
             Show();
         }
 
         void Show()
         {
-            if (_memberRows == null)
+            if (_partRows == null)
                 return;
 
             var texts = Editor.Texts;
-            var chosen = Editor.StandIn(_system);
+            var chosen = Blockset;
             _shape = Shape(chosen);
 
-            _madeHeading.Text = texts.BlueprintMade.ToUpperInvariant();
             _partsHeading.Text = texts.BlueprintParts.ToUpperInvariant();
-
-            _instances.Clear();
-            _instances.AddRange(_system.Instances);
-            _memberRows.Show(_instances);
-            for (var i = 0; i < _instances.Count; i++)
-            {
-                var row = _memberRows[_instances[i]];
-                row.Summary = SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, _instances[i]);
-                row.Chosen = _instances[i] == chosen;
-                row.Show(texts);
-            }
-
-            _another.Summary = Template.Fill(texts.BlueprintAnother, "name", _system.Name);
-            _another.Show(texts);
-
-            _chosen.IsVisible = chosen != null;
-            if (chosen != null)
-                Head(chosen);
+            Describe();
+            Write();
 
             Collect();
             _partRows.Show(_parts);
-            for (var i = 0; i < _parts.Count; i++)
-                Part(_partRows[_parts[i]], _parts[i], chosen);
 
-            Live();
+            var unfilled = 0;
+            for (var i = 0; i < _parts.Count; i++)
+            {
+                if (!Part(_partRows[_parts[i]], _parts[i], chosen) && !_parts[i].Optional)
+                    unfilled++;
+            }
+
+            Needs(chosen, unfilled);
         }
 
-        /// <summary>What the chosen logic system is doing and whether it is switched on, read every tick because neither costs anything.</summary>
-        void Live()
+        /// <summary>Shows what the blueprint's author wrote about it, parsed again only when it has changed.</summary>
+        void Describe()
         {
-            var chosen = Editor.StandIn(_system);
-            if (_memberRows == null || chosen == null)
+            var said = _system.Annotation;
+            _description.IsVisible = said.Length > 0 && !_editing;
+            if (ReferenceEquals(said, _described))
                 return;
 
-            var going = SystemSummary.IsRunning(_system, Editor.Runner, chosen);
-            _chosen.SwitchIsOn = chosen.Enabled;
-            _chosen.Status = SystemSummary.RunningText(Editor.Texts, going);
-            _chosen.Running = going;
-            _chosen.Show(Editor.Texts);
+            _described = said;
+            _description.Document = Markdown.Parse(said);
         }
 
-        /// <summary>One of the logic systems made from the blueprint, chosen by pressing it.</summary>
-        StatusRow Member(SystemInstance instance)
+        /// <summary>Puts the description in its box while the blueprint is being written, leaving alone a box being typed in.</summary>
+        void Write()
         {
-            return new StatusRow { Opens = Editor.Act(Cmd.ChooseInstance, delegate { Editor.Choose(_system, instance); }) };
+            var texts = Editor.Texts;
+            _writing.IsVisible = _editing;
+            if (!_editing)
+                return;
+
+            _writingHeading.Text = texts.BlueprintDescription.ToUpperInvariant();
+            _composer.Show(texts);
+            _composer.Hint = texts.BlueprintDescriptionHint;
+            if (!_composer.Box.IsFocused)
+                _composer.Text = _system.Annotation;
         }
 
-        /// <summary>The chosen logic system at the head of its blocks: its switch, and the way into what the blueprint does, through these blocks.</summary>
-        void Head(SystemInstance chosen)
+        /// <summary>Writes a box into the blueprint once the keyboard has left it, read every tick because it is one comparison.</summary>
+        void Refocused()
         {
-            _chosen.Summary = SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, chosen);
-            _chosen.SwitchGovernsAll = true;
-            _chosen.Flips = Editor.Act(Cmd.EnableInstance, delegate
+            var now = Editor.Input == null ? null : Editor.Input.Focused;
+            if (ReferenceEquals(now, _focused))
+                return;
+
+            var left = _focused;
+            _focused = now;
+            Written(left);
+        }
+
+        /// <summary>Writes the box that holds the keyboard into the blueprint and lets the keyboard go, so what comes next starts from what was typed.</summary>
+        /// <remarks>Before a step back, so it takes back what was typed and the box then shows what the step leaves.</remarks>
+        void Settle()
+        {
+            Written(_focused);
+            _focused = null;
+            if (Editor.Input != null)
+                Editor.Input.Focus(null);
+        }
+
+        /// <summary>Writes what was typed in <paramref name="box" /> into the blueprint, where it is one of this page's boxes.</summary>
+        /// <remarks>Only once the keyboard has left it, so a description being typed is one step back rather than one a letter.</remarks>
+        void Written(Ui.Element box)
+        {
+            if (box == null || !_editing)
+                return;
+
+            if (box == _composer.Box)
             {
-                chosen.Enabled = !chosen.Enabled;
-                Editor.Invalidate();
-            });
+                Editor.Do(_system, new Annotate(_system.Annotation, _composer.Text));
+                return;
+            }
 
-            _chosen.ButtonText = Editor.Texts.BlueprintEditUsing;
-            _chosen.Offers = Editor.Act(Cmd.EditBlueprint, delegate { Editor.Push(new LogicSystemPage(Editor, _system)); });
+            for (var i = 0; i < _parts.Count; i++)
+            {
+                var part = _parts[i];
+                var row = _partRows[part];
+                if (box == row.NameBox)
+                {
+                    var name = Naming.Clean(row.NameBox.Text);
+                    if (name.Length > 0)
+                        Editor.Do(_system, new AnnotatePart(part, part.Labelled(name), "renaming a slot"));
+                    return;
+                }
+
+                if (box == row.About.Box)
+                {
+                    Editor.Do(_system, new AnnotatePart(part, part.Described(row.About.Text), "describing a slot"));
+                    return;
+                }
+            }
+        }
+
+        /// <summary>Beside the slots' heading, how many of those that need a block still have none, while filling; nothing once every one has.</summary>
+        void Needs(SystemInstance chosen, int unfilled)
+        {
+            var texts = Editor.Texts;
+            _needs.IsVisible = !_editing && chosen != null && unfilled > 0;
+            _needs.Text = unfilled == 1
+                ? texts.BlueprintStillOne
+                : Template.Fill(texts.BlueprintStillMany, "count", unfilled.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
         PartRow PartRow(Part part)
         {
-            var row = new PartRow();
-            row.Renames = Editor.Act(Cmd.RenamePart, delegate { Relabelling(part, row); });
-            return row;
+            return new PartRow(Windows);
         }
 
-        /// <summary>A part, with the blocks <paramref name="chosen" /> fills it with, and a press on them that chooses others.</summary>
-        void Part(PartRow row, Part part, SystemInstance chosen)
+        WindowLayer Windows()
         {
+            return Editor.Windows;
+        }
+
+        /// <summary>A slot, with the blocks <paramref name="chosen" /> fills it with and a press on them that chooses others; false where no block fills it.</summary>
+        /// <remarks>While the blueprint is being written, its name and what it is for in their boxes instead, and whether it needs a block.</remarks>
+        bool Part(PartRow row, Part part, SystemInstance chosen)
+        {
+            row.Editing = _editing;
+            if (_editing)
+                Authored(row, part);
+
             row.Name = part.Label;
-            row.About = part.About;
+            row.Described = part.About;
+            row.Optional = part.Optional ? Editor.Texts.BlueprintOptional : null;
             row.Blocks.Clear();
+            _gone.Clear();
 
             var filled = chosen == null ? null : chosen.FilledWith(part.Id);
             if (filled != null)
@@ -217,54 +355,82 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     var block = Editor.Runner.Bindings.Entity(filled[i]);
                     if (block != null)
                         row.Blocks.Add(block.Id);
+                    else if (_gone.Count == 0)
+                        _gone.Add(new Mention(Template.Fill(Editor.Texts.BlueprintGone, "name", Called(filled[i])), null));
                 }
             }
 
             row.Fills = chosen == null ? null : Editor.Act(Cmd.FillPart, delegate { Fill(part, chosen); });
-            row.Show(Editor.World);
+
+            row.Problem = row.Blocks.Count == 0 && _gone.Count > 0 ? _gone[0].Text : null;
+
+            if (row.Blocks.Count > 0)
+                row.Show(Editor.World);
+            else if (part.Optional)
+                row.Say(SentenceText.Empty, false);
+            else
+                row.Say(SentenceText.Empty, true);
+
+            return row.Blocks.Count > 0;
         }
 
-        /// <summary>Asks the part's new name, in a box hanging under its pencil.</summary>
-        void Relabelling(Part part, PartRow row)
+        /// <summary>Puts a slot's name and what it is for in their boxes, leaving alone a box being typed in, and gives its switch its words and its press.</summary>
+        void Authored(PartRow row, Part part)
         {
-            if (_prompt == null)
-                _prompt = new Prompt(Editor.Texts.PromptContinue);
+            var texts = Editor.Texts;
+            if (!row.NameBox.IsFocused)
+                row.NameBox.Text = part.Label;
 
-            _prompt.Ask(Editor.Texts.BlueprintRenamePart, part.Label, row.Pencil,
-                delegate(string name) { return Naming.Clean(name).Length > 0; },
-                delegate(string name)
-                {
-                    var rename = Editor.Act(Cmd.RenamePart, delegate { Relabel(part, name); });
-                    if (rename != null)
-                        rename.Execute();
-                },
-                Editor.Windows, Editor.Input);
+            row.NameBox.Submit = new Ui.Input.Relay(delegate { Editor.Input.Focus(null); });
+
+            row.About.Show(texts);
+            row.About.Hint = texts.BlueprintAboutHint;
+            if (!row.About.Box.IsFocused)
+                row.About.Text = part.About;
+            row.Required.Says(texts.BlueprintOptional, texts.BlueprintRequired);
+            row.Required.IsOn = part.Optional;
+            row.Required.Command = Editor.Act(Cmd.MakeOptional, delegate
+            {
+                Editor.Do(_system, new SetOptional(part, !part.Optional));
+            });
         }
 
-        /// <summary>Asks which of the construct's blocks fills <paramref name="part" /> for <paramref name="chosen" />.</summary>
+        /// <summary>What the block a reference names was called in the game, where the reference remembers, or its name in the program.</summary>
+        string Called(string reference)
+        {
+            var found = Editor.Program.FindRef(reference);
+            if (found == null)
+                return reference;
+
+            for (var i = 0; i < found.Keys.Count; i++)
+            {
+                string text;
+                if (found.Keys[i].Cells == null
+                    && Editor.World.Values.TryText(found.Keys[i].Kind, found.Keys[i].Value, out text))
+                    return text;
+            }
+
+            return reference;
+        }
+
+        /// <summary>Asks which of the construct's blocks fill <paramref name="part" /> for <paramref name="chosen" />, in the picker.</summary>
         /// <remarks>
-        /// Only blocks of the types the part expects, where it says: a door's part is offered doors. The block it holds now is
-        /// marked, so choosing is also seeing what is there.
+        /// Only blocks of the types the part expects, where it says: a door's part is offered doors. The blocks it holds now are
+        /// chosen already, so choosing is also seeing what is there.
         /// </remarks>
         void Fill(Part part, SystemInstance chosen)
         {
-            var page = new ChoicePage(Editor, part.Label);
-            page.Caption = SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, chosen);
-            page.EmptyText = Editor.Texts.BlueprintNoneFits;
-
+            var targets = new List<long>();
             var filled = chosen.FilledWith(part.Id);
-            var entities = Editor.World.Entities;
-            for (var i = 0; i < entities.Count; i++)
+            for (var i = 0; filled != null && i < filled.Count; i++)
             {
-                var block = entities[i];
-                if (!Fits(part, block))
-                    continue;
-
-                var current = filled != null && filled.Count == 1 && Editor.Runner.Bindings.Entity(filled[0]) == block;
-                page.Add(block.Name, current, delegate { Filled(part, chosen, block); });
+                var block = Editor.Runner.Bindings.Entity(filled[i]);
+                if (block != null)
+                    targets.Add(block.Id);
             }
 
-            Editor.Push(page);
+            Editor.Push(new PickPage(Editor, part.Label, targets, delegate(GridEntity block) { return Fits(part, block); },
+                delegate(PickAnswer answer) { Filled(part, chosen, answer.Targets); }));
         }
 
         /// <summary>Whether <paramref name="block" /> is of a type <paramref name="part" /> may be filled with.</summary>
@@ -285,25 +451,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return false;
         }
 
-        /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with <paramref name="block" />, and goes back to the blueprint.</summary>
+        /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with the blocks <paramref name="ids" />, and goes back to the blueprint.</summary>
         /// <remarks>Rewired as any edit is, because what a trigger's button is may have been this part.</remarks>
-        void Filled(Part part, SystemInstance chosen, GridEntity block)
+        void Filled(Part part, SystemInstance chosen, IList<long> ids)
         {
-            chosen.Fill(part.Id, new[] { Editor.Program.Declare(Editor.World, block).Name });
+            var names = new List<string>();
+            for (var i = 0; i < ids.Count; i++)
+            {
+                var block = Editor.World.FindEntity(ids[i]);
+                if (block != null)
+                    names.Add(Editor.Program.Declare(Editor.World, block).Name);
+            }
+
+            chosen.Fill(part.Id, names);
             Editor.Program.Edited();
             Editor.Program.Rewire();
             Editor.Pop();
-            Editor.Invalidate();
-        }
-
-        void Relabel(Part part, string name)
-        {
-            name = Naming.Clean(name);
-            if (name.Length == 0)
-                return;
-
-            part.Relabel(name);
-            Editor.Program.Edited();
             Editor.Invalidate();
         }
 

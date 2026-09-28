@@ -67,9 +67,10 @@ sprocket 1 alpha 7
 `<format>` goes up only when a change would stop existing programs working. A reader of a later
 format converts an earlier program rather than turning it away.
 
-`alpha <draft>` says the format is not finished, and numbers the drafts of it. It goes up for any
-change at all to what is written or read, and a program from another draft is turned away rather
-than converted. It is absent from a finished format, so a program with no `alpha` was written
+`alpha <draft>` says the format is not finished, and numbers the drafts of it. It goes up for a
+change that makes an existing program read differently or not at all, and a program from another
+draft is turned away rather than converted. An addition that no existing program uses leaves it
+where it is. It is absent from a finished format, so a program with no `alpha` was written
 against one.
 
 # A system
@@ -99,8 +100,8 @@ deleted and is worth writing only then.
 
 ## Parts
 
-What the system needs a construct to provide. Every part starts with `required`, and everything else
-in the system refers to a part by its name.
+What the system needs a construct to provide. Every part starts with `required` or `optional`, and
+everything else in the system refers to a part by its name.
 
 ```
 # The inner door
@@ -109,12 +110,17 @@ required block inner expects Door
 # The hangar door, and only the large one
 required block hangar expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'
 
+# A light over the door, where there is one
+optional block lamp expects InteriorLight
+
 # The call button
 required trigger pressed_1 [ call ] to run 1
 
 # Something on the ship, and the program does not say what
 required trigger to run 2
 ```
+
+An `optional block` is one a construct may leave unfilled.
 
 `expects` names what may fill a part: a game type id with the `MyObjectBuilder_` prefix dropped, a
 quoted `'Type/Subtype'` for one exact block, or a list of either.

@@ -40,8 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         int _busy;
         int _off;
         string _skips = "";
-        ICommand _undo;
-        ICommand _redo;
+        string _madeName;
+        bool _madeOn;
         Keyed<Step, StepRow> _rows;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
@@ -63,6 +63,64 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// on its system's screen: a sequence three triggers start has no one line to say so.
         /// </remarks>
         public override string Title => SequenceText.Doing(Editor.Runner.Bindings, _sequence, Editor.StandIn(_sequence.System));
+
+        /// <summary>Whether anything starts the sequence is read from the toolbars.</summary>
+        public override bool CanRefresh => true;
+
+        /// <summary>The sequence has a switch of its own, whatever it is doing, because stopping it is the act.</summary>
+        public override bool CanSwitch => true;
+
+        /// <inheritdoc />
+        public override bool SwitchIsOn => _sequence.Enabled;
+
+        /// <summary>The switch parks this sequence and nothing else in its system.</summary>
+        public override bool SwitchGovernsAll => false;
+
+        /// <inheritdoc />
+        public override bool IsRunning
+        {
+            get
+            {
+                var state = Editor.Runner.Get(_sequence);
+                return state != null && state.IsRunning;
+            }
+        }
+
+        /// <summary>Runs it by hand, whatever the switch says.</summary>
+        /// <remarks>
+        /// Somebody working on a sequence parks it so its triggers leave it alone, which is exactly when they want to see it
+        /// work.
+        /// </remarks>
+        public override ICommand Runs => Editor.Act(Cmd.RunNow, delegate { Editor.RunNow(_sequence); });
+
+        /// <inheritdoc />
+        public override ICommand Stops => Editor.Act(Cmd.StopNow, delegate { Editor.StopNow(_sequence); });
+
+        /// <summary>Throws the whole sequence away, which is not editing it and so is offered while it may run.</summary>
+        public override ICommand Deletes => Editor.Act(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(_sequence); });
+
+        /// <inheritdoc />
+        public override string DeleteAbout => Editor.Texts.SequenceDelete;
+
+        /// <summary>The sequence's own way back, for what is done to it on this page.</summary>
+        public override bool HasHistory => true;
+
+        /// <summary>Nothing is walked back while the sequence may run, as nothing else about it changes then.</summary>
+        public override bool CanUndo => !Running && Editor.CanUndo(_sequence);
+
+        /// <inheritdoc />
+        public override string UndoText => Editor.UndoLabel(_sequence);
+
+        /// <inheritdoc />
+        public override bool CanRedo => !Running && Editor.CanRedo(_sequence);
+
+        /// <inheritdoc />
+        public override string RedoText => Editor.RedoLabel(_sequence);
+
+        /// <summary>The sequence just made is as it was made: its name and switch, and nothing done to it that could be walked back.</summary>
+        /// <remarks>Everything that changes what a sequence does is an edit in its history, so an empty history is nothing done.</remarks>
+        public override bool Untouched => _sequence.Name == _madeName && _sequence.Enabled == _madeOn
+            && !Editor.CanUndo(_sequence) && !Editor.CanRedo(_sequence);
 
         /// <summary>A sequence arrives already named, "Sequence 3", the way a block does, so renaming is always overtyping.</summary>
         public override string CustomName => _sequence.Name ?? "";
@@ -86,7 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 ? Template.Fill(Editor.Texts.SequenceHeld, "holder", Editor.Holder)
                 : Editor.Texts.SequenceLocked;
 
-        /// <summary>The bar of what the sequence is doing and the tools that act on the whole of it.</summary>
+        /// <summary>The line saying what the sequence is doing.</summary>
         public SequenceBar Bar => _bar;
 
         /// <summary>The steps, one row each, in order.</summary>
@@ -107,6 +165,43 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Editor.Do(_sequence, new Rename(_sequence.Name, wanted), true);
         }
 
+        /// <inheritdoc />
+        public override bool IsAbout(AutomationSystem system)
+        {
+            return system == _sequence.System;
+        }
+
+        /// <inheritdoc />
+        public override void Unmake()
+        {
+            Editor.TakeOut(_sequence);
+        }
+
+        /// <summary>Notes the sequence just made, as it was made.</summary>
+        protected override void Remember()
+        {
+            _madeName = _sequence.Name;
+            _madeOn = _sequence.Enabled;
+        }
+
+        /// <inheritdoc />
+        public override void Switch(bool on)
+        {
+            SetEnabled(on);
+        }
+
+        /// <inheritdoc />
+        public override void Undo()
+        {
+            Editor.Undo(_sequence);
+        }
+
+        /// <inheritdoc />
+        public override void Redo()
+        {
+            Editor.Redo(_sequence);
+        }
+
         /// <summary>One part: what this sequence is called, the name where there is one and what it does where there is not.</summary>
         /// <remarks>What starts it is not here: a sequence may be started from several places, and its system already lists them.</remarks>
         public override void Heading(List<HeadingPart> parts)
@@ -115,6 +210,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             does.About = NameAbout;
             does.NameRequired = NameRequired;
             does.Renames = Editor.Renaming(Rename, null);
+            does.NamedOnArrival = NameOnArrival;
+            NameOnArrival = false;
 
             parts.Add(does);
             RefreshHeading(parts);
@@ -187,17 +284,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return false;
         }
 
-        /// <summary>Gives the tools that act on the whole sequence their presses, and keeps the rows by step.</summary>
+        /// <summary>Keeps the rows by step, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            // Whatever the switch says, and that is the point of it: somebody working on a sequence parks it so its
-            // triggers leave it alone, which is exactly when they want to see it work. Throwing it away is not editing it
-            // either, and the switch is the one control a running sequence keeps, because stopping it is the act.
-            _bar.Runs = Editor.Act(Cmd.RunNow, delegate { Editor.RunNow(_sequence); });
-            _bar.Stops = Editor.Act(Cmd.StopNow, delegate { Editor.StopNow(_sequence); });
-            _bar.Deletes = Editor.Act(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(_sequence); });
-            _bar.Flips = Editor.Act(Cmd.Enable, delegate { SetEnabled(!_sequence.Enabled); });
-
             _rows = new Keyed<Step, StepRow>(_steps.Children, delegate { return new StepRow(); });
             _steps.Moves = delegate(int from, int to)
             {
@@ -225,22 +314,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var state = Editor.Runner.Get(_sequence);
             var tick = Editor.CurrentTick;
 
-            _bar.SwitchIsOn = _sequence.Enabled;
             _bar.Status = SequenceText.Status(SequenceSummary.Status(_sequence, state));
-            _bar.Running = state != null && state.IsRunning;
             _bar.JustRan = state != null && state.LastFiredTick >= 0 && tick - state.LastFiredTick < JustRanTicks;
             _bar.LastRun = TimeText.Ago(SequenceSummary.TicksSinceRun(state, tick));
             _bar.Skipped = Skips(texts, state == null ? 0 : state.SkippedCount, state == null ? 0 : state.RefusedCount);
-
-            // Read every tick rather than only when the steps change, because renaming changes what there is to walk
-            // back without changing the steps.
-            var canUndo = _undo != null && Editor.CanUndo(_sequence);
-            _bar.Undoes = canUndo ? _undo : null;
-            _bar.UndoText = canUndo ? Editor.UndoLabel(_sequence) : "";
-
-            var canRedo = _redo != null && Editor.CanRedo(_sequence);
-            _bar.Redoes = canRedo ? _redo : null;
-            _bar.RedoText = canRedo ? Editor.RedoLabel(_sequence) : "";
 
             if (recount)
                 Mark();
@@ -274,9 +351,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             // Everything that changes what the sequence does waits until it is switched off: the commands are not made,
             // so there is nothing to press by accident, and the page keeps its shape either way.
-            _undo = Changes(Cmd.Undo, delegate { Editor.Undo(_sequence); });
-            _redo = Changes(Cmd.Redo, delegate { Editor.Redo(_sequence); });
-
             var editable = Editable;
             _doSomething.Text = StatusRow.Plus + texts.SequenceDoSomething;
             _doSomething.Command = Changes(Cmd.AddAction, AddAction);

@@ -79,7 +79,7 @@ public class RigTests
 
         Airlock(rig.Editor);
 
-        rig.Editor.PressAdd("do something");
+        rig.Editor.PressAdd("Action…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -189,7 +189,7 @@ public class RigTests
 
         Airlock(rig.Editor);
 
-        rig.Editor.PressAdd("do something");
+        rig.Editor.PressAdd("Action…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -308,7 +308,7 @@ public class RigTests
         Assert.True(changes.Apply());
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("do something");
+        rig.Editor.PressAdd("Action…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -354,7 +354,7 @@ public class RigTests
         }
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("do something");
+        rig.Editor.PressAdd("Action…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -484,7 +484,7 @@ public class RigTests
 
         rig.Editor.NewButtonSystem("Airlock");
         // A wait, so the run lasts long enough to be stopped.
-        rig.Editor.PressAdd("wait");
+        rig.Editor.PressAdd("Wait…");
         rig.Editor.PressChoice(TimeText.WaitChoice(600));
         rig.Editor.SwitchOn();
 
@@ -530,7 +530,7 @@ public class RigTests
         rig.Tick();
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("do something");
+        rig.Editor.PressAdd("Action…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -572,7 +572,7 @@ public class RigTests
         Simulation rig = Simulation.Fresh();
 
         rig.Editor.NewButtonSystem("Airlock");
-        rig.Editor.PressAdd("do something");
+        rig.Editor.PressAdd("Action…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -677,7 +677,7 @@ public class RigTests
         Simulation built = Simulation.On(store);
         Airlock(built.Editor);
 
-        built.Editor.PressAdd("do something");
+        built.Editor.PressAdd("Action…");
         built.Editor.PressBlock("Airlock Inner Door");
         built.Editor.PressChoice("Open");
         built.Editor.PressPrimary();
@@ -728,7 +728,7 @@ public class RigTests
         Simulation built = Simulation.On(store);
         Airlock(built.Editor);
 
-        built.Editor.PressAdd("do something");
+        built.Editor.PressAdd("Action…");
         built.Editor.PressBlock("Airlock Inner Door");
         built.Editor.PressChoice("Open");
         built.Editor.PressPrimary();

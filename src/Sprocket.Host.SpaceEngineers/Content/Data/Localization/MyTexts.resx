@@ -106,19 +106,19 @@ Press to rename the grid.</value>
     <comment>Note on the grid's name in the heading.</comment>
   </data>
   <data name="Sprocket.Systems.New" xml:space="preserve">
-    <value>New logic system</value>
-    <comment>Button that starts a new logic system. A logic system is a set of sequences that work together, such as an airlock's.</comment>
+    <value>Logic system</value>
+    <comment>Button, after a plus that means add, that adds a new logic system. A logic system is a set of sequences that work together, such as an airlock's.</comment>
   </data>
   <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
     <value>Start a new logic system on this grid.</value>
     <comment>Note on the button above.</comment>
   </data>
   <data name="Sprocket.Systems.Load" xml:space="preserve">
-    <value>Load blueprint</value>
-    <comment>Button that sets up a blueprint made on another grid. A blueprint is a logic system that more can be made from, each using its own blocks.</comment>
+    <value>Blueprints</value>
+    <comment>Button that opens the blueprint library, where blueprints are imported and exported. Also the library's heading.</comment>
   </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
-    <value>Set up a **blueprint** made somewhere else, choosing which of this grid's blocks it uses.</value>
+    <value>The library of **blueprints**, where they are imported and exported.</value>
     <comment>Note on the button above.</comment>
   </data>
   <data name="Sprocket.Systems.Empty" xml:space="preserve">
@@ -138,9 +138,21 @@ This one becomes the first of them.</value>
     <value>Made from **{name}** blueprint</value>
     <comment>Heading over the logic systems made from one blueprint. {name} is the blueprint's name, as the player gave it.</comment>
   </data>
+  <data name="Sprocket.Systems.Edit" xml:space="preserve">
+    <value>Edit blueprint</value>
+    <comment>Button beside the heading over the logic systems made from one blueprint, which opens the blueprint's logic system screen.</comment>
+  </data>
+  <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
+    <value>Opens the **{name}** blueprint, to change what starts its sequences and what they do. Every logic system made from it changes with it.</value>
+    <comment>Note on the Edit blueprint button. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Systems.LibraryUnbuilt" xml:space="preserve">
+    <value>Not built yet. Blueprints will be imported and exported here.</value>
+    <comment>Said on the blueprint library while it is not built.</comment>
+  </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
-    <value>add another {name}</value>
-    <comment>Row under the logic systems made from a blueprint, which makes one more. {name} is the blueprint's name.</comment>
+    <value>Another</value>
+    <comment>Row under the logic systems made from a blueprint, after a plus that means add, which makes one more. The blueprint is named in the heading above, so the row does not name it.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
     <value>Make another logic system from the **{name}** blueprint, and choose which blocks it uses.</value>
@@ -162,6 +174,18 @@ This one becomes the first of them.</value>
   <data name="Sprocket.Delete.System" xml:space="preserve">
     <value>Delete this logic system?</value>
     <comment>Asked before a logic system is deleted, with its name under it.</comment>
+  </data>
+  <data name="Sprocket.Delete.Blueprint" xml:space="preserve">
+    <value>This deletes the {name} blueprint and every logic system made from it, and cannot be undone. Type {name} to go ahead.</value>
+    <comment>Over the box a blueprint's name is typed into to delete it; the button beside the box does nothing until the name is typed. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Delete.Instance" xml:space="preserve">
+    <value>Delete only this logic system?</value>
+    <comment>Asked before one of the logic systems made from a blueprint is deleted, with its name under it. Only that one goes.</comment>
+  </data>
+  <data name="Sprocket.Delete.InstanceKept" xml:space="preserve">
+    <value>The {name} blueprint and the other logic systems made from it are kept. This cannot be undone.</value>
+    <comment>Said on the answer that deletes one of the logic systems made from a blueprint. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
     <value>Keep it</value>
@@ -185,9 +209,21 @@ Press to rename it.</value>
     <value>blueprint</value>
     <comment>Said after a blueprint's name in the heading of its screen.</comment>
   </data>
+  <data name="Sprocket.System.Delete" xml:space="preserve">
+    <value>Delete this logic system</value>
+    <comment>Note on the bin in the header of a logic system's screen.</comment>
+  </data>
+  <data name="Sprocket.System.DeleteBlueprint" xml:space="preserve">
+    <value>Delete this blueprint, and every logic system made from it</value>
+    <comment>Note on the bin in the header of a blueprint's logic system screen.</comment>
+  </data>
+  <data name="Sprocket.System.EditPanel" xml:space="preserve">
+    <value>Edit configuration panel</value>
+    <comment>Button on a blueprint's logic system screen that opens the panel its blocks are chosen on, to set up its slots and description.</comment>
+  </data>
   <data name="Sprocket.System.Using" xml:space="preserve">
     <value>Using the blocks of</value>
-    <comment>Leads the name of the logic system a blueprint is edited through, whose blocks every sentence on the screen names. Also the title of the list that chooses another.</comment>
+    <comment>Leads the name of the logic system whose blocks every sentence on the screen names: the system's own, or for a blueprint a list of the blocksets made from it.</comment>
   </data>
   <data name="Sprocket.System.Triggers" xml:space="preserve">
     <value>Triggers</value>
@@ -206,8 +242,8 @@ Press to rename it.</value>
     <comment>Heading over a logic system's sequences: the named runs of steps its triggers start.</comment>
   </data>
   <data name="Sprocket.System.NewSequence" xml:space="preserve">
-    <value>New sequence</value>
-    <comment>Button that adds a sequence with nothing to start it yet.</comment>
+    <value>Sequence</value>
+    <comment>Button, after a plus that means add, that adds a sequence with nothing to start it yet.</comment>
   </data>
   <data name="Sprocket.System.NoSequences" xml:space="preserve">
     <value>No sequences yet.</value>
@@ -236,12 +272,12 @@ Press to rename it.</value>
     <comment>Note on a sequence's name, in the heading of its own screen.</comment>
   </data>
   <data name="Sprocket.Sequence.DoSomething" xml:space="preserve">
-    <value>do something</value>
-    <comment>Button under a sequence's steps that adds a step acting on blocks.</comment>
+    <value>Action…</value>
+    <comment>Button under a sequence's steps, after a plus that means add, that adds a step acting on blocks. The ellipsis says it asks which before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.Wait" xml:space="preserve">
-    <value>wait</value>
-    <comment>Button under a sequence's steps that adds a step waiting a length of time.</comment>
+    <value>Wait…</value>
+    <comment>Button under a sequence's steps, after a plus that means add, that adds a step waiting a length of time. The ellipsis says it asks how long before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.Locked" xml:space="preserve">
     <value>Switched on. Switch it off to make changes.</value>
@@ -262,14 +298,6 @@ Press to rename it.</value>
   <data name="Sprocket.Sequence.DeleteStep" xml:space="preserve">
     <value>Delete this step</value>
     <comment>Note on the bin at the end of a step's row.</comment>
-  </data>
-  <data name="Sprocket.Sequence.Undo" xml:space="preserve">
-    <value>Undo {what}</value>
-    <comment>Note on the undo arrow of a sequence. {what} is the change it takes back, such as "adding a step".</comment>
-  </data>
-  <data name="Sprocket.Sequence.Redo" xml:space="preserve">
-    <value>Redo {what}</value>
-    <comment>Note on the redo arrow of a sequence. {what} is the change it puts back.</comment>
   </data>
   <data name="Sprocket.Sequence.SkippedBusy" xml:space="preserve">
     <value>skipped {busy}x while busy</value>
@@ -515,25 +543,83 @@ Press to rename it.</value>
 Press to rename it.</value>
     <comment>Note on a blueprint's name at the head of its screen.</comment>
   </data>
-  <data name="Sprocket.Blueprint.Made" xml:space="preserve">
-    <value>Made from it</value>
-    <comment>Heading over the logic systems made from a blueprint.</comment>
-  </data>
   <data name="Sprocket.Blueprint.Parts" xml:space="preserve">
-    <value>Parts</value>
-    <comment>Heading over a blueprint's parts.</comment>
+    <value>Slots</value>
+    <comment>Heading over a blueprint's slots, where each is filled with blocks.</comment>
   </data>
-  <data name="Sprocket.Blueprint.RenamePart" xml:space="preserve">
-    <value>What is this part called?</value>
-    <comment>Asked when a part's pencil is pressed to rename it.</comment>
+  <data name="Sprocket.Blueprint.Panel" xml:space="preserve">
+    <value>Configuration panel</value>
+    <comment>Heading of a blueprint's configuration panel while it is being set up: the slots and words everyone filling a blockset made from the blueprint sees.</comment>
   </data>
-  <data name="Sprocket.Blueprint.Another" xml:space="preserve">
-    <value>add another {name}</value>
-    <comment>Row under a blueprint's logic systems that makes one more. {name} is the blueprint's name.</comment>
+  <data name="Sprocket.Blueprint.PanelFor" xml:space="preserve">
+    <value>for {name} blueprint</value>
+    <comment>After "Configuration panel" in its heading. {name} is the blueprint's name.</comment>
   </data>
-  <data name="Sprocket.Blueprint.EditUsing" xml:space="preserve">
-    <value>Edit using these blocks</value>
-    <comment>Button that opens what a blueprint does, through the logic system chosen.</comment>
+  <data name="Sprocket.Blueprint.PanelAbout" xml:space="preserve">
+    <value>Shown to anyone setting up, or changing, something made from this blueprint.</value>
+    <comment>Under the heading of a configuration panel being set up.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.StillOne" xml:space="preserve">
+    <value>1 still needs a block</value>
+    <comment>Beside the heading over a blockset's slots, where one slot that needs a block has none.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.StillMany" xml:space="preserve">
+    <value>{count} still need a block</value>
+    <comment>Beside the heading over a blockset's slots. {count} is how many slots that need a block have none, always more than one.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.From" xml:space="preserve">
+    <value>made from {name} blueprint</value>
+    <comment>After the name of a logic system made from a blueprint, at the head of its slots. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
+    <value>{name} was lost.</value>
+    <comment>Beside a slot whose block is no longer on the construct. {name} is what the block was called.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.Description" xml:space="preserve">
+    <value>Description</value>
+    <comment>Heading over the box a blueprint's description is written in.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.DescriptionHint" xml:space="preserve">
+    <value>What this blueprint does, and what whoever fills it in needs to know.</value>
+    <comment>In the empty box a blueprint's description is written in.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.AboutHint" xml:space="preserve">
+    <value>What this slot is for.</value>
+    <comment>In the empty box what a slot is for is written in.</comment>
+  </data>
+  <data name="Sprocket.Writing.Preview" xml:space="preserve">
+    <value>Preview</value>
+    <comment>Button that shows rich text as it will read, in place of the box it is written in.</comment>
+  </data>
+  <data name="Sprocket.Writing.Edit" xml:space="preserve">
+    <value>Edit text</value>
+    <comment>Button that goes back from rich text's preview to the box it is written in.</comment>
+  </data>
+  <data name="Sprocket.Writing.Markup" xml:space="preserve">
+    <value>Markup</value>
+    <comment>Button that shows, beside a box rich text is written in, the marks it can be written with.</comment>
+  </data>
+  <data name="Sprocket.Writing.Examples" xml:space="preserve">
+    <value>**strong words**
+*emphasized words*
+# A heading
+- An item in a list
+1. A counted item
+`code`
+---</value>
+    <comment>The guide to the marks rich text can be written with, one example per line, each shown as typed and then as it reads. Translate the words, and keep the marks: ** * # - 1. ` ---</comment>
+  </data>
+  <data name="Sprocket.Writing.ExamplesNote" xml:space="preserve">
+    <value>A blank line starts a new paragraph. A \ before a mark shows the mark itself.</value>
+    <comment>Under the guide to the marks rich text can be written with.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.Required" xml:space="preserve">
+    <value>required</value>
+    <comment>On the switch of a slot that must be filled with a block. The other side reads optional.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.Optional" xml:space="preserve">
+    <value>optional</value>
+    <comment>After the name of a slot that may be left without a block.</comment>
   </data>
   <data name="Sprocket.Blueprint.NoneFits" xml:space="preserve">
     <value>Nothing on this construct can fill it.</value>

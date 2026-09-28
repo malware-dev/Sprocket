@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
@@ -121,6 +123,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether the page opens with its name in hand to be given, once, as it is first shown.</summary>
         internal bool NameOnArrival { get; set; }
 
+        /// <summary>Whether the page was opened on something made as it opened, which is taken back if left untouched.</summary>
+        internal bool IsMade { get; private set; }
+
+        /// <summary>Whether what the page was opened on is as it was made, so taking it back loses nothing.</summary>
+        public virtual bool Untouched => false;
+
         public virtual bool CanRename => false;
 
         /// <summary>What the name in the heading is and what renaming it does, in markdown-lite, said where the pointer rests on it; null for nothing.</summary>
@@ -161,6 +169,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return true;
         }
 
+        /// <summary>Whether this page shows what the construct's toolbars say, so reading them again can change it.</summary>
+        /// <remarks>The read is the construct's whole, the same one the screen makes as it opens; the page only decides whether it is offered.</remarks>
+        public virtual bool CanRefresh => false;
+
         /// <summary>
         /// Whether this page's subject can be switched on and off.
         /// </summary>
@@ -170,14 +182,52 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         public virtual void Switch(bool on) { }
 
+        /// <summary>Whether the switch governs everything the subject does, as a system's does, rather than one sequence.</summary>
+        public virtual bool SwitchGovernsAll => true;
+
+        /// <summary>Whether the subject is running now, which turns the run mark into a stop.</summary>
+        public virtual bool IsRunning => false;
+
+        /// <summary>Runs the subject by hand, or null where it cannot be run from here.</summary>
+        /// <remarks>Asked as the screen is built, and made through the editor's commands, so a copy lent to look at is refused it.</remarks>
+        public virtual ICommand Runs => null;
+
+        /// <summary>Stops the subject, or null where it cannot be stopped from here.</summary>
+        public virtual ICommand Stops => null;
+
+        /// <summary>Deletes the subject, or null where it cannot be deleted from here.</summary>
+        public virtual ICommand Deletes => null;
+
+        /// <summary>What deleting the subject does, said as the bin's note.</summary>
+        public virtual string DeleteAbout => "";
+
+        /// <summary>Whether this page shows <paramref name="system" /> or something in it, so it goes when the system does.</summary>
+        public virtual bool IsAbout(AutomationSystem system)
+        {
+            return false;
+        }
+
+        /// <summary>Marks the page as opened on something just made, and notes how it stands, for <see cref="Untouched" /> to compare with.</summary>
+        internal void Made()
+        {
+            IsMade = true;
+            Remember();
+        }
+
+        /// <summary>Notes how what the page was opened on stands as it was made.</summary>
+        protected virtual void Remember()
+        {
+        }
+
+        /// <summary>Takes what the page was opened on back out, without asking, for something made and left untouched.</summary>
+        public virtual void Unmake()
+        {
+        }
+
         /// <summary>
         /// Whether this screen offers a way back from what is done on it.
         /// </summary>
-        /// <remarks>
-        /// A screen with a history of its own. Which things are in it is the page's business: a
-        /// system's covers what starts its sequences, and a sequence's own is on its sentence rather
-        /// than here, because there it sits among the bin and the switch that act on the same thing.
-        /// </remarks>
+        /// <remarks>A screen with a history of its own. Which things are in it is the page's business.</remarks>
         public virtual bool HasHistory => false;
 
         public virtual bool CanUndo => false;
@@ -215,10 +265,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return _view;
             }
         }
-
-        /// <summary>Whether the page finishes where it stands, with a way to finish of its own, rather than from the foot of the screen.</summary>
-        /// <remarks>Finished any other way, such as by an answer that keeps what was changed, it is <see cref="Primary()" /> that finishes it, as its own way would.</remarks>
-        public virtual bool FinishesInPlace => false;
 
         /// <summary>Whether the page's view is given the whole of the screen's room, scrolling whatever it has to itself.</summary>
         public virtual bool ScrollsItself => false;

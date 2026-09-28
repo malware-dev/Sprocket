@@ -24,7 +24,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
@@ -51,7 +51,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Run(2);
@@ -71,7 +71,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Editor.Typed("2");
@@ -204,7 +204,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Editor.Typed("2");
@@ -246,7 +246,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Warning Beacon");
         screen.Run(2);
 
@@ -267,7 +267,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("do something");
+        screen.Editor.PressAdd("Action…");
         screen.Editor.PressBlock("Approach Sensor");
         screen.Run(2);
 

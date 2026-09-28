@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -32,6 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             CreateView();
             _heading.Arguments = _named;
+            _edit.Command = editor.Act(Cmd.OpenSystem, delegate { page.Open(system); });
             _rows = new Keyed<object, StatusRow>(_list.Children, Made);
         }
 
@@ -45,6 +47,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             }
 
             _named.Set("name", _system.Name);
+            _edit.Text = texts.SystemsEdit;
+            _edit.Tip = Tip.For(_edit.Tip, texts.SystemsEditBlueprint, _named);
 
             _keys.Clear();
             var instances = _system.Instances;
@@ -58,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 _rows[instances[n]].Summary = SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, _system, instances[n]);
 
             var another = _rows[_system];
-            another.Summary = Template.Fill(texts.SystemsAddAnother, "name", _system.Name);
+            another.Summary = texts.SystemsAddAnother;
             another.About = texts.SystemsAddAnotherAbout;
         }
 

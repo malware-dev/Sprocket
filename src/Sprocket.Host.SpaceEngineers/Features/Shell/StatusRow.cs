@@ -47,7 +47,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Glyph _below;
 
         string _said;
-        bool _saidAsks;
 
         /// <summary>An empty row, filled in by setting what it shows and calling <see cref="Show" />.</summary>
         public StatusRow()
@@ -143,9 +142,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether it is a way to add something rather than a thing that is there.</summary>
         public bool IsAction { get; set; }
 
-        /// <summary>Whether pressing it asks something first, which an action row says with an ellipsis.</summary>
-        public bool Asks { get; set; }
-
         /// <summary>What pressing it does, in markdown-lite, said where the pointer rests on it; null for nothing.</summary>
         public string About { get; set; }
 
@@ -163,9 +159,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Whether it is waiting for something before it can go on.</summary>
         public bool Parked { get; set; }
-
-        /// <summary>Whether it is the row the rest of its screen is about.</summary>
-        public bool Chosen { get; set; }
 
         /// <summary>Whether it ran a moment ago.</summary>
         public bool JustRan { get; set; }
@@ -239,30 +232,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var wrong = Problems > 0;
 
             Style = wrong
-                ? (Chosen ? Styles.BrokenChosen : Styles.Broken)
+                ? Styles.Broken
                 : Running
-                    ? (Chosen ? Styles.RunningChosen : Styles.Running)
+                    ? Styles.Running
                     : Parked
-                        ? (Chosen ? Styles.ParkedChosen : Styles.Parked)
-                        : Chosen
-                            ? Styles.Chosen
-                            : !pressable
-                                ? Styles.Still
-                                : IsAction
-                                    ? Styles.AddRow
-                                    : Styles.Row;
+                        ? Styles.Parked
+                        : !pressable
+                            ? Styles.Still
+                            : IsAction
+                                ? Styles.AddRow
+                                : Styles.Row;
 
-            if (!ReferenceEquals(_said, Summary) || _saidAsks != Asks)
+            if (!ReferenceEquals(_said, Summary))
             {
                 _said = Summary;
-                _saidAsks = Asks;
-
-                // The ellipsis is the desktop convention for a button that asks something before it acts.
-                _summary.Text = IsAction ? Plus + Summary + (Asks ? "…" : "") : Summary;
+                _summary.Text = IsAction ? Plus + Summary : Summary;
             }
 
             _summary.Color = IsAction ? Palette.Muted : Palette.Ink;
 
+            // A row that adds has no state to show, and its plus stands where the light does, so it reads as one more of
+            // the rows above it rather than as something inside the last of them.
+            _light.IsVisible = !IsAction;
             _light.Tint = wrong
                 ? Palette.Problem
                 : IsAction

@@ -1,12 +1,12 @@
 using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Viewing;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Developing
 {
     sealed partial class ScriptPage
     {
-        Listing _listing;
+        EditBox _listing;
 
         /// <summary>The script on a listing that fills the page and moves both ways.</summary>
         /// <remarks>
@@ -16,8 +16,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         /// </remarks>
         protected override Element CreateView()
         {
-            return new Listing
+            return new EditBox
             {
+                IsReadOnly = true,
                 Font = Lettering.Mono,
                 FontSize = 20f,
                 Color = Palette.Ink,

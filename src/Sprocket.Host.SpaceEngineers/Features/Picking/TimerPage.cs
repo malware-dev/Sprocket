@@ -49,9 +49,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override string PrimaryText => _aim.Finishes ? Editor.Texts.PickDone : "";
 
         /// <inheritdoc />
-        public override bool FinishesInPlace => true;
-
-        /// <inheritdoc />
         public override bool ScrollsItself => true;
 
         /// <summary>The strip the pick is drawn in, which the page the single action is chosen on goes on in.</summary>

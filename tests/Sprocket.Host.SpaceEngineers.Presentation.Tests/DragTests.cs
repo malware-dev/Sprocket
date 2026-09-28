@@ -44,7 +44,7 @@ public class DragTests
         DragAfter(screen, from: 0, row: 2);
         Assert.Equal("depressurize, open, close", Order(editor));
 
-        editor.Sentence().Bar.Undoes!.Execute();
+        editor.Screen.Undo!.Execute();
         screen.Run(5);
 
         Assert.Equal("close, depressurize, open", Order(editor));
@@ -60,7 +60,7 @@ public class DragTests
         Assert.Equal("close, depressurize, open", Order(editor));
 
         // Three steps were added, so there is history - but the drag added nothing to it.
-        Assert.Equal("adding a step", editor.Sentence().Bar.UndoText);
+        Assert.Equal("adding a step", editor.Screen.UndoText);
     }
 
     /// <summary>
@@ -193,7 +193,7 @@ public class DragTests
 
     static void Step(SprocketEditor editor, string entity, string action)
     {
-        editor.PressAdd("do something");
+        editor.PressAdd("Action…");
         editor.PressBlock(entity);
         editor.PressChoice(action);
         editor.PressPrimary();

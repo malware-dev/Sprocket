@@ -3,7 +3,6 @@ using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
@@ -11,7 +10,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
     {
         HStack _using;
         Label _usingLead;
-        Slot _usingName;
+        Label _usingName;
+        HStack _usingChoice;
+        Button _editPanel;
         Label _triggersHeading;
         Button _when;
         Button _every;
@@ -28,8 +29,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 Children =
                 {
-                    // A blueprint is edited through one of its logic systems, so whose blocks every sentence below
-                    // names is said before any of them.
+                    // Whose blocks every sentence below names, said before any of them: fixed for one logic system,
+                    // and for a blueprint one of the blocksets made from it, with the way to set up its configuration panel.
                     new HStack
                     {
                         Spacing = 8f,
@@ -37,7 +38,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         Children =
                         {
                             new Label { Style = Styles.Phrase }.As(out _usingLead),
-                            new Slot().As(out _usingName)
+                            new Label { Style = Styles.Name }.As(out _usingName),
+                            new HStack { Placement = Flex.Grow }.As(out _usingChoice),
+                            new Button { Style = Styles.Button }.As(out _editPanel)
                         }
                     }.As(out _using),
 

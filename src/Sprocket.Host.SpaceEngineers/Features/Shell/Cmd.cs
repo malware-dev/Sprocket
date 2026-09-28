@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         DeleteInstance,
         EditBlueprint,
         FillPart,
-        RenamePart,
+        MakeOptional,
         StartWhen,
         StartEvery,
         OpenSequence,

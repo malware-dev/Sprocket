@@ -7,37 +7,35 @@ on screen     Sequence 1
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1328 H:40}
+003  SetClip    {X:296 Y:53 W:1091 H:40}
 004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Sequence 1"
 005  Text       at {X:440.7496 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 006  ClearClip  
-007  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
-008  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-009  SetClip    {X:256 Y:118 W:1408 H:853}
-010  Text       at {X:260.0625 Y:129.2328} scale 0.161  #5F7278FF  "0"
-011  Text       at {X:280 Y:121.6399} scale 0.694  #F0AC28FF  "This is switched off, so nothing starts it on its own."
-012  Text       at {X:1429.34 Y:122.5141} scale 0.401  #A2C3CDFF  "g"
-013  Text       at {X:1469.34 Y:122.5141} scale 0.401  #A2C3CDFF  "u"
-014  Text       at {X:1509.34 Y:122.5141} scale 0.401  #5F7278FF  "r"
-015  Text       at {X:1549.34 Y:122.5141} scale 0.401  #A2C3CDFF  "d"
-016  Sprite     Sprocket_Fill         {X:1583 Y:118 W:69 H:32}  #5B737BFF
-017  Sprite     Sprocket_Fill         {X:1587 Y:122 W:61 H:24}  #20272DFF
-018  Sprite     Sprocket_Fill         {X:1587 Y:122 W:24 H:24}  #DCF5FDFF
-019  Text       at {X:1619.183 Y:124.0543} scale 0.556  #DCF5FDFF  "OFF"
-020  Sprite     Sprocket_Fill         {X:276 Y:182 W:3 H:3}  #85A1A9FF
-021  Sprite     Sprocket_Fill         {X:276 Y:188 W:3 H:3}  #85A1A9FF
-022  Sprite     Sprocket_Fill         {X:276 Y:194 W:3 H:3}  #85A1A9FF
-023  Sprite     Sprocket_Fill         {X:282 Y:182 W:3 H:3}  #85A1A9FF
-024  Sprite     Sprocket_Fill         {X:282 Y:188 W:3 H:3}  #85A1A9FF
-025  Sprite     Sprocket_Fill         {X:282 Y:194 W:3 H:3}  #85A1A9FF
-026  Text       at {X:296 Y:177.6399} scale 0.694  #85A1A9FF  "1"
-027  Text       at {X:344 Y:175.2255} scale 0.833  #A2C3CDFF  "wait"
-028  Sprite     Sprocket_Fill         {X:385 Y:170 W:92 H:40}  #374851FF
-029  Sprite     Sprocket_Fill         {X:385 Y:208 W:92 H:2}  #8EBCCFFF
-030  Text       at {X:400.7033 Y:175.2255} scale 0.833  #DCF5FDFF  "90 ticks"
-031  Text       at {X:1614.156 Y:178.5141} scale 0.401  #A2C3CDFF  "d"
-032  Text       at {X:308 Y:235.2255} scale 0.833  #A2C3CDFF  "+ do something"
-033  Text       at {X:476.17 Y:235.2255} scale 0.833  #A2C3CDFF  "+ wait"
+007  Text       at {X:1401.34 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
+008  Text       at {X:1441.34 Y:61.51406} scale 0.401  #A2C3CDFF  "g"
+009  Text       at {X:1481.34 Y:61.51406} scale 0.401  #A2C3CDFF  "u"
+010  Text       at {X:1521.34 Y:61.51406} scale 0.401  #5F7278FF  "r"
+011  Text       at {X:1561.34 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
+012  Sprite     Sprocket_Fill         {X:1595 Y:57 W:69 H:32}  #5B737BFF
+013  Sprite     Sprocket_Fill         {X:1599 Y:61 W:61 H:24}  #20272DFF
+014  Sprite     Sprocket_Fill         {X:1599 Y:61 W:24 H:24}  #DCF5FDFF
+015  Text       at {X:1631.183 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
+016  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+017  SetClip    {X:256 Y:118 W:1408 H:902}
+018  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
+019  Text       at {X:280 Y:115.6399} scale 0.694  #F0AC28FF  "This is switched off, so nothing starts it on its own."
+020  Sprite     Sprocket_Fill         {X:280 Y:170 W:3 H:3}  #85A1A9FF
+021  Sprite     Sprocket_Fill         {X:280 Y:176 W:3 H:3}  #85A1A9FF
+022  Sprite     Sprocket_Fill         {X:280 Y:182 W:3 H:3}  #85A1A9FF
+023  Sprite     Sprocket_Fill         {X:286 Y:170 W:3 H:3}  #85A1A9FF
+024  Sprite     Sprocket_Fill         {X:286 Y:176 W:3 H:3}  #85A1A9FF
+025  Sprite     Sprocket_Fill         {X:286 Y:182 W:3 H:3}  #85A1A9FF
+026  Text       at {X:300 Y:165.6399} scale 0.694  #85A1A9FF  "1"
+027  Text       at {X:348 Y:163.2255} scale 0.833  #A2C3CDFF  "wait"
+028  Sprite     Sprocket_Fill         {X:389 Y:158 W:92 H:40}  #374851FF
+029  Sprite     Sprocket_Fill         {X:389 Y:196 W:92 H:2}  #8EBCCFFF
+030  Text       at {X:404.7033 Y:163.2255} scale 0.833  #DCF5FDFF  "90 ticks"
+031  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
+032  Text       at {X:272 Y:223.2255} scale 0.833  #A2C3CDFF  "+ Action…"
+033  Text       at {X:393.75 Y:223.2255} scale 0.833  #A2C3CDFF  "+ Wait…"
 034  ClearClip  
-035  Sprite     Sprocket_Fill         {X:240 Y:986 W:1440 H:1}  #5B737BFF
-036  Sprite     Sprocket_Fill         {X:240 Y:987 W:1440 H:48}  #1B242AFF

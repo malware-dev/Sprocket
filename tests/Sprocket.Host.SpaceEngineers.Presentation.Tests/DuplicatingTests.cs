@@ -134,7 +134,7 @@ public class DuplicatingTests
         Duplicate(screen, 0);
 
         var copy = screen.Editor.Sentence();
-        Assert.False(copy.Bar.SwitchIsOn);
+        Assert.False(screen.Editor.Screen.SwitchIsOn);
         Assert.True(screen.Shows("switched off"));
 
         var made = screen.Editor.Program.Sequences[1];
@@ -159,7 +159,7 @@ public class DuplicatingTests
 
         Duplicate(screen, 0);
 
-        Assert.False(screen.Editor.Sentence().Bar.SwitchIsOn);
+        Assert.False(screen.Editor.Screen.SwitchIsOn);
         Assert.True(screen.Editor.Program.Sequences[0].Enabled);
     }
 

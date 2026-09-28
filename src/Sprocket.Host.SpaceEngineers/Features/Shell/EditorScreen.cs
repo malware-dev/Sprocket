@@ -26,6 +26,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         ICommand _refresh;
         ICommand _flip;
         bool _switchIsOn;
+        bool _switchGovernsAll = true;
+        bool _running;
+        ICommand _runs;
+        ICommand _stops;
+        ICommand _deletes;
+        string _deleteAbout = "";
         bool _hasHistory;
         ICommand _undo;
         string _undoText = "";
@@ -96,10 +102,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Switches this screen's subject the other way, or null when it has no such switch.</summary>
-        /// <remarks>
-        /// A system's switch, where a sequence's lives on the sentence itself. Rewiring an airlock means stopping the
-        /// airlock, not stopping three sequences one at a time.
-        /// </remarks>
         public ICommand Flip
         {
             get { return _flip; }
@@ -114,6 +116,48 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _switchIsOn; }
             set { Set(ref _switchIsOn, value); }
+        }
+
+        /// <summary>Whether the switch governs everything the subject does, as a system's does, rather than one sequence.</summary>
+        public bool SwitchGovernsAll
+        {
+            get { return _switchGovernsAll; }
+            set { Set(ref _switchGovernsAll, value); }
+        }
+
+        /// <summary>Whether the subject is running now, which turns the run mark into a stop.</summary>
+        public bool Running
+        {
+            get { return _running; }
+            set { Set(ref _running, value); }
+        }
+
+        /// <summary>Runs the subject by hand, or null where it cannot be run from here.</summary>
+        public ICommand Runs
+        {
+            get { return _runs; }
+            set { Set(ref _runs, value); }
+        }
+
+        /// <summary>Stops the subject, or null where it cannot be stopped from here.</summary>
+        public ICommand Stops
+        {
+            get { return _stops; }
+            set { Set(ref _stops, value); }
+        }
+
+        /// <summary>Deletes the subject, or null where it cannot be deleted from here.</summary>
+        public ICommand Deletes
+        {
+            get { return _deletes; }
+            set { Set(ref _deletes, value); }
+        }
+
+        /// <summary>What deleting the subject does, said as the bin's note.</summary>
+        public string DeleteAbout
+        {
+            get { return _deleteAbout; }
+            set { Set(ref _deleteAbout, value ?? ""); }
         }
 
         /// <summary>Whether this screen has a way back from what was done on it.</summary>

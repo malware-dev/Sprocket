@@ -403,7 +403,7 @@ public class ProblemTests
 
         ship.Editor.NewButtonSystem("Airlock");
 
-        ship.Editor.PressAdd("do something");
+        ship.Editor.PressAdd("Action…");
         ship.Editor.PressBlock("Inner Door");
         ship.Editor.PressChoice("Close");
         ship.Editor.PressPrimary();

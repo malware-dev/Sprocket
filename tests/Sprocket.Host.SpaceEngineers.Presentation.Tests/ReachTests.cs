@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ReachTests
 {
-    const string OpenThePicker = "60 130 type Airlock enter 60 161";
+    const string OpenThePicker = "60 130 type Airlock enter 60 237";
 
     const string Older = "sprocket 1\nblock|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:21,t:B\n";
 

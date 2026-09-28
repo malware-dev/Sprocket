@@ -19,6 +19,12 @@ public class RenameTests
         Sequence(editor);
         screen.Run(5);
 
+        // A new sequence arrives with its made-up name in hand, to be given one of its own.
+        Assert.True(IsEditing(screen), "a new sequence did not arrive with its name in the box");
+        screen.Do("enter");
+        screen.Run(5);
+        Assert.False(IsEditing(screen), "the box is still up after Enter");
+
         var before = Header(screen);
         var heading = screen.Text(editor.Screen.CustomName());
 
@@ -107,17 +113,21 @@ public class RenameTests
         Assert.True(screen.Legible.Any(t => t.Contains("Press to rename the grid")), "resting on the grid's name said nothing about it");
     }
 
-    /// <summary>Escape puts the box away and leaves the name as it was.</summary>
+    /// <summary>
+    /// Escape goes back, in one press, keeping the name typed as pressing away does: the box is only the name, shown so it
+    /// can be typed into, and not something opened over the page.
+    /// </summary>
     [Fact]
-    public void EscapeLeavesTheNameAsItWas()
+    public void EscapeGivesTheNameAndGoesBack()
     {
         var screen = Renaming();
 
         screen.Do("clear", "type", "Hangar", "escape");
         screen.Run(5);
 
-        Assert.Equal("Airlock", screen.Editor.Screen.Title());
+        Assert.Equal("Hangar", screen.Editor.Program.Systems.Single().Name);
         Assert.False(IsEditing(screen), "the box is still up after Escape");
+        Assert.False(screen.Editor.Screen.CanGoBack, "Escape did not go back");
     }
 
     /// <summary>Pressing away from the box gives the name typed in it, as Enter does.</summary>

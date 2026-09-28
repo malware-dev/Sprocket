@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
@@ -29,7 +30,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         readonly List<Trigger> _triggers = new List<Trigger>();
         readonly List<Sequence> _runs = new List<Sequence>();
 
+        readonly List<string> _called = new List<string>();
+
         int _wiring = -1;
+        ListField _blocksets;
+        string _madeName;
+        string _madeAbout;
+        bool _madeOn;
 
         Keyed<Trigger, TriggerRow> _triggerRows;
         Keyed<Sequence, StatusRow> _sequenceRows;
@@ -43,12 +50,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override string Title => SystemSummary.Describe(Editor.Texts, Editor.Runner.Bindings, _system);
 
-        /// <summary>What the author said this thing is.</summary>
+        /// <summary>What the author said this thing is, for one logic system; a blueprint's description is read on its panel.</summary>
         /// <remarks>
         /// A label to whoever built it, and the only explanation anybody who receives it will ever get. Empty until
-        /// somebody writes one, and empty reads as nothing rather than as a blank waiting to be filled.
+        /// somebody writes one, and empty reads as nothing rather than as a blank waiting to be filled. A blueprint's is
+        /// rich text of any length, which the heading's one line has no room for.
         /// </remarks>
-        public override string Subtitle => _system.Annotation;
+        public override string Subtitle => _system.IsBlueprint ? "" : _system.Annotation;
 
         /// <inheritdoc />
         public override string CustomName => _system.Name ?? "";
@@ -69,6 +77,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <summary>A switch for a logic system, and none for a blueprint, which does not run: its logic systems do.</summary>
         public override bool CanSwitch => !_system.IsBlueprint;
+
+        /// <summary>Which button starts each sequence, and which nothing starts, is read from the toolbars.</summary>
+        public override bool CanRefresh => true;
+
+        /// <summary>The logic system just made is as it was made: its name, what it says about itself, its switch, and nothing in it.</summary>
+        /// <remarks>A sequence made in it and left untouched has gone already, since its page was left first.</remarks>
+        public override bool Untouched => _system.Name == _madeName && _system.Annotation == _madeAbout
+            && SwitchIsOn == _madeOn && _system.Triggers.Count == 0 && _system.Sequences.Count == 0;
+
+        /// <summary>Deletes the system, asking first; a blueprint only once its name is typed, since every logic system made from it goes too.</summary>
+        public override ICommand Deletes => Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(_system); });
+
+        /// <inheritdoc />
+        public override string DeleteAbout => _system.IsBlueprint ? Editor.Texts.SystemDeleteBlueprint : Editor.Texts.SystemDelete;
 
         /// <summary>The switch of the one of the system being edited.</summary>
         public override bool SwitchIsOn
@@ -136,6 +158,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             shown.Enabled = on;
             Editor.Invalidate();
+        }
+
+        /// <inheritdoc />
+        public override void Unmake()
+        {
+            Editor.TakeOut(_system);
+        }
+
+        /// <summary>Notes the logic system just made, as it was made.</summary>
+        protected override void Remember()
+        {
+            _madeName = _system.Name;
+            _madeAbout = _system.Annotation;
+            _madeOn = SwitchIsOn;
+        }
+
+        /// <inheritdoc />
+        public override bool IsAbout(AutomationSystem system)
+        {
+            return system == _system;
         }
 
         /// <inheritdoc />
@@ -208,6 +250,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (reshaped)
                 Arrange(texts);
 
+            // Renaming the system changes the heading without building the page again, and this says the same name.
+            _usingName.Text = _system.Name;
+
             var through = Editor.StandIn(_system);
             var tick = Editor.CurrentTick;
 
@@ -250,7 +295,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             ArrangeUsing(texts);
 
             _triggersHeading.Text = texts.SystemTriggers.ToUpperInvariant();
-            _triggersHeading.Style = _system.IsBlueprint ? Styles.NextHeading : Styles.Heading;
+            _triggersHeading.Style = Styles.NextHeading;
             _when.Text = StatusRow.Plus + texts.SystemWhen;
             _every.Text = StatusRow.Plus + texts.SystemEvery;
 
@@ -278,18 +323,61 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
         }
 
+        /// <summary>Says whose blocks the sentences name: the system's own name for one logic system, and for a blueprint a list of the blocksets made from it, with the way to set up its configuration panel.</summary>
         void ArrangeUsing(Texts texts)
         {
-            _using.IsVisible = _system.IsBlueprint;
-            if (!_system.IsBlueprint)
+            var blueprint = _system.IsBlueprint;
+            var shown = Editor.StandIn(_system);
+
+            _usingLead.Text = texts.SystemUsing;
+            _usingLead.IsVisible = !blueprint || shown != null;
+
+            _usingName.IsVisible = !blueprint;
+
+            _usingChoice.IsVisible = blueprint && shown != null;
+            _editPanel.IsVisible = blueprint;
+            _editPanel.Text = texts.SystemEditPanel;
+            _editPanel.Command = blueprint ? Editor.Act(Cmd.EditBlueprint, delegate { Editor.Push(new BlueprintPage(Editor, _system, true)); }) : null;
+
+            if (!blueprint || shown == null)
                 return;
 
-            var shown = Editor.StandIn(_system);
-            _usingLead.Text = texts.SystemUsing;
-            _usingName.Say(shown == null ? "" : SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, shown));
+            Blocksets(texts);
+            _blocksets.Text = SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, shown);
+        }
 
-            // Pressed only where there is another to choose; otherwise it reads as a part that cannot be pressed.
-            _usingName.Command = _system.Instances.Count < 2 ? null : Editor.Act(Cmd.ChooseInstance, delegate { Another(shown); });
+        /// <summary>The list of the blocksets made from the blueprint, made again only where what they are called has changed.</summary>
+        void Blocksets(Texts texts)
+        {
+            var instances = _system.Instances;
+            var same = _blocksets != null && _called.Count == instances.Count;
+            for (var i = 0; same && i < instances.Count; i++)
+                same = _called[i] == SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, instances[i]);
+
+            if (same)
+                return;
+
+            _called.Clear();
+            for (var i = 0; i < instances.Count; i++)
+                _called.Add(SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, instances[i]));
+
+            _blocksets = new ListField(_called.ToArray(), delegate { return Editor.Windows; });
+            _blocksets.Edited += Chose;
+            _usingChoice.Children.Clear();
+            _usingChoice.Children.Add(_blocksets);
+        }
+
+        /// <summary>Shows the blocks of the blockset the list was left on.</summary>
+        void Chose()
+        {
+            var at = _called.IndexOf(_blocksets.Text);
+            if (at < 0 || at >= _system.Instances.Count)
+                return;
+
+            var instance = _system.Instances[at];
+            var choose = Editor.Act(Cmd.ChooseInstance, delegate { Editor.Choose(_system, instance); });
+            if (choose != null)
+                choose.Execute();
         }
 
         StatusRow Own(Sequence sequence)
@@ -449,23 +537,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         ICommand Starts(Trigger trigger, Opening opens)
         {
             return Editor.Act(Cmd.OpenTrigger, delegate { Editor.ChangeTrigger(_system, trigger, opens, false); });
-        }
-
-        void Another(SystemInstance shown)
-        {
-            var page = new ChoicePage(Editor, Editor.Texts.SystemUsing);
-            var instances = _system.Instances;
-            for (var i = 0; i < instances.Count; i++)
-            {
-                var instance = instances[i];
-                page.Add(SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, instance), instance == shown, delegate
-                {
-                    Editor.Choose(_system, instance);
-                    Editor.Pop();
-                });
-            }
-
-            Editor.Push(page);
         }
 
         void Collect()

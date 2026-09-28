@@ -36,7 +36,7 @@ public class PaperTargetTests
         editor.PressPrimary();
         Note(seen, ship);
 
-        editor.PressAdd("do something");
+        editor.PressAdd("Action…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -45,7 +45,7 @@ public class PaperTargetTests
         editor.GoToRoot();
         Note(seen, ship);
 
-        editor.PressStart("Load blueprint");
+        editor.PressStart("Blueprints");
         Note(seen, ship);
 
         Assert.Contains(nameof(PickPage), seen);
@@ -61,7 +61,7 @@ public class PaperTargetTests
 
         editor.NewButtonSystem("Airlock");
 
-        editor.PressAdd("do something");
+        editor.PressAdd("Action…");
         editor.PressBlock("Inner Door");
         editor.PressChoice("Close");
         editor.PressPrimary();

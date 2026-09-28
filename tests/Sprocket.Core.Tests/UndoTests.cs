@@ -303,6 +303,83 @@ public class UndoTests
         Assert.Same(trigger, system.Triggers[0]);
     }
 
+    /// <summary>A system with one slot that has a label and says what it is for, as a blueprint's author leaves it.</summary>
+    static Part Slot(out AutomationSystem system)
+    {
+        system = new Automation().AddSystem();
+        system.Annotation = "Cycles an airlock.";
+
+        var part = system.PartFor("inner");
+        part.Annotation = "Inner door\n\nThe door to the inside of the ship.";
+        return part;
+    }
+
+    /// <summary>Applies <paramref name="edit" /> to <paramref name="system" />, checks it changed what <paramref name="read" /> reads, and that undoing puts it back.</summary>
+    static void RoundTrip(AutomationSystem system, SystemEdit edit, Func<string> read)
+    {
+        var before = read();
+
+        edit.Apply(system);
+        Assert.NotEqual(before, read());
+        Assert.True(edit.Undoable(system));
+
+        edit.Undo(system);
+        Assert.Equal(before, read());
+        Assert.True(edit.Redoable(system));
+    }
+
+    [Fact]
+    public void DescribingABlueprintReversesExactly()
+    {
+        _ = Slot(out var system);
+        RoundTrip(system, new Annotate(system.Annotation, "Cycles an airlock with **one button**."), () => system.Annotation);
+    }
+
+    [Fact]
+    public void RenamingASlotKeepsWhatItSaysAndReversesExactly()
+    {
+        var part = Slot(out var system);
+        var edit = new AnnotatePart(part, part.Labelled("Hatch"), "renaming a slot");
+
+        RoundTrip(system, edit, () => part.Annotation);
+
+        edit.Apply(system);
+        Assert.Equal("Hatch", part.Label);
+        Assert.Equal("The door to the inside of the ship.", part.About);
+    }
+
+    [Fact]
+    public void DescribingASlotKeepsItsLabelAndReversesExactly()
+    {
+        var part = Slot(out var system);
+        var edit = new AnnotatePart(part, part.Described("The door to the **inside** of the ship."), "describing a slot");
+
+        RoundTrip(system, edit, () => part.Annotation);
+
+        edit.Apply(system);
+        Assert.Equal("Inner door", part.Label);
+        Assert.Equal("The door to the **inside** of the ship.", part.About);
+    }
+
+    [Fact]
+    public void MakingASlotOptionalReversesExactly()
+    {
+        var part = Slot(out var system);
+        RoundTrip(system, new SetOptional(part, true), () => part.Optional ? "optional" : "required");
+    }
+
+    /// <summary>A step back over a slot the system no longer has is dropped rather than taken.</summary>
+    [Fact]
+    public void ASlotThatIsGoneCannotBeWalkedBack()
+    {
+        var part = Slot(out var system);
+        var edit = new SetOptional(part, true);
+        edit.Apply(system);
+
+        var other = new Automation().AddSystem();
+        Assert.False(edit.Undoable(other));
+    }
+
     /// <summary>
     /// An edit that settles on what was already there is not an edit.
     /// </summary>
@@ -318,5 +395,10 @@ public class UndoTests
         Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", Form.Native, new Literal[0], true).Changes);
         Assert.False(new Rename("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
+
+        var part = Slot(out var system);
+        Assert.False(new Annotate(system.Annotation, system.Annotation).Changes);
+        Assert.False(new AnnotatePart(part, part.Labelled("Inner door"), "renaming a slot").Changes);
+        Assert.False(new SetOptional(part, false).Changes);
     }
 }

@@ -33,4 +33,7 @@ to a page, a `.dds`, or a definition in an `.sbc` is invisible until the game is
 A change to the mod's own code is not. The scripts are compiled from the mod folder when a world
 loads, so a quickload picks it up.
 
+The mod's own texts (`Data/Localization/*.resx`) are the exception under `Content`: Sprocket loads
+them itself on every world load (`SprocketSession.Speak`), so a quickload picks them up too.
+
 So after `dotnet build src/Sprocket.Host.SpaceEngineers`, say which of the two changed.

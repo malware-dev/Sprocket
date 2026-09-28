@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class PageTurnTests
 {
-    const string Chosen = "60 130 type Airlock enter 60 161 200 351 560 333 1000 207";
+    const string Chosen = "60 130 type Airlock enter 60 237 200 351 560 333 1000 207";
 
     const string Fold = "47 500";
 

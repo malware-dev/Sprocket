@@ -1,7 +1,7 @@
 using System.Text;
 using VRageMath;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Ui.Viewing;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// The defect this guards against draws the right picture: every line issued as a call, the scissor
 /// throwing away all but a screenful. Nothing on screen says it is happening, so it is counted.
 /// </remarks>
-public class ListingTests
+public class EditBoxTests
 {
     const float Width = 800f;
     const float Height = 600f;
@@ -26,9 +26,9 @@ public class ListingTests
         return text.ToString(0, text.Length - 1);
     }
 
-    static Listing Long(int count)
+    static EditBox Long(int count)
     {
-        return new Listing { Text = Lines(count) };
+        return new EditBox { IsReadOnly = true, Text = Lines(count) };
     }
 
     /// <summary>
@@ -38,9 +38,9 @@ public class ListingTests
     /// A control has no bounds until it has been arranged, so anything that presses at one has to
     /// have drawn it first even where the frame is not what is being asked about.
     /// </remarks>
-    static void Laid(Listing listing)
+    static void Laid(EditBox box)
     {
-        new Easel(listing, Width, Height).Draw(Width, Height);
+        new Easel(box, Width, Height).Draw(Width, Height);
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class ListingTests
     [Fact]
     public void ItStandsAsTallAsItsLines()
     {
-        Listing listing = Long(200);
+        EditBox listing = Long(200);
         var easel = new Easel(listing, Width, Height);
 
         Assert.Equal(200 * easel.LineHeight, listing.Extent, 2);
@@ -63,7 +63,7 @@ public class ListingTests
     [Fact]
     public void ItIsAWindowAndNotAColumn()
     {
-        Listing listing = Long(5000);
+        EditBox listing = Long(5000);
         var easel = new Easel(listing, Width, Height);
 
         Assert.Equal(Height, listing.DesiredSize.Y, 2);
@@ -114,7 +114,7 @@ public class ListingTests
     [Fact]
     public void ScrollingMeasuresOnlyWhatComesIntoView()
     {
-        Listing listing = Long(1000);
+        EditBox listing = Long(1000);
         var easel = new Easel(listing, Width, Height);
 
         int settled = easel.Measured;
@@ -129,7 +129,7 @@ public class ListingTests
     [Fact]
     public void TheReachGrowsAsLongerLinesAreMet()
     {
-        var listing = new Listing { Text = Lines(500) + "\n" + new string('x', 400) + "\n" + Lines(500) };
+        var listing = new EditBox { IsReadOnly = true, Text = Lines(500) + "\n" + new string('x', 400) + "\n" + Lines(500) };
         var easel = new Easel(listing, Width, Height);
 
         float known = listing.Widest;
@@ -164,7 +164,7 @@ public class ListingTests
     [Fact]
     public void ScrollingShowsOtherLinesAndNoMoreOfThem()
     {
-        Listing listing = Long(5000);
+        EditBox listing = Long(5000);
         var easel = new Easel(listing, Width, Height);
 
         int before = easel.Written.Count();
@@ -182,7 +182,7 @@ public class ListingTests
     [Fact]
     public void ALineTooWideForTheRoomCanBeReached()
     {
-        var listing = new Listing { Text = new string('x', 400) };
+        var listing = new EditBox { IsReadOnly = true, Text = new string('x', 400) };
         var easel = new Easel(listing, Width, Height);
 
         Assert.True(listing.Widest > Width, "the line fits, so there is nothing to reach");
@@ -200,7 +200,7 @@ public class ListingTests
     [Fact]
     public void SidewaysStopsAtTheLongestLine()
     {
-        var listing = new Listing { Text = new string('x', 400) };
+        var listing = new EditBox { IsReadOnly = true, Text = new string('x', 400) };
         var easel = new Easel(listing, Width, Height);
 
         listing.ShiftBy(100000f);
@@ -213,8 +213,9 @@ public class ListingTests
     [Fact]
     public void AThumbIsDrawnForEachDirectionThatHasSomewhereToGo()
     {
-        var listing = new Listing
+        var listing = new EditBox
         {
+            IsReadOnly = true,
             Text = Lines(500),
             BarWidth = 8f,
             Thumb = Color.White
@@ -242,7 +243,7 @@ public class ListingTests
     [Fact]
     public void TheTextCanBeDraggedAbout()
     {
-        Listing listing = Long(5000);
+        EditBox listing = Long(5000);
         var easel = new Easel(listing, Width, Height);
 
         listing.OnPointerDown(new Vector2(100f, 100f), 1, false, false);
@@ -264,7 +265,7 @@ public class ListingTests
     [Fact]
     public void DraggingSidewaysMovesItSideways()
     {
-        var listing = new Listing { Text = new string('x', 400) };
+        var listing = new EditBox { IsReadOnly = true, Text = new string('x', 400) };
         Laid(listing);
 
         listing.OnPointerDown(new Vector2(100f, 10f), 1, false, false);
@@ -280,7 +281,7 @@ public class ListingTests
     [Fact]
     public void APressOnAThumbTakesTheThumb()
     {
-        var listing = new Listing { Text = Lines(5000), BarWidth = 20f, Thumb = Color.White };
+        var listing = new EditBox { IsReadOnly = true, Text = Lines(5000), BarWidth = 20f, Thumb = Color.White };
         Laid(listing);
 
         listing.OnPointerDown(new Vector2(Width - 10f, 10f), 1, false, false);
@@ -295,16 +296,16 @@ public class ListingTests
     [Fact]
     public void TextThatFitsIsNotDraggedAbout()
     {
-        var listing = new Listing { Text = "one\ntwo" };
+        var listing = new EditBox { IsReadOnly = true, Text = "one\ntwo" };
         _ = new Easel(listing, Width, Height);
 
         listing.OnPointerDown(new Vector2(100f, 10f), 1, false, false);
         Assert.False(listing.IsPanning);
     }
 
-    static Listing Numbered(string text)
+    static EditBox Numbered(string text)
     {
-        return new Listing { Text = text, Numbered = true, NumberColor = Color.White };
+        return new EditBox { IsReadOnly = true, Text = text, Numbered = true, NumberColor = Color.White };
     }
 
     static float WhereIs(Easel easel, string said)
@@ -343,7 +344,7 @@ public class ListingTests
     [Fact]
     public void TheNumbersAreFlushAgainstTheWords()
     {
-        Listing listing = Numbered(Lines(5000));
+        EditBox listing = Numbered(Lines(5000));
         var easel = new Easel(listing, Width, Height);
 
         float nine = WhereIs(easel, "9");
@@ -393,7 +394,7 @@ public class ListingTests
     [Fact]
     public void TheGutterHoldsStillWhileTheWordsMove()
     {
-        Listing listing = Numbered(new string('x', 400) + "\n" + Lines(500));
+        EditBox listing = Numbered(new string('x', 400) + "\n" + Lines(500));
         var easel = new Easel(listing, Width, Height);
 
         float gutter = WhereIs(easel, "2");
@@ -412,7 +413,7 @@ public class ListingTests
     {
         var wide = new string('x', 400);
 
-        var plain = new Listing { Text = wide };
+        var plain = new EditBox { IsReadOnly = true, Text = wide };
         var withGutter = Numbered(wide);
 
         var first = new Easel(plain, Width, Height);
@@ -426,7 +427,7 @@ public class ListingTests
     [Fact]
     public void EmptyItHasOneLineOfExtent()
     {
-        var listing = new Listing();
+        var listing = new EditBox { IsReadOnly = true };
         var easel = new Easel(listing, Width, Height);
 
         Assert.Empty(easel.Written);

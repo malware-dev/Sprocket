@@ -220,6 +220,27 @@ public class ScriptTests
         Assert.Empty(read.FindPart("anything")!.Expects);
     }
 
+    /// <summary>A part a construct may leave unfilled is written optional, and read back as one.</summary>
+    [Fact]
+    public void APartMayBeOptional()
+    {
+        var program = SystemCalled("", "Airlock");
+        var system = program.Systems[0];
+        system.PartFor("inner").Expects.Add("Door");
+        var lamp = system.PartFor("lamp");
+        lamp.Expects.Add("InteriorLight");
+        lamp.Optional = true;
+
+        var text = Save(program);
+        Assert.Contains("    required block inner expects Door\n", text);
+        Assert.Contains("    optional block lamp expects InteriorLight\n", text);
+
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+        Assert.False(after.Systems[0].FindPart("inner")!.Optional);
+        Assert.True(after.Systems[0].FindPart("lamp")!.Optional);
+    }
+
     /// <summary>
     /// A subtype is quoted, because a `/` is not a bare name.
     /// </summary>

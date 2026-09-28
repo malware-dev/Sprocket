@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Spacing = 8f,
                 Children =
                 {
-                    new Label { Style = Styles.ColumnNote }.As(out _question),
+                    new Label { Style = Styles.ColumnNote, Wraps = true }.As(out _question),
                     new HStack
                     {
                         Spacing = 8f,

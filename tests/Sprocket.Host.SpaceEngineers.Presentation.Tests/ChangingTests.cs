@@ -186,7 +186,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("New sequence");
+        screen.Editor.PressStart("Sequence");
         screen.Editor.Name("Seal up");
         screen.Editor.Back();
         screen.Run(2);
@@ -376,7 +376,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("New sequence");
+        screen.Editor.PressStart("Sequence");
         screen.Editor.Name("Seal up");
         screen.Editor.Back();
         screen.Run(2);
