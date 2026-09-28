@@ -83,15 +83,14 @@ public class DuplicatingTests
     /// <remarks>
     /// Throwing a sequence away is not editing it: nothing half-written can result, the question
     /// asks first, and a machine somebody wants rid of while it is running is exactly when they
-    /// want rid of it. Parking it first was an errand on the way to the same place.
+    /// want rid of it. Switching it off first would be an errand on the way to the same place.
     /// </remarks>
     [Fact]
     public void ARunningSequenceIsStillDeletedFromItsRow()
     {
         var screen = AtTheList();
 
-        var row = Row(screen, 0);
-        row.Flips!.Execute();
+        screen.Editor.Screen.Flip!.Execute();
         screen.Run(2);
 
         Row(screen, 0).Deletes!.Execute();
@@ -143,24 +142,24 @@ public class DuplicatingTests
     }
 
     /// <summary>
-    /// A running sequence can be copied, and the copy is still switched off.
+    /// A sequence of a system switched on can be copied, and the copy starts on nothing.
     /// </summary>
     /// <remarks>
     /// Unlike everything on the sequence's own screen, which waits for the switch. Copying does not
-    /// touch what is running, and the copy cannot run: it has nothing to start it and its own switch
-    /// is off.
+    /// touch what is running, and the copy cannot run: it has nothing to start it.
     /// </remarks>
     [Fact]
     public void ARunningSequenceCanBeCopied()
     {
         var screen = AtTheList();
-        Row(screen, 0).Flips!.Execute();
+        screen.Editor.Screen.Flip!.Execute();
         screen.Run(2);
 
         Duplicate(screen, 0);
 
-        Assert.False(screen.Editor.Screen.SwitchIsOn);
-        Assert.True(screen.Editor.Program.Sequences[0].Enabled);
+        Assert.True(screen.Editor.Program.Systems[0].Enabled);
+        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
+        Assert.Null(screen.Editor.Program.Sequences[1].Trigger);
     }
 
     /// <summary>The copy is a sequence of the same system, so the system's list shows both.</summary>

@@ -410,7 +410,9 @@ public class HandoverTests : IDisposable
         {
             Assert.Contains("first difference at line", line);
             Assert.Contains("Hangar", line);
-            Assert.Contains("switches unchanged", line);
+
+            // A new system arrives switched off, which the switches say.
+            Assert.Contains("; switches first difference", line);
         }
     }
 
@@ -478,7 +480,7 @@ public class HandoverTests : IDisposable
 
         var sequence = _sim.Editor.Program.Sequences[0];
         sequence.Steps.Add(new Wait(600));
-        sequence.Enabled = true;
+        sequence.System.Enabled = true;
 
         // Ticked first, so the runner has caught up with a program it was handed a moment ago.
         _sim.Tick();
@@ -605,6 +607,7 @@ public class HandoverTests : IDisposable
     public void ACopyRunsNothing()
     {
         Repeating();
+        _sim.Editor.SwitchOn();
 
         string program;
         string state;

@@ -191,6 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _screen.Subtitle = Current.Subtitle;
             _screen.SwitchIsOn = Current.SwitchIsOn;
+            _screen.SwitchAbout = Current.SwitchAbout;
             _screen.Running = Current.IsRunning;
 
             Walking();
@@ -929,7 +930,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
             _screen.Refresh = page.CanRefresh ? Act(Cmd.Refresh, Look) : null;
             _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
-            _screen.SwitchGovernsAll = page.SwitchGovernsAll;
+            _screen.SwitchAbout = page.SwitchAbout;
             _screen.Runs = page.Runs;
             _screen.Stops = page.Stops;
             _screen.Deletes = page.Deletes;
@@ -1127,7 +1128,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         internal void NewSequence(AutomationSystem system)
         {
             var sequence = _program.AddSequence(system);
-            sequence.Enabled = false;
             sequence.Name = Name(sequence);
 
             Invalidate();
@@ -1335,12 +1335,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>
         /// Makes the sequence this trigger runs, and opens it.
         /// </summary>
-        /// <remarks>
-        /// Parked until somebody says otherwise. Enabled by default, a sequence with a trigger and no
-        /// steps would already be live, and would get progressively more so as each step was added -
-        /// a system half-doing something nobody has finished describing. It is also the only way the
-        /// switch can gate editing without a new sequence being unbuildable the moment it exists.
-        /// </remarks>
+        /// <remarks>Made in a system switched off, as everything in one is, so a trigger with no steps behind it is never live.</remarks>
         void RunNew(AutomationSystem system, Trigger trigger, int origin, bool fresh, SystemEdit start)
         {
             // The picker goes with the answer. Left on the stack, backing out of the sequence would
@@ -1348,7 +1343,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             UnwindTo(origin);
 
             var sequence = _program.AddSequence(system);
-            sequence.Enabled = false;
             sequence.Name = Name(sequence);
 
             Points(system, trigger, sequence, false, fresh, sequence, start);
@@ -1807,6 +1801,47 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             Deleting(Texts.DeleteInstance, named, Template.Fill(Texts.DeleteInstanceKept, "name", system.Name),
                 delegate { TakeOut(system, instance); });
+        }
+
+        /// <summary>Switches <paramref name="system" /> on or off; a blueprint off only after asking, since that stops every logic system made from it.</summary>
+        internal void SwitchSystem(AutomationSystem system, bool on)
+        {
+            if (on || !system.IsBlueprint || system.Instances.Count == 0)
+            {
+                system.Enabled = on;
+                Invalidate();
+                return;
+            }
+
+            var instances = system.Instances;
+            var names = new string[instances.Count];
+            for (var i = 0; i < instances.Count; i++)
+                names[i] = SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instances[i]);
+
+            var page = new ChoicePage(this, Template.Fill(Texts.BlueprintSwitchOffQuestion, "name", system.Name));
+            page.Caption = Template.Fill(Texts.BlueprintSwitchOffStops, "names", string.Join(", ", names));
+
+            page.Add(Texts.BlueprintKeepRunning, false, delegate { Pop(); });
+            page.Add(Texts.BlueprintSwitchThemOff, false, delegate
+            {
+                Pop();
+                system.Enabled = false;
+                Invalidate();
+            });
+
+            if (SystemSummary.IsRunning(system, _runner, null))
+                page.WarnOnLast(Texts.BlueprintSwitchOffRunning);
+
+            Push(page);
+        }
+
+        /// <summary>What pressing the switch of <paramref name="system" /> would do, said as a note on it.</summary>
+        internal string SwitchAbout(AutomationSystem system)
+        {
+            if (!system.IsBlueprint)
+                return StatusRow.Switching(Texts, true, system.Enabled);
+
+            return system.Enabled ? Texts.RowSwitchBlueprintOff : Texts.RowSwitchBlueprintOn;
         }
 
         /// <summary>Takes <paramref name="sequence" /> out of the program without asking, and any page showing it.</summary>

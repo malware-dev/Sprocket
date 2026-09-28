@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -117,7 +118,7 @@ public class ProblemTests
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
-        Assert.True(warn.Enabled);
+        Assert.True(warn.System.Enabled);
 
         ship.Editor.PressRow(0);
         ship.Runner.Tick(1200);
@@ -274,30 +275,30 @@ public class ProblemTests
     }
 
     /// <summary>
-    /// A sequence that cannot work is switched off, and mending it does not switch it back on.
+    /// A system with a sequence that cannot work is switched off, says why, and mending it does not switch it back on.
     /// </summary>
     /// <remarks>
-    /// Switching it off costs nothing, because it was not going to run. What it buys is that editing
-    /// it no longer starts with an errand - a sequence may only be changed while it is parked.
-    /// Switching one on stays somebody's decision every time, so mending leaves it parked.
+    /// Starting it again stays somebody's decision, which is switching it on.
     /// </remarks>
     [Fact]
-    public void ABrokenSequenceIsSwitchedOff()
+    public void ABrokenSystemIsSwitchedOff()
     {
         var ship = Build();
-        ship.Sequence.Enabled = true;
+        var system = ship.Sequence.System;
 
         ship.Rig.CannotStart(ship.Sequence);
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
-        Assert.False(ship.Sequence.Enabled);
+        Assert.False(system.Enabled);
+        Assert.Equal(SequenceProblem.NeverTriggered, system.Halt!.Problem);
 
         ship.Rig.CanStart(ship.Sequence);
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
-        Assert.False(ship.Sequence.Enabled);
+        Assert.False(system.Enabled);
+        Assert.Equal("Stopped in " + ship.Sequence.Name + ": nothing could start it.", SequenceText.Stopped(system.Halt, system));
     }
 
     /// <summary>A step's own trouble marks the step, and only the step.</summary>
@@ -411,9 +412,9 @@ public class ProblemTests
         ship.Editor.GoToRoot();
         ship.Sequence = ship.Automation.Sequences[0];
 
-        // Switched on, because these are about a sequence that would work: one left parked says so
-        // itself, and that would be the answer to every question below rather than the one asked.
-        ship.Sequence.Enabled = true;
+        // Switched on, because these are about a sequence that would work, and only one that may run
+        // is held for what is wrong with it.
+        ship.Sequence.System.Enabled = true;
         return ship;
     }
 

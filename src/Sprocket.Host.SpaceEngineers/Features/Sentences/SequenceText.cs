@@ -271,10 +271,82 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return values.ToString(CultureInfo.InvariantCulture);
         }
 
-        /// <summary>The same, letting whatever is at fault speak for itself where it can.</summary>
-        internal static string Problem(SequenceFault fault)
+        /// <summary>What is wrong with <paramref name="sequence" />, letting whatever is at fault speak for itself where it can.</summary>
+        internal static string Problem(SequenceFault fault, Sequence sequence)
         {
+            if (fault.Problem == SequenceProblem.EmptySlot)
+                return "The " + Slot(sequence == null ? null : sequence.System, fault.Which)
+                    + " slot is empty. Fill it on the configuration panel.";
+
             return string.IsNullOrEmpty(fault.Because) ? Problem(fault.Problem) : fault.Because;
+        }
+
+        /// <summary>Why Sprocket switched off <paramref name="system" />, or one of it, as <paramref name="halt" /> recorded it.</summary>
+        public static string Stopped(Halt halt, AutomationSystem system)
+        {
+            if (halt == null || halt.Problem == SequenceProblem.None)
+                return "Stopped for an unknown reason.";
+
+            var sequence = system == null ? null : system.FindSequence(halt.Sequence);
+            var row = Row(sequence, halt.Step);
+            var at = row > 0 ? " at step " + row.ToString(CultureInfo.InvariantCulture) : "";
+            var of = sequence == null || !sequence.HasName ? "" : (row > 0 ? " of " : " in ") + sequence.Name;
+
+            return "Stopped" + at + of + ": " + (string.IsNullOrEmpty(halt.Said) ? Because(halt.Problem, halt.Block) : halt.Said);
+        }
+
+        /// <summary>What a slot is called: its label where it has one.</summary>
+        static string Slot(AutomationSystem system, string slot)
+        {
+            var part = system == null || slot == null ? null : system.FindPart(slot);
+            return part == null ? slot : part.Label;
+        }
+
+        static string Because(SequenceProblem problem, string block)
+        {
+            if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.EmptySlot)
+                return "the " + block + " slot was empty.";
+            if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.MissingTarget)
+                return block + " was gone.";
+            if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Adrift)
+                return block + " may have been replaced.";
+
+            if (problem == SequenceProblem.NeverTriggered)
+                return "nothing could start it.";
+            if (problem == SequenceProblem.MissingSource)
+                return "a block that starts it was gone.";
+            if (problem == SequenceProblem.MissingTarget)
+                return "a block it acts on was gone.";
+            if (problem == SequenceProblem.MissingGate)
+                return "a block it waits on was gone.";
+            if (problem == SequenceProblem.Unoffered)
+                return "its blocks no longer offered the action.";
+            if (problem == SequenceProblem.Unfilled)
+                return "a value was missing.";
+            if (problem == SequenceProblem.Mistyped)
+                return "a value didn't fit the action.";
+            if (problem == SequenceProblem.Unawaited)
+                return "it didn't wait for what it started.";
+            if (problem == SequenceProblem.Adrift)
+                return "a block may have been replaced.";
+
+            return "it could not work.";
+        }
+
+        /// <summary>The number a step's row shows, counting past the waits for what a step starts, or 0 where there is none.</summary>
+        static int Row(Sequence sequence, int step)
+        {
+            if (sequence == null || step < 0 || step >= sequence.Steps.Count || sequence.Steps[step] is Await)
+                return 0;
+
+            var row = 0;
+            for (var i = 0; i <= step; i++)
+            {
+                if (!(sequence.Steps[i] is Await))
+                    row++;
+            }
+
+            return row;
         }
 
         public static string Problem(SequenceProblem problem)
@@ -287,8 +359,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return "Nothing can start this.";
             if (problem == SequenceProblem.NothingStarts)
                 return "Nothing starts this yet.";
-            if (problem == SequenceProblem.SwitchedOff)
-                return "This is switched off, so nothing starts it on its own.";
             if (problem == SequenceProblem.MissingGate)
                 return "This waits on something that isn't here any more.";
             if (problem == SequenceProblem.Unoffered)

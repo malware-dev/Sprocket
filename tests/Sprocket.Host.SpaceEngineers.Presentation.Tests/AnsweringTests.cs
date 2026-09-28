@@ -11,16 +11,16 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class AnsweringTests
 {
-    const string LeavingASequence =
+    const string LeavingASystem =
         "60 133 type Airlock enter 60 237 200 384 560 340 1353 314 70 200 "
-        + "150 203 type Tug 200 360 800 565 1316 201 1316 319 enter 25 62";
+        + "150 203 type Tug 200 360 800 565 1316 201 1316 319 enter 25 62 25 62";
 
     [Fact]
     public void EnterTakesTheAnswerThePageNamed()
     {
-        var screen = Screen.Fresh(LeavingASequence.Split(' '));
+        var screen = Screen.Fresh(LeavingASystem.Split(' '));
 
-        Assert.True(screen.Shows("Switch this sequence on?"), "leaving did not ask");
+        Assert.True(screen.Shows("Switch Airlock on?"), "leaving did not ask");
         Assert.True(screen.Scene.IsQuestioning, "the question is not the thing owning the screen");
 
         Assert.True(screen.Scene.TakeDefault(), "Enter took no answer");
@@ -29,7 +29,7 @@ public class AnsweringTests
         // The safe one, which is the one that leaves it off. A key pressed without reading must not
         // switch something on.
         Assert.False(screen.Scene.IsQuestioning, "the question is still up");
-        Assert.False(screen.Editor.Program.Sequences[0].Enabled, "Enter switched it on");
+        Assert.False(screen.Editor.Program.Systems[0].Enabled, "Enter switched it on");
     }
 
     /// <summary>And dismissing it is a third outcome rather than the safe answer.</summary>
@@ -40,13 +40,13 @@ public class AnsweringTests
     [Fact]
     public void AndDismissingItAnswersNothing()
     {
-        var screen = Screen.Fresh(LeavingASequence.Split(' '));
+        var screen = Screen.Fresh(LeavingASystem.Split(' '));
 
         screen.Scene.Dismiss();
         screen.Run(2);
 
         Assert.False(screen.Scene.IsQuestioning, "the question is still up");
-        Assert.False(screen.Editor.Program.Sequences[0].Enabled, "dismissing switched it on");
-        Assert.True(screen.Shows("Switch this sequence on?") == false, "the question still shows");
+        Assert.False(screen.Editor.Program.Systems[0].Enabled, "dismissing switched it on");
+        Assert.True(screen.Shows("Switch Airlock on?") == false, "the question still shows");
     }
 }

@@ -328,8 +328,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             /// <summary>Which event of it, so the block can be asked about the right button.</summary>
             public string EventId;
 
-            /// <summary>Which sequence this is for, so reachability can be reported per sequence.</summary>
+            /// <summary>Which sequence this is for, so a button that is gone can be dropped from its trigger.</summary>
             public int SequenceId;
+
+            /// <summary>Which sequence on which one of its system, so reachability is reported for each one.</summary>
+            public long Start;
 
             /// <summary>
             /// The block whose own action goes in the slot, or zero where Sprocket's action does.
@@ -513,6 +516,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 want.Reference = _sources[source];
                 want.EventId = needed.EventId;
                 want.SequenceId = sequence.Id;
+                want.Start = GridWorld.Start(sequence.Id, instance);
 
                 long acts;
                 string named;
@@ -785,8 +789,9 @@ namespace Sprocket.Host.SpaceEngineers.World
                         if (Answered(system, instances[n], sequences[q]))
                             continue;
 
-                        if (!_unstartable.Contains(sequences[q].Id))
-                            _unstartable.Add(sequences[q].Id);
+                        var start = GridWorld.Start(sequences[q].Id, instances[n]);
+                        if (!_unstartable.Contains(start))
+                            _unstartable.Add(start);
                     }
                 }
             }
@@ -796,7 +801,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Want want = _wanted[w];
                 if (Wired(want))
                 {
-                    _reachable.Add(want.SequenceId);
+                    _reachable.Add(want.Start);
                     continue;
                 }
 
@@ -816,15 +821,15 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var w = 0; w < _wanted.Count; w++)
             {
                 Want want = _wanted[w];
-                if (!_reachable.Contains(want.SequenceId) && !_unstartable.Contains(want.SequenceId))
-                    _unstartable.Add(want.SequenceId);
+                if (!_reachable.Contains(want.Start) && !_unstartable.Contains(want.Start))
+                    _unstartable.Add(want.Start);
             }
 
             _world.Unstartable(_unstartable, _broken);
         }
 
-        readonly List<int> _unstartable = new List<int>();
-        readonly HashSet<int> _reachable = new HashSet<int>();
+        readonly List<long> _unstartable = new List<long>();
+        readonly HashSet<long> _reachable = new HashSet<long>();
         readonly Dictionary<int, List<string>> _broken = new Dictionary<int, List<string>>();
         readonly List<Want> _dropped = new List<Want>();
 

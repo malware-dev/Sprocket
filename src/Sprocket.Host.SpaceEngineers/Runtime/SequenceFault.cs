@@ -1,4 +1,3 @@
-
 namespace Sprocket.Host.SpaceEngineers.Runtime
 {
     /// <summary>
@@ -38,6 +37,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Because = because;
         }
 
+        /// <summary>The same, naming the one block at fault by <paramref name="which" />, its reference.</summary>
+        public SequenceFault(SequenceProblem problem, int step, string because, string which) : this(problem, step, because)
+        {
+            Which = which;
+        }
+
+        /// <summary>The reference of the one block at fault, or null where no one block is.</summary>
+        public string Which { get; private set; }
+
         public string Because { get; private set; }
 
         public SequenceProblem Problem { get; private set; }
@@ -60,7 +68,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// as broken, add to what is counted as wrong, or get the sequence parked.
         /// </remarks>
         public bool IsWarning => Problem == SequenceProblem.NothingStarts
-            || Problem == SequenceProblem.SwitchedOff
             || Problem == SequenceProblem.Conflicted;
 
         /// <summary>

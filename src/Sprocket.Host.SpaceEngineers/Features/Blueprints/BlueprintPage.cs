@@ -58,6 +58,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <inheritdoc />
         public override bool SwitchIsOn => Blockset != null && Blockset.Enabled;
 
+        /// <summary>The blockset's switch stops that one and nothing else made from the blueprint.</summary>
+        public override string SwitchAbout => StatusRow.Switching(Editor.Texts, false, SwitchIsOn);
+
         /// <summary>The blockset just made is as it was made: its name, its switch, and not one slot filled.</summary>
         public override bool Untouched
         {
@@ -398,19 +401,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>What the block a reference names was called in the game, where the reference remembers, or its name in the program.</summary>
         string Called(string reference)
         {
-            var found = Editor.Program.FindRef(reference);
-            if (found == null)
-                return reference;
-
-            for (var i = 0; i < found.Keys.Count; i++)
-            {
-                string text;
-                if (found.Keys[i].Cells == null
-                    && Editor.World.Values.TryText(found.Keys[i].Kind, found.Keys[i].Value, out text))
-                    return text;
-            }
-
-            return reference;
+            return Editor.Program.Called(reference, Editor.World.Values);
         }
 
         /// <summary>Asks which of the construct's blocks fill <paramref name="part" /> for <paramref name="chosen" />, in the picker.</summary>

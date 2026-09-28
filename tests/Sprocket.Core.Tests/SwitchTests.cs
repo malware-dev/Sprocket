@@ -93,28 +93,18 @@ public class SwitchTests
         return step;
     }
 
-    /// <summary>Adds a sequence of the same system with nothing to start it.</summary>
-    static Sequence Called(Ship ship, string name, string actionId, string target)
-    {
-        var sequence = ship.Program.AddSequence(ship.Airlock);
-        sequence.Name = name;
-        sequence.Steps.Add(Do(actionId, target));
-        sequence.Steps.Add(new Await());
-        return sequence;
-    }
-
     /// <summary>
-    /// A parked sequence reads its trigger and starts nothing.
+    /// A sequence in a system switched off reads its trigger and starts nothing.
     /// </summary>
     /// <remarks>
     /// Sampled anyway, which is what makes switching it on again safe: an edge is a change since the
     /// last reading, so a sequence that slept through one would fire on the next thing it noticed.
     /// </remarks>
     [Fact]
-    public void AParkedSequenceDoesNotStart()
+    public void ASystemSwitchedOffStartsNothing()
     {
         var ship = Build();
-        ship.Secure.Enabled = false;
+        ship.Airlock.Enabled = false;
         ship.Tick(3);
         ship.Log.Clear();
 
@@ -127,7 +117,7 @@ public class SwitchTests
         // first: an edge is a change, and a door that is already open cannot open again.
         ship.World.Invoke(ship.Seen(ship.Inner), "close");
         ship.Tick(90);
-        ship.Secure.Enabled = true;
+        ship.Airlock.Enabled = true;
 
         ship.Inner.ForceOpen();
         ship.Tick(Rota.Ten);
@@ -136,53 +126,15 @@ public class SwitchTests
     }
 
     /// <summary>
-    /// A step saying <c>run</c> that meets a parked sequence is refused, and the refusal is counted.
+    /// Switching a system off stops what its sequences were in the middle of.
     /// </summary>
     /// <remarks>
-    /// Both halves matter. A switch a person threw must hold against another sequence asking, or it
-    /// does not mean what it says - and the refusal must be visible, or a rule that ignored a request
-    /// is indistinguishable from one nothing asked for.
+    /// Which is what makes editing safe: a system may only be changed while it is switched off, and
+    /// finding a sequence still half way through its steps would be a rule rewritten under a machine
+    /// that was acting on it. Whatever it has already done stays done.
     /// </remarks>
     [Fact]
-    public void ACallOnAParkedSequenceIsRefusedAndSaysSo()
-    {
-        var ship = Build();
-
-        var warn = Called(ship, "Warn", BlockKinds.SwitchOff, ship.Ref(ship.Outer));
-        warn.Enabled = false;
-        ship.Secure.Steps.Add(new Run(warn.Number));
-
-        ship.Tick(Rota.Ten);
-        ship.Log.Clear();
-
-        ship.Inner.ForceOpen();
-        ship.Tick(Rota.Ten);
-
-        Assert.DoesNotContain("Outer Door:off", ship.Log);
-        Assert.Equal(1, ship.State(warn).RefusedCount);
-
-        // And switched on it runs, called by the same step.
-        ship.World.Invoke(ship.Seen(ship.Inner), "close");
-        ship.Tick(90);
-        warn.Enabled = true;
-
-        ship.Inner.ForceOpen();
-        ship.Tick(Rota.Ten);
-
-        Assert.Contains("Outer Door:off", ship.Log);
-        Assert.Equal(1, ship.State(warn).RefusedCount);
-    }
-
-    /// <summary>
-    /// Switching a sequence off stops what it was in the middle of.
-    /// </summary>
-    /// <remarks>
-    /// Which is what makes editing safe: a sequence may only be changed while it is parked, and
-    /// finding one still half way through its steps would be a rule rewritten under a machine that
-    /// was acting on it. Whatever it has already done stays done - see the editor's own words for it.
-    /// </remarks>
-    [Fact]
-    public void ParkingASequenceStopsItMidRun()
+    public void SwitchingASystemOffStopsItMidRun()
     {
         var ship = Build();
         ship.Secure.Steps.Add(new Wait(600));
@@ -194,7 +146,7 @@ public class SwitchTests
 
         Assert.True(ship.State(ship.Secure).IsRunning);
 
-        ship.Secure.Enabled = false;
+        ship.Airlock.Enabled = false;
         ship.Tick(Rota.Ten);
 
         Assert.False(ship.State(ship.Secure).IsRunning);
@@ -207,29 +159,30 @@ public class SwitchTests
     }
 
     /// <summary>
-    /// Switching a logic system off reaches everything in it, and leaves the sequences' own switches
-    /// alone.
+    /// Switching a logic system on, or one of it, forgets why Sprocket switched it off, and leaves the other switch alone.
     /// </summary>
     /// <remarks>
-    /// Rewiring a machine means stopping the machine, not stopping three rules one at a time - and
-    /// starting it again must not arm the one rule somebody had deliberately parked.
+    /// Starting the machine must not start the one of it somebody had stopped.
     /// </remarks>
     [Fact]
-    public void SwitchingALogicSystemOffDoesNotDisturbTheSequenceSwitches()
+    public void SwitchingOnForgetsWhyItWentOff()
     {
         var ship = Build();
-        var warn = Called(ship, "Warn", BlockKinds.SwitchOff, ship.Ref(ship.Outer));
-        warn.Enabled = false;
-
         var airlock = ship.Airlock.First!;
         airlock.Enabled = false;
+        airlock.Halt = new Halt(SequenceProblem.MissingTarget, ship.Secure.Number, 0, null, "Outer Door");
+        ship.Airlock.Enabled = false;
+        ship.Airlock.Halt = new Halt(SequenceProblem.NeverTriggered, ship.Secure.Number, -1, null, null);
 
+        ship.Airlock.Enabled = true;
+
+        Assert.Null(ship.Airlock.Halt);
+        Assert.NotNull(airlock.Halt);
         Assert.False(ship.Secure.CanRun(airlock));
-        Assert.True(ship.Secure.Enabled);
 
         airlock.Enabled = true;
 
+        Assert.Null(airlock.Halt);
         Assert.True(ship.Secure.CanRun(airlock));
-        Assert.False(warn.Enabled);
     }
 }

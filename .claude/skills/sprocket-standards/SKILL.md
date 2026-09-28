@@ -146,6 +146,22 @@ because the slower two periods are not guaranteed to land on exact multiples - w
 on what else is in the game's component list. A shift counting how often it was called is measuring
 server load and calling it time.
 
+## What Sprocket tells a person
+
+**Every word on screen is clear, concise and unconfusing.** The fewest words that still say what
+happened, why, and what to do. A sentence that is accurate but wordy, or says little, is a defect.
+
+**An error names exactly what went wrong.** The step, the block, and the block's own words where it
+gave any: "Stopped at step 3: Airlock 1 Outer Door was gone." Never "a block" where the block is
+known.
+
+**Details are recorded when the fault is found, and kept.** That moment is when Sprocket knows them
+exactly; later the cause may be mended or the block gone, and nothing can be worked out again. What
+is recorded travels with whatever it explains, saved state included.
+
+**A fallback stays, short and plain.** For a cause that really is not known: "Stopped for an unknown
+reason." Removing a message is never the fix for a bad one.
+
 ## The language's spec is `docs/Language.md`
 
 **It holds the current truth of the script language and nothing else.** What the language is right

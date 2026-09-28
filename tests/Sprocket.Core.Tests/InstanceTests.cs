@@ -278,7 +278,7 @@ public class InstanceTests
         // Parking one leaves the other and the sequence as they were.
         Assert.False(port.Enabled);
         Assert.True(front.Enabled);
-        Assert.True(cycle.Enabled);
+        Assert.True(cycle.CanRun(front));
 
         Door(ship, "Front Inner").ForceOpen();
         ship.Tick(2);

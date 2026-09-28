@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -6,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -33,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         readonly List<string> _called = new List<string>();
 
         int _wiring = -1;
+        int _quiet;
         ListField _blocksets;
         string _madeName;
         string _madeAbout;
@@ -45,6 +48,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public LogicSystemPage(SprocketEditor editor, AutomationSystem system) : base(editor)
         {
             _system = system;
+
+            // Here rather than when the screen is built, which happens again after every change.
+            _quiet = editor.Program.Wiring;
         }
 
         /// <inheritdoc />
@@ -75,8 +81,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// </remarks>
         public override bool NameRequired => true;
 
-        /// <summary>A switch for a logic system, and none for a blueprint, which does not run: its logic systems do.</summary>
-        public override bool CanSwitch => !_system.IsBlueprint;
+        /// <summary>The system's switch, a blueprint's included, which is also what keeps it from being changed while it may run.</summary>
+        public override bool CanSwitch => true;
+
+        /// <inheritdoc />
+        public override bool SwitchIsOn => _system.Enabled;
+
+        /// <inheritdoc />
+        public override string SwitchAbout => Editor.SwitchAbout(_system);
 
         /// <summary>Which button starts each sequence, and which nothing starts, is read from the toolbars.</summary>
         public override bool CanRefresh => true;
@@ -84,23 +96,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The logic system just made is as it was made: its name, what it says about itself, its switch, and nothing in it.</summary>
         /// <remarks>A sequence made in it and left untouched has gone already, since its page was left first.</remarks>
         public override bool Untouched => _system.Name == _madeName && _system.Annotation == _madeAbout
-            && SwitchIsOn == _madeOn && _system.Triggers.Count == 0 && _system.Sequences.Count == 0;
+            && _system.Enabled == _madeOn && _system.Triggers.Count == 0 && _system.Sequences.Count == 0;
 
         /// <summary>Deletes the system, asking first; a blueprint only once its name is typed, since every logic system made from it goes too.</summary>
         public override ICommand Deletes => Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(_system); });
 
         /// <inheritdoc />
         public override string DeleteAbout => _system.IsBlueprint ? Editor.Texts.SystemDeleteBlueprint : Editor.Texts.SystemDelete;
-
-        /// <summary>The switch of the one of the system being edited.</summary>
-        public override bool SwitchIsOn
-        {
-            get
-            {
-                var shown = Editor.StandIn(_system);
-                return shown != null && shown.Enabled;
-            }
-        }
 
         /// <summary>What starts this system's sequences is the system's to walk back.</summary>
         /// <remarks>
@@ -109,17 +111,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// </remarks>
         public override bool HasHistory => true;
 
-        /// <inheritdoc />
-        public override bool CanUndo => Editor.CanUndo(_system);
+        /// <summary>Nothing is walked back while the system may run, as nothing else about it changes then.</summary>
+        public override bool CanUndo => Editable && Editor.CanUndo(_system);
 
         /// <inheritdoc />
         public override string UndoText => Editor.UndoLabel(_system);
 
         /// <inheritdoc />
-        public override bool CanRedo => Editor.CanRedo(_system);
+        public override bool CanRedo => Editable && Editor.CanRedo(_system);
 
         /// <inheritdoc />
         public override string RedoText => Editor.RedoLabel(_system);
+
+        /// <summary>Whether what the system does may be changed now: not while it may run, and not while somebody else holds the editor.</summary>
+        public bool Editable => !_system.Enabled && Editor.Holder == null;
+
+        /// <summary>Why nothing can be changed, said above what it is about; empty while it can.</summary>
+        public string LockedText => Editable
+            ? ""
+            : Editor.Holder != null
+                ? Template.Fill(Editor.Texts.SequenceHeld, "holder", Editor.Holder)
+                : Template.Fill(Editor.Texts.SystemLocked, "name", _system.Name);
 
         /// <inheritdoc />
         public override void Rename(string name)
@@ -152,12 +164,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override void Switch(bool on)
         {
-            var shown = Editor.StandIn(_system);
-            if (shown == null)
-                return;
+            Editor.SwitchSystem(_system, on);
+        }
 
-            shown.Enabled = on;
-            Editor.Invalidate();
+        /// <summary>Offers to switch a changed system on, on the way out.</summary>
+        /// <remarks>
+        /// A system is switched off while it is changed, so a half-written rule never fires, and the cost is somebody
+        /// finishing, walking away and concluding it does not work. Leaving it is the moment that costs one press to put
+        /// right, and moving between its sequences and triggers is not leaving it. Only when something was changed, only
+        /// once per change, and never for a system with nothing in it to run. Dismissing the question is not answering it,
+        /// so pressing back asks again.
+        /// </remarks>
+        public override bool Leaving()
+        {
+            if (_system.Enabled || Editor.Program.Wiring == _quiet || !HasSteps())
+                return true;
+
+            Editor.Ask(Template.Fill(Editor.Texts.SystemSwitchOnQuestion, "name", _system.Name));
+
+            Editor.Answer(Editor.Texts.SystemSwitchItOn, delegate
+            {
+                _quiet = Editor.Program.Wiring;
+                Editor.SwitchSystem(_system, true);
+                Editor.Pop();
+            });
+
+            // The one Enter takes: leaving it off is what pressing back already meant, and the key that gets pressed
+            // without reading must not switch something on.
+            Editor.Answer(Editor.Texts.SystemLeaveItOff, delegate
+            {
+                _quiet = Editor.Program.Wiring;
+                Editor.Pop();
+            }, true);
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -171,7 +211,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             _madeName = _system.Name;
             _madeAbout = _system.Annotation;
-            _madeOn = SwitchIsOn;
+            _madeOn = _system.Enabled;
         }
 
         /// <inheritdoc />
@@ -216,16 +256,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Show(false);
         }
 
-        /// <summary>Gives the ways to add something their presses, keeps the rows by trigger and by sequence, and fills the view.</summary>
+        /// <summary>Keeps the rows by trigger and by sequence, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            _when.Command = Editor.Act(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); });
-            _every.Command = Editor.Act(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Cadences.Default)); });
-
-            // The way to make a sequence without starting from what would start it. Somebody who knows what the
-            // machine should do can write that first and give it a trigger afterwards.
-            _newSequence.Command = Editor.Act(Cmd.NewSequence, delegate { Editor.NewSequence(_system); });
-
             _triggerRows = new Keyed<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
             _sequenceRows = new Keyed<Sequence, StatusRow>(_sequenceList.Children, Own);
 
@@ -256,6 +289,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var through = Editor.StandIn(_system);
             var tick = Editor.CurrentTick;
 
+            if (recount)
+                Stopped(through);
+
             for (var i = 0; i < _triggers.Count; i++)
             {
                 var row = _triggerRows[_triggers[i]];
@@ -265,7 +301,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (recount)
                 {
                     var fault = _runs[i] == null ? SequenceFault.None : Fault(_runs[i], through);
-                    row.Problem = IsStarting(fault) ? SequenceText.Problem(fault) : "";
+                    row.Problem = IsStarting(fault) ? SequenceText.Problem(fault, _runs[i]) : "";
                 }
 
                 row.Show(Editor.World, texts);
@@ -281,7 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (recount)
                 {
                     row.Summary = SequenceText.Doing(Editor.Runner.Bindings, sequence, through);
-                    Mark(row, Fault(sequence, through));
+                    Mark(row, Fault(sequence, through), sequence);
                 }
 
                 row.Show(texts);
@@ -293,11 +329,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             // Walks the triggers' blocks for their names, which is why it runs only when the page is built.
 
             ArrangeUsing(texts);
+            ArrangeLock(texts);
 
             _triggersHeading.Text = texts.SystemTriggers.ToUpperInvariant();
             _triggersHeading.Style = Styles.NextHeading;
             _when.Text = StatusRow.Plus + texts.SystemWhen;
+            _when.Command = Changes(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); });
             _every.Text = StatusRow.Plus + texts.SystemEvery;
+            _every.Command = Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Cadences.Default)); });
 
             _runs.Clear();
             for (var i = 0; i < _triggers.Count; i++)
@@ -310,6 +349,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _sequencesHeading.Text = texts.SystemSequences.ToUpperInvariant();
             _newSequence.Text = StatusRow.Plus + texts.SystemNewSequence;
 
+            // The way to make a sequence without starting from what would start it. Somebody who knows what the
+            // machine should do can write that first and give it a trigger afterwards.
+            _newSequence.Command = Changes(Cmd.NewSequence, delegate { Editor.NewSequence(_system); });
+
             _sequenceRows.Show(_sequences);
             _noSequences.IsVisible = _sequences.Count == 0;
             _noSequences.Text = texts.SystemNoSequences;
@@ -319,8 +362,54 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 // Said before it is done rather than discovered after: the copy having no trigger is the part
                 // somebody would otherwise read as a fault.
                 var sequence = _sequences[i];
-                _sequenceRows[sequence].DuplicateText = sequence.Trigger != null ? texts.SystemCopy : texts.SystemCopyUnstarted;
+                var row = _sequenceRows[sequence];
+                row.DuplicateText = sequence.Trigger != null ? texts.SystemCopy : texts.SystemCopyUnstarted;
             }
+        }
+
+        /// <summary>Hides the ways to add something while the system may run, and says why in their place, with the way to switch it off.</summary>
+        void ArrangeLock(Texts texts)
+        {
+            var editable = Editable;
+
+            _addTriggers.IsVisible = editable;
+            _addSequence.IsVisible = editable;
+
+            _locked.IsVisible = !editable;
+            _lockedText.Text = LockedText;
+            _unlock.IsVisible = Editor.Holder == null;
+            _unlock.Text = texts.SystemSwitchOffToEdit;
+            _unlock.Command = Editor.Act(Cmd.Switch, delegate { Editor.SwitchSystem(_system, false); });
+        }
+
+        /// <summary>Says why Sprocket switched off the system, or the blockset shown, where it did.</summary>
+        void Stopped(SystemInstance through)
+        {
+            var halt = _system.IsBlueprint
+                ? through == null || through.Enabled ? null : through.Halt
+                : _system.Enabled ? null : _system.Halt;
+
+            _halted.IsVisible = halt != null;
+            _halted.Text = halt == null ? "" : SequenceText.Stopped(halt, _system);
+        }
+
+        /// <summary>A command made only while the system may be changed, and null while it may not.</summary>
+        ICommand Changes(Cmd kind, Action action)
+        {
+            return Editable ? Editor.Act(kind, action) : null;
+        }
+
+        /// <summary>Whether any sequence in the system has anything to do.</summary>
+        bool HasSteps()
+        {
+            var sequences = _system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                if (sequences[i].Steps.Count > 0)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Says whose blocks the sentences name: the system's own name for one logic system, and for a blueprint a list of the blocksets made from it, with the way to set up its configuration panel.</summary>
@@ -337,7 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _usingChoice.IsVisible = blueprint && shown != null;
             _editPanel.IsVisible = blueprint;
             _editPanel.Text = texts.SystemEditPanel;
-            _editPanel.Command = blueprint ? Editor.Act(Cmd.EditBlueprint, delegate { Editor.Push(new BlueprintPage(Editor, _system, true)); }) : null;
+            _editPanel.Command = blueprint ? Changes(Cmd.EditBlueprint, delegate { Editor.Push(new BlueprintPage(Editor, _system, true)); }) : null;
 
             if (!blueprint || shown == null)
                 return;
@@ -382,21 +471,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         StatusRow Own(Sequence sequence)
         {
-            // Copying is offered whether or not it is running: a copy is switched off and started by nothing, so making
-            // one cannot disturb what is running. Running it by hand is offered whatever its switch says, because
-            // somebody debugging a sequence parks it so its triggers leave it alone, and that is when running it by
-            // hand is worth most. Throwing one away is not editing it: nothing half-written can result, and the
-            // question asks first.
+            // Copying is offered whether or not the system is on: a copy is started by nothing, so making one cannot
+            // disturb what is running. Running it by hand is offered whatever the switch says, because somebody working
+            // on a system switches it off so its triggers leave it alone, and that is when running a sequence by hand is
+            // worth most. Throwing one away is not editing it: nothing half-written can result, and the question asks
+            // first.
 
             return new StatusRow
             {
                 Opens = Editor.Act(Cmd.OpenSequence, delegate { Editor.Push(new SequencePage(Editor, sequence)); }),
-                Flips = Editor.Act(Cmd.Enable, delegate
-                {
-                    // Built again, because what else the row offers moves with the switch.
-                    sequence.Enabled = !sequence.Enabled;
-                    Editor.Invalidate();
-                }),
                 Copies = Editor.Act(Cmd.DuplicateSequence, delegate { Editor.Duplicate(sequence); }),
                 Runs = Editor.Act(Cmd.RunNow, delegate { Editor.RunNow(sequence); }),
                 Stops = Editor.Act(Cmd.StopNow, delegate { Editor.StopNow(sequence); }),
@@ -416,10 +499,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             row.Running = running != null && running.IsRunning;
             row.JustRan = running != null && running.LastFiredTick >= 0 && tick - running.LastFiredTick < JustRanTicks;
             row.LastRun = TimeText.Ago(SequenceSummary.TicksSinceRun(running, tick));
-            row.SwitchIsOn = sequence.Enabled;
         }
 
-        static void Mark(StatusRow row, SequenceFault fault)
+        static void Mark(StatusRow row, SequenceFault fault, Sequence sequence)
         {
             // News about what starts a sequence goes on the row of the trigger that starts it, and not on the
             // sequence's: a cleared button is the trigger's trouble and the sequence is fine. The warning that nothing
@@ -427,10 +509,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var starting = IsStarting(fault);
 
-            row.Problem = starting ? "" : SequenceText.Problem(fault);
+            row.Problem = starting ? "" : SequenceText.Problem(fault, sequence);
             row.ProblemIsWarning = fault.IsWarning;
             row.Problems = !starting && fault.Exists && !fault.IsWarning ? 1 : 0;
-            row.Parked = fault.Problem == SequenceProblem.SwitchedOff;
         }
 
         static bool IsStarting(SequenceFault fault)
@@ -470,7 +551,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             Doing(row, trigger);
 
-            row.Deletes = Editor.Act(Cmd.DeleteTrigger, delegate { Editor.Forget(_system, trigger); });
+            row.Deletes = Changes(Cmd.DeleteTrigger, delegate { Editor.Forget(_system, trigger); });
         }
 
         static TriggerKind Kind(Trigger trigger)
@@ -509,7 +590,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, true, false);
                 row.Does.Add(new SequenceSlot(trigger.Runs, sequence == null || !sequence.HasName ? "" : sequence.Name,
-                    Editor.Act(Cmd.TriggerTarget, delegate { Editor.ChangeTrigger(_system, trigger, Opening.Nothing, false); })));
+                    Changes(Cmd.TriggerTarget, delegate { Editor.ChangeTrigger(_system, trigger, Opening.Nothing, false); })));
 
                 return;
             }
@@ -531,12 +612,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         ICommand Does(Trigger trigger, Opening opens)
         {
-            return Editor.Act(Cmd.TriggerTarget, delegate { Editor.ChangeTrigger(_system, trigger, opens, true); });
+            return Changes(Cmd.TriggerTarget, delegate { Editor.ChangeTrigger(_system, trigger, opens, true); });
         }
 
         ICommand Starts(Trigger trigger, Opening opens)
         {
-            return Editor.Act(Cmd.OpenTrigger, delegate { Editor.ChangeTrigger(_system, trigger, opens, false); });
+            return Changes(Cmd.OpenTrigger, delegate { Editor.ChangeTrigger(_system, trigger, opens, false); });
         }
 
         void Collect()

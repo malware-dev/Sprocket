@@ -57,7 +57,7 @@ public class UndoTests
     static string Shape(Sequence sequence)
     {
         var text = new StringBuilder();
-        text.Append(sequence.Name).Append(sequence.Enabled ? " [on]" : " [off]");
+        text.Append(sequence.Name);
 
         switch (sequence.Trigger)
         {

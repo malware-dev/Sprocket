@@ -1076,13 +1076,15 @@ It becomes meaningful with slots - when a sequence runs once per one-of-a-system
 one's own doors, which also means a runner per instance-and-sequence rather than per sequence.
 Until then this half of the requirement is blocked on the configurator, not on the editor.
 
-*True today for the other two: `Sequence.Enabled`, `AutomationSystem.Enabled` and
-`Sequence.CanRun` exist, the runner honours them, and both are visible controls - a sequence's
-on its sentence, a system's on both its own screen and its row in the ship's list. The two
-switches are deliberately separate rather than one setting the other, so parking a whole
-system and restoring it leaves a deliberately-parked sequence still parked. A step saying `run`
-that meets a parked sequence is refused and the refusal is counted and shown, which is what keeps
-"no step runs" from being silent. Not built: either of them being programmable.*
+*True today for the other two: `AutomationSystem.Enabled`, `SystemInstance.Enabled` and
+`Sequence.CanRun` exist, the runner honours them, and both are visible controls - a system's on
+its own screen, its sequences' screens and its row in the ship's list, and one of a blueprint's on
+its row. The two switches are deliberately separate rather than one setting the other, so switching
+a whole system off and on leaves one of it deliberately stopped still stopped. Where a sequence
+cannot work, Sprocket switches off the logic system, or for a blueprint the one of it at fault, and
+keeps why - the sequence, step and block - until somebody switches it on again. A step saying `run`
+that meets a sequence that may not run is refused and the refusal is counted and shown, which is
+what keeps "no step runs" from being silent. Not built: either of them being programmable.*
 
 ## From story T - when my miner docks
 

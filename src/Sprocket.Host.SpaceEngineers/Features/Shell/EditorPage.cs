@@ -182,8 +182,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         public virtual void Switch(bool on) { }
 
-        /// <summary>Whether the switch governs everything the subject does, as a system's does, rather than one sequence.</summary>
-        public virtual bool SwitchGovernsAll => true;
+        /// <summary>What pressing the switch would do, said as a note on it, or null for none.</summary>
+        public virtual string SwitchAbout => null;
 
         /// <summary>Whether the subject is running now, which turns the run mark into a stop.</summary>
         public virtual bool IsRunning => false;

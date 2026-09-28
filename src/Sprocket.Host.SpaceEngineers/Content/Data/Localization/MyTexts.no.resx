@@ -72,6 +72,12 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Row.SwitchSystemOff" xml:space="preserve">
     <value>Slå av hele systemet, og stopp hver sekvens i det</value>
   </data>
+  <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
+    <value>Slå på logikksystemene laget fra denne plantegningen</value>
+  </data>
+  <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
+    <value>Slå av hvert logikksystem laget fra denne plantegningen på denne konstruksjonen</value>
+  </data>
 
   <data name="Sprocket.Systems.Title" xml:space="preserve">
     <value>Automasjon for {name}</value>

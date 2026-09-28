@@ -146,15 +146,16 @@ namespace Sprocket.Host.SpaceEngineers.World
                 grid.CustomName = name;
         }
 
-        readonly HashSet<int> _unstartable = new HashSet<int>();
+        readonly HashSet<long> _unstartable = new HashSet<long>();
 
         readonly Dictionary<int, List<string>> _unarranged = new Dictionary<int, List<string>>();
 
-        public void Unstartable(List<int> sequenceIds, Dictionary<int, List<string>> sources)
+        /// <summary>Which sequences nothing can start on which one of their system, each as <see cref="Start" /> gives it, and which sources each has left unarranged.</summary>
+        public void Unstartable(List<long> starts, Dictionary<int, List<string>> sources)
         {
             _unstartable.Clear();
-            for (var i = 0; i < sequenceIds.Count; i++)
-                _unstartable.Add(sequenceIds[i]);
+            for (var i = 0; i < starts.Count; i++)
+                _unstartable.Add(starts[i]);
 
             _unarranged.Clear();
             foreach (var pair in sources)
@@ -174,9 +175,21 @@ namespace Sprocket.Host.SpaceEngineers.World
                 sources.Add(broken[i]);
         }
 
-        public bool CanStart(Sequence sequence)
+        /// <summary>Whether anything on the construct can start <paramref name="sequence" /> on <paramref name="instance" />.</summary>
+        public bool CanStart(Sequence sequence, SystemInstance instance)
         {
-            return _unstartable.Count == 0 || !_unstartable.Contains(sequence.Id);
+            return _unstartable.Count == 0 || !_unstartable.Contains(Start(sequence.Id, instance));
+        }
+
+        /// <summary>One sequence on one of its system, as one number.</summary>
+        /// <remarks>
+        /// Each one of a system answers its triggers with its own blocks, so whether a sequence can be
+        /// started is a question about the pair: a button filled in the front airlock starts the front
+        /// airlock whether or not the port airlock has had its button given yet.
+        /// </remarks>
+        public static long Start(int sequenceId, SystemInstance instance)
+        {
+            return ((long)sequenceId << 32) | (uint)(instance == null ? 0 : instance.Number);
         }
 
         bool _asked;

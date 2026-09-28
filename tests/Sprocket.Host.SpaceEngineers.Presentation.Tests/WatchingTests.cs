@@ -39,7 +39,7 @@ public class WatchingTests
         Assert.False(screen.Shows("+ Action…"), "add button still offered while locked");
         Assert.Equal(adders, screen.TopOf(screen.Text(editor.Sentence().LockedText)), 3);
 
-        editor.SwitchSequence(false);
+        editor.SwitchSystem(false);
         screen.Run(5);
 
         Assert.Equal(parked, Places(screen));

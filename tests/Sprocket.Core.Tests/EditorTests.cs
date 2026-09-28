@@ -536,15 +536,15 @@ public class EditorTests
     }
 
     /// <summary>
-    /// A system's switch and a sequence's switch are separate, and both have to hold.
+    /// A system's switch and the switch of one of it are separate, and both have to hold.
     /// </summary>
     /// <remarks>
-    /// Parking a whole airlock to weld on it, and then starting it again, must not quietly
-    /// arm the one sequence somebody had deliberately left off. Those are two different
-    /// intentions and neither may overwrite the other.
+    /// Stopping a whole airlock to rewire it, and then starting it again, must not quietly start
+    /// the one of it somebody had deliberately left off. Those are two different intentions and
+    /// neither may overwrite the other.
     /// </remarks>
     [Fact]
-    public void ParkingAMachineDoesNotForgetWhichSequencesWereAlreadyParked()
+    public void SwitchingASystemDoesNotForgetWhichOfItWasOff()
     {
         var ship = Build();
         var editor = ship.Editor;
@@ -554,30 +554,27 @@ public class EditorTests
         ship.Tick();
 
         var sequence = ship.Automation.Sequences[0];
-        Assert.True(sequence.CanRun(sequence.System.First));
+        var one = sequence.System.First!;
+        Assert.True(sequence.CanRun(one));
 
-        // Deliberately park this one sequence.
-        editor.SwitchSequence(false);
+        // Deliberately stop this one of it.
+        one.Enabled = false;
         ship.Tick();
-        Assert.False(sequence.CanRun(sequence.System.First));
+        Assert.False(sequence.CanRun(one));
 
-        editor.SwitchOn();
-        ship.Tick();
-        Assert.True(sequence.CanRun(sequence.System.First));
-
-        // Now park the whole system from its own screen.
+        // Now the whole system, from its own screen, off and on again.
         editor.Back();
         ship.Tick();
         Assert.True(editor.Screen.HasSwitch);
 
         editor.Screen.Flip!.Execute();
         ship.Tick();
-        Assert.False(sequence.CanRun(sequence.System.First));
-        Assert.True(sequence.Enabled);
+        Assert.False(sequence.System.Enabled);
 
         editor.Screen.Flip!.Execute();
         ship.Tick();
-        Assert.True(sequence.CanRun(sequence.System.First));
+        Assert.True(sequence.System.Enabled);
+        Assert.False(sequence.CanRun(one));
     }
 
     /// <summary>
@@ -793,10 +790,10 @@ public class EditorTests
 
         Assert.Equal(2, editor.StepRows().Count);
 
-        Assert.True(ship.Automation.Sequences[0].Enabled == false);
+        Assert.False(ship.Automation.Systems[0].Enabled);
         toggle!.Execute();
         ship.Tick();
-        Assert.True(ship.Automation.Sequences[0].Enabled);
+        Assert.True(ship.Automation.Systems[0].Enabled);
     }
 
     /// <summary>Narrowing a list keeps what comes after it: the box being typed into, the kinds, and the next column's rows.</summary>
@@ -889,12 +886,10 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.SwitchOn();
         ship.Tick();
 
         var system = ship.Automation.Systems[0];
         var sequence = ship.Automation.Sequences[0];
-        Assert.True(sequence.CanRun(sequence.System.First));
 
         editor.Back();
         ship.Tick();
@@ -905,6 +900,10 @@ public class EditorTests
         editor.Name("Front Airlock");
         ship.Tick();
         Assert.Equal("Front Airlock", system.Name);
+
+        editor.SwitchOn();
+        ship.Tick();
+        Assert.True(sequence.CanRun(sequence.System.First));
 
         editor.Back();
         ship.Tick();
@@ -919,46 +918,25 @@ public class EditorTests
         heading.Flips!.Execute();
         ship.Tick();
 
-        Assert.False(system.First!.Enabled);
+        Assert.False(system.Enabled);
+        Assert.True(system.First!.Enabled);
         Assert.False(sequence.CanRun(sequence.System.First));
-        Assert.True(sequence.Enabled);
         Assert.False(editor.RootRows()
             .First(e => e.Depth == 0 && !e.IsAction).SwitchIsOn);
     }
 
-    /// <summary>
-    /// A thing can be stopped from wherever it is listed, at every level.
-    /// </summary>
-    /// <remarks>
-    /// A system on the ship's list, a sequence on its system's list, and a sequence on its own
-    /// screen. Having it at two of those three and not the middle one was an accident of the
-    /// order they were built in.
-    /// </remarks>
+    /// <summary>A sequence's row has no switch: the system's is the one switch for everything in it.</summary>
     [Fact]
-    public void ASequenceCanBeStoppedFromItsSystemsScreen()
+    public void ASequenceRowHasNoSwitchOfItsOwn()
     {
         var ship = Build();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.SwitchOn();
-        ship.Tick();
-
-        var sequence = ship.Automation.Sequences[0];
-        Assert.True(sequence.Enabled);
-
         editor.Back();
         ship.Tick();
 
-        var row = editor.Rows()[0];
-        Assert.NotNull(row.Flips);
-        Assert.True(row.SwitchIsOn);
-
-        row.Flips!.Execute();
-        ship.Tick();
-
-        Assert.False(sequence.Enabled);
-        Assert.False(editor.Rows()[0].SwitchIsOn);
+        Assert.Null(editor.Rows()[0].Flips);
     }
 
     /// <summary>
@@ -1097,29 +1075,34 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Leaving a sequence somebody built and left switched off offers to switch it on.
+    /// Leaving a system somebody changed and left switched off offers to switch it on.
     /// </summary>
     /// <remarks>
-    /// A sequence is parked while it is being built, so the way this fails is silent: somebody
+    /// A system is switched off while it is changed, so the way this fails is silent: somebody
     /// finishes, walks away, and concludes the whole thing does not work. Leaving is the last moment
     /// they are still thinking about it and the first at which one press puts it right.
     /// </remarks>
     [Fact]
-    public void LeavingASequenceThatIsOffOffersToSwitchItOn()
+    public void LeavingASystemThatIsOffOffersToSwitchItOn()
     {
         var ship = Built();
+
+        // Moving from a sequence to its system asks nothing: that is not leaving the system.
+        ship.Editor.Back();
+        ship.Tick();
+        Assert.Equal("", ship.Editor.Question());
 
         ship.Editor.Back();
         ship.Tick();
 
-        Assert.Equal("Switch this sequence on?", ship.Editor.Question());
+        Assert.Equal("Switch Airlock on?", ship.Editor.Question());
         Assert.True(ship.Editor.HasAnswer("Switch it on"));
         Assert.True(ship.Editor.HasAnswer("Leave it off"));
 
         ship.Editor.PressAnswer("Switch it on");
         ship.Tick();
 
-        Assert.True(ship.Automation.Sequences[0].Enabled);
+        Assert.True(ship.Automation.Systems[0].Enabled);
     }
 
     /// <summary>
@@ -1136,13 +1119,15 @@ public class EditorTests
 
         ship.Editor.Back();
         ship.Tick();
+        ship.Editor.Back();
+        ship.Tick();
         ship.Editor.PressAnswer("Leave it off");
         ship.Tick();
 
-        Assert.False(ship.Automation.Sequences[0].Enabled);
+        Assert.False(ship.Automation.Systems[0].Enabled);
 
-        // Straight back in and out again, having touched nothing. Leaving landed on the system's
-        // own screen, where the sequences are listed, so going back in is one press.
+        // Straight back in and out again, having touched nothing. Leaving landed on the home page,
+        // where the systems are listed, so going back in is one press.
         ship.Editor.PressRow(0);
         ship.Tick();
         ship.Editor.Back();
@@ -1153,7 +1138,11 @@ public class EditorTests
         // Now change something, and it is worth asking again.
         ship.Editor.PressRow(0);
         ship.Tick();
+        ship.Editor.PressRow(0);
+        ship.Tick();
         ship.Editor.Name("Let me out");
+        ship.Tick();
+        ship.Editor.Back();
         ship.Tick();
         ship.Editor.Back();
         ship.Tick();
@@ -1166,13 +1155,15 @@ public class EditorTests
     /// </summary>
     /// <remarks>
     /// Backing out of "switch this on?" says "I did not mean to leave", which is neither answer - so
-    /// the sequence stays open, stays off, and the question is not spent.
+    /// the system stays open, stays off, and the question is not spent.
     /// </remarks>
     [Fact]
     public void DismissingTheQuestionIsNotAnswering()
     {
         var ship = Built();
 
+        ship.Editor.Back();
+        ship.Tick();
         ship.Editor.Back();
         ship.Tick();
         Assert.True(ship.Editor.HasAnswer("Switch it on"));
@@ -1182,7 +1173,7 @@ public class EditorTests
 
         // Still here, still off, and still worth asking about.
         Assert.Equal("", ship.Editor.Question());
-        Assert.False(ship.Automation.Sequences[0].Enabled);
+        Assert.False(ship.Automation.Systems[0].Enabled);
 
         ship.Editor.Back();
         ship.Tick();
@@ -1218,27 +1209,16 @@ public class EditorTests
         Assert.NotSame(before, after);
     }
 
-    /// <summary>Nothing that cannot run is offered, since that is why it is off.</summary>
-    [Fact]
-    public void ABrokenSequenceIsNotOfferedToSwitchOn()
-    {
-        var ship = Built();
-        ship.Rig.CannotStart(ship.Automation.Sequences[0]);
-
-        ship.Editor.Back();
-        ship.Tick();
-
-        Assert.False(ship.Editor.HasAnswer("Switch it on"));
-    }
-
     /// <summary>Nothing built yet is not something to be nagged about.</summary>
     [Fact]
-    public void ASequenceWithNoStepsIsNotOffered()
+    public void ASystemWithNoStepsIsNotOffered()
     {
         var ship = Build();
         StartOnTheButton(ship.Editor);
         ship.Tick();
 
+        ship.Editor.Back();
+        ship.Tick();
         ship.Editor.Back();
         ship.Tick();
 
@@ -1490,7 +1470,7 @@ public class EditorTests
         editor.PressPrimary();
         ship.Tick();
 
-        Assert.False(ship.Automation.Sequences[0].Enabled);
+        Assert.False(ship.Automation.Systems[0].Enabled);
 
         var run = editor.Screen.Runs;
         Assert.NotNull(run);
@@ -1501,7 +1481,7 @@ public class EditorTests
         Assert.Contains("Airlock Light:on", ship.Log);
 
         // And it says what is happening rather than what is allowed to: the switch is still off.
-        Assert.False(ship.Automation.Sequences[0].Enabled);
+        Assert.False(ship.Automation.Systems[0].Enabled);
     }
 
     /// <summary>
@@ -1570,9 +1550,8 @@ public class EditorTests
         editor.PressPrimary();
         editor.Back();
 
-        // Sampled only while they may run, which is what the switch on each row is for.
-        foreach (var sequence in ship.Automation.Sequences)
-            sequence.Enabled = true;
+        // Sampled only while they may run, which is what the system's switch is for.
+        ship.Automation.Systems[0].Enabled = true;
 
         Door(ship, "Inner Door").ForceOpen();
         ship.Tick(Rota.Ten);

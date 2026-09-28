@@ -13,11 +13,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Label _usingName;
         HStack _usingChoice;
         Button _editPanel;
+        Label _halted;
+        HStack _locked;
+        Label _lockedText;
+        Button _unlock;
         Label _triggersHeading;
+        VStack _addTriggers;
         Button _when;
         Button _every;
         VStack _triggerList;
         Label _sequencesHeading;
+        VStack _addSequence;
         Button _newSequence;
         Label _noSequences;
         VStack _sequenceList;
@@ -44,6 +50,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         }
                     }.As(out _using),
 
+                    // Why Sprocket switched it off, said before anything it is about.
+                    new Label { Style = Styles.Caution, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _halted),
+
+                    // Why nothing below can be changed, and the way to change that, said before any of it.
+                    new HStack
+                    {
+                        Spacing = 8f,
+                        Padding = new Thickness(4f, 0f, 0f, 8f),
+                        IsVisible = false,
+                        Children =
+                        {
+                            new Label { Style = Styles.Aside }.As(out _lockedText),
+                            new Button { Style = Styles.Button }.As(out _unlock)
+                        }
+                    }.As(out _locked),
+
                     // Named, because this screen holds two lists of different things and the rows in them read
                     // alike: the ways to add something on top, then what is already here, twice over.
                     new Label { Style = Styles.Heading }.As(out _triggersHeading),
@@ -62,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                             },
                             new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }
                         }
-                    },
+                    }.As(out _addTriggers),
                     new VStack { Spacing = 8f }.As(out _triggerList),
 
                     new Label { Style = Styles.NextHeading }.As(out _sequencesHeading),
@@ -73,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                             new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } },
                             new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }
                         }
-                    },
+                    }.As(out _addSequence),
                     new Label { Style = Styles.Empty, Wraps = true }.As(out _noSequences),
                     new VStack { Spacing = 8f }.As(out _sequenceList)
                 }

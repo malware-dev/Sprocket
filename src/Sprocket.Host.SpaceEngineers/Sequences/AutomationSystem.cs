@@ -26,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Trigger> _triggers = new List<Trigger>();
         DateTime? _changed;
         int _lastSequence;
+        bool _enabled = true;
 
         /// <summary>Told whenever a sequence or one of this system comes or goes. See <see cref="Automation.Reshaped" />.</summary>
         internal Action Reshaped;
@@ -44,6 +45,23 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Name = "";
             Annotation = "";
         }
+
+        /// <summary>Whether the system may run, which is also what keeps what it does from being changed while it does.</summary>
+        /// <remarks>One switch for everything the system does. Switching it on forgets why Sprocket switched it off.</remarks>
+        public bool Enabled
+        {
+            get { return _enabled; }
+            set
+            {
+                if (value)
+                    Halt = null;
+
+                _enabled = value;
+            }
+        }
+
+        /// <summary>Why Sprocket switched the system off because it could not work, or null where it did not.</summary>
+        public Halt Halt { get; set; }
 
         /// <summary>
         /// A handle for this session only.

@@ -37,7 +37,7 @@ public class StartingTests
 
         Assert.Single(screen.Editor.Program.Sequences);
         Assert.Equal("Sequence 1", screen.Ended);
-        Assert.False(screen.Editor.Program.Sequences[0].Enabled);
+        Assert.False(screen.Editor.Program.Systems[0].Enabled);
         Assert.Null(screen.Editor.Program.Sequences[0].Trigger);
     }
 
@@ -75,10 +75,8 @@ public class StartingTests
     {
         var screen = WithOne();
 
-        // Leaving a sequence with steps offers to switch it on. Not now: what it is missing is
-        // something to start it.
+        // Leaving a sequence for its system asks nothing, since that is not leaving the system.
         screen.Editor.Back();
-        screen.Editor.PressAnswer("Leave it off");
         screen.Run(120);
 
         // The row for it says the same thing, one screen out.
@@ -94,8 +92,7 @@ public class StartingTests
         Assert.NotNull(screen.Editor.Program.Sequences[0].Trigger);
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
 
-        // Mended. What the row says now is that it is switched off, which is the next thing to do
-        // about it and not the thing that was wrong.
+        // Mended.
         Assert.NotEqual("Nothing starts this yet.", screen.Editor.Rows()[0].Problem);
     }
 }

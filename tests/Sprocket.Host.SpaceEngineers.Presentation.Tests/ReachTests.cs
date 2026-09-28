@@ -61,12 +61,12 @@ public class ReachTests
         // carries no command, so pressing one has never done anything but work its switch.
         var sequence = Switchable(root);
         Assert.NotNull(sequence.Opens);
-        Assert.True(sequence.SwitchIsOn);
+        Assert.False(sequence.SwitchIsOn);
 
         var was = root.Ended;
         var name = root.Text(sequence.Summary);
         var on = root.Drawings.First(d =>
-            d.IsText && d.Text == "ON" && Math.Abs(d.At.Y - name.At.Y) < name.Scale * 30f);
+            d.IsText && d.Text == "OFF" && Math.Abs(d.At.Y - name.At.Y) < name.Scale * 30f);
 
         root.Do(At(Screen.Ui(on.At.X, on.At.Y)));
 
@@ -74,7 +74,7 @@ public class ReachTests
         // for rather than the moment a switch is thrown.
         root.Run(1);
 
-        Assert.False(Switchable(root).SwitchIsOn);
+        Assert.True(Switchable(root).SwitchIsOn);
         Assert.Equal(was, root.Ended);
     }
 

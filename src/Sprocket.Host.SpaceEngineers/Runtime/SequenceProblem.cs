@@ -88,17 +88,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         NothingStarts,
 
-        /// <summary>
-        /// It is switched off, so nothing starts it however right the rest of it is.
-        /// </summary>
-        /// <remarks>
-        /// <b>A warning rather than a fault</b>, and the one that is deliberate: switching a sequence
-        /// off is how somebody stops it happening while they work on it. It is still the likeliest
-        /// reason a button does nothing, and the switch is on a different screen from the button that
-        /// was pressed, so a row that only reported its state in the column where every row reports
-        /// something said it too quietly to be found by somebody who did not already suspect it.
-        /// </remarks>
-        SwitchedOff,
+        /// <summary>A slot it uses, and may not do without, is empty in the one of its system it runs on.</summary>
+        EmptySlot,
 
         /// <summary>
         /// Everything it names is here, but at least one of them was found by a weaker key.

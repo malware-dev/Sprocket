@@ -179,18 +179,20 @@ namespace Sprocket.Sim.Driving
         public static void PressStart(this SprocketEditor editor, string label) => PressButton(editor, label);
 
         /// <summary>
-        /// Switches a sequence on, which a new one is not.
+        /// Switches on the logic system the editor is in, which a new one is not.
         /// </summary>
         /// <remarks>
-        /// Building and running are separate acts. A sequence is parked while it is written, both
-        /// so a half-built one never fires and so its own switch is what makes it safe to edit.
+        /// Building and running are separate acts. A system is switched off while it is written, both
+        /// so a half-built one never fires and so its switch is what makes it safe to edit.
         /// </remarks>
-        public static void SwitchOn(this SprocketEditor editor) => SwitchSequence(editor, true);
+        public static void SwitchOn(this SprocketEditor editor) => SwitchSystem(editor, true);
 
-        /// <summary>Switches the sequence the editor is on to <paramref name="on" />, pressing its switch only where it says otherwise.</summary>
-        public static void SwitchSequence(this SprocketEditor editor, bool on)
+        /// <summary>Switches the logic system the editor is in to <paramref name="on" />, from its own screen or a sequence's, pressing the switch only where it says otherwise.</summary>
+        public static void SwitchSystem(this SprocketEditor editor, bool on)
         {
-            _ = editor.Sentence();
+            if (editor.Current is not SequencePage && editor.Current is not LogicSystemPage)
+                throw new InvalidOperationException($"'{editor.Screen.Title()}' is not in a logic system.");
+
             if (editor.Screen.SwitchIsOn != on)
                 editor.Screen.Flip!.Execute();
         }

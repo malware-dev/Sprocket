@@ -23,7 +23,7 @@ on screen     Sequence 1
 016  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 017  SetClip    {X:256 Y:118 W:1408 H:902}
 018  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
-019  Text       at {X:280 Y:115.6399} scale 0.694  #F0AC28FF  "This is switched off, so nothing starts it on its own."
+019  Text       at {X:280 Y:115.6399} scale 0.694  #A2C3CDFF  "switched off"
 020  Sprite     Sprocket_Fill         {X:280 Y:170 W:3 H:3}  #85A1A9FF
 021  Sprite     Sprocket_Fill         {X:280 Y:176 W:3 H:3}  #85A1A9FF
 022  Sprite     Sprocket_Fill         {X:280 Y:182 W:3 H:3}  #85A1A9FF

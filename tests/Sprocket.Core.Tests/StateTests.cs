@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Storage;
@@ -39,37 +41,47 @@ public class StateTests
         Assert.Equal("", StateText.Save(Ship(), null));
     }
 
+    /// <summary>What is off is written and read back, with why where Sprocket switched it off.</summary>
     [Fact]
-    public void WhatIsOffIsWrittenAndReadBack()
+    public void WhatIsOffAndWhyIsWrittenAndReadBack()
     {
         var before = Ship();
-        before.Systems[0].Sequences[1].Enabled = false;
+        before.Systems[0].Enabled = false;
+        before.Systems[0].Halt = new Halt(SequenceProblem.MissingTarget, 2, 3, null, "Airlock 1 Outer Door");
         before.Systems[0].Instances[1].Enabled = false;
+        before.Systems[0].Instances[1].Halt = new Halt(SequenceProblem.EmptySlot, 1, -1, null, "Inner Door");
 
         var text = StateText.Save(before, null);
         Assert.Equal(
-            "off \"" + Airlock + "\" sequence 2\n" +
-            "off \"" + Airlock + "\" instance 2\n",
+            "off \"" + Airlock + "\" \"block gone\" sequence 2 step 3 block \"Airlock 1 Outer Door\"\n" +
+            "off \"" + Airlock + "\" instance 2 \"slot empty\" sequence 1 block \"Inner Door\"\n",
             text);
 
         var after = Ship();
         Assert.Equal("", StateText.Load(text, after, null));
 
-        Assert.True(after.Systems[0].Sequences[0].Enabled);
-        Assert.False(after.Systems[0].Sequences[1].Enabled);
-        Assert.True(after.Systems[0].Instances[0].Enabled);
-        Assert.False(after.Systems[0].Instances[1].Enabled);
+        var system = after.Systems[0];
+        Assert.False(system.Enabled);
+        Assert.Equal(SequenceProblem.MissingTarget, system.Halt!.Problem);
+        Assert.Equal(2, system.Halt!.Sequence);
+        Assert.Equal(3, system.Halt!.Step);
+        Assert.Equal("Airlock 1 Outer Door", system.Halt!.Block);
+        Assert.True(system.Instances[0].Enabled);
+        Assert.False(system.Instances[1].Enabled);
+        Assert.Equal(SequenceProblem.EmptySlot, system.Instances[1].Halt!.Problem);
+        Assert.Equal("Inner Door", system.Instances[1].Halt!.Block);
     }
 
-    /// <summary>A whole system switched off by its identity alone is every one of it switched off.</summary>
+    /// <summary>A system switched off by its identity alone is its own switch, and leaves each one's switch and each sequence as they were.</summary>
     [Fact]
-    public void AWholeSystemSwitchedOffIsEveryOneOfItOff()
+    public void AWholeSystemSwitchedOffIsItsOwnSwitch()
     {
         var after = Ship();
         Assert.Equal("", StateText.Load("off \"" + Airlock + "\"\n", after, null));
 
-        Assert.All(after.Systems[0].Instances, instance => Assert.False(instance.Enabled));
-        Assert.True(after.Systems[0].Sequences[0].Enabled);
+        Assert.False(after.Systems[0].Enabled);
+        Assert.All(after.Systems[0].Instances, instance => Assert.True(instance.Enabled));
+        Assert.Null(after.Systems[0].Halt);
     }
 
     /// <summary>
@@ -88,8 +100,32 @@ public class StateTests
         var after = Ship();
         Assert.Equal("", StateText.Load(line + "\n", after, null));
 
-        Assert.True(after.Systems[0].Sequences[1].Enabled);
+        Assert.True(after.Systems[0].Enabled);
         Assert.True(after.Systems[0].Instances[1].Enabled);
+    }
+
+    /// <summary>A line naming a sequence switches nothing, since a sequence has no switch of its own.</summary>
+    [Fact]
+    public void ALineForASequenceSwitchesNothing()
+    {
+        var after = Ship();
+        Assert.Equal("", StateText.Load("off \"" + Airlock + "\" sequence 2\n", after, null));
+
+        Assert.True(after.Systems[0].Enabled);
+        Assert.All(after.Systems[0].Instances, instance => Assert.True(instance.Enabled));
+    }
+
+    /// <summary>A reason this version cannot read is kept as one not known, and said shortly.</summary>
+    [Fact]
+    public void AReasonNotKnownIsSaidShortly()
+    {
+        var after = Ship();
+        Assert.Equal("", StateText.Load("off \"" + Airlock + "\" \"something new\"\n", after, null));
+
+        var system = after.Systems[0];
+        Assert.False(system.Enabled);
+        Assert.Equal(SequenceProblem.None, system.Halt!.Problem);
+        Assert.Equal("Stopped for an unknown reason.", SequenceText.Stopped(system.Halt, system));
     }
 
     [Theory]
@@ -130,7 +166,7 @@ public class StateTests
         var program = Ship();
         Assert.NotEqual("", StateText.Load("off \"" + Airlock + "\" " + tail + "\n", program, null));
 
-        Assert.True(program.Systems[0].Sequences[0].Enabled);
+        Assert.True(program.Systems[0].Enabled);
         Assert.True(program.Systems[0].Instances[0].Enabled);
     }
 
@@ -141,7 +177,8 @@ public class StateTests
     public void TheProgramSaysNothingAboutSwitches()
     {
         var program = Ship();
-        program.Systems[0].Sequences[0].Enabled = false;
+        program.Systems[0].Enabled = false;
+        program.Systems[0].Halt = new Halt(SequenceProblem.NeverTriggered, 1, -1, null, null);
         program.Systems[0].Instances[0].Enabled = false;
 
         var text = ProgramText.Save(program, new Values());
@@ -152,7 +189,8 @@ public class StateTests
         // And a program read without its switches is a construct with everything running.
         var after = new Automation();
         Assert.Equal("", ProgramText.Load(text, after, new Values()));
-        Assert.True(after.Systems[0].Sequences[0].Enabled);
+        Assert.True(after.Systems[0].Enabled);
+        Assert.Null(after.Systems[0].Halt);
         Assert.True(after.Systems[0].Instances[0].Enabled);
     }
 }

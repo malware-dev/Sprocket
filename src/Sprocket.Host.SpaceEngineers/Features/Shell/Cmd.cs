@@ -38,9 +38,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         TriggerTarget,
         DeleteTrigger,
 
-        // A sequence.
-        Enable,
+        // A logic system's switch, and one of a blueprint's.
+        EnableSystem,
         EnableInstance,
+
+        // A sequence.
         DeleteSequence,
         DuplicateSequence,
         RunNow,

@@ -339,45 +339,83 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Switches off anything that cannot work.
+        /// Switches off what cannot work, with why: a logic system as a whole, and one of a blueprint's on its own.
         /// </summary>
         /// <remarks>
         /// On the world's rota every hundred ticks, and whether or not anybody has a screen open,
         /// because a sequence that cannot work is not made safer by nobody looking at it.
         /// <para>
-        /// Sprocket switching off somebody's automation, which it does nowhere else, and the reason it
-        /// is allowed here is that there is nothing to switch off: the thing is already not running.
-        /// A sequence nothing can start never fires, and one whose blocks are gone can only get part
-        /// way through - which is worse than not starting, because it leaves a machine half-way.
+        /// A sequence nothing can start never fires, and one whose blocks are gone can only get part way
+        /// through - which is worse than not starting, because it leaves a machine half-way. The switch that
+        /// goes off is the one a person sees, so nothing is stopped behind a switch that says on; and one of a
+        /// blueprint's goes off alone, so the port airlock missing a door leaves the front one working.
         /// </para>
         /// <para>
-        /// It also saves a step. A sequence may only be edited while it is switched off, so a broken
-        /// one is ready to mend the moment somebody finds it.
-        /// </para>
-        /// <para>
-        /// <b>Off, and never back on.</b> Mending it leaves it parked, and switching a sequence on is
-        /// somebody's decision every time - Sprocket starting a machine on its own judgement is the one
-        /// direction that can hurt. Leaving the editor with it off is where the offer to switch it on
-        /// belongs.
+        /// <b>Never switched back on by Sprocket.</b> Mending it leaves it off, and starting it again is
+        /// somebody's decision - Sprocket starting a machine on its own judgement is the one direction that
+        /// can hurt.
         /// </para>
         /// </remarks>
         void ParkBroken(int tick)
         {
-            var sequences = _automation.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
+            var systems = _automation.Systems;
+            for (var i = 0; i < systems.Count; i++)
             {
-                Sequence sequence = sequences[i];
-                if (!sequence.Enabled)
+                AutomationSystem system = systems[i];
+                if (!system.Enabled)
                     continue;
 
-                // Faults only. A sequence nothing starts yet is not broken, and parking it would make
-                // the step somebody is about to point at it fail for a second reason.
-                var fault = SequenceSummary.Fault(_world, Bindings, sequence, Get(sequence),
-                    sequence.System == null ? null : sequence.System.First);
+                if (!system.IsBlueprint)
+                {
+                    var halt = Broken(system, system.First);
+                    if (halt != null)
+                    {
+                        system.Enabled = false;
+                        system.Halt = halt;
+                    }
 
-                if (fault.Parks)
-                    sequence.Enabled = false;
+                    continue;
+                }
+
+                var instances = system.Instances;
+                for (var n = 0; n < instances.Count; n++)
+                {
+                    if (!instances[n].Enabled)
+                        continue;
+
+                    var halt = Broken(system, instances[n]);
+                    if (halt == null)
+                        continue;
+
+                    instances[n].Enabled = false;
+                    instances[n].Halt = halt;
+                }
             }
+        }
+
+        /// <summary>Why <paramref name="system" /> cannot work on <paramref name="instance" />, or null where it can.</summary>
+        /// <remarks>
+        /// Faults only. A sequence nothing starts yet is not broken, and switching it off would make the step somebody is
+        /// about to point at it fail for a second reason.
+        /// </remarks>
+        Halt Broken(AutomationSystem system, SystemInstance instance)
+        {
+            var sequences = system.Sequences;
+            for (var q = 0; q < sequences.Count; q++)
+            {
+                var fault = SequenceSummary.Fault(_world, Bindings, sequences[q], Get(sequences[q], instance), instance);
+                if (!fault.Parks)
+                    continue;
+
+                var block = fault.Which == null ? null
+                    : system.FindPart(fault.Which) != null && fault.Problem == SequenceProblem.EmptySlot
+                        ? system.FindPart(fault.Which).Label
+                        : _automation.Called(fault.Which, _world.Values);
+
+                return new Halt(fault.Problem, sequences[q].Number, fault.Step, fault.Because, block);
+            }
+
+            return null;
         }
     }
 }

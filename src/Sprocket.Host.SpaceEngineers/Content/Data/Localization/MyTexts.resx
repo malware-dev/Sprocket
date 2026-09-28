@@ -95,6 +95,14 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Switch the whole system off, stopping every sequence in it</value>
     <comment>Note on a logic system's switch when it is on.</comment>
   </data>
+  <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
+    <value>Switch on the logic systems made from this blueprint</value>
+    <comment>Note on a blueprint's switch when it is off. Each of them runs where its own switch is on.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
+    <value>Switch off every logic system made from this blueprint on this construct</value>
+    <comment>Note on a blueprint's switch when it is on.</comment>
+  </data>
 
   <data name="Sprocket.Systems.Title" xml:space="preserve">
     <value>Automation for {name}</value>
@@ -279,10 +287,6 @@ Press to rename it.</value>
     <value>Wait…</value>
     <comment>Button under a sequence's steps, after a plus that means add, that adds a step waiting a length of time. The ellipsis says it asks how long before it adds.</comment>
   </data>
-  <data name="Sprocket.Sequence.Locked" xml:space="preserve">
-    <value>Switched on. Switch it off to make changes.</value>
-    <comment>Said in place of the buttons that add steps while the sequence is switched on.</comment>
-  </data>
   <data name="Sprocket.Sequence.Held" xml:space="preserve">
     <value>Read only while {holder} edits it.</value>
     <comment>Said in place of the buttons that add steps while another player is editing. {holder} is that player's name.</comment>
@@ -310,18 +314,6 @@ Press to rename it.</value>
   <data name="Sprocket.Sequence.SkippedBoth" xml:space="preserve">
     <value>skipped {busy}x while busy, {off}x while off</value>
     <comment>The two above at once.</comment>
-  </data>
-  <data name="Sprocket.Sequence.SwitchOnQuestion" xml:space="preserve">
-    <value>Switch this sequence on?</value>
-    <comment>Asked on leaving a sequence that was changed and is still switched off.</comment>
-  </data>
-  <data name="Sprocket.Sequence.SwitchItOn" xml:space="preserve">
-    <value>Switch it on</value>
-    <comment>The answer that switches the sequence on.</comment>
-  </data>
-  <data name="Sprocket.Sequence.LeaveItOff" xml:space="preserve">
-    <value>Leave it off</value>
-    <comment>The answer that leaves the sequence switched off.</comment>
   </data>
   <data name="Sprocket.Sequence.WaitQuestion" xml:space="preserve">
     <value>How long should it wait?</value>
@@ -624,6 +616,46 @@ Press to rename it.</value>
   <data name="Sprocket.Blueprint.NoneFits" xml:space="preserve">
     <value>Nothing on this construct can fill it.</value>
     <comment>Where no block on the construct can fill a part.</comment>
+  </data>
+  <data name="Sprocket.System.Locked" xml:space="preserve">
+    <value>{name} is switched on.</value>
+    <comment>Said in place of the buttons that change a logic system, or a sequence in it, while it is switched on. {name} is the logic system's name.</comment>
+  </data>
+  <data name="Sprocket.System.SwitchOffToEdit" xml:space="preserve">
+    <value>Switch it off to edit</value>
+    <comment>Button beside the words above, that switches the logic system off so it can be changed.</comment>
+  </data>
+  <data name="Sprocket.System.SwitchOnQuestion" xml:space="preserve">
+    <value>Switch {name} on?</value>
+    <comment>Asked on leaving a logic system that was changed and is still switched off. {name} is its name.</comment>
+  </data>
+  <data name="Sprocket.System.SwitchItOn" xml:space="preserve">
+    <value>Switch it on</value>
+    <comment>The answer that switches the logic system on.</comment>
+  </data>
+  <data name="Sprocket.System.LeaveItOff" xml:space="preserve">
+    <value>Leave it off</value>
+    <comment>The answer that leaves the logic system switched off.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.SwitchOffQuestion" xml:space="preserve">
+    <value>Switch off the {name} blueprint?</value>
+    <comment>Asked before a blueprint is switched off. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.SwitchOffStops" xml:space="preserve">
+    <value>This stops every logic system made from it on this construct: {names}.</value>
+    <comment>Under the question above. {names} lists the logic systems made from the blueprint.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.KeepRunning" xml:space="preserve">
+    <value>Keep them running</value>
+    <comment>The answer that leaves the blueprint switched on.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.SwitchThemOff" xml:space="preserve">
+    <value>Switch them off</value>
+    <comment>The answer that switches the blueprint off.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.SwitchOffRunning" xml:space="preserve">
+    <value>Anything running now stops where it is.</value>
+    <comment>Warning on the answer that switches a blueprint off, while any of its logic systems is running.</comment>
   </data>
   <data name="Sprocket.Prompt.Continue" xml:space="preserve">
     <value>Continue</value>

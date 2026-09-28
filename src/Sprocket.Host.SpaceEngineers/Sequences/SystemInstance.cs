@@ -21,6 +21,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class SystemInstance
     {
+        bool _enabled;
+
         public SystemInstance(int number)
         {
             Number = number;
@@ -47,15 +49,26 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// Whether this one may run, independently of the others.
         /// </summary>
         /// <remarks>
-        /// The third switch, and the one somebody actually reaches for: welding on the port
-        /// airlock should stop the port airlock, not both of them and not every rule in the
-        /// system one at a time.
+        /// Welding on the port airlock should stop the port airlock, not every airlock made from the
+        /// same blueprint.
         ///
-        /// Separate from the system's switch and from each sequence's, and each has to survive
-        /// the others. Stopping the whole system to work on it and starting it again must
-        /// leave a deliberately-parked one still parked.
+        /// Separate from the system's switch, and each has to survive the other. Stopping the whole
+        /// system to work on it and starting it again must leave a deliberately stopped one stopped.
         /// </remarks>
-        public bool Enabled { get; set; }
+        public bool Enabled
+        {
+            get { return _enabled; }
+            set
+            {
+                if (value)
+                    Halt = null;
+
+                _enabled = value;
+            }
+        }
+
+        /// <summary>Why Sprocket switched this one off because it could not work, or null where it did not.</summary>
+        public Halt Halt { get; set; }
 
         readonly Dictionary<string, List<string>> _fills = new Dictionary<string, List<string>>();
 

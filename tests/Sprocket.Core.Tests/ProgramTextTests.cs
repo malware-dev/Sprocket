@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -74,8 +75,9 @@ public class ProgramTextTests
 
         var out1 = program.AddSequence(airlock, when);
         out1.Name = "Let me out";
-        out1.Enabled = false;
         out1.Annotation = "Inside to outside.";
+        airlock.Enabled = false;
+        airlock.Halt = new Halt(SequenceProblem.MissingTarget, out1.Number, 2, null, "Front Inner Door");
 
         var close = new Act("close");
         close.Targets.Add("inner");
@@ -209,7 +211,8 @@ public class ProgramTextTests
 
         var letMeOut = after.Sequences[0];
         Assert.Equal("Let me out", letMeOut.Name);
-        Assert.False(letMeOut.Enabled);
+        Assert.Equal(SequenceProblem.MissingTarget, letMeOut.System.Halt!.Problem);
+        Assert.Equal("Front Inner Door", letMeOut.System.Halt!.Block);
 
         var when = Assert.IsType<WhenTrigger>(letMeOut.Trigger);
         Assert.Equal("pressed", when.EventId);

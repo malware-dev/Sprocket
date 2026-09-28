@@ -36,13 +36,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var system = systems[i];
                 var identity = system.Identity.ToString("D");
 
-                var sequences = system.Sequences;
-                for (var s = 0; s < sequences.Count; s++)
+                if (!system.Enabled)
                 {
-                    if (sequences[s].Enabled)
-                        continue;
-
-                    pen.Start(Keyword.Off).Text(identity).Says(Keyword.Sequence).Whole(sequences[s].Number);
+                    pen.Start(Keyword.Off).Text(identity);
+                    Why(pen, system.Halt);
                     pen.End();
                 }
 
@@ -53,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                         continue;
 
                     pen.Start(Keyword.Off).Text(identity).Says(Keyword.Instance).Whole(instances[n].Number);
+                    Why(pen, instances[n].Halt);
                     pen.End();
                 }
 
@@ -250,6 +248,80 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 : 0;
         }
 
+        /// <summary>What the reason Sprocket switched something off is written as.</summary>
+        /// <remarks>Persisted: a spelling here cannot change without every saved reason being forgotten.</remarks>
+        static readonly string[] Reasons =
+        {
+            "unstartable", "source gone", "block gone", "gate gone", "unoffered", "unfilled", "mistyped", "unawaited", "adrift",
+            "slot empty"
+        };
+
+        static readonly SequenceProblem[] Problems =
+        {
+            SequenceProblem.NeverTriggered, SequenceProblem.MissingSource, SequenceProblem.MissingTarget,
+            SequenceProblem.MissingGate, SequenceProblem.Unoffered, SequenceProblem.Unfilled, SequenceProblem.Mistyped,
+            SequenceProblem.Unawaited, SequenceProblem.Adrift, SequenceProblem.EmptySlot
+        };
+
+        /// <summary>Writes why Sprocket switched something off: what was wrong, in which sequence, at which step, with which block, and what the block said.</summary>
+        static void Why(Pen pen, Halt halt)
+        {
+            if (halt == null)
+                return;
+
+            var at = Array.IndexOf(Problems, halt.Problem);
+            pen.Text(at < 0 ? "unknown" : Reasons[at]);
+
+            if (halt.Sequence > 0)
+                pen.Says(Keyword.Sequence).Whole(halt.Sequence);
+
+            if (halt.Step >= 0)
+                pen.Says(Keyword.Step).Whole(halt.Step);
+
+            if (!string.IsNullOrEmpty(halt.Block))
+                pen.Says(Keyword.Block).Text(halt.Block);
+
+            if (!string.IsNullOrEmpty(halt.Said))
+                pen.Text(halt.Said);
+        }
+
+        /// <summary>Why a line says Sprocket switched something off, read from <paramref name="from" /> on, or null where it says nobody but a person did.</summary>
+        static Halt Why(Statement line, int from)
+        {
+            if (from >= line.Count)
+                return null;
+
+            var at = Array.IndexOf(Reasons, line.Text(from));
+            var sequence = 0;
+            var step = -1;
+            string block = null;
+            string said = null;
+            for (var i = from + 1; i < line.Count; i++)
+            {
+                if (line.Says(i, Keyword.Sequence) && i + 1 < line.Count)
+                {
+                    sequence = Counted(line, ++i);
+                }
+                else if (line.Says(i, Keyword.Step) && i + 1 < line.Count)
+                {
+                    var number = line.ValueAt(++i);
+                    if (number.Form == ValueForm.Integer && number.Whole >= 0 && number.Whole <= int.MaxValue)
+                        step = (int)number.Whole;
+                }
+                else if (line.Says(i, Keyword.Block) && i + 1 < line.Count)
+                {
+                    block = line.Text(++i);
+                }
+                else
+                {
+                    said = line.Text(i);
+                }
+            }
+
+            return new Halt(at < 0 ? SequenceProblem.None : Problems[at], sequence, step,
+                string.IsNullOrEmpty(said) ? null : said, string.IsNullOrEmpty(block) ? null : block);
+        }
+
         static void Switch(Statement line, Automation program, Trouble trouble)
         {
             Guid identity;
@@ -263,42 +335,38 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system == null)
                 return;
 
-            // A system switched off as a whole, which is every one of it switched off.
-            if (line.Count == 1)
+            if (line.Count == 1 || line.ValueAt(1).Form == ValueForm.Text)
             {
-                for (var i = 0; i < system.Instances.Count; i++)
-                    system.Instances[i].Enabled = false;
-
+                system.Enabled = false;
+                system.Halt = Why(line, 1);
                 return;
             }
 
             var number = line.ValueAt(2);
             if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
             {
-                trouble.Say(line, "a sequence or one of a system is switched off by its number");
+                trouble.Say(line, "one of a system is switched off by its number");
                 return;
             }
 
+            // A sequence has no switch of its own, so a line naming one switches nothing.
             if (line.Says(1, Keyword.Sequence))
-            {
-                var sequence = system.FindSequence((int)number.Whole);
-                if (sequence != null)
-                    sequence.Enabled = false;
-
                 return;
-            }
 
             if (!line.Says(1, Keyword.Instance))
             {
-                trouble.Say(line, "a system's identity is followed by 'sequence' or 'instance', or nothing");
+                trouble.Say(line, "a system's identity is followed by 'instance', a reason, or nothing");
                 return;
             }
 
             var instances = system.Instances;
             for (var i = 0; i < instances.Count; i++)
             {
-                if (instances[i].Number == number.Whole)
-                    instances[i].Enabled = false;
+                if (instances[i].Number != number.Whole)
+                    continue;
+
+                instances[i].Enabled = false;
+                instances[i].Halt = Why(line, 3);
             }
         }
     }

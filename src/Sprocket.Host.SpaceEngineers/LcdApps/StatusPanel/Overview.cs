@@ -135,9 +135,12 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// and anything at all beats a rule somebody parked - which is the least interesting fact about
         /// a system where the others are running.
         /// </remarks>
-        /// <summary>Whether every one of <paramref name="system" /> is switched off.</summary>
+        /// <summary>Whether <paramref name="system" /> is switched off, as a whole or every one of it.</summary>
         static bool Off(AutomationSystem system)
         {
+            if (!system.Enabled)
+                return true;
+
             var instances = system.Instances;
             for (var i = 0; i < instances.Count; i++)
             {

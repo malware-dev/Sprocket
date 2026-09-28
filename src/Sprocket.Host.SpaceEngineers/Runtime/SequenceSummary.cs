@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// both dearer and weaker, since it could only ask whether <i>something</i> was wired there.
         /// </para>
         /// </remarks>
-        static SequenceProblem StartTrouble(GridWorld world, Sequence sequence)
+        static SequenceProblem StartTrouble(GridWorld world, Sequence sequence, SystemInstance through)
         {
             var system = sequence.System;
             if (system == null)
@@ -103,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     : SequenceProblem.None;
             }
 
-            return world.CanStart(sequence) ? SequenceProblem.None : SequenceProblem.NeverTriggered;
+            return world.CanStart(sequence, through) ? SequenceProblem.None : SequenceProblem.NeverTriggered;
         }
 
         /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
@@ -122,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (state != null && state.IsRunning)
                 return state.IsWaiting ? SequenceStatus.RunningWaiting : SequenceStatus.Running;
 
-            if (!sequence.Enabled)
+            if (!sequence.CanRun(null))
                 return SequenceStatus.Off;
 
             if (state == null)
@@ -197,6 +197,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (state != null && state.HasMissingSources)
                 return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger);
 
+            // Before what is missing, because an empty slot names no block and would read as one that is gone.
+            SequenceFault empty = Empty(sequence, through);
+            if (empty.Exists)
+                return empty;
+
             var adrift = SequenceFault.None;
 
             for (var i = 0; i < sequence.Steps.Count; i++)
@@ -210,9 +215,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 {
                     var points = bindings.State(targets[t]);
                     if (points == RefState.Lost)
-                        return new SequenceFault(SequenceProblem.MissingTarget, i);
+                        return new SequenceFault(SequenceProblem.MissingTarget, i, null, targets[t]);
                     if (points == RefState.Adrift && !adrift.Exists)
-                        adrift = new SequenceFault(SequenceProblem.Adrift, i);
+                        adrift = new SequenceFault(SequenceProblem.Adrift, i, null, targets[t]);
                 }
             }
 
@@ -246,18 +251,60 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             // These last, because they are the ones about the sequence as a whole rather than about
             // something it names, and anything missing is the more useful thing to say.
-            var trouble = StartTrouble(world, sequence);
+            var trouble = StartTrouble(world, sequence, through);
             if (trouble != SequenceProblem.None)
                 return new SequenceFault(trouble, SequenceFault.Trigger);
 
-            // Reported even while something starts it perfectly well, because that is the case it is
-            // for: the button works, the trigger is right, and the sequence sits there. Not while it
-            // is actually going, since somebody has run it by hand and can see that it ran, and not
-            // before it does anything, because one nobody has written yet is not one to switch on.
-            if (!sequence.Enabled && sequence.Steps.Count > 0 && (state == null || !state.IsRunning))
-                return new SequenceFault(SequenceProblem.SwitchedOff, SequenceFault.Trigger);
+            return SequenceFault.None;
+        }
+
+        /// <summary>The first slot, of what starts it and then what its steps act on, that <paramref name="through" /> leaves empty and may not, or none.</summary>
+        static SequenceFault Empty(Sequence sequence, SystemInstance through)
+        {
+            var system = sequence.System;
+            if (system == null || through == null)
+                return SequenceFault.None;
+
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var moment = triggers[i] as MomentTrigger;
+                if (moment == null || moment.Runs != sequence.Number)
+                    continue;
+
+                var slot = EmptyOf(system, through, moment.Sources);
+                if (slot != null)
+                    return new SequenceFault(SequenceProblem.EmptySlot, SequenceFault.Trigger, null, slot);
+            }
+
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var act = sequence.Steps[i] as Act;
+                if (act == null)
+                    continue;
+
+                var slot = EmptyOf(system, through, act.Targets);
+                if (slot != null)
+                    return new SequenceFault(SequenceProblem.EmptySlot, i, null, slot);
+            }
 
             return SequenceFault.None;
+        }
+
+        static string EmptyOf(AutomationSystem system, SystemInstance through, IList<string> names)
+        {
+            for (var i = 0; i < names.Count; i++)
+            {
+                var part = system.FindPart(names[i]);
+                if (part == null || part.Optional)
+                    continue;
+
+                var filled = through.FilledWith(names[i]);
+                if (filled == null || filled.Count == 0)
+                    return names[i];
+            }
+
+            return null;
         }
 
         /// <summary>The first action that takes time to finish and is not followed by a wait for it, or none.</summary>

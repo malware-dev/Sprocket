@@ -237,6 +237,23 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return declared;
         }
 
+        /// <summary>The name <paramref name="reference" /> was last known by on the construct, or the reference itself where none was recorded.</summary>
+        public string Called(string reference, Values values)
+        {
+            var found = FindRef(reference);
+            if (found == null)
+                return reference;
+
+            for (var i = 0; i < found.Keys.Count; i++)
+            {
+                string text;
+                if (found.Keys[i].Cells == null && values.TryText(found.Keys[i].Kind, found.Keys[i].Value, out text))
+                    return text;
+            }
+
+            return reference;
+        }
+
         public EntityRef FindRef(string name)
         {
             for (var i = 0; i < _refs.Count; i++)
@@ -437,7 +454,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             var copy = AddSequence(sequence.System);
             copy.Annotation = sequence.Annotation;
-            copy.Enabled = false;
 
             var steps = sequence.Steps;
             for (var i = 0; i < steps.Count; i++)

@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         ICommand _refresh;
         ICommand _flip;
         bool _switchIsOn;
-        bool _switchGovernsAll = true;
+        string _switchAbout;
         bool _running;
         ICommand _runs;
         ICommand _stops;
@@ -118,11 +118,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             set { Set(ref _switchIsOn, value); }
         }
 
-        /// <summary>Whether the switch governs everything the subject does, as a system's does, rather than one sequence.</summary>
-        public bool SwitchGovernsAll
+        /// <summary>What pressing the switch would do, said as a note on it.</summary>
+        public string SwitchAbout
         {
-            get { return _switchGovernsAll; }
-            set { Set(ref _switchGovernsAll, value); }
+            get { return _switchAbout; }
+            set { Set(ref _switchAbout, value); }
         }
 
         /// <summary>Whether the subject is running now, which turns the run mark into a stop.</summary>

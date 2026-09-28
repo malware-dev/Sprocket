@@ -40,19 +40,20 @@ on screen     Automation for Test Rig
 033  Sprite     Sprocket_Fill         {X:1568 Y:261 W:24 H:24}  #DCF5FDFF
 034  Text       at {X:1540.557 Y:263.0543} scale 0.556  #DCF5FDFF  "ON"
 035  Text       at {X:1610.156 Y:261.5141} scale 0.401  #A2C3CDFF  "d"
-036  Sprite     Sprocket_Fill         {X:256 Y:315 W:1396 H:68}  #29363EFF
-037  Text       at {X:308.0625 Y:344.2328} scale 0.161  #5F7278FF  "0"
+036  Sprite     Sprocket_Fill         {X:256 Y:315 W:1396 H:68}  #240C0AFF
+037  Text       at {X:308.0625 Y:344.2328} scale 0.161  #E84A3AFF  "0"
 038  Text       at {X:336 Y:334.2255} scale 0.833  #DCF5FDFF  "Airlock 2"
-039  Sprite     Sprocket_Fill         {X:1527 Y:333 W:69 H:32}  #5B737BFF
-040  Sprite     Sprocket_Fill         {X:1531 Y:337 W:61 H:24}  #20272DFF
-041  Sprite     Sprocket_Fill         {X:1531 Y:337 W:24 H:24}  #DCF5FDFF
-042  Text       at {X:1563.183 Y:339.0543} scale 0.556  #DCF5FDFF  "OFF"
-043  Text       at {X:1610.156 Y:337.5141} scale 0.401  #A2C3CDFF  "d"
-044  Text       at {X:304 Y:400.2255} scale 0.833  #A2C3CDFF  "+ Another"
-045  ClearClip  
-046  Sprite     Sprocket_Fill         {X:275 Y:78 W:129 H:36}  #1B242AFF
-047  Sprite     Sprocket_Fill         {X:275 Y:78 W:129 H:1}  #5B737BFF
-048  Sprite     Sprocket_Fill         {X:275 Y:113 W:129 H:1}  #5B737BFF
-049  Sprite     Sprocket_Fill         {X:275 Y:78 W:1 H:36}  #5B737BFF
-050  Sprite     Sprocket_Fill         {X:403 Y:78 W:1 H:36}  #5B737BFF
-051  Text       at {X:287 Y:83.92793} scale 0.694  #A2C3CDFF  "Close the editor"
+039  Text       at {X:419.3563 Y:337.5141} scale 0.401  #E84A3AFF  "!"
+040  Sprite     Sprocket_Fill         {X:1527 Y:333 W:69 H:32}  #5B737BFF
+041  Sprite     Sprocket_Fill         {X:1531 Y:337 W:61 H:24}  #20272DFF
+042  Sprite     Sprocket_Fill         {X:1531 Y:337 W:24 H:24}  #DCF5FDFF
+043  Text       at {X:1563.183 Y:339.0543} scale 0.556  #DCF5FDFF  "OFF"
+044  Text       at {X:1610.156 Y:337.5141} scale 0.401  #A2C3CDFF  "d"
+045  Text       at {X:304 Y:400.2255} scale 0.833  #A2C3CDFF  "+ Another"
+046  ClearClip  
+047  Sprite     Sprocket_Fill         {X:275 Y:78 W:129 H:36}  #1B242AFF
+048  Sprite     Sprocket_Fill         {X:275 Y:78 W:129 H:1}  #5B737BFF
+049  Sprite     Sprocket_Fill         {X:275 Y:113 W:129 H:1}  #5B737BFF
+050  Sprite     Sprocket_Fill         {X:275 Y:78 W:1 H:36}  #5B737BFF
+051  Sprite     Sprocket_Fill         {X:403 Y:78 W:1 H:36}  #5B737BFF
+052  Text       at {X:287 Y:83.92793} scale 0.694  #A2C3CDFF  "Close the editor"

@@ -194,13 +194,13 @@ public class RigTests
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
 
-        // Long enough for the slot to be written and looked at again. Left parked, which is where the
-        // editor leaves a rule somebody has just finished describing.
+        // Long enough for the slot to be written and looked at again. Left switched off, which is where
+        // the editor leaves a system somebody has just finished describing.
         for (var i = 0; i < 5; i++)
             rig.Tick();
 
         Sequence sequence = rig.Editor.Program.Sequences[0];
-        Assert.False(sequence.Enabled);
+        Assert.False(sequence.System.Enabled);
 
         rig.Press("Airlock Button");
         rig.Tick();
@@ -359,7 +359,6 @@ public class RigTests
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
         rig.Editor.Back();
-        rig.Editor.PressAnswer("Switch it on");
 
         Sequence sequence = rig.Editor.Program.Sequences[0];
 
@@ -368,11 +367,12 @@ public class RigTests
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressChoice(sequence.Name);
         rig.Editor.PressPrimary();
+        rig.Editor.SwitchOn();
 
         for (var i = 0; i < 5; i++)
             rig.Tick();
 
-        Assert.True(rig.World.CanStart(sequence), "nothing can start the sequence both buttons were given");
+        Assert.True(rig.World.CanStart(sequence, sequence.System.First), "nothing can start the sequence both buttons were given");
 
         rig.Press("Inside Button");
         rig.Tick();
@@ -423,12 +423,12 @@ public class RigTests
         Assert.Contains("Airlock Inner Door:open", rig.Machine.Log);
         Assert.False(Running(rig, sequence), "Sprocket ran a sequence the game was doing itself");
 
-        // Long enough for the pass that parks what cannot work. A slot holding the game's action
+        // Long enough for the pass that switches off what cannot work. A slot holding the game's action
         // answers for the sequence, so nothing here is broken.
         for (var i = 0; i < 70; i++)
             rig.Tick();
 
-        Assert.True(sequence.Enabled, "the sequence was parked although its button is wired");
+        Assert.True(sequence.System.Enabled, "the system was switched off although its button is wired");
     }
 
     /// <summary>
@@ -647,8 +647,8 @@ public class RigTests
         Sequence had = rig.Editor.Program.Sequences[0];
         Sequence took = rig.Editor.Program.Sequences[1];
 
-        Assert.True(rig.World.CanStart(took), "the trigger that took the button cannot start");
-        Assert.False(rig.World.CanStart(had), "the trigger that lost it still holds the button");
+        Assert.True(rig.World.CanStart(took, took.System.First), "the trigger that took the button cannot start");
+        Assert.False(rig.World.CanStart(had, had.System.First), "the trigger that lost it still holds the button");
 
         // And the one that lost it is in the state anybody can mend: no blocks, and a row that says
         // so with its parts still there.
@@ -697,7 +697,7 @@ public class RigTests
         // Still says what starts it, and the construct agrees that something does.
         var pressed = Assert.IsType<RequiredTrigger>(sequence.Trigger);
         Assert.Single(pressed.Sources);
-        Assert.True(pasted.World.CanStart(sequence), "the trigger was reported as unstartable");
+        Assert.True(pasted.World.CanStart(sequence, sequence.System.First), "the trigger was reported as unstartable");
 
         // And the button does it, which is the half that was being reported without being true.
         pasted.Press("Airlock Button");
@@ -749,7 +749,7 @@ public class RigTests
             pasted.Tick();
 
         Sequence sequence = pasted.Editor.Program.Sequences[0];
-        Assert.False(pasted.World.CanStart(sequence), "it claimed a button somebody else holds");
+        Assert.False(pasted.World.CanStart(sequence, sequence.System.First), "it claimed a button somebody else holds");
 
         Panel panel = null!;
         foreach (Panel found in pasted.Panels())

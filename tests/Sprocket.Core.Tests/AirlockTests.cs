@@ -206,10 +206,12 @@ public class AirlockTests
         a.Ship.Grind(a.Inner);
         a.Tick(300);
 
-        // A block that is gone is a fault, and a sequence at fault is switched off, which is what
-        // ends the run: holding for it and then parking, never walking on.
+        // A block that is gone is a fault, and a system with a sequence at fault is switched off, which
+        // is what ends the run: holding for it and then stopping, never walking on.
         Assert.DoesNotContain("Outer Door:open", a.Log);
-        Assert.False(a.LetMeOut.Enabled, "a sequence waiting on a door that is not there was left on");
+        Assert.False(a.LetMeOut.System.Enabled, "a system waiting on a door that is not there was left on");
+        Assert.Equal(SequenceProblem.MissingTarget, a.LetMeOut.System.Halt!.Problem);
+        Assert.Equal("Inner Door", a.LetMeOut.System.Halt!.Block);
     }
 
     /// <summary>
@@ -520,9 +522,9 @@ public class AirlockTests
         Assert.Equal(DoorStatus.Open, a.Inner.Status);
 
         // And the outer door is never opened onto it. A step that does not wait is a fault, so the
-        // sequence is switched off rather than left to carry on.
+        // system is switched off rather than left to carry on.
         Assert.Equal(DoorStatus.Closed, a.Outer.Status);
-        Assert.False(letMeOut.Enabled, "a sequence with a step that does not wait was left on");
+        Assert.False(letMeOut.System.Enabled, "a system with a step that does not wait was left on");
     }
 
     /// <summary>

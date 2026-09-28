@@ -37,9 +37,11 @@ the blueprint's name in the bright ink. The heading is a sentence rather than in
 it, because the name is somebody's and is shown as they typed it. Logic systems of their own come
 first, so a row of its own is never read as belonging to the blueprint above it.
 
-**Every logic system has its own switch; a blueprint has none.** A blueprint does not run - the
-logic systems made from it do - and switching the port airlock off to weld on it must not stop
-the front one.
+**Every logic system has its own switch, and a blueprint has one over all of them.** Switching
+the port airlock off to weld on it must not stop the front one; switching the blueprint off stops
+every logic system made from it on the construct, so it asks first and names them. A system's
+switch is also what guards changing it: its triggers and steps are changed only while it is off,
+and leaving it off after a change offers to switch it on.
 
 **Names are numbered, and given in place.** Nothing is asked when something is made: another
 logic system made from a blueprint is *Airlock 2*, the first number free, the way the game

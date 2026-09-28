@@ -27,7 +27,6 @@ public class DuplicateTests
         sequence = program.AddSequence(program.AddSystem(), trigger);
         sequence.Name = "Let me out";
         sequence.Annotation = "the front door";
-        sequence.Enabled = true;
 
         sequence.Steps.Add(Acting("close", "inner"));
         sequence.Steps.Add(new Await());
@@ -99,17 +98,6 @@ public class DuplicateTests
         // was copied from. It has to be told what starts it.
         Assert.NotNull(sequence.Trigger);
         Assert.Null(copy.Trigger);
-    }
-
-    [Fact]
-    public void ACopyArrivesSwitchedOff()
-    {
-        var program = Program(out var sequence);
-
-        var copy = program.Duplicate(sequence);
-
-        Assert.True(sequence.Enabled);
-        Assert.False(copy.Enabled);
     }
 
     [Fact]

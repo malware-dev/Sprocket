@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -5,22 +7,17 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// A sequence somebody switched off says so with a ground, and with nothing else.
+/// A logic system Sprocket switched off says why, on its row and on its own screen, with a ground.
 /// </summary>
 /// <remarks>
-/// It is the commonest reason a button does nothing, and everything else about such a sequence
-/// reads as working: the trigger is right, the blocks are there, and the one column that said
-/// otherwise said it in the place every row says something. Found by reading the screen rather
-/// than by being shown, which is the failure the marks exist to prevent.
-/// <para>
-/// The words go in the line the row already has for what it is doing, because being switched off is
-/// what it is doing. A line of its own would come and go as the switch beside it is pressed, moving
-/// the row out from under the press that moved it.
-/// </para>
+/// Once what broke it is mended, it is the likeliest reason a button does nothing, and everything
+/// else about it reads as working: the trigger is right and the blocks are there.
 /// </remarks>
 public class ParkedTests
 {
-    static Screen WithOneParked()
+    const string Why = "Stopped at step 1 of Sequence 1: Airlock Inner Door was gone.";
+
+    static Screen WithOneStopped()
     {
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
@@ -28,98 +25,77 @@ public class ParkedTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
+        screen.Editor.GoToRoot();
 
-        screen.Editor.Back();
-        screen.Editor.PressAnswer("Leave it off");
+        var system = screen.Editor.Program.Systems[0];
+        system.Enabled = false;
+        system.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, null, "Airlock Inner Door");
         return screen.Run(120);
     }
 
     static bool Washed(Screen screen, Color ground) =>
         screen.Drawings.Any(d => !d.IsText && d.Ink == ground);
 
+    /// <summary>Its row says why, in the line it already has for what it is doing, on the parked ground.</summary>
     [Fact]
-    public void AParkedSequenceIsWashed()
+    public void ItsRowSaysWhy()
     {
-        var screen = WithOneParked();
+        var screen = WithOneStopped();
+        var row = screen.Editor.RootRows()[0];
 
-        Assert.True(screen.Editor.Rows()[0].Parked);
-        Assert.True(Washed(screen, Palette.NoticeWash), "a parked sequence's row has no ground");
+        Assert.Equal(Why, row.Problem);
+        Assert.True(row.Parked);
+        Assert.True(screen.Shows(Why), "the row does not say why it was switched off");
+        Assert.True(Washed(screen, Palette.NoticeWash), "a system Sprocket switched off has no ground");
     }
 
-    /// <summary>
-    /// The words take the place of the line the row already had, rather than adding one.
-    /// </summary>
-    /// <remarks>
-    /// "Switched off" beside a switch that says off is a word spent on nothing, so what follows
-    /// from it is shown there instead. The row is the same height either way, so nothing moves when
-    /// the switch is pressed - and a control that moves as it is used is the one thing a screen must
-    /// never do.
-    /// <para>
-    /// The two are separate readings and only one of them is ever shown, which is what lets the
-    /// warning be drawn as a warning rather than in the colour of an ordinary state.
-    /// </para>
-    /// </remarks>
+    /// <summary>What broke it is mended, so it is not counted as broken or washed as broken.</summary>
     [Fact]
-    public void TheWordsReplaceWhatTheRowSaidThere()
+    public void BeingStoppedIsNotAFault()
     {
-        var screen = WithOneParked();
+        var screen = WithOneStopped();
 
-        Assert.Equal("This is switched off, so nothing starts it on its own.",
-            screen.Editor.Rows()[0].Problem);
-        Assert.Equal("switched off", screen.Editor.Rows()[0].Status);
-
-        Assert.True(screen.Shows("This is switched off, so nothing starts it on its own."),
-            "the row does not say what being switched off costs");
-        Assert.False(screen.Shows("switched off"), "the row says it twice");
+        Assert.Equal(0, screen.Editor.RootRows()[0].Problems);
+        Assert.False(Washed(screen, Palette.ProblemWash), "a mended system's row reads as broken");
     }
 
-    /// <summary>
-    /// A remark, not a fault: it is not counted and the row is not washed as broken.
-    /// </summary>
-    /// <remarks>
-    /// Switching a sequence off is a thing somebody did on purpose, so a red row sending them to
-    /// hunt for a missing block would be the screen lying about what it knows.
-    /// </remarks>
+    /// <summary>Its own screen says why as well, above everything it is about.</summary>
     [Fact]
-    public void BeingParkedIsNotAFault()
+    public void ItsScreenSaysWhy()
     {
-        var screen = WithOneParked();
+        var screen = WithOneStopped();
+        screen.Editor.PressRow(0);
+        screen.Run(120);
 
-        Assert.Equal(0, screen.Editor.Rows()[0].Problems);
-        Assert.False(Washed(screen, Palette.ProblemWash), "a parked sequence's row reads as broken");
+        Assert.True(screen.Shows(Why), "the logic system screen does not say why it was switched off");
     }
 
     /// <summary>Switching it on takes the ground and the words away.</summary>
     [Fact]
     public void SwitchingItOnClearsIt()
     {
-        var screen = WithOneParked();
+        var screen = WithOneStopped();
 
-        screen.Editor.Program.Sequences[0].Enabled = true;
+        screen.Editor.RootRows()[0].Flips!.Execute();
         screen.Run(120);
 
-        Assert.False(screen.Editor.Rows()[0].Parked);
-        Assert.Equal("ready", screen.Editor.Rows()[0].Status);
-        Assert.False(Washed(screen, Palette.NoticeWash), "a live sequence's row is wearing the parked ground");
+        Assert.Null(screen.Editor.Program.Systems[0].Halt);
+        Assert.False(screen.Editor.RootRows()[0].Parked);
+        Assert.Equal("", screen.Editor.RootRows()[0].Problem);
+        Assert.False(screen.Shows(Why), "the words stayed after it was switched on");
     }
 
-    /// <summary>
-    /// One nobody has written yet is not one to switch on.
-    /// </summary>
-    /// <remarks>
-    /// The same rule the trigger's own warning follows: somebody half way through building is not
-    /// told they have got it wrong, because they have not finished getting it right.
-    /// </remarks>
+    /// <summary>A system Sprocket did not switch off says nothing about it: its switch already does.</summary>
     [Fact]
-    public void ASequenceWithNoStepsIsNotRemarkedOn()
+    public void ASystemSwitchedOffByHandIsNotRemarkedOn()
     {
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
-        screen.Editor.Back();
+        screen.Editor.GoToRoot();
         screen.Run(120);
 
-        Assert.False(screen.Editor.Rows()[0].Parked);
-        Assert.Equal("switched off", screen.Editor.Rows()[0].Status);
-        Assert.False(Washed(screen, Palette.NoticeWash), "an unwritten sequence is being remarked on");
+        Assert.False(screen.Editor.Program.Systems[0].Enabled);
+        Assert.False(screen.Editor.RootRows()[0].Parked);
+        Assert.Equal("", screen.Editor.RootRows()[0].Problem);
     }
 }

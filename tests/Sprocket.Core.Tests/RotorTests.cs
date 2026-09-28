@@ -353,7 +353,7 @@ public class RotorTests
         if (byHand)
             runner.Get(sequence)!.Stop();
         else
-            sequence.Enabled = false;
+            sequence.System.Enabled = false;
 
         for (var end = frame + 2 * Rota.Ten; frame < end; frame++)
         {

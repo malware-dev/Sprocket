@@ -675,7 +675,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     // the inner one is no longer there to be shut.
                     //
                     // Holding is all this does. A missing block is a fault, and a sequence at fault
-                    // is switched off within the second by SprocketEditor.ParkBroken, which is what
+                    // is switched off within the second by AutomationRunner.ParkBroken, which is what
                     // stops the run and marks it. The same road a step that cannot act at all
                     // already travels.
                     // Looked at the moment it is reached, so what has already arrived passes in the same

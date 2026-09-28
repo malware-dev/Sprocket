@@ -25,7 +25,7 @@ public class RunningTests
         // a wait is the shortest step that leaves a sequence running for longer than an instant.
         var sequence = screen.Editor.Program.Sequences[0];
         sequence.Steps.Add(new Wait(600));
-        sequence.Enabled = true;
+        sequence.System.Enabled = true;
 
         screen.Editor.Back();
         screen.Run(2);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
@@ -124,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             Show(reshaped);
         }
 
-        /// <summary>Gives a row the switch of one logic system, which stops that one and nothing else.</summary>
+        /// <summary>Gives a row the switch of one of the logic systems made from a blueprint, which stops that one and nothing else.</summary>
         public void Switched(StatusRow row, SystemInstance instance)
         {
             if (instance == null)
@@ -144,6 +145,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         public void Live(StatusRow row, AutomationSystem system, SystemInstance instance, bool recount, bool shown,
             Texts texts)
         {
+            Live(row, system, instance, instance != null && instance.Enabled, instance == null ? null : instance.Halt, recount, shown,
+                texts);
+        }
+
+        /// <summary>Brings a row up to what its logic system is doing now, its switch showing <paramref name="on" /> and why Sprocket switched it off where it did.</summary>
+        void Live(StatusRow row, AutomationSystem system, SystemInstance instance, bool on, Halt halt, bool recount, bool shown,
+            Texts texts)
+        {
             var changed = shown;
 
             if (instance != null)
@@ -152,12 +161,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 {
                     var problems = SystemSummary.Problems(Editor.World, Editor.Runner.Bindings, Editor.Runner, system, instance);
                     var remarks = SystemSummary.Remarks(Editor.World, Editor.Runner.Bindings, Editor.Runner, system, instance);
-                    changed |= row.Problems != problems || row.Remarks != remarks;
+                    var stopped = on || halt == null ? "" : SequenceText.Stopped(halt, system);
+                    changed |= row.Problems != problems || row.Remarks != remarks || row.Problem != stopped;
                     row.Problems = problems;
                     row.Remarks = remarks;
+                    row.Problem = stopped;
+                    row.ProblemIsWarning = problems == 0;
+                    row.Parked = stopped.Length > 0;
                 }
 
-                var on = instance.Enabled;
                 var going = SystemSummary.IsRunning(system, Editor.Runner, instance);
                 changed |= row.SwitchIsOn != on || row.Running != going;
                 row.SwitchIsOn = on;
@@ -212,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             for (var i = 0; i < _own.Count; i++)
             {
                 var system = _own[i];
-                Live(_rows[system], system, system.First, recount, reshaped, texts);
+                Live(_rows[system], system, system.First, system.Enabled, system.Halt, recount, reshaped, texts);
             }
 
             for (var i = 0; i < _blueprints.Count; i++)
@@ -258,15 +270,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>The row of a logic system of its own: opened by pressing it, switched by its switch, and made a blueprint of by its button.</summary>
         StatusRow Own(AutomationSystem system)
         {
-            var row = new StatusRow
+            return new StatusRow
             {
                 Opens = Editor.Act(Cmd.OpenSystem, delegate { Open(system); }),
+                Flips = Editor.Act(Cmd.EnableSystem, delegate { Editor.SwitchSystem(system, !system.Enabled); }),
                 Offers = Editor.Act(Cmd.MakeBlueprint, delegate { Made(system); }),
                 Deletes = Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(system); })
             };
-
-            Switched(row, system.First);
-            return row;
         }
 
         /// <summary>Makes a logic system, numbered, and opens it with its name in hand to be given.</summary>
@@ -274,6 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             var system = Editor.Program.AddSystem();
             system.Namespace = Editor.Author;
+            system.Enabled = false;
 
             Editor.PushMade(new LogicSystemPage(Editor, system));
         }

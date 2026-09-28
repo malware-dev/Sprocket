@@ -660,7 +660,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _switch.IsOn = screen.SwitchIsOn;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
             _flips.CanExecute = screen.HasSwitch;
-            _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? StatusRow.Switching(texts, screen.SwitchGovernsAll, screen.SwitchIsOn) : null);
+            _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? screen.SwitchAbout : null);
 
             ShowActions(screen);
         }
