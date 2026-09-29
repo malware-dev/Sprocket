@@ -79,34 +79,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        /// <summary>
-        /// That the blocks a trigger names are spoken for: "Airlock Button is already in use".
-        /// </summary>
-        /// <remarks>
-        /// The blocks rather than what holds them, because what holds them may be a system on the
-        /// other side of the construct, and the fact somebody needs is the one in front of them: the
-        /// button they just picked is not free.
-        /// <para>
-        /// The moment is left out of the words although it is part of what clashes - a panel's third
-        /// button is free while its first is not. It cannot be said without the sentence coming
-        /// apart, because a moment reads as a verb: "button 3 is pressed is already in use". What is
-        /// on screen behind this question is the choice it is about.
-        /// </para>
-        /// <para>
-        /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
-        /// </para>
-        /// </remarks>
-        public static string Taken(Bindings bindings, Trigger trigger, SystemInstance through)
-        {
-            var moment = trigger as MomentTrigger;
-            if (moment == null || moment.Sources.Count == 0)
-                return "That is already in use";
-
-            var when = moment as WhenTrigger;
-            return SentenceText.Named(bindings, SystemInstance.Through(through, moment.Sources),
-                when != null && when.RequiresAll) + " is already in use";
-        }
-
         /// <summary>The words for the moment a trigger watches for on <paramref name="sources" />, or an unfilled gap.</summary>
         static string Happening(Bindings bindings, MomentTrigger moment, IList<string> sources)
         {

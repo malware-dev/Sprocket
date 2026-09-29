@@ -311,6 +311,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             if (system.First == null)
                 return;
 
+            Editor.Slotted(system);
             system.First.Name = system.Name;
             Editor.Choose(system, system.First);
             Editor.Push(new BlueprintPage(Editor, system, true));

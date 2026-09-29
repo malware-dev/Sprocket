@@ -103,6 +103,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public Action<Sequence, SystemInstance, bool> Elsewhere { get; set; }
 
+        /// <summary>Where a button somebody has just picked goes to be written into its panel's slots: the panel, by entity id.</summary>
+        /// <remarks>
+        /// Set by the unit that writes the toolbars; on a copy a client is editing, by whoever lent it, since the toolbars are
+        /// written where the Sprocket is kept.
+        /// </remarks>
+        public Action<long> Wire { get; set; }
+
         /// <summary>Who holds the Sprocket this editor shows, or null where this editor may change it.</summary>
         /// <remarks>
         /// Set on a copy lent to look at while somebody else edits it. Every command but the ones that
@@ -1185,6 +1192,264 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
+        /// Does it, unless something already answers the button it is given; then asks first, and takes the button only where
+        /// that is the answer.
+        /// </summary>
+        /// <remarks>
+        /// A toolbar slot holds one thing. Two triggers on the same button and the same press are two claims on that one slot,
+        /// and the one written last silently wins, so it is asked before it happens rather than found afterwards on a row that
+        /// has gone quiet. Taking a button from a trigger of a logic system of its own leaves that trigger without it; taking it
+        /// from one of a blueprint's blocksets empties the slot that blockset had it through. Either way the button is written,
+        /// whatever its slot holds by then.
+        /// <para>
+        /// Only where the construct is what announces the moment. Two sequences both watching the inner door close is an
+        /// ordinary way to build and costs nothing: Sprocket does that watching, and it can watch for two.
+        /// </para>
+        /// <para>
+        /// Its own trigger never counts, so settling on what was already there is not a clash with itself.
+        /// </para>
+        /// </remarks>
+        void Unless(AutomationSystem system, MomentTrigger made, Trigger except, Action<MomentTrigger> then,
+            Action otherwise)
+        {
+            var panels = Blocks(system, made.Sources);
+            var holder = Holding(panels, ButtonPanelExtension.ButtonOf(made.EventId), except, StandIn(system), null);
+            if (holder == null)
+            {
+                then(null);
+                Wired(panels);
+                return;
+            }
+
+            AskAbout(holder);
+            Answer(Texts.ButtonTakeOver, delegate
+            {
+                MomentTrigger taken = null;
+                if (holder.Trigger != null && holder.System.IsBlueprint)
+                    Release(holder);
+                else
+                    taken = holder.Trigger;
+
+                then(taken);
+                Wired(panels);
+            });
+            Answer(Texts.ButtonLeaveAlone, otherwise, true);
+        }
+
+        /// <summary>
+        /// Fills <paramref name="part" /> of <paramref name="chosen" /> with the blocks <paramref name="blocks" /> by
+        /// <paramref name="fill" />, asking first about each button of them that something else already answers.
+        /// </summary>
+        /// <remarks>
+        /// Every trigger of the system that uses the part is asked about, one question at a time. Taking a button empties the
+        /// slot of the blockset that had it, or leaves a trigger of a logic system of its own without it; nothing is taken
+        /// until every question is answered, and leaving any of them alone leaves the part as it was.
+        /// </remarks>
+        internal void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, Action fill)
+        {
+            Filling(system, part, chosen, blocks, fill, new List<Occupant>());
+        }
+
+        void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, Action fill,
+            List<Occupant> taking)
+        {
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var trigger = triggers[i] as RequiredTrigger;
+                if (trigger == null || !trigger.Sources.Contains(part.Id))
+                    continue;
+
+                var holder = Holding(blocks, ButtonPanelExtension.ButtonOf(trigger.EventId), trigger, chosen, taking);
+                if (holder == null)
+                    continue;
+
+                AskAbout(holder);
+                Answer(Texts.ButtonTakeOver, delegate
+                {
+                    taking.Add(holder);
+                    Filling(system, part, chosen, blocks, fill, taking);
+                });
+                Answer(Texts.ButtonLeaveAlone, delegate { }, true);
+                return;
+            }
+
+            for (var i = 0; i < taking.Count; i++)
+            {
+                if (taking[i].Trigger == null)
+                    continue;
+
+                if (taking[i].System.IsBlueprint)
+                    Release(taking[i]);
+                else
+                    taking[i].Trigger.Sources.Clear();
+            }
+
+            fill();
+            Wired(blocks);
+        }
+
+        /// <summary>What already answers a button: a trigger of the program on one of its system, or, with no trigger, a slot the program did not write.</summary>
+        sealed class Occupant
+        {
+            public GridEntity Panel;
+            public int Button;
+            public AutomationSystem System;
+            public RequiredTrigger Trigger;
+            public SystemInstance Instance;
+
+            public bool Same(Occupant other)
+            {
+                return Panel.Id == other.Panel.Id && Button == other.Button && Trigger == other.Trigger && Instance == other.Instance;
+            }
+        }
+
+        /// <summary>
+        /// The first of <paramref name="panels" /> whose button <paramref name="button" /> something other than
+        /// <paramref name="trigger" /> on <paramref name="instance" /> already answers, passing over what is in
+        /// <paramref name="taking" />; or null where nothing does.
+        /// </summary>
+        /// <remarks>
+        /// Compared as blocks, through every one of every system: a toolbar slot belongs to a block, and two systems can each
+        /// have a part called Button Panel on different buttons. A trigger of the program comes first, since it can be named;
+        /// then a slot holding what the program did not write, which is only read where no trigger has the button.
+        /// </remarks>
+        Occupant Holding(IList<long> panels, int button, Trigger trigger, SystemInstance instance, List<Occupant> taking)
+        {
+            if (button < 0)
+                return null;
+
+            for (var p = 0; p < panels.Count; p++)
+            {
+                GridEntity panel = _world.FindEntity(panels[p]);
+                if (panel == null)
+                    continue;
+
+                var named = false;
+                for (var s = 0; s < _program.Systems.Count; s++)
+                {
+                    AutomationSystem each = _program.Systems[s];
+                    var triggers = each.Triggers;
+                    for (var i = 0; i < triggers.Count; i++)
+                    {
+                        var other = triggers[i] as RequiredTrigger;
+                        if (other == null || ButtonPanelExtension.ButtonOf(other.EventId) != button)
+                            continue;
+
+                        var instances = each.Instances;
+                        for (var n = 0; n < instances.Count || n == 0; n++)
+                        {
+                            var through = instances.Count == 0 ? null : instances[n];
+                            if ((other == trigger && through == instance) || !Names(through, other.Sources, panel.Id))
+                                continue;
+
+                            named = true;
+                            var holder = new Occupant { Panel = panel, Button = button, System = each, Trigger = other, Instance = through };
+                            if (!Taken(taking, holder))
+                                return holder;
+                        }
+                    }
+                }
+
+                if (!named && _world.Foreign(panel.Block, button))
+                {
+                    var holder = new Occupant { Panel = panel, Button = button };
+                    if (!Taken(taking, holder))
+                        return holder;
+                }
+            }
+
+            return null;
+        }
+
+        static bool Taken(List<Occupant> taking, Occupant holder)
+        {
+            for (var i = 0; taking != null && i < taking.Count; i++)
+            {
+                if (taking[i].Same(holder))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether <paramref name="sources" /> come to the block <paramref name="block" /> through <paramref name="instance" />.</summary>
+        bool Names(SystemInstance instance, IList<string> sources, long block)
+        {
+            var seen = SystemInstance.Through(instance, sources);
+            for (var i = 0; i < seen.Count; i++)
+            {
+                GridEntity entity = _runner.Bindings.Entity(seen[i]);
+                if (entity != null && entity.Id == block)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Asks whether to take the button <paramref name="holder" /> has, saying what it does now.</summary>
+        void AskAbout(Occupant holder)
+        {
+            var arguments = new Arguments();
+            arguments.Set("block", holder.Panel.Name);
+
+            if (holder.Trigger == null)
+            {
+                arguments.Set("button", (holder.Button + 1).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                AskHere(Texts.ButtonElsewhere, arguments);
+                return;
+            }
+
+            var sequence = holder.System.FindSequence(holder.Trigger.Runs);
+            arguments.Set("sequence", sequence == null ? "" : sequence.Name);
+            arguments.Set("blockset", holder.System.IsBlueprint && holder.Instance != null
+                ? SystemSummary.DescribeInstance(Texts, _runner.Bindings, holder.System, holder.Instance)
+                : holder.System.Name);
+            AskHere(holder.Trigger.Stops ? Texts.ButtonStops : Texts.ButtonStarts, arguments);
+        }
+
+        /// <summary>Takes <paramref name="holder" />'s button out of the slots of the blockset that had it, which then needs another.</summary>
+        void Release(Occupant holder)
+        {
+            var sources = holder.Trigger.Sources;
+            for (var i = 0; i < sources.Count; i++)
+            {
+                var filled = holder.Instance.FilledWith(sources[i]);
+                if (filled == null)
+                    continue;
+
+                var kept = new List<string>();
+                for (var f = 0; f < filled.Count; f++)
+                {
+                    GridEntity entity = _runner.Bindings.Entity(filled[f]);
+                    if (entity == null || entity.Id != holder.Panel.Id)
+                        kept.Add(filled[f]);
+                }
+
+                if (kept.Count == filled.Count)
+                    continue;
+
+                if (kept.Count == 0)
+                    holder.Instance.Clear(sources[i]);
+                else
+                    holder.Instance.Fill(sources[i], kept);
+            }
+
+            _program.Edited();
+            _program.Rewire();
+        }
+
+        /// <summary>Has every slot the program wants on <paramref name="panels" /> written, whatever it holds, as somebody has just picked them.</summary>
+        void Wired(IList<long> panels)
+        {
+            if (Wire == null)
+                return;
+
+            for (var i = 0; i < panels.Count; i++)
+                Wire(panels[i]);
+        }
+
+        /// <summary>
         /// What somebody has just described, as the trigger that makes it happen.
         /// </summary>
         /// <remarks>
@@ -1192,98 +1457,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// means the construct already announces it and Sprocket wires a slot, picking a door means
         /// Sprocket watches for it. See <see cref="Vocabulary.Starter" />.
         /// </remarks>
-        /// <summary>
-        /// Does it, unless something on the construct is already answering that moment.
-        /// </summary>
-        /// <remarks>
-        /// A toolbar slot holds one thing. Two triggers on the same button and the same press are
-        /// two claims on that one slot, which is a state the construct cannot be put into: asked to
-        /// arrange both, Sprocket arranges neither, and the button is left answering nothing at all.
-        /// So it is asked before it happens rather than found afterwards on a row that has quietly
-        /// gone quiet - and the answer decides which trigger keeps the button.
-        /// <para>
-        /// Only where the construct is what announces the moment. Two sequences both watching the
-        /// inner door close is an ordinary way to build and costs nothing: Sprocket does that
-        /// watching, and it can watch for two.
-        /// </para>
-        /// <para>
-        /// Its own trigger never counts, so settling on what was already there is not a clash with
-        /// itself.
-        /// </para>
-        /// </remarks>
-        void Unless(AutomationSystem system, MomentTrigger made, Trigger except, Action<MomentTrigger> then,
-            Action otherwise)
-        {
-            SystemInstance through;
-            var taken = Holding(Seen(system, made.Sources), made, except, out through) as MomentTrigger;
-            if (taken == null)
-            {
-                then(null);
-                return;
-            }
-
-            AskHere(SequenceText.Taken(_runner.Bindings, taken, through));
-            Answer("Take it over", delegate { then(taken); });
-            Answer("Leave it alone", otherwise);
-        }
-
-        /// <summary>
-        /// What already answers that moment on the blocks in <paramref name="blocks" />, or null; and
-        /// which one of its system holds it.
-        /// </summary>
-        /// <remarks>
-        /// Compared as blocks, through every one of every system: a toolbar slot belongs to a block, and
-        /// two systems can each have a part called Button Panel on different buttons.
-        /// </remarks>
-        Trigger Holding(IList<string> blocks, MomentTrigger made, Trigger except, out SystemInstance instance)
-        {
-            instance = null;
-            if (!(made is RequiredTrigger))
-                return null;
-
-            for (var s = 0; s < _program.Systems.Count; s++)
-            {
-                AutomationSystem each = _program.Systems[s];
-                var triggers = each.Triggers;
-                for (var i = 0; i < triggers.Count; i++)
-                {
-                    var moment = triggers[i] as RequiredTrigger;
-                    if (moment == null || triggers[i] == except || moment.EventId != made.EventId)
-                        continue;
-
-                    for (var n = 0; n < each.Instances.Count; n++)
-                    {
-                        if (!Same(SystemInstance.Through(each.Instances[n], moment.Sources), blocks))
-                            continue;
-
-                        instance = each.Instances[n];
-                        return moment;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>Whether two triggers name the same blocks, in whatever order they were picked.</summary>
-        static bool Same(IList<string> left, IList<string> right)
-        {
-            if (left.Count != right.Count)
-                return false;
-
-            for (var i = 0; i < left.Count; i++)
-            {
-                var found = false;
-                for (var q = 0; q < right.Count && !found; q++)
-                    found = left[i] == right[q];
-
-                if (!found)
-                    return false;
-            }
-
-            return true;
-        }
-
         internal MomentTrigger Starter(AutomationSystem system, PickAnswer answer)
         {
             MomentTrigger made = Vocabulary.Starter(
@@ -1464,6 +1637,71 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             aim.Following.Arrived(aim.Straight);
             aim.Straight = false;
             Push(aim.Following);
+        }
+
+        /// <summary>Gives every block <paramref name="system" /> names directly a slot of its own, filled with that block in its first blockset.</summary>
+        /// <remarks>
+        /// A blueprint's blocks are its slots, and a slot is only made where a block is picked; steps and triggers that name
+        /// blocks themselves would leave a blueprint of them with none. Each block becomes one slot, named for its kind as a
+        /// picked one is, and every step and trigger that named the block names the slot.
+        /// </remarks>
+        internal void Slotted(AutomationSystem system)
+        {
+            var first = system.First;
+            if (first == null)
+                return;
+
+            var named = new List<string>();
+            system.Acted(named);
+
+            var slots = new Dictionary<string, string>();
+            for (var i = 0; i < named.Count; i++)
+            {
+                if (system.FindPart(named[i]) != null)
+                    continue;
+
+                GridEntity entity = _runner.Bindings.Entity(named[i]);
+                slots[named[i]] = entity == null
+                    ? system.Take(first, named[i], _program.Called(named[i], _world.Values), "")
+                    : system.Take(first, named[i], entity.Kind.DisplayName, Type(entity.Kind));
+            }
+
+            if (slots.Count == 0)
+                return;
+
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var moment = triggers[i] as MomentTrigger;
+                if (moment != null)
+                    Slotted(moment.Sources, slots);
+            }
+
+            var sequences = system.Sequences;
+            for (var q = 0; q < sequences.Count; q++)
+            {
+                var steps = sequences[q].Steps;
+                for (var s = 0; s < steps.Count; s++)
+                {
+                    var act = steps[s] as Act;
+                    if (act != null)
+                        Slotted(act.Targets, slots);
+                }
+            }
+
+            _program.Edited();
+            _program.Rewire();
+        }
+
+        /// <summary>Names the slot for each block in <paramref name="names" /> that <paramref name="slots" /> has one for.</summary>
+        static void Slotted(IList<string> names, Dictionary<string, string> slots)
+        {
+            for (var i = 0; i < names.Count; i++)
+            {
+                string slot;
+                if (slots.TryGetValue(names[i], out slot))
+                    names[i] = slot;
+            }
         }
 
         /// <summary>

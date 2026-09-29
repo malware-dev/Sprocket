@@ -579,7 +579,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("Airlock Button is already in use", screen.Editor.Screen.Question);
+        Assert.Equal("Airlock Button already starts Sequence 1 on Airlock.", screen.Editor.Question());
 
         // And leaving it alone leaves everything as it was: no second trigger, and no sequence made
         // for one.
@@ -632,7 +632,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("Airlock Button is already in use", screen.Editor.Screen.Question);
+        Assert.Equal("Airlock Button already starts Sequence 1 on Airlock.", screen.Editor.Question());
 
         screen.Editor.PressChoice("Leave it alone");
         screen.Run(2);

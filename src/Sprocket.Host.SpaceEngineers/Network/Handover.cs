@@ -82,7 +82,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 .UsingModel<Grant>(Grant.SizeOf, Grant.Read, Grant.Write)
                 .UsingModel<Release>(Release.SizeOf, Release.Read, Release.Write)
                 .UsingModel<Change>(Change.SizeOf, Change.Read, Change.Write)
-                .UsingModel<Order>(Order.SizeOf, Order.Read, Order.Write);
+                .UsingModel<Order>(Order.SizeOf, Order.Read, Order.Write)
+                .UsingModel<Wiring>(Wiring.SizeOf, Wiring.Read, Wiring.Write);
         }
 
         /// <summary>Starts hearing what arrives on <paramref name="channel" />, which is built with <see cref="Carry" />.</summary>
@@ -94,6 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _channel.ListenFor<Release>(Released);
             _channel.ListenFor<Change>(Changed);
             _channel.ListenFor<Order>(Ordered);
+            _channel.ListenFor<Wiring>(Wired);
         }
 
         /// <summary>Asks the server for the Sprocket on <paramref name="block" />, as <paramref name="name" />.</summary>
@@ -292,6 +294,37 @@ namespace Sprocket.Host.SpaceEngineers.Network
             Told.Say(Who(sender) + " handed back block " + release.Block
                 + (Holds(release.Block, sender) ? "" : ", which they did not hold"));
             Take(release.Block, sender);
+        }
+
+        /// <summary>Asks the server to write the buttons of <paramref name="panel" /> for the Sprocket on <paramref name="block" />, as just picked.</summary>
+        public void Wire(long block, long panel)
+        {
+            Told.Say("asking the server to wire panel " + panel + " for block " + block);
+            _channel.SendToServer(new Wiring { Block = block, Panel = panel }, true);
+        }
+
+        /// <summary>A panel to wire arriving at the server, which it takes only from whoever holds that Sprocket.</summary>
+        void Wired(ushort channel, Wiring wiring, ulong sender, bool fromServer)
+        {
+            if (!NetworkChannel.Network.IsServer)
+                return;
+
+            var said = Who(sender) + " asked to wire panel " + wiring.Panel + " for block " + wiring.Block;
+            if (!Holds(wiring.Block, sender))
+            {
+                Told.Say(said + ", and was ignored: they do not hold it");
+                return;
+            }
+
+            SprocketUnit unit = _find(wiring.Block);
+            if (unit == null)
+            {
+                Told.Say(said + ", which carries no Sprocket here");
+                return;
+            }
+
+            Told.Say(said);
+            unit.Wire(wiring.Panel);
         }
 
         /// <summary>An order arriving at the server, which it takes only from whoever holds that Sprocket.</summary>

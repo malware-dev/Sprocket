@@ -250,6 +250,13 @@ namespace Sprocket.Host.SpaceEngineers
                 _handover.Run(id, sequence, instance, stops);
             };
 
+            // And a picked button is written there too, after the program that wants it.
+            copy.Editor.Wire = delegate(long panel)
+            {
+                _handover.Keep(id, copy);
+                _handover.Wire(id, panel);
+            };
+
             Show(block, copy, delegate
             {
                 // What changed since the last comparison goes before the Sprocket is handed back,

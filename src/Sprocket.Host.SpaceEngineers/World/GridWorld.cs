@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
@@ -164,6 +165,44 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly HashSet<long> _unstartable = new HashSet<long>();
 
         readonly Dictionary<long, Unanswered> _why = new Dictionary<long, Unanswered>();
+
+        readonly HashSet<string> _written = new HashSet<string>(StringComparer.Ordinal);
+
+        /// <summary>The buttons the program writes as the game's own action, each as <see cref="Spelled" /> spells it.</summary>
+        /// <remarks>Told again whenever the program's triggers change, by the unit that works out what they want.</remarks>
+        public void Writes(List<string> written)
+        {
+            _written.Clear();
+            for (var i = 0; i < written.Count; i++)
+                _written.Add(written[i]);
+        }
+
+        /// <summary>One button written as the game's own action: the panel, its slot, and the block and action it holds.</summary>
+        public static string Spelled(long panel, int slot, long block, string action)
+        {
+            return panel + "/" + slot + "/" + block + "/" + action;
+        }
+
+        /// <summary>
+        /// Whether slot <paramref name="slot" /> of <paramref name="panel" /> holds something this program did not write: the
+        /// game's own action put there by a person, or another Sprocket's.
+        /// </summary>
+        /// <remarks>
+        /// Read from the toolbar as it is now. What this Sprocket wrote there counts as its own whatever key it carries, and so
+        /// does one pointed at a Sprocket that is gone, since nobody's program answers it.
+        /// </remarks>
+        public bool Foreign(IMyTerminalBlock panel, int slot)
+        {
+            IMyToolbar toolbar = Toolbars.Of(panel);
+            MyToolbarItemInfo present;
+            if (toolbar == null || slot < 0 || slot >= toolbar.SlotCount || !toolbar.TryGetItem(slot, out present))
+                return false;
+
+            if (TriggerAction.IsOurs(present))
+                return _anchor != null && present.BlockEntityId != _anchor.EntityId && Toolbars.Exists(present.BlockEntityId);
+
+            return !_written.Contains(Spelled(panel.EntityId, slot, present.BlockEntityId, present.ActionId));
+        }
 
         /// <summary>How many times what nothing can start has been told again, so what reads it knows to read it again.</summary>
         public int Unstarted { get; private set; }

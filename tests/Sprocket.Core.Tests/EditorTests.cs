@@ -516,9 +516,55 @@ public class EditorTests
         editor.PressPrimary();
         ship.Tick();
 
+        // That button is the first blockset's, so it is asked about before it moves, and taking it empties the first's slot.
+        Assert.StartsWith("Airlock Button already starts ", editor.Question());
+        editor.PressChoice(editor.Texts.ButtonTakeOver);
+        ship.Tick();
+
         Assert.Single(editor.Parts()[0].Blocks);
         var cargo = ship.Automation.Systems[0].FindInstance("Airlock 2")!;
         Assert.Single(cargo.Filled);
+        Assert.Empty(ship.Automation.Systems[0].Instances[0].Filled);
+    }
+
+    /// <summary>
+    /// A logic system whose trigger and step name their blocks directly is given a slot for each block when it is made a
+    /// blueprint, and its trigger and step name the slots.
+    /// </summary>
+    [Fact]
+    public void ABlueprintOfBlocksNamedDirectlyGetsASlotForEach()
+    {
+        var ship = Build();
+        var button = ship.Automation.Declare(ship.World, ship.World.Entities.Single(e => e.Name == "Airlock Button")).Name;
+        var door = ship.Automation.Declare(ship.World, ship.World.Entities.Single(e => e.Name == "Inner Door")).Name;
+
+        var pressed = new RequiredTrigger("pressed_1");
+        pressed.Sources.Add(button);
+        var sequence = ship.Automation.AddSequence(pressed);
+        var close = new Act("close");
+        close.Targets.Add(door);
+        sequence.Steps.Add(close);
+        sequence.Steps.Add(new Await());
+
+        var system = sequence.System!;
+        if (system.First == null)
+            system.AddInstance();
+        Assert.Empty(system.Parts);
+        ship.Tick();
+
+        ship.Editor.GoToRoot();
+        ship.Tick();
+        ship.Editor.RootRows()[0].Offers!.Execute();
+        ship.Tick();
+
+        Assert.Equal(2, system.Parts.Count);
+        var buttonSlot = Assert.Single(pressed.Sources);
+        var doorSlot = Assert.Single(close.Targets);
+        Assert.NotNull(system.FindPart(buttonSlot));
+        Assert.NotNull(system.FindPart(doorSlot));
+        Assert.Equal(new[] { button }, system.First!.FilledWith(buttonSlot));
+        Assert.Equal(new[] { door }, system.First!.FilledWith(doorSlot));
+        Assert.Equal(2, ship.Editor.Parts().Count);
     }
 
     /// <summary>A logic system with a trigger, and its row on the construct's own list.</summary>

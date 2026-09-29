@@ -497,22 +497,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with the blocks <paramref name="ids" />, and goes back to the blueprint.</summary>
-        /// <remarks>Rewired as any edit is, because what a trigger's button is may have been this part.</remarks>
+        /// <remarks>
+        /// Asked about first where a button among them already starts something, and rewired as any edit is, because what a
+        /// trigger's button is may have been this part.
+        /// </remarks>
         void Filled(Part part, SystemInstance chosen, IList<long> ids)
         {
-            var names = new List<string>();
-            for (var i = 0; i < ids.Count; i++)
+            Editor.Filling(_system, part, chosen, ids, delegate
             {
-                var block = Editor.World.FindEntity(ids[i]);
-                if (block != null)
-                    names.Add(Editor.Program.Declare(Editor.World, block).Name);
-            }
+                var names = new List<string>();
+                for (var i = 0; i < ids.Count; i++)
+                {
+                    var block = Editor.World.FindEntity(ids[i]);
+                    if (block != null)
+                        names.Add(Editor.Program.Declare(Editor.World, block).Name);
+                }
 
-            chosen.Fill(part.Id, names);
-            Editor.Program.Edited();
-            Editor.Program.Rewire();
-            Editor.Pop();
-            Editor.Invalidate();
+                chosen.Fill(part.Id, names);
+                Editor.Program.Edited();
+                Editor.Program.Rewire();
+                Editor.Pop();
+                Editor.Invalidate();
+            });
         }
 
         /// <summary>The parts the system's sentences use, in the order the system declares them.</summary>

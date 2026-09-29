@@ -362,6 +362,26 @@ Press to rename it.</value>
     <comment>Shown when the banner above is opened.</comment>
   </data>
 
+  <data name="Sprocket.Button.Starts" xml:space="preserve">
+    <value>**{block}** already starts {sequence} on {blockset}.</value>
+    <comment>Asked on picking a button that another trigger already has. {block} is the button panel, {sequence} the sequence it starts, {blockset} the logic system or blockset it starts it on.</comment>
+  </data>
+  <data name="Sprocket.Button.Stops" xml:space="preserve">
+    <value>**{block}** already stops {sequence} on {blockset}.</value>
+    <comment>The same, where the other trigger stops its sequence.</comment>
+  </data>
+  <data name="Sprocket.Button.Elsewhere" xml:space="preserve">
+    <value>Button {button} of **{block}** already does something else.</value>
+    <comment>Asked on picking a button whose slot holds something no trigger here put there: the game's own action, or another block's automation. {button} is the button's number, from 1.</comment>
+  </data>
+  <data name="Sprocket.Button.TakeOver" xml:space="preserve">
+    <value>Take it over</value>
+    <comment>The answer that gives the button to what is being made, taking it from what had it.</comment>
+  </data>
+  <data name="Sprocket.Button.LeaveAlone" xml:space="preserve">
+    <value>Leave it alone</value>
+    <comment>The answer that leaves the button as it is.</comment>
+  </data>
   <data name="Sprocket.Pick.Search" xml:space="preserve">
     <value>Search</value>
     <comment>Hint in the box that narrows a column of a pick, or its list of kinds, by typing.</comment>

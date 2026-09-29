@@ -183,6 +183,10 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 _editor = new SprocketEditor(_world, _program, _runner, _texts);
 
+                // A copy's buttons are written where the Sprocket is kept, which is asked by whoever lent it.
+                if (!_copy)
+                    _editor.Wire = Wire;
+
                 if (_author != null)
                     _editor.Author = _author;
 
@@ -409,6 +413,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Reindex();
             Wanted(_wanting);
+            Written();
 
             // Nothing is written for a program that has just been loaded. Every button it asks for was
             // wired by the session that built it and the game has owned those slots ever since; a slot
@@ -1235,12 +1240,88 @@ namespace Sprocket.Host.SpaceEngineers.World
             //
             // Firing does not depend on any of it: a slot invokes Sprocket's action itself and arrives
             // carrying its key, so a button works whether or not anything has ever looked at it.
+            if (_asserted.Count > 0)
+                Assert();
+
             if (_world.TakeLook() || !_read)
             {
                 _read = true;
                 Reach();
             }
         }
+
+        /// <summary>Writes every slot the program wants on <paramref name="panel" /> on the next pass, whatever the slot holds by then.</summary>
+        /// <remarks>
+        /// A person picking a button in the editor, after being asked about anything its slot already held. That pick is the
+        /// instruction a slot changed by hand waits for, so it is written even where Sprocket believes it already did.
+        /// </remarks>
+        public void Wire(long panel)
+        {
+            if (!_asserted.Contains(panel))
+                _asserted.Add(panel);
+        }
+
+        /// <summary>Writes the slots <see cref="Wire" /> asked for that do not hold what the program wants of them.</summary>
+        /// <remarks>
+        /// After the program's own pass, so what is wanted is what the edit that picked the button left. A panel nothing wants
+        /// yet stays asked for: a trigger joins the program only once what it does is chosen, some screens after its button.
+        /// </remarks>
+        void Assert()
+        {
+            _answered.Clear();
+            for (var w = 0; w < _wanted.Count; w++)
+            {
+                Want want = _wanted[w];
+                if (!_asserted.Contains(want.PanelId))
+                    continue;
+
+                if (!_answered.Contains(want.PanelId))
+                    _answered.Add(want.PanelId);
+
+                IMyToolbar toolbar = ToolbarOf(want.PanelId);
+                if (toolbar == null)
+                    continue;
+
+                MyToolbarItemInfo present;
+                if (toolbar.TryGetItem(want.Slot, out present) && Asked(toolbar, present, want))
+                    continue;
+
+                if (!Toolbars.Write(toolbar, want.Slot, Item(want), Arguments(want)))
+                {
+                    Told.Say("the write was refused for slot " + want.Slot);
+                    continue;
+                }
+
+                Told.Say("wired slot " + want.Slot + " to " + Said(want) + ", as picked");
+            }
+
+            if (_answered.Count == 0)
+                return;
+
+            for (var i = 0; i < _answered.Count; i++)
+                _asserted.Remove(_answered[i]);
+
+            _world.LookAgain();
+        }
+
+        readonly List<long> _asserted = new List<long>();
+        readonly List<long> _answered = new List<long>();
+
+        /// <summary>Tells the world which buttons the program writes as the game's own action, so a slot holding one reads as the program's.</summary>
+        void Written()
+        {
+            _spelled.Clear();
+            for (var w = 0; w < _wanting.Count; w++)
+            {
+                Want want = _wanting[w];
+                if (want.GameActionId != null)
+                    _spelled.Add(GridWorld.Spelled(want.PanelId, want.Slot, want.ActionBlockId, want.GameActionId));
+            }
+
+            _world.Writes(_spelled);
+        }
+
+        readonly List<string> _spelled = new List<string>();
 
         /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
         /// <remarks>
