@@ -19,7 +19,9 @@ A newline ends a statement. There are no continuations: no semicolons, no line j
 A head is a bare or quoted name, or one of the language's words. Keywords are contextual, and a
 quoted name is never a keyword, so an action called `every` is written `'every'`.
 
-A statement the language does not know is dropped, with the block under it.
+Names and keywords are matched exactly, case included: `Run` and `run` are different words.
+
+A statement the language does not know is an error in the system or instance that holds it.
 
 An annotation describes the statement below it. An annotation with nothing under it is an error.
 
@@ -37,6 +39,7 @@ An annotation describes the statement below it. An annotation with nothing under
 | Colour | `#FF8800`, `#FF8800CC` | |
 | Vector | `(3 0 -2)` | |
 | List | `[ 1, "two", three ]` | An item may be a list or a vector: `[ 7, [ (0 2 -1), (3 0 0) ] ]` |
+| Toolbar slot | `panel1:toolbar(1, 1, 4)` | A block, then which of its toolbars, the page and the slot, each counted from 1 |
 
 ## References
 
@@ -59,17 +62,24 @@ outlives one written as a name.
 The first statement of every program, and the version of the language it is written in.
 
 ```
-sprocket 1 alpha 7
+sprocket 1 alpha 8
 ```
 
-`<format>` goes up only when a change would stop existing programs working. A reader of a later
-format converts an earlier program rather than turning it away.
+`<format>` goes up only when a change would stop existing programs working.
 
 `alpha <draft>` says the format is not finished, and numbers the drafts of it. It goes up for a
-change that makes an existing program read differently or not at all, and a program from another
-draft is turned away rather than converted. An addition that no existing program uses leaves it
-where it is. It is absent from a finished format, so a program with no `alpha` was written
-against one.
+change that makes an existing program read differently or not at all; an addition that no existing
+program uses leaves it where it is. A program with no `alpha` was written against the finished
+format, which comes after all of its drafts, however many there were.
+
+```
+# Oldest first
+sprocket 1 alpha 1
+sprocket 1 alpha 8
+sprocket 1
+sprocket 2 alpha 1
+sprocket 2
+```
 
 # A system
 
@@ -112,59 +122,67 @@ required block hangar expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'
 optional block lamp expects InteriorLight
 
 # The call button
-required trigger pressed_1 [ call ] to run 1
+required trigger call to run 1
 
-# Something on the ship, and the program does not say what
-required trigger to run 2
+# The stop button
+required trigger halt to stop 1
+
+# The outer door's own button: it opens the door, and nothing else
+required trigger open to act sprocket.open on [ outer ]
+
+# A second call button, where there is one
+optional trigger callToo to run 1
 ```
 
-An `optional block` is one a construct may leave unfilled.
+An `optional block` or `optional trigger` is one an instance may leave unanswered.
 
 `expects` names what may fill a part: a game type id with the `MyObjectBuilder_` prefix dropped, a
 quoted `'Type/Subtype'` for one exact block, or a list of either.
 
-`required trigger <moment> [ <parts> ] to run <sequence>` says the construct announces that moment
-and starts that sequence. A button, a timer, a sensor and an event controller all answer it, because
-each is a toolbar slot: the slot holds Sprocket's own action and the construct invokes it. The slot is
-the wiring and the only record of it, so it lives in the save beside the program rather than in the
-program.
+`required trigger <name> to <step>` says the construct starts that step from a toolbar slot. Each
+instance says which slots: a button, a sensor, a timer, or any other block with a toolbar answers it,
+because the slot holds Sprocket's own action and the construct invokes it. The slot is the wiring and
+the only record of it, so it lives in the save beside the program rather than in the program.
 
-The parts and the moment may be left out - `required trigger to run <sequence>` - which says only
-that something starts it. That is a whole sentence, not an unfinished one, and then which slot
-answers it is whatever somebody points at Sprocket by hand.
+The step is one of `run`, `stop`, `act` or `set`, written as a sequence writes it.
 
-**Which of the two a moment gets is the block's to say, never the author's.** A button press is
-announced by the construct, so it is a `required trigger`; a door finishing closing is announced to
-nobody, so it is a `when`. Writing the first as a `when` would claim Sprocket watches a property the
-game does not have, and Sprocket would be inventing a signal rather than reading one.
-
-Two triggers running one sequence need two slots running it.
+A trigger is always a toolbar slot. A moment nothing announces, such as a door finishing closing, is
+watched with `when`.
 
 ## Triggers the system runs itself
 
 ```
 # The inner door has shut
-when any closed [ inner ] then run 2
+when any sprocket.closed [ inner ] then run 2
 
 # Whichever of the two shuts first
-when any closed [ inner, outer ] then run 2
+when any sprocket.closed [ inner, outer ] then run 2
 
-# Not until both of them are shut
-when all closed [ inner, outer ] then run 3
+# Not until both of them are shut, and then the hangar opens
+when all sprocket.closed [ inner, outer ] then act sprocket.open on [ hangar ]
 
-every 600t run 3
+# The room has filled, looked for every half second
+when any sprocket.filled [ vent ] every 30t then run 4
+
+every 600t stop 3
 ```
 
-`when <any|all> <moment> [ <parts> ] then run <sequence>` watches those parts for that moment
-itself, which is what a moment the construct announces to nobody needs.
+`when <any|all> <moment> [ <parts> ] [every <duration>] then <step>` watches those parts for that
+moment itself, which is what a moment the construct announces to nobody needs.
 
 `any` is each part's own moment, so two doors shutting at different times is two firings. `all` is
 one moment on the whole sentence: the instant the last of them is there, and not again until one of
 them leaves that state.
 
-`every <duration> run <sequence>` is a clock.
+A moment is either reported as it happens or looked for. `every` is how often one that is looked for
+is looked for, and `10t` where it is left out. A reported moment takes no `every`, and writing one is
+an error. Which moments are which is the host's to say.
 
-A trigger has no name.
+`every <duration> <step>` is a clock.
+
+The step is one of `run`, `stop`, `act` or `set`, written as a sequence writes it.
+
+A `when` and an `every` have no name.
 
 ## Sequences
 
@@ -182,20 +200,18 @@ The name is optional, and is a name rather than text.
 ## Steps
 
 ```
-<action> [ <parts> ] [with <values>]
-action '<id>' on [ <parts> ] [with <values>]
-set '<id>' on [ <parts> ] to <value>
+act <member> on [ <parts> ] [with <values>]
+set <member> on [ <parts> ] to <value>
 run <sequence>
+stop <sequence>
 await
 wait <duration>
 ```
 
 A step starts something and the next statement follows immediately.
 
-The head of a step is an action from the host's own vocabulary - `open`, `close`, `depressurize` - and
-the list is the parts it acts on.
-
-`action '<id>' on [ <parts> ]` runs one of the game's terminal actions by the game's own id.
+`act <member> on [ <parts> ]` runs an action on the parts. The member is the action's id: the
+game's own id as it is, or an id the host adds, qualified by what adds it.
 
 `with` carries the values an action takes, in either form. Every value is written as the kind it is,
 in order, and a value left out is the default the action declared. Where an action says what type a
@@ -203,25 +219,27 @@ value has to be, a value of another kind, or a whole number too large for that t
 and a whole number stands for a real.
 
 ```
-'rotate-to' [ arm ] with 0 90 2
-action 'Reverse' on [ arm ]
-action 'SetColor' on [ light ] with 255 136 0
-action 'Run' on [ pb ] with "doors open"
+act sprocket.close on [ inner ]
+act sprocket.'rotate-to' on [ arm ] with 0 90 2
+act Reverse on [ arm ]
+act SetColor on [ light ] with 255 136 0
+act Run on [ pb ] with "doors open"
 ```
 
-`set '<id>' on [ <parts> ] to <value>` writes one of the block's own values, by the game's id for it.
-A value declares what kind it is, and it is written as that kind, or as a whole number where it is
-real. An id can name both one of the game's actions and one of the block's values, and `set` always
-means the value.
+`set <member> on [ <parts> ] to <value>` writes one of the block's own values, by its id. A value
+declares what kind it is, and it is written as that kind, or as a whole number where it is real. An
+id can name both an action and a value, and `set` always means the value.
 
 ```
-set 'Radius' on [ light ] to 4.5
-set 'OnOff' on [ light ] to off
-set 'Color' on [ light ] to #FF8800
+set Radius on [ light ] to 4.5
+set OnOff on [ light ] to off
+set Color on [ light ] to #FF8800
 ```
 
 `run <sequence>` starts another sequence of the same system and carries on. A sequence already
 running is not started again.
+
+`stop <sequence>` stops another sequence of the same system where it is running, and carries on.
 
 `await` waits for every action started above it to finish. It does not wait for a sequence `run`
 started.
@@ -230,11 +248,11 @@ started.
 statements.
 
 ```
-close [ inner ]
+act sprocket.close on [ inner ]
 await
-open [ outer ]
+act sprocket.open on [ outer ]
 wait 60t
-action 'Run' on [ pb ] with "doors open"
+act Run on [ pb ] with "doors open"
 ```
 
 # A construct
@@ -270,11 +288,14 @@ instance <n> of <system> [as '<name>'] {
 ```
 
 `<part> = [ <blocks> ]` says which of this construct's blocks answer a part of the system. More than
-one block may answer a part.
+one block may answer a part. A trigger is answered by toolbar slots, and more than one slot means any
+of them starts it. An instance that leaves a required part unanswered, block or trigger, is missing
+it.
 
 ```
 instance 1 of MalTek.Airlock {
     inner = [ door1 ]
     hangar = [ door2, door3 ]
+    call = [ panel1:toolbar(1, 1, 4) ]
 }
 ```
