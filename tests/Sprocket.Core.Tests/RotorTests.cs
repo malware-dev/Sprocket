@@ -433,7 +433,7 @@ public class RotorTests
 
     /// <summary>What is plainly wrong with a rotor is read off it, and needs no watching.</summary>
     [Theory]
-    [InlineData("power", "Rotor is switched off, so it can't rotate.")]
+    [InlineData("power", "Rotor")]
     [InlineData("head", "cannot turn - it has no head")]
     [InlineData("lock", "cannot turn - it is locked")]
     [InlineData("torque", "cannot turn - its torque is nought")]
@@ -465,6 +465,13 @@ public class RotorTests
         }
 
         var fault = Faulted(runner, sequence);
+        if (what == "power")
+        {
+            Assert.Equal(SequenceProblem.Stalled, fault.Problem);
+            Assert.Equal(said, fault.Which);
+            return;
+        }
+
         Assert.Equal(SequenceProblem.Stuck, fault.Problem);
         Assert.Equal(said, fault.Because);
     }

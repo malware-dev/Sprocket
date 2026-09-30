@@ -684,7 +684,7 @@ public class AirlockTests
         var fault = SequenceSummary.Fault(a.Runner.Get(cycle));
         Assert.Equal(SequenceProblem.Unable, fault.Problem);
         Assert.Equal(0, fault.Step);
-        Assert.Equal("Inner Door is switched off, so it can't close.", fault.Because);
+        Assert.Equal("Inner Door", fault.Which);
         Assert.DoesNotContain("Outer Door:open", a.Log);
         Assert.False(system.Enabled);
     }
@@ -710,7 +710,7 @@ public class AirlockTests
         var fault = SequenceSummary.Fault(a.Runner.Get(cycle));
         Assert.Equal(SequenceProblem.Unable, fault.Problem);
         Assert.Equal(1, fault.Step);
-        Assert.Equal("Outer Door is switched off, so it can't open.", fault.Because);
+        Assert.Equal("Outer Door", fault.Which);
         Assert.DoesNotContain("Outer Door:open", a.Log);
     }
 
@@ -837,6 +837,34 @@ public class AirlockTests
 
         Assert.Empty(a.Log);
         Assert.False(a.Runner.Get(first)!.IsRunning);
+    }
+
+    /// <summary>A sequence that meets trouble in one it ran goes no further, since the system is switched off.</summary>
+    [Fact]
+    public void ASequenceWhoseRunMeetsTroubleEndsThere()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var first = a.Automation.AddSequence(system);
+        var second = a.Automation.AddSequence(system);
+        Then(second, "close", a.Ref(a.Seen(a.Inner)));
+
+        first.Steps.Add(new Run(second.Number));
+        Then(first, "open", a.Ref(a.Seen(a.Outer)));
+
+        a.Inner.ForceOpen();
+        a.Inner.Enabled = false;
+        system.Enabled = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(first);
+        a.Tick(100);
+
+        Assert.DoesNotContain("Outer Door:open", a.Log);
+        Assert.False(a.Runner.Get(first)!.IsRunning);
+        Assert.False(system.Enabled);
     }
 
     /// <summary>A clock can stop a sequence, where a clock that ran it would start it.</summary>

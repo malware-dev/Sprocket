@@ -6,12 +6,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// Takes a trigger out of a system, with the trigger part it is and what each instance answered it with.
     /// </summary>
     /// <remarks>
-    /// In the system's history rather than asked about first, because a question in front of every deletion teaches
-    /// people to press through questions, and the way back answers the same need.
-    /// <para>
     /// It comes back where it was. A trigger put back on the end would reorder the list somebody is looking at, which
     /// reads as a second change rather than as the first one being undone.
-    /// </para>
     /// </remarks>
     sealed class ForgetTrigger : SystemEdit
     {

@@ -477,13 +477,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = 12f, Tint = Palette.Muted }
         };
 
-        /// <summary>A symbol that could hold something as it is, smaller than the icons round it until it does.</summary>
+        /// <summary>A symbol that pauses something, smaller than the icons round it while nothing is paused.</summary>
         public static readonly GlyphStyle Holds = new GlyphStyle(Icon)
         {
             Base = { FontSize = 12f }
         };
 
-        /// <summary>A symbol that holds something as it is, lit in the color of something worth noticing while it does.</summary>
+        /// <summary>A symbol that pauses something, lit in the color of something worth noticing while it is paused.</summary>
         public static readonly GlyphStyle Held = new GlyphStyle(Icon)
         {
             Base = { Background = Palette.NoticeWash, Tint = Palette.Notice },

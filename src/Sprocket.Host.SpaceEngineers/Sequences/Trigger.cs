@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public bool IsAbout(Sequence sequence)
         {
-            if (sequence.Number > 0)
+            if (!sequence.IsAlone)
                 return Runs == sequence.Number;
 
             var act = Acts;

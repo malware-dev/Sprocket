@@ -19,6 +19,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         internal const string SwitchOn = "on";
         internal const string SwitchOff = "off";
 
+        /// <summary>What Sprocket's own members and moments are qualified by: <c>'sprocket'.close</c>.</summary>
+        /// <remarks>Persisted in every program that uses one, so it cannot change without changing what those programs say.</remarks>
+        internal const string Own = "sprocket";
+
         const string GamePrefix = "MyObjectBuilder_";
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();

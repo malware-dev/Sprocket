@@ -9,6 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
     sealed partial class ScriptPage
     {
         Label _problem;
+        HStack _spacer;
         Button _apply;
         EditBox _listing;
 
@@ -31,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
                         Children =
                         {
                             new Label { Style = Styles.Problem, Wraps = true, IsVisible = false, Placement = Flex.Grow }.As(out _problem),
-                            new HStack { Placement = Flex.Grow },
+                            new HStack { Placement = Flex.Grow }.As(out _spacer),
                             new Button { Style = Styles.Primary }.As(out _apply)
                         }
                     },

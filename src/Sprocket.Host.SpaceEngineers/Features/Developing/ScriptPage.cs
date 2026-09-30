@@ -122,6 +122,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
             var trouble = Trouble;
             _problem.Text = trouble;
             _problem.IsVisible = trouble.Length > 0;
+
+            // The words take the room the button does not, where there are any.
+            _spacer.IsVisible = trouble.Length == 0;
         }
 
         /// <summary>Selects the line what is wrong names, in view and ready to be typed over, where it names one.</summary>

@@ -1116,9 +1116,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Opens the listing of what this construct's automation is saved as.
         /// </summary>
         /// <remarks>
-        /// A developer tool. Nothing offers it unless <see cref="DeveloperMode" /> says so, and this
-        /// does not check again: the check belongs where the way in is put on a screen, so there is one
-        /// place to read rather than two that can disagree.
+        /// Offered in <see cref="DeveloperMode" />, and from the notice about a program that would not read. This
+        /// does not check either: the check belongs where the way in is put on a screen, so there is one place to
+        /// read rather than two that can disagree.
         /// </remarks>
         internal void ShowScript()
         {
@@ -1184,6 +1184,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         {
                             if (taken != null)
                                 Release(taken);
+
+                            var answering = Answering(system, made, answer, null);
+                            if (answering != null)
+                            {
+                                answering.Apply(system);
+                                _program.Edited();
+                                _program.Rewire();
+                            }
 
                             Aimed(system, made, aim, origin, true, null);
                         }, delegate { });
@@ -1534,9 +1542,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>
         /// The one place the two arrangements are told apart, and nobody is asked: picking a button means the construct
         /// already announces it and Sprocket wires a slot, picking a door means Sprocket watches for it. See
-        /// <see cref="Vocabulary.Starter" />. A button makes a trigger part, answered in the blockset shown by what was
-        /// picked; one picked again for <paramref name="keeping" /> is that trigger's own part, filled once the question of
-        /// whether the buttons are free is answered - see <see cref="Refill" />.
+        /// <see cref="Vocabulary.Starter" />. A button names a trigger part, new or, picked again for
+        /// <paramref name="keeping" />, that trigger's own; the part is taken and answered once the question of whether
+        /// the buttons are free is answered - see <see cref="Answering" />.
         /// </remarks>
         internal MomentTrigger Starter(AutomationSystem system, PickAnswer answer, RequiredTrigger keeping)
         {
@@ -1563,22 +1571,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return made;
 
             var called = declared.Count == 1 ? Called(first) : first.Kind.DisplayName;
-            return RequiredTrigger.Named(system.TakeTrigger(instance, declared, at, called, Type(first.Kind)));
+            return RequiredTrigger.Named(system.Free(called));
         }
 
-        /// <summary>Answers trigger part <paramref name="part" /> in the blockset shown with the buttons <paramref name="answer" /> picked.</summary>
-        void Refill(AutomationSystem system, string part, PickAnswer answer)
+        /// <summary>
+        /// The edit that answers the trigger part <paramref name="made" /> names in the blockset shown with the buttons
+        /// <paramref name="answer" /> picked, taking the part where it is new, around <paramref name="then" />; null where
+        /// <paramref name="made" /> names no part or nothing was picked.
+        /// </summary>
+        /// <remarks>Made once the question about the buttons is answered, so leaving them alone leaves no part behind.</remarks>
+        SystemEdit Answering(AutomationSystem system, MomentTrigger made, PickAnswer answer, SystemEdit then)
         {
+            var required = made as RequiredTrigger;
             var instance = StandIn(system);
-            if (instance == null)
-                return;
+            if (required == null || instance == null)
+                return null;
 
             var declared = new List<string>();
             var at = new List<ToolbarSlot>();
-            Picked(answer, declared, at);
-            instance.Fill(part, declared, at);
-            _program.Edited();
-            _program.Rewire();
+            var first = Picked(answer, declared, at);
+            if (first == null)
+                return null;
+
+            return new AnswerTrigger(then, system, instance, required.Part, Type(first.Kind), declared, at);
         }
 
         /// <summary>The blocks <paramref name="answer" /> picked, as the construct declares them, each with the toolbar slot its press is answered on; the first of them, or null.</summary>
@@ -2004,11 +2019,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         // its toolbar slots name it.
                         if (keeping != null && made is RequiredTrigger)
                         {
-                            if (taken != null)
-                                Release(taken);
+                            var refill = Answering(system, made, answer, null);
+                            if (refill != null)
+                                Aimed(system, moment, aim, origin, false, taken == null ? refill : TakingOver(refill, taken));
+                            else
+                                Aimed(system, moment, aim, origin, false, null);
 
-                            Refill(system, keeping.Part, answer);
-                            Aimed(system, moment, aim, origin, false, null);
                             return;
                         }
 
@@ -2020,7 +2036,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         }
 
                         // One edit either way, because it is one answer to one question.
-                        Aimed(system, made, aim, origin, false, taken == null ? change : TakingOver(change, taken));
+                        var edit = Answering(system, made, answer, change) ?? change;
+                        Aimed(system, made, aim, origin, false, taken == null ? edit : TakingOver(edit, taken));
                     }, delegate { UnwindTo(origin); });
                 },
                 true, was != null && was.RequiresAll, opens: action ? Opening.Nothing : opens, aim: aim);
@@ -2127,7 +2144,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         internal void DeleteSequence(Sequence sequence)
         {
-            Deleting(Texts.SequenceDeleteQuestion, SequenceText.Doing(_runner.Bindings, sequence, StandIn(sequence.System)),
+            Deleting(Texts.SequenceDeleteQuestion, SequenceText.Called(sequence),
                 Texts.DeleteFinal, null, delegate { TakeOut(sequence); });
         }
 

@@ -125,7 +125,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             get
             {
-                if (_owner.Missing(_sequence, _instance))
+                if (_missingSeen != _owner.MissingStamp)
+                {
+                    _missing = _owner.Missing(_sequence, _instance);
+                    _missingSeen = _owner.MissingStamp;
+                }
+
+                if (_missing)
                     return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger);
                 if (_met.Exists)
                     return _met;
@@ -157,6 +163,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         SequenceFault _met;
         SequenceFault _stuck;
 
+        int _missingSeen = -1;
+        bool _missing;
+
         int _tick;
 
         /// <summary>
@@ -185,12 +194,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (string.IsNullOrEmpty(doing.LeadsToStateId))
                         continue;
 
-                    // Switched off on the way: it gets no further until it is switched on again, which is somebody's to do.
+                    // Switched off, unpowered or broken on the way: it gets no further until somebody sees to it.
                     var entity = compiled.Entities[t];
-                    var unable = Reached(_owner.World, entity, doing.LeadsToStateId) ? null : entity.Unable(doing);
-                    if (unable != null && !_stuck.Exists)
+                    if (!Reached(_owner.World, entity, doing.LeadsToStateId) && entity.Stalls(doing))
                     {
-                        _stuck = new SequenceFault(SequenceProblem.Stuck, _sequence.Steps.IndexOf(_outstanding[i]), unable);
+                        if (!_stuck.Exists)
+                            _stuck = new SequenceFault(SequenceProblem.Stalled, _sequence.Steps.IndexOf(_outstanding[i]), null, entity.Name);
+
                         continue;
                     }
 
@@ -719,9 +729,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (!run.Stops)
                         _started.Add(run.Number);
 
-                    // Stopped by that: by stopping itself, or by a sequence it ran. The run ends here.
+                    // Stopped by that: by stopping itself, or by a sequence it ran; or the one it ran met trouble and
+                    // switched the system off. The run ends here.
                     if (!IsRunning)
                         return;
+
+                    if (!CanRun && !_byHand)
+                    {
+                        Stop();
+                        return;
+                    }
 
                     Step();
                     continue;
@@ -806,7 +823,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             EnterStep();
         }
 
-        /// <summary>The first block of an act that is switched off or not working, and so cannot do what it is asked; none where all can.</summary>
+        /// <summary>The first block of an act that is switched off, and so cannot do what it is asked; none where all can.</summary>
         SequenceFault Unable(Compiled compiled)
         {
             for (var i = 0; i < compiled.Entities.Count; i++)
@@ -817,9 +834,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!string.IsNullOrEmpty(leads) && Reached(_owner.World, entity, leads))
                     continue;
 
-                var said = entity.Unable(compiled.Actions[i]);
-                if (said != null)
-                    return new SequenceFault(SequenceProblem.Unable, _stepIndex, said, compiled.Names[i]);
+                if (entity.Refuses(compiled.Actions[i]))
+                    return new SequenceFault(SequenceProblem.Unable, _stepIndex, null, entity.Name);
             }
 
             return SequenceFault.None;
@@ -917,7 +933,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         readonly List<Act> _outstanding = new List<Act>();
 
-        /// <summary>The sequences started since the last await, by number.</summary>
         readonly List<int> _started = new List<int>();
 
         void Execute(GridWorld world, Act step)
@@ -945,9 +960,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public readonly List<EntityAction> Actions = new List<EntityAction>();
             public readonly List<IList<Literal>> Values = new List<IList<Literal>>();
             public readonly List<Order> Orders = new List<Order>();
-
-            /// <summary>What the program calls each block, in the same order.</summary>
-            public readonly List<string> Names = new List<string>();
 
             /// <summary>Why the act cannot be done, gone or possibly swapped, or none.</summary>
             public SequenceProblem Problem;
@@ -1010,7 +1022,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 compiled.Entities.Add(entity);
-                compiled.Names.Add(acting[i]);
                 compiled.Actions.Add(action);
                 compiled.Values.Add(values);
                 compiled.Orders.Add(entity.Prepare(action, values));

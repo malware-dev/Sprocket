@@ -7,6 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class ToolbarSlot
     {
+        /// <summary>Slot <paramref name="slot" /> of page <paramref name="page" /> of toolbar <paramref name="toolbar" />, each counted from 1.</summary>
         public ToolbarSlot(int toolbar, int page, int slot)
         {
             Toolbar = toolbar;

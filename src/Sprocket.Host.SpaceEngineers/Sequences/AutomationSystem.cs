@@ -427,7 +427,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary><paramref name="called" />, numbered where a part already has it: Door, Door 2.</summary>
-        string Free(string called)
+        public string Free(string called)
         {
             var name = called;
             for (var n = 2; FindPart(name) != null; n++)

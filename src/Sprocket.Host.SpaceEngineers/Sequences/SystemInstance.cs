@@ -45,6 +45,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         public bool HasName => !string.IsNullOrEmpty(Name);
 
+        /// <summary>What somebody wrote above it, or empty.</summary>
+        public string Annotation { get; set; } = "";
+
         /// <summary>
         /// Whether this one may run, independently of the others.
         /// </summary>
@@ -73,6 +76,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Dictionary<string, List<string>> _fills = new Dictionary<string, List<string>>();
 
         readonly Dictionary<string, List<ToolbarSlot>> _positions = new Dictionary<string, List<ToolbarSlot>>();
+
+        readonly Dictionary<string, string> _notes = new Dictionary<string, string>();
 
         public IEnumerable<string> Filled => _fills.Keys;
 
@@ -128,6 +133,23 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             _fills.Remove(slot);
             _positions.Remove(slot);
+            _notes.Remove(slot);
+        }
+
+        /// <summary>What somebody wrote above how <paramref name="slot" /> is answered, or empty.</summary>
+        public string NoteOn(string slot)
+        {
+            string note;
+            return _notes.TryGetValue(slot, out note) ? note : "";
+        }
+
+        /// <summary>Keeps <paramref name="annotation" /> as what is written above how <paramref name="slot" /> is answered.</summary>
+        public void Note(string slot, string annotation)
+        {
+            if (string.IsNullOrEmpty(annotation))
+                _notes.Remove(slot);
+            else
+                _notes[slot] = annotation;
         }
 
         /// <summary>Moves what fills slot <paramref name="was" /> to the slot's new name, <paramref name="now" />.</summary>
@@ -139,6 +161,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             _fills.Remove(was);
             _fills[now] = chosen;
+
+            string note;
+            if (_notes.TryGetValue(was, out note))
+            {
+                _notes.Remove(was);
+                _notes[now] = note;
+            }
 
             List<ToolbarSlot> positions;
             if (!_positions.TryGetValue(was, out positions))

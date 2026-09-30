@@ -11,23 +11,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// Writes a program out as a script, and reads one back.
     /// </summary>
     /// <remarks>
-    /// Core never touches a file - the banned list says so, because Space Engineers does not whitelist
-    /// IO and a mod stores its data in the save. So this turns a program into a string and back, and
-    /// whoever is hosting decides where the string lives: a file beside the prototype, a section of the
-    /// world save, a datapad.
+    /// Space Engineers does not whitelist IO, and a mod stores its data in the save. So this turns a
+    /// program into a string and back, and whoever holds the string decides where it lives.
     /// <para>
     /// <b>The script is the program.</b> There is nothing else to project it from - the model lives in
     /// memory in a mod the game may unload at any moment - so this is not a view of the truth, it is
-    /// the truth written down. Three things follow and all three are load-bearing: it stays readable so
-    /// a save that breaks can be looked at, a construct nobody recognises is dropped whole rather than
-    /// taking its neighbours with it, and a program that did not read cleanly is marked
-    /// <see cref="Automation.Intact" /> false so that the next save cannot write the damage over what
-    /// is still on disk.
+    /// the truth written down. Two things follow and both are load-bearing: it stays readable so a save
+    /// that breaks can be looked at and mended, and a text with anything wrong in it is read as nothing,
+    /// kept whole as it was written and marked <see cref="Automation.Intact" /> false so that the next
+    /// save cannot write over it.
     /// </para>
     /// <para>
     /// It is a language and not prose, and that is the line to hold: keywords here are syntax, the way
     /// <c>if</c> and <c>while</c> are, and nobody localises those. The moment it drifts towards English
-    /// it puts word order and vocabulary back into core and freezes them in a file format, where they
+    /// it puts word order and vocabulary into the model and freezes them in a file format, where they
     /// become a compatibility promise. Every word a person reads is the host's; every word in here is
     /// the format's.
     /// </para>
@@ -37,10 +34,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         const int Version = 1;
 
         const int Draft = 8;
-
-        /// <summary>What Sprocket's own actions and moments are qualified by: <c>sprocket.close</c>.</summary>
-        /// <remarks>Persisted in every program that uses one, so it cannot change without changing what those programs say.</remarks>
-        const string Own = "sprocket";
 
         static readonly string[] Times =
         {
@@ -58,6 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public static string Save(Automation program, Values values)
         {
             var pen = new Pen();
+            pen.Note(program.Annotation);
             pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
             pen.End();
 
@@ -137,14 +131,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             // Turned away whole rather than read as far as it goes. A different version or draft is
             // not a damaged program, it is one this build does not speak, so whatever happened to read
-            // would be read as something it does not mean.
+            // would be read as something it does not mean. A header that would not parse says nothing
+            // about its version, so that is damage like any other.
             string refused = null;
-            if (constructs.Count == 0 || constructs[0].Key != Keyword.Sprocket)
-                refused = "Line 1: expected sprocket <format>.";
-            else if (constructs[0].Whole(0) != Version)
-                refused = "Line 1: written for sprocket " + constructs[0].Whole(0) + "; this reads sprocket " + Version + ".";
-            else if (DraftOf(constructs[0]) != Draft)
-                refused = "Line 1: written for " + (DraftOf(constructs[0]) < 0 ? "the finished format" : "alpha " + DraftOf(constructs[0]))
+            var header = constructs.Count > 0 && constructs[0].Key == Keyword.Sprocket ? constructs[0] : null;
+            if (header == null && parser.Trouble.Length == 0)
+                refused = (constructs.Count == 0 ? "Line 1: " : trouble.Line(constructs[0])) + "expected sprocket <format>.";
+            else if (header != null && header.Whole(0) != Version)
+                refused = trouble.Line(header) + "written for sprocket " + header.Whole(0) + "; this reads sprocket " + Version + ".";
+            else if (header != null && DraftOf(header) != Draft)
+                refused = trouble.Line(header) + "written for " + (DraftOf(header) < 0 ? "the finished format" : "alpha " + DraftOf(header))
                     + "; this reads alpha " + Draft + ".";
 
             if (refused != null)
@@ -155,13 +151,17 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return refused;
             }
 
-            Ends(constructs[0], constructs[0].Says(1, Keyword.Alpha) ? 3 : 1, trouble);
+            if (header != null)
+            {
+                Header(header, trouble);
+                program.Annotation = header.Annotation;
+            }
 
             for (var i = 0; i < constructs.Count; i++)
             {
                 var construct = constructs[i];
                 if (construct.IsOff)
-                    trouble.Say(construct, "'//' only switches off a step in a sequence.");
+                    trouble.Say(construct, "unexpected '//'; only a step in a sequence can be switched off.");
                 else if (construct.Key == Keyword.Block)
                     ReadRef(construct, program, values, trouble);
                 else if (construct.Key == Keyword.System)
@@ -184,6 +184,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return trouble.What;
         }
 
+        /// <summary>Says what is wrong with the shape of <paramref name="header" />: whole numbers, and nothing after them.</summary>
+        static void Header(Statement header, Trouble trouble)
+        {
+            var alpha = header.Says(1, Keyword.Alpha);
+            if (header.ValueAt(0).Form != ValueForm.Integer || (alpha && header.ValueAt(2).Form != ValueForm.Integer))
+            {
+                trouble.Say(header, "expected whole numbers in sprocket <format>.");
+                return;
+            }
+
+            Ends(header, alpha ? 3 : 1, trouble);
+        }
+
         /// <summary>
         /// Which draft of the format a program says it was written against, or none where it does not say.
         /// </summary>
@@ -200,6 +213,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         static void WriteRef(Pen pen, Values values, EntityRef declared)
         {
+            pen.Note(declared.Annotation);
             pen.Start(Keyword.Block).Word(BlockKinds.Sort(declared.KindId)).Word(declared.Name);
             pen.OpenList();
 
@@ -216,7 +230,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </summary>
         /// <remarks>
         /// The syntax carries the kind, so nothing here tags anything: a whole number reads back as a
-        /// whole number because that is what it looks like. Which is the point - core does not know what
+        /// whole number because that is what it looks like. Which is the point - this reader does not know what
         /// a key means, only what it is, and the host that minted the list is the only thing that reads
         /// it.
         /// </remarks>
@@ -295,7 +309,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static void ReadRef(Statement statement, Automation program, Values values, Trouble trouble)
         {
             var name = statement.ValueAt(1);
-            if (statement.Word(0).Length == 0 || !Named(name) || statement.ValueAt(2).Form != ValueForm.List)
+            if (!Named(statement.ValueAt(0)) || !Named(name) || statement.ValueAt(2).Form != ValueForm.List)
             {
                 trouble.Say(statement, "expected block '<type>/<subtype>' <name> [ <keys> ].");
                 return;
@@ -311,6 +325,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             var declared = new EntityRef(statement.Word(1), BlockKinds.Definition(statement.Word(0)));
+            declared.Annotation = statement.Annotation;
             var keys = statement.Items(2);
             for (var i = 0; i < keys.Count; i++)
                 ReadKey(values, keys[i], declared.Keys, statement, trouble);
@@ -321,10 +336,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A key, or trouble where this build has no kind that could hold it.
         /// </summary>
-        /// <remarks>
-        /// Said rather than dropped, because a key is how a block is found again: dropping one quietly
-        /// leaves the next save writing a block that matches less than the one it replaces.
-        /// </remarks>
         static void ReadKey(Values values, Value key, IList<EntityKey> into, Statement statement,
             Trouble trouble)
         {
@@ -485,7 +496,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var inner = body[i];
                 if (inner.IsOff)
                 {
-                    trouble.Say(inner, "'//' only switches off a step in a sequence.");
+                    trouble.Say(inner, "unexpected '//'; only a step in a sequence can be switched off.");
                     continue;
                 }
 
@@ -556,7 +567,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (part.Expects.Count == 1)
                 pen.Says(Keyword.Expects).Word(part.Expects[0]);
             else if (part.Expects.Count > 1)
-                Names(pen.Says(Keyword.Expects), part.Expects);
+                WriteNames(pen.Says(Keyword.Expects), part.Expects);
 
             pen.End();
         }
@@ -598,7 +609,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var one = statement.ValueAt(3);
             if (one.Form == ValueForm.List)
                 Names(statement, 3, part.Expects, trouble, "expected a block type or a list of them after 'expects'.");
-            else if (one.IsWord && one.Word.Length > 0)
+            else if (Named(one))
                 part.Expects.Add(one.Word);
             else
                 trouble.Say(statement, "expected a block type or a list of them after 'expects'.");
@@ -616,6 +627,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static void WriteInstance(Pen pen, AutomationSystem system, SystemInstance instance)
         {
             pen.Blank();
+            pen.Note(instance.Annotation);
             pen.Start(Keyword.Instance).Whole(instance.Number)
                 .Says(Keyword.Of).Text(system.Identity.ToString("D"));
 
@@ -632,11 +644,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Body();
             for (var i = 0; i < parts.Count; i++)
             {
+                pen.Note(instance.NoteOn(parts[i]));
                 pen.Head(parts[i]).Says(Keyword.Equals);
 
                 var positions = instance.Positions(parts[i]);
                 if (positions == null)
-                    Names(pen, instance.FilledWith(parts[i]));
+                    WriteNames(pen, instance.FilledWith(parts[i]));
                 else
                     Slots(pen, instance.FilledWith(parts[i]), positions);
 
@@ -688,10 +701,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
             }
 
-            var system = Named(program, statement, 2);
+            var system = SystemNamed(program, statement, 2);
             if (system == null)
             {
-                trouble.Say(statement, "no system called " + Spelled(statement.ValueAt(2)) + ".");
+                trouble.Say(statement, "no system called " + Spelled(statement, 2) + ".");
                 return;
             }
 
@@ -719,6 +732,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
 
             var instance = system.Restore((int)number.Whole, name);
+            instance.Annotation = statement.Annotation;
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
@@ -726,7 +740,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var inner = body[i];
                 if (inner.IsOff)
                 {
-                    trouble.Say(inner, "'//' only switches off a step in a sequence.");
+                    trouble.Say(inner, "unexpected '//'; only a step in a sequence can be switched off.");
                     continue;
                 }
 
@@ -745,6 +759,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     trouble.Say(inner, "system '" + system.Name + "' has no part '" + inner.Head + "'.");
                     continue;
                 }
+
+                if (instance.FilledWith(inner.Head) != null)
+                {
+                    trouble.Say(inner, "part '" + inner.Head + "' is already answered.");
+                    continue;
+                }
+
+                instance.Note(inner.Head, inner.Annotation);
 
                 if (part.IsTrigger)
                 {
@@ -799,7 +821,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>The system a statement names by identity or by name, or null.</summary>
-        static AutomationSystem Named(Automation program, Statement statement, int at)
+        static AutomationSystem SystemNamed(Automation program, Statement statement, int at)
         {
             Guid identity;
             if (Guid.TryParseExact(statement.Text(at), "D", out identity))
@@ -880,7 +902,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>required trigger call to run 1</c>, <c>when any sprocket.closed [ inner ] then run 2</c>, or
+        /// <c>required trigger call to run 1</c>, <c>when any 'sprocket'.closed [ inner ] then run 2</c>, or
         /// <c>every 600t stop 3</c>.
         /// </summary>
         /// <remarks>
@@ -902,7 +924,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 pen.Note(note);
                 pen.Start(part != null && part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Trigger)
                     .Word(needed.Part).Says(Keyword.To);
-                Does(pen, trigger.Does);
+                WriteDoes(pen, trigger.Does);
                 pen.End();
                 return;
             }
@@ -913,13 +935,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var when = trigger as WhenTrigger;
             if (when != null)
             {
-                pen.Start(Keyword.When).Says(when.RequiresAll ? Keyword.All : Keyword.Any).Qualified(Own, when.EventId);
-                Names(pen, when.Sources);
+                pen.Start(Keyword.When).Says(when.RequiresAll ? Keyword.All : Keyword.Any).Qualified(when.Provider, when.EventId);
+                WriteNames(pen, when.Sources);
                 if (when.IntervalTicks > 0)
                     pen.Says(Keyword.Every).Ticks(when.IntervalTicks);
 
                 pen.Says(Keyword.Then);
-                Does(pen, trigger.Does);
+                WriteDoes(pen, trigger.Does);
                 pen.End();
                 return;
             }
@@ -928,13 +950,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (every != null)
             {
                 pen.Start(Keyword.Every).Ticks(every.IntervalTicks);
-                Does(pen, trigger.Does);
+                WriteDoes(pen, trigger.Does);
                 pen.End();
             }
         }
 
         /// <summary>The step a trigger does, on the line the trigger is written on.</summary>
-        static void Does(Pen pen, Step step)
+        static void WriteDoes(Pen pen, Step step)
         {
             pen.Says(Head(step));
             Rest(pen, step);
@@ -1040,13 +1062,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             var moment = statement.Parts(1);
-            if (moment.Count != 2 || moment[0].Word != Own || moment[1].Word.Length == 0)
+            if (moment.Count != 2 || moment[0].Word.Length == 0 || moment[1].Word.Length == 0)
             {
-                trouble.Say(statement, "expected a moment qualified by what adds it, like sprocket.closed.");
+                trouble.Say(statement, "expected a moment qualified by what adds it, like 'sprocket'.closed.");
                 return null;
             }
 
             var when = new WhenTrigger(moment[1].Word);
+            when.Provider = moment[0].Word;
             when.RequiresAll = statement.Says(0, Keyword.All);
             if (statement.ValueAt(2).Form != ValueForm.List)
             {
@@ -1149,7 +1172,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (act.Form == Form.Value)
                 {
                     pen.Word(act.ActionId).Says(Keyword.On);
-                    Names(pen, act.Targets);
+                    WriteNames(pen, act.Targets);
 
                     if (act.Values.Count > 0)
                     {
@@ -1162,10 +1185,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     if (act.Form == Form.Action)
                         pen.Word(act.ActionId);
                     else
-                        pen.Qualified(Own, act.ActionId);
+                        pen.Qualified(act.Provider, act.ActionId);
 
                     pen.Says(Keyword.On);
-                    Names(pen, act.Targets);
+                    WriteNames(pen, act.Targets);
 
                     if (act.Values.Count > 0)
                     {
@@ -1206,8 +1229,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (Ticks(statement.ValueAt(0), 0, out ticks))
                     return Ends(statement, 1, trouble) ? Noted(new Wait(ticks), statement) : null;
 
-                // Said rather than dropped, because a wait without its unit is somebody writing a
-                // length of time and Sprocket is the only thing that can tell them it read as nothing.
                 trouble.Say(statement, "expected a duration after 'wait', like 60t.");
                 return null;
             }
@@ -1216,14 +1237,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return Acted(statement, trouble);
 
             if (statement.Key == Keyword.Set)
-                return Given(statement, trouble);
+                return ReadSet(statement, trouble);
 
             trouble.Say(statement, "unexpected " + Headed(statement) + "; expected act, set, run, stop, await or wait.");
             return null;
         }
 
         /// <summary>
-        /// <c>act sprocket.close on [ inner ]</c> or <c>act SetColor on [ light ] with 255 0 0</c>: an action, by the game's own
+        /// <c>act 'sprocket'.close on [ inner ]</c> or <c>act SetColor on [ light ] with 255 0 0</c>: an action, by the game's own
         /// id or qualified by what adds it, on some parts, given what it asks for.
         /// </summary>
         static Step Acted(Statement statement, Trouble trouble)
@@ -1235,14 +1256,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 act = new Act(member[0].Word);
                 act.Form = Form.Action;
             }
-            else if (member.Count == 2 && member[0].Word == Own && member[1].Word.Length > 0)
+            else if (member.Count == 2 && member[0].Word.Length > 0 && member[1].Word.Length > 0)
             {
                 act = new Act(member[1].Word);
                 act.Form = Form.Native;
+                act.Provider = member[0].Word;
             }
             else
             {
-                trouble.Say(statement, "expected an action after 'act', like Reverse or sprocket.close.");
+                trouble.Say(statement, "expected an action after 'act', like Reverse or 'sprocket'.close.");
                 return null;
             }
 
@@ -1262,7 +1284,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             for (var at = 4; at < statement.Count; at++)
-                act.Values.Add(Given(statement.ValueAt(at)));
+            {
+                if (!ReadValue(statement, at, act, trouble))
+                    return null;
+            }
 
             return Noted(act, statement);
         }
@@ -1272,9 +1297,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// The value is taken by position rather than by what it looks like, so a flag written <c>on</c> is a value and
         /// not mistaken for one of the language's own words.
         /// </remarks>
-        static Step Given(Statement statement, Trouble trouble)
+        static Step ReadSet(Statement statement, Trouble trouble)
         {
-            if (statement.Word(0).Length == 0 || !statement.Says(1, Keyword.On) || statement.ValueAt(2).Form != ValueForm.List
+            if (!Named(statement.ValueAt(0)) || !statement.Says(1, Keyword.On) || statement.ValueAt(2).Form != ValueForm.List
                 || !statement.Says(3, Keyword.To) || statement.Count < 5)
             {
                 trouble.Say(statement, "expected set <value> on [ <parts> ] to <value>.");
@@ -1289,8 +1314,21 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!Names(statement, 2, act.Targets, trouble, "expected part names in the list."))
                 return null;
 
-            act.Values.Add(Given(statement.ValueAt(4)));
-            return Noted(act, statement);
+            return ReadValue(statement, 4, act, trouble) ? Noted(act, statement) : null;
+        }
+
+        /// <summary>Adds the value at <paramref name="index" /> of <paramref name="statement" /> to what <paramref name="act" /> is given, and says whether it is one a step can be given.</summary>
+        static bool ReadValue(Statement statement, int index, Act act, Trouble trouble)
+        {
+            var form = statement.ValueAt(index).Form;
+            if (form == ValueForm.List || form == ValueForm.Vector || form == ValueForm.Slot || form == ValueForm.Qualified)
+            {
+                trouble.Say(statement, "unexpected " + Spelled(statement, index) + "; expected a value.");
+                return false;
+            }
+
+            act.Values.Add(Given(statement.ValueAt(index)));
+            return true;
         }
 
         /// <summary>One value of an action, as whatever kind it was written as.</summary>
@@ -1369,14 +1407,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 var numbered = new Run((int)named.Whole);
                 numbered.Stops = stops;
+                trouble.Wrote(statement, numbered);
                 return Noted(numbered, statement);
             }
 
-            if (named.IsWord && named.Word.Length > 0)
+            if (Named(named))
             {
                 var run = new Run(0);
                 run.Named = named.Word;
                 run.Stops = stops;
+                trouble.Wrote(statement, run);
                 return Noted(run, statement);
             }
 
@@ -1391,10 +1431,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Late, because a sequence may be named or numbered before it is written. Anything naming a
         /// sequence the system has not got is trouble: it can never run, nothing else would say so, and
         /// a number that is not there would take the runner down on the tick that reached it.
-        /// <para>
-        /// Reported against the system's own line rather than the step's, because a step does not keep
-        /// where it was written and the system is what the name was looked for in.
-        /// </para>
         /// </remarks>
         static void Resolve(AutomationSystem system, Statement statement, Trouble trouble)
         {
@@ -1417,6 +1453,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (run == null)
                 return;
 
+            statement = trouble.Where(run, statement);
             if (!string.IsNullOrEmpty(run.Named))
             {
                 var named = Called(system, run.Named);
@@ -1445,7 +1482,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return null;
         }
 
-        static void Names(Pen pen, IList<string> names)
+        static void WriteNames(Pen pen, IList<string> names)
         {
             pen.OpenList();
             for (var i = 0; i < names.Count; i++)
@@ -1460,7 +1497,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Count <= count)
                 return true;
 
-            trouble.Say(statement, "unexpected " + Spelled(statement.ValueAt(count)) + ".");
+            trouble.Say(statement, "unexpected " + Spelled(statement, count) + ".");
             return false;
         }
 
@@ -1470,9 +1507,35 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return "'" + (statement.Key == Keyword.None ? statement.Head : Keywords.Name(statement.Key)) + "'";
         }
 
-        /// <summary>A value as it is written, for trouble to name it.</summary>
-        static string Spelled(Value value)
+        /// <summary>The value at <paramref name="index" /> of <paramref name="statement" /> as it is written, or what it is, for trouble to name it.</summary>
+        static string Spelled(Statement statement, int index)
         {
+            var value = statement.ValueAt(index);
+            if (value.Form == ValueForm.Qualified)
+            {
+                var parts = statement.Parts(index);
+                var joined = "";
+                for (var i = 0; i < parts.Count; i++)
+                    joined += (i > 0 ? "." : "") + parts[i].Word;
+
+                return "'" + joined + "'";
+            }
+
+            if (value.Form == ValueForm.Real)
+                return value.Real.ToString(CultureInfo.InvariantCulture);
+
+            if (value.Form == ValueForm.Color)
+                return "a color";
+
+            if (value.Form == ValueForm.List)
+                return "'['";
+
+            if (value.Form == ValueForm.Vector)
+                return "'('";
+
+            if (value.Form == ValueForm.Slot)
+                return "a toolbar slot";
+
             if (value.Form == ValueForm.Keyword)
                 return "'" + Keywords.Name(value.Keyword) + "'";
 

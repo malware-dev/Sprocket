@@ -8,12 +8,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </summary>
     /// <remarks>
     /// <b>Trouble is recorded, not thrown.</b> The script is the only copy of somebody's program, so
-    /// losing the line that is wrong and keeping the rest is worth far more than a clean failure - and
-    /// whether the program is then safe to write back over is the caller's decision, which is why
-    /// <see cref="Trouble" /> is an answer rather than an exception.
+    /// what is wrong with it is an answer to show them, with the line it is on, rather than an exception -
+    /// see <see cref="Trouble" />.
     /// <para>
-    /// Recovery is to the end of the line. Braces are still counted through it, so one bad step does not
-    /// tip every following statement out of its system.
+    /// Recovery is to the end of the line. Braces are still counted through it, so the rest of the script
+    /// is read in its right place and the first trouble reported is the one that matters.
     /// </para>
     /// </remarks>
     sealed class Parser
@@ -156,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
-                // A line starting //: the statement after it is read as ever, and marked off.
+                // A line starting //: the statement after it is read as any other, and marked off.
                 var off = _token.Kind == TokenKind.Off;
                 if (off)
                     Step();
@@ -222,8 +221,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 values.Add(Next());
             }
 
-            // A line that went wrong is dropped whole rather than half-read, because half a statement is a
-            // step with no gate or a trigger with no sources, which reads as a change somebody made.
+            // A line that went wrong is not made a statement at all, since the trouble already says what is wrong
+            // with it and half a statement would only be judged again for what is missing.
             if (_failures > failures)
             {
                 Recover();
@@ -241,6 +240,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 EndOfLine();
                 return statement;
             }
+
+            // Only a system, a sequence and an instance hold statements. The body is still read, so the braces stay counted.
+            if (key != Keyword.System && key != Keyword.Sequence && key != Keyword.Instance)
+                Fail("unexpected '{'.");
 
             Step();
             EndOfLine();
@@ -284,10 +287,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case TokenKind.Keyword:
                     Step();
 
-                    // Before a dot a keyword is the first part of a name, as it may be after one: sprocket.close.
-                    return _token.Kind == TokenKind.Dot
-                        ? Qualified(new Value(ValueForm.Identifier, Keywords.Name(token.Keyword)))
-                        : new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
+                    // A name spelled like a keyword is quoted, beside a dot as anywhere: 'sprocket'.close.
+                    if (_token.Kind == TokenKind.Dot)
+                    {
+                        Fail("unexpected '" + Keywords.Name(token.Keyword) + "' before '.'; a name spelled like a keyword is quoted.");
+                        return Value.None;
+                    }
+
+                    return new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
 
                 case TokenKind.Equals:
                     Step();
@@ -395,8 +402,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Step();
                 if (_token.Kind == TokenKind.Identifier)
                     parts.Add(new Value(ValueForm.Identifier, _token.Text.ToString()));
-                else if (_token.Kind == TokenKind.Keyword)
-                    parts.Add(new Value(ValueForm.Identifier, Keywords.Name(_token.Keyword)));
                 else
                 {
                     Fail("expected a name after '.'.");

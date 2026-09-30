@@ -308,19 +308,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
             }
 
-            // Beside a dot only a name can stand, so a keyword there is a name and needs no quotes: sprocket.close.
-            Part(into, space);
+            Spell(into, space);
             into.Append('.');
-            Part(into, name);
-        }
-
-        /// <summary>One part of a qualified name: bare where it has a name's shape, in single quotes where it has not.</summary>
-        static void Part(StringBuilder into, string id)
-        {
-            if (Keywords.Shaped(id))
-                into.Append(id);
-            else
-                Quote(into, id, '\'');
+            Spell(into, name);
         }
 
         /// <summary>A name: bare where it can be, in single quotes where it cannot.</summary>

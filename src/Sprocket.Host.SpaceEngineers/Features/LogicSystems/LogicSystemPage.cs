@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <summary>A logic system has to be called something.</summary>
         /// <remarks>
-        /// Unlike a sequence, which reads as its own sentence when it is unnamed. A logic system is a name and the ones
+        /// Unlike a sequence, which is called by its number when it is unnamed. A logic system is a name and the ones
         /// of it and nothing else, so an empty one leaves a row on the home page that cannot be told apart from any
         /// other.
         /// </remarks>
@@ -300,7 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var poller = Editor.Runner.Poller(_triggers[i], through);
                 row.IsLiveNow = poller != null && poller.Live;
 
-                // What a trigger's own act meets is the trigger's to say, as what starts a sequence is.
+                // A trigger's own act has no row of its own, so what goes wrong with it is said on the trigger's.
                 if (recount)
                 {
                     var fault = _runs[i] == null ? SequenceFault.None : Fault(_runs[i], through);
@@ -320,7 +320,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
                 if (recount)
                 {
-                    row.Summary = SequenceText.Doing(Editor.Runner.Bindings, sequence, through);
+                    row.Summary = SequenceText.Called(sequence);
                     Mark(row, Fault(sequence, through), sequence);
                 }
 

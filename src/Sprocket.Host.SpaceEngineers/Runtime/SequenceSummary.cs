@@ -193,7 +193,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return mistyped;
 
             // A trigger's own act starts what it starts and is done, with nothing after it to wait for.
-            SequenceFault unawaited = sequence.Number > 0 ? Unawaited(bindings, sequence, through) : SequenceFault.None;
+            SequenceFault unawaited = !sequence.IsAlone ? Unawaited(bindings, sequence, through) : SequenceFault.None;
             if (unawaited.Exists)
                 return unawaited;
 
@@ -318,7 +318,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         static SequenceFault Circular(Sequence sequence)
         {
             var system = sequence.System;
-            if (system == null || sequence.Number <= 0)
+            if (system == null || sequence.IsAlone)
                 return SequenceFault.None;
 
             var steps = sequence.Steps;

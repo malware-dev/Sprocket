@@ -31,6 +31,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public Form Form { get; set; }
 
+        /// <summary>What adds the member, where it is one a host adds rather than the game's own: <c>sprocket</c> for Sprocket's.</summary>
+        /// <remarks>Kept as the program says it, so a member added by something this host does not have is never taken for one it does.</remarks>
+        public string Provider { get; set; } = BlockKinds.Own;
+
         /// <summary>Whether this writes one of the block's own values rather than performing an action.</summary>
         public bool Sets => Form == Form.Value;
 
@@ -57,6 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The entry among these that this step names, or null where there is none.</summary>
         public EntityAction Names(IList<EntityAction> actions)
         {
+            if (Form == Form.Native && Provider != BlockKinds.Own)
+                return null;
+
             for (var i = 0; i < actions.Count; i++)
             {
                 if (actions[i].Id == ActionId && actions[i].Form == Form)

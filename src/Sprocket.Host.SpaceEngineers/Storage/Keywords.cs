@@ -80,8 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>Whether a word has the shape of a name - a letter, then letters, digits and underscores - keyword or not.</summary>
-        /// <remarks>What a part of a qualified name needs to be written bare, since only a name can stand beside a dot.</remarks>
-        public static bool Shaped(string word)
+        static bool Shaped(string word)
         {
             if (string.IsNullOrEmpty(word) || !Letter(word[0]))
                 return false;

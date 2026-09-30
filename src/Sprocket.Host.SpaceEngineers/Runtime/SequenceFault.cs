@@ -95,6 +95,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// half-finished machine parking exists to prevent; and the world can mend it without
         /// anybody editing anything, at which point it carries on by itself.
         /// </remarks>
-        public bool Parks => Exists && !IsWarning && Problem != SequenceProblem.Stuck;
+        public bool Parks => Exists && !IsWarning && Problem != SequenceProblem.Stuck && Problem != SequenceProblem.Stalled;
     }
 }

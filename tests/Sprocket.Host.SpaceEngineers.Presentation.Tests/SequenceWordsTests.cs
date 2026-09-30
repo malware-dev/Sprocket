@@ -32,7 +32,7 @@ public class SequenceWordsTests
         var caller = program.AddSequence(system);
         caller.Steps.Add(new Run(called.Number));
 
-        Assert.Equal("run Let me out", SequenceText.Doing(null!, caller, null));
+        Assert.Equal("run Let me out", SequenceText.Step(null!, caller, caller.Steps[0], null));
     }
 
     [Fact]
@@ -45,6 +45,6 @@ public class SequenceWordsTests
         var caller = program.AddSequence(system);
         caller.Steps.Add(new Run(called.Number));
 
-        Assert.Equal("run Sequence " + called.Number, SequenceText.Doing(null!, caller, null));
+        Assert.Equal("run Sequence " + called.Number, SequenceText.Step(null!, caller, caller.Steps[0], null));
     }
 }

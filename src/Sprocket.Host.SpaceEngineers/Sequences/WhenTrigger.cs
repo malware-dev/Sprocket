@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.World;
+
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
@@ -33,5 +35,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>How often the moment is looked for, in ticks, or 0 where the program leaves it to the default.</summary>
         public int IntervalTicks { get; set; }
+
+        /// <summary>What adds the moment: <c>sprocket</c> for Sprocket's own.</summary>
+        /// <remarks>Kept as the program says it, so a moment added by something this host does not have is never taken for one it does.</remarks>
+        public string Provider { get; set; } = BlockKinds.Own;
+
+        /// <summary>The moment as a block of <paramref name="kind" /> has it, or null where it has none or it is not this host's.</summary>
+        public EntityEvent Moment(EntityKind kind)
+        {
+            return Provider == BlockKinds.Own ? kind.FindEvent(EventId) : null;
+        }
     }
 }

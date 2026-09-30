@@ -41,7 +41,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         public override string Label => "changing what it does";
 
-        public override bool Changes => _was != _now;
+        /// <summary>Whether it does something else: a sequence run the same way again is no change.</summary>
+        public override bool Changes
+        {
+            get
+            {
+                var was = _was as Run;
+                var now = _now as Run;
+                if (was != null && now != null)
+                    return was.Number != now.Number || was.Stops != now.Stops;
+
+                return _was != _now;
+            }
+        }
 
         public override bool Undoable(AutomationSystem system)
         {

@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
@@ -568,6 +569,7 @@ public class ChangingTests
     public void TakingAButtonThatIsAlreadyUsedAsksFirst()
     {
         var screen = WithOne();
+        var parts = System(screen).Parts.Count;
 
         screen.Editor.PressStart("When…");
         screen.Editor.PressBlock("Airlock Button");
@@ -584,6 +586,7 @@ public class ChangingTests
 
         Assert.Single(System(screen).Triggers);
         Assert.Single(screen.Editor.Program.Sequences);
+        Assert.Equal(parts, System(screen).Parts.Count);
     }
 
     /// <summary>Saying so anyway goes through, which is what a warning is rather than a refusal.</summary>
@@ -633,7 +636,41 @@ public class ChangingTests
         screen.Editor.PressChoice("Leave it alone");
         screen.Run(2);
 
-        // Untouched: it still waits for the door it was given.
+        // Untouched: it still waits for the door it was given, and no slot was made for the button.
+        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(1));
+        Assert.DoesNotContain(System(screen).Parts, part => part.IsTrigger && part.Id != "Airlock Button");
+    }
+
+    /// <summary>Changing a trigger onto a button is one step back, which takes the slot it made with it.</summary>
+    [Fact]
+    public void ChangingOntoAButtonIsOneStepBack()
+    {
+        var screen = WithOne();
+
+        screen.Editor.PressStart("When…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("finishes closing");
+        screen.Editor.PressPrimary();
+        screen.Editor.Back();
+        screen.Run(2);
+
+        var parts = System(screen).Parts.Count;
+
+        screen.Editor.PressWhen(1);
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressBlock("Airlock Button");
+        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressPrimary();
+        screen.Editor.PressChoice("Take it over");
+        screen.Run(2);
+
+        Assert.IsType<LogicSystemPage>(screen.Editor.Current);
+        Assert.Equal(parts + 1, System(screen).Parts.Count);
+
+        screen.Editor.Screen.Undo!.Execute();
+        screen.Run(2);
+
+        Assert.Equal(parts, System(screen).Parts.Count);
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(1));
     }
 

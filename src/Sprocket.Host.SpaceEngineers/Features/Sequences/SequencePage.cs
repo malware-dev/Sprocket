@@ -51,12 +51,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>The id of the sequence the page shows.</summary>
         public int SequenceId => _sequence.Id;
 
-        /// <summary>A named sequence is called by its name, and an unnamed one reads as its own sentence.</summary>
+        /// <summary>A named sequence is called by its name, and an unnamed one by its number.</summary>
         /// <remarks>
         /// No subtitle. What the sequence is doing belongs beside the switch that changes it, and what starts it is a row
         /// on its system's screen: a sequence three triggers start has no one line to say so.
         /// </remarks>
-        public override string Title => SequenceText.Doing(Editor.Runner.Bindings, _sequence, Editor.StandIn(_sequence.System));
+        public override string Title => SequenceText.Called(_sequence);
 
         /// <summary>Whether anything starts the sequence is read from the toolbars.</summary>
         public override bool CanRefresh => true;
@@ -214,7 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return;
 
             parts[0].Name = CustomName;
-            parts[0].Text = SequenceText.Doing(Editor.Runner.Bindings, _sequence, Editor.StandIn(_sequence.System));
+            parts[0].Text = SequenceText.Called(_sequence);
         }
 
         /// <summary>Brings the view up to date, parts and all.</summary>

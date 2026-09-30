@@ -145,6 +145,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             for (var i = 0; i < lines.Count; i++)
             {
                 var line = lines[i];
+                if (line.IsOff)
+                {
+                    trouble.Say(line, "unexpected '//'; only a step in a sequence can be switched off.");
+                    continue;
+                }
 
                 if (line.Key == Keyword.Off)
                 {

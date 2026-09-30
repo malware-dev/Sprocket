@@ -20,6 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Dictionary<long, SequenceRunner> _acting = new Dictionary<long, SequenceRunner>();
         readonly Dictionary<Trigger, Sequence> _alone = new Dictionary<Trigger, Sequence>();
         readonly Dictionary<Trigger, List<Poller>> _pollers = new Dictionary<Trigger, List<Poller>>();
+
+        int _missingStamp;
         readonly HashSet<Poller> _keptPollers = new HashSet<Poller>();
         readonly HashSet<long> _keptActing = new HashSet<long>();
         readonly HashSet<Trigger> _keptTriggers = new HashSet<Trigger>();
@@ -101,7 +103,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        /// <summary>Advances everything to the given frame.</summary>
         /// <summary>
         /// Whether the machine Sprocket runs on can run anything: its block powered and switched on.
         /// </summary>
@@ -115,6 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>Set by whatever owns the runner, from what the server says it can afford; 1 by default, which holds nothing back.</remarks>
         public int QuickestLook { get; set; } = 1;
 
+        /// <summary>Advances everything to the given frame.</summary>
         public void Tick(int tick)
         {
             CurrentTick = tick;
@@ -253,7 +255,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return null;
         }
 
+        /// <summary>Counts up whenever what <see cref="Missing" /> answers may have changed, so a reader asks again only then.</summary>
+        internal int MissingStamp => _missingStamp;
+
+        /// <summary>Says a poller now finds a block it watches gone, or back, or the pollers themselves changed.</summary>
+        internal void MissingChanged()
+        {
+            _missingStamp++;
+        }
+
         /// <summary>Whether a block that something about <paramref name="sequence" /> watches on <paramref name="instance" /> is no longer on the construct.</summary>
+        /// <remarks>Walks every poller, so it is read through <see cref="MissingStamp" /> rather than on every look.</remarks>
         internal bool Missing(Sequence sequence, SystemInstance instance)
         {
             foreach (var pair in _pollers)
@@ -622,6 +634,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
             }
 
+            _missingStamp++;
             _goneTriggers.Clear();
             foreach (var pair in _pollers)
             {

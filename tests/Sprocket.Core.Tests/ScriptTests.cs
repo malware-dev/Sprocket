@@ -108,15 +108,15 @@ public class ScriptTests
             "    # The door onto the ship.\n" +
             "    required block inner expects Door\n" +
             "\n" +
-            "    when any sprocket.pressed [ inner ] then run 1\n" +
+            "    when any 'sprocket'.pressed [ inner ] then run 1\n" +
             "\n" +
             "    sequence 1 as 'Let me out' {\n" +
-            "        act sprocket.close on [ inner ]\n" +
+            "        act 'sprocket'.close on [ inner ]\n" +
             "        await\n" +
             "        wait 60t\n" +
             "\n" +
             "        # The vent needs the full cycle.\n" +
-            "        act sprocket.open on [ inner ]\n" +
+            "        act 'sprocket'.open on [ inner ]\n" +
             "        await\n" +
             "    }\n" +
             "}\n" +
@@ -338,8 +338,8 @@ public class ScriptTests
         Assert.Equal("", Load(
             Head + "MalTek.Airlock {\n" +
             "    required block inside\n    required block inner\n    required block outer\n\n" +
-            "    when any sprocket.pressed [ inside ] then run 1\n" +
-            "    when all sprocket.closed [ inner, outer ] then run 1\n" +
+            "    when any 'sprocket'.pressed [ inside ] then run 1\n" +
+            "    when all 'sprocket'.closed [ inner, outer ] then run 1\n" +
             "    every 600t run 2\n\n" +
             "    sequence 1 {\n    }\n\n" +
             "    sequence 2 {\n    }\n" +
@@ -368,21 +368,21 @@ public class ScriptTests
 
         // And it all comes back the same way.
         var text = Save(after);
-        Assert.Contains("    when any sprocket.pressed [ inside ] then run 1\n", text);
-        Assert.Contains("    when all sprocket.closed [ inner, outer ] then run 1\n", text);
+        Assert.Contains("    when any 'sprocket'.pressed [ inside ] then run 1\n", text);
+        Assert.Contains("    when all 'sprocket'.closed [ inner, outer ] then run 1\n", text);
         Assert.Contains("    every 600t run 2\n", text);
     }
 
     [Theory]
-    [InlineData("when any sprocket.pressed [ inside ] run 1")]
+    [InlineData("when any 'sprocket'.pressed [ inside ] run 1")]
     [InlineData("when pressed [ inside ] then run 1")]
-    [InlineData("when any sprocket.pressed [ inside ] then run")]
+    [InlineData("when any 'sprocket'.pressed [ inside ] then run")]
     [InlineData("every 600 run 1")]
     [InlineData("every 600t")]
     [InlineData("when any pressed [ inside ] then run 1")]
     [InlineData("when any other.pressed [ inside ] then run 1")]
-    [InlineData("when any sprocket.pressed [ inside ] every 30 then run 1")]
-    [InlineData("when any sprocket.pressed [ inside ] every 0t then run 1")]
+    [InlineData("when any 'sprocket'.pressed [ inside ] every 30 then run 1")]
+    [InlineData("when any 'sprocket'.pressed [ inside ] every 0t then run 1")]
     [InlineData("whatever [ inside ]")]
     public void ATriggerThatSaysNothingUsefulIsTrouble(string line)
     {
@@ -396,7 +396,7 @@ public class ScriptTests
     /// <summary>A line in a sequence that is no step is trouble, and so is a step that does not say what it needs to.</summary>
     [Theory]
     [InlineData("close [ inner ]")]
-    [InlineData("act sprocket.close [ inner ]")]
+    [InlineData("act 'sprocket'.close [ inner ]")]
     [InlineData("act other.close on [ inner ]")]
     [InlineData("act on [ inner ]")]
     [InlineData("stop")]
@@ -437,16 +437,16 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.Equal("", Load(Head + "MalTek.Airlock {\n    required block vent\n    required block inner\n\n"
-            + "    when any sprocket.filled [ vent ] every 30t then run 1\n"
-            + "    when any sprocket.closed [ inner ] then run 1\n\n    sequence 1 {\n    }\n}\n", after));
+            + "    when any 'sprocket'.filled [ vent ] every 30t then run 1\n"
+            + "    when any 'sprocket'.closed [ inner ] then run 1\n\n    sequence 1 {\n    }\n}\n", after));
 
         var triggers = after.Systems[0].Triggers;
         Assert.Equal(30, Assert.IsType<WhenTrigger>(triggers[0]).IntervalTicks);
         Assert.Equal(0, Assert.IsType<WhenTrigger>(triggers[1]).IntervalTicks);
 
         var text = Save(after);
-        Assert.Contains("    when any sprocket.filled [ vent ] every 30t then run 1\n", text);
-        Assert.Contains("    when any sprocket.closed [ inner ] then run 1\n", text);
+        Assert.Contains("    when any 'sprocket'.filled [ vent ] every 30t then run 1\n", text);
+        Assert.Contains("    when any 'sprocket'.closed [ inner ] then run 1\n", text);
     }
 
     /// <summary>A trigger the construct provides is a named part that says what it does, and its words are the part's.</summary>
@@ -543,10 +543,10 @@ public class ScriptTests
     public void AStepSwitchedOffIsReadAndWrittenWhole()
     {
         var text = Head + "MalTek.Airlock {\n    required block inner\n\n    sequence 1 {\n"
-            + "        act sprocket.close on [ inner ]\n"
+            + "        act 'sprocket'.close on [ inner ]\n"
             + "        await\n\n"
             + "        # Not yet\n"
-            + "        // act sprocket.open on [ inner ] with 2\n"
+            + "        // act 'sprocket'.open on [ inner ] with 2\n"
             + "        // await\n"
             + "        wait 60t\n"
             + "    }\n}\n";
@@ -565,7 +565,7 @@ public class ScriptTests
         Assert.True(steps[3].IsOff);
         Assert.False(steps[4].IsOff);
 
-        Assert.Contains("        # Not yet\n        // act sprocket.open on [ inner ] with 2\n        // await\n        wait 60t\n", Save(after));
+        Assert.Contains("        # Not yet\n        // act 'sprocket'.open on [ inner ] with 2\n        // await\n        wait 60t\n", Save(after));
     }
 
     /// <summary>A trigger does one step, written as a sequence writes it: run, stop, act or set.</summary>
@@ -574,10 +574,10 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.Equal("", Load(Head + "MalTek.Airlock {\n    required block outer\n    required block light\n"
-            + "    required trigger open to act sprocket.open on [ outer ]\n"
+            + "    required trigger open to act 'sprocket'.open on [ outer ]\n"
             + "    required trigger dim to set Radius on [ light ] to 4.5\n"
             + "    optional trigger halt to stop 'Cycle'\n\n"
-            + "    when all sprocket.closed [ outer ] then act Reverse on [ outer ] with 2\n\n"
+            + "    when all 'sprocket'.closed [ outer ] then act Reverse on [ outer ] with 2\n\n"
             + "    every 600t stop 1\n\n"
             + "    sequence 1 as Cycle {\n    }\n}\n", after));
 
@@ -601,10 +601,10 @@ public class ScriptTests
         Assert.True(Assert.IsType<EveryTrigger>(triggers[4]).Stops);
 
         var text = Save(after);
-        Assert.Contains("    required trigger open to act sprocket.open on [ outer ]\n", text);
+        Assert.Contains("    required trigger open to act 'sprocket'.open on [ outer ]\n", text);
         Assert.Contains("    required trigger dim to set Radius on [ light ] to 4.5\n", text);
         Assert.Contains("    optional trigger halt to stop 1\n", text);
-        Assert.Contains("    when all sprocket.closed [ outer ] then act Reverse on [ outer ] with 2\n", text);
+        Assert.Contains("    when all 'sprocket'.closed [ outer ] then act Reverse on [ outer ] with 2\n", text);
         Assert.Contains("    every 600t stop 1\n", text);
     }
 
@@ -614,8 +614,8 @@ public class ScriptTests
     [InlineData("required trigger call to wait 60t")]
     [InlineData("required trigger call to")]
     [InlineData("required trigger call to run 9")]
-    [InlineData("when any sprocket.closed [ outer ] then stop 'Nothing'")]
-    [InlineData("when any sprocket.closed [ outer ] then")]
+    [InlineData("when any 'sprocket'.closed [ outer ] then stop 'Nothing'")]
+    [InlineData("when any 'sprocket'.closed [ outer ] then")]
     [InlineData("every 600t await")]
     [InlineData("every 600t act on [ outer ]")]
     public void ATriggerWhoseStepStartsNothingIsTrouble(string line)
@@ -1018,7 +1018,7 @@ public class ScriptTests
 
         var text = Save(program);
         Assert.Contains("act 'every' on [ thing ]\n", text);
-        Assert.Contains("act sprocket.every on [ thing ]\n", text);
+        Assert.Contains("act 'sprocket'.'every' on [ thing ]\n", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
@@ -1083,8 +1083,8 @@ public class ScriptTests
     public void AStatementTheLanguageDoesNotKnowIsTrouble()
     {
         var text = Save(Airlock())
-            .Replace("        act sprocket.close on [ inner ]\n",
-                "        act sprocket.close on [ inner ]\n" +
+            .Replace("        act 'sprocket'.close on [ inner ]\n",
+                "        act 'sprocket'.close on [ inner ]\n" +
                 "        every 3 {\n" +
                 "            whatever [ inner ]\n" +
                 "        }\n");
@@ -1185,12 +1185,12 @@ public class ScriptTests
     /// with an error in it is trusted in no part, so nothing of it runs.
     /// </remarks>
     [Theory]
-    [InlineData("        act sprocket.close on [ inner\n")]
+    [InlineData("        act 'sprocket'.close on [ inner\n")]
     [InlineData("        close \"inner ]\n")]
-    [InlineData("        act sprocket.close on [ inner ] !\n")]
+    [InlineData("        act 'sprocket'.close on [ inner ] !\n")]
     public void TroubleIsReportedAndTheProgramWillNotBeSavedOverTheSave(string line)
     {
-        var text = Save(Airlock()).Replace("        act sprocket.close on [ inner ]\n", line);
+        var text = Save(Airlock()).Replace("        act 'sprocket'.close on [ inner ]\n", line);
 
         var after = new Automation();
         var trouble = Load(text, after);

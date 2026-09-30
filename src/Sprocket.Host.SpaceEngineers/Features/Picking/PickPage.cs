@@ -71,8 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<Field> _nothing = new List<Field>();
         readonly List<Field> _givenFields = new List<Field>();
         readonly Func<GridEntity, bool> _fits;
-
-        readonly Func<GridEntity, bool> _offers;
+        readonly Func<GridEntity, bool> _admits;
 
         string _chosen;
         Form _chosenForm;
@@ -113,16 +112,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Asks what to point at and what should happen to it, starting from whatever the answer is now.</summary>
         /// <remarks>
         /// <paramref name="after" /> is the strip of the pick this page goes on in, as its next page, or null for a pick of its
-        /// own. Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind it
-        /// does not have is dropped later, where it is.
+        /// own. <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
+        /// them. Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind
+        /// it does not have is dropped later, where it is.
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
             bool asksAll = false, bool all = false, IList<Literal> values = null,
-            Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> offers = null)
+            Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null)
             : base(editor)
         {
-            _offers = offers;
+            _admits = admits;
             _opens = opens;
             _aim = aim;
             if (aim != null)
@@ -1251,7 +1251,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var capable = Vocabulary.Capable(Editor.World, _forEvents);
                 for (var i = 0; i < capable.Count; i++)
                 {
-                    if (_offers == null || _offers(capable[i]))
+                    if (_admits == null || _admits(capable[i]))
                         _candidates.Add(capable[i]);
                 }
             }

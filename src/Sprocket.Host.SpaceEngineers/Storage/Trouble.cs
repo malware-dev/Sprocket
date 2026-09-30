@@ -17,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         readonly string _script;
         readonly List<Owed> _owed = new List<Owed>();
+        readonly Dictionary<Step, Statement> _written = new Dictionary<Step, Statement>();
 
         public Trouble(string script, string already)
         {
@@ -48,6 +49,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Warning = Line(at) + what;
         }
 
+        /// <summary>Remembers that <paramref name="step" /> was written at <paramref name="at" />, for trouble found about it once the whole script is read.</summary>
+        public void Wrote(Statement at, Step step)
+        {
+            _written[step] = at;
+        }
+
+        /// <summary>Where <paramref name="step" /> was written, or <paramref name="otherwise" /> where it was not remembered.</summary>
+        public Statement Where(Step step, Statement otherwise)
+        {
+            Statement at;
+            return _written.TryGetValue(step, out at) ? at : otherwise;
+        }
+
         /// <summary>
         /// Says <paramref name="at" /> names <paramref name="name" />: one of <paramref name="system" />'s parts or a block, or
         /// a block where <paramref name="system" /> is null.
@@ -71,14 +85,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (program.FindRef(owed.Name) != null)
                     continue;
 
+                var part = owed.System == null ? null : owed.System.FindPart(owed.Name);
                 if (owed.System == null)
                     Say(owed.At, "no block called '" + owed.Name + "'.");
-                else if (owed.System.FindPart(owed.Name) == null)
+                else if (part == null)
                     Say(owed.At, "no part or block called '" + owed.Name + "'.");
+                else if (part.IsTrigger)
+                    Say(owed.At, "'" + owed.Name + "' is a trigger part; expected a block part.");
             }
         }
 
-        string Line(Statement at)
+        /// <summary>Where <paramref name="at" /> starts, as trouble begins: <c>Line 5: </c>.</summary>
+        public string Line(Statement at)
         {
             return "Line " + new TextPtr(_script, at.At).FindLineNo() + ": ";
         }

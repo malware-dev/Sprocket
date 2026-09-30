@@ -256,12 +256,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         /// <remarks>
         /// By the part's name, because a trigger has no number and its part is what each instance answers. Renaming the part
-        /// changes what is wanted, and the slot is written again with the rest of the wiring.
+        /// changes what is wanted, and the slot is written again with the rest of the wiring. Marked <c>part:</c>, because a
+        /// part may be called anything, a sequence's number and <c>2/stop</c> among it.
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, RequiredTrigger trigger)
         {
-            return system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number) + "/" + trigger.Part;
+            return system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number) + "/part:" + trigger.Part;
         }
+
+        readonly List<Sequence> _runs = new List<Sequence>();
 
         /// <summary>The sequences of <paramref name="system" />, and the runtime's sequence for each trigger that acts itself.</summary>
         List<Sequence> Runs(AutomationSystem system)
@@ -283,8 +286,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return _runs;
         }
 
-        readonly List<Sequence> _runs = new List<Sequence>();
-
         /// <summary>A block fired one of the actions Sprocket put in it.</summary>
         public void Fire(string key)
         {
@@ -297,7 +298,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             Told.Say("a button fired " + key + ", " + (target.Stops ? "stopping " : "running ")
-                + (target.Sequence.Number > 0 ? "sequence " + target.Sequence.Number : "what its trigger does")
+                + (!target.Sequence.IsAlone ? "sequence " + target.Sequence.Number : "what its trigger does")
                 + (target.Instance == null ? "" : " on " + target.Instance.Number));
 
             if (target.Stops)
@@ -605,7 +606,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             blockId = 0;
             actionId = null;
 
-            if (sequence.Number > 0 || sequence.Steps.Count != 1)
+            if (!sequence.IsAlone || sequence.Steps.Count != 1)
                 return false;
 
             var act = sequence.Steps[0] as Act;
@@ -1331,9 +1332,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (trouble.Length == 0)
                 return;
 
-            // Logged and nowhere else. Nothing of the program was kept, and it is marked not to be
-            // saved over, which is what actually protects somebody's work; there is no screen for this
-            // yet, and inventing wording for one in here would put core's words on a host's screen.
+            // Logged here; the editor says it on its notice and shows the text on the script page, where it is mended.
+            // Nothing of the program was kept, and it is marked not to be saved over, which is what protects somebody's work.
             Told.Say(_block.CustomName + " has a program that would not read: " + trouble);
         }
 

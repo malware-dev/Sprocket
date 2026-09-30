@@ -80,6 +80,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool IsActive => _extension != null && _extension.IsBusy(_block);
 
+        /// <summary>Whether it is switched off, where it is a block that has a switch.</summary>
+        public bool IsSwitchedOff
+        {
+            get
+            {
+                var functional = _block as IMyFunctionalBlock;
+                return functional != null && !functional.Enabled;
+            }
+        }
+
+        /// <summary>Whether it can do anything at all: built, powered and switched on.</summary>
+        public bool IsWorking => _block.IsWorking;
+
         public EntityValue GetValue(string propertyId)
         {
             EntityValue told;
@@ -114,34 +127,21 @@ namespace Sprocket.Host.SpaceEngineers.World
             return announces == null ? null : announces.Listen(_block, told);
         }
 
-        /// <summary>Whether it is switched off, where it is a block that has a switch.</summary>
-        public bool IsSwitchedOff
+        /// <summary>Whether a step asking this block for <paramref name="action" /> would be lost: it is waited for, and the block is switched off.</summary>
+        /// <remarks>
+        /// Only the switch, because a switch just thrown, by a step before this one, shows at once, where whether a block
+        /// is powered may not until the game next works it out. Anything a step does not wait for a block takes as ever,
+        /// and switching it on is one of those.
+        /// </remarks>
+        public bool Refuses(EntityAction action)
         {
-            get
-            {
-                var functional = _block as IMyFunctionalBlock;
-                return functional != null && !functional.Enabled;
-            }
+            return action.Lasts && IsSwitchedOff;
         }
 
-        /// <summary>Whether it can do anything at all: built, powered and switched on.</summary>
-        public bool IsWorking => _block.IsWorking;
-
-        /// <summary>Why this block cannot do <paramref name="action" />, naming it, or null where it can.</summary>
-        /// <remarks>
-        /// A block that is switched off, or not working, gets nowhere, so nothing a step waits for can be asked of it;
-        /// anything else it takes as ever, and switching it on is one of those. The switch is read before whether it works,
-        /// because a switch just thrown, by a step before this one, shows at once.
-        /// </remarks>
-        public string Unable(EntityAction action)
+        /// <summary>Whether this block is getting nowhere with <paramref name="action" />, which is waited for: switched off, unpowered or broken.</summary>
+        public bool Stalls(EntityAction action)
         {
-            if (!action.Lasts)
-                return null;
-
-            if (IsSwitchedOff)
-                return Name + " is switched off, so it can't " + action.Text + ".";
-
-            return IsWorking ? null : Name + " isn't working, so it can't " + action.Text + ".";
+            return action.Lasts && !IsWorking;
         }
 
         /// <summary>Calls off what the action started, where this block's own knowledge says how.</summary>

@@ -208,7 +208,7 @@ public class InstanceTests
         // airlock's shut door and opening onto space.
         var fault = SequenceSummary.Fault(ship.Runner.Get(ship.Program.Sequences[0], ship.Airlock.Instances[1]));
         Assert.Equal(SequenceProblem.Unable, fault.Problem);
-        Assert.Contains("Port Inner", fault.Because);
+        Assert.Equal("Port Inner", fault.Which);
         Assert.DoesNotContain("Port Outer:open", ship.Rig.Rig.Log);
     }
 

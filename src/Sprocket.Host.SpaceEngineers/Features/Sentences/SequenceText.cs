@@ -104,41 +104,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        /// <summary>What a sequence does, in a line: its name, or its first step and how many follow.</summary>
-        /// <remarks>Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.</remarks>
-        public static string Doing(Bindings bindings, Sequence sequence, SystemInstance through)
+        /// <summary>What a sequence is called: its name, or its number where it has none.</summary>
+        public static string Called(Sequence sequence)
         {
-            if (sequence.HasName)
-                return sequence.Name;
-
-            // The way out for a sequence the editor did not make - the model still allows a nameless
-            // one, so this stays rather than leaving a blank row behind. No longer the intended path:
-            // anything built through the editor is named from birth.
-            if (sequence.Steps.Count == 0)
-                return "nothing yet";
-
-            // Awaits are not counted. The editor writes one after every step, so counting them would
-            // say a sequence of one action has two lines - and an await is not a line on any screen:
-            // a step and the await that follows it are one row, moved and deleted together.
-            Step told = null;
-            var lines = 0;
-            var steps = sequence.Steps;
-            for (var i = 0; i < steps.Count; i++)
-            {
-                if (steps[i] is Await)
-                    continue;
-
-                if (told == null)
-                    told = steps[i];
-
-                lines++;
-            }
-
-            if (told == null)
-                return "nothing yet";
-
-            var first = Step(bindings, sequence, told, through);
-            return lines == 1 ? first : first + " (+" + (lines - 1) + " more)";
+            return sequence.HasName ? sequence.Name : DefaultName(sequence.Number);
         }
 
 
@@ -251,6 +220,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (fault.Problem == SequenceProblem.NeverTriggered)
                 return Unstarted(fault.Unwired, fault.Which);
 
+            if (fault.Problem == SequenceProblem.Unable && !string.IsNullOrEmpty(fault.Which))
+                return fault.Which + " is switched off. Switch it on first.";
+
+            if (fault.Problem == SequenceProblem.Stalled && !string.IsNullOrEmpty(fault.Which))
+                return fault.Which + " isn't working, so this waits for it.";
+
             return string.IsNullOrEmpty(fault.Because) ? Problem(fault.Problem) : fault.Because;
         }
 
@@ -258,7 +233,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         internal static string Failing(SequenceFault fault, Sequence sequence)
         {
             // A trigger's own act has no steps to count, and no name.
-            if (sequence.Number == 0)
+            if (sequence.IsAlone)
                 return Problem(fault, sequence);
 
             var row = Row(sequence, fault.Step);
@@ -384,6 +359,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return "This runs a sequence that runs this one again. Remove one of the two.";
             if (problem == SequenceProblem.Unable)
                 return "A block this step acts on is switched off. Switch it on first.";
+            if (problem == SequenceProblem.Stalled)
+                return "A block this waits for isn't working, so this waits for it.";
 
             return "";
         }
@@ -396,7 +373,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// Three sorts of line, because a sequence has three: something done to some blocks, waiting
         /// for what has been started, and spending time.
         /// </remarks>
-        static string Step(Bindings bindings, Sequence sequence, Step step, SystemInstance through)
+        public static string Step(Bindings bindings, Sequence sequence, Step step, SystemInstance through)
         {
             var wait = step as Wait;
             if (wait != null)

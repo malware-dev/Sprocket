@@ -44,6 +44,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public string KindId { get; private set; }
 
+        /// <summary>What somebody wrote above it, or empty.</summary>
+        public string Annotation { get; set; } = "";
+
         /// <summary>In priority order, strongest first. The host minted these and only it reads them.</summary>
         public List<EntityKey> Keys { get { return _keys; } }
     }

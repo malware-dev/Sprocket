@@ -55,12 +55,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>See <see cref="IAnnounces" />. Set by the extension that knows the block raises it.</remarks>
         public bool Announced { get; private set; }
 
-        /// <summary>Says the block announces this.</summary>
-        internal void Announce()
-        {
-            Announced = true;
-        }
-
         /// <summary>The property on the entity this event watches.</summary>
         public string PropertyId { get; private set; }
 
@@ -72,5 +66,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// complete "When the hangar door ___", never as a technical name.
         /// </summary>
         public string Text { get; private set; }
+
+        /// <summary>Says the block announces this.</summary>
+        internal void Announce()
+        {
+            Announced = true;
+        }
     }
 }

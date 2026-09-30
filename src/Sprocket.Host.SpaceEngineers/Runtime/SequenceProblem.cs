@@ -125,8 +125,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>The language makes it an error, so the system does not run. Stopping itself is not this: a sequence may.</remarks>
         Circular,
 
-        /// <summary>A step asked a block that is switched off, or not working, for something a step waits for.</summary>
+        /// <summary>A step asked a block that is switched off for something a step waits for.</summary>
         /// <remarks>What it was asked would never happen, so the run ends there and says which block.</remarks>
-        Unable
+        Unable,
+
+        /// <summary>A block a step waits for is switched off or not working, so it is getting nowhere.</summary>
+        /// <remarks>The run holds rather than ends, since the block may be switched on or mended and carry on.</remarks>
+        Stalled
     }
 }

@@ -37,6 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Shift _shift;
 
         readonly Dictionary<string, bool> _signals = new Dictionary<string, bool>();
+        readonly List<string> _forgotten = new List<string>();
         readonly List<string> _watched = new List<string>();
         readonly List<IDisposable> _listening = new List<IDisposable>();
         readonly Action _heard;
@@ -69,11 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>The instance whose blocks it watches.</summary>
         public SystemInstance Instance => _instance;
 
-        /// <summary>Whether what it watches for read true at the last look.</summary>
-        /// <remarks>
-        /// Nothing where it has not looked yet, which is the honest answer: a trigger that has never been read has no
-        /// reading.
-        /// </remarks>
+        /// <summary>Whether what it watches for read true at the last look; false until the first look.</summary>
         public bool Live { get; private set; }
 
         /// <summary>Whether one or more of the blocks it watches is no longer on the construct.</summary>
@@ -146,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Listens to every watched block that announces the moment, and says whether all of them do.
+        /// Listens to every watched block that announces the moment, and marks whether all of them do.
         /// </summary>
         /// <remarks>Done again only where the blocks the names point at, or the program, have changed since.</remarks>
         void Listen()
@@ -164,7 +161,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var i = 0; i < sources.Count; i++)
             {
                 var entity = _bindings.Entity(sources[i]);
-                var definition = entity == null ? null : entity.Kind.FindEvent(when.EventId);
+                var definition = entity == null ? null : when.Moment(entity.Kind);
                 var listening = definition != null && definition.Announced ? entity.Listen(_heard) : null;
                 if (listening == null)
                 {
@@ -233,7 +230,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
-                var definition = entity.Kind.FindEvent(when.EventId);
+                var definition = when.Moment(entity.Kind);
                 if (definition == null)
                     continue;
 
@@ -255,9 +252,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _signals[sourceId] = now;
             }
 
+            // More remembered than watched only once the blocks it watches have changed, so the walk is rare.
+            if (_signals.Count > sources.Count)
+                Forget(sources);
+
             Live = anyTrue;
-            HasMissingSources = anyMissing;
+            Missed(anyMissing);
             return fired;
+        }
+
+        /// <summary>Lets go of what it read of any block it no longer watches.</summary>
+        void Forget(List<string> sources)
+        {
+            _forgotten.Clear();
+            foreach (var pair in _signals)
+            {
+                if (!sources.Contains(pair.Key))
+                    _forgotten.Add(pair.Key);
+            }
+
+            for (var i = 0; i < _forgotten.Count; i++)
+                _signals.Remove(_forgotten[i]);
         }
 
         /// <summary>
@@ -284,7 +299,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
-                var definition = entity.Kind.FindEvent(when.EventId);
+                var definition = when.Moment(entity.Kind);
                 if (definition == null)
                 {
                     all = false;
@@ -297,7 +312,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             Live = all;
-            HasMissingSources = anyMissing;
+            Missed(anyMissing);
 
             // Unknown until the second look, so a condition that is already true when the trigger appears does not set
             // it off.
@@ -344,6 +359,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var kind = property == null ? ValueKind.Flag : property.Kind;
 
             return world.Values.Flag(kind, entity.GetValue(propertyId));
+        }
+
+        /// <summary>Keeps whether a block it watches is gone, telling the runner where that changed.</summary>
+        void Missed(bool missing)
+        {
+            if (HasMissingSources == missing)
+                return;
+
+            HasMissingSources = missing;
+            _owner.MissingChanged();
         }
     }
 }

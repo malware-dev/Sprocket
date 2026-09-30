@@ -285,7 +285,7 @@ public class ProgramTextTests
 
         var saved = Save(program);
         Assert.Contains("act Reverse on [ rotor ]", saved);
-        Assert.Contains("act sprocket.'rotate-to' on [ rotor ] with 90 2.5", saved);
+        Assert.Contains("act 'sprocket'.'rotate-to' on [ rotor ] with 90 2.5", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
 
         var after = new Automation();
@@ -386,7 +386,7 @@ public class ProgramTextTests
         sequence.Steps.Add(shut);
 
         var written = Save(program);
-        Assert.Contains("act sprocket.close on [ inner ]\n", written);
+        Assert.Contains("act 'sprocket'.close on [ inner ]\n", written);
         Assert.DoesNotContain("with", written);
     }
 

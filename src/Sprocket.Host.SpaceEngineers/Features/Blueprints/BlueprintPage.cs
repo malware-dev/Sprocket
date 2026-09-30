@@ -481,7 +481,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 var pressed = positions != null && positions.Count > 0 ? ButtonPanelExtension.Pressed(positions[0].Slot) : "";
                 Editor.Push(new PickPage(Editor, part.Id, true, targets, pressed, Form.Native,
                     delegate(PickAnswer answer) { Answered(part, chosen, answer); },
-                    offers: delegate(GridEntity block) { return Fits(part, block); }));
+                    admits: delegate(GridEntity block) { return Fits(part, block); }));
                 return;
             }
 

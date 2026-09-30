@@ -84,6 +84,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public bool Incompatible { get; private set; }
 
+        /// <summary>What somebody wrote above the program's first line, or empty.</summary>
+        public string Annotation { get; set; } = "";
+
         /// <summary>The text that would not read, kept so it can be shown and mended; empty where everything read.</summary>
         public string Unread { get; private set; } = "";
 
@@ -498,6 +501,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 var copy = new Act(act.ActionId);
                 copy.Form = act.Form;
+                copy.Provider = act.Provider;
                 for (var i = 0; i < act.Targets.Count; i++)
                     copy.Targets.Add(act.Targets[i]);
                 for (var i = 0; i < act.Values.Count; i++)
@@ -545,6 +549,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 RemoveSystem(_systems[i]);
 
             _refs.Clear();
+            Annotation = "";
         }
 
         /// <summary>Takes <paramref name="system" /> out of the program, with its sequences, its triggers and every one of it, and says whether it was here.</summary>
