@@ -50,7 +50,7 @@ public class ProblemTests
     public void AnUnfinishedTriggerIsNotReported()
     {
         var ship = Build();
-        ((MomentTrigger)ship.Sequence.Trigger).Sources.Clear();
+        ((RequiredTrigger)ship.Sequence.Trigger).Sources.Clear();
         ship.Sequence.Steps.Clear();
 
         ship.Rig.CannotStart(ship.Sequence);
@@ -268,11 +268,20 @@ public class ProblemTests
     public void ABuiltSequenceWithNothingToStartItSaysSo()
     {
         var ship = Build();
-        ((MomentTrigger)ship.Sequence.Trigger).Sources.Clear();
+        var part = Unanswer(ship);
 
         var fault = Fault(ship);
-        Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
+        Assert.Equal(SequenceProblem.EmptySlot, fault.Problem);
         Assert.Equal(SequenceFault.Trigger, fault.Step);
+        Assert.Equal(part, fault.Which);
+    }
+
+    /// <summary>Leaves the sequence's button trigger without a button in the first blockset, and answers its trigger part.</summary>
+    static string Unanswer(Ship ship)
+    {
+        var part = ((RequiredTrigger)ship.Sequence.Trigger).Part;
+        ship.Sequence.System.First!.Clear(part);
+        return part;
     }
 
     /// <summary>
@@ -453,8 +462,8 @@ public class ProblemTests
         var system = ship.Automation.Systems[0];
         var sequence = ship.Automation.AddSequence(system);
 
-        var needed = new RequiredTrigger();
-        needed.Runs = sequence.Number;
+        var needed = Pressed.On(system, "call");
+        needed.Does = new Run(sequence.Number);
         system.AddTrigger(needed);
 
         // Nothing on this construct claims it, which is what the host says by this.

@@ -79,11 +79,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// rather than being damaged in places.
         /// </summary>
         /// <remarks>
-        /// The two are different faults with different consequences. A damaged program is read as far
-        /// as it goes, and what did read is what somebody sees. An incompatible one is not read at all,
-        /// so nothing of it is here.
+        /// Either way nothing of it is here: a damaged text is trusted in no part, and an incompatible
+        /// one is not read at all. They differ in what somebody is told.
         /// </remarks>
         public bool Incompatible { get; private set; }
+
+        /// <summary>The text that would not read, kept so it can be shown and mended; empty where everything read.</summary>
+        public string Unread { get; private set; } = "";
+
+        /// <summary>Empties it, and keeps <paramref name="text" /> as what would not read.</summary>
+        public void Unreadable(string text)
+        {
+            Discard();
+            Unread = text ?? "";
+        }
 
         /// <summary>Says this program is not all of what was saved, and cannot be saved over it.</summary>
         public void Damaged(string what)
@@ -119,6 +128,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Intact = true;
             Incompatible = false;
             Trouble = "";
+            Unread = "";
         }
 
         /// <summary>
@@ -370,7 +380,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             if (trigger != null)
             {
-                trigger.Runs = number;
+                trigger.Does = new Run(number);
                 system.AddTrigger(trigger);
             }
 
@@ -439,7 +449,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             if (trigger != null)
             {
-                trigger.Runs = sequence.Number;
+                trigger.Does = new Run(sequence.Number);
                 system.AddTrigger(trigger);
             }
 
@@ -525,6 +535,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
 
             Wiring++;
+        }
+
+        /// <summary>Empties it of every system and every block it declared.</summary>
+        /// <remarks>For a text with an error in it, which is trusted in no part: nothing of it runs.</remarks>
+        public void Discard()
+        {
+            for (var i = _systems.Count - 1; i >= 0; i--)
+                RemoveSystem(_systems[i]);
+
+            _refs.Clear();
         }
 
         /// <summary>Takes <paramref name="system" /> out of the program, with its sequences, its triggers and every one of it, and says whether it was here.</summary>

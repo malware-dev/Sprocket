@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
@@ -13,6 +14,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Values;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Run = Sprocket.Host.SpaceEngineers.Sequences.Run;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
@@ -373,8 +375,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             // One line, and the rest when they ask for it. The line says what is wrong; opening it
             // says what happened and what it will cost, which is what somebody needs to decide. Two
-            // faults, because what is on the screen differs: nothing of a program from another
-            // version, and whatever did read of a damaged one.
+            // faults, because what somebody can do differs: a program from another version, and one
+            // with an error in its text, which can be mended there.
             if (_program.Incompatible)
             {
                 _notice.Text = Texts.SalvageDifferent;
@@ -382,8 +384,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
             else
             {
-                _notice.Text = Texts.SalvagePartial;
-                _notice.Detail = Texts.SalvagePartialDetail;
+                _notice.Text = Texts.SalvageBroken;
+                _notice.Detail = Texts.SalvageBrokenDetail;
             }
 
             // The reader's own words, kept because somebody has to be able to say what happened to
@@ -394,10 +396,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _notice.Expands = Expands;
 
             // The mending, on the thing that reports the fault, so somebody who has read what it costs
-            // does not have to go and find an edit to make. It asks the same question the first edit
-            // does, because it throws away the same program.
-            _notice.OfferText = Texts.SalvageReplace;
-            _notice.Offers = Resolves;
+            // does not have to go and find an edit to make. A text with an error in it is mended in the
+            // text; one from another version can only be replaced, which asks the same question the
+            // first edit does, because it throws away the same program.
+            if (_program.Incompatible)
+            {
+                _notice.OfferText = Texts.SalvageReplace;
+                _notice.Offers = Resolves;
+            }
+            else
+            {
+                _notice.OfferText = Texts.SalvageMend;
+                _notice.Offers = Mends;
+            }
         }
 
         /// <summary>
@@ -427,6 +438,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         ICommand _expands;
         ICommand _resolves;
+        ICommand _mends;
 
         ICommand Expands => _expands ?? (_expands = Act(Cmd.Expand, delegate
         {
@@ -436,6 +448,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }));
 
         ICommand Resolves => _resolves ?? (_resolves = Act(Cmd.Resolve, delegate { AskBeforeReplacing(delegate { }); }));
+
+        ICommand Mends => _mends ?? (_mends = Act(Cmd.ShowScript, ShowScript));
 
         bool _open;
 
@@ -480,6 +494,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Cmd.Refresh:
                 case Cmd.Expand:
                 case Cmd.Resolve:
+                case Cmd.Mend:
                 case Cmd.Choice:
                 case Cmd.OpenSystem:
                 case Cmd.OpenSequence:
@@ -913,6 +928,39 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return list.ToString();
         }
 
+        /// <summary>
+        /// Puts the program <paramref name="text" /> says in place of the whole of this one, keeping what was switched off, and
+        /// answers empty; or answers what is wrong with the text, and changes nothing.
+        /// </summary>
+        /// <remarks>
+        /// Read into a program of its own first, because a text with an error in it is trusted in no part. There is no way
+        /// back: it is which program the block has, not an edit to it. Runs under way end, as they do when a system goes.
+        /// </remarks>
+        public string Apply(string text)
+        {
+            var trial = new Automation();
+            var trouble = ProgramText.Load(text, trial, _world.Values);
+            if (trouble.Length > 0)
+                return trouble;
+
+            var switches = StateText.Save(_program, _runner);
+
+            var systems = _program.Systems;
+            for (var i = systems.Count - 1; i >= 0; i--)
+                Drop(systems[i]);
+
+            _program.Discard();
+            ProgramText.Load(text, _program, _world.Values);
+            StateText.Load(switches, _program, _runner);
+
+            _told = true;
+            _program.Kept();
+            _program.Edited();
+            _program.Rewire();
+            Invalidate();
+            return "";
+        }
+
         void Drop(AutomationSystem system)
         {
             var sequences = system.Sequences;
@@ -1057,7 +1105,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // anywhere, belonging to the screen rather than to what is on it.
             if (DeveloperMode)
             {
-                _actionBar.Add(new ChoiceEntry(ScriptPage.Called, Current is ScriptPage,
+                _actionBar.Add(new ChoiceEntry(Texts.ScriptTitle, Current is ScriptPage,
                     Act(Cmd.ShowScript, ShowScript)));
             }
 
@@ -1074,6 +1122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         internal void ShowScript()
         {
+            // Also the way to a program's text that would not read, which is mended there whether or not developer mode is on.
             // Offered from every screen including this one, where it is already lit. Pressing it there
             // means "I am looking at it", not "give me another one on top of the first".
             if (Current is ScriptPage)
@@ -1130,11 +1179,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         // history for it and nothing to take back to - which is why the trigger
                         // losing the button here loses it outright, the way the bin on its row is
                         // the way back from making one at all.
-                        MomentTrigger made = Starter(system, answer);
-                        Unless(system, made, null, delegate(MomentTrigger taken)
+                        MomentTrigger made = Starter(system, answer, null);
+                        Unless(system, made, answer, null, delegate(Occupant taken)
                         {
                             if (taken != null)
-                                taken.Sources.Clear();
+                                Release(taken);
 
                             Aimed(system, made, aim, origin, true, null);
                         }, delegate { });
@@ -1192,15 +1241,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Does it, unless something already answers the button it is given; then asks first, and takes the button only where
+        /// Does it, unless something already answers a button it is given; then asks first, and takes the button only where
         /// that is the answer.
         /// </summary>
         /// <remarks>
         /// A toolbar slot holds one thing. Two triggers on the same button and the same press are two claims on that one slot,
         /// and the one written last silently wins, so it is asked before it happens rather than found afterwards on a row that
-        /// has gone quiet. Taking a button from a trigger of a logic system of its own leaves that trigger without it; taking it
-        /// from one of a blueprint's blocksets empties the slot that blockset had it through. Either way the button is written,
-        /// whatever its slot holds by then.
+        /// has gone quiet. Taking a button empties the trigger slot of the blockset that had it, which then needs another;
+        /// either way the button is written, whatever its slot holds by then.
         /// <para>
         /// Only where the construct is what announces the moment. Two sequences both watching the inner door close is an
         /// ordinary way to build and costs nothing: Sprocket does that watching, and it can watch for two.
@@ -1209,11 +1257,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Its own trigger never counts, so settling on what was already there is not a clash with itself.
         /// </para>
         /// </remarks>
-        void Unless(AutomationSystem system, MomentTrigger made, Trigger except, Action<MomentTrigger> then,
+        /// <param name="system">The logic system the trigger is in.</param>
+        /// <param name="made">The trigger as it would be once done.</param>
+        /// <param name="answer">What was picked, buttons and all.</param>
+        /// <param name="except">The trigger being changed, which never clashes with itself; null for a new one.</param>
+        /// <param name="then">What is done once it may be, given the trigger the button is taken from and the blockset it was in, or null where it takes none.</param>
+        /// <param name="otherwise">What is done where the answer is to leave the button as it is.</param>
+        void Unless(AutomationSystem system, MomentTrigger made, PickAnswer answer, Trigger except, Action<Occupant> then,
             Action otherwise)
         {
-            var panels = Blocks(system, made.Sources);
-            var holder = Holding(panels, ButtonPanelExtension.ButtonOf(made.EventId), except, StandIn(system), null);
+            if (!(made is RequiredTrigger))
+            {
+                then(null);
+                return;
+            }
+
+            var panels = answer.Targets;
+            var holder = Holding(panels, Pressed(answer), except, StandIn(system), null);
             if (holder == null)
             {
                 then(null);
@@ -1224,51 +1284,50 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             AskAbout(holder);
             Answer(Texts.ButtonTakeOver, delegate
             {
-                MomentTrigger taken = null;
-                if (holder.Trigger != null && holder.System.IsBlueprint)
-                    Release(holder);
-                else
-                    taken = holder.Trigger;
-
-                then(taken);
+                then(holder.Trigger == null ? null : holder);
                 Wired(panels);
             });
             Answer(Texts.ButtonLeaveAlone, otherwise, true);
         }
 
-        /// <summary>
-        /// Fills <paramref name="part" /> of <paramref name="chosen" /> with the blocks <paramref name="blocks" /> by
-        /// <paramref name="fill" />, asking first about each button of them that something else already answers.
-        /// </summary>
-        /// <remarks>
-        /// Every trigger of the system that uses the part is asked about, one question at a time. Taking a button empties the
-        /// slot of the blockset that had it, or leaves a trigger of a logic system of its own without it; nothing is taken
-        /// until every question is answered, and leaving any of them alone leaves the part as it was.
-        /// </remarks>
-        internal void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, Action fill)
+        /// <summary>The toolbar slot a picked button press is answered on, for each picked block: the first toolbar, its first page, that button.</summary>
+        internal static List<ToolbarSlot> Pressed(PickAnswer answer)
         {
-            Filling(system, part, chosen, blocks, fill, new List<Occupant>());
+            var button = ButtonPanelExtension.ButtonOf(answer.Chosen) + 1;
+            var at = new List<ToolbarSlot>();
+            for (var i = 0; i < answer.Targets.Count; i++)
+                at.Add(new ToolbarSlot(1, 1, button));
+
+            return at;
         }
 
-        void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, Action fill,
-            List<Occupant> taking)
+        /// <summary>
+        /// Fills <paramref name="part" /> of <paramref name="chosen" /> with the blocks <paramref name="blocks" /> by
+        /// <paramref name="fill" />, asking first where it is a trigger part and something else already answers one of the
+        /// toolbar slots <paramref name="at" /> it is given.
+        /// </summary>
+        /// <remarks>
+        /// One question at a time. Taking a button empties the trigger slot of the blockset that had it; nothing is taken until
+        /// every question is answered, and leaving any of them alone leaves the part as it was.
+        /// </remarks>
+        internal void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
+            Action fill)
         {
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
+            Filling(system, part, chosen, blocks, at, fill, new List<Occupant>());
+        }
+
+        void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
+            Action fill, List<Occupant> taking)
+        {
+            var trigger = part.IsTrigger && at != null ? TriggerOf(system, part.Id) : null;
+            var holder = trigger == null ? null : Holding(blocks, at, trigger, chosen, taking);
+            if (holder != null)
             {
-                var trigger = triggers[i] as RequiredTrigger;
-                if (trigger == null || !trigger.Sources.Contains(part.Id))
-                    continue;
-
-                var holder = Holding(blocks, ButtonPanelExtension.ButtonOf(trigger.EventId), trigger, chosen, taking);
-                if (holder == null)
-                    continue;
-
                 AskAbout(holder);
                 Answer(Texts.ButtonTakeOver, delegate
                 {
                     taking.Add(holder);
-                    Filling(system, part, chosen, blocks, fill, taking);
+                    Filling(system, part, chosen, blocks, at, fill, taking);
                 });
                 Answer(Texts.ButtonLeaveAlone, delegate { }, true);
                 return;
@@ -1276,53 +1335,60 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             for (var i = 0; i < taking.Count; i++)
             {
-                if (taking[i].Trigger == null)
-                    continue;
-
-                if (taking[i].System.IsBlueprint)
+                if (taking[i].Trigger != null)
                     Release(taking[i]);
-                else
-                    taking[i].Trigger.Sources.Clear();
             }
 
             fill();
             Wired(blocks);
         }
 
-        /// <summary>What already answers a button: a trigger of the program on one of its system, or, with no trigger, a slot the program did not write.</summary>
+        /// <summary>The trigger that is the trigger part <paramref name="part" /> of <paramref name="system" />, or null.</summary>
+        static RequiredTrigger TriggerOf(AutomationSystem system, string part)
+        {
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var trigger = triggers[i] as RequiredTrigger;
+                if (trigger != null && trigger.Part == part)
+                    return trigger;
+            }
+
+            return null;
+        }
+
+        /// <summary>What already answers a toolbar slot: a trigger of the program on one of its system, or, with no trigger, a slot the program did not write.</summary>
         sealed class Occupant
         {
             public GridEntity Panel;
-            public int Button;
+            public ToolbarSlot At;
             public AutomationSystem System;
             public RequiredTrigger Trigger;
             public SystemInstance Instance;
 
             public bool Same(Occupant other)
             {
-                return Panel.Id == other.Panel.Id && Button == other.Button && Trigger == other.Trigger && Instance == other.Instance;
+                return Panel.Id == other.Panel.Id && At.Same(other.At) && Trigger == other.Trigger && Instance == other.Instance;
             }
         }
 
         /// <summary>
-        /// The first of <paramref name="panels" /> whose button <paramref name="button" /> something other than
+        /// The first of <paramref name="panels" /> whose toolbar slot in <paramref name="at" /> something other than
         /// <paramref name="trigger" /> on <paramref name="instance" /> already answers, passing over what is in
         /// <paramref name="taking" />; or null where nothing does.
         /// </summary>
         /// <remarks>
-        /// Compared as blocks, through every one of every system: a toolbar slot belongs to a block, and two systems can each
-        /// have a part called Button Panel on different buttons. A trigger of the program comes first, since it can be named;
-        /// then a slot holding what the program did not write, which is only read where no trigger has the button.
+        /// Compared as blocks and slots, through every one of every system: a toolbar slot belongs to a block, whichever part
+        /// of whichever system names it. A trigger of the program comes first, since it can be named; then a slot holding what
+        /// the program did not write, which is only read where no trigger has the slot.
         /// </remarks>
-        Occupant Holding(IList<long> panels, int button, Trigger trigger, SystemInstance instance, List<Occupant> taking)
+        Occupant Holding(IList<long> panels, IList<ToolbarSlot> at, Trigger trigger, SystemInstance instance, List<Occupant> taking)
         {
-            if (button < 0)
-                return null;
-
-            for (var p = 0; p < panels.Count; p++)
+            for (var p = 0; p < panels.Count && p < at.Count; p++)
             {
                 GridEntity panel = _world.FindEntity(panels[p]);
-                if (panel == null)
+                var where = at[p];
+                if (panel == null || where.Slot < 1)
                     continue;
 
                 var named = false;
@@ -1333,27 +1399,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     for (var i = 0; i < triggers.Count; i++)
                     {
                         var other = triggers[i] as RequiredTrigger;
-                        if (other == null || ButtonPanelExtension.ButtonOf(other.EventId) != button)
+                        if (other == null)
                             continue;
 
                         var instances = each.Instances;
-                        for (var n = 0; n < instances.Count || n == 0; n++)
+                        for (var n = 0; n < instances.Count; n++)
                         {
-                            var through = instances.Count == 0 ? null : instances[n];
-                            if ((other == trigger && through == instance) || !Names(through, other.Sources, panel.Id))
+                            var through = instances[n];
+                            if ((other == trigger && through == instance) || !Answers(through, other.Part, panel.Id, where))
                                 continue;
 
                             named = true;
-                            var holder = new Occupant { Panel = panel, Button = button, System = each, Trigger = other, Instance = through };
+                            var holder = new Occupant { Panel = panel, At = where, System = each, Trigger = other, Instance = through };
                             if (!Taken(taking, holder))
                                 return holder;
                         }
                     }
                 }
 
-                if (!named && _world.Foreign(panel.Block, button))
+                if (!named && _world.Foreign(panel.Block, where))
                 {
-                    var holder = new Occupant { Panel = panel, Button = button };
+                    var holder = new Occupant { Panel = panel, At = where };
                     if (!Taken(taking, holder))
                         return holder;
                 }
@@ -1373,14 +1439,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return false;
         }
 
-        /// <summary>Whether <paramref name="sources" /> come to the block <paramref name="block" /> through <paramref name="instance" />.</summary>
-        bool Names(SystemInstance instance, IList<string> sources, long block)
+        /// <summary>Whether <paramref name="instance" /> answers trigger part <paramref name="part" /> with the slot <paramref name="where" /> on the block <paramref name="block" />.</summary>
+        bool Answers(SystemInstance instance, string part, long block, ToolbarSlot where)
         {
-            var seen = SystemInstance.Through(instance, sources);
-            for (var i = 0; i < seen.Count; i++)
+            var blocks = instance.FilledWith(part);
+            var positions = instance.Positions(part);
+            for (var i = 0; blocks != null && positions != null && i < blocks.Count && i < positions.Count; i++)
             {
-                GridEntity entity = _runner.Bindings.Entity(seen[i]);
-                if (entity != null && entity.Id == block)
+                GridEntity entity = _runner.Bindings.Entity(blocks[i]);
+                if (entity != null && entity.Id == block && positions[i].Same(where))
                     return true;
             }
 
@@ -1395,48 +1462,60 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             if (holder.Trigger == null)
             {
-                arguments.Set("button", (holder.Button + 1).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                arguments.Set("button", holder.At.Slot.ToString(System.Globalization.CultureInfo.InvariantCulture));
                 AskHere(Texts.ButtonElsewhere, arguments);
                 return;
             }
 
             var sequence = holder.System.FindSequence(holder.Trigger.Runs);
-            arguments.Set("sequence", sequence == null ? "" : sequence.Name);
+            arguments.Set("sequence", sequence == null ? "" : sequence.HasName ? sequence.Name : SequenceText.DefaultName(sequence.Number));
             arguments.Set("blockset", holder.System.IsBlueprint && holder.Instance != null
                 ? SystemSummary.DescribeInstance(Texts, _runner.Bindings, holder.System, holder.Instance)
                 : holder.System.Name);
-            AskHere(holder.Trigger.Stops ? Texts.ButtonStops : Texts.ButtonStarts, arguments);
+            AskHere(holder.Trigger.Acts != null ? Texts.ButtonActs : holder.Trigger.Stops ? Texts.ButtonStops : Texts.ButtonStarts,
+                arguments);
         }
 
-        /// <summary>Takes <paramref name="holder" />'s button out of the slots of the blockset that had it, which then needs another.</summary>
+        /// <summary>Takes <paramref name="holder" />'s toolbar slot out of the trigger slot of the blockset that had it, which then needs another.</summary>
         void Release(Occupant holder)
         {
-            var sources = holder.Trigger.Sources;
-            for (var i = 0; i < sources.Count; i++)
-            {
-                var filled = holder.Instance.FilledWith(sources[i]);
-                if (filled == null)
-                    continue;
+            var kept = new List<string>();
+            var keptAt = new List<ToolbarSlot>();
+            Kept(holder, kept, keptAt);
 
-                var kept = new List<string>();
-                for (var f = 0; f < filled.Count; f++)
-                {
-                    GridEntity entity = _runner.Bindings.Entity(filled[f]);
-                    if (entity == null || entity.Id != holder.Panel.Id)
-                        kept.Add(filled[f]);
-                }
-
-                if (kept.Count == filled.Count)
-                    continue;
-
-                if (kept.Count == 0)
-                    holder.Instance.Clear(sources[i]);
-                else
-                    holder.Instance.Fill(sources[i], kept);
-            }
+            if (kept.Count == 0)
+                holder.Instance.Clear(holder.Trigger.Part);
+            else
+                holder.Instance.Fill(holder.Trigger.Part, kept, keptAt);
 
             _program.Edited();
             _program.Rewire();
+        }
+
+        /// <summary>Does <paramref name="made" /> and takes <paramref name="holder" />'s button, as one edit.</summary>
+        SystemEdit TakingOver(SystemEdit made, Occupant holder)
+        {
+            var kept = new List<string>();
+            var keptAt = new List<ToolbarSlot>();
+            Kept(holder, kept, keptAt);
+            return new TakeOver(made, holder.Instance, holder.Trigger.Part, kept, keptAt);
+        }
+
+        /// <summary>What answers <paramref name="holder" />'s trigger part in its blockset once its toolbar slot is taken out.</summary>
+        void Kept(Occupant holder, List<string> kept, List<ToolbarSlot> keptAt)
+        {
+            var part = holder.Trigger.Part;
+            var blocks = holder.Instance.FilledWith(part);
+            var positions = holder.Instance.Positions(part);
+            for (var i = 0; blocks != null && positions != null && i < blocks.Count && i < positions.Count; i++)
+            {
+                GridEntity entity = _runner.Bindings.Entity(blocks[i]);
+                if (entity != null && entity.Id == holder.Panel.Id && positions[i].Same(holder.At))
+                    continue;
+
+                kept.Add(blocks[i]);
+                keptAt.Add(positions[i]);
+            }
         }
 
         /// <summary>Has every slot the program wants on <paramref name="panels" /> written, whatever it holds, as somebody has just picked them.</summary>
@@ -1453,20 +1532,74 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// What somebody has just described, as the trigger that makes it happen.
         /// </summary>
         /// <remarks>
-        /// The one place the two arrangements are told apart, and nobody is asked: picking a button
-        /// means the construct already announces it and Sprocket wires a slot, picking a door means
-        /// Sprocket watches for it. See <see cref="Vocabulary.Starter" />.
+        /// The one place the two arrangements are told apart, and nobody is asked: picking a button means the construct
+        /// already announces it and Sprocket wires a slot, picking a door means Sprocket watches for it. See
+        /// <see cref="Vocabulary.Starter" />. A button makes a trigger part, answered in the blockset shown by what was
+        /// picked; one picked again for <paramref name="keeping" /> is that trigger's own part, filled once the question of
+        /// whether the buttons are free is answered - see <see cref="Refill" />.
         /// </remarks>
-        internal MomentTrigger Starter(AutomationSystem system, PickAnswer answer)
+        internal MomentTrigger Starter(AutomationSystem system, PickAnswer answer, RequiredTrigger keeping)
         {
             MomentTrigger made = Vocabulary.Starter(
                 Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.All);
 
-            var named = Named(system, answer.Targets);
-            for (var i = 0; i < named.Count; i++)
-                made.Sources.Add(named[i]);
+            if (!(made is RequiredTrigger))
+            {
+                var named = Named(system, answer.Targets);
+                for (var i = 0; i < named.Count; i++)
+                    made.Sources.Add(named[i]);
 
-            return made;
+                return made;
+            }
+
+            if (keeping != null)
+                return RequiredTrigger.Named(keeping.Part);
+
+            var instance = StandIn(system);
+            var declared = new List<string>();
+            var at = new List<ToolbarSlot>();
+            var first = Picked(answer, declared, at);
+            if (instance == null || first == null)
+                return made;
+
+            var called = declared.Count == 1 ? Called(first) : first.Kind.DisplayName;
+            return RequiredTrigger.Named(system.TakeTrigger(instance, declared, at, called, Type(first.Kind)));
+        }
+
+        /// <summary>Answers trigger part <paramref name="part" /> in the blockset shown with the buttons <paramref name="answer" /> picked.</summary>
+        void Refill(AutomationSystem system, string part, PickAnswer answer)
+        {
+            var instance = StandIn(system);
+            if (instance == null)
+                return;
+
+            var declared = new List<string>();
+            var at = new List<ToolbarSlot>();
+            Picked(answer, declared, at);
+            instance.Fill(part, declared, at);
+            _program.Edited();
+            _program.Rewire();
+        }
+
+        /// <summary>The blocks <paramref name="answer" /> picked, as the construct declares them, each with the toolbar slot its press is answered on; the first of them, or null.</summary>
+        internal GridEntity Picked(PickAnswer answer, List<string> declared, List<ToolbarSlot> at)
+        {
+            var pressed = Pressed(answer);
+            GridEntity first = null;
+            for (var i = 0; i < answer.Targets.Count; i++)
+            {
+                GridEntity entity = _world.FindEntity(answer.Targets[i]);
+                if (entity == null)
+                    continue;
+
+                if (first == null)
+                    first = entity;
+
+                declared.Add(_program.Declare(_world, entity).Name);
+                at.Add(pressed[i]);
+            }
+
+            return first;
         }
 
         /// <summary>
@@ -1509,7 +1642,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var sequence = system.FindSequence(aim.Sequence);
             if (sequence != null)
-                Points(system, trigger, sequence, aim.Stops, fresh, null, start);
+                Points(system, trigger, new Run(sequence.Number, aim.Stops), fresh, null, start);
             else if (start != null)
                 Do(system, start);
         }
@@ -1523,20 +1656,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// is already there, so this is an edit, and it is the system's to walk back, together with
         /// <paramref name="start" /> where what starts it changed too.
         /// </remarks>
-        void Points(AutomationSystem system, Trigger trigger, Sequence sequence, bool stops,
-            bool fresh, Sequence made, SystemEdit start)
+        void Points(AutomationSystem system, Trigger trigger, Step does, bool fresh, Sequence made, SystemEdit start)
         {
             if (fresh)
             {
-                trigger.Runs = sequence.Number;
-                trigger.Stops = stops;
+                trigger.Does = does;
                 system.AddTrigger(trigger);
                 _program.Rewire();
                 Invalidate();
                 return;
             }
 
-            var point = new PointTrigger(_program, trigger, sequence.Number, stops, made);
+            var point = new PointTrigger(_program, trigger, does, made);
             Do(system, start == null ? point : (SystemEdit)new Retrigger(start, point));
         }
 
@@ -1553,7 +1684,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var sequence = _program.AddSequence(system);
             sequence.Name = Name(sequence);
 
-            Points(system, trigger, sequence, false, fresh, sequence, start);
+            Points(system, trigger, new Run(sequence.Number), fresh, sequence, start);
 
             PushNamed(new SequencePage(this, sequence));
         }
@@ -1563,13 +1694,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// chosen in, and makes it do exactly that.
         /// </summary>
         /// <remarks>
-        /// What it holds is a sequence of one act that nobody named, which is what "one thing" is in
-        /// the model. Where the block has an action of the game's own for it, the host writes that
-        /// into the button and Sprocket is not part of the press - see <c>SprocketUnit</c>, which
-        /// decides that by looking at the sequence rather than by being told.
+        /// What it holds is an act of its own. Where the block has an action of the game's own for it,
+        /// the host writes that into the button and Sprocket is not part of the press - see
+        /// <c>SprocketUnit</c>, which decides that by looking at the act rather than by being told.
         /// <para>
-        /// A trigger that already does one thing opens on it, and finishing changes that act where it
-        /// is, together with <paramref name="start" />.
+        /// A trigger that already does one thing opens on it, and finishing puts the act chosen in its
+        /// place, together with <paramref name="start" />.
         /// </para>
         /// <para>
         /// The page is kept on <paramref name="aim" /> while the single action stays chosen, so going
@@ -1580,21 +1710,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh,
             SystemEdit start, Aim aim)
         {
-            Sequence doing = fresh ? null : system.FindSequence(trigger.Runs);
-            var only = doing == null || doing.HasName ? null : doing.Only;
+            aim.Finish = delegate(PickAnswer answer)
+            {
+                var act = new Act(answer.Chosen);
+                act.Form = answer.Form;
+                var named = Named(system, answer.Targets);
+                for (var i = 0; i < named.Count; i++)
+                    act.Targets.Add(named[i]);
+
+                for (var i = 0; i < answer.Values.Count; i++)
+                    act.Values.Add(answer.Values[i]);
+
+                UnwindTo(origin);
+                Points(system, trigger, act, fresh, null, start);
+            };
+
+            var only = fresh ? null : trigger.Acts;
             if (only != null)
             {
-                var index = doing.Steps.IndexOf(only);
-                aim.Finish = delegate(PickAnswer answer)
-                {
-                    UnwindTo(origin);
-
-                    var rewrite = new Rewrite(doing, new ChangeStep(index, only, Named(system, answer.Targets),
-                        answer.Chosen, answer.Form, answer.Values,
-                        Vocabulary.Lasts(World, answer.Targets, answer.Chosen, answer.Form)));
-                    Do(system, start == null ? rewrite : (SystemEdit)new Retrigger(start, rewrite));
-                };
-
                 if (aim.Following == null)
                 {
                     aim.Following = new PickPage(this, "Do something", false, Blocks(system, only.Targets),
@@ -1607,26 +1740,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Push(aim.Following);
                 return;
             }
-
-            aim.Finish = delegate(PickAnswer answer)
-            {
-                var act = new Act(answer.Chosen);
-                act.Form = answer.Form;
-                var named = Named(system, answer.Targets);
-                for (var i = 0; i < named.Count; i++)
-                    act.Targets.Add(named[i]);
-
-                for (var i = 0; i < answer.Values.Count; i++)
-                    act.Values.Add(answer.Values[i]);
-
-                var sequence = _program.AddSequence(system);
-                sequence.Steps.Add(act);
-                if (Vocabulary.Lasts(World, answer.Targets, answer.Chosen, answer.Form))
-                    sequence.Steps.Add(new Await());
-
-                UnwindTo(origin);
-                Points(system, trigger, sequence, false, fresh, sequence, start);
-            };
 
             if (aim.Following == null)
             {
@@ -1642,8 +1755,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Gives every block <paramref name="system" /> names directly a slot of its own, filled with that block in its first blockset.</summary>
         /// <remarks>
         /// A blueprint's blocks are its slots, and a slot is only made where a block is picked; steps and triggers that name
-        /// blocks themselves would leave a blueprint of them with none. Each block becomes one slot, named for its kind as a
-        /// picked one is, and every step and trigger that named the block names the slot.
+        /// blocks themselves would leave a blueprint of them with none. Each block becomes one slot, called what the block is
+        /// called now as a picked one is, and every step and trigger that named the block names the slot.
         /// </remarks>
         internal void Slotted(AutomationSystem system)
         {
@@ -1663,7 +1776,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 GridEntity entity = _runner.Bindings.Entity(named[i]);
                 slots[named[i]] = entity == null
                     ? system.Take(first, named[i], _program.Called(named[i], _world.Values), "")
-                    : system.Take(first, named[i], entity.Kind.DisplayName, Type(entity.Kind));
+                    : system.Take(first, named[i], Called(entity), Type(entity.Kind));
             }
 
             if (slots.Count == 0)
@@ -1675,6 +1788,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var moment = triggers[i] as MomentTrigger;
                 if (moment != null)
                     Slotted(moment.Sources, slots);
+
+                var own = triggers[i].Acts;
+                if (own != null)
+                    Slotted(own.Targets, slots);
             }
 
             var sequences = system.Sequences;
@@ -1727,7 +1844,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var declared = _program.Declare(_world, entity).Name;
                 named.Add(instance == null
                     ? declared
-                    : system.Take(instance, declared, entity.Kind.DisplayName, Type(entity.Kind)));
+                    : system.Take(instance, declared, Called(entity), Type(entity.Kind)));
             }
 
             return named;
@@ -1798,6 +1915,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Invalidate();
         }
 
+        /// <summary>What a slot taken for <paramref name="entity" /> is called at first: the block's own name, or its kind where it has none.</summary>
+        static string Called(GridEntity entity)
+        {
+            var name = entity.Name == null ? "" : entity.Name.Trim();
+            return name.Length > 0 ? name : entity.Kind.DisplayName;
+        }
+
         /// <summary>The type a part filled by a block of <paramref name="kind" /> expects, with no subtype.</summary>
         static string Type(EntityKind kind)
         {
@@ -1807,7 +1931,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Takes a trigger out of a system, and the sequence it was the only reason for.
+        /// Takes a trigger out of a system.
         /// </summary>
         /// <remarks>
         /// No question asked, because the system's arrows are the answer to a deletion nobody meant -
@@ -1817,15 +1941,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         internal void Forget(AutomationSystem system, Trigger trigger)
         {
-            Sequence sequence = system.FindSequence(trigger.Runs);
-            var only = sequence != null && !sequence.HasName && !Started(system, sequence, trigger)
-                ? sequence
-                : null;
-
-            if (only != null)
-                ForgetSequence(only);
-
-            Do(system, new ForgetTrigger(_program, trigger, only));
+            Do(system, new ForgetTrigger(system, trigger));
         }
 
         /// <summary>
@@ -1877,16 +1993,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var was = moment as WhenTrigger;
 
             var picker = new PickPage(this, "When something happens", true,
-                Blocks(system, moment.Sources), moment.EventId, Form.Native,
+                Blocks(system, moment.Sources), Vocabulary.EventOf(moment, StandIn(system)), Form.Native,
                 delegate(PickAnswer answer)
                 {
-                    MomentTrigger made = Starter(system, answer);
-                    Unless(system, made, moment, delegate(MomentTrigger taken)
+                    var keeping = moment as RequiredTrigger;
+                    MomentTrigger made = Starter(system, answer, keeping);
+                    Unless(system, made, answer, moment, delegate(Occupant taken)
                     {
-                        var change = new ChangeTrigger(moment, made);
+                        // A button picked again for a button trigger answers the same trigger part, so the trigger is kept:
+                        // its toolbar slots name it.
+                        if (keeping != null && made is RequiredTrigger)
+                        {
+                            if (taken != null)
+                                Release(taken);
 
-                        // The trigger kept where what starts it is the same, because the toolbar
-                        // slot names that one.
+                            Refill(system, keeping.Part, answer);
+                            Aimed(system, moment, aim, origin, false, null);
+                            return;
+                        }
+
+                        var change = new ChangeTrigger(moment, made);
                         if (!change.Changes && taken == null)
                         {
                             Aimed(system, moment, aim, origin, false, null);
@@ -1894,9 +2020,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         }
 
                         // One edit either way, because it is one answer to one question.
-                        Aimed(system, made, aim, origin, false, taken == null
-                            ? (SystemEdit)change
-                            : new TakeOver(change, taken));
+                        Aimed(system, made, aim, origin, false, taken == null ? change : TakingOver(change, taken));
                     }, delegate { UnwindTo(origin); });
                 },
                 true, was != null && was.RequiresAll, opens: action ? Opening.Nothing : opens, aim: aim);
@@ -1928,25 +2052,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
 
             return found;
-        }
-
-        /// <summary>
-        /// Whether anything but that trigger still starts or stops the sequence.
-        /// </summary>
-        /// <remarks>
-        /// Asked while the one being deleted is still in the list, because what is being decided is
-        /// whether to delete it - so it cannot be allowed to answer for itself.
-        /// </remarks>
-        static bool Started(AutomationSystem system, Sequence sequence, Trigger apart)
-        {
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                if (triggers[i] != apart && triggers[i].Runs == sequence.Number)
-                    return true;
-            }
-
-            return false;
         }
 
         /// <summary>

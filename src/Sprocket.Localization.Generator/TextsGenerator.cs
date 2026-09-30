@@ -113,7 +113,8 @@ namespace Sprocket.Localization.Generator
             return texts;
         }
 
-        /// <summary>Reports each text in a translation that the original lacks.</summary>
+        /// <summary>Reports each text in a translation that the original lacks, and each text of the original the translation lacks.</summary>
+        /// <remarks>A text missing from a translation is shown in the original's language, in the middle of the translated ones.</remarks>
         static void Check(SourceProductionContext output, string path, string xml, List<Said> texts)
         {
             string problem;
@@ -128,10 +129,18 @@ namespace Sprocket.Localization.Generator
             foreach (var text in texts)
                 keys.Add(text.Key);
 
+            var translated = new HashSet<string>();
             foreach (var entry in entries)
             {
+                translated.Add(entry.Key);
                 if (!keys.Contains(entry.Key))
                     output.ReportDiagnostic(Diagnostic.Create(Problems.Stray, At(path, entry.Line), entry.Key, Resx.Culture(path)));
+            }
+
+            foreach (var text in texts)
+            {
+                if (!translated.Contains(text.Key))
+                    output.ReportDiagnostic(Diagnostic.Create(Problems.Missing, At(path, 0), text.Key, Resx.Culture(path)));
             }
         }
 

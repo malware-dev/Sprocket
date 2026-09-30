@@ -263,44 +263,43 @@ public class UndoTests
     [Fact]
     public void DeletingATriggerReversesExactly()
     {
-        var program = new Automation();
         Sequence sequence = Build();
 
-        RoundTrip(sequence, new ForgetTrigger(program, sequence.Trigger, null));
+        RoundTrip(sequence, new ForgetTrigger(sequence.System, sequence.Trigger));
     }
 
     /// <summary>
-    /// And it brings back the sequence it took with it, as the sequence it was.
+    /// Deleting a trigger the construct answers takes its trigger part and what each instance answered it with, and undoing
+    /// puts all three back as they were.
     /// </summary>
-    /// <remarks>
-    /// A trigger that does one plain thing owns the sequence holding that act, so deleting the
-    /// trigger deletes it. Everything that pointed at that sequence named it by number, so one that
-    /// came back as a new sequence would come back as a different thing.
-    /// </remarks>
     [Fact]
-    public void DeletingATriggerBringsBackTheSequenceItTook()
+    public void DeletingATriggerTakesItsPartAndBringsItBack()
     {
         var program = new Automation();
         var system = program.AddSystem();
-
-        var trigger = new WhenTrigger("pressed");
-        trigger.Sources.Add("call");
-
-        var sequence = program.AddSequence(system, trigger);
+        var sequence = program.AddSequence(system);
         sequence.Steps.Add(StepFor("open", "outer"));
 
-        var edit = new ForgetTrigger(program, trigger, sequence);
-        var number = sequence.Number;
+        var part = system.PartFor("call");
+        part.IsTrigger = true;
+        var trigger = RequiredTrigger.Named("call");
+        trigger.Does = new Run(sequence.Number);
+        system.AddTrigger(trigger);
+        system.First!.Fill("call", new[] { "panel1" }, new[] { new ToolbarSlot(1, 1, 4) });
 
+        var edit = new ForgetTrigger(system, trigger);
         edit.Apply(system);
-        Assert.Empty(program.Sequences);
+
         Assert.Empty(system.Triggers);
+        Assert.Null(system.FindPart("call"));
+        Assert.Null(system.First.FilledWith("call"));
 
         edit.Undo(system);
-        Assert.Single(program.Sequences);
-        Assert.Same(sequence, program.Sequences[0]);
-        Assert.Equal(number, program.Sequences[0].Number);
+
         Assert.Same(trigger, system.Triggers[0]);
+        Assert.Same(part, system.FindPart("call"));
+        Assert.Equal(new[] { "panel1" }, system.First.FilledWith("call"));
+        Assert.Equal(4, system.First.Positions("call")![0].Slot);
     }
 
     /// <summary>A system with one slot that has a label and says what it is for, as a blueprint's author leaves it.</summary>

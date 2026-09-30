@@ -64,6 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>What deleting it does, or null where it cannot be deleted.</summary>
         public ICommand Deletes { get; set; }
 
+        /// <summary>Why nothing on it can be changed, said over every part that would change it; empty while it can.</summary>
+        public string Locked { get; set; } = "";
+
         /// <summary>Shows what it has been told, naming blocks as <paramref name="world" /> calls them and saying its fixed words in <paramref name="texts" />.</summary>
         /// <remarks>Runs on every refresh of the page, so it words only a part that has changed.</remarks>
         public void Show(GridWorld world, Texts texts)
@@ -86,10 +89,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
 
             for (var i = 0; i < Starts.Count; i++)
+            {
+                _starts[i].Tip = Tip.For(_starts[i].Tip, Starts[i].Opens == null ? Why() : null);
                 Part(_starts[i], i, Starts[i], world);
+            }
 
             for (var i = 0; i < Does.Count; i++)
             {
+                _does[i].WaitsTip = texts.MemberWaits;
+                _does[i].Tip = Tip.For(_does[i].Tip, Does[i].Opens == null ? Why() : null);
+
                 // Before the part is shown, which is what records it as shown: a join is worked out only for a
                 // part that has changed.
                 if (!ReferenceEquals(_shown[Starts.Count + i], Does[i]))
@@ -115,6 +124,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _delete.Command = Deletes;
             _delete.IsVisible = Deletes != null;
             _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.TriggerDelete : null);
+        }
+
+        /// <summary><see cref="Locked" />, or null where there is nothing to say.</summary>
+        string Why()
+        {
+            return Locked.Length == 0 ? null : Locked;
         }
 
         void Part(Slot chip, int at, SentenceSlot part, GridWorld world)

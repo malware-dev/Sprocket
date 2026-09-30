@@ -41,6 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<GridEntity> _candidates = new List<GridEntity>();
         readonly List<GridEntity> _filtered = new List<GridEntity>();
         readonly List<long> _filteredIds = new List<long>();
+        readonly HashSet<long> _wasShown = new HashSet<long>();
         readonly List<EntityKind> _kinds = new List<EntityKind>();
         readonly Filter _filter;
         readonly List<EntityKind> _shownKinds = new List<EntityKind>();
@@ -71,11 +72,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<Field> _givenFields = new List<Field>();
         readonly Func<GridEntity, bool> _fits;
 
+        readonly Func<GridEntity, bool> _offers;
+
         string _chosen;
         Form _chosenForm;
         bool _all;
         string _blockSearch;
         string _kind;
+        string _narrowedSearch;
+        string _narrowedKind;
         string _kindSearch;
         string _whatSearch;
         string _said;
@@ -114,9 +119,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
             bool asksAll = false, bool all = false, IList<Literal> values = null,
-            Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null)
+            Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> offers = null)
             : base(editor)
         {
+            _offers = offers;
             _opens = opens;
             _aim = aim;
             if (aim != null)
@@ -989,7 +995,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 row.Many = false;
                 row.HasPicture = false;
                 row.Secondary = "";
-                row.WaitsTip = texts.PickWaits;
+                row.WaitsTip = texts.MemberWaits;
 
                 if (at < 0)
                 {
@@ -1223,8 +1229,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <remarks>
         /// Ticking a block narrows what can be said about it in the next stage and nothing else, so nobody watches the list of
         /// their own blocks shrink underneath them. Narrowing is the one thing that can hide a row, and a picked block is
-        /// exempt: a tick nobody can find is a tick nobody can clear. Sorted by name, because the order the world hands them
-        /// over is whatever walking the grid produced.
+        /// exempt: a tick nobody can find is a tick nobody can clear. A row stays on the list until the narrowing changes, so a
+        /// block kept only because it was picked is still there after somebody picks another in its place. Sorted by name,
+        /// because the order the world hands them over is whatever walking the grid produced.
         /// </remarks>
         void Collect()
         {
@@ -1243,7 +1250,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var capable = Vocabulary.Capable(Editor.World, _forEvents);
                 for (var i = 0; i < capable.Count; i++)
-                    _candidates.Add(capable[i]);
+                {
+                    if (_offers == null || _offers(capable[i]))
+                        _candidates.Add(capable[i]);
+                }
             }
 
             _candidates.Sort(ByName);
@@ -1251,12 +1261,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _kinds.Clear();
             EntityQuery.KindsPresent(_candidates, _kinds);
 
+            _wasShown.Clear();
+            if (_blockSearch == _narrowedSearch && _kind == _narrowedKind)
+            {
+                for (var i = 0; i < _filteredIds.Count; i++)
+                    _wasShown.Add(_filteredIds[i]);
+            }
+
+            _narrowedSearch = _blockSearch;
+            _narrowedKind = _kind;
+
             _filtered.Clear();
             _filteredIds.Clear();
             for (var i = 0; i < _candidates.Count; i++)
             {
                 var entity = _candidates[i];
-                if (!Contains(_selection, entity.Id) && !EntityQuery.Matches(entity, _blockSearch, _kind))
+                if (!_wasShown.Contains(entity.Id) && !Contains(_selection, entity.Id)
+                    && !EntityQuery.Matches(entity, _blockSearch, _kind))
                     continue;
 
                 _filtered.Add(entity);

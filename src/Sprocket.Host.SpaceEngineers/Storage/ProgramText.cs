@@ -36,7 +36,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         const int Version = 1;
 
-        const int Draft = 7;
+        const int Draft = 8;
+
+        /// <summary>What Sprocket's own actions and moments are qualified by: <c>sprocket.close</c>.</summary>
+        /// <remarks>Persisted in every program that uses one, so it cannot change without changing what those programs say.</remarks>
+        const string Own = "sprocket";
 
         static readonly string[] Times =
         {
@@ -81,13 +85,29 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return pen.ToString();
         }
 
+        /// <summary>The line, counted from 1, that trouble this reader reported names, or 0 where it names none.</summary>
+        /// <remarks>Read back out of the words, which start <c>Line 5:</c> wherever a line is known.</remarks>
+        public static int LineOf(string trouble)
+        {
+            const string lead = "Line ";
+            if (trouble == null || !trouble.StartsWith(lead, StringComparison.Ordinal))
+                return 0;
+
+            var line = 0;
+            for (var i = lead.Length; i < trouble.Length && trouble[i] >= '0' && trouble[i] <= '9'; i++)
+                line = line * 10 + (trouble[i] - '0');
+
+            return line;
+        }
+
         /// <summary>
         /// Reads a program back into an empty one, and answers what was wrong with it.
         /// </summary>
         /// <remarks>
-        /// An empty answer means everything that was written was read. Anything else is for the host to
-        /// log or show; the program itself carries the same news as <see cref="Automation.Intact" />,
-        /// because the decision it forces - do not save over this - is taken somewhere else entirely.
+        /// An empty answer means everything that was written was read. Anything else leaves the program
+        /// empty, because a text with an error in it is trusted in no part, and is for the host to log or
+        /// show; the program itself carries the same news as <see cref="Automation.Intact" />, because the
+        /// decision it forces - do not save over this - is taken somewhere else entirely.
         /// </remarks>
         public static string Load(string saved, Automation program, Values values)
         {
@@ -120,32 +140,45 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             // would be read as something it does not mean.
             string refused = null;
             if (constructs.Count == 0 || constructs[0].Key != Keyword.Sprocket)
-                refused = "this is not a Sprocket program";
+                refused = "Line 1: expected sprocket <format>.";
             else if (constructs[0].Whole(0) != Version)
-                refused = "this was written by a different version of Sprocket";
+                refused = "Line 1: written for sprocket " + constructs[0].Whole(0) + "; this reads sprocket " + Version + ".";
             else if (DraftOf(constructs[0]) != Draft)
-                refused = "this was written against a different draft of the format";
+                refused = "Line 1: written for " + (DraftOf(constructs[0]) < 0 ? "the finished format" : "alpha " + DraftOf(constructs[0]))
+                    + "; this reads alpha " + Draft + ".";
 
             if (refused != null)
             {
+                program.Unreadable(saved);
                 program.Refused(refused);
                 warning = "";
                 return refused;
             }
 
+            Ends(constructs[0], constructs[0].Says(1, Keyword.Alpha) ? 3 : 1, trouble);
+
             for (var i = 0; i < constructs.Count; i++)
             {
                 var construct = constructs[i];
-                if (construct.Key == Keyword.Block)
+                if (construct.IsOff)
+                    trouble.Say(construct, "'//' only switches off a step in a sequence.");
+                else if (construct.Key == Keyword.Block)
                     ReadRef(construct, program, values, trouble);
                 else if (construct.Key == Keyword.System)
                     ReadSystem(construct, program, trouble);
                 else if (construct.Key == Keyword.Instance)
                     ReadInstance(construct, program, trouble);
+                else if (i > 0)
+                    trouble.Say(construct, "unexpected " + Headed(construct) + "; expected block, system or instance.");
             }
 
+            trouble.Settle(program);
+
             if (trouble.What.Length > 0)
+            {
+                program.Unreadable(saved);
                 program.Damaged(trouble.What);
+            }
 
             warning = trouble.Warning;
             return trouble.What;
@@ -261,6 +294,22 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         static void ReadRef(Statement statement, Automation program, Values values, Trouble trouble)
         {
+            var name = statement.ValueAt(1);
+            if (statement.Word(0).Length == 0 || !Named(name) || statement.ValueAt(2).Form != ValueForm.List)
+            {
+                trouble.Say(statement, "expected block '<type>/<subtype>' <name> [ <keys> ].");
+                return;
+            }
+
+            if (!Ends(statement, 3, trouble))
+                return;
+
+            if (program.FindRef(name.Word) != null)
+            {
+                trouble.Say(statement, "block '" + name.Word + "' is already declared.");
+                return;
+            }
+
             var declared = new EntityRef(statement.Word(1), BlockKinds.Definition(statement.Word(0)));
             var keys = statement.Items(2);
             for (var i = 0; i < keys.Count; i++)
@@ -285,7 +334,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     Vector3I[] cells = Cells(statement.Within(key), statement);
                     if (cells == null)
                     {
-                        trouble.Say(statement, "a list among a block's keys is a list of cells, like [ (0 2 -1), (3 0 0) ]");
+                        trouble.Say(statement, "expected cells in the list among the keys, like [ (0 2 -1), (3 0 0) ].");
                         return;
                     }
 
@@ -320,7 +369,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     break;
             }
 
-            trouble.Say(statement, "this build cannot keep one of this block's keys");
+            trouble.Say(statement, "unsupported key in the block's list.");
         }
 
         static void WriteSystem(Pen pen, AutomationSystem system)
@@ -349,13 +398,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
             {
-                if (parts[i].Kept(used.Contains(parts[i].Id)))
+                if (!parts[i].IsTrigger && parts[i].Kept(used.Contains(parts[i].Id)))
                     WritePart(pen, parts[i]);
             }
 
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
-                WriteTrigger(pen, triggers[i]);
+                WriteTrigger(pen, system, triggers[i]);
 
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
@@ -379,7 +428,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Guid identity;
             if (!Guid.TryParseExact(statement.Text(0), "D", out identity) || identity == Guid.Empty)
             {
-                trouble.Say(statement, "a system starts with its identity, like \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\"");
+                trouble.Say(statement, "expected the system's identity, a quoted GUID.");
                 return;
             }
 
@@ -387,37 +436,60 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!statement.Says(1, Keyword.As) || name.Count == 0 || name.Count > 2
                 || name[name.Count - 1].Word.Length == 0)
             {
-                trouble.Say(statement, "a system is named after 'as', as a name or a namespace and a name");
+                trouble.Say(statement, "expected 'as' and the system's name.");
                 return;
             }
 
             if (program.FindSystem(identity) != null)
             {
-                trouble.Say(statement, "two systems are both " + identity.ToString("D"));
+                trouble.Say(statement, "system " + identity.ToString("D") + " is already declared.");
                 return;
             }
 
             var space = name.Count == 2 ? name[0].Word : "";
             var called = name[name.Count - 1].Word;
             if (program.FindSystem(space, called) != null)
-                trouble.Warn(statement, "two systems are both called " + Pen.Spelling(space, called));
+                trouble.Warn(statement, "another system is also called " + Pen.Spelling(space, called) + ".");
 
             var system = program.Restore(identity, space, called);
             system.Annotation = statement.Annotation;
 
-            var changed = statement.Find(Keyword.Changed);
-            if (changed >= 0)
-                system.Changed = Time(statement, changed + 1, trouble);
-
-            var last = statement.Find(Keyword.Last);
-            if (last >= 0)
-                LastSequence(statement, last, system, trouble);
+            // The two metadata clauses, in either order and each at most once.
+            var at = 3;
+            var changed = false;
+            var last = false;
+            while (at < statement.Count)
+            {
+                if (statement.Says(at, Keyword.Changed) && !changed)
+                {
+                    system.Changed = Time(statement, at + 1, trouble);
+                    changed = true;
+                    at += 2;
+                }
+                else if (statement.Says(at, Keyword.Last) && !last)
+                {
+                    LastSequence(statement, at, system, trouble);
+                    last = true;
+                    at += 3;
+                }
+                else
+                {
+                    Ends(statement, at, trouble);
+                    break;
+                }
+            }
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
             {
                 var inner = body[i];
-                if (inner.Key == Keyword.Required && inner.Says(0, Keyword.Trigger))
+                if (inner.IsOff)
+                {
+                    trouble.Say(inner, "'//' only switches off a step in a sequence.");
+                    continue;
+                }
+
+                if ((inner.Key == Keyword.Required || inner.Key == Keyword.Optional) && inner.Says(0, Keyword.Trigger))
                     ReadTrigger(inner, system, trouble);
                 else if (inner.Key == Keyword.Required || inner.Key == Keyword.Optional)
                     ReadPart(inner, system, trouble);
@@ -425,6 +497,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     ReadTrigger(inner, system, trouble);
                 else if (inner.Key == Keyword.Sequence)
                     ReadSequence(inner, system, program, trouble);
+                else
+                    trouble.Say(inner, "unexpected " + Headed(inner) + "; expected required, optional, when, every or sequence.");
             }
 
             Resolve(system, statement, trouble);
@@ -443,7 +517,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!statement.Says(at + 1, Keyword.Sequence) || number.Form != ValueForm.Integer || number.Whole < 1
                 || number.Whole > int.MaxValue)
             {
-                trouble.Say(statement, "'last' is followed by 'sequence' and a number, like last sequence 4");
+                trouble.Say(statement, "expected last sequence <number>.");
                 return;
             }
 
@@ -458,7 +532,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out time))
                 return time;
 
-            trouble.Say(statement, "a changed time is written as ISO 8601, like \"2026-09-14T19:02:11Z\"");
+            trouble.Say(statement, "expected an ISO 8601 time after 'changed', like \"2026-09-14T19:02:11Z\".");
             return null;
         }
 
@@ -493,26 +567,43 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!statement.Says(0, Keyword.Block))
             {
                 trouble.Say(statement, optional
-                    ? "'optional' is followed by block"
-                    : "'required' is followed by what sort of thing is required: block, trigger");
+                    ? "expected 'block' or 'trigger' after 'optional'."
+                    : "expected 'block' or 'trigger' after 'required'.");
                 return;
             }
 
-            var part = system.PartFor(statement.Word(1));
+            var name = statement.ValueAt(1);
+            if (!Named(name))
+            {
+                trouble.Say(statement, "expected the part's name.");
+                return;
+            }
+
+            if (system.FindPart(name.Word) != null)
+            {
+                trouble.Say(statement, "part '" + name.Word + "' is already declared.");
+                return;
+            }
+
+            var part = system.PartFor(name.Word);
             part.Annotation = statement.Annotation;
             part.Optional = optional;
 
-            var expects = statement.Find(Keyword.Expects);
-            if (expects < 0)
+            if (!statement.Says(2, Keyword.Expects))
+            {
+                Ends(statement, 2, trouble);
                 return;
+            }
 
-            var one = statement.ValueAt(expects + 1);
+            var one = statement.ValueAt(3);
             if (one.Form == ValueForm.List)
-                Words(statement.Items(expects + 1), part.Expects);
+                Names(statement, 3, part.Expects, trouble, "expected a block type or a list of them after 'expects'.");
             else if (one.IsWord && one.Word.Length > 0)
                 part.Expects.Add(one.Word);
             else
-                trouble.Say(statement, "'expects' is followed by a block type, or a list of them");
+                trouble.Say(statement, "expected a block type or a list of them after 'expects'.");
+
+            Ends(statement, 4, trouble);
         }
 
         /// <summary>
@@ -542,7 +633,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             for (var i = 0; i < parts.Count; i++)
             {
                 pen.Head(parts[i]).Says(Keyword.Equals);
-                Names(pen, instance.FilledWith(parts[i]));
+
+                var positions = instance.Positions(parts[i]);
+                if (positions == null)
+                    Names(pen, instance.FilledWith(parts[i]));
+                else
+                    Slots(pen, instance.FilledWith(parts[i]), positions);
+
                 pen.End();
             }
 
@@ -587,40 +684,118 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue
                 || !statement.Says(1, Keyword.Of))
             {
-                trouble.Say(statement, "one of a system is written like instance 1 of MalTek.Airlock");
+                trouble.Say(statement, "expected instance <number> of <system>.");
                 return;
             }
 
             var system = Named(program, statement, 2);
             if (system == null)
             {
-                trouble.Say(statement, "there is no system for this one to be one of");
+                trouble.Say(statement, "no system called " + Spelled(statement.ValueAt(2)) + ".");
                 return;
             }
 
             if (system.FindInstance((int)number.Whole) != null)
             {
-                trouble.Say(statement, "this system already has a number " + number.Whole);
+                trouble.Say(statement, "instance " + number.Whole + " of this system is already declared.");
                 return;
             }
 
-            var name = statement.Says(3, Keyword.As) ? statement.Word(4) : "";
+            var name = "";
+            var at = 3;
+            if (statement.Says(3, Keyword.As))
+            {
+                if (!Named(statement.ValueAt(4)))
+                {
+                    trouble.Say(statement, "expected a name after 'as'.");
+                    return;
+                }
+
+                name = statement.Word(4);
+                at = 5;
+            }
+
+            if (!Ends(statement, at, trouble))
+                return;
+
             var instance = system.Restore((int)number.Whole, name);
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
             {
                 var inner = body[i];
-                if (inner.Key != Keyword.None || !inner.Says(0, Keyword.Equals))
+                if (inner.IsOff)
                 {
-                    trouble.Say(inner, "one of a system says what a part is, like inner = [ door1 ]");
+                    trouble.Say(inner, "'//' only switches off a step in a sequence.");
+                    continue;
+                }
+
+                if (inner.Key != Keyword.None || !inner.Says(0, Keyword.Equals) || inner.ValueAt(1).Form != ValueForm.List)
+                {
+                    trouble.Say(inner, "expected <part> = [ <answers> ].");
+                    continue;
+                }
+
+                if (!Ends(inner, 2, trouble))
+                    continue;
+
+                Part part = system.FindPart(inner.Head);
+                if (part == null)
+                {
+                    trouble.Say(inner, "system '" + system.Name + "' has no part '" + inner.Head + "'.");
+                    continue;
+                }
+
+                if (part.IsTrigger)
+                {
+                    Answered(inner, instance, trouble);
                     continue;
                 }
 
                 var filled = new List<string>();
-                Words(inner.Items(1), filled);
+                if (!Names(inner, 1, filled, trouble, "expected block names in the list."))
+                    continue;
+
+                for (var n = 0; n < filled.Count; n++)
+                    trouble.Owes(inner, filled[n], null);
+
                 instance.Fill(inner.Head, filled);
             }
+        }
+
+        /// <summary><c>call = [ panel1:toolbar(1, 1, 4) ]</c>: the toolbar slots that answer a trigger in one of a system.</summary>
+        static void Answered(Statement statement, SystemInstance instance, Trouble trouble)
+        {
+            var items = statement.Items(1);
+            var blocks = new List<string>();
+            var at = new List<ToolbarSlot>();
+            for (var i = 0; i < items.Count; i++)
+            {
+                string block;
+                int toolbar, page, slot;
+                if (!statement.Slot(items[i], out block, out toolbar, out page, out slot) || block.Length == 0
+                    || toolbar == 0 || page == 0 || slot == 0)
+                {
+                    trouble.Say(statement, "expected toolbar slots in the list, like [ panel1:toolbar(1, 1, 4) ].");
+                    return;
+                }
+
+                blocks.Add(block);
+                at.Add(new ToolbarSlot(toolbar, page, slot));
+                trouble.Owes(statement, block, null);
+            }
+
+            instance.Fill(statement.Head, blocks, at);
+        }
+
+        /// <summary>A trigger part's toolbar slots, each on its block, as a list.</summary>
+        static void Slots(Pen pen, IList<string> blocks, IList<ToolbarSlot> at)
+        {
+            pen.OpenList();
+            for (var i = 0; blocks != null && i < blocks.Count && i < at.Count; i++)
+                pen.Slot(blocks[i], at[i]);
+
+            pen.CloseList();
         }
 
         /// <summary>The system a statement names by identity or by name, or null.</summary>
@@ -666,76 +841,85 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var number = statement.ValueAt(0);
             if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
             {
-                trouble.Say(statement, "a sequence starts with its number within its system");
+                trouble.Say(statement, "expected the sequence's number.");
                 return;
             }
 
             if (system.FindSequence((int)number.Whole) != null)
             {
-                trouble.Say(statement, "two sequences of one system are both number " + number.Whole);
+                trouble.Say(statement, "sequence " + number.Whole + " is already declared.");
                 return;
             }
 
             var sequence = program.Restore(system, (int)number.Whole, null);
             sequence.Annotation = statement.Annotation;
 
+            var at = 1;
             if (statement.Says(1, Keyword.As))
             {
-                sequence.Name = statement.Word(2);
+                sequence.Name = Named(statement.ValueAt(2)) ? statement.Word(2) : "";
                 if (sequence.Name.Length == 0)
-                    trouble.Say(statement, "'as' is followed by the sequence's name");
+                    trouble.Say(statement, "expected a name after 'as'.");
+
+                at = 3;
             }
+
+            Ends(statement, at, trouble);
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
             {
                 var step = ReadStep(body[i], trouble);
-                if (step != null)
-                    sequence.Steps.Add(step);
+                if (step == null)
+                    continue;
+
+                step.IsOff = body[i].IsOff;
+                Owes(body[i], step as Act, system, trouble);
+                sequence.Steps.Add(step);
             }
         }
 
         /// <summary>
-        /// <c>when any pressed [ call ] then run 1</c>, or <c>every 600t run 2</c>.
+        /// <c>required trigger call to run 1</c>, <c>when any sprocket.closed [ inner ] then run 2</c>, or
+        /// <c>every 600t stop 3</c>.
         /// </summary>
         /// <remarks>
-        /// A trigger says what it runs, because it belongs to the system rather than to one sequence. The
-        /// condition a <c>when</c> takes is as much as the language can say today: an event, and the parts
-        /// to watch for it.
+        /// A trigger says the step it does, written as a sequence writes it, because it belongs to the system rather than
+        /// to one sequence.
         /// </remarks>
-        static void WriteTrigger(Pen pen, Trigger trigger)
+        static void WriteTrigger(Pen pen, AutomationSystem system, Trigger trigger)
         {
-            // The ones a construct answers sit in a list of their own and only break it up where one
-            // carries words; the rest each start a paragraph.
-            if (!(trigger is RequiredTrigger) || trigger.Annotation.Length > 0)
-                pen.Blank();
-
-            pen.Note(trigger.Annotation);
-
+            // The ones a construct answers are parts, in a list of their own broken up only where one carries words; the
+            // rest each start a paragraph.
             var needed = trigger as RequiredTrigger;
             if (needed != null)
             {
-                pen.Start(Keyword.Required).Says(Keyword.Trigger);
+                var part = system.FindPart(needed.Part);
+                var note = part == null ? "" : part.Annotation;
+                if (note.Length > 0)
+                    pen.Blank();
 
-                // Which block and which moment, where the editor said: a person reading their own
-                // program should see the button they picked, not just that something has to press.
-                if (needed.Sources.Count > 0)
-                {
-                    pen.Word(needed.EventId);
-                    Names(pen, needed.Sources);
-                }
-
-                pen.Says(Keyword.To).Says(Doing(trigger)).Whole(trigger.Runs);
+                pen.Note(note);
+                pen.Start(part != null && part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Trigger)
+                    .Word(needed.Part).Says(Keyword.To);
+                Does(pen, trigger.Does);
                 pen.End();
                 return;
             }
 
+            pen.Blank();
+            pen.Note(trigger.Annotation);
+
             var when = trigger as WhenTrigger;
             if (when != null)
             {
-                pen.Start(Keyword.When).Says(when.RequiresAll ? Keyword.All : Keyword.Any).Word(when.EventId);
+                pen.Start(Keyword.When).Says(when.RequiresAll ? Keyword.All : Keyword.Any).Qualified(Own, when.EventId);
                 Names(pen, when.Sources);
-                pen.Says(Keyword.Then).Says(Doing(trigger)).Whole(trigger.Runs);
+                if (when.IntervalTicks > 0)
+                    pen.Says(Keyword.Every).Ticks(when.IntervalTicks);
+
+                pen.Says(Keyword.Then);
+                Does(pen, trigger.Does);
                 pen.End();
                 return;
             }
@@ -743,44 +927,79 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var every = trigger as EveryTrigger;
             if (every != null)
             {
-                pen.Start(Keyword.Every).Ticks(every.IntervalTicks).Says(Keyword.Run).Whole(trigger.Runs);
+                pen.Start(Keyword.Every).Ticks(every.IntervalTicks);
+                Does(pen, trigger.Does);
                 pen.End();
             }
         }
 
-        /// <summary>Which word says what a trigger does with its sequence.</summary>
-        static Keyword Doing(Trigger trigger)
+        /// <summary>The step a trigger does, on the line the trigger is written on.</summary>
+        static void Does(Pen pen, Step step)
         {
-            return trigger.Stops ? Keyword.Stop : Keyword.Run;
+            pen.Says(Head(step));
+            Rest(pen, step);
         }
 
         static void ReadTrigger(Statement statement, AutomationSystem system, Trouble trouble)
         {
-            var trigger = Kind(statement, trouble);
+            var trigger = Kind(statement, system, trouble);
             if (trigger == null)
                 return;
 
-            trigger.Annotation = statement.Annotation;
-
-            var at = statement.Find(Keyword.Run);
-            if (at < 0)
-            {
-                at = statement.Find(Keyword.Stop);
-                trigger.Stops = at >= 0;
-            }
-
-            var number = statement.ValueAt(at + 1);
-            if (at < 0 || number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
-            {
-                trouble.Say(statement, "a trigger says which sequence it runs or stops, like run 1");
+            trigger.Does = Does(statement, Doing(statement), trouble);
+            if (trigger.Does == null)
                 return;
+
+            Owes(statement, trigger.Acts, system, trouble);
+
+            var when = trigger as WhenTrigger;
+            for (var i = 0; when != null && i < when.Sources.Count; i++)
+                trouble.Owes(statement, when.Sources[i], system);
+
+            // A trigger part's words are the part's, where the configuration panel shows them.
+            var needed = trigger as RequiredTrigger;
+            if (needed == null)
+            {
+                trigger.Annotation = statement.Annotation;
+            }
+            else
+            {
+                var part = system.PartFor(needed.Part);
+                part.IsTrigger = true;
+                part.Optional = statement.Key == Keyword.Optional;
+                part.Annotation = statement.Annotation;
             }
 
-            trigger.Runs = (int)number.Whole;
             system.AddTrigger(trigger);
         }
 
-        static Trigger Kind(Statement statement, Trouble trouble)
+        /// <summary>Where the step a trigger does starts: after <c>to</c>, after <c>then</c>, or after how often.</summary>
+        static int Doing(Statement statement)
+        {
+            if (statement.Key == Keyword.When)
+                return statement.Find(Keyword.Then) + 1;
+
+            return statement.Key == Keyword.Every ? 1 : 3;
+        }
+
+        /// <summary>The step a trigger does, which is one a sequence could hold and that starts something: run, stop, act or set.</summary>
+        static Step Does(Statement statement, int at, Trouble trouble)
+        {
+            var step = statement.Rest(at);
+            if (step.Key != Keyword.Run && step.Key != Keyword.Stop && step.Key != Keyword.Act && step.Key != Keyword.Set)
+            {
+                trouble.Say(statement, "expected run, stop, act or set.");
+                return null;
+            }
+
+            var does = ReadStep(step, trouble);
+            if (does != null)
+                does.Annotation = "";
+
+            return does;
+        }
+
+        static Trigger Kind(Statement statement, AutomationSystem system, Trouble trouble)
         {
             if (statement.Key == Keyword.When)
                 return When(statement, trouble);
@@ -788,41 +1007,76 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Key == Keyword.Every)
                 return Every(statement, trouble);
 
-            // required trigger to run 1: something on the construct answers it, and nothing here
-            // says which. Legal, and what a hand-written program or an imported system may say.
-            if (statement.Says(1, Keyword.To))
-                return new RequiredTrigger();
-
-            // required trigger pressed_1 [Airlock Button] to run 1: the same, saying which block
-            // and which of its moments, which is what the editor always writes.
-            if (!statement.Says(3, Keyword.To))
+            // required trigger call to run 1: the trigger part call, which each instance answers with toolbar slots.
+            var name = Named(statement.ValueAt(1)) ? statement.Word(1) : "";
+            if (name.Length == 0 || !statement.Says(2, Keyword.To))
             {
-                trouble.Say(statement, "a required trigger says what it runs, like required trigger to run 1");
+                trouble.Say(statement, "expected trigger <name> to <step>.");
                 return null;
             }
 
-            var needed = new RequiredTrigger(statement.Word(1));
-            Words(statement.Items(2), needed.Sources);
-            return needed;
+            if (system.FindPart(name) != null)
+            {
+                trouble.Say(statement, "part '" + name + "' is already declared.");
+                return null;
+            }
+
+            return RequiredTrigger.Named(name);
         }
 
         static Trigger When(Statement statement, Trouble trouble)
         {
             if (!statement.Says(0, Keyword.All) && !statement.Says(0, Keyword.Any))
             {
-                trouble.Say(statement, "'when' says whether it watches any of the parts or all of them");
+                trouble.Say(statement, "expected 'any' or 'all' after 'when'.");
                 return null;
             }
 
-            if (!statement.Says(statement.Find(Keyword.Then), Keyword.Then))
+            var then = statement.Find(Keyword.Then);
+            if (then < 0)
             {
-                trouble.Say(statement, "what a 'when' watches for is followed by 'then'");
+                trouble.Say(statement, "expected 'then'.");
                 return null;
             }
 
-            var when = new WhenTrigger(statement.Word(1));
+            var moment = statement.Parts(1);
+            if (moment.Count != 2 || moment[0].Word != Own || moment[1].Word.Length == 0)
+            {
+                trouble.Say(statement, "expected a moment qualified by what adds it, like sprocket.closed.");
+                return null;
+            }
+
+            var when = new WhenTrigger(moment[1].Word);
             when.RequiresAll = statement.Says(0, Keyword.All);
-            Words(statement.Items(2), when.Sources);
+            if (statement.ValueAt(2).Form != ValueForm.List)
+            {
+                trouble.Say(statement, "expected a list of part names.");
+                return null;
+            }
+
+            if (!Names(statement, 2, when.Sources, trouble, "expected a list of part names."))
+                return null;
+
+            var at = 3;
+            if (statement.Says(at, Keyword.Every))
+            {
+                int ticks;
+                if (!Ticks(statement.ValueAt(at + 1), 1, out ticks))
+                {
+                    trouble.Say(statement, "expected a duration after 'every', like 30t.");
+                    return null;
+                }
+
+                when.IntervalTicks = ticks;
+                at += 2;
+            }
+
+            if (at != then)
+            {
+                trouble.Say(statement, "expected 'then'.");
+                return null;
+            }
+
             return when;
         }
 
@@ -831,7 +1085,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             int ticks;
             if (!Ticks(statement.ValueAt(0), 1, out ticks))
             {
-                trouble.Say(statement, "'every' is followed by how often, like every 600t");
+                trouble.Say(statement, "expected a duration after 'every', like 600t.");
                 return null;
             }
 
@@ -856,28 +1110,45 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return true;
         }
 
-        /// <summary>
-        /// A step: an action on some parts, an await, or a length of time.
-        /// </summary>
-        /// <remarks>
-        /// An action's id is the head, so a step reads as what it does, and an id that collides with one
-        /// of the language's words is quoted.
-        /// </remarks>
+        /// <summary>A step: an action on some parts, a value set on them, a sequence run or stopped, an await, or a length of time.</summary>
         static void WriteStep(Pen pen, Step step)
         {
             if (step.Annotation.Length > 0)
                 pen.Blank();
 
             pen.Note(step.Annotation);
+            pen.Start(Head(step), step.IsOff);
+            Rest(pen, step);
+            pen.End();
+        }
 
+        /// <summary>The word a step starts with.</summary>
+        static Keyword Head(Step step)
+        {
+            // A value is a set; an action is an act, by the game's own id or qualified by what adds it.
+            var act = step as Act;
+            if (act != null)
+                return act.Form == Form.Value ? Keyword.Set : Keyword.Act;
+
+            if (step is Wait)
+                return Keyword.Wait;
+
+            var run = step as Run;
+            if (run != null)
+                return run.Stops ? Keyword.Stop : Keyword.Run;
+
+            return Keyword.Await;
+        }
+
+        /// <summary>Everything in a step after the word it starts with.</summary>
+        static void Rest(Pen pen, Step step)
+        {
             var act = step as Act;
             if (act != null)
             {
-                // Written as what it is: a value is a set, one of the game's actions is an action, and
-                // one of Sprocket's own is a bare head. Either action carries its values after with.
                 if (act.Form == Form.Value)
                 {
-                    pen.Start(Keyword.Set).Word(act.ActionId).Says(Keyword.On);
+                    pen.Word(act.ActionId).Says(Keyword.On);
                     Names(pen, act.Targets);
 
                     if (act.Values.Count > 0)
@@ -889,10 +1160,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 else
                 {
                     if (act.Form == Form.Action)
-                        pen.Start(Keyword.Action).Word(act.ActionId).Says(Keyword.On);
+                        pen.Word(act.ActionId);
                     else
-                        pen.Head(act.ActionId);
+                        pen.Qualified(Own, act.ActionId);
 
+                    pen.Says(Keyword.On);
                     Names(pen, act.Targets);
 
                     if (act.Values.Count > 0)
@@ -904,124 +1176,120 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     }
                 }
 
-                pen.End();
                 return;
             }
 
             var wait = step as Wait;
             if (wait != null)
             {
-                pen.Start(Keyword.Wait).Ticks(wait.Ticks);
-                pen.End();
+                pen.Ticks(wait.Ticks);
                 return;
             }
 
             var run = step as Run;
             if (run != null)
-            {
-                pen.Start(Keyword.Run).Whole(run.Number);
-                pen.End();
-                return;
-            }
-
-            pen.Start(Keyword.Await);
-            pen.End();
+                pen.Whole(run.Number);
         }
 
-        /// <summary>
-        /// A step, or nothing where the statement was not one.
-        /// </summary>
-        /// <remarks>
-        /// Only <c>await</c> and <c>wait</c> are the language speaking here; any other bare head is an
-        /// action id, which is why a statement a later build adds has to carry a word of its own to be
-        /// dropped whole rather than read as a step.
-        /// </remarks>
+        /// <summary>A step, or nothing where the statement was not one, which is trouble.</summary>
         static Step ReadStep(Statement statement, Trouble trouble)
         {
             if (statement.Key == Keyword.Await)
-                return Noted(new Await(), statement);
+                return Ends(statement, 0, trouble) ? Noted(new Await(), statement) : null;
 
-            if (statement.Key == Keyword.Run)
-                return Called(statement, trouble);
+            if (statement.Key == Keyword.Run || statement.Key == Keyword.Stop)
+                return Ends(statement, 1, trouble) ? Called(statement, trouble) : null;
 
             if (statement.Key == Keyword.Wait)
             {
                 int ticks;
                 if (Ticks(statement.ValueAt(0), 0, out ticks))
-                    return Noted(new Wait(ticks), statement);
+                    return Ends(statement, 1, trouble) ? Noted(new Wait(ticks), statement) : null;
 
                 // Said rather than dropped, because a wait without its unit is somebody writing a
                 // length of time and Sprocket is the only thing that can tell them it read as nothing.
-                trouble.Say(statement, "a wait is written with its unit, like wait 60t");
+                trouble.Say(statement, "expected a duration after 'wait', like 60t.");
                 return null;
             }
 
-            if (statement.Key == Keyword.Action)
-                return Given(statement, Keyword.With);
+            if (statement.Key == Keyword.Act)
+                return Acted(statement, trouble);
 
             if (statement.Key == Keyword.Set)
-                return Given(statement, Keyword.To);
+                return Given(statement, trouble);
 
-            if (statement.Key != Keyword.None)
-                return null;
+            trouble.Say(statement, "unexpected " + Headed(statement) + "; expected act, set, run, stop, await or wait.");
+            return null;
+        }
 
-            var act = new Act(statement.Head);
-            for (var i = 0; i < statement.Count; i++)
+        /// <summary>
+        /// <c>act sprocket.close on [ inner ]</c> or <c>act SetColor on [ light ] with 255 0 0</c>: an action, by the game's own
+        /// id or qualified by what adds it, on some parts, given what it asks for.
+        /// </summary>
+        static Step Acted(Statement statement, Trouble trouble)
+        {
+            var member = statement.Parts(0);
+            Act act;
+            if (member.Count == 1 && member[0].Word.Length > 0)
             {
-                if (statement.ValueAt(i).Form != ValueForm.List)
-                    continue;
-
-                Words(statement.Items(i), act.Targets);
-                break;
+                act = new Act(member[0].Word);
+                act.Form = Form.Action;
+            }
+            else if (member.Count == 2 && member[0].Word == Own && member[1].Word.Length > 0)
+            {
+                act = new Act(member[1].Word);
+                act.Form = Form.Native;
+            }
+            else
+            {
+                trouble.Say(statement, "expected an action after 'act', like Reverse or sprocket.close.");
+                return null;
             }
 
-            Values(statement, 0, Keyword.With, act.Values);
+            if (!statement.Says(1, Keyword.On) || statement.ValueAt(2).Form != ValueForm.List)
+            {
+                trouble.Say(statement, "expected 'on' and a list of parts.");
+                return null;
+            }
+
+            if (!Names(statement, 2, act.Targets, trouble, "expected part names in the list."))
+                return null;
+
+            if (statement.Count > 3 && (!statement.Says(3, Keyword.With) || statement.Count < 5))
+            {
+                trouble.Say(statement, "expected 'with' and values after the parts.");
+                return null;
+            }
+
+            for (var at = 4; at < statement.Count; at++)
+                act.Values.Add(Given(statement.ValueAt(at)));
+
             return Noted(act, statement);
         }
 
-        /// <summary>
-        /// Everything after the word that introduces a step's values, in the order it lies.
-        /// </summary>
+        /// <summary><c>set Radius on [ light ] to 4.5</c>: one of the block's own values.</summary>
         /// <remarks>
-        /// Order is all the game says about them - there are no names to match and nothing is
-        /// optional. Taken by position rather than by what it looks like, so a flag written
-        /// <c>on</c> is a value and not mistaken for one of the language's own words.
+        /// The value is taken by position rather than by what it looks like, so a flag written <c>on</c> is a value and
+        /// not mistaken for one of the language's own words.
         /// </remarks>
-        static void Values(Statement statement, int from, Keyword introduces, IList<Literal> into)
+        static Step Given(Statement statement, Trouble trouble)
         {
-            var start = -1;
-            for (var at = from; at < statement.Count; at++)
+            if (statement.Word(0).Length == 0 || !statement.Says(1, Keyword.On) || statement.ValueAt(2).Form != ValueForm.List
+                || !statement.Says(3, Keyword.To) || statement.Count < 5)
             {
-                if (!statement.Says(at, introduces))
-                    continue;
-
-                start = at + 1;
-                break;
+                trouble.Say(statement, "expected set <value> on [ <parts> ] to <value>.");
+                return null;
             }
 
-            for (var at = start; at >= 0 && at < statement.Count; at++)
-                into.Add(Given(statement.ValueAt(at)));
-        }
+            if (!Ends(statement, 5, trouble))
+                return null;
 
-        /// <summary>
-        /// <c>action 'SetColor' on [ light ] with 255 0 0</c>: one of the game's own actions, given what
-        /// it asked for. Or <c>set 'Radius' on [ light ] to 4.5</c>, one of the block's own values.
-        /// </summary>
-        static Step Given(Statement statement, Keyword introduces)
-        {
             var act = new Act(statement.Word(0));
-            act.Form = introduces == Keyword.To ? Form.Value : Form.Action;
+            act.Form = Form.Value;
+            if (!Names(statement, 2, act.Targets, trouble, "expected part names in the list."))
+                return null;
 
-            for (var at = 1; at < statement.Count; at++)
-            {
-                if (statement.ValueAt(at).Form != ValueForm.List)
-                    continue;
-
-                Words(statement.Items(at), act.Targets);
-                break;
-            }
-
-            Values(statement, 1, introduces, act.Values);
+            act.Values.Add(Given(statement.ValueAt(4)));
             return Noted(act, statement);
         }
 
@@ -1092,23 +1360,27 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return step;
         }
 
-        /// <summary>
-        /// <c>run 2</c>, or <c>run 'Let me out'</c>: another sequence of the same system.
-        /// </summary>
+        /// <summary><c>run 2</c>, <c>stop 2</c> or <c>run 'Let me out'</c>: another sequence of the same system.</summary>
         static Step Called(Statement statement, Trouble trouble)
         {
+            var stops = statement.Key == Keyword.Stop;
             var named = statement.ValueAt(0);
             if (named.Form == ValueForm.Integer && named.Whole >= 1 && named.Whole <= int.MaxValue)
-                return Noted(new Run((int)named.Whole), statement);
+            {
+                var numbered = new Run((int)named.Whole);
+                numbered.Stops = stops;
+                return Noted(numbered, statement);
+            }
 
             if (named.IsWord && named.Word.Length > 0)
             {
                 var run = new Run(0);
                 run.Named = named.Word;
+                run.Stops = stops;
                 return Noted(run, statement);
             }
 
-            trouble.Say(statement, "'run' is followed by a sequence's number or its name");
+            trouble.Say(statement, "expected a sequence's number or name after '" + Keywords.Name(statement.Key) + "'.");
             return null;
         }
 
@@ -1131,34 +1403,34 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 var steps = sequences[i].Steps;
                 for (var s = 0; s < steps.Count; s++)
-                {
-                    var run = steps[s] as Run;
-                    if (run == null)
-                        continue;
-
-                    if (!string.IsNullOrEmpty(run.Named))
-                    {
-                        var named = Called(system, run.Named);
-                        if (named == null)
-                            trouble.Say(statement, "no sequence of this system is called " + run.Named);
-                        else
-                            run.Number = named.Number;
-
-                        run.Named = "";
-                        continue;
-                    }
-
-                    if (system.FindSequence(run.Number) == null)
-                        trouble.Say(statement, "this system has no sequence " + run.Number + " to run");
-                }
+                    Resolve(system, steps[s] as Run, statement, trouble);
             }
 
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
+                Resolve(system, triggers[i].Does as Run, statement, trouble);
+        }
+
+        /// <summary>Turns the name a <c>run</c> or <c>stop</c> used into the number, or says there is no such sequence.</summary>
+        static void Resolve(AutomationSystem system, Run run, Statement statement, Trouble trouble)
+        {
+            if (run == null)
+                return;
+
+            if (!string.IsNullOrEmpty(run.Named))
             {
-                if (system.FindSequence(triggers[i].Runs) == null)
-                    trouble.Say(statement, "this system has no sequence " + triggers[i].Runs + " to run");
+                var named = Called(system, run.Named);
+                if (named == null)
+                    trouble.Say(statement, "no sequence called '" + run.Named + "'.");
+                else
+                    run.Number = named.Number;
+
+                run.Named = "";
+                return;
             }
+
+            if (system.FindSequence(run.Number) == null)
+                trouble.Say(statement, "no sequence " + run.Number + " to " + (run.Stops ? "stop" : "run") + ".");
         }
 
         static Sequence Called(AutomationSystem system, string name)
@@ -1182,15 +1454,73 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.CloseList();
         }
 
-        static void Words(ValueRange values, IList<string> into)
+        /// <summary>Whether <paramref name="statement" /> says nothing after its first <paramref name="count" /> values, and trouble naming the first where it does.</summary>
+        static bool Ends(Statement statement, int count, Trouble trouble)
+        {
+            if (statement.Count <= count)
+                return true;
+
+            trouble.Say(statement, "unexpected " + Spelled(statement.ValueAt(count)) + ".");
+            return false;
+        }
+
+        /// <summary>The word a statement starts with, as it is written, for trouble to name it.</summary>
+        static string Headed(Statement statement)
+        {
+            return "'" + (statement.Key == Keyword.None ? statement.Head : Keywords.Name(statement.Key)) + "'";
+        }
+
+        /// <summary>A value as it is written, for trouble to name it.</summary>
+        static string Spelled(Value value)
+        {
+            if (value.Form == ValueForm.Keyword)
+                return "'" + Keywords.Name(value.Keyword) + "'";
+
+            if (value.IsWord)
+                return "'" + value.Word + "'";
+
+            if (value.Form == ValueForm.Text)
+                return "\"" + value.Word + "\"";
+
+            if (value.Form == ValueForm.Integer)
+                return value.Whole.ToString(CultureInfo.InvariantCulture);
+
+            if (value.Form == ValueForm.Duration)
+                return value.Whole.ToString(CultureInfo.InvariantCulture) + "t";
+
+            return "what follows";
+        }
+
+        /// <summary>Whether <paramref name="value" /> is a name, bare or quoted, rather than one of the language's words or anything else.</summary>
+        static bool Named(Value value)
+        {
+            return value.Form == ValueForm.Identifier && value.Word.Length > 0;
+        }
+
+        /// <summary>The names in the list at <paramref name="at" />, into <paramref name="into" />; or false, and trouble saying <paramref name="what" />, where one is not a name.</summary>
+        static bool Names(Statement statement, int at, IList<string> into, Trouble trouble, string what)
         {
             into.Clear();
-            for (var i = 0; i < values.Count; i++)
+            var items = statement.Items(at);
+            for (var i = 0; i < items.Count; i++)
             {
-                var value = values[i];
-                if (value.IsWord && value.Word.Length > 0)
-                    into.Add(value.Word);
+                if (!Named(items[i]))
+                {
+                    trouble.Say(statement, what);
+                    return false;
+                }
+
+                into.Add(items[i].Word);
             }
+
+            return true;
+        }
+
+        /// <summary>Owes every part an act names, to be judged once the whole script is read.</summary>
+        static void Owes(Statement statement, Act act, AutomationSystem system, Trouble trouble)
+        {
+            for (var i = 0; act != null && i < act.Targets.Count; i++)
+                trouble.Owes(statement, act.Targets[i], system);
         }
 
     }

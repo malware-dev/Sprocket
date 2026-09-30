@@ -57,16 +57,22 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return new Value(ValueForm.List, null, Run(from, count));
         }
 
-        /// <summary>A name whose parts are a run of <see cref="Reading.Parts" />.</summary>
         /// <summary>A vector, its three numbers the run starting at <paramref name="from" />.</summary>
         public static Value Vectored(int from)
         {
             return new Value(ValueForm.Vector, null, Run(from, 3));
         }
 
+        /// <summary>A name whose parts are a run of <see cref="Reading.Parts" />.</summary>
         public static Value Qualified(int from, int count)
         {
             return new Value(ValueForm.Qualified, null, Run(from, count));
+        }
+
+        /// <summary>A toolbar slot, its block and three numbers the run of <see cref="Reading.Parts" /> starting at <paramref name="from" />.</summary>
+        public static Value Slotted(int from)
+        {
+            return new Value(ValueForm.Slot, null, Run(from, 4));
         }
 
         static long Run(int from, int count)

@@ -235,7 +235,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The first thing that starts that sequence, or null where nothing does.</summary>
         public Trigger TriggerFor(int number)
         {
-            for (var i = 0; i < _triggers.Count; i++)
+            for (var i = 0; i < _triggers.Count && number > 0; i++)
             {
                 if (_triggers[i].Runs == number)
                     return _triggers[i];
@@ -258,7 +258,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 for (var q = 0; q < steps.Count; q++)
                 {
                     var run = steps[q] as Run;
-                    if (run != null && run.Number == number)
+                    if (run != null && !run.IsOff && run.Number == number)
                         return true;
                 }
             }
@@ -296,6 +296,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 var moment = _triggers[i] as MomentTrigger;
                 if (moment != null)
                     Rename(moment.Sources, was, name);
+
+                var own = _triggers[i].Acts;
+                if (own != null)
+                    Rename(own.Targets, was, name);
             }
 
             for (var s = 0; s < _sequences.Count; s++)
@@ -346,6 +350,25 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return part;
         }
 
+        /// <summary>Takes <paramref name="part" /> out of the system, and answers where it was, or -1 where it was not there.</summary>
+        public int ForgetPart(Part part)
+        {
+            var at = _parts.IndexOf(part);
+            if (at >= 0)
+                _parts.RemoveAt(at);
+
+            return at;
+        }
+
+        /// <summary>Puts <paramref name="part" /> back at <paramref name="at" />, as it was before it was forgotten.</summary>
+        public void PutPartBack(int at, Part part)
+        {
+            if (at < 0 || at > _parts.Count)
+                _parts.Add(part);
+            else
+                _parts.Insert(at, part);
+        }
+
         /// <summary>
         /// Which of the system's parts its sequences actually act on.
         /// </summary>
@@ -359,15 +382,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// else, made where there is none.
         /// </summary>
         /// <remarks>
-        /// A new part is named for the kind of block, numbered the way the game numbers blocks - Door,
-        /// Door 2 - and expects that type. The name is given once and kept: deriving it again would let
-        /// renaming a block rewrite the system's own vocabulary.
+        /// A new part takes <paramref name="called" />, numbered the way the game numbers blocks where
+        /// another part has it - Door, Door 2 - and expects that type. The name is given once and kept:
+        /// deriving it again would let renaming a block rewrite the system's own vocabulary.
         /// </remarks>
         /// <param name="instance">The one of the system the block was picked through.</param>
         /// <param name="declared">The block, as the construct declares it.</param>
-        /// <param name="kind">The block's kind by name, as a person reads it.</param>
+        /// <param name="called">What a new part is called, as a person reads it.</param>
         /// <param name="type">The block's type, as a part expects one.</param>
-        public string Take(SystemInstance instance, string declared, string kind, string type)
+        public string Take(SystemInstance instance, string declared, string called, string type)
         {
             for (var i = 0; i < _parts.Count; i++)
             {
@@ -376,16 +399,40 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     return _parts[i].Id;
             }
 
-            var name = kind;
-            for (var n = 2; FindPart(name) != null; n++)
-                name = kind + " " + n;
-
+            var name = Free(called);
             var part = PartFor(name);
             part.Picked = true;
             if (type.Length > 0)
                 part.Expects.Add(type);
 
             instance.Fill(name, new[] { declared });
+            return name;
+        }
+
+        /// <summary>
+        /// A new trigger part, answered in <paramref name="instance" /> by the slot <paramref name="at" /> on each block of
+        /// <paramref name="declared" />, and called <paramref name="called" /> as a picked block's part is.
+        /// </summary>
+        public string TakeTrigger(SystemInstance instance, IList<string> declared, IList<ToolbarSlot> at, string called, string type)
+        {
+            var name = Free(called);
+            var part = PartFor(name);
+            part.Picked = true;
+            part.IsTrigger = true;
+            if (type.Length > 0)
+                part.Expects.Add(type);
+
+            instance.Fill(name, declared, at);
+            return name;
+        }
+
+        /// <summary><paramref name="called" />, numbered where a part already has it: Door, Door 2.</summary>
+        string Free(string called)
+        {
+            var name = called;
+            for (var n = 2; FindPart(name) != null; n++)
+                name = called + " " + n;
+
             return name;
         }
 
@@ -398,6 +445,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 var moment = _triggers[i] as MomentTrigger;
                 if (moment != null)
                     Gather(moment.Sources, into);
+
+                var own = _triggers[i].Acts;
+                if (own != null)
+                    Gather(own.Targets, into);
             }
 
             for (var i = 0; i < _sequences.Count; i++)

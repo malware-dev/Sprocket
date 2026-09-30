@@ -28,5 +28,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public RequiredTrigger(string eventId) : base(eventId)
         {
         }
+
+        /// <summary>The trigger that is the trigger part <paramref name="part" />, answered in each instance by its toolbar slots.</summary>
+        public static RequiredTrigger Named(string part)
+        {
+            var trigger = new RequiredTrigger();
+            trigger.Sources.Add(part);
+            return trigger;
+        }
+
+        /// <summary>The trigger part this is, or empty where it names none.</summary>
+        public string Part => Sources.Count > 0 ? Sources[0] : "";
     }
 }

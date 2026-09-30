@@ -56,8 +56,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case ')': return One(TokenKind.VectorClose);
                 case ',': return One(TokenKind.Comma);
                 case '.': return One(TokenKind.Dot);
+                case ':': return One(TokenKind.Colon);
                 case '=': return One(TokenKind.Equals);
                 case '#': return Hash();
+                case '/': return Slashes();
                 case '"': return Quoted('"', TokenKind.Text);
                 case '\'': return Quoted('\'', TokenKind.Identifier);
             }
@@ -68,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (Letter(c))
                 return Identifier();
 
-            return Bad(_ptr++, "'" + c + "' means nothing here");
+            return Bad(_ptr++, "unexpected '" + c + "'.");
         }
 
         static bool Letter(char c)
@@ -100,6 +102,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return new Token(kind, at);
         }
 
+        /// <summary><c>//</c>, or trouble where a single slash stands alone.</summary>
+        Token Slashes()
+        {
+            var start = _ptr;
+            _ptr++;
+            if (_ptr.IsOutOfBounds() || _ptr.Char != '/')
+                return Bad(start, "unexpected '/'.");
+
+            _ptr++;
+            return new Token(TokenKind.Off, start.Index);
+        }
+
         static Token Bad(TextPtr at, string what)
         {
             return new Token(TokenKind.Bad, at.Index, new StringSegment(what));
@@ -111,11 +125,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// An annotation line, or a colour, told apart by one character of lookahead.
+        /// An annotation line, or a color, told apart by one character of lookahead.
         /// </summary>
         /// <remarks>
         /// Lookahead rather than position in the line, so the lexer stays context-free and a list holding a
-        /// colour is not a special case. The cost is one wart: a hash with no space after it is trouble
+        /// color is not a special case. The cost is one wart: a hash with no space after it is trouble
         /// rather than an annotation. A writer always emits the space.
         /// </remarks>
         Token Hash()
@@ -127,7 +141,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return Colour(start);
 
             if (!_ptr.IsEndOfLine() && _ptr.Char != ' ')
-                return Bad(start, "a '#' starts an annotation or a colour, and this is neither");
+                return Bad(start, "expected '# ' and an annotation, or a color, after '#'.");
 
             // Everything after the hash and one optional space, so a writer emitting "# " round-trips.
             if (_ptr.Char == ' ')
@@ -144,7 +158,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var digits = 0;
 
             // Walked as a local. Stepping the cursor in its field pays a write barrier per digit,
-            // which is per digit of every colour in the file - see Run, which does the same.
+            // which is per digit of every color in the file - see Run, which does the same.
             // Walked as a local and written back once, measured: a TextPtr holds a string, so storing one into a
             // field pays the collector's write barrier on every step. Stepping the field made lexing 54% slower
             // than stepping an integer; walking a local brings it to 11%.
@@ -167,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (digits == 8)
                 return new Token(TokenKind.Color, start.Index, default(StringSegment), packed);
 
-            return Bad(start, "a colour is six or eight hex digits, not " + digits);
+            return Bad(start, "expected six or eight hex digits in the color, not " + digits + ".");
         }
 
         /// <summary>
@@ -230,7 +244,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         static string Unclosed(TokenKind kind)
         {
-            return kind == TokenKind.Text ? "a text value is not closed" : "a quoted name is not closed";
+            return kind == TokenKind.Text ? "missing '\"' at the end of the text." : "missing ''' at the end of the name.";
         }
 
         /// <summary>
@@ -271,20 +285,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var body = Since(start).ToString();
             if (digits == 0)
-                return Bad(start, "'" + body + "' is not a number");
+                return Bad(start, "expected a number, not '" + body + "'.");
 
             if (real)
             {
                 double value;
                 if (!double.TryParse(body, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
-                    return Bad(start, "'" + body + "' is not a number");
+                    return Bad(start, "expected a number, not '" + body + "'.");
 
                 return new Token(TokenKind.Real, start.Index, default(StringSegment), 0, value);
             }
 
             long whole;
             if (!long.TryParse(body, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
-                return Bad(start, "'" + body + "' does not fit in a whole number");
+                return Bad(start, "'" + body + "' is too large for a whole number.");
 
             return Letter(_ptr.Char)
                 ? Duration(start, whole)
@@ -312,7 +326,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var unit = Since(from);
             if (unit.Length != 1 || unit[0] != 't')
-                return Bad(start, "'" + Since(start) + "' is not a duration; ticks are written like 600t");
+                return Bad(start, "expected a duration like 600t, not '" + Since(start) + "'.");
 
             return new Token(TokenKind.Duration, start.Index, default(StringSegment), ticks);
         }

@@ -184,18 +184,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Whether slot <paramref name="slot" /> of <paramref name="panel" /> holds something this program did not write: the
+        /// Whether toolbar slot <paramref name="at" /> of <paramref name="panel" /> holds something this program did not write: the
         /// game's own action put there by a person, or another Sprocket's.
         /// </summary>
         /// <remarks>
         /// Read from the toolbar as it is now. What this Sprocket wrote there counts as its own whatever key it carries, and so
         /// does one pointed at a Sprocket that is gone, since nobody's program answers it.
         /// </remarks>
-        public bool Foreign(IMyTerminalBlock panel, int slot)
+        public bool Foreign(IMyTerminalBlock panel, ToolbarSlot at)
         {
-            IMyToolbar toolbar = Toolbars.Of(panel);
+            IMyToolbar toolbar = Toolbars.Of(panel, at.Toolbar);
+            var slot = Toolbars.Index(toolbar, at);
             MyToolbarItemInfo present;
-            if (toolbar == null || slot < 0 || slot >= toolbar.SlotCount || !toolbar.TryGetItem(slot, out present))
+            if (slot < 0 || !toolbar.TryGetItem(slot, out present))
                 return false;
 
             if (TriggerAction.IsOurs(present))

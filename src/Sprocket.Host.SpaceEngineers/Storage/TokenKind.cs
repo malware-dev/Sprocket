@@ -7,6 +7,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Nothing left.</summary>
         End,
 
+        /// <summary><c>//</c>, which switches off the step after it on its line.</summary>
+        Off,
+
         /// <summary>Ends a statement. There are no continuations, so this is structural.</summary>
         Newline,
 
@@ -60,6 +63,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// a name is always its parts. <c>'a.b'.'c'</c> and <c>'a'.'b.c'</c> are different names.
         /// </remarks>
         Dot,
+
+        /// <summary>The <c>:</c> between a block and the toolbar slot on it: <c>panel1:toolbar(1, 1, 4)</c>.</summary>
+        Colon,
 
         /// <summary>The <c>=</c> of one of a system saying what one of its parts is.</summary>
         Equals,

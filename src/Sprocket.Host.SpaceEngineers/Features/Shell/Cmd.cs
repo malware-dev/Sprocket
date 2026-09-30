@@ -16,6 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         Expand,
         Resolve,
 
+        /// <summary>Switches a step off, or back on.</summary>
+        SwitchStep,
+
+        /// <summary>Puts the program a text says in place of the one there, having read the text first.</summary>
+        Mend,
+
         // The list screens.
         NewSystem,
         LoadSystem,

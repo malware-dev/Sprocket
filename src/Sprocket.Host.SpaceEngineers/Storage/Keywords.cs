@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "sprocket", "block", "system", "instance", "of", "sequence",
             "when", "every", "then", "trigger", "to", "run", "set",
             "on", "off", "all", "any", "wait", "await", "required", "expects", "=", "changed", "as", "last",
-            "running", "step", "stop", "action", "with", "alpha", "optional"
+            "running", "step", "stop", "act", "with", "alpha", "optional"
         };
 
         static readonly Keyword[][] ByLength = Bucket();
@@ -76,7 +76,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         public static bool Bare(string word)
         {
-            if (string.IsNullOrEmpty(word) || !Letter(word[0]) || Taken(word))
+            return Shaped(word) && !Taken(word);
+        }
+
+        /// <summary>Whether a word has the shape of a name - a letter, then letters, digits and underscores - keyword or not.</summary>
+        /// <remarks>What a part of a qualified name needs to be written bare, since only a name can stand beside a dot.</remarks>
+        public static bool Shaped(string word)
+        {
+            if (string.IsNullOrEmpty(word) || !Letter(word[0]))
                 return false;
 
             for (var i = 1; i < word.Length; i++)

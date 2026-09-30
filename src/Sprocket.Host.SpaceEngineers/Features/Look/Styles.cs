@@ -276,6 +276,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Muted }
         };
 
+        /// <summary>The words of a sentence that is paused, quieter than those of one that runs.</summary>
+        public static readonly TextStyle PausedPhrase = new TextStyle(Phrase)
+        {
+            Base = { Color = Palette.Dim }
+        };
+
         /// <summary>A part of a sentence: a chip with a line along its bottom, the one look nothing else may borrow.</summary>
         /// <remarks>
         /// One that cannot be pressed keeps its place and its shape, lifted only a notch off the page so the words still
@@ -292,6 +298,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Empty = { Color = Palette.Notice, Underline = Palette.Notice },
             Still = { Background = Palette.Chrome, Underline = Palette.None },
             Hot = { Background = Palette.Well }
+        };
+
+        /// <summary>A part of a sentence that is paused: there to be read and pressed, and quieter than one that runs.</summary>
+        public static readonly SlotStyle PausedSlot = new SlotStyle(Slot)
+        {
+            Base = { Color = Palette.Dim, Background = Palette.Chrome, Underline = Palette.Line }
         };
 
         /// <summary>A word on a green wash, saying something is true at this instant.</summary>
@@ -463,6 +475,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly GlyphStyle ListMark = new GlyphStyle
         {
             Base = { Font = Symbols.Font, FontSize = 12f, Tint = Palette.Muted }
+        };
+
+        /// <summary>A symbol that could hold something as it is, smaller than the icons round it until it does.</summary>
+        public static readonly GlyphStyle Holds = new GlyphStyle(Icon)
+        {
+            Base = { FontSize = 12f }
+        };
+
+        /// <summary>A symbol that holds something as it is, lit in the color of something worth noticing while it does.</summary>
+        public static readonly GlyphStyle Held = new GlyphStyle(Icon)
+        {
+            Base = { Background = Palette.NoticeWash, Tint = Palette.Notice },
+            Hot = { Background = Palette.NoticeWash, Tint = Palette.Ink }
         };
 
         /// <summary>A symbol that throws something away, lit in the color of something wrong under the pointer.</summary>

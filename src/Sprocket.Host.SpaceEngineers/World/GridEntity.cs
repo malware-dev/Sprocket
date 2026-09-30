@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
 
@@ -104,6 +105,43 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Invoke(string actionId)
         {
             Invoke(actionId, null);
+        }
+
+        /// <summary>Tells <paramref name="told" /> each time this block may have changed, until the answer is disposed; null where it says nothing.</summary>
+        public IDisposable Listen(Action told)
+        {
+            var announces = _extension as IAnnounces;
+            return announces == null ? null : announces.Listen(_block, told);
+        }
+
+        /// <summary>Whether it is switched off, where it is a block that has a switch.</summary>
+        public bool IsSwitchedOff
+        {
+            get
+            {
+                var functional = _block as IMyFunctionalBlock;
+                return functional != null && !functional.Enabled;
+            }
+        }
+
+        /// <summary>Whether it can do anything at all: built, powered and switched on.</summary>
+        public bool IsWorking => _block.IsWorking;
+
+        /// <summary>Why this block cannot do <paramref name="action" />, naming it, or null where it can.</summary>
+        /// <remarks>
+        /// A block that is switched off, or not working, gets nowhere, so nothing a step waits for can be asked of it;
+        /// anything else it takes as ever, and switching it on is one of those. The switch is read before whether it works,
+        /// because a switch just thrown, by a step before this one, shows at once.
+        /// </remarks>
+        public string Unable(EntityAction action)
+        {
+            if (!action.Lasts)
+                return null;
+
+            if (IsSwitchedOff)
+                return Name + " is switched off, so it can't " + action.Text + ".";
+
+            return IsWorking ? null : Name + " isn't working, so it can't " + action.Text + ".";
         }
 
         /// <summary>Calls off what the action started, where this block's own knowledge says how.</summary>

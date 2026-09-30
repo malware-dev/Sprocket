@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
@@ -21,6 +22,9 @@ sealed class Door : Fitting
     int _progress;
     bool _opening;
 
+    Action<IMyDoor>? _opened;
+    Action<IMyDoor>? _closed;
+
     public Door(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
@@ -29,8 +33,16 @@ sealed class Door : Fitting
             .Gives("OpenRatio", () => (float)_progress / TravelTicks)
             .Does("OpenDoor", () => { _opening = true; Told("open"); return null; })
             .Does("CloseDoor", () => { _opening = false; Told("close"); return null; })
-            .Does("ToggleDoor", () => { _opening = !_opening; Told("toggle"); return null; }));
+            .Does("ToggleDoor", () => { _opening = !_opening; Told("toggle"); return null; })
+            .Does("add_OnDoorOpened", handler => { _opened += (Action<IMyDoor>)handler[0]; })
+            .Does("remove_OnDoorOpened", handler => { _opened -= (Action<IMyDoor>)handler[0]; })
+            .Does("add_OnDoorClosed", handler => { _closed += (Action<IMyDoor>)handler[0]; })
+            .Does("remove_OnDoorClosed", handler => { _closed -= (Action<IMyDoor>)handler[0]; }));
     }
+
+    /// <summary>Whether the door raises the game's own events on finishing, as every door in the game does.</summary>
+    /// <remarks>Off for a test about a door whose announcement never comes, which is what the backstop look is for.</remarks>
+    public bool Announces { get; set; } = true;
 
     /// <summary>The game's own pair for a door's switch, which is called Open.</summary>
     public override bool Offers(string actionId)
@@ -71,12 +83,17 @@ sealed class Door : Fitting
     /// </summary>
     /// <remarks>
     /// For setting a scene: a test about closing a door wants one that is open to begin with, and
-    /// forty-five ticks of it travelling is not what the test is about.
+    /// forty-five ticks of it travelling is not what the test is about. It announces having opened,
+    /// as a door that got there by travelling does.
     /// </remarks>
     public void ForceOpen()
     {
+        var was = _progress;
         _progress = TravelTicks;
         _opening = true;
+
+        if (was != TravelTicks && Announces)
+            _opened?.Invoke((IMyDoor)Block);
     }
 
     /// <summary>What the game would report of this door, which is what the mod reads.</summary>
@@ -94,14 +111,26 @@ sealed class Door : Fitting
         }
     }
 
+    /// <summary>How many are listening for the door to finish opening or closing.</summary>
+    public int Listeners => (_opened == null ? 0 : _opened.GetInvocationList().Length)
+        + (_closed == null ? 0 : _closed.GetInvocationList().Length);
+
     public override void Tick()
     {
         if (!Enabled)
             return;
 
         if (_opening && _progress < TravelTicks)
+        {
             _progress++;
+            if (_progress == TravelTicks && Announces)
+                _opened?.Invoke((IMyDoor)Block);
+        }
         else if (!_opening && _progress > 0)
+        {
             _progress--;
+            if (_progress == 0 && Announces)
+                _closed?.Invoke((IMyDoor)Block);
+        }
     }
 }

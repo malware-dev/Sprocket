@@ -30,5 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// several edges at once - they would almost never land on the same tick.
         /// </remarks>
         public bool RequiresAll { get; set; }
+
+        /// <summary>How often the moment is looked for, in ticks, or 0 where the program leaves it to the default.</summary>
+        public int IntervalTicks { get; set; }
     }
 }

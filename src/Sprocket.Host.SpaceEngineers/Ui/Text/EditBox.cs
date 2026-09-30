@@ -363,6 +363,15 @@ namespace Sprocket.Host.SpaceEngineers.Ui.Text
             return HasSelection ? Slice(SelectionStart, SelectionEnd) : string.Empty;
         }
 
+        /// <summary>Selects the whole of line <paramref name="line" />, counted from 0 and held inside the text, and brings it into view.</summary>
+        /// <remarks>The caret goes to the start of the line, so a long line is shown from its beginning.</remarks>
+        public void SelectLine(int line)
+        {
+            var start = Within(new Spot(line, 0));
+            Place(start, new Spot(start.Line, _lines[start.Line].Length));
+            Follow();
+        }
+
         /// <summary>Moves the caret to a line and a column, held inside the text, extending the selection when <paramref name="select" /> is set.</summary>
         public void MoveCaret(int line, int column, bool select)
         {

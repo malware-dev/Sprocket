@@ -32,6 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         IMyToolbar Of(IMyTerminalBlock block);
 
+        /// <summary>A block's toolbar by its place in the game's own order, from 0, or null where it has no such toolbar.</summary>
+        IMyToolbar Of(IMyTerminalBlock block, int index);
+
         /// <summary>What a slot's item was given to run with, appended to <paramref name="into" />.</summary>
         void Parameters(IMyToolbar toolbar, int slot, List<TerminalActionParameter> into);
 

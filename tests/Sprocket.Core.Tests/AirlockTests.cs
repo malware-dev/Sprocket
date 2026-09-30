@@ -383,7 +383,7 @@ public class AirlockTests
         {
             var trigger = new WhenTrigger("switched-on");
             trigger.Sources.Add(a.Ref(a.Seen(lamp)));
-            trigger.Runs = a.LetMeOut.Number;
+            trigger.Does = new Run(a.LetMeOut.Number);
             system.AddTrigger(trigger);
         }
 
@@ -436,6 +436,630 @@ public class AirlockTests
 
         // Both doors closing: the called sequence started, and the caller did not wait for it.
         Assert.Equal(["Outer Door:close", "Inner Door:close"], a.Log);
+    }
+
+    /// <summary>A sequence can stop another one of its own system where it is running, so the rest of it never happens.</summary>
+    [Fact]
+    public void ASequenceCanStopAnother()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var slow = a.Automation.AddSequence(system);
+        slow.Steps.Add(new Wait(600));
+        Then(slow, "close", a.Ref(a.Seen(a.Outer)));
+
+        var stopper = a.Automation.AddSequence(system);
+        stopper.Steps.Add(new Run(slow.Number) { Stops = true });
+
+        a.Outer.ForceOpen();
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(slow);
+        a.Tick();
+        Assert.True(a.Runner.Get(slow)!.IsRunning);
+
+        a.Runner.Call(stopper);
+        a.Tick();
+        Assert.False(a.Runner.Get(slow)!.IsRunning);
+
+        // Past where the wait would have ended: the outer door was never closed.
+        a.Tick(700);
+        Assert.Empty(a.Log);
+    }
+
+    /// <summary>A sequence that would start itself, directly or through one it runs, is at fault at the step that does it, and its system does not run.</summary>
+    [Fact]
+    public void ASequenceThatWouldStartItselfIsAtFault()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var first = a.Automation.AddSequence(system);
+        var second = a.Automation.AddSequence(system);
+        Then(first, "close", a.Ref(a.Seen(a.Outer)));
+        first.Steps.Add(new Run(second.Number));
+        second.Steps.Add(new Run(first.Number));
+
+        var alone = a.Automation.AddSequence(system);
+        alone.Steps.Add(new Run(alone.Number));
+
+        system.Enabled = true;
+        a.Automation.Edited();
+        a.Tick(3);
+
+        var fault = SequenceSummary.Fault(a.Runner.Get(first));
+        Assert.Equal(SequenceProblem.Circular, fault.Problem);
+        Assert.Equal(2, fault.Step);
+        Assert.Equal(SequenceProblem.Circular, SequenceSummary.Fault(a.Runner.Get(alone)).Problem);
+        Assert.False(system.Enabled);
+    }
+
+    /// <summary>Running another sequence, and stopping one, start nothing again.</summary>
+    [Fact]
+    public void RunningOnAndStoppingAreNoCycle()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var first = a.Automation.AddSequence(system);
+        var second = a.Automation.AddSequence(system);
+        first.Steps.Add(new Run(second.Number));
+        second.Steps.Add(new Run(first.Number, true));
+        first.Steps.Add(new Run(first.Number, true));
+
+        a.Automation.Edited();
+        a.Tick(3);
+
+        Assert.NotEqual(SequenceProblem.Circular, SequenceSummary.Fault(a.Runner.Get(first)).Problem);
+        Assert.NotEqual(SequenceProblem.Circular, SequenceSummary.Fault(a.Runner.Get(second)).Problem);
+    }
+
+    /// <summary>An await waits for a sequence started above it to finish, as it does for an action.</summary>
+    [Fact]
+    public void AnAwaitWaitsForASequenceItStarted()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var slow = a.Automation.AddSequence(system);
+        slow.Steps.Add(new Wait(100));
+        Then(slow, "close", a.Ref(a.Seen(a.Inner)));
+
+        var waiting = a.Automation.AddSequence(system);
+        waiting.Steps.Add(new Run(slow.Number));
+        waiting.Steps.Add(new Await());
+        Then(waiting, "close", a.Ref(a.Seen(a.Outer)));
+
+        a.Inner.ForceOpen();
+        a.Outer.ForceOpen();
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(waiting);
+        a.Tick(90);
+        Assert.Empty(a.Log);
+        Assert.True(a.Runner.Get(waiting)!.IsWaiting);
+
+        a.Tick(200);
+        Assert.Equal(["Inner Door:close", "Outer Door:close"], a.Log);
+    }
+
+    /// <summary>A step switched off is never done, and the steps around it run as though it were not there.</summary>
+    [Fact]
+    public void AStepSwitchedOffIsNeverDone()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        Then(cycle, "close", a.Ref(a.Seen(a.Inner)));
+        Then(cycle, "close", a.Ref(a.Seen(a.Outer)));
+        cycle.Steps[2].IsOff = true;
+        cycle.Steps[3].IsOff = true;
+        var wait = new Wait(600) { IsOff = true };
+        cycle.Steps.Add(wait);
+        Then(cycle, "open", a.Ref(a.Seen(a.Outer)));
+
+        a.Inner.ForceOpen();
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(cycle);
+        a.Tick(150);
+
+        Assert.Equal(["Inner Door:close", "Outer Door:open"], a.Log);
+        Assert.False(a.Runner.Get(cycle)!.IsRunning);
+    }
+
+    /// <summary>A step switched off between an action and its await leaves the await covering the action.</summary>
+    [Fact]
+    public void AStepSwitchedOffBetweenAnActionAndItsAwaitLeavesItAwaited()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        cycle.Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
+        cycle.Steps.Add(new Wait(600) { IsOff = true });
+        cycle.Steps.Add(new Await());
+        Then(cycle, "open", a.Ref(a.Seen(a.Outer)));
+
+        a.Inner.ForceOpen();
+        system.Enabled = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(cycle);
+        a.Tick(150);
+
+        Assert.Equal(["Inner Door:close", "Outer Door:open"], a.Log);
+        Assert.NotEqual(SequenceProblem.Unawaited, SequenceSummary.Fault(a.Runner.Get(cycle)).Problem);
+    }
+
+    /// <summary>A block switched off that is already where the step would take it has nothing to do, and is no trouble.</summary>
+    [Fact]
+    public void ABlockSwitchedOffAlreadyThereIsNoTrouble()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        Then(cycle, "close", a.Ref(a.Seen(a.Inner)));
+        Then(cycle, "open", a.Ref(a.Seen(a.Outer)));
+
+        a.Inner.Enabled = false;
+        system.Enabled = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(cycle);
+        a.Tick(150);
+
+        Assert.Contains("Outer Door:open", a.Log);
+        Assert.NotEqual(SequenceProblem.Unable, SequenceSummary.Fault(a.Runner.Get(cycle)).Problem);
+        Assert.True(system.Enabled);
+    }
+
+    /// <summary>An await switched off waits for nothing, so the step above it goes on without waiting, which is a fault.</summary>
+    [Fact]
+    public void AnAwaitSwitchedOffLeavesItsStepUnawaited()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        Then(cycle, "close", a.Ref(a.Seen(a.Inner)));
+        cycle.Steps[1].IsOff = true;
+
+        var both = a.Automation.AddSequence(system);
+        Then(both, "close", a.Ref(a.Seen(a.Inner)));
+        both.Steps[0].IsOff = true;
+        both.Steps[1].IsOff = true;
+
+        a.Automation.Edited();
+        a.Tick(3);
+
+        Assert.Equal(SequenceProblem.Unawaited, SequenceSummary.Fault(a.Runner.Get(cycle)).Problem);
+        Assert.NotEqual(SequenceProblem.Unawaited, SequenceSummary.Fault(a.Runner.Get(both)).Problem);
+    }
+
+    /// <summary>A run switched off starts nothing, so it makes no cycle.</summary>
+    [Fact]
+    public void ARunSwitchedOffMakesNoCycle()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var alone = a.Automation.AddSequence(system);
+        alone.Steps.Add(new Run(alone.Number) { IsOff = true });
+
+        a.Automation.Edited();
+        a.Tick(3);
+
+        Assert.NotEqual(SequenceProblem.Circular, SequenceSummary.Fault(a.Runner.Get(alone)).Problem);
+    }
+
+    /// <summary>An action asked of a block that is switched off ends the run at that step, naming the block, and switches the system off.</summary>
+    [Fact]
+    public void AnActionOnABlockSwitchedOffEndsTheRun()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        Then(cycle, "close", a.Ref(a.Seen(a.Inner)));
+        Then(cycle, "open", a.Ref(a.Seen(a.Outer)));
+
+        a.Inner.ForceOpen();
+        a.Inner.Enabled = false;
+        system.Enabled = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(cycle);
+        a.Tick(20);
+
+        var fault = SequenceSummary.Fault(a.Runner.Get(cycle));
+        Assert.Equal(SequenceProblem.Unable, fault.Problem);
+        Assert.Equal(0, fault.Step);
+        Assert.Equal("Inner Door is switched off, so it can't close.", fault.Because);
+        Assert.DoesNotContain("Outer Door:open", a.Log);
+        Assert.False(system.Enabled);
+    }
+
+    /// <summary>A block switched off by the step before is as unable as one switched off by hand.</summary>
+    [Fact]
+    public void ABlockSwitchedOffInTheStepBeforeCannotAct()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        cycle.Steps.Add(Do(BlockKinds.SwitchOff, a.Ref(a.Seen(a.Outer))));
+        Then(cycle, "open", a.Ref(a.Seen(a.Outer)));
+
+        system.Enabled = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(cycle);
+        a.Tick(20);
+
+        var fault = SequenceSummary.Fault(a.Runner.Get(cycle));
+        Assert.Equal(SequenceProblem.Unable, fault.Problem);
+        Assert.Equal(1, fault.Step);
+        Assert.Equal("Outer Door is switched off, so it can't open.", fault.Because);
+        Assert.DoesNotContain("Outer Door:open", a.Log);
+    }
+
+    /// <summary>The game's own value is a setting even where one of Sprocket's own lasts over the same control, so a block switched off takes it.</summary>
+    [Fact]
+    public void TheGamesOwnValueIsTakenByABlockSwitchedOff()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        var empty = new Act("Depressurize") { Form = Form.Value };
+        empty.Targets.Add(a.Ref(a.Seen(a.Vent)));
+        empty.Values.Add(Literal.Of(true));
+        cycle.Steps.Add(empty);
+
+        a.Vent.Enabled = false;
+        system.Enabled = true;
+        a.Tick(3);
+
+        a.Runner.Call(cycle);
+        a.Tick(20);
+
+        Assert.NotEqual(SequenceProblem.Unable, SequenceSummary.Fault(a.Runner.Get(cycle)).Problem);
+    }
+
+    /// <summary>A setting given to a block that is switched off is taken as ever, since nothing has to happen.</summary>
+    [Fact]
+    public void ASettingIsTakenByABlockSwitchedOff()
+    {
+        var a = Build();
+        var lamp = a.Ship.Light(9, "Lamp").Carrying("Radius", "Radius", ValueKind.Real, "1", "20");
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        var radius = new Act("Radius") { Form = Form.Value };
+        radius.Targets.Add(a.Ref(a.Seen(lamp)));
+        radius.Values.Add(Literal.Of(4.5));
+        cycle.Steps.Add(radius);
+        Then(cycle, "close", a.Ref(a.Seen(a.Inner)));
+
+        lamp.Enabled = false;
+        a.Inner.ForceOpen();
+        system.Enabled = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(cycle);
+        a.Tick(100);
+
+        Assert.Contains("Inner Door:close", a.Log);
+        Assert.NotEqual(SequenceProblem.Unable, SequenceSummary.Fault(a.Runner.Get(cycle)).Problem);
+    }
+
+    /// <summary>A block that is switched off can still be switched on, and then does what it is asked.</summary>
+    [Fact]
+    public void ABlockSwitchedOffCanBeSwitchedOnFirst()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var cycle = a.Automation.AddSequence(system);
+        cycle.Steps.Add(Do(BlockKinds.SwitchOn, a.Ref(a.Seen(a.Inner))));
+        Then(cycle, "close", a.Ref(a.Seen(a.Inner)));
+
+        a.Inner.ForceOpen();
+        a.Inner.Enabled = false;
+        system.Enabled = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(cycle);
+        a.Tick(100);
+
+        Assert.Contains("Inner Door:close", a.Log);
+        Assert.NotEqual(SequenceProblem.Unable, SequenceSummary.Fault(a.Runner.Get(cycle)).Problem);
+        Assert.True(system.Enabled);
+    }
+
+    /// <summary>A sequence may stop itself, and ends there.</summary>
+    [Fact]
+    public void ASequenceThatStopsItselfEndsThere()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var halting = a.Automation.AddSequence(system);
+        Then(halting, "close", a.Ref(a.Seen(a.Inner)));
+        halting.Steps.Add(new Run(halting.Number, true));
+        Then(halting, "close", a.Ref(a.Seen(a.Outer)));
+
+        a.Inner.ForceOpen();
+        a.Outer.ForceOpen();
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(halting);
+        a.Tick(200);
+
+        Assert.Equal(["Inner Door:close"], a.Log);
+        Assert.False(a.Runner.Get(halting)!.IsRunning);
+    }
+
+    /// <summary>A sequence stopped by one it ran ends there, as though it had stopped itself.</summary>
+    [Fact]
+    public void ASequenceStoppedByOneItRanEndsThere()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var first = a.Automation.AddSequence(system);
+        var second = a.Automation.AddSequence(system);
+        second.Steps.Add(new Run(first.Number, true));
+
+        first.Steps.Add(new Run(second.Number));
+        Then(first, "close", a.Ref(a.Seen(a.Outer)));
+
+        a.Outer.ForceOpen();
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(first);
+        a.Tick(200);
+
+        Assert.Empty(a.Log);
+        Assert.False(a.Runner.Get(first)!.IsRunning);
+    }
+
+    /// <summary>A clock can stop a sequence, where a clock that ran it would start it.</summary>
+    [Fact]
+    public void AClockCanStopASequence()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var slow = a.Automation.AddSequence(system);
+        slow.Steps.Add(new Wait(600));
+        Then(slow, "close", a.Ref(a.Seen(a.Outer)));
+
+        var clock = new EveryTrigger(30);
+        clock.Does = new Run(slow.Number, true);
+        system.AddTrigger(clock);
+        a.Automation.Edited();
+
+        a.Outer.ForceOpen();
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Runner.Call(slow);
+        a.Tick();
+        Assert.True(a.Runner.Get(slow)!.IsRunning);
+
+        a.Tick(100);
+        Assert.False(a.Runner.Get(slow)!.IsRunning);
+
+        a.Tick(700);
+        Assert.Empty(a.Log);
+    }
+
+    /// <summary>A <c>when</c> may act on the blocks itself, with no sequence to run.</summary>
+    [Fact]
+    public void AWhenMayActItself()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var shut = new WhenTrigger("closed");
+        shut.Sources.Add(a.Ref(a.Seen(a.Inner)));
+        shut.Does = Do("open", a.Ref(a.Seen(a.Outer)));
+        system.AddTrigger(shut);
+        a.Automation.Edited();
+
+        var closing = a.Automation.AddSequence(system);
+        Then(closing, "close", a.Ref(a.Seen(a.Inner)));
+
+        a.Inner.ForceOpen();
+        a.Tick(20);
+        a.Log.Clear();
+
+        a.Runner.Call(closing);
+        a.Tick(200);
+
+        Assert.Equal(["Inner Door:close", "Outer Door:open"], a.Log);
+        Assert.Single(a.Automation.Sequences, s => s.System == system && s != a.LetMeOut);
+    }
+
+    /// <summary>A <c>when</c> looks no more often than the runner allows, whatever it asks for.</summary>
+    /// <remarks>
+    /// Held to every thirty ticks, a vent switched on on tick 40 is seen on tick 61, as it is by a <c>when</c> that asks for
+    /// thirty. Nothing announces a block being switched on, which is what leaves the cadence to decide.
+    /// </remarks>
+    [Fact]
+    public void AWhenIsHeldToTheQuickestLook()
+    {
+        var a = Build();
+        a.Runner.QuickestLook = 30;
+        var system = a.Automation.Systems[0];
+
+        var on = new WhenTrigger("switched-on");
+        on.Sources.Add(a.Ref(a.Seen(a.Vent)));
+        on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(on);
+        a.Automation.Edited();
+
+        a.Vent.Enabled = false;
+        a.Inner.ForceOpen();
+        a.Tick(39);
+        a.Log.Clear();
+
+        a.Vent.Enabled = true;
+        a.Tick(21);
+        Assert.Empty(a.Log);
+
+        a.Tick();
+        Assert.Equal(["Inner Door:close"], a.Log);
+    }
+
+    /// <summary>With <c>any</c>, each block that reaches the moment fires on its own, even when both are found there at one look.</summary>
+    [Fact]
+    public void AnyFiresOnceForEachBlock()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var on = new WhenTrigger("switched-on");
+        on.Sources.Add(a.Ref(a.Seen(a.Vent)));
+        on.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(on);
+        a.Automation.Edited();
+
+        a.Vent.Enabled = false;
+        a.Outer.Enabled = false;
+        a.Inner.ForceOpen();
+        a.Tick(20);
+        a.Log.Clear();
+
+        a.Vent.Enabled = true;
+        a.Outer.Enabled = true;
+        a.Tick(20);
+
+        Assert.Equal(["Inner Door:close", "Inner Door:close"], a.Log);
+        Assert.Equal(2, a.Runner.Poller(on, system.First)!.FiredCount);
+    }
+
+    /// <summary>A moment the block announces is looked for on the tick after, whatever the <c>when</c> asks for.</summary>
+    [Fact]
+    public void AnAnnouncedMomentIsSeenOnTheTickAfter()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var opened = new WhenTrigger("opened");
+        opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        opened.IntervalTicks = 600;
+        opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(opened);
+        a.Automation.Edited();
+
+        a.Inner.ForceOpen();
+        a.Tick(39);
+        a.Log.Clear();
+
+        a.Outer.ForceOpen();
+        a.Tick();
+
+        Assert.Equal(["Inner Door:close"], a.Log);
+
+        // One for finishing opening and one for finishing closing.
+        Assert.Equal(2, a.Outer.Listeners);
+    }
+
+    /// <summary>A moment whose announcement never comes is still seen, by the look every hundred ticks.</summary>
+    [Fact]
+    public void AnAnnouncementThatNeverComesIsCaughtByTheBackstop()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var opened = new WhenTrigger("opened");
+        opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(opened);
+        a.Automation.Edited();
+
+        a.Inner.ForceOpen();
+        a.Tick(39);
+        a.Log.Clear();
+
+        a.Outer.Announces = false;
+        a.Outer.ForceOpen();
+        a.Tick(40);
+        Assert.Empty(a.Log);
+
+        a.Tick(100);
+        Assert.Equal(["Inner Door:close"], a.Log);
+    }
+
+    /// <summary>Deleting a <c>when</c> stops it listening to its blocks.</summary>
+    [Fact]
+    public void AWhenGoneListensToNothing()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var opened = new WhenTrigger("opened");
+        opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(opened);
+        a.Automation.Edited();
+        a.Tick(3);
+        Assert.Equal(2, a.Outer.Listeners);
+
+        system.ReplaceTrigger(opened, null);
+        a.Automation.Edited();
+        a.Tick(3);
+        Assert.Equal(0, a.Outer.Listeners);
+    }
+
+    /// <summary>A <c>when</c> that says how often it looks looks that often, and fires on the look that sees the moment.</summary>
+    /// <remarks>
+    /// Its first look is on the first tick after it is made, which is tick 1, and every thirtieth tick after that; so a vent
+    /// switched on on tick 40 is seen on tick 61, where one left to the default of ten would be seen on tick 41. Nothing
+    /// announces a block being switched on, which is what leaves the cadence to decide.
+    /// </remarks>
+    [Fact]
+    public void AWhenLooksAsOftenAsItSays()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var on = new WhenTrigger("switched-on");
+        on.Sources.Add(a.Ref(a.Seen(a.Vent)));
+        on.IntervalTicks = 30;
+        on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(on);
+        a.Automation.Edited();
+
+        a.Vent.Enabled = false;
+        a.Inner.ForceOpen();
+        a.Tick(39);
+        a.Log.Clear();
+
+        a.Vent.Enabled = true;
+        a.Tick(21);
+        Assert.Empty(a.Log);
+
+        a.Tick();
+        Assert.Equal(["Inner Door:close"], a.Log);
     }
 
     /// <summary>

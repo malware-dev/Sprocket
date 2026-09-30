@@ -450,6 +450,21 @@ def stop():
                  (0.5 + half, 0.5 + half), (0.5 - half, 0.5 + half))]
 
 
+def pause():
+    """
+    Two bars. Held where it is, kept as it was, and passed over until it is let go again.
+
+    In the same box as stop, so the two read at one weight: each bar a third of the box across,
+    with a third between them.
+    """
+    half = 0.21
+    bar = 2 * half / 3
+    return [poly((0.5 - half, 0.5 - half), (0.5 - half + bar, 0.5 - half),
+                 (0.5 - half + bar, 0.5 + half), (0.5 - half, 0.5 + half)),
+            poly((0.5 + half - bar, 0.5 - half), (0.5 + half, 0.5 - half),
+                 (0.5 + half, 0.5 + half), (0.5 + half - bar, 0.5 + half))]
+
+
 def solid(shapes):
     """Most glyphs are just filled shapes with nothing taken back out."""
     return shapes, []
@@ -483,6 +498,8 @@ GLYPHS = [
     # Not "s", which refresh already has. The letter is in the word and nothing else wanted it.
     ("t", "stop", lambda: solid(stop())),
     ("w", "finish", lambda: solid(finish())),
+    # "p" and "a", "u" and "s" are taken; "e" is the one letter of the word left.
+    ("e", "pause", lambda: solid(pause())),
 ]
 
 

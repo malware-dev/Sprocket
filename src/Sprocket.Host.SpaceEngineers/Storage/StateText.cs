@@ -158,7 +158,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
-                trouble.Say(line, "this says what is switched off and what is running, and nothing else");
+                trouble.Say(line, "expected 'off' or 'running'.");
             }
 
             if (trouble.What.Length > 0)
@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Guid identity;
             if (!Guid.TryParseExact(line.Text(0), "D", out identity))
             {
-                trouble.Say(line, "what is running is named by its system's identity");
+                trouble.Say(line, "expected the system's identity.");
                 return;
             }
 
@@ -204,7 +204,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (instance < 1 || sequence < 1 || step.Form != ValueForm.Integer
                 || step.Whole < 0 || step.Whole > int.MaxValue)
             {
-                trouble.Say(line, "an instance and a sequence are numbered from one, and a step from zero");
+                trouble.Say(line, "expected an instance and a sequence counted from 1, and a step from 0.");
                 return;
             }
 
@@ -216,7 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var ticks = line.ValueAt(8);
                 if (ticks.Form != ValueForm.Duration || ticks.Whole < 0 || ticks.Whole > int.MaxValue)
                 {
-                    trouble.Say(line, "what is left of a wait is written with its unit, like wait 60t");
+                    trouble.Say(line, "expected a duration after 'wait', like 60t.");
                     return;
                 }
 
@@ -327,7 +327,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Guid identity;
             if (!Guid.TryParseExact(line.Text(0), "D", out identity))
             {
-                trouble.Say(line, "what is switched off is named by its system's identity");
+                trouble.Say(line, "expected the system's identity.");
                 return;
             }
 
@@ -345,7 +345,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var number = line.ValueAt(2);
             if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
             {
-                trouble.Say(line, "one of a system is switched off by its number");
+                trouble.Say(line, "expected the instance's number.");
                 return;
             }
 
@@ -355,7 +355,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (!line.Says(1, Keyword.Instance))
             {
-                trouble.Say(line, "a system's identity is followed by 'instance', a reason, or nothing");
+                trouble.Say(line, "expected 'instance', a reason, or the end of the line.");
                 return;
             }
 

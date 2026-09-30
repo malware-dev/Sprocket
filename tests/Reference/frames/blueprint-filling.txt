@@ -20,7 +20,7 @@ on screen     Airlock
 013  SetClip    {X:256 Y:118 W:1408 H:902}
 014  Sprite     Sprocket_Fill         {X:256 Y:126 W:1396 H:1}  #5B737BFF
 015  Text       at {X:260 Y:144.6399} scale 0.694  #85A1A9FF  "SLOTS"
-016  Text       at {X:276 Y:192.2255} scale 0.833  #DCF5FDFF  "Button Panel"
+016  Text       at {X:276 Y:192.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
 017  Sprite     Sprocket_Fill         {X:856 Y:187 W:177 H:40}  #374851FF
 018  Sprite     Sprocket_Fill         {X:856 Y:225 W:177 H:2}  #8EBCCFFF
 019  Sprite     MyObjectBuilder_ButtonPanel/ButtonPanelLarge{X:872 Y:195 W:24 H:24}  #FFFFFFFF

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Game.ModAPI;
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
@@ -40,6 +41,26 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static IMyToolbar Of(IMyTerminalBlock block)
         {
             return _slots.Of(block);
+        }
+
+        /// <summary>A block's toolbar by number, from 1 in the game's own order, or null where it has no such toolbar.</summary>
+        public static IMyToolbar Of(IMyTerminalBlock block, int toolbar)
+        {
+            return _slots.Of(block, toolbar - 1);
+        }
+
+        /// <summary>
+        /// Where <paramref name="at" />'s page and slot sit in <paramref name="toolbar" />'s items, or -1 where the toolbar has
+        /// no such slot.
+        /// </summary>
+        /// <remarks>The game keeps a toolbar's items as one run across its pages, a page's slots after the page before's.</remarks>
+        public static int Index(IMyToolbar toolbar, ToolbarSlot at)
+        {
+            if (toolbar == null || at == null || at.Page < 1 || at.Slot < 1 || at.Slot > toolbar.SlotCount)
+                return -1;
+
+            var index = (at.Page - 1) * toolbar.SlotCount + at.Slot - 1;
+            return index < toolbar.ItemCount ? index : -1;
         }
 
         /// <summary>What a slot's item was given to run with, appended to <paramref name="into" />.</summary>

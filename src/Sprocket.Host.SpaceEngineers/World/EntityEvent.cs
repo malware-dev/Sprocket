@@ -51,6 +51,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Answered { get; private set; }
 
+        /// <summary>Whether the block says when this may have happened, so it is looked for then rather than only on a cadence.</summary>
+        /// <remarks>See <see cref="IAnnounces" />. Set by the extension that knows the block raises it.</remarks>
+        public bool Announced { get; private set; }
+
+        /// <summary>Says the block announces this.</summary>
+        internal void Announce()
+        {
+            Announced = true;
+        }
+
         /// <summary>The property on the entity this event watches.</summary>
         public string PropertyId { get; private set; }
 

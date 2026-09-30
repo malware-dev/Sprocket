@@ -8,8 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <remarks>
     /// A trigger belongs to the system rather than to the sequence it runs, so taking one back is
     /// not something a sequence's history could hold - two triggers may run one sequence, and a
-    /// trigger that does one plain thing runs a sequence that has no screen at all. These are
-    /// walked back from the system's screen, which is where they are made.
+    /// trigger that does one plain thing runs no sequence at all. These are walked back from the
+    /// system's screen, which is where they are made.
     /// </remarks>
     abstract class SystemEdit : Edit<AutomationSystem>
     {

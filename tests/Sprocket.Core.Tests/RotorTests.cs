@@ -433,7 +433,7 @@ public class RotorTests
 
     /// <summary>What is plainly wrong with a rotor is read off it, and needs no watching.</summary>
     [Theory]
-    [InlineData("power", "cannot turn - it is switched off or has no power")]
+    [InlineData("power", "Rotor is switched off, so it can't rotate.")]
     [InlineData("head", "cannot turn - it has no head")]
     [InlineData("lock", "cannot turn - it is locked")]
     [InlineData("torque", "cannot turn - its torque is nought")]

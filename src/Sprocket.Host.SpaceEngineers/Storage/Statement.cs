@@ -63,6 +63,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         public string Annotation { get; set; }
 
+        /// <summary>Whether its line starts with <c>//</c>, which switches a step off.</summary>
+        public bool IsOff { get; set; }
+
         public int Count { get; private set; }
 
         /// <summary>What is inside its braces, empty when it has none.</summary>
@@ -121,6 +124,33 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return -1;
         }
 
+        /// <summary>The block and numbers of a toolbar slot, or false where <paramref name="value" /> is not one.</summary>
+        public bool Slot(Value value, out string block, out int toolbar, out int page, out int slot)
+        {
+            block = "";
+            toolbar = page = slot = 0;
+            if (value.Form != ValueForm.Slot)
+                return false;
+
+            var parts = new ValueRange(_reading.Parts, value.From, value.Count);
+            block = parts[0].Word;
+            toolbar = Number(parts[1].Whole);
+            page = Number(parts[2].Whole);
+            slot = Number(parts[3].Whole);
+            return true;
+        }
+
+        /// <summary>The statement that starts at the value <paramref name="at" />: its word, and the values after it.</summary>
+        /// <remarks>How a trigger reads the step it does, which is written as a sequence writes it, after <c>to</c> or <c>then</c>.</remarks>
+        public Statement Rest(int at)
+        {
+            var value = ValueAt(at);
+            var key = value.Form == ValueForm.Keyword ? value.Keyword : Keyword.None;
+            var head = key == Keyword.None && value.IsWord ? value.Word : "";
+            var from = at < 0 ? Count : at + 1 > Count ? Count : at + 1;
+            return new Statement(_reading, At, key, head, _from + from, Count - from, null);
+        }
+
         /// <summary>The items of a list at a position, or none where there is no list there.</summary>
         public ValueRange Items(int index)
         {
@@ -160,6 +190,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return value.Form == ValueForm.Identifier
                 ? new ValueRange(_reading.Values, _from + index, 1)
                 : new ValueRange();
+        }
+
+        /// <summary>A written number as a count, 0 where it is none a count can be.</summary>
+        static int Number(long written)
+        {
+            return written < 1 || written > int.MaxValue ? 0 : (int)written;
         }
     }
 }

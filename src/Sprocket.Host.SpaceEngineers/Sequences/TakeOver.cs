@@ -3,61 +3,76 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// Points a trigger at a button another trigger holds, and takes the button off that one.
+    /// Does what was picked, and takes the button it was given out of the trigger slot of the blockset that had it.
     /// </summary>
     /// <remarks>
-    /// A toolbar slot holds one thing, so two triggers naming one button is a state the construct
-    /// cannot be put into - and Sprocket, asked to arrange it, ends up arranging neither: the slot is
-    /// left empty and both triggers stand there naming a button that answers nothing.
+    /// A toolbar slot holds one thing, so two triggers naming one button is a state the construct cannot be put into. The
+    /// person's answer decides it: the blockset that had the button is left needing another, the same state somebody
+    /// clearing that button in the game leaves behind, said on its row and mended by picking one.
     /// <para>
-    /// So the person's answer decides it. Taking a button over means the trigger that had it is left
-    /// without one - the same state the host leaves behind when somebody clears that button in the
-    /// game, which says so on its row and is mended by pressing it.
-    /// </para>
-    /// <para>
-    /// One edit rather than two, because it is one answer to one question. What it carries out is
-    /// whatever was being done - pointing an existing trigger, usually - and the blocks it took away
-    /// come back with it.
+    /// One edit rather than two, because it is one answer to one question; undoing it puts the other blockset's slot back.
     /// </para>
     /// </remarks>
     sealed class TakeOver : SystemEdit
     {
         readonly SystemEdit _made;
-        readonly MomentTrigger _from;
+        readonly SystemInstance _from;
+        readonly string _part;
         readonly List<string> _had;
+        readonly List<ToolbarSlot> _hadAt;
+        readonly List<string> _kept;
+        readonly List<ToolbarSlot> _keptAt;
 
-        public TakeOver(SystemEdit made, MomentTrigger from)
+        /// <summary>Does <paramref name="made" />, leaving trigger part <paramref name="part" /> of <paramref name="from" /> answered by <paramref name="kept" /> at <paramref name="keptAt" /> alone.</summary>
+        public TakeOver(SystemEdit made, SystemInstance from, string part, IList<string> kept, IList<ToolbarSlot> keptAt)
         {
             _made = made;
             _from = from;
-            _had = CopyOf(from.Sources);
+            _part = part;
+            _had = CopyOf(from.FilledWith(part) ?? new List<string>());
+            _hadAt = new List<ToolbarSlot>(from.Positions(part) ?? new List<ToolbarSlot>());
+            _kept = CopyOf(kept);
+            _keptAt = new List<ToolbarSlot>(keptAt);
         }
 
         public override string Label => "taking a button over";
 
-        public override bool Changes => _made.Changes;
+        public override bool Changes => true;
 
         public override void Apply(AutomationSystem system)
         {
             _made.Apply(system);
-            _from.Sources.Clear();
+            Put(_kept, _keptAt);
         }
 
         public override void Undo(AutomationSystem system)
         {
-            Refill(_from.Sources, _had);
+            Put(_had, _hadAt);
             _made.Undo(system);
         }
 
         /// <summary>Only while what it did is still what is there, and what it took is still gone.</summary>
         public override bool Undoable(AutomationSystem system)
         {
-            return _from.Sources.Count == 0 && _made.Undoable(system);
+            return Holding(_kept) && _made.Undoable(system);
         }
 
         public override bool Redoable(AutomationSystem system)
         {
-            return Same(_from.Sources, _had) && _made.Redoable(system);
+            return Holding(_had) && _made.Redoable(system);
+        }
+
+        bool Holding(IList<string> blocks)
+        {
+            return Same(_from.FilledWith(_part) ?? new List<string>(), blocks);
+        }
+
+        void Put(IList<string> blocks, IList<ToolbarSlot> at)
+        {
+            if (blocks.Count == 0)
+                _from.Clear(_part);
+            else
+                _from.Fill(_part, blocks, at);
         }
     }
 }

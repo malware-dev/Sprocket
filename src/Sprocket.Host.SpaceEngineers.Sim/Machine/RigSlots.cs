@@ -40,6 +40,12 @@ sealed class RigSlots : ISlots
         return null;
     }
 
+    /// <summary>The rig's blocks have one toolbar each, the first.</summary>
+    public IMyToolbar Of(IMyTerminalBlock block, int index)
+    {
+        return index == 0 ? Of(block) : null;
+    }
+
     public void Parameters(IMyToolbar toolbar, int slot, List<TerminalActionParameter> into)
     {
         var rigs = toolbar as Toolbar;

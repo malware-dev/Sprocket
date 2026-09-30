@@ -43,6 +43,16 @@ Three results are worth knowing by name, because each has already been a real de
 Anything flat out wrong gets a pragma or an `.editorconfig` entry with a reason. Nothing is left to
 be re-reported forever.
 
+## Check the translations
+
+**Every commit keeps the Norwegian translation whole.** It is a requirement before a commit, as this
+review is. The build says half of it: `LOC005` is a Norwegian text the English file lacks, `LOC006` an
+English text with no Norwegian, and a change goes in with neither.
+
+The other half no build can see: a Norwegian text that has gone stale. Every English text the diff adds
+or changes in `MyTexts.resx` has its Norwegian written or rewritten in `MyTexts.no.resx` in the same
+change, and is read against it.
+
 ## Read the diff
 
 Every added comment, against the rule that a comment says what the code **is**:

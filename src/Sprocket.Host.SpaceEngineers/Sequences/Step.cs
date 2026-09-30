@@ -27,5 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// anything, in any language - is the host's word and has no bearing on this one.
         /// </remarks>
         public string Annotation { get; set; }
+
+        /// <summary>Whether it is switched off: kept whole, and read and checked as ever, but never done.</summary>
+        public bool IsOff { get; set; }
     }
 }

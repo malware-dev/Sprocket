@@ -137,6 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _copy = copy;
             _world = new GridWorld(block);
             _runner = new AutomationRunner(_program, _world, rota);
+            _runner.QuickestLook = settings == null ? 1 : settings.QuickestLook;
 
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
@@ -250,6 +251,40 @@ namespace Sprocket.Host.SpaceEngineers.World
             return stops ? key + "/stop" : key;
         }
 
+        /// <summary>
+        /// What goes in a slot for a trigger that acts itself: which system, which one of it, and the trigger part.
+        /// </summary>
+        /// <remarks>
+        /// By the part's name, because a trigger has no number and its part is what each instance answers. Renaming the part
+        /// changes what is wanted, and the slot is written again with the rest of the wiring.
+        /// </remarks>
+        static string KeyOf(AutomationSystem system, SystemInstance instance, RequiredTrigger trigger)
+        {
+            return system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number) + "/" + trigger.Part;
+        }
+
+        /// <summary>The sequences of <paramref name="system" />, and the runtime's sequence for each trigger that acts itself.</summary>
+        List<Sequence> Runs(AutomationSystem system)
+        {
+            _runs.Clear();
+
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+                _runs.Add(sequences[i]);
+
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var alone = _runner.Alone(system, triggers[i]);
+                if (alone != null)
+                    _runs.Add(alone);
+            }
+
+            return _runs;
+        }
+
+        readonly List<Sequence> _runs = new List<Sequence>();
+
         /// <summary>A block fired one of the actions Sprocket put in it.</summary>
         public void Fire(string key)
         {
@@ -261,7 +296,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            Told.Say("a button fired " + key + ", " + (target.Stops ? "stopping " : "running ") + target.Sequence.Name
+            Told.Say("a button fired " + key + ", " + (target.Stops ? "stopping " : "running ")
+                + (target.Sequence.Number > 0 ? "sequence " + target.Sequence.Number : "what its trigger does")
                 + (target.Instance == null ? "" : " on " + target.Instance.Number));
 
             if (target.Stops)
@@ -287,6 +323,20 @@ namespace Sprocket.Host.SpaceEngineers.World
                 AutomationSystem system = _program.Systems[s];
                 var sequences = system.Sequences;
                 var instances = system.Instances;
+
+                var triggers = system.Triggers;
+                for (var t = 0; t < triggers.Count; t++)
+                {
+                    var needed = triggers[t] as RequiredTrigger;
+                    var alone = needed == null ? null : _runner.Alone(system, needed);
+                    for (var n = 0; alone != null && n < instances.Count; n++)
+                    {
+                        var target = new Target();
+                        target.Sequence = alone;
+                        target.Instance = instances[n];
+                        _byKey[KeyOf(system, instances[n], needed)] = target;
+                    }
+                }
 
                 for (var q = 0; q < sequences.Count; q++)
                 {
@@ -330,17 +380,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         struct Want
         {
             public long PanelId;
+
+            /// <summary>Which of the block's toolbars, from 1.</summary>
+            public int Toolbar;
+
+            /// <summary>Where in that toolbar's items, from 0, across its pages.</summary>
             public int Slot;
+
             public string Key;
 
             /// <summary>What the trigger named, so the block can be resolved again without a search.</summary>
             public string Reference;
-
-            /// <summary>Which event of it, so the block can be asked about the right button.</summary>
-            public string EventId;
-
-            /// <summary>Which sequence this is for, so a button that is gone can be dropped from its trigger.</summary>
-            public int SequenceId;
 
             /// <summary>Which sequence on which one of its system, so reachability is reported for each one.</summary>
             public long Start;
@@ -359,7 +409,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public bool Same(Want other)
             {
-                return PanelId == other.PanelId && Slot == other.Slot
+                return PanelId == other.PanelId && Toolbar == other.Toolbar && Slot == other.Slot
                     && ActionBlockId == other.ActionBlockId
                     && string.Equals(GameActionId, other.GameActionId, StringComparison.Ordinal)
                     && string.Equals(Key, other.Key, StringComparison.Ordinal);
@@ -455,7 +505,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var s = 0; s < _program.Systems.Count; s++)
             {
                 AutomationSystem system = _program.Systems[s];
-                var sequences = system.Sequences;
+                var sequences = Runs(system);
                 var instances = system.Instances;
 
                 for (var q = 0; q < sequences.Count; q++)
@@ -486,7 +536,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                if (triggers[i].Runs != sequence.Number)
+                if (!triggers[i].IsAbout(sequence))
                     continue;
 
                 var needed = triggers[i] as RequiredTrigger;
@@ -495,39 +545,28 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>The toolbar slots <paramref name="instance" /> answers <paramref name="needed" /> with, each a want.</summary>
         void WantedForTrigger(List<Want> into, AutomationSystem system, SystemInstance instance,
             Sequence sequence, RequiredTrigger needed)
         {
-            var slot = ButtonPanelExtension.ButtonOf(needed.EventId);
-            if (slot < 0)
+            var blocks = instance == null ? null : instance.FilledWith(needed.Part);
+            var positions = instance == null ? null : instance.Positions(needed.Part);
+            if (blocks == null || positions == null)
                 return;
 
-            // Reused rather than made per sequence: this runs whenever the program changes, and a
-            // fresh list per trigger would be a drip of garbage for no reason.
-            _sources.Clear();
-            if (instance == null)
+            for (var i = 0; i < blocks.Count && i < positions.Count; i++)
             {
-                for (var i = 0; i < needed.Sources.Count; i++)
-                    _sources.Add(needed.Sources[i]);
-            }
-            else
-            {
-                instance.Resolve(needed.Sources, _sources);
-            }
-
-            for (var source = 0; source < _sources.Count; source++)
-            {
-                IMyToolbar toolbar = ToolbarOf(_sources[source]);
-                if (toolbar == null || slot >= toolbar.SlotCount)
+                var at = positions[i];
+                var slot = Toolbars.Index(ToolbarOf(blocks[i], at.Toolbar), at);
+                if (slot < 0)
                     continue;
 
                 var want = new Want();
-                want.PanelId = PanelId(_sources[source]);
+                want.PanelId = PanelId(blocks[i]);
+                want.Toolbar = at.Toolbar;
                 want.Slot = slot;
-                want.Key = KeyOf(system, instance, sequence, needed.Stops);
-                want.Reference = _sources[source];
-                want.EventId = needed.EventId;
-                want.SequenceId = sequence.Id;
+                want.Key = needed.Acts != null ? KeyOf(system, instance, needed) : KeyOf(system, instance, sequence, needed.Stops);
+                want.Reference = blocks[i];
                 want.Start = GridWorld.Start(sequence.Id, instance);
 
                 long acts;
@@ -542,20 +581,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        readonly List<string> _sources = new List<string>();
-
         /// <summary>
-        /// The game's own action a sequence amounts to, where it amounts to exactly one.
+        /// The game's own action a trigger's own act amounts to, where it amounts to exactly one.
         /// </summary>
         /// <remarks>
-        /// An unnamed sequence of one act, on one block, whose kind knows the game's name for that
-        /// act. Then the slot holds the game's action rather than Sprocket's, and the button works
+        /// The act of a trigger that acts itself, on one block, whose kind knows the game's name for
+        /// that act. Then the slot holds the game's action rather than Sprocket's, and the button works
         /// with the mod removed - which is the point of it.
         /// <para>
-        /// Only a sequence nobody named. A named one is a thing on screen with a switch of its own,
-        /// and switching it off has to stop its buttons, which the game's action in a slot would sail
-        /// straight past. Anything else - several steps, several blocks, or an action Sprocket performs
-        /// out of property writes - is Sprocket's to run.
+        /// Only a trigger's own act. A sequence is a thing on screen with a switch of its own, and
+        /// switching it off has to stop its buttons, which the game's action in a slot would sail
+        /// straight past. Anything else - several blocks, or an action Sprocket performs out of
+        /// property writes - is Sprocket's to run.
         /// </para>
         /// <para>
         /// Asked of the block as well as of the kind, because a name is data and the block is the
@@ -568,25 +605,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             blockId = 0;
             actionId = null;
 
-            if (sequence.HasName)
+            if (sequence.Number > 0 || sequence.Steps.Count != 1)
                 return false;
 
-            // One act, and nothing else that does anything. Awaits are allowed because the editor
-            // writes one after every step, so a sequence of one action is an act and an await.
-            Act act = null;
-            var steps = sequence.Steps;
-            for (var i = 0; i < steps.Count; i++)
-            {
-                if (steps[i] is Await)
-                    continue;
-
-                var one = steps[i] as Act;
-                if (one == null || act != null)
-                    return false;
-
-                act = one;
-            }
-
+            var act = sequence.Steps[0] as Act;
             if (act == null || !act.HasAction)
                 return false;
 
@@ -642,27 +664,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether the block this want names is arranged to start exactly this.
         /// </summary>
-        /// <remarks>
-        /// A want written as the game's own action is checked here rather than by the block's
-        /// extension: what is in the slot is not Sprocket's, so there is no key to compare. A slot
-        /// somebody has since changed answers no, and the trigger then stops claiming that button,
-        /// which is the same rule Sprocket's own slots follow.
-        /// </remarks>
+        /// <remarks>Read off the slot itself: Sprocket's action carrying this want's key, or the game's own action it asks for.</remarks>
         bool Wired(Want want)
         {
             GridEntity grid = _runner.Bindings.Entity(want.Reference);
             if (grid == null)
                 return true;
 
-            if (want.GameActionId != null)
-            {
-                IMyToolbar held = Toolbars.Of(grid.Block);
-                MyToolbarItemInfo present;
-                return held != null && held.TryGetItem(want.Slot, out present) && Asked(held, present, want);
-            }
-
-            IBlockExtension extension = _world.Extensions.For(grid.Block);
-            return extension == null || extension.Raises(grid.Block, want.EventId, want.Key);
+            IMyToolbar held = ToolbarOf(want);
+            MyToolbarItemInfo present;
+            return held != null && held.TryGetItem(want.Slot, out present) && Asked(held, present, want);
         }
 
         readonly Dictionary<string, int> _claims = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -678,9 +689,11 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             long acts;
             string named;
-            return Plain(instance, sequence, out acts, out named)
-                ? PlainKey(acts, named)
-                : KeyOf(system, instance, sequence);
+            if (Plain(instance, sequence, out acts, out named))
+                return PlainKey(acts, named);
+
+            var needed = trigger as RequiredTrigger;
+            return needed != null && needed.Acts != null ? KeyOf(system, instance, needed) : KeyOf(system, instance, sequence);
         }
 
         void Claims()
@@ -756,7 +769,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                if (!(triggers[i] is RequiredTrigger) || triggers[i].Runs != sequence.Number)
+                if (!(triggers[i] is RequiredTrigger) || !triggers[i].IsAbout(sequence))
                     continue;
 
                 var wanted = Wanting(system, instance, sequence, triggers[i]);
@@ -791,7 +804,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var s = 0; s < _program.Systems.Count; s++)
             {
                 AutomationSystem system = _program.Systems[s];
-                var sequences = system.Sequences;
+                var sequences = Runs(system);
                 var instances = system.Instances;
 
                 for (var q = 0; q < sequences.Count; q++)
@@ -813,25 +826,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             for (var w = 0; w < _wanted.Count; w++)
             {
+                // A slot that no longer holds what the program wants leaves the program naming it: the trigger is still the
+                // reference, and what it names is reported as not answering, until picking it again writes it back.
                 Want want = _wanted[w];
                 if (Wired(want))
-                {
                     _reachable.Add(want.Start);
-                    continue;
-                }
-
-                // Not wired, and Sprocket can see that for itself - so the trigger stops naming it.
-                // A screen has to show what is true, and "this sequence starts from that button" is
-                // not true once the button no longer points here. Marking it instead would leave the same
-                // untruth in three places: the sentence, the rows above it, and the picker opening
-                // with a button preselected that nothing was going to honour.
-                _dropped.Add(want);
             }
-
-            for (var d = 0; d < _dropped.Count; d++)
-                Drop(_dropped[d]);
-
-            _dropped.Clear();
 
             for (var w = 0; w < _wanted.Count; w++)
             {
@@ -840,7 +840,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
 
                 _unstartable.Add(want.Start);
-                _why[want.Start] = Unanswer(ToolbarOf(want.PanelId), want.Slot, want.Key, want.Reference);
+                _why[want.Start] = Unanswer(ToolbarOf(want), want.Slot, want.Key, want.Reference);
             }
 
             _world.Unstartable(_unstartable, _why);
@@ -854,17 +854,16 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < triggers.Count; i++)
             {
                 var needed = triggers[i] as RequiredTrigger;
-                if (needed == null || needed.Runs != sequence.Number)
+                if (needed == null || !needed.IsAbout(sequence))
                     continue;
 
-                var slot = ButtonPanelExtension.ButtonOf(needed.EventId);
                 var wanted = Wanting(system, instance, sequence, needed);
-
-                _sources.Clear();
-                instance.Resolve(needed.Sources, _sources);
-                for (var s = 0; s < _sources.Count; s++)
+                var blocks = instance.FilledWith(needed.Part);
+                var positions = instance.Positions(needed.Part);
+                for (var s = 0; blocks != null && positions != null && s < blocks.Count && s < positions.Count; s++)
                 {
-                    var why = Unanswer(ToolbarOf(_sources[s]), slot, wanted, _sources[s]);
+                    IMyToolbar toolbar = ToolbarOf(blocks[s], positions[s].Toolbar);
+                    var why = Unanswer(toolbar, Toolbars.Index(toolbar, positions[s]), wanted, blocks[s]);
                     if (why.Why != Unwired.Unknown)
                         return why;
                 }
@@ -877,7 +876,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         Unanswered Unanswer(IMyToolbar toolbar, int slot, string wanted, string reference)
         {
             var block = _program.Called(reference, _world.Values);
-            if (toolbar == null || slot < 0 || slot >= toolbar.SlotCount)
+            if (toolbar == null || slot < 0)
                 return new Unanswered(block, Unwired.Unknown);
 
             MyToolbarItemInfo present;
@@ -905,43 +904,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<long> _unstartable = new List<long>();
         readonly HashSet<long> _reachable = new HashSet<long>();
         readonly Dictionary<long, Unanswered> _why = new Dictionary<long, Unanswered>();
-        readonly List<Want> _dropped = new List<Want>();
-
-        /// <summary>
-        /// Takes a block out of a trigger, because what reached it is gone.
-        /// </summary>
-        /// <remarks>
-        /// <b>This is the host changing the program, which it does nowhere else</b>, so it is worth
-        /// being plain about why. A block reference that has come adrift is kept, because the block
-        /// may come back and nothing was decided by anybody. This is not that: somebody cleared a
-        /// button or pointed it at something else, which is a decision, and honouring it means the
-        /// sequence stops claiming that button starts it.
-        /// <para>
-        /// Only ever done from a toolbar that could actually be read - see <see cref="Reach" />. A panel
-        /// that cannot be looked at right now says nothing, rather than saying no.
-        /// </para>
-        /// </remarks>
-        void Drop(Want want)
-        {
-            for (var i = 0; i < _program.Sequences.Count; i++)
-            {
-                Sequence sequence = _program.Sequences[i];
-                if (sequence.Id != want.SequenceId)
-                    continue;
-
-                var needed = sequence.Trigger as RequiredTrigger;
-                if (needed == null || !needed.Sources.Remove(want.Reference))
-                    return;
-
-                Told.Say("dropped " + want.Reference + " from sequence " + want.SequenceId
-                    + ": slot " + want.Slot + " is no longer ours");
-
-                // So the next pass works from what the trigger now says rather than from what it
-                // said when this one started.
-                _program.Rewire();
-                return;
-            }
-        }
 
         /// <summary>
         /// Rewrites the slots that are Sprocket's and say nothing it understands.
@@ -971,7 +933,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 Want want = _wanting[w];
 
-                IMyToolbar toolbar = ToolbarOf(want.PanelId);
+                IMyToolbar toolbar = ToolbarOf(want);
                 MyToolbarItemInfo present;
 
                 if (toolbar == null || !toolbar.TryGetItem(want.Slot, out present)
@@ -1032,7 +994,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (Holds(_wanting, had))
                     continue;
 
-                IMyToolbar toolbar = ToolbarOf(had.PanelId);
+                IMyToolbar toolbar = ToolbarOf(had);
                 MyToolbarItemInfo present;
 
                 if (toolbar == null || !toolbar.TryGetItem(had.Slot, out present)
@@ -1062,7 +1024,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (Holds(_wanted, want))
                     continue;
 
-                IMyToolbar toolbar = ToolbarOf(want.PanelId);
+                IMyToolbar toolbar = ToolbarOf(want);
                 if (toolbar == null)
                     continue;
 
@@ -1192,27 +1154,28 @@ namespace Sprocket.Host.SpaceEngineers.World
             return grid == null ? 0 : grid.Block.EntityId;
         }
 
-        IMyToolbar ToolbarOf(string reference)
+        IMyToolbar ToolbarOf(string reference, int toolbar)
         {
             GridEntity grid = _runner.Bindings.Entity(reference);
-            return grid == null ? null : ToolbarOfBlock(grid.Block);
+            return grid == null ? null : ToolbarOfBlock(grid.Block, toolbar);
         }
 
-        IMyToolbar ToolbarOf(long panelId)
+        /// <summary>The toolbar a want is on.</summary>
+        IMyToolbar ToolbarOf(Want want)
         {
             for (var i = 0; i < _world.Entities.Count; i++)
             {
                 GridEntity grid = _world.Entities[i];
-                if (grid.Block.EntityId == panelId)
-                    return ToolbarOfBlock(grid.Block);
+                if (grid.Block.EntityId == want.PanelId)
+                    return ToolbarOfBlock(grid.Block, want.Toolbar);
             }
 
             return null;
         }
 
-        static IMyToolbar ToolbarOfBlock(IMyTerminalBlock block)
+        static IMyToolbar ToolbarOfBlock(IMyTerminalBlock block, int toolbar)
         {
-            return block is IMyButtonPanel ? Toolbars.Of(block) : null;
+            return block is IMyButtonPanel ? Toolbars.Of(block, toolbar) : null;
         }
 
         public void Tick(int frame)
@@ -1278,7 +1241,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!_answered.Contains(want.PanelId))
                     _answered.Add(want.PanelId);
 
-                IMyToolbar toolbar = ToolbarOf(want.PanelId);
+                IMyToolbar toolbar = ToolbarOf(want);
                 if (toolbar == null)
                     continue;
 
@@ -1368,9 +1331,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (trouble.Length == 0)
                 return;
 
-            // Logged and nowhere else. The program is marked not to be saved over, which is what
-            // actually protects somebody's work; there is no screen for this yet, and inventing
-            // wording for one in here would put core's words on a host's screen.
+            // Logged and nowhere else. Nothing of the program was kept, and it is marked not to be
+            // saved over, which is what actually protects somebody's work; there is no screen for this
+            // yet, and inventing wording for one in here would put core's words on a host's screen.
             Told.Say(_block.CustomName + " has a program that would not read: " + trouble);
         }
 

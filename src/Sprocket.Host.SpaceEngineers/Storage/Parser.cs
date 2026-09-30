@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             _failures++;
             if (Trouble.Length == 0)
-                Trouble = "line " + new TextPtr(_lexer.Script, _token.At).FindLineNo() + ": " + what;
+                Trouble = "Line " + new TextPtr(_lexer.Script, _token.At).FindLineNo() + ": " + what;
         }
 
         /// <summary>Past the end of this line, so reading can pick up at the next construct.</summary>
@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (_token.Kind == TokenKind.End)
                 return;
 
-            Fail("a statement ends at the end of its line");
+            Fail("expected the end of the line.");
             Recover();
         }
 
@@ -110,7 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (_token.Kind == TokenKind.End)
                 {
                     if (nested)
-                        Fail("a block is never closed");
+                        Fail("missing '}'.");
 
                     Orphan(note);
                     return;
@@ -120,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 {
                     if (!nested)
                     {
-                        Fail("a '}' that closes nothing");
+                        Fail("unexpected '}'.");
                         Recover();
                         continue;
                     }
@@ -156,10 +156,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
+                // A line starting //: the statement after it is read as ever, and marked off.
+                var off = _token.Kind == TokenKind.Off;
+                if (off)
+                    Step();
+
                 var statement = One(note);
                 note = "";
-                if (statement != null)
-                    into.Add(statement);
+                if (statement == null)
+                    continue;
+
+                statement.IsOff = off;
+                into.Add(statement);
             }
         }
 
@@ -173,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         void Orphan(string note)
         {
             if (note.Length > 0)
-                Fail("an annotation with nothing under it");
+                Fail("expected a statement under the annotation.");
         }
 
         Statement One(string note)
@@ -181,7 +189,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var kind = _token.Kind;
             if (kind != TokenKind.Identifier && kind != TokenKind.Keyword)
             {
-                Fail("a statement starts with a word");
+                Fail("expected a statement.");
                 Recover();
                 return null;
             }
@@ -198,7 +206,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 if (_token.Kind == TokenKind.Comma)
                 {
-                    Fail("a comma separates the items of a list, and nothing else");
+                    Fail("unexpected ','.");
+                    break;
+                }
+
+                if (_token.Kind == TokenKind.Off)
+                {
+                    Fail("unexpected '//'; it only starts a line.");
                     break;
                 }
 
@@ -262,11 +276,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case TokenKind.Identifier:
                     Step();
                     var name = new Value(ValueForm.Identifier, token.Text.ToString());
-                    return _token.Kind == TokenKind.Dot ? Qualified(name) : name;
+                    if (_token.Kind == TokenKind.Dot)
+                        return Qualified(name);
+
+                    return _token.Kind == TokenKind.Colon ? Slotted(name) : name;
 
                 case TokenKind.Keyword:
                     Step();
-                    return new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
+
+                    // Before a dot a keyword is the first part of a name, as it may be after one: sprocket.close.
+                    return _token.Kind == TokenKind.Dot
+                        ? Qualified(new Value(ValueForm.Identifier, Keywords.Name(token.Keyword)))
+                        : new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
 
                 case TokenKind.Equals:
                     Step();
@@ -328,7 +349,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 if (!Valuish())
                 {
-                    Fail("a list holds values and ends with a ']'");
+                    Fail("expected a value or ']'.");
                     return Value.None;
                 }
 
@@ -341,7 +362,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (_token.Kind != TokenKind.ListClose)
             {
-                Fail("a list ends with a ']'");
+                Fail("expected ']'.");
                 return Value.None;
             }
 
@@ -360,8 +381,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </summary>
         /// <remarks>
         /// The dot is an operator, so spaces around it are nothing and <c>'MalTek Inc.' . Airlock</c> is the
-        /// same name as <c>'MalTek Inc.'.Airlock</c>. A part after a dot may be a keyword written bare - the
-        /// writer never produces one, but a name is still a name - and its text is its part.
+        /// same name as <c>'MalTek Inc.'.Airlock</c>. Any part may be a keyword written bare, since only a name can stand
+        /// beside a dot, and its text is its part.
         /// </remarks>
         Value Qualified(Value first)
         {
@@ -378,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     parts.Add(new Value(ValueForm.Identifier, Keywords.Name(_token.Keyword)));
                 else
                 {
-                    Fail("a '.' is followed by the next part of a name");
+                    Fail("expected a name after '.'.");
                     return Value.None;
                 }
 
@@ -386,6 +407,60 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             return Value.Qualified(from, parts.Count - from);
+        }
+
+        /// <summary>A toolbar slot, <c>panel1:toolbar(1, 1, 4)</c>, having read the block's name already.</summary>
+        Value Slotted(Value block)
+        {
+            Step();
+            if (_token.Kind != TokenKind.Identifier || !_token.Text.Equals("toolbar"))
+            {
+                Fail("expected toolbar(<toolbar>, <page>, <slot>) after ':'.");
+                return Value.None;
+            }
+
+            Step();
+            if (_token.Kind != TokenKind.VectorOpen)
+            {
+                Fail("expected '(' after toolbar.");
+                return Value.None;
+            }
+
+            Step();
+            var parts = _reading.Parts;
+            var from = parts.Count;
+            parts.Add(block);
+            for (var i = 0; i < 3; i++)
+            {
+                if (i > 0)
+                {
+                    if (_token.Kind != TokenKind.Comma)
+                    {
+                        Fail("expected ',' between the toolbar slot's numbers.");
+                        return Value.None;
+                    }
+
+                    Step();
+                }
+
+                if (_token.Kind != TokenKind.Integer)
+                {
+                    Fail("expected a whole number in the toolbar slot.");
+                    return Value.None;
+                }
+
+                parts.Add(new Value(ValueForm.Integer, null, _token.Whole));
+                Step();
+            }
+
+            if (_token.Kind != TokenKind.VectorClose)
+            {
+                Fail("expected ')' after the toolbar slot's numbers.");
+                return Value.None;
+            }
+
+            Step();
+            return Value.Slotted(from);
         }
 
         /// <summary>A vector, its three numbers written into the reading's shared run.</summary>
@@ -403,7 +478,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     items.Add(new Value(ValueForm.Real, null, 0, _token.Real));
                 else
                 {
-                    Fail("a vector is three numbers in brackets");
+                    Fail("expected three numbers in the vector.");
                     return Value.None;
                 }
 
@@ -412,7 +487,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (_token.Kind != TokenKind.VectorClose)
             {
-                Fail("a vector is three numbers in brackets");
+                Fail("expected three numbers in the vector.");
                 return Value.None;
             }
 

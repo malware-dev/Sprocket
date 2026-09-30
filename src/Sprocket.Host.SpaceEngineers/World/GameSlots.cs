@@ -39,6 +39,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             return provider.GetToolbar(0);
         }
 
+        public IMyToolbar Of(IMyTerminalBlock block, int index)
+        {
+            if (block == null || index < 0)
+                return null;
+
+            IMyToolbarProvider provider;
+            if (!block.Components.TryGet(out provider) || index >= provider.ToolbarCount)
+                return null;
+
+            return provider.GetToolbar(index);
+        }
+
         public void Parameters(IMyToolbar toolbar, int slot, List<TerminalActionParameter> into)
         {
             if (toolbar != null)

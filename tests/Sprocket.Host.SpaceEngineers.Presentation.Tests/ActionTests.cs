@@ -209,6 +209,32 @@ public class ActionTests
         Assert.False(entries.Single(entry => entry.Text == "Switch on").Waits, "switching on is marked, and holds nothing");
     }
 
+    /// <summary>A step's member is marked in its sentence as it is in the picker: what the step waits for, and nothing else.</summary>
+    [Fact]
+    public void WhatAStepWaitsForIsMarkedInItsSentence()
+    {
+        var screen = WithASequence();
+
+        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("Open");
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("Switch on");
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        var rows = screen.Editor.StepRows();
+        var opens = rows[0].Within().OfType<MemberName>().Single();
+        var switches = rows[1].Within().OfType<MemberName>().Single();
+
+        Assert.True(opens.Waits, "opening a door is not marked");
+        Assert.False(switches.Waits, "switching on is marked, and holds nothing");
+    }
+
     /// <summary>The tab answers where it is drawn, which nothing else on this screen proves.</summary>
     [Fact]
     public void TheTabIsPressedWhereItIsDrawn()

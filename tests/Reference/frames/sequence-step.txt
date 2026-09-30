@@ -31,14 +31,16 @@ on screen     Sequence 1
 024  Sprite     Sprocket_Fill         {X:286 Y:176 W:3 H:3}  #85A1A9FF
 025  Sprite     Sprocket_Fill         {X:286 Y:182 W:3 H:3}  #85A1A9FF
 026  Text       at {X:300 Y:165.6399} scale 0.694  #85A1A9FF  "1"
-027  Sprite     Sprocket_Fill         {X:348 Y:158 W:73 H:40}  #374851FF
-028  Sprite     Sprocket_Fill         {X:348 Y:196 W:73 H:2}  #8EBCCFFF
-029  Text       at {X:364 Y:163.2255} scale 0.833  #DCF5FDFF  "open"
-030  Sprite     Sprocket_Fill         {X:429 Y:158 W:209 H:40}  #374851FF
-031  Sprite     Sprocket_Fill         {X:429 Y:196 W:209 H:2}  #8EBCCFFF
-032  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:445 Y:166 W:24 H:24}  #FFFFFFFF
-033  Text       at {X:476.8267 Y:163.2255} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
-034  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-035  Text       at {X:272 Y:223.2255} scale 0.833  #A2C3CDFF  "+ Action…"
-036  Text       at {X:393.75 Y:223.2255} scale 0.833  #A2C3CDFF  "+ Wait…"
-037  ClearClip  
+027  Sprite     Sprocket_Fill         {X:348 Y:158 W:101 H:40}  #374851FF
+028  Sprite     Sprocket_Fill         {X:348 Y:196 W:101 H:2}  #8EBCCFFF
+029  Text       at {X:364 Y:166.5141} scale 0.401  #A2C3CDFF  "w"
+030  Text       at {X:391.6875 Y:163.2255} scale 0.833  #DCF5FDFF  "open"
+031  Sprite     Sprocket_Fill         {X:457 Y:158 W:209 H:40}  #374851FF
+032  Sprite     Sprocket_Fill         {X:457 Y:196 W:209 H:2}  #8EBCCFFF
+033  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:473 Y:166 W:24 H:24}  #FFFFFFFF
+034  Text       at {X:504.5142 Y:163.2255} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
+035  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
+036  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
+037  Text       at {X:272 Y:223.2255} scale 0.833  #A2C3CDFF  "+ Action…"
+038  Text       at {X:393.75 Y:223.2255} scale 0.833  #A2C3CDFF  "+ Wait…"
+039  ClearClip  

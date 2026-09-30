@@ -20,6 +20,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         Wait,
 
         /// <summary>Starts another sequence of the same system.</summary>
-        Run
+        Run,
+
+        /// <summary>Stops another sequence of the same system where it is running.</summary>
+        Stop
     }
 }

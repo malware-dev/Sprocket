@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Images;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
@@ -10,8 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     {
         Mark _mark;
         Image _picture;
-        Glyph _waits;
-        Label _name;
+        MemberName _name;
         Label _detail;
 
         /// <summary>Makes the mark and the picture, then the name with what is quieter about it under it.</summary>
@@ -31,17 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Placement = Flex.Grow,
                 Children =
                 {
-                    // In the line rather than in a column of its own: only a handful of rows carry it, and a column would
-                    // indent every other name for nothing.
-                    new HStack
-                    {
-                        Spacing = 8f,
-                        Children =
-                        {
-                            new Glyph { Symbol = Symbols.Finish, Style = Styles.Waits, IsVisible = false }.As(out _waits),
-                            new Label { Style = Styles.PickName, Wraps = true, Placement = Flex.Grow }.As(out _name)
-                        }
-                    },
+                    new MemberName { Style = Styles.PickName, Wraps = true }.As(out _name),
                     new Label { Style = Styles.ColumnNote, IsVisible = false }.As(out _detail)
                 }
             });

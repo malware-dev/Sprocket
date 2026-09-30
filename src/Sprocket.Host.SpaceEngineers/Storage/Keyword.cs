@@ -50,11 +50,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Which step of it, in the same line.</summary>
         Step,
 
-        /// <summary>What a trigger does instead of running, which is to abandon a run.</summary>
+        /// <summary>Abandoning a run: what a trigger does instead of running one, and a step of its own.</summary>
         Stop,
 
-        /// <summary>A step naming one of the game's own actions by the game's own id.</summary>
-        Action,
+        /// <summary>A step running an action on some parts.</summary>
+        Act,
 
         /// <summary>The values such an action has to be given.</summary>
         With,

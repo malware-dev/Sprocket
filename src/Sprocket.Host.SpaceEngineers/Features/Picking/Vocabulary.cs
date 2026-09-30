@@ -86,6 +86,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return when;
         }
 
+        /// <summary>
+        /// The moment <paramref name="moment" /> means as <paramref name="through" /> answers it: for a trigger part, its first
+        /// toolbar slot there as a button press; for anything watched, what it watches for. Empty where there is none.
+        /// </summary>
+        public static string EventOf(MomentTrigger moment, SystemInstance through)
+        {
+            var required = moment as RequiredTrigger;
+            if (required == null)
+                return moment.EventId;
+
+            var positions = through == null ? null : through.Positions(required.Part);
+            if (positions == null || positions.Count == 0)
+                return "";
+
+            var at = positions[0];
+            return at.Toolbar == 1 && at.Page == 1 ? ButtonPanelExtension.Pressed(at.Slot) : "";
+        }
+
         /// <summary>Actions every one of the given entities accepts.</summary>
         public static List<EntityAction> ActionsFor(Bindings bindings, IList<string> names)
         {

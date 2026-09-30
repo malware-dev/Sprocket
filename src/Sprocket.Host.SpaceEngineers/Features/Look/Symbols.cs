@@ -75,6 +75,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Two sheets, one behind the other: another of something that already exists.</summary>
         public const string Duplicate = "2";
 
+        /// <summary>Two bars: held where it is and passed over, until it is let go again.</summary>
+        public const string Pause = "e";
+
         /// <summary>Every hue in order, red round to red.</summary>
         /// <remarks>
         ///     The game's own <c>Textures\GUI\HueScale.png</c>, which has no id a mod can use, so a material is

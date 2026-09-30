@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -33,6 +34,28 @@ public class SystemSwitchTests
 
         Assert.True(page.Editable);
         Assert.False(sim.Editor.Program.Systems[0].Enabled);
+    }
+
+    /// <summary>Switched on, every part that cannot be pressed says how to change it, and says nothing once it can be.</summary>
+    [Fact]
+    public void ALockedPartSaysHowToEditIt()
+    {
+        var sim = Simulation.Fresh();
+        sim.Editor.NewButtonSystem("Airlock");
+        sim.Editor.Back();
+        sim.Tick();
+
+        sim.Editor.SwitchOn();
+        sim.Tick();
+
+        var chips = sim.Editor.Triggers()[0].Within().OfType<Slot>().ToList();
+        Assert.NotEmpty(chips);
+        Assert.All(chips, chip => Assert.Equal("Turn the system off to edit.", chip.Tip?.Text));
+
+        sim.Editor.Screen.Flip!.Execute();
+        sim.Tick();
+
+        Assert.All(sim.Editor.Triggers()[0].Within().OfType<Slot>(), chip => Assert.Null(chip.Tip));
     }
 
     /// <summary>Switching a blueprint off asks first, naming each logic system it stops; keeping them running changes nothing.</summary>

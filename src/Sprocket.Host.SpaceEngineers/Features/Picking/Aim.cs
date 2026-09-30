@@ -40,18 +40,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
-            {
-                if (sequences[i].HasName)
-                    _offered.Add(sequences[i]);
-            }
+                _offered.Add(sequences[i]);
 
             Outcome = Outcome.New;
             var running = trigger == null || trigger.Runs < 1 ? null : system.FindSequence(trigger.Runs);
             if (running != null)
             {
-                Outcome = running.HasName ? Outcome.Existing : Outcome.One;
-                Sequence = running.HasName ? running.Number : 0;
-                Stops = running.HasName && trigger.Stops;
+                Outcome = Outcome.Existing;
+                Sequence = running.Number;
+                Stops = trigger.Stops;
+            }
+            else if (trigger != null && trigger.Acts != null)
+            {
+                Outcome = Outcome.One;
             }
 
             _was = Outcome;

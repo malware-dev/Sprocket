@@ -22,11 +22,11 @@ on screen     Airlock 2
 015  Text       at {X:1631.183 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
 016  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 017  SetClip    {X:256 Y:118 W:1408 H:902}
-018  Text       at {X:256 Y:116.0543} scale 0.556  #E84A3AFF  "Sequence 1: The Button Panel slot is empty. Fill it on the configuration panel."
+018  Text       at {X:256 Y:116.0543} scale 0.556  #E84A3AFF  "Sequence 1: The Airlock Button slot is empty. Fill it on the configuration panel."
 019  Sprite     Sprocket_Fill         {X:256 Y:154 W:1396 H:1}  #5B737BFF
 020  Text       at {X:260 Y:172.6399} scale 0.694  #85A1A9FF  "SLOTS"
 021  Text       at {X:316.78 Y:172.6399} scale 0.694  #F0AC28FF  "1 still needs a block"
-022  Text       at {X:276 Y:220.2255} scale 0.833  #DCF5FDFF  "Button Panel"
+022  Text       at {X:276 Y:220.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
 023  Sprite     Sprocket_Fill         {X:856 Y:215 W:45 H:40}  #374851FF
 024  Sprite     Sprocket_Fill         {X:856 Y:253 W:45 H:2}  #F0AC28FF
 025  Text       at {X:872 Y:220.2255} scale 0.833  #F0AC28FF  "…"

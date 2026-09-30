@@ -10,7 +10,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
-    /// <summary>A fillable part of a sentence, saying what it holds in pieces: each block it names with its icon, and the words around them.</summary>
+    /// <summary>A fillable part of a sentence, saying what it holds in pieces: each block it names with its icon, a member with its marks, and the words around them.</summary>
     /// <remarks>
     /// The only thing on screen that changes what a sequence means, so nothing else may borrow this look. The line
     /// under it is what distinguishes it from a row at a glance, and it is drawn rather than being a border because
@@ -23,6 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         readonly List<Mention> _said = new List<Mention>();
 
         bool _empty;
+        string _waitsTip;
         string _font = MyFontEnum.White;
         float _fontSize = TextState.NeutralFontSize;
         Color _color = Color.White;
@@ -35,6 +36,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>The color of the line along the bottom.</summary>
         public Color Underline { get; set; }
+
+        /// <summary>The note over the waits mark of a member it says.</summary>
+        public string WaitsTip
+        {
+            get { return _waitsTip; }
+            set
+            {
+                if (_waitsTip == value)
+                    return;
+
+                _waitsTip = value;
+                for (var i = 0; i < Children.Count && i < _said.Count; i++)
+                {
+                    var member = Children[i] as MemberName;
+                    if (member != null)
+                        member.WaitsTip = _said[i].Waits ? value : null;
+                }
+            }
+        }
 
         /// <summary>Whether nothing fills the part yet, so it reads as an invitation.</summary>
         public bool IsEmpty
@@ -144,19 +164,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             for (var i = 0; i < _said.Count; i++)
             {
                 var piece = _said[i];
-                var block = piece.Icon != null;
 
-                if (i < Children.Count && (Children[i] is BlockName) != block)
+                if (i < Children.Count && !Says(Children[i], piece))
                     Children.Remove(Children[i]);
 
-                if (i >= Children.Count || (Children[i] is BlockName) != block)
-                    Children.Insert(i, block ? (Element)new BlockName() : new Label());
+                if (i >= Children.Count || !Says(Children[i], piece))
+                    Children.Insert(i, piece.Icon != null ? new BlockName() : piece.IsMember ? new MemberName() : (Element)new Label());
 
-                if (block)
+                if (piece.Icon != null)
                 {
                     var named = (BlockName)Children[i];
                     named.Name = piece.Text;
                     named.Icon = piece.Icon;
+                    continue;
+                }
+
+                if (piece.IsMember)
+                {
+                    var member = (MemberName)Children[i];
+                    member.Name = piece.Text;
+                    member.Waits = piece.Waits;
+                    member.WaitsTip = piece.Waits ? WaitsTip : null;
                     continue;
                 }
 
@@ -169,6 +197,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 Children.Remove(Children[Children.Count - 1]);
 
             Dress();
+        }
+
+        /// <summary>Whether <paramref name="child" /> is the element that says <paramref name="piece" />: a block's, a member's, or words.</summary>
+        static bool Says(Element child, Mention piece)
+        {
+            return piece.Icon != null ? child is BlockName : piece.IsMember ? child is MemberName : child is Label;
         }
 
         void Dress()

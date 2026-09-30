@@ -2,7 +2,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// Something that starts a sequence.
+    /// Something that starts a step: runs or stops a sequence, or acts on some parts itself.
     /// </summary>
     /// <remarks>
     /// A trigger belongs to the system rather than to the sequence it runs, because a sequence is a
@@ -16,11 +16,21 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Annotation = "";
         }
 
-        /// <summary>The number, within the system, of the sequence this is about.</summary>
-        public int Runs { get; set; }
+        /// <summary>The step it starts: a <see cref="Run" /> that runs or stops a sequence, or an <see cref="Act" /> of its own.</summary>
+        public Step Does { get; set; }
+
+        /// <summary>The number, within the system, of the sequence it runs or stops, or 0 where it acts itself.</summary>
+        public int Runs
+        {
+            get
+            {
+                var run = Does as Run;
+                return run == null ? 0 : run.Number;
+            }
+        }
 
         /// <summary>
-        /// Whether this stops that sequence rather than starting it.
+        /// Whether it stops that sequence rather than starting it.
         /// </summary>
         /// <remarks>
         /// The other thing a person wants a button for, and the one a sequence cannot do for itself:
@@ -28,7 +38,31 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// Stopping abandons what it was doing, which is what the switch already does - a button is
         /// simply the reachable version of it.
         /// </remarks>
-        public bool Stops { get; set; }
+        public bool Stops
+        {
+            get
+            {
+                var run = Does as Run;
+                return run != null && run.Stops;
+            }
+        }
+
+        /// <summary>The act it does itself, or null where it runs or stops a sequence.</summary>
+        public Act Acts => Does as Act;
+
+        /// <summary>Whether this is about <paramref name="sequence" />: runs or stops it, or is the trigger whose own act it runs.</summary>
+        /// <remarks>
+        /// A sequence of the system has a number, and a trigger names it by that. The runtime runs a trigger's own act as a
+        /// sequence with no number and that act for its one step, and that sequence is this trigger's alone.
+        /// </remarks>
+        public bool IsAbout(Sequence sequence)
+        {
+            if (sequence.Number > 0)
+                return Runs == sequence.Number;
+
+            var act = Acts;
+            return act != null && sequence.Steps.Count == 1 && sequence.Steps[0] == act;
+        }
 
         /// <summary>
         /// What somebody wrote about this trigger, in their own words, or empty.

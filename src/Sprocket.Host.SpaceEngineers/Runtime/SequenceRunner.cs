@@ -41,7 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var place = _rota.Join();
             _sampling = new Shift(place, Sample);
             _busy = new Shift(place, Continued);
-            _rota.Every(_sampling, Rota.Ten);
             LastFiredTick = -1;
             LastSkippedTick = -1;
         }
@@ -53,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Set by whatever owns the runners, because a sequence knows nothing about anything running
         /// beside it. Null until then, which is what a sequence run on its own in a test has.
         /// </remarks>
-        public Action<int> Calls { get; set; }
+        public Action<int, bool> Calls { get; set; }
 
         readonly SystemInstance _instance;
 
@@ -71,7 +70,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         Bindings _bindings;
 
         readonly List<string> _actedOn = new List<string>();
-        readonly List<string> _watched = new List<string>();
 
         List<string> ActedOn(IList<string> slots)
         {
@@ -86,21 +84,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _instance.Resolve(slots, _actedOn);
             }
             return _actedOn;
-        }
-
-        List<string> Watched(IList<string> slots)
-        {
-            _watched.Clear();
-            if (_instance == null)
-            {
-                for (var i = 0; i < slots.Count; i++)
-                    _watched.Add(slots[i]);
-            }
-            else
-            {
-                _instance.Resolve(slots, _watched);
-            }
-            return _watched;
         }
 
         public Sequence Sequence => _sequence;
@@ -142,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             get
             {
-                if (HasMissingSources)
+                if (_owner.Missing(_sequence, _instance))
                     return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger);
                 if (_met.Exists)
                     return _met;
@@ -201,6 +184,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     EntityAction doing = compiled.Actions[t];
                     if (string.IsNullOrEmpty(doing.LeadsToStateId))
                         continue;
+
+                    // Switched off on the way: it gets no further until it is switched on again, which is somebody's to do.
+                    var entity = compiled.Entities[t];
+                    var unable = Reached(_owner.World, entity, doing.LeadsToStateId) ? null : entity.Unable(doing);
+                    if (unable != null && !_stuck.Exists)
+                    {
+                        _stuck = new SequenceFault(SequenceProblem.Stuck, _sequence.Steps.IndexOf(_outstanding[i]), unable);
+                        continue;
+                    }
 
                     Trouble said = compiled.Entities[t].Trouble(doing.LeadsToStateId);
                     if (said.Ends)
@@ -269,30 +261,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public int RefusedCount { get; private set; }
 
-        /// <summary>Whether the watched signal is true right now.</summary>
-        public bool TriggerSignalIsTrue { get; private set; }
-
-        /// <summary>One or more listened-to entities are no longer on the construct.</summary>
-        public bool HasMissingSources { get; private set; }
-
         /// <summary>
-        /// Samples this sequence's triggers, and keeps an eye on a run: done every ten ticks while
-        /// there is anything to sample or a run under way, and every hundred otherwise.
+        /// Keeps an eye on a run: done every ten ticks while one is under way.
         /// </summary>
         /// <remarks>
         /// Whether the machine Sprocket runs on can do anything at all - its own block powered and
-        /// switched on - is asked here. Nothing starts and nothing moves on while it cannot, and what
-        /// was already running is <b>kept</b> rather than stopped: a power cut is not somebody
-        /// pressing a switch, and coming back up part way through a cycle is the whole point of
-        /// remembering the run at all.
-        /// <para>
-        /// The trigger is still sampled. Edge detection compares a sample with the one before it, so
-        /// a door opened during a blackout must not read as having just opened when the lights come
-        /// back. What matters is that no turn is skipped, not that every tick is looked at: every edge
-        /// sampled is a change that stays changed - a door that is open afterwards - and is still
-        /// there when the turn comes round. Anything that exists for a moment only is answered rather
-        /// than sampled.
-        /// </para>
+        /// switched on - is asked here. Nothing moves on while it cannot, and what was already running
+        /// is <b>kept</b> rather than stopped: a power cut is not somebody pressing a switch, and coming
+        /// back up part way through a cycle is the whole point of remembering the run at all.
         /// <para>
         /// The same rule the programmable block follows: it will not instantiate a script until its
         /// block is powered and enabled, and it asks for updates again when power arrives. On a world
@@ -303,8 +279,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         void Sample(int tick)
         {
             Enter(tick);
-            var world = _owner.World;
-            var triggered = SampleTrigger(world);
 
             if (_owner.Live)
             {
@@ -318,17 +292,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
                 else if (IsRunning)
                 {
-                    if (triggered)
-                    {
-                        SkippedCount++;
-                        LastSkippedTick = tick;
-                    }
-
                     Rescue(tick);
-                }
-                else if (triggered)
-                {
-                    Start(world, tick);
                 }
             }
 
@@ -408,29 +372,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _rota.At(_busy, tick);
         }
 
-        /// <summary>How often the triggers are sampled: every ten while there is anything to watch.</summary>
-        /// <remarks>
-        /// A sequence with only buttons to start it, and nothing running, is still looked at every
-        /// hundred ticks, which is how a trigger added to it later comes to be sampled.
-        /// </remarks>
+        /// <summary>Watches a run every ten ticks while there is one, and leaves the rota while there is not.</summary>
         void Pace()
         {
-            _rota.Every(_sampling, IsRunning || Reads() ? Rota.Ten : Rota.Hundred);
-        }
-
-        /// <summary>Whether any trigger of this sequence is read off the blocks rather than answered.</summary>
-        bool Reads()
-        {
-            var system = _sequence.System;
-            var triggers = system == null ? null : system.Triggers;
-            for (var i = 0; triggers != null && i < triggers.Count; i++)
-            {
-                var trigger = triggers[i];
-                if (trigger.Runs == _sequence.Number && (trigger is WhenTrigger || trigger is EveryTrigger))
-                    return true;
-            }
-
-            return false;
+            if (IsRunning)
+                _rota.Every(_sampling, Rota.Ten);
+            else
+                _rota.Leave(_sampling);
         }
 
         /// <summary>Takes this sequence off the rota for good, when it no longer exists.</summary>
@@ -491,6 +439,33 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool _byHand;
 
         /// <summary>
+        /// Starts the sequence because its trigger fired, where it may run and is not already running.
+        /// </summary>
+        /// <remarks>
+        /// A switched-off sequence lets its own trigger go by without counting it: that is what off
+        /// means, and counting it would report a door somebody opened ten times as ten refusals. One
+        /// already running skips, which is counted, because the press or the moment was real.
+        /// </remarks>
+        internal void Triggered(GridWorld world, Bindings bindings, int tick)
+        {
+            _bindings = bindings;
+            _tick = tick;
+
+            if (!CanRun)
+                return;
+
+            if (IsRunning)
+            {
+                SkippedCount++;
+                LastSkippedTick = tick;
+                return;
+            }
+
+            _byHand = false;
+            Start(world, tick);
+        }
+
+        /// <summary>
         /// Puts a run back where a reload interrupted it.
         /// </summary>
         /// <remarks>
@@ -524,18 +499,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _holding = false;
 
             _outstanding.Clear();
+            _started.Clear();
 
             // Backwards to the await before this step, because that is the span an await covers. An
-            // act that has already arrived is no burden: Settled says so at once.
+            // act that has already arrived is no burden: Settled says so at once, and a sequence no
+            // longer running is none either.
             for (var i = step - 1; i >= 0; i--)
             {
                 var earlier = _sequence.Steps[i];
+                if (earlier.IsOff)
+                    continue;
+
                 if (earlier is Await)
                     break;
 
                 var act = earlier as Act;
                 if (act != null)
                     _outstanding.Add(act);
+
+                var run = earlier as Run;
+                if (run != null && !run.Stops)
+                    _started.Add(run.Number);
             }
 
             // Looked at on the first tick the rota runs: the world has only just loaded, and what the
@@ -548,14 +532,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Ends the run, and calls off what it had in flight.
         /// </summary>
         /// <remarks>
-        /// Every way a run ends comes through here - switched off, stopped by hand, taken over,
+        /// Every way a run is cut short comes through here - switched off, stopped by hand, taken over,
         /// at fault - so this is where a machine left moving is told to stop. What that means is the
         /// block's own to say, and for most of them it means nothing at all.
         /// </remarks>
         public void Stop()
         {
             Called();
+            Finish();
+        }
 
+        /// <summary>Ends a run that has done its last step, leaving what it started to carry on.</summary>
+        /// <remarks>A trigger's own act has no wait after it, so what it started is still in flight when the run ends.</remarks>
+        void Finish()
+        {
             IsRunning = false;
             IsWaiting = false;
             _byHand = false;
@@ -564,7 +554,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _waitUntil = -1;
             _holding = false;
             _outstanding.Clear();
+            _started.Clear();
             _rota.Leave(_busy);
+            _rota.Leave(_sampling);
         }
 
         /// <summary>Tells every block still being waited on to call off what was started on it.</summary>
@@ -583,6 +575,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 for (var t = 0; t < compiled.Entities.Count; t++)
                     compiled.Entities[t].Stop(act.ActionId);
             }
+        }
+
+        /// <summary>Whether <paramref name="entity" /> is in the state <paramref name="stateId" /> names, or has no such state.</summary>
+        static bool Reached(GridWorld world, GridEntity entity, string stateId)
+        {
+            var state = entity.Kind.FindState(stateId);
+            return state == null || state.Holds(world.Values, entity.GetValue(state.PropertyId));
         }
 
         /// <summary>
@@ -621,22 +620,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Whether a signal reads as true right now.
-        /// </summary>
-        /// <remarks>
-        /// A value does not carry its own kind, so reading one needs the world that made it. An event
-        /// is declared against a property whose reading is a flag in every case that matters, and
-        /// anything else answers the same question - is there anything there.
-        /// </remarks>
-        static bool Reads(GridWorld world, GridEntity entity, string propertyId)
-        {
-            var property = entity.Kind.FindProperty(propertyId);
-            var kind = property == null ? ValueKind.Flag : property.Kind;
-
-            return world.Values.Flag(kind, entity.GetValue(propertyId));
         }
 
         void Start(GridWorld world, int tick)
@@ -683,6 +666,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 var step = _sequence.Steps[_stepIndex];
 
+                // Switched off: kept, and never done.
+                if (step.IsOff)
+                {
+                    Step();
+                    continue;
+                }
+
                 var act = step as Act;
                 if (act != null)
                 {
@@ -694,6 +684,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (needed != null && needed.Problem != SequenceProblem.None)
                     {
                         Meet(new SequenceFault(needed.Problem, _stepIndex, null, needed.Which));
+                        return;
+                    }
+
+                    // Asked of a block that is off, an action or a value is lost; so the run ends where it was asked, and says so.
+                    var unable = needed == null ? SequenceFault.None : Unable(needed);
+                    if (unable.Exists)
+                    {
+                        Meet(unable);
                         return;
                     }
 
@@ -714,10 +712,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 {
                     IsWaiting = false;
 
-                    // Started and left to it. An await waits for actions this sequence began, not for
-                    // a sequence somebody called - waiting for one of those is the concurrency work.
+                    // Started and left to it, until an await below waits for it.
                     if (Calls != null)
-                        Calls(run.Number);
+                        Calls(run.Number, run.Stops);
+
+                    if (!run.Stops)
+                        _started.Add(run.Number);
+
+                    // Stopped by that: by stopping itself, or by a sequence it ran. The run ends here.
+                    if (!IsRunning)
+                        return;
 
                     Step();
                     continue;
@@ -769,6 +773,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     }
 
                     _outstanding.Clear();
+                    _started.Clear();
                     _holding = false;
                     _stuck = SequenceFault.None;
                     IsWaiting = false;
@@ -792,13 +797,32 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 Step();
             }
 
-            Stop();
+            Finish();
         }
 
         void Step()
         {
             _stepIndex++;
             EnterStep();
+        }
+
+        /// <summary>The first block of an act that is switched off or not working, and so cannot do what it is asked; none where all can.</summary>
+        SequenceFault Unable(Compiled compiled)
+        {
+            for (var i = 0; i < compiled.Entities.Count; i++)
+            {
+                // A block already where the step would take it has nothing to do, switched on or not.
+                var entity = compiled.Entities[i];
+                var leads = compiled.Actions[i].LeadsToStateId;
+                if (!string.IsNullOrEmpty(leads) && Reached(_owner.World, entity, leads))
+                    continue;
+
+                var said = entity.Unable(compiled.Actions[i]);
+                if (said != null)
+                    return new SequenceFault(SequenceProblem.Unable, _stepIndex, said, compiled.Names[i]);
+            }
+
+            return SequenceFault.None;
         }
 
         /// <summary>The first block still being waited for that is gone, or may have been swapped, or none.</summary>
@@ -846,6 +870,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>How many ticks the slowest of what is being waited on should take, or unknown if any cannot say.</summary>
         int Expected()
         {
+            if (_started.Count > 0)
+                return GridEntity.Unestimated;
+
             var longest = 0;
             for (var i = 0; i < _outstanding.Count; i++)
             {
@@ -867,7 +894,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return longest;
         }
 
-        /// <summary>Whether everything started since the last await has got where it was going.</summary>
+        /// <summary>Whether everything started since the last await has got where it was going, and every sequence started since has finished.</summary>
         bool Finished(GridWorld world)
         {
             for (var i = 0; i < _outstanding.Count; i++)
@@ -876,10 +903,22 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     return false;
             }
 
+            var system = _sequence.System;
+            for (var i = 0; i < _started.Count && system != null; i++)
+            {
+                var started = system.FindSequence(_started[i]);
+                var running = started == null ? null : _owner.Get(started, _instance);
+                if (running != null && running.IsRunning)
+                    return false;
+            }
+
             return true;
         }
 
         readonly List<Act> _outstanding = new List<Act>();
+
+        /// <summary>The sequences started since the last await, by number.</summary>
+        readonly List<int> _started = new List<int>();
 
         void Execute(GridWorld world, Act step)
         {
@@ -906,6 +945,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public readonly List<EntityAction> Actions = new List<EntityAction>();
             public readonly List<IList<Literal>> Values = new List<IList<Literal>>();
             public readonly List<Order> Orders = new List<Order>();
+
+            /// <summary>What the program calls each block, in the same order.</summary>
+            public readonly List<string> Names = new List<string>();
 
             /// <summary>Why the act cannot be done, gone or possibly swapped, or none.</summary>
             public SequenceProblem Problem;
@@ -968,6 +1010,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 compiled.Entities.Add(entity);
+                compiled.Names.Add(acting[i]);
                 compiled.Actions.Add(action);
                 compiled.Values.Add(values);
                 compiled.Orders.Add(entity.Prepare(action, values));
@@ -1029,259 +1072,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             var converted = new List<Literal>(given.Count);
             return action.Converts(given, converted) ? converted : null;
-        }
-
-        /// <summary>
-        /// Samples everything that starts this sequence, and answers whether any of it fired.
-        /// </summary>
-        /// <remarks>
-        /// All of them, every tick, because edge detection is stateful: a trigger that is not sampled
-        /// has no previous reading, and the next sample it gets is wrong. Two triggers on one sequence
-        /// are the ordinary case - the inside button and the outside one - and each keeps its own
-        /// reading, so one firing never robs the other of its edge.
-        /// </remarks>
-        bool SampleTrigger(GridWorld world)
-        {
-            var anySignal = false;
-            var anyMissing = false;
-            var fired = false;
-            var watched = 0;
-
-            var system = _sequence.System;
-            var triggers = system == null ? null : system.Triggers;
-            for (var i = 0; triggers != null && i < triggers.Count; i++)
-            {
-                var trigger = triggers[i];
-                if (trigger.Runs != _sequence.Number)
-                    continue;
-
-                Watch watch = Watching(trigger);
-                if (Sampled(world, trigger, watch))
-                    fired = true;
-
-                // What the sample just read is this trigger's, until the next one overwrites it.
-                watch.Live = TriggerSignalIsTrue;
-
-                anySignal = anySignal || TriggerSignalIsTrue;
-                anyMissing = anyMissing || HasMissingSources;
-                watched++;
-            }
-
-            // A trigger somebody has changed or deleted is still in here holding an edge nothing
-            // will ever read again. Swept only when there is something to sweep, which is after an
-            // edit and never on an ordinary tick.
-            if (_watching.Count > watched)
-                Forget(triggers);
-
-            TriggerSignalIsTrue = anySignal;
-            HasMissingSources = anyMissing;
-            return fired;
-        }
-
-        bool Sampled(GridWorld world, Trigger trigger, Watch watch)
-        {
-            var when = trigger as WhenTrigger;
-            if (when != null)
-                return when.RequiresAll ? SampleWhenAll(world, when, watch) : SampleWhen(world, when, watch);
-
-            var every = trigger as EveryTrigger;
-            if (every != null)
-                return SampleEvery(every, watch);
-
-            // A trigger the construct answers fires by being fired: a slot invokes Sprocket's action
-            // and the host calls in. There is nothing here to sample.
-            return false;
-        }
-
-        /// <summary>
-        /// What one trigger read last time, kept per trigger.
-        /// </summary>
-        /// <remarks>
-        /// Per trigger rather than per sequence, because an edge is a change since <em>this</em>
-        /// trigger last looked. Shared state made the second trigger on a sequence read the first
-        /// one's history, which fires nothing or fires twice.
-        /// </remarks>
-        sealed class Watch
-        {
-            public readonly Dictionary<string, bool> Signals = new Dictionary<string, bool>();
-
-            public int All = -1;
-
-            /// <summary>The tick a timer last fell due, or negative before it has been sampled.</summary>
-            public int Due = -1;
-
-            /// <summary>
-            /// What this one trigger's signal read at the last sample.
-            /// </summary>
-            /// <remarks>
-            /// Kept per trigger as well as gathered into one, because a screen listing triggers
-            /// shows each of them saying what it is reading - and two triggers on one sequence
-            /// would otherwise both light because one of them was true.
-            /// </remarks>
-            public bool Live;
-        }
-
-        readonly Dictionary<Trigger, Watch> _watching = new Dictionary<Trigger, Watch>();
-
-        /// <summary>Forgets what a trigger read, for every trigger this sequence no longer has.</summary>
-        void Forget(IReadOnlyList<Trigger> triggers)
-        {
-            _forgotten.Clear();
-
-            foreach (Trigger held in _watching.Keys)
-            {
-                var kept = false;
-                for (var i = 0; triggers != null && i < triggers.Count; i++)
-                    kept = kept || (triggers[i] == held && triggers[i].Runs == _sequence.Number);
-
-                if (!kept)
-                    _forgotten.Add(held);
-            }
-
-            for (var i = 0; i < _forgotten.Count; i++)
-                _watching.Remove(_forgotten[i]);
-        }
-
-        readonly List<Trigger> _forgotten = new List<Trigger>();
-
-        /// <summary>Whether that trigger's own signal reads true at this instant.</summary>
-        /// <remarks>
-        /// Nothing where it has not been sampled yet, which is the honest answer: a trigger that
-        /// has never been read has no reading.
-        /// </remarks>
-        public bool LiveNow(Trigger trigger)
-        {
-            Watch watch;
-            return _watching.TryGetValue(trigger, out watch) && watch.Live;
-        }
-
-        Watch Watching(Trigger trigger)
-        {
-            Watch watch;
-            if (_watching.TryGetValue(trigger, out watch))
-                return watch;
-
-            watch = new Watch();
-            _watching.Add(trigger, watch);
-            return watch;
-        }
-
-        bool SampleWhen(GridWorld world, WhenTrigger when, Watch watch)
-        {
-            var sources = Watched(when.Sources);
-            var fired = false;
-            var anySignalTrue = false;
-            var anyMissing = false;
-
-            for (var i = 0; i < sources.Count; i++)
-            {
-                var sourceId = sources[i];
-                var entity = _bindings.Entity(sourceId);
-                if (entity == null)
-                {
-                    anyMissing = true;
-                    continue;
-                }
-
-                var definition = entity.Kind.FindEvent(when.EventId);
-                if (definition == null)
-                    continue;
-
-                var now = Reads(world, entity, definition.PropertyId);
-                if (now)
-                    anySignalTrue = true;
-
-                bool previous;
-                if (watch.Signals.TryGetValue(sourceId, out previous))
-                {
-                    // No previous sample means the sequence has only just come into
-                    // existence, and an edge needs two. Firing on the first tick
-                    // would set every sequence off the moment it was created.
-                    if (definition.Edge == Edge.Rising && !previous && now)
-                        fired = true;
-                    else if (definition.Edge == Edge.Falling && previous && !now)
-                        fired = true;
-                }
-
-                watch.Signals[sourceId] = now;
-            }
-
-            TriggerSignalIsTrue = anySignalTrue;
-            HasMissingSources = anyMissing;
-            return fired;
-        }
-
-        /// <summary>
-        /// Fires when the last of the sources reaches the state, and not again until
-        /// one of them has left it.
-        /// </summary>
-        /// <remarks>
-        /// Watching for several separate edges on the same tick would almost never
-        /// fire, because the sources reach their state at different moments. What the
-        /// sentence means is "the moment they are all there", so that is what is
-        /// watched: one edge, on the whole condition.
-        /// </remarks>
-        bool SampleWhenAll(GridWorld world, WhenTrigger when, Watch watch)
-        {
-            var sources = Watched(when.Sources);
-            var all = sources.Count > 0;
-            var anyMissing = false;
-
-            for (var i = 0; i < sources.Count; i++)
-            {
-                var entity = _bindings.Entity(sources[i]);
-                if (entity == null)
-                {
-                    anyMissing = true;
-                    all = false;
-                    continue;
-                }
-
-                var definition = entity.Kind.FindEvent(when.EventId);
-                if (definition == null)
-                {
-                    all = false;
-                    continue;
-                }
-
-                var wanted = definition.Edge == Edge.Rising;
-                if (Reads(world, entity, definition.PropertyId) != wanted)
-                    all = false;
-            }
-
-            TriggerSignalIsTrue = all;
-            HasMissingSources = anyMissing;
-
-            // Unknown until the second sample, so a condition that is already true
-            // when the sequence appears does not set it off.
-            var now = all ? 1 : 0;
-            var fired = watch.All == 0 && now == 1;
-            watch.All = now;
-            return fired;
-        }
-
-        /// <remarks>
-        /// Measured in the game's ticks rather than in samples, because samples are only taken when
-        /// this sequence's place comes round. The next time falls due from when the last one did,
-        /// not from when it was noticed, so a timer noticed a few ticks late runs late by the same
-        /// few ticks every time rather than drifting further each time.
-        /// </remarks>
-        bool SampleEvery(EveryTrigger every, Watch watch)
-        {
-            var interval = every.IntervalTicks < 1 ? 1 : every.IntervalTicks;
-            if (watch.Due < 0 || _tick < watch.Due)
-            {
-                watch.Due = _tick;
-                return false;
-            }
-
-            if (_tick - watch.Due < interval)
-                return false;
-
-            // A world that was paused, or a sequence that was not ticked, starts counting again
-            // rather than firing once for every period it missed.
-            watch.Due = _tick - watch.Due < 2 * interval ? watch.Due + interval : _tick;
-            return true;
         }
     }
 }

@@ -303,6 +303,14 @@ Press to rename it.</value>
     <value>Delete this step</value>
     <comment>Note on the bin at the end of a step's row.</comment>
   </data>
+  <data name="Sprocket.Sequence.PauseStep" xml:space="preserve">
+    <value>Pause this step to have the sequence skip it.</value>
+    <comment>Note on the pause mark on a step's row, while the step runs.</comment>
+  </data>
+  <data name="Sprocket.Sequence.UnpauseStep" xml:space="preserve">
+    <value>This step is paused. Click to resume it.</value>
+    <comment>Note on the pause mark on a step's row, lit while the step is paused.</comment>
+  </data>
   <data name="Sprocket.Sequence.SkippedBusy" xml:space="preserve">
     <value>skipped {busy}x while busy</value>
     <comment>Said while a sequence was started and did not run because it was already running. {busy} is how many times.</comment>
@@ -328,13 +336,25 @@ Press to rename it.</value>
     <value>This version cannot read it, so this screen starts empty. The block still holds it until you change something here - and that replaces it for good.</value>
     <comment>Shown when the banner above is opened.</comment>
   </data>
-  <data name="Sprocket.Salvage.Partial" xml:space="preserve">
-    <value>This block holds a program that could only partly be read.</value>
-    <comment>Banner on the first screen when only part of the block's program could be read.</comment>
+  <data name="Sprocket.Salvage.Broken" xml:space="preserve">
+    <value>This block holds a program with an error in it.</value>
+    <comment>Banner on every screen when the block's program has an error in its text, so none of it was loaded.</comment>
   </data>
-  <data name="Sprocket.Salvage.PartialDetail" xml:space="preserve">
-    <value>What could be read is shown here. The block still holds the whole of it until you change something here - and that replaces it with what you see.</value>
+  <data name="Sprocket.Salvage.BrokenDetail" xml:space="preserve">
+    <value>None of it runs, and this screen starts empty. Edit the text to mend it. The block still holds it until you change something here - and that replaces it for good.</value>
     <comment>Shown when the banner above is opened.</comment>
+  </data>
+  <data name="Sprocket.Salvage.Mend" xml:space="preserve">
+    <value>Edit the text</value>
+    <comment>Button on the banner above that opens the program's text, where the error can be mended.</comment>
+  </data>
+  <data name="Sprocket.Script.Title" xml:space="preserve">
+    <value>Script</value>
+    <comment>Heading of the screen that shows the program as text, where it can be edited by hand, and the way in to it.</comment>
+  </data>
+  <data name="Sprocket.Script.Apply" xml:space="preserve">
+    <value>Apply</value>
+    <comment>Button that reads the text on the screen above and, where it has no error, puts it in place of the program.</comment>
   </data>
   <data name="Sprocket.Salvage.Trouble" xml:space="preserve">
     <value>Read as: {trouble}</value>
@@ -369,6 +389,10 @@ Press to rename it.</value>
   <data name="Sprocket.Button.Stops" xml:space="preserve">
     <value>**{block}** already stops {sequence} on {blockset}.</value>
     <comment>The same, where the other trigger stops its sequence.</comment>
+  </data>
+  <data name="Sprocket.Button.Acts" xml:space="preserve">
+    <value>**{block}** already does something on {blockset}.</value>
+    <comment>The same, where the other trigger acts on its blocks itself rather than starting a sequence.</comment>
   </data>
   <data name="Sprocket.Button.Elsewhere" xml:space="preserve">
     <value>Button {button} of **{block}** already does something else.</value>
@@ -510,7 +534,7 @@ Press to rename it.</value>
     <value>Sprocket has only partly checked this block, so some of what it offers may still be doubled, missing or oddly named.</value>
     <comment>Note over what a block offers, where the block has been checked in part.</comment>
   </data>
-  <data name="Sprocket.Pick.Waits" xml:space="preserve">
+  <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>This takes time to finish. The sequence waits until it is done before going on to the next step.</value>
     <comment>Note on the mark beside something done that a step waits for.</comment>
   </data>
@@ -640,6 +664,10 @@ Press to rename it.</value>
   <data name="Sprocket.Blueprint.NoneFits" xml:space="preserve">
     <value>Nothing on this construct can fill it.</value>
     <comment>Where no block on the construct can fill a part.</comment>
+  </data>
+  <data name="Sprocket.System.TurnOffToEdit" xml:space="preserve">
+    <value>Turn the system off to edit.</value>
+    <comment>Note over a part, or a button, that cannot be changed while its logic system is switched on.</comment>
   </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} is switched on. Switch it off to change it.</value>

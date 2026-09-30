@@ -9,10 +9,10 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public enum Form
     {
-        /// <summary>One of Sprocket's own actions, written as a bare head.</summary>
+        /// <summary>One of Sprocket's own actions, written qualified by what adds it: <c>sprocket.close</c>.</summary>
         Native,
 
-        /// <summary>One of the game's actions, by the game's id, written with <c>action</c>.</summary>
+        /// <summary>One of the game's actions, written by the game's own id alone.</summary>
         Action,
 
         /// <summary>One of the block's values, by the game's id, written with <c>set</c>.</summary>

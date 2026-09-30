@@ -127,23 +127,22 @@ public class ChangingTests
 
         Assert.Same(was, System(screen).Triggers[0]);
         Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(0));
+        Assert.NotNull(was.Acts);
 
-        // What it used to run stands on its own, so it stays behind rather than going with the
-        // pointing.
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
+        // What it used to run stands on its own, so it stays behind; the act is the trigger's own and
+        // makes no sequence.
+        Assert.Single(screen.Editor.Program.Sequences);
         Assert.Single(screen.Editor.Rows());
     }
 
     /// <summary>
-    /// Pointing away from a sequence nobody named takes that sequence with it.
+    /// Pointing a trigger that acts itself at a sequence instead walks back to the act it had.
     /// </summary>
     /// <remarks>
-    /// It existed only to be the one thing that trigger did, so nothing is left that could ever run
-    /// it - and it has no row of its own to be deleted from. The way back is the arrows, like every
-    /// other trigger act.
+    /// The act has no row of its own anywhere else, so the way back is the only place it can be had again.
     /// </remarks>
     [Fact]
-    public void PointingAwayFromAPlainThingTakesItWithIt()
+    public void PointingAwayFromAnActWalksBack()
     {
         var screen = WithOne();
 
@@ -156,7 +155,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
+        Assert.Single(screen.Editor.Program.Sequences);
 
         screen.Editor.PressWhen(1);
         screen.Editor.PressChoice("Sequence 1");
@@ -166,11 +165,11 @@ public class ChangingTests
         Assert.Single(screen.Editor.Program.Sequences);
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(1));
 
-        // One step back puts the plain sequence back with what the trigger did.
+        // One step back puts the act back as what the trigger does.
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
+        Assert.Single(screen.Editor.Program.Sequences);
         Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
     }
 
@@ -409,8 +408,8 @@ public class ChangingTests
     /// And pressing the one thing a trigger does opens that, in the picker it was chosen in.
     /// </summary>
     /// <remarks>
-    /// The act belongs to a sequence nobody named, which has no screen of its own - so this is the
-    /// only way to change it, and the way back is the system's.
+    /// The act is the trigger's own, with no screen of its own - so this is the only way to change it,
+    /// and the way back is the system's.
     /// </remarks>
     [Fact]
     public void PressingWhatItDoesOpensThatAct()
@@ -434,8 +433,8 @@ public class ChangingTests
 
         Assert.Equal("then close Airlock Inner Door", screen.Editor.Doing(1));
 
-        // And it walks back from here, because the sequence it changed has nowhere else to offer it.
-        Assert.Equal("changing a step", screen.Editor.Steps().UndoText);
+        // And it walks back from here, because the act it changed has nowhere else to offer it.
+        Assert.Equal("changing what it does", screen.Editor.Steps().UndoText);
 
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
@@ -473,7 +472,7 @@ public class ChangingTests
         screen.Run(2);
 
         var back = Assert.IsType<RequiredTrigger>(System(screen).Triggers[0]);
-        Assert.Equal("pressed_1", back.EventId);
+        Assert.Equal(1, Assert.Single(System(screen).First!.Positions(back.Part)!).Slot);
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
 
         // And forward again, into the same change rather than a rebuilt one that reads the same.
@@ -485,12 +484,12 @@ public class ChangingTests
     }
 
     /// <summary>
-    /// Deleting a trigger walks back, and brings the sequence it took with it.
+    /// Deleting a trigger walks back, with the act it did.
     /// </summary>
     /// <remarks>
-    /// Which is what makes deleting one safe to do without asking first. The steps of a plain
-    /// trigger's sequence are nowhere else on any screen, so a bin with no way back would be the
-    /// one control in the editor that can lose work silently.
+    /// Which is what makes deleting one safe to do without asking first. A trigger's own act is
+    /// nowhere else on any screen, so a bin with no way back would be the one control in the editor
+    /// that can lose work silently.
     /// </remarks>
     [Fact]
     public void DeletingATriggerWalksBack()
@@ -506,13 +505,10 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-
         screen.Editor.Triggers()[1].Deletes!.Execute();
         screen.Run(2);
 
         Assert.Single(screen.Editor.Triggers());
-        Assert.Single(screen.Editor.Program.Sequences);
         Assert.Equal("deleting a trigger", screen.Editor.Steps().UndoText);
 
         screen.Editor.Steps().Undo!.Execute();
@@ -520,7 +516,7 @@ public class ChangingTests
 
         // Back where it was, with what it did, and in the place it had among the others.
         Assert.Equal(2, screen.Editor.Triggers().Count);
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
+        Assert.Single(screen.Editor.Program.Sequences);
         Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
     }
 
@@ -670,9 +666,9 @@ public class ChangingTests
         screen.Editor.PressChoice("Take it over");
         screen.Run(2);
 
-        var had = (MomentTrigger)System(screen).Triggers[0];
+        var had = (RequiredTrigger)System(screen).Triggers[0];
 
-        Assert.Empty(had.Sources);
+        Assert.Null(System(screen).First!.FilledWith(had.Part));
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(1));
         Assert.Equal("taking a button over", screen.Editor.Steps().UndoText);
 

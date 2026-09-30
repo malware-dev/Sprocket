@@ -25,5 +25,9 @@ namespace Sprocket.Localization.Generator
         public static readonly DiagnosticDescriptor Stray = new DiagnosticDescriptor(
             "LOC005", "Translation has a text the original lacks", "{0} in {1} is not a text the original has",
             Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Missing = new DiagnosticDescriptor(
+            "LOC006", "Translation lacks a text the original has", "{0} has no translation in {1}",
+            Category, DiagnosticSeverity.Warning, true);
     }
 }

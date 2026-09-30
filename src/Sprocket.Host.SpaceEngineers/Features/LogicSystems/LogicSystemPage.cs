@@ -297,13 +297,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             for (var i = 0; i < _triggers.Count; i++)
             {
                 var row = _triggerRows[_triggers[i]];
-                var state = _runs[i] == null ? null : Editor.Runner.Get(_runs[i]);
-                row.IsLiveNow = state != null && state.LiveNow(_triggers[i]);
+                var poller = Editor.Runner.Poller(_triggers[i], through);
+                row.IsLiveNow = poller != null && poller.Live;
 
+                // What a trigger's own act meets is the trigger's to say, as what starts a sequence is.
                 if (recount)
                 {
                     var fault = _runs[i] == null ? SequenceFault.None : Fault(_runs[i], through);
-                    row.Problem = IsStarting(fault) ? SequenceText.Problem(fault, _runs[i]) : "";
+                    var own = _triggers[i].Acts != null && fault.Exists && !fault.IsWarning;
+                    row.Problem = own || IsStarting(fault) ? SequenceText.Problem(fault, _runs[i]) : "";
                 }
 
                 row.Show(Editor.World, texts);
@@ -342,7 +344,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _runs.Clear();
             for (var i = 0; i < _triggers.Count; i++)
-                _runs.Add(_system.FindSequence(_triggers[i].Runs));
+            {
+                var trigger = _triggers[i];
+                _runs.Add(trigger.Acts != null ? Editor.Runner.Alone(_system, trigger) : _system.FindSequence(trigger.Runs));
+            }
 
             _triggerRows.Show(_triggers);
             for (var i = 0; i < _triggers.Count; i++)
@@ -390,6 +395,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _halted.IsVisible = halt != null;
             _halted.Text = halt == null ? "" : SequenceText.Stopped(halt, _system);
+        }
+
+        /// <summary>Why nothing can be changed, said over each part that cannot be pressed; empty while it can.</summary>
+        string Locked()
+        {
+            return Editable
+                ? ""
+                : Editor.Holder != null
+                    ? Template.Fill(Editor.Texts.SequenceHeld, "holder", Editor.Holder)
+                    : Editor.Texts.SystemTurnOffToEdit;
         }
 
         /// <summary>A command made only while the system may be changed, and null while it may not.</summary>
@@ -550,6 +565,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Doing(row, trigger);
 
             row.Deletes = Changes(Cmd.DeleteTrigger, delegate { Editor.Forget(_system, trigger); });
+            row.Locked = Locked();
         }
 
         static TriggerKind Kind(Trigger trigger)
@@ -566,9 +582,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             // a moment that is no longer among them reads as an empty part rather than as words that could never fire.
 
             var events = Vocabulary.EventsFor(Editor.Runner.Bindings, Editor.Seen(_system, moment.Sources));
+            var eventId = Vocabulary.EventOf(moment, Editor.StandIn(_system));
             for (var i = 0; i < events.Count; i++)
             {
-                if (events[i].Id == moment.EventId)
+                if (events[i].Id == eventId)
                     return events[i];
             }
 
@@ -577,15 +594,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         void Doing(TriggerRow row, Trigger trigger)
         {
-            // A named sequence is a thing in its own right, so it is said by name after "runs" or "stops", and pressing
-            // it opens the picker the trigger was made in. One nobody named is what this trigger does, so its act is
-            // written out as the parts a step of a sequence uses, each opening the picker on its own column.
+            // A sequence is a thing in its own right, so it is said by name after "runs" or "stops", and pressing it
+            // opens the picker the trigger was made in. An act of the trigger's own is written out as the parts a step
+            // of a sequence uses, each opening the picker on its own column.
 
-            var sequence = _system.FindSequence(trigger.Runs);
-            var act = sequence == null || sequence.HasName ? null : sequence.Only;
-
+            var act = trigger.Acts;
             if (act == null)
             {
+                var sequence = _system.FindSequence(trigger.Runs);
                 row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, true, false);
                 row.Does.Add(new SequenceSlot(trigger.Runs, sequence == null || !sequence.HasName ? "" : sequence.Name,
                     Changes(Cmd.TriggerTarget, delegate { Editor.ChangeTrigger(_system, trigger, Opening.Nothing, false); })));
@@ -620,19 +636,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         void Collect()
         {
-            // A sequence nobody named is the one thing some trigger does, said on that trigger's own row: listing it
-            // here as well would show it twice, and offer a switch and a copy for something that is not a thing in its
-            // own right.
-
             _wiring = Editor.Program.Wiring;
 
             _sequences.Clear();
             var sequences = _system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
-            {
-                if (sequences[i].HasName)
-                    _sequences.Add(sequences[i]);
-            }
+                _sequences.Add(sequences[i]);
 
             _triggers.Clear();
             var triggers = _system.Triggers;

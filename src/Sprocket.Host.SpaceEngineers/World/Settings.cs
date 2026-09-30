@@ -30,6 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         const string Developer = "developerMode";
 
+        const string Quickest = "quickestLook";
+
         /// <summary>
         /// Said outright, for a host that has its own way of being told.
         /// </summary>
@@ -37,13 +39,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The harness has no mod storage to read and wants to drive both answers anyway, so it says
         /// what it wants rather than going through <see cref="Read" />.
         /// </remarks>
-        public Settings(bool developerMode)
+        public Settings(bool developerMode, int quickestLook = 1)
         {
             DeveloperMode = developerMode;
+            QuickestLook = quickestLook < 1 ? 1 : quickestLook;
         }
 
         /// <summary>Tools that are not part of the product, off unless somebody asked for them.</summary>
         public bool DeveloperMode { get; }
+
+        /// <summary>The fewest ticks between two looks of a <c>when</c> or an <c>every</c>, whatever the program asks for; 1 where nothing is said.</summary>
+        /// <remarks>What a server that cannot afford a moment looked for on every tick sets, and every program on it is held to.</remarks>
+        public int QuickestLook { get; }
 
         /// <summary>Both stores, merged, with nothing said anywhere meaning every default.</summary>
         public static Settings Read()
@@ -66,7 +73,20 @@ namespace Sprocket.Host.SpaceEngineers.World
             MyIni everywhere = Parse(global, "global");
             MyIni here = Parse(world, "world");
 
-            return new Settings(Said(everywhere, here, Developer));
+            return new Settings(Said(everywhere, here, Developer), Count(everywhere, here, Quickest));
+        }
+
+        /// <summary>The world's count where it has one, then the global one, then 1.</summary>
+        static int Count(MyIni global, MyIni world, string name)
+        {
+            int said;
+            if (world != null && world.Get(Section, name).TryGetInt32(out said))
+                return said;
+
+            if (global != null && global.Get(Section, name).TryGetInt32(out said))
+                return said;
+
+            return 1;
         }
 
         /// <summary>The world's answer where it has one, then the global one, then off.</summary>
@@ -154,6 +174,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             write.SetSectionComment(Section, " Sprocket. The same for every world; each world may override it.");
             write.Set(Section, Developer, false);
             write.SetComment(Section, Developer, " Tools for working on Sprocket itself, rather than for playing with it.");
+            write.Set(Section, Quickest, 1);
+            write.SetComment(Section, Quickest,
+                " The fewest ticks between two looks of a 'when' or an 'every'. 1 lets a program look on every tick; 10 holds it to six times a second.");
 
             try
             {

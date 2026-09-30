@@ -34,16 +34,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </remarks>
         public static string Runs(Bindings bindings, AutomationSystem system, Trigger trigger, SystemInstance through)
         {
+            var act = trigger.Acts;
+            if (act != null)
+                return Action(bindings, act, through);
+
             Sequence sequence = system == null ? null : system.FindSequence(trigger.Runs);
             if (sequence == null)
                 return trigger.Stops ? "stops a sequence that is gone" : "runs a sequence that is gone";
 
-            if (sequence.HasName)
-                return (trigger.Stops ? "stops " : "runs ") + sequence.Name;
-
-            return trigger.Stops
-                ? "stops " + Doing(bindings, sequence, through)
-                : Doing(bindings, sequence, through);
+            return (trigger.Stops ? "stops " : "runs ") + (sequence.HasName ? sequence.Name : DefaultName(sequence.Number));
         }
 
 
@@ -66,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 var when = moment as WhenTrigger;
                 var sources = SystemInstance.Through(through, moment.Sources);
                 return "When " + SentenceText.Named(bindings, sources,
-                    when != null && when.RequiresAll) + " " + Happening(bindings, moment, sources);
+                    when != null && when.RequiresAll) + " " + Happening(bindings, Vocabulary.EventOf(moment, through), sources);
             }
 
             var every = trigger as EveryTrigger;
@@ -79,13 +78,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        /// <summary>The words for the moment a trigger watches for on <paramref name="sources" />, or an unfilled gap.</summary>
-        static string Happening(Bindings bindings, MomentTrigger moment, IList<string> sources)
+        /// <summary>The words for the moment <paramref name="eventId" /> on <paramref name="sources" />, or an unfilled gap.</summary>
+        static string Happening(Bindings bindings, string eventId, IList<string> sources)
         {
             var events = Vocabulary.EventsFor(bindings, sources);
             for (var i = 0; i < events.Count; i++)
             {
-                if (events[i].Id == moment.EventId)
+                if (events[i].Id == eventId)
                     return events[i].Text;
             }
 
@@ -258,6 +257,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
         internal static string Failing(SequenceFault fault, Sequence sequence)
         {
+            // A trigger's own act has no steps to count, and no name.
+            if (sequence.Number == 0)
+                return Problem(fault, sequence);
+
             var row = Row(sequence, fault.Step);
             var named = sequence.HasName ? sequence.Name : "";
             var at = row > 0 ? (named.Length > 0 ? ", step " : "Step ") + row.ToString(CultureInfo.InvariantCulture) : "";
@@ -325,6 +328,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return "a value didn't fit the action.";
             if (problem == SequenceProblem.Unawaited)
                 return "it didn't wait for what it started.";
+            if (problem == SequenceProblem.Circular)
+                return "it would have started itself again.";
+            if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Unable)
+                return block + " was switched off.";
+            if (problem == SequenceProblem.Unable)
+                return "a block it acts on was switched off.";
             if (problem == SequenceProblem.Adrift)
                 return "a block may have been replaced.";
 
@@ -371,6 +380,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return "This is waiting for something that cannot finish.";
             if (problem == SequenceProblem.Conflicted)
                 return "This stopped: something else took over one of its blocks.";
+            if (problem == SequenceProblem.Circular)
+                return "This runs a sequence that runs this one again. Remove one of the two.";
+            if (problem == SequenceProblem.Unable)
+                return "A block this step acts on is switched off. Switch it on first.";
 
             return "";
         }
@@ -394,7 +407,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             {
                 var system = sequence.System;
                 var called = system == null ? null : system.FindSequence(run.Number);
-                return "run " + (called == null || !called.HasName
+                return (run.Stops ? "stop " : "run ") + (called == null || !called.HasName
                     ? DefaultName(run.Number)
                     : called.Name);
             }

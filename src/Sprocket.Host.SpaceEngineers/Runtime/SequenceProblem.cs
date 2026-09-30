@@ -119,6 +119,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// one block and the later one won. It says what happened last time and is cleared the next
         /// time the sequence runs.
         /// </remarks>
-        Conflicted
+        Conflicted,
+
+        /// <summary>One of its steps runs a sequence that starts it again, directly or through the sequences that one runs.</summary>
+        /// <remarks>The language makes it an error, so the system does not run. Stopping itself is not this: a sequence may.</remarks>
+        Circular,
+
+        /// <summary>A step asked a block that is switched off, or not working, for something a step waits for.</summary>
+        /// <remarks>What it was asked would never happen, so the run ends there and says which block.</remarks>
+        Unable
     }
 }

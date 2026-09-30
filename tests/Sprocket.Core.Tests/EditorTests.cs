@@ -259,8 +259,8 @@ public class EditorTests
         StartOnTheButton(ship.Editor);
 
         var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
-        Assert.Equal("pressed_1", pressed.EventId);
         Assert.Single(pressed.Sources);
+        Assert.Equal(1, Assert.Single(ship.Automation.Systems[0].First!.Positions(pressed.Part)!).Slot);
 
         // And the same question about a door, which the game announces nothing about.
         ship.Editor.GoToRoot();
@@ -305,7 +305,7 @@ public class EditorTests
         ship.Tick();
 
         var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
-        Assert.Equal("pressed_1", pressed.EventId);
+        Assert.Equal(1, Assert.Single(ship.Automation.Systems[0].First!.Positions(pressed.Part)!).Slot);
         Assert.Equal("When Airlock Button is pressed", editor.Says(0));
 
         // One trigger for the sequence, not the old one left beside the new.
@@ -512,6 +512,7 @@ public class EditorTests
         Assert.NotEmpty(editor.Offered());
         Assert.All(editor.Offered(), row => Assert.Contains("Button", row.Secondary));
         editor.PressBlock("Airlock Button");
+        editor.PressChoice("is pressed");
         ship.Tick();
         editor.PressPrimary();
         ship.Tick();
@@ -538,18 +539,15 @@ public class EditorTests
         var button = ship.Automation.Declare(ship.World, ship.World.Entities.Single(e => e.Name == "Airlock Button")).Name;
         var door = ship.Automation.Declare(ship.World, ship.World.Entities.Single(e => e.Name == "Inner Door")).Name;
 
-        var pressed = new RequiredTrigger("pressed_1");
-        pressed.Sources.Add(button);
-        var sequence = ship.Automation.AddSequence(pressed);
+        var system = ship.Automation.AddSystem();
+        var pressed = Pressed.On(system, button);
+        var sequence = ship.Automation.AddSequence(system, pressed);
         var close = new Act("close");
         close.Targets.Add(door);
         sequence.Steps.Add(close);
         sequence.Steps.Add(new Await());
 
-        var system = sequence.System!;
-        if (system.First == null)
-            system.AddInstance();
-        Assert.Empty(system.Parts);
+        Assert.Single(system.Parts);
         ship.Tick();
 
         ship.Editor.GoToRoot();
@@ -872,6 +870,36 @@ public class EditorTests
         Assert.Same(kinds, stages[0].Kinds()[0]);
         Assert.Same(firstChoice, stages[1].Entries()[0]);
     }
+
+    /// <summary>A block picked outside the search stays on the list when another is picked in its place, until the search changes.</summary>
+    [Fact]
+    public void APickedBlockOutsideTheSearchStaysUntilTheSearchChanges()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+
+        editor.NewSystem("Airlock");
+        editor.PressStart("When…");
+        editor.PressBlock("Inner Door");
+        ship.Tick();
+
+        editor.Pick().Stages[0].Search("outer");
+        ship.Tick();
+        Assert.Contains(Rows(editor), text => text == "Inner Door");
+
+        editor.PressBlock("Outer Door");
+        ship.Tick();
+        Assert.Contains(Rows(editor), text => text == "Inner Door");
+
+        editor.Pick().Stages[0].Search("oute");
+        ship.Tick();
+        Assert.DoesNotContain(Rows(editor), text => text == "Inner Door");
+        Assert.Contains(Rows(editor), text => text == "Outer Door");
+    }
+
+    /// <summary>The names on the rows of the picker's first column.</summary>
+    static List<string> Rows(SprocketEditor editor) =>
+        editor.Pick().Stages[0].Entries().Select(entry => entry.Text).ToList();
 
     /// <summary>
     /// A picker opens on a ship whose blocks carry the game's own ids.

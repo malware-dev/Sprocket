@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -28,6 +29,14 @@ public class SalvageTests
         + "one|1|\n"
         + "sequence|1|on||\n"
         + "when|any|pressed_1|entity1\n";
+
+    /// <summary>A program of this version with a step no sequence can hold.</summary>
+    const string Broken = "sprocket 1 alpha 8\n\nsystem \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
+        + "    sequence 1 {\n        nonsense\n    }\n}\n";
+
+    /// <summary>The same, mended.</summary>
+    const string Mended = "sprocket 1 alpha 8\n\nsystem \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
+        + "    sequence 1 {\n        wait 60t\n    }\n}\n";
 
     /// <summary>The notice on the screen, or null. The driving helper throws where there is none.</summary>
     static Notice Said(Simulation rig) =>
@@ -88,26 +97,88 @@ public class SalvageTests
         Assert.Contains("replaces it for good", said.Detail);
 
         // And the reader's own words, which are what gets read back to whoever mends Sprocket.
-        Assert.Contains("different draft", said.Diagnostic);
+        Assert.Contains("written for alpha 6", said.Diagnostic);
     }
 
-    /// <summary>And a program of this version that is damaged in places says that instead.</summary>
-    /// <remarks>
-    /// A different fault with a different screen behind it: what did read is shown, so the banner
-    /// says that what replaces the original is what somebody can see.
-    /// </remarks>
+    /// <summary>And a program of this version with an error in its text says that instead, and offers the text.</summary>
+    /// <remarks>A different fault with a different way out: nothing of it runs, and the text is where it is mended.</remarks>
     [Fact]
-    public void TheScreenSaysADamagedProgramWasOnlyPartlyRead()
+    public void TheScreenSaysAProgramHasAnError()
     {
-        Simulation rig = Simulation.On(Holding(Older.Replace("alpha 6", "alpha 7")));
+        Simulation rig = Simulation.On(Holding(Broken));
         rig.Tick();
 
         Notice said = Said(rig);
 
         Assert.NotNull(said);
-        Assert.Contains("could only partly be read", said.Text);
-        Assert.Contains("replaces it with what you see", said.Detail);
-        Assert.Contains("means nothing here", said.Diagnostic);
+        Assert.Contains("with an error in it", said.Text);
+        Assert.Contains("Edit the text to mend it", said.Detail);
+        Assert.Contains("Line 5", said.Diagnostic);
+        Assert.Equal("Edit the text", said.OfferText);
+        Assert.Empty(rig.Editor.Program.Systems);
+    }
+
+    /// <summary>The banner opens the text that would not read, with what is wrong with it.</summary>
+    [Fact]
+    public void TheBannerOpensTheTextToMendIt()
+    {
+        Simulation rig = Simulation.On(Holding(Broken));
+        rig.Tick();
+
+        Said(rig).Offers!.Execute();
+        rig.Tick();
+
+        var page = Assert.IsType<ScriptPage>(rig.Editor.Current);
+        _ = page.View;
+        Assert.Equal(Broken, page.Listing.Text);
+        Assert.StartsWith("Line 5: ", page.Problem);
+        Assert.Equal("        nonsense", page.Listing.SelectedText());
+    }
+
+    /// <summary>Mending the text puts its program in place, which runs and saves like any other.</summary>
+    [Fact]
+    public void MendingTheTextPutsItsProgramInPlace()
+    {
+        Store store = Holding(Broken);
+        Simulation rig = Simulation.On(store);
+        rig.Tick();
+
+        Said(rig).Offers!.Execute();
+        rig.Tick();
+        rig.Editor.Scripted(Mended);
+        rig.Editor.ApplyScript();
+        rig.Tick();
+
+        Assert.True(rig.Editor.Program.Intact);
+        Assert.Equal("Airlock", Assert.Single(rig.Editor.Program.Systems).Name);
+        Assert.Equal("", Assert.IsType<ScriptPage>(rig.Editor.Current).Problem);
+        var shown = Said(rig);
+        Assert.True(shown == null || shown.Leaving, "the banner stayed");
+
+        rig.Save();
+        Assert.Contains("as Airlock", store.GetValue(SprocketUnit.ProgramKey));
+    }
+
+    /// <summary>A text still wrong changes nothing, and says what is wrong with it now.</summary>
+    [Fact]
+    public void ATextStillWrongChangesNothing()
+    {
+        Store store = Holding(Broken);
+        Simulation rig = Simulation.On(store);
+        rig.Tick();
+
+        Said(rig).Offers!.Execute();
+        rig.Tick();
+        rig.Editor.Scripted(Mended.Replace("sequence 1 {", "sequence {"));
+        rig.Editor.ApplyScript();
+        rig.Tick();
+
+        Assert.False(rig.Editor.Program.Intact);
+        Assert.Empty(rig.Editor.Program.Systems);
+        Assert.Contains("expected the sequence's number", Assert.IsType<ScriptPage>(rig.Editor.Current).Problem);
+
+        rig.Save();
+        Assert.Equal(Broken, store.GetValue(SprocketUnit.ProgramKey));
     }
 
     /// <summary>
@@ -135,7 +206,7 @@ public class SalvageTests
 
         var saved = store.GetValue(SprocketUnit.ProgramKey);
 
-        Assert.StartsWith("sprocket 1 alpha 7", saved);
+        Assert.StartsWith("sprocket 1 alpha 8", saved);
         Assert.Contains("Airlock", saved);
         Assert.DoesNotContain("|", saved);
 
@@ -218,7 +289,7 @@ public class SalvageTests
         rig.Save();
 
         Assert.False(rig.Editor.Screen.HasQuestion);
-        Assert.StartsWith("sprocket 1 alpha 7", store.GetValue(SprocketUnit.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 8", store.GetValue(SprocketUnit.ProgramKey));
         Assert.Null(Said(rig));
     }
 
@@ -279,7 +350,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.StartsWith("sprocket 1 alpha 7", store.GetValue(SprocketUnit.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 8", store.GetValue(SprocketUnit.ProgramKey));
         Assert.Contains("Airlock", store.GetValue(SprocketUnit.ProgramKey));
     }
 }

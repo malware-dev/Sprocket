@@ -5,6 +5,17 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>Setting up a configuration panel: what is typed reaches the blueprint once the keyboard leaves the box, as one step back.</summary>
 public class BlueprintWritingTests
 {
+    /// <summary>A slot is called what its block is called when the blueprint is made.</summary>
+    [Fact]
+    public void ASlotTakesItsBlocksName()
+    {
+        var screen = Writing();
+        var part = Assert.Single(screen.Editor.Program.Systems[0].Parts);
+
+        Assert.Equal("Airlock Button", part.Id);
+        Assert.Equal("Airlock Button", screen.Editor.Parts()[0].NameBox.Text);
+    }
+
     /// <summary>A slot renamed as the panel is set up is renamed wherever its system names it, and one step back takes it back.</summary>
     [Fact]
     public void ASlotRenamedIsOneStepBack()

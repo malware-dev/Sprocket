@@ -52,7 +52,7 @@ on screen     Airlock
 045  Sprite     Sprocket_Fill         {X:509 Y:295 W:124 H:40}  #374851FF
 046  Sprite     Sprocket_Fill         {X:509 Y:333 W:124 H:2}  #8EBCCFFF
 047  Text       at {X:524.7633 Y:300.2255} scale 0.833  #DCF5FDFF  "Sequence 1"
-048  Text       at {X:272 Y:337.0543} scale 0.556  #E84A3AFF  "The Button Panel slot is empty. Fill it on the configuration panel."
+048  Text       at {X:272 Y:337.0543} scale 0.556  #E84A3AFF  "The Airlock Button slot is empty. Fill it on the configuration panel."
 049  Text       at {X:1610.156 Y:313.5141} scale 0.401  #A2C3CDFF  "d"
 050  Text       at {X:260 Y:392.6399} scale 0.694  #85A1A9FF  "SEQUENCES"
 051  Text       at {X:272 Y:428.2255} scale 0.833  #A2C3CDFF  "+ Sequence"

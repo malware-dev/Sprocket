@@ -54,12 +54,14 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Row.Delete" xml:space="preserve">
     <value>Slett</value>
   </data>
+
   <data name="Sprocket.Switch.On" xml:space="preserve">
     <value>PÅ</value>
   </data>
   <data name="Sprocket.Switch.Off" xml:space="preserve">
     <value>AV</value>
   </data>
+
   <data name="Sprocket.Row.SwitchOn" xml:space="preserve">
     <value>Slå på</value>
   </data>
@@ -111,6 +113,15 @@ Dette blir det første av dem.</value>
   <data name="Sprocket.Systems.MadeFrom" xml:space="preserve">
     <value>Laget fra **{name}**-plantegningen</value>
   </data>
+  <data name="Sprocket.Systems.Edit" xml:space="preserve">
+    <value>Rediger plantegning</value>
+  </data>
+  <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
+    <value>Åpner **{name}**-plantegningen, for å endre hva som starter sekvensene og hva de gjør. Hvert logikksystem laget fra den endres med den.</value>
+  </data>
+  <data name="Sprocket.Systems.LibraryUnbuilt" xml:space="preserve">
+    <value>Ikke bygget ennå. Plantegninger skal importeres og eksporteres her.</value>
+  </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
     <value>Én til</value>
   </data>
@@ -127,18 +138,143 @@ Dette blir det første av dem.</value>
     <value>{name} {number}</value>
   </data>
 
+  <data name="Sprocket.Delete.System" xml:space="preserve">
+    <value>Slette dette logikksystemet?</value>
+  </data>
+  <data name="Sprocket.Delete.Blueprint" xml:space="preserve">
+    <value>Dette sletter {name}-plantegningen og hvert logikksystem laget fra den, og kan ikke angres. Skriv {name} for å fortsette.</value>
+  </data>
+  <data name="Sprocket.Delete.Instance" xml:space="preserve">
+    <value>Slette bare dette logikksystemet?</value>
+  </data>
+  <data name="Sprocket.Delete.InstanceKept" xml:space="preserve">
+    <value>**{name}**-plantegningen og de andre logikksystemene laget fra den beholdes. Dette kan ikke angres.</value>
+  </data>
+  <data name="Sprocket.Delete.Keep" xml:space="preserve">
+    <value>Behold det</value>
+  </data>
+  <data name="Sprocket.Delete.Confirm" xml:space="preserve">
+    <value>Slett det</value>
+  </data>
+  <data name="Sprocket.Delete.Final" xml:space="preserve">
+    <value>Dette kan ikke angres.</value>
+  </data>
+
+  <data name="Sprocket.System.NameAbout" xml:space="preserve">
+    <value>Navnet på dette logikksystemet.
+Trykk for å gi det nytt navn.</value>
+  </data>
+  <data name="Sprocket.System.Blueprint" xml:space="preserve">
+    <value>plantegning</value>
+  </data>
+  <data name="Sprocket.System.Delete" xml:space="preserve">
+    <value>Slett dette logikksystemet</value>
+  </data>
+  <data name="Sprocket.System.DeleteBlueprint" xml:space="preserve">
+    <value>Slett denne plantegningen, og hvert logikksystem laget fra den</value>
+  </data>
+  <data name="Sprocket.System.EditPanel" xml:space="preserve">
+    <value>Rediger konfigurasjonspanelet</value>
+  </data>
+  <data name="Sprocket.System.Using" xml:space="preserve">
+    <value>Bruker blokkene til</value>
+  </data>
+  <data name="Sprocket.System.Triggers" xml:space="preserve">
+    <value>Utløsere</value>
+  </data>
+  <data name="Sprocket.System.When" xml:space="preserve">
+    <value>Når…</value>
+  </data>
+  <data name="Sprocket.System.Every" xml:space="preserve">
+    <value>Hver…</value>
+  </data>
+  <data name="Sprocket.System.Sequences" xml:space="preserve">
+    <value>Sekvenser</value>
+  </data>
+  <data name="Sprocket.System.NewSequence" xml:space="preserve">
+    <value>Sekvens</value>
+  </data>
+  <data name="Sprocket.System.NoSequences" xml:space="preserve">
+    <value>Ingen sekvenser ennå.</value>
+  </data>
+  <data name="Sprocket.System.Copy" xml:space="preserve">
+    <value>Lager en kopi av denne sekvensen, slått av og uten egen utløser</value>
+  </data>
+  <data name="Sprocket.System.CopyUnstarted" xml:space="preserve">
+    <value>Lager en kopi av denne sekvensen, slått av</value>
+  </data>
+
+  <data name="Sprocket.Trigger.Live" xml:space="preserve">
+    <value>sant akkurat nå</value>
+  </data>
+  <data name="Sprocket.Trigger.Delete" xml:space="preserve">
+    <value>Slett denne utløseren</value>
+  </data>
+
+  <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
+    <value>Navnet på denne sekvensen.
+Trykk for å gi den nytt navn.</value>
+  </data>
+  <data name="Sprocket.Sequence.DoSomething" xml:space="preserve">
+    <value>Handling…</value>
+  </data>
+  <data name="Sprocket.Sequence.Wait" xml:space="preserve">
+    <value>Vent…</value>
+  </data>
+  <data name="Sprocket.Sequence.Held" xml:space="preserve">
+    <value>Kan bare leses mens {holder} redigerer den.</value>
+  </data>
+  <data name="Sprocket.Sequence.Delete" xml:space="preserve">
+    <value>Slett denne sekvensen</value>
+  </data>
+  <data name="Sprocket.Sequence.DeleteQuestion" xml:space="preserve">
+    <value>Slette denne sekvensen?</value>
+  </data>
+  <data name="Sprocket.Sequence.DeleteStep" xml:space="preserve">
+    <value>Slett dette steget</value>
+  </data>
+  <data name="Sprocket.Sequence.PauseStep" xml:space="preserve">
+    <value>Pause dette steget så sekvensen hopper over det.</value>
+  </data>
+  <data name="Sprocket.Sequence.UnpauseStep" xml:space="preserve">
+    <value>Dette steget er på pause. Klikk for å gjenoppta det.</value>
+  </data>
+  <data name="Sprocket.Sequence.SkippedBusy" xml:space="preserve">
+    <value>hoppet over {busy}x mens den var opptatt</value>
+  </data>
+  <data name="Sprocket.Sequence.SkippedOff" xml:space="preserve">
+    <value>hoppet over {off}x mens den var av</value>
+  </data>
+  <data name="Sprocket.Sequence.SkippedBoth" xml:space="preserve">
+    <value>hoppet over {busy}x mens den var opptatt, {off}x mens den var av</value>
+  </data>
+  <data name="Sprocket.Sequence.WaitQuestion" xml:space="preserve">
+    <value>Hvor lenge skal den vente?</value>
+  </data>
+
   <data name="Sprocket.Salvage.Different" xml:space="preserve">
     <value>Denne blokken har et program fra en annen versjon.</value>
   </data>
   <data name="Sprocket.Salvage.DifferentDetail" xml:space="preserve">
     <value>Denne versjonen kan ikke lese det, så skjermen starter tom. Blokken har det fortsatt til du endrer noe her - og da erstattes det for godt.</value>
   </data>
-  <data name="Sprocket.Salvage.Partial" xml:space="preserve">
-    <value>Denne blokken har et program som bare delvis kunne leses.</value>
+  <data name="Sprocket.Salvage.Broken" xml:space="preserve">
+    <value>Denne blokken har et program med en feil i.</value>
   </data>
-  <data name="Sprocket.Salvage.PartialDetail" xml:space="preserve">
-    <value>Det som kunne leses, vises her. Blokken har fortsatt hele programmet til du endrer noe her - og da erstattes det med det du ser.</value>
+  <data name="Sprocket.Salvage.BrokenDetail" xml:space="preserve">
+    <value>Ingenting av det kjører, og skjermen starter tom. Rediger teksten for å rette det. Blokken har det fortsatt til du endrer noe her - og da erstattes det for godt.</value>
   </data>
+  <data name="Sprocket.Salvage.Mend" xml:space="preserve">
+    <value>Rediger teksten</value>
+  </data>
+
+  <data name="Sprocket.Script.Title" xml:space="preserve">
+    <value>Skript</value>
+  </data>
+  <data name="Sprocket.Script.Apply" xml:space="preserve">
+    <value>Bruk</value>
+  </data>
+
   <data name="Sprocket.Salvage.Trouble" xml:space="preserve">
     <value>Lest som: {trouble}</value>
   </data>
@@ -157,5 +293,268 @@ Dette blir det første av dem.</value>
   </data>
   <data name="Sprocket.Lease.Detail" xml:space="preserve">
     <value>Bare én kan redigere om gangen. Åpne dette igjen når de er ferdige for å gjøre endringer.</value>
+  </data>
+
+  <data name="Sprocket.Button.Starts" xml:space="preserve">
+    <value>**{block}** starter allerede {sequence} på {blockset}.</value>
+  </data>
+  <data name="Sprocket.Button.Stops" xml:space="preserve">
+    <value>**{block}** stopper allerede {sequence} på {blockset}.</value>
+  </data>
+  <data name="Sprocket.Button.Acts" xml:space="preserve">
+    <value>**{block}** gjør allerede noe på {blockset}.</value>
+  </data>
+  <data name="Sprocket.Button.Elsewhere" xml:space="preserve">
+    <value>Knapp {button} på **{block}** gjør allerede noe annet.</value>
+  </data>
+  <data name="Sprocket.Button.TakeOver" xml:space="preserve">
+    <value>Ta den over</value>
+  </data>
+  <data name="Sprocket.Button.LeaveAlone" xml:space="preserve">
+    <value>La den være</value>
+  </data>
+
+  <data name="Sprocket.Pick.Search" xml:space="preserve">
+    <value>Søk</value>
+  </data>
+  <data name="Sprocket.Pick.Done" xml:space="preserve">
+    <value>Ferdig</value>
+  </data>
+  <data name="Sprocket.Pick.Back" xml:space="preserve">
+    <value>Tilbake</value>
+  </data>
+  <data name="Sprocket.Pick.Next" xml:space="preserve">
+    <value>Neste</value>
+  </data>
+  <data name="Sprocket.Pick.ClearTyped" xml:space="preserve">
+    <value>Tøm det som er skrevet</value>
+  </data>
+  <data name="Sprocket.Pick.EveryKind" xml:space="preserve">
+    <value>Vis alle typer igjen</value>
+  </data>
+  <data name="Sprocket.Pick.AllShown" xml:space="preserve">
+    <value>{count} blokker</value>
+  </data>
+  <data name="Sprocket.Pick.SomeShown" xml:space="preserve">
+    <value>{shown} av {count}</value>
+  </data>
+  <data name="Sprocket.Pick.Anything" xml:space="preserve">
+    <value>Hva som helst</value>
+  </data>
+  <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
+    <value>Beholde endringene?</value>
+  </data>
+  <data name="Sprocket.Pick.KeepThem" xml:space="preserve">
+    <value>Behold dem</value>
+  </data>
+  <data name="Sprocket.Pick.DiscardThem" xml:space="preserve">
+    <value>Forkast dem</value>
+  </data>
+  <data name="Sprocket.Pick.Blocks" xml:space="preserve">
+    <value>Blokker</value>
+  </data>
+  <data name="Sprocket.Pick.NoBlocksHappen" xml:space="preserve">
+    <value>Ingenting her har noe som kan skje med det.</value>
+  </data>
+  <data name="Sprocket.Pick.NoBlocksDone" xml:space="preserve">
+    <value>Ingenting her har noe som kan gjøres med det.</value>
+  </data>
+  <data name="Sprocket.Pick.WhatHappens" xml:space="preserve">
+    <value>Hva som skjer</value>
+  </data>
+  <data name="Sprocket.Pick.WhatToDo" xml:space="preserve">
+    <value>Hva som skal gjøres</value>
+  </data>
+  <data name="Sprocket.Pick.NothingHappens" xml:space="preserve">
+    <value>De blokkene har ingenting til felles som kan skje med dem.</value>
+  </data>
+  <data name="Sprocket.Pick.NothingDone" xml:space="preserve">
+    <value>De blokkene har ingenting til felles som kan gjøres med dem.</value>
+  </data>
+  <data name="Sprocket.Pick.WhatItDoes" xml:space="preserve">
+    <value>Hva den gjør</value>
+  </data>
+  <data name="Sprocket.Pick.NonePicked" xml:space="preserve">
+    <value>ingen valgt</value>
+  </data>
+  <data name="Sprocket.Pick.OnePicked" xml:space="preserve">
+    <value>1 valgt</value>
+  </data>
+  <data name="Sprocket.Pick.SomePicked" xml:space="preserve">
+    <value>{count} valgt</value>
+  </data>
+  <data name="Sprocket.Pick.AnyOne" xml:space="preserve">
+    <value>hvilken som helst</value>
+  </data>
+  <data name="Sprocket.Pick.AllOfThem" xml:space="preserve">
+    <value>alle sammen</value>
+  </data>
+  <data name="Sprocket.Pick.Values" xml:space="preserve">
+    <value>Verdier</value>
+  </data>
+  <data name="Sprocket.Pick.ToolbarActions" xml:space="preserve">
+    <value>Verktøylinjehandlinger</value>
+  </data>
+  <data name="Sprocket.Pick.Organized" xml:space="preserve">
+    <value>Ordnet</value>
+  </data>
+  <data name="Sprocket.Pick.Terminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="Sprocket.Pick.Shared" xml:space="preserve">
+    <value>Viser nå bare det de valgte blokkene har felles</value>
+  </data>
+  <data name="Sprocket.Pick.Pending" xml:space="preserve">
+    <value>Sprocket har ikke sjekket denne blokken ennå, så noe av det den tilbyr kan være doblet, mangle eller ha rare navn.</value>
+  </data>
+  <data name="Sprocket.Pick.Partial" xml:space="preserve">
+    <value>Sprocket har bare delvis sjekket denne blokken, så noe av det den tilbyr kan fortsatt være doblet, mangle eller ha rare navn.</value>
+  </data>
+  <data name="Sprocket.Member.Waits" xml:space="preserve">
+    <value>Dette tar tid å fullføre. Sekvensen venter til det er gjort før den går videre til neste steg.</value>
+  </data>
+  <data name="Sprocket.Pick.Run" xml:space="preserve">
+    <value>kjør</value>
+  </data>
+  <data name="Sprocket.Pick.Stop" xml:space="preserve">
+    <value>stopp</value>
+  </data>
+  <data name="Sprocket.Pick.SingleAction" xml:space="preserve">
+    <value>Én enkelt handling…</value>
+  </data>
+  <data name="Sprocket.Pick.NewSequence" xml:space="preserve">
+    <value>En ny sekvens</value>
+  </data>
+  <data name="Sprocket.Pick.Sequences" xml:space="preserve">
+    <value>Sekvenser</value>
+  </data>
+  <data name="Sprocket.Pick.HowOftenQuestion" xml:space="preserve">
+    <value>Hvor ofte?</value>
+  </data>
+  <data name="Sprocket.Pick.HowOften" xml:space="preserve">
+    <value>Hvor ofte</value>
+  </data>
+  <data name="Sprocket.Pick.EveryTick" xml:space="preserve">
+    <value>hvert tikk</value>
+  </data>
+  <data name="Sprocket.Pick.Rate" xml:space="preserve">
+    <value>{name} - hvert {ticks}. tikk</value>
+  </data>
+
+  <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
+    <value>Navnet på denne plantegningen.
+Trykk for å gi den nytt navn.</value>
+  </data>
+  <data name="Sprocket.Blueprint.Parts" xml:space="preserve">
+    <value>Plasser</value>
+  </data>
+  <data name="Sprocket.Blueprint.Panel" xml:space="preserve">
+    <value>Konfigurasjonspanel</value>
+  </data>
+  <data name="Sprocket.Blueprint.PanelFor" xml:space="preserve">
+    <value>for {name}-plantegningen</value>
+  </data>
+  <data name="Sprocket.Blueprint.PanelAbout" xml:space="preserve">
+    <value>Vises for alle som setter opp, eller endrer, noe laget fra denne plantegningen.</value>
+  </data>
+  <data name="Sprocket.Blueprint.StillOne" xml:space="preserve">
+    <value>1 mangler fortsatt en blokk</value>
+  </data>
+  <data name="Sprocket.Blueprint.StillMany" xml:space="preserve">
+    <value>{count} mangler fortsatt en blokk</value>
+  </data>
+  <data name="Sprocket.Blueprint.From" xml:space="preserve">
+    <value>laget fra {name}-plantegningen</value>
+  </data>
+  <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
+    <value>{name} gikk tapt.</value>
+  </data>
+  <data name="Sprocket.Blueprint.Description" xml:space="preserve">
+    <value>Beskrivelse</value>
+  </data>
+  <data name="Sprocket.Blueprint.DescriptionHint" xml:space="preserve">
+    <value>Hva denne plantegningen gjør, og hva den som fyller den ut trenger å vite.</value>
+  </data>
+  <data name="Sprocket.Blueprint.AboutHint" xml:space="preserve">
+    <value>Hva denne plassen er til.</value>
+  </data>
+
+  <data name="Sprocket.Writing.Preview" xml:space="preserve">
+    <value>Forhåndsvis</value>
+  </data>
+  <data name="Sprocket.Writing.Edit" xml:space="preserve">
+    <value>Rediger tekst</value>
+  </data>
+  <data name="Sprocket.Writing.Markup" xml:space="preserve">
+    <value>Markering</value>
+  </data>
+  <data name="Sprocket.Writing.Examples" xml:space="preserve">
+    <value>**sterke ord**
+*framhevede ord*
+# En overskrift
+- Et punkt i en liste
+1. Et nummerert punkt
+`kode`
+---</value>
+  </data>
+  <data name="Sprocket.Writing.ExamplesNote" xml:space="preserve">
+    <value>En tom linje starter et nytt avsnitt. En \ foran et merke viser selve merket.</value>
+  </data>
+
+  <data name="Sprocket.Blueprint.Required" xml:space="preserve">
+    <value>påkrevd</value>
+  </data>
+  <data name="Sprocket.Blueprint.Optional" xml:space="preserve">
+    <value>valgfri</value>
+  </data>
+  <data name="Sprocket.Blueprint.OpenSequence" xml:space="preserve">
+    <value>Åpne {name}</value>
+  </data>
+  <data name="Sprocket.Blueprint.NoneFits" xml:space="preserve">
+    <value>Ingenting på denne konstruksjonen kan fylle den.</value>
+  </data>
+
+  <data name="Sprocket.System.TurnOffToEdit" xml:space="preserve">
+    <value>Slå av systemet for å redigere.</value>
+  </data>
+  <data name="Sprocket.System.Locked" xml:space="preserve">
+    <value>{name} er slått på. Slå det av for å endre det.</value>
+  </data>
+  <data name="Sprocket.System.OffQuestion" xml:space="preserve">
+    <value>**{name}** er slått av. Slå det på?</value>
+  </data>
+  <data name="Sprocket.System.SwitchOnQuestion" xml:space="preserve">
+    <value>Slå på **{name}**?</value>
+  </data>
+  <data name="Sprocket.System.SwitchItOn" xml:space="preserve">
+    <value>Slå det på</value>
+  </data>
+  <data name="Sprocket.System.LeaveItOff" xml:space="preserve">
+    <value>La det være av</value>
+  </data>
+
+  <data name="Sprocket.Blueprint.SwitchOffQuestion" xml:space="preserve">
+    <value>Slå av **{name}**-plantegningen?</value>
+  </data>
+  <data name="Sprocket.Blueprint.SwitchOffStops" xml:space="preserve">
+    <value>Dette stopper hvert logikksystem laget fra den på denne konstruksjonen:</value>
+  </data>
+
+  <data name="Sprocket.Dialog.More" xml:space="preserve">
+    <value>og {count} til</value>
+  </data>
+
+  <data name="Sprocket.Blueprint.KeepRunning" xml:space="preserve">
+    <value>La dem kjøre</value>
+  </data>
+  <data name="Sprocket.Blueprint.SwitchThemOff" xml:space="preserve">
+    <value>Slå dem av</value>
+  </data>
+  <data name="Sprocket.Blueprint.SwitchOffRunning" xml:space="preserve">
+    <value>Alt som kjører nå stopper der det er.</value>
+  </data>
+
+  <data name="Sprocket.Prompt.Continue" xml:space="preserve">
+    <value>Fortsett</value>
   </data>
 </root>

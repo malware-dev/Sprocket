@@ -100,11 +100,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _picture.Tint = string.IsNullOrEmpty(Icon) ? Palette.None : Color.White;
             }
 
-            _name.Text = IsHeading ? (Text ?? "").ToUpperInvariant() : Text;
+            _name.Name = IsHeading ? (Text ?? "").ToUpperInvariant() : Text;
             _name.Style = IsHeading ? Styles.PickGroup : IsWithheld ? Styles.PickWithheld : Styles.PickName;
-
-            _waits.IsVisible = Waits;
-            _waits.Tip = Tip.For(_waits.Tip, Waits ? WaitsTip : null);
+            _name.Waits = Waits;
+            _name.WaitsTip = Waits ? WaitsTip : null;
 
             var detail = Detail(Secondary, Status);
             _detail.Text = detail;

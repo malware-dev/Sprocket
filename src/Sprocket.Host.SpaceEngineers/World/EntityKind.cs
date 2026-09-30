@@ -97,6 +97,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Says that the block announces when the moment added last may have happened - see <see cref="IAnnounces" />.</summary>
+        public EntityKind Announced()
+        {
+            _events[_events.Count - 1].Announce();
+            return this;
+        }
+
         /// <summary>
         /// Adds a moment the construct answers - see <see cref="EntityEvent.Answered" />.
         /// </summary>

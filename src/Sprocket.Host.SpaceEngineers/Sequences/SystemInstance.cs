@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     ///
     /// What it is for is the blocks: each of these slots its own doors and its own vent into
     /// the system's block slots, which is why one system can run two airlocks at opposite ends
-    /// of a ship. See <see cref="Fill" /> and <see cref="Resolve" /> - the runtime goes through them
+    /// of a ship. See <see cref="Fill(string, IList{string})" /> and <see cref="Resolve" /> - the runtime goes through them
     /// on every step of every running sequence.
     /// </remarks>
     public sealed class SystemInstance
@@ -72,6 +72,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         readonly Dictionary<string, List<string>> _fills = new Dictionary<string, List<string>>();
 
+        readonly Dictionary<string, List<ToolbarSlot>> _positions = new Dictionary<string, List<ToolbarSlot>>();
+
         public IEnumerable<string> Filled => _fills.Keys;
 
         /// <summary>Whether no slot has been filled.</summary>
@@ -79,6 +81,36 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>Slots this one's own blocks into one of the system's block slots.</summary>
         public void Fill(string slot, IList<string> entities)
+        {
+            _positions.Remove(slot);
+            Blocks(slot, entities);
+        }
+
+        /// <summary>Answers a trigger with toolbar slots: the slot <paramref name="at" /> on each block of <paramref name="entities" />, in the same order.</summary>
+        public void Fill(string slot, IList<string> entities, IList<ToolbarSlot> at)
+        {
+            Blocks(slot, entities);
+
+            List<ToolbarSlot> positions;
+            if (!_positions.TryGetValue(slot, out positions))
+            {
+                positions = new List<ToolbarSlot>();
+                _positions[slot] = positions;
+            }
+
+            positions.Clear();
+            for (var i = 0; i < at.Count; i++)
+                positions.Add(at[i]);
+        }
+
+        /// <summary>Where on each of the blocks filling <paramref name="slot" /> a trigger is answered, in the blocks' order, or null where it is not a trigger's.</summary>
+        public IList<ToolbarSlot> Positions(string slot)
+        {
+            List<ToolbarSlot> positions;
+            return _positions.TryGetValue(slot, out positions) ? positions : null;
+        }
+
+        void Blocks(string slot, IList<string> entities)
         {
             List<string> chosen;
             if (!_fills.TryGetValue(slot, out chosen))
@@ -95,6 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public void Clear(string slot)
         {
             _fills.Remove(slot);
+            _positions.Remove(slot);
         }
 
         /// <summary>Moves what fills slot <paramref name="was" /> to the slot's new name, <paramref name="now" />.</summary>
@@ -106,6 +139,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             _fills.Remove(was);
             _fills[now] = chosen;
+
+            List<ToolbarSlot> positions;
+            if (!_positions.TryGetValue(was, out positions))
+                return;
+
+            _positions.Remove(was);
+            _positions[now] = positions;
         }
 
         public IList<string> FilledWith(string slot)

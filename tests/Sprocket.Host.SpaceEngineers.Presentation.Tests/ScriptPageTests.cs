@@ -14,7 +14,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ScriptPageTests
 {
-    static readonly string Way = ScriptPage.Called.ToUpperInvariant();
+    const string Called = "Script";
+
+    static readonly string Way = Called.ToUpperInvariant();
 
     const string Back = Symbols.Left;
 
@@ -69,8 +71,8 @@ public class ScriptPageTests
     {
         Screen screen = Developing();
 
-        Assert.Contains(screen.Editor.Screen.Actions, entry => entry.Text == ScriptPage.Called);
-        Assert.DoesNotContain(screen.Words, said => said.Contains("+ " + ScriptPage.Called));
+        Assert.Contains(screen.Editor.Screen.Actions, entry => entry.Text == Called);
+        Assert.DoesNotContain(screen.Words, said => said.Contains("+ " + Called));
     }
 
     /// <summary>The listing shows the script, beginning where every saved program begins.</summary>
@@ -79,7 +81,7 @@ public class ScriptPageTests
     {
         Screen screen = Press(Developing(), Way);
 
-        Assert.Equal(ScriptPage.Called, screen.Ended);
+        Assert.Equal(Called, screen.Ended);
         Assert.Contains(screen.Legible, said => said.StartsWith("sprocket "));
     }
 
@@ -97,7 +99,7 @@ public class ScriptPageTests
         string home = screen.Ended;
 
         Press(Press(screen, Way), Way);
-        Assert.Equal(ScriptPage.Called, screen.Ended);
+        Assert.Equal(Called, screen.Ended);
 
         Press(screen, Back);
         Assert.Equal(home, screen.Ended);
@@ -121,6 +123,57 @@ public class ScriptPageTests
 
         // Nothing to scroll on a program this short, so no thumb belongs anywhere on the screen.
         Assert.DoesNotContain(screen.Drawings, d => !d.IsText && d.Ink == Palette.Thumb);
+    }
+
+    /// <summary>The script edited by hand and applied is the program, and what was switched off stays off.</summary>
+    [Fact]
+    public void AnEditedScriptIsTheProgram()
+    {
+        Screen screen = Developing();
+        screen.Editor.NewSystem("Airlock");
+        screen.Editor.GoToRoot();
+        screen.Run(1);
+
+        var system = screen.Editor.Program.Systems[0];
+        var identity = system.Identity;
+        Assert.False(system.Enabled);
+
+        Press(screen, Way);
+        screen.Run(1);
+
+        var page = Assert.IsType<ScriptPage>(screen.Editor.Current);
+        screen.Editor.Scripted(page.Listing.Text.Replace(".Airlock {", ".Hangar {"));
+        Assert.True(screen.Shows("Apply"), "the script page has no Apply button");
+        Press(screen, "Apply");
+        screen.Run(1);
+
+        var now = Assert.Single(screen.Editor.Program.Systems);
+        Assert.Equal("Hangar", now.Name);
+        Assert.Equal(identity, now.Identity);
+        Assert.False(now.Enabled);
+        Assert.Contains(".Hangar {", page.Listing.Text);
+    }
+
+    /// <summary>A script edited into something with an error in it changes nothing, and says what is wrong.</summary>
+    [Fact]
+    public void AnEditedScriptWithAnErrorChangesNothing()
+    {
+        Screen screen = Developing();
+        screen.Editor.NewSystem("Airlock");
+        screen.Editor.GoToRoot();
+        screen.Run(1);
+        Press(screen, Way);
+        screen.Run(1);
+
+        var page = Assert.IsType<ScriptPage>(screen.Editor.Current);
+        screen.Editor.Scripted(page.Listing.Text.Replace("instance 1 of", "instance of"));
+        Assert.True(screen.Shows("Apply"), "the script page has no Apply button");
+        Press(screen, "Apply");
+        screen.Run(1);
+
+        Assert.Equal("Airlock", Assert.Single(screen.Editor.Program.Systems).Name);
+        Assert.True(screen.Editor.Program.Intact);
+        Assert.StartsWith("Line ", page.Problem);
     }
 
     /// <summary>

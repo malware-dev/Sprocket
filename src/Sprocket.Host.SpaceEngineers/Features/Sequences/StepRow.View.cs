@@ -12,9 +12,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         Label _number;
         Flow _sentence;
         Label _lead;
+        Glyph _pause;
         Glyph _delete;
 
-        /// <summary>Makes the grip and the step's number, the sentence, and the bin.</summary>
+        /// <summary>Makes the grip and the step's number, the sentence, the pause and the bin.</summary>
         void CreateView()
         {
             Spacing = 12f;
@@ -37,6 +38,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Placement = Flex.Grow,
                 Children = { new Label { Style = Styles.Phrase }.As(out _lead) }
             }.As(out _sentence));
+
+            Children.Add(new Glyph { Symbol = Symbols.Pause, Style = Styles.Holds, Placement = Fixed.Size(32f, 32f) }.As(out _pause));
 
             // The one control on the row that destroys something, so the one place that warns under the pointer.
             Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f) }.As(out _delete));

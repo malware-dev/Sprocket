@@ -130,14 +130,14 @@ public class RotaTests
         ship.Tick();
         runner.Tick(++frame);
 
-        // The sequence's own two shifts: its triggers and its run.
+        // A sequence at rest is on no shift. A run has two: the watch on it, and its next step.
         var idle = runner.Rota.Count;
         runner.Call(sequence);
         var state = runner.Get(sequence)!;
 
         while (state.IsRunning && frame < 2000)
         {
-            Assert.Equal(idle + 1, runner.Rota.Count);
+            Assert.Equal(idle + 2, runner.Rota.Count);
             ship.Tick();
             runner.Tick(++frame);
         }
@@ -255,8 +255,13 @@ public class RotaTests
     }
 
     /// <summary>
-    /// A block's change is seen when the sequence's place comes round, and the trigger fires then.
+    /// A block's change is seen when the trigger's place comes round, and it fires then.
     /// </summary>
+    /// <remarks>
+    /// The sequence's runner joins the rota first and takes place 0, and the trigger's watch takes place 1, so a door
+    /// switched on after tick 23 is seen on tick 31. Nothing announces a block being switched on, which is what leaves its place
+    /// to decide.
+    /// </remarks>
     [Fact]
     public void ATriggerFiresWhenItsPlaceComesRound()
     {
@@ -265,9 +270,11 @@ public class RotaTests
         var door = ship.Door(1, "Door");
         var lamp = ship.Light(2, "Lamp");
 
-        var opened = new WhenTrigger("opened");
-        opened.Sources.Add(automation.Declare(ship.World, ship.Entity(door.Id)).Name);
-        var sequence = automation.AddSequence(opened);
+        door.Enabled = false;
+
+        var on = new WhenTrigger("switched-on");
+        on.Sources.Add(automation.Declare(ship.World, ship.Entity(door.Id)).Name);
+        var sequence = automation.AddSequence(on);
         Then(sequence, BlockKinds.SwitchOn, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
 
         var runner = new AutomationRunner(automation, ship.World);
@@ -278,14 +285,14 @@ public class RotaTests
             runner.Tick(frame + 1);
         }
 
-        door.ForceOpen();
+        door.Enabled = true;
         while (frame < 100 && runner.Get(sequence)!.FiredCount == 0)
         {
             ship.Tick();
             runner.Tick(++frame);
         }
 
-        Assert.Equal(30, frame);
+        Assert.Equal(31, frame);
     }
 
     /// <summary>
@@ -386,10 +393,10 @@ public class RotaTests
     /// </summary>
     /// <remarks>
     /// The guard on the whole of the runtime's tick, whoever wrote what: three Sprockets, each with
-    /// ten sequences started by a door and ten started by a button, and nothing running. The door
-    /// ones are sampled every ten ticks, the button ones every hundred, and each program is checked
-    /// for faults every hundred - spread so no tick carries more than its share, and nothing matched
-    /// to the program again after the first tick.
+    /// ten sequences started by a door and ten started by a button, and nothing running. A door says
+    /// when it has moved, so it is looked at every hundred ticks in case it does not, and a button
+    /// costs nothing until it is pressed - spread so no tick carries more than its share, and nothing
+    /// matched to the program again after the first tick.
     /// </remarks>
     [Fact]
     public void AnIdleWorldCostsOnlyItsShare()
@@ -438,10 +445,10 @@ public class RotaTests
             most = Math.Max(most, rota.Done - was);
         }
 
-        // Per thousand ticks: 30 door sequences sampled 100 times and 30 button ones 10 times. A
-        // program is checked when it changes and on no tick, so an idle one costs nothing here.
+        // Per thousand ticks: 30 doors looked at 10 times each. A program is checked when it changes
+        // and on no tick, so an idle one costs nothing here.
         var total = rota.Done - before;
-        Assert.Equal(30 * 100 + 30 * 10, total);
+        Assert.Equal(30 * 10, total);
 
         // No tick carries more than twice its even share. Places are handed out in turn to
         // everything, so what is looked at every ten and what is looked at every hundred interleave

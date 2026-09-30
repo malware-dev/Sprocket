@@ -97,13 +97,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The same, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
         public static void InTrigger(GridWorld world, SentenceSlot slot, List<Mention> into)
         {
-            if (!Blocks(world, slot, into))
+            if (!Blocks(world, slot, into) && !Member(slot, into))
                 into.Add(new Mention(InTrigger(world, slot), null));
         }
 
 
         /// <summary>
-        /// What comes before a step's slots: "wait", "run", "set", or nothing at all.
+        /// What comes before a step's slots: "wait", "run", "stop", "set", or nothing at all.
         /// </summary>
         /// <remarks>
         /// Ordinarily nothing. A step reads as "close the inner door" and the list being a list is
@@ -113,6 +113,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             if (kind == StepKind.Run)
                 return "run";
+
+            if (kind == StepKind.Stop)
+                return "stop";
 
             if (kind == StepKind.Set)
                 return SetWord;
@@ -189,7 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The same, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
         public static void InStep(GridWorld world, SentenceSlot slot, List<Mention> into)
         {
-            if (!Blocks(world, slot, into))
+            if (!Blocks(world, slot, into) && !Member(slot, into))
                 into.Add(new Mention(InStep(world, slot), null));
         }
 
@@ -330,6 +333,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return false;
 
             Entities(world, entities.Entities, entities.RequiresAll, into);
+            return true;
+        }
+
+        /// <summary>Adds the member <paramref name="slot" /> holds to <paramref name="into" />, where it holds one.</summary>
+        static bool Member(SentenceSlot slot, List<Mention> into)
+        {
+            var action = slot as ActionSlot;
+            if (action == null || action.Action == null)
+                return false;
+
+            into.Add(Mention.Member(action.Action.Sets ? action.Action.Named : action.Action.Text, action.Action.Lasts));
             return true;
         }
 

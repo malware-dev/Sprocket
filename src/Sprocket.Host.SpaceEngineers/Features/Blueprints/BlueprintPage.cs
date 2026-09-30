@@ -474,8 +474,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     targets.Add(block.Id);
             }
 
+            if (part.IsTrigger)
+            {
+                // A trigger slot is a block and one of its buttons, picked as a trigger's are.
+                var positions = chosen.Positions(part.Id);
+                var pressed = positions != null && positions.Count > 0 ? ButtonPanelExtension.Pressed(positions[0].Slot) : "";
+                Editor.Push(new PickPage(Editor, part.Id, true, targets, pressed, Form.Native,
+                    delegate(PickAnswer answer) { Answered(part, chosen, answer); },
+                    offers: delegate(GridEntity block) { return Fits(part, block); }));
+                return;
+            }
+
             Editor.Push(new PickPage(Editor, part.Id, targets, delegate(GridEntity block) { return Fits(part, block); },
                 delegate(PickAnswer answer) { Filled(part, chosen, answer.Targets); }));
+        }
+
+        /// <summary>Answers trigger slot <paramref name="part" /> for <paramref name="chosen" /> with the button <paramref name="answer" /> picked on each of its blocks, and goes back to the blueprint.</summary>
+        /// <remarks>Only a button press answers a trigger slot; anything else picked leaves the picker open.</remarks>
+        void Answered(Part part, SystemInstance chosen, PickAnswer answer)
+        {
+            var button = ButtonPanelExtension.ButtonOf(answer.Chosen) + 1;
+            if (button < 1)
+                return;
+
+            Editor.Filling(_system, part, chosen, answer.Targets, SprocketEditor.Pressed(answer), delegate
+            {
+                var names = new List<string>();
+                var kept = new List<ToolbarSlot>();
+                Editor.Picked(answer, names, kept);
+                chosen.Fill(part.Id, names, kept);
+                Editor.Program.Edited();
+                Editor.Program.Rewire();
+                Editor.Pop();
+                Editor.Invalidate();
+            });
         }
 
         /// <summary>Whether <paramref name="block" /> is of a type <paramref name="part" /> may be filled with.</summary>
@@ -503,7 +535,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// </remarks>
         void Filled(Part part, SystemInstance chosen, IList<long> ids)
         {
-            Editor.Filling(_system, part, chosen, ids, delegate
+            Editor.Filling(_system, part, chosen, ids, null, delegate
             {
                 var names = new List<string>();
                 for (var i = 0; i < ids.Count; i++)

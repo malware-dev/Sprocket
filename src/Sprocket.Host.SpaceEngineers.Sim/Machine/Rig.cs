@@ -238,10 +238,14 @@ sealed class Rig
     }
 
     /// <summary>A button panel, named, with as many buttons as asked for.</summary>
+    /// <remarks>
+    /// The game fixes the number of buttons by the block's definition, and a kind is described once per definition,
+    /// so each count is a subtype of its own.
+    /// </remarks>
     public Panel Panel(long id, string name, int buttons = 1)
     {
-        return Weld(new Panel(id, name, Type<MyObjectBuilder_ButtonPanel>(), "ButtonPanelLarge",
-            "Button Panel", buttons));
+        var subtype = buttons == 1 ? "ButtonPanelLarge" : "ButtonPanelLarge" + buttons;
+        return Weld(new Panel(id, name, Type<MyObjectBuilder_ButtonPanel>(), subtype, "Button Panel", buttons));
     }
 
     /// <summary>A block with nothing but a switch, which is most of a ship.</summary>

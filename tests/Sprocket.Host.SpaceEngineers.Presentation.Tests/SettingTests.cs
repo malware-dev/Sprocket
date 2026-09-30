@@ -100,8 +100,7 @@ public class SettingTests
         AutomationSystem system = program.AddSystem();
         system.Name = "Lighting";
 
-        var pressed = new RequiredTrigger("pressed_1");
-        pressed.Sources.Add(Named(sim, button));
+        var pressed = Pressed.On(system, Named(sim, button));
 
         Sequence dim = program.AddSequence(system, pressed);
         dim.Name = "Dim";
@@ -145,8 +144,7 @@ public class SettingTests
         AutomationSystem system = program.AddSystem();
         system.Name = "Lighting";
 
-        var pressed = new RequiredTrigger("pressed_1");
-        pressed.Sources.Add(Named(sim, button));
+        var pressed = Pressed.On(system, Named(sim, button));
 
         Sequence dark = program.AddSequence(system, pressed);
         dark.Name = "Dark";

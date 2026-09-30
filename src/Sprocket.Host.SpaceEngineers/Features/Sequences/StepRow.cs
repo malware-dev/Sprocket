@@ -47,6 +47,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>What deleting it does, or null while it cannot be deleted.</summary>
         public ICommand Deletes { get; set; }
 
+        /// <summary>Why nothing on it can be changed, said over everything that would change it; empty while it can.</summary>
+        public string Locked { get; set; } = "";
+
+        /// <summary>Whether the step is paused: switched off, kept as it is and passed over.</summary>
+        public bool IsOff { get; set; }
+
+        /// <summary>What pausing it, or letting it go again, does, or null while it cannot be paused.</summary>
+        public ICommand Pauses { get; set; }
+
         /// <summary>Whether the sequence is inside this step right now.</summary>
         public bool IsCurrent { get; set; }
 
@@ -80,13 +89,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Reshape();
 
             for (var i = 0; i < Slots.Count; i++)
+            {
+                _chips[i].WaitsTip = texts.MemberWaits;
+                _chips[i].Tip = Tip.For(_chips[i].Tip, Slots[i].Opens == null ? Why() : null);
                 Part(i, Slots[i], world);
+            }
+
+            // A paused step reads as quieter than one that runs, and every part of it can still be pressed and changed.
+            var words = IsOff ? Styles.PausedPhrase : Styles.Phrase;
+            var parts = IsOff ? Styles.PausedSlot : Styles.Slot;
+            _lead.Style = words;
+            for (var i = 0; i < _chips.Count; i++)
+            {
+                _joins[i].Style = words;
+                _chips[i].Style = parts;
+            }
 
             // Quiet rather than gone, so a locked row is the same row with nothing on it to press.
             _grip.Color = _grip.CanCarry ? Palette.Faint : Palette.Dim;
             _delete.Command = Deletes;
             _delete.IsEnabled = Deletes != null;
-            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.SequenceDeleteStep : null);
+            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.SequenceDeleteStep : Why());
+
+            // As quiet as the bin while the step runs, and lit while it is paused, which is the one time it has anything to say.
+            _pause.Style = IsOff ? Styles.Held : Styles.Holds;
+            _pause.Command = Pauses;
+            _pause.IsEnabled = Pauses != null;
+            _pause.Tip = Tip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.SequenceUnpauseStep : texts.SequencePauseStep);
 
             // Broken outranks being the current step, which the two can only be at once for the instant between a
             // block going away and the run abandoning the step that named it.
@@ -97,6 +126,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     : IsCurrent
                         ? Palette.LiveWash
                         : Palette.None;
+        }
+
+        /// <summary><see cref="Locked" />, or null where there is nothing to say.</summary>
+        string Why()
+        {
+            return Locked.Length == 0 ? null : Locked;
         }
 
         void Part(int at, SentenceSlot part, GridWorld world)

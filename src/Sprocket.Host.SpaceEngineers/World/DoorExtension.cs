@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
 
@@ -15,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// door has got to. Sprocket needs the difference: "close the inner door" is finished when the door is
     /// shut, not when the order was given.
     /// </remarks>
-    sealed class DoorExtension : IBlockExtension
+    sealed class DoorExtension : IBlockExtension, IAnnounces
     {
         public const string Open = "open";
         public const string Shut = "shut";
@@ -37,14 +38,51 @@ namespace Sprocket.Host.SpaceEngineers.World
             kind.WithProperty(Open, "open")
                 .WithProperty(Shut, "shut")
                 .WithProperty(Moving, "moving")
-                .WithEvent("opened", Open, Edge.Rising, "finishes opening")
-                .WithEvent("closed", Shut, Edge.Rising, "finishes closing")
+                .WithEvent("opened", Open, Edge.Rising, "finishes opening").Announced()
+                .WithEvent("closed", Shut, Edge.Rising, "finishes closing").Announced()
                 .WithState("is-open", Open, true, "is open")
                 .WithState("is-shut", Shut, true, "is shut")
                 .WithState("is-moving", Moving, true, "is moving")
                 .WithAction("open", "open", "is-open", "Open_On").Lasting()
                 .WithAction("close", "close", "is-shut", "Open_Off").Lasting()
                 .Renaming("Open", false, "reverse");
+        }
+
+        /// <summary>Told when the door finishes opening or closing, which every door raises from its own update.</summary>
+        /// <remarks>
+        /// Each family of door raises these itself, and a plain door may raise "closed" as a world loads with it shut; a
+        /// look finds nothing changed and nothing fires.
+        /// </remarks>
+        public IDisposable Listen(IMyTerminalBlock block, Action told)
+        {
+            var door = block as IMyDoor;
+            return door == null ? null : new Listening(door, told);
+        }
+
+        /// <summary>A door being listened to, until disposed.</summary>
+        sealed class Listening : IDisposable
+        {
+            readonly IMyDoor _door;
+            readonly Action _told;
+
+            public Listening(IMyDoor door, Action told)
+            {
+                _door = door;
+                _told = told;
+                _door.OnDoorOpened += Moved;
+                _door.OnDoorClosed += Moved;
+            }
+
+            public void Dispose()
+            {
+                _door.OnDoorOpened -= Moved;
+                _door.OnDoorClosed -= Moved;
+            }
+
+            void Moved(IMyDoor door)
+            {
+                _told();
+            }
         }
 
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)

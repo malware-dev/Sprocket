@@ -31,8 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             _was = was;
             _now = now;
-            _now.Runs = was.Runs;
-            _now.Stops = was.Stops;
+            _now.Does = was.Does;
             _now.Annotation = was.Annotation;
 
             _wasSources = CopyOf(was.Sources);

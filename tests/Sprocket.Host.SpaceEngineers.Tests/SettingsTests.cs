@@ -54,4 +54,14 @@ public class SettingsTests
     {
         Assert.True(Settings.From(On, "this is not an ini file at all").DeveloperMode);
     }
+
+    /// <summary>How often a program may look holds nothing back where nothing says otherwise, and the world's count beats the global one.</summary>
+    [Fact]
+    public void TheQuickestLookIsEveryTickUnlessSaid()
+    {
+        Assert.Equal(1, Settings.From(null, null).QuickestLook);
+        Assert.Equal(10, Settings.From("[Sprocket]\nquickestLook=10\n", null).QuickestLook);
+        Assert.Equal(30, Settings.From("[Sprocket]\nquickestLook=10\n", "[Sprocket]\nquickestLook=30\n").QuickestLook);
+        Assert.Equal(1, Settings.From("[Sprocket]\nquickestLook=-4\n", null).QuickestLook);
+    }
 }

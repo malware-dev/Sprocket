@@ -21,6 +21,10 @@ public class ProgramTextTests
 
     static string Save(Automation program) => ProgramText.Save(program, Store);
 
+    /// <summary>Declares a block called <paramref name="name" />, which is what a program names.</summary>
+    static void Block(Automation program, string name) =>
+        program.Restore(new EntityRef(name, BlockKinds.Definition("Door/LargeBlockDoor")));
+
     /// <summary>Loads, and refuses anything this file writes that does not read back cleanly.</summary>
     static void Load(string text, Automation program)
     {
@@ -280,8 +284,8 @@ public class ProgramTextTests
         sequence.Steps.Add(speed);
 
         var saved = Save(program);
-        Assert.Contains("action Reverse on [ rotor ]", saved);
-        Assert.Contains("'rotate-to' [ rotor ] with 90 2.5", saved);
+        Assert.Contains("act Reverse on [ rotor ]", saved);
+        Assert.Contains("act sprocket.'rotate-to' on [ rotor ] with 90 2.5", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
 
         var after = new Automation();
@@ -333,7 +337,7 @@ public class ProgramTextTests
         sequence.Steps.Add(each);
 
         // The language's own words for it, rather than a spelling invented here.
-        Assert.Contains("action SetColor on [ light ] with 255 136 0", Save(program));
+        Assert.Contains("act SetColor on [ light ] with 255 136 0", Save(program));
 
         var after = new Automation();
         LoadAll(program, after);
@@ -365,13 +369,9 @@ public class ProgramTextTests
         Assert.Equal(0, kinds.Values[3].Blue);
     }
 
-    /// <summary>An action that asked for nothing is still written as a verb and its targets.</summary>
-    /// <remarks>
-    /// Every program ever saved spells a step that way, and most steps have no values at all - so
-    /// the longer form is what a value hangs off, not a new way of writing everything.
-    /// </remarks>
+    /// <summary>An action that asked for nothing is written as the action and its parts, with no <c>with</c>.</summary>
     [Fact]
-    public void AStepWithNoValuesIsWrittenAsItAlwaysWas()
+    public void AStepWithNoValuesHasNoWith()
     {
         var program = new Automation();
         var values = new Values();
@@ -386,8 +386,8 @@ public class ProgramTextTests
         sequence.Steps.Add(shut);
 
         var written = Save(program);
-        Assert.Contains("close [ inner ]", written);
-        Assert.DoesNotContain("action", written);
+        Assert.Contains("act sprocket.close on [ inner ]\n", written);
+        Assert.DoesNotContain("with", written);
     }
 
     /// <summary>One of a block's own values is written as a set, and comes back as one.</summary>
@@ -457,10 +457,9 @@ public class ProgramTextTests
         var sequence = program.AddSequence(system);
         sequence.Name = "Cycle";
 
-        var halt = new RequiredTrigger("pressed_1");
-        halt.Runs = sequence.Number;
-        halt.Stops = true;
-        halt.Sources.Add("entity1");
+        Block(program, "entity1");
+        var halt = Pressed.On(system, "entity1");
+        halt.Does = new Run(sequence.Number, true);
         system.AddTrigger(halt);
 
         var text = Save(program);
@@ -477,10 +476,8 @@ public class ProgramTextTests
     /// A sequence nobody named writes down, and reads back, with the trigger that runs it.
     /// </summary>
     /// <remarks>
-    /// What a trigger holds when it does one thing Sprocket has to perform itself: nothing stands
-    /// alone on screen, and there is no name to show. The format needs no spelling of its own for it
-    /// - a sequence's name is optional - and that is worth a test, because the one thing that would
-    /// break it is the writer deciding to name everything.
+    /// A sequence's name is optional, and that is worth a test, because the one thing that would break
+    /// it is the writer deciding to name everything.
     /// </remarks>
     [Fact]
     public void AnUnnamedSequenceAndItsTriggerSurviveBeingSaved()
@@ -489,16 +486,17 @@ public class ProgramTextTests
         var system = program.AddSystem();
         system.Name = "Airlock";
 
+        Block(program, "entity1");
+        Block(program, "entity2");
+
         var open = new Act("open");
         open.Targets.Add("entity1");
 
         var sequence = program.AddSequence(system);
         sequence.Steps.Add(open);
 
-        var pressed = new RequiredTrigger();
-        pressed.EventId = "pressed_1";
-        pressed.Runs = sequence.Number;
-        pressed.Sources.Add("entity2");
+        var pressed = Pressed.On(system, "entity2");
+        pressed.Does = new Run(sequence.Number);
         system.AddTrigger(pressed);
 
         var after = new Automation();

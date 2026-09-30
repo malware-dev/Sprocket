@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Controls;
@@ -173,6 +174,28 @@ namespace Sprocket.Sim.Driving
                 throw new InvalidOperationException($"'{editor.Screen.Title()}' asks nothing to be typed.");
 
             Run(editor.Act(Cmd.Primary, () => pick.Give(said)));
+        }
+
+        /// <summary>Writes <paramref name="text" /> into the script page's listing in place of what it holds, as somebody editing it by hand.</summary>
+        public static void Scripted(this SprocketEditor editor, string text)
+        {
+            var page = editor.Current as ScriptPage;
+            if (page == null)
+                throw new InvalidOperationException($"'{editor.Screen.Title()}' is not the script.");
+
+            _ = page.View;
+            page.Listing.Text = text;
+        }
+
+        /// <summary>Presses the script page's Apply button.</summary>
+        public static void ApplyScript(this SprocketEditor editor)
+        {
+            var page = editor.Current as ScriptPage;
+            if (page == null)
+                throw new InvalidOperationException($"'{editor.Screen.Title()}' is not the script.");
+
+            _ = page.View;
+            Run(page.Apply.Command);
         }
 
         /// <summary>Presses one of the ways to start something on this screen, wherever it sits.</summary>

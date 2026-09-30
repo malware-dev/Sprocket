@@ -204,9 +204,11 @@ public class InstanceTests
         ship.Start(ship.Airlock.Instances[1]);
         ship.Tick(20);
 
-        // It tried to close its own door and is waiting on it, rather than reading the front
+        // It asked its own door, which cannot close, and stopped there rather than reading the front
         // airlock's shut door and opening onto space.
-        Assert.Contains("Port Inner:close", ship.Rig.Rig.Log);
+        var fault = SequenceSummary.Fault(ship.Runner.Get(ship.Program.Sequences[0], ship.Airlock.Instances[1]));
+        Assert.Equal(SequenceProblem.Unable, fault.Problem);
+        Assert.Contains("Port Inner", fault.Because);
         Assert.DoesNotContain("Port Outer:open", ship.Rig.Rig.Log);
     }
 

@@ -311,6 +311,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _locked.IsVisible = !editable;
             _locked.Text = LockedText;
 
+            var locked = editable
+                ? ""
+                : Editor.Holder != null
+                    ? Template.Fill(texts.SequenceHeld, "holder", Editor.Holder)
+                    : texts.SystemTurnOffToEdit;
+
             _keys.Clear();
             _shown.Clear();
             for (var i = 0; i < _sequence.Steps.Count; i++)
@@ -334,7 +340,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Slots.Clear();
                 Word(row, _keys[i]);
                 row.Deletes = Changes(Cmd.DeleteStep, delegate { RemoveStep(index); });
+                row.IsOff = _keys[i].IsOff;
+                row.Pauses = Changes(Cmd.SwitchStep, delegate { SwitchStep(index); });
                 row.Grip.CanCarry = editable;
+                row.Locked = locked;
             }
         }
 
@@ -435,7 +444,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (act != null && act.Sets)
                 return StepKind.Set;
 
-            return step is Run ? StepKind.Run : StepKind.Do;
+            var run = step as Run;
+            if (run != null)
+                return run.Stops ? StepKind.Stop : StepKind.Run;
+
+            return StepKind.Do;
         }
 
         /// <summary>How many of the sequence's lines a row stands for: the step, and any wait for it after it.</summary>
@@ -559,6 +572,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 going.Add(_sequence.Steps[index + i]);
 
             Editor.Do(_sequence, new RemoveStep(index, going.ToArray()));
+        }
+
+        /// <summary>Pauses the row's step, or lets it go again, with the wait for it to finish, which is one row with it.</summary>
+        void SwitchStep(int index)
+        {
+            Editor.Do(_sequence, new SwitchStep(index, Spanned(index), !_sequence.Steps[index].IsOff));
         }
 
         /// <summary>Moves the row somebody dragged to where they dropped it; both ends are rows, since a row is what was taken hold of.</summary>

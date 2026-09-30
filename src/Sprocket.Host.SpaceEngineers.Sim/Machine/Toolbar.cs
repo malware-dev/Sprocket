@@ -34,20 +34,8 @@ sealed class Toolbar : IMyToolbar
 
     public int PageCount => 1;
 
-    public int ItemCount
-    {
-        get
-        {
-            var count = 0;
-            for (var i = 0; i < _filled.Length; i++)
-            {
-                if (_filled[i])
-                    count++;
-            }
-
-            return count;
-        }
-    }
+    /// <summary>How many slots it has across its pages, filled or not, as the game counts them.</summary>
+    public int ItemCount => SlotCount * PageCount;
 
     public MyToolbarType Type => MyToolbarType.ButtonPanel;
 

@@ -90,6 +90,20 @@ public class GeneratorTests
         Assert.Equal(DiagnosticSeverity.Warning, problem.Severity);
     }
 
+    /// <summary>A text of the original that a translation lacks is a warning, since the game would show it untranslated.</summary>
+    [Fact]
+    public void AMissingTranslationIsAWarning()
+    {
+        var run = Run(
+            ("MyTexts.resx", Resx(("Mod.Greeting", "Hello"), ("Mod.Farewell", "Goodbye"))),
+            ("MyTexts.no.resx", Resx(("Mod.Greeting", "Hei"))));
+
+        var problem = Assert.Single(run.Diagnostics);
+        Assert.Equal("LOC006", problem.Id);
+        Assert.Equal(DiagnosticSeverity.Warning, problem.Severity);
+        Assert.Contains("Mod.Farewell", problem.GetMessage());
+    }
+
     /// <summary>The generator run over <paramref name="files" />, with the prefix and namespaces a mod would set.</summary>
     static GeneratorDriverRunResult Run(params (string Path, string Text)[] files)
     {

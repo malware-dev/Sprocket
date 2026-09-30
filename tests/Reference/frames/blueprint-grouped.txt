@@ -45,7 +45,7 @@ on screen     Automation for Test Rig
 038  Text       at {X:308.0625 Y:344.2328} scale 0.161  #E84A3AFF  "0"
 039  Text       at {X:336 Y:324.2255} scale 0.833  #DCF5FDFF  "Port"
 040  Text       at {X:382.5529 Y:327.5141} scale 0.401  #E84A3AFF  "!"
-041  Text       at {X:336 Y:357.0543} scale 0.556  #E84A3AFF  "Sequence 1: The Button Panel slot is empty. Fill it on the configuration panel."
+041  Text       at {X:336 Y:357.0543} scale 0.556  #E84A3AFF  "Sequence 1: The Airlock Button slot is empty. Fill it on the configuration panel."
 042  Sprite     Sprocket_Fill         {X:1527 Y:333 W:69 H:32}  #5B737BFF
 043  Sprite     Sprocket_Fill         {X:1531 Y:337 W:61 H:24}  #20272DFF
 044  Sprite     Sprocket_Fill         {X:1531 Y:337 W:24 H:24}  #DCF5FDFF

@@ -117,13 +117,8 @@ public class TargetTests
     }
 
     /// <summary>
-    /// One plain thing makes a sequence nobody named, which the list does not show as a thing.
+    /// One plain thing is the trigger's own act, said on the trigger's own row, and makes no sequence.
     /// </summary>
-    /// <remarks>
-    /// It is not a sequence somebody made; it is what their trigger does. So the trigger's own row
-    /// says it - "open Airlock Inner Door" - and the list of sequences is left for the things that
-    /// stand on their own.
-    /// </remarks>
     [Fact]
     public void OnePlainThingIsSaidOnTheTriggersOwnRow()
     {
@@ -138,13 +133,13 @@ public class TargetTests
 
         Assert.Equal(2, screen.Editor.Triggers().Count);
         Assert.Equal("then close Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.NotNull(screen.Editor.Program.Systems[0].Triggers[1].Acts);
 
-        // Two sequences exist, but only the named one is a row in the list of them.
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
+        Assert.Single(screen.Editor.Program.Sequences);
         Assert.Single(screen.Editor.Rows());
     }
 
-    /// <summary>A trigger is thrown away from its row, and takes its own sequence with it.</summary>
+    /// <summary>A trigger is thrown away from its row, and takes the act it did with it.</summary>
     [Fact]
     public void DeletingATriggerTakesTheOneThingItDidWithIt()
     {

@@ -2,15 +2,14 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// A step that starts another sequence of the same system.
+    /// A step that starts another sequence of the same system, or stops it.
     /// </summary>
     /// <remarks>
     /// By number, because that is what a sequence is. A script may name one instead - a person writing
     /// one by hand has the name in front of them - and the reader turns that into the number.
     /// <para>
-    /// It starts the sequence and carries on. <see cref="Await" /> waits for the actions started above
-    /// it, not for a sequence somebody called, so waiting for one is undesigned - see the concurrency
-    /// work. A sequence that is already running is not started twice; it records the miss instead.
+    /// It starts the sequence and carries on, and an <see cref="Await" /> below it waits for that sequence
+    /// to finish. A sequence that is already running is not started twice; it records the miss instead.
     /// </para>
     /// </remarks>
     public sealed class Run : Step
@@ -20,8 +19,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Number = number;
         }
 
-        /// <summary>The number, within the system, of the sequence to start.</summary>
+        /// <summary>A step that stops sequence <paramref name="number" /> where <paramref name="stops" /> says so, and starts it otherwise.</summary>
+        public Run(int number, bool stops)
+        {
+            Number = number;
+            Stops = stops;
+        }
+
+        /// <summary>The number, within the system, of the sequence to start or stop.</summary>
         public int Number { get; set; }
+
+        /// <summary>Whether it stops the sequence where it is running, rather than starting it.</summary>
+        public bool Stops { get; set; }
 
         /// <summary>
         /// The name a script used instead of a number, until the system has been read.

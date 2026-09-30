@@ -75,10 +75,23 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                if (triggers[i].Runs != sequence.Number)
+                if (!triggers[i].IsAbout(sequence))
                     continue;
 
                 starts++;
+
+                // A trigger part left unanswered is said by Empty; whether the slots it is given answer is the
+                // construct's to say below. One that names no part yet is somebody still building it.
+                var required = triggers[i] as RequiredTrigger;
+                if (required != null)
+                {
+                    if (required.Sources.Count > 0)
+                        continue;
+
+                    return sequence.Steps.Count == 0
+                        ? SequenceFault.None
+                        : SequenceFault.Unstarted(Unwired.NoBlock, null);
+                }
 
                 var moment = triggers[i] as MomentTrigger;
                 if (moment == null)
@@ -163,6 +176,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (empty.Exists)
                 return empty;
 
+            SequenceFault circular = Circular(sequence);
+            if (circular.Exists)
+                return circular;
+
             SequenceFault unoffered = Unoffered(bindings, sequence, through);
             if (unoffered.Exists)
                 return unoffered;
@@ -175,7 +192,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (mistyped.Exists)
                 return mistyped;
 
-            SequenceFault unawaited = Unawaited(bindings, sequence, through);
+            // A trigger's own act starts what it starts and is done, with nothing after it to wait for.
+            SequenceFault unawaited = sequence.Number > 0 ? Unawaited(bindings, sequence, through) : SequenceFault.None;
             if (unawaited.Exists)
                 return unawaited;
 
@@ -235,7 +253,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var i = 0; i < triggers.Count; i++)
             {
                 var moment = triggers[i] as MomentTrigger;
-                if (moment == null || moment.Runs != sequence.Number)
+                if (moment == null || !moment.IsAbout(sequence))
                     continue;
 
                 var slot = EmptyOf(system, through, moment.Sources);
@@ -279,15 +297,61 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var steps = sequence.Steps;
             for (var i = 0; i < steps.Count; i++)
             {
+                // A step switched off starts nothing and waits for nothing, so the wait that counts is the next step that is on.
                 var act = steps[i] as Act;
-                if (act != null && (i + 1 == steps.Count || !(steps[i + 1] is Await))
-                    && Lasts(bindings, act, through))
-                {
+                if (act == null || act.IsOff || !Lasts(bindings, act, through))
+                    continue;
+
+                var next = i + 1;
+                while (next < steps.Count && steps[next].IsOff)
+                    next++;
+
+                if (next == steps.Count || !(steps[next] is Await))
                     return new SequenceFault(SequenceProblem.Unawaited, i);
-                }
             }
 
             return SequenceFault.None;
+        }
+
+        /// <summary>The first step that runs a sequence which, directly or through the sequences it runs, starts this one again, or none.</summary>
+        /// <remarks>Only <c>run</c> counts, because a sequence may <c>stop</c> itself. Asked when the program is checked, and on no tick.</remarks>
+        static SequenceFault Circular(Sequence sequence)
+        {
+            var system = sequence.System;
+            if (system == null || sequence.Number <= 0)
+                return SequenceFault.None;
+
+            var steps = sequence.Steps;
+            for (var i = 0; i < steps.Count; i++)
+            {
+                var run = steps[i] as Run;
+                if (run != null && !run.Stops && !run.IsOff && Reaches(system, run.Number, sequence.Number, new List<int>()))
+                    return new SequenceFault(SequenceProblem.Circular, i);
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>Whether sequence <paramref name="from" />, or any it runs, is sequence <paramref name="to" />.</summary>
+        static bool Reaches(AutomationSystem system, int from, int to, List<int> seen)
+        {
+            if (from == to)
+                return true;
+
+            if (seen.Contains(from))
+                return false;
+
+            seen.Add(from);
+            var called = system.FindSequence(from);
+            var steps = called == null ? null : called.Steps;
+            for (var i = 0; steps != null && i < steps.Count; i++)
+            {
+                var run = steps[i] as Run;
+                if (run != null && !run.Stops && !run.IsOff && Reaches(system, run.Number, to, seen))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Whether what the step does to any of its blocks takes time to finish.</summary>

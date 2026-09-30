@@ -100,9 +100,14 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             row.Status = SequenceStatus.Off;
 
             var sequences = system.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
+            var triggers = system.Triggers;
+            for (var i = 0; i < sequences.Count + triggers.Count; i++)
             {
-                var sequence = sequences[i];
+                // The sequences, and then what each trigger that acts itself runs.
+                var sequence = i < sequences.Count ? sequences[i] : runner.Alone(system, triggers[i - sequences.Count]);
+                if (sequence == null)
+                    continue;
+
                 var state = runner.Get(sequence);
 
                 if (Louder(SequenceSummary.Status(sequence, state), row.Status))

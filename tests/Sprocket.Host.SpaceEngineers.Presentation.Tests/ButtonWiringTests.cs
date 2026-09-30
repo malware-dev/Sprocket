@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
@@ -45,6 +47,7 @@ public class ButtonWiringTests
         sim.Editor.Parts()[0].Fills!.Execute();
         sim.Tick();
         sim.Editor.PressBlock("Port Button");
+        sim.Editor.PressChoice("is pressed");
         sim.Editor.PressPrimary();
         sim.Tick();
 
@@ -78,6 +81,7 @@ public class ButtonWiringTests
         sim.Editor.Parts()[0].Fills!.Execute();
         sim.Tick();
         sim.Editor.PressBlock("Airlock Button");
+        sim.Editor.PressChoice("is pressed");
         sim.Editor.PressPrimary();
         sim.Tick();
 
@@ -90,6 +94,35 @@ public class ButtonWiringTests
         Assert.Empty(system.Instances[0].Filled);
         Assert.Single(system.Instances[1].Filled);
         Assert.EndsWith("/2/1", KeyIn(button));
+    }
+
+    /// <summary>
+    /// Each blockset answers the blueprint's trigger with its own button, and picking button 3 of a panel with four for
+    /// the second writes that button and leaves the first blockset's alone.
+    /// </summary>
+    [Fact]
+    public void EachBlocksetChoosesItsOwnButton()
+    {
+        var sim = Blueprinted();
+        var four = sim.Machine.Panel(40, "Four Button", 4);
+        Tick(sim);
+
+        sim.Editor.Parts()[0].Fills!.Execute();
+        sim.Tick();
+        sim.Editor.PressBlock("Four Button");
+        sim.Editor.PressChoice("button 3 is pressed");
+        sim.Editor.PressPrimary();
+        Tick(sim);
+
+        Assert.EndsWith("/1/1", KeyIn(PanelNamed(sim, "Airlock Button")));
+        Assert.EndsWith("/2/1", KeyIn(four, 2));
+        Assert.Null(KeyIn(four));
+
+        var system = sim.Editor.Program.Systems[0];
+        var trigger = (RequiredTrigger)system.Triggers[0];
+        Assert.Equal(1, system.Instances[0].Positions(trigger.Part)![0].Slot);
+        Assert.Equal(3, system.Instances[1].Positions(trigger.Part)![0].Slot);
+        Assert.Contains(":toolbar(1, 1, 3) ]", ProgramText.Save(sim.Editor.Program, sim.World.Values));
     }
 
     /// <summary>
@@ -124,6 +157,7 @@ public class ButtonWiringTests
         sim.Editor.Parts()[0].Fills!.Execute();
         sim.Tick();
         sim.Editor.PressBlock(block);
+        sim.Editor.PressChoice("is pressed");
         sim.Editor.PressPrimary();
         Tick(sim);
     }
@@ -136,14 +170,14 @@ public class ButtonWiringTests
 
     static Panel PanelNamed(Simulation sim, string name) => sim.Panels().Single(panel => panel.Name == name);
 
-    /// <summary>The key Sprocket's action in the panel's first slot carries, or null where it holds something else.</summary>
-    static string? KeyIn(Panel panel)
+    /// <summary>The key Sprocket's action in one of the panel's slots carries, the first by default, or null where it holds something else.</summary>
+    static string? KeyIn(Panel panel, int slot = 0)
     {
-        if (!panel.Toolbar.TryGetItem(0, out var present) || !TriggerAction.IsOurs(present))
+        if (!panel.Toolbar.TryGetItem(slot, out var present) || !TriggerAction.IsOurs(present))
             return null;
 
         var parameters = new List<TerminalActionParameter>();
-        panel.Toolbar.Parameters(0, parameters);
+        panel.Toolbar.Parameters(slot, parameters);
         return parameters.Count == 0 ? null : parameters[0].Value as string;
     }
 }

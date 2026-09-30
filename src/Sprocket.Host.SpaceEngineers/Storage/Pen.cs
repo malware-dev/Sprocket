@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
@@ -86,7 +87,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Starts a statement with one of the format's own words.</summary>
         public Pen Start(Keyword keyword)
         {
+            return Start(keyword, false);
+        }
+
+        /// <summary>Starts a statement with <paramref name="keyword" />, after <c>//</c> where <paramref name="off" /> says it is switched off.</summary>
+        public Pen Start(Keyword keyword, bool off)
+        {
             Pad();
+            if (off)
+                _text.Append("// ");
+
             _text.Append(Keywords.Name(keyword));
             _fresh = false;
             return this;
@@ -96,8 +106,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Starts a statement whose first word is an id rather than a keyword.
         /// </summary>
         /// <remarks>
-        /// A step reads as what it does - <c>open [outer] wait</c> - so the action id is the head, and
-        /// an action named after one of the format's words is quoted like any other collision.
+        /// An instance's <c>inner = [ door1 ]</c> is headed by the part it fills, and a part named after one of the
+        /// format's words is quoted like any other collision.
         /// </remarks>
         public Pen Head(string id)
         {
@@ -135,6 +145,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             Space();
             Quote(_text, value, '"');
+            return this;
+        }
+
+        /// <summary>A toolbar slot on a block: <c>panel1:toolbar(1, 1, 4)</c>.</summary>
+        public Pen Slot(string block, ToolbarSlot at)
+        {
+            Space();
+            Write(block);
+            _text.Append(":toolbar(").Append(at.Toolbar).Append(", ").Append(at.Page).Append(", ").Append(at.Slot).Append(')');
             return this;
         }
 
@@ -283,13 +302,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         static void Spell(StringBuilder into, string space, string name)
         {
-            if (!string.IsNullOrEmpty(space))
+            if (string.IsNullOrEmpty(space))
             {
-                Spell(into, space);
-                into.Append('.');
+                Spell(into, name);
+                return;
             }
 
-            Spell(into, name);
+            // Beside a dot only a name can stand, so a keyword there is a name and needs no quotes: sprocket.close.
+            Part(into, space);
+            into.Append('.');
+            Part(into, name);
+        }
+
+        /// <summary>One part of a qualified name: bare where it has a name's shape, in single quotes where it has not.</summary>
+        static void Part(StringBuilder into, string id)
+        {
+            if (Keywords.Shaped(id))
+                into.Append(id);
+            else
+                Quote(into, id, '\'');
         }
 
         /// <summary>A name: bare where it can be, in single quotes where it cannot.</summary>

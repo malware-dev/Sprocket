@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace Sprocket.Host.SpaceEngineers.Storage
@@ -14,6 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     sealed class Trouble
     {
         readonly string _script;
+        readonly List<Owed> _owed = new List<Owed>();
 
         public Trouble(string script, string already)
         {
@@ -45,9 +48,47 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Warning = Line(at) + what;
         }
 
+        /// <summary>
+        /// Says <paramref name="at" /> names <paramref name="name" />: one of <paramref name="system" />'s parts or a block, or
+        /// a block where <paramref name="system" /> is null.
+        /// </summary>
+        /// <remarks>Judged by <see cref="Settle" />, once the whole script is read, because a block may be written below what names it.</remarks>
+        public void Owes(Statement at, string name, AutomationSystem system)
+        {
+            var owed = new Owed();
+            owed.At = at;
+            owed.Name = name;
+            owed.System = system;
+            _owed.Add(owed);
+        }
+
+        /// <summary>Says what is wrong with every name owed that <paramref name="program" /> has nothing called.</summary>
+        public void Settle(Automation program)
+        {
+            for (var i = 0; i < _owed.Count; i++)
+            {
+                var owed = _owed[i];
+                if (program.FindRef(owed.Name) != null)
+                    continue;
+
+                if (owed.System == null)
+                    Say(owed.At, "no block called '" + owed.Name + "'.");
+                else if (owed.System.FindPart(owed.Name) == null)
+                    Say(owed.At, "no part or block called '" + owed.Name + "'.");
+            }
+        }
+
         string Line(Statement at)
         {
-            return "line " + new TextPtr(_script, at.At).FindLineNo() + ": ";
+            return "Line " + new TextPtr(_script, at.At).FindLineNo() + ": ";
+        }
+
+        /// <summary>A name a statement uses, waiting to be judged.</summary>
+        struct Owed
+        {
+            public Statement At;
+            public string Name;
+            public AutomationSystem System;
         }
     }
 }

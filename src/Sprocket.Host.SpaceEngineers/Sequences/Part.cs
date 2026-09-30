@@ -31,6 +31,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Whether a construct may leave this part unfilled.</summary>
         public bool Optional { get; set; }
 
+        /// <summary>Whether this part is a trigger, answered by toolbar slots on its blocks rather than by the blocks alone.</summary>
+        public bool IsTrigger { get; set; }
+
         /// <summary>
         /// The block types that may fill this part, or none for anything.
         /// </summary>
