@@ -78,6 +78,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Two bars: held where it is and passed over, until it is let go again.</summary>
         public const string Pause = "e";
 
+        /// <summary>A sheet ruled into four: a blueprint, the drawing logic systems are made from.</summary>
+        public const string Blueprint = "b";
+
         /// <summary>Every hue in order, red round to red.</summary>
         /// <remarks>
         ///     The game's own <c>Textures\GUI\HueScale.png</c>, which has no id a mod can use, so a material is

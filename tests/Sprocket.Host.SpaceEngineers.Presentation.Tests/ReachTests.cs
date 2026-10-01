@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ReachTests
 {
-    const string OpenThePicker = "60 130 type Airlock enter 60 237";
+    const string OpenThePicker = "60 196 type Airlock enter 60 163";
 
     const string Older = "sprocket 1\nblock|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:21,t:B\n";
 
@@ -55,7 +55,7 @@ public class ReachTests
     [Fact]
     public void ASwitchIsPressedRatherThanTheRowItStandsOn()
     {
-        var root = Screen.Fresh("60 130 type Airlock enter 25 62".Split(' '));
+        var root = Screen.Fresh("60 200 type Airlock enter 25 62".Split(' '));
 
         // A row that is both, which is the only kind where the two can disagree: a system's own row
         // carries no command, so pressing one has never done anything but work its switch.
@@ -205,13 +205,13 @@ public class ReachTests
         AssertEverythingLights("the picker", screen =>
         {
             screen.Editor.NewSystem("Airlock");
-            screen.Editor.PressStart("When…");
+            screen.Editor.PressStart("when…");
         });
 
         AssertEverythingLights("the picker with its kinds open", screen =>
         {
             screen.Editor.NewSystem("Airlock");
-            screen.Editor.PressStart("When…");
+            screen.Editor.PressStart("when…");
             screen.Run(2);
 
             var line = screen.Text(Blocks(screen).Kinds()[0].Text);

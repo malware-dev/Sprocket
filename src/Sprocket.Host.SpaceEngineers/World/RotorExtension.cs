@@ -319,31 +319,31 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return Trouble.None;
 
             if (!rotor.IsWorking)
-                return Trouble.Waiting("cannot turn - it is switched off or has no power");
+                return Trouble.Waiting(Cause.RotorNoPower);
 
             if (!rotor.IsAttached)
-                return Trouble.Waiting("cannot turn - it has no head");
+                return Trouble.Waiting(Cause.RotorNoHead);
 
             if (rotor.RotorLock)
-                return Trouble.Waiting("cannot turn - it is locked");
+                return Trouble.Waiting(Cause.RotorLocked);
 
             if (rotor.Torque <= 0f)
-                return Trouble.Waiting("cannot turn - its torque is nought");
+                return Trouble.Waiting(Cause.RotorNoTorque);
 
             if (rotor.TargetVelocityRPM == 0f)
-                return Trouble.Fatal("stopped turning - its speed was set to nought");
+                return Trouble.Fatal(Cause.RotorStopped);
 
             // Waited through rather than given up on. Whatever is holding the rotor may be moved, and
             // the rotor leaning on it meanwhile is no worse than the rotor stopped: measured in game,
             // taking its speed away does not settle what the pushing does to a construct.
             return _turn.Turning(rotor)
                 ? Trouble.None
-                : Trouble.Waiting("cannot turn - something is holding it");
+                : Trouble.Waiting(Cause.RotorHeld);
         }
 
-        public string StatusOf(IMyTerminalBlock block)
+        public Status StatusOf(IMyTerminalBlock block)
         {
-            return null;
+            return Status.None;
         }
 
         public bool IsBusy(IMyTerminalBlock block)

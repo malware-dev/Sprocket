@@ -23,6 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     {
         readonly Func<WindowLayer> _windows;
         readonly List<Button> _views = new List<Button>();
+        readonly string _doneFirst;
 
         float _width;
 
@@ -42,10 +43,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _narrow.Hint = texts.PickSearch;
             _kindNarrow.Hint = texts.PickSearch;
             _done.Text = texts.PickDone;
+            _doneFirst = texts.PickDoneFirst;
 
             _narrowClear.Tip = Tip.For(null, texts.PickClearTyped);
             _kindNarrowClear.Tip = Tip.For(null, texts.PickClearTyped);
             _kindClear.Tip = Tip.For(null, texts.PickEveryKind);
+            _kindLine.Tip = Tip.For(null, texts.PickKindAbout);
 
             _narrow.Edited += delegate { Typed(_narrow, _narrowClear, Narrowed); };
             _narrowClear.Command = new Relay(delegate { Emptied(_narrow, _narrowClear, Narrowed); });
@@ -210,6 +213,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>The way to finish, at the foot of the rows where the column is finished from.</summary>
         public Button Done => _done;
+
+        /// <summary>Whether the pick can be finished yet; while it cannot, the way to finish says what is still to choose.</summary>
+        public bool CanFinish
+        {
+            get { return _done.IsEnabled; }
+            set
+            {
+                _done.IsEnabled = value;
+                _done.Tip = Tip.For(_done.Tip, value ? null : _doneFirst);
+            }
+        }
 
         /// <summary>Shows the view at <paramref name="current" /> as the one showing, each view carrying out the command beside it.</summary>
         public void ShowViews(int current, IList<ICommand> commands)

@@ -40,7 +40,7 @@
     <comment>Note on the redo arrow. {action} is what redoing does again, such as "rename".</comment>
   </data>
   <data name="Sprocket.Chrome.Refresh" xml:space="preserve">
-    <value>Read the ship again, in case somebody has changed a button</value>
+    <value>Refresh: pick up blocks and buttons changed since this screen opened.</value>
     <comment>Note on the button that reads the blocks again.</comment>
   </data>
 
@@ -67,10 +67,6 @@ Open it to see what.</value>
 Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Note on a row's light when it is dark.</comment>
   </data>
-  <data name="Sprocket.Row.Delete" xml:space="preserve">
-    <value>Delete</value>
-    <comment>Note on a row's bin.</comment>
-  </data>
   <data name="Sprocket.Switch.On" xml:space="preserve">
     <value>ON</value>
     <comment>The half of an on/off switch that turns something on. Short: it shares the switch with the next.</comment>
@@ -80,27 +76,27 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>The half of an on/off switch that turns something off.</comment>
   </data>
   <data name="Sprocket.Row.SwitchOn" xml:space="preserve">
-    <value>Switch on</value>
-    <comment>Note on a switch that is off.</comment>
+    <value>Switch this installation on</value>
+    <comment>Note on an installation's switch while it is off.</comment>
   </data>
   <data name="Sprocket.Row.SwitchOff" xml:space="preserve">
-    <value>Switch off</value>
-    <comment>Note on a switch that is on.</comment>
+    <value>Switch this installation off, stopping its sequences</value>
+    <comment>Note on an installation's switch while it is on.</comment>
   </data>
   <data name="Sprocket.Row.SwitchSystemOn" xml:space="preserve">
-    <value>Switch the whole system on</value>
+    <value>Switch this logic system on, locking it against changes.</value>
     <comment>Note on a logic system's switch when it is off.</comment>
   </data>
   <data name="Sprocket.Row.SwitchSystemOff" xml:space="preserve">
-    <value>Switch the whole system off, stopping every sequence in it</value>
+    <value>Switch this logic system off, stopping its sequences and unlocking it for changes.</value>
     <comment>Note on a logic system's switch when it is on.</comment>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
-    <value>Switch on the logic systems made from this blueprint</value>
+    <value>Switch on every installation of this blueprint</value>
     <comment>Note on a blueprint's switch when it is off. Each of them runs where its own switch is on.</comment>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
-    <value>Switch off every logic system made from this blueprint on this construct</value>
+    <value>Switch off every installation of this blueprint</value>
     <comment>Note on a blueprint's switch when it is on.</comment>
   </data>
 
@@ -109,21 +105,37 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Heading of the first screen. {name} is the grid's name, which is pressed to rename it, so the words either side of it are drawn around it, and the name is always shown exactly as it is.</comment>
   </data>
   <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
-    <value>This grid's name, the one the game shows for it everywhere.
-Press to rename the grid.</value>
+    <value>This grid's name, as the game shows it everywhere.
+Renaming it here renames the grid.</value>
     <comment>Note on the grid's name in the heading.</comment>
   </data>
   <data name="Sprocket.Systems.New" xml:space="preserve">
-    <value>Logic system</value>
+    <value>logic system</value>
     <comment>Button, after a plus that means add, that adds a new logic system. A logic system is a set of sequences that work together, such as an airlock's.</comment>
   </data>
   <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
-    <value>Start a new logic system on this grid.</value>
+    <value>Start a new logic system on this construct.</value>
     <comment>Note on the button above.</comment>
+  </data>
+  <data name="Sprocket.Systems.OpenAbout" xml:space="preserve">
+    <value>Open **{name}** to see and change what it does.</value>
+    <comment>Note on a logic system's row on the home screen; {name} is the system.</comment>
+  </data>
+  <data name="Sprocket.Systems.OpenInstanceAbout" xml:space="preserve">
+    <value>Open **{name}** to choose the blocks it uses.</value>
+    <comment>Note on the row of a logic system made from a blueprint, on the home screen; {name} is the system.</comment>
   </data>
   <data name="Sprocket.Systems.Load" xml:space="preserve">
     <value>Blueprints</value>
     <comment>Button that opens the blueprint library, where blueprints are imported and exported. Also the library's heading.</comment>
+  </data>
+  <data name="Sprocket.Systems.PlainHeading" xml:space="preserve">
+    <value>Logic systems</value>
+    <comment>Heading over the logic systems of their own on the home screen; shown in capitals.</comment>
+  </data>
+  <data name="Sprocket.Systems.BlueprintsHeading" xml:space="preserve">
+    <value>Blueprints</value>
+    <comment>Heading over the blueprints on the home screen, under the logic systems of their own; shown in capitals.</comment>
   </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
     <value>The library of **blueprints**, where they are imported and exported.</value>
@@ -138,32 +150,24 @@ Press to rename the grid.</value>
     <comment>Button on a logic system's row that makes it a blueprint.</comment>
   </data>
   <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
-    <value>Turn this into a **blueprint**, so more logic systems like it can be made, each using its own blocks.
-This one becomes the first of them.</value>
+    <value>Turn this into a **blueprint**, so it can be installed again on other blocks.
+This one becomes its first installation.</value>
     <comment>Note on the button above.</comment>
   </data>
-  <data name="Sprocket.Systems.MadeFrom" xml:space="preserve">
-    <value>Made from **{name}** blueprint</value>
-    <comment>Heading over the logic systems made from one blueprint. {name} is the blueprint's name, as the player gave it.</comment>
-  </data>
-  <data name="Sprocket.Systems.Edit" xml:space="preserve">
-    <value>Edit blueprint</value>
-    <comment>Button beside the heading over the logic systems made from one blueprint, which opens the blueprint's logic system screen.</comment>
-  </data>
   <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
-    <value>Opens the **{name}** blueprint, to change what starts its sequences and what they do. Every logic system made from it changes with it.</value>
-    <comment>Note on the Edit blueprint button. {name} is the blueprint's name.</comment>
+    <value>Opens the **{name}** blueprint, to change what starts its sequences and what they do. Every installation of it changes with it.</value>
+    <comment>Note on the row over the logic systems made from a blueprint. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.Systems.LibraryUnbuilt" xml:space="preserve">
     <value>Not built yet. Blueprints will be imported and exported here.</value>
     <comment>Said on the blueprint library while it is not built.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
-    <value>Another</value>
-    <comment>Row under the logic systems made from a blueprint, after a plus that means add, which makes one more. The blueprint is named in the heading above, so the row does not name it.</comment>
+    <value>installation</value>
+    <comment>Adds another installation of a blueprint: its blocks, chosen on the configuration panel. Shown after a plus, as the last line under a blueprint.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
-    <value>Make another logic system from the **{name}** blueprint, and choose which blocks it uses.</value>
+    <value>Install the **{name}** blueprint on another set of blocks, and choose which blocks it uses.</value>
     <comment>Note on the row above. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.Systems.Running" xml:space="preserve">
@@ -184,15 +188,15 @@ This one becomes the first of them.</value>
     <comment>Asked before a logic system is deleted, with its name under it.</comment>
   </data>
   <data name="Sprocket.Delete.Blueprint" xml:space="preserve">
-    <value>This deletes the {name} blueprint and every logic system made from it, and cannot be undone. Type {name} to go ahead.</value>
+    <value>This deletes the {name} blueprint and every installation of it, and cannot be undone. Type {name} to go ahead.</value>
     <comment>Over the box a blueprint's name is typed into to delete it; the button beside the box does nothing until the name is typed. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.Delete.Instance" xml:space="preserve">
-    <value>Delete only this logic system?</value>
+    <value>Delete only this installation?</value>
     <comment>Asked before one of the logic systems made from a blueprint is deleted, with its name under it. Only that one goes.</comment>
   </data>
   <data name="Sprocket.Delete.InstanceKept" xml:space="preserve">
-    <value>The **{name}** blueprint and the other logic systems made from it are kept. This cannot be undone.</value>
+    <value>The **{name}** blueprint and its other installations are kept. This cannot be undone.</value>
     <comment>Said on the answer that deletes one of the logic systems made from a blueprint. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
@@ -209,8 +213,7 @@ This one becomes the first of them.</value>
   </data>
 
   <data name="Sprocket.System.NameAbout" xml:space="preserve">
-    <value>This logic system's name.
-Press to rename it.</value>
+    <value>This logic system's name.</value>
     <comment>Note on a logic system's name, in the heading of its own screen.</comment>
   </data>
   <data name="Sprocket.System.Blueprint" xml:space="preserve">
@@ -221,49 +224,77 @@ Press to rename it.</value>
     <value>Delete this logic system</value>
     <comment>Note on the bin in the header of a logic system's screen.</comment>
   </data>
+  <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
+    <value>Delete this installation</value>
+    <comment>The bin on an installation's row.</comment>
+  </data>
   <data name="Sprocket.System.DeleteBlueprint" xml:space="preserve">
-    <value>Delete this blueprint, and every logic system made from it</value>
+    <value>Delete this blueprint, and every installation of it</value>
     <comment>Note on the bin in the header of a blueprint's logic system screen.</comment>
   </data>
   <data name="Sprocket.System.EditPanel" xml:space="preserve">
     <value>Edit configuration panel</value>
     <comment>Button on a blueprint's logic system screen that opens the panel its blocks are chosen on, to set up its slots and description.</comment>
   </data>
+  <data name="Sprocket.System.EditPanelAbout" xml:space="preserve">
+    <value>Set up the description and slots everyone filling in this blueprint sees.</value>
+    <comment>Note on the button that opens a blueprint's configuration panel.</comment>
+  </data>
   <data name="Sprocket.System.Using" xml:space="preserve">
     <value>Using the blocks of</value>
     <comment>Leads the name of the logic system whose blocks every sentence on the screen names: the system's own, or for a blueprint a list of the blocksets made from it.</comment>
+  </data>
+  <data name="Sprocket.System.UsingAbout" xml:space="preserve">
+    <value>Pick an installation of this blueprint, to see its blocks in the sentences below.</value>
+    <comment>Note on the list of logic systems made from a blueprint, on the blueprint's logic system screen.</comment>
   </data>
   <data name="Sprocket.System.Triggers" xml:space="preserve">
     <value>Triggers</value>
     <comment>Heading over a logic system's triggers: what starts its sequences.</comment>
   </data>
   <data name="Sprocket.System.When" xml:space="preserve">
-    <value>When…</value>
+    <value>when…</value>
     <comment>Button that adds a trigger started by something happening to a block.</comment>
   </data>
   <data name="Sprocket.System.Every" xml:space="preserve">
-    <value>Every…</value>
+    <value>every…</value>
     <comment>Button that adds a trigger started on a timer.</comment>
+  </data>
+  <data name="Sprocket.System.WhenAbout" xml:space="preserve">
+    <value>Add a trigger that starts on a button or toolbar press, or when a block's value changes.</value>
+    <comment>Note on the button that adds a trigger started by something happening.</comment>
+  </data>
+  <data name="Sprocket.System.EveryAbout" xml:space="preserve">
+    <value>Start a sequence repeatedly, on a timed interval.</value>
+    <comment>Note on the button that adds a trigger started on a timer.</comment>
   </data>
   <data name="Sprocket.System.Sequences" xml:space="preserve">
     <value>Sequences</value>
     <comment>Heading over a logic system's sequences: the named runs of steps its triggers start.</comment>
   </data>
   <data name="Sprocket.System.NewSequence" xml:space="preserve">
-    <value>Sequence</value>
+    <value>sequence</value>
     <comment>Button, after a plus that means add, that adds a sequence with nothing to start it yet.</comment>
+  </data>
+  <data name="Sprocket.System.NewSequenceAbout" xml:space="preserve">
+    <value>Add a sequence: steps that run in order. Give it a trigger to start it.</value>
+    <comment>Note on the button that adds a sequence.</comment>
   </data>
   <data name="Sprocket.System.NoSequences" xml:space="preserve">
     <value>No sequences yet.</value>
     <comment>Said in place of the list of sequences while a logic system has none.</comment>
   </data>
   <data name="Sprocket.System.Copy" xml:space="preserve">
-    <value>Creates a copy of this sequence, switched off and with no trigger of its own</value>
+    <value>Copy this sequence. The copy starts switched off, with nothing to start it.</value>
     <comment>Note on the copy mark of a sequence that a trigger starts.</comment>
   </data>
   <data name="Sprocket.System.CopyUnstarted" xml:space="preserve">
-    <value>Creates a copy of this sequence, switched off</value>
+    <value>Copy this sequence. The copy starts switched off.</value>
     <comment>Note on the copy mark of a sequence nothing starts.</comment>
+  </data>
+  <data name="Sprocket.System.OpenSequence" xml:space="preserve">
+    <value>Open **{name}** to see and change its steps.</value>
+    <comment>Note on a sequence's row on the logic system screen; {name} is the sequence.</comment>
   </data>
   <data name="Sprocket.Trigger.Live" xml:space="preserve">
     <value>true right now</value>
@@ -273,19 +304,46 @@ Press to rename it.</value>
     <value>Delete this trigger</value>
     <comment>Note on the bin at the end of a trigger's row.</comment>
   </data>
+  <data name="Sprocket.Trigger.BlocksAbout" xml:space="preserve">
+    <value>Choose which block starts this.</value>
+    <comment>Note on the block a trigger's sentence names.</comment>
+  </data>
+  <data name="Sprocket.Trigger.WhatAbout" xml:space="preserve">
+    <value>Choose what happens to the block to start this.</value>
+    <comment>Note on what happens to the block, in a trigger's sentence.</comment>
+  </data>
+  <data name="Sprocket.Trigger.DoesAbout" xml:space="preserve">
+    <value>Choose what this trigger does.</value>
+    <comment>Note on what a trigger's sentence says it does.</comment>
+  </data>
+  <data name="Sprocket.Trigger.RateAbout" xml:space="preserve">
+    <value>Change how often it runs.</value>
+    <comment>Note on how often an Every trigger runs.</comment>
+  </data>
+  <data name="Sprocket.Trigger.TargetsAbout" xml:space="preserve">
+    <value>Choose which blocks this trigger acts on.</value>
+    <comment>Note on the blocks a trigger's own task acts on.</comment>
+  </data>
 
   <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
-    <value>This sequence's name.
-Press to rename it.</value>
+    <value>This sequence's name.</value>
     <comment>Note on a sequence's name, in the heading of its own screen.</comment>
   </data>
   <data name="Sprocket.Sequence.DoSomething" xml:space="preserve">
-    <value>Action…</value>
+    <value>task…</value>
     <comment>Button under a sequence's steps, after a plus that means add, that adds a step acting on blocks. The ellipsis says it asks which before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.Wait" xml:space="preserve">
-    <value>Wait…</value>
+    <value>wait…</value>
     <comment>Button under a sequence's steps, after a plus that means add, that adds a step waiting a length of time. The ellipsis says it asks how long before it adds.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
+    <value>Add a task: run an action on blocks, or set one of their values.</value>
+    <comment>Note on the button that adds a task to a sequence.</comment>
+  </data>
+  <data name="Sprocket.Sequence.WaitAbout" xml:space="preserve">
+    <value>Add a step that waits a while before the next one.</value>
+    <comment>Note on the button that adds a wait to a sequence.</comment>
   </data>
   <data name="Sprocket.Sequence.Held" xml:space="preserve">
     <value>Read only while {holder} edits it.</value>
@@ -303,12 +361,32 @@ Press to rename it.</value>
     <value>Delete this step</value>
     <comment>Note on the bin at the end of a step's row.</comment>
   </data>
+  <data name="Sprocket.Sequence.ActionAbout" xml:space="preserve">
+    <value>Choose what this step does.</value>
+    <comment>Note on the action a step's sentence names.</comment>
+  </data>
+  <data name="Sprocket.Sequence.BlocksAbout" xml:space="preserve">
+    <value>Choose which blocks this step acts on.</value>
+    <comment>Note on the blocks a step's sentence names.</comment>
+  </data>
+  <data name="Sprocket.Sequence.ValuesAbout" xml:space="preserve">
+    <value>Change the value it is given.</value>
+    <comment>Note on a value a step's sentence gives.</comment>
+  </data>
+  <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
+    <value>Change how long it waits.</value>
+    <comment>Note on a wait's length.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DragStep" xml:space="preserve">
+    <value>Drag to move this step.</value>
+    <comment>Note on a step's drag handle.</comment>
+  </data>
   <data name="Sprocket.Sequence.PauseStep" xml:space="preserve">
-    <value>Pause this step to have the sequence skip it.</value>
+    <value>Pause this step. The sequence skips it until it is resumed.</value>
     <comment>Note on the pause mark on a step's row, while the step runs.</comment>
   </data>
   <data name="Sprocket.Sequence.UnpauseStep" xml:space="preserve">
-    <value>This step is paused. Click to resume it.</value>
+    <value>Paused: the sequence skips this step. Press to resume it.</value>
     <comment>Note on the pause mark on a step's row, lit while the step is paused.</comment>
   </data>
   <data name="Sprocket.Sequence.SkippedBusy" xml:space="preserve">
@@ -327,13 +405,21 @@ Press to rename it.</value>
     <value>How long should it wait?</value>
     <comment>Title of the question that chooses how long a waiting step waits.</comment>
   </data>
+  <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
+    <value>60 ticks is one second.</value>
+    <comment>Note on the box a length of wait is typed into.</comment>
+  </data>
+  <data name="Sprocket.Sequence.WaitTypeFirst" xml:space="preserve">
+    <value>Type a whole number of ticks first.</value>
+    <comment>Note on the button that takes a typed wait, while nothing is typed.</comment>
+  </data>
 
   <data name="Sprocket.Salvage.Different" xml:space="preserve">
     <value>This block holds a program from a different version.</value>
     <comment>Banner on the first screen when the block's program was written by a version that cannot be read.</comment>
   </data>
   <data name="Sprocket.Salvage.DifferentDetail" xml:space="preserve">
-    <value>This version cannot read it, so this screen starts empty. The block still holds it until you change something here - and that replaces it for good.</value>
+    <value>This version cannot read it, so this screen starts empty. The block keeps the old program until you change something here. Then it is gone for good.</value>
     <comment>Shown when the banner above is opened.</comment>
   </data>
   <data name="Sprocket.Salvage.Broken" xml:space="preserve">
@@ -341,7 +427,7 @@ Press to rename it.</value>
     <comment>Banner on every screen when the block's program has an error in its text, so none of it was loaded.</comment>
   </data>
   <data name="Sprocket.Salvage.BrokenDetail" xml:space="preserve">
-    <value>None of it runs, and this screen starts empty. Edit the text to mend it. The block still holds it until you change something here - and that replaces it for good.</value>
+    <value>None of it runs, and this screen starts empty. Edit the text to mend it. The block keeps the old program until you change something here. Then it is gone for good.</value>
     <comment>Shown when the banner above is opened.</comment>
   </data>
   <data name="Sprocket.Salvage.Mend" xml:space="preserve">
@@ -391,7 +477,7 @@ Press to rename it.</value>
     <comment>The same, where the other trigger stops its sequence.</comment>
   </data>
   <data name="Sprocket.Button.Acts" xml:space="preserve">
-    <value>**{block}** already does something on {blockset}.</value>
+    <value>**{block}** already does a task on {blockset}.</value>
     <comment>The same, where the other trigger acts on its blocks itself rather than starting a sequence.</comment>
   </data>
   <data name="Sprocket.Button.Elsewhere" xml:space="preserve">
@@ -413,6 +499,10 @@ Press to rename it.</value>
   <data name="Sprocket.Pick.Done" xml:space="preserve">
     <value>Done</value>
     <comment>Button that finishes a pick.</comment>
+  </data>
+  <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
+    <value>Choose something in every column first.</value>
+    <comment>Note on Done while it cannot be pressed.</comment>
   </data>
   <data name="Sprocket.Pick.Back" xml:space="preserve">
     <value>Back</value>
@@ -441,6 +531,10 @@ Press to rename it.</value>
   <data name="Sprocket.Pick.Anything" xml:space="preserve">
     <value>Anything</value>
     <comment>The entry in the list of kinds that narrows to no kind at all.</comment>
+  </data>
+  <data name="Sprocket.Pick.KindAbout" xml:space="preserve">
+    <value>Show only one kind of block.</value>
+    <comment>Note on the line that opens the list of kinds of block.</comment>
   </data>
   <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
     <value>Keep your changes?</value>
@@ -523,15 +617,15 @@ Press to rename it.</value>
     <comment>Tab showing what a block offers as the block itself declares it.</comment>
   </data>
   <data name="Sprocket.Pick.Shared" xml:space="preserve">
-    <value>Currently showing only what the selected blocks share</value>
+    <value>Showing only what the picked blocks share</value>
     <comment>Note over what several blocks offer.</comment>
   </data>
   <data name="Sprocket.Pick.Pending" xml:space="preserve">
-    <value>Sprocket has not checked this block yet, so some of what it offers may be doubled, missing or oddly named.</value>
+    <value>Support for this block is still being worked on, so some of what it offers may be doubled, missing or oddly named.</value>
     <comment>Note over what a block offers, before the block has been checked.</comment>
   </data>
   <data name="Sprocket.Pick.Partial" xml:space="preserve">
-    <value>Sprocket has only partly checked this block, so some of what it offers may still be doubled, missing or oddly named.</value>
+    <value>Support for this block is only partly done, so some of what it offers may still be doubled, missing or oddly named.</value>
     <comment>Note over what a block offers, where the block has been checked in part.</comment>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
@@ -546,13 +640,33 @@ Press to rename it.</value>
     <value>stop</value>
     <comment>Choice that a trigger stops the sequence chosen.</comment>
   </data>
+  <data name="Sprocket.Pick.RunAbout" xml:space="preserve">
+    <value>Start the sequence chosen below</value>
+    <comment>Note on the answer that makes a trigger start a sequence.</comment>
+  </data>
+  <data name="Sprocket.Pick.StopAbout" xml:space="preserve">
+    <value>Stop the sequence chosen below</value>
+    <comment>Note on the answer that makes a trigger stop a sequence.</comment>
+  </data>
   <data name="Sprocket.Pick.SingleAction" xml:space="preserve">
-    <value>A single action…</value>
+    <value>A task on blocks…</value>
     <comment>Choice that a trigger does one thing to some blocks, chosen on the page after.</comment>
+  </data>
+  <data name="Sprocket.Pick.SingleActionAbout" xml:space="preserve">
+    <value>Do a single task on some blocks, without a sequence.</value>
+    <comment>Note on the choice of a trigger doing a task of its own.</comment>
+  </data>
+  <data name="Sprocket.Pick.SingleTask" xml:space="preserve">
+    <value>A task on blocks</value>
+    <comment>Title of the picker for a trigger's own task.</comment>
   </data>
   <data name="Sprocket.Pick.NewSequence" xml:space="preserve">
     <value>A new sequence</value>
     <comment>Choice that a trigger runs a sequence made for it.</comment>
+  </data>
+  <data name="Sprocket.Pick.NewSequenceAbout" xml:space="preserve">
+    <value>Make a new sequence for this trigger to start.</value>
+    <comment>Note on the choice of a new sequence for a trigger.</comment>
   </data>
   <data name="Sprocket.Pick.Sequences" xml:space="preserve">
     <value>Sequences</value>
@@ -575,8 +689,7 @@ Press to rename it.</value>
     <comment>A rate a timer fires at. {name} is its word, such as steady; {ticks} how many ticks apart.</comment>
   </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
-    <value>This blueprint's name.
-Press to rename it.</value>
+    <value>This blueprint's name.</value>
     <comment>Note on a blueprint's name at the head of its screen.</comment>
   </data>
   <data name="Sprocket.Blueprint.Parts" xml:space="preserve">
@@ -603,9 +716,13 @@ Press to rename it.</value>
     <value>{count} still need a block</value>
     <comment>Beside the heading over a blockset's slots. {count} is how many slots that need a block have none, always more than one.</comment>
   </data>
-  <data name="Sprocket.Blueprint.From" xml:space="preserve">
-    <value>made from {name} blueprint</value>
-    <comment>After the name of a logic system made from a blueprint, at the head of its slots. {name} is the blueprint's name.</comment>
+  <data name="Sprocket.Blueprint.FromLead" xml:space="preserve">
+    <value>made from</value>
+    <comment>Before the blueprint's name in the heading of a logic system made from it; the name opens the blueprint.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.FromAfter" xml:space="preserve">
+    <value>blueprint</value>
+    <comment>After the blueprint's name in that heading, or empty for nothing.</comment>
   </data>
   <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
     <value>{name} was lost.</value>
@@ -622,6 +739,14 @@ Press to rename it.</value>
   <data name="Sprocket.Blueprint.AboutHint" xml:space="preserve">
     <value>What this slot is for.</value>
     <comment>In the empty box what a slot is for is written in.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NameBoxAbout" xml:space="preserve">
+    <value>The slot's name, as everyone filling in this blueprint sees it.</value>
+    <comment>Note on the box a slot's name is typed into.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.RequiredAbout" xml:space="preserve">
+    <value>Whether an installation of this blueprint may leave this slot empty.</value>
+    <comment>Note on the switch between required and optional.</comment>
   </data>
   <data name="Sprocket.Writing.Preview" xml:space="preserve">
     <value>Preview</value>
@@ -649,6 +774,30 @@ Press to rename it.</value>
     <value>A blank line starts a new paragraph. A \ before a mark shows the mark itself.</value>
     <comment>Under the guide to the marks rich text can be written with.</comment>
   </data>
+  <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
+    <value>Show the guide to formatting text.</value>
+    <comment>Note on the button that shows the guide to markup.</comment>
+  </data>
+  <data name="Sprocket.Writing.PreviewAbout" xml:space="preserve">
+    <value>Show the text as others will see it.</value>
+    <comment>Note on the button that shows the text as it reads.</comment>
+  </data>
+  <data name="Sprocket.Color.Hue" xml:space="preserve">
+    <value>Hue</value>
+    <comment>Note on the H slider of a color.</comment>
+  </data>
+  <data name="Sprocket.Color.Saturation" xml:space="preserve">
+    <value>Saturation</value>
+    <comment>Note on the S slider of a color.</comment>
+  </data>
+  <data name="Sprocket.Color.Brightness" xml:space="preserve">
+    <value>Brightness</value>
+    <comment>Note on the V slider of a color.</comment>
+  </data>
+  <data name="Sprocket.Color.CodeAbout" xml:space="preserve">
+    <value>A color as #RRGGBB, or #RRGGBBAA to include how see-through it is.</value>
+    <comment>Note on the box a color code is typed into.</comment>
+  </data>
   <data name="Sprocket.Blueprint.Required" xml:space="preserve">
     <value>required</value>
     <comment>On the switch of a slot that must be filled with a block. The other side reads optional.</comment>
@@ -670,7 +819,7 @@ Press to rename it.</value>
     <comment>Note over a part, or a button, that cannot be changed while its logic system is switched on.</comment>
   </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
-    <value>{name} is switched on. Switch it off to change it.</value>
+    <value>{name} is on. Turn it off to edit.</value>
     <comment>Said in place of the buttons that change a logic system, or a sequence in it, while it is switched on. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.System.OffQuestion" xml:space="preserve">
@@ -694,7 +843,7 @@ Press to rename it.</value>
     <comment>Asked before a blueprint is switched off. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.Blueprint.SwitchOffStops" xml:space="preserve">
-    <value>This stops every logic system made from it on this construct:</value>
+    <value>This stops every installation of it on this construct:</value>
     <comment>Under the question above, over the list of the logic systems made from the blueprint.</comment>
   </data>
   <data name="Sprocket.Dialog.More" xml:space="preserve">
@@ -716,5 +865,769 @@ Press to rename it.</value>
   <data name="Sprocket.Prompt.Continue" xml:space="preserve">
     <value>Continue</value>
     <comment>Button beside a box a name is typed into, that gives it.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Off" xml:space="preserve">
+    <value>switched off</value>
+    <comment>A sequence's state: its system is switched off.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Running" xml:space="preserve">
+    <value>running</value>
+    <comment>A sequence's state: it is running.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RunningWaiting" xml:space="preserve">
+    <value>running - waiting for this step</value>
+    <comment>A sequence's state: running, held at a step.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Ready" xml:space="preserve">
+    <value>ready</value>
+    <comment>A sequence's state: ready to be started.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RunNow" xml:space="preserve">
+    <value>Run it now, as its trigger would</value>
+    <comment>Note on the button that runs a sequence by hand.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StopNow" xml:space="preserve">
+    <value>Stop it, leaving everything where it is</value>
+    <comment>Note on the button that stops a running sequence.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Numbered" xml:space="preserve">
+    <value>Sequence {number}</value>
+    <comment>What a sequence nobody has named is called; {number} is its number.</comment>
+  </data>
+  <data name="Sprocket.Pick.WantsOne" xml:space="preserve">
+    <value>This needs one value.</value>
+    <comment>Over the values of an action that takes one.</comment>
+  </data>
+  <data name="Sprocket.Pick.WantsMany" xml:space="preserve">
+    <value>This needs {count} values.</value>
+    <comment>Over the values of an action that takes several; {count} is a number word or digits.</comment>
+  </data>
+  <data name="Sprocket.Pick.WantsColor" xml:space="preserve">
+    <value>This needs a color.</value>
+    <comment>Over the values of an action that takes a color.</comment>
+  </data>
+  <data name="Sprocket.Number.Two" xml:space="preserve">
+    <value>two</value>
+    <comment>The number 2 as a word, in "This needs {count} values."</comment>
+  </data>
+  <data name="Sprocket.Number.Three" xml:space="preserve">
+    <value>three</value>
+    <comment>The number 3 as a word.</comment>
+  </data>
+  <data name="Sprocket.Number.Four" xml:space="preserve">
+    <value>four</value>
+    <comment>The number 4 as a word.</comment>
+  </data>
+  <data name="Sprocket.Problem.EmptySlot" xml:space="preserve">
+    <value>The {slot} slot is empty. Fill it on the configuration panel.</value>
+    <comment>A blueprint slot a step needs has no block; {slot} is its name.</comment>
+  </data>
+  <data name="Sprocket.Problem.BlockOff" xml:space="preserve">
+    <value>{block} is switched off. Switch it on first.</value>
+    <comment>A block a step acts on is switched off.</comment>
+  </data>
+  <data name="Sprocket.Problem.BlockStalled" xml:space="preserve">
+    <value>{block} isn't working, so this waits for it.</value>
+    <comment>A block a step waits on is not working.</comment>
+  </data>
+  <data name="Sprocket.Problem.AtStep" xml:space="preserve">
+    <value>Step {step}: {problem}</value>
+    <comment>What is wrong, at a step of a sequence with no name; {problem} is one of the Problem texts.</comment>
+  </data>
+  <data name="Sprocket.Problem.AtNamedStep" xml:space="preserve">
+    <value>{sequence}, step {step}: {problem}</value>
+    <comment>What is wrong, at a step of a named sequence.</comment>
+  </data>
+  <data name="Sprocket.Problem.InSequence" xml:space="preserve">
+    <value>{sequence}: {problem}</value>
+    <comment>What is wrong with a named sequence, at no one step.</comment>
+  </data>
+  <data name="Sprocket.Problem.NoBlock" xml:space="preserve">
+    <value>No block starts this. Choose one.</value>
+    <comment>A trigger with no block.</comment>
+  </data>
+  <data name="Sprocket.Problem.NoMoment" xml:space="preserve">
+    <value>Choose what the block must do to start this.</value>
+    <comment>A trigger whose block has nothing chosen to happen.</comment>
+  </data>
+  <data name="Sprocket.Problem.NoMomentOf" xml:space="preserve">
+    <value>Choose what {block} must do to start this.</value>
+    <comment>The same, naming the block.</comment>
+  </data>
+  <data name="Sprocket.Problem.NeverTriggered" xml:space="preserve">
+    <value>Nothing can start this.</value>
+    <comment>A trigger that can never fire.</comment>
+  </data>
+  <data name="Sprocket.Problem.Cleared" xml:space="preserve">
+    <value>{block}'s button was cleared, so it can't start this.</value>
+    <comment>The toolbar slot that started this was emptied in the game.</comment>
+  </data>
+  <data name="Sprocket.Problem.Taken" xml:space="preserve">
+    <value>{block}'s button does something else, so it can't start this.</value>
+    <comment>The toolbar slot that started this was given something else.</comment>
+  </data>
+  <data name="Sprocket.Problem.Unset" xml:space="preserve">
+    <value>{block}'s button isn't set to start this.</value>
+    <comment>The toolbar slot that should start this does not.</comment>
+  </data>
+  <data name="Sprocket.Problem.MissingSource" xml:space="preserve">
+    <value>This listens to something that isn't here any more.</value>
+    <comment>A block that starts this is gone.</comment>
+  </data>
+  <data name="Sprocket.Problem.MissingTarget" xml:space="preserve">
+    <value>This affects something that isn't here any more.</value>
+    <comment>A block this acts on is gone.</comment>
+  </data>
+  <data name="Sprocket.Problem.NothingStarts" xml:space="preserve">
+    <value>Nothing starts this yet.</value>
+    <comment>A sequence with no trigger.</comment>
+  </data>
+  <data name="Sprocket.Problem.MissingGate" xml:space="preserve">
+    <value>This waits on something that isn't here any more.</value>
+    <comment>A block this waits on is gone.</comment>
+  </data>
+  <data name="Sprocket.Problem.Unoffered" xml:space="preserve">
+    <value>This does something these blocks no longer offer. Replace this step.</value>
+    <comment>A step's action is no longer offered by its blocks.</comment>
+  </data>
+  <data name="Sprocket.Problem.Unfilled" xml:space="preserve">
+    <value>This step is missing a value it needs. Fill it in.</value>
+    <comment>A step lacks a value.</comment>
+  </data>
+  <data name="Sprocket.Problem.Mistyped" xml:space="preserve">
+    <value>This step has a value its action can't take. Fill it in again.</value>
+    <comment>A step has a value of the wrong kind.</comment>
+  </data>
+  <data name="Sprocket.Problem.Unawaited" xml:space="preserve">
+    <value>This step doesn't wait for what it starts, which this version can't show. Replace this step.</value>
+    <comment>A step from an older program that cannot be shown.</comment>
+  </data>
+  <data name="Sprocket.Problem.Stuck" xml:space="preserve">
+    <value>This is waiting for something that cannot finish.</value>
+    <comment>A step held by something that cannot finish.</comment>
+  </data>
+  <data name="Sprocket.Problem.Conflicted" xml:space="preserve">
+    <value>This stopped: something else took over one of its blocks.</value>
+    <comment>A run given up because something else took a block over.</comment>
+  </data>
+  <data name="Sprocket.Problem.Circular" xml:space="preserve">
+    <value>This runs a sequence that runs this one again. Remove one of the two.</value>
+    <comment>Two sequences that run each other.</comment>
+  </data>
+  <data name="Sprocket.Problem.Unable" xml:space="preserve">
+    <value>A block this step acts on is switched off. Switch it on first.</value>
+    <comment>A block a step acts on is switched off.</comment>
+  </data>
+  <data name="Sprocket.Problem.Stalled" xml:space="preserve">
+    <value>A block this waits for isn't working, so this waits for it.</value>
+    <comment>A block a step waits on is not working.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Unknown" xml:space="preserve">
+    <value>Stopped for an unknown reason.</value>
+    <comment>A logic system was switched off and the reason was not kept.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Plain" xml:space="preserve">
+    <value>Stopped: {reason}</value>
+    <comment>A logic system was switched off; {reason} is one of the Stopped reasons, or a block trouble.</comment>
+  </data>
+  <data name="Sprocket.Stopped.AtStep" xml:space="preserve">
+    <value>Stopped at step {step}: {reason}</value>
+    <comment>The same, at a step of a sequence with no name.</comment>
+  </data>
+  <data name="Sprocket.Stopped.In" xml:space="preserve">
+    <value>Stopped in {sequence}: {reason}</value>
+    <comment>The same, in a named sequence at no one step.</comment>
+  </data>
+  <data name="Sprocket.Stopped.AtStepOf" xml:space="preserve">
+    <value>Stopped at step {step} of {sequence}: {reason}</value>
+    <comment>The same, at a step of a named sequence.</comment>
+  </data>
+  <data name="Sprocket.Stopped.EmptySlot" xml:space="preserve">
+    <value>the {slot} slot was empty.</value>
+    <comment>Reason: a blueprint slot had no block.</comment>
+  </data>
+  <data name="Sprocket.Stopped.ButtonFailed" xml:space="preserve">
+    <value>{block}'s button couldn't start it.</value>
+    <comment>Reason: a block's toolbar slot could not start it.</comment>
+  </data>
+  <data name="Sprocket.Stopped.BlockGone" xml:space="preserve">
+    <value>{block} was gone.</value>
+    <comment>Reason: a block was gone.</comment>
+  </data>
+  <data name="Sprocket.Stopped.BlockReplaced" xml:space="preserve">
+    <value>{block} may have been replaced.</value>
+    <comment>Reason: a block may have been replaced.</comment>
+  </data>
+  <data name="Sprocket.Stopped.NeverTriggered" xml:space="preserve">
+    <value>nothing could start it.</value>
+    <comment>Reason: nothing could start it.</comment>
+  </data>
+  <data name="Sprocket.Stopped.MissingSource" xml:space="preserve">
+    <value>a block that starts it was gone.</value>
+    <comment>Reason: a block that starts it was gone.</comment>
+  </data>
+  <data name="Sprocket.Stopped.MissingTarget" xml:space="preserve">
+    <value>a block it acts on was gone.</value>
+    <comment>Reason: a block it acts on was gone.</comment>
+  </data>
+  <data name="Sprocket.Stopped.MissingGate" xml:space="preserve">
+    <value>a block it waits on was gone.</value>
+    <comment>Reason: a block it waits on was gone.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Unoffered" xml:space="preserve">
+    <value>its blocks no longer offered the action.</value>
+    <comment>Reason: the action was no longer offered.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Unfilled" xml:space="preserve">
+    <value>a value was missing.</value>
+    <comment>Reason: a value was missing.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Mistyped" xml:space="preserve">
+    <value>a value didn't fit the action.</value>
+    <comment>Reason: a value did not fit.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Unawaited" xml:space="preserve">
+    <value>it didn't wait for what it started.</value>
+    <comment>Reason: a step from an older program.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Circular" xml:space="preserve">
+    <value>it would have started itself again.</value>
+    <comment>Reason: two sequences ran each other.</comment>
+  </data>
+  <data name="Sprocket.Stopped.BlockOff" xml:space="preserve">
+    <value>{block} was switched off.</value>
+    <comment>Reason: a block was switched off.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Unable" xml:space="preserve">
+    <value>a block it acts on was switched off.</value>
+    <comment>Reason: a block it acts on was switched off.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Adrift" xml:space="preserve">
+    <value>a block may have been replaced.</value>
+    <comment>Reason: a block may have been replaced.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Failed" xml:space="preserve">
+    <value>it could not work.</value>
+    <comment>Reason: anything else.</comment>
+  </data>
+  <data name="Sprocket.Trouble.VentNowhere" xml:space="preserve">
+    <value>cannot empty - nowhere to put the air</value>
+    <comment>An air vent cannot empty the room.</comment>
+  </data>
+  <data name="Sprocket.Trouble.VentNotAirtight" xml:space="preserve">
+    <value>cannot fill - the room is not airtight</value>
+    <comment>An air vent cannot fill a leaking room.</comment>
+  </data>
+  <data name="Sprocket.Trouble.VentNoOxygen" xml:space="preserve">
+    <value>cannot fill - no oxygen to fill it with</value>
+    <comment>An air vent has no oxygen.</comment>
+  </data>
+  <data name="Sprocket.Trouble.VentToldToFill" xml:space="preserve">
+    <value>stopped - something else told this vent to fill the room</value>
+    <comment>Something else sent the vent the other way.</comment>
+  </data>
+  <data name="Sprocket.Trouble.VentToldToEmpty" xml:space="preserve">
+    <value>stopped - something else told this vent to empty the room</value>
+    <comment>Something else sent the vent the other way.</comment>
+  </data>
+  <data name="Sprocket.Trouble.BatteryToldToDischarge" xml:space="preserve">
+    <value>stopped - something else set this battery to discharge</value>
+    <comment>Something else changed the battery.</comment>
+  </data>
+  <data name="Sprocket.Trouble.BatteryToldToAuto" xml:space="preserve">
+    <value>stopped - something else set this battery to auto</value>
+    <comment>Something else changed the battery.</comment>
+  </data>
+  <data name="Sprocket.Trouble.BatteryOff" xml:space="preserve">
+    <value>cannot charge - it is switched off</value>
+    <comment>A battery is switched off.</comment>
+  </data>
+  <data name="Sprocket.Trouble.BatteryDamaged" xml:space="preserve">
+    <value>cannot charge - it is damaged</value>
+    <comment>A battery is damaged.</comment>
+  </data>
+  <data name="Sprocket.Trouble.BatteryNoPower" xml:space="preserve">
+    <value>cannot charge - no power coming in</value>
+    <comment>A battery gets no power.</comment>
+  </data>
+  <data name="Sprocket.Trouble.PistonNoPower" xml:space="preserve">
+    <value>cannot move - it is switched off or has no power</value>
+    <comment>A piston is off or unpowered.</comment>
+  </data>
+  <data name="Sprocket.Trouble.PistonNoHead" xml:space="preserve">
+    <value>cannot move - it has no head</value>
+    <comment>A piston has no head.</comment>
+  </data>
+  <data name="Sprocket.Trouble.PistonStopped" xml:space="preserve">
+    <value>stopped moving - its speed was set to nought</value>
+    <comment>A piston's speed was set to 0.</comment>
+  </data>
+  <data name="Sprocket.Trouble.PistonReversedExtending" xml:space="preserve">
+    <value>stopped extending - it was sent the other way</value>
+    <comment>A piston was reversed while extending.</comment>
+  </data>
+  <data name="Sprocket.Trouble.PistonReversedRetracting" xml:space="preserve">
+    <value>stopped retracting - it was sent the other way</value>
+    <comment>A piston was reversed while retracting.</comment>
+  </data>
+  <data name="Sprocket.Trouble.RotorNoPower" xml:space="preserve">
+    <value>cannot turn - it is switched off or has no power</value>
+    <comment>A rotor or hinge is off or unpowered.</comment>
+  </data>
+  <data name="Sprocket.Trouble.RotorNoHead" xml:space="preserve">
+    <value>cannot turn - it has no head</value>
+    <comment>A rotor or hinge has no head.</comment>
+  </data>
+  <data name="Sprocket.Trouble.RotorLocked" xml:space="preserve">
+    <value>cannot turn - it is locked</value>
+    <comment>A rotor or hinge is locked.</comment>
+  </data>
+  <data name="Sprocket.Trouble.RotorNoTorque" xml:space="preserve">
+    <value>cannot turn - its torque is nought</value>
+    <comment>A rotor or hinge's torque is 0.</comment>
+  </data>
+  <data name="Sprocket.Trouble.RotorStopped" xml:space="preserve">
+    <value>stopped turning - its speed was set to nought</value>
+    <comment>A rotor or hinge's speed was set to 0.</comment>
+  </data>
+  <data name="Sprocket.Trouble.RotorHeld" xml:space="preserve">
+    <value>cannot turn - something is holding it</value>
+    <comment>A rotor or hinge is blocked.</comment>
+  </data>
+  <data name="Sprocket.Trouble.TankStockpileOff" xml:space="preserve">
+    <value>stopped - something else switched stockpile off</value>
+    <comment>Something else switched a tank's stockpile off.</comment>
+  </data>
+  <data name="Sprocket.Trouble.TankNoPower" xml:space="preserve">
+    <value>cannot fill - it is switched off or has no power</value>
+    <comment>A tank is off or unpowered.</comment>
+  </data>
+  <data name="Sprocket.Trouble.TankNoGas" xml:space="preserve">
+    <value>cannot fill - no {gas} coming in</value>
+    <comment>A tank gets no gas; {gas} is the gas the game names.</comment>
+  </data>
+  <data name="Sprocket.Status.Damaged" xml:space="preserve">
+    <value>damaged</value>
+    <comment>A block's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Off" xml:space="preserve">
+    <value>off</value>
+    <comment>A block's state: switched off.</comment>
+  </data>
+  <data name="Sprocket.Status.On" xml:space="preserve">
+    <value>on</value>
+    <comment>A block's state: switched on and working.</comment>
+  </data>
+  <data name="Sprocket.Status.NoPower" xml:space="preserve">
+    <value>no power</value>
+    <comment>A block's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Open" xml:space="preserve">
+    <value>open</value>
+    <comment>A door's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Shut" xml:space="preserve">
+    <value>shut</value>
+    <comment>A door's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Opening" xml:space="preserve">
+    <value>opening…</value>
+    <comment>A door's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Closing" xml:space="preserve">
+    <value>closing…</value>
+    <comment>A door's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Pressurized" xml:space="preserve">
+    <value>pressurized</value>
+    <comment>An air vent's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Empty" xml:space="preserve">
+    <value>empty</value>
+    <comment>An air vent's, battery's or tank's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Filling" xml:space="preserve">
+    <value>filling…</value>
+    <comment>An air vent's or tank's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Emptying" xml:space="preserve">
+    <value>emptying…</value>
+    <comment>An air vent's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Full" xml:space="preserve">
+    <value>full</value>
+    <comment>A battery's or tank's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Charging" xml:space="preserve">
+    <value>charging…</value>
+    <comment>A battery's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Extended" xml:space="preserve">
+    <value>extended</value>
+    <comment>A piston's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Retracted" xml:space="preserve">
+    <value>retracted</value>
+    <comment>A piston's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Extending" xml:space="preserve">
+    <value>extending…</value>
+    <comment>A piston's state.</comment>
+  </data>
+  <data name="Sprocket.Status.Retracting" xml:space="preserve">
+    <value>retracting…</value>
+    <comment>A piston's state.</comment>
+  </data>
+  <data name="Sprocket.Status.NotWired" xml:space="preserve">
+    <value>not wired</value>
+    <comment>A button panel's state: no button does anything.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Events" xml:space="preserve">
+    <value>Set this in the terminal: the game keeps this block's events from mods</value>
+    <comment>Note on a member the game keeps from mods.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Camera" xml:space="preserve">
+    <value>Set this in the terminal for now: choosing a camera here is planned</value>
+    <comment>Note on a member that chooses a camera.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Rotor" xml:space="preserve">
+    <value>Set this in the terminal for now: choosing a rotor here is planned</value>
+    <comment>Note on a member that chooses a rotor.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Ammo" xml:space="preserve">
+    <value>Set this in the terminal for now: choosing ammunition here is planned</value>
+    <comment>Note on a member that chooses ammunition.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Unread" xml:space="preserve">
+    <value>Set this in the terminal for now: support for it is still being worked on</value>
+    <comment>Note on a member whose values cannot be read yet.</comment>
+  </data>
+  <data name="Sprocket.Pick.TagPending" xml:space="preserve">
+    <value>pending</value>
+    <comment>Tag under a member that is not offered yet.</comment>
+  </data>
+  <data name="Sprocket.Pick.TagUnsupported" xml:space="preserve">
+    <value>not supported</value>
+    <comment>Tag under a member that cannot be offered.</comment>
+  </data>
+  <data name="Sprocket.Pick.NoteAndShared" xml:space="preserve">
+    <value>{note} {shared}.</value>
+    <comment>Two notes over the list of what blocks offer, when both apply.</comment>
+  </data>
+  <data name="Sprocket.Category.Power" xml:space="preserve">
+    <value>Power</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Movement" xml:space="preserve">
+    <value>Movement</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Opening" xml:space="preserve">
+    <value>Opening</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Locking" xml:space="preserve">
+    <value>Locking</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Flight" xml:space="preserve">
+    <value>Flight</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Cargo" xml:space="preserve">
+    <value>Cargo</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Air" xml:space="preserve">
+    <value>Air</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Production" xml:space="preserve">
+    <value>Production</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Weapons" xml:space="preserve">
+    <value>Weapons</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Detection" xml:space="preserve">
+    <value>Detection</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Automation" xml:space="preserve">
+    <value>Automation</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Behavior" xml:space="preserve">
+    <value>Behavior</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Signals" xml:space="preserve">
+    <value>Signals</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Appearance" xml:space="preserve">
+    <value>Appearance</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Screens" xml:space="preserve">
+    <value>Screens</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Sound" xml:space="preserve">
+    <value>Sound</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Identity" xml:space="preserve">
+    <value>Identity</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Access" xml:space="preserve">
+    <value>Access</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Other" xml:space="preserve">
+    <value>Other</value>
+    <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Rate.Fast" xml:space="preserve">
+    <value>fast</value>
+    <comment>Name of the 10-tick rate.</comment>
+  </data>
+  <data name="Sprocket.Rate.Steady" xml:space="preserve">
+    <value>steady</value>
+    <comment>Name of the 100-tick rate.</comment>
+  </data>
+  <data name="Sprocket.Rate.Slow" xml:space="preserve">
+    <value>slow</value>
+    <comment>Name of the 300-tick rate.</comment>
+  </data>
+  <data name="Sprocket.Rate.VerySlow" xml:space="preserve">
+    <value>very slow</value>
+    <comment>Name of the 600-tick rate.</comment>
+  </data>
+  <data name="Sprocket.Rate.Occasional" xml:space="preserve">
+    <value>occasional</value>
+    <comment>Name of the 1800-tick rate.</comment>
+  </data>
+  <data name="Sprocket.Rate.Rare" xml:space="preserve">
+    <value>rare</value>
+    <comment>Name of the 3600-tick rate.</comment>
+  </data>
+  <data name="Sprocket.Rate.EveryTickCost" xml:space="preserve">
+    <value>Runs sixty times a second. Hard on the server - only worth it if nothing slower will do.</value>
+    <comment>Note on the every-tick rate.</comment>
+  </data>
+  <data name="Sprocket.Rate.FastCost" xml:space="preserve">
+    <value>Six times a second. Still costly; try something slower first.</value>
+    <comment>Note on the 10-tick rate.</comment>
+  </data>
+  <data name="Sprocket.Time.OtherWait" xml:space="preserve">
+    <value>Another length, in ticks</value>
+    <comment>Hint in the box a length of wait is typed into.</comment>
+  </data>
+  <data name="Sprocket.Time.Use" xml:space="preserve">
+    <value>Use</value>
+    <comment>The button that takes a typed length of wait.</comment>
+  </data>
+  <data name="Sprocket.Time.JustNow" xml:space="preserve">
+    <value>just now</value>
+    <comment>When a sequence last ran.</comment>
+  </data>
+  <data name="Sprocket.Time.UnderMinute" xml:space="preserve">
+    <value>less than a minute ago</value>
+    <comment>When a sequence last ran.</comment>
+  </data>
+  <data name="Sprocket.Time.MinuteAgo" xml:space="preserve">
+    <value>a minute ago</value>
+    <comment>When a sequence last ran.</comment>
+  </data>
+  <data name="Sprocket.Time.MinutesAgo" xml:space="preserve">
+    <value>{count} minutes ago</value>
+    <comment>When a sequence last ran; {count} is 2 to 59.</comment>
+  </data>
+  <data name="Sprocket.Time.HourAgo" xml:space="preserve">
+    <value>over an hour ago</value>
+    <comment>When a sequence last ran.</comment>
+  </data>
+  <data name="Sprocket.Time.Second" xml:space="preserve">
+    <value>1 second</value>
+    <comment>A length of wait, said aloud.</comment>
+  </data>
+  <data name="Sprocket.Time.Seconds" xml:space="preserve">
+    <value>{count} seconds</value>
+    <comment>A length of wait, said aloud.</comment>
+  </data>
+  <data name="Sprocket.Time.Minute" xml:space="preserve">
+    <value>a minute</value>
+    <comment>A length of wait, said aloud.</comment>
+  </data>
+  <data name="Sprocket.Time.Minutes" xml:space="preserve">
+    <value>{count} minutes</value>
+    <comment>A length of wait, said aloud.</comment>
+  </data>
+  <data name="Sprocket.Time.Choice" xml:space="preserve">
+    <value>{spoken} - {ticks}</value>
+    <comment>A length of wait offered: said aloud, then in ticks.</comment>
+  </data>
+  <data name="Sprocket.Value.AtLeast" xml:space="preserve">
+    <value>({least} or more)</value>
+    <comment>Beside a value box: the value has a floor.</comment>
+  </data>
+  <data name="Sprocket.Value.AtMost" xml:space="preserve">
+    <value>({most} or less)</value>
+    <comment>Beside a value box: the value has a ceiling.</comment>
+  </data>
+  <data name="Sprocket.Value.Either" xml:space="preserve">
+    <value>{rest} or {last}</value>
+    <comment>The words a value can be, the last joined by "or".</comment>
+  </data>
+  <data name="Sprocket.Value.Needed" xml:space="preserve">
+    <value>{name} needs a value.</value>
+    <comment>A value left empty.</comment>
+  </data>
+  <data name="Sprocket.Value.OneOf" xml:space="preserve">
+    <value>{name} has to be {words}.</value>
+    <comment>A value not among its words.</comment>
+  </data>
+  <data name="Sprocket.Value.Number" xml:space="preserve">
+    <value>{name} has to be a number.</value>
+    <comment>A value that is not a number.</comment>
+  </data>
+  <data name="Sprocket.Value.Whole" xml:space="preserve">
+    <value>{name} has to be a whole number.</value>
+    <comment>A value that is not a whole number.</comment>
+  </data>
+  <data name="Sprocket.Value.Within" xml:space="preserve">
+    <value>{name} has to be {range}.</value>
+    <comment>A value outside its bounds; {range} is one of the range texts.</comment>
+  </data>
+  <data name="Sprocket.Value.AboveAtMost" xml:space="preserve">
+    <value>above {least} and at most {most}</value>
+    <comment>A range in a refusal.</comment>
+  </data>
+  <data name="Sprocket.Value.Between" xml:space="preserve">
+    <value>between {least} and {most}</value>
+    <comment>A range in a refusal.</comment>
+  </data>
+  <data name="Sprocket.Value.Above" xml:space="preserve">
+    <value>more than {least}</value>
+    <comment>A range in a refusal.</comment>
+  </data>
+  <data name="Sprocket.Value.OrMore" xml:space="preserve">
+    <value>{least} or more</value>
+    <comment>A range in a refusal.</comment>
+  </data>
+  <data name="Sprocket.Value.OrLess" xml:space="preserve">
+    <value>{most} or less</value>
+    <comment>A range in a refusal.</comment>
+  </data>
+  <data name="Sprocket.Value.Numbered" xml:space="preserve">
+    <value>Value {number}</value>
+    <comment>What a refusal calls a value nobody named.</comment>
+  </data>
+  <data name="Sprocket.Change.Describe" xml:space="preserve">
+    <value>changing the description</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.PickButton" xml:space="preserve">
+    <value>picking a button</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Step" xml:space="preserve">
+    <value>changing a step</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.When" xml:space="preserve">
+    <value>changing when it runs</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.ForgetTrigger" xml:space="preserve">
+    <value>deleting a trigger</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveStep" xml:space="preserve">
+    <value>moving a step</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Target" xml:space="preserve">
+    <value>changing what it does</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveStep" xml:space="preserve">
+    <value>deleting a step</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Rename" xml:space="preserve">
+    <value>renaming</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameSlot" xml:space="preserve">
+    <value>renaming a slot</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Trigger" xml:space="preserve">
+    <value>changing the trigger</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Cadence" xml:space="preserve">
+    <value>changing how often it runs</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Optional" xml:space="preserve">
+    <value>making a slot optional</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Required" xml:space="preserve">
+    <value>making a slot required</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Wait" xml:space="preserve">
+    <value>changing a wait</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.PauseStep" xml:space="preserve">
+    <value>switching a step off</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.ResumeStep" xml:space="preserve">
+    <value>switching a step on</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.TakeOver" xml:space="preserve">
+    <value>taking a button over</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddStep" xml:space="preserve">
+    <value>adding a step</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddWait" xml:space="preserve">
+    <value>adding a wait</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
+    <value>describing a slot</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Systems.Default" xml:space="preserve">
+    <value>Logic system {number}</value>
+    <comment>The name a new logic system is given; {number} is the first free one.</comment>
+  </data>
+  <data name="Sprocket.Terminal.Open" xml:space="preserve">
+    <value>Automation</value>
+    <comment>The button in the block's terminal that opens the editor, and the title of the game's message about it.</comment>
+  </data>
+  <data name="Sprocket.Terminal.OpenAbout" xml:space="preserve">
+    <value>Open the automation editor.</value>
+    <comment>Note on that button.</comment>
+  </data>
+  <data name="Sprocket.Terminal.Action" xml:space="preserve">
+    <value>Automation: trigger</value>
+    <comment>The block's toolbar action, as the game lists it.</comment>
+  </data>
+  <data name="Sprocket.Terminal.Refused" xml:space="preserve">
+    <value>This block's automation cannot be edited.</value>
+    <comment>The game's message when the editor cannot open.</comment>
   </data>
 </root>

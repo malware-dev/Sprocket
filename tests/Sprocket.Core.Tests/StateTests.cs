@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
 
@@ -27,9 +28,12 @@ public class StateTests
         system.Identity = new Guid(Airlock);
         system.Namespace = "MalTek";
         system.Name = "Airlock";
+        system.IsBlueprint = true;
+        system.AddInstance();
         system.AddInstance();
 
         program.AddSequence(system);
+
         program.AddSequence(system);
 
         return program;
@@ -47,9 +51,9 @@ public class StateTests
     {
         var before = Ship();
         before.Systems[0].Enabled = false;
-        before.Systems[0].Halt = new Halt(SequenceProblem.MissingTarget, 2, 3, null, "Airlock 1 Outer Door");
+        before.Systems[0].Halt = new Halt(SequenceProblem.MissingTarget, 2, 3, Host.SpaceEngineers.World.Trouble.None, "Airlock 1 Outer Door");
         before.Systems[0].Instances[1].Enabled = false;
-        before.Systems[0].Instances[1].Halt = new Halt(SequenceProblem.EmptySlot, 1, -1, null, "Inner Door");
+        before.Systems[0].Instances[1].Halt = new Halt(SequenceProblem.EmptySlot, 1, -1, Host.SpaceEngineers.World.Trouble.None, "Inner Door");
 
         var text = StateText.Save(before, null);
         Assert.Equal(
@@ -70,6 +74,29 @@ public class StateTests
         Assert.False(system.Instances[1].Enabled);
         Assert.Equal(SequenceProblem.EmptySlot, system.Instances[1].Halt!.Problem);
         Assert.Equal("Inner Door", system.Instances[1].Halt!.Block);
+    }
+
+    /// <summary>What a block said stopped it is kept as what it is, and worded only when it is read.</summary>
+    [Fact]
+    public void ABlocksTroubleIsWrittenAndReadBack()
+    {
+        var before = Ship();
+        before.Systems[0].Enabled = false;
+        before.Systems[0].Halt = new Halt(SequenceProblem.MissingTarget, 2, 3,
+            Host.SpaceEngineers.World.Trouble.Waiting(Cause.TankNoGas, "hydrogen"), "Airlock 1 Tank");
+
+        var text = StateText.Save(before, null);
+        Assert.Equal(
+            "off \"" + Airlock + "\" \"block gone\" sequence 2 step 3 block \"Airlock 1 Tank\" \"tank no gas\" \"hydrogen\"\n",
+            text);
+
+        var after = Ship();
+        Assert.Equal("", StateText.Load(text, after, null));
+
+        var because = after.Systems[0].Halt!.Because;
+        Assert.Equal(Cause.TankNoGas, because.Cause);
+        Assert.Equal("hydrogen", because.About);
+        Assert.Equal("cannot fill - no hydrogen coming in", TroubleText.Of(new Texts(), because));
     }
 
     /// <summary>A system switched off by its identity alone is its own switch, and leaves each one's switch and each sequence as they were.</summary>
@@ -125,7 +152,7 @@ public class StateTests
         var system = after.Systems[0];
         Assert.False(system.Enabled);
         Assert.Equal(SequenceProblem.None, system.Halt!.Problem);
-        Assert.Equal("Stopped for an unknown reason.", SequenceText.Stopped(system.Halt, system));
+        Assert.Equal("Stopped for an unknown reason.", SequenceText.Stopped(new Texts(), system.Halt, system));
     }
 
     [Theory]
@@ -178,7 +205,7 @@ public class StateTests
     {
         var program = Ship();
         program.Systems[0].Enabled = false;
-        program.Systems[0].Halt = new Halt(SequenceProblem.NeverTriggered, 1, -1, null, null);
+        program.Systems[0].Halt = new Halt(SequenceProblem.NeverTriggered, 1, -1, Host.SpaceEngineers.World.Trouble.None, null);
         program.Systems[0].Instances[0].Enabled = false;
 
         var text = ProgramText.Save(program, new Values());

@@ -9,7 +9,6 @@ using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
@@ -134,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             if (_values == null)
             {
-                _values = new ValuesColumn(Width, SequenceText.ValuesTitle(), _texts.PickDone);
+                _values = new ValuesColumn(Width, _texts.PickValues, _texts.PickDone);
                 _values.Form.Windows = _windows;
             }
 
@@ -161,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     filling.Add(i < filled.Count ? filled[i] : "");
             }
 
-            _values.Form.Show(fields, filling, colors);
+            _values.Form.Show(fields, filling, colors, _texts);
             _values.Why = "";
             _values.Place();
             return _values;

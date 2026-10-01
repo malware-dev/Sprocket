@@ -8,6 +8,8 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Ui;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
@@ -63,6 +65,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         /// <summary>Which of the logic systems nothing starts is read from the toolbars.</summary>
         public override bool CanRefresh => true;
+
+        /// <inheritdoc />
+        public override ICommand Library => Editor.Act(Cmd.LoadSystem, Editor.OfferLoading);
 
         /// <summary>
         /// Reaching outside the automation to rename the machine itself, which is deliberate.
@@ -168,7 +173,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 {
                     var problems = SystemSummary.Problems(Editor.Runner, system, instance);
                     var remarks = SystemSummary.Remarks(Editor.Runner, system, instance);
-                    var stopped = on || halt == null ? "" : SequenceText.Stopped(halt, system);
+                    var stopped = on || halt == null ? "" : SequenceText.Stopped(texts, halt, system);
                     var said = stopped.Length > 0 || problems == 0 ? stopped : Failing(system, instance);
                     changed |= row.Problems != problems || row.Remarks != remarks || row.Problem != said;
                     row.Problems = problems;
@@ -194,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             SequenceFault fault;
             var sequence = SystemSummary.Failing(Editor.Runner, system, instance, out fault);
-            return sequence == null ? "" : SequenceText.Failing(fault, sequence);
+            return sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence);
         }
 
         /// <summary>Adds another logic system made from a blueprint, numbered, and opens its configuration panel on it with its name in hand to be given.</summary>
@@ -215,7 +220,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         protected override void ViewCreated()
         {
             _new.Command = Editor.Act(Cmd.NewSystem, Make);
-            _load.Command = Editor.Act(Cmd.LoadSystem, Editor.OfferLoading);
 
             _rows = new Keyed<AutomationSystem, StatusRow>(_plainRows.Children, Own);
             _groups = new Keyed<AutomationSystem, BlueprintGroup>(_blueprintGroups.Children, system => new BlueprintGroup(Editor, this, system));
@@ -253,8 +257,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             _new.Text = StatusRow.Plus + texts.SystemsNew;
             _new.Tip = Tip.For(_new.Tip, texts.SystemsNewAbout);
-            _load.Text = texts.SystemsLoad;
-            _load.Tip = Tip.For(_load.Tip, texts.SystemsLoadAbout);
 
             _own.Clear();
             _blueprints.Clear();
@@ -264,7 +266,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _rows.Show(_own);
             _groups.Show(_blueprints);
 
-            _plain.IsVisible = _own.Count > 0 || _systems.Count == 0;
+            _plainHeading.Text = texts.SystemsPlainHeading.ToUpperInvariant();
+            _blueprintsHeading.Text = texts.SystemsBlueprintsHeading.ToUpperInvariant();
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
 
@@ -277,6 +280,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 // system becomes several, and a way to do that nobody finds is the problem this row solves.
                 row.ButtonText = texts.SystemsMakeBlueprint;
                 row.ButtonAbout = texts.SystemsMakeBlueprintAbout;
+
+                row.About = texts.SystemsOpenAbout;
+                row.AboutArguments.Set("name", row.Summary);
+                row.DeleteText = texts.SystemDelete;
             }
 
             for (var i = 0; i < _blueprints.Count; i++)
@@ -291,14 +298,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 Opens = Editor.Act(Cmd.OpenSystem, delegate { Open(system); }),
                 Flips = Editor.Act(Cmd.EnableSystem, delegate { Editor.SwitchSystem(system, !system.Enabled); }),
                 Offers = Editor.Act(Cmd.MakeBlueprint, delegate { Made(system); }),
-                Deletes = Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(system); })
+                Deletes = Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(system); }),
+                AboutArguments = new Arguments(),
+                SwitchGovernsAll = true
             };
         }
 
         /// <summary>Makes a logic system, numbered, and opens it with its name in hand to be given.</summary>
         void Make()
         {
-            var system = Editor.Program.AddSystem();
+            var system = Editor.Program.AddSystem(Editor.Texts.SystemsDefault);
             system.Namespace = Editor.Author;
             system.Enabled = false;
 
@@ -308,12 +317,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>Makes a blueprint of a logic system, and opens it to be written: the blueprint keeps the system's name, and so does the first logic system made from it.</summary>
         void Made(AutomationSystem system)
         {
-            if (system.First == null)
+            var first = Editor.Blueprinted(system);
+            if (first == null)
                 return;
 
-            Editor.Slotted(system);
-            system.First.Name = system.Name;
-            Editor.Choose(system, system.First);
+            first.Name = system.Name;
+            Editor.Choose(system, first);
             Editor.Push(new BlueprintPage(Editor, system, true));
         }
 

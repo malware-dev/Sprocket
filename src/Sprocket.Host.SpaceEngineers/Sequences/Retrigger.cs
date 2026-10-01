@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _does = does;
         }
 
-        public override string Label => "changing the trigger";
+        public override Change Change => Change.Trigger;
 
         public override bool Changes => _start.Changes || _does.Changes;
 

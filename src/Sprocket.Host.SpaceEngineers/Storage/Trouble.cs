@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Game.ModAPI.Ingame.Utilities;
@@ -18,6 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         readonly string _script;
         readonly List<Owed> _owed = new List<Owed>();
         readonly Dictionary<Step, Statement> _written = new Dictionary<Step, Statement>();
+        readonly HashSet<string> _taken = new HashSet<string>(StringComparer.Ordinal);
 
         public Trouble(string script, string already)
         {
@@ -43,6 +45,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 What = Line(at) + what;
         }
 
+        /// <summary>
+        /// Says that slot <paramref name="at" /> on <paramref name="block" /> starts something, and is trouble where something
+        /// read before already starts something from it.
+        /// </summary>
+        /// <remarks>A toolbar slot holds one action, so a second trigger on it could never be wired.</remarks>
+        public void Takes(Statement statement, string block, ToolbarSlot at)
+        {
+            if (!_taken.Add(block + "\n" + at.EventId))
+                Say(statement, Pen.Spelling("", block) + ":toolbar(" + at.Toolbar + ", " + at.Page + ", " + at.Slot
+                    + ") already starts something; a toolbar slot holds one action.");
+        }
+
         public void Warn(Statement at, string what)
         {
             if (Warning.Length == 0)
@@ -63,35 +77,33 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// Says <paramref name="at" /> names <paramref name="name" />: one of <paramref name="system" />'s parts or a block, or
-        /// a block where <paramref name="system" /> is null.
+        /// Says <paramref name="at" /> names <paramref name="name" />, a slot of the system blueprint <paramref name="system" />:
+        /// a trigger slot where <paramref name="trigger" /> says so, and a slot for a block otherwise.
         /// </summary>
-        /// <remarks>Judged by <see cref="Settle" />, once the whole script is read, because a block may be written below what names it.</remarks>
-        public void Owes(Statement at, string name, AutomationSystem system)
+        /// <remarks>Judged by <see cref="Settle" />, once the whole script is read, because a slot may be written below what names it.</remarks>
+        public void Owes(Statement at, string name, AutomationSystem system, bool trigger)
         {
             var owed = new Owed();
             owed.At = at;
             owed.Name = name;
             owed.System = system;
+            owed.Trigger = trigger;
             _owed.Add(owed);
         }
 
-        /// <summary>Says what is wrong with every name owed that <paramref name="program" /> has nothing called.</summary>
-        public void Settle(Automation program)
+        /// <summary>Says what is wrong with every slot owed that its system blueprint has nothing of the right sort called.</summary>
+        public void Settle()
         {
             for (var i = 0; i < _owed.Count; i++)
             {
                 var owed = _owed[i];
-                if (program.FindRef(owed.Name) != null)
-                    continue;
-
-                var part = owed.System == null ? null : owed.System.FindPart(owed.Name);
-                if (owed.System == null)
-                    Say(owed.At, "no block called '" + owed.Name + "'.");
-                else if (part == null)
-                    Say(owed.At, "no part or block called '" + owed.Name + "'.");
-                else if (part.IsTrigger)
-                    Say(owed.At, "'" + owed.Name + "' is a trigger part; expected a block part.");
+                var part = owed.System.FindPart(owed.Name);
+                if (part == null)
+                    Say(owed.At, "no slot called '" + owed.Name + "'.");
+                else if (part.IsTrigger && !owed.Trigger)
+                    Say(owed.At, "'" + owed.Name + "' is a trigger slot; expected a slot for a block.");
+                else if (!part.IsTrigger && owed.Trigger)
+                    Say(owed.At, "'" + owed.Name + "' is a slot for a block; expected a trigger slot.");
             }
         }
 
@@ -107,6 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             public Statement At;
             public string Name;
             public AutomationSystem System;
+            public bool Trigger;
         }
     }
 }

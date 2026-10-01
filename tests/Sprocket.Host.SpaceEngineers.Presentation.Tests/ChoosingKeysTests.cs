@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Features.Values;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using VRage.Input;
@@ -28,7 +29,7 @@ public class ChoosingKeysTests
     static FieldSet Form(out InputRoot input, params Field[] fields)
     {
         var form = new FieldSet();
-        form.Show(fields, new[] { "", "", "" }, new Hsv[0]);
+        form.Show(fields, new[] { "", "", "" }, new Hsv[0], new Texts());
 
         input = new InputRoot(form);
         form.Take(input);

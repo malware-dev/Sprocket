@@ -25,7 +25,7 @@ public class TargetTests
     /// <summary>Starts a second trigger, up to choosing what it does.</summary>
     static void Another(Screen screen)
     {
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
     }
@@ -35,13 +35,13 @@ public class TargetTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Run(2);
 
         var does = screen.Editor.Pick().Stages[2];
-        Assert.Equal(new[] { "A single action…", "A new sequence" }, does.Entries().Select(e => e.Text));
+        Assert.Equal(new[] { "A task on blocks…", "A new sequence" }, does.Entries().Select(e => e.Text));
         Assert.Empty(does.Options);
     }
 
@@ -84,7 +84,7 @@ public class TargetTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Button");
 
         Assert.Equal(2, screen.Editor.Pick().Stages.Count);
@@ -110,7 +110,7 @@ public class TargetTests
         // And back to running offers the two that make something again, a new sequence already chosen,
         // with the sequences under their own heading after them.
         screen.Editor.PressChoice("run");
-        Assert.Equal(new[] { "A single action…", "A new sequence", "Sequences", "Cycle" },
+        Assert.Equal(new[] { "A task on blocks…", "A new sequence", "Sequences", "Cycle" },
             does.Entries().Select(e => e.Text));
         Assert.Contains(does.Entries(), e => e.Text == "A new sequence" && e.IsChosen);
         Assert.True(does.Entries()[2].IsHeading, "the sequences are not set apart");
@@ -125,7 +125,7 @@ public class TargetTests
         var screen = WithOne();
         Another(screen);
 
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -146,7 +146,7 @@ public class TargetTests
         var screen = WithOne();
         Another(screen);
 
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();

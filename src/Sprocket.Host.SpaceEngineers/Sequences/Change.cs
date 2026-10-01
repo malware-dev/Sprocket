@@ -1,0 +1,73 @@
+namespace Sprocket.Host.SpaceEngineers.Sequences
+{
+    /// <summary>What an edit did, as it is offered back after Undo and Redo.</summary>
+    /// <remarks>Also what a run of edits is folded by: typing a name is many edits of one kind, and one step back.</remarks>
+    public enum Change
+    {
+        /// <summary>Nothing.</summary>
+        None,
+
+        /// <summary>Changing the description.</summary>
+        Describe,
+
+        /// <summary>Picking a button.</summary>
+        PickButton,
+
+        /// <summary>Changing a step.</summary>
+        Step,
+
+        /// <summary>Changing when it runs.</summary>
+        When,
+
+        /// <summary>Deleting a trigger.</summary>
+        ForgetTrigger,
+
+        /// <summary>Moving a step.</summary>
+        MoveStep,
+
+        /// <summary>Changing what it does.</summary>
+        Target,
+
+        /// <summary>Deleting a step.</summary>
+        RemoveStep,
+
+        /// <summary>Renaming.</summary>
+        Rename,
+
+        /// <summary>Renaming a slot.</summary>
+        RenameSlot,
+
+        /// <summary>Changing the trigger.</summary>
+        Trigger,
+
+        /// <summary>Changing how often it runs.</summary>
+        Cadence,
+
+        /// <summary>Making a slot optional.</summary>
+        Optional,
+
+        /// <summary>Making a slot required.</summary>
+        Required,
+
+        /// <summary>Changing a wait.</summary>
+        Wait,
+
+        /// <summary>Switching a step off.</summary>
+        PauseStep,
+
+        /// <summary>Switching a step on.</summary>
+        ResumeStep,
+
+        /// <summary>Taking a button over.</summary>
+        TakeOver,
+
+        /// <summary>Adding a step.</summary>
+        AddStep,
+
+        /// <summary>Adding a wait.</summary>
+        AddWait,
+
+        /// <summary>Describing a slot.</summary>
+        DescribeSlot
+    }
+}

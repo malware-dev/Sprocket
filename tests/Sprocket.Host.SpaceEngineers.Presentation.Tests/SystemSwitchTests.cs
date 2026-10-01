@@ -25,7 +25,7 @@ public class SystemSwitchTests
         sim.Tick();
 
         Assert.False(page.Editable);
-        Assert.Equal("Airlock is switched on. Switch it off to change it.", page.LockedText);
+        Assert.Equal("Airlock is on. Turn it off to edit.", page.LockedText);
         Assert.Null(sim.Editor.Triggers()[0].Deletes);
         Assert.False(page.CanUndo);
 
@@ -36,7 +36,7 @@ public class SystemSwitchTests
         Assert.False(sim.Editor.Program.Systems[0].Enabled);
     }
 
-    /// <summary>Switched on, every part that cannot be pressed says how to change it, and says nothing once it can be.</summary>
+    /// <summary>Switched on, every part that cannot be pressed says how to change it, and stops saying so once it can be.</summary>
     [Fact]
     public void ALockedPartSaysHowToEditIt()
     {
@@ -55,7 +55,7 @@ public class SystemSwitchTests
         sim.Editor.Screen.Flip!.Execute();
         sim.Tick();
 
-        Assert.All(sim.Editor.Triggers()[0].Within().OfType<Slot>(), chip => Assert.Null(chip.Tip));
+        Assert.All(sim.Editor.Triggers()[0].Within().OfType<Slot>(), chip => Assert.NotEqual("Turn the system off to edit.", chip.Tip?.Text));
     }
 
     /// <summary>Switching a blueprint off asks first, naming each logic system it stops; keeping them running changes nothing.</summary>
@@ -151,7 +151,7 @@ public class SystemSwitchTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        sim.Editor.RootRows().Single(row => row.IsAction).Opens!.Execute();
+        sim.Editor.AddInstallation(0);
         sim.Tick();
 
         // Something done to it, switched off, so it stays when the panel is left.

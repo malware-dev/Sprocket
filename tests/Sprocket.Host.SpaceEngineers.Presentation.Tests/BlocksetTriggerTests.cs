@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Sim.Machine;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -40,7 +41,7 @@ public class BlocksetTriggerTests
         Assert.True(system.Instances[0].Enabled);
         Assert.False(system.Instances[1].Enabled);
         Assert.Equal(SequenceProblem.EmptySlot, system.Instances[1].Halt!.Problem);
-        Assert.EndsWith("slot was empty.", SequenceText.Stopped(system.Instances[1].Halt, system));
+        Assert.EndsWith("slot was empty.", SequenceText.Stopped(new Texts(), system.Instances[1].Halt, system));
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ public class BlocksetTriggerTests
         sim.Tick();
 
         sim.Editor.NewButtonSystem("Airlock");
-        sim.Editor.PressAdd("Action…");
+        sim.Editor.PressAdd("task…");
         sim.Editor.PressBlock("Airlock Inner Door");
         sim.Editor.PressChoice("Open");
         sim.Editor.PressPrimary();
@@ -66,7 +67,7 @@ public class BlocksetTriggerTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        sim.Editor.RootRows().Single(row => row.IsAction).Opens!.Execute();
+        sim.Editor.AddInstallation(0);
         sim.Tick();
         sim.Editor.Screen.Heading[0].Renames!("Port airlock");
         sim.Editor.GoToRoot();
@@ -87,10 +88,10 @@ public class BlocksetTriggerTests
             sim.Tick();
         }
 
-        sim.Editor.PressStart("When…");
+        sim.Editor.PressStart("when…");
         sim.Editor.PressBlock("Inside Button");
         sim.Editor.PressChoice("is pressed");
-        sim.Editor.PressChoice("A single action…");
+        sim.Editor.PressChoice("A task on blocks…");
         sim.Editor.PressBlock("Airlock Outer Door");
         sim.Editor.PressChoice("Open");
         sim.Editor.PressPrimary();

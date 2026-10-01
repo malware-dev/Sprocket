@@ -83,6 +83,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 _instance.Resolve(slots, _actedOn);
             }
+
+            _bindings.Distinct(_actedOn);
             return _actedOn;
         }
 
@@ -97,14 +99,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public bool IsWaiting { get; private set; }
 
         /// <summary>
-        /// Why the last run ended before its last step, or null where it did not.
+        /// Why the last run ended before its last step, or none where it did not.
         /// </summary>
         /// <remarks>
         /// Kept after the run has stopped, because that is the only moment somebody can be told: the
         /// sequence is no longer running and nothing is outstanding to be asked. Cleared when the
         /// sequence next runs, so it says what happened last time and never what happened once.
         /// </remarks>
-        public string Quit { get; private set; }
+        public Trouble Quit { get; private set; }
 
         /// <summary>What was wrong with the program for this sequence when it was last built, or none.</summary>
         /// <remarks>Set by the runner of the whole program when the program or its wiring changes, and on no tick.</remarks>
@@ -141,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     return Found;
                 if (_stuck.Exists && IsWaiting)
                     return _stuck;
-                if (!string.IsNullOrEmpty(Quit))
+                if (Quit.Exists)
                     return new SequenceFault(SequenceProblem.Conflicted, SequenceFault.Trigger, Quit);
 
                 return Found;
@@ -169,7 +171,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         int _tick;
 
         /// <summary>
-        /// What a block being waited on says has taken it out of this sequence's hands, or null; and keeps what one says
+        /// What a block being waited on says has taken it out of this sequence's hands, or none; and keeps what one says
         /// stops it finishing.
         /// </summary>
         /// <remarks>
@@ -182,7 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// knows which it is owed.
         /// </para>
         /// </remarks>
-        string Troubled()
+        Trouble Troubled()
         {
             _stuck = SequenceFault.None;
             for (var i = 0; i < _outstanding.Count; i++)
@@ -199,21 +201,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (!Reached(_owner.World, entity, doing.LeadsToStateId) && entity.Stalls(doing))
                     {
                         if (!_stuck.Exists)
-                            _stuck = new SequenceFault(SequenceProblem.Stalled, _sequence.Steps.IndexOf(_outstanding[i]), null, entity.Name);
+                            _stuck = new SequenceFault(SequenceProblem.Stalled, _sequence.Steps.IndexOf(_outstanding[i]), Trouble.None, entity.Name);
 
                         continue;
                     }
 
                     Trouble said = compiled.Entities[t].Trouble(doing.LeadsToStateId);
                     if (said.Ends)
-                        return said.Said;
+                        return said;
 
                     if (said.Exists && !_stuck.Exists)
-                        _stuck = new SequenceFault(SequenceProblem.Stuck, _sequence.Steps.IndexOf(_outstanding[i]), said.Said);
+                        _stuck = new SequenceFault(SequenceProblem.Stuck, _sequence.Steps.IndexOf(_outstanding[i]), said);
                 }
             }
 
-            return null;
+            return Trouble.None;
         }
 
         /// <summary>
@@ -640,7 +642,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             // What stopped the last run is about the last run. Somebody starting this one has
             // either mended it or is about to find out again.
-            Quit = null;
+            Quit = Trouble.None;
             _met = SequenceFault.None;
             _stuck = SequenceFault.None;
             _stepIndex = 0;
@@ -693,7 +695,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     var needed = act.HasAction ? Compile(act) : null;
                     if (needed != null && needed.Problem != SequenceProblem.None)
                     {
-                        Meet(new SequenceFault(needed.Problem, _stepIndex, null, needed.Which));
+                        Meet(new SequenceFault(needed.Problem, _stepIndex, Trouble.None, needed.Which));
                         return;
                     }
 
@@ -777,8 +779,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         // something or a trigger firing, so it cannot arrive faster than that, and
                         // giving up a second later than it could have is a second nobody can
                         // measure against a machine that has already stopped moving.
-                        string quit = _conflicts.Due(_tick) ? Troubled() : null;
-                        if (quit != null)
+                        var quit = _conflicts.Due(_tick) ? Troubled() : Trouble.None;
+                        if (quit.Exists)
                         {
                             Stop();
                             Quit = quit;
@@ -835,7 +837,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 if (entity.Refuses(compiled.Actions[i]))
-                    return new SequenceFault(SequenceProblem.Unable, _stepIndex, null, entity.Name);
+                    return new SequenceFault(SequenceProblem.Unable, _stepIndex, Trouble.None, entity.Name);
             }
 
             return SequenceFault.None;
@@ -855,7 +857,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 var compiled = Compile(_outstanding[i]);
                 if (compiled.Problem != SequenceProblem.None)
-                    return new SequenceFault(compiled.Problem, _sequence.Steps.IndexOf(_outstanding[i]), null, compiled.Which);
+                    return new SequenceFault(compiled.Problem, _sequence.Steps.IndexOf(_outstanding[i]), Trouble.None, compiled.Which);
             }
 
             return SequenceFault.None;

@@ -76,6 +76,8 @@ public class OverviewTests
         var ship = Build();
         System(ship, "Airlock", 1, 2);
         AutomationSystem hangar = System(ship, "Hangar", 2, 1);
+        hangar.IsBlueprint = true;
+        hangar.AddInstance();
         hangar.AddInstance();
 
         ship.Tick(3);
@@ -134,9 +136,13 @@ public class OverviewTests
     {
         var ship = Build();
         AutomationSystem airlock = System(ship, "Airlock", 1, 2);
+        airlock.IsBlueprint = true;
+        airlock.AddInstance();
+        airlock.AddInstance();
         ship.Tick(3);
 
         foreach (var instance in airlock.Instances)
+
             instance.Enabled = false;
         ship.Tick();
 

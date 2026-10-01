@@ -27,7 +27,7 @@ public class PageSmokeTests
         editor.NewSystem("Airlock");
         Record(seen, screen);
 
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         Record(seen, screen);
 
         editor.PressBlock("Approach Sensor");
@@ -37,7 +37,7 @@ public class PageSmokeTests
         editor.PressPrimary();
         Record(seen, screen);
 
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Landing Lights");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -48,7 +48,7 @@ public class PageSmokeTests
 
         // A question with a fixed set of answers. The starters used to be one of these and are not
         // any more, so the walk reaches for the loader instead.
-        editor.PressStart("Blueprints");
+        editor.OpenLibrary();
         Record(seen, screen);
 
         Assert.Contains(nameof(PickPage), seen);

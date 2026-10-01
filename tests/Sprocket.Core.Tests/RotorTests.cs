@@ -6,6 +6,7 @@ using Sprocket.Sim.Machine;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
 
@@ -269,14 +270,14 @@ public class RotorTests
         action.Fields(fields);
 
         var speed = fields[2];
-        Assert.Equal("speed needs a value.", speed.Refuses("speed", ""));
-        Assert.Equal("speed has to be above 0 and at most 30.", speed.Refuses("speed", "0"));
-        Assert.Equal("speed has to be above 0 and at most 30.", speed.Refuses("speed", "31"));
-        Assert.Equal("", speed.Refuses("speed", "0.5"));
-        Assert.Equal("(0 - 30)", speed.Takes);
+        Assert.Equal("speed needs a value.", speed.Refuses(new Texts(), "speed", ""));
+        Assert.Equal("speed has to be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "0"));
+        Assert.Equal("speed has to be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "31"));
+        Assert.Equal("", speed.Refuses(new Texts(), "speed", "0.5"));
+        Assert.Equal("(0 - 30)", speed.Takes(new Texts()));
 
-        Assert.Equal("angle needs a value.", fields[1].Refuses("angle", ""));
-        Assert.Equal("direction needs a value.", fields[0].Refuses("direction", ""));
+        Assert.Equal("angle needs a value.", fields[1].Refuses(new Texts(), "angle", ""));
+        Assert.Equal("direction needs a value.", fields[0].Refuses(new Texts(), "direction", ""));
     }
 
     /// <summary>
@@ -404,7 +405,7 @@ public class RotorTests
         // finish by itself.
         var fault = Faulted(runner, sequence);
         Assert.Equal(SequenceProblem.Stuck, fault.Problem);
-        Assert.Equal("cannot turn - something is holding it", fault.Because);
+        Assert.Equal("cannot turn - something is holding it", TroubleText.Of(new Texts(), fault.Because));
         Assert.True(runner.Get(sequence)!.IsRunning);
     }
 
@@ -473,7 +474,7 @@ public class RotorTests
         }
 
         Assert.Equal(SequenceProblem.Stuck, fault.Problem);
-        Assert.Equal(said, fault.Because);
+        Assert.Equal(said, TroubleText.Of(new Texts(), fault.Because));
     }
 
     static SequenceFault Faulted(AutomationRunner runner, Sequence sequence)

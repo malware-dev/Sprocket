@@ -46,6 +46,6 @@ on screen     Sequence 1
 039  Text       at {X:812.5333 Y:163.2255} scale 0.833  #DCF5FDFF  "Left"
 040  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
 041  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-042  Text       at {X:272 Y:223.2255} scale 0.833  #A2C3CDFF  "+ Action…"
-043  Text       at {X:393.75 Y:223.2255} scale 0.833  #A2C3CDFF  "+ Wait…"
+042  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task…"
+043  Text       at {X:374.43 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait…"
 044  ClearClip  

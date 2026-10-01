@@ -1,6 +1,7 @@
 using System;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
@@ -94,20 +95,22 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         static void Runs(Pen pen, AutomationRunner runner, AutomationSystem system, string identity)
         {
-            var instances = system.Instances;
+            var uses = system.Uses;
             var sequences = system.Sequences;
 
-            for (var n = 0; n < instances.Count; n++)
+            for (var n = 0; n < uses.Count; n++)
             {
                 for (var q = 0; q < sequences.Count; q++)
                 {
-                    var state = runner.Get(sequences[q], instances[n]);
+                    var state = runner.Get(sequences[q], uses[n]);
                     if (state == null || !state.IsRunning || state.CurrentStep < 0)
                         continue;
 
-                    pen.Start(Keyword.Running).Text(identity)
-                        .Says(Keyword.Instance).Whole(instances[n].Number)
-                        .Says(Keyword.Sequence).Whole(sequences[q].Number)
+                    pen.Start(Keyword.Running).Text(identity);
+                    if (system.IsBlueprint)
+                        pen.Says(Keyword.Instance).Whole(uses[n].Number);
+
+                    pen.Says(Keyword.Sequence).Whole(sequences[q].Number)
                         .Says(Keyword.Step).Whole(state.CurrentStep);
 
                     if (state.WaitTicks > 0)
@@ -194,31 +197,33 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
             }
 
-            if (!line.Says(1, Keyword.Instance) || !line.Says(3, Keyword.Sequence)
-                || !line.Says(5, Keyword.Step))
+            // A blueprint's run names its instance; a system's has none to name.
+            var instanced = line.Says(1, Keyword.Instance);
+            var at = instanced ? 3 : 1;
+            if (!line.Says(at, Keyword.Sequence) || !line.Says(at + 2, Keyword.Step))
             {
                 trouble.Say(line,
-                    "a run is written as its system, then instance, sequence and step, each with a number");
+                    "a run is written as its system, then its instance where it has one, sequence and step, each with a number");
                 return;
             }
 
-            var instance = Counted(line, 2);
-            var sequence = Counted(line, 4);
-            var step = line.ValueAt(6);
+            var instance = instanced ? Counted(line, 2) : 0;
+            var sequence = Counted(line, at + 1);
+            var step = line.ValueAt(at + 3);
 
-            if (instance < 1 || sequence < 1 || step.Form != ValueForm.Integer
+            if ((instanced && instance < 1) || sequence < 1 || step.Form != ValueForm.Integer
                 || step.Whole < 0 || step.Whole > int.MaxValue)
             {
                 trouble.Say(line, "expected an instance and a sequence counted from 1, and a step from 0.");
                 return;
             }
 
-            var waiting = line.Says(7, Keyword.Await);
+            var waiting = line.Says(at + 4, Keyword.Await);
             var held = 0;
 
-            if (line.Says(7, Keyword.Wait))
+            if (line.Says(at + 4, Keyword.Wait))
             {
-                var ticks = line.ValueAt(8);
+                var ticks = line.ValueAt(at + 5);
                 if (ticks.Form != ValueForm.Duration || ticks.Whole < 0 || ticks.Whole > int.MaxValue)
                 {
                     trouble.Say(line, "expected a duration after 'wait', like 60t.");
@@ -236,7 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system == null)
                 return;
 
-            var one = system.FindInstance(instance);
+            var one = !instanced ? (system.IsBlueprint ? null : system.First) : system.FindInstance(instance);
             var which = system.FindSequence(sequence);
             if (one == null || which == null)
                 return;
@@ -268,6 +273,27 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             SequenceProblem.Unawaited, SequenceProblem.Adrift, SequenceProblem.EmptySlot
         };
 
+        /// <summary>What a block's trouble is written as, beside <see cref="Troubles" />.</summary>
+        /// <remarks>Persisted: a spelling here cannot change without every saved trouble being forgotten.</remarks>
+        static readonly string[] Spelled =
+        {
+            "vent nowhere", "vent leaking", "vent no oxygen", "vent told to fill", "vent told to empty",
+            "battery told to discharge", "battery told to auto", "battery off", "battery damaged", "battery no power",
+            "piston no power", "piston no head", "piston stopped", "piston reversed extending", "piston reversed retracting",
+            "rotor no power", "rotor no head", "rotor locked", "rotor no torque", "rotor stopped", "rotor held",
+            "tank stockpile off", "tank no power", "tank no gas"
+        };
+
+        static readonly Cause[] Troubles =
+        {
+            Cause.VentNowhere, Cause.VentNotAirtight, Cause.VentNoOxygen, Cause.VentToldToFill, Cause.VentToldToEmpty,
+            Cause.BatteryToldToDischarge, Cause.BatteryToldToAuto, Cause.BatteryOff, Cause.BatteryDamaged, Cause.BatteryNoPower,
+            Cause.PistonNoPower, Cause.PistonNoHead, Cause.PistonStopped, Cause.PistonReversedExtending,
+            Cause.PistonReversedRetracting,
+            Cause.RotorNoPower, Cause.RotorNoHead, Cause.RotorLocked, Cause.RotorNoTorque, Cause.RotorStopped, Cause.RotorHeld,
+            Cause.TankStockpileOff, Cause.TankNoPower, Cause.TankNoGas
+        };
+
         /// <summary>Writes why Sprocket switched something off: what was wrong, in which sequence, at which step, with which block, and what the block said.</summary>
         static void Why(Pen pen, Halt halt)
         {
@@ -286,8 +312,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!string.IsNullOrEmpty(halt.Block))
                 pen.Says(Keyword.Block).Text(halt.Block);
 
-            if (!string.IsNullOrEmpty(halt.Said))
-                pen.Text(halt.Said);
+            var cause = Array.IndexOf(Troubles, halt.Because.Cause);
+            if (cause < 0)
+                return;
+
+            pen.Text(Spelled[cause]);
+            if (!string.IsNullOrEmpty(halt.Because.About))
+                pen.Text(halt.Because.About);
         }
 
         /// <summary>Why a line says Sprocket switched something off, read from <paramref name="from" /> on, or null where it says nobody but a person did.</summary>
@@ -300,7 +331,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var sequence = 0;
             var step = -1;
             string block = null;
-            string said = null;
+            var cause = Cause.None;
+            string about = null;
             for (var i = from + 1; i < line.Count; i++)
             {
                 if (line.Says(i, Keyword.Sequence) && i + 1 < line.Count)
@@ -317,14 +349,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 {
                     block = line.Text(++i);
                 }
+                else if (cause == Cause.None)
+                {
+                    var spelled = Array.IndexOf(Spelled, line.Text(i));
+                    cause = spelled < 0 ? Cause.None : Troubles[spelled];
+                }
                 else
                 {
-                    said = line.Text(i);
+                    about = line.Text(i);
                 }
             }
 
-            return new Halt(at < 0 ? SequenceProblem.None : Problems[at], sequence, step,
-                string.IsNullOrEmpty(said) ? null : said, string.IsNullOrEmpty(block) ? null : block);
+            var because = cause == Cause.None ? World.Trouble.None : World.Trouble.Kept(cause, string.IsNullOrEmpty(about) ? null : about);
+            return new Halt(at < 0 ? SequenceProblem.None : Problems[at], sequence, step, because,
+                string.IsNullOrEmpty(block) ? null : block);
         }
 
         static void Switch(Statement line, Automation program, Trouble trouble)

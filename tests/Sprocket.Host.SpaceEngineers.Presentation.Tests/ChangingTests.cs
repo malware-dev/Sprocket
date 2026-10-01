@@ -58,7 +58,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("stop");
@@ -84,7 +84,7 @@ public class ChangingTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Housekeeping");
-        screen.Editor.PressStart("Every…");
+        screen.Editor.PressStart("every…");
         screen.Editor.PressChoice("steady - every 100 ticks");
         screen.Editor.PressPrimary();
         screen.Editor.Back();
@@ -120,7 +120,7 @@ public class ChangingTests
         Trigger was = System(screen).Triggers[0];
 
         screen.Editor.PressDoes(0);
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -147,10 +147,10 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -186,7 +186,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("Sequence");
+        screen.Editor.PressStart("sequence");
         screen.Editor.Name("Seal up");
         screen.Editor.Back();
         screen.Run(2);
@@ -226,10 +226,10 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Run(2);
 
-        Assert.Equal("Do something", screen.Editor.Screen.Title());
+        Assert.Equal("A task on blocks", screen.Editor.Screen.Title());
         Assert.Equal(3, screen.Editor.Pick().Page);
 
         screen.Editor.Back();
@@ -239,12 +239,12 @@ public class ChangingTests
         var pick = screen.Editor.Pick();
         Assert.Equal(0, pick.Page);
         Assert.Equal(3, pick.Stages.Count);
-        Assert.Contains(pick.Stages[2].Entries(), e => e.Text == "A single action…" && e.IsChosen);
+        Assert.Contains(pick.Stages[2].Entries(), e => e.Text == "A task on blocks…" && e.IsChosen);
         Assert.Same(was, System(screen).Triggers[0]);
 
         // Nothing to finish here while a single action is chosen: choosing it again goes on.
         Assert.False(screen.Editor.Screen.HasPrimary);
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -266,10 +266,10 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.Back();
         screen.Editor.Back();
         screen.Editor.PressChoice("Discard them");
@@ -287,10 +287,10 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -299,7 +299,7 @@ public class ChangingTests
         var sequences = screen.Editor.Program.Sequences.Count;
 
         screen.Editor.PressWhen(1);
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Run(2);
 
         var pick = screen.Editor.Pick();
@@ -322,12 +322,12 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         Assert.Null(screen.Editor.Pick().Onward);
 
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.Back();
         screen.Run(2);
@@ -350,10 +350,10 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.Back();
         screen.Editor.PressChoice("A new sequence");
@@ -361,7 +361,7 @@ public class ChangingTests
 
         Assert.Null(screen.Editor.Pick().Onward);
 
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Run(2);
 
         var pick = screen.Editor.Pick();
@@ -376,7 +376,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("Sequence");
+        screen.Editor.PressStart("sequence");
         screen.Editor.Name("Seal up");
         screen.Editor.Back();
         screen.Run(2);
@@ -417,10 +417,10 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -473,7 +473,7 @@ public class ChangingTests
         screen.Run(2);
 
         var back = Assert.IsType<RequiredTrigger>(System(screen).Triggers[0]);
-        Assert.Equal(1, Assert.Single(System(screen).First!.Positions(back.Part)!).Slot);
+        Assert.Equal(1, Assert.Single(Pressed.Where(screen.Editor.Program, System(screen), back.Part)!).Slot);
         Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
 
         // And forward again, into the same change rather than a rebuilt one that reads the same.
@@ -497,10 +497,10 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -571,7 +571,7 @@ public class ChangingTests
         var screen = WithOne();
         var parts = System(screen).Parts.Count;
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
@@ -589,20 +589,25 @@ public class ChangingTests
         Assert.Equal(parts, System(screen).Parts.Count);
     }
 
-    /// <summary>Saying so anyway goes through, which is what a warning is rather than a refusal.</summary>
+    /// <summary>
+    /// Saying so anyway goes through, which is what a warning is rather than a refusal; in a logic system the trigger that
+    /// had the button goes, since its variable holds that button.
+    /// </summary>
     [Fact]
     public void TakingItAnywayIsAllowed()
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
         screen.Editor.PressChoice("Take it over");
         screen.Run(2);
 
-        Assert.Equal(2, System(screen).Triggers.Count);
+        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
+        var took = Assert.Single(System(screen).Triggers);
+        Assert.True(took.IsAbout(screen.Editor.Program.Sequences[1]));
     }
 
     /// <summary>
@@ -617,7 +622,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
@@ -641,20 +646,18 @@ public class ChangingTests
         Assert.DoesNotContain(System(screen).Parts, part => part.IsTrigger && part.Id != "Airlock Button");
     }
 
-    /// <summary>Changing a trigger onto a button is one step back, which takes the slot it made with it.</summary>
+    /// <summary>Changing a trigger onto a button another trigger has is one step back, which brings the other back with it.</summary>
     [Fact]
     public void ChangingOntoAButtonIsOneStepBack()
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
         screen.Editor.Back();
         screen.Run(2);
-
-        var parts = System(screen).Parts.Count;
 
         screen.Editor.PressWhen(1);
         screen.Editor.PressBlock("Airlock Inner Door");
@@ -665,30 +668,31 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.IsType<LogicSystemPage>(screen.Editor.Current);
-        Assert.Equal(parts + 1, System(screen).Parts.Count);
+        Assert.Single(System(screen).Triggers);
 
         screen.Editor.Screen.Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal(parts, System(screen).Parts.Count);
+        Assert.Equal(2, System(screen).Triggers.Count);
+        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(1));
     }
 
     /// <summary>
-    /// Taking the button over leaves the trigger that had it without one, and walks back.
+    /// Taking the button over takes out the logic system's trigger that had it, and walks back.
     /// </summary>
     /// <remarks>
     /// The answer decides which trigger keeps the button, because the construct cannot hold both and
-    /// arranges neither when asked to: the slot ends up empty and neither sequence starts. So the
-    /// one that lost it is left in the state anybody can mend, and one press of the way back puts
-    /// both of them where they were, since it was one answer to one question.
+    /// arranges neither when asked to: the slot ends up empty and neither sequence starts. A logic
+    /// system's trigger is a variable holding its button, so the one that lost it goes, and one press
+    /// of the way back puts both of them where they were, since it was one answer to one question.
     /// </remarks>
     [Fact]
-    public void TakingAButtonOverEmptiesTheTriggerThatHadIt()
+    public void TakingAButtonOverTakesOutTheTriggerThatHadIt()
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
@@ -703,11 +707,10 @@ public class ChangingTests
         screen.Editor.PressChoice("Take it over");
         screen.Run(2);
 
-        var had = (RequiredTrigger)System(screen).Triggers[0];
-
-        Assert.Null(System(screen).First!.FilledWith(had.Part));
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(1));
+        Assert.Single(System(screen).Triggers);
+        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
         Assert.Equal("taking a button over", screen.Editor.Steps().UndoText);
+
 
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);

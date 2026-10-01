@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Ui.Styling;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.Ui.Windows;
 
@@ -67,7 +68,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         public void Show(Texts texts)
         {
             _markup.Text = texts.WritingMarkup;
+            _markup.Tip = Tip.For(_markup.Tip, texts.WritingMarkupAbout);
             _preview.Text = _previewing.IsVisible ? texts.WritingEdit : texts.WritingPreview;
+            _preview.Tip = Tip.For(_preview.Tip, _previewing.IsVisible ? null : texts.WritingPreviewAbout);
             _guideNote.Text = texts.WritingExamplesNote;
 
             if (ReferenceEquals(_examples, texts.WritingExamples))

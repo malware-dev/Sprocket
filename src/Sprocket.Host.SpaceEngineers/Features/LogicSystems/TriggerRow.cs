@@ -90,14 +90,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             for (var i = 0; i < Starts.Count; i++)
             {
-                _starts[i].Tip = Tip.For(_starts[i].Tip, Starts[i].Opens == null ? Why() : null);
+                _starts[i].Tip = Tip.For(_starts[i].Tip, Starts[i].Opens == null ? Why() : Starting(texts, Starts[i]));
                 Part(_starts[i], i, Starts[i], world);
             }
 
             for (var i = 0; i < Does.Count; i++)
             {
                 _does[i].WaitsTip = texts.MemberWaits;
-                _does[i].Tip = Tip.For(_does[i].Tip, Does[i].Opens == null ? Why() : null);
+                _does[i].Tip = Tip.For(_does[i].Tip, Does[i].Opens == null ? Why() : Doing(texts, Does[i]));
 
                 // Before the part is shown, which is what records it as shown: a join is worked out only for a
                 // part that has changed.
@@ -121,9 +121,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             // already recognised.
             Background = Problem.Length != 0 ? Palette.ProblemWash : Palette.None;
 
+            // Quiet rather than gone while it cannot be deleted, saying why.
             _delete.Command = Deletes;
-            _delete.IsVisible = Deletes != null;
-            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.TriggerDelete : null);
+            _delete.IsVisible = Deletes != null || Locked.Length != 0;
+            _delete.IsEnabled = Deletes != null;
+            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.TriggerDelete : Why());
+        }
+
+        /// <summary>What pressing a part of what starts it does, or null where it goes without saying.</summary>
+        static string Starting(Texts texts, SentenceSlot part)
+        {
+            if (part is EntitiesSlot)
+                return texts.TriggerBlocksAbout;
+
+            if (part is DurationSlot)
+                return texts.TriggerRateAbout;
+
+            return part is EventSlot ? texts.TriggerWhatAbout : null;
+        }
+
+        /// <summary>What pressing a part of what it does does, or null where it goes without saying.</summary>
+        static string Doing(Texts texts, SentenceSlot part)
+        {
+            if (part is SequenceSlot || part is ActionSlot)
+                return texts.TriggerDoesAbout;
+
+            if (part is EntitiesSlot)
+                return texts.TriggerTargetsAbout;
+
+            return part is ValuesSlot ? texts.SequenceValuesAbout : null;
         }
 
         /// <summary><see cref="Locked" />, or null where there is nothing to say.</summary>

@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         {
                             new Button { Style = Styles.Start }.As(out _doSomething),
                             new Button { Style = Styles.Start }.As(out _wait),
-                            new Label { Style = Styles.Aside, Padding = new Thickness(16f, 8f), IsVisible = false }.As(out _locked)
+                            new Label { Style = Styles.Aside, Padding = new Thickness(16f, 4f), IsVisible = false }.As(out _locked)
                         }
                     }
                 }

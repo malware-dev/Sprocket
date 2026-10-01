@@ -7,25 +7,26 @@ on screen     Automation for Test Rig
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1328 H:40}
+003  SetClip    {X:296 Y:53 W:1235 H:40}
 004  Text       at {X:296 Y:53.39666} scale 1.111  #A2C3CDFF  "Automation for"
 005  Sprite     Sprocket_Fill         {X:463 Y:53 W:100 H:40}  #3C4C52FF
 006  SetClip    {X:463 Y:53 W:100 H:40}
 007  Sprite     Sprocket_Fill         {X:471 Y:57 W:82 H:32}  #5B737BFF
 008  Text       at {X:470.6234 Y:53.39666} scale 1.111  #DCF5FDFF  "Test Rig"
 009  Sprite     Sprocket_Fill         {X:553 Y:57 W:2 H:32}  #DCF5FDFF
-010  SetClip    {X:296 Y:53 W:1328 H:40}
+010  SetClip    {X:296 Y:53 W:1235 H:40}
 011  ClearClip  
-012  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
-013  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-014  SetClip    {X:256 Y:118 W:1408 H:902}
-015  Text       at {X:272 Y:123.2255} scale 0.833  #A2C3CDFF  "+ Logic system"
-016  Sprite     Sprocket_Fill         {X:1551 Y:122 W:85 H:32}  #29363EFF
-017  Sprite     Sprocket_Fill         {X:1551 Y:122 W:85 H:1}  #3F474FFF
-018  Sprite     Sprocket_Fill         {X:1551 Y:153 W:85 H:1}  #3F474FFF
-019  Sprite     Sprocket_Fill         {X:1551 Y:122 W:1 H:32}  #3F474FFF
-020  Sprite     Sprocket_Fill         {X:1635 Y:122 W:1 H:32}  #3F474FFF
-021  Text       at {X:1566.937 Y:128.0543} scale 0.556  #DCF5FDFF  "Blueprints"
-022  Sprite     Sprocket_Fill         {X:256 Y:166 W:1396 H:1}  #5B737BFF
-023  Text       at {X:264 Y:180.2255} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
-024  ClearClip  
+012  Sprite     Sprocket_Fill         {X:1539 Y:57 W:85 H:32}  #29363EFF
+013  Sprite     Sprocket_Fill         {X:1539 Y:57 W:85 H:1}  #3F474FFF
+014  Sprite     Sprocket_Fill         {X:1539 Y:88 W:85 H:1}  #3F474FFF
+015  Sprite     Sprocket_Fill         {X:1539 Y:57 W:1 H:32}  #3F474FFF
+016  Sprite     Sprocket_Fill         {X:1623 Y:57 W:1 H:32}  #3F474FFF
+017  Text       at {X:1554.937 Y:63.05432} scale 0.556  #DCF5FDFF  "Blueprints"
+018  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
+019  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+020  SetClip    {X:256 Y:118 W:1408 H:902}
+021  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "LOGIC SYSTEMS"
+022  Text       at {X:264 Y:159.2255} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
+023  Text       at {X:272 Y:195.2255} scale 0.833  #A2C3CDFF  "+ logic system"
+024  Text       at {X:260 Y:271.6399} scale 0.694  #85A1A9FF  "BLUEPRINTS"
+025  ClearClip  

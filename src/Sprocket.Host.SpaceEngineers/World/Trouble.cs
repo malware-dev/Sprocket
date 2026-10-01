@@ -15,32 +15,49 @@ namespace Sprocket.Host.SpaceEngineers.World
     {
         public static readonly Trouble None = new Trouble();
 
-        /// <summary>Something to wait through: said, and still worth holding for.</summary>
-        public static Trouble Waiting(string said)
+        /// <summary>Something to wait through: <paramref name="cause" />, about <paramref name="about" /> where it names something, and still worth holding for.</summary>
+        public static Trouble Waiting(Cause cause, string about = null)
         {
-            return new Trouble(said, false);
+            return new Trouble(cause, about, false);
         }
 
-        /// <summary>Something to give up on: said, and the run ends here.</summary>
-        public static Trouble Fatal(string said)
+        /// <summary>Something to give up on: <paramref name="cause" />, and the run ends here.</summary>
+        public static Trouble Fatal(Cause cause)
         {
-            return new Trouble(said, true);
+            return new Trouble(cause, null, true);
         }
 
-        Trouble(string said, bool fatal) : this()
+        /// <summary>The same trouble read back from a save: <paramref name="cause" />, about <paramref name="about" />, whose run has already ended.</summary>
+        public static Trouble Kept(Cause cause, string about)
         {
-            Said = said;
+            return new Trouble(cause, about, true);
+        }
+
+        Trouble(Cause cause, string about, bool fatal) : this()
+        {
+            Cause = cause;
+            About = about;
             Ends = fatal;
         }
 
-        public string Said { get; private set; }
+        /// <summary>What is stopping it.</summary>
+        public Cause Cause { get; private set; }
+
+        /// <summary>The thing the cause names, as the game names it, such as the gas a tank lacks; null where it names nothing.</summary>
+        public string About { get; private set; }
 
         /// <summary>Whether the run should end rather than go on waiting.</summary>
         public bool Ends { get; private set; }
 
         public bool Exists
         {
-            get { return !string.IsNullOrEmpty(Said); }
+            get { return Cause != Cause.None; }
+        }
+
+        /// <summary>Whether <paramref name="other" /> says the same thing.</summary>
+        public bool Same(Trouble other)
+        {
+            return Cause == other.Cause && About == other.About;
         }
     }
 }

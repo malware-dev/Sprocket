@@ -28,23 +28,20 @@ public class StatusRowTests
         Assert.Equal(Word(marked, "Nothing starts this yet.").Bounds.X, Word(plain, "switched off").Bounds.X);
     }
 
-    /// <summary>A row stands the same height whatever it has to say, and a way to add something stands lower, having nothing under its name.</summary>
+    /// <summary>A row stands the same height whatever it has to say.</summary>
     [Fact]
-    public void EveryRowOfAKindIsOneHeight()
+    public void EveryRowIsOneHeight()
     {
         var texts = Simulation.Fresh().Texts;
         var quiet = new StatusRow { Summary = "Sequence 3" };
-        var adds = new StatusRow { Summary = "add another", IsAction = true };
         quiet.Show(texts);
-        adds.Show(texts);
 
         var (marked, plain) = Laid();
-        _ = new Easel(new VStack { Children = { quiet, adds } }, 1200f, 400f);
+        _ = new Easel(new VStack { Children = { quiet } }, 1200f, 400f);
 
         Assert.Equal(68f, marked.Bounds.Height);
         Assert.Equal(68f, plain.Bounds.Height);
         Assert.Equal(68f, quiet.Bounds.Height);
-        Assert.Equal(48f, adds.Bounds.Height);
     }
 
     /// <summary>A row with nothing to say under its name has the name on its middle.</summary>

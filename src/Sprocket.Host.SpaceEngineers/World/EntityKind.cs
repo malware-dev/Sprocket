@@ -105,15 +105,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Adds a moment the construct answers - see <see cref="EntityEvent.Answered" />.
+        /// Adds a trigger, a moment the construct answers through the toolbar slot <paramref name="at" /> - see
+        /// <see cref="EntityEvent.Answered" />.
         /// </summary>
         /// <remarks>
         /// No property, because there is nothing to read: what makes it happen is a slot on this
         /// block's own toolbar, and what it runs is what that slot was given.
         /// </remarks>
-        public EntityKind WithAnsweredEvent(string id, string text)
+        public EntityKind WithTrigger(Sequences.ToolbarSlot at, string text)
         {
-            _events.Add(new EntityEvent(id, text));
+            _events.Add(new EntityEvent(at, text));
             return this;
         }
 
@@ -294,6 +295,22 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (_events[i].Id == eventId)
                     return _events[i];
             }
+            return null;
+        }
+
+        /// <summary>The trigger the one toolbar slot <paramref name="at" /> is among, or null where none of this kind's is.</summary>
+        public EntityEvent Trigger(Sequences.ToolbarSlot at)
+        {
+            for (var i = 0; i < _events.Count; i++)
+            {
+                if (!_events[i].Answered)
+                    continue;
+
+                var stands = Sequences.ToolbarSlot.Of(_events[i].Id);
+                if (stands != null && stands.Covers(at))
+                    return _events[i];
+            }
+
             return null;
         }
 

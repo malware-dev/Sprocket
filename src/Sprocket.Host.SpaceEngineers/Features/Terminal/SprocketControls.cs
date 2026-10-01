@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.Utils;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 {
@@ -27,7 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
         static IMyTerminalControlButton _open;
         static IMyTerminalControlSeparator _below;
 
-        public static void DoOnce()
+        /// <summary>Makes the button once, in <paramref name="texts" />, which the game keeps for the session.</summary>
+        public static void DoOnce(Texts texts)
         {
             if (_done)
                 return;
@@ -42,8 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             _open = MyAPIGateway.TerminalControls
                 .CreateControl<IMyTerminalControlButton, IMyProgrammableBlock>("Sprocket_Open");
 
-            _open.Title = MyStringId.GetOrCompute("Automation");
-            _open.Tooltip = MyStringId.GetOrCompute("Open the automation editor.");
+            _open.Title = MyStringId.GetOrCompute(texts.TerminalOpen);
+            _open.Tooltip = MyStringId.GetOrCompute(texts.TerminalOpenAbout);
             _open.SupportsMultipleBlocks = false;
             _open.Visible = _ => true;
             _open.Enabled = _ => true;

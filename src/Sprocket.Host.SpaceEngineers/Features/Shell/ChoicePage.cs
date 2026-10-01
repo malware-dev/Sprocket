@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
@@ -47,6 +48,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Naming the thing is the difference between a question somebody can answer and one they have to guess at.
         /// </remarks>
         public string Caption { get; set; }
+
+        /// <summary>What the box an answer is typed into is for, said where the pointer rests on it; null for nothing.</summary>
+        public string TypedAbout { get; set; }
+
+        /// <summary>Why the button that takes a typed answer cannot be pressed while nothing is typed; null for nothing.</summary>
+        public string TypeFirst { get; set; }
 
         /// <summary>The answers, in the order they are offered, for whoever reads them back.</summary>
         public IReadOnlyList<ChoiceRow> Answers => _rows;
@@ -113,6 +120,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _box.Hint = _hint;
             _box.Accepts = _accepts;
             _give.Text = _takes;
+            _box.Tip = Tip.For(_box.Tip, TypedAbout);
+            _give.Tip = Tip.For(_give.Tip, TypeFirst);
 
             var takes = Editor.Act(Cmd.ChoiceTaken, delegate { _take(_box.Text); });
             _taking = new Relay(delegate
@@ -122,7 +131,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }) { CanExecute = false };
 
             // Offered only while there is something to take, and told so by the box as it is typed into.
-            _box.Edited += delegate { _taking.CanExecute = _box.Text.Length > 0; };
+            _box.Edited += delegate
+            {
+                _taking.CanExecute = _box.Text.Length > 0;
+                _give.Tip = Tip.For(_give.Tip, _taking.CanExecute ? null : TypeFirst);
+            };
 
             _give.Command = _taking;
             _box.Submit = _taking;

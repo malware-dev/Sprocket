@@ -53,8 +53,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Abandoning a run: a step, as a sequence or a trigger does it.</summary>
         Stop,
 
-        /// <summary>A step running an action on some parts.</summary>
-        Act,
+        /// <summary>A step calling an action on some blocks.</summary>
+        Call,
 
         /// <summary>The values such an action has to be given.</summary>
         With,
@@ -62,7 +62,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Which draft of an unfinished format a program was written against.</summary>
         Alpha,
 
-        /// <summary>A part the construct may leave unfilled.</summary>
-        Optional
+        /// <summary>A slot an instance may leave unanswered.</summary>
+        Optional,
+
+        /// <summary>A variable: a name for something on the program's construct.</summary>
+        Let,
+
+        /// <summary>A system written against slots, to be used by instances.</summary>
+        Blueprint,
+
+        /// <summary>Something a system blueprint needs a construct to provide.</summary>
+        Slot
     }
 }

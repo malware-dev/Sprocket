@@ -282,12 +282,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     if (_token.Kind == TokenKind.Dot)
                         return Qualified(name);
 
-                    return _token.Kind == TokenKind.Colon ? Slotted(name) : name;
+                    return _token.Kind == TokenKind.Colon ? Function(name) : name;
 
                 case TokenKind.Keyword:
                     Step();
 
-                    // A name spelled like a keyword is quoted, beside a dot as anywhere: 'sprocket'.close.
+                    // A name spelled like a keyword is quoted, beside a dot as anywhere: ext.'on'.
                     if (_token.Kind == TokenKind.Dot)
                     {
                         Fail("unexpected '" + Keywords.Name(token.Keyword) + "' before '.'; a name spelled like a keyword is quoted.");
@@ -414,58 +414,66 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return Value.Qualified(from, parts.Count - from);
         }
 
-        /// <summary>A toolbar slot, <c>panel1:toolbar(1, 1, 4)</c>, having read the block's name already.</summary>
-        Value Slotted(Value block)
+        /// <summary>A host function called on a block, <c>panel1:toolbar(1, 1, 4)</c>, having read the block's name already.</summary>
+        /// <remarks>
+        /// Only the shape is the language's: which functions there are, and what each takes, is the host's, so the values are
+        /// read as whatever they are and judged by whoever reads the statement.
+        /// </remarks>
+        Value Function(Value block)
         {
             Step();
-            if (_token.Kind != TokenKind.Identifier || !_token.Text.Equals("toolbar"))
+            if (_token.Kind != TokenKind.Identifier)
             {
-                Fail("expected toolbar(<toolbar>, <page>, <slot>) after ':'.");
+                Fail("expected a function's name after ':'.");
                 return Value.None;
             }
 
+            var name = new Value(ValueForm.Identifier, _token.Text.ToString());
             Step();
             if (_token.Kind != TokenKind.VectorOpen)
             {
-                Fail("expected '(' after toolbar.");
+                Fail("expected '(' after " + name.Word + ".");
                 return Value.None;
             }
 
             Step();
-            var parts = _reading.Parts;
-            var from = parts.Count;
-            parts.Add(block);
-            for (var i = 0; i < 3; i++)
+            var values = new List<Value>();
+            while (_token.Kind != TokenKind.VectorClose)
             {
-                if (i > 0)
+                if (values.Count > 0)
                 {
                     if (_token.Kind != TokenKind.Comma)
                     {
-                        Fail("expected ',' between the toolbar slot's numbers.");
+                        Fail("expected ',' or ')' after a value of " + name.Word + ".");
                         return Value.None;
                     }
 
                     Step();
                 }
 
-                if (_token.Kind != TokenKind.Integer)
+                if (!Valuish())
                 {
-                    Fail("expected a whole number in the toolbar slot.");
+                    Fail("expected a value of " + name.Word + ".");
                     return Value.None;
                 }
 
-                parts.Add(new Value(ValueForm.Integer, null, _token.Whole));
-                Step();
-            }
-
-            if (_token.Kind != TokenKind.VectorClose)
-            {
-                Fail("expected ')' after the toolbar slot's numbers.");
-                return Value.None;
+                var failures = _failures;
+                values.Add(Next());
+                if (_failures > failures)
+                    return Value.None;
             }
 
             Step();
-            return Value.Slotted(from);
+
+            // Written as one run only once the values are read, because a value may write a run of its own first.
+            var parts = _reading.Parts;
+            var from = parts.Count;
+            parts.Add(block);
+            parts.Add(name);
+            for (var i = 0; i < values.Count; i++)
+                parts.Add(values[i]);
+
+            return Value.Function(from, parts.Count - from);
         }
 
         /// <summary>A vector, its three numbers written into the reading's shared run.</summary>

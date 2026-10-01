@@ -121,24 +121,29 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return -1;
         }
 
-        /// <summary>The block and numbers of a toolbar slot, or false where <paramref name="value" /> is not one.</summary>
-        public bool Slot(Value value, out string block, out int toolbar, out int page, out int slot)
+        /// <summary>The block, function name and values of a host function call, or false where <paramref name="value" /> is not one.</summary>
+        public bool Function(Value value, out string block, out string name, out ValueRange values)
         {
-            block = "";
-            toolbar = page = slot = 0;
-            if (value.Form != ValueForm.Slot)
+            block = name = "";
+            values = new ValueRange();
+            if (value.Form != ValueForm.Function)
                 return false;
 
             var parts = new ValueRange(_reading.Parts, value.From, value.Count);
             block = parts[0].Word;
-            toolbar = Number(parts[1].Whole);
-            page = Number(parts[2].Whole);
-            slot = Number(parts[3].Whole);
+            name = parts[1].Word;
+            values = new ValueRange(_reading.Parts, value.From + 2, value.Count - 2);
             return true;
         }
 
+        /// <summary>A written number as a count, 0 where it is none a count can be.</summary>
+        public static int Counted(Value value)
+        {
+            return value.Form == ValueForm.Integer ? Number(value.Whole) : 0;
+        }
+
         /// <summary>The statement that starts at the value <paramref name="at" />: its word, and the values after it.</summary>
-        /// <remarks>How a trigger reads the step it does, which is written as a sequence writes it, after <c>to</c> or <c>then</c>.</remarks>
+        /// <remarks>How a trigger reads the step it does, which is written as a sequence writes it, after <c>then</c> or a clock's duration.</remarks>
         public Statement Rest(int at)
         {
             var value = ValueAt(at);

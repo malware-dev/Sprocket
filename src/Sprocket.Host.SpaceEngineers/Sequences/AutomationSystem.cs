@@ -11,9 +11,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// cannot be called that - a type named <c>System</c> shadows the namespace every file
     /// in the project depends on - so the name is longer here and nowhere else.
     ///
-    /// A system is what a system <em>is</em>; a <see cref="SystemInstance"/> is one somebody
-    /// actually has. Every system has at least one, made with it, because a system with no
-    /// instances is not a thing this editor can show.
+    /// A system runs on the program's own construct and names its blocks directly. A system blueprint is
+    /// written against slots instead, and each <see cref="SystemInstance"/> of it answers them on blocks of
+    /// its own.
     ///
     /// Nothing is declared before it is used. A system exists because somebody built
     /// something, never because they made an empty one first.
@@ -24,9 +24,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<SystemInstance> _instances = new List<SystemInstance>();
         readonly List<Part> _parts = new List<Part>();
         readonly List<Trigger> _triggers = new List<Trigger>();
+        readonly SystemInstance[] _self;
         DateTime? _changed;
         int _lastSequence;
         bool _enabled = true;
+        bool _blueprint;
 
         /// <summary>Told whenever a sequence or one of this system comes or goes. See <see cref="Automation.Reshaped" />.</summary>
         internal Action Reshaped;
@@ -47,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Namespace = "";
             Name = "";
             Annotation = "";
+            _self = new[] { new SystemInstance(0, this) };
         }
 
         /// <summary>Whether the system may run, which is also what keeps what it does from being changed while it does.</summary>
@@ -473,35 +476,34 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
-        /// <summary>The instances on this ship, which is none until the first one is made.</summary>
+        /// <summary>The instances of this system blueprint on this ship, which a system never has.</summary>
         public IReadOnlyList<SystemInstance> Instances => _instances;
 
-        /// <summary>The first of the instances, or null where there are none.</summary>
-        public SystemInstance First => _instances.Count > 0 ? _instances[0] : null;
+        /// <summary>The first way it runs: a blueprint's first instance, or a system's own run; null for a blueprint with no instances.</summary>
+        public SystemInstance First => Uses.Count > 0 ? Uses[0] : null;
 
-        /// <summary>Whether this is a blueprint, with its instances made from it, rather than one logic system.</summary>
-        /// <remarks>
-        /// Told by the instances. One logic system is its only instance and goes by the system's own name;
-        /// making a blueprint of it names the blueprint and that first instance, and every instance added
-        /// afterwards is named as it is made. A system with no instance at all is a blueprint with nothing
-        /// made from it, since one logic system is made with its first.
-        /// </remarks>
+        /// <summary>Whether this is a system blueprint, used by instances, rather than a system.</summary>
+        /// <remarks>Changes which runs it has, so whatever arranges triggers and runners is told, as for an instance coming or going.</remarks>
         public bool IsBlueprint
         {
-            get
+            get { return _blueprint; }
+            set
             {
-                if (_instances.Count == 0)
-                    return true;
+                if (_blueprint == value)
+                    return;
 
-                for (var i = 0; i < _instances.Count; i++)
-                {
-                    if (_instances[i].HasName)
-                        return true;
-                }
-
-                return false;
+                _blueprint = value;
+                Reshape();
             }
         }
+
+        /// <summary>Each way this system runs: one run for each instance of a blueprint, and one of a system's own.</summary>
+        /// <remarks>
+        /// A system's own run is numbered 0, is never saved, and answers no slots, so the names its steps use come through
+        /// as the program's variables. Every runner, poller and toolbar slot is kept per run, so a system and a blueprint
+        /// are worked the same way.
+        /// </remarks>
+        public IReadOnlyList<SystemInstance> Uses => IsBlueprint ? (IReadOnlyList<SystemInstance>)_instances : _self;
 
         /// <summary>
         /// Adds another of this system, named after the system and its number.
@@ -520,7 +522,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     highest = _instances[i].Number;
             }
 
-            var instance = new SystemInstance(highest + 1);
+            var instance = new SystemInstance(highest + 1, this);
             _instances.Add(instance);
             Reshape();
             return instance;
@@ -549,13 +551,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return null;
         }
 
-        /// <summary>The one of this system carrying a number, or null.</summary>
+        /// <summary>The run of this system carrying a number, a blueprint's instance or a system's own numbered 0, or null.</summary>
         public SystemInstance FindInstance(int number)
         {
-            for (var i = 0; i < _instances.Count; i++)
+            var uses = Uses;
+            for (var i = 0; i < uses.Count; i++)
             {
-                if (_instances[i].Number == number)
-                    return _instances[i];
+                if (uses[i].Number == number)
+                    return uses[i];
             }
 
             return null;
@@ -564,7 +567,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Puts back one of this system that was saved, number and name intact.</summary>
         public SystemInstance Restore(int number, string name)
         {
-            var instance = new SystemInstance(number);
+            var instance = new SystemInstance(number, this);
             instance.Name = name;
             _instances.Add(instance);
             Reshape();

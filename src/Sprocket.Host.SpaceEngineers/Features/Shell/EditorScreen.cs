@@ -25,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         int _revision;
         string _subtitle = "";
         ICommand _refresh;
+        ICommand _library;
         ICommand _flip;
         bool _switchIsOn;
         string _switchAbout;
@@ -101,6 +102,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _refresh; }
             set { Set(ref _refresh, value); }
+        }
+
+        /// <summary>Opens the blueprint library, or null on a screen that does not offer it.</summary>
+        public ICommand Library
+        {
+            get { return _library; }
+            set { Set(ref _library, value); }
         }
 
         /// <summary>Switches this screen's subject the other way, or null when it has no such switch.</summary>

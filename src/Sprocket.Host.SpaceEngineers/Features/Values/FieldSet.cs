@@ -9,6 +9,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Values
 {
@@ -40,6 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         readonly Relay _submit;
 
         bool _judged;
+        Texts _language;
 
         /// <summary>A form asking for nothing yet.</summary>
         public FieldSet()
@@ -148,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
                 }
 
                 if (_judged && _fields.Count > 0 && !Filled)
-                    return Called(0) + " needs a value.";
+                    return Template.Fill(_language.ValueNeeded, "name", Called(0));
 
                 return "";
             }
@@ -177,7 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
                 for (var i = 0; i < _fields.Count; i++)
                 {
                     var said = _fields[i].Text;
-                    if (said.Length == 0 || _wanted[i].Refuses(Called(i), said).Length > 0)
+                    if (said.Length == 0 || _wanted[i].Refuses(_language, Called(i), said).Length > 0)
                         return false;
                 }
 
@@ -206,13 +208,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             return string.IsNullOrEmpty(field.Name) ? "#" + Ordinal(at) : field.Name;
         }
 
-        /// <summary>Asks for <paramref name="fields" />, one line each, holding <paramref name="filled" /> or what each says is usual.</summary>
+        /// <summary>Asks for <paramref name="fields" />, one line each, holding <paramref name="filled" /> or what each says is usual, its notes in <paramref name="texts" />.</summary>
         /// <remarks>
         /// Made again whole, because it is asked only when what the values are for changes. <paramref name="colors" /> are
         /// the player's own, offered on any color among them.
         /// </remarks>
-        public void Show(IList<Field> fields, IList<string> filled, IList<Hsv> colors)
+        public void Show(IList<Field> fields, IList<string> filled, IList<Hsv> colors, Texts texts)
         {
+            _language = texts;
             for (var i = 0; i < _placed.Count; i++)
                 Cells[_placed[i].Row, _placed[i].Column, 1, _placed[i].Columns] = null;
 
@@ -227,7 +230,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
 
             for (var i = 0; i < _wanted.Count; i++)
             {
-                var field = Make(_wanted[i], colors);
+                var field = Make(_wanted[i], colors, texts);
                 _fields.Add(field);
                 _seen.Add(false);
 
@@ -274,7 +277,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             for (var i = 0; i < _fields.Count; i++)
             {
                 var said = _fields[i].Text;
-                if (said.Length > 0 && _wanted[i].Refuses(Called(i), said).Length == 0)
+                if (said.Length > 0 && _wanted[i].Refuses(_language, Called(i), said).Length == 0)
                     continue;
 
                 first = i;
@@ -328,10 +331,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         }
 
         /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, or a box.</summary>
-        IField Make(Field field, IList<Hsv> colors)
+        IField Make(Field field, IList<Hsv> colors, Texts texts)
         {
             if (field.Edits == Editor.Colour)
-                return new ColorField(colors, _submit);
+                return new ColorField(colors, _submit, texts);
 
             if (field.Edits == Editor.Angle)
                 return new AngleField(field.Least, field.Most, _submit);
@@ -392,7 +395,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             if (edits == Editor.Chosen || edits == Editor.Angle)
                 return _wanted[at].Name ?? "";
 
-            var said = _wanted[at].Label;
+            var said = _wanted[at].Label(_language);
             if (said.Length > 0)
                 return said;
 
@@ -403,7 +406,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         string Called(int at)
         {
             var name = _wanted[at].Name ?? "";
-            return name.Length > 0 ? name : "Value " + Ordinal(at);
+            return name.Length > 0 ? name : Template.Fill(_language.ValueNumbered, "number", Ordinal(at));
         }
 
         /// <summary>Why the value at <paramref name="at" /> will not do, or empty, where it is being held to anything at all.</summary>
@@ -417,7 +420,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             if (!_seen[at] && string.IsNullOrEmpty(said))
                 return "";
 
-            return _wanted[at].Refuses(Called(at), said);
+            return _wanted[at].Refuses(_language, Called(at), said);
         }
 
         static string Ordinal(int at)

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// Takes a trigger out of a system, with the trigger part it is and what each instance answered it with.
+    /// Takes a trigger out of a system, with the trigger slot it names and what each instance answered it with, where no
+    /// other trigger names that slot.
     /// </summary>
     /// <remarks>
     /// It comes back where it was. A trigger put back on the end would reorder the list somebody is looking at, which
@@ -27,14 +28,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _going = going;
 
             var needed = going as RequiredTrigger;
-            _part = needed == null ? null : system.FindPart(needed.Part);
+            _part = needed == null || Shared(system, needed) ? null : system.FindPart(needed.Part);
 
             var moment = going as MomentTrigger;
             _sources = moment == null ? null : CopyOf(moment.Sources);
             _eventId = moment == null ? null : moment.EventId;
         }
 
-        public override string Label => "deleting a trigger";
+        public override Change Change => Change.ForgetTrigger;
 
         public override bool Undoable(AutomationSystem system)
         {
@@ -94,7 +95,22 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             system.PutTriggerBack(_at, _going);
         }
 
+        /// <summary>Whether another trigger of <paramref name="system" /> names the slot <paramref name="needed" /> names.</summary>
+        static bool Shared(AutomationSystem system, RequiredTrigger needed)
+        {
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var other = triggers[i] as RequiredTrigger;
+                if (other != null && other != needed && other.Part == needed.Part)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>What one instance answered the trigger part with.</summary>
+
         sealed class Answer
         {
             public SystemInstance Instance;

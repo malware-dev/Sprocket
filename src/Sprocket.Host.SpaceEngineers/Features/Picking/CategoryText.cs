@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
@@ -9,29 +10,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public static class CategoryText
     {
-        public static string Of(Category category)
+        public static string Of(Texts texts, Category category)
         {
             switch (category)
             {
-                case Category.Power: return "Power";
-                case Category.Movement: return "Movement";
-                case Category.Opening: return "Opening";
-                case Category.Locking: return "Locking";
-                case Category.Flight: return "Flight";
-                case Category.Stock: return "Cargo";
-                case Category.Air: return "Air";
-                case Category.Making: return "Production";
-                case Category.Weapons: return "Weapons";
-                case Category.Detection: return "Detection";
-                case Category.Automation: return "Automation";
-                case Category.Behaviour: return "Behaviour";
-                case Category.Signals: return "Signals";
-                case Category.Appearance: return "Appearance";
-                case Category.Screen: return "Screens";
-                case Category.Sound: return "Sound";
-                case Category.Identity: return "Identity";
-                case Category.Access: return "Access";
-                default: return "Other";
+                case Category.Power: return texts.CategoryPower;
+                case Category.Movement: return texts.CategoryMovement;
+                case Category.Opening: return texts.CategoryOpening;
+                case Category.Locking: return texts.CategoryLocking;
+                case Category.Flight: return texts.CategoryFlight;
+                case Category.Stock: return texts.CategoryCargo;
+                case Category.Air: return texts.CategoryAir;
+                case Category.Making: return texts.CategoryProduction;
+                case Category.Weapons: return texts.CategoryWeapons;
+                case Category.Detection: return texts.CategoryDetection;
+                case Category.Automation: return texts.CategoryAutomation;
+                case Category.Behaviour: return texts.CategoryBehavior;
+                case Category.Signals: return texts.CategorySignals;
+                case Category.Appearance: return texts.CategoryAppearance;
+                case Category.Screen: return texts.CategoryScreens;
+                case Category.Sound: return texts.CategorySound;
+                case Category.Identity: return texts.CategoryIdentity;
+                case Category.Access: return texts.CategoryAccess;
+                default: return texts.CategoryOther;
             }
         }
     }

@@ -81,7 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     continue;
                 }
 
-                var instances = system.Instances;
+                var instances = system.Uses;
                 for (var n = 0; n < instances.Count; n++)
                 {
                     var any = runner.Get(sequences[i], instances[n]);

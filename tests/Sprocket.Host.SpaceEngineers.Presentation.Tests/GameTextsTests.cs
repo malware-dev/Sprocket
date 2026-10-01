@@ -17,7 +17,7 @@ public class GameTextsTests
         var texts = new GameTexts(Mod);
         texts.Load(MyLanguagesEnum.English);
 
-        Assert.Equal("Logic system", texts.Find("Sprocket.Systems.New"));
+        Assert.Equal("logic system", texts.Find("Sprocket.Systems.New"));
     }
 
     /// <summary>In another language, a key says what that language's file says.</summary>
@@ -27,7 +27,7 @@ public class GameTextsTests
         var texts = new GameTexts(Mod);
         texts.Load(MyLanguagesEnum.Norwegian);
 
-        Assert.Equal("Logikksystem", texts.Find("Sprocket.Systems.New"));
+        Assert.Equal("logikksystem", texts.Find("Sprocket.Systems.New"));
         Assert.Equal(MyLanguagesEnum.Norwegian, texts.Language);
     }
 

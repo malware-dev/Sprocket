@@ -51,7 +51,7 @@ public class DeletingSystemsTests
         // Asked as the one going, and told that the blueprint and the rest are kept.
         sim.Editor.RootRows()[1].Deletes!.Execute();
         Assert.StartsWith(sim.Texts.DeleteInstance, sim.Editor.Question());
-        Assert.EndsWith("The " + system.Name + " blueprint and the other logic systems made from it are kept. This cannot be undone.",
+        Assert.EndsWith("The " + system.Name + " blueprint and its other installations are kept. This cannot be undone.",
             sim.Editor.Question());
 
         sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
@@ -80,7 +80,8 @@ public class DeletingSystemsTests
         var system = sim.Editor.Program.Systems.Single();
         Assert.Empty(system.Instances);
         Assert.True(system.IsBlueprint);
-        Assert.True(sim.Editor.RootRows().Single().IsAction, "the way to add another is gone");
+        Assert.Empty(sim.Editor.RootRows());
+        Assert.Single(sim.Editor.RootAdds());
 
         var store = Store.Nowhere();
         sim.Unit.Written(out var program, out _);
@@ -89,7 +90,8 @@ public class DeletingSystemsTests
         reread.Tick();
 
         Assert.True(reread.Editor.Program.Systems.Single().IsBlueprint);
-        Assert.True(reread.Editor.RootRows().Single().IsAction, "the blueprint came back as something else");
+        Assert.Empty(reread.Editor.RootRows());
+        Assert.Single(reread.Editor.RootAdds());
     }
 
     /// <summary>A logic system's own screen has a bin too, which asks the same question and leaves for the home page once it has gone.</summary>
@@ -182,8 +184,7 @@ public class DeletingSystemsTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        var add = sim.Editor.RootRows().Single(row => row.IsAction);
-        add.Opens!.Execute();
+        sim.Editor.AddInstallation(0);
         sim.Tick();
 
         // Something done to it, switched off, so it stays when the panel is left.

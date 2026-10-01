@@ -53,13 +53,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values);
 
         /// <summary>
-        /// This block's live state in the player's own words, or null to fall back to the floor.
+        /// What this block is doing, or what is stopping it, or <see cref="Status.None" /> to fall back to the floor.
         /// </summary>
         /// <remarks>
         /// "closing" beats "on" by a mile on a list of forty blocks, and it is the only thing a ship
         /// browser is for.
         /// </remarks>
-        string StatusOf(IMyTerminalBlock block);
+        Status StatusOf(IMyTerminalBlock block);
 
         /// <summary>
         /// Why this block will not finish what it was told to do, or null while it might.

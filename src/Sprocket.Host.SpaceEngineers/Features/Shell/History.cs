@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _undone.Remove(subject);
 
             var stack = Stack(_done, subject);
-            if (!coalesce || stack.Count == 0 || stack[stack.Count - 1].Label != edit.Label)
+            if (!coalesce || stack.Count == 0 || stack[stack.Count - 1].Change != edit.Change)
             {
                 stack.Add(edit);
 
@@ -76,18 +76,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return Waiting(_undone, subject) != null;
         }
 
-        /// <summary>What undoing would undo, in the words it happened in.</summary>
-        public string UndoLabel(T subject)
+        /// <summary>What undoing would undo, or <see cref="Change.None" /> where there is nothing.</summary>
+        public Change Undoes(T subject)
         {
             var edit = Waiting(_done, subject);
-            return edit == null ? "" : edit.Label;
+            return edit == null ? Change.None : edit.Change;
         }
 
-        /// <summary>What redoing would put back, in the words it happened in.</summary>
-        public string RedoLabel(T subject)
+        /// <summary>What redoing would put back, or <see cref="Change.None" /> where there is nothing.</summary>
+        public Change Redoes(T subject)
         {
             var edit = Waiting(_undone, subject);
-            return edit == null ? "" : edit.Label;
+            return edit == null ? Change.None : edit.Change;
         }
 
         /// <summary>Takes back the last change, and says which one it was, or null.</summary>

@@ -25,8 +25,8 @@ on screen     Sequence 1
 018  SetClip    {X:256 Y:118 W:1408 H:902}
 019  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
 020  Text       at {X:280 Y:115.6399} scale 0.694  #A2C3CDFF  "switched off"
-021  Text       at {X:272 Y:167.2255} scale 0.833  #A2C3CDFF  "+ Action…"
-022  Text       at {X:393.75 Y:167.2255} scale 0.833  #A2C3CDFF  "+ Wait…"
+021  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ task…"
+022  Text       at {X:374.43 Y:163.2255} scale 0.833  #A2C3CDFF  "+ wait…"
 023  ClearClip  
 024  Sprite     Sprocket_Fill         {X:269 Y:78 W:55 H:36}  #1B242AFF
 025  Sprite     Sprocket_Fill         {X:269 Y:78 W:55 H:1}  #5B737BFF

@@ -39,33 +39,33 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityKind Kind => _kind;
 
         /// <summary>
-        /// Live state in the player's own words.
+        /// Live state, for the player's own words.
         /// </summary>
         /// <remarks>
         /// Four answers rather than two, because "off" and "no power" are different problems and telling
         /// somebody the wrong one is worse than telling them nothing. Damage comes first because a damaged
         /// block is not working for a reason no switch will fix.
         /// </remarks>
-        public string Status
+        public Status Status
         {
             get
             {
                 // What this block is doing, when something knows. "closing" beats "on" on a list of forty.
                 if (_extension != null)
                 {
-                    string told = _extension.StatusOf(_block);
-                    if (!string.IsNullOrEmpty(told))
+                    var told = _extension.StatusOf(_block);
+                    if (told.Exists)
                         return told;
                 }
 
                 if (!_block.IsFunctional)
-                    return "damaged";
+                    return Status.Of(Condition.Damaged);
 
                 IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
                 if (functional != null && !functional.Enabled)
-                    return "off";
+                    return Status.Of(Condition.Off);
 
-                return _block.IsWorking ? "on" : "no power";
+                return Status.Of(_block.IsWorking ? Condition.On : Condition.NoPower);
             }
         }
 

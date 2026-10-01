@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _count = count < 1 ? 1 : count;
         }
 
-        public override string Label => "moving a step";
+        public override Change Change => Change.MoveStep;
 
         public override bool Changes => _from != _to;
 

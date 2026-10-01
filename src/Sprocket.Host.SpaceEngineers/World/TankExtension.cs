@@ -66,26 +66,26 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public string StatusOf(IMyTerminalBlock block)
+        public Status StatusOf(IMyTerminalBlock block)
         {
             var tank = block as IMyGasTank;
             if (tank == null)
-                return null;
+                return Status.None;
 
             if (tank.FilledRatio >= 1.0)
-                return "full";
+                return Status.Of(Condition.Full);
 
             if (tank.Stockpile)
             {
                 Trouble stuck = Filling(tank);
                 if (stuck.Exists)
-                    return stuck.Said;
+                    return Status.Of(stuck);
             }
 
             if (In(tank) > 0f)
-                return "filling…";
+                return Status.Of(Condition.Filling);
 
-            return tank.FilledRatio <= 0.0 ? "empty" : null;
+            return tank.FilledRatio <= 0.0 ? Status.Of(Condition.Empty) : Status.None;
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return Trouble.None;
 
             if (!tank.Stockpile)
-                return Trouble.Fatal("stopped - something else switched stockpile off");
+                return Trouble.Fatal(Cause.TankStockpileOff);
 
             return Filling(tank);
         }
@@ -111,14 +111,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         static Trouble Filling(IMyGasTank tank)
         {
             if (!tank.IsWorking)
-                return Trouble.Waiting("cannot fill - it is switched off or has no power");
+                return Trouble.Waiting(Cause.TankNoPower);
 
             MyGasTankDefinition definition = Definition(tank);
             if (definition == null || In(tank, definition.StoredGasId) != 0f)
                 return Trouble.None;
 
-            return Trouble.Waiting("cannot fill - no " + definition.StoredGasId.SubtypeName.ToLowerInvariant()
-                + " coming in");
+            return Trouble.Waiting(Cause.TankNoGas, definition.StoredGasId.SubtypeName.ToLowerInvariant());
         }
 
         /// <summary>The gas coming in, or zero where nothing says.</summary>

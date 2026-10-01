@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _off = off;
         }
 
-        public override string Label => _off ? "switching a step off" : "switching a step on";
+        public override Change Change => _off ? Change.PauseStep : Change.ResumeStep;
 
         public override void Apply(Sequence sequence)
         {

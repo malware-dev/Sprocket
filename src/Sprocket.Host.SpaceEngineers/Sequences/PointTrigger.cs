@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _eventId = moment == null ? null : moment.EventId;
         }
 
-        public override string Label => "changing what it does";
+        public override Change Change => Change.Target;
 
         /// <summary>Whether it does something else: a sequence run the same way again is no change.</summary>
         public override bool Changes

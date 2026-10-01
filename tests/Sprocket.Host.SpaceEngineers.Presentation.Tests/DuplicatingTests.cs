@@ -78,26 +78,21 @@ public class DuplicatingTests
     }
 
     /// <summary>
-    /// Running or not, which is unlike everything that rewires one.
+    /// While its system is on, a sequence's bin stays where it is, cannot be pressed, and says why.
     /// </summary>
-    /// <remarks>
-    /// Throwing a sequence away is not editing it: nothing half-written can result, the question
-    /// asks first, and a machine somebody wants rid of while it is running is exactly when they
-    /// want rid of it. Switching it off first would be an errand on the way to the same place.
-    /// </remarks>
     [Fact]
-    public void ARunningSequenceIsStillDeletedFromItsRow()
+    public void ASequenceOfASwitchedOnSystemKeepsAQuietBin()
     {
         var screen = AtTheList();
 
         screen.Editor.Screen.Flip!.Execute();
         screen.Run(2);
 
-        Row(screen, 0).Deletes!.Execute();
-        screen.Editor.PressChoice("Delete it");
-        screen.Run(2);
-
-        Assert.Empty(screen.Editor.Program.Sequences);
+        var row = Row(screen, 0);
+        Assert.Null(row.Deletes);
+        Assert.True(row.DeletePart.IsVisible, "the bin went away while the system is on");
+        Assert.False(row.DeletePart.IsEnabled, "the bin can still be pressed while the system is on");
+        Assert.Equal("Turn the system off to edit.", row.DeletePart.Tip?.Text);
     }
 
     /// <summary>
@@ -114,7 +109,7 @@ public class DuplicatingTests
         var rows = screen.Editor.Rows();
 
         Assert.NotNull(rows[0].Copies);
-        Assert.All(rows, row => Assert.False(row.IsAction));
+        Assert.All(rows, row => Assert.NotNull(row.Copies));
     }
 
     /// <summary>

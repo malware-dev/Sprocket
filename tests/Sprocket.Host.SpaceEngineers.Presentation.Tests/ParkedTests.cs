@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -21,7 +22,7 @@ public class ParkedTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
-        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressAdd("task…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -29,7 +30,7 @@ public class ParkedTests
 
         var system = screen.Editor.Program.Systems[0];
         system.Enabled = false;
-        system.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, null, "Airlock Inner Door");
+        system.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, Trouble.None, "Airlock Inner Door");
         return screen.Run(120);
     }
 

@@ -248,6 +248,12 @@ sealed class Rig
         return Weld(new Panel(id, name, Type<MyObjectBuilder_ButtonPanel>(), subtype, "Button Panel", buttons));
     }
 
+    /// <summary>A timer block, named.</summary>
+    public TimerBlock Timer(long id, string name)
+    {
+        return Weld(new TimerBlock(id, name, Type<MyObjectBuilder_TimerBlock>(), "TimerBlockLarge", "Timer Block"));
+    }
+
     /// <summary>A block with nothing but a switch, which is most of a ship.</summary>
     public Piston Piston(long id, string name)
     {

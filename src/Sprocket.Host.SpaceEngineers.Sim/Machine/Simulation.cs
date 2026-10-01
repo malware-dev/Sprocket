@@ -99,13 +99,9 @@ sealed class Simulation
         // The harness is always drawing the screen, which is what the unit ticks its editor for.
         _unit.Showing = true;
 
-        // A press invokes what the slot holds, and what that means is the unit's to say - which is
+        // A slot used invokes what it holds, and what that means is the unit's to say - which is
         // the game's arrangement exactly: the slot carries a key and Sprocket resolves it.
-        foreach (Panel panel in Panels())
-        {
-            panel.Invokes = Fire;
-            panel.Performs = _rig.Perform;
-        }
+        Connect();
 
         // One tick before anybody can press anything, because that is the order in the game: the
         // session adopts a block as it comes alive, long before a screen is opened on it. Without it
@@ -154,17 +150,10 @@ sealed class Simulation
         // with server load.
         _frame++;
 
-        // A panel welded after the rig was made is wired here rather than only in the constructor,
+        // A block with a toolbar welded after the rig was made is wired here rather than only in the constructor,
         // because the game wires one as it is built. Without this a button added later is a button
         // nobody hears, which looks exactly like Sprocket failing to claim the slot.
-        foreach (Panel panel in Panels())
-        {
-            if (panel.Invokes != null)
-                continue;
-
-            panel.Invokes = Fire;
-            panel.Performs = _rig.Perform;
-        }
+        Connect();
 
         _rig.Tick();
         _unit.Tick(_frame);
@@ -209,7 +198,21 @@ sealed class Simulation
         }
     }
 
+    /// <summary>Has every block with a toolbar that is not yet connected run what its slots hold through this simulation.</summary>
+    void Connect()
+    {
+        foreach (var fitting in _rig.Fitted)
+        {
+            if (fitting.Toolbar == null || fitting.Invokes != null)
+                continue;
+
+            fitting.Invokes = Fire;
+            fitting.Performs = _rig.Perform;
+        }
+    }
+
     /// <summary>The buttons on the rig, for the row of pokes along the bottom of the window.</summary>
+
     public IEnumerable<Panel> Panels()
     {
         foreach (var fitting in _rig.Fitted)

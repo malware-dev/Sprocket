@@ -37,11 +37,12 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.Utilities == null)
                 return;
 
-            TriggerAction.Register();
+            var texts = SprocketSession.Texts;
+            TriggerAction.Register(texts);
 
             // The button belongs to a terminal, and a dedicated server has none.
             if (!MyAPIGateway.Utilities.IsDedicated)
-                SprocketControls.DoOnce();
+                SprocketControls.DoOnce(texts);
 
             IMyTerminalBlock block = Entity as IMyTerminalBlock;
             if (block != null && SprocketUnit.HasProgram(block))

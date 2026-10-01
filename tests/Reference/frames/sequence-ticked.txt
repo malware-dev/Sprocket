@@ -28,6 +28,6 @@ on screen     Sequence 1
 021  SetClip    {X:256 Y:118 W:1408 H:902}
 022  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
 023  Text       at {X:280 Y:115.6399} scale 0.694  #A2C3CDFF  "switched off"
-024  Text       at {X:272 Y:167.2255} scale 0.833  #A2C3CDFF  "+ Action…"
-025  Text       at {X:393.75 Y:167.2255} scale 0.833  #A2C3CDFF  "+ Wait…"
+024  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ task…"
+025  Text       at {X:374.43 Y:163.2255} scale 0.833  #A2C3CDFF  "+ wait…"
 026  ClearClip  

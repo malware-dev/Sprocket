@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Values;
@@ -14,10 +16,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <remarks>
     /// The other half of <see cref="SentenceText" />. A sentence is slots because every part of one
     /// is somebody's to change; these are labels, so they are one string each and this decides all
-    /// of it - including the word order, which is the part core must never own.
+    /// of it - including the word order, which is the part core must never own. A line written the
+    /// way the program writes it stays in the program's words; everything else is said in the
+    /// player's language.
     /// </remarks>
     public static class SequenceText
     {
+        /// <summary>The program's own word for a sequence nobody has named, in the lines written as the program writes them.</summary>
+        const string Written = "Sequence ";
 
 
         /// <summary>
@@ -42,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (sequence == null)
                 return trigger.Stops ? "stops a sequence that is gone" : "runs a sequence that is gone";
 
-            return (trigger.Stops ? "stops " : "runs ") + (sequence.HasName ? sequence.Name : DefaultName(sequence.Number));
+            return (trigger.Stops ? "stops " : "runs ") + (sequence.HasName ? sequence.Name : Written + sequence.Number);
         }
 
 
@@ -65,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 var when = moment as WhenTrigger;
                 var sources = SystemInstance.Through(through, moment.Sources);
                 return "When " + SentenceText.Named(bindings, sources,
-                    when != null && when.RequiresAll) + " " + Happening(bindings, Vocabulary.EventOf(moment, through), sources);
+                    when != null && when.RequiresAll) + " " + Happening(bindings, Vocabulary.EventOf(null, bindings, null, moment, through), sources);
             }
 
             var every = trigger as EveryTrigger;
@@ -74,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             // A required trigger that names nothing: whatever answers it is on the ship's toolbars
             // and not in the system, so there is nothing to name and the line says that.
-            return trigger is RequiredTrigger ? "When something on this ship says so" : SentenceText.Empty;
+            return trigger is RequiredTrigger ? "When something on this construct starts it" : SentenceText.Empty;
         }
 
 
@@ -98,27 +104,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// a row's identity change as somebody edits it. The game names a block and lets the name be
         /// overtyped, and everybody already knows that.
         /// </remarks>
-        public static string DefaultName(int number)
+        public static string DefaultName(Texts texts, int number)
         {
-            return "Sequence " + number;
+            return Template.Fill(texts.SequenceNumbered, "number", number.ToString(CultureInfo.InvariantCulture));
         }
 
 
         /// <summary>What a sequence is called: its name, or its number where it has none.</summary>
-        public static string Called(Sequence sequence)
+        public static string Called(Texts texts, Sequence sequence)
         {
-            return sequence.HasName ? sequence.Name : DefaultName(sequence.Number);
+            return sequence.HasName ? sequence.Name : DefaultName(texts, sequence.Number);
         }
 
 
-        public static string Status(SequenceStatus status)
+        public static string Status(Texts texts, SequenceStatus status)
         {
             if (status == SequenceStatus.Off)
-                return "switched off";
+                return texts.SequenceOff;
             if (status == SequenceStatus.Running)
-                return "running";
+                return texts.SequenceRunning;
             if (status == SequenceStatus.RunningWaiting)
-                return "running - waiting for this step";
+                return texts.SequenceRunningWaiting;
 
             // Not "waiting", which is what a sequence held mid-run says two lines above. The same
             // word for a sequence doing nothing and for one stopped part-way through is the one
@@ -131,7 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             // never run is worth saying and would be said here - but only a run in progress is
             // written to the save, so after a world is loaded every sequence looks like one that
             // has never fired, including the one that has cycled an airlock every day for a month.
-            return "ready";
+            return texts.SequenceReady;
         }
 
 
@@ -144,12 +150,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// inventing knowledge it does not have, on the screen where somebody is deciding what to
         /// type.
         /// </remarks>
-        static string Wants(int values)
+        static string Wants(Texts texts, int values)
         {
             if (values <= 1)
-                return "This needs one value.";
+                return texts.PickWantsOne;
 
-            return "This needs " + Counted(values) + " values.";
+            return Template.Fill(texts.PickWantsMany, "count", Counted(texts, values));
         }
 
         /// <summary>
@@ -160,18 +166,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// truth the moment a description says these three values are one colour. Then the form shows
         /// one control and asking for three values would be counting something nobody can see.
         /// </remarks>
-        public static string Wants(IList<Field> fields)
+        public static string Wants(Texts texts, IList<Field> fields)
         {
             if (fields.Count == 1 && fields[0].Edits == Editor.Colour)
-                return "This needs a colour.";
+                return texts.PickWantsColor;
 
-            return Wants(fields.Count);
-        }
-
-        /// <summary>What the picker's column of values is headed.</summary>
-        public static string ValuesTitle()
-        {
-            return "Values";
+            return Wants(texts, fields.Count);
         }
 
         /// <summary>
@@ -183,14 +183,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// because "run" and "play" are not the same promise; stopping says what it leaves behind,
         /// because a machine halfway through a cycle stays halfway through it.
         /// </remarks>
-        public static string Starts()
+        public static string Starts(Texts texts)
         {
-            return "Run it now, as its trigger would";
+            return texts.SequenceRunNow;
         }
 
-        public static string Stops()
+        /// <summary>The same button, facing the other way.</summary>
+        public static string Stops(Texts texts)
         {
-            return "Stop it, leaving everything where it is";
+            return texts.SequenceStopNow;
         }
 
         /// <summary>The row that opens the field, which says what pressing it is for.</summary>
@@ -199,120 +200,141 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return "Say what to give it";
         }
 
-        static string Counted(int values)
+        static string Counted(Texts texts, int values)
         {
             if (values == 2)
-                return "two";
+                return texts.NumberTwo;
             if (values == 3)
-                return "three";
+                return texts.NumberThree;
             if (values == 4)
-                return "four";
+                return texts.NumberFour;
 
             return values.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>What is wrong with <paramref name="sequence" />, letting whatever is at fault speak for itself where it can.</summary>
-        internal static string Problem(SequenceFault fault, Sequence sequence)
+        internal static string Problem(Texts texts, SequenceFault fault, Sequence sequence)
         {
             if (fault.Problem == SequenceProblem.EmptySlot)
-                return "The " + fault.Which + " slot is empty. Fill it on the configuration panel.";
+                return Template.Fill(texts.ProblemEmptySlot, "slot", fault.Which);
 
             if (fault.Problem == SequenceProblem.NeverTriggered)
-                return Unstarted(fault.Unwired, fault.Which);
+                return Unstarted(texts, fault.Unwired, fault.Which);
 
             if (fault.Problem == SequenceProblem.Unable && !string.IsNullOrEmpty(fault.Which))
-                return fault.Which + " is switched off. Switch it on first.";
+                return Template.Fill(texts.ProblemBlockOff, "block", fault.Which);
 
             if (fault.Problem == SequenceProblem.Stalled && !string.IsNullOrEmpty(fault.Which))
-                return fault.Which + " isn't working, so this waits for it.";
+                return Template.Fill(texts.ProblemBlockStalled, "block", fault.Which);
 
-            return string.IsNullOrEmpty(fault.Because) ? Problem(fault.Problem) : fault.Because;
+            return fault.Because.Exists ? TroubleText.Of(texts, fault.Because) : Problem(texts, fault.Problem);
         }
 
         /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
-        internal static string Failing(SequenceFault fault, Sequence sequence)
+        internal static string Failing(Texts texts, SequenceFault fault, Sequence sequence)
         {
             // A trigger's own act has no steps to count, and no name.
+            var problem = Problem(texts, fault, sequence);
             if (sequence.IsAlone)
-                return Problem(fault, sequence);
+                return problem;
 
             var row = Row(sequence, fault.Step);
-            var named = sequence.HasName ? sequence.Name : "";
-            var at = row > 0 ? (named.Length > 0 ? ", step " : "Step ") + row.ToString(CultureInfo.InvariantCulture) : "";
+            var step = row.ToString(CultureInfo.InvariantCulture);
+            if (sequence.HasName)
+            {
+                return row > 0
+                    ? Fill(texts.ProblemAtNamedStep, "step", step, "problem", problem, "sequence", sequence.Name)
+                    : Fill(texts.ProblemInSequence, "problem", problem, "sequence", sequence.Name);
+            }
 
-            return named + at + (named.Length + at.Length > 0 ? ": " : "") + Problem(fault, sequence);
+            return row > 0 ? Fill(texts.ProblemAtStep, "step", step, "problem", problem) : problem;
         }
 
         /// <summary>Why nothing can start a sequence, naming the block whose button it is where that is known.</summary>
-        static string Unstarted(Unwired why, string block)
+        static string Unstarted(Texts texts, Unwired why, string block)
         {
             if (why == Unwired.NoBlock)
-                return "No block starts this. Choose one.";
+                return texts.ProblemNoBlock;
             if (why == Unwired.NoMoment)
                 return string.IsNullOrEmpty(block)
-                    ? "Choose what the block must do to start this."
-                    : "Choose what " + block + " must do to start this.";
+                    ? texts.ProblemNoMoment
+                    : Template.Fill(texts.ProblemNoMomentOf, "block", block);
             if (string.IsNullOrEmpty(block))
-                return "Nothing can start this.";
+                return texts.ProblemNeverTriggered;
             if (why == Unwired.Cleared)
-                return block + "'s button was cleared, so it can't start this.";
+                return Template.Fill(texts.ProblemCleared, "block", block);
             if (why == Unwired.Taken)
-                return block + "'s button does something else, so it can't start this.";
+                return Template.Fill(texts.ProblemTaken, "block", block);
 
-            return block + "'s button isn't set to start this.";
+            return Template.Fill(texts.ProblemUnset, "block", block);
         }
 
         /// <summary>Why Sprocket switched off <paramref name="system" />, or one of it, as <paramref name="halt" /> recorded it.</summary>
-        public static string Stopped(Halt halt, AutomationSystem system)
+        public static string Stopped(Texts texts, Halt halt, AutomationSystem system)
         {
             if (halt == null || halt.Problem == SequenceProblem.None)
-                return "Stopped for an unknown reason.";
+                return texts.StoppedUnknown;
 
             var sequence = system == null ? null : system.FindSequence(halt.Sequence);
             var row = Row(sequence, halt.Step);
-            var at = row > 0 ? " at step " + row.ToString(CultureInfo.InvariantCulture) : "";
-            var of = sequence == null || !sequence.HasName ? "" : (row > 0 ? " of " : " in ") + sequence.Name;
+            var step = row.ToString(CultureInfo.InvariantCulture);
+            var reason = halt.Because.Exists ? TroubleText.Of(texts, halt.Because) : Because(texts, halt.Problem, halt.Block);
 
-            return "Stopped" + at + of + ": " + (string.IsNullOrEmpty(halt.Said) ? Because(halt.Problem, halt.Block) : halt.Said);
+            if (sequence == null || !sequence.HasName)
+                return row > 0 ? Fill(texts.StoppedAtStep, "step", step, "reason", reason) : Template.Fill(texts.StoppedPlain, "reason", reason);
+
+            return row > 0
+                ? Fill(texts.StoppedAtStepOf, "step", step, "reason", reason, "sequence", sequence.Name)
+                : Fill(texts.StoppedIn, "reason", reason, "sequence", sequence.Name);
         }
 
-        static string Because(SequenceProblem problem, string block)
+        static string Because(Texts texts, SequenceProblem problem, string block)
         {
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.EmptySlot)
-                return "the " + block + " slot was empty.";
+                return Template.Fill(texts.StoppedEmptySlot, "slot", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.NeverTriggered)
-                return block + "'s button couldn't start it.";
+                return Template.Fill(texts.StoppedButtonFailed, "block", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.MissingTarget)
-                return block + " was gone.";
+                return Template.Fill(texts.StoppedBlockGone, "block", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Adrift)
-                return block + " may have been replaced.";
+                return Template.Fill(texts.StoppedBlockReplaced, "block", block);
 
             if (problem == SequenceProblem.NeverTriggered)
-                return "nothing could start it.";
+                return texts.StoppedNeverTriggered;
             if (problem == SequenceProblem.MissingSource)
-                return "a block that starts it was gone.";
+                return texts.StoppedMissingSource;
             if (problem == SequenceProblem.MissingTarget)
-                return "a block it acts on was gone.";
+                return texts.StoppedMissingTarget;
             if (problem == SequenceProblem.MissingGate)
-                return "a block it waits on was gone.";
+                return texts.StoppedMissingGate;
             if (problem == SequenceProblem.Unoffered)
-                return "its blocks no longer offered the action.";
+                return texts.StoppedUnoffered;
             if (problem == SequenceProblem.Unfilled)
-                return "a value was missing.";
+                return texts.StoppedUnfilled;
             if (problem == SequenceProblem.Mistyped)
-                return "a value didn't fit the action.";
+                return texts.StoppedMistyped;
             if (problem == SequenceProblem.Unawaited)
-                return "it didn't wait for what it started.";
+                return texts.StoppedUnawaited;
             if (problem == SequenceProblem.Circular)
-                return "it would have started itself again.";
+                return texts.StoppedCircular;
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Unable)
-                return block + " was switched off.";
+                return Template.Fill(texts.StoppedBlockOff, "block", block);
             if (problem == SequenceProblem.Unable)
-                return "a block it acts on was switched off.";
+                return texts.StoppedUnable;
             if (problem == SequenceProblem.Adrift)
-                return "a block may have been replaced.";
+                return texts.StoppedAdrift;
 
-            return "it could not work.";
+            return texts.StoppedFailed;
+        }
+
+        static string Fill(string template, string name, string value, string other, string said)
+        {
+            return Template.Fill(Template.Fill(template, name, value), other, said);
+        }
+
+        static string Fill(string template, string name, string value, string other, string said, string last, string lastSaid)
+        {
+            return Template.Fill(Fill(template, name, value, other, said), last, lastSaid);
         }
 
         /// <summary>The number a step's row shows, counting past the waits for what a step starts, or 0 where there is none.</summary>
@@ -331,36 +353,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return row;
         }
 
-        public static string Problem(SequenceProblem problem)
+        public static string Problem(Texts texts, SequenceProblem problem)
         {
             if (problem == SequenceProblem.MissingSource)
-                return "This listens to something that isn't here any more.";
+                return texts.ProblemMissingSource;
             if (problem == SequenceProblem.MissingTarget)
-                return "This affects something that isn't here any more.";
+                return texts.ProblemMissingTarget;
             if (problem == SequenceProblem.NeverTriggered)
-                return "Nothing can start this.";
+                return texts.ProblemNeverTriggered;
             if (problem == SequenceProblem.NothingStarts)
-                return "Nothing starts this yet.";
+                return texts.ProblemNothingStarts;
             if (problem == SequenceProblem.MissingGate)
-                return "This waits on something that isn't here any more.";
+                return texts.ProblemMissingGate;
             if (problem == SequenceProblem.Unoffered)
-                return "This does something these blocks no longer offer. Replace this step.";
+                return texts.ProblemUnoffered;
             if (problem == SequenceProblem.Unfilled)
-                return "This step is missing a value it needs. Fill it in.";
+                return texts.ProblemUnfilled;
             if (problem == SequenceProblem.Mistyped)
-                return "This step has a value its action can't take. Fill it in again.";
+                return texts.ProblemMistyped;
             if (problem == SequenceProblem.Unawaited)
-                return "This step doesn't wait for what it starts, which this version can't show. Replace this step.";
+                return texts.ProblemUnawaited;
             if (problem == SequenceProblem.Stuck)
-                return "This is waiting for something that cannot finish.";
+                return texts.ProblemStuck;
             if (problem == SequenceProblem.Conflicted)
-                return "This stopped: something else took over one of its blocks.";
+                return texts.ProblemConflicted;
             if (problem == SequenceProblem.Circular)
-                return "This runs a sequence that runs this one again. Remove one of the two.";
+                return texts.ProblemCircular;
             if (problem == SequenceProblem.Unable)
-                return "A block this step acts on is switched off. Switch it on first.";
+                return texts.ProblemUnable;
             if (problem == SequenceProblem.Stalled)
-                return "A block this waits for isn't working, so this waits for it.";
+                return texts.ProblemStalled;
 
             return "";
         }
@@ -379,13 +401,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (wait != null)
                 return "wait " + TimeText.Duration(wait.Ticks);
 
-            var run = step as Run;
+            var run = step as SpaceEngineers.Sequences.Run;
             if (run != null)
             {
                 var system = sequence.System;
                 var called = system == null ? null : system.FindSequence(run.Number);
                 return (run.Stops ? "stop " : "run ") + (called == null || !called.HasName
-                    ? DefaultName(run.Number)
+                    ? Written + run.Number
                     : called.Name);
             }
 

@@ -53,9 +53,21 @@ namespace Sprocket.Sim.Driving
         }
 
 
-        /// <summary>Opens what the blueprint under the root's heading number <paramref name="group" /> does, through the button beside that heading.</summary>
+        /// <summary>The lines under each blueprint on the root that add another installation, one for each blueprint.</summary>
+        public static List<Button> RootAdds(this SprocketEditor editor) =>
+            Within(Root(editor).View).OfType<BlueprintGroup>().Select(group => group.Adds).ToList();
+
+        /// <summary>Adds another installation of the blueprint number <paramref name="group" /> on the root, by pressing its line.</summary>
+        public static void AddInstallation(this SprocketEditor editor, int group) =>
+            RootAdds(editor)[group].Command!.Execute();
+
+        /// <summary>Opens the blueprint library, by pressing its button in the header.</summary>
+        public static void OpenLibrary(this SprocketEditor editor) =>
+            (editor.Screen.Library ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' offers no library.")).Execute();
+
+        /// <summary>Opens what the blueprint under the root's heading number <paramref name="group" /> does, by pressing that heading.</summary>
         public static void OpenBlueprintSystem(this SprocketEditor editor, int group) =>
-            Within(Root(editor).View).OfType<Button>().Where(button => button.Text == editor.Texts.SystemsEdit).ElementAt(group).Command!.Execute();
+            Within(Root(editor).View).OfType<BlueprintGroup>().ElementAt(group).Heading.Opens!.Execute();
 
         /// <summary>The parts of the blueprint the editor is on, one row each.</summary>
         public static List<PartRow> Parts(this SprocketEditor editor) =>
@@ -125,15 +137,19 @@ namespace Sprocket.Sim.Driving
         /// The root's rows, as the controls it draws, in the order they stand.
         /// </summary>
         /// <remarks>The root draws itself, so these are its own rows, pressed through their own commands.</remarks>
-        public static List<StatusRow> RootRows(this SprocketEditor editor) =>
-            Within(Root(editor).View).OfType<StatusRow>().ToList();
+        public static List<StatusRow> RootRows(this SprocketEditor editor)
+        {
+            var headings = RootHeadings(editor);
+            return Within(Root(editor).View).OfType<StatusRow>().Where(row => !headings.Contains(row)).ToList();
+        }
+
+        /// <summary>The rows over each blueprint's logic systems on the root, one for each blueprint.</summary>
+        public static List<StatusRow> RootHeadings(this SprocketEditor editor) =>
+            Within(Root(editor).View).OfType<BlueprintGroup>().Select(group => group.Heading).ToList();
 
         /// <summary>The names the root's headings say, one for each blueprint.</summary>
         public static List<string> RootHeadingNames(this SprocketEditor editor) =>
-            Within(Root(editor).View).OfType<RichText>()
-                .Where(text => text.Arguments != null)
-                .Select(text => text.Arguments!.Of("name"))
-                .ToList();
+            RootHeadings(editor).Select(heading => heading.AboutArguments!.Of("name")).ToList();
 
         /// <summary>What the root's buttons for starting something say, in order.</summary>
         public static List<string> RootStarts(this SprocketEditor editor) =>
@@ -148,7 +164,7 @@ namespace Sprocket.Sim.Driving
         /// </remarks>
         public static void NewSystem(this SprocketEditor editor, string name)
         {
-            PressButton(editor, "Logic system");
+            PressButton(editor, editor.Texts.SystemsNew);
             editor.Screen.Heading[0].Renames!(name);
         }
 
@@ -156,7 +172,7 @@ namespace Sprocket.Sim.Driving
         public static void NewButtonSystem(this SprocketEditor editor, string name)
         {
             editor.NewSystem(name);
-            editor.PressStart("When…");
+            editor.PressStart(editor.Texts.SystemWhen);
             editor.PressBlock("Airlock Button");
             editor.PressChoice("is pressed");
             editor.PressPrimary();

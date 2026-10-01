@@ -44,6 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         int _listenedBindings = -1;
         int _listenedEdits = -1;
+        int _watchedBindings = -1;
+        int _watchedEdits = -1;
         bool _announced;
 
         int _all = -1;
@@ -196,8 +198,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return every != null && SampleEvery(every) ? 1 : 0;
         }
 
+        /// <summary>The blocks <paramref name="slots" /> come to, each once.</summary>
+        /// <remarks>Worked out again only where the blocks the names point at, or the program, have changed since.</remarks>
         List<string> Watched(IList<string> slots)
         {
+            if (_bindings.Revision == _watchedBindings && _owner.Program.Edits == _watchedEdits)
+                return _watched;
+
+            _watchedBindings = _bindings.Revision;
+            _watchedEdits = _owner.Program.Edits;
             _watched.Clear();
             if (_instance == null)
             {
@@ -209,6 +218,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _instance.Resolve(slots, _watched);
             }
 
+            _bindings.Distinct(_watched);
             return _watched;
         }
 

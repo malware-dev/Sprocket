@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Ui.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
@@ -25,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _name = "";
         Action<string> _renames;
         Func<string, bool> _accepts;
+        ICommand _opens;
         bool _namedOnArrival;
         string _about;
         bool _nameRequired;
@@ -104,6 +106,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether this part can be renamed.</summary>
         public bool CanRename => _renames != null;
 
+        /// <summary>What pressing this part does where it cannot be renamed, such as opening what it names, or null for nothing.</summary>
+        public ICommand Opens
+        {
+            get { return _opens; }
+            set { Set(ref _opens, value); }
+        }
+
         /// <summary>Whether the screen opens with this part's name in hand to be given, as for something just made and numbered.</summary>
         public bool NamedOnArrival
         {
@@ -111,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             set { Set(ref _namedOnArrival, value); }
         }
 
-        /// <summary>What this part is and what renaming it does, for whoever rests the pointer on it, in markdown-lite, or null for nothing to say.</summary>
+        /// <summary>What this part is and what renaming or pressing it does, for whoever rests the pointer on it, in markdown-lite, or null for nothing to say.</summary>
         public string About
         {
             get { return _about; }

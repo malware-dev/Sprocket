@@ -140,30 +140,31 @@ public class RefTests
     /// A name read back from storage is never handed out again to something else.
     /// </summary>
     /// <remarks>
-    /// Generated names count up, so a program loaded with entity1 and entity2 must not mint entity2
-    /// for the next block picked - two declarations sharing a name is two claims about one door.
+    /// A variable is named after its block, so a program loaded with a variable called Inner Door must not name the next
+    /// Inner Door picked the same - two declarations sharing a name is two claims about one door.
     /// </remarks>
     [Fact]
     public void ARestoredNameIsNotMintedAgain()
     {
         var program = new Automation();
-        program.Restore(new EntityRef("entity7", ""));
+        program.Restore(new EntityRef("Inner Door", ""));
 
         var minted = program.Declare(_ship.World, Add(1, "Inner Door"));
 
-        Assert.NotEqual("entity7", minted.Name);
-        Assert.Same(program.FindRef("entity7"), program.Refs[0]);
+        Assert.Equal("Inner Door 2", minted.Name);
+        Assert.Same(program.FindRef("Inner Door"), program.Refs[0]);
     }
 
-    /// <summary>A name somebody wrote is left alone by the counting.</summary>
+    /// <summary>A block picked is named after itself.</summary>
     [Fact]
-    public void AWrittenNameDoesNotDisturbTheNumbering()
+    public void ABlockIsNamedAfterItself()
     {
         var program = new Automation();
         program.Restore(new EntityRef("inner", ""));
 
-        Assert.Equal("entity1", program.Declare(_ship.World, Add(1, "Inner Door")).Name);
+        Assert.Equal("Inner Door", program.Declare(_ship.World, Add(1, "Inner Door")).Name);
     }
+
 
     /// <summary>
     /// An ordinary tick looks at nothing, which is the number that matters.

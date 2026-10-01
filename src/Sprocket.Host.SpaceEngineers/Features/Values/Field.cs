@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Ui.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Values
 {
@@ -203,18 +205,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         /// Together, because the moment the bounds are worth knowing is the moment somebody is
         /// deciding what to type, and the only other place to say them is after it has been refused.
         /// </remarks>
-        public string Label
+        public string Label(Texts texts)
         {
-            get
-            {
-                string name = Name ?? "";
-                string takes = Takes;
+            string name = Name ?? "";
+            string takes = Takes(texts);
 
-                if (takes.Length == 0)
-                    return name;
+            if (takes.Length == 0)
+                return name;
 
-                return name.Length == 0 ? takes : name + " " + takes;
-            }
+            return name.Length == 0 ? takes : name + " " + takes;
         }
 
         /// <summary>
@@ -224,40 +223,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         /// Either end on its own is worth saying: "0 or more" is a real thing to know, and so is a
         /// ceiling with no floor.
         /// </remarks>
-        public string Takes
+        public string Takes(Texts texts)
         {
-            get
-            {
-                if (Words != null && Words.Count > 0)
-                    return Listed();
+            if (Words != null && Words.Count > 0)
+                return Listed(texts);
 
-                string least = Least ?? "";
-                string most = Most ?? "";
+            string least = Least ?? "";
+            string most = Most ?? "";
 
-                // In brackets beside the name, as a range is written: "speed (0 - 30)".
-                if (least.Length > 0 && most.Length > 0)
-                    return "(" + least + " - " + most + ")";
+            // In brackets beside the name, as a range is written: "speed (0 - 30)".
+            if (least.Length > 0 && most.Length > 0)
+                return "(" + least + " - " + most + ")";
 
-                if (least.Length > 0)
-                    return "(" + least + " or more)";
+            if (least.Length > 0)
+                return Template.Fill(texts.ValueAtLeast, "least", least);
 
-                return most.Length > 0 ? "(" + most + " or less)" : "";
-            }
+            return most.Length > 0 ? Template.Fill(texts.ValueAtMost, "most", most) : "";
         }
 
         /// <summary>The words it takes, said the way somebody would say them aloud.</summary>
-        string Listed()
+        string Listed(Texts texts)
         {
-            var said = "";
-            for (var i = 0; i < Words.Count; i++)
-            {
-                if (said.Length > 0)
-                    said += i == Words.Count - 1 ? " or " : ", ";
+            var rest = "";
+            for (var i = 0; i < Words.Count - 1; i++)
+                rest += i == 0 ? Words[i] : ", " + Words[i];
 
-                said += Words[i];
-            }
-
-            return said;
+            var last = Words[Words.Count - 1];
+            return rest.Length == 0 ? last : Template.Fill(Template.Fill(texts.ValueEither, "last", last), "rest", rest);
         }
 
         /// <summary>
@@ -273,16 +265,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         /// for a value nobody named is its place in the order.
         /// </para>
         /// </remarks>
-        public string Refuses(string called, string said)
+        public string Refuses(Texts texts, string called, string said)
         {
             // An empty field is a value not given, and the action then does what it declared it does
             // without one - unless it declared that it needs one. Held to a bound it would be a value
             // of nothing, which is a different thing and a worse one.
             if (string.IsNullOrEmpty(said))
-                return Needed ? called + " needs a value." : "";
+                return Needed ? Template.Fill(texts.ValueNeeded, "name", called) : "";
 
             if (Words != null && Words.Count > 0)
-                return Knows(said) ? "" : called + " has to be " + Listed() + ".";
+                return Knows(said) ? "" : Template.Fill(Template.Fill(texts.ValueOneOf, "words", Listed(texts)), "name", called);
 
             double low, high;
             bool hasLow = Reads(Least, out low);
@@ -294,34 +286,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
 
             double value;
             if (!Reads(said, out value))
-                return called + " has to be a number.";
+                return Template.Fill(texts.ValueNumber, "name", called);
 
             long whole;
             if (Entry == Entry.Whole
                 && !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
             {
-                return called + " has to be a whole number.";
+                return Template.Fill(texts.ValueWhole, "name", called);
             }
 
             if (!hasLow && !hasHigh)
                 return "";
 
             if ((hasLow && (Above ? value <= low : value < low)) || (hasHigh && value > high))
-                return called + " has to be " + Within(hasLow, hasHigh) + ".";
+                return Template.Fill(Template.Fill(texts.ValueWithin, "range", Within(texts, hasLow, hasHigh)), "name", called);
 
             return "";
         }
 
         /// <summary>The bounds said as part of a sentence, rather than as the label's shorthand.</summary>
-        string Within(bool hasLow, bool hasHigh)
+        string Within(Texts texts, bool hasLow, bool hasHigh)
         {
             if (hasLow && hasHigh)
-                return Above ? "above " + Least + " and at most " + Most : "between " + Least + " and " + Most;
+                return Template.Fill(Template.Fill(Above ? texts.ValueAboveAtMost : texts.ValueBetween, "least", Least), "most", Most);
 
             if (hasLow)
-                return Above ? "more than " + Least : Least + " or more";
+                return Template.Fill(Above ? texts.ValueAbove : texts.ValueOrMore, "least", Least);
 
-            return Most + " or less";
+            return Template.Fill(texts.ValueOrLess, "most", Most);
         }
 
         bool Knows(string said)

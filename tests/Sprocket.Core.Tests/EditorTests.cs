@@ -83,7 +83,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
 
         StageColumn What() => editor.Pick().Stages
@@ -115,19 +115,19 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
 
         StageColumn What() => editor.Pick().Stages
             .Single(s => s.Entries().Any(e => e.Text == "Switch on"));
 
         editor.PressBlock("Airlock Light");
-        Assert.StartsWith("Sprocket has not checked this block yet", What().Note);
+        Assert.StartsWith("Support for this block is still being worked on", What().Note);
 
         editor.PressBlock("Inner Door");
-        Assert.StartsWith("Sprocket has only partly checked this block", What().Note);
+        Assert.StartsWith("Support for this block is only partly done", What().Note);
 
         editor.TickBlock("Airlock Light");
-        Assert.StartsWith("Sprocket has not checked this block yet", What().Note);
+        Assert.StartsWith("Support for this block is still being worked on", What().Note);
     }
 
     /// <summary>
@@ -151,7 +151,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
 
         IEnumerable<PickRow> Offered() =>
@@ -187,7 +187,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
 
         IEnumerable<StageColumn> Stages() => editor.Pick().Stages;
@@ -220,11 +220,11 @@ public class EditorTests
         foreach (var one in ship.Rig.Entity(light.Id).Kind.Actions)
         {
             if (one.GamePropertyId == "Pattern")
-                one.Withhold(Readiness.Unsupported, "Set this in the terminal: the game keeps it from mods");
+                one.Withhold(Readiness.Unsupported, Holdback.Events);
         }
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
 
         IEnumerable<PickRow> Offered() =>
@@ -260,13 +260,13 @@ public class EditorTests
 
         var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Single(pressed.Sources);
-        Assert.Equal(1, Assert.Single(ship.Automation.Systems[0].First!.Positions(pressed.Part)!).Slot);
+        Assert.Equal(1, Assert.Single(Pressed.Where(ship.Automation, ship.Automation.Systems[0], pressed.Part)!).Slot);
 
         // And the same question about a door, which the game announces nothing about.
         ship.Editor.GoToRoot();
         ship.Tick();
         ship.Editor.PressRow(0);
-        ship.Editor.PressStart("When…");
+        ship.Editor.PressStart("when…");
         ship.Editor.PressBlock("Inner Door");
         ship.Editor.PressChoice("finishes closing");
         ship.Editor.PressPrimary();
@@ -285,7 +285,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         editor.PressBlock("Inner Door");
         editor.PressChoice("finishes closing");
         editor.PressPrimary();
@@ -305,7 +305,7 @@ public class EditorTests
         ship.Tick();
 
         var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
-        Assert.Equal(1, Assert.Single(ship.Automation.Systems[0].First!.Positions(pressed.Part)!).Slot);
+        Assert.Equal(1, Assert.Single(Pressed.Where(ship.Automation, ship.Automation.Systems[0], pressed.Part)!).Slot);
         Assert.Equal("When Airlock Button is pressed", editor.Says(0));
 
         // One trigger for the sequence, not the old one left beside the new.
@@ -313,17 +313,17 @@ public class EditorTests
     }
 
     /// <summary>
-    /// A block picked for a sentence becomes a part of the system, which the first of it fills with
-    /// that block, so another one of the system can fill it with its own.
+    /// A block picked for a logic system's sentence is a variable of the program's, named after the block, and a button
+    /// picked to start it is a trigger variable on that button.
     /// </summary>
     [Fact]
-    public void APickedBlockIsAPartTheFirstOneFills()
+    public void APickedBlockIsAVariable()
     {
         var ship = Build();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -331,17 +331,18 @@ public class EditorTests
 
         var system = ship.Automation.Systems[0];
         var step = Assert.IsType<Act>(ship.Automation.Sequences[0].Steps[0]);
-        var trigger = Assert.IsAssignableFrom<MomentTrigger>(Assert.Single(system.Triggers));
+        var trigger = Assert.IsType<RequiredTrigger>(Assert.Single(system.Triggers));
 
-        foreach (var (part, block) in new[] { (step.Targets[0], "Airlock Light"), (trigger.Sources[0], "Airlock Button") })
-        {
-            Assert.NotNull(system.FindPart(part));
-            var filled = Assert.Single(system.First!.FilledWith(part));
-            Assert.Equal(block, ship.Runner.Bindings.Entity(filled)!.Name);
-        }
+        Assert.Empty(system.Parts);
+        Assert.Equal("Airlock Light", step.Targets[0]);
+        Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(step.Targets[0])!.Name);
+
+        var button = ship.Automation.FindTriggerRef(trigger.Part)!;
+        Assert.Equal("Airlock Button", ship.Runner.Bindings.Entity(button.Block)!.Name);
+        Assert.Equal(1, button.At.Slot);
     }
 
-    /// <summary>The same block picked again is the same part, not a second one filled by the same block.</summary>
+    /// <summary>The same block picked again is the same variable, not a second one for the same block.</summary>
     [Fact]
     public void PickingTheSameBlockAgainIsTheSamePart()
     {
@@ -351,7 +352,7 @@ public class EditorTests
         StartOnTheButton(editor);
         for (var i = 0; i < 2; i++)
         {
-            editor.PressAdd("Action…");
+            editor.PressAdd("task…");
             editor.PressBlock("Airlock Light");
             editor.PressChoice("Switch on");
             editor.PressPrimary();
@@ -361,7 +362,7 @@ public class EditorTests
         var steps = ship.Automation.Sequences[0].Steps.OfType<Act>().ToList();
         Assert.Equal(2, steps.Count);
         Assert.Equal(steps[0].Targets[0], steps[1].Targets[0]);
-        Assert.Equal(2, ship.Automation.Systems[0].Parts.Count);
+        Assert.Single(ship.Automation.Refs, declared => declared.Name.StartsWith("Airlock Light", StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -392,7 +393,7 @@ public class EditorTests
 
         Assert.Contains("Airlock", editor.RootHeadingNames());
         Assert.Equal("Airlock", editor.RootRows()[0].Summary);
-        Assert.True(editor.RootRows()[1].IsAction);
+        Assert.Equal("+ installation", editor.RootAdds().Single().Text);
     }
 
 
@@ -406,10 +407,7 @@ public class EditorTests
         editor.GoToRoot();
         ship.Tick();
 
-        var add = editor.RootRows().Last();
-        Assert.True(add.IsAction);
-
-        add.Opens!.Execute();
+        editor.AddInstallation(0);
         ship.Tick();
 
         // Opened on the blueprint through the new one, which has blocks to be given.
@@ -428,7 +426,7 @@ public class EditorTests
         ship.Tick();
         Assert.Equal("Airlock 2", editor.RootRows()[1].Summary);
 
-        editor.RootRows().Last().Opens!.Execute();
+        editor.AddInstallation(0);
         Assert.Equal("Airlock 3", system.Instances[2].Name);
     }
 
@@ -443,16 +441,16 @@ public class EditorTests
         ship.Tick();
         var system = ship.Automation.Systems[0];
 
-        editor.RootRows().Last().Opens!.Execute();
+        editor.AddInstallation(0);
         ship.Tick();
         Assert.Equal(2, system.Instances.Count);
 
         editor.GoToRoot();
         ship.Tick();
         Assert.Single(system.Instances);
-        Assert.Equal(2, editor.RootRows().Count);
+        Assert.Single(editor.RootRows());
 
-        editor.RootRows().Last().Opens!.Execute();
+        editor.AddInstallation(0);
         ship.Tick();
         editor.Screen.Heading[0].Renames!("Port airlock");
         ship.Tick();
@@ -482,7 +480,7 @@ public class EditorTests
 
         editor.GoToRoot();
         ship.Tick();
-        editor.RootRows().Last().Opens!.Execute();
+        editor.AddInstallation(0);
         ship.Tick();
 
         Assert.Equal("Airlock 2", editor.Blueprint().Title);
@@ -508,11 +506,13 @@ public class EditorTests
         editor.Parts()[0].Fills!.Execute();
         ship.Tick();
 
-        // The slot's pick offers only what the slot can take, and a button is what this one expects.
+        // A trigger slot's pick offers only blocks with triggers, and of a block only its triggers.
         Assert.NotEmpty(editor.Offered());
         Assert.All(editor.Offered(), row => Assert.Contains("Button", row.Secondary));
         editor.PressBlock("Airlock Button");
+        Assert.True(editor.HasChoice("is pressed"));
         editor.PressChoice("is pressed");
+
         ship.Tick();
         editor.PressPrimary();
         ship.Tick();
@@ -529,8 +529,8 @@ public class EditorTests
     }
 
     /// <summary>
-    /// A logic system whose trigger and step name their blocks directly is given a slot for each block when it is made a
-    /// blueprint, and its trigger and step name the slots.
+    /// A logic system's variables each become a slot when it is made a blueprint, and its trigger and step name the slots,
+    /// which the first instance answers with the variables.
     /// </summary>
     [Fact]
     public void ABlueprintOfBlocksNamedDirectlyGetsASlotForEach()
@@ -540,14 +540,14 @@ public class EditorTests
         var door = ship.Automation.Declare(ship.World, ship.World.Entities.Single(e => e.Name == "Inner Door")).Name;
 
         var system = ship.Automation.AddSystem();
-        var pressed = Pressed.On(system, button);
+        var pressed = Pressed.On(ship.Automation, system, button);
         var sequence = ship.Automation.AddSequence(system, pressed);
         var close = new Act("close");
         close.Targets.Add(door);
         sequence.Steps.Add(close);
         sequence.Steps.Add(new Await());
 
-        Assert.Single(system.Parts);
+        Assert.Empty(system.Parts);
         ship.Tick();
 
         ship.Editor.GoToRoot();
@@ -555,14 +555,17 @@ public class EditorTests
         ship.Editor.RootRows()[0].Offers!.Execute();
         ship.Tick();
 
+        Assert.True(system.IsBlueprint);
         Assert.Equal(2, system.Parts.Count);
         var buttonSlot = Assert.Single(pressed.Sources);
         var doorSlot = Assert.Single(close.Targets);
-        Assert.NotNull(system.FindPart(buttonSlot));
-        Assert.NotNull(system.FindPart(doorSlot));
+        Assert.True(system.FindPart(buttonSlot)!.IsTrigger);
+        Assert.False(system.FindPart(doorSlot)!.IsTrigger);
         Assert.Equal(new[] { button }, system.First!.FilledWith(buttonSlot));
+        Assert.Equal(1, system.First!.Positions(buttonSlot)![0].Slot);
         Assert.Equal(new[] { door }, system.First!.FilledWith(doorSlot));
         Assert.Equal(2, ship.Editor.Parts().Count);
+
     }
 
     /// <summary>A logic system with a trigger, and its row on the construct's own list.</summary>
@@ -594,12 +597,13 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
+        var sequence = ship.Automation.Sequences[0];
+        var one = editor.Blueprinted(sequence.System);
         editor.SwitchOn();
         ship.Tick();
 
-        var sequence = ship.Automation.Sequences[0];
-        var one = sequence.System.First!;
         Assert.True(sequence.CanRun(one));
+
 
         // Deliberately stop this one of it.
         one.Enabled = false;
@@ -611,9 +615,12 @@ public class EditorTests
         ship.Tick();
         Assert.True(editor.Screen.HasSwitch);
 
+        // A blueprint asks first, since switching it off stops every instance.
         editor.Screen.Flip!.Execute();
+        editor.PressChoice(editor.Texts.BlueprintSwitchThemOff);
         ship.Tick();
         Assert.False(sequence.System.Enabled);
+
 
         editor.Screen.Flip!.Execute();
         ship.Tick();
@@ -714,13 +721,13 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
         ship.Tick();
 
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Outer Door");
         editor.PressChoice("Open");
         editor.PressPrimary();
@@ -744,7 +751,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -793,7 +800,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -818,7 +825,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Inner Door");
         editor.PressChoice("Close");
         editor.PressPrimary();
@@ -826,7 +833,7 @@ public class EditorTests
 
         var toggle = editor.Screen.Flip;
 
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Outer Door");
         editor.PressChoice("Open");
         editor.PressPrimary();
@@ -849,7 +856,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         editor.PressBlock("Inner Door");
         ship.Tick();
 
@@ -879,7 +886,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         editor.PressBlock("Inner Door");
         ship.Tick();
 
@@ -929,7 +936,7 @@ public class EditorTests
         ship.Editor.NewSystem("Airlock");
 
         // Throws before returning if two blocks claim one command.
-        ship.Editor.PressStart("When…");
+        ship.Editor.PressStart("when…");
 
         // Four rows for three blocks: the construct's own programmable block is a block on the
         // grid like any other, and it has a switch, so it is offered like any other.
@@ -984,7 +991,7 @@ public class EditorTests
 
         // On the ship's list: the system's own row carries its switch.
         var heading = editor.RootRows()
-            .First(e => e.Depth == 0 && !e.IsAction);
+            .First(e => e.Depth == 0);
 
         Assert.NotNull(heading.Flips);
         Assert.True(heading.SwitchIsOn);
@@ -996,7 +1003,7 @@ public class EditorTests
         Assert.True(system.First!.Enabled);
         Assert.False(sequence.CanRun(sequence.System.First));
         Assert.False(editor.RootRows()
-            .First(e => e.Depth == 0 && !e.IsAction).SwitchIsOn);
+            .First(e => e.Depth == 0).SwitchIsOn);
     }
 
     /// <summary>A sequence's row has no switch: the system's is the one switch for everything in it.</summary>
@@ -1135,7 +1142,7 @@ public class EditorTests
 
         // Row 0 is the logic system, which opens.
         ship.Editor.PressRow(0);
-        ship.Editor.PressStart("When…");
+        ship.Editor.PressStart("when…");
         ship.Editor.PressBlock("Airlock Button");
         ship.Editor.PressChoice("is pressed");
         ship.Editor.PressPrimary();
@@ -1304,7 +1311,7 @@ public class EditorTests
         StartOnTheButton(ship.Editor);
         ship.Tick();
 
-        ship.Editor.PressAdd("Action…");
+        ship.Editor.PressAdd("task…");
         ship.Editor.PressBlock("Inner Door");
         ship.Editor.PressChoice("Close");
         ship.Editor.PressPrimary();
@@ -1370,7 +1377,7 @@ public class EditorTests
     {
         var ship = Build();
         ship.Editor.NewSystem("Airlock");
-        ship.Editor.PressStart("When…");
+        ship.Editor.PressStart("when…");
 
         var before = Listed(ship.Editor);
         ship.Editor.PressBlock("Airlock Button");
@@ -1392,7 +1399,7 @@ public class EditorTests
     {
         var ship = Build();
         ship.Editor.NewSystem("Airlock");
-        ship.Editor.PressStart("When…");
+        ship.Editor.PressStart("when…");
         ship.Editor.PressBlock("Airlock Button");
         ship.Editor.TickBlock("Inner Door");
 
@@ -1415,7 +1422,8 @@ public class EditorTests
         Assert.Empty(ship.Editor.RootRows());
 
         // Both ways in are offered, and neither asks anything first.
-        Assert.Equal(new[] { "+ Logic system", "Blueprints" }, ship.Editor.RootStarts());
+        Assert.Equal(new[] { "+ logic system" }, ship.Editor.RootStarts());
+        Assert.NotNull(ship.Editor.Screen.Library);
     }
 
     [Fact]
@@ -1425,7 +1433,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
 
         // One pane to begin with; the second appears once it has something to be about.
         Assert.Single(editor.Pick().Stages);
@@ -1460,7 +1468,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         editor.PressBlock("Inner Door");
         editor.TickBlock("Outer Door");
         editor.PressChoice("finishes opening");
@@ -1470,7 +1478,7 @@ public class EditorTests
         Assert.Equal(2, starts.Sources.Count);
         Assert.False(starts.RequiresAll);
 
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Inner Door");
         editor.TickBlock("Outer Door");
         editor.PressChoice("Close");
@@ -1498,7 +1506,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -1536,7 +1544,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -1571,10 +1579,10 @@ public class EditorTests
 
         StartOnTheButton(editor);
 
-        editor.PressAdd("Wait…");
+        editor.PressAdd("wait…");
         editor.PressChoice("2 seconds - 120 ticks");
 
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -1610,13 +1618,13 @@ public class EditorTests
 
         editor.NewSystem("Airlock");
 
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         editor.PressBlock("Inner Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
         editor.Back();
 
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         editor.PressBlock("Outer Door");
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
@@ -1648,7 +1656,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         editor.PressBlock("Inner Door");
         editor.TickBlock("Outer Door");
         editor.PressChoice("finishes opening");
@@ -1659,7 +1667,7 @@ public class EditorTests
 
         starts.RequiresAll = true;
 
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -1690,7 +1698,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
 
         Assert.False(editor.HasChoice("any one"));
         Assert.False(editor.HasChoice("all of them"));
@@ -1710,7 +1718,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         editor.PressBlock("Airlock Button");
         editor.Back();
 
@@ -1728,7 +1736,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         Assert.Equal("When something happens", editor.Screen.Title());
 
         editor.PressBlock("Airlock Button");
@@ -1796,7 +1804,7 @@ public class EditorTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("Every…");
+        editor.PressStart("every…");
         editor.PressChoice("steady - every 100 ticks");
         editor.PressPrimary();
 
@@ -1814,7 +1822,7 @@ public class EditorTests
         var editor = ship.Editor;
         StartOnTheButton(editor);
 
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         Assert.Equal("Do something", editor.Screen.Title());
         Assert.Single(editor.Pick().Stages);
 
@@ -1839,7 +1847,7 @@ public class EditorTests
         var editor = ship.Editor;
         StartOnTheButton(editor);
 
-        editor.PressAdd("Action…");
+        editor.PressAdd("task…");
         editor.PressBlock("Inner Door");
         editor.Back();
 
@@ -1855,7 +1863,7 @@ public class EditorTests
         var editor = ship.Editor;
         StartOnTheButton(editor);
 
-        editor.PressAdd("Wait…");
+        editor.PressAdd("wait…");
         Assert.Equal("How long should it wait?", editor.Screen.Title());
 
         editor.PressChoice("5 seconds - 300 ticks");
@@ -1927,19 +1935,19 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressStart("Logic system");
+        editor.PressStart("logic system");
         Assert.Equal("Logic system 1", ship.Automation.Systems[0].Name);
         Assert.True(editor.Screen.Heading[0].NamedOnArrival);
 
         editor.GoToRoot();
         Assert.Empty(ship.Automation.Systems);
 
-        editor.PressStart("Logic system");
+        editor.PressStart("logic system");
         Assert.Equal("Logic system 1", ship.Automation.Systems[0].Name);
         editor.Screen.Flip!.Execute();
 
         editor.GoToRoot();
-        editor.PressStart("Logic system");
+        editor.PressStart("logic system");
         Assert.Equal("Logic system 2", ship.Automation.Systems[1].Name);
     }
 
@@ -1950,9 +1958,9 @@ public class EditorTests
         var ship = Build();
         var editor = ship.Editor;
 
-        editor.PressStart("Logic system");
+        editor.PressStart("logic system");
         ship.Tick();
-        editor.PressStart("Sequence");
+        editor.PressStart("sequence");
         ship.Tick();
         Assert.Single(ship.Automation.Sequences);
 
@@ -1965,11 +1973,11 @@ public class EditorTests
         ship.Tick();
         Assert.Empty(ship.Automation.Systems);
 
-        editor.PressStart("Logic system");
+        editor.PressStart("logic system");
         ship.Tick();
-        editor.PressStart("Sequence");
+        editor.PressStart("sequence");
         ship.Tick();
-        editor.PressAdd("Wait…");
+        editor.PressAdd("wait…");
         editor.PressChoice("2 seconds - 120 ticks");
         ship.Tick();
 
@@ -2021,7 +2029,7 @@ public class EditorTests
     {
         var ship = Build();
         ship.Editor.NewSystem("Airlock");
-        ship.Editor.PressStart("When…");
+        ship.Editor.PressStart("when…");
 
         ship.Editor.PressBlock("Inner Door");
         ship.Editor.PressBlock("Outer Door");
@@ -2050,7 +2058,7 @@ public class EditorTests
     {
         var ship = Build();
         ship.Editor.NewSystem("Airlock");
-        ship.Editor.PressStart("When…");
+        ship.Editor.PressStart("when…");
 
         string[] listed = Listed(ship.Editor).Split(new[] { ", " }, StringSplitOptions.None);
 

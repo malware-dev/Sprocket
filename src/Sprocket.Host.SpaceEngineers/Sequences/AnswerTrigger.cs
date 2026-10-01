@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _nowAt = new List<ToolbarSlot>(nowAt);
         }
 
-        public override string Label => "picking a button";
+        public override Change Change => Change.PickButton;
 
         public override bool Changes => true;
 

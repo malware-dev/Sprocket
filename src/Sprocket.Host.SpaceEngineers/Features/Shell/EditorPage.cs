@@ -169,6 +169,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return true;
         }
 
+        /// <summary>What opens the blueprint library from this page, or null where it is not offered.</summary>
+        public virtual ICommand Library => null;
+
         /// <summary>Whether this page shows what the construct's toolbars say, so reading them again can change it.</summary>
         /// <remarks>The read is the construct's whole, the same one the screen makes as it opens; the page only decides whether it is offered.</remarks>
         public virtual bool CanRefresh => false;

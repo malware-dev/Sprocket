@@ -92,8 +92,8 @@ public class HandoverTests : IDisposable
     void Repeating()
     {
         _sim.Editor.NewSystem("Airlock");
-        _sim.Editor.PressStart("Every…");
-        _sim.Editor.PressChoice("A single action…");
+        _sim.Editor.PressStart("every…");
+        _sim.Editor.PressChoice("A task on blocks…");
         _sim.Editor.PressBlock("Airlock Outer Door");
         _sim.Editor.PressChoice("Close");
         _sim.Editor.PressPrimary();
@@ -442,7 +442,7 @@ public class HandoverTests : IDisposable
 
         _wire.As(anna, () =>
         {
-            copy.Editor.PressStart("When…");
+            copy.Editor.PressStart("when…");
             copy.Editor.PressBlock("Airlock Button");
             hers.Keep(_block, copy);
         });
@@ -489,7 +489,7 @@ public class HandoverTests : IDisposable
         for (var i = 0; i < 10; i++)
             _sim.Tick();
 
-        Assert.True(_sim.Runner.Get(sequence, sequence.System.Instances[0]).IsRunning);
+        Assert.True(_sim.Runner.Get(sequence, sequence.System.First).IsRunning);
 
         string program;
         _sim.Unit.Written(out program, out _);
@@ -506,7 +506,7 @@ public class HandoverTests : IDisposable
         });
 
         var again = rebuilt.Editor.Program.Sequences[0];
-        var run = rebuilt.Runner.Get(again, again.System.Instances[0]);
+        var run = rebuilt.Runner.Get(again, again.System.First);
         Assert.True(run.IsRunning, "the run did not carry across");
         Assert.True(run.WaitTicks > 0, "the wait did not carry across");
     }
@@ -531,14 +531,14 @@ public class HandoverTests : IDisposable
         var (anna, hers, copy) = Lent();
         var theirs = copy.Editor.Program.Sequences[0];
 
-        _wire.As(anna, () => hers.Run(_block, theirs, theirs.System.Instances[0], false));
+        _wire.As(anna, () => hers.Run(_block, theirs, theirs.System.First, false));
         _wire.Settle();
         _sim.Tick();
 
-        var run = _sim.Runner.Get(sequence, sequence.System.Instances[0]);
+        var run = _sim.Runner.Get(sequence, sequence.System.First);
         Assert.True(run.IsRunning, "the sequence did not run on the server");
 
-        _wire.As(anna, () => hers.Run(_block, theirs, theirs.System.Instances[0], true));
+        _wire.As(anna, () => hers.Run(_block, theirs, theirs.System.First, true));
         _wire.Settle();
         _sim.Tick();
 
@@ -554,11 +554,11 @@ public class HandoverTests : IDisposable
 
         var bert = _wire.Client("Bert");
         var his = Client(bert, new Heard());
-        _wire.As(bert, () => his.Run(_block, theirs, theirs.System.Instances[0], false));
+        _wire.As(bert, () => his.Run(_block, theirs, theirs.System.First, false));
         _wire.Settle();
         _sim.Tick();
 
-        var run = _sim.Runner.Get(sequence, sequence.System.Instances[0]);
+        var run = _sim.Runner.Get(sequence, sequence.System.First);
         Assert.True(run == null || !run.IsRunning, "somebody without the Sprocket ran it");
     }
 
@@ -579,7 +579,7 @@ public class HandoverTests : IDisposable
             copy.Editor.Tick(1);
             copy.Editor.RootRows()[0].Opens!.Execute();
             copy.Editor.Tick(1);
-            copy.Editor.PressStart("When…");
+            copy.Editor.PressStart("when…");
             copy.Editor.PressBlock("Airlock Button");
             copy.Editor.PressChoice("is pressed");
             copy.Editor.PressPrimary();

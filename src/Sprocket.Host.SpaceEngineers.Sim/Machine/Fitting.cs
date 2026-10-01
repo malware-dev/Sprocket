@@ -8,6 +8,8 @@ using VRage.Game.Components.Interfaces;
 using VRage.Game.ModAPI;
 using VRage.ObjectBuilders;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
+using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Sim.Machine;
 
@@ -23,6 +25,32 @@ abstract class Fitting
 {
     readonly SerializableDefinitionId _definition;
     readonly string _display;
+    readonly List<TerminalActionParameter> _held = new List<TerminalActionParameter>();
+
+    /// <summary>
+    /// What the game does when a slot of this block's toolbar is invoked: run whatever it holds, with what it holds it with.
+    /// </summary>
+    /// <remarks>
+    /// Installed by whoever is running the rig, because what a slot's payload means is Sprocket's
+    /// business and not the block's.
+    /// <para>
+    /// Handed the block the slot names as well as the payload, because the game runs an action
+    /// <em>on a block</em>: a slot naming one that is gone does nothing at all. Without that, a
+    /// slot here reached Sprocket however broken the wiring was, and the rig answered a slot the
+    /// game would have left silent.
+    /// </para>
+    /// </remarks>
+    public Action<long, string>? Invokes;
+
+    /// <summary>
+    /// What the game does when a slot holds a block's own action: perform it on that block.
+    /// </summary>
+    /// <remarks>
+    /// Installed by whoever is running the rig, because finding a block by its id is the construct's
+    /// business. A trigger that does one plain thing is wired this way, and Sprocket is not part of
+    /// it at all - which is the property worth being able to test.
+    /// </remarks>
+    public Action<long, string>? Performs;
 
     protected Fitting(long id, string name, MyObjectBuilderType type, string subtype, string display)
     {
@@ -383,5 +411,36 @@ abstract class Fitting
             .Done();
 
         return true;
+    }
+
+    /// <summary>Runs what slot <paramref name="slot" /> of this block's toolbar holds, counted from zero, as the game does when the slot is used.</summary>
+    protected void Run(int slot)
+    {
+        MyToolbarItemInfo held;
+        if (Toolbar == null || !Toolbar.TryGetItem(slot, out held))
+            return;
+
+        // A block's own action, which the game performs itself. Nothing of Sprocket's is involved and
+        // the slot carries no argument.
+        if (held.ActionId != TriggerAction.ActionId)
+        {
+            if (Performs != null)
+                Performs(held.BlockEntityId, held.ActionId);
+
+            return;
+        }
+
+        if (Invokes == null)
+            return;
+
+        _held.Clear();
+        Toolbar.Parameters(slot, _held);
+
+        if (_held.Count > 0)
+        {
+            var key = _held[0].Value as string;
+            if (!string.IsNullOrEmpty(key))
+                Invokes(held.BlockEntityId, key);
+        }
     }
 }

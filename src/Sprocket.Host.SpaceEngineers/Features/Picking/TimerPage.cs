@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             FillRates();
             _aim.Fill(_does);
-            _does.Done.IsEnabled = PrimaryText.Length != 0;
+            _does.CanFinish = PrimaryText.Length != 0;
 
             _strip.Show();
 
@@ -156,15 +156,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var row = _rows[ticks];
 
                 row.Text = ticks == 1
-                    ? Editor.Texts.PickEveryTick
-                    : Template.Fill(Template.Fill(Editor.Texts.PickRate, "name", cadences[i].Name),
-                        "ticks", ticks.ToString(CultureInfo.InvariantCulture));
+                    ? cadences[i].Name(Editor.Texts)
+                    : Template.Fill(Template.Fill(Editor.Texts.PickRate, "ticks", ticks.ToString(CultureInfo.InvariantCulture)),
+                        "name", cadences[i].Name(Editor.Texts));
                 row.IsChosen = ticks == _ticks;
                 row.Why = null;
                 row.Show();
 
                 // Said on the pointer rather than withheld: a costly rate can still be chosen.
-                row.Tip = Tip.For(row.Tip, string.IsNullOrEmpty(cadences[i].Warning) ? null : cadences[i].Warning);
+                var warning = cadences[i].Warning(Editor.Texts);
+                row.Tip = Tip.For(row.Tip, warning.Length == 0 ? null : warning);
             }
         }
     }

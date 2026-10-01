@@ -182,9 +182,9 @@ on screen     … Airlock Inner Door, Airlock Outer Door and 1 more
 175  Text       at {X:1033.052 Y:239.6399} scale 0.694  #A2C3CDFF  "Terminal"
 176  SetClip    {X:740 Y:278 W:428 H:726}
 177  Sprite     Sprocket_Fill         {X:740 Y:278 W:416 H:76}  #374851FF
-178  Text       at {X:756 Y:283.6399} scale 0.694  #A2C3CDFF  "Sprocket has not checked this block yet, so some of what"
-179  Text       at {X:756 Y:303.6399} scale 0.694  #A2C3CDFF  "it offers may be doubled, missing or oddly named."
-180  Text       at {X:756 Y:323.6399} scale 0.694  #A2C3CDFF  "Currently showing only what the selected blocks share."
+178  Text       at {X:756 Y:283.6399} scale 0.694  #A2C3CDFF  "Support for this block is still being worked on, so some of"
+179  Text       at {X:756 Y:303.6399} scale 0.694  #A2C3CDFF  "what it offers may be doubled, missing or oddly named."
+180  Text       at {X:756 Y:323.6399} scale 0.694  #A2C3CDFF  "Showing only what the picked blocks share."
 181  Text       at {X:752 Y:363.2255} scale 0.833  #85A1A9FF  "POWER"
 182  Text       at {X:752 Y:399.2255} scale 0.833  #DCF5FDFF  "Switch off"
 183  Text       at {X:752 Y:443.2255} scale 0.833  #DCF5FDFF  "Switch on"

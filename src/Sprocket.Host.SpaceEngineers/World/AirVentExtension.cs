@@ -125,11 +125,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
-        public string StatusOf(IMyTerminalBlock block)
+        public Status StatusOf(IMyTerminalBlock block)
         {
             var vent = block as IMyAirVent;
             if (vent == null)
-                return null;
+                return Status.None;
 
             // What it cannot do comes before what it says it is doing, asked about the thing it is
             // currently set to do. A vent that has stopped moving gas short of where it was going
@@ -137,17 +137,17 @@ namespace Sprocket.Host.SpaceEngineers.World
             // word for it is the one thing that never says so.
             Trouble stuck = Said(vent);
             if (stuck.Exists)
-                return stuck.Said;
+                return Status.Of(stuck);
 
             switch (vent.Status)
             {
-                case VentStatus.Pressurized: return "pressurized";
-                case VentStatus.Depressurized: return "empty";
-                case VentStatus.Pressurizing: return "filling…";
-                case VentStatus.Depressurizing: return "emptying…";
+                case VentStatus.Pressurized: return Status.Of(Condition.Pressurized);
+                case VentStatus.Depressurized: return Status.Of(Condition.Empty);
+                case VentStatus.Pressurizing: return Status.Of(Condition.Filling);
+                case VentStatus.Depressurizing: return Status.Of(Condition.Emptying);
             }
 
-            return null;
+            return Status.None;
         }
 
         /// <summary>
@@ -190,18 +190,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             if (vent.Depressurize)
                 return vent.GetOxygenLevel() > Emptied && !_gas.Moving(vent, true)
-                    ? Trouble.Waiting("cannot empty - nowhere to put the air")
+                    ? Trouble.Waiting(Cause.VentNowhere)
                     : Trouble.None;
 
             if (vent.GetOxygenLevel() >= Filled)
                 return Trouble.None;
 
             if (!vent.CanPressurize)
-                return Trouble.Waiting("cannot fill - the room is not airtight");
+                return Trouble.Waiting(Cause.VentNotAirtight);
 
             return _gas.Moving(vent, false)
                 ? Trouble.None
-                : Trouble.Waiting("cannot fill - no oxygen to fill it with");
+                : Trouble.Waiting(Cause.VentNoOxygen);
         }
 
         Trouble Emptying(IMyAirVent vent)
@@ -210,11 +210,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return Trouble.None;
 
             if (!vent.Depressurize)
-                return Trouble.Fatal("stopped - something else told this vent to fill the room");
+                return Trouble.Fatal(Cause.VentToldToFill);
 
             return _gas.Working(vent, true)
                 ? Trouble.None
-                : Trouble.Waiting("cannot empty - nowhere to put the air");
+                : Trouble.Waiting(Cause.VentNowhere);
         }
 
         /// <summary>Why the room will not fill, or null while it still might.</summary>
@@ -224,14 +224,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return Trouble.None;
 
             if (vent.Depressurize)
-                return Trouble.Fatal("stopped - something else told this vent to empty the room");
+                return Trouble.Fatal(Cause.VentToldToEmpty);
 
             if (!vent.CanPressurize)
-                return Trouble.Waiting("cannot fill - the room is not airtight");
+                return Trouble.Waiting(Cause.VentNotAirtight);
 
             return _gas.Working(vent, false)
                 ? Trouble.None
-                : Trouble.Waiting("cannot fill - no oxygen to fill it with");
+                : Trouble.Waiting(Cause.VentNoOxygen);
         }
 
         public bool IsBusy(IMyTerminalBlock block)

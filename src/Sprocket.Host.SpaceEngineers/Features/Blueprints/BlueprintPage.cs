@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -135,11 +136,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 Blockset.Name = wanted;
         }
 
-        /// <inheritdoc />
+        /// <summary>Names the blueprint after the panel's own name: as words on the panel, which is where the blueprint is changed from, and as a part of its own that opens the blueprint on a logic system made from it.</summary>
         public override void Heading(List<HeadingPart> parts)
         {
             base.Heading(parts);
-            parts[0].After = Template.Fill(_editing ? Editor.Texts.BlueprintPanelFor : Editor.Texts.BlueprintFrom, "name", _system.Name);
+            if (_editing)
+            {
+                parts[0].After = Template.Fill(Editor.Texts.BlueprintPanelFor, "name", _system.Name);
+                return;
+            }
+
+            // Pushed rather than swapped in, so Back comes back to the blocks being filled.
+            var from = new HeadingPart(_system.Name);
+            from.Lead = Editor.Texts.BlueprintFromLead;
+            from.After = Editor.Texts.BlueprintFromAfter;
+            from.About = Template.Fill(Editor.Texts.SystemsEditBlueprint, "name", _system.Name);
+            from.Opens = Editor.Act(Cmd.OpenSystem, delegate { Editor.Push(new LogicSystemPage(Editor, _system)); });
+            parts.Add(from);
         }
 
         /// <summary>Writes what is still being typed into the blueprint before going.</summary>
@@ -256,7 +269,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             if (!_editing && chosen != null && !chosen.Enabled && chosen.Halt != null)
             {
-                said = SequenceText.Stopped(chosen.Halt, _system);
+                said = SequenceText.Stopped(Editor.Texts, chosen.Halt, _system);
                 sequence = _system.FindSequence(chosen.Halt.Sequence);
                 empty = chosen.Halt.Problem == Runtime.SequenceProblem.EmptySlot;
                 mended = true;
@@ -265,7 +278,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 Runtime.SequenceFault fault;
                 sequence = SystemSummary.Failing(Editor.Runner, _system, chosen, out fault);
-                said = sequence == null ? "" : SequenceText.Failing(fault, sequence);
+                said = sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence);
                 empty = fault.Problem == Runtime.SequenceProblem.EmptySlot;
             }
 
@@ -364,7 +377,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
                 if (box == row.About.Box)
                 {
-                    Editor.Do(_system, new AnnotatePart(part, row.About.Text, "describing a slot"));
+                    Editor.Do(_system, new AnnotatePart(part, row.About.Text, Change.DescribeSlot));
                     return;
                 }
             }
@@ -439,13 +452,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 row.NameBox.Text = part.Id;
 
             row.NameBox.Submit = new Ui.Input.Relay(delegate { Editor.Input.Focus(null); });
+            row.NameBox.Tip = Ui.Tip.For(row.NameBox.Tip, texts.BlueprintNameBoxAbout);
 
             row.About.Show(texts);
             row.About.Hint = texts.BlueprintAboutHint;
             if (!row.About.Box.IsFocused)
                 row.About.Text = part.Annotation;
-            row.Required.Says(texts.BlueprintOptional, texts.BlueprintRequired);
-            row.Required.IsOn = part.Optional;
+            row.Required.Says(texts.BlueprintRequired, texts.BlueprintOptional);
+            row.Required.IsOn = !part.Optional;
+            row.Required.Tip = Ui.Tip.For(row.Required.Tip, texts.BlueprintRequiredAbout);
             row.Required.Command = Editor.Act(Cmd.MakeOptional, delegate
             {
                 Editor.Do(_system, new SetOptional(part, !part.Optional));
@@ -476,12 +491,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             if (part.IsTrigger)
             {
-                // A trigger slot is a block and one of its buttons, picked as a trigger's are.
+                // A trigger slot is a block and one of its toolbar slots, picked as a trigger's are.
                 var positions = chosen.Positions(part.Id);
-                var pressed = positions != null && positions.Count > 0 ? ButtonPanelExtension.Pressed(positions[0].Slot) : "";
+                var pressed = positions != null && positions.Count > 0 ? positions[0].EventId : "";
                 Editor.Push(new PickPage(Editor, part.Id, true, targets, pressed, Form.Native,
                     delegate(PickAnswer answer) { Answered(part, chosen, answer); },
-                    admits: delegate(GridEntity block) { return Fits(part, block); }));
+                    admits: Triggering, triggersOnly: true));
                 return;
             }
 
@@ -489,15 +504,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 delegate(PickAnswer answer) { Filled(part, chosen, answer.Targets); }));
         }
 
-        /// <summary>Answers trigger slot <paramref name="part" /> for <paramref name="chosen" /> with the button <paramref name="answer" /> picked on each of its blocks, and goes back to the blueprint.</summary>
-        /// <remarks>Only a button press answers a trigger slot; anything else picked leaves the picker open.</remarks>
+        /// <summary>Answers trigger slot <paramref name="part" /> for <paramref name="chosen" /> with the trigger <paramref name="answer" /> picked on each of its blocks, and goes back to the blueprint.</summary>
+        /// <remarks>Only a trigger answers a trigger slot; anything else picked leaves the picker open.</remarks>
         void Answered(Part part, SystemInstance chosen, PickAnswer answer)
         {
-            var button = ButtonPanelExtension.ButtonOf(answer.Chosen) + 1;
-            if (button < 1)
+            if (ToolbarSlot.Of(answer.Chosen) == null)
                 return;
 
-            Editor.Filling(_system, part, chosen, answer.Targets, SprocketEditor.Pressed(answer), delegate
+            Editor.Filling(_system, part, chosen, answer.Targets, Editor.Pressed(answer), delegate
             {
                 var names = new List<string>();
                 var kept = new List<ToolbarSlot>();
@@ -510,7 +524,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             });
         }
 
+        /// <summary>Whether <paramref name="block" /> has a trigger: something the construct itself does to start a step.</summary>
+        static bool Triggering(GridEntity block)
+        {
+            var events = block.Kind.Events;
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (events[i].Answered)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Whether <paramref name="block" /> is of a type <paramref name="part" /> may be filled with.</summary>
+
         static bool Fits(Part part, GridEntity block)
         {
             if (part.Expects.Count == 0)

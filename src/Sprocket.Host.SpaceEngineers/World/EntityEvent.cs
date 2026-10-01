@@ -24,10 +24,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             Text = text;
         }
 
-        /// <summary>One the construct answers, which has no reading behind it at all.</summary>
-        public EntityEvent(string id, string text)
+        /// <summary>A trigger: one the construct answers through the toolbar slot <paramref name="at" />, which its id names, with no reading behind it at all.</summary>
+        public EntityEvent(Sequences.ToolbarSlot at, string text)
         {
-            Id = id;
+            Id = at.EventId;
             PropertyId = "";
             Text = text;
             Answered = true;

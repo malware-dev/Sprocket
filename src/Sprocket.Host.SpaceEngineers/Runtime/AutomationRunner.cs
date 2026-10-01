@@ -185,8 +185,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public SequenceRunner Get(Sequence sequence)
         {
             var system = sequence.System;
-            var first = system != null && system.Instances.Count > 0
-                ? system.Instances[0].Number
+            var first = system != null && system.Uses.Count > 0
+                ? system.Uses[0].Number
                 : 0;
 
             return Get(Key(sequence.Id, first));
@@ -439,7 +439,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var s = 0; s < systems.Count; s++)
             {
                 var system = systems[s];
-                var instances = system.Instances;
+                var instances = system.Uses;
                 var sequences = system.Sequences;
 
                 for (var n = 0; n < instances.Count; n++)
@@ -535,7 +535,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var s = 0; s < systems.Count; s++)
             {
                 var system = systems[s];
-                var instances = system.Instances;
+                var instances = system.Uses;
                 var sequences = system.Sequences;
 
                 var triggers = system.Triggers;
@@ -566,7 +566,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>Faults only: a sequence nothing starts yet is not broken, and switching it off would make the step somebody is about to point at it fail for a second reason.</remarks>
         void SwitchOffBroken(AutomationSystem system)
         {
-            var instances = system.Instances;
+            var instances = system.Uses;
             var sequences = system.Sequences;
 
             for (var n = 0; n < instances.Count && system.Enabled; n++)
@@ -613,7 +613,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var s = 0; s < systems.Count; s++)
             {
                 var system = systems[s];
-                var instances = system.Instances;
+                var instances = system.Uses;
                 var triggers = system.Triggers;
 
                 for (var t = 0; t < triggers.Count; t++)

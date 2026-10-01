@@ -10,7 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
     {
         HStack _using;
         Label _usingLead;
-        Label _usingName;
         HStack _usingChoice;
         Button _editPanel;
         Label _halted;
@@ -34,8 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 Children =
                 {
-                    // Whose blocks every sentence below names, said before any of them: fixed for one logic system,
-                    // and for a blueprint one of the blocksets made from it, with the way to set up its configuration panel.
+                    // For a blueprint, whose blocks every sentence below names, said before any of them: one of the
+                    // blocksets made from it, with the way to set up its configuration panel.
                     new HStack
                     {
                         Spacing = 8f,
@@ -43,7 +42,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         Children =
                         {
                             new Label { Style = Styles.Phrase }.As(out _usingLead),
-                            new Label { Style = Styles.Name }.As(out _usingName),
                             new HStack { Placement = Flex.Grow }.As(out _usingChoice),
                             new Button { Style = Styles.Button }.As(out _editPanel)
                         }
@@ -65,10 +63,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     }.As(out _locked),
 
                     // Named, because this screen holds two lists of different things and the rows in them read
-                    // alike: the ways to add something on top, then what is already here, twice over.
+                    // alike: what is already here, then the ways to add more on the line under it, twice over -
+                    // the way a sequence lays out its steps.
                     new Label { Style = Styles.Heading }.As(out _triggersHeading),
+                    new VStack { Spacing = 8f }.As(out _triggerList),
                     new VStack
                     {
+                        Padding = new Thickness(0f, 8f, 0f, 0f),
                         Children =
                         {
                             new HStack
@@ -79,23 +80,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                     new Button { Style = Styles.Start }.As(out _when),
                                     new Button { Style = Styles.Start }.As(out _every)
                                 }
-                            },
-                            new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }
+                            }
                         }
                     }.As(out _addTriggers),
-                    new VStack { Spacing = 8f }.As(out _triggerList),
 
                     new Label { Style = Styles.NextHeading }.As(out _sequencesHeading),
+                    new Label { Style = Styles.Empty, Wraps = true }.As(out _noSequences),
+                    new VStack { Spacing = 8f }.As(out _sequenceList),
                     new VStack
                     {
-                        Children =
-                        {
-                            new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } },
-                            new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }
-                        }
-                    }.As(out _addSequence),
-                    new Label { Style = Styles.Empty, Wraps = true }.As(out _noSequences),
-                    new VStack { Spacing = 8f }.As(out _sequenceList)
+                        Padding = new Thickness(0f, 8f, 0f, 0f),
+                        Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } } }
+                    }.As(out _addSequence)
                 }
             };
         }

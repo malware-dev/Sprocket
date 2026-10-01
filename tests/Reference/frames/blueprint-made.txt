@@ -74,5 +74,5 @@ on screen     Configuration panel  |  Shown to anyone setting up, or changing, s
 067  Sprite     Sprocket_Fill         {X:856 Y:604 W:93 H:32}  #5B737BFF
 068  Sprite     Sprocket_Fill         {X:860 Y:608 W:85 H:24}  #20272DFF
 069  Sprite     Sprocket_Fill         {X:860 Y:608 W:24 H:24}  #DCF5FDFF
-070  Text       at {X:892 Y:610.0543} scale 0.556  #DCF5FDFF  "required"
+070  Text       at {X:892.415 Y:610.0543} scale 0.556  #DCF5FDFF  "optional"
 071  ClearClip  

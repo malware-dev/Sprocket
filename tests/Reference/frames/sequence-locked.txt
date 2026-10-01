@@ -40,5 +40,5 @@ on screen     Sequence 1
 033  Text       at {X:504.5142 Y:163.2255} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
 034  Text       at {X:1570.094 Y:170.9932} scale 0.241  #5F7278FF  "e"
 035  Text       at {X:1610.156 Y:166.5141} scale 0.401  #5F7278FF  "d"
-036  Text       at {X:272 Y:223.6399} scale 0.694  #85A1A9FF  "Airlock is switched on. Switch it off to change it."
+036  Text       at {X:272 Y:219.6399} scale 0.694  #85A1A9FF  "Airlock is on. Turn it off to edit."
 037  ClearClip  

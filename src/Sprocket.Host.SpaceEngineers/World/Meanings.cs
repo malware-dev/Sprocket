@@ -33,12 +33,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Turrets(kind, block);
 
             if (block is IMyUserControllableGun)
-                Withhold(kind, "SelectedAmmoType", Readiness.Pending, AmmoSaid);
+                Withhold(kind, "SelectedAmmoType", Readiness.Pending, Holdback.Ammo);
 
             if (block is IMyEventControllerBlock)
             {
-                Withhold(kind, "AvailableEvents", Readiness.Unsupported, EventsSaid);
-                Withhold(kind, "Condition", Readiness.Unsupported, EventsSaid);
+                Withhold(kind, "AvailableEvents", Readiness.Unsupported, Holdback.Events);
+                Withhold(kind, "Condition", Readiness.Unsupported, Holdback.Events);
             }
 
             if (block is IMyRadioAntenna || block is IMyBeacon)
@@ -226,7 +226,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             In(kind, "CameraList", Category.Behaviour);
-            Withhold(kind, "CameraList", Readiness.Pending, CameraSaid);
+            Withhold(kind, "CameraList", Readiness.Pending, Holdback.Camera);
             In(kind, "SpeedLimit", Category.Behaviour);
 
             // Which way a remote calls forward, spelled once as a value and six times as actions.
@@ -259,9 +259,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             In(kind, "RotorElevation", Category.Behaviour);
             In(kind, "CameraList", Category.Behaviour);
 
-            Withhold(kind, "RotorAzimuth", Readiness.Pending, RotorSaid);
-            Withhold(kind, "RotorElevation", Readiness.Pending, RotorSaid);
-            Withhold(kind, "CameraList", Readiness.Pending, CameraSaid);
+            Withhold(kind, "RotorAzimuth", Readiness.Pending, Holdback.Rotor);
+            Withhold(kind, "RotorElevation", Readiness.Pending, Holdback.Rotor);
+            Withhold(kind, "CameraList", Readiness.Pending, Holdback.Camera);
         }
 
         /// <summary>A screen: what is written on it, and how it was set up to write.</summary>
@@ -311,7 +311,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Keeps every member the game named <paramref name="stem" /> from being made into a step.</summary>
-        static void Withhold(EntityKind kind, string stem, Readiness readiness, string why)
+        static void Withhold(EntityKind kind, string stem, Readiness readiness, Holdback why)
         {
             var actions = kind.Actions;
             for (var i = 0; i < actions.Count; i++)
@@ -321,14 +321,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                     one.Withhold(readiness, why);
             }
         }
-
-        const string EventsSaid = "Set this in the terminal: the game keeps this block's events from mods";
-
-        const string CameraSaid = "Set this in the terminal for now: choosing a camera here is planned";
-
-        const string RotorSaid = "Set this in the terminal for now: choosing a rotor here is planned";
-
-        const string AmmoSaid = "Set this in the terminal for now: choosing ammunition here is planned";
 
         /// <summary>Puts every member the game named <paramref name="stem" /> in its true category.</summary>
         static void In(EntityKind kind, string stem, Category category)

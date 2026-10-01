@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _nowEvent = now.EventId;
         }
 
-        public override string Label => "changing when it runs";
+        public override Change Change => Change.When;
 
         public override bool Changes
         {

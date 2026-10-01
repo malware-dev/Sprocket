@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Ui;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
@@ -131,8 +132,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var asks = _offered.Count > 0;
             if (asks && _run == null)
             {
-                _run = new OptionRow { Text = texts.PickRun, Command = _editor.Act(Cmd.TriggerRuns, delegate { Stopping(false); }) };
-                _stop = new OptionRow { Text = texts.PickStop, Command = _editor.Act(Cmd.TriggerStops, delegate { Stopping(true); }) };
+                _run = new OptionRow
+                {
+                    Text = texts.PickRun,
+                    Tip = Tip.For(null, texts.PickRunAbout),
+                    Command = _editor.Act(Cmd.TriggerRuns, delegate { Stopping(false); })
+                };
+                _stop = new OptionRow
+                {
+                    Text = texts.PickStop,
+                    Tip = Tip.For(null, texts.PickStopAbout),
+                    Command = _editor.Act(Cmd.TriggerStops, delegate { Stopping(true); })
+                };
                 stage.Options.Add(_run);
                 stage.Options.Add(_stop);
             }
@@ -160,17 +171,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             if (!Stops)
             {
-                Show(_rows[One], texts.PickSingleAction, Outcome == Outcome.One, false);
-                Show(_rows[New], texts.PickNewSequence, Outcome == Outcome.New, false);
+                Show(_rows[One], texts.PickSingleAction, texts.PickSingleActionAbout, Outcome == Outcome.One, false);
+                Show(_rows[New], texts.PickNewSequence, texts.PickNewSequenceAbout, Outcome == Outcome.New, false);
             }
 
             if (!Stops && _offered.Count > 0)
-                Show(_rows[Heading], texts.PickSequences, false, true);
+                Show(_rows[Heading], texts.PickSequences, null, false, true);
 
             for (var i = 0; i < _offered.Count; i++)
             {
                 var number = _offered[i].Number;
-                Show(_rows[Key(number)], _offered[i].Name, Outcome == Outcome.Existing && Sequence == number, false);
+                Show(_rows[Key(number)], _offered[i].Name, null, Outcome == Outcome.Existing && Sequence == number, false);
             }
 
             stage.ShowEmpty();
@@ -181,9 +192,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return number.ToString(CultureInfo.InvariantCulture);
         }
 
-        static void Show(PickRow row, string text, bool chosen, bool heading)
+        static void Show(PickRow row, string text, string about, bool chosen, bool heading)
         {
             row.Text = text;
+            row.About = about;
             row.IsChosen = chosen;
             row.IsHeading = heading;
             row.Show();

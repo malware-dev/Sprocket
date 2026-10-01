@@ -63,7 +63,7 @@ on screen     When Airlock Button is pressed
 056  SetClip    {X:256 Y:118 W:1408 H:902}
 057  SetClip    {X:740 Y:234 W:428 H:770}
 058  Sprite     Sprocket_Fill         {X:740 Y:234 W:416 H:76}  #374851FF
-059  Text       at {X:756 Y:239.6399} scale 0.694  #A2C3CDFF  "Sprocket has only partly checked this block, so some of"
+059  Text       at {X:756 Y:239.6399} scale 0.694  #A2C3CDFF  "Support for this block is only partly done, so some of"
 060  Text       at {X:756 Y:259.6399} scale 0.694  #A2C3CDFF  "what it offers may still be doubled, missing or oddly"
 061  Text       at {X:756 Y:279.6399} scale 0.694  #A2C3CDFF  "named."
 062  Sprite     Sprocket_Fill         {X:740 Y:314 W:416 H:40}  #3C4C52FF

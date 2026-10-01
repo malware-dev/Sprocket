@@ -13,11 +13,11 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class LeavingTests
 {
-    const string Filled = "60 133 type Airlock enter 60 237 200 384 560 340";
+    const string Filled = "60 196 type Airlock enter 60 163 200 384 560 340";
     const string Back = "25 62";
 
-    const string WantsValues = "60 133 type Airlock enter 60 237 200 384 560 340 1353 314 "
-        + "70 200 200 485 800 653";
+    const string WantsValues = "60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+        + "70 175 200 485 800 653";
 
     [Fact]
     public void LeavingAFilledPickerAsksFirst()
@@ -52,7 +52,7 @@ public class LeavingTests
     [Fact]
     public void AndOneNobodyTouchedJustGoesBack()
     {
-        var picker = Screen.Fresh(("60 133 type Airlock enter 60 237 " + Back).Split(' '));
+        var picker = Screen.Fresh(("60 196 type Airlock enter 60 163 " + Back).Split(' '));
 
         Assert.False(picker.Scene.IsQuestioning, "leaving an untouched picker asked something");
         Assert.False(picker.Shows("Keep your changes?"), "it asked anyway");

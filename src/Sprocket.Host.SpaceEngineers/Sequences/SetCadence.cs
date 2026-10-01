@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _now = now;
         }
 
-        public override string Label => "changing how often it runs";
+        public override Change Change => Change.Cadence;
 
         public override bool Changes => _was != _now;
 

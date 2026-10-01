@@ -1,11 +1,7 @@
 using System;
-using System.Collections.Generic;
 using Sprocket.Sim.Fakes;
-using VRage.Game.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 using VRage.ObjectBuilders;
-using Sprocket.Host.SpaceEngineers.Features.Terminal;
-using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Sim.Machine;
 
@@ -46,31 +42,6 @@ sealed class Panel : Fitting
     public int Buttons => Toolbar.SlotCount;
 
     /// <summary>
-    /// What the game does when a slot is invoked: run whatever it holds, with what it holds it with.
-    /// </summary>
-    /// <remarks>
-    /// Installed by whoever is running the rig, because what a slot's payload means is Sprocket's
-    /// business and not a button's.
-    /// <para>
-    /// Handed the block the slot names as well as the payload, because the game runs an action
-    /// <em>on a block</em>: a slot naming one that is gone does nothing at all. Without that, a
-    /// press here reached Sprocket however broken the wiring was, and the rig answered a button the
-    /// game would have left silent.
-    /// </para>
-    /// </remarks>
-    public Action<long, string> Invokes;
-
-    /// <summary>
-    /// What the game does when a slot holds a block's own action: perform it on that block.
-    /// </summary>
-    /// <remarks>
-    /// Installed by whoever is running the rig, because finding a block by its id is the construct's
-    /// business. A trigger that does one plain thing is wired this way, and Sprocket is not part of
-    /// the press at all - which is the property worth being able to test.
-    /// </remarks>
-    public Action<long, string> Performs;
-
-    /// <summary>
     /// Somebody pressing one, counted from zero.
     /// </summary>
     /// <remarks>
@@ -90,33 +61,6 @@ sealed class Panel : Fitting
         if (_pressed != null)
             _pressed(button);
 
-        MyToolbarItemInfo held;
-        if (!Toolbar.TryGetItem(button, out held))
-            return;
-
-        // A block's own action, which the game performs itself. Nothing of Sprocket's is involved and
-        // the slot carries no argument.
-        if (held.ActionId != TriggerAction.ActionId)
-        {
-            if (Performs != null)
-                Performs(held.BlockEntityId, held.ActionId);
-
-            return;
-        }
-
-        if (Invokes == null)
-            return;
-
-        _held.Clear();
-        Toolbar.Parameters(button, _held);
-
-        if (_held.Count > 0)
-        {
-            var key = _held[0].Value as string;
-            if (!string.IsNullOrEmpty(key))
-                Invokes(held.BlockEntityId, key);
-        }
+        Run(button);
     }
-
-    readonly List<TerminalActionParameter> _held = new List<TerminalActionParameter>();
 }

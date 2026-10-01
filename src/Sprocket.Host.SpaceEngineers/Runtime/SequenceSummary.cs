@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (system == null)
                 return runner.Get(sequence);
 
-            var instances = system.Instances;
+            var instances = system.Uses;
             for (var i = 0; i < instances.Count; i++)
             {
                 var one = runner.Get(sequence, instances[i]);
@@ -113,6 +113,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     var named = SystemInstance.Through(through, moment.Sources);
                     var entity = named.Count == 0 ? null : bindings.Entity(named[0]);
                     return SequenceFault.Unstarted(Unwired.NoMoment, entity == null ? null : entity.Name);
+                }
+
+                // A block that never reaches the moment can never start it, which is said rather than waited on forever.
+                var when = moment as WhenTrigger;
+                if (when == null)
+                    continue;
+
+                var watched = SystemInstance.Through(through, when.Sources);
+                for (var s = 0; s < watched.Count; s++)
+                {
+                    GridEntity block = bindings.Entity(watched[s]);
+                    if (block != null && when.Moment(block.Kind) == null)
+                        return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
                 }
             }
 
@@ -231,9 +244,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         var name = filled == null ? slot : filled[n];
                         var points = bindings.State(name);
                         if (points == RefState.Lost && (part == null || !part.Optional))
-                            return new SequenceFault(SequenceProblem.MissingTarget, i, null, name);
+                            return new SequenceFault(SequenceProblem.MissingTarget, i, Trouble.None, name);
                         if (points == RefState.Adrift && !adrift.Exists)
-                            adrift = new SequenceFault(SequenceProblem.Adrift, i, null, name);
+                            adrift = new SequenceFault(SequenceProblem.Adrift, i, Trouble.None, name);
                     }
                 }
             }
@@ -258,7 +271,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 var slot = EmptyOf(system, through, moment.Sources);
                 if (slot != null)
-                    return new SequenceFault(SequenceProblem.EmptySlot, SequenceFault.Trigger, null, slot);
+                    return new SequenceFault(SequenceProblem.EmptySlot, SequenceFault.Trigger, Trouble.None, slot);
             }
 
             for (var i = 0; i < sequence.Steps.Count; i++)
@@ -269,7 +282,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 var slot = EmptyOf(system, through, act.Targets);
                 if (slot != null)
-                    return new SequenceFault(SequenceProblem.EmptySlot, i, null, slot);
+                    return new SequenceFault(SequenceProblem.EmptySlot, i, Trouble.None, slot);
             }
 
             return SequenceFault.None;

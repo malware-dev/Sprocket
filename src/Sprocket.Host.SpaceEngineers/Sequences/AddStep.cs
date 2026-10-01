@@ -4,7 +4,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     sealed class AddStep : SequenceEdit
     {
-        readonly string _label;
+        readonly Change _change;
         readonly int _index;
         readonly List<Step> _steps = new List<Step>();
 
@@ -15,15 +15,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// Several, because a step and the await after it are one thing somebody did and have to be
         /// one thing they can take back. Undoing half of it would leave an await waiting for nothing.
         /// </remarks>
-        public AddStep(string label, int index, params Step[] steps)
+        public AddStep(Change change, int index, params Step[] steps)
         {
-            _label = label;
+            _change = change;
             _index = index;
             for (var i = 0; i < steps.Length; i++)
                 _steps.Add(steps[i]);
         }
 
-        public override string Label => _label;
+        public override Change Change => _change;
 
         public override void Apply(Sequence sequence)
         {

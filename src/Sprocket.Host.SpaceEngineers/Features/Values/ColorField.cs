@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Values
 {
@@ -22,11 +23,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         byte _alpha = 255;
         bool _chose;
 
-        /// <summary>A field resting on white with no color given, offering the player's <paramref name="colors" />, whose Enter carries out <paramref name="submit" />.</summary>
-        public ColorField(IList<Hsv> colors, ICommand submit)
+        /// <summary>A field resting on white with no color given, offering the player's <paramref name="colors" />, whose Enter carries out <paramref name="submit" />, its notes in <paramref name="texts" />.</summary>
+        public ColorField(IList<Hsv> colors, ICommand submit, Texts texts)
         {
             CreateView();
             _written.Submit = submit;
+
+            _hue.Tip = Tip.For(null, texts.ColorHue);
+            _saturation.Tip = Tip.For(null, texts.ColorSaturation);
+            _value.Tip = Tip.For(null, texts.ColorBrightness);
+            _written.Tip = Tip.For(null, texts.ColorCodeAbout);
 
             for (var i = 0; i < colors.Count; i++)
             {

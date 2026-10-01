@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             /// <summary>What the player called the system.</summary>
             public string Name;
 
-            /// <summary>How many instances of it this construct has.</summary>
+            /// <summary>How many ways it runs on this construct: a blueprint's instances, or one for a system.</summary>
             public int Instances;
 
             /// <summary>The most telling of its sequences' states.</summary>
@@ -95,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         {
             var row = new Row();
             row.Name = system.Name;
-            row.Instances = system.Instances.Count;
+            row.Instances = system.Uses.Count;
             row.Parked = Off(system);
             row.Status = SequenceStatus.Off;
 
@@ -132,6 +132,22 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return row;
         }
 
+        /// <summary>Whether <paramref name="system" /> is switched off, as a whole or every one of it.</summary>
+        static bool Off(AutomationSystem system)
+        {
+            if (!system.Enabled)
+                return true;
+
+            var uses = system.Uses;
+            for (var i = 0; i < uses.Count; i++)
+            {
+                if (uses[i].Enabled)
+                    return false;
+            }
+
+            return uses.Count > 0;
+        }
+
         /// <summary>
         /// Whether one state is more worth showing than another.
         /// </summary>
@@ -140,22 +156,6 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// and anything at all beats a rule somebody parked - which is the least interesting fact about
         /// a system where the others are running.
         /// </remarks>
-        /// <summary>Whether <paramref name="system" /> is switched off, as a whole or every one of it.</summary>
-        static bool Off(AutomationSystem system)
-        {
-            if (!system.Enabled)
-                return true;
-
-            var instances = system.Instances;
-            for (var i = 0; i < instances.Count; i++)
-            {
-                if (instances[i].Enabled)
-                    return false;
-            }
-
-            return instances.Count > 0;
-        }
-
         static bool Louder(SequenceStatus now, SequenceStatus than)
         {
             return Rank(now) > Rank(than);

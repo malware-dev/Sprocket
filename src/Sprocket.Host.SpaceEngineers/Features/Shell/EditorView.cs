@@ -54,6 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Glyph _undo;
         readonly Glyph _redo;
         readonly Switch _switch;
+        readonly Button _library;
         readonly Glyph _refresh;
         readonly Glyph _run;
         readonly Glyph _delete;
@@ -67,6 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly Relay _undoes;
         readonly Relay _redoes;
+        readonly Relay _libraries;
         readonly Relay _refreshes;
         readonly Relay _flips;
         readonly Relay _runs;
@@ -107,6 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _undoes = new Relay(() => Run(_editor.Screen.Undo));
             _redoes = new Relay(() => Run(_editor.Screen.Redo));
+            _libraries = new Relay(() => Run(_editor.Screen.Library));
             _refreshes = new Relay(() => Run(_editor.Screen.Refresh));
             _flips = new Relay(() => Run(_editor.Screen.Flip));
             _runs = new Relay(() => Run(_editor.Screen.Running ? _editor.Screen.Stops : _editor.Screen.Runs));
@@ -135,6 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                     _title,
                                     // Quietest first and the switch last: the row stands against the right edge, so a control's
                                     // place depends only on what stands to its right, and the last cannot be moved by anything.
+                                    new Button { Style = Styles.Button, Command = _libraries }.As(out _library),
                                     new Glyph { Symbol = Symbols.Refresh, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _refreshes }.As(out _refresh),
                                     new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
@@ -640,6 +644,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _redoes.CanExecute = screen.Redo != null;
             _redo.Tip = Tip.For(_redo.Tip, screen.Redo != null ? texts.ChromeRedo : null, _redone);
 
+            _library.IsVisible = screen.Library != null;
+            _library.Text = texts.SystemsLoad;
+            _libraries.CanExecute = screen.Library != null;
+            _library.Tip = Tip.For(_library.Tip, screen.Library != null ? texts.SystemsLoadAbout : null);
+
             _refresh.IsVisible = screen.Refresh != null;
             _refreshes.CanExecute = screen.Refresh != null;
             _refresh.Tip = Tip.For(_refresh.Tip, screen.Refresh != null ? texts.ChromeRefresh : null);
@@ -650,7 +659,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _run.IsVisible = doing != null;
             _run.Symbol = screen.Running ? Symbols.Stop : Symbols.Play;
             _runs.CanExecute = doing != null;
-            _run.Tip = Tip.For(_run.Tip, doing == null ? null : screen.Running ? SequenceText.Stops() : SequenceText.Starts());
+            _run.Tip = Tip.For(_run.Tip, doing == null ? null : screen.Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts));
 
             _delete.IsVisible = screen.Deletes != null;
             _deletes.CanExecute = screen.Deletes != null;
