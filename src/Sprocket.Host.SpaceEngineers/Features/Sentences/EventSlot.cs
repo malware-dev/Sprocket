@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {

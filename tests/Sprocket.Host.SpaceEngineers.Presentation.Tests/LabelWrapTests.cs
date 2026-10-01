@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel.Text;
 using VRageMath;
 using Xunit;
 

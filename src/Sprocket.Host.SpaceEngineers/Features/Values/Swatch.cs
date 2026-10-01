@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Lumel;
+using Lumel.Drawing;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Values

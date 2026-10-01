@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Input;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Values;
 

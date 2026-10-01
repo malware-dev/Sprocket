@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Sim.Machine;
+using Lumel.Text;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -32,7 +33,7 @@ public class BlocksetTroubleTests
         Run(sim, 401, 500);
 
         Assert.IsType<BlueprintPage>(sim.Editor.Current);
-        Assert.Contains(sim.Editor.Current.View!.Within().OfType<Ui.Text.Label>(), label => label.Text == Why && label.IsVisible);
+        Assert.Contains(sim.Editor.Current.View!.Within().OfType<Label>(), label => label.Text == Why && label.IsVisible);
 
         sim.Editor.PressStart("Open Sequence 1");
         sim.Tick();

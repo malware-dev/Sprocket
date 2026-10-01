@@ -1,8 +1,8 @@
 using System.Text;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel;
+using Lumel.Drawing;
+using Lumel.Text;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;

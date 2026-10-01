@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Values;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Input;
 using VRage.Input;
 using Xunit;
 

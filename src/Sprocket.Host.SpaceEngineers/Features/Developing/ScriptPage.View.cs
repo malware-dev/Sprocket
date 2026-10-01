@@ -1,7 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel;
+using Lumel.Controls;
+using Lumel.Layout;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Developing

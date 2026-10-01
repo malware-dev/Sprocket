@@ -1,11 +1,12 @@
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Styling;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel;
+using Lumel.Layout;
+using Lumel.Styling;
+using Lumel.Text;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Ui.Viewing;
+using Lumel.Viewing;
+using Lumel.Windows;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -71,7 +72,7 @@ public class ContainerTests
     public void ContentFillsTheRoomInsidePadding()
     {
         var content = new Label { Text = "Held" };
-        var window = new Ui.Windows.Window
+        var window = new Window
         {
             Padding = new Thickness(8f),
             Content = content,

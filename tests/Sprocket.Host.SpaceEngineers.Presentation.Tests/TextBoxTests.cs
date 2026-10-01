@@ -1,6 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel.Input;
+using Lumel.Layout;
+using Lumel.Text;
 using VRage.Input;
 using VRageMath;
 using Xunit;

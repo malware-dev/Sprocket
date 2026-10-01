@@ -1,11 +1,11 @@
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Styling;
+using Lumel;
+using Lumel.Styling;
 using VRage.Game;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using Sprocket.Host.SpaceEngineers.Ui.Images;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Viewing;
-using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Lumel.Controls;
+using Lumel.Images;
+using Lumel.Text;
+using Lumel.Viewing;
+using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Look

@@ -1,6 +1,6 @@
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Controls;
+using Lumel.Input;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

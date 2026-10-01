@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui;
+using Lumel.Text;
+using Lumel;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using VRageMath;

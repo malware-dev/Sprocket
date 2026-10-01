@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Features.Values;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Lumel.Layout;
+using Lumel.Text;
+using Lumel.Windows;
 using VRageMath;
 using Xunit;
 

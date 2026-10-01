@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Machine;
+using Lumel.Text;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -70,7 +71,7 @@ public class ChoicePageTests
         var sim = Asking(page => page.EmptyText = "No blueprints yet.");
 
         Assert.Empty(sim.Editor.Choices());
-        Assert.Contains(sim.Editor.Current.View!.Within().OfType<Ui.Text.Label>(),
+        Assert.Contains(sim.Editor.Current.View!.Within().OfType<Label>(),
             label => label.IsVisible && label.Text == "No blueprints yet.");
     }
 

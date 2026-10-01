@@ -1,0 +1,173 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Sandbox.Definitions;
+using Sandbox.ModAPI;
+using VRage.Game;
+using VRage.Game.Definitions;
+using VRage.Utils;
+using VRageMath;
+
+namespace Lumel.Drawing
+{
+    /// <summary>The game's own screen, and the only place the mod calls its screen-space API.</summary>
+    public sealed class GameScreenSpace : IScreenSpace
+    {
+        readonly List<MyScreenSpace.MyScissorScope> _scissors =
+            new List<MyScreenSpace.MyScissorScope>();
+
+        readonly Dictionary<string, int> _lineUnits = new Dictionary<string, int>();
+
+        /// <inheritdoc />
+        public RectangleF SafeArea => MyScreenSpace.GetSafeGuiArea();
+
+        /// <summary>The camera's viewport, or the safe area's size before the session has a camera.</summary>
+        public Vector2 ViewportSize
+        {
+            get
+            {
+                // The camera's viewport is the window rather than the HUD. There is no camera until the
+                // session has finished loading.
+                if (MyAPIGateway.Session != null && MyAPIGateway.Session.Camera != null)
+                    return MyAPIGateway.Session.Camera.ViewportSize;
+
+                var area = MyScreenSpace.GetSafeGuiArea();
+                return new Vector2(area.Width, area.Height);
+            }
+        }
+
+        /// <remarks>
+        ///     Unverified in the game: whether a scope is recorded into a buffered layer's queue or applied
+        ///     when that queue replays.
+        /// </remarks>
+        public void PushScissor(Rectangle pixels, MyScreenSpaceLayer layer)
+        {
+            // Kept typed, because MyScissorScope is a struct and holding it as IDisposable would box one per push.
+            // Disposing a copy is safe: it reads its two fields and pops.
+            _scissors.Add(MyScreenSpace.UsingScissorRectanglePixels(pixels, layer));
+        }
+
+        /// <inheritdoc />
+        public void PopScissor(MyScreenSpaceLayer layer)
+        {
+            var last = _scissors.Count - 1;
+            if (last < 0)
+                return;
+
+            _scissors[last].Dispose();
+            _scissors.RemoveAt(last);
+        }
+
+        /// <inheritdoc />
+        public void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,
+            MyScreenSpaceLayer layer)
+        {
+            MyScreenSpaceSprite.DrawPixels(material, destination, null, color, rotation, layer);
+        }
+
+        /// <inheritdoc />
+        public void DrawText(string font, string text, Vector2 position, float scale, Color color,
+            MyGuiDrawAlignEnum align, float maxWidth, MyScreenSpaceLayer layer)
+        {
+            MyScreenSpaceText.DrawPixels(font, text, position, scale, color, align, maxWidth, layer);
+        }
+
+        /// <inheritdoc />
+        public Vector2 MeasureText(string font, StringBuilder text, float scale)
+        {
+            return MyScreenSpaceText.MeasurePixels(font, text, scale);
+        }
+
+        /// <inheritdoc />
+        /// <remarks>
+        ///     Read from the file the font's definition names, in the game's content or in the mod that
+        ///     declares it, and kept: the game holds the same number on its loaded font, where a mod may not
+        ///     read it. Once per font.
+        /// </remarks>
+        public int LineUnits(string font)
+        {
+            var units = 0;
+            if (font == null || _lineUnits.TryGetValue(font, out units))
+                return units;
+
+            units = Read(font);
+            _lineUnits[font] = units;
+            return units;
+        }
+
+        /// <inheritdoc />
+        public bool TryCursorPixels(out Vector2 pixels)
+        {
+            return MyScreenSpace.TryGetCursorPositionPixels(out pixels);
+        }
+
+        /// <inheritdoc />
+        public Vector2 NormalizedToPixels(Vector2 position)
+        {
+            return MyScreenSpace.NormalizedToPixels(position);
+        }
+
+        /// <inheritdoc />
+        public Vector2 NormalizedSizeToPixels(Vector2 size)
+        {
+            return MyScreenSpace.NormalizedSizeToPixels(size);
+        }
+
+        /// <summary>The <c>height</c> on the font file's <c>font</c> element, or zero where the file will not give one.</summary>
+        static int Read(string font)
+        {
+            var definitions = MyDefinitionManager.Static;
+            if (definitions == null)
+                return 0;
+
+            var definition = definitions.GetDefinition(
+                new MyDefinitionId(typeof(MyObjectBuilder_FontDefinition), font)) as MyFontDefinition;
+            if (definition == null)
+                return 0;
+
+            var path = definition.CompatibilityPath;
+            foreach (var resource in definition.Resources)
+            {
+                path = resource.Path;
+                break;
+            }
+
+            if (string.IsNullOrEmpty(path))
+                return 0;
+
+            string text;
+            try
+            {
+                var context = definition.Context;
+                using (var reader = context == null || context.IsBaseGame
+                           ? MyAPIGateway.Utilities.ReadFileInGameContent(path)
+                           : MyAPIGateway.Utilities.ReadFileInModLocation(path, context.ModItem))
+                    text = reader.ReadToEnd();
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+
+            return Height(text);
+        }
+
+        /// <summary>The whole number in the first <c>height</c> attribute after <c>&lt;font</c>, or zero.</summary>
+        static int Height(string text)
+        {
+            var element = text.IndexOf("<font", StringComparison.Ordinal);
+            if (element < 0)
+                return 0;
+
+            const string attribute = " height=\"";
+            var at = text.IndexOf(attribute, element, StringComparison.Ordinal);
+            if (at < 0)
+                return 0;
+
+            at += attribute.Length;
+            var end = text.IndexOf('"', at);
+            int height;
+            return end > at && int.TryParse(text.Substring(at, end - at), out height) ? height : 0;
+        }
+    }
+}

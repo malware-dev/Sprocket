@@ -62,4 +62,5 @@
     <AdditionalFiles Remove="Content\*\**\*.cs" />
     <None Remove="thumb.png" />
   </ItemGroup>
+  <Import Project="..\Lumel\Lumel.projitems" Label="Shared" />
 </Project>

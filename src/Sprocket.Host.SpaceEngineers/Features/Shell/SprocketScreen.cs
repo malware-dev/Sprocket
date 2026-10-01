@@ -1,6 +1,6 @@
 using System;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Drawing;
+using Lumel.Input;
 using Sandbox.Game;
 using Sandbox.ModAPI;
 using VRage.Input;

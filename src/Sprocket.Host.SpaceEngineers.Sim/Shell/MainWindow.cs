@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Lumel.Drawing;
 using Sprocket.Sim.Simulation;
 using VRage.Input;
 using VRageMath;

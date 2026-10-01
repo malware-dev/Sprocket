@@ -1,7 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Lumel.Layout;
 using VRageMath;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Ui.Images;
+using Lumel.Images;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

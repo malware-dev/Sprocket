@@ -1,9 +1,9 @@
 using System;
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Lumel;
+using Lumel.Controls;
+using Lumel.Layout;
+using Lumel.Text;
+using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Writing;

@@ -8,17 +8,20 @@ of Sprocket and would be wrong anywhere else.
 
 ## How this repository is put together
 
-Three projects of code, and the first one is the mod:
+Four projects of code, and the first one is the mod:
 
 - **`src/Sprocket.Host.SpaceEngineers`** is everything that runs in the game, in one tree, one folder
   per capability and each holding the whole of it. **Anything that belongs to the user interface lives
   within `Features/`, and code outside it reaches in there.** A sequence's model sits in `Sequences/`, and
   the sentence as drawn in `Features/Sentences/`, which also decides how a sentence is composed - not the
-  same as holding the English, see below. `Ui/` is the UI framework, kept apart from the features built on
-  it, and sits beside them. Files are globbed, so a new file is in the build by being in the folder.
+  same as holding the English, see below. Files are globbed, so a new file is in the build by being in
+  the folder.
 
   **The model and the runtime hold ids and never words.** Every word a player reads comes from `Texts`,
   put there by the page that shows it.
+- **`src/Lumel`** is the UI framework, a shared project the mod imports, so its files compile into the
+  mod's own assembly. It knows nothing of Sprocket, so any other mod can import it as it is. Its files
+  are globbed in the same way.
 - **`src/Sprocket.Host.SpaceEngineers.Sim`** is the harness. It references the mod and drives it over
   blocks it makes up, answering the game's own interfaces.
 - **`src/Sprocket.Localization.Generator`** writes the mod's `Texts` class from its `MyTexts.resx` at
@@ -29,7 +32,7 @@ editor the way a target would through the harness's `Driving/Target`. The genera
 of its own, which runs it as the compiler does and needs nothing of the game.
 
 **Two things only the game can do, and each is an interface the mod asks through.**
-`Ui/Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers
+`Lumel/Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers
 both, which is how a frame is recorded rather than drawn and how a toolbar slot is read without one.
 Everything else - mod storage, the grid's events, the block interfaces - the harness uses for real,
 through Castle proxies over the game's own types. See `Fakes/Pretend.cs`.

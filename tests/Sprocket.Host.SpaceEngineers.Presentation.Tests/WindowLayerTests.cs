@@ -1,9 +1,9 @@
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Viewing;
-using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Lumel;
+using Lumel.Controls;
+using Lumel.Input;
+using Lumel.Layout;
+using Lumel.Viewing;
+using Lumel.Windows;
 using VRageMath;
 using Xunit;
 

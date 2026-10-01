@@ -1,8 +1,8 @@
 using System;
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Lumel;
+using Lumel.Input;
+using Lumel.Text;
+using Lumel.Windows;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {

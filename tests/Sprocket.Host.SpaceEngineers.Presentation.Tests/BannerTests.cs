@@ -1,6 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Layout;
+using Lumel.Input;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

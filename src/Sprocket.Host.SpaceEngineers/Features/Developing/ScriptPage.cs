@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel.Controls;
+using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Developing
 {

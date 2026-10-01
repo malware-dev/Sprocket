@@ -2,7 +2,7 @@ using Sprocket.Sim.Simulation;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Lumel.Drawing;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

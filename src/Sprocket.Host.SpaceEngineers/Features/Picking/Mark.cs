@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Images;
+using Lumel.Drawing;
+using Lumel.Images;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 

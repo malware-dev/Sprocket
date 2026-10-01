@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Ui.Images;
-using Sprocket.Host.SpaceEngineers.Ui;
+using Lumel.Images;
+using Lumel;
 using VRageMath;
 using Xunit;
 

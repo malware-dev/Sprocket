@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Styling;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel;
+using Lumel.Drawing;
+using Lumel.Layout;
+using Lumel.Styling;
+using Lumel.Text;
 using VRage.Game;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -191,6 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 var words = (Label)Children[i];
                 words.Text = piece.Text;
                 words.Sample = _said.Count == 1 ? sample : null;
+                words.SampleEdge = Palette.Line;
             }
 
             while (Children.Count > _said.Count)

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel;
+using Lumel.Input;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 

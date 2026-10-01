@@ -1,10 +1,11 @@
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Viewing;
-using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Lumel;
+using Lumel.Controls;
+using Lumel.Layout;
+using Lumel.Styling;
+using Lumel.Text;
+using Lumel.Viewing;
+using Lumel.Windows;
 using VRage.Game;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
@@ -21,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         Label _guideNote;
 
         /// <summary>Makes the two buttons over the box, the box and its preview in one room, and the guide that hangs from its button.</summary>
-        void CreateView(float high, Ui.Styling.IStyle reads)
+        void CreateView(float high, IStyle reads)
         {
             Spacing = 6f;
 

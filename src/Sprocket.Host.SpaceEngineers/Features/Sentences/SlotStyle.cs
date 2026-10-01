@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Styling;
+using Lumel;
+using Lumel.Styling;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {

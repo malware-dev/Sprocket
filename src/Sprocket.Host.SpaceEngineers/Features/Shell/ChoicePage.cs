@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Input;
+using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
@@ -52,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public IReadOnlyList<ChoiceRow> Answers => _rows;
 
         /// <summary>The box an answer is typed into, or null where the question offers none.</summary>
-        public Ui.Text.TextBox Box => _take == null ? null : _box;
+        public TextBox Box => _take == null ? null : _box;
 
         /// <summary>Offers <paramref name="text" /> as an answer, <paramref name="choose" /> carried out when it is given.</summary>
         public void Add(string text, bool isCurrent, Action choose)

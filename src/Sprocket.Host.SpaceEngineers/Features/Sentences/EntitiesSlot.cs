@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {

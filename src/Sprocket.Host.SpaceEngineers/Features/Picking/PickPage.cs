@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel.Input;
+using Lumel.Layout;
+using Lumel.Text;
+using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -497,7 +498,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _strip.Arrive(Opens, Editor.Input);
         }
 
-        Ui.Windows.WindowLayer Windows()
+        WindowLayer Windows()
         {
             return Editor.Windows;
         }

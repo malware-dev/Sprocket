@@ -1,9 +1,9 @@
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel.Layout;
+using Lumel.Text;
 using Sprocket.Sim.Machine;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Ui.Images;
+using Lumel.Images;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 

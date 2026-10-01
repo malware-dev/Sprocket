@@ -1,9 +1,9 @@
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Lumel;
+using Lumel.Input;
+using Lumel.Layout;
 using VRageMath;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Ui.Viewing;
+using Lumel.Viewing;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

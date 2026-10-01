@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel.Input;
+using Lumel.Layout;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Ui;
+using Lumel;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;

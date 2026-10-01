@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Images;
+using Lumel;
+using Lumel.Input;
+using Lumel.Layout;
+using Lumel.Text;
+using Lumel.Images;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell

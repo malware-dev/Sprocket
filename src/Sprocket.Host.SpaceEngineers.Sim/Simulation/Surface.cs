@@ -13,7 +13,7 @@ using Matrix = System.Windows.Media.Matrix;
 using Point = System.Windows.Point;
 using Rect = System.Windows.Rect;
 using Ink = System.Windows.Media.Color;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Lumel.Drawing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Sim.Simulation

@@ -1,6 +1,6 @@
 using System.Reflection;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
+using Lumel.Input;
 using Xunit;
 
 namespace Sprocket.Tests;

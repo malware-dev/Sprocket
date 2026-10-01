@@ -6,9 +6,11 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Lumel;
+using Lumel.Input;
+using Lumel.Layout;
+using Lumel.Text;
+using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
@@ -32,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         bool _madeOn;
         int _shape = -1;
         string _described;
-        Ui.Element _focused;
+        Element _focused;
         Keyed<Part, PartRow> _partRows;
 
         /// <summary>The configuration panel of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />, filling a blockset's slots or, where <paramref name="editing" />, setting up the panel.</summary>
@@ -96,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override string RedoText => Editor.RedoLabel(_system);
 
         /// <summary>The blueprint's parts, one row each, with the chosen logic system's blocks for each.</summary>
-        public Ui.Element.Collection Parts => _partList.Children;
+        public Element.Collection Parts => _partList.Children;
 
         /// <summary>The logic system whose blocks fill the slots, or null before there is one.</summary>
         SystemInstance Blockset => Editor.StandIn(_system);
@@ -337,7 +339,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         /// <summary>Writes what was typed in <paramref name="box" /> into the blueprint, where it is one of this page's boxes.</summary>
         /// <remarks>Only once the keyboard has left it, so a description being typed is one step back rather than one a letter.</remarks>
-        void Written(Ui.Element box)
+        void Written(Element box)
         {
             if (box == null || !_editing)
                 return;
@@ -438,7 +440,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (!row.NameBox.IsFocused)
                 row.NameBox.Text = part.Id;
 
-            row.NameBox.Submit = new Ui.Input.Relay(delegate { Editor.Input.Focus(null); });
+            row.NameBox.Submit = new Relay(delegate { Editor.Input.Focus(null); });
 
             row.About.Show(texts);
             row.About.Hint = texts.BlueprintAboutHint;

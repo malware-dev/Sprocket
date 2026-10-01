@@ -3,12 +3,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
+using Lumel;
+using Lumel.Drawing;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Sim.Measuring;

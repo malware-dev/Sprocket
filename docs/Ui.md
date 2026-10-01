@@ -1,6 +1,6 @@
 # The UI framework
 
-The target for `Ui/`: the framework every screen is built with. What is written here is decided and
+The target for Lumel (`src/Lumel`): the framework every screen is built with. What is written here is decided and
 not yet built, or built in part. Once a piece is built, the code is the record and it leaves this
 file. Anything not written here is undecided.
 
@@ -199,4 +199,3 @@ framework never learns what a command means to the application.
   property: whether the state wins, or the view's value is kept.
 - An items control, with a row template, in place of the six lists of rows built by hand.
 - Whether rows and columns inside a grid can share its tracks through other containers.
-- The framework's own namespace, in place of `Sprocket.Host.SpaceEngineers.Ui`.

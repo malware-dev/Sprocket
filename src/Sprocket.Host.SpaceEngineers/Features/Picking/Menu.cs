@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Ui.Drawing;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
+using Lumel.Drawing;
+using Lumel.Layout;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking

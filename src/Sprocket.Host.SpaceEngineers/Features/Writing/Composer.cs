@@ -1,10 +1,10 @@
 using System;
 using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.Ui.Styling;
-using Sprocket.Host.SpaceEngineers.Ui.Input;
-using Sprocket.Host.SpaceEngineers.Ui.Layout;
-using Sprocket.Host.SpaceEngineers.Ui.Text;
-using Sprocket.Host.SpaceEngineers.Ui.Windows;
+using Lumel.Styling;
+using Lumel.Input;
+using Lumel.Layout;
+using Lumel.Text;
+using Lumel.Windows;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
 {
