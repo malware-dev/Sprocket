@@ -245,9 +245,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         public virtual void Redo() { }
 
-        public virtual string PrimaryText => "";
+        /// <summary>Whether the page changes something, and so is finished with Done as well as left by going back.</summary>
+        public virtual bool Edits => false;
 
-        public virtual void Primary() { }
+        /// <summary>The words on the button at the right end of the header, or empty where the page has none.</summary>
+        public virtual string PrimaryText => Edits ? Editor.Texts.ChromeDone : "";
+
+        /// <summary>Whether the header's button can be pressed yet.</summary>
+        public virtual bool CanPrimary => true;
+
+        /// <summary>What the header's button does, said as its note while it can be pressed.</summary>
+        public virtual string PrimaryAbout => Edits ? Editor.Texts.ChromeDoneAbout : "";
+
+        /// <summary>What has to happen before the header's button can be pressed, said as its note while it cannot.</summary>
+        public virtual string PrimaryWaits => "";
+
+        /// <summary>Does what the header's button says; on a page that edits, that is leaving it as going back does.</summary>
+        public virtual void Primary()
+        {
+            if (Edits)
+                Editor.Leave();
+        }
 
         /// <summary>Brings the page to the shape the program is in now, whenever the screen is built.</summary>
         /// <remarks>

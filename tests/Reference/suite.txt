@@ -31,16 +31,16 @@ system-rename       60 200 type Airlock enter 80 68
 system-back         60 200 type Airlock enter 25 62
 
 # --- a blueprint made of a logic system, and another logic system made from it -------------------
-blueprint-made      60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186
-blueprint-guide     60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 75 201
-blueprint-filling   60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 25 62 130 372
-blueprint-picking   60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 25 62 130 372 300 186
-blueprint-editing   60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 25 62 800 300 1330 144
-blueprint-another   60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 25 62 100 433
-blueprint-grouped   60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 25 62 100 433 type Port enter 25 62
-blueprint-system    60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 25 62 800 300
-blueprint-system-on 60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 25 62 800 300 1389 73 move 1330 135
-blueprint-blocksets 60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 25 62 1220 186 25 62 100 433 type Port enter 25 62 800 300 220 143
+blueprint-made      60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186
+blueprint-guide     60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 75 201
+blueprint-filling   60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 25 62 130 372
+blueprint-picking   60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 25 62 130 372 300 186
+blueprint-editing   60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 25 62 800 300 1330 144
+blueprint-another   60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 25 62 100 433
+blueprint-grouped   60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 25 62 100 433 type Port enter 25 62
+blueprint-system    60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 25 62 800 300
+blueprint-system-on 60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 25 62 800 300 1320 73 move 1330 135
+blueprint-blocksets 60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 25 62 1220 186 25 62 100 433 type Port enter 25 62 800 300 220 143
 
 # --- a name another system has, refused where it is typed -----------------------------------------
 root-taken          60 200 type Airlock enter 25 62 60 240 type Airlock enter
@@ -90,7 +90,7 @@ picker-leaving      60 200 type Airlock enter 60 171 200 351 560 333 19 62
 # the system already has, which is why both states are held: nothing to point at, where there is no
 # running or stopping to choose between, and a sequence to run or stop.
 trigger-target      60 200 type Airlock enter 60 171 200 351 560 333
-trigger-target-full 60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 60 229 200 351 560 333
+trigger-target-full 60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 60 229 200 351 560 333
 
 # A single action is the page after the trigger's, in the same pick: the trigger's last column
 # folds to the narrow way back at the left, and the action's three columns share the rest. Back on
@@ -100,29 +100,29 @@ trigger-paged-values 60 200 type Airlock enter 60 171 200 351 560 333 1000 207 t
 trigger-onward      60 200 type Airlock enter 60 171 200 351 560 333 1000 207 tick 30 47 500 tick 30
 
 # --- the sequence that walk arrives at ----------------------------------------------------------
-sequence            60 200 type Airlock enter 60 171 200 351 560 333 1353 311
-sequence-hover      60 200 type Airlock enter 60 171 200 351 560 333 1353 311 move 100 175
-sequence-ticked     60 200 type Airlock enter 60 171 200 351 560 333 1353 311 tick 120
+sequence            60 200 type Airlock enter 60 171 200 351 560 333 1394 72
+sequence-hover      60 200 type Airlock enter 60 171 200 351 560 333 1394 72 move 100 175
+sequence-ticked     60 200 type Airlock enter 60 171 200 351 560 333 1394 72 tick 120
 
 # --- and the two kinds of line it can be given ---------------------------------------------------
 #
 # The words on a step are the host's, not core's: core says which blocks and which action, and this
 # target says "open" and joins them. A step that read right before the words moved out and wrong
 # after would show up nowhere else, because nothing else in the suite gets as far as a step.
-sequence-step       60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 400 396 800 626 1365 159
-sequence-wait       60 200 type Airlock enter 60 171 200 351 560 333 1353 311 160 175 100 255
+sequence-step       60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 400 396 800 626 1394 72
+sequence-wait       60 200 type Airlock enter 60 171 200 351 560 333 1394 72 160 175 100 255
 
 # --- the same step, switched on ----------------------------------------------------------------
 #
 # Locked, and every grip, chip, bin and arrow in the place it had in sequence-step: only colors and
 # words differ, and the adders' line says why there is nothing to add. A frame here that differs from
 # sequence-step by a position is the page moving under somebody who switched a sequence on.
-sequence-locked     60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 400 396 800 626 1365 159 1389 73 move 700 600
-wait-chooser        60 200 type Airlock enter 60 171 200 351 560 333 1353 311 160 175
-wait-typed          60 200 type Airlock enter 60 171 200 351 560 333 1353 311 160 175 100 537 type 90 enter
-wait-refused        60 200 type Airlock enter 60 171 200 351 560 333 1353 311 160 175 100 537 type 2s
-wait-ready          60 200 type Airlock enter 60 171 200 351 560 333 1353 311 160 175 100 537 type 90
-wait-used           60 200 type Airlock enter 60 171 200 351 560 333 1353 311 160 175 100 537 type 90 1370 537
+sequence-locked     60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 400 396 800 626 1394 72 1320 73 move 700 600
+wait-chooser        60 200 type Airlock enter 60 171 200 351 560 333 1394 72 160 175
+wait-typed          60 200 type Airlock enter 60 171 200 351 560 333 1394 72 160 175 100 537 type 90 enter
+wait-refused        60 200 type Airlock enter 60 171 200 351 560 333 1394 72 160 175 100 537 type 2s
+wait-ready          60 200 type Airlock enter 60 171 200 351 560 333 1394 72 160 175 100 537 type 90
+wait-used           60 200 type Airlock enter 60 171 200 351 560 333 1394 72 160 175 100 537 type 90 1370 537
 
 # --- the column an action's values are given in ---------------------------------------------------
 #
@@ -130,10 +130,10 @@ wait-used           60 200 type Airlock enter 60 171 200 351 560 333 1353 311 16
 # its own line with its name and its bounds beside it, in the picker's third column with Done at its
 # foot, and that a value outside them is refused by Done with the reason over it - Done stays where
 # it is whatever the reason says.
-values              60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 200 476 800 650
-picker-terminal     60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 200 476 820 244
-picker-shared       60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 56 413 56 565 56 489
-values-refused      60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 200 476 800 650 1315 206 type 300 1365 260
+values              60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 200 476 800 650
+picker-terminal     60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 200 476 820 244
+picker-shared       60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 56 413 56 565 56 489
+values-refused      60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 200 476 800 650 1315 206 type 300 1394 72
 
 # And the same column asking for the thing nobody should be typing.
 #
@@ -142,71 +142,71 @@ values-refused      60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70
 # the three - the hue track, two plain ones, and what the colour is written as. The swatches above
 # them are the player's own and there is nobody to ask here, so the row they would be in is not
 # drawn at all, which is the other thing this holds still.
-values-colour       60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 200 476 800 562
+values-colour       60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 200 476 800 562
 
 # And the value that is one of two words, which is a switch rather than a box with the words beside
 # it. Neither half is lit until one is pressed, because a switch that opened showing "off" would be
 # answering for somebody.
-values-flag         60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 150 200 type Approach 200 351 800 562
+values-flag         60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 150 200 type Approach 200 351 800 562
 
 # And the same value with more of them than a switch can hold.
 #
 # A battery's charge mode is three words, and the block is told a number for whichever one is
 # chosen. What is held still is that the words are what is on the screen, that none of them is lit
 # until one is pressed, and that the step afterwards reads the word rather than the number.
-values-choices      60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 150 200 type Standby 200 351 800 394
-sequence-choices    60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 150 200 type Standby 200 351 800 394 1247 198 enter
+values-choices      60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 150 200 type Standby 200 351 800 394
+sequence-choices    60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 150 200 type Standby 200 351 800 394 1247 198 enter
 
 # And more of them than a row can hold, which folds into a box that opens a list.
 #
 # Six forward directions. What is held still is that the box is one line whatever the list holds,
 # that it says nothing until something is chosen, and that the list hangs over whatever is below it
 # rather than under it - which is the whole reason the column draws it and the control does not.
-values-list         60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 150 200 type Tug 200 351 800 562
-values-list-open    60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 150 200 type Tug 200 351 800 562 1345 206
-sequence-list       60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 150 200 type Tug 200 351 800 562 1345 206 1345 316 enter
+values-list         60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 150 200 type Tug 200 351 800 562
+values-list-open    60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 150 200 type Tug 200 351 800 562 1345 206
+sequence-list       60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 150 200 type Tug 200 351 800 562 1345 206 1345 316 enter
 
 # Leaving a sequence that is still switched off asks about it, and says which answer Enter takes.
 #
 # The safe answer is drawn the way everything else that carries on is drawn, because a key nobody
 # can see the effect of is a key nobody trusts twice. Safe, and not the one that reads best first:
 # Enter gets pressed without reading, and must not switch something on.
-sequence-leaving    60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 150 200 type Tug 200 351 800 584 1345 206 1345 316 enter 19 62
+sequence-leaving    60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 150 200 type Tug 200 351 800 584 1345 206 1345 316 enter 19 62
 
 # And the step it leaves behind, which is the other half of the same decision.
 #
 # A colour is the one slot in a sentence that is not words. Held still here because a step is read
 # far more often than it is written, and because the fallback - three numbers, or the code - is what
 # it used to show and what it must not go back to showing.
-sequence-colour     60 200 type Airlock enter 60 171 200 351 560 333 1353 311 70 175 200 476 800 562 1049 371 type #FF8800 enter
+sequence-colour     60 200 type Airlock enter 60 171 200 351 560 333 1394 72 70 175 200 476 800 562 1049 371 type #FF8800 enter
 
 # --- the list with something in it, which is where a copy is made from ---------------------------
 #
 # Every other look at this screen in here is of an empty one, so a sequence's row and the controls
 # on it - its switch, and the copy button beside it - are drawn nowhere else in the suite. The
 # second entry holds the button's own note, which names the row it belongs to.
-system-filled       60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62
-system-copying      60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 move 1340 355
+system-filled       60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62
+system-copying      60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 move 1340 355
 
 # --- a trigger's own sentence, with one of its parts under the pointer ----------------------------
 #
 # The rows of triggers are the only sentence on any screen outside a sequence, and every part of one
 # is a control: the blocks, the moment, and what it then does. Hovering a part is how that is said,
 # so this is the frame that would notice them going back to being a line of words.
-system-trigger      60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 move 150 180
+system-trigger      60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 move 150 180
 
 # --- a sequence switched on, which is the only time it can be run by hand ------------------------
 #
 # The play mark appears with the switch, and is the one control on these screens that acts on the
 # machine rather than on the program. Nothing else holds a running row still.
-system-running      60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 1300 355
+system-running      60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 1300 355
 
 # --- a copy of it, which arrives saying the same thing and starting nothing ----------------------
 #
 # Made from the list, where the button is, and the state worth holding still is the one the copy
 # lands in: the same steps, the switch off, and an ellipsis where its trigger will go. A copy that
 # arrived live, or with the trigger it came from, would claim a toolbar slot that is already taken.
-sequence-copied     60 200 type Airlock enter 60 171 200 351 560 333 1353 311 25 62 1340 355
+sequence-copied     60 200 type Airlock enter 60 171 200 351 560 333 1394 72 25 62 1340 355
 
 # --- swapping a choice, which nothing else here covers ------------------------------------------
 #

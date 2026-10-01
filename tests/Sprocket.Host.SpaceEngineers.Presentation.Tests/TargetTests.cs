@@ -105,7 +105,7 @@ public class TargetTests
 
         var does = screen.Editor.Pick().Stages[2];
         Assert.Equal(new[] { "Cycle" }, does.Entries().Select(e => e.Text));
-        Assert.False(screen.Editor.Screen.HasPrimary, "stopping finished without saying what");
+        Assert.Null(screen.Editor.Screen.Primary);
 
         // And back to running offers the two that make something again, a new sequence already chosen,
         // with the sequences under their own heading after them.

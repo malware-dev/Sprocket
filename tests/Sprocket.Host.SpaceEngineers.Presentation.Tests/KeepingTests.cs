@@ -13,15 +13,15 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class KeepingTests
 {
-    const string ARadiusStep = "60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+    const string ARadiusStep = "60 196 type Airlock enter 60 163 200 384 560 340 1394 72 "
         + "70 175 200 485 800 653 1315 209 type 5 enter";
 
-    const string AColourStep = "60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+    const string AColourStep = "60 196 type Airlock enter 60 163 200 384 560 340 1394 72 "
         + "70 175 200 485 800 565 1049 374 type #FF8800 enter";
 
     const string Again = "270 182";
 
-    const string Done = "1365 263";
+    const string Done = "1394 72";
 
     [Fact]
     public void ThePickerOpensOnTheValueTheStepAlreadyHas()

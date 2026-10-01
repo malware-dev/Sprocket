@@ -7,99 +7,99 @@ on screen     Set Forward Direction on Tug Autopilot
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1368 H:40}
+003  SetClip    {X:296 Y:53 W:1299 H:40}
 004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Set Forward Direction on Tug Autopilot"
 005  ClearClip  
-006  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-007  SetClip    {X:256 Y:118 W:1408 H:902}
-008  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:902}  #29363EFF
-009  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:1}  #5B737BFF
-010  Sprite     Sprocket_Fill         {X:256 Y:1018 W:460 H:1}  #5B737BFF
-011  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:902}  #5B737BFF
-012  Sprite     Sprocket_Fill         {X:715 Y:118 W:1 H:902}  #5B737BFF
-013  Text       at {X:272 Y:131.2255} scale 0.833  #DCF5FDFF  "BLOCKS"
-014  Text       at {X:272 Y:164.0543} scale 0.556  #85A1A9FF  "1 picked"
-015  Sprite     Sprocket_Fill         {X:272 Y:190 W:396 H:36}  #141B20FF
-016  Sprite     Sprocket_Fill         {X:272 Y:190 W:396 H:1}  #5B737BFF
-017  Sprite     Sprocket_Fill         {X:272 Y:225 W:396 H:1}  #5B737BFF
-018  Sprite     Sprocket_Fill         {X:272 Y:190 W:1 H:36}  #5B737BFF
-019  Sprite     Sprocket_Fill         {X:667 Y:190 W:1 H:36}  #5B737BFF
-020  SetClip    {X:272 Y:190 W:396 H:36}
-021  Text       at {X:284 Y:195.6399} scale 0.694  #DCF5FDFF  "Tug"
-022  SetClip    {X:256 Y:118 W:1408 H:902}
-023  Text       at {X:676.1563 Y:196.5141} scale 0.401  #A2C3CDFF  "x"
-024  Sprite     Sprocket_Fill         {X:272 Y:234 W:104 H:36}  #20272DFF
-025  Sprite     Sprocket_Fill         {X:272 Y:234 W:104 H:1}  #5B737BFF
-026  Sprite     Sprocket_Fill         {X:272 Y:269 W:104 H:1}  #5B737BFF
-027  Sprite     Sprocket_Fill         {X:272 Y:234 W:1 H:36}  #5B737BFF
-028  Sprite     Sprocket_Fill         {X:375 Y:234 W:1 H:36}  #5B737BFF
-029  Text       at {X:284 Y:239.6399} scale 0.694  #A2C3CDFF  "Anything"
-030  Text       at {X:352.1938 Y:244.4932} scale 0.241  #A2C3CDFF  "v"
-031  Text       at {X:272 Y:276.0543} scale 0.556  #85A1A9FF  "1 of 14"
-032  SetClip    {X:272 Y:302 W:428 H:702}
-033  Sprite     Sprocket_Fill         {X:286 Y:330 W:16 H:1}  #3ACC00FF
-034  Sprite     Sprocket_Fill         {X:286 Y:345 W:16 H:1}  #3ACC00FF
-035  Sprite     Sprocket_Fill         {X:286 Y:330 W:1 H:16}  #3ACC00FF
-036  Sprite     Sprocket_Fill         {X:301 Y:330 W:1 H:16}  #3ACC00FF
-037  Text       at {X:286.125 Y:328.7536} scale 0.321  #3ACC00FF  "c"
-038  Sprite     Sprocket_Fill         {X:312 Y:310 W:56 H:56}  #374851FF
-039  Sprite     MyObjectBuilder_RemoteControl/LargeBlockRemoteControl{X:312 Y:310 W:56 H:56}  #FFFFFFFF
-040  Text       at {X:376 Y:313.2255} scale 0.833  #DCF5FDFF  "Tug Autopilot"
-041  Text       at {X:376 Y:342.0543} scale 0.556  #85A1A9FF  "Remote Control   on"
-042  SetClip    {X:256 Y:118 W:1408 H:902}
-043  Sprite     Sprocket_Fill         {X:724 Y:118 W:460 H:902}  #29363EFF
-044  Sprite     Sprocket_Fill         {X:724 Y:118 W:460 H:1}  #5B737BFF
-045  Sprite     Sprocket_Fill         {X:724 Y:1018 W:460 H:1}  #5B737BFF
-046  Sprite     Sprocket_Fill         {X:724 Y:118 W:1 H:902}  #5B737BFF
-047  Sprite     Sprocket_Fill         {X:1183 Y:118 W:1 H:902}  #5B737BFF
-048  Text       at {X:740 Y:131.2255} scale 0.833  #DCF5FDFF  "WHAT TO DO"
-049  Sprite     Sprocket_Fill         {X:740 Y:190 W:428 H:36}  #141B20FF
-050  Sprite     Sprocket_Fill         {X:740 Y:190 W:428 H:1}  #5B737BFF
-051  Sprite     Sprocket_Fill         {X:740 Y:225 W:428 H:1}  #5B737BFF
-052  Sprite     Sprocket_Fill         {X:740 Y:190 W:1 H:36}  #5B737BFF
-053  Sprite     Sprocket_Fill         {X:1167 Y:190 W:1 H:36}  #5B737BFF
-054  SetClip    {X:740 Y:190 W:428 H:36}
-055  Text       at {X:752 Y:195.6399} scale 0.694  #85A1A9FF  "Search"
-056  SetClip    {X:256 Y:118 W:1408 H:902}
-057  Sprite     Sprocket_Fill         {X:740 Y:234 W:214 H:36}  #5B737BFF
-058  Sprite     Sprocket_Fill         {X:740 Y:234 W:214 H:1}  #5B737BFF
-059  Sprite     Sprocket_Fill         {X:740 Y:269 W:214 H:1}  #5B737BFF
-060  Sprite     Sprocket_Fill         {X:740 Y:234 W:1 H:36}  #5B737BFF
-061  Sprite     Sprocket_Fill         {X:953 Y:234 W:1 H:36}  #5B737BFF
-062  Text       at {X:812.6317 Y:239.6399} scale 0.694  #A2C3CDFF  "Organized"
-063  Sprite     Sprocket_Fill         {X:954 Y:234 W:214 H:36}  #29363EFF
-064  Sprite     Sprocket_Fill         {X:954 Y:234 W:214 H:1}  #5B737BFF
-065  Sprite     Sprocket_Fill         {X:954 Y:269 W:214 H:1}  #5B737BFF
-066  Sprite     Sprocket_Fill         {X:954 Y:234 W:1 H:36}  #5B737BFF
-067  Sprite     Sprocket_Fill         {X:1167 Y:234 W:1 H:36}  #5B737BFF
-068  Text       at {X:1033.052 Y:239.6399} scale 0.694  #A2C3CDFF  "Terminal"
-069  SetClip    {X:740 Y:278 W:428 H:726}
-070  Sprite     Sprocket_Fill         {X:740 Y:278 W:416 H:56}  #374851FF
-071  Text       at {X:756 Y:283.6399} scale 0.694  #A2C3CDFF  "Support for this block is still being worked on, so some of"
-072  Text       at {X:756 Y:303.6399} scale 0.694  #A2C3CDFF  "what it offers may be doubled, missing or oddly named."
-073  Text       at {X:752 Y:343.2255} scale 0.833  #85A1A9FF  "POWER"
-074  Text       at {X:752 Y:379.2255} scale 0.833  #DCF5FDFF  "Switch off"
-075  Text       at {X:752 Y:423.2255} scale 0.833  #DCF5FDFF  "Switch on"
-076  Text       at {X:752 Y:467.2255} scale 0.833  #DCF5FDFF  "Toggle block On/Off"
-077  Text       at {X:752 Y:511.2255} scale 0.833  #85A1A9FF  "BEHAVIOR"
-078  Sprite     Sprocket_Fill         {X:740 Y:542 W:416 H:40}  #3C4C52FF
-079  Text       at {X:752 Y:547.2255} scale 0.833  #DCF5FDFF  "Set Forward Direction"
-080  SetClip    {X:256 Y:118 W:1408 H:902}
-081  Sprite     Sprocket_Fill         {X:1192 Y:118 W:460 H:902}  #29363EFF
-082  Sprite     Sprocket_Fill         {X:1192 Y:118 W:460 H:1}  #5B737BFF
-083  Sprite     Sprocket_Fill         {X:1192 Y:1018 W:460 H:1}  #5B737BFF
-084  Sprite     Sprocket_Fill         {X:1192 Y:118 W:1 H:902}  #5B737BFF
-085  Sprite     Sprocket_Fill         {X:1651 Y:118 W:1 H:902}  #5B737BFF
-086  Text       at {X:1208 Y:131.2255} scale 0.833  #DCF5FDFF  "VALUES"
-087  Text       at {X:1208 Y:195.6399} scale 0.694  #85A1A9FF  "Forward Direction"
-088  Sprite     Sprocket_Fill         {X:1529 Y:190 W:107 H:36}  #29363EFF
-089  Sprite     Sprocket_Fill         {X:1529 Y:190 W:107 H:1}  #A2C3CDFF
-090  Sprite     Sprocket_Fill         {X:1529 Y:225 W:107 H:1}  #A2C3CDFF
-091  Sprite     Sprocket_Fill         {X:1529 Y:190 W:1 H:36}  #A2C3CDFF
-092  Sprite     Sprocket_Fill         {X:1635 Y:190 W:1 H:36}  #A2C3CDFF
-093  Text       at {X:1548.807 Y:200.4932} scale 0.241  #A2C3CDFF  "v"
-094  Sprite     Sprocket_Fill         {X:1575 Y:234 W:61 H:32}  #8EBCCFFF
-095  Text       at {X:1591.42 Y:240.0543} scale 0.556  #1B242AFF  "Done"
+006  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
+007  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
+008  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+009  SetClip    {X:256 Y:118 W:1408 H:902}
+010  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:902}  #29363EFF
+011  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:1}  #5B737BFF
+012  Sprite     Sprocket_Fill         {X:256 Y:1018 W:460 H:1}  #5B737BFF
+013  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:902}  #5B737BFF
+014  Sprite     Sprocket_Fill         {X:715 Y:118 W:1 H:902}  #5B737BFF
+015  Text       at {X:272 Y:131.2255} scale 0.833  #DCF5FDFF  "BLOCKS"
+016  Text       at {X:272 Y:164.0543} scale 0.556  #85A1A9FF  "1 picked"
+017  Sprite     Sprocket_Fill         {X:272 Y:190 W:396 H:36}  #141B20FF
+018  Sprite     Sprocket_Fill         {X:272 Y:190 W:396 H:1}  #5B737BFF
+019  Sprite     Sprocket_Fill         {X:272 Y:225 W:396 H:1}  #5B737BFF
+020  Sprite     Sprocket_Fill         {X:272 Y:190 W:1 H:36}  #5B737BFF
+021  Sprite     Sprocket_Fill         {X:667 Y:190 W:1 H:36}  #5B737BFF
+022  SetClip    {X:272 Y:190 W:396 H:36}
+023  Text       at {X:284 Y:195.6399} scale 0.694  #DCF5FDFF  "Tug"
+024  SetClip    {X:256 Y:118 W:1408 H:902}
+025  Text       at {X:676.1563 Y:196.5141} scale 0.401  #A2C3CDFF  "x"
+026  Sprite     Sprocket_Fill         {X:272 Y:234 W:104 H:36}  #20272DFF
+027  Sprite     Sprocket_Fill         {X:272 Y:234 W:104 H:1}  #5B737BFF
+028  Sprite     Sprocket_Fill         {X:272 Y:269 W:104 H:1}  #5B737BFF
+029  Sprite     Sprocket_Fill         {X:272 Y:234 W:1 H:36}  #5B737BFF
+030  Sprite     Sprocket_Fill         {X:375 Y:234 W:1 H:36}  #5B737BFF
+031  Text       at {X:284 Y:239.6399} scale 0.694  #A2C3CDFF  "Anything"
+032  Text       at {X:352.1938 Y:244.4932} scale 0.241  #A2C3CDFF  "v"
+033  Text       at {X:272 Y:276.0543} scale 0.556  #85A1A9FF  "1 of 14"
+034  SetClip    {X:272 Y:302 W:428 H:702}
+035  Sprite     Sprocket_Fill         {X:286 Y:330 W:16 H:1}  #3ACC00FF
+036  Sprite     Sprocket_Fill         {X:286 Y:345 W:16 H:1}  #3ACC00FF
+037  Sprite     Sprocket_Fill         {X:286 Y:330 W:1 H:16}  #3ACC00FF
+038  Sprite     Sprocket_Fill         {X:301 Y:330 W:1 H:16}  #3ACC00FF
+039  Text       at {X:286.125 Y:328.7536} scale 0.321  #3ACC00FF  "c"
+040  Sprite     Sprocket_Fill         {X:312 Y:310 W:56 H:56}  #374851FF
+041  Sprite     MyObjectBuilder_RemoteControl/LargeBlockRemoteControl{X:312 Y:310 W:56 H:56}  #FFFFFFFF
+042  Text       at {X:376 Y:313.2255} scale 0.833  #DCF5FDFF  "Tug Autopilot"
+043  Text       at {X:376 Y:342.0543} scale 0.556  #85A1A9FF  "Remote Control   on"
+044  SetClip    {X:256 Y:118 W:1408 H:902}
+045  Sprite     Sprocket_Fill         {X:724 Y:118 W:460 H:902}  #29363EFF
+046  Sprite     Sprocket_Fill         {X:724 Y:118 W:460 H:1}  #5B737BFF
+047  Sprite     Sprocket_Fill         {X:724 Y:1018 W:460 H:1}  #5B737BFF
+048  Sprite     Sprocket_Fill         {X:724 Y:118 W:1 H:902}  #5B737BFF
+049  Sprite     Sprocket_Fill         {X:1183 Y:118 W:1 H:902}  #5B737BFF
+050  Text       at {X:740 Y:131.2255} scale 0.833  #DCF5FDFF  "WHAT TO DO"
+051  Sprite     Sprocket_Fill         {X:740 Y:190 W:428 H:36}  #141B20FF
+052  Sprite     Sprocket_Fill         {X:740 Y:190 W:428 H:1}  #5B737BFF
+053  Sprite     Sprocket_Fill         {X:740 Y:225 W:428 H:1}  #5B737BFF
+054  Sprite     Sprocket_Fill         {X:740 Y:190 W:1 H:36}  #5B737BFF
+055  Sprite     Sprocket_Fill         {X:1167 Y:190 W:1 H:36}  #5B737BFF
+056  SetClip    {X:740 Y:190 W:428 H:36}
+057  Text       at {X:752 Y:195.6399} scale 0.694  #85A1A9FF  "Search"
+058  SetClip    {X:256 Y:118 W:1408 H:902}
+059  Sprite     Sprocket_Fill         {X:740 Y:234 W:214 H:36}  #5B737BFF
+060  Sprite     Sprocket_Fill         {X:740 Y:234 W:214 H:1}  #5B737BFF
+061  Sprite     Sprocket_Fill         {X:740 Y:269 W:214 H:1}  #5B737BFF
+062  Sprite     Sprocket_Fill         {X:740 Y:234 W:1 H:36}  #5B737BFF
+063  Sprite     Sprocket_Fill         {X:953 Y:234 W:1 H:36}  #5B737BFF
+064  Text       at {X:812.6317 Y:239.6399} scale 0.694  #A2C3CDFF  "Organized"
+065  Sprite     Sprocket_Fill         {X:954 Y:234 W:214 H:36}  #29363EFF
+066  Sprite     Sprocket_Fill         {X:954 Y:234 W:214 H:1}  #5B737BFF
+067  Sprite     Sprocket_Fill         {X:954 Y:269 W:214 H:1}  #5B737BFF
+068  Sprite     Sprocket_Fill         {X:954 Y:234 W:1 H:36}  #5B737BFF
+069  Sprite     Sprocket_Fill         {X:1167 Y:234 W:1 H:36}  #5B737BFF
+070  Text       at {X:1033.052 Y:239.6399} scale 0.694  #A2C3CDFF  "Terminal"
+071  SetClip    {X:740 Y:278 W:428 H:726}
+072  Sprite     Sprocket_Fill         {X:740 Y:278 W:416 H:56}  #374851FF
+073  Text       at {X:756 Y:283.6399} scale 0.694  #A2C3CDFF  "Support for this block is still being worked on, so some of"
+074  Text       at {X:756 Y:303.6399} scale 0.694  #A2C3CDFF  "what it offers may be doubled, missing or oddly named."
+075  Text       at {X:752 Y:343.2255} scale 0.833  #85A1A9FF  "POWER"
+076  Text       at {X:752 Y:379.2255} scale 0.833  #DCF5FDFF  "Switch off"
+077  Text       at {X:752 Y:423.2255} scale 0.833  #DCF5FDFF  "Switch on"
+078  Text       at {X:752 Y:467.2255} scale 0.833  #DCF5FDFF  "Toggle block On/Off"
+079  Text       at {X:752 Y:511.2255} scale 0.833  #85A1A9FF  "BEHAVIOR"
+080  Sprite     Sprocket_Fill         {X:740 Y:542 W:416 H:40}  #3C4C52FF
+081  Text       at {X:752 Y:547.2255} scale 0.833  #DCF5FDFF  "Set Forward Direction"
+082  SetClip    {X:256 Y:118 W:1408 H:902}
+083  Sprite     Sprocket_Fill         {X:1192 Y:118 W:460 H:902}  #29363EFF
+084  Sprite     Sprocket_Fill         {X:1192 Y:118 W:460 H:1}  #5B737BFF
+085  Sprite     Sprocket_Fill         {X:1192 Y:1018 W:460 H:1}  #5B737BFF
+086  Sprite     Sprocket_Fill         {X:1192 Y:118 W:1 H:902}  #5B737BFF
+087  Sprite     Sprocket_Fill         {X:1651 Y:118 W:1 H:902}  #5B737BFF
+088  Text       at {X:1208 Y:131.2255} scale 0.833  #DCF5FDFF  "VALUES"
+089  Text       at {X:1208 Y:195.6399} scale 0.694  #85A1A9FF  "Forward Direction"
+090  Sprite     Sprocket_Fill         {X:1529 Y:190 W:107 H:36}  #29363EFF
+091  Sprite     Sprocket_Fill         {X:1529 Y:190 W:107 H:1}  #A2C3CDFF
+092  Sprite     Sprocket_Fill         {X:1529 Y:225 W:107 H:1}  #A2C3CDFF
+093  Sprite     Sprocket_Fill         {X:1529 Y:190 W:1 H:36}  #A2C3CDFF
+094  Sprite     Sprocket_Fill         {X:1635 Y:190 W:1 H:36}  #A2C3CDFF
+095  Text       at {X:1548.807 Y:200.4932} scale 0.241  #A2C3CDFF  "v"
 096  ClearClip  
 097  Sprite     Sprocket_Fill         {X:1529 Y:226 W:95 H:224}  #20272DFF
 098  Sprite     Sprocket_Fill         {X:1529 Y:226 W:95 H:1}  #5B737BFF

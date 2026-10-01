@@ -434,7 +434,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Color = Palette.Dim }
         };
 
-        /// <summary>The button that finishes a screen or answers a dialog as Enter would, and none at all while there is nothing to finish, keeping its place.</summary>
+        /// <summary>The button that finishes a screen or answers a dialog as Enter would, greyed while there is nothing to finish.</summary>
         public static readonly ButtonStyle Primary = new ButtonStyle
         {
             Base =
@@ -446,7 +446,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Padding = new Thickness(16f, 8f)
             },
             Hot = { Background = Palette.Ink },
-            Disabled = { Color = Palette.None, Background = Palette.None }
+            Disabled = { Color = Palette.Dim, Background = Palette.Panel }
         };
 
         /// <summary>A way to start something, offered in place: a plus and quiet words, and a panel under the pointer.</summary>

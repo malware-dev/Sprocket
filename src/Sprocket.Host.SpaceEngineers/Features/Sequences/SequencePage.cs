@@ -58,6 +58,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// </remarks>
         public override string Title => SequenceText.Called(Editor.Texts, _sequence);
 
+        /// <inheritdoc />
+        public override bool Edits => true;
+
         /// <summary>Whether anything starts the sequence is read from the toolbars.</summary>
         public override bool CanRefresh => true;
 

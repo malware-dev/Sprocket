@@ -235,10 +235,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var canRedo = page.CanRedo;
             _screen.Redo = canRedo ? _redo : null;
             _screen.RedoText = canRedo ? page.RedoText : "";
+
+            // The button itself, its words and whether it can be pressed, because a picker comes to be finishable by a
+            // choice that leaves the screen its shape.
+            var primary = page.PrimaryText;
+            var ready = primary.Length != 0 && page.CanPrimary;
+            _screen.PrimaryText = primary;
+            _screen.Primary = ready ? _primary : null;
+            _screen.PrimaryAbout = primary.Length == 0 ? "" : ready ? page.PrimaryAbout : page.PrimaryWaits;
         }
 
         ICommand _undo;
         ICommand _redo;
+        ICommand _primary;
 
         const int Second = 60;
 
@@ -729,19 +738,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _structureDirty = true;
         }
 
-        /// <summary>
-        /// Goes back, unless the page has something to say about it first.
-        /// </summary>
-        /// <remarks>
-        /// Back is the one control on every screen, so a page that wants a word on the way out has
-        /// nowhere else to get it. A page that answers false stays where it is, and whatever it put
-        /// on screen instead is then responsible for leaving - the question raised on the way out of
-        /// a sequence pops from its own answers, and the one on the way out of a picker does the
-        /// same.
-        /// </remarks>
         /// <summary>Goes back a page, where the page lets it go, taking back what it was opened on where that was made and left untouched.</summary>
-        /// <remarks>Pressing to add something and backing straight out adds nothing.</remarks>
-        void Leave()
+        /// <remarks>
+        /// A page whose <see cref="EditorPage.Leaving" /> answers false stays where it is, and whatever it put on screen instead
+        /// is then responsible for leaving: the question raised on the way out of a sequence pops from its own answers, and the
+        /// one on the way out of a picker does the same. Pressing to add something and backing straight out adds nothing.
+        /// </remarks>
+        public void Leave()
         {
             var page = Current;
             if (!page.Leaving())
@@ -1009,6 +1012,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // as it stood before the choice was worded.
             if (Current.TakeRetitle())
                 Current.RefreshHeading(_screen.Heading);
+
+            Walking();
         }
 
         /// <summary>
@@ -1049,8 +1054,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.HasHistory = page.HasHistory;
             _undo = page.HasHistory ? Act(Cmd.Undo, page.Undo) : null;
             _redo = page.HasHistory ? Act(Cmd.Redo, page.Redo) : null;
-            _screen.PrimaryText = page.PrimaryText;
-            _screen.Primary = _screen.HasPrimary ? Act(Cmd.Primary, page.Primary) : null;
+            _primary = Act(Cmd.Primary, page.Primary);
 
             page.Build();
 

@@ -47,6 +47,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override string Title => _editing ? Editor.Texts.BlueprintPanel : Blockset == null ? _system.Name : Blockset.Name;
 
         /// <inheritdoc />
+        public override bool Edits => true;
+
+        /// <inheritdoc />
         public override string CustomName => Title;
 
         /// <summary>The blockset can be renamed here; the panel is named for its blueprint, which is renamed on its logic system screen.</summary>

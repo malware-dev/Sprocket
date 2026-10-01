@@ -1437,20 +1437,20 @@ public class EditorTests
 
         // One pane to begin with; the second appears once it has something to be about.
         Assert.Single(editor.Pick().Stages);
-        Assert.False(editor.Screen.HasPrimary);
+        Assert.Null(editor.Screen.Primary);
 
         editor.PressBlock("Airlock Button");
         Assert.Equal(2, editor.Pick().Stages.Count);
 
         // Still nothing to move on to - the path is not finished.
-        Assert.False(editor.Screen.HasPrimary);
+        Assert.Null(editor.Screen.Primary);
 
         // What happens, and then beside it what the trigger does.
         editor.PressChoice("is pressed");
         var stages = editor.Pick().Stages;
         Assert.Equal(3, stages.Count);
         Assert.Contains(stages[2].Entries(), e => e.Text == "A new sequence" && e.IsChosen);
-        Assert.True(editor.Screen.HasPrimary);
+        Assert.NotNull(editor.Screen.Primary);
 
         // A new sequence is what a trigger usually does, so finishing lands on its sentence.
         editor.PressPrimary();

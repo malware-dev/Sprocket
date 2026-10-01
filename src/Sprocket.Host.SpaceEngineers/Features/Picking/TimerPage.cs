@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             aim.Onward = Primary;
             aim.MovesOn = delegate
             {
-                if (_finish != null && PrimaryText.Length != 0)
+                if (_finish != null && CanPrimary)
                     _finish.Execute();
             };
             _done = done;
@@ -46,7 +46,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override string Title => Editor.Texts.PickHowOftenQuestion;
 
         /// <inheritdoc />
-        public override string PrimaryText => _aim.Finishes ? Editor.Texts.PickDone : "";
+        public override string PrimaryText => _aim.Outcome != Outcome.One ? Editor.Texts.ChromeDone : "";
+
+        /// <inheritdoc />
+        public override bool CanPrimary => _aim.Finishes;
+
+        /// <inheritdoc />
+        public override string PrimaryAbout => Editor.Texts.PickDoneAbout;
+
+        /// <inheritdoc />
+        public override string PrimaryWaits => Editor.Texts.PickDoneFirst;
 
         /// <inheritdoc />
         public override bool ScrollsItself => true;
@@ -74,7 +83,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _does = new StageColumn(_strip.Width, false, null, Editor.Texts, delegate { return Editor.Windows; });
                 _does.Title = Editor.Texts.PickWhatItDoes;
-                _does.Done.Command = _finish;
             }
 
             _aim.Pick = _strip;
@@ -93,7 +101,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             FillRates();
             _aim.Fill(_does);
-            _does.CanFinish = PrimaryText.Length != 0;
 
             _strip.Show();
 

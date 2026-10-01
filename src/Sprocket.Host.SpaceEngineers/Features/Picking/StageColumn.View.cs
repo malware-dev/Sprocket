@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Ui;
-using Sprocket.Host.SpaceEngineers.Ui.Controls;
 using Sprocket.Host.SpaceEngineers.Ui.Images;
 using Sprocket.Host.SpaceEngineers.Ui.Layout;
 using Sprocket.Host.SpaceEngineers.Ui.Text;
@@ -27,8 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         Label _note;
         VStack _rows;
         Label _empty;
-        HStack _foot;
-        Button _done;
+
         Popup _kinds;
         TextBox _kindNarrow;
         Glyph _kindNarrowClear;
@@ -105,19 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     {
                         new Label { Style = Styles.Note, Wraps = true, IsVisible = false }.As(out _note),
                         new VStack { Spacing = 4f }.As(out _rows),
-                        new Label { Style = Styles.Nothing, Wraps = true, IsVisible = false }.As(out _empty),
-
-                        // The gap the values column keeps between its last field and its Done.
-                        new HStack
-                        {
-                            Padding = new Thickness(0f, 12f, 0f, 0f),
-                            IsVisible = false,
-                            Children =
-                            {
-                                new HStack { Placement = Flex.Grow },
-                                new Button { Style = Styles.Primary, Text = "Done" }.As(out _done)
-                            }
-                        }.As(out _foot)
+                        new Label { Style = Styles.Nothing, Wraps = true, IsVisible = false }.As(out _empty)
                     }
                 }
             });

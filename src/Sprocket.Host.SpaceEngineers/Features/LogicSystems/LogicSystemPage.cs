@@ -57,6 +57,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override string Title => SystemSummary.Describe(Editor.Texts, Editor.Runner.Bindings, _system);
 
+        /// <inheritdoc />
+        public override bool Edits => true;
+
         /// <summary>What the author said this thing is, for one logic system; a blueprint's description is read on its panel.</summary>
         /// <remarks>
         /// A label to whoever built it, and the only explanation anybody who receives it will ever get. Empty until

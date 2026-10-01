@@ -190,7 +190,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <inheritdoc />
         /// <remarks>Nothing where what the trigger does goes on to a page of its own.</remarks>
-        public override string PrimaryText => IsComplete && (_aim == null || _aim.Finishes) ? Editor.Texts.PickDone : "";
+        public override string PrimaryText => _aim == null || _aim.Outcome != Outcome.One ? Editor.Texts.ChromeDone : "";
+
+        /// <inheritdoc />
+        public override bool CanPrimary => IsComplete && (_aim == null || _aim.Finishes);
+
+        /// <inheritdoc />
+        public override string PrimaryAbout => Editor.Texts.PickDoneAbout;
+
+        /// <inheritdoc />
+        public override string PrimaryWaits => Editor.Texts.PickDoneFirst;
 
         /// <summary>What the chosen action will not do anything without, which the column of values asks for beside the stages.</summary>
         /// <remarks>
@@ -387,14 +396,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             FillBlocks();
 
-            // A slot's pick is finished from the only column it has.
-            if (_fits != null)
-            {
-                // ReSharper disable once PossibleNullReferenceException - made above where it had not been, by MakeBlocks.
-                _blocks.Finishes = true;
-                _blocks.Done.Command = _finish;
-                _blocks.CanFinish = PrimaryText.Length != 0;
-            }
+
 
             // The second stage exists only once there is something for it to be about, and never where only blocks are asked.
             var wanted = _selection.Count > 0 && _fits == null;
@@ -423,7 +425,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 _does = new StageColumn(_strip.Width, false, null, Editor.Texts, Windows);
                 _does.Title = Editor.Texts.PickWhatItDoes;
-                _does.Done.Command = _finish;
                 _strip.Add(_does);
             }
             else if (!does && _does != null)
@@ -435,10 +436,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             FillGiven();
 
             if (_does != null && _aim != null)
-            {
                 _aim.Fill(_does);
-                _does.CanFinish = PrimaryText.Length != 0;
-            }
 
             _strip.Show();
             _strip.Arrive(Opens, Editor.Input);
@@ -612,7 +610,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </summary>
         void MoveOn()
         {
-            if (PrimaryText.Length == 0)
+            if (PrimaryText.Length == 0 || !CanPrimary)
                 return;
 
             var values = _strip.Values;
@@ -716,7 +714,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 };
             }
 
-            values.Done.Command = _finish;
             _entered = values.Form.Answer;
 
             // Nowhere to type is nowhere to keep the keyboard. Somebody who came for the values gets it in them, once.

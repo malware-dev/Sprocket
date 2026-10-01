@@ -417,7 +417,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>Presses the screen's move-on action - "Next" or "Done".</summary>
         public static void PressPrimary(this SprocketEditor editor)
         {
-            if (!editor.Screen.HasPrimary)
+            if (editor.Screen.Primary == null)
                 throw new InvalidOperationException($"'{editor.Screen.Title()}' has nothing to move on to.");
 
             Run(editor.Screen.Primary);

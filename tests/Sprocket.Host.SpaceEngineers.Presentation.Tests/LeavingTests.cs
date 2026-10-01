@@ -16,7 +16,7 @@ public class LeavingTests
     const string Filled = "60 196 type Airlock enter 60 163 200 384 560 340";
     const string Back = "25 62";
 
-    const string WantsValues = "60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+    const string WantsValues = "60 196 type Airlock enter 60 163 200 384 560 340 1394 72 "
         + "70 175 200 485 800 653";
 
     [Fact]

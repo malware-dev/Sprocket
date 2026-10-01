@@ -126,8 +126,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _run = null;
             }
 
-            // Nothing is finished from here where what is chosen goes on to another page.
-            stage.Finishes = Finishes;
 
             var asks = _offered.Count > 0;
             if (asks && _run == null)

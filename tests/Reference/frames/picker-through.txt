@@ -7,172 +7,174 @@ on screen     When Airlock Button, Airlock Inner Door or 1 more …
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1368 H:40}
+003  SetClip    {X:296 Y:53 W:1299 H:40}
 004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "When Airlock Button, Airlock Inner Door or 1 more …"
 005  ClearClip  
-006  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-007  SetClip    {X:256 Y:118 W:1408 H:902}
-008  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:902}  #29363EFF
-009  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:1}  #5B737BFF
-010  Sprite     Sprocket_Fill         {X:256 Y:1018 W:460 H:1}  #5B737BFF
-011  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:902}  #5B737BFF
-012  Sprite     Sprocket_Fill         {X:715 Y:118 W:1 H:902}  #5B737BFF
-013  Text       at {X:272 Y:131.2255} scale 0.833  #DCF5FDFF  "BLOCKS"
-014  Text       at {X:272 Y:164.0543} scale 0.556  #85A1A9FF  "3 picked"
-015  Sprite     Sprocket_Fill         {X:272 Y:190 W:428 H:36}  #141B20FF
-016  Sprite     Sprocket_Fill         {X:272 Y:190 W:428 H:1}  #5B737BFF
-017  Sprite     Sprocket_Fill         {X:272 Y:225 W:428 H:1}  #5B737BFF
-018  Sprite     Sprocket_Fill         {X:272 Y:190 W:1 H:36}  #5B737BFF
-019  Sprite     Sprocket_Fill         {X:699 Y:190 W:1 H:36}  #5B737BFF
-020  SetClip    {X:272 Y:190 W:428 H:36}
-021  Text       at {X:284 Y:195.6399} scale 0.694  #85A1A9FF  "Search"
-022  SetClip    {X:256 Y:118 W:1408 H:902}
-023  Sprite     Sprocket_Fill         {X:272 Y:234 W:104 H:36}  #20272DFF
-024  Sprite     Sprocket_Fill         {X:272 Y:234 W:104 H:1}  #5B737BFF
-025  Sprite     Sprocket_Fill         {X:272 Y:269 W:104 H:1}  #5B737BFF
-026  Sprite     Sprocket_Fill         {X:272 Y:234 W:1 H:36}  #5B737BFF
-027  Sprite     Sprocket_Fill         {X:375 Y:234 W:1 H:36}  #5B737BFF
-028  Text       at {X:284 Y:239.6399} scale 0.694  #A2C3CDFF  "Anything"
-029  Text       at {X:352.1938 Y:244.4932} scale 0.241  #A2C3CDFF  "v"
-030  Text       at {X:272 Y:276.0543} scale 0.556  #85A1A9FF  "14 blocks"
-031  SetClip    {X:272 Y:302 W:428 H:702}
-032  Sprite     Sprocket_Fill         {X:286 Y:330 W:16 H:1}  #3ACC00FF
-033  Sprite     Sprocket_Fill         {X:286 Y:345 W:16 H:1}  #3ACC00FF
-034  Sprite     Sprocket_Fill         {X:286 Y:330 W:1 H:16}  #3ACC00FF
-035  Sprite     Sprocket_Fill         {X:301 Y:330 W:1 H:16}  #3ACC00FF
-036  Text       at {X:286.125 Y:328.7536} scale 0.321  #3ACC00FF  "c"
-037  Sprite     Sprocket_Fill         {X:312 Y:310 W:56 H:56}  #374851FF
-038  Sprite     MyObjectBuilder_ButtonPanel/ButtonPanelLarge{X:312 Y:310 W:56 H:56}  #FFFFFFFF
-039  Text       at {X:376 Y:313.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
-040  Text       at {X:376 Y:342.0543} scale 0.556  #85A1A9FF  "Button Panel   not wired"
-041  Sprite     Sprocket_Fill         {X:286 Y:406 W:16 H:1}  #3ACC00FF
-042  Sprite     Sprocket_Fill         {X:286 Y:421 W:16 H:1}  #3ACC00FF
-043  Sprite     Sprocket_Fill         {X:286 Y:406 W:1 H:16}  #3ACC00FF
-044  Sprite     Sprocket_Fill         {X:301 Y:406 W:1 H:16}  #3ACC00FF
-045  Text       at {X:286.125 Y:404.7536} scale 0.321  #3ACC00FF  "c"
-046  Sprite     Sprocket_Fill         {X:312 Y:386 W:56 H:56}  #374851FF
-047  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:312 Y:386 W:56 H:56}  #FFFFFFFF
-048  Text       at {X:376 Y:389.2255} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
-049  Text       at {X:376 Y:418.0543} scale 0.556  #85A1A9FF  "Door   shut"
-050  Sprite     Sprocket_Fill         {X:272 Y:454 W:416 H:72}  #3C4C52FF
-051  Sprite     Sprocket_Fill         {X:286 Y:482 W:16 H:1}  #3ACC00FF
-052  Sprite     Sprocket_Fill         {X:286 Y:497 W:16 H:1}  #3ACC00FF
-053  Sprite     Sprocket_Fill         {X:286 Y:482 W:1 H:16}  #3ACC00FF
-054  Sprite     Sprocket_Fill         {X:301 Y:482 W:1 H:16}  #3ACC00FF
-055  Text       at {X:286.125 Y:480.7536} scale 0.321  #3ACC00FF  "c"
-056  Sprite     Sprocket_Fill         {X:312 Y:462 W:56 H:56}  #374851FF
-057  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:312 Y:462 W:56 H:56}  #FFFFFFFF
-058  Text       at {X:376 Y:465.2255} scale 0.833  #DCF5FDFF  "Airlock Light"
-059  Text       at {X:376 Y:494.0543} scale 0.556  #85A1A9FF  "Interior Light   on"
-060  Sprite     Sprocket_Fill         {X:286 Y:558 W:16 H:1}  #85A1A9FF
-061  Sprite     Sprocket_Fill         {X:286 Y:573 W:16 H:1}  #85A1A9FF
-062  Sprite     Sprocket_Fill         {X:286 Y:558 W:1 H:16}  #85A1A9FF
-063  Sprite     Sprocket_Fill         {X:301 Y:558 W:1 H:16}  #85A1A9FF
-064  Sprite     Sprocket_Fill         {X:312 Y:538 W:56 H:56}  #374851FF
-065  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:312 Y:538 W:56 H:56}  #FFFFFFFF
-066  Text       at {X:376 Y:541.2255} scale 0.833  #DCF5FDFF  "Airlock Outer Door"
-067  Text       at {X:376 Y:570.0543} scale 0.556  #85A1A9FF  "Door   shut"
-068  Sprite     Sprocket_Fill         {X:286 Y:634 W:16 H:1}  #85A1A9FF
-069  Sprite     Sprocket_Fill         {X:286 Y:649 W:16 H:1}  #85A1A9FF
-070  Sprite     Sprocket_Fill         {X:286 Y:634 W:1 H:16}  #85A1A9FF
-071  Sprite     Sprocket_Fill         {X:301 Y:634 W:1 H:16}  #85A1A9FF
-072  Sprite     Sprocket_Fill         {X:312 Y:614 W:56 H:56}  #374851FF
-073  Sprite     MyObjectBuilder_AirVent/SmallAirVent{X:312 Y:614 W:56 H:56}  #FFFFFFFF
-074  Text       at {X:376 Y:617.2255} scale 0.833  #DCF5FDFF  "Airlock Vent"
-075  Text       at {X:376 Y:646.0543} scale 0.556  #85A1A9FF  "Air Vent   pressurized"
-076  Sprite     Sprocket_Fill         {X:286 Y:710 W:16 H:1}  #85A1A9FF
-077  Sprite     Sprocket_Fill         {X:286 Y:725 W:16 H:1}  #85A1A9FF
-078  Sprite     Sprocket_Fill         {X:286 Y:710 W:1 H:16}  #85A1A9FF
-079  Sprite     Sprocket_Fill         {X:301 Y:710 W:1 H:16}  #85A1A9FF
-080  Sprite     Sprocket_Fill         {X:312 Y:690 W:56 H:56}  #374851FF
-081  Sprite     MyObjectBuilder_SensorBlock/LargeBlockSensor{X:312 Y:690 W:56 H:56}  #FFFFFFFF
-082  Text       at {X:376 Y:693.2255} scale 0.833  #DCF5FDFF  "Approach Sensor"
-083  Text       at {X:376 Y:722.0543} scale 0.556  #85A1A9FF  "Sensor   on"
-084  Sprite     Sprocket_Fill         {X:286 Y:786 W:16 H:1}  #85A1A9FF
-085  Sprite     Sprocket_Fill         {X:286 Y:801 W:16 H:1}  #85A1A9FF
-086  Sprite     Sprocket_Fill         {X:286 Y:786 W:1 H:16}  #85A1A9FF
-087  Sprite     Sprocket_Fill         {X:301 Y:786 W:1 H:16}  #85A1A9FF
-088  Sprite     Sprocket_Fill         {X:312 Y:766 W:56 H:56}  #374851FF
-089  Sprite     MyObjectBuilder_MyProgrammableBlock/LargeProgrammableBlock{X:312 Y:766 W:56 H:56}  #FFFFFFFF
-090  Text       at {X:376 Y:769.2255} scale 0.833  #DCF5FDFF  "Automation"
-091  Text       at {X:376 Y:798.0543} scale 0.556  #85A1A9FF  "Programmable Block   on"
-092  Sprite     Sprocket_Fill         {X:286 Y:862 W:16 H:1}  #85A1A9FF
-093  Sprite     Sprocket_Fill         {X:286 Y:877 W:16 H:1}  #85A1A9FF
-094  Sprite     Sprocket_Fill         {X:286 Y:862 W:1 H:16}  #85A1A9FF
-095  Sprite     Sprocket_Fill         {X:301 Y:862 W:1 H:16}  #85A1A9FF
-096  Sprite     Sprocket_Fill         {X:312 Y:842 W:56 H:56}  #374851FF
-097  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:312 Y:842 W:56 H:56}  #FFFFFFFF
-098  Text       at {X:376 Y:845.2255} scale 0.833  #DCF5FDFF  "Cockpit Light"
-099  Text       at {X:376 Y:874.0543} scale 0.556  #85A1A9FF  "Interior Light   on"
-100  Sprite     Sprocket_Fill         {X:286 Y:938 W:16 H:1}  #85A1A9FF
-101  Sprite     Sprocket_Fill         {X:286 Y:953 W:16 H:1}  #85A1A9FF
-102  Sprite     Sprocket_Fill         {X:286 Y:938 W:1 H:16}  #85A1A9FF
-103  Sprite     Sprocket_Fill         {X:301 Y:938 W:1 H:16}  #85A1A9FF
-104  Sprite     Sprocket_Fill         {X:312 Y:918 W:56 H:56}  #374851FF
-105  Sprite     MyObjectBuilder_AirtightHangarDoor/AirtightHangarDoor{X:312 Y:918 W:56 H:56}  #FFFFFFFF
-106  Text       at {X:376 Y:921.2255} scale 0.833  #DCF5FDFF  "Hangar Door"
-107  Text       at {X:376 Y:950.0543} scale 0.556  #85A1A9FF  "Hangar Door   shut"
-108  Sprite     Sprocket_Fill         {X:286 Y:1014 W:16 H:1}  #85A1A9FF
-109  Sprite     Sprocket_Fill         {X:286 Y:1029 W:16 H:1}  #85A1A9FF
-110  Sprite     Sprocket_Fill         {X:286 Y:1014 W:1 H:16}  #85A1A9FF
-111  Sprite     Sprocket_Fill         {X:301 Y:1014 W:1 H:16}  #85A1A9FF
-112  Sprite     Sprocket_Fill         {X:312 Y:994 W:56 H:56}  #374851FF
-113  Sprite     MyObjectBuilder_OxygenTank/LargeHydrogenTank{X:312 Y:994 W:56 H:56}  #FFFFFFFF
-114  Text       at {X:376 Y:997.2255} scale 0.833  #DCF5FDFF  "Hydrogen Tank"
-115  Text       at {X:376 Y:1026.054} scale 0.556  #85A1A9FF  "Hydrogen Tank   on"
-116  Sprite     Sprocket_Fill         {X:286 Y:1090 W:16 H:1}  #85A1A9FF
-117  Sprite     Sprocket_Fill         {X:286 Y:1105 W:16 H:1}  #85A1A9FF
-118  Sprite     Sprocket_Fill         {X:286 Y:1090 W:1 H:16}  #85A1A9FF
-119  Sprite     Sprocket_Fill         {X:301 Y:1090 W:1 H:16}  #85A1A9FF
-120  Sprite     Sprocket_Fill         {X:312 Y:1070 W:56 H:56}  #374851FF
-121  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:312 Y:1070 W:56 H:56}  #FFFFFFFF
-122  Text       at {X:376 Y:1073.225} scale 0.833  #DCF5FDFF  "Landing Lights"
-123  Text       at {X:376 Y:1102.054} scale 0.556  #85A1A9FF  "Interior Light   on"
-124  Sprite     Sprocket_Fill         {X:286 Y:1166 W:16 H:1}  #85A1A9FF
-125  Sprite     Sprocket_Fill         {X:286 Y:1181 W:16 H:1}  #85A1A9FF
-126  Sprite     Sprocket_Fill         {X:286 Y:1166 W:1 H:16}  #85A1A9FF
-127  Sprite     Sprocket_Fill         {X:301 Y:1166 W:1 H:16}  #85A1A9FF
-128  Sprite     Sprocket_Fill         {X:312 Y:1146 W:56 H:56}  #374851FF
-129  Sprite     MyObjectBuilder_BatteryBlock/LargeBlockBatteryBlock{X:312 Y:1146 W:56 H:56}  #FFFFFFFF
-130  Text       at {X:376 Y:1149.225} scale 0.833  #DCF5FDFF  "Standby Battery"
-131  Text       at {X:376 Y:1178.054} scale 0.556  #85A1A9FF  "Battery   on"
-132  Sprite     Sprocket_Fill         {X:286 Y:1242 W:16 H:1}  #85A1A9FF
-133  Sprite     Sprocket_Fill         {X:286 Y:1257 W:16 H:1}  #85A1A9FF
-134  Sprite     Sprocket_Fill         {X:286 Y:1242 W:1 H:16}  #85A1A9FF
-135  Sprite     Sprocket_Fill         {X:301 Y:1242 W:1 H:16}  #85A1A9FF
-136  Sprite     Sprocket_Fill         {X:312 Y:1222 W:56 H:56}  #374851FF
-137  Sprite     MyObjectBuilder_RemoteControl/LargeBlockRemoteControl{X:312 Y:1222 W:56 H:56}  #FFFFFFFF
-138  Text       at {X:376 Y:1225.225} scale 0.833  #DCF5FDFF  "Tug Autopilot"
-139  Text       at {X:376 Y:1254.054} scale 0.556  #85A1A9FF  "Remote Control   on"
-140  Sprite     Sprocket_Fill         {X:286 Y:1318 W:16 H:1}  #85A1A9FF
-141  Sprite     Sprocket_Fill         {X:286 Y:1333 W:16 H:1}  #85A1A9FF
-142  Sprite     Sprocket_Fill         {X:286 Y:1318 W:1 H:16}  #85A1A9FF
-143  Sprite     Sprocket_Fill         {X:301 Y:1318 W:1 H:16}  #85A1A9FF
-144  Sprite     Sprocket_Fill         {X:312 Y:1298 W:56 H:56}  #374851FF
-145  Sprite     MyObjectBuilder_Beacon/LargeBlockBeacon{X:312 Y:1298 W:56 H:56}  #FFFFFFFF
-146  Text       at {X:376 Y:1301.225} scale 0.833  #DCF5FDFF  "Warning Beacon"
-147  Text       at {X:376 Y:1330.054} scale 0.556  #85A1A9FF  "Beacon   on"
-148  Sprite     Sprocket_Fill         {X:688 Y:302 W:12 H:464}  #5F7278FF
-149  SetClip    {X:256 Y:118 W:1408 H:902}
-150  Sprite     Sprocket_Fill         {X:724 Y:118 W:460 H:902}  #29363EFF
-151  Sprite     Sprocket_Fill         {X:724 Y:118 W:460 H:1}  #5B737BFF
-152  Sprite     Sprocket_Fill         {X:724 Y:1018 W:460 H:1}  #5B737BFF
-153  Sprite     Sprocket_Fill         {X:724 Y:118 W:1 H:902}  #5B737BFF
-154  Sprite     Sprocket_Fill         {X:1183 Y:118 W:1 H:902}  #5B737BFF
-155  Text       at {X:740 Y:131.2255} scale 0.833  #DCF5FDFF  "WHAT HAPPENS"
-156  Sprite     Sprocket_Fill         {X:740 Y:190 W:428 H:36}  #141B20FF
-157  Sprite     Sprocket_Fill         {X:740 Y:190 W:428 H:1}  #5B737BFF
-158  Sprite     Sprocket_Fill         {X:740 Y:225 W:428 H:1}  #5B737BFF
-159  Sprite     Sprocket_Fill         {X:740 Y:190 W:1 H:36}  #5B737BFF
-160  Sprite     Sprocket_Fill         {X:1167 Y:190 W:1 H:36}  #5B737BFF
-161  SetClip    {X:740 Y:190 W:428 H:36}
-162  Text       at {X:752 Y:195.6399} scale 0.694  #85A1A9FF  "Search"
-163  SetClip    {X:256 Y:118 W:1408 H:902}
-164  SetClip    {X:740 Y:234 W:428 H:770}
-165  Sprite     Sprocket_Fill         {X:740 Y:234 W:416 H:56}  #374851FF
-166  Text       at {X:756 Y:239.6399} scale 0.694  #A2C3CDFF  "Support for this block is still being worked on, so some of"
-167  Text       at {X:756 Y:259.6399} scale 0.694  #A2C3CDFF  "what it offers may be doubled, missing or oddly named."
-168  Text       at {X:744 Y:303.6399} scale 0.694  #A2C3CDFF  "Those blocks have nothing in common that can happen to"
-169  Text       at {X:744 Y:323.6399} scale 0.694  #A2C3CDFF  "them."
-170  SetClip    {X:256 Y:118 W:1408 H:902}
-171  ClearClip  
+006  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #29363EFF
+007  Text       at {X:1619.42 Y:63.05432} scale 0.556  #5F7278FF  "Done"
+008  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+009  SetClip    {X:256 Y:118 W:1408 H:902}
+010  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:902}  #29363EFF
+011  Sprite     Sprocket_Fill         {X:256 Y:118 W:460 H:1}  #5B737BFF
+012  Sprite     Sprocket_Fill         {X:256 Y:1018 W:460 H:1}  #5B737BFF
+013  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:902}  #5B737BFF
+014  Sprite     Sprocket_Fill         {X:715 Y:118 W:1 H:902}  #5B737BFF
+015  Text       at {X:272 Y:131.2255} scale 0.833  #DCF5FDFF  "BLOCKS"
+016  Text       at {X:272 Y:164.0543} scale 0.556  #85A1A9FF  "3 picked"
+017  Sprite     Sprocket_Fill         {X:272 Y:190 W:428 H:36}  #141B20FF
+018  Sprite     Sprocket_Fill         {X:272 Y:190 W:428 H:1}  #5B737BFF
+019  Sprite     Sprocket_Fill         {X:272 Y:225 W:428 H:1}  #5B737BFF
+020  Sprite     Sprocket_Fill         {X:272 Y:190 W:1 H:36}  #5B737BFF
+021  Sprite     Sprocket_Fill         {X:699 Y:190 W:1 H:36}  #5B737BFF
+022  SetClip    {X:272 Y:190 W:428 H:36}
+023  Text       at {X:284 Y:195.6399} scale 0.694  #85A1A9FF  "Search"
+024  SetClip    {X:256 Y:118 W:1408 H:902}
+025  Sprite     Sprocket_Fill         {X:272 Y:234 W:104 H:36}  #20272DFF
+026  Sprite     Sprocket_Fill         {X:272 Y:234 W:104 H:1}  #5B737BFF
+027  Sprite     Sprocket_Fill         {X:272 Y:269 W:104 H:1}  #5B737BFF
+028  Sprite     Sprocket_Fill         {X:272 Y:234 W:1 H:36}  #5B737BFF
+029  Sprite     Sprocket_Fill         {X:375 Y:234 W:1 H:36}  #5B737BFF
+030  Text       at {X:284 Y:239.6399} scale 0.694  #A2C3CDFF  "Anything"
+031  Text       at {X:352.1938 Y:244.4932} scale 0.241  #A2C3CDFF  "v"
+032  Text       at {X:272 Y:276.0543} scale 0.556  #85A1A9FF  "14 blocks"
+033  SetClip    {X:272 Y:302 W:428 H:702}
+034  Sprite     Sprocket_Fill         {X:286 Y:330 W:16 H:1}  #3ACC00FF
+035  Sprite     Sprocket_Fill         {X:286 Y:345 W:16 H:1}  #3ACC00FF
+036  Sprite     Sprocket_Fill         {X:286 Y:330 W:1 H:16}  #3ACC00FF
+037  Sprite     Sprocket_Fill         {X:301 Y:330 W:1 H:16}  #3ACC00FF
+038  Text       at {X:286.125 Y:328.7536} scale 0.321  #3ACC00FF  "c"
+039  Sprite     Sprocket_Fill         {X:312 Y:310 W:56 H:56}  #374851FF
+040  Sprite     MyObjectBuilder_ButtonPanel/ButtonPanelLarge{X:312 Y:310 W:56 H:56}  #FFFFFFFF
+041  Text       at {X:376 Y:313.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
+042  Text       at {X:376 Y:342.0543} scale 0.556  #85A1A9FF  "Button Panel   not wired"
+043  Sprite     Sprocket_Fill         {X:286 Y:406 W:16 H:1}  #3ACC00FF
+044  Sprite     Sprocket_Fill         {X:286 Y:421 W:16 H:1}  #3ACC00FF
+045  Sprite     Sprocket_Fill         {X:286 Y:406 W:1 H:16}  #3ACC00FF
+046  Sprite     Sprocket_Fill         {X:301 Y:406 W:1 H:16}  #3ACC00FF
+047  Text       at {X:286.125 Y:404.7536} scale 0.321  #3ACC00FF  "c"
+048  Sprite     Sprocket_Fill         {X:312 Y:386 W:56 H:56}  #374851FF
+049  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:312 Y:386 W:56 H:56}  #FFFFFFFF
+050  Text       at {X:376 Y:389.2255} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
+051  Text       at {X:376 Y:418.0543} scale 0.556  #85A1A9FF  "Door   shut"
+052  Sprite     Sprocket_Fill         {X:272 Y:454 W:416 H:72}  #3C4C52FF
+053  Sprite     Sprocket_Fill         {X:286 Y:482 W:16 H:1}  #3ACC00FF
+054  Sprite     Sprocket_Fill         {X:286 Y:497 W:16 H:1}  #3ACC00FF
+055  Sprite     Sprocket_Fill         {X:286 Y:482 W:1 H:16}  #3ACC00FF
+056  Sprite     Sprocket_Fill         {X:301 Y:482 W:1 H:16}  #3ACC00FF
+057  Text       at {X:286.125 Y:480.7536} scale 0.321  #3ACC00FF  "c"
+058  Sprite     Sprocket_Fill         {X:312 Y:462 W:56 H:56}  #374851FF
+059  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:312 Y:462 W:56 H:56}  #FFFFFFFF
+060  Text       at {X:376 Y:465.2255} scale 0.833  #DCF5FDFF  "Airlock Light"
+061  Text       at {X:376 Y:494.0543} scale 0.556  #85A1A9FF  "Interior Light   on"
+062  Sprite     Sprocket_Fill         {X:286 Y:558 W:16 H:1}  #85A1A9FF
+063  Sprite     Sprocket_Fill         {X:286 Y:573 W:16 H:1}  #85A1A9FF
+064  Sprite     Sprocket_Fill         {X:286 Y:558 W:1 H:16}  #85A1A9FF
+065  Sprite     Sprocket_Fill         {X:301 Y:558 W:1 H:16}  #85A1A9FF
+066  Sprite     Sprocket_Fill         {X:312 Y:538 W:56 H:56}  #374851FF
+067  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:312 Y:538 W:56 H:56}  #FFFFFFFF
+068  Text       at {X:376 Y:541.2255} scale 0.833  #DCF5FDFF  "Airlock Outer Door"
+069  Text       at {X:376 Y:570.0543} scale 0.556  #85A1A9FF  "Door   shut"
+070  Sprite     Sprocket_Fill         {X:286 Y:634 W:16 H:1}  #85A1A9FF
+071  Sprite     Sprocket_Fill         {X:286 Y:649 W:16 H:1}  #85A1A9FF
+072  Sprite     Sprocket_Fill         {X:286 Y:634 W:1 H:16}  #85A1A9FF
+073  Sprite     Sprocket_Fill         {X:301 Y:634 W:1 H:16}  #85A1A9FF
+074  Sprite     Sprocket_Fill         {X:312 Y:614 W:56 H:56}  #374851FF
+075  Sprite     MyObjectBuilder_AirVent/SmallAirVent{X:312 Y:614 W:56 H:56}  #FFFFFFFF
+076  Text       at {X:376 Y:617.2255} scale 0.833  #DCF5FDFF  "Airlock Vent"
+077  Text       at {X:376 Y:646.0543} scale 0.556  #85A1A9FF  "Air Vent   pressurized"
+078  Sprite     Sprocket_Fill         {X:286 Y:710 W:16 H:1}  #85A1A9FF
+079  Sprite     Sprocket_Fill         {X:286 Y:725 W:16 H:1}  #85A1A9FF
+080  Sprite     Sprocket_Fill         {X:286 Y:710 W:1 H:16}  #85A1A9FF
+081  Sprite     Sprocket_Fill         {X:301 Y:710 W:1 H:16}  #85A1A9FF
+082  Sprite     Sprocket_Fill         {X:312 Y:690 W:56 H:56}  #374851FF
+083  Sprite     MyObjectBuilder_SensorBlock/LargeBlockSensor{X:312 Y:690 W:56 H:56}  #FFFFFFFF
+084  Text       at {X:376 Y:693.2255} scale 0.833  #DCF5FDFF  "Approach Sensor"
+085  Text       at {X:376 Y:722.0543} scale 0.556  #85A1A9FF  "Sensor   on"
+086  Sprite     Sprocket_Fill         {X:286 Y:786 W:16 H:1}  #85A1A9FF
+087  Sprite     Sprocket_Fill         {X:286 Y:801 W:16 H:1}  #85A1A9FF
+088  Sprite     Sprocket_Fill         {X:286 Y:786 W:1 H:16}  #85A1A9FF
+089  Sprite     Sprocket_Fill         {X:301 Y:786 W:1 H:16}  #85A1A9FF
+090  Sprite     Sprocket_Fill         {X:312 Y:766 W:56 H:56}  #374851FF
+091  Sprite     MyObjectBuilder_MyProgrammableBlock/LargeProgrammableBlock{X:312 Y:766 W:56 H:56}  #FFFFFFFF
+092  Text       at {X:376 Y:769.2255} scale 0.833  #DCF5FDFF  "Automation"
+093  Text       at {X:376 Y:798.0543} scale 0.556  #85A1A9FF  "Programmable Block   on"
+094  Sprite     Sprocket_Fill         {X:286 Y:862 W:16 H:1}  #85A1A9FF
+095  Sprite     Sprocket_Fill         {X:286 Y:877 W:16 H:1}  #85A1A9FF
+096  Sprite     Sprocket_Fill         {X:286 Y:862 W:1 H:16}  #85A1A9FF
+097  Sprite     Sprocket_Fill         {X:301 Y:862 W:1 H:16}  #85A1A9FF
+098  Sprite     Sprocket_Fill         {X:312 Y:842 W:56 H:56}  #374851FF
+099  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:312 Y:842 W:56 H:56}  #FFFFFFFF
+100  Text       at {X:376 Y:845.2255} scale 0.833  #DCF5FDFF  "Cockpit Light"
+101  Text       at {X:376 Y:874.0543} scale 0.556  #85A1A9FF  "Interior Light   on"
+102  Sprite     Sprocket_Fill         {X:286 Y:938 W:16 H:1}  #85A1A9FF
+103  Sprite     Sprocket_Fill         {X:286 Y:953 W:16 H:1}  #85A1A9FF
+104  Sprite     Sprocket_Fill         {X:286 Y:938 W:1 H:16}  #85A1A9FF
+105  Sprite     Sprocket_Fill         {X:301 Y:938 W:1 H:16}  #85A1A9FF
+106  Sprite     Sprocket_Fill         {X:312 Y:918 W:56 H:56}  #374851FF
+107  Sprite     MyObjectBuilder_AirtightHangarDoor/AirtightHangarDoor{X:312 Y:918 W:56 H:56}  #FFFFFFFF
+108  Text       at {X:376 Y:921.2255} scale 0.833  #DCF5FDFF  "Hangar Door"
+109  Text       at {X:376 Y:950.0543} scale 0.556  #85A1A9FF  "Hangar Door   shut"
+110  Sprite     Sprocket_Fill         {X:286 Y:1014 W:16 H:1}  #85A1A9FF
+111  Sprite     Sprocket_Fill         {X:286 Y:1029 W:16 H:1}  #85A1A9FF
+112  Sprite     Sprocket_Fill         {X:286 Y:1014 W:1 H:16}  #85A1A9FF
+113  Sprite     Sprocket_Fill         {X:301 Y:1014 W:1 H:16}  #85A1A9FF
+114  Sprite     Sprocket_Fill         {X:312 Y:994 W:56 H:56}  #374851FF
+115  Sprite     MyObjectBuilder_OxygenTank/LargeHydrogenTank{X:312 Y:994 W:56 H:56}  #FFFFFFFF
+116  Text       at {X:376 Y:997.2255} scale 0.833  #DCF5FDFF  "Hydrogen Tank"
+117  Text       at {X:376 Y:1026.054} scale 0.556  #85A1A9FF  "Hydrogen Tank   on"
+118  Sprite     Sprocket_Fill         {X:286 Y:1090 W:16 H:1}  #85A1A9FF
+119  Sprite     Sprocket_Fill         {X:286 Y:1105 W:16 H:1}  #85A1A9FF
+120  Sprite     Sprocket_Fill         {X:286 Y:1090 W:1 H:16}  #85A1A9FF
+121  Sprite     Sprocket_Fill         {X:301 Y:1090 W:1 H:16}  #85A1A9FF
+122  Sprite     Sprocket_Fill         {X:312 Y:1070 W:56 H:56}  #374851FF
+123  Sprite     MyObjectBuilder_InteriorLight/LargeBlockLight_1corner{X:312 Y:1070 W:56 H:56}  #FFFFFFFF
+124  Text       at {X:376 Y:1073.225} scale 0.833  #DCF5FDFF  "Landing Lights"
+125  Text       at {X:376 Y:1102.054} scale 0.556  #85A1A9FF  "Interior Light   on"
+126  Sprite     Sprocket_Fill         {X:286 Y:1166 W:16 H:1}  #85A1A9FF
+127  Sprite     Sprocket_Fill         {X:286 Y:1181 W:16 H:1}  #85A1A9FF
+128  Sprite     Sprocket_Fill         {X:286 Y:1166 W:1 H:16}  #85A1A9FF
+129  Sprite     Sprocket_Fill         {X:301 Y:1166 W:1 H:16}  #85A1A9FF
+130  Sprite     Sprocket_Fill         {X:312 Y:1146 W:56 H:56}  #374851FF
+131  Sprite     MyObjectBuilder_BatteryBlock/LargeBlockBatteryBlock{X:312 Y:1146 W:56 H:56}  #FFFFFFFF
+132  Text       at {X:376 Y:1149.225} scale 0.833  #DCF5FDFF  "Standby Battery"
+133  Text       at {X:376 Y:1178.054} scale 0.556  #85A1A9FF  "Battery   on"
+134  Sprite     Sprocket_Fill         {X:286 Y:1242 W:16 H:1}  #85A1A9FF
+135  Sprite     Sprocket_Fill         {X:286 Y:1257 W:16 H:1}  #85A1A9FF
+136  Sprite     Sprocket_Fill         {X:286 Y:1242 W:1 H:16}  #85A1A9FF
+137  Sprite     Sprocket_Fill         {X:301 Y:1242 W:1 H:16}  #85A1A9FF
+138  Sprite     Sprocket_Fill         {X:312 Y:1222 W:56 H:56}  #374851FF
+139  Sprite     MyObjectBuilder_RemoteControl/LargeBlockRemoteControl{X:312 Y:1222 W:56 H:56}  #FFFFFFFF
+140  Text       at {X:376 Y:1225.225} scale 0.833  #DCF5FDFF  "Tug Autopilot"
+141  Text       at {X:376 Y:1254.054} scale 0.556  #85A1A9FF  "Remote Control   on"
+142  Sprite     Sprocket_Fill         {X:286 Y:1318 W:16 H:1}  #85A1A9FF
+143  Sprite     Sprocket_Fill         {X:286 Y:1333 W:16 H:1}  #85A1A9FF
+144  Sprite     Sprocket_Fill         {X:286 Y:1318 W:1 H:16}  #85A1A9FF
+145  Sprite     Sprocket_Fill         {X:301 Y:1318 W:1 H:16}  #85A1A9FF
+146  Sprite     Sprocket_Fill         {X:312 Y:1298 W:56 H:56}  #374851FF
+147  Sprite     MyObjectBuilder_Beacon/LargeBlockBeacon{X:312 Y:1298 W:56 H:56}  #FFFFFFFF
+148  Text       at {X:376 Y:1301.225} scale 0.833  #DCF5FDFF  "Warning Beacon"
+149  Text       at {X:376 Y:1330.054} scale 0.556  #85A1A9FF  "Beacon   on"
+150  Sprite     Sprocket_Fill         {X:688 Y:302 W:12 H:464}  #5F7278FF
+151  SetClip    {X:256 Y:118 W:1408 H:902}
+152  Sprite     Sprocket_Fill         {X:724 Y:118 W:460 H:902}  #29363EFF
+153  Sprite     Sprocket_Fill         {X:724 Y:118 W:460 H:1}  #5B737BFF
+154  Sprite     Sprocket_Fill         {X:724 Y:1018 W:460 H:1}  #5B737BFF
+155  Sprite     Sprocket_Fill         {X:724 Y:118 W:1 H:902}  #5B737BFF
+156  Sprite     Sprocket_Fill         {X:1183 Y:118 W:1 H:902}  #5B737BFF
+157  Text       at {X:740 Y:131.2255} scale 0.833  #DCF5FDFF  "WHAT HAPPENS"
+158  Sprite     Sprocket_Fill         {X:740 Y:190 W:428 H:36}  #141B20FF
+159  Sprite     Sprocket_Fill         {X:740 Y:190 W:428 H:1}  #5B737BFF
+160  Sprite     Sprocket_Fill         {X:740 Y:225 W:428 H:1}  #5B737BFF
+161  Sprite     Sprocket_Fill         {X:740 Y:190 W:1 H:36}  #5B737BFF
+162  Sprite     Sprocket_Fill         {X:1167 Y:190 W:1 H:36}  #5B737BFF
+163  SetClip    {X:740 Y:190 W:428 H:36}
+164  Text       at {X:752 Y:195.6399} scale 0.694  #85A1A9FF  "Search"
+165  SetClip    {X:256 Y:118 W:1408 H:902}
+166  SetClip    {X:740 Y:234 W:428 H:770}
+167  Sprite     Sprocket_Fill         {X:740 Y:234 W:416 H:56}  #374851FF
+168  Text       at {X:756 Y:239.6399} scale 0.694  #A2C3CDFF  "Support for this block is still being worked on, so some of"
+169  Text       at {X:756 Y:259.6399} scale 0.694  #A2C3CDFF  "what it offers may be doubled, missing or oddly named."
+170  Text       at {X:744 Y:303.6399} scale 0.694  #A2C3CDFF  "Those blocks have nothing in common that can happen to"
+171  Text       at {X:744 Y:323.6399} scale 0.694  #A2C3CDFF  "them."
+172  SetClip    {X:256 Y:118 W:1408 H:902}
+173  ClearClip  

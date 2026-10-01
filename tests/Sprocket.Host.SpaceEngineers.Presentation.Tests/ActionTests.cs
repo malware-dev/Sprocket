@@ -239,7 +239,7 @@ public class ActionTests
     [Fact]
     public void TheTabIsPressedWhereItIsDrawn()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1394 72 "
             + "70 175 200 509").Split(' '));
 
         StageColumn what = screen.Editor.Pick().Stages.Last();
@@ -444,7 +444,7 @@ public class ActionTests
     [Fact]
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1394 72 "
             + "70 175 150 203 type Approach 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
@@ -474,7 +474,7 @@ public class ActionTests
     [Fact]
     public void AColourIsChosenByPressingOne()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1394 72 "
             + "70 175 200 485 800 565").Split(' '));
 
 
@@ -500,7 +500,7 @@ public class ActionTests
     [Fact]
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1394 72 "
             + "70 175 150 203 type Standby 200 360 800 397").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
@@ -532,7 +532,7 @@ public class ActionTests
     [Fact]
     public void MoreChoicesThanFitFoldIntoAList()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1353 314 "
+        var screen = Screen.Fresh(("60 196 type Airlock enter 60 163 200 384 560 340 1394 72 "
             + "70 175 150 203 type Tug 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");

@@ -496,13 +496,21 @@ This one becomes its first installation.</value>
     <value>Search</value>
     <comment>Hint in the box that narrows a column of a pick, or its list of kinds, by typing.</comment>
   </data>
-  <data name="Sprocket.Pick.Done" xml:space="preserve">
+  <data name="Sprocket.Chrome.Done" xml:space="preserve">
     <value>Done</value>
-    <comment>Button that finishes a pick.</comment>
+    <comment>Button at the right end of the header that finishes the screen.</comment>
+  </data>
+  <data name="Sprocket.Chrome.DoneAbout" xml:space="preserve">
+    <value>Keep any changes and return.</value>
+    <comment>Note on Done on a screen whose changes are kept as they are made.</comment>
   </data>
   <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
     <value>Choose something in every column first.</value>
     <comment>Note on Done while it cannot be pressed.</comment>
+  </data>
+  <data name="Sprocket.Pick.DoneAbout" xml:space="preserve">
+    <value>Use what is chosen, and go back.</value>
+    <comment>Note on Done in a picker, once it can be pressed.</comment>
   </data>
   <data name="Sprocket.Pick.Back" xml:space="preserve">
     <value>Back</value>

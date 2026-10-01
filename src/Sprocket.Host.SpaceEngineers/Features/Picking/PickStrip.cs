@@ -133,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             if (_values == null)
             {
-                _values = new ValuesColumn(Width, _texts.PickValues, _texts.PickDone);
+                _values = new ValuesColumn(Width, _texts.PickValues);
                 _values.Form.Windows = _windows;
             }
 
@@ -162,7 +162,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _values.Form.Show(fields, filling, colors, _texts);
             _values.Why = "";
-            _values.Place();
             return _values;
         }
 

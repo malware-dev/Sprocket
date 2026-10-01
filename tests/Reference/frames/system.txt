@@ -7,24 +7,26 @@ on screen     Airlock
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1131 H:40}
+003  SetClip    {X:296 Y:53 W:1063 H:40}
 004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Airlock"
 005  Text       at {X:390.8629 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 006  ClearClip  
-007  Text       at {X:1441.34 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
-008  Text       at {X:1481.34 Y:61.51406} scale 0.401  #5F7278FF  "u"
-009  Text       at {X:1521.34 Y:61.51406} scale 0.401  #5F7278FF  "r"
-010  Text       at {X:1561.34 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
-011  Sprite     Sprocket_Fill         {X:1595 Y:57 W:69 H:32}  #5B737BFF
-012  Sprite     Sprocket_Fill         {X:1599 Y:61 W:61 H:24}  #20272DFF
-013  Sprite     Sprocket_Fill         {X:1599 Y:61 W:24 H:24}  #DCF5FDFF
-014  Text       at {X:1631.183 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
-015  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-016  SetClip    {X:256 Y:118 W:1408 H:902}
-017  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "TRIGGERS"
-018  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ when…"
-019  Text       at {X:385.4067 Y:163.2255} scale 0.833  #A2C3CDFF  "+ every…"
-020  Text       at {X:260 Y:239.6399} scale 0.694  #85A1A9FF  "SEQUENCES"
-021  Text       at {X:264 Y:275.2255} scale 0.833  #A2C3CDFF  "No sequences yet."
-022  Text       at {X:272 Y:311.2255} scale 0.833  #A2C3CDFF  "+ sequence"
-023  ClearClip  
+007  Text       at {X:1372.76 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
+008  Text       at {X:1412.76 Y:61.51406} scale 0.401  #5F7278FF  "u"
+009  Text       at {X:1452.76 Y:61.51406} scale 0.401  #5F7278FF  "r"
+010  Text       at {X:1492.76 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
+011  Sprite     Sprocket_Fill         {X:1527 Y:57 W:69 H:32}  #5B737BFF
+012  Sprite     Sprocket_Fill         {X:1531 Y:61 W:61 H:24}  #20272DFF
+013  Sprite     Sprocket_Fill         {X:1531 Y:61 W:24 H:24}  #DCF5FDFF
+014  Text       at {X:1562.603 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
+015  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
+016  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
+017  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+018  SetClip    {X:256 Y:118 W:1408 H:902}
+019  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "TRIGGERS"
+020  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ when…"
+021  Text       at {X:385.4067 Y:163.2255} scale 0.833  #A2C3CDFF  "+ every…"
+022  Text       at {X:260 Y:239.6399} scale 0.694  #85A1A9FF  "SEQUENCES"
+023  Text       at {X:264 Y:275.2255} scale 0.833  #A2C3CDFF  "No sequences yet."
+024  Text       at {X:272 Y:311.2255} scale 0.833  #A2C3CDFF  "+ sequence"
+025  ClearClip  
