@@ -30,15 +30,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         public static readonly IReadOnlyList<Cadence> All = new[]
         {
-            new Cadence("every tick", 1,
-                "Runs sixty times a second. Hard on the server - only worth it if nothing slower will do."),
-            new Cadence("fast", 10,
-                "Six times a second. Still costly; try something slower first."),
-            new Cadence("steady", 100),
-            new Cadence("slow", 300),
-            new Cadence("very slow", 600),
-            new Cadence("occasional", 1800),
-            new Cadence("rare", 3600)
+            new Cadence(texts => texts.PickEveryTick, 1, texts => texts.RateEveryTickCost),
+            new Cadence(texts => texts.RateFast, 10, texts => texts.RateFastCost),
+            new Cadence(texts => texts.RateSteady, 100),
+            new Cadence(texts => texts.RateSlow, 300),
+            new Cadence(texts => texts.RateVerySlow, 600),
+            new Cadence(texts => texts.RateOccasional, 1800),
+            new Cadence(texts => texts.RateRare, 3600)
         };
     }
 }

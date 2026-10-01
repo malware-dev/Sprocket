@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Sequences;
+using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -19,9 +21,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         internal const string SwitchOn = "on";
         internal const string SwitchOff = "off";
 
-        /// <summary>What Sprocket's own members and moments are qualified by: <c>'sprocket'.close</c>.</summary>
+        /// <summary>What Sprocket's own members and moments are qualified by: <c>ext.close</c>.</summary>
         /// <remarks>Persisted in every program that uses one, so it cannot change without changing what those programs say.</remarks>
-        internal const string Own = "sprocket";
+        internal const string Own = "ext";
 
         const string GamePrefix = "MyObjectBuilder_";
 
@@ -59,6 +61,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (extension != null)
                 extension.Describe(kind, block);
 
+            Triggers(kind, block, _extensions.TriggersFor(block));
+
             kind.WithProperty(GridEntity.WorkingProperty, "working")
                 .WithState("is-working", GridEntity.WorkingProperty, true, "is working")
                 .WithState("is-not-working", GridEntity.WorkingProperty, false, "is not working");
@@ -90,6 +94,46 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             _kinds.Add(id, kind);
             return kind;
+        }
+
+        /// <summary>Adds the block's triggers: as <paramref name="layout" /> says they run, or every slot of every toolbar it has, by where it is.</summary>
+        /// <remarks>
+        /// A trigger is a toolbar slot, whatever block it is on, so a block nothing knows about offers its slots all the same.
+        /// Asked once per block type, which has the same toolbars whichever block is asked.
+        /// </remarks>
+        static void Triggers(EntityKind kind, IMyTerminalBlock block, ITriggers layout)
+        {
+            if (layout != null)
+            {
+                layout.Describe(kind, block);
+                return;
+            }
+
+            var toolbars = 0;
+            while (Toolbars.Of(block, toolbars + 1) != null)
+                toolbars++;
+
+            for (var t = 1; t <= toolbars; t++)
+            {
+                IMyToolbar toolbar = Toolbars.Of(block, t);
+                for (var p = 1; p <= toolbar.PageCount; p++)
+                {
+                    for (var s = 1; s <= toolbar.SlotCount; s++)
+                    {
+                        var at = new ToolbarSlot(t, p, s);
+                        kind.WithTrigger(at, Placed(at, toolbars, toolbar.PageCount));
+                    }
+                }
+            }
+        }
+
+        /// <summary>A trigger named by where its slot is, saying no more of the place than the block has to tell apart.</summary>
+        static string Placed(ToolbarSlot at, int toolbars, int pages)
+        {
+            if (toolbars > 1)
+                return "toolbar " + at.Toolbar + ", page " + at.Page + ", slot " + at.Slot + " runs";
+
+            return pages > 1 ? "toolbar page " + at.Page + ", slot " + at.Slot + " runs" : "toolbar slot " + at.Slot + " runs";
         }
 
         /// <summary>
@@ -220,10 +264,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         static void Unread(EntityAction one, Offer offer)
         {
             if (offer.Unreadable)
-                one.Withhold(Readiness.Pending, UnreadSaid);
+                one.Withhold(Readiness.Pending, Holdback.Unread);
         }
-
-        const string UnreadSaid = "Set this in the terminal for now: whether Sprocket can offer it is being looked at";
 
         /// <summary>
         /// What the form asks for one of a block's values, from what the block said about it.

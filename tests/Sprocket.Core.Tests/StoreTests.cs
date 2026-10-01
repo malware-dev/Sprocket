@@ -4,6 +4,8 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 using ChargeMode = Sandbox.ModAPI.Ingame.ChargeMode;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
 
@@ -60,7 +62,7 @@ public class StoreTests
         ship.World.Invoke(entity, BatteryExtension.Recharge);
 
         var trouble = entity.Trouble("is-full");
-        Assert.Equal("cannot charge - no power coming in", trouble.Said);
+        Assert.Equal("cannot charge - no power coming in", TroubleText.Of(new Texts(), trouble));
         Assert.False(trouble.Ends);
     }
 
@@ -137,7 +139,7 @@ public class StoreTests
         ship.World.Invoke(entity, TankExtension.Stockpile);
 
         var trouble = entity.Trouble("is-full");
-        Assert.Equal("cannot fill - it is switched off or has no power", trouble.Said);
+        Assert.Equal("cannot fill - it is switched off or has no power", TroubleText.Of(new Texts(), trouble));
         Assert.False(trouble.Ends);
     }
 

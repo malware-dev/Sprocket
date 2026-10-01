@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -24,7 +25,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressAdd("task…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
@@ -51,7 +52,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressAdd("task…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Run(2);
@@ -61,8 +62,8 @@ public class SettingTests
         // The numbers this block's own definition declares, and nobody else's: a corner light's
         // falloff stops at two where another light's stops somewhere else.
         Field one = Assert.Single(screen.Editor.Picking().Fields);
-        Assert.Equal("Falloff (0 - 2)", one.Label);
-        Assert.Equal("Falloff has to be between 0 and 2.", one.Refuses("Falloff", "5"));
+        Assert.Equal("Falloff (0 - 2)", one.Label(new Texts()));
+        Assert.Equal("Falloff has to be between 0 and 2.", one.Refuses(new Texts(), "Falloff", "5"));
     }
 
     /// <summary>And the step holds the value the way an action's values are held.</summary>
@@ -71,7 +72,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressAdd("task…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Editor.Typed("2");
@@ -100,7 +101,7 @@ public class SettingTests
         AutomationSystem system = program.AddSystem();
         system.Name = "Lighting";
 
-        var pressed = Pressed.On(system, Named(sim, button));
+        var pressed = Pressed.On(program, system, Named(sim, button));
 
         Sequence dim = program.AddSequence(system, pressed);
         dim.Name = "Dim";
@@ -144,7 +145,7 @@ public class SettingTests
         AutomationSystem system = program.AddSystem();
         system.Name = "Lighting";
 
-        var pressed = Pressed.On(system, Named(sim, button));
+        var pressed = Pressed.On(program, system, Named(sim, button));
 
         Sequence dark = program.AddSequence(system, pressed);
         dark.Name = "Dark";
@@ -180,10 +181,10 @@ public class SettingTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Power");
-        screen.Editor.PressStart("When…");
+        screen.Editor.PressStart("when…");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
-        screen.Editor.PressChoice("A single action…");
+        screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Standby Battery");
         screen.Editor.PressChoice("Set Charge Mode");
         screen.Editor.Typed("1");
@@ -202,7 +203,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressAdd("task…");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Editor.Typed("2");
@@ -244,7 +245,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressAdd("task…");
         screen.Editor.PressBlock("Warning Beacon");
         screen.Run(2);
 
@@ -265,7 +266,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("Action…");
+        screen.Editor.PressAdd("task…");
         screen.Editor.PressBlock("Approach Sensor");
         screen.Run(2);
 

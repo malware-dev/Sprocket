@@ -143,7 +143,7 @@ public class ButtonWiringTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        sim.Editor.RootRows().Single(row => row.IsAction).Opens!.Execute();
+        sim.Editor.AddInstallation(0);
         sim.Tick();
 
         var system = sim.Editor.Program.Systems[0];

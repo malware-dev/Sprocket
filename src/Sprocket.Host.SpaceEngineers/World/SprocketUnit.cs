@@ -1,4 +1,3 @@
-using SpaceEngineers.Game.ModAPI;
 using VRage.Game.ModAPI;
 using System.Collections.Generic;
 using System;
@@ -323,7 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 AutomationSystem system = _program.Systems[s];
                 var sequences = system.Sequences;
-                var instances = system.Instances;
+                var instances = system.Uses;
 
                 var triggers = system.Triggers;
                 for (var t = 0; t < triggers.Count; t++)
@@ -341,12 +340,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 for (var q = 0; q < sequences.Count; q++)
                 {
-                    if (instances.Count == 0)
-                    {
-                        Register(system, null, sequences[q]);
-                        continue;
-                    }
-
                     for (var n = 0; n < instances.Count; n++)
                         Register(system, instances[n], sequences[q]);
                 }
@@ -507,16 +500,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 AutomationSystem system = _program.Systems[s];
                 var sequences = Runs(system);
-                var instances = system.Instances;
+                var instances = system.Uses;
 
                 for (var q = 0; q < sequences.Count; q++)
                 {
-                    if (instances.Count == 0)
-                    {
-                        WantedFor(into, system, null, sequences[q]);
-                        continue;
-                    }
-
                     for (var n = 0; n < instances.Count; n++)
                         WantedFor(into, system, instances[n], sequences[q]);
                 }
@@ -550,10 +537,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         void WantedForTrigger(List<Want> into, AutomationSystem system, SystemInstance instance,
             Sequence sequence, RequiredTrigger needed)
         {
-            var blocks = instance == null ? null : instance.FilledWith(needed.Part);
-            var positions = instance == null ? null : instance.Positions(needed.Part);
-            if (blocks == null || positions == null)
-                return;
+            var blocks = _answering;
+            var positions = _answeringAt;
+            _program.Answers(system, instance, needed.Part, blocks, positions);
 
             for (var i = 0; i < blocks.Count && i < positions.Count; i++)
             {
@@ -624,6 +610,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 instance.Resolve(act.Targets, _acting);
             }
 
+            _runner.Bindings.Distinct(_acting);
             if (_acting.Count != 1)
                 return false;
 
@@ -644,6 +631,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         readonly List<string> _acting = new List<string>();
+        readonly List<string> _answering = new List<string>();
+        readonly List<ToolbarSlot> _answeringAt = new List<ToolbarSlot>();
 
         /// <summary>What a slot holding the game's own action is counted under.</summary>
         static string PlainKey(long blockId, string actionId)
@@ -701,49 +690,54 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             _claims.Clear();
 
+            // Every slot of every page of every toolbar, since a trigger may be on any of them: a cockpit's target lock is
+            // its third toolbar, and a timer runs all of its pages.
             for (var i = 0; i < _world.Entities.Count; i++)
             {
                 GridEntity grid = _world.Entities[i];
-                IMyToolbar toolbar = Toolbars.Of(grid.Block);
-                if (toolbar == null)
+                for (var t = 1; Toolbars.Of(grid.Block, t) != null; t++)
+                    Claims(Toolbars.Of(grid.Block, t));
+            }
+        }
+
+        /// <summary>Counts what each slot of <paramref name="toolbar" /> holds that answers this program.</summary>
+        void Claims(IMyToolbar toolbar)
+        {
+            for (var slot = 0; slot < toolbar.ItemCount; slot++)
+            {
+                MyToolbarItemInfo present;
+                if (!toolbar.TryGetItem(slot, out present))
                     continue;
 
-                for (var slot = 0; slot < toolbar.SlotCount; slot++)
+                // A slot holding the game's own action on a block is a claim as well. It is how
+                // a trigger that does one plain thing is wired, and without counting it such a
+                // trigger reads as a sequence nothing starts and is parked a second later.
+                //
+                // Sprocket's action counts only where it points here. One pointed at another
+                // Sprocket runs that one's program, and one pointed at a block that is gone runs
+                // nothing at all, so counting either would be this program reporting a button
+                // that answers somebody else - or nobody - as its own.
+                if (!Mine(present))
                 {
-                    MyToolbarItemInfo present;
-                    if (!toolbar.TryGetItem(slot, out present))
-                        continue;
-
-                    // A slot holding the game's own action on a block is a claim as well. It is how
-                    // a trigger that does one plain thing is wired, and without counting it such a
-                    // trigger reads as a sequence nothing starts and is parked a second later.
-                    //
-                    // Sprocket's action counts only where it points here. One pointed at another
-                    // Sprocket runs that one's program, and one pointed at a block that is gone runs
-                    // nothing at all, so counting either would be this program reporting a button
-                    // that answers somebody else - or nobody - as its own.
-                    if (!Mine(present))
+                    if (present.Kind == MyToolbarItemKind.BlockAction
+                        && !string.IsNullOrEmpty(present.ActionId))
                     {
-                        if (present.Kind == MyToolbarItemKind.BlockAction
-                            && !string.IsNullOrEmpty(present.ActionId))
-                        {
-                            Claimed(PlainKey(present.BlockEntityId, present.ActionId));
-                        }
-
-                        continue;
+                        Claimed(PlainKey(present.BlockEntityId, present.ActionId));
                     }
 
-                    _arguments.Clear();
-                    Toolbars.Parameters(toolbar, slot, _arguments);
-                    if (_arguments.Count == 0)
-                        continue;
-
-                    var key = _arguments[0].Value as string;
-                    if (string.IsNullOrEmpty(key))
-                        continue;
-
-                    Claimed(key);
+                    continue;
                 }
+
+                _arguments.Clear();
+                Toolbars.Parameters(toolbar, slot, _arguments);
+                if (_arguments.Count == 0)
+                    continue;
+
+                var key = _arguments[0].Value as string;
+                if (string.IsNullOrEmpty(key))
+                    continue;
+
+                Claimed(key);
             }
         }
 
@@ -806,7 +800,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 AutomationSystem system = _program.Systems[s];
                 var sequences = Runs(system);
-                var instances = system.Instances;
+                var instances = system.Uses;
 
                 for (var q = 0; q < sequences.Count; q++)
                 {
@@ -859,9 +853,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
 
                 var wanted = Wanting(system, instance, sequence, needed);
-                var blocks = instance.FilledWith(needed.Part);
-                var positions = instance.Positions(needed.Part);
-                for (var s = 0; blocks != null && positions != null && s < blocks.Count && s < positions.Count; s++)
+                var blocks = _answering;
+                var positions = _answeringAt;
+                _program.Answers(system, instance, needed.Part, blocks, positions);
+                for (var s = 0; s < blocks.Count && s < positions.Count; s++)
                 {
                     IMyToolbar toolbar = ToolbarOf(blocks[s], positions[s].Toolbar);
                     var why = Unanswer(toolbar, Toolbars.Index(toolbar, positions[s]), wanted, blocks[s]);
@@ -1174,9 +1169,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             return null;
         }
 
+        /// <summary>Toolbar <paramref name="toolbar" /> of <paramref name="block" />, from 1, whatever block it is, or null where it has none.</summary>
         static IMyToolbar ToolbarOfBlock(IMyTerminalBlock block, int toolbar)
         {
-            return block is IMyButtonPanel ? Toolbars.Of(block, toolbar) : null;
+            return Toolbars.Of(block, toolbar);
         }
 
         public void Tick(int frame)

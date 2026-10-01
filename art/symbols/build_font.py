@@ -465,6 +465,35 @@ def pause():
                  (0.5 + half, 0.5 + half), (0.5 + half - bar, 0.5 + half))]
 
 
+def blueprint():
+    """
+    Blueprint: a sheet ruled into four, the drawing a logic system is made from.
+
+    Solid, with the four panes taken back out, so the rules and the edge are one weight and one
+    shape. Drawn at the duplicate's lighter line rather than the set's, for the same reason: it is a
+    frame inside a frame, and the set's stroke closes the panes up into a blob at row size.
+    """
+    line = 0.094
+    near, far = 0.20, 0.80
+    half = line / 2
+
+    sheet = poly((near, near), (far, near), (far, far), (near, far))
+    (left, top), (right, bottom) = sheet[0], sheet[2]
+    mid_x = (left + right) / 2
+    mid_y = (top + bottom) / 2
+
+    # Set out from the sheet after it is placed, as the duplicate's opening is, so the edge and the
+    # rules come out the same weight.
+    panes = [
+        raw((left + line, top + line), (mid_x - half, top + line), (mid_x - half, mid_y - half), (left + line, mid_y - half)),
+        raw((mid_x + half, top + line), (right - line, top + line), (right - line, mid_y - half), (mid_x + half, mid_y - half)),
+        raw((left + line, mid_y + half), (mid_x - half, mid_y + half), (mid_x - half, bottom - line), (left + line, bottom - line)),
+        raw((mid_x + half, mid_y + half), (right - line, mid_y + half), (right - line, bottom - line), (mid_x + half, bottom - line)),
+    ]
+
+    return [sheet], panes
+
+
 def solid(shapes):
     """Most glyphs are just filled shapes with nothing taken back out."""
     return shapes, []
@@ -500,6 +529,7 @@ GLYPHS = [
     ("w", "finish", lambda: solid(finish())),
     # "p" and "a", "u" and "s" are taken; "e" is the one letter of the word left.
     ("e", "pause", lambda: solid(pause())),
+    ("b", "blueprint", lambda: blueprint()),
 ]
 
 

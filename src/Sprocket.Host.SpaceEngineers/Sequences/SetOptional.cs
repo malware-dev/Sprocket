@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _now = now;
         }
 
-        public override string Label => _now ? "making a slot optional" : "making a slot required";
+        public override Change Change => _now ? Change.Optional : Change.Required;
 
         public override bool Changes => _part.Optional != _now;
 

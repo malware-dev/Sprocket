@@ -56,11 +56,11 @@ public class ResumeTests
             Program.Declare(World, Rig.Entity(fitting.Id)).Name;
 
         public SequenceRunner State =>
-            Runner.Get(Program.Sequences[0], Program.Systems[0].Instances[0]);
+            Runner.Get(Program.Sequences[0], Program.Systems[0].Uses[0]);
 
         /// <summary>The button being pressed, which is the construct calling the sequence.</summary>
         public void Press() =>
-            Runner.Call(Program.Sequences[0], Program.Systems[0].Instances[0]);
+            Runner.Call(Program.Sequences[0], Program.Systems[0].Uses[0]);
 
         /// <summary>
         /// The world loading again: the blocks are where they were, and nothing else is.
@@ -86,7 +86,7 @@ public class ResumeTests
         a.Vent = a.Rig.Vent(3, "Airlock Vent");
         a.Button = a.Rig.Panel(4, "Inside Button");
 
-        var trigger = new WhenTrigger("pressed_1");
+        var trigger = new WhenTrigger(new ToolbarSlot(1, 1, 1).EventId);
         trigger.Sources.Add(a.Name(a.Button));
 
         var cycle = a.Program.AddSequence(trigger);

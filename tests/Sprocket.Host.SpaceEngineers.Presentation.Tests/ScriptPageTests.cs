@@ -166,7 +166,7 @@ public class ScriptPageTests
         screen.Run(1);
 
         var page = Assert.IsType<ScriptPage>(screen.Editor.Current);
-        screen.Editor.Scripted(page.Listing.Text.Replace("instance 1 of", "instance of"));
+        screen.Editor.Scripted(page.Listing.Text.Replace(".Airlock {", ".Airlock garbage {"));
         Assert.True(screen.Shows("Apply"), "the script page has no Apply button");
         Press(screen, "Apply");
         screen.Run(1);

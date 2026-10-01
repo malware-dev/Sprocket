@@ -5,6 +5,7 @@ using System.Xml.Serialization;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
 
@@ -125,7 +126,7 @@ public class DefinitionTests
         // Each says what it will accept, because the moment that is worth knowing is the moment
         // somebody is deciding what to type - and the action itself never says.
         Assert.Equal(new[] { "Red (0 - 255)", "Green (0 - 255)", "Blue (0 - 255)" },
-            fields.ConvertAll(field => field.Label));
+            fields.ConvertAll(field => field.Label(new Texts())));
 
         foreach (Field field in fields)
             Assert.Equal(1, field.Covers);
@@ -137,8 +138,8 @@ public class DefinitionTests
     {
         var fields = Fields(3);
 
-        Assert.Equal("", fields[0].Refuses("Red", "255"));
-        Assert.Equal("Red has to be between 0 and 255.", fields[0].Refuses("Red", "256"));
+        Assert.Equal("", fields[0].Refuses(new Texts(), "Red", "255"));
+        Assert.Equal("Red has to be between 0 and 255.", fields[0].Refuses(new Texts(), "Red", "256"));
     }
 
     static List<Field> Fields(int action)

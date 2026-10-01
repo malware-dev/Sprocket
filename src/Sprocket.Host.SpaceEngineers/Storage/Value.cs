@@ -69,10 +69,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return new Value(ValueForm.Qualified, null, Run(from, count));
         }
 
-        /// <summary>A toolbar slot, its block and three numbers the run of <see cref="Reading.Parts" /> starting at <paramref name="from" />.</summary>
-        public static Value Slotted(int from)
+        /// <summary>A host function call, its block, its name and its values the run of <see cref="Reading.Parts" /> starting at <paramref name="from" />.</summary>
+        public static Value Function(int from, int count)
         {
-            return new Value(ValueForm.Slot, null, Run(from, 4));
+            return new Value(ValueForm.Function, null, Run(from, count));
         }
 
         static long Run(int from, int count)

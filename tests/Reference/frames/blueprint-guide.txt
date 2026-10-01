@@ -7,94 +7,98 @@ on screen     Configuration panel  |  Shown to anyone setting up, or changing, s
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:76}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1288 H:40}
+003  SetClip    {X:296 Y:53 W:1219 H:40}
 004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Configuration panel"
 005  Text       at {X:527.0433 Y:53.39666} scale 1.111  #A2C3CDFF  "for Airlock blueprint"
 006  ClearClip  
-007  Text       at {X:1598.156 Y:61.51406} scale 0.401  #5F7278FF  "u"
-008  Text       at {X:1638.156 Y:61.51406} scale 0.401  #5F7278FF  "r"
-009  Text       at {X:256 Y:95.05432} scale 0.556  #85A1A9FF  "Shown to anyone setting up, or changing, something made from this blueprint."
-010  Sprite     Sprocket_Fill         {X:240 Y:121 W:1440 H:1}  #5B737BFF
-011  SetClip    {X:256 Y:138 W:1408 H:882}
-012  Text       at {X:280 Y:147.6399} scale 0.694  #85A1A9FF  "DESCRIPTION"
-013  Sprite     Sprocket_Fill         {X:276 Y:186 W:73 H:32}  #3C4C52FF
-014  Sprite     Sprocket_Fill         {X:276 Y:186 W:73 H:1}  #70757AFF
-015  Sprite     Sprocket_Fill         {X:276 Y:217 W:73 H:1}  #70757AFF
-016  Sprite     Sprocket_Fill         {X:276 Y:186 W:1 H:32}  #70757AFF
-017  Sprite     Sprocket_Fill         {X:348 Y:186 W:1 H:32}  #70757AFF
-018  Text       at {X:292 Y:192.0543} scale 0.556  #DCF5FDFF  "Markup"
-019  Sprite     Sprocket_Fill         {X:357 Y:186 W:73 H:32}  #29363EFF
-020  Sprite     Sprocket_Fill         {X:357 Y:186 W:73 H:1}  #3F474FFF
-021  Sprite     Sprocket_Fill         {X:357 Y:217 W:73 H:1}  #3F474FFF
-022  Sprite     Sprocket_Fill         {X:357 Y:186 W:1 H:32}  #3F474FFF
-023  Sprite     Sprocket_Fill         {X:429 Y:186 W:1 H:32}  #3F474FFF
-024  Text       at {X:372.9667 Y:192.0543} scale 0.556  #DCF5FDFF  "Preview"
-025  Sprite     Sprocket_Fill         {X:276 Y:224 W:1356 H:240}  #141B20FF
-026  Sprite     Sprocket_Fill         {X:276 Y:224 W:1356 H:1}  #5B737BFF
-027  Sprite     Sprocket_Fill         {X:276 Y:463 W:1356 H:1}  #5B737BFF
-028  Sprite     Sprocket_Fill         {X:276 Y:224 W:1 H:240}  #5B737BFF
-029  Sprite     Sprocket_Fill         {X:1631 Y:224 W:1 H:240}  #5B737BFF
-030  SetClip    {X:276 Y:224 W:1356 H:240}
-031  SetClip    {X:284 Y:230 W:1328 H:216}
-032  Text       at {X:284 Y:227.6399} scale 0.694  #85A1A9FF  "What this blueprint does, and what whoever fills it in needs to know."
-033  SetClip    {X:276 Y:224 W:1356 H:240}
-034  SetClip    {X:256 Y:138 W:1408 H:882}
-035  Sprite     Sprocket_Fill         {X:256 Y:480 W:1396 H:1}  #5B737BFF
-036  Text       at {X:260 Y:498.6399} scale 0.694  #85A1A9FF  "SLOTS"
-037  Sprite     Sprocket_Fill         {X:276 Y:545 W:560 H:40}  #141B20FF
-038  Sprite     Sprocket_Fill         {X:276 Y:545 W:560 H:1}  #5B737BFF
-039  Sprite     Sprocket_Fill         {X:276 Y:584 W:560 H:1}  #5B737BFF
-040  Sprite     Sprocket_Fill         {X:276 Y:545 W:1 H:40}  #5B737BFF
-041  Sprite     Sprocket_Fill         {X:835 Y:545 W:1 H:40}  #5B737BFF
-042  SetClip    {X:276 Y:545 W:560 H:40}
-043  Text       at {X:288 Y:550.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
-044  SetClip    {X:256 Y:138 W:1408 H:882}
-045  Sprite     Sprocket_Fill         {X:276 Y:589 W:73 H:32}  #29363EFF
-046  Sprite     Sprocket_Fill         {X:276 Y:589 W:73 H:1}  #3F474FFF
-047  Sprite     Sprocket_Fill         {X:276 Y:620 W:73 H:1}  #3F474FFF
-048  Sprite     Sprocket_Fill         {X:276 Y:589 W:1 H:32}  #3F474FFF
-049  Sprite     Sprocket_Fill         {X:348 Y:589 W:1 H:32}  #3F474FFF
-050  Text       at {X:292 Y:595.0543} scale 0.556  #DCF5FDFF  "Markup"
-051  Sprite     Sprocket_Fill         {X:357 Y:589 W:73 H:32}  #29363EFF
-052  Sprite     Sprocket_Fill         {X:357 Y:589 W:73 H:1}  #3F474FFF
-053  Sprite     Sprocket_Fill         {X:357 Y:620 W:73 H:1}  #3F474FFF
-054  Sprite     Sprocket_Fill         {X:357 Y:589 W:1 H:32}  #3F474FFF
-055  Sprite     Sprocket_Fill         {X:429 Y:589 W:1 H:32}  #3F474FFF
-056  Text       at {X:372.9667 Y:595.0543} scale 0.556  #DCF5FDFF  "Preview"
-057  Sprite     Sprocket_Fill         {X:276 Y:627 W:560 H:72}  #141B20FF
-058  Sprite     Sprocket_Fill         {X:276 Y:627 W:560 H:1}  #5B737BFF
-059  Sprite     Sprocket_Fill         {X:276 Y:698 W:560 H:1}  #5B737BFF
-060  Sprite     Sprocket_Fill         {X:276 Y:627 W:1 H:72}  #5B737BFF
-061  Sprite     Sprocket_Fill         {X:835 Y:627 W:1 H:72}  #5B737BFF
-062  SetClip    {X:276 Y:627 W:560 H:72}
-063  SetClip    {X:284 Y:633 W:532 H:48}
-064  Text       at {X:284 Y:630.6399} scale 0.694  #85A1A9FF  "What this slot is for."
-065  SetClip    {X:276 Y:627 W:560 H:72}
-066  SetClip    {X:256 Y:138 W:1408 H:882}
-067  Sprite     Sprocket_Fill         {X:856 Y:604 W:93 H:32}  #5B737BFF
-068  Sprite     Sprocket_Fill         {X:860 Y:608 W:85 H:24}  #20272DFF
-069  Sprite     Sprocket_Fill         {X:860 Y:608 W:24 H:24}  #DCF5FDFF
-070  Text       at {X:892 Y:610.0543} scale 0.556  #DCF5FDFF  "required"
-071  ClearClip  
-072  Sprite     Sprocket_Fill         {X:276 Y:222 W:480 H:218}  #3C4C52FF
-073  Sprite     Sprocket_Fill         {X:276 Y:222 W:480 H:1}  #5B737BFF
-074  Sprite     Sprocket_Fill         {X:276 Y:439 W:480 H:1}  #5B737BFF
-075  Sprite     Sprocket_Fill         {X:276 Y:222 W:1 H:218}  #5B737BFF
-076  Sprite     Sprocket_Fill         {X:755 Y:222 W:1 H:218}  #5B737BFF
-077  Text       at {X:284 Y:230.0543} scale 0.556  #85A1A9FF  "**strong words**"
-078  Text       at {X:486 Y:227.6399} scale 0.694  #FF9370FF  "strong words"
-079  Text       at {X:284 Y:256.0543} scale 0.556  #85A1A9FF  "*emphasized words*"
-080  Text       at {X:486 Y:253.6399} scale 0.694  #DCF5FDFF  "emphasized words"
-081  Text       at {X:284 Y:284.0543} scale 0.556  #85A1A9FF  "# A heading"
-082  Text       at {X:486 Y:279.2255} scale 0.833  #DCF5FDFF  "A heading"
-083  Text       at {X:284 Y:312.0543} scale 0.556  #85A1A9FF  "- An item in a list"
-084  Sprite     Sprocket_Fill         {X:494 Y:320 W:4 H:4}  #5B737BFF
-085  Text       at {X:506 Y:309.6399} scale 0.694  #A2C3CDFF  "An item in a list"
-086  Text       at {X:284 Y:338.0543} scale 0.556  #85A1A9FF  "1. A counted item"
-087  Text       at {X:486 Y:335.6399} scale 0.694  #A2C3CDFF  "1."
-088  Text       at {X:506 Y:335.6399} scale 0.694  #A2C3CDFF  "A counted item"
-089  Text       at {X:284 Y:364.0543} scale 0.556  #85A1A9FF  "`code`"
-090  Text       at {X:486 Y:361.6399} scale 0.694  #A2C3CDFF  "code"
-091  Text       at {X:284 Y:390.0543} scale 0.556  #85A1A9FF  "---"
-092  Sprite     Sprocket_Fill         {X:486 Y:400 W:262 H:1}  #5B737BFF
-093  Text       at {X:284 Y:414.0543} scale 0.556  #85A1A9FF  "A blank line starts a new paragraph. A \ before a mark shows the mark itself."
+007  Text       at {X:1529.576 Y:61.51406} scale 0.401  #5F7278FF  "u"
+008  Text       at {X:1569.576 Y:61.51406} scale 0.401  #5F7278FF  "r"
+009  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
+010  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
+011  Text       at {X:256 Y:95.05432} scale 0.556  #85A1A9FF  "Shown to anyone setting up, or changing, something made from this blueprint."
+012  Sprite     Sprocket_Fill         {X:240 Y:121 W:1440 H:1}  #5B737BFF
+013  SetClip    {X:256 Y:138 W:1408 H:882}
+014  Text       at {X:280 Y:147.6399} scale 0.694  #85A1A9FF  "DESCRIPTION"
+015  Sprite     Sprocket_Fill         {X:276 Y:186 W:73 H:32}  #3C4C52FF
+016  Sprite     Sprocket_Fill         {X:276 Y:186 W:73 H:1}  #70757AFF
+017  Sprite     Sprocket_Fill         {X:276 Y:217 W:73 H:1}  #70757AFF
+018  Sprite     Sprocket_Fill         {X:276 Y:186 W:1 H:32}  #70757AFF
+019  Sprite     Sprocket_Fill         {X:348 Y:186 W:1 H:32}  #70757AFF
+020  Text       at {X:292 Y:192.0543} scale 0.556  #DCF5FDFF  "Markup"
+021  Sprite     Sprocket_Fill         {X:357 Y:186 W:73 H:32}  #29363EFF
+022  Sprite     Sprocket_Fill         {X:357 Y:186 W:73 H:1}  #3F474FFF
+023  Sprite     Sprocket_Fill         {X:357 Y:217 W:73 H:1}  #3F474FFF
+024  Sprite     Sprocket_Fill         {X:357 Y:186 W:1 H:32}  #3F474FFF
+025  Sprite     Sprocket_Fill         {X:429 Y:186 W:1 H:32}  #3F474FFF
+026  Text       at {X:372.9667 Y:192.0543} scale 0.556  #DCF5FDFF  "Preview"
+027  Sprite     Sprocket_Fill         {X:276 Y:224 W:1356 H:240}  #141B20FF
+028  Sprite     Sprocket_Fill         {X:276 Y:224 W:1356 H:1}  #5B737BFF
+029  Sprite     Sprocket_Fill         {X:276 Y:463 W:1356 H:1}  #5B737BFF
+030  Sprite     Sprocket_Fill         {X:276 Y:224 W:1 H:240}  #5B737BFF
+031  Sprite     Sprocket_Fill         {X:1631 Y:224 W:1 H:240}  #5B737BFF
+032  SetClip    {X:276 Y:224 W:1356 H:240}
+033  SetClip    {X:284 Y:230 W:1328 H:216}
+034  Text       at {X:284 Y:227.6399} scale 0.694  #85A1A9FF  "What this blueprint does, and what whoever fills it in needs to know."
+035  SetClip    {X:276 Y:224 W:1356 H:240}
+036  SetClip    {X:256 Y:138 W:1408 H:882}
+037  Sprite     Sprocket_Fill         {X:256 Y:480 W:1396 H:1}  #5B737BFF
+038  Text       at {X:260 Y:498.6399} scale 0.694  #85A1A9FF  "SLOTS"
+039  Sprite     Sprocket_Fill         {X:276 Y:545 W:560 H:40}  #141B20FF
+040  Sprite     Sprocket_Fill         {X:276 Y:545 W:560 H:1}  #5B737BFF
+041  Sprite     Sprocket_Fill         {X:276 Y:584 W:560 H:1}  #5B737BFF
+042  Sprite     Sprocket_Fill         {X:276 Y:545 W:1 H:40}  #5B737BFF
+043  Sprite     Sprocket_Fill         {X:835 Y:545 W:1 H:40}  #5B737BFF
+044  SetClip    {X:276 Y:545 W:560 H:40}
+045  Text       at {X:288 Y:550.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
+046  SetClip    {X:256 Y:138 W:1408 H:882}
+047  Sprite     Sprocket_Fill         {X:276 Y:589 W:73 H:32}  #29363EFF
+048  Sprite     Sprocket_Fill         {X:276 Y:589 W:73 H:1}  #3F474FFF
+049  Sprite     Sprocket_Fill         {X:276 Y:620 W:73 H:1}  #3F474FFF
+050  Sprite     Sprocket_Fill         {X:276 Y:589 W:1 H:32}  #3F474FFF
+051  Sprite     Sprocket_Fill         {X:348 Y:589 W:1 H:32}  #3F474FFF
+052  Text       at {X:292 Y:595.0543} scale 0.556  #DCF5FDFF  "Markup"
+053  Sprite     Sprocket_Fill         {X:357 Y:589 W:73 H:32}  #29363EFF
+054  Sprite     Sprocket_Fill         {X:357 Y:589 W:73 H:1}  #3F474FFF
+055  Sprite     Sprocket_Fill         {X:357 Y:620 W:73 H:1}  #3F474FFF
+056  Sprite     Sprocket_Fill         {X:357 Y:589 W:1 H:32}  #3F474FFF
+057  Sprite     Sprocket_Fill         {X:429 Y:589 W:1 H:32}  #3F474FFF
+058  Text       at {X:372.9667 Y:595.0543} scale 0.556  #DCF5FDFF  "Preview"
+059  Sprite     Sprocket_Fill         {X:276 Y:627 W:560 H:72}  #141B20FF
+060  Sprite     Sprocket_Fill         {X:276 Y:627 W:560 H:1}  #5B737BFF
+061  Sprite     Sprocket_Fill         {X:276 Y:698 W:560 H:1}  #5B737BFF
+062  Sprite     Sprocket_Fill         {X:276 Y:627 W:1 H:72}  #5B737BFF
+063  Sprite     Sprocket_Fill         {X:835 Y:627 W:1 H:72}  #5B737BFF
+064  SetClip    {X:276 Y:627 W:560 H:72}
+065  SetClip    {X:284 Y:633 W:532 H:48}
+066  Text       at {X:284 Y:630.6399} scale 0.694  #85A1A9FF  "What this slot is for."
+067  SetClip    {X:276 Y:627 W:560 H:72}
+068  SetClip    {X:256 Y:138 W:1408 H:882}
+069  ClearClip  
+070  Sprite     Sprocket_Fill         {X:276 Y:222 W:480 H:218}  #3C4C52FF
+071  Sprite     Sprocket_Fill         {X:276 Y:222 W:480 H:1}  #5B737BFF
+072  Sprite     Sprocket_Fill         {X:276 Y:439 W:480 H:1}  #5B737BFF
+073  Sprite     Sprocket_Fill         {X:276 Y:222 W:1 H:218}  #5B737BFF
+074  Sprite     Sprocket_Fill         {X:755 Y:222 W:1 H:218}  #5B737BFF
+075  Text       at {X:284 Y:230.0543} scale 0.556  #85A1A9FF  "**strong words**"
+076  Text       at {X:486 Y:227.6399} scale 0.694  #FF9370FF  "strong words"
+077  Text       at {X:284 Y:256.0543} scale 0.556  #85A1A9FF  "*emphasized words*"
+078  Text       at {X:486 Y:253.6399} scale 0.694  #DCF5FDFF  "emphasized words"
+079  Text       at {X:284 Y:284.0543} scale 0.556  #85A1A9FF  "# A heading"
+080  Text       at {X:486 Y:279.2255} scale 0.833  #DCF5FDFF  "A heading"
+081  Text       at {X:284 Y:312.0543} scale 0.556  #85A1A9FF  "- An item in a list"
+082  Sprite     Sprocket_Fill         {X:494 Y:320 W:4 H:4}  #5B737BFF
+083  Text       at {X:506 Y:309.6399} scale 0.694  #A2C3CDFF  "An item in a list"
+084  Text       at {X:284 Y:338.0543} scale 0.556  #85A1A9FF  "1. A counted item"
+085  Text       at {X:486 Y:335.6399} scale 0.694  #A2C3CDFF  "1."
+086  Text       at {X:506 Y:335.6399} scale 0.694  #A2C3CDFF  "A counted item"
+087  Text       at {X:284 Y:364.0543} scale 0.556  #85A1A9FF  "`code`"
+088  Text       at {X:486 Y:361.6399} scale 0.694  #A2C3CDFF  "code"
+089  Text       at {X:284 Y:390.0543} scale 0.556  #85A1A9FF  "---"
+090  Sprite     Sprocket_Fill         {X:486 Y:400 W:262 H:1}  #5B737BFF
+091  Text       at {X:284 Y:414.0543} scale 0.556  #85A1A9FF  "A blank line starts a new paragraph. A \ before a mark shows the mark itself."
+092  Sprite     Sprocket_Fill         {X:325 Y:217 W:253 H:36}  #1B242AFF
+093  Sprite     Sprocket_Fill         {X:325 Y:217 W:253 H:1}  #5B737BFF
+094  Sprite     Sprocket_Fill         {X:325 Y:252 W:253 H:1}  #5B737BFF
+095  Sprite     Sprocket_Fill         {X:325 Y:217 W:1 H:36}  #5B737BFF
+096  Sprite     Sprocket_Fill         {X:577 Y:217 W:1 H:36}  #5B737BFF
+097  Text       at {X:337 Y:222.9279} scale 0.694  #A2C3CDFF  "Show the guide to formatting text."

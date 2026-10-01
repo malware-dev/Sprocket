@@ -73,6 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<Field> _givenFields = new List<Field>();
         readonly Func<GridEntity, bool> _fits;
         readonly Func<GridEntity, bool> _admits;
+        readonly bool _triggersOnly;
 
         string _chosen;
         Form _chosenForm;
@@ -114,16 +115,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <remarks>
         /// <paramref name="after" /> is the strip of the pick this page goes on in, as its next page, or null for a pick of its
         /// own. <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
-        /// them. Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind
-        /// it does not have is dropped later, where it is.
+        /// them. <paramref name="triggersOnly" /> offers only what the construct does to start something, for a trigger slot.
+        /// Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind it does
+        /// not have is dropped later, where it is.
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
             bool asksAll = false, bool all = false, IList<Literal> values = null,
-            Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null)
+            Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
+            bool triggersOnly = false)
             : base(editor)
         {
             _admits = admits;
+            _triggersOnly = triggersOnly;
             _opens = opens;
             _aim = aim;
             if (aim != null)
@@ -187,7 +191,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <inheritdoc />
         /// <remarks>Nothing where what the trigger does goes on to a page of its own.</remarks>
-        public override string PrimaryText => IsComplete && (_aim == null || _aim.Finishes) ? Editor.Texts.PickDone : "";
+        public override string PrimaryText => _aim == null || _aim.Outcome != Outcome.One ? Editor.Texts.ChromeDone : "";
+
+        /// <inheritdoc />
+        public override bool CanPrimary => IsComplete && (_aim == null || _aim.Finishes);
+
+        /// <inheritdoc />
+        public override string PrimaryAbout => Editor.Texts.PickDoneAbout;
+
+        /// <inheritdoc />
+        public override string PrimaryWaits => Editor.Texts.PickDoneFirst;
 
         /// <summary>What the chosen action will not do anything without, which the column of values asks for beside the stages.</summary>
         /// <remarks>
@@ -199,7 +212,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             get
             {
                 var fields = Wanted();
-                return fields.Count > 0 ? SequenceText.Wants(fields) : "";
+                return fields.Count > 0 ? SequenceText.Wants(Editor.Texts, fields) : "";
             }
         }
 
@@ -384,14 +397,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             FillBlocks();
 
-            // A slot's pick is finished from the only column it has.
-            if (_fits != null)
-            {
-                // ReSharper disable once PossibleNullReferenceException - made above where it had not been, by MakeBlocks.
-                _blocks.Finishes = true;
-                _blocks.Done.Command = _finish;
-                _blocks.Done.IsEnabled = PrimaryText.Length != 0;
-            }
+
 
             // The second stage exists only once there is something for it to be about, and never where only blocks are asked.
             var wanted = _selection.Count > 0 && _fits == null;
@@ -420,7 +426,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 _does = new StageColumn(_strip.Width, false, null, Editor.Texts, Windows);
                 _does.Title = Editor.Texts.PickWhatItDoes;
-                _does.Done.Command = _finish;
                 _strip.Add(_does);
             }
             else if (!does && _does != null)
@@ -432,10 +437,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             FillGiven();
 
             if (_does != null && _aim != null)
-            {
                 _aim.Fill(_does);
-                _does.Done.IsEnabled = PrimaryText.Length != 0;
-            }
 
             _strip.Show();
             _strip.Arrive(Opens, Editor.Input);
@@ -463,10 +465,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var entity = Editor.World.FindEntity(_filtered[i].Id);
                 var row = _blockRows[_filtered[i].Id];
-                if (entity == null || row == null || row.Status == entity.Status)
+                if (entity == null || row == null || row.Status == TroubleText.Of(Editor.Texts, entity.Status))
                     continue;
 
-                row.Status = entity.Status;
+                row.Status = TroubleText.Of(Editor.Texts, entity.Status);
                 row.Show();
             }
         }
@@ -609,7 +611,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </summary>
         void MoveOn()
         {
-            if (PrimaryText.Length == 0)
+            if (PrimaryText.Length == 0 || !CanPrimary)
                 return;
 
             var values = _strip.Values;
@@ -713,7 +715,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 };
             }
 
-            values.Done.Command = _finish;
             _entered = values.Form.Answer;
 
             // Nowhere to type is nowhere to keep the keyboard. Somebody who came for the values gets it in them, once.
@@ -784,7 +785,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 row.Text = entity.Name;
                 row.Secondary = entity.Kind.DisplayName;
-                row.Status = entity.Status;
+                row.Status = TroubleText.Of(Editor.Texts, entity.Status);
                 row.Icon = entity.Kind.Icon;
                 row.HasPicture = icons;
                 row.Many = true;
@@ -919,7 +920,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var events = Vocabulary.EventsOf(Editor.World, _selection);
                 for (var i = 0; i < events.Count; i++)
                 {
+                    if (_triggersOnly && !events[i].Answered)
+                        continue;
+
                     _names.Add(events[i].Text);
+
                     _ids.Add(events[i].Id);
                     _sets.Add(false);
                 }
@@ -932,7 +937,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var texts = Editor.Texts;
             var note = Checked(texts, Vocabulary.Least(Editor.World, _selection));
             if (!_forEvents && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsTerminal))
-                note = note.Length == 0 ? texts.PickShared : note + " " + texts.PickShared + ".";
+                note = note.Length == 0 ? texts.PickShared : Template.Fill(Template.Fill(texts.PickNoteAndShared, "shared", texts.PickShared), "note", note);
 
             // A choice the blocks can no longer honor is dropped rather than left showing, so Done never appears over a
             // sentence that could not run.
@@ -1019,7 +1024,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 row.IsHeading = false;
                 row.IsWithheld = ready != Readiness.Ready;
                 row.Why = row.IsWithheld ? _why[at] : null;
-                row.Status = ReadinessText.Tag(ready);
+                row.Status = ReadinessText.Tag(Editor.Texts, ready);
                 row.IsChosen = _ids[at] == chosen && form == _chosenForm;
                 row.Waits = _waits.Count > at && _waits[at];
                 row.Show();
@@ -1084,7 +1089,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _waits.Add(one.Lasts);
                 _sets.Add(one.Sets);
                 _ready.Add(one.Readiness);
-                _why.Add(one.Why);
+                _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
             }
         }
 
@@ -1211,7 +1216,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (Editor.ShowsTerminal)
                 return group == Values ? Editor.Texts.PickValues : Editor.Texts.PickToolbarActions;
 
-            return CategoryText.Of((Category)group);
+            return CategoryText.Of(Editor.Texts, (Category)group);
         }
 
         int CountOfKind(string kindId)

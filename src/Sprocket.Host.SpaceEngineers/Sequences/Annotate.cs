@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _now = now;
         }
 
-        public override string Label => "changing the description";
+        public override Change Change => Change.Describe;
 
         public override bool Changes => _was != _now;
 

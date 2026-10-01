@@ -25,22 +25,22 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Nothing can start the sequence, for <paramref name="why" />, on the button of <paramref name="block" /> where one is known.</summary>
         public static SequenceFault Unstarted(Unwired why, string block)
         {
-            var fault = new SequenceFault(SequenceProblem.NeverTriggered, Trigger, null, block);
+            var fault = new SequenceFault(SequenceProblem.NeverTriggered, Trigger, Trouble.None, block);
             fault.Unwired = why;
             return fault;
         }
 
-        public SequenceFault(SequenceProblem problem, int step) : this(problem, step, null)
+        public SequenceFault(SequenceProblem problem, int step) : this(problem, step, Trouble.None)
         {
         }
 
-        /// <summary>The same, where the thing at fault said in its own words what is wrong.</summary>
+        /// <summary>The same, where the block at fault said what is wrong.</summary>
         /// <remarks>
         /// Most problems are the same sentence every time they happen, and that sentence lives in
         /// the wording. A block that cannot finish is not: only it knows why, and the reason is
         /// worth more than the category.
         /// </remarks>
-        public SequenceFault(SequenceProblem problem, int step, string because) : this()
+        public SequenceFault(SequenceProblem problem, int step, Trouble because) : this()
         {
             Problem = problem;
             Step = step;
@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The same, naming the one block at fault by <paramref name="which" />, its reference.</summary>
-        public SequenceFault(SequenceProblem problem, int step, string because, string which) : this(problem, step, because)
+        public SequenceFault(SequenceProblem problem, int step, Trouble because, string which) : this(problem, step, because)
         {
             Which = which;
         }
@@ -59,7 +59,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Why nothing can start the sequence, for a <see cref="SequenceProblem.NeverTriggered" /> fault.</summary>
         public Unwired Unwired { get; private set; }
 
-        public string Because { get; private set; }
+        /// <summary>What the block at fault said is wrong, or none where it said nothing.</summary>
+        public Trouble Because { get; private set; }
 
         public SequenceProblem Problem { get; private set; }
 

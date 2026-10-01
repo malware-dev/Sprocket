@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             GameActionId = gameActionId;
             Named = Capitalised(text);
             Declared = text;
-            Why = "";
+            Why = Holdback.None;
             Wants = wants;
             Category = Categories.Of(gameActionId);
         }
@@ -64,14 +64,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether this can be made into a step, which nearly everything can.</summary>
         public Readiness Readiness { get; private set; }
 
-        /// <summary>Why it cannot be made into a step, for the person looking at it, or empty where it can.</summary>
-        public string Why { get; private set; }
+        /// <summary>Why it cannot be made into a step, for the person looking at it, or <see cref="Holdback.None" /> where it can.</summary>
+        public Holdback Why { get; private set; }
 
         /// <summary>Keeps this from being made into a step, saying why.</summary>
-        public void Withhold(Readiness readiness, string why)
+        public void Withhold(Readiness readiness, Holdback why)
         {
             Readiness = readiness;
-            Why = why ?? "";
+            Why = why;
         }
 
         /// <summary>Says that reaching this action's state takes time.</summary>

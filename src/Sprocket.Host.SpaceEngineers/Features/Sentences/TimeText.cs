@@ -1,4 +1,6 @@
-
+using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Localization;
+using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
@@ -10,76 +12,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// sags under load, so anything promising seconds would drift exactly when the machine matters
     /// most. Saying that in seconds and minutes is this target choosing readability over precision,
     /// which is the right trade for "recently, or ages ago" and the wrong one for deciding when to
-    /// act - and nothing decides when to act from these.
+    /// act - and nothing decides when to act from these. A length in ticks is the program's own,
+    /// so it stays in the program's words; how long ago is <see cref="Ago" />'s.
     /// </remarks>
     public static class TimeText
     {
-        const int TicksPerSecond = 60;
-
-        /// <summary>What the box for a length nobody offered says while it is empty.</summary>
-        public const string OtherWait = "Another length, in ticks";
-
-        /// <summary>The button beside that box, which takes the length typed in it.</summary>
-        public const string UseLength = "Use";
-
-        static readonly string[] Minutes = BuildMinutes();
-
-
         /// <summary>A length of time, in ticks, which is the only unit a program writes one in.</summary>
         public static string Duration(int ticks)
         {
             return ticks == 1 ? "1 tick" : ticks + " ticks";
         }
 
-        /// <summary>
-        /// How long ago, in words.
-        /// </summary>
-        /// <remarks>
-        /// Every answer comes from a table built once, so this can be called on every tick for every
-        /// visible sequence without allocating.
-        /// <para>
-        /// The seconds are derived from ticks at the nominal rate, so under heavy load they run
-        /// slightly short of wall-clock. Fine here, and it would not be elsewhere: this only ever has
-        /// to answer "recently, or ages ago", and nothing decides when to act from it.
-        /// </para>
-        /// </remarks>
-        public static string Ago(int ticksAgo)
-        {
-            if (ticksAgo < 0)
-                return "";
-
-            var seconds = ticksAgo / TicksPerSecond;
-            if (seconds < 2)
-                return "just now";
-
-            // One answer for the whole first minute, rather than a new one every second. Counting
-            // seconds changes what every row says once a second for as long as a screen is open,
-            // and wakes everything downstream of it to be told a number nobody is reading - a
-            // construct with fifty sequences pays that fifty times a second, for ever.
-            //
-            // Nothing is lost with it. What second-level words were good for is saying that
-            // something has just happened, and the light on the row says that faster and without
-            // being read.
-            if (seconds < 60)
-                return "less than a minute ago";
-            if (seconds < 120)
-                return "a minute ago";
-
-            var minutes = seconds / 60;
-            if (minutes < 60)
-                return Minutes[minutes];
-
-            return "over an hour ago";
-        }
-
-
-        /// <summary>One of the lengths offered for a wait, said aloud and then in ticks.</summary>
+        /// <summary>One of the lengths offered for a wait, said aloud in <paramref name="texts" /> and then in ticks.</summary>
         /// <remarks>
         /// Where somebody meets a tick for the first time, so the length they know sits beside it.
         /// </remarks>
-        public static string WaitChoice(int ticks)
+        public static string WaitChoice(Texts texts, int ticks)
         {
-            return Spoken(ticks) + " - " + Duration(ticks);
+            return Template.Fill(Template.Fill(texts.TimeChoice, "ticks", Duration(ticks)), "spoken", Spoken(texts, ticks));
         }
 
 
@@ -89,26 +39,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>A length of time as it would be said aloud, for a choice that also gives its ticks.</summary>
-        static string Spoken(int ticks)
+        static string Spoken(Texts texts, int ticks)
         {
             if (ticks < 60)
                 return Duration(ticks);
 
             var seconds = ticks / 60;
             if (seconds < 60)
-                return seconds == 1 ? "1 second" : seconds + " seconds";
+                return seconds == 1 ? texts.TimeSecond : Template.Fill(texts.TimeSeconds, "count", seconds.ToString(CultureInfo.InvariantCulture));
 
             var minutes = seconds / 60;
-            return minutes == 1 ? "a minute" : minutes + " minutes";
-        }
-
-
-        static string[] BuildMinutes()
-        {
-            var words = new string[60];
-            for (var i = 2; i < 60; i++)
-                words[i] = i + " minutes ago";
-            return words;
+            return minutes == 1 ? texts.TimeMinute : Template.Fill(texts.TimeMinutes, "count", minutes.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

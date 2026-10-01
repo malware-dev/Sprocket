@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _keptAt = new List<ToolbarSlot>(keptAt);
         }
 
-        public override string Label => "taking a button over";
+        public override Change Change => Change.TakeOver;
 
         public override bool Changes => true;
 

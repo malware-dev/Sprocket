@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
@@ -25,10 +26,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
         readonly List<EntityRef> _refs = new List<EntityRef>();
+        readonly List<TriggerRef> _triggerRefs = new List<TriggerRef>();
+
+        // Every name in a program is looked up here while it is read, so a scan of the lists would make reading
+        // quadratic in the size of the program.
+        readonly Dictionary<string, EntityRef> _refsByName = new Dictionary<string, EntityRef>();
+        readonly Dictionary<string, TriggerRef> _triggerRefsByName = new Dictionary<string, TriggerRef>();
 
         int _nextSequenceId = 1;
         int _nextSystemId = 1;
-        int _nextRefNumber = 1;
 
         /// <summary>
         /// Every sequence, flat, in the order they were made.
@@ -144,6 +150,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public IReadOnlyList<EntityRef> Refs => _refs;
 
+        /// <summary>Every trigger this program names as a variable: a slot on a block's toolbar, which a system starts a step from with <c>on</c>.</summary>
+        public IReadOnlyList<TriggerRef> TriggerRefs => _triggerRefs;
+
         /// <summary>
         /// Bumped whenever a declaration is added, removed or re-pointed.
         /// </summary>
@@ -223,6 +232,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// which is what makes re-pointing it later a single act - and the way to tell is to resolve
         /// what is already declared rather than to remember an id, because an id is exactly the thing
         /// that stops being true.
+        /// <para>
+        /// The variable is named for the block as it is called when it is declared, numbered where another variable has
+        /// that name: the name a person recognizes, given once and kept.
+        /// </para>
         /// </remarks>
         public EntityRef Declare(GridWorld world, GridEntity entity)
         {
@@ -234,28 +247,117 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     return _refs[i];
             }
 
-            var declared = new EntityRef("entity" + _nextRefNumber++, entity.Kind.Id);
+            var called = Naming.Clean(entity.Name);
+            var declared = new EntityRef(Free(called.Length > 0 ? called : entity.Kind.DisplayName), entity.Kind.Id);
             world.Identify(entity, declared.Keys);
+            return Restore(declared);
+        }
+
+        /// <summary>Puts back a declaration read from storage.</summary>
+        public EntityRef Restore(EntityRef declared)
+        {
             _refs.Add(declared);
+            if (!_refsByName.ContainsKey(declared.Name))
+                _refsByName.Add(declared.Name, declared);
+
             Revision++;
             Wiring++;
             return declared;
         }
 
         /// <summary>
-        /// Puts back a declaration read from storage, keeping generated names from colliding with it.
+        /// The variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names, declared where there
+        /// is none, named <paramref name="called" /> as a block's variable is.
         /// </summary>
-        public EntityRef Restore(EntityRef declared)
+        public TriggerRef DeclareTrigger(string block, ToolbarSlot at, string called)
         {
-            _refs.Add(declared);
+            var declared = FindTriggerRef(block, at);
+            if (declared != null)
+                return declared;
+
+            return Restore(new TriggerRef(Free(called), block, at));
+        }
+
+        /// <summary>Puts back a trigger variable read from storage.</summary>
+        public TriggerRef Restore(TriggerRef declared)
+        {
+            _triggerRefs.Add(declared);
+            if (!_triggerRefsByName.ContainsKey(declared.Name))
+                _triggerRefsByName.Add(declared.Name, declared);
+
             Revision++;
             Wiring++;
-
-            var number = Number(declared.Name);
-            if (number >= _nextRefNumber)
-                _nextRefNumber = number + 1;
-
             return declared;
+        }
+
+        /// <summary>The trigger variable called <paramref name="name" />, or null.</summary>
+        public TriggerRef FindTriggerRef(string name)
+        {
+            TriggerRef found;
+            return _triggerRefsByName.TryGetValue(name, out found) ? found : null;
+        }
+
+        /// <summary>The trigger variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names, or null.</summary>
+        public TriggerRef FindTriggerRef(string block, ToolbarSlot at)
+        {
+            for (var i = 0; i < _triggerRefs.Count; i++)
+            {
+                if (_triggerRefs[i].Block == block && _triggerRefs[i].At.Same(at))
+                    return _triggerRefs[i];
+            }
+
+            return null;
+        }
+
+        /// <summary>Whether a variable, of either sort, is called <paramref name="name" />.</summary>
+        public bool Names(string name)
+        {
+            return FindRef(name) != null || FindTriggerRef(name) != null;
+        }
+
+        /// <summary><paramref name="called" />, numbered where a variable already has it: Door, Door 2.</summary>
+        public string Free(string called)
+        {
+            var name = called;
+            for (var n = 2; Names(name); n++)
+                name = called + " " + n;
+
+            return name;
+        }
+
+        /// <summary>
+        /// What answers trigger <paramref name="trigger" /> of <paramref name="system" /> as <paramref name="instance" />
+        /// runs it: the blocks, in <paramref name="blocks" />, and the slot on each, in <paramref name="at" />.
+        /// </summary>
+        /// <remarks>
+        /// An instance answers a blueprint's trigger slot; a system's trigger is a variable of the program's own. Both
+        /// lists are cleared first, and stay empty where nothing answers it.
+        /// </remarks>
+        public void Answers(AutomationSystem system, SystemInstance instance, string trigger, List<string> blocks,
+            List<ToolbarSlot> at)
+        {
+            blocks.Clear();
+            at.Clear();
+
+            if (system.IsBlueprint)
+            {
+                var filled = instance == null ? null : instance.FilledWith(trigger);
+                var positions = instance == null ? null : instance.Positions(trigger);
+                for (var i = 0; filled != null && positions != null && i < filled.Count && i < positions.Count; i++)
+                {
+                    blocks.Add(filled[i]);
+                    at.Add(positions[i]);
+                }
+
+                return;
+            }
+
+            var declared = FindTriggerRef(trigger);
+            if (declared == null)
+                return;
+
+            blocks.Add(declared.Block);
+            at.Add(declared.At);
         }
 
         /// <summary>The name <paramref name="reference" /> was last known by on the construct, or the reference itself where none was recorded.</summary>
@@ -275,73 +377,47 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return reference;
         }
 
+        /// <summary>The block variable called <paramref name="name" />, or null.</summary>
         public EntityRef FindRef(string name)
         {
-            for (var i = 0; i < _refs.Count; i++)
-            {
-                if (_refs[i].Name == name)
-                    return _refs[i];
-            }
-
-            return null;
-        }
-
-        /// <summary>The number a generated name ends in, or zero for one somebody wrote.</summary>
-        static int Number(string name)
-        {
-            var digits = 0;
-            while (digits < name.Length && name[name.Length - 1 - digits] >= '0'
-                   && name[name.Length - 1 - digits] <= '9')
-                digits++;
-
-            if (digits == 0 || digits == name.Length)
-                return 0;
-
-            var number = 0;
-            for (var i = name.Length - digits; i < name.Length; i++)
-                number = number * 10 + (name[i] - '0');
-
-            return number;
+            EntityRef found;
+            return _refsByName.TryGetValue(name, out found) ? found : null;
         }
 
         /// <summary>
-        /// A new system, named, with one of it already on the ship.
+        /// A new system, named, running on this construct's own blocks.
         /// </summary>
         /// <remarks>
-        /// Making a system and then being asked to place one would be two steps for one
-        /// thought. Somebody who builds a thing has one of that thing.
-        /// <para>
         /// <b>Named from birth, because a name is not optional.</b> The format has no spelling for a
         /// system without one, so an unnamed system is a program that cannot be written down: it
         /// saves as an empty name and refuses to read back. Whoever made it says what it is called
         /// straight afterwards - the editor asks before it gets here - and this is what the ones
         /// nobody names are left with.
-        /// </para>
         /// </remarks>
-        public AutomationSystem AddSystem()
+        /// <param name="numbered">What the ones nobody names are called, with <c>{number}</c> where the number goes: in the player's language where a person made it.</param>
+        public AutomationSystem AddSystem(string numbered = "Logic system {number}")
         {
             var system = new AutomationSystem(_nextSystemId++, Guid.NewGuid());
             system.Reshaped = Reshape;
             system.Started = Start;
-            system.Name = FreeName();
-            system.AddInstance();
+            system.Name = FreeName(numbered);
             _systems.Add(system);
             return system;
         }
 
         /// <summary>
-        /// The first <c>Logic system n</c> nobody is using.
+        /// The first <paramref name="numbered" /> nobody is using.
         /// </summary>
         /// <remarks>
         /// The first free number rather than a running count, so deleting the second of three and
         /// adding another gives "Logic system 2" back - the same rule a new sequence is named by, and the
         /// same rule the game names a block by.
         /// </remarks>
-        string FreeName()
+        string FreeName(string numbered)
         {
             for (var number = 1; ; number++)
             {
-                var wanted = "Logic system " + number;
+                var wanted = numbered.Replace("{number}", number.ToString(CultureInfo.InvariantCulture));
 
                 var taken = false;
                 for (var i = 0; i < _systems.Count && !taken; i++)
@@ -358,9 +434,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <remarks>
         /// The system is its identity, so that comes back with its name; its session handle is new, since
         /// nothing outside this session ever held one.
-        ///
-        /// No instance is added, unlike <see cref="AddSystem"/>: whatever was saved is what
-        /// comes back, and inventing an extra one would multiply systems on every reload.
         /// </remarks>
         public AutomationSystem Restore(Guid identity, string space, string name)
         {
@@ -549,6 +622,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 RemoveSystem(_systems[i]);
 
             _refs.Clear();
+            _triggerRefs.Clear();
+            _refsByName.Clear();
+            _triggerRefsByName.Clear();
             Annotation = "";
         }
 

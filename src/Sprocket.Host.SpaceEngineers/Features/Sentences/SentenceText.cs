@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             // it reaches Sprocket is not what the sentence is about. Only one naming nothing has to
             // say that out loud, because it has nothing else to show.
             return kind == TriggerKind.Required && parts == 0
-                ? "When something on this ship says so"
+                ? "When something on this construct starts it"
                 : "When";
         }
 

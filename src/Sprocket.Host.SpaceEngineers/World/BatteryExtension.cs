@@ -67,26 +67,26 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public string StatusOf(IMyTerminalBlock block)
+        public Status StatusOf(IMyTerminalBlock block)
         {
             var battery = block as IMyBatteryBlock;
             if (battery == null)
-                return null;
+                return Status.None;
 
             if (Charged(battery))
-                return "full";
+                return Status.Of(Condition.Full);
 
             if (battery.ChargeMode == ChargeMode.Recharge)
             {
                 Trouble stuck = Charging(battery);
                 if (stuck.Exists)
-                    return stuck.Said;
+                    return Status.Of(stuck);
             }
 
             if (battery.IsCharging)
-                return "charging…";
+                return Status.Of(Condition.Charging);
 
-            return battery.HasCapacityRemaining ? null : "empty";
+            return battery.HasCapacityRemaining ? Status.None : Status.Of(Condition.Empty);
         }
 
         /// <summary>
@@ -103,10 +103,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return Trouble.None;
 
             if (battery.ChargeMode == ChargeMode.Discharge)
-                return Trouble.Fatal("stopped - something else set this battery to discharge");
+                return Trouble.Fatal(Cause.BatteryToldToDischarge);
 
             if (battery.ChargeMode == ChargeMode.Auto)
-                return Trouble.Fatal("stopped - something else set this battery to auto");
+                return Trouble.Fatal(Cause.BatteryToldToAuto);
 
             return Charging(battery);
         }
@@ -120,14 +120,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         static Trouble Charging(IMyBatteryBlock battery)
         {
             if (!battery.Enabled)
-                return Trouble.Waiting("cannot charge - it is switched off");
+                return Trouble.Waiting(Cause.BatteryOff);
 
             if (!battery.IsFunctional)
-                return Trouble.Waiting("cannot charge - it is damaged");
+                return Trouble.Waiting(Cause.BatteryDamaged);
 
             return battery.CurrentInput > 0f
                 ? Trouble.None
-                : Trouble.Waiting("cannot charge - no power coming in");
+                : Trouble.Waiting(Cause.BatteryNoPower);
         }
 
         static bool Charged(IMyBatteryBlock battery)

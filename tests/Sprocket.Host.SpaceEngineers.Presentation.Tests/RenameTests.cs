@@ -67,7 +67,7 @@ public class RenameTests
         var editor = screen.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("When…");
+        editor.PressStart("when…");
         screen.Run(5);
 
         var tall = Header(screen);
@@ -110,7 +110,7 @@ public class RenameTests
         var at = Screen.Ui(name.At.X + 8f, screen.MiddleOf(name));
         screen.Do("move", Say(at.X), Say(at.Y));
 
-        Assert.True(screen.Legible.Any(t => t.Contains("Press to rename the grid")), "resting on the grid's name said nothing about it");
+        Assert.True(screen.Legible.Any(t => t.Contains("Renaming it here renames the grid")), "resting on the grid's name said nothing about it");
     }
 
     /// <summary>

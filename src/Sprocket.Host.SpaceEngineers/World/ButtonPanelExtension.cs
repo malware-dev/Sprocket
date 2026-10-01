@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
 // are declared in both, and the mod-side ones are the ones with the events on them.
@@ -26,40 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     sealed class ButtonPanelExtension : IBlockExtension
     {
-        /// <summary>
-        /// One property per button, named by its number from one.
-        /// </summary>
-        /// <remarks>
-        /// A property each rather than one for the panel, because "when the airlock button is
-        /// pressed" is only the right sentence on a panel with one button. On a panel with four it
-        /// has to say which, and the picker offers whatever a kind declares - so declaring four
-        /// events is the whole of making them selectable.
-        /// </remarks>
-        public static string Pressed(int button)
-        {
-            return Spelling + button;
-        }
-
-        const string Spelling = "pressed_";
-
-        /// <summary>
-        /// Which button an event names, counting from zero, or -1 for anything else.
-        /// </summary>
-        /// <remarks>
-        /// The only place that knows how a button event is spelled. A toolbar slot has to be claimed
-        /// on the button somebody chose, and the event id is where that choice is recorded.
-        /// </remarks>
-        public static int ButtonOf(string eventId)
-        {
-            if (string.IsNullOrEmpty(eventId) || !eventId.StartsWith(Spelling))
-                return -1;
-
-            int number;
-            return int.TryParse(eventId.Substring(Spelling.Length), out number) && number >= 1
-                ? number - 1
-                : -1;
-        }
-
         /// <summary>How many buttons a panel has.</summary>
         /// <remarks>Its toolbar's slot count, which is the game's own answer to the same question.</remarks>
         static int Buttons(IMyTerminalBlock block)
@@ -76,12 +43,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether that button still starts that particular thing.</summary>
         public bool Raises(IMyTerminalBlock block, string eventId, string key)
         {
-            var button = ButtonOf(eventId);
-            if (button < 0)
+            var at = ToolbarSlot.Of(eventId);
+            if (at == null)
                 return true;
 
-            IMyToolbar toolbar = Toolbars.Of(block);
-            if (toolbar == null || button >= toolbar.SlotCount)
+            IMyToolbar toolbar = Toolbars.Of(block, at.Toolbar);
+            var button = Toolbars.Index(toolbar, at);
+            if (button < 0)
                 return false;
 
             MyToolbarItemInfo held;
@@ -99,16 +67,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            var buttons = Buttons(block);
-
-            for (var i = 1; i <= buttons; i++)
-            {
-                // "button 2 is pressed" on a panel with several, and plain "is pressed" on a panel
-                // with one, where saying which would be saying something nobody needs to know.
-                var words = buttons == 1 ? "is pressed" : "button " + i + " is pressed";
-                kind.WithAnsweredEvent(Pressed(i), words);
-            }
-
             // What is written on the panel for somebody standing in front of it to read, which is a
             // label on the machine rather than anything the machine does.
             kind.Hiding("ButtonName");
@@ -140,20 +98,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             return Trouble.None;
         }
-        public string StatusOf(IMyTerminalBlock block)
+        public Status StatusOf(IMyTerminalBlock block)
         {
             var panel = block as IMyButtonPanel;
             if (panel == null)
-                return null;
+                return Status.None;
 
             var buttons = Buttons(block);
             for (int i = 0; i < buttons; i++)
             {
                 if (panel.IsButtonAssigned(i))
-                    return null;
+                    return Status.None;
             }
 
-            return "not wired";
+            return Status.Of(Condition.NotWired);
         }
 
         public bool IsBusy(IMyTerminalBlock block)

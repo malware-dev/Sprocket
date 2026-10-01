@@ -7,70 +7,75 @@ on screen     Airlock
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1131 H:40}
+003  SetClip    {X:296 Y:53 W:1063 H:40}
 004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Airlock"
 005  Text       at {X:390.8629 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 006  Text       at {X:420.7067 Y:53.39666} scale 1.111  #A2C3CDFF  "blueprint"
 007  ClearClip  
-008  Text       at {X:1441.34 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
-009  Text       at {X:1481.34 Y:61.51406} scale 0.401  #5F7278FF  "u"
-010  Text       at {X:1521.34 Y:61.51406} scale 0.401  #5F7278FF  "r"
-011  Text       at {X:1561.34 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
-012  Sprite     Sprocket_Fill         {X:1595 Y:57 W:69 H:32}  #5B737BFF
-013  Sprite     Sprocket_Fill         {X:1599 Y:61 W:61 H:24}  #20272DFF
-014  Sprite     Sprocket_Fill         {X:1599 Y:61 W:24 H:24}  #DCF5FDFF
-015  Text       at {X:1631.183 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
-016  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-017  SetClip    {X:256 Y:118 W:1408 H:902}
-018  Text       at {X:260 Y:129.2255} scale 0.833  #A2C3CDFF  "Using the blocks of"
-019  Sprite     Sprocket_Fill         {X:421 Y:126 W:89 H:36}  #29363EFF
-020  Sprite     Sprocket_Fill         {X:421 Y:126 W:89 H:1}  #A2C3CDFF
-021  Sprite     Sprocket_Fill         {X:421 Y:161 W:89 H:1}  #A2C3CDFF
-022  Sprite     Sprocket_Fill         {X:421 Y:126 W:1 H:36}  #A2C3CDFF
-023  Sprite     Sprocket_Fill         {X:509 Y:126 W:1 H:36}  #A2C3CDFF
-024  Text       at {X:432.58 Y:131.6399} scale 0.694  #DCF5FDFF  "Port"
-025  Text       at {X:467.6704 Y:136.4932} scale 0.241  #A2C3CDFF  "v"
-026  Sprite     Sprocket_Fill         {X:1493 Y:128 W:159 H:32}  #29363EFF
-027  Sprite     Sprocket_Fill         {X:1493 Y:128 W:159 H:1}  #3F474FFF
-028  Sprite     Sprocket_Fill         {X:1493 Y:159 W:159 H:1}  #3F474FFF
-029  Sprite     Sprocket_Fill         {X:1493 Y:128 W:1 H:32}  #3F474FFF
-030  Sprite     Sprocket_Fill         {X:1651 Y:128 W:1 H:32}  #3F474FFF
-031  Text       at {X:1508.91 Y:134.0543} scale 0.556  #DCF5FDFF  "Edit configuration panel"
-032  Text       at {X:260 Y:199.6399} scale 0.694  #85A1A9FF  "TRIGGERS"
-033  Text       at {X:272 Y:235.2255} scale 0.833  #A2C3CDFF  "+ When…"
-034  Text       at {X:389.22 Y:235.2255} scale 0.833  #A2C3CDFF  "+ Every…"
-035  Sprite     Sprocket_Fill         {X:256 Y:278 W:1396 H:1}  #5B737BFF
-036  Sprite     Sprocket_Fill         {X:256 Y:287 W:1396 H:76}  #240C0AFF
-037  Text       at {X:272 Y:300.2255} scale 0.833  #A2C3CDFF  "When"
-038  Sprite     Sprocket_Fill         {X:327 Y:295 W:45 H:40}  #374851FF
-039  Sprite     Sprocket_Fill         {X:327 Y:333 W:45 H:2}  #F0AC28FF
-040  Text       at {X:342.71 Y:300.2255} scale 0.833  #F0AC28FF  "…"
-041  Sprite     Sprocket_Fill         {X:380 Y:295 W:45 H:40}  #374851FF
-042  Sprite     Sprocket_Fill         {X:380 Y:333 W:45 H:2}  #F0AC28FF
-043  Text       at {X:395.9333 Y:300.2255} scale 0.833  #F0AC28FF  "…"
-044  Text       at {X:433.1567 Y:300.2255} scale 0.833  #A2C3CDFF  "then run"
-045  Sprite     Sprocket_Fill         {X:509 Y:295 W:124 H:40}  #374851FF
-046  Sprite     Sprocket_Fill         {X:509 Y:333 W:124 H:2}  #8EBCCFFF
-047  Text       at {X:524.7633 Y:300.2255} scale 0.833  #DCF5FDFF  "Sequence 1"
-048  Text       at {X:272 Y:337.0543} scale 0.556  #E84A3AFF  "The Airlock Button slot is empty. Fill it on the configuration panel."
-049  Text       at {X:1610.156 Y:313.5141} scale 0.401  #A2C3CDFF  "d"
-050  Text       at {X:260 Y:392.6399} scale 0.694  #85A1A9FF  "SEQUENCES"
-051  Text       at {X:272 Y:428.2255} scale 0.833  #A2C3CDFF  "+ Sequence"
-052  Sprite     Sprocket_Fill         {X:256 Y:471 W:1396 H:1}  #5B737BFF
-053  Sprite     Sprocket_Fill         {X:256 Y:480 W:1396 H:68}  #29363EFF
-054  Text       at {X:276.0625 Y:509.2328} scale 0.161  #5F7278FF  "0"
-055  Text       at {X:304 Y:489.2255} scale 0.833  #DCF5FDFF  "Sequence 1"
-056  Text       at {X:304 Y:522.0543} scale 0.556  #85A1A9FF  "switched off"
-057  Text       at {X:1530.156 Y:502.5141} scale 0.401  #A2C3CDFF  "g"
-058  Text       at {X:1570.156 Y:502.5141} scale 0.401  #A2C3CDFF  "2"
-059  Text       at {X:1610.156 Y:502.5141} scale 0.401  #A2C3CDFF  "d"
-060  ClearClip  
-061  Sprite     Sprocket_Fill         {X:421 Y:162 W:77 H:80}  #20272DFF
-062  Sprite     Sprocket_Fill         {X:421 Y:162 W:77 H:1}  #5B737BFF
-063  Sprite     Sprocket_Fill         {X:421 Y:241 W:77 H:1}  #5B737BFF
-064  Sprite     Sprocket_Fill         {X:421 Y:162 W:1 H:80}  #5B737BFF
-065  Sprite     Sprocket_Fill         {X:497 Y:162 W:1 H:80}  #5B737BFF
-066  SetClip    {X:425 Y:166 W:69 H:72}
-067  Text       at {X:436.58 Y:171.6399} scale 0.694  #DCF5FDFF  "Airlock"
-068  Text       at {X:436.58 Y:207.6399} scale 0.694  #DCF5FDFF  "Port"
-069  ClearClip  
+008  Text       at {X:1372.76 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
+009  Text       at {X:1412.76 Y:61.51406} scale 0.401  #5F7278FF  "u"
+010  Text       at {X:1452.76 Y:61.51406} scale 0.401  #5F7278FF  "r"
+011  Text       at {X:1492.76 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
+012  Sprite     Sprocket_Fill         {X:1527 Y:57 W:69 H:32}  #5B737BFF
+013  Sprite     Sprocket_Fill         {X:1531 Y:61 W:61 H:24}  #20272DFF
+014  Sprite     Sprocket_Fill         {X:1531 Y:61 W:24 H:24}  #DCF5FDFF
+015  Text       at {X:1562.603 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
+016  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
+017  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
+018  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+019  SetClip    {X:256 Y:118 W:1408 H:902}
+020  Text       at {X:260 Y:129.2255} scale 0.833  #A2C3CDFF  "Using the blocks of"
+021  Sprite     Sprocket_Fill         {X:421 Y:126 W:89 H:36}  #29363EFF
+022  Sprite     Sprocket_Fill         {X:421 Y:126 W:89 H:1}  #A2C3CDFF
+023  Sprite     Sprocket_Fill         {X:421 Y:161 W:89 H:1}  #A2C3CDFF
+024  Sprite     Sprocket_Fill         {X:421 Y:126 W:1 H:36}  #A2C3CDFF
+025  Sprite     Sprocket_Fill         {X:509 Y:126 W:1 H:36}  #A2C3CDFF
+026  Text       at {X:432.58 Y:131.6399} scale 0.694  #DCF5FDFF  "Port"
+027  Text       at {X:467.6704 Y:136.4932} scale 0.241  #A2C3CDFF  "v"
+028  Sprite     Sprocket_Fill         {X:1493 Y:128 W:159 H:32}  #29363EFF
+029  Sprite     Sprocket_Fill         {X:1493 Y:128 W:159 H:1}  #3F474FFF
+030  Sprite     Sprocket_Fill         {X:1493 Y:159 W:159 H:1}  #3F474FFF
+031  Sprite     Sprocket_Fill         {X:1493 Y:128 W:1 H:32}  #3F474FFF
+032  Sprite     Sprocket_Fill         {X:1651 Y:128 W:1 H:32}  #3F474FFF
+033  Text       at {X:1508.91 Y:134.0543} scale 0.556  #DCF5FDFF  "Edit configuration panel"
+034  Text       at {X:260 Y:215.6399} scale 0.694  #85A1A9FF  "TRIGGERS"
+035  Text       at {X:272 Y:259.2255} scale 0.833  #A2C3CDFF  "When"
+036  Sprite     Sprocket_Fill         {X:327 Y:254 W:45 H:40}  #374851FF
+037  Sprite     Sprocket_Fill         {X:327 Y:292 W:45 H:2}  #F0AC28FF
+038  Text       at {X:342.71 Y:259.2255} scale 0.833  #F0AC28FF  "…"
+039  Sprite     Sprocket_Fill         {X:380 Y:254 W:45 H:40}  #374851FF
+040  Sprite     Sprocket_Fill         {X:380 Y:292 W:45 H:2}  #F0AC28FF
+041  Text       at {X:395.9333 Y:259.2255} scale 0.833  #F0AC28FF  "…"
+042  Text       at {X:433.1567 Y:259.2255} scale 0.833  #A2C3CDFF  "then run"
+043  Sprite     Sprocket_Fill         {X:509 Y:254 W:124 H:40}  #374851FF
+044  Sprite     Sprocket_Fill         {X:509 Y:292 W:124 H:2}  #8EBCCFFF
+045  Text       at {X:524.7633 Y:259.2255} scale 0.833  #DCF5FDFF  "Sequence 1"
+046  Text       at {X:1610.156 Y:262.5141} scale 0.401  #A2C3CDFF  "d"
+047  Text       at {X:272 Y:311.2255} scale 0.833  #A2C3CDFF  "+ when…"
+048  Text       at {X:385.4067 Y:311.2255} scale 0.833  #A2C3CDFF  "+ every…"
+049  Text       at {X:260 Y:387.6399} scale 0.694  #85A1A9FF  "SEQUENCES"
+050  Sprite     Sprocket_Fill         {X:256 Y:418 W:1396 H:68}  #29363EFF
+051  Text       at {X:276.0625 Y:447.2328} scale 0.161  #5F7278FF  "0"
+052  Text       at {X:304 Y:427.2255} scale 0.833  #DCF5FDFF  "Sequence 1"
+053  Text       at {X:304 Y:460.0543} scale 0.556  #85A1A9FF  "switched off"
+054  Text       at {X:1530.156 Y:440.5141} scale 0.401  #A2C3CDFF  "g"
+055  Text       at {X:1570.156 Y:440.5141} scale 0.401  #A2C3CDFF  "2"
+056  Text       at {X:1610.156 Y:440.5141} scale 0.401  #A2C3CDFF  "d"
+057  Text       at {X:272 Y:495.2255} scale 0.833  #A2C3CDFF  "+ sequence"
+058  ClearClip  
+059  Sprite     Sprocket_Fill         {X:421 Y:162 W:77 H:80}  #20272DFF
+060  Sprite     Sprocket_Fill         {X:421 Y:162 W:77 H:1}  #5B737BFF
+061  Sprite     Sprocket_Fill         {X:421 Y:241 W:77 H:1}  #5B737BFF
+062  Sprite     Sprocket_Fill         {X:421 Y:162 W:1 H:80}  #5B737BFF
+063  Sprite     Sprocket_Fill         {X:497 Y:162 W:1 H:80}  #5B737BFF
+064  SetClip    {X:425 Y:166 W:69 H:72}
+065  Text       at {X:436.58 Y:171.6399} scale 0.694  #DCF5FDFF  "Airlock"
+066  Text       at {X:436.58 Y:207.6399} scale 0.694  #DCF5FDFF  "Port"
+067  ClearClip  
+068  Sprite     Sprocket_Fill         {X:470 Y:159 W:481 H:56}  #1B242AFF
+069  Sprite     Sprocket_Fill         {X:470 Y:159 W:481 H:1}  #5B737BFF
+070  Sprite     Sprocket_Fill         {X:470 Y:214 W:481 H:1}  #5B737BFF
+071  Sprite     Sprocket_Fill         {X:470 Y:159 W:1 H:56}  #5B737BFF
+072  Sprite     Sprocket_Fill         {X:950 Y:159 W:1 H:56}  #5B737BFF
+073  Text       at {X:482 Y:164.9279} scale 0.694  #A2C3CDFF  "Pick an installation of this blueprint, to see its blocks in the sentences"
+074  Text       at {X:482 Y:184.9279} scale 0.694  #A2C3CDFF  "below."

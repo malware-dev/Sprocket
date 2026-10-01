@@ -56,7 +56,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// No subtitle. What the sequence is doing belongs beside the switch that changes it, and what starts it is a row
         /// on its system's screen: a sequence three triggers start has no one line to say so.
         /// </remarks>
-        public override string Title => SequenceText.Called(_sequence);
+        public override string Title => SequenceText.Called(Editor.Texts, _sequence);
+
+        /// <inheritdoc />
+        public override bool Edits => true;
 
         /// <summary>Whether anything starts the sequence is read from the toolbars.</summary>
         public override bool CanRefresh => true;
@@ -214,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return;
 
             parts[0].Name = CustomName;
-            parts[0].Text = SequenceText.Called(_sequence);
+            parts[0].Text = SequenceText.Called(Editor.Texts, _sequence);
         }
 
         /// <summary>Brings the view up to date, parts and all.</summary>
@@ -264,9 +267,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var state = Editor.Runner.Get(_sequence);
             var tick = Editor.CurrentTick;
 
-            _bar.Status = SequenceText.Status(SequenceSummary.Status(_sequence, state));
+            _bar.Status = SequenceText.Status(texts, SequenceSummary.Status(_sequence, state));
             _bar.JustRan = state != null && state.LastFiredTick >= 0 && tick - state.LastFiredTick < JustRanTicks;
-            _bar.LastRun = TimeText.Ago(SequenceSummary.TicksSinceRun(state, tick));
+            _bar.LastRun = Editor.Ago.Said(SequenceSummary.TicksSinceRun(state, tick));
             _bar.Skipped = Skips(texts, state == null ? 0 : state.SkippedCount, state == null ? 0 : state.RefusedCount);
 
             if (recount)
@@ -303,9 +306,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // made, so there is nothing to press by accident, and the page keeps its shape either way.
             var editable = Editable;
             _doSomething.Text = StatusRow.Plus + texts.SequenceDoSomething;
+            _doSomething.Tip = Tip.For(_doSomething.Tip, texts.SequenceDoSomethingAbout);
             _doSomething.Command = Changes(Cmd.AddAction, AddAction);
             _doSomething.IsVisible = editable;
             _wait.Text = StatusRow.Plus + texts.SequenceWait;
+            _wait.Tip = Tip.For(_wait.Tip, texts.SequenceWaitAbout);
             _wait.Command = Changes(Cmd.AddWait, AddWait);
             _wait.IsVisible = editable;
             _locked.IsVisible = !editable;
@@ -357,7 +362,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var through = Editor.StandIn(_sequence.System);
             var fault = SequenceSummary.Fault(Editor.Runner.Get(_sequence, through));
 
-            _bar.Problem = fault.Exists ? SequenceText.Problem(fault, _sequence) : "";
+            _bar.Problem = fault.Exists ? SequenceText.Problem(Editor.Texts, fault, _sequence) : "";
             _bar.ProblemIsWarning = fault.IsWarning;
 
             for (var i = 0; i < _keys.Count; i++)
@@ -501,8 +506,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     // With a wait for it after it where what it does takes time to finish, because a numbered list is
                     // read as one thing after another; one edit, so one press takes the pair back.
                     Editor.Do(_sequence, Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)
-                        ? new AddStep("adding a step", _sequence.Steps.Count, step, new Await())
-                        : new AddStep("adding a step", _sequence.Steps.Count, step));
+                        ? new AddStep(Change.AddStep, _sequence.Steps.Count, step, new Await())
+                        : new AddStep(Change.AddStep, _sequence.Steps.Count, step));
                     Editor.UnwindTo(origin);
                 }));
         }
@@ -513,7 +518,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var origin = Editor.Depth;
             Editor.Push(WaitPage(delegate(int ticks)
             {
-                Editor.Do(_sequence, new AddStep("adding a wait", _sequence.Steps.Count, new Wait(ticks)));
+                Editor.Do(_sequence, new AddStep(Change.AddWait, _sequence.Steps.Count, new Wait(ticks)));
                 Editor.UnwindTo(origin);
             }));
         }
@@ -524,10 +529,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; i < WaitPresets.Length; i++)
             {
                 var ticks = WaitPresets[i];
-                page.Add(TimeText.WaitChoice(ticks), false, delegate { chosen(ticks); });
+                page.Add(TimeText.WaitChoice(Editor.Texts, ticks), false, delegate { chosen(ticks); });
             }
 
-            page.AddTyped(TimeText.OtherWait, TimeText.UseLength, WholeTicks, delegate(string said)
+            page.TypedAbout = Editor.Texts.SequenceWaitTypedAbout;
+            page.TypeFirst = Editor.Texts.SequenceWaitTypeFirst;
+            page.AddTyped(Editor.Texts.TimeOtherWait, Editor.Texts.TimeUse, WholeTicks, delegate(string said)
             {
                 int ticks;
                 if (int.TryParse(said, NumberStyles.None, CultureInfo.InvariantCulture, out ticks) && ticks > 0)

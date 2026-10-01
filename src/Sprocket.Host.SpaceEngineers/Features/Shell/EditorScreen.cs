@@ -25,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         int _revision;
         string _subtitle = "";
         ICommand _refresh;
+        ICommand _library;
         ICommand _flip;
         bool _switchIsOn;
         string _switchAbout;
@@ -41,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         bool _canGoBack;
         ICommand _back;
         string _primaryText = "";
+        string _primaryAbout = "";
         ICommand _primary;
         string _question = "";
         Arguments _questionArguments;
@@ -101,6 +103,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _refresh; }
             set { Set(ref _refresh, value); }
+        }
+
+        /// <summary>Opens the blueprint library, or null on a screen that does not offer it.</summary>
+        public ICommand Library
+        {
+            get { return _library; }
+            set { Set(ref _library, value); }
         }
 
         /// <summary>Switches this screen's subject the other way, or null when it has no such switch.</summary>
@@ -220,25 +229,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             set { Set(ref _back, value); }
         }
 
-        /// <summary>The obvious next move, if this screen has one - "Next", "Done".</summary>
-        /// <remarks>
-        /// Deliberately separate from going back, which always means exactly what it says: return to the screen before.
-        /// Empty when there is nothing to move on to - which on a picker also means "nothing has been chosen yet".
-        /// </remarks>
+        /// <summary>The words on the button at the right end of the header, or empty where the screen has none.</summary>
+        /// <remarks>Separate from going back, which always means exactly what it says: return to the screen before.</remarks>
         public string PrimaryText
         {
             get { return _primaryText; }
             set { Set(ref _primaryText, value ?? ""); }
         }
 
-        /// <summary>Makes the next move, or null where there is none.</summary>
+        /// <summary>What the header's button does, or null while it cannot be pressed.</summary>
         public ICommand Primary
         {
             get { return _primary; }
             set { Set(ref _primary, value); }
         }
 
-        /// <summary>Whether there is a next move to make.</summary>
+        /// <summary>The note on the header's button: what it does, or what has to happen before it can be pressed.</summary>
+        public string PrimaryAbout
+        {
+            get { return _primaryAbout; }
+            set { Set(ref _primaryAbout, value ?? ""); }
+        }
+
+        /// <summary>Whether the header has the button at all.</summary>
         public bool HasPrimary => !string.IsNullOrEmpty(_primaryText);
 
         /// <summary>Screen-level actions, which a target renders wherever it puts navigation.</summary>

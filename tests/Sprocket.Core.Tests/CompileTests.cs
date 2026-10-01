@@ -279,8 +279,8 @@ public class CompileTests
         var field = Field.Between("count", "0", "10");
         field.Entry = Entry.Whole;
 
-        Assert.Equal("count has to be a whole number.", field.Refuses("count", "2.5"));
-        Assert.Equal("", field.Refuses("count", "2"));
+        Assert.Equal("count has to be a whole number.", field.Refuses(new Texts(), "count", "2.5"));
+        Assert.Equal("", field.Refuses(new Texts(), "count", "2"));
     }
 
     [Fact]
@@ -291,7 +291,7 @@ public class CompileTests
 
         Assert.Equal("1.0", field.Shown("1"));
         Assert.Equal("0.25", field.Shown("0.25"));
-        Assert.Equal("", field.Refuses("speed", "0.25"));
+        Assert.Equal("", field.Refuses(new Texts(), "speed", "0.25"));
     }
 
     static Act Turn(Rigged ship, Automation automation, Rotor rotor, Literal angle, Literal speed)

@@ -16,7 +16,7 @@ public class WaitTests
     public void ALengthNobodyOfferedCanBeTyped()
     {
         var screen = WithASequence();
-        screen.Editor.PressAdd("Wait…");
+        screen.Editor.PressAdd("wait…");
         screen.Run(2);
 
         var box = screen.Editor.TypedBox()!;
@@ -34,7 +34,7 @@ public class WaitTests
     public void TheBoxTakesDigitsAndNothingElse()
     {
         var screen = WithASequence();
-        screen.Editor.PressAdd("Wait…");
+        screen.Editor.PressAdd("wait…");
         screen.Run(2);
 
         var box = screen.Editor.TypedBox()!;
@@ -53,7 +53,7 @@ public class WaitTests
     public void NothingTypedTakesNothing()
     {
         var screen = WithASequence();
-        screen.Editor.PressAdd("Wait…");
+        screen.Editor.PressAdd("wait…");
         screen.Run(2);
 
         screen.Run(1);

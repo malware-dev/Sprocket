@@ -276,13 +276,23 @@ public class ProblemTests
         Assert.Equal(part, fault.Which);
     }
 
-    /// <summary>Leaves the sequence's button trigger without a button in the first blockset, and answers its trigger part.</summary>
+    /// <summary>
+    /// Makes the system a blueprint, its trigger slot required, and leaves the slot unanswered in its first instance, and
+    /// answers the slot: a system's trigger is a variable, which always holds its button.
+    /// </summary>
     static string Unanswer(Ship ship)
     {
+        var first = ship.Editor.Blueprinted(ship.Sequence.System);
         var part = ((RequiredTrigger)ship.Sequence.Trigger).Part;
-        ship.Sequence.System.First!.Clear(part);
+        ship.Sequence.System.FindPart(part)!.Optional = false;
+        first.Clear(part);
+
+        ship.Automation.Edited();
+        ship.Automation.Rewire();
         return part;
+
     }
+
 
     /// <summary>
     /// A system with a sequence that cannot work is switched off, says why, and mending it does not switch it back on.
@@ -308,7 +318,7 @@ public class ProblemTests
         ship.Editor.Tick(1200);
 
         Assert.False(system.Enabled);
-        Assert.Equal("Stopped in " + ship.Sequence.Name + ": nothing could start it.", SequenceText.Stopped(system.Halt, system));
+        Assert.Equal("Stopped in " + ship.Sequence.Name + ": nothing could start it.", SequenceText.Stopped(new Texts(), system.Halt, system));
     }
 
     /// <summary>A step's own trouble marks the step, and only the step.</summary>
@@ -423,7 +433,7 @@ public class ProblemTests
 
         ship.Editor.NewButtonSystem("Airlock");
 
-        ship.Editor.PressAdd("Action…");
+        ship.Editor.PressAdd("task…");
         ship.Editor.PressBlock("Inner Door");
         ship.Editor.PressChoice("Close");
         ship.Editor.PressPrimary();
@@ -462,7 +472,7 @@ public class ProblemTests
         var system = ship.Automation.Systems[0];
         var sequence = ship.Automation.AddSequence(system);
 
-        var needed = Pressed.On(system, "call");
+        var needed = Pressed.On(ship.Automation, system, "call");
         needed.Does = new Run(sequence.Number);
         system.AddTrigger(needed);
 

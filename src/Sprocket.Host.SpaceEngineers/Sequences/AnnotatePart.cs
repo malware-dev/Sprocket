@@ -6,17 +6,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Part _part;
         readonly string _was;
         readonly string _now;
-        readonly string _label;
+        readonly Change _change;
 
-        public AnnotatePart(Part part, string now, string label)
+        public AnnotatePart(Part part, string now, Change change)
         {
             _part = part;
             _was = part.Annotation;
             _now = now;
-            _label = label;
+            _change = change;
         }
 
-        public override string Label => _label;
+        public override Change Change => _change;
 
         /// <summary>Only what the slot says changes, and its box already says it.</summary>
         public override bool ChangesShape => false;

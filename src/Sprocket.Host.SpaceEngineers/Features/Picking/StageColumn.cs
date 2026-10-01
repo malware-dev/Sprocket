@@ -41,11 +41,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _search.IsVisible = canNarrow;
             _narrow.Hint = texts.PickSearch;
             _kindNarrow.Hint = texts.PickSearch;
-            _done.Text = texts.PickDone;
+
 
             _narrowClear.Tip = Tip.For(null, texts.PickClearTyped);
             _kindNarrowClear.Tip = Tip.For(null, texts.PickClearTyped);
             _kindClear.Tip = Tip.For(null, texts.PickEveryKind);
+            _kindLine.Tip = Tip.For(null, texts.PickKindAbout);
 
             _narrow.Edited += delegate { Typed(_narrow, _narrowClear, Narrowed); };
             _narrowClear.Command = new Relay(delegate { Emptied(_narrow, _narrowClear, Narrowed); });
@@ -201,15 +202,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>What the column says where there is nothing to choose.</summary>
         public string EmptyText { get; set; }
 
-        /// <summary>Whether the column is finished from, which puts the way to finish at the foot of its rows.</summary>
-        public bool Finishes
-        {
-            get { return _foot.IsVisible; }
-            set { _foot.IsVisible = value; }
-        }
 
-        /// <summary>The way to finish, at the foot of the rows where the column is finished from.</summary>
-        public Button Done => _done;
 
         /// <summary>Shows the view at <paramref name="current" /> as the one showing, each view carrying out the command beside it.</summary>
         public void ShowViews(int current, IList<ICommand> commands)

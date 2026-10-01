@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -55,6 +56,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <inheritdoc />
         public override string Title => SystemSummary.Describe(Editor.Texts, Editor.Runner.Bindings, _system);
+
+        /// <inheritdoc />
+        public override bool Edits => true;
 
         /// <summary>What the author said this thing is, for one logic system; a blueprint's description is read on its panel.</summary>
         /// <remarks>
@@ -285,9 +289,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (reshaped)
                 Arrange(texts);
 
-            // Renaming the system changes the heading without building the page again, and this says the same name.
-            _usingName.Text = _system.Name;
-
             var through = Editor.StandIn(_system);
             var tick = Editor.CurrentTick;
 
@@ -305,7 +306,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 {
                     var fault = _runs[i] == null ? SequenceFault.None : Fault(_runs[i], through);
                     var own = _triggers[i].Acts != null && fault.Exists && !fault.IsWarning;
-                    row.Problem = own || IsStarting(fault) ? SequenceText.Problem(fault, _runs[i]) : "";
+                    row.Problem = own || IsStarting(fault) ? SequenceText.Problem(texts, fault, _runs[i]) : "";
                 }
 
                 row.Show(Editor.World, texts);
@@ -320,8 +321,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
                 if (recount)
                 {
-                    row.Summary = SequenceText.Called(sequence);
-                    Mark(row, Fault(sequence, through), sequence);
+                    row.Summary = SequenceText.Called(texts, sequence);
+                    Mark(texts, row, Fault(sequence, through), sequence);
                 }
 
                 row.Show(texts);
@@ -336,10 +337,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             ArrangeLock();
 
             _triggersHeading.Text = texts.SystemTriggers.ToUpperInvariant();
-            _triggersHeading.Style = Styles.NextHeading;
+            // A blueprint's line of whose blocks the sentences name stands above it; a logic system of its own has nothing there.
+            _triggersHeading.Style = _system.IsBlueprint ? Styles.NextHeading : Styles.Heading;
             _when.Text = StatusRow.Plus + texts.SystemWhen;
+            _when.Tip = Tip.For(_when.Tip, texts.SystemWhenAbout);
             _when.Command = Changes(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); });
             _every.Text = StatusRow.Plus + texts.SystemEvery;
+            _every.Tip = Tip.For(_every.Tip, texts.SystemEveryAbout);
             _every.Command = Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Cadences.Default)); });
 
             _runs.Clear();
@@ -355,6 +359,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _sequencesHeading.Text = texts.SystemSequences.ToUpperInvariant();
             _newSequence.Text = StatusRow.Plus + texts.SystemNewSequence;
+            _newSequence.Tip = Tip.For(_newSequence.Tip, texts.SystemNewSequenceAbout);
 
             // The way to make a sequence without starting from what would start it. Somebody who knows what the
             // machine should do can write that first and give it a trigger afterwards.
@@ -371,6 +376,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var sequence = _sequences[i];
                 var row = _sequenceRows[sequence];
                 row.DuplicateText = sequence.Trigger != null ? texts.SystemCopy : texts.SystemCopyUnstarted;
+                row.About = texts.SystemOpenSequence;
+                row.AboutArguments.Set("name", SequenceText.Called(texts, sequence));
+
+                // Deleting one is changing the system, so it waits for the switch like any other change.
+                row.Deletes = Changes(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(sequence); });
+                row.DeleteText = texts.SequenceDelete;
+                row.Locked = Locked();
             }
         }
 
@@ -394,7 +406,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 : _system.Enabled ? null : _system.Halt;
 
             _halted.IsVisible = halt != null;
-            _halted.Text = halt == null ? "" : SequenceText.Stopped(halt, _system);
+            _halted.Text = halt == null ? "" : SequenceText.Stopped(Editor.Texts, halt, _system);
         }
 
         /// <summary>Why nothing can be changed, said over each part that cannot be pressed; empty while it can.</summary>
@@ -426,27 +438,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             return false;
         }
 
-        /// <summary>Says whose blocks the sentences name: the system's own name for one logic system, and for a blueprint a list of the blocksets made from it, with the way to set up its configuration panel.</summary>
+        /// <summary>Says, for a blueprint, whose blocks the sentences name, as a list of the blocksets made from it, with the way to set up its configuration panel.</summary>
+        /// <remarks>A logic system of its own names its own blocks, which its heading already says.</remarks>
         void ArrangeUsing(Texts texts)
         {
             var blueprint = _system.IsBlueprint;
             var shown = Editor.StandIn(_system);
 
+            _using.IsVisible = blueprint;
+            if (!blueprint)
+                return;
+
             _usingLead.Text = texts.SystemUsing;
-            _usingLead.IsVisible = !blueprint || shown != null;
+            _usingLead.IsVisible = shown != null;
+            _usingChoice.IsVisible = shown != null;
 
-            _usingName.IsVisible = !blueprint;
-
-            _usingChoice.IsVisible = blueprint && shown != null;
-            _editPanel.IsVisible = blueprint && Editable;
+            // Quiet rather than gone while the system is on, so it is the same button saying why it cannot be pressed.
+            var editable = Editable;
             _editPanel.Text = texts.SystemEditPanel;
-            _editPanel.Command = blueprint ? Changes(Cmd.EditBlueprint, delegate { Editor.Push(new BlueprintPage(Editor, _system, true)); }) : null;
+            _editPanel.Command = Changes(Cmd.EditBlueprint, delegate { Editor.Push(new BlueprintPage(Editor, _system, true)); });
+            _editPanel.IsEnabled = editable;
+            _editPanel.Tip = Tip.For(_editPanel.Tip, editable ? texts.SystemEditPanelAbout : Locked());
 
-            if (!blueprint || shown == null)
+            if (shown == null)
                 return;
 
             Blocksets(texts);
             _blocksets.Text = SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, shown);
+            _blocksets.Tip = Tip.For(_blocksets.Tip, texts.SystemUsingAbout);
         }
 
         /// <summary>The list of the blocksets made from the blueprint, made again only where what they are called has changed.</summary>
@@ -488,8 +507,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             // Copying is offered whether or not the system is on: a copy is started by nothing, so making one cannot
             // disturb what is running. Running it by hand is offered whatever the switch says, because somebody working
             // on a system switches it off so its triggers leave it alone, and that is when running a sequence by hand is
-            // worth most. Throwing one away is not editing it: nothing half-written can result, and the question asks
-            // first.
+            // worth most.
 
             return new StatusRow
             {
@@ -497,7 +515,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 Copies = Editor.Act(Cmd.DuplicateSequence, delegate { Editor.Duplicate(sequence); }),
                 Runs = Editor.Act(Cmd.RunNow, delegate { Editor.RunNow(sequence); }),
                 Stops = Editor.Act(Cmd.StopNow, delegate { Editor.StopNow(sequence); }),
-                Deletes = Editor.Act(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(sequence); })
+                AboutArguments = new Arguments()
             };
         }
 
@@ -509,13 +527,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var running = SequenceSummary.Live(Editor.Runner, sequence);
 
-            row.Status = SequenceText.Status(SequenceSummary.Status(sequence, running));
+            row.Status = SequenceText.Status(Editor.Texts, SequenceSummary.Status(sequence, running));
             row.Running = running != null && running.IsRunning;
             row.JustRan = running != null && running.LastFiredTick >= 0 && tick - running.LastFiredTick < JustRanTicks;
-            row.LastRun = TimeText.Ago(SequenceSummary.TicksSinceRun(running, tick));
+            row.LastRun = Editor.Ago.Said(SequenceSummary.TicksSinceRun(running, tick));
         }
 
-        static void Mark(StatusRow row, SequenceFault fault, Sequence sequence)
+        static void Mark(Texts texts, StatusRow row, SequenceFault fault, Sequence sequence)
         {
             // News about what starts a sequence goes on the row of the trigger that starts it, and not on the
             // sequence's: a cleared button is the trigger's trouble and the sequence is fine. The warning that nothing
@@ -523,7 +541,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var starting = IsStarting(fault);
 
-            row.Problem = starting ? "" : SequenceText.Problem(fault, sequence);
+            row.Problem = starting ? "" : SequenceText.Problem(texts, fault, sequence);
             row.ProblemIsWarning = fault.IsWarning;
             row.Problems = !starting && fault.Exists && !fault.IsWarning ? 1 : 0;
         }
@@ -582,7 +600,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             // a moment that is no longer among them reads as an empty part rather than as words that could never fire.
 
             var events = Vocabulary.EventsFor(Editor.Runner.Bindings, Editor.Seen(_system, moment.Sources));
-            var eventId = Vocabulary.EventOf(moment, Editor.StandIn(_system));
+            var eventId = Vocabulary.EventOf(Editor.Program, Editor.Runner.Bindings, _system, moment, Editor.StandIn(_system));
             for (var i = 0; i < events.Count; i++)
             {
                 if (events[i].Id == eventId)

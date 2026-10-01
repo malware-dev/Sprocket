@@ -19,6 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
         };
 
+        /// <summary>The name of something listed inside a group, a size under the group's own.</summary>
+        public static readonly TextStyle InnerName = new TextStyle(Name)
+        {
+            Base = { FontSize = 20f }
+        };
+
         /// <summary>What a list says while it has nothing in it.</summary>
         public static readonly TextStyle Empty = new TextStyle(Name)
         {
@@ -211,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The same, following other content, with room above it so it reads as the start of what comes after.</summary>
         public static readonly TextStyle NextHeading = new TextStyle(Heading)
         {
-            Base = { Padding = new Thickness(4f, 32f, 0f, 8f) }
+            Base = { Padding = new Thickness(4f, 48f, 0f, 8f) }
         };
 
         /// <summary>The quiet line under a name: what it is doing, and when it last did anything.</summary>
@@ -353,13 +359,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.NoticeWash }
         };
 
-        /// <summary>A row that adds something rather than naming it.</summary>
-        public static readonly ElementStyle AddRow = new ElementStyle(Row)
-        {
-            Base = { Background = Palette.None },
-            Hot = { Background = Palette.Panel }
-        };
-
         /// <summary>A row with nothing to open.</summary>
         public static readonly ElementStyle Still = new ElementStyle(Row)
         {
@@ -371,6 +370,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly GlyphStyle Light = new GlyphStyle
         {
             Base = { Font = Symbols.Font, FontSize = 8f, Tint = Palette.Dim }
+        };
+
+        /// <summary>A row's light drawn as a symbol of what the row is, large enough to be read rather than only seen.</summary>
+        public static readonly GlyphStyle Marked = new GlyphStyle(Light)
+        {
+            Base = { FontSize = 20f }
         };
 
         /// <summary>A mark beside a name, whose color the view sets from what it marks.</summary>
@@ -412,7 +417,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Edge = Palette.ControlEdgeHot }
         };
 
-        /// <summary>The game's button: a panel with a hairline round it, lifted under the pointer and lit while pressed.</summary>
+        /// <summary>The game's button: a panel with a hairline round it, lifted under the pointer, lit while pressed, and its words dimmed while it cannot be used.</summary>
         public static readonly ButtonStyle Button = new ButtonStyle
         {
             Base =
@@ -425,10 +430,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Padding = new Thickness(16f, 8f)
             },
             Hot = { Background = Palette.PanelHot, Edge = Palette.ControlEdgeHot },
-            Pressed = { Background = Palette.Line }
+            Pressed = { Background = Palette.Line },
+            Disabled = { Color = Palette.Dim }
         };
 
-        /// <summary>The button that finishes a screen or answers a dialog as Enter would, and none at all while there is nothing to finish, keeping its place.</summary>
+        /// <summary>The button that finishes a screen or answers a dialog as Enter would, greyed while there is nothing to finish.</summary>
         public static readonly ButtonStyle Primary = new ButtonStyle
         {
             Base =
@@ -440,13 +446,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Padding = new Thickness(16f, 8f)
             },
             Hot = { Background = Palette.Ink },
-            Disabled = { Color = Palette.None, Background = Palette.None }
+            Disabled = { Color = Palette.Dim, Background = Palette.Panel }
         };
 
         /// <summary>A way to start something, offered in place: a plus and quiet words, and a panel under the pointer.</summary>
         public static readonly ButtonStyle Start = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, Padding = new Thickness(16f, 4f) },
             Hot = { Background = Palette.Panel }
         };
 

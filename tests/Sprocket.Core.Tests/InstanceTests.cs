@@ -75,8 +75,11 @@ public class InstanceTests
 
         ship.Airlock = ship.Program.AddSystem();
         ship.Airlock.Name = "Airlock";
+        ship.Airlock.IsBlueprint = true;
+        ship.Airlock.AddInstance();
 
-        var when = new WhenTrigger("pressed");
+
+        var when = new WhenTrigger(new ToolbarSlot(1, 1, 1).EventId);
         when.Sources.Add(ship.Ref(1));
 
         var cycle = ship.Program.AddSequence(ship.Airlock, when);
@@ -145,9 +148,36 @@ public class InstanceTests
         Assert.DoesNotContain("Front Inner:close", ship.Rig.Rig.Log);
     }
 
+    /// <summary>
+    /// The names a step acts on stand for one set of blocks: a block two slots are answered with is acted on once.
+    /// </summary>
+    [Fact]
+    public void ABlockTwoSlotsReachIsActedOnOnce()
+    {
+        var ship = Build();
+        var close = (Act)ship.Program.Sequences[0].Steps[0];
+        close.Targets.Add(ship.Ref(3));
+
+        // The port airlock answers both doors with its inner one.
+        var port = ship.Airlock.AddInstance();
+        port.Fill(ship.Ref(2), new[] { ship.Ref(12) });
+        port.Fill(ship.Ref(3), new[] { ship.Ref(12) });
+        ship.Program.Edited();
+
+        Door(ship, "Port Inner").ForceOpen();
+        ship.Tick(2);
+        ship.Rig.Rig.Forget();
+
+        ship.Start(port);
+        ship.Tick(3);
+
+        Assert.Single(ship.Rig.Rig.Log, line => line == "Port Inner:close");
+    }
+
     [Fact]
     public void EachOneOfASystemActsOnItsOwnThings()
     {
+
         var ship = Build();
         Fit(ship, ship.Airlock.AddInstance());
 

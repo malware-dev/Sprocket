@@ -8,6 +8,8 @@ using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
+using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -48,9 +50,10 @@ public class RigTests
         // And what the program says about it: the construct starts this, which is what the game's
         // own arrangement is. A "when" here would be Sprocket claiming it watches the button.
         var program = store.GetValue(SprocketUnit.ProgramKey);
-        Assert.Contains("required trigger 'Airlock Button' to run 1", program);
-        Assert.Contains(":toolbar(1, 1, 1) ]", program);
+        Assert.Contains("let 'Airlock Button 1' = 'Airlock Button':toolbar(1, 1, 1)\n", program);
+        Assert.Contains("on 'Airlock Button 1' then run 1", program);
         Assert.DoesNotContain("when ", program);
+
 
         Simulation reopened = Simulation.On(store);
         reopened.Tick();
@@ -80,7 +83,7 @@ public class RigTests
 
         Airlock(rig.Editor);
 
-        rig.Editor.PressAdd("Action…");
+        rig.Editor.PressAdd("task…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -102,13 +105,126 @@ public class RigTests
         // refusal recorded. What made that happen was the panel declaring a readable "pressed"
         // property that nothing could really read; it declares a moment the construct answers now,
         // so there is nothing left to sample.
-        SequenceRunner runner = rig.Runner.Get(sequence, sequence.System.Instances[0]);
+        SequenceRunner runner = rig.Runner.Get(sequence, sequence.System.First);
         Assert.Equal(-1, runner.LastSkippedTick);
+    }
+
+    /// <summary>
+    /// A timer's toolbar slot is a trigger as a button is: picked to start a sequence, its slot is written, and the timer
+    /// going off runs the sequence.
+    /// </summary>
+    [Fact]
+    public void ATimersToolbarSlotIsATrigger()
+    {
+        var rig = new Rig();
+        TimerBlock timer = rig.Timer(1, "Cycle Timer");
+        rig.Door(2, "Inner Door");
+
+        Simulation sim = Simulation.On(rig);
+        sim.Editor.NewSystem("Clock");
+        sim.Editor.PressStart("when…");
+        sim.Editor.PressBlock("Cycle Timer");
+        sim.Editor.PressChoice("goes off");
+        sim.Editor.PressPrimary();
+
+        sim.Editor.PressAdd("task…");
+        sim.Editor.PressBlock("Inner Door");
+        sim.Editor.PressChoice("Open");
+        sim.Editor.PressPrimary();
+        sim.Editor.SwitchOn();
+
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        var pressed = Assert.IsType<RequiredTrigger>(sim.Editor.Program.Sequences[0].Trigger);
+        var at = sim.Editor.Program.FindTriggerRef(pressed.Part)!.At;
+        Assert.Equal(1, at.Slot);
+        Assert.True(timer.Toolbar.Holds(0), "the timer's slot was not written");
+
+        rig.Forget();
+        timer.GoOff();
+        sim.Tick();
+
+        Assert.Contains("Inner Door:open", rig.Log);
+    }
+
+    /// <summary>Two sequences started by one timer each take a slot of their own, and both run when it goes off.</summary>
+    [Fact]
+    public void TwoSequencesOnOneTimerBothRun()
+    {
+        var rig = new Rig();
+        TimerBlock timer = rig.Timer(1, "Cycle Timer");
+        rig.Door(2, "Inner Door");
+        rig.Door(3, "Outer Door");
+
+        Simulation sim = Simulation.On(rig);
+        sim.Editor.NewSystem("Clock");
+        foreach (var door in new[] { "Inner Door", "Outer Door" })
+        {
+            sim.Editor.PressStart("when…");
+            sim.Editor.PressBlock("Cycle Timer");
+            sim.Editor.PressChoice("goes off");
+            sim.Editor.PressPrimary();
+            sim.Editor.PressAdd("task…");
+            sim.Editor.PressBlock(door);
+            sim.Editor.PressChoice("Open");
+            sim.Editor.PressPrimary();
+            sim.Editor.Back();
+            sim.Tick();
+        }
+
+        sim.Editor.SwitchOn();
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        Assert.False(sim.Editor.HasChoice("Take it over"), "the second trigger was asked about a slot it need not share");
+        Assert.True(timer.Toolbar.Holds(0));
+        Assert.True(timer.Toolbar.Holds(1));
+
+        rig.Forget();
+        timer.GoOff();
+        sim.Tick();
+
+        Assert.Contains("Inner Door:open", rig.Log);
+        Assert.Contains("Outer Door:open", rig.Log);
+    }
+
+    /// <summary>A trigger slot's picker offers a block's triggers and nothing else it can do.</summary>
+
+    [Fact]
+    public void ATriggerSlotOffersOnlyTriggers()
+    {
+        var rig = new Rig();
+        rig.Timer(1, "Cycle Timer");
+        rig.Door(2, "Inner Door");
+
+        Simulation sim = Simulation.On(rig);
+        sim.Editor.NewSystem("Clock");
+        sim.Editor.PressStart("when…");
+        sim.Editor.PressBlock("Cycle Timer");
+        Assert.True(sim.Editor.HasChoice("is switched on"), "the timer offers nothing but triggers, so this proves nothing");
+        sim.Editor.PressChoice("goes off");
+        sim.Editor.PressPrimary();
+        sim.Tick();
+
+        AutomationSystem system = sim.Editor.Program.Systems[0];
+        sim.Editor.Blueprinted(system);
+        sim.Editor.Push(new BlueprintPage(sim.Editor, system, true));
+        sim.Tick();
+
+        sim.Editor.Parts()[0].Fills!.Execute();
+        sim.Tick();
+
+        Assert.DoesNotContain(sim.Editor.Offered(), row => row.Text == "Inner Door");
+        sim.Editor.PressBlock("Cycle Timer");
+        Assert.True(sim.Editor.HasChoice("goes off"));
+        Assert.False(sim.Editor.HasChoice("is switched on"), "a moment Sprocket watches was offered as a trigger");
     }
 
     /// <summary>
     /// Two of a system are two buttons, and each one starts its own.
     /// </summary>
+
     /// <remarks>
     /// The other half of what a slot carries. A slot naming only a sequence could say "cycle the
     /// airlock" and never which airlock, so the port button ran the front one - and on a ship with
@@ -133,8 +249,10 @@ public class RigTests
 
         AutomationSystem system = program.AddSystem();
         system.Name = "Airlock";
+        system.IsBlueprint = true;
+        system.AddInstance();
 
-        var pressed = Pressed.On(system, Named(sim, front));
+        var pressed = Pressed.On(program, system, Named(sim, front));
 
         Sequence cycle = program.AddSequence(system, pressed);
         cycle.Name = "Cycle";
@@ -190,8 +308,10 @@ public class RigTests
 
         AutomationSystem system = program.AddSystem();
         system.Name = "Airlock";
+        system.IsBlueprint = true;
+        system.AddInstance();
 
-        var pressed = Pressed.On(system, Named(sim, front));
+        var pressed = Pressed.On(program, system, Named(sim, front));
         var close = new Act("close");
         close.Targets.Add(Named(sim, frontInner));
         close.Targets.Add(Named(sim, frontOuter));
@@ -241,8 +361,10 @@ public class RigTests
 
         AutomationSystem system = program.AddSystem();
         system.Name = "Airlock";
+        system.IsBlueprint = true;
+        system.AddInstance();
 
-        var pressed = Pressed.On(system, Named(sim, front));
+        var pressed = Pressed.On(program, system, Named(sim, front));
 
         Sequence cycle = program.AddSequence(system, pressed);
         cycle.Name = "Cycle";
@@ -295,7 +417,7 @@ public class RigTests
 
         Airlock(rig.Editor);
 
-        rig.Editor.PressAdd("Action…");
+        rig.Editor.PressAdd("task…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -314,7 +436,7 @@ public class RigTests
         Assert.False(Running(rig, sequence), "a parked sequence ran");
 
         // Refused rather than dropped, which is what the sequence's own screen shows.
-        Assert.Equal(1, rig.Runner.Get(sequence, sequence.System.Instances[0]).RefusedCount);
+        Assert.Equal(1, rig.Runner.Get(sequence, sequence.System.First).RefusedCount);
 
         rig.Editor.SwitchOn();
         rig.Tick();
@@ -343,7 +465,9 @@ public class RigTests
         Simulation rig = Simulation.On(Store.Nowhere());
         rig.Tick();
 
-        var program = "sprocket 1 alpha 8\n\nblock '" + sort + "' door1 [ 2, \"Airlock Inner Door\" ]\n";
+        var program = "sprocket 1 alpha 9\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
+            + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
+
         Assert.Equal("", ProgramText.Load(program, rig.Editor.Program, rig.World.Values));
 
         rig.Tick();
@@ -357,7 +481,7 @@ public class RigTests
 
         // Written back the way the language spells it, which is where the prefix comes off.
         var saved = ProgramText.Save(rig.Editor.Program, rig.World.Values);
-        Assert.Contains("block 'Door/LargeBlockDoor' door1", saved);
+        Assert.Contains("let door1 = block 'Door/LargeBlockDoor'", saved);
         Assert.DoesNotContain("MyObjectBuilder_", saved);
     }
 
@@ -378,7 +502,7 @@ public class RigTests
         var open = new Act("open");
         open.Targets.Add(program.Declare(rig.World, rig.World.FindEntity(2)).Name);
 
-        var pressed = Pressed.On(system, program.Declare(rig.World, rig.World.FindEntity(21)).Name);
+        var pressed = Pressed.On(program, system, program.Declare(rig.World, rig.World.FindEntity(21)).Name);
         pressed.Does = open;
         system.AddTrigger(pressed);
         program.Edited();
@@ -410,7 +534,7 @@ public class RigTests
         Assert.True(changes.Apply());
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("Action…");
+        rig.Editor.PressAdd("task…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -456,7 +580,7 @@ public class RigTests
         }
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("Action…");
+        rig.Editor.PressAdd("task…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -464,7 +588,7 @@ public class RigTests
 
         Sequence sequence = rig.Editor.Program.Sequences[0];
 
-        rig.Editor.PressStart("When…");
+        rig.Editor.PressStart("when…");
         rig.Editor.PressBlock("Inside Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressChoice(sequence.Name);
@@ -550,7 +674,7 @@ public class RigTests
             rig.Tick();
 
         var trigger = (RequiredTrigger)sequence.System.Triggers[0];
-        var filled = sequence.System.First!.FilledWith(trigger.Part)!.ToList();
+        var filled = Pressed.By(rig.Editor.Program, sequence.System, trigger.Part)!.ToList();
 
         // Somebody points the button at the other door instead.
         Panel panel = Named(rig, "Airlock Button");
@@ -563,7 +687,7 @@ public class RigTests
         for (var i = 0; i < 3; i++)
             rig.Tick();
 
-        Assert.Equal(filled, sequence.System.First!.FilledWith(trigger.Part));
+        Assert.Equal(filled, Pressed.By(rig.Editor.Program, sequence.System, trigger.Part));
         Assert.False(rig.World.CanStart(sequence, sequence.System.First));
         Assert.Equal(Unwired.Taken, rig.World.Why(sequence, sequence.System.First)!.Why);
     }
@@ -585,13 +709,13 @@ public class RigTests
 
         rig.Editor.NewButtonSystem("Airlock");
         // A wait, so the run lasts long enough to be stopped.
-        rig.Editor.PressAdd("Wait…");
-        rig.Editor.PressChoice(TimeText.WaitChoice(600));
+        rig.Editor.PressAdd("wait…");
+        rig.Editor.PressChoice(TimeText.WaitChoice(new Texts(), 600));
         rig.Editor.SwitchOn();
 
         Sequence sequence = rig.Editor.Program.Sequences[0];
 
-        var halt = Pressed.On(sequence.System, rig.Editor.Program.Declare(rig.World, rig.World.FindEntity(31)).Name);
+        var halt = Pressed.On(rig.Editor.Program, sequence.System, rig.Editor.Program.Declare(rig.World, rig.World.FindEntity(31)).Name);
         halt.Does = new Run(sequence.Number, true);
         sequence.System.AddTrigger(halt);
         rig.Editor.Program.Rewire();
@@ -628,7 +752,7 @@ public class RigTests
         rig.Tick();
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("Action…");
+        rig.Editor.PressAdd("task…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -640,7 +764,7 @@ public class RigTests
         // has no way to add one yet, which is what #14 is for.
         GridEntity button = rig.World.FindEntity(30);
         Assert.NotNull(button);
-        var inside = Pressed.On(sequence.System, rig.Editor.Program.Declare(rig.World, button).Name);
+        var inside = Pressed.On(rig.Editor.Program, sequence.System, rig.Editor.Program.Declare(rig.World, button).Name);
         inside.Does = new Run(sequence.Number);
         sequence.System.AddTrigger(inside);
         rig.Editor.Program.Rewire();
@@ -668,7 +792,7 @@ public class RigTests
         Simulation rig = Simulation.Fresh();
 
         rig.Editor.NewButtonSystem("Airlock");
-        rig.Editor.PressAdd("Action…");
+        rig.Editor.PressAdd("task…");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -708,8 +832,8 @@ public class RigTests
     /// names is not its own. That is a trigger with nothing left on its row to press.
     /// <para>
     /// So the answer decides it. What is asserted here is the construct rather than the program: the
-    /// slot holds Sprocket's action, the sequence that took it can be started, and the one that lost
-    /// it cannot.
+    /// slot holds Sprocket's action, and the sequence that took it can be started. In a logic system a
+    /// trigger is a variable holding its button, so the trigger that lost it goes.
     /// </para>
     /// </remarks>
     [Fact]
@@ -722,7 +846,7 @@ public class RigTests
             rig.Tick();
 
         rig.Editor.Back();
-        rig.Editor.PressStart("When…");
+        rig.Editor.PressStart("when…");
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
@@ -744,12 +868,12 @@ public class RigTests
         Sequence took = rig.Editor.Program.Sequences[1];
 
         Assert.True(rig.World.CanStart(took, took.System.First), "the trigger that took the button cannot start");
-        Assert.False(rig.World.CanStart(had, had.System.First), "the trigger that lost it still holds the button");
 
-        // And the one that lost it is in the state anybody can mend: its trigger slot empty, and a row that says so.
-        var lost = (RequiredTrigger)rig.Editor.Program.Systems[0].Triggers[0];
-        Assert.Null(rig.Editor.Program.Systems[0].First!.FilledWith(lost.Part));
+        var left = Assert.Single(rig.Editor.Program.Systems[0].Triggers);
+        Assert.True(left.IsAbout(took), "the trigger that lost the button is still there");
+        Assert.False(left.IsAbout(had));
     }
+
 
     /// <summary>
     /// Cutting the block Sprocket runs in and pasting it back keeps the buttons working.
@@ -772,7 +896,7 @@ public class RigTests
         Simulation built = Simulation.On(store);
         Airlock(built.Editor);
 
-        built.Editor.PressAdd("Action…");
+        built.Editor.PressAdd("task…");
         built.Editor.PressBlock("Airlock Inner Door");
         built.Editor.PressChoice("Open");
         built.Editor.PressPrimary();
@@ -823,7 +947,7 @@ public class RigTests
         Simulation built = Simulation.On(store);
         Airlock(built.Editor);
 
-        built.Editor.PressAdd("Action…");
+        built.Editor.PressAdd("task…");
         built.Editor.PressBlock("Airlock Inner Door");
         built.Editor.PressChoice("Open");
         built.Editor.PressPrimary();
@@ -848,7 +972,7 @@ public class RigTests
 
         // And it says whose button, and why.
         var fault = SequenceSummary.Fault(pasted.Runner.Get(sequence, sequence.System.First));
-        Assert.Equal("Airlock Button's button does something else, so it can't start this.", SequenceText.Problem(fault, sequence));
+        Assert.Equal("Airlock Button's button does something else, so it can't start this.", SequenceText.Problem(new Texts(), fault, sequence));
 
         Panel panel = null!;
         foreach (Panel found in pasted.Panels())
@@ -867,7 +991,7 @@ public class RigTests
 
     static bool Running(Simulation rig, Sequence sequence)
     {
-        SequenceRunner runner = rig.Runner.Get(sequence, sequence.System.Instances[0]);
+        SequenceRunner runner = rig.Runner.Get(sequence, sequence.System.First);
         return runner != null && runner.IsRunning;
     }
 }

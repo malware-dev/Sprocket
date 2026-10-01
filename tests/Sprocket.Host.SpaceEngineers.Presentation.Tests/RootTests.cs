@@ -42,7 +42,8 @@ public class RootTests
         Assert.Same(hangar, rows[0]);
         Assert.Equal(new[] { "Airlock" }, sim.Editor.RootHeadingNames());
         Assert.Equal("Airlock", rows[1].Summary);
-        Assert.True(rows[2].IsAction);
+        Assert.Equal(2, rows.Count);
+        Assert.Single(sim.Editor.RootAdds());
     }
 
     /// <summary>
@@ -65,7 +66,7 @@ public class RootTests
         sim.Tick();
 
         var rows = sim.Editor.RootRows();
-        Assert.Equal(sim.Texts.RowSwitchOff, rows[0].SwitchPart.Tip?.Text);
+        Assert.Equal(sim.Texts.RowSwitchSystemOff, rows[0].SwitchPart.Tip?.Text);
         Assert.Equal(sim.Texts.RowSwitchOff, rows[1].SwitchPart.Tip?.Text);
     }
 
@@ -78,10 +79,10 @@ public class RootTests
         var sim = Simulation.On(store);
         sim.Tick();
 
-        sim.Editor.PressStart("Logic system");
+        sim.Editor.PressStart("logic system");
         Assert.True(sim.Editor.Screen.HasQuestion, "replacing an unreadable program asked nothing");
 
-        sim.Editor.PressStart("Logic system");
+        sim.Editor.PressStart("logic system");
 
         Assert.False(sim.Editor.Screen.HasQuestion);
         Assert.IsType<HomePage>(sim.Editor.Current);
@@ -97,7 +98,7 @@ public class RootTests
     {
         var screen = Screen.Holding(Older, "tick", "2");
 
-        screen.Editor.PressStart("Logic system");
+        screen.Editor.PressStart("logic system");
         screen.Run(2);
 
         var keep = screen.Text(screen.Editor.Texts.SalvageKeep);
@@ -135,7 +136,7 @@ public class RootTests
         sim.Editor.Invalidate();
         sim.Tick();
 
-        Assert.Equal(new[] { "+ Logikksystem", "Plantegninger" }, sim.Editor.RootStarts());
+        Assert.Equal(new[] { "+ logikksystem" }, sim.Editor.RootStarts());
     }
 
     const string Older = "sprocket 1 alpha 6\n"
@@ -157,8 +158,8 @@ public class RootTests
     static void Repeating(Simulation sim, string name)
     {
         sim.Editor.NewSystem(name);
-        sim.Editor.PressStart("Every…");
-        sim.Editor.PressChoice("A single action…");
+        sim.Editor.PressStart("every…");
+        sim.Editor.PressChoice("A task on blocks…");
         sim.Editor.PressBlock("Airlock Outer Door");
         sim.Editor.PressChoice("Close");
         sim.Editor.PressPrimary();

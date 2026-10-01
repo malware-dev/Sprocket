@@ -8,29 +8,31 @@ on screen     Sequence 1
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Sprite     Sprocket_Fill         {X:256 Y:57 W:32 H:32}  #3C4C52FF
 003  Text       at {X:262.1563 Y:59.01406} scale 0.401  #DCF5FDFF  "<"
-004  SetClip    {X:296 Y:53 W:1091 H:40}
+004  SetClip    {X:296 Y:53 W:1023 H:40}
 005  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Sequence 1"
 006  Text       at {X:440.7496 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 007  ClearClip  
-008  Text       at {X:1401.34 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
-009  Text       at {X:1441.34 Y:61.51406} scale 0.401  #A2C3CDFF  "g"
-010  Text       at {X:1481.34 Y:61.51406} scale 0.401  #5F7278FF  "u"
-011  Text       at {X:1521.34 Y:61.51406} scale 0.401  #5F7278FF  "r"
-012  Text       at {X:1561.34 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
-013  Sprite     Sprocket_Fill         {X:1595 Y:57 W:69 H:32}  #5B737BFF
-014  Sprite     Sprocket_Fill         {X:1599 Y:61 W:61 H:24}  #20272DFF
-015  Sprite     Sprocket_Fill         {X:1599 Y:61 W:24 H:24}  #DCF5FDFF
-016  Text       at {X:1631.183 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
-017  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-018  SetClip    {X:256 Y:118 W:1408 H:902}
-019  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
-020  Text       at {X:280 Y:115.6399} scale 0.694  #A2C3CDFF  "switched off"
-021  Text       at {X:272 Y:167.2255} scale 0.833  #A2C3CDFF  "+ Action…"
-022  Text       at {X:393.75 Y:167.2255} scale 0.833  #A2C3CDFF  "+ Wait…"
-023  ClearClip  
-024  Sprite     Sprocket_Fill         {X:269 Y:78 W:55 H:36}  #1B242AFF
-025  Sprite     Sprocket_Fill         {X:269 Y:78 W:55 H:1}  #5B737BFF
-026  Sprite     Sprocket_Fill         {X:269 Y:113 W:55 H:1}  #5B737BFF
-027  Sprite     Sprocket_Fill         {X:269 Y:78 W:1 H:36}  #5B737BFF
-028  Sprite     Sprocket_Fill         {X:323 Y:78 W:1 H:36}  #5B737BFF
-029  Text       at {X:281 Y:83.92793} scale 0.694  #A2C3CDFF  "Back"
+008  Text       at {X:1332.76 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
+009  Text       at {X:1372.76 Y:61.51406} scale 0.401  #A2C3CDFF  "g"
+010  Text       at {X:1412.76 Y:61.51406} scale 0.401  #5F7278FF  "u"
+011  Text       at {X:1452.76 Y:61.51406} scale 0.401  #5F7278FF  "r"
+012  Text       at {X:1492.76 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
+013  Sprite     Sprocket_Fill         {X:1527 Y:57 W:69 H:32}  #5B737BFF
+014  Sprite     Sprocket_Fill         {X:1531 Y:61 W:61 H:24}  #20272DFF
+015  Sprite     Sprocket_Fill         {X:1531 Y:61 W:24 H:24}  #DCF5FDFF
+016  Text       at {X:1562.603 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
+017  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
+018  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
+019  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+020  SetClip    {X:256 Y:118 W:1408 H:902}
+021  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
+022  Text       at {X:280 Y:115.6399} scale 0.694  #A2C3CDFF  "switched off"
+023  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ task…"
+024  Text       at {X:374.43 Y:163.2255} scale 0.833  #A2C3CDFF  "+ wait…"
+025  ClearClip  
+026  Sprite     Sprocket_Fill         {X:269 Y:78 W:55 H:36}  #1B242AFF
+027  Sprite     Sprocket_Fill         {X:269 Y:78 W:55 H:1}  #5B737BFF
+028  Sprite     Sprocket_Fill         {X:269 Y:113 W:55 H:1}  #5B737BFF
+029  Sprite     Sprocket_Fill         {X:269 Y:78 W:1 H:36}  #5B737BFF
+030  Sprite     Sprocket_Fill         {X:323 Y:78 W:1 H:36}  #5B737BFF
+031  Text       at {X:281 Y:83.92793} scale 0.694  #A2C3CDFF  "Back"

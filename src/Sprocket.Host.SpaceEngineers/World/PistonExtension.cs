@@ -224,38 +224,38 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return Trouble.None;
 
             if (!piston.IsWorking)
-                return Trouble.Waiting("cannot move - it is switched off or has no power");
+                return Trouble.Waiting(Cause.PistonNoPower);
 
             if (!piston.IsAttached)
-                return Trouble.Waiting("cannot move - it has no head");
+                return Trouble.Waiting(Cause.PistonNoHead);
 
             if (piston.Velocity == 0f)
-                return Trouble.Fatal("stopped moving - its speed was set to nought");
+                return Trouble.Fatal(Cause.PistonStopped);
 
             if (stateId == IsOut && piston.Velocity < 0f)
-                return Trouble.Fatal("stopped extending - it was sent the other way");
+                return Trouble.Fatal(Cause.PistonReversedExtending);
 
             if (stateId == IsIn && piston.Velocity > 0f)
-                return Trouble.Fatal("stopped retracting - it was sent the other way");
+                return Trouble.Fatal(Cause.PistonReversedRetracting);
 
             return Trouble.None;
         }
 
-        public string StatusOf(IMyTerminalBlock block)
+        public Status StatusOf(IMyTerminalBlock block)
         {
             var piston = block as IMyPistonBase;
             if (piston == null)
-                return null;
+                return Status.None;
 
             switch (piston.Status)
             {
-                case PistonStatus.Extended: return "extended";
-                case PistonStatus.Retracted: return "retracted";
-                case PistonStatus.Extending: return "extending…";
-                case PistonStatus.Retracting: return "retracting…";
+                case PistonStatus.Extended: return Status.Of(Condition.Extended);
+                case PistonStatus.Retracted: return Status.Of(Condition.Retracted);
+                case PistonStatus.Extending: return Status.Of(Condition.Extending);
+                case PistonStatus.Retracting: return Status.Of(Condition.Retracting);
             }
 
-            return null;
+            return Status.None;
         }
 
         public bool IsBusy(IMyTerminalBlock block)

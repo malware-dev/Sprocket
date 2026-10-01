@@ -60,6 +60,7 @@ public static class StorageReport
         var values = new Values();
         var program = shape.Build(values);
         var text = ProgramText.Save(program, values);
+        Readable(text);
 
         var save = Time(() => ProgramText.Save(program, values));
         var load = Time(() => Read(text));
@@ -107,6 +108,7 @@ public static class StorageReport
             var values = new Values();
             var shape = new Shape(systems * 8, systems, 3, 10, 8, 3);
             var text = ProgramText.Save(shape.Build(values), values);
+            Readable(text);
 
             var load = Time(() => Read(text));
             var statements = Statements(text);
@@ -139,6 +141,14 @@ public static class StorageReport
         report.AppendLine("A 200-declaration program with every step and sequence line broken: "
             + Span(Time(() => Read(hurt))) + " ms against " + Span(Time(() => Read(whole)))
             + " ms intact.");
+    }
+
+    /// <summary>Refuses a shape that does not read, because a load that fails is timing the failure.</summary>
+    static void Readable(string text)
+    {
+        var trouble = ProgramText.Load(text, new Automation(), new Values());
+        if (trouble.Length > 0)
+            throw new InvalidOperationException("The measured program does not read: " + trouble);
     }
 
     static void Read(string text)
@@ -353,16 +363,26 @@ public static class StorageReport
             system.Name = Named("Airlock") + " " + number;
             system.Annotation = _annotation;
 
-            var part = system.PartFor(Entity(0));
-            part.Annotation = _annotation;
-            part.Expects.Add("Door");
+            system.IsBlueprint = true;
 
-            for (var i = 1; i < _instances; i++)
-                system.AddInstance().Name = Named("Forward " + i);
+            // A blueprint names only its slots, so every block its sequences name is one.
+            var named = Math.Max(1, Math.Min(_refs, Math.Max(_targets, _sequences)));
+            for (var f = 0; f < named; f++)
+            {
+                var part = system.PartFor(Entity(f));
+                part.Annotation = _annotation;
+                part.Expects.Add("Door");
+            }
 
             for (var i = 0; i < _instances; i++)
-                for (var f = 0; f < 4 && f < _refs; f++)
-                    system.Instances[i].Fill(Entity(f), new[] { Entity(f) });
+            {
+                var instance = system.AddInstance();
+                if (i > 0)
+                    instance.Name = Named("Forward " + i);
+
+                for (var f = 0; f < named; f++)
+                    instance.Fill(Entity(f), new[] { Entity(f) });
+            }
 
             for (var q = 0; q < _sequences; q++)
                 BuildSequence(program, system, q);

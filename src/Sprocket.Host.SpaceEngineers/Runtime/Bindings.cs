@@ -19,6 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public sealed class Bindings
     {
+        static readonly TriggerRef[] NoTriggers = new TriggerRef[0];
+
         readonly Dictionary<string, GridEntity> _bound = new Dictionary<string, GridEntity>();
         readonly Dictionary<string, RefState> _states = new Dictionary<string, RefState>();
 
@@ -52,11 +54,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _world = world.Revision;
             _program = program.Revision;
-            Resolve(world, program.Refs);
+            Resolve(world, program.Refs, program.TriggerRefs);
         }
 
         /// <summary>Resolves every declaration against the world as it is now, unconditionally.</summary>
         public void Resolve(GridWorld world, IReadOnlyList<EntityRef> refs)
+        {
+            Resolve(world, refs, NoTriggers);
+        }
+
+        /// <summary>
+        /// The same, and each trigger variable to the block its slot is on, so a trigger names its block wherever blocks are
+        /// asked after.
+        /// </summary>
+        public void Resolve(GridWorld world, IReadOnlyList<EntityRef> refs, IReadOnlyList<TriggerRef> triggers)
         {
             Revision++;
             _bound.Clear();
@@ -95,6 +106,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (key.Cells != null)
                     world.Renumber(found, declared.Keys);
             }
+
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                GridEntity panel;
+                if (_bound.TryGetValue(triggers[i].Block, out panel))
+                    _bound[triggers[i].Name] = panel;
+
+                _states[triggers[i].Name] = State(triggers[i].Block);
+            }
         }
 
         /// <summary>
@@ -120,6 +140,28 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public bool Holds(string name)
         {
             return State(name) == RefState.Bound;
+        }
+
+        /// <summary>Leaves each block in <paramref name="names" /> once: a name repeated, or a second name for a block already there, is taken out.</summary>
+        /// <remarks>
+        /// The language's names stand for one set of blocks. Done where a list of names is worked out, never per tick: the walk
+        /// is quadratic in the length of one list, which is a handful of blocks.
+        /// </remarks>
+        public void Distinct(List<string> names)
+        {
+            var kept = 0;
+            for (var i = 0; i < names.Count; i++)
+            {
+                var entity = Entity(names[i]);
+                var seen = false;
+                for (var k = 0; k < kept && !seen; k++)
+                    seen = names[k] == names[i] || (entity != null && Entity(names[k]) == entity);
+
+                if (!seen)
+                    names[kept++] = names[i];
+            }
+
+            names.RemoveRange(kept, names.Count - kept);
         }
     }
 }

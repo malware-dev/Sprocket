@@ -169,6 +169,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return true;
         }
 
+        /// <summary>What opens the blueprint library from this page, or null where it is not offered.</summary>
+        public virtual ICommand Library => null;
+
         /// <summary>Whether this page shows what the construct's toolbars say, so reading them again can change it.</summary>
         /// <remarks>The read is the construct's whole, the same one the screen makes as it opens; the page only decides whether it is offered.</remarks>
         public virtual bool CanRefresh => false;
@@ -242,9 +245,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         public virtual void Redo() { }
 
-        public virtual string PrimaryText => "";
+        /// <summary>Whether the page changes something, and so is finished with Done as well as left by going back.</summary>
+        public virtual bool Edits => false;
 
-        public virtual void Primary() { }
+        /// <summary>The words on the button at the right end of the header, or empty where the page has none.</summary>
+        public virtual string PrimaryText => Edits ? Editor.Texts.ChromeDone : "";
+
+        /// <summary>Whether the header's button can be pressed yet.</summary>
+        public virtual bool CanPrimary => true;
+
+        /// <summary>What the header's button does, said as its note while it can be pressed.</summary>
+        public virtual string PrimaryAbout => Edits ? Editor.Texts.ChromeDoneAbout : "";
+
+        /// <summary>What has to happen before the header's button can be pressed, said as its note while it cannot.</summary>
+        public virtual string PrimaryWaits => "";
+
+        /// <summary>Does what the header's button says; on a page that edits, that is leaving it as going back does.</summary>
+        public virtual void Primary()
+        {
+            if (Edits)
+                Editor.Leave();
+        }
 
         /// <summary>Brings the page to the shape the program is in now, whenever the screen is built.</summary>
         /// <remarks>

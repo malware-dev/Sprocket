@@ -63,6 +63,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Why it is listed only to be read about, said while the pointer rests on it.</summary>
         public string Why { get; set; }
 
+        /// <summary>What choosing it does, said while the pointer rests on it; null where it goes without saying.</summary>
+        public string About { get; set; }
+
         /// <summary>Whether a step doing this waits for it to finish.</summary>
         public bool Waits { get; set; }
 
@@ -110,7 +113,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _detail.IsVisible = detail.Length != 0;
 
             Style = IsHeading ? Styles.PickHeading : !pressable ? Styles.Unpicked : IsChosen && !Many ? Styles.Settled : Styles.Pick;
-            Tip = Tip.For(Tip, IsWithheld ? Why : null);
+            Tip = Tip.For(Tip, IsWithheld ? Why : About);
         }
 
         /// <inheritdoc />

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Controls;
 using Lumel.Layout;
@@ -8,6 +9,7 @@ using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
@@ -22,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     {
         readonly List<Mention> _pieces = new List<Mention>();
 
+        float _wide = PartList.Widest;
         string _said = "";
 
         /// <summary>A part saying nothing yet, whose description's guide opens in <paramref name="windows" />.</summary>
@@ -62,11 +65,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set
             {
                 _optional.Text = value ?? "";
-                _optional.IsVisible = value != null && !Editing;
             }
         }
 
-        /// <summary>Whether the slot is being written rather than filled: its name and what it is for in boxes, and a switch for whether it needs a block.</summary>
+        /// <summary>Whether the slot is being written rather than filled: its name and what it is for in boxes.</summary>
         public bool Editing
         {
             get { return _nameBox.IsVisible; }
@@ -74,12 +76,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 _name.IsVisible = !value;
                 _about.IsVisible = !value && _said.Length != 0;
-                _optional.IsVisible = !value && _optional.Text.Length != 0;
                 _blocks.IsVisible = !value;
                 _problem.IsVisible = !value && _problem.Text.Length != 0;
                 _nameBox.IsVisible = value;
                 _aboutComposer.IsVisible = value;
-                _required.IsVisible = value;
             }
         }
 
@@ -103,6 +103,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             }
         }
 
+        /// <summary>How wide the part's name and description stand, which the list it is in decides.</summary>
+        public float Column
+        {
+            get { return _wide; }
+            set
+            {
+                if (_wide == value)
+                    return;
+
+                _wide = value;
+                _column.Placement = Fixed.Wide(value);
+            }
+        }
+
         /// <summary>The blocks the chosen logic system fills the part with, by entity id; none where it is empty.</summary>
         public List<long> Blocks { get; }
 
@@ -111,6 +125,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             get { return _blocks.Command; }
             set { _blocks.Command = value; }
+        }
+
+        /// <summary>How wide the part's name and description would stand in <paramref name="available" />.</summary>
+        public float Asks(IGraphics g, Vector2 available)
+        {
+            _column.Measure(g, available);
+            return _column.DesiredSize.X;
         }
 
         /// <summary>Says <paramref name="words" /> in place of blocks, marked as a slot still to be filled where <paramref name="unfilled" /> is true.</summary>

@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _edit = edit;
         }
 
-        public override string Label => _edit.Label;
+        public override Change Change => _edit.Change;
 
         public override bool Changes => _edit.Changes;
 

@@ -4,6 +4,8 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
 
@@ -113,7 +115,7 @@ public class PistonTests
 
         ship.World.Invoke(entity, PistonExtension.Extend);
 
-        Assert.Equal("cannot move - it has no head", entity.Trouble("is-extended").Said);
+        Assert.Equal("cannot move - it has no head", TroubleText.Of(new Texts(), entity.Trouble("is-extended")));
     }
 
     /// <summary>Runs the one act on the piston, and counts the frames until the step after it runs.</summary>

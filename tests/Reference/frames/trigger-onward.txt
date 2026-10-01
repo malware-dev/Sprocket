@@ -168,7 +168,7 @@ on screen     When Airlock Button is pressed
 161  SetClip    {X:256 Y:118 W:1408 H:902}
 162  SetClip    {X:740 Y:234 W:428 H:770}
 163  Sprite     Sprocket_Fill         {X:740 Y:234 W:416 H:76}  #374851FF
-164  Text       at {X:756 Y:239.6399} scale 0.694  #A2C3CDFF  "Sprocket has only partly checked this block, so some of"
+164  Text       at {X:756 Y:239.6399} scale 0.694  #A2C3CDFF  "Support for this block is only partly done, so some of"
 165  Text       at {X:756 Y:259.6399} scale 0.694  #A2C3CDFF  "what it offers may still be doubled, missing or oddly"
 166  Text       at {X:756 Y:279.6399} scale 0.694  #A2C3CDFF  "named."
 167  Sprite     Sprocket_Fill         {X:740 Y:314 W:416 H:40}  #3C4C52FF
@@ -182,7 +182,7 @@ on screen     When Airlock Button is pressed
 175  Text       at {X:1208 Y:131.2255} scale 0.833  #DCF5FDFF  "WHAT IT DOES"
 176  SetClip    {X:1208 Y:190 W:364 H:814}
 177  Sprite     Sprocket_Fill         {X:1208 Y:190 W:352 H:40}  #3C4C52FF
-178  Text       at {X:1220 Y:195.2255} scale 0.833  #DCF5FDFF  "A single action…"
+178  Text       at {X:1220 Y:195.2255} scale 0.833  #DCF5FDFF  "A task on blocks…"
 179  Text       at {X:1220 Y:239.2255} scale 0.833  #DCF5FDFF  "A new sequence"
 180  SetClip    {X:256 Y:118 W:1408 H:902}
 181  Sprite     Sprocket_Fill         {X:1596 Y:118 W:56 H:902}  #29363EFF

@@ -14,8 +14,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ClearTests
 {
-    const string OpenTheMenu = "60 133 type Airlock enter 60 237 60 244 60 285 type door";
-    const string SearchTheBlocks = "60 130 type Airlock enter 60 237 150 200 type door";
+    const string OpenTheMenu = "60 196 type Airlock enter 60 163 60 244 60 285 type door";
+    const string SearchTheBlocks = "60 196 type Airlock enter 60 163 150 200 type door";
 
     [Fact]
     public void TheCrossBesideTheMenusBoxEmptiesIt()
@@ -49,7 +49,7 @@ public class ClearTests
     [Fact]
     public void AndNeitherIsThereWhileItsBoxIsEmpty()
     {
-        var picker = Screen.Fresh("60 130 type Airlock enter 60 237".Split(' '));
+        var picker = Screen.Fresh("60 196 type Airlock enter 60 163".Split(' '));
 
         Element? at = picker.Scene.Under(new Vector2(452f, 230f));
 

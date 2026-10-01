@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _now = now;
         }
 
-        public override string Label => "renaming";
+        public override Change Change => Change.Rename;
 
         public override bool ChangesShape => false;
 

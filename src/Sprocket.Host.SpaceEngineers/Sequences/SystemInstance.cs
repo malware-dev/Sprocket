@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// One instance of a system, pointed at real blocks.
+    /// One run of a system pointed at real blocks: an instance of a system blueprint, or a system's own run.
     /// </summary>
     /// <remarks>
     /// A system is what a system is; this is one somebody has. The front airlock and the port
@@ -14,20 +14,23 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// invite a better name without a dialog asking for one, and it never collides with the
     /// name of the system it belongs to.
     ///
-    /// What it is for is the blocks: each of these slots its own doors and its own vent into
-    /// the system's block slots, which is why one system can run two airlocks at opposite ends
+    /// What it is for is the blocks: each instance of a system blueprint answers the blueprint's slots with its own
+    /// doors and its own vent, which is why one blueprint can run two airlocks at opposite ends
     /// of a ship. See <see cref="Fill(string, IList{string})" /> and <see cref="Resolve" /> - the runtime goes through them
-    /// on every step of every running sequence.
+    /// whenever it works out which blocks a step or a watch is about.
     /// </remarks>
     public sealed class SystemInstance
     {
+        readonly AutomationSystem _system;
         bool _enabled;
 
-        public SystemInstance(int number)
+        /// <summary>Use <paramref name="number" /> of <paramref name="system" />.</summary>
+        public SystemInstance(int number, AutomationSystem system)
         {
             Number = number;
             Name = "";
             Enabled = true;
+            _system = system;
         }
 
         /// <summary>Which one of its system this is.</summary>
@@ -184,19 +187,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>
-        /// Turns what the system says into what this one actually acts on.
-        /// </summary>
-        /// <remarks>
-        /// Appends rather than returning, and takes the list to append to, because this runs
-        /// for every step of every running sequence on every tick. Handing back a fresh list
-        /// each time would be a steady drip of garbage into the game's update loop.
-        ///
-        /// A slot nobody filled resolves to what the system was built with. For the first
-        /// one of a system that is exactly right, and for a later one it is the honest failure:
-        /// it goes on pointing at somebody else's door until it is told better, which is
-        /// visible, rather than silently doing nothing.
-        /// </remarks>
-        /// <summary>
         /// What <paramref name="names" /> come to as <paramref name="instance" /> fills them, or the names
         /// as they are where there is no instance.
         /// </summary>
@@ -215,6 +205,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return seen;
         }
 
+        /// <summary>
+        /// Adds what <paramref name="slots" /> come to here to <paramref name="into" />: what answers each slot, nothing for a
+        /// slot left unanswered, and any other name as it is.
+        /// </summary>
         public void Resolve(IList<string> slots, List<string> into)
         {
             for (var i = 0; i < slots.Count; i++)
@@ -222,7 +216,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 List<string> chosen;
                 if (!_fills.TryGetValue(slots[i], out chosen))
                 {
-                    into.Add(slots[i]);
+                    if (!_system.IsBlueprint || _system.FindPart(slots[i]) == null)
+                        into.Add(slots[i]);
+
                     continue;
                 }
 

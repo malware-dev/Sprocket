@@ -24,6 +24,27 @@ namespace Sprocket.Host.SpaceEngineers.World
             new SoundExtension()
         };
 
+        readonly ITriggers[] _triggers =
+        {
+            new ButtonPanelTriggers(),
+            new TimerTriggers(),
+            new SensorTriggers(),
+            new EventControllerTriggers(),
+            new ShipControllerTriggers()
+        };
+
+        /// <summary>What <paramref name="block" />'s toolbar slots mean as triggers, or null where each is a trigger of its own.</summary>
+        public ITriggers TriggersFor(IMyTerminalBlock block)
+        {
+            for (var i = 0; i < _triggers.Length; i++)
+            {
+                if (_triggers[i].Claims(block))
+                    return _triggers[i];
+            }
+
+            return null;
+        }
+
         public IBlockExtension For(IMyTerminalBlock block)
         {
             for (var i = 0; i < _all.Length; i++)

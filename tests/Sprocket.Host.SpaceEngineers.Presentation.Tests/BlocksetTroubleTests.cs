@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Sim.Machine;
 using Lumel.Text;
@@ -20,6 +21,40 @@ public class BlocksetTroubleTests
         var row = sim.Editor.RootRows()[0];
         Assert.True(row.Problems > 0);
         Assert.Equal(Why, row.Problem);
+    }
+
+    /// <summary>The blueprint's heading is marked broken with it, so the trouble shows from the blueprint down.</summary>
+    [Fact]
+    public void ItsBlueprintsHeadingIsMarkedWithIt()
+    {
+        var sim = Broken();
+
+        var heading = sim.Editor.RootHeadings().Single();
+        Assert.Equal(sim.Editor.RootRows()[0].Problems, heading.Problems);
+        Assert.True(heading.Problems > 0);
+    }
+
+    /// <summary>The blueprint named in its heading opens the blueprint, on its blocks, and Back comes back to it.</summary>
+    [Fact]
+    public void TheBlueprintInItsHeadingOpensTheBlueprint()
+    {
+        var sim = Broken();
+        var system = sim.Editor.Program.Systems.Single();
+
+        sim.Editor.RootRows()[0].Opens!.Execute();
+        sim.Tick();
+
+        var from = sim.Editor.Screen.Heading[1];
+        Assert.Equal(system.Name, from.Text);
+        from.Opens!.Execute();
+        sim.Tick();
+
+        Assert.IsType<LogicSystemPage>(sim.Editor.Current);
+        Assert.Same(system.Instances[0], sim.Editor.StandIn(system));
+
+        sim.Editor.Back();
+        sim.Tick();
+        Assert.IsType<BlueprintPage>(sim.Editor.Current);
     }
 
     /// <summary>Its configuration panel says the same, and opens the sequence at fault as this blockset runs it.</summary>
@@ -47,7 +82,7 @@ public class BlocksetTroubleTests
     {
         var sim = Simulation.Fresh();
         sim.Editor.NewButtonSystem("Airlock");
-        sim.Editor.PressAdd("Action…");
+        sim.Editor.PressAdd("task…");
         sim.Editor.PressBlock("Airlock Inner Door");
         sim.Editor.PressChoice("Open");
         sim.Editor.PressPrimary();

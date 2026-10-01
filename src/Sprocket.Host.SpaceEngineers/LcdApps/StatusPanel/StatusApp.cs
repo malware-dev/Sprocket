@@ -8,6 +8,7 @@ using VRage.Game.ModAPI;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using IngameBlock = VRage.Game.ModAPI.Ingame.IMyCubeBlock;
 
@@ -207,6 +208,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
 
             var rows = _overview.Rows;
+            var texts = _found[0].Editor.Texts;
             if (rows.Count == 0)
             {
                 Line(frame, "Nothing built yet.", left, y, scale * 0.8f, _quiet);
@@ -223,12 +225,12 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                     return;
                 }
 
-                Row(frame, rows[i], left, right, y, scale);
+                Row(frame, rows[i], texts, left, right, y, scale);
                 y += height;
             }
         }
 
-        void Row(MySpriteDrawFrame frame, Overview.Row row, float left, float right, float y, float scale)
+        void Row(MySpriteDrawFrame frame, Overview.Row row, Texts texts, float left, float right, float y, float scale)
         {
             var lamp = 10f * scale;
             frame.Add(Fill(new Vector2(left + (lamp / 2f), y + (9f * scale)),
@@ -239,7 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 name = name + "  x" + row.Instances;
 
             Line(frame, name, left + (lamp * 2f), y, scale * 0.8f, _ink);
-            Line(frame, Says(row), right, y, scale * 0.8f, Lamp(row), TextAlignment.RIGHT);
+            Line(frame, Says(row, texts), right, y, scale * 0.8f, Lamp(row), TextAlignment.RIGHT);
         }
 
         /// <summary>
@@ -250,18 +252,18 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// broken. The words are the editor's own - see <see cref="SequenceText" /> - so the two
         /// screens cannot come to disagree about what a state is called.
         /// </remarks>
-        string Says(Overview.Row row)
+        string Says(Overview.Row row, Texts texts)
         {
             if (row.Problems > 0)
                 return row.Problems == 1 ? "1 problem" : row.Problems + " problems";
 
             if (row.Parked)
-                return SequenceText.Status(SequenceStatus.Off);
+                return SequenceText.Status(texts, SequenceStatus.Off);
 
             if (row.Warnings > 0)
                 return row.Warnings == 1 ? "1 warning" : row.Warnings + " warnings";
 
-            return SequenceText.Status(row.Status);
+            return SequenceText.Status(texts, row.Status);
         }
 
         Color Lamp(Overview.Row row)

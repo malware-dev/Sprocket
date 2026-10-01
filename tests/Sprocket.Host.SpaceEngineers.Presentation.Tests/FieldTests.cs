@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Features.Values;
 using Xunit;
 
@@ -17,18 +18,18 @@ public class FieldTests
     [Fact]
     public void WhatItTakesIsSaidBesideItsName()
     {
-        Assert.Equal("Red (0 - 255)", Field.Between("Red", "0", "255").Label);
-        Assert.Equal("Angle (0 or more)", Field.Between("Angle", "0", "").Label);
-        Assert.Equal("Angle (90 or less)", Field.Between("Angle", "", "90").Label);
-        Assert.Equal("Angle", Field.Called("Angle").Label);
+        Assert.Equal("Red (0 - 255)", Field.Between("Red", "0", "255").Label(new Texts()));
+        Assert.Equal("Angle (0 or more)", Field.Between("Angle", "0", "").Label(new Texts()));
+        Assert.Equal("Angle (90 or less)", Field.Between("Angle", "", "90").Label(new Texts()));
+        Assert.Equal("Angle", Field.Called("Angle").Label(new Texts()));
     }
 
     /// <summary>A value nobody named still says what it takes, which is all there is to say.</summary>
     [Fact]
     public void AndOnItsOwnWhereNobodyNamedTheValue()
     {
-        Assert.Equal("(0 - 255)", Field.Between("", "0", "255").Label);
-        Assert.Equal("", Field.Unnamed().Label);
+        Assert.Equal("(0 - 255)", Field.Between("", "0", "255").Label(new Texts()));
+        Assert.Equal("", Field.Unnamed().Label(new Texts()));
     }
 
     [Fact]
@@ -36,9 +37,9 @@ public class FieldTests
     {
         Field red = Field.Between("Red", "0", "255");
 
-        Assert.Equal("", red.Refuses("Red", "0"));
-        Assert.Equal("", red.Refuses("Red", "136"));
-        Assert.Equal("", red.Refuses("Red", "255"));
+        Assert.Equal("", red.Refuses(new Texts(), "Red", "0"));
+        Assert.Equal("", red.Refuses(new Texts(), "Red", "136"));
+        Assert.Equal("", red.Refuses(new Texts(), "Red", "255"));
     }
 
     [Fact]
@@ -46,17 +47,17 @@ public class FieldTests
     {
         Field red = Field.Between("Red", "0", "255");
 
-        Assert.Equal("Red has to be between 0 and 255.", red.Refuses("Red", "256"));
-        Assert.Equal("Red has to be between 0 and 255.", red.Refuses("Red", "-1"));
-        Assert.Equal("Angle has to be 0 or more.", Field.Between("Angle", "0", "").Refuses("Angle", "-4"));
-        Assert.Equal("Angle has to be 90 or less.", Field.Between("Angle", "", "90").Refuses("Angle", "91"));
+        Assert.Equal("Red has to be between 0 and 255.", red.Refuses(new Texts(), "Red", "256"));
+        Assert.Equal("Red has to be between 0 and 255.", red.Refuses(new Texts(), "Red", "-1"));
+        Assert.Equal("Angle has to be 0 or more.", Field.Between("Angle", "0", "").Refuses(new Texts(), "Angle", "-4"));
+        Assert.Equal("Angle has to be 90 or less.", Field.Between("Angle", "", "90").Refuses(new Texts(), "Angle", "91"));
     }
 
     /// <summary>And so is one that is not a number at all, since a bound is something to compare with.</summary>
     [Fact]
     public void SoIsOneThatIsNotANumber()
     {
-        Assert.Equal("Red has to be a number.", Field.Between("Red", "0", "255").Refuses("Red", "crimson"));
+        Assert.Equal("Red has to be a number.", Field.Between("Red", "0", "255").Refuses(new Texts(), "Red", "crimson"));
     }
 
     /// <summary>
@@ -69,7 +70,7 @@ public class FieldTests
     [Fact]
     public void AnEmptyFieldIsNotRefused()
     {
-        Assert.Equal("", Field.Between("Red", "0", "255").Refuses("Red", ""));
+        Assert.Equal("", Field.Between("Red", "0", "255").Refuses(new Texts(), "Red", ""));
     }
 
     /// <summary>
@@ -82,7 +83,7 @@ public class FieldTests
     [Fact]
     public void AFieldToldNothingTakesAnything()
     {
-        Assert.Equal("", Field.Called("Radius").Refuses("Radius", "anything at all"));
+        Assert.Equal("", Field.Called("Radius").Refuses(new Texts(), "Radius", "anything at all"));
     }
 
     /// <summary>
@@ -97,9 +98,9 @@ public class FieldTests
     {
         Field odd = Field.Between("Mood", "sullen", "cheerful");
 
-        Assert.Equal("Mood (sullen - cheerful)", odd.Label);
-        Assert.Equal("", odd.Refuses("Mood", "7"));
-        Assert.Equal("", odd.Refuses("Mood", "livid"));
+        Assert.Equal("Mood (sullen - cheerful)", odd.Label(new Texts()));
+        Assert.Equal("", odd.Refuses(new Texts(), "Mood", "7"));
+        Assert.Equal("", odd.Refuses(new Texts(), "Mood", "livid"));
     }
 
     /// <summary>The form is refused in the words of the field that is wrong.</summary>
@@ -134,7 +135,7 @@ public class FieldTests
     public void AValueWithNoNameIsRefusedByItsNumber()
     {
         var form = new FieldSet();
-        form.Show(new[] { Field.Unnamed(), Field.Between("", "0", "255") }, new string[0], new Hsv[0]);
+        form.Show(new[] { Field.Unnamed(), Field.Between("", "0", "255") }, new string[0], new Hsv[0], new Texts());
 
         form.Fields[1].Text = "900";
         form.Judge();
@@ -161,7 +162,7 @@ public class FieldTests
             Field.Between("Red", "0", "255"),
             Field.Between("Green", "0", "255"),
             Field.Between("Blue", "0", "255")
-        }, new string[0], new Hsv[0]);
+        }, new string[0], new Hsv[0], new Texts());
 
         return form;
     }

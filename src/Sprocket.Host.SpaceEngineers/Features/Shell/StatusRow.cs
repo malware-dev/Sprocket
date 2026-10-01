@@ -21,10 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What goes before the words of anything that adds.</summary>
         public const string Plus = "+ ";
 
-        const float Indent = 32f;
-
         static readonly Fixed ThingHeight = Fixed.High(68f);
-        static readonly Fixed ActionHeight = Fixed.High(48f);
 
         readonly Relay _opens;
         readonly Relay _runs;
@@ -32,7 +29,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Relay _copies;
         readonly Relay _offers;
         readonly Relay _bins;
-        readonly HStack _inside;
         readonly Glyph _light;
         readonly Label _summary;
         readonly Label _status;
@@ -109,7 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         }
                     }
                 }
-            }.As(out _inside));
+            });
         }
 
         /// <summary>What pressing the row does, or null for a row that is not pressed.</summary>
@@ -133,14 +129,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What deleting it does, or null where it cannot be deleted.</summary>
         public ICommand Deletes { get; set; }
 
-        /// <summary>How deep it stands under the row it belongs to: none, or one level.</summary>
+        /// <summary>How deep it stands under the row it belongs to: none, or one level, which says its name a size smaller.</summary>
+        /// <remarks>Whatever holds it sets it in; a row is as wide as it is given.</remarks>
         public int Depth { get; set; }
+
+        /// <summary>The symbol its light is drawn as, or null for the round light every row has.</summary>
+        public string Mark { get; set; }
 
         /// <summary>What it is called.</summary>
         public string Summary { get; set; }
-
-        /// <summary>Whether it is a way to add something rather than a thing that is there.</summary>
-        public bool IsAction { get; set; }
 
         /// <summary>What pressing it does, in markdown-lite, said where the pointer rests on it; null for nothing.</summary>
         public string About { get; set; }
@@ -184,6 +181,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What copying it does, said on the copy mark.</summary>
         public string DuplicateText { get; set; }
 
+        /// <summary>What deleting it does, said on the bin.</summary>
+        public string DeleteText { get; set; }
+
+        /// <summary>Why it cannot be deleted now, said on its quiet bin; empty where nothing stands in the way.</summary>
+        public string Locked { get; set; }
+
         /// <summary>What its button says.</summary>
         public string ButtonText { get; set; }
 
@@ -220,11 +223,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>Runs on every refresh of the list, so it writes what may have changed and joins no string that has not.</remarks>
         public void Show(Texts texts)
         {
-            _inside.Padding = new Thickness(Depth > 0 ? Indent : 0f, 0f, 0f, 0f);
+            _summary.Style = Depth > 0 ? Styles.InnerName : Styles.Name;
+            _light.Symbol = Mark ?? Symbols.Disc;
+            _light.Style = Mark == null ? Styles.Light : Styles.Marked;
 
-            // One height for every row of a kind, so no row moves the rows under it; one with nothing to say under its
-            // name has the name on its middle.
-            Placement = IsAction ? ActionHeight : ThingHeight;
+            // One height for every row, so no row moves the rows under it; one with nothing to say under its name has the
+            // name on its middle.
+            Placement = ThingHeight;
 
             var pressable = Opens != null;
             _opens.CanExecute = pressable;
@@ -239,36 +244,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         ? Styles.Parked
                         : !pressable
                             ? Styles.Still
-                            : IsAction
-                                ? Styles.AddRow
-                                : Styles.Row;
+                            : Styles.Row;
 
             if (!ReferenceEquals(_said, Summary))
             {
                 _said = Summary;
-                _summary.Text = IsAction ? Plus + Summary : Summary;
+                _summary.Text = Summary;
             }
 
-            _summary.Color = IsAction ? Palette.Muted : Palette.Ink;
-
-            // A row that adds has no state to show, and its plus stands where the light does, so it reads as one more of
-            // the rows above it rather than as something inside the last of them.
-            _light.IsVisible = !IsAction;
             _light.Tint = wrong
                 ? Palette.Problem
-                : IsAction
-                    ? Palette.None
-                    : JustRan
-                        ? Palette.Live
-                        : Palette.Dim;
+                : JustRan
+                    ? Palette.Live
+                    : Palette.Dim;
 
-            _light.Tip = Tip.For(_light.Tip, IsAction
-                ? null
-                : wrong
-                    ? texts.RowBroken
-                    : JustRan
-                        ? texts.RowRan
-                        : texts.RowIdle);
+            _light.Tip = Tip.For(_light.Tip, wrong
+                ? texts.RowBroken
+                : JustRan
+                    ? texts.RowRan
+                    : texts.RowIdle);
 
             _status.Text = Status;
             _lastRun.Text = LastRun;
@@ -278,7 +272,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _run.Symbol = Running ? Symbols.Stop : Symbols.Play;
             _run.IsVisible = doing != null;
             _runs.CanExecute = doing != null;
-            _run.Tip = Tip.For(_run.Tip, doing != null ? (Running ? SequenceText.Stops() : SequenceText.Starts()) : null);
+            _run.Tip = Tip.For(_run.Tip, doing != null ? (Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts)) : null);
 
             var saying = !string.IsNullOrEmpty(Problem);
 
@@ -316,10 +310,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (offers)
                 _button.Text = ButtonText;
 
+            // A row that may not be deleted now keeps its bin, quiet, saying why.
             var bins = Deletes != null;
-            _delete.IsVisible = bins;
+            var locked = !string.IsNullOrEmpty(Locked);
+            _delete.IsVisible = bins || locked;
             _bins.CanExecute = bins;
-            _delete.Tip = Tip.For(_delete.Tip, bins ? texts.RowDelete : null);
+            _delete.Tip = Tip.For(_delete.Tip, bins ? DeleteText : locked ? Locked : null);
         }
 
         static void Carry(ICommand command)

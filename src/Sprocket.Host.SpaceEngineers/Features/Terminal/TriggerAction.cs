@@ -5,6 +5,7 @@ using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.Collections;
 using VRage.Game;
 using VRage.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.World;
 
 // Ingame cannot be imported whole - IMyTerminalBlock and friends are declared in both namespaces and
@@ -93,7 +94,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             return arguments;
         }
 
-        public static void Register()
+        /// <summary>Makes the action once, in <paramref name="texts" />, which the game keeps for the session.</summary>
+        public static void Register(Texts texts)
         {
             if (_registered)
                 return;
@@ -101,10 +103,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             _registered = true;
 
             IMyTerminalAction action = MyAPIGateway.TerminalControls.CreateAction<IMyProgrammableBlock>(ActionId);
-            action.Name = new StringBuilder("Automation: trigger");
+            action.Name = new StringBuilder(texts.TerminalAction);
 
             // Never rendered for a slot Sprocket labelled, and the fallback when it has not been.
-            action.Writer = delegate(IMyTerminalBlock _, StringBuilder text) { text.Append("Automation"); };
+            var slot = texts.TerminalOpen;
+            action.Writer = delegate(IMyTerminalBlock _, StringBuilder text) { text.Append(slot); };
 
             // The value fixes the parameter's type, and is what the action receives if it is ever run
             // with none. A string, because what a slot carries is a key naming a sequence of a system

@@ -8,52 +8,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
     sealed partial class HomePage
     {
-        Button _new;
-        Button _load;
-        VStack _plain;
+        Label _plainHeading;
         Label _empty;
         VStack _plainRows;
+        Button _new;
+        Label _blueprintsHeading;
         VStack _blueprintGroups;
 
         /// <inheritdoc />
+        /// <remarks>
+        /// Two lists, each the way a sequence lays out its steps: a heading, what is there, and the ways to add more on
+        /// the line under it. Logic systems of their own first, then the blueprints, so a row of its own is never read as
+        /// belonging to the blueprint above it. A blueprint is added from a logic system, or from the library in the page's
+        /// header, so the second list ends with its last blueprint.
+        /// </remarks>
         protected override Element CreateView()
         {
             return new VStack
             {
                 Children =
                 {
-                    new VStack
-                    {
-                        Children =
-                        {
-                            // What adds stands on the left with its plus; the way to the library goes somewhere, so it stands on
-                            // the right as a button of its own, ending where the rows' controls do.
-                            new HStack
-                            {
-                                Spacing = 8f,
-                                Padding = new Thickness(0f, 0f, 16f, 0f),
-                                Children =
-                                {
-                                    new Button { Style = Styles.Start }.As(out _new),
-                                    new HStack { Placement = Flex.Grow },
-                                    new Button { Style = Styles.Button }.As(out _load)
-                                }
-                            },
-                            new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }
-                        }
-                    },
-
-                    // Logic systems of their own first, with nothing over them: a heading of theirs would be the
-                    // one thing on the screen asking to be understood before anything is made. The blueprints
-                    // follow, so a row of its own is never read as belonging to the blueprint above it.
+                    new Label { Style = Styles.Heading }.As(out _plainHeading),
                     new VStack
                     {
                         Children =
                         {
                             new Label { Style = Styles.Empty, Wraps = true }.As(out _empty),
-                            new VStack { Spacing = 8f }.As(out _plainRows)
+                            new VStack { Spacing = 8f }.As(out _plainRows),
+                            new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _new) } }
                         }
-                    }.As(out _plain),
+                    },
+
+                    new Label { Style = Styles.NextHeading }.As(out _blueprintsHeading),
                     new VStack().As(out _blueprintGroups)
                 }
             };

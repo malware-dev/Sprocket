@@ -1,32 +1,45 @@
 using Lumel;
 using Lumel.Controls;
 using Lumel.Layout;
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
     partial class BlueprintGroup
     {
-        RichText _heading;
-        Button _edit;
+        const float Gutter = 32f;
+        const float RailWidth = 2f;
+
+        StatusRow _heading;
+        Button _another;
         VStack _list;
 
-        /// <summary>Makes the group's heading with the button that opens the blueprint on the right, and the place its rows go.</summary>
+        /// <summary>Makes the group's heading, a row of its own that opens the blueprint, and under it its rows and the way to add another, set in by a gutter with a rail down it.</summary>
         void CreateView()
         {
-            // Padded on the right as the rows under it are, so the button ends where their controls do.
+            Spacing = 8f;
+            Padding = new Thickness(0f, 0f, 0f, 16f);
+
+            Children.Add(new StatusRow().As(out _heading));
             Children.Add(new HStack
             {
-                Spacing = 8f,
-                Padding = new Thickness(4f, 24f, 16f, 8f),
+                Padding = new Thickness((Gutter - RailWidth) / 2f, 0f, 0f, 0f),
+                Spacing = (Gutter - RailWidth) / 2f,
                 Children =
                 {
-                    new RichText { Style = Styles.Section, Placement = Flex.Grow }.As(out _heading),
-                    new Button { Style = Styles.Button }.As(out _edit)
+                    new VStack { Background = Palette.Line, Placement = Fixed.Wide(RailWidth) },
+                    new VStack
+                    {
+                        Placement = Flex.Grow,
+                        Children =
+                        {
+                            new VStack { Spacing = 8f }.As(out _list),
+                            new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _another) } }
+                        }
+                    }
                 }
             });
-            Children.Add(new VStack { Spacing = 8f }.As(out _list));
         }
     }
 }

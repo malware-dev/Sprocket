@@ -129,11 +129,11 @@ public class UndoTests
 
     [Fact]
     public void AddingAStepReversesExactly() =>
-        RoundTrip(new AddStep("adding a step", 3, StepFor("close", "outer")));
+        RoundTrip(new AddStep(Change.AddStep, 3, StepFor("close", "outer")));
 
     [Fact]
     public void AddingAStepInTheMiddleReversesExactly() =>
-        RoundTrip(new AddStep("adding a step", 1, StepFor("close", "outer")));
+        RoundTrip(new AddStep(Change.AddStep, 1, StepFor("close", "outer")));
 
     [Fact]
     public void RemovingAStepReversesExactly()
@@ -240,7 +240,7 @@ public class UndoTests
         Sequence sequence = Build();
         var was = (MomentTrigger)sequence.Trigger;
 
-        var now = new RequiredTrigger("pressed_1");
+        var now = new RequiredTrigger(new ToolbarSlot(1, 1, 1).EventId);
         now.Sources.Add("call");
 
         RoundTrip(sequence, new ChangeTrigger(was, now));
@@ -277,6 +277,8 @@ public class UndoTests
     {
         var program = new Automation();
         var system = program.AddSystem();
+        system.IsBlueprint = true;
+        system.AddInstance();
         var sequence = program.AddSequence(system);
         sequence.Steps.Add(StepFor("open", "outer"));
 
@@ -302,12 +304,44 @@ public class UndoTests
         Assert.Equal(4, system.First.Positions("call")![0].Slot);
     }
 
+    /// <summary>Deleting one of two triggers on the same trigger slot leaves the slot and its answer to the other.</summary>
+    [Fact]
+    public void DeletingATriggerKeepsASlotAnotherNames()
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+        system.IsBlueprint = true;
+        system.AddInstance();
+        var sequence = program.AddSequence(system);
+        sequence.Steps.Add(StepFor("open", "outer"));
+
+        var part = system.PartFor("call");
+        part.IsTrigger = true;
+        var runs = RequiredTrigger.Named("call");
+        runs.Does = new Run(sequence.Number);
+        system.AddTrigger(runs);
+        var stops = RequiredTrigger.Named("call");
+        stops.Does = new Run(sequence.Number, true);
+        system.AddTrigger(stops);
+        system.First!.Fill("call", new[] { "panel1" }, new[] { new ToolbarSlot(1, 1, 4) });
+
+        new ForgetTrigger(system, runs).Apply(system);
+
+        Assert.Same(stops, Assert.Single(system.Triggers));
+        Assert.Same(part, system.FindPart("call"));
+        Assert.Equal(new[] { "panel1" }, system.First.FilledWith("call"));
+    }
+
     /// <summary>A system with one slot that has a label and says what it is for, as a blueprint's author leaves it.</summary>
+
     static Part Slot(out AutomationSystem system)
     {
         var program = new Automation();
         system = program.AddSystem();
+        system.IsBlueprint = true;
+        system.AddInstance();
         system.Annotation = "Cycles an airlock.";
+
 
         var part = system.PartFor("inner");
         part.Annotation = "The door to the inside of the ship.";
@@ -362,7 +396,7 @@ public class UndoTests
     public void DescribingASlotReversesExactly()
     {
         var part = Slot(out var system);
-        var edit = new AnnotatePart(part, "The door to the **inside** of the ship.", "describing a slot");
+        var edit = new AnnotatePart(part, "The door to the **inside** of the ship.", Change.DescribeSlot);
 
         RoundTrip(system, edit, () => part.Annotation);
 
@@ -408,7 +442,7 @@ public class UndoTests
         var part = Slot(out var system);
         Assert.False(new Annotate(system.Annotation, system.Annotation).Changes);
         Assert.False(new RenamePart(part, "inner").Changes);
-        Assert.False(new AnnotatePart(part, part.Annotation, "describing a slot").Changes);
+        Assert.False(new AnnotatePart(part, part.Annotation, Change.DescribeSlot).Changes);
         Assert.False(new SetOptional(part, false).Changes);
     }
 }

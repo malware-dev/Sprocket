@@ -70,6 +70,8 @@ public class ProgramTextTests
         airlock.Namespace = "MalTek";
         airlock.Name = "Airlock";
         airlock.Annotation = "Cycles the front airlock";
+        airlock.IsBlueprint = true;
+        airlock.AddInstance();
         airlock.AddInstance().Name = "Port";
 
         var when = new WhenTrigger("pressed");
@@ -81,7 +83,7 @@ public class ProgramTextTests
         out1.Name = "Let me out";
         out1.Annotation = "Inside to outside.";
         airlock.Enabled = false;
-        airlock.Halt = new Halt(SequenceProblem.MissingTarget, out1.Number, 2, null, "Front Inner Door");
+        airlock.Halt = new Halt(SequenceProblem.MissingTarget, out1.Number, 2, Host.SpaceEngineers.World.Trouble.None, "Front Inner Door");
 
         var close = new Act("close");
         close.Targets.Add("inner");
@@ -105,14 +107,24 @@ public class ProgramTextTests
         var spare = airlock.PartFor("vent");
         spare.Annotation = "The vent.";
 
+        airlock.PartFor("call");
+        airlock.PartFor("spare");
+
+        var front = airlock.Instances[0];
+        front.Fill("inner", new[] { "inner" });
+        front.Fill("vent", new[] { "vent" });
+        front.Fill("call", new[] { "call" });
+        front.Fill("spare", new[] { "spare" });
+
         var port = airlock.Instances[1];
         port.Enabled = false;
         port.Fill("inner", new[] { "outer" });
         port.Fill("vent", new[] { "call", "spare" });
 
+        // A system on the construct itself, naming its variables directly.
         var rig = program.AddSystem();
         rig.Name = "Drill Rig";
-        rig.Instances[0].Enabled = false;
+        rig.Enabled = false;
 
         var timed = program.AddSequence(rig, new EveryTrigger(600));
         timed.Name = "Top up";
@@ -211,7 +223,9 @@ public class ProgramTextTests
         Assert.Equal(new[] { "call", "spare" }, port.FilledWith("vent"));
         Assert.Null(port.FilledWith("nothing-like-this"));
 
-        Assert.False(after.Systems[1].Instances[0].Enabled);
+        Assert.False(after.Systems[1].IsBlueprint);
+        Assert.False(after.Systems[1].Enabled);
+
 
         var letMeOut = after.Sequences[0];
         Assert.Equal("Let me out", letMeOut.Name);
@@ -284,8 +298,8 @@ public class ProgramTextTests
         sequence.Steps.Add(speed);
 
         var saved = Save(program);
-        Assert.Contains("act Reverse on [ rotor ]", saved);
-        Assert.Contains("act 'sprocket'.'rotate-to' on [ rotor ] with 90 2.5", saved);
+        Assert.Contains("call Reverse on [ rotor ]", saved);
+        Assert.Contains("call ext.'rotate-to' on [ rotor ] with 90 2.5", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
 
         var after = new Automation();
@@ -337,7 +351,7 @@ public class ProgramTextTests
         sequence.Steps.Add(each);
 
         // The language's own words for it, rather than a spelling invented here.
-        Assert.Contains("act SetColor on [ light ] with 255 136 0", Save(program));
+        Assert.Contains("call SetColor on [ light ] with 255 136 0", Save(program));
 
         var after = new Automation();
         LoadAll(program, after);
@@ -386,7 +400,7 @@ public class ProgramTextTests
         sequence.Steps.Add(shut);
 
         var written = Save(program);
-        Assert.Contains("act 'sprocket'.close on [ inner ]\n", written);
+        Assert.Contains("call ext.close on [ inner ]\n", written);
         Assert.DoesNotContain("with", written);
     }
 
@@ -458,12 +472,12 @@ public class ProgramTextTests
         sequence.Name = "Cycle";
 
         Block(program, "entity1");
-        var halt = Pressed.On(system, "entity1");
+        var halt = Pressed.On(program, system, "entity1");
         halt.Does = new Run(sequence.Number, true);
         system.AddTrigger(halt);
 
         var text = Save(program);
-        Assert.Contains("to stop 1", text);
+        Assert.Contains("then stop 1", text);
 
         var after = new Automation();
         Load(text, after);
@@ -495,7 +509,7 @@ public class ProgramTextTests
         var sequence = program.AddSequence(system);
         sequence.Steps.Add(open);
 
-        var pressed = Pressed.On(system, "entity2");
+        var pressed = Pressed.On(program, system, "entity2");
         pressed.Does = new Run(sequence.Number);
         system.AddTrigger(pressed);
 

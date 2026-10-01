@@ -107,9 +107,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Nothing to add to the floor: whether a sound is playing is known only where it is heard.</summary>
-        public string StatusOf(IMyTerminalBlock block)
+        public Status StatusOf(IMyTerminalBlock block)
         {
-            return null;
+            return Status.None;
         }
 
         /// <inheritdoc />

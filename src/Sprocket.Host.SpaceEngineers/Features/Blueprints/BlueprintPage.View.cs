@@ -16,9 +16,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         VStack _writing;
         Label _writingHeading;
         Composer _composer;
+        Rule _rule;
         Label _partsHeading;
         Label _needs;
-        VStack _partList;
+        PartList _partList;
 
         /// <summary>What the blueprint's author wrote about it, or the box it is written in, then the slots with how many still need a block.</summary>
         protected override Element CreateView()
@@ -54,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new Composer(240f, Styles.Example, Windows).As(out _composer)
                         }
                     }.As(out _writing),
-                    new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) },
+                    new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }.As(out _rule),
                     new HStack
                     {
                         Spacing = 12f,
@@ -64,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs)
                         }
                     },
-                    new VStack { Spacing = 4f }.As(out _partList)
+                    new PartList { Spacing = 4f }.As(out _partList)
                 }
             };
         }

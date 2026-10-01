@@ -1,19 +1,42 @@
+using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Sim.Driving
 {
-    /// <summary>Button triggers written straight into a program, the way the trigger picker makes them.</summary>
+    /// <summary>Button triggers written straight into a program, the way the trigger picker makes them, and read back.</summary>
     public static class Pressed
     {
         /// <summary>
-        /// A trigger part of <paramref name="system" />, answered in its first blockset by button <paramref name="button" /> of
-        /// the block <paramref name="declared" />, and the trigger that is it, not yet added to the system.
+        /// The trigger that is button <paramref name="button" /> of the block <paramref name="declared" />, not yet added to
+        /// <paramref name="system" />: a trigger variable of <paramref name="program" /> for a system, or a trigger slot
+        /// answered in its first instance for a system blueprint.
         /// </summary>
-        public static RequiredTrigger On(AutomationSystem system, string declared, int button = 1)
+        public static RequiredTrigger On(Automation program, AutomationSystem system, string declared, int button = 1)
         {
-            var part = system.TakeTrigger(system.First, new[] { declared }, new[] { new ToolbarSlot(1, 1, button) },
-                "Button Panel", "");
+            var at = new ToolbarSlot(1, 1, button);
+            if (!system.IsBlueprint)
+                return RequiredTrigger.Named(program.DeclareTrigger(declared, at, declared + " " + button).Name);
+
+            var part = system.TakeTrigger(system.First, new[] { declared }, new[] { at }, "Button Panel", "");
             return RequiredTrigger.Named(part);
+        }
+
+        /// <summary>The toolbar slots answering the trigger <paramref name="part" /> of <paramref name="system" /> in its first use, or null where none does.</summary>
+        public static IList<ToolbarSlot>? Where(Automation program, AutomationSystem system, string part)
+        {
+            var blocks = new List<string>();
+            var at = new List<ToolbarSlot>();
+            program.Answers(system, system.First, part, blocks, at);
+            return at.Count == 0 ? null : at;
+        }
+
+        /// <summary>The blocks answering the trigger <paramref name="part" /> of <paramref name="system" /> in its first use, or null where none does.</summary>
+        public static IList<string>? By(Automation program, AutomationSystem system, string part)
+        {
+            var blocks = new List<string>();
+            var at = new List<ToolbarSlot>();
+            program.Answers(system, system.First, part, blocks, at);
+            return blocks.Count == 0 ? null : blocks;
         }
     }
 }

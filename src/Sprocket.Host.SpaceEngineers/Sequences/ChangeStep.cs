@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override string Label => "changing a step";
+        public override Change Change => Change.Step;
 
         /// <inheritdoc />
         public override bool Changes =>

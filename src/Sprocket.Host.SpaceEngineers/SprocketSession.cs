@@ -81,6 +81,10 @@ namespace Sprocket.Host.SpaceEngineers
             get { return _settings ?? (_settings = Settings.Read()); }
         }
 
+        /// <summary>What the mod says, in the player's language, or null before the session has loaded.</summary>
+        /// <remarks>Static for the reason <see cref="_current" /> is: a block's own component reaches the session only through statics, and it registers the terminal button and toolbar action in these words.</remarks>
+        public static Texts Texts => _current == null ? null : _current._texts;
+
         /// <summary>
         /// The unit a block carries, or null. Never creates one.
         /// </summary>
@@ -358,7 +362,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             if (holder.Length == 0 || program.Length == 0 || block == null)
             {
-                Say("This block's automation cannot be edited.");
+                Say(_texts.TerminalRefused);
                 return;
             }
 
@@ -397,10 +401,10 @@ namespace Sprocket.Host.SpaceEngineers
         /// Not the HUD's notifications: this answers a press in the terminal, and the HUD does not
         /// draw while the terminal is open.
         /// </remarks>
-        static void Say(string what)
+        void Say(string what)
         {
             if (MyAPIGateway.Utilities != null)
-                MyAPIGateway.Utilities.ShowMissionScreen("Automation", null, null, what);
+                MyAPIGateway.Utilities.ShowMissionScreen(_texts.TerminalOpen, null, null, what);
         }
 
         /// <summary>

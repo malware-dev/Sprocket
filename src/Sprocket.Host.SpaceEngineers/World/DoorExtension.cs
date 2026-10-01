@@ -139,21 +139,21 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Trouble.None;
         }
 
-        public string StatusOf(IMyTerminalBlock block)
+        public Status StatusOf(IMyTerminalBlock block)
         {
             var door = block as IMyDoor;
             if (door == null)
-                return null;
+                return Status.None;
 
             switch (door.Status)
             {
-                case DoorStatus.Open: return "open";
-                case DoorStatus.Closed: return "shut";
-                case DoorStatus.Opening: return "opening…";
-                case DoorStatus.Closing: return "closing…";
+                case DoorStatus.Open: return Status.Of(Condition.Open);
+                case DoorStatus.Closed: return Status.Of(Condition.Shut);
+                case DoorStatus.Opening: return Status.Of(Condition.Opening);
+                case DoorStatus.Closing: return Status.Of(Condition.Closing);
             }
 
-            return null;
+            return Status.None;
         }
 
         public bool IsBusy(IMyTerminalBlock block)

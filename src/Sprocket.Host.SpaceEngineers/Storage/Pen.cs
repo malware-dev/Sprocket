@@ -153,7 +153,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             Space();
             Write(block);
-            _text.Append(":toolbar(").Append(at.Toolbar).Append(", ").Append(at.Page).Append(", ").Append(at.Slot).Append(')');
+            _text.Append(":").Append(ProgramText.Toolbar).Append("(").Append(at.Toolbar).Append(", ").Append(at.Page).Append(", ").Append(at.Slot).Append(')');
             return this;
         }
 

@@ -87,21 +87,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// The moment <paramref name="moment" /> means as <paramref name="through" /> answers it: for a trigger part, its first
-        /// toolbar slot there as a button press; for anything watched, what it watches for. Empty where there is none.
+        /// The moment <paramref name="moment" /> of <paramref name="system" /> means as <paramref name="through" /> runs it: for a
+        /// trigger, the trigger on its block that the first toolbar slot answering it is among; for anything watched, what it
+        /// watches for. Empty where there is none, or no program to ask.
         /// </summary>
-        public static string EventOf(MomentTrigger moment, SystemInstance through)
+        public static string EventOf(Automation program, Bindings bindings, AutomationSystem system, MomentTrigger moment,
+            SystemInstance through)
         {
             var required = moment as RequiredTrigger;
             if (required == null)
                 return moment.EventId;
 
-            var positions = through == null ? null : through.Positions(required.Part);
-            if (positions == null || positions.Count == 0)
+            if (program == null || system == null)
                 return "";
 
-            var at = positions[0];
-            return at.Toolbar == 1 && at.Page == 1 ? ButtonPanelExtension.Pressed(at.Slot) : "";
+            var blocks = new List<string>();
+            var positions = new List<ToolbarSlot>();
+            program.Answers(system, through, required.Part, blocks, positions);
+            if (positions.Count == 0)
+                return "";
+
+            GridEntity block = bindings == null ? null : bindings.Entity(blocks[0]);
+            EntityEvent stands = block == null ? null : block.Kind.Trigger(positions[0]);
+            return stands != null ? stands.Id : positions[0].EventId;
         }
 
         /// <summary>Actions every one of the given entities accepts.</summary>

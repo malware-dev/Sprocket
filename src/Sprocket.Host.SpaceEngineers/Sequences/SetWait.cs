@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _now = now;
         }
 
-        public override string Label => "changing a wait";
+        public override Change Change => Change.Wait;
 
         public override bool Changes => _was != _now;
 

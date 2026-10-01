@@ -24,8 +24,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     abstract class Edit<T>
     {
-        /// <summary>What this did, in the words it will be offered back in.</summary>
-        public abstract string Label { get; }
+        /// <summary>What this did, as it will be offered back.</summary>
+        public abstract Change Change { get; }
 
         public abstract void Apply(T subject);
 

@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _now = now;
         }
 
-        public override string Label => "renaming a slot";
+        public override Change Change => Change.RenameSlot;
 
         /// <summary>Only what the slot is called changes, and its box already says it.</summary>
         public override bool ChangesShape => false;

@@ -103,7 +103,7 @@ public class AirlockTests
         a.Vent = a.Ship.Vent(3, "Airlock Vent");
         a.Inside = a.Ship.Panel(4, "Inside Button");
 
-        var trigger = new WhenTrigger("pressed_1");
+        var trigger = new WhenTrigger(new ToolbarSlot(1, 1, 1).EventId);
         trigger.Sources.Add(a.Ref(a.Seen(a.Inside)));
 
         a.LetMeOut = a.Automation.AddSequence(trigger);
@@ -496,7 +496,30 @@ public class AirlockTests
         Assert.False(system.Enabled);
     }
 
+    /// <summary>A <c>when</c> on a block that never reaches its moment is at fault, naming the block, rather than waiting forever.</summary>
+    [Fact]
+    public void AMomentTheBlockHasNotGotIsAtFault()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var never = new WhenTrigger("no-such-moment");
+        never.Sources.Add(a.Ref(a.Seen(a.Inner)));
+        var sequence = a.Automation.AddSequence(system, never);
+        Then(sequence, "close", a.Ref(a.Seen(a.Outer)));
+
+        system.Enabled = true;
+        a.Automation.Edited();
+        a.Tick(3);
+
+        var fault = SequenceSummary.Fault(a.Runner.Get(sequence));
+        Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
+        Assert.Equal(Unwired.NoMoment, fault.Unwired);
+        Assert.Equal("Inner Door", fault.Which);
+    }
+
     /// <summary>Running another sequence, and stopping one, start nothing again.</summary>
+
     [Fact]
     public void RunningOnAndStoppingAreNoCycle()
     {
@@ -983,6 +1006,39 @@ public class AirlockTests
         Assert.Equal(["Inner Door:close", "Inner Door:close"], a.Log);
         Assert.Equal(2, a.Runner.Poller(on, system.First)!.FiredCount);
     }
+
+    /// <summary>The names a <c>when</c> watches stand for one set of blocks, so a block two variables hold fires once.</summary>
+    [Fact]
+    public void ABlockTwoVariablesHoldIsWatchedOnce()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var vent = a.Automation.FindRef(a.Ref(a.Seen(a.Vent)))!;
+        var again = new EntityRef("Vent again", vent.KindId);
+        again.Keys.AddRange(vent.Keys);
+        a.Automation.Restore(again);
+
+        var on = new WhenTrigger("switched-on");
+        on.Sources.Add(vent.Name);
+        on.Sources.Add(again.Name);
+
+        on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(on);
+        a.Automation.Edited();
+
+        a.Vent.Enabled = false;
+        a.Inner.ForceOpen();
+        a.Tick(20);
+        a.Log.Clear();
+
+        a.Vent.Enabled = true;
+        a.Tick(20);
+
+        Assert.Equal(["Inner Door:close"], a.Log);
+        Assert.Equal(1, a.Runner.Poller(on, system.First)!.FiredCount);
+    }
+
 
     /// <summary>A moment the block announces is looked for on the tick after, whatever the <c>when</c> asks for.</summary>
     [Fact]

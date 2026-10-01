@@ -44,9 +44,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         Qualified,
 
         /// <summary>
-        /// A toolbar slot, <c>panel1:toolbar(1, 1, 4)</c>: the block's name and the three numbers, a run of four in
-        /// <see cref="Reading.Parts" />.
+        /// A host function called on a block, <c>panel1:toolbar(1, 1, 4)</c>: the block's name, the function's name and its
+        /// values, a run of <see cref="Reading.Parts" />.
         /// </summary>
-        Slot
+        Function
     }
 }

@@ -91,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; i < Slots.Count; i++)
             {
                 _chips[i].WaitsTip = texts.MemberWaits;
-                _chips[i].Tip = Tip.For(_chips[i].Tip, Slots[i].Opens == null ? Why() : null);
+                _chips[i].Tip = Tip.For(_chips[i].Tip, Slots[i].Opens == null ? Why() : About(texts, Slots[i]));
                 Part(i, Slots[i], world);
             }
 
@@ -107,6 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             // Quiet rather than gone, so a locked row is the same row with nothing on it to press.
             _grip.Color = _grip.CanCarry ? Palette.Faint : Palette.Dim;
+            _grip.Tip = Tip.For(_grip.Tip, _grip.CanCarry ? texts.SequenceDragStep : Why());
             _delete.Command = Deletes;
             _delete.IsEnabled = Deletes != null;
             _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.SequenceDeleteStep : Why());
@@ -132,6 +133,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         string Why()
         {
             return Locked.Length == 0 ? null : Locked;
+        }
+
+        /// <summary>What pressing <paramref name="part" /> does, or null where it goes without saying.</summary>
+        static string About(Texts texts, SentenceSlot part)
+        {
+            if (part is ActionSlot)
+                return texts.SequenceActionAbout;
+
+            if (part is EntitiesSlot)
+                return texts.SequenceBlocksAbout;
+
+            if (part is ValuesSlot)
+                return texts.SequenceValuesAbout;
+
+            return part is DurationSlot ? texts.SequenceLengthAbout : null;
         }
 
         void Part(int at, SentenceSlot part, GridWorld world)

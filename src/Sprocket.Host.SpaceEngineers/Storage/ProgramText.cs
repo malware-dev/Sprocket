@@ -33,7 +33,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         const int Version = 1;
 
-        const int Draft = 8;
+        const int Draft = 9;
+
+        /// <summary>The host function this host answers a trigger with: a slot on a block's toolbar.</summary>
+        /// <remarks>Persisted in every program with a trigger, and written by <see cref="Pen.Slot" />.</remarks>
+        public const string Toolbar = "toolbar";
 
         static readonly string[] Times =
         {
@@ -55,13 +59,33 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
             pen.End();
 
-            // Before anything that names one, so a reader has them in hand by the time it meets a step.
-            var refs = program.Refs;
-            if (refs.Count > 0)
-                pen.Blank();
+            // Before anything that names one, so a reader has them in hand by the time it meets a step. A variable
+            // nothing names is left out.
+            var blocks = new HashSet<string>(StringComparer.Ordinal);
+            var triggers = new HashSet<string>(StringComparer.Ordinal);
+            Used(program, blocks, triggers);
 
+            var refs = program.Refs;
+            var first = true;
             for (var i = 0; i < refs.Count; i++)
+            {
+                if (!blocks.Contains(refs[i].Name))
+                    continue;
+
+                if (first)
+                    pen.Blank();
+
+                first = false;
                 WriteRef(pen, values, refs[i]);
+            }
+
+            // After the blocks, since each is on one of them.
+            var held = program.TriggerRefs;
+            for (var i = 0; i < held.Count; i++)
+            {
+                if (triggers.Contains(held[i].Name))
+                    WriteTriggerRef(pen, held[i]);
+            }
 
             var systems = program.Systems;
             for (var i = 0; i < systems.Count; i++)
@@ -73,10 +97,65 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 var instances = systems[i].Instances;
                 for (var n = 0; n < instances.Count; n++)
-                    WriteInstance(pen, systems[i], instances[n]);
+                    WriteInstance(pen, program, systems[i], instances[n]);
             }
 
             return pen.ToString();
+        }
+
+        /// <summary>
+        /// The variables something in <paramref name="program" /> names: in <paramref name="blocks" /> those holding a
+        /// block, in <paramref name="triggers" /> those holding a trigger.
+        /// </summary>
+        /// <remarks>
+        /// A system names variables in its steps and triggers; a blueprint names only its slots, and its instances name the
+        /// variables answering them. A trigger variable names the block it is on.
+        /// </remarks>
+        static void Used(Automation program, HashSet<string> blocks, HashSet<string> triggers)
+        {
+            var named = new List<string>();
+            var systems = program.Systems;
+            for (var i = 0; i < systems.Count; i++)
+            {
+                var system = systems[i];
+                if (!system.IsBlueprint)
+                {
+                    system.Acted(named);
+                    for (var n = 0; n < named.Count; n++)
+                    {
+                        if (program.FindTriggerRef(named[n]) != null)
+                            triggers.Add(named[n]);
+                        else
+                            blocks.Add(named[n]);
+                    }
+
+                    continue;
+                }
+
+                var instances = system.Instances;
+                for (var n = 0; n < instances.Count; n++)
+                {
+                    foreach (var slot in instances[n].Filled)
+                    {
+                        var filled = instances[n].FilledWith(slot);
+                        var at = instances[n].Positions(slot);
+                        for (var f = 0; f < filled.Count; f++)
+                        {
+                            blocks.Add(filled[f]);
+                            var declared = at == null || f >= at.Count ? null : program.FindTriggerRef(filled[f], at[f]);
+                            if (declared != null)
+                                triggers.Add(declared.Name);
+                        }
+                    }
+                }
+            }
+
+            var held = program.TriggerRefs;
+            for (var i = 0; i < held.Count; i++)
+            {
+                if (triggers.Contains(held[i].Name))
+                    blocks.Add(held[i].Block);
+            }
         }
 
         /// <summary>The line, counted from 1, that trouble this reader reported names, or 0 where it names none.</summary>
@@ -162,17 +241,17 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var construct = constructs[i];
                 if (construct.IsOff)
                     trouble.Say(construct, "unexpected '//'; only a step in a sequence can be switched off.");
-                else if (construct.Key == Keyword.Block)
-                    ReadRef(construct, program, values, trouble);
+                else if (construct.Key == Keyword.Let)
+                    ReadLet(construct, program, values, trouble);
                 else if (construct.Key == Keyword.System)
                     ReadSystem(construct, program, trouble);
                 else if (construct.Key == Keyword.Instance)
                     ReadInstance(construct, program, trouble);
                 else if (i > 0)
-                    trouble.Say(construct, "unexpected " + Headed(construct) + "; expected block, system or instance.");
+                    trouble.Say(construct, "unexpected " + Headed(construct) + "; expected let, system or instance.");
             }
 
-            trouble.Settle(program);
+            trouble.Settle();
 
             if (trouble.What.Length > 0)
             {
@@ -211,10 +290,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return at < 0 ? -1 : statement.Whole(at + 1);
         }
 
+        /// <summary><c>let door1 = block 'Door/LargeBlockDoor' [ 7485…, "Airlock Inner Door" ]</c></summary>
         static void WriteRef(Pen pen, Values values, EntityRef declared)
         {
             pen.Note(declared.Annotation);
-            pen.Start(Keyword.Block).Word(BlockKinds.Sort(declared.KindId)).Word(declared.Name);
+            pen.Start(Keyword.Let).Word(declared.Name).Says(Keyword.Equals).Says(Keyword.Block).Word(BlockKinds.Sort(declared.KindId));
             pen.OpenList();
 
             var keys = declared.Keys;
@@ -306,31 +386,98 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return cells;
         }
 
-        static void ReadRef(Statement statement, Automation program, Values values, Trouble trouble)
+        /// <summary><c>let button = panel1:toolbar(1, 1, 4)</c>: a trigger, the slot this host answers one with, on a block above.</summary>
+        static void WriteTriggerRef(Pen pen, TriggerRef declared)
         {
-            var name = statement.ValueAt(1);
-            if (!Named(statement.ValueAt(0)) || !Named(name) || statement.ValueAt(2).Form != ValueForm.List)
+            pen.Note(declared.Annotation);
+            pen.Start(Keyword.Let).Word(declared.Name).Says(Keyword.Equals).Slot(declared.Block, declared.At);
+            pen.End();
+        }
+
+        /// <summary>
+        /// <c>let door1 = block '…' [ … ]</c> or <c>let button = panel1:toolbar(1, 1, 4)</c>: a variable, holding a block or a
+        /// trigger on one.
+        /// </summary>
+        static void ReadLet(Statement statement, Automation program, Values values, Trouble trouble)
+        {
+            var name = statement.ValueAt(0);
+            if (!Named(name) || !statement.Says(1, Keyword.Equals))
             {
-                trouble.Say(statement, "expected block '<type>/<subtype>' <name> [ <keys> ].");
+                trouble.Say(statement, "expected let <name> = <value>.");
                 return;
             }
 
-            if (!Ends(statement, 3, trouble))
-                return;
-
-            if (program.FindRef(name.Word) != null)
+            if (program.Names(name.Word))
             {
-                trouble.Say(statement, "block '" + name.Word + "' is already declared.");
+                trouble.Say(statement, "variable '" + name.Word + "' is already defined.");
                 return;
             }
 
-            var declared = new EntityRef(statement.Word(1), BlockKinds.Definition(statement.Word(0)));
+            if (statement.ValueAt(2).Form == ValueForm.Function)
+            {
+                if (!Ends(statement, 3, trouble))
+                    return;
+
+                string block;
+                ToolbarSlot at;
+                if (!Trigger(statement, statement.ValueAt(2), program, trouble, out block, out at))
+                    return;
+
+                var trigger = new TriggerRef(name.Word, block, at);
+                trigger.Annotation = statement.Annotation;
+                program.Restore(trigger);
+                return;
+            }
+
+            if (!statement.Says(2, Keyword.Block) || !Named(statement.ValueAt(3)) || statement.ValueAt(4).Form != ValueForm.List)
+            {
+                trouble.Say(statement, "expected a block, like block '<type>/<subtype>' [ <keys> ], or a trigger, like panel1:toolbar(1, 1, 4).");
+                return;
+            }
+
+            if (!Ends(statement, 5, trouble))
+                return;
+
+            var declared = new EntityRef(name.Word, BlockKinds.Definition(statement.Word(3)));
             declared.Annotation = statement.Annotation;
-            var keys = statement.Items(2);
+            var keys = statement.Items(4);
             for (var i = 0; i < keys.Count; i++)
                 ReadKey(values, keys[i], declared.Keys, statement, trouble);
 
             program.Restore(declared);
+        }
+
+        /// <summary>
+        /// The trigger the host function <paramref name="value" /> gives back: this host's <c>toolbar</c>, a slot on the
+        /// toolbars of a block a variable above holds, or trouble.
+        /// </summary>
+        static bool Trigger(Statement statement, Value value, Automation program, Trouble trouble, out string block,
+            out ToolbarSlot at)
+        {
+            at = null;
+            string function;
+            ValueRange given;
+            statement.Function(value, out block, out function, out given);
+            if (function != Toolbar)
+            {
+                trouble.Say(statement, "no host function '" + function + "'; expected toolbar(<toolbar>, <page>, <slot>).");
+                return false;
+            }
+
+            if (given.Count != 3 || Statement.Counted(given[0]) == 0 || Statement.Counted(given[1]) == 0 || Statement.Counted(given[2]) == 0)
+            {
+                trouble.Say(statement, "expected toolbar(<toolbar>, <page>, <slot>), each a whole number from 1.");
+                return false;
+            }
+
+            if (program.FindRef(block) == null)
+            {
+                trouble.Say(statement, "no variable '" + block + "' holding a block above this line.");
+                return false;
+            }
+
+            at = new ToolbarSlot(Statement.Counted(given[0]), Statement.Counted(given[1]), Statement.Counted(given[2]));
+            return true;
         }
 
         /// <summary>
@@ -387,8 +534,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             pen.Blank();
             pen.Note(system.Annotation);
-            pen.Start(Keyword.System).Text(system.Identity.ToString("D"))
-                .Says(Keyword.As).Qualified(system.Namespace, system.Name);
+            pen.Start(Keyword.System);
+            if (system.IsBlueprint)
+                pen.Says(Keyword.Blueprint);
+
+            pen.Text(system.Identity.ToString("D")).Says(Keyword.As).Qualified(system.Namespace, system.Name);
 
             if (system.Changed.HasValue)
             {
@@ -401,21 +551,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             pen.Body();
 
-            // The parts before the ones that fill them in, so a reader meets the vocabulary before
-            // the answers.
+            // The slots before what uses them, so a reader meets the vocabulary before the answers.
             var used = new List<string>();
             system.Acted(used);
 
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
             {
-                if (!parts[i].IsTrigger && parts[i].Kept(used.Contains(parts[i].Id)))
-                    WritePart(pen, parts[i]);
+                if (parts[i].IsTrigger || parts[i].Kept(used.Contains(parts[i].Id)))
+                    WriteSlot(pen, parts[i]);
             }
 
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
-                WriteTrigger(pen, system, triggers[i]);
+                WriteTrigger(pen, triggers[i]);
 
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
@@ -425,7 +574,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>system "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43" as MalTek.Airlock changed "…" last sequence 4 { … }</c>
+        /// <c>system "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43" as MalTek.Airlock changed "…" last sequence 4 { … }</c>, or the
+        /// same as a <c>system blueprint</c>.
         /// </summary>
         /// <remarks>
         /// Strict where it matters. A system is its identity, so one without a readable identity, or a second
@@ -436,15 +586,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         static void ReadSystem(Statement statement, Automation program, Trouble trouble)
         {
+            var blueprint = statement.Says(0, Keyword.Blueprint);
+            var first = blueprint ? 1 : 0;
+
             Guid identity;
-            if (!Guid.TryParseExact(statement.Text(0), "D", out identity) || identity == Guid.Empty)
+            if (!Guid.TryParseExact(statement.Text(first), "D", out identity) || identity == Guid.Empty)
             {
                 trouble.Say(statement, "expected the system's identity, a quoted GUID.");
                 return;
             }
 
-            var name = statement.Parts(2);
-            if (!statement.Says(1, Keyword.As) || name.Count == 0 || name.Count > 2
+            var name = statement.Parts(first + 2);
+            if (!statement.Says(first + 1, Keyword.As) || name.Count == 0 || name.Count > 2
                 || name[name.Count - 1].Word.Length == 0)
             {
                 trouble.Say(statement, "expected 'as' and the system's name.");
@@ -464,9 +617,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var system = program.Restore(identity, space, called);
             system.Annotation = statement.Annotation;
+            system.IsBlueprint = blueprint;
 
             // The two metadata clauses, in either order and each at most once.
-            var at = 3;
+            var at = first + 3;
             var changed = false;
             var last = false;
             while (at < statement.Count)
@@ -500,16 +654,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
-                if ((inner.Key == Keyword.Required || inner.Key == Keyword.Optional) && inner.Says(0, Keyword.Trigger))
-                    ReadTrigger(inner, system, trouble);
+                if ((inner.Key == Keyword.Required || inner.Key == Keyword.Optional) && blueprint)
+                    ReadSlot(inner, system, trouble);
                 else if (inner.Key == Keyword.Required || inner.Key == Keyword.Optional)
-                    ReadPart(inner, system, trouble);
-                else if (inner.Key == Keyword.When || inner.Key == Keyword.Every)
-                    ReadTrigger(inner, system, trouble);
+                    trouble.Say(inner, "unexpected " + Headed(inner) + "; only a system blueprint has slots.");
+                else if (inner.Key == Keyword.On || inner.Key == Keyword.When || inner.Key == Keyword.Every)
+                    ReadTrigger(inner, system, program, trouble);
                 else if (inner.Key == Keyword.Sequence)
                     ReadSequence(inner, system, program, trouble);
                 else
-                    trouble.Say(inner, "unexpected " + Headed(inner) + "; expected required, optional, when, every or sequence.");
+                    trouble.Say(inner, "unexpected " + Headed(inner) + (blueprint
+                        ? "; expected required, optional, on, when, every or sequence."
+                        : "; expected on, when, every or sequence."));
             }
 
             Resolve(system, statement, trouble);
@@ -548,23 +704,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>required block inner expects Door</c>: something the construct has to provide, or may
-        /// leave out where it is <c>optional</c>.
+        /// <c>required slot inner expects Door</c>: something the construct has to provide, or may leave out where it is
+        /// <c>optional</c>.
         /// </summary>
         /// <remarks>
-        /// <c>required</c> or <c>optional</c> heads it, so every line that starts with either word is
-        /// something the ship answers rather than something Sprocket does. What a part expects is written
-        /// only when the author said it; nothing means anything may fill it.
+        /// <c>required</c> or <c>optional</c> heads it, so every line that starts with either word is something the ship
+        /// answers rather than something Sprocket does. What a slot for a block expects is written only when the author said
+        /// it; nothing means any block may fill it.
         /// </remarks>
-        static void WritePart(Pen pen, Part part)
+        static void WriteSlot(Pen pen, Part part)
         {
             if (part.Annotation.Length > 0)
                 pen.Blank();
 
             pen.Note(part.Annotation);
-            pen.Start(part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Block).Word(part.Id);
+            pen.Start(part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Slot).Word(part.Id);
 
-            if (part.Expects.Count == 1)
+            if (part.IsTrigger)
+                pen.Says(Keyword.Expects).Says(Keyword.Trigger);
+            else if (part.Expects.Count == 1)
                 pen.Says(Keyword.Expects).Word(part.Expects[0]);
             else if (part.Expects.Count > 1)
                 WriteNames(pen.Says(Keyword.Expects), part.Expects);
@@ -572,27 +730,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.End();
         }
 
-        static void ReadPart(Statement statement, AutomationSystem system, Trouble trouble)
+        static void ReadSlot(Statement statement, AutomationSystem system, Trouble trouble)
         {
             var optional = statement.Key == Keyword.Optional;
-            if (!statement.Says(0, Keyword.Block))
+            if (!statement.Says(0, Keyword.Slot))
             {
-                trouble.Say(statement, optional
-                    ? "expected 'block' or 'trigger' after 'optional'."
-                    : "expected 'block' or 'trigger' after 'required'.");
+                trouble.Say(statement, optional ? "expected 'slot' after 'optional'." : "expected 'slot' after 'required'.");
                 return;
             }
 
             var name = statement.ValueAt(1);
             if (!Named(name))
             {
-                trouble.Say(statement, "expected the part's name.");
+                trouble.Say(statement, "expected the slot's name.");
                 return;
             }
 
             if (system.FindPart(name.Word) != null)
             {
-                trouble.Say(statement, "part '" + name.Word + "' is already declared.");
+                trouble.Say(statement, "slot '" + name.Word + "' is already declared.");
                 return;
             }
 
@@ -607,12 +763,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             var one = statement.ValueAt(3);
-            if (one.Form == ValueForm.List)
+            if (one.Says(Keyword.Trigger))
+                part.IsTrigger = true;
+            else if (one.Form == ValueForm.List)
                 Names(statement, 3, part.Expects, trouble, "expected a block type or a list of them after 'expects'.");
             else if (Named(one))
                 part.Expects.Add(one.Word);
             else
-                trouble.Say(statement, "expected a block type or a list of them after 'expects'.");
+                trouble.Say(statement, "expected trigger, a block type or a list of them after 'expects'.");
 
             Ends(statement, 4, trouble);
         }
@@ -621,10 +779,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <c>instance 1 of "3f2a…" as 'Port airlock' { inner = [ door1 ] }</c>
         /// </summary>
         /// <remarks>
-        /// One of a system, on this construct. It sits outside the system rather than inside it, because
-        /// the system is what is shared and which of somebody's blocks answer its parts is not.
+        /// One use of a system blueprint, on this construct. It sits outside the blueprint rather than inside it,
+        /// because the blueprint is what is shared and which of somebody's blocks answer its slots is not.
         /// </remarks>
-        static void WriteInstance(Pen pen, AutomationSystem system, SystemInstance instance)
+        static void WriteInstance(Pen pen, Automation program, AutomationSystem system, SystemInstance instance)
         {
             pen.Blank();
             pen.Note(instance.Annotation);
@@ -651,7 +809,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (positions == null)
                     WriteNames(pen, instance.FilledWith(parts[i]));
                 else
-                    Slots(pen, instance.FilledWith(parts[i]), positions);
+                    Slots(pen, program, instance.FilledWith(parts[i]), positions);
 
                 pen.End();
             }
@@ -685,7 +843,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// One of a system, or nothing where it does not say which system it is one of.
+        /// One use of a system blueprint, or nothing where it does not say which blueprint it is one of.
         /// </summary>
         /// <remarks>
         /// The system may be named by its identity or by its name, because a person writing one by hand
@@ -697,7 +855,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue
                 || !statement.Says(1, Keyword.Of))
             {
-                trouble.Say(statement, "expected instance <number> of <system>.");
+                trouble.Say(statement, "expected instance <number> of <system blueprint>.");
                 return;
             }
 
@@ -705,6 +863,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system == null)
             {
                 trouble.Say(statement, "no system called " + Spelled(statement, 2) + ".");
+                return;
+            }
+
+            if (!system.IsBlueprint)
+            {
+                trouble.Say(statement, "system " + Spelled(statement, 2) + " is not a system blueprint; only a blueprint has instances.");
                 return;
             }
 
@@ -746,7 +910,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 if (inner.Key != Keyword.None || !inner.Says(0, Keyword.Equals) || inner.ValueAt(1).Form != ValueForm.List)
                 {
-                    trouble.Say(inner, "expected <part> = [ <answers> ].");
+                    trouble.Say(inner, "expected <slot> = [ <answers> ].");
                     continue;
                 }
 
@@ -756,13 +920,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Part part = system.FindPart(inner.Head);
                 if (part == null)
                 {
-                    trouble.Say(inner, "system '" + system.Name + "' has no part '" + inner.Head + "'.");
+                    trouble.Say(inner, "system blueprint '" + system.Name + "' has no slot '" + inner.Head + "'.");
                     continue;
                 }
 
                 if (instance.FilledWith(inner.Head) != null)
                 {
-                    trouble.Say(inner, "part '" + inner.Head + "' is already answered.");
+                    trouble.Say(inner, "slot '" + inner.Head + "' is already answered.");
                     continue;
                 }
 
@@ -770,52 +934,84 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 if (part.IsTrigger)
                 {
-                    Answered(inner, instance, trouble);
+                    Answered(inner, system, instance, program, trouble);
                     continue;
                 }
 
                 var filled = new List<string>();
-                if (!Names(inner, 1, filled, trouble, "expected block names in the list."))
+                if (!Names(inner, 1, filled, trouble, "expected variables holding blocks in the list."))
                     continue;
 
                 for (var n = 0; n < filled.Count; n++)
-                    trouble.Owes(inner, filled[n], null);
+                {
+                    if (program.FindRef(filled[n]) == null)
+                        trouble.Say(inner, "no variable '" + filled[n] + "' holding a block above this line.");
+                }
 
                 instance.Fill(inner.Head, filled);
             }
         }
 
-        /// <summary><c>call = [ panel1:toolbar(1, 1, 4) ]</c>: the toolbar slots that answer a trigger in one of a system.</summary>
-        static void Answered(Statement statement, SystemInstance instance, Trouble trouble)
+        /// <summary>
+        /// <c>button = [ panel1:toolbar(1, 1, 4) ]</c>: the triggers that answer a trigger slot in one use of a blueprint, each
+        /// written in place or named by a variable above.
+        /// </summary>
+        static void Answered(Statement statement, AutomationSystem system, SystemInstance instance, Automation program,
+            Trouble trouble)
         {
             var items = statement.Items(1);
             var blocks = new List<string>();
             var at = new List<ToolbarSlot>();
             for (var i = 0; i < items.Count; i++)
             {
-                string block;
-                int toolbar, page, slot;
-                if (!statement.Slot(items[i], out block, out toolbar, out page, out slot) || block.Length == 0
-                    || toolbar == 0 || page == 0 || slot == 0)
+                if (Named(items[i]))
                 {
-                    trouble.Say(statement, "expected toolbar slots in the list, like [ panel1:toolbar(1, 1, 4) ].");
+                    var declared = program.FindTriggerRef(items[i].Word);
+                    if (declared == null)
+                    {
+                        trouble.Say(statement, "no variable '" + items[i].Word + "' holding a trigger above this line.");
+                        return;
+                    }
+
+                    blocks.Add(declared.Block);
+                    at.Add(declared.At);
+                    continue;
+                }
+
+                string block;
+                ToolbarSlot slot;
+                if (items[i].Form != ValueForm.Function)
+                {
+                    trouble.Say(statement, "expected triggers in the list, like [ panel1:toolbar(1, 1, 4) ].");
                     return;
                 }
 
+                if (!Trigger(statement, items[i], program, trouble, out block, out slot))
+                    return;
+
                 blocks.Add(block);
-                at.Add(new ToolbarSlot(toolbar, page, slot));
-                trouble.Owes(statement, block, null);
+                at.Add(slot);
             }
+
+            // Each answer to a slot an on names is a toolbar slot that starts it, and holds nothing else.
+            for (var i = 0; Started(system, statement.Head) && i < blocks.Count; i++)
+                trouble.Takes(statement, blocks[i], at[i]);
 
             instance.Fill(statement.Head, blocks, at);
         }
 
-        /// <summary>A trigger part's toolbar slots, each on its block, as a list.</summary>
-        static void Slots(Pen pen, IList<string> blocks, IList<ToolbarSlot> at)
+        /// <summary>A trigger slot's answers as a list, each by the variable holding it where there is one, or written in place on its block.</summary>
+        static void Slots(Pen pen, Automation program, IList<string> blocks, IList<ToolbarSlot> at)
         {
             pen.OpenList();
             for (var i = 0; blocks != null && i < blocks.Count && i < at.Count; i++)
-                pen.Slot(blocks[i], at[i]);
+            {
+                var declared = program.FindTriggerRef(blocks[i], at[i]);
+                if (declared != null)
+                    pen.Word(declared.Name);
+                else
+                    pen.Slot(blocks[i], at[i]);
+            }
 
             pen.CloseList();
         }
@@ -896,41 +1092,31 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
 
                 step.IsOff = body[i].IsOff;
-                Owes(body[i], step as Act, system, trouble);
+                Uses(body[i], step as Act, system, program, trouble);
                 sequence.Steps.Add(step);
             }
         }
 
         /// <summary>
-        /// <c>required trigger call to run 1</c>, <c>when any 'sprocket'.closed [ inner ] then run 2</c>, or
-        /// <c>every 600t stop 3</c>.
+        /// <c>on button then run 1</c>, <c>when any ext.closed [ inner ] then run 2</c>, or <c>every 600t stop 3</c>.
         /// </summary>
         /// <remarks>
         /// A trigger says the step it does, written as a sequence writes it, because it belongs to the system rather than
         /// to one sequence.
         /// </remarks>
-        static void WriteTrigger(Pen pen, AutomationSystem system, Trigger trigger)
+        static void WriteTrigger(Pen pen, Trigger trigger)
         {
-            // The ones a construct answers are parts, in a list of their own broken up only where one carries words; the
-            // rest each start a paragraph.
+            pen.Blank();
+            pen.Note(trigger.Annotation);
+
             var needed = trigger as RequiredTrigger;
             if (needed != null)
             {
-                var part = system.FindPart(needed.Part);
-                var note = part == null ? "" : part.Annotation;
-                if (note.Length > 0)
-                    pen.Blank();
-
-                pen.Note(note);
-                pen.Start(part != null && part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Trigger)
-                    .Word(needed.Part).Says(Keyword.To);
+                pen.Start(Keyword.On).Word(needed.Part).Says(Keyword.Then);
                 WriteDoes(pen, trigger.Does);
                 pen.End();
                 return;
             }
-
-            pen.Blank();
-            pen.Note(trigger.Annotation);
 
             var when = trigger as WhenTrigger;
             if (when != null)
@@ -962,9 +1148,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Rest(pen, step);
         }
 
-        static void ReadTrigger(Statement statement, AutomationSystem system, Trouble trouble)
+        static void ReadTrigger(Statement statement, AutomationSystem system, Automation program, Trouble trouble)
         {
-            var trigger = Kind(statement, system, trouble);
+            var trigger = Kind(statement, trouble);
             if (trigger == null)
                 return;
 
@@ -972,45 +1158,73 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (trigger.Does == null)
                 return;
 
-            Owes(statement, trigger.Acts, system, trouble);
+            Uses(statement, trigger.Acts, system, program, trouble);
 
             var when = trigger as WhenTrigger;
             for (var i = 0; when != null && i < when.Sources.Count; i++)
-                trouble.Owes(statement, when.Sources[i], system);
+                Uses(statement, when.Sources[i], system, program, false, trouble);
 
-            // A trigger part's words are the part's, where the configuration panel shows them.
             var needed = trigger as RequiredTrigger;
-            if (needed == null)
+            if (needed != null)
             {
-                trigger.Annotation = statement.Annotation;
-            }
-            else
-            {
-                var part = system.PartFor(needed.Part);
-                part.IsTrigger = true;
-                part.Optional = statement.Key == Keyword.Optional;
-                part.Annotation = statement.Annotation;
+                Uses(statement, needed.Part, system, program, true, trouble);
+                Takes(statement, needed, system, program, trouble);
             }
 
+            trigger.Annotation = statement.Annotation;
             system.AddTrigger(trigger);
         }
 
-        /// <summary>Where the step a trigger does starts: after <c>to</c>, after <c>then</c>, or after how often.</summary>
+        /// <summary>
+        /// Trouble where the trigger <paramref name="needed" /> names already starts something: a slot of a system blueprint
+        /// another <c>on</c> names, or the toolbar slot a system's trigger variable holds.
+        /// </summary>
+        /// <remarks>A toolbar slot holds one action, so a second <c>on</c> on it could never be wired.</remarks>
+        static void Takes(Statement statement, RequiredTrigger needed, AutomationSystem system, Automation program, Trouble trouble)
+        {
+            if (system.IsBlueprint)
+            {
+                if (Started(system, needed.Part))
+                    trouble.Say(statement, "slot '" + needed.Part + "' already starts something; a toolbar slot holds one action.");
+
+                return;
+            }
+
+            var declared = program.FindTriggerRef(needed.Part);
+            if (declared != null)
+                trouble.Takes(statement, declared.Block, declared.At);
+        }
+
+        /// <summary>Whether an <c>on</c> of <paramref name="system" /> names <paramref name="slot" />.</summary>
+        static bool Started(AutomationSystem system, string slot)
+        {
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var needed = triggers[i] as RequiredTrigger;
+                if (needed != null && needed.Part == slot)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Where the step a trigger does starts: after <c>then</c>, or after how often.</summary>
         static int Doing(Statement statement)
         {
             if (statement.Key == Keyword.When)
                 return statement.Find(Keyword.Then) + 1;
 
-            return statement.Key == Keyword.Every ? 1 : 3;
+            return statement.Key == Keyword.Every ? 1 : 2;
         }
 
-        /// <summary>The step a trigger does, which is one a sequence could hold and that starts something: run, stop, act or set.</summary>
+        /// <summary>The step a trigger does, which is one a sequence could hold and that starts something: run, stop, call or set.</summary>
         static Step Does(Statement statement, int at, Trouble trouble)
         {
             var step = statement.Rest(at);
-            if (step.Key != Keyword.Run && step.Key != Keyword.Stop && step.Key != Keyword.Act && step.Key != Keyword.Set)
+            if (step.Key != Keyword.Run && step.Key != Keyword.Stop && step.Key != Keyword.Call && step.Key != Keyword.Set)
             {
-                trouble.Say(statement, "expected run, stop, act or set.");
+                trouble.Say(statement, "expected run, stop, call or set.");
                 return null;
             }
 
@@ -1021,7 +1235,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return does;
         }
 
-        static Trigger Kind(Statement statement, AutomationSystem system, Trouble trouble)
+        static Trigger Kind(Statement statement, Trouble trouble)
         {
             if (statement.Key == Keyword.When)
                 return When(statement, trouble);
@@ -1029,21 +1243,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Key == Keyword.Every)
                 return Every(statement, trouble);
 
-            // required trigger call to run 1: the trigger part call, which each instance answers with toolbar slots.
-            var name = Named(statement.ValueAt(1)) ? statement.Word(1) : "";
-            if (name.Length == 0 || !statement.Says(2, Keyword.To))
+            // on button then run 1: the trigger button, a variable of a system's or a trigger slot of a blueprint's.
+            if (!Named(statement.ValueAt(0)) || !statement.Says(1, Keyword.Then))
             {
-                trouble.Say(statement, "expected trigger <name> to <step>.");
+                trouble.Say(statement, "expected on <trigger> then <step>.");
                 return null;
             }
 
-            if (system.FindPart(name) != null)
-            {
-                trouble.Say(statement, "part '" + name + "' is already declared.");
-                return null;
-            }
-
-            return RequiredTrigger.Named(name);
+            return RequiredTrigger.Named(statement.Word(0));
         }
 
         static Trigger When(Statement statement, Trouble trouble)
@@ -1061,10 +1268,17 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return null;
             }
 
+            // Every moment this host has is its own, so a moment is always qualified by ext.
             var moment = statement.Parts(1);
             if (moment.Count != 2 || moment[0].Word.Length == 0 || moment[1].Word.Length == 0)
             {
-                trouble.Say(statement, "expected a moment qualified by what adds it, like 'sprocket'.closed.");
+                trouble.Say(statement, "expected a moment qualified by its namespace, like ext.closed.");
+                return null;
+            }
+
+            if (moment[0].Word != BlockKinds.Own)
+            {
+                trouble.Say(statement, "no namespace '" + moment[0].Word + "' with moments; expected ext.");
                 return null;
             }
 
@@ -1073,11 +1287,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             when.RequiresAll = statement.Says(0, Keyword.All);
             if (statement.ValueAt(2).Form != ValueForm.List)
             {
-                trouble.Say(statement, "expected a list of part names.");
+                trouble.Say(statement, "expected a list of names.");
                 return null;
             }
 
-            if (!Names(statement, 2, when.Sources, trouble, "expected a list of part names."))
+            if (!Names(statement, 2, when.Sources, trouble, "expected a list of names."))
                 return null;
 
             var at = 3;
@@ -1148,10 +1362,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>The word a step starts with.</summary>
         static Keyword Head(Step step)
         {
-            // A value is a set; an action is an act, by the game's own id or qualified by what adds it.
+            // A value is a set; an action is a call, bare or qualified by its namespace.
             var act = step as Act;
             if (act != null)
-                return act.Form == Form.Value ? Keyword.Set : Keyword.Act;
+                return act.Form == Form.Value ? Keyword.Set : Keyword.Call;
 
             if (step is Wait)
                 return Keyword.Wait;
@@ -1233,19 +1447,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return null;
             }
 
-            if (statement.Key == Keyword.Act)
+            if (statement.Key == Keyword.Call)
                 return Acted(statement, trouble);
 
             if (statement.Key == Keyword.Set)
                 return ReadSet(statement, trouble);
 
-            trouble.Say(statement, "unexpected " + Headed(statement) + "; expected act, set, run, stop, await or wait.");
+            trouble.Say(statement, "unexpected " + Headed(statement) + "; expected call, set, run, stop, await or wait.");
             return null;
         }
 
         /// <summary>
-        /// <c>act 'sprocket'.close on [ inner ]</c> or <c>act SetColor on [ light ] with 255 0 0</c>: an action, by the game's own
-        /// id or qualified by what adds it, on some parts, given what it asks for.
+        /// <c>call ext.close on [ inner ]</c> or <c>call SetColor on [ light ] with 255 0 0</c>: an action, bare or qualified by
+        /// its namespace, on some blocks, given what it asks for.
         /// </summary>
         static Step Acted(Statement statement, Trouble trouble)
         {
@@ -1258,28 +1472,35 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
             else if (member.Count == 2 && member[0].Word.Length > 0 && member[1].Word.Length > 0)
             {
+                if (member[0].Word != BlockKinds.Own)
+                {
+                    trouble.Say(statement, "no namespace '" + member[0].Word + "'; expected an action, bare or qualified by ext.");
+                    return null;
+                }
+
                 act = new Act(member[1].Word);
+
                 act.Form = Form.Native;
                 act.Provider = member[0].Word;
             }
             else
             {
-                trouble.Say(statement, "expected an action after 'act', like Reverse or 'sprocket'.close.");
+                trouble.Say(statement, "expected an action after 'call', like Reverse or ext.close.");
                 return null;
             }
 
             if (!statement.Says(1, Keyword.On) || statement.ValueAt(2).Form != ValueForm.List)
             {
-                trouble.Say(statement, "expected 'on' and a list of parts.");
+                trouble.Say(statement, "expected 'on' and a list of names.");
                 return null;
             }
 
-            if (!Names(statement, 2, act.Targets, trouble, "expected part names in the list."))
+            if (!Names(statement, 2, act.Targets, trouble, "expected names in the list."))
                 return null;
 
             if (statement.Count > 3 && (!statement.Says(3, Keyword.With) || statement.Count < 5))
             {
-                trouble.Say(statement, "expected 'with' and values after the parts.");
+                trouble.Say(statement, "expected 'with' and values after the names.");
                 return null;
             }
 
@@ -1302,7 +1523,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!Named(statement.ValueAt(0)) || !statement.Says(1, Keyword.On) || statement.ValueAt(2).Form != ValueForm.List
                 || !statement.Says(3, Keyword.To) || statement.Count < 5)
             {
-                trouble.Say(statement, "expected set <value> on [ <parts> ] to <value>.");
+                trouble.Say(statement, "expected set <value> on [ <names> ] to <value>.");
                 return null;
             }
 
@@ -1311,7 +1532,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var act = new Act(statement.Word(0));
             act.Form = Form.Value;
-            if (!Names(statement, 2, act.Targets, trouble, "expected part names in the list."))
+            if (!Names(statement, 2, act.Targets, trouble, "expected names in the list."))
                 return null;
 
             return ReadValue(statement, 4, act, trouble) ? Noted(act, statement) : null;
@@ -1321,7 +1542,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static bool ReadValue(Statement statement, int index, Act act, Trouble trouble)
         {
             var form = statement.ValueAt(index).Form;
-            if (form == ValueForm.List || form == ValueForm.Vector || form == ValueForm.Slot || form == ValueForm.Qualified)
+            if (form == ValueForm.List || form == ValueForm.Vector || form == ValueForm.Function || form == ValueForm.Qualified)
             {
                 trouble.Say(statement, "unexpected " + Spelled(statement, index) + "; expected a value.");
                 return false;
@@ -1533,8 +1754,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (value.Form == ValueForm.Vector)
                 return "'('";
 
-            if (value.Form == ValueForm.Slot)
-                return "a toolbar slot";
+            if (value.Form == ValueForm.Function)
+                return "a host function";
 
             if (value.Form == ValueForm.Keyword)
                 return "'" + Keywords.Name(value.Keyword) + "'";
@@ -1579,12 +1800,31 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return true;
         }
 
-        /// <summary>Owes every part an act names, to be judged once the whole script is read.</summary>
-        static void Owes(Statement statement, Act act, AutomationSystem system, Trouble trouble)
+        /// <summary>Checks every name a step acts on, as <see cref="Uses(Statement, string, AutomationSystem, Automation, bool, Trouble)" /> does.</summary>
+        static void Uses(Statement statement, Act act, AutomationSystem system, Automation program, Trouble trouble)
         {
             for (var i = 0; act != null && i < act.Targets.Count; i++)
-                trouble.Owes(statement, act.Targets[i], system);
+                Uses(statement, act.Targets[i], system, program, false, trouble);
         }
 
+        /// <summary>
+        /// Checks a name <paramref name="system" /> uses: a block, or a trigger where <paramref name="trigger" /> says so.
+        /// </summary>
+        /// <remarks>
+        /// A system names the program's variables, which are written above it, so they are looked for at once. A system
+        /// blueprint names its own slots, which may be written below, so those are judged once the whole script is read.
+        /// </remarks>
+        static void Uses(Statement statement, string name, AutomationSystem system, Automation program, bool trigger,
+            Trouble trouble)
+        {
+            if (system.IsBlueprint)
+            {
+                trouble.Owes(statement, name, system, trigger);
+                return;
+            }
+
+            if (trigger ? program.FindTriggerRef(name) == null : program.FindRef(name) == null)
+                trouble.Say(statement, "no variable '" + name + "' holding " + (trigger ? "a trigger" : "a block") + " above this line.");
+        }
     }
 }

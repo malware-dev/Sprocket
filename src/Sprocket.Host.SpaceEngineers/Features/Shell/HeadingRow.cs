@@ -9,7 +9,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>A screen's heading: each part's name, renamed in place where it can be, with an arrow between parts.</summary>
+    /// <summary>A screen's heading: each part's name, renamed in place where it can be or pressed to open what it names, with an arrow between parts.</summary>
     public class HeadingRow : HStack
     {
         readonly Action<int> _renames;
@@ -54,10 +54,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 shown.Pen.IsVisible = part.CanRename;
                 shown.Pen.Tint = i == renaming ? Palette.None : Palette.Faint;
                 shown.Renames.CanExecute = part.CanRename && i != renaming;
+                shown.Plate.Command = part.CanRename || part.Opens == null ? shown.Renames : part.Opens;
 
                 // While a part is renamed, its plate says only why a name is refused. See Refuse.
                 if (i != renaming)
-                    shown.Plate.Tip = Tip.For(shown.Plate.Tip, part.CanRename ? part.About : null);
+                    shown.Plate.Tip = Tip.For(shown.Plate.Tip, part.CanRename || part.Opens != null ? part.About : null);
 
                 shown.Lead.Text = part.Lead;
                 shown.After.Text = part.After;

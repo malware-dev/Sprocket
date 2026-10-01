@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
 
@@ -104,6 +105,6 @@ public class CategoryTests
     public void EveryCategoryIsHeaded()
     {
         for (var category = Category.Power; category <= Category.Other; category++)
-            Assert.False(string.IsNullOrEmpty(CategoryText.Of(category)), category.ToString());
+            Assert.False(string.IsNullOrEmpty(CategoryText.Of(new Texts(), category)), category.ToString());
     }
 }

@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _steps.Add(steps[i]);
         }
 
-        public override string Label => "deleting a step";
+        public override Change Change => Change.RemoveStep;
 
         public override void Apply(Sequence sequence)
         {
