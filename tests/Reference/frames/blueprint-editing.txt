@@ -71,8 +71,4 @@ on screen     Configuration panel  |  Shown to anyone setting up, or changing, s
 064  Text       at {X:284 Y:630.6399} scale 0.694  #85A1A9FF  "What this slot is for."
 065  SetClip    {X:276 Y:627 W:560 H:72}
 066  SetClip    {X:256 Y:138 W:1408 H:882}
-067  Sprite     Sprocket_Fill         {X:856 Y:604 W:93 H:32}  #5B737BFF
-068  Sprite     Sprocket_Fill         {X:860 Y:608 W:85 H:24}  #20272DFF
-069  Sprite     Sprocket_Fill         {X:860 Y:608 W:24 H:24}  #DCF5FDFF
-070  Text       at {X:892.415 Y:610.0543} scale 0.556  #DCF5FDFF  "optional"
-071  ClearClip  
+067  ClearClip  

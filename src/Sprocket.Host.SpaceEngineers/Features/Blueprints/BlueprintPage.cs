@@ -256,6 +256,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             Needs(chosen, unfilled);
             Troubled(chosen);
+            _rule.IsVisible = _description.IsVisible || _troubled.IsVisible || _writing.IsVisible;
         }
 
         /// <summary>Says what is wrong with the blockset being filled, and offers the sequence at fault where that is where it is mended.</summary>

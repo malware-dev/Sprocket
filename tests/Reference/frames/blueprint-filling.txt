@@ -20,12 +20,10 @@ on screen     Airlock made from Airlock
 013  Text       at {X:1631.183 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
 014  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 015  SetClip    {X:256 Y:118 W:1408 H:902}
-016  Sprite     Sprocket_Fill         {X:256 Y:126 W:1396 H:1}  #5B737BFF
-017  Text       at {X:260 Y:144.6399} scale 0.694  #85A1A9FF  "SLOTS"
-018  Text       at {X:276 Y:192.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
-019  Text       at {X:397.0367 Y:197.0543} scale 0.556  #85A1A9FF  "optional"
-020  Sprite     Sprocket_Fill         {X:856 Y:187 W:177 H:40}  #374851FF
-021  Sprite     Sprocket_Fill         {X:856 Y:225 W:177 H:2}  #8EBCCFFF
-022  Sprite     MyObjectBuilder_ButtonPanel/ButtonPanelLarge{X:872 Y:195 W:24 H:24}  #FFFFFFFF
-023  Text       at {X:904 Y:192.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
-024  ClearClip  
+016  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "SLOTS"
+017  Text       at {X:276 Y:171.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
+018  Sprite     Sprocket_Fill         {X:409 Y:166 W:177 H:40}  #374851FF
+019  Sprite     Sprocket_Fill         {X:409 Y:204 W:177 H:2}  #8EBCCFFF
+020  Sprite     MyObjectBuilder_ButtonPanel/ButtonPanelLarge{X:425 Y:174 W:24 H:24}  #FFFFFFFF
+021  Text       at {X:457.0367 Y:171.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
+022  ClearClip  

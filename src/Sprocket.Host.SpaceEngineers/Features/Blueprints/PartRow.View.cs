@@ -12,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     partial class PartRow
     {
+        VStack _column;
         Label _name;
         TextBox _nameBox;
         Label _optional;
@@ -33,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Children.Add(new VStack
             {
                 Spacing = 4f,
-                Placement = Fixed.Wide(560f),
+                Placement = Fixed.Wide(PartList.Widest),
                 Children =
                 {
                     new HStack
@@ -42,6 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Children =
                         {
                             new Label { Style = Styles.Name }.As(out _name),
+                            // Hidden, as the switch below is.
                             new Label { Style = Styles.Detail, IsVisible = false }.As(out _optional)
                         }
                     },
@@ -49,10 +51,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _about),
                     new Composer(72f, Styles.SlotDescription, windows) { IsVisible = false }.As(out _aboutComposer)
                 }
-            });
+            }.As(out _column));
 
             Children.Add(new Slot().As(out _blocks));
             Children.Add(new Label { Style = Styles.Problem, IsVisible = false }.As(out _problem));
+            // Hidden: an empty optional slot can still stop its installation.
             Children.Add(new Switch { Style = Styles.Switch, IsVisible = false }.As(out _required));
         }
     }

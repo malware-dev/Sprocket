@@ -24,11 +24,9 @@ on screen     Airlock 2 made from Airlock
 017  Text       at {X:1631.183 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
 018  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 019  SetClip    {X:256 Y:118 W:1408 H:902}
-020  Sprite     Sprocket_Fill         {X:256 Y:126 W:1396 H:1}  #5B737BFF
-021  Text       at {X:260 Y:144.6399} scale 0.694  #85A1A9FF  "SLOTS"
-022  Text       at {X:276 Y:192.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
-023  Text       at {X:397.0367 Y:197.0543} scale 0.556  #85A1A9FF  "optional"
-024  Sprite     Sprocket_Fill         {X:856 Y:187 W:45 H:40}  #374851FF
-025  Sprite     Sprocket_Fill         {X:856 Y:225 W:45 H:2}  #8EBCCFFF
-026  Text       at {X:872 Y:192.2255} scale 0.833  #DCF5FDFF  "…"
-027  ClearClip  
+020  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "SLOTS"
+021  Text       at {X:276 Y:171.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
+022  Sprite     Sprocket_Fill         {X:409 Y:166 W:45 H:40}  #374851FF
+023  Sprite     Sprocket_Fill         {X:409 Y:204 W:45 H:2}  #8EBCCFFF
+024  Text       at {X:425.0367 Y:171.2255} scale 0.833  #DCF5FDFF  "…"
+025  ClearClip  
