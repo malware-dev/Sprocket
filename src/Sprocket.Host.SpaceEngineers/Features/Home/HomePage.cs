@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         public override bool CanRefresh => true;
 
         /// <inheritdoc />
-        public override ICommand Library => Editor.Act(Cmd.LoadSystem, Editor.OfferLoading);
+        public override ICommand Library => Editor.Act(Cmd.LoadSystem, Editor.OpenLibrary);
 
         /// <summary>
         /// Reaching outside the automation to rename the machine itself, which is deliberate.

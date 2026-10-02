@@ -15,6 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         VStack _column;
         Label _name;
         TextBox _nameBox;
+        Label _refusal;
         Label _optional;
         RichText _about;
         Composer _aboutComposer;
@@ -48,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         }
                     },
                     new TextBox { Style = Styles.Field, IsVisible = false }.As(out _nameBox),
+                    new Label { Style = Styles.Problem, Wraps = true, IsVisible = false }.As(out _refusal),
                     new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _about),
                     new Composer(72f, Styles.SlotDescription, windows) { IsVisible = false }.As(out _aboutComposer)
                 }

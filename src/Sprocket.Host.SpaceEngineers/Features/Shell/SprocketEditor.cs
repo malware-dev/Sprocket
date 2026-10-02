@@ -6,6 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Lumel.Input;
@@ -649,6 +650,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return gives;
         }
 
+        /// <summary>The world's backups, which the library lists; null on a machine that does not keep them.</summary>
+        public Backups Backups { get; set; }
+
+        /// <summary>The player's library, which keeps blueprints for every world; null on a machine that keeps none.</summary>
+        public Shelf Shelf { get; set; }
+
         /// <summary>How somebody is working in this editor; see <see cref="Shell.Habits" />.</summary>
         /// <remarks>Replaced on a client's copy by the ones its earlier copies of the same block used.</remarks>
         public Habits Habits
@@ -716,6 +723,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Cmd.PageOn:
                 case Cmd.PageBack:
                 case Cmd.ShowScript:
+                case Cmd.Shelve:
+                case Cmd.Unshelve:
+                case Cmd.ForgetBackup:
                     return false;
                 default:
                     return true;
@@ -1144,17 +1154,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Push(new ScriptPage(this));
         }
 
-        /// <summary>
-        /// The blueprint library, where blueprints are imported and exported. Not built yet, and says so.
-        /// </summary>
-        /// <remarks>
-        /// Present rather than hidden because a screen that grows an option later teaches itself twice.
-        /// </remarks>
-        internal void OfferLoading()
+        /// <summary>Opens the library: the world's backups, and the blueprints.</summary>
+        internal void OpenLibrary()
         {
-            var page = new ChoicePage(this, Texts.SystemsLoad);
-            page.EmptyText = Texts.SystemsLibraryUnbuilt;
-            Push(page);
+            Push(new LibraryPage(this));
         }
 
         /// <summary>
@@ -1891,7 +1894,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 GridEntity entity = _runner.Bindings.Entity(named[i]);
                 var slot = system.Free(entity == null ? _program.Called(named[i], _world.Values) : Called(entity));
                 var part = system.PartFor(slot);
-                part.Picked = true;
                 if (entity != null && Type(entity.Kind).Length > 0)
                     part.Expects.Add(Type(entity.Kind));
 
@@ -1910,7 +1912,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 GridEntity panel = _runner.Bindings.Entity(declared.Block);
                 var slot = system.Free(panel == null ? declared.Name : Called(panel));
                 var part = system.PartFor(slot);
-                part.Picked = true;
                 part.IsTrigger = true;
                 part.Optional = true;
 
@@ -2294,6 +2295,143 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         drop.Execute();
                 },
                 Windows, Input);
+        }
+
+        /// <summary>Puts the blueprint <paramref name="system" /> in the library as it is now.</summary>
+        internal void Shelve(AutomationSystem system)
+        {
+            Shelf.Keep(system, DateTime.UtcNow);
+            Invalidate();
+        }
+
+        /// <summary>Asks before deleting <paramref name="volume" /> from the library.</summary>
+        internal void Unshelve(Volume volume)
+        {
+            Deleting(Texts.LibraryForgetQuestion, volume.Name, Texts.DeleteFinal, null, delegate
+            {
+                Shelf.Forget(volume);
+                Invalidate();
+            });
+        }
+
+        /// <summary>Asks before forgetting <paramref name="backup" />, the automation of a construct that is gone.</summary>
+        internal void ForgetBackup(Backup backup)
+        {
+            Deleting(Texts.LibraryForgetLostQuestion, backup.Name, Texts.DeleteFinal, null, delegate
+            {
+                Backups.Forget(backup);
+                Invalidate();
+            });
+        }
+
+        /// <summary>
+        /// Puts the blueprint <paramref name="volume" /> from the library on the construct, with no installation yet,
+        /// answering what was wrong with it, or empty.
+        /// </summary>
+        internal string PutOn(Volume volume)
+        {
+            var trouble = ProgramText.AddBlueprint(volume.Text, _program, _world.Values);
+            if (trouble.Length > 0)
+                return trouble;
+
+            _program.Edited();
+            _program.Rewire();
+            Invalidate();
+            return "";
+        }
+
+        /// <summary>
+        /// Puts a copy of the blueprint written as <paramref name="text" /> on the construct, as a blueprint of its own with no
+        /// installation, answering it; or null, with what was wrong in <paramref name="trouble" />.
+        /// </summary>
+        /// <remarks>
+        /// A blueprint of its own because it has an identity of its own: changing either never touches the other. It is named
+        /// with the first number no blueprint here or in the library has, and is by whoever made the copy.
+        /// </remarks>
+        internal AutomationSystem Copy(string text, out string trouble)
+        {
+            var trial = new Automation();
+            trouble = ProgramText.Load(text, trial, _world.Values);
+            if (trouble.Length > 0)
+                return null;
+
+            if (trial.Systems.Count != 1)
+            {
+                trouble = "expected one system blueprint and nothing else.";
+                return null;
+            }
+
+            var copy = trial.Systems[0];
+            copy.Identity = Guid.NewGuid();
+            copy.Name = Numbered(copy.Name);
+            if (_author.Length > 0)
+                copy.Namespace = _author;
+
+            trouble = ProgramText.AddBlueprint(ProgramText.Blueprint(copy), _program, _world.Values);
+            if (trouble.Length > 0)
+                return null;
+
+            _program.Edited();
+            _program.Rewire();
+            Invalidate();
+            return _program.FindSystem(copy.Identity);
+        }
+
+        /// <summary><paramref name="name" /> with the first number from 2 that no system here and no blueprint in the library is called.</summary>
+        string Numbered(string name)
+        {
+            for (var number = 2; ; number++)
+            {
+                // The number first, so a name with braces in it is never read as a slot.
+                var wanted = Template.Fill(Template.Fill(Texts.LibraryCopyName, "number",
+                    number.ToString(System.Globalization.CultureInfo.InvariantCulture)), "name", name);
+
+                var taken = false;
+                for (var i = 0; i < _program.Systems.Count && !taken; i++)
+                    taken = _program.Systems[i].Name == wanted;
+
+                for (var i = 0; Shelf != null && i < Shelf.All.Count && !taken; i++)
+                    taken = Shelf.All[i].Name == wanted;
+
+                if (!taken)
+                    return wanted;
+            }
+        }
+
+        /// <summary>Whether storage keeps a copy of the blueprint <paramref name="system" />, as it is or older.</summary>
+        internal bool Stored(AutomationSystem system)
+        {
+            return Shelf != null && Shelf.Find(system.Identity) != null;
+        }
+
+        /// <summary>Asks before taking the blueprint <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
+        /// <remarks>Nothing is lost either way, but a press that landed on the wrong minus should not cost the work of putting it back.</remarks>
+        internal void AskTakeOff(AutomationSystem system)
+        {
+            var arguments = new Arguments();
+            arguments.Set("named", system.Name);
+
+            Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffKept, arguments);
+            Answer(Texts.LibraryTakeOffKeep, delegate { }, true);
+            Answer(Texts.LibraryTakeOffConfirm, delegate { TakeOff(system); });
+        }
+
+        /// <summary>
+        /// Takes the blueprint <paramref name="system" />, which has no installation and is in storage, off the construct, bringing
+        /// the stored copy up to date.
+        /// </summary>
+        /// <remarks>One that is not in storage is deleted instead, by <see cref="DeleteSystem" />: taking it off would lose it.</remarks>
+        internal void TakeOff(AutomationSystem system)
+        {
+            if (system.Instances.Count > 0 || !Stored(system))
+                return;
+
+            if (!Shelf.Holds(system))
+                Shelf.Keep(system, DateTime.UtcNow);
+
+            Drop(system);
+            _program.Edited();
+            _program.Rewire();
         }
 
         /// <summary>Asks before taking <paramref name="instance" />, one of the logic systems made from a blueprint, out of it.</summary>

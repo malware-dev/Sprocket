@@ -130,8 +130,8 @@ Renaming it here renames the grid.</value>
     <comment>Note on the row of a logic system made from a blueprint, on the home screen; {name} is the system.</comment>
   </data>
   <data name="Sprocket.Systems.Load" xml:space="preserve">
-    <value>Blueprints</value>
-    <comment>Button that opens the blueprint library, where blueprints are imported and exported. Also the library's heading.</comment>
+    <value>Library</value>
+    <comment>Button that opens the library, which holds the backups and the blueprints. Also the library's heading.</comment>
   </data>
   <data name="Sprocket.Systems.PlainHeading" xml:space="preserve">
     <value>Logic systems</value>
@@ -142,7 +142,7 @@ Renaming it here renames the grid.</value>
     <comment>Heading over the blueprints on the home screen, under the logic systems of their own; shown in capitals.</comment>
   </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
-    <value>The library of **blueprints**, where they are imported and exported.</value>
+    <value>The **library**: the blueprints on this construct and in storage, and the automation of constructs that are lost.</value>
     <comment>Note on the button above.</comment>
   </data>
   <data name="Sprocket.Systems.Empty" xml:space="preserve">
@@ -165,10 +165,6 @@ This one becomes its first installation.</value>
   <data name="Sprocket.Systems.LibraryUnbuilt" xml:space="preserve">
     <value>Not built yet. Blueprints will be imported and exported here.</value>
     <comment>Said on the blueprint library while it is not built.</comment>
-  </data>
-  <data name="Sprocket.Systems.RemoveBlueprintLater" xml:space="preserve">
-    <value>Not built yet. This will take the blueprint off the construct and keep it in the library.</value>
-    <comment>Note on the minus beside a blueprint on the home screen, which cannot be pressed while the library is not built.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
     <value>installation</value>
@@ -1645,5 +1641,181 @@ This one becomes its first installation.</value>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>This block's automation cannot be edited.</value>
     <comment>The game's message when the editor cannot open.</comment>
+  </data>
+  <data name="Sprocket.Library.Saved" xml:space="preserve">
+    <value>Saved {time}</value>
+    <comment>Under a backup in the library. {time} is the date and time it was taken.</comment>
+  </data>
+  <data name="Sprocket.Library.NoneSaved" xml:space="preserve">
+    <value>None yet. A blueprint saved here goes wherever you go.</value>
+    <comment>Said where no blueprint is saved.</comment>
+  </data>
+  <data name="Sprocket.Library.OnConstructs" xml:space="preserve">
+    <value>On your constructs</value>
+    <comment>Heading in the library over the blueprints on the player's constructs, and the constructs that are lost.</comment>
+  </data>
+  <data name="Sprocket.Library.ThisConstruct" xml:space="preserve">
+    <value>{name} (this construct)</value>
+    <comment>Line in the library over the blueprints on the construct it was opened on. {name} is the construct.</comment>
+  </data>
+  <data name="Sprocket.Library.NoneHere" xml:space="preserve">
+    <value>No blueprints on this construct.</value>
+    <comment>Said in the library where the construct has no blueprint.</comment>
+  </data>
+  <data name="Sprocket.Library.NoInstallations" xml:space="preserve">
+    <value>No installations</value>
+    <comment>Under a blueprint in the library that is on the construct with no installation.</comment>
+  </data>
+  <data name="Sprocket.Library.OneInstallation" xml:space="preserve">
+    <value>1 installation</value>
+    <comment>Under a blueprint in the library that is on the construct with one installation.</comment>
+  </data>
+  <data name="Sprocket.Library.Installations" xml:space="preserve">
+    <value>{count} installations</value>
+    <comment>Under a blueprint in the library that is on the construct. {count} is how many installations, always more than one.</comment>
+  </data>
+  <data name="Sprocket.Library.Lost" xml:space="preserve">
+    <value>Lost {time}. Its automation is kept here.</value>
+    <comment>Under a construct in the library that is gone from the world. {time} is when its automation was last saved.</comment>
+  </data>
+  <data name="Sprocket.Library.ForgetLost" xml:space="preserve">
+    <value>Forget this construct's automation</value>
+    <comment>Note on the bin of a lost construct in the library.</comment>
+  </data>
+  <data name="Sprocket.Library.ForgetLostQuestion" xml:space="preserve">
+    <value>Forget the automation of this lost construct?</value>
+    <comment>Asked before forgetting a lost construct's automation; the construct's name follows.</comment>
+  </data>
+  <data name="Sprocket.Library.InStorage" xml:space="preserve">
+    <value>In storage</value>
+    <comment>Heading in the library over the blueprints the player keeps, which go wherever they go.</comment>
+  </data>
+  <data name="Sprocket.Library.SavedBy" xml:space="preserve">
+    <value>By {name}, saved {time}</value>
+    <comment>Under a blueprint in the library that somebody else made. {name} is who, {time} when it was put in the library.</comment>
+  </data>
+  <data name="Sprocket.Library.Forget" xml:space="preserve">
+    <value>Delete it from storage</value>
+    <comment>Note on the bin of a blueprint in storage.</comment>
+  </data>
+  <data name="Sprocket.Library.ForgetQuestion" xml:space="preserve">
+    <value>Delete this blueprint from storage?</value>
+    <comment>Asked before deleting a blueprint from storage; its name follows.</comment>
+  </data>
+  <data name="Sprocket.Library.Here" xml:space="preserve">
+    <value>On this construct</value>
+    <comment>Beside the switch in the library that puts the chosen blueprint on the construct, or takes it off.</comment>
+  </data>
+  <data name="Sprocket.Library.PutOn" xml:space="preserve">
+    <value>Put this blueprint on this construct, ready for its first installation.</value>
+    <comment>Note on the switch in the library, where the blueprint is not on the construct.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOff" xml:space="preserve">
+    <value>Take this blueprint off this construct. Its copy in storage is kept, brought up to date.</value>
+    <comment>Note on the switch in the library, and on the minus of a blueprint on the home screen, where the blueprint has no installation and is in storage.</comment>
+  </data>
+  <data name="Sprocket.Library.HeldOne" xml:space="preserve">
+    <value>1 installation on this construct. Remove it from the home screen first.</value>
+    <comment>Note on the switch in the library, which cannot be pressed while the blueprint has an installation.</comment>
+  </data>
+  <data name="Sprocket.Library.Held" xml:space="preserve">
+    <value>{count} installations on this construct. Remove them from the home screen first.</value>
+    <comment>Note on the switch in the library, which cannot be pressed while the blueprint has installations. {count} is how many, always more than one.</comment>
+  </data>
+  <data name="Sprocket.Library.Save" xml:space="preserve">
+    <value>Save to storage</value>
+    <comment>Button in the library that keeps a copy of the chosen blueprint for every world.</comment>
+  </data>
+  <data name="Sprocket.Library.SaveAbout" xml:space="preserve">
+    <value>Keep a copy in storage. It goes wherever you go.</value>
+    <comment>Note on the button that saves a blueprint to the library.</comment>
+  </data>
+  <data name="Sprocket.Library.Update" xml:space="preserve">
+    <value>Update stored copy</value>
+    <comment>Button in the library that puts the blueprint on the construct in place of the copy in storage.</comment>
+  </data>
+  <data name="Sprocket.Library.UpdateAbout" xml:space="preserve">
+    <value>Put this blueprint in place of the stored copy.</value>
+    <comment>Note on the button that updates the library's copy of a blueprint.</comment>
+  </data>
+  <data name="Sprocket.Library.Same" xml:space="preserve">
+    <value>The stored copy is the same as this one.</value>
+    <comment>Note on the update button, which cannot be pressed while the copies are the same.</comment>
+  </data>
+  <data name="Sprocket.Library.By" xml:space="preserve">
+    <value>By {name}</value>
+    <comment>Line under the chosen blueprint's name in the library. {name} is who made it.</comment>
+  </data>
+  <data name="Sprocket.Library.ByChanged" xml:space="preserve">
+    <value>By {name}, changed {time}</value>
+    <comment>Line under the chosen blueprint's name in the library. {name} is who made it, {time} when it was last changed.</comment>
+  </data>
+  <data name="Sprocket.Library.Changed" xml:space="preserve">
+    <value>Changed {time}</value>
+    <comment>Line under the chosen blueprint's name in the library, where nobody is named. {time} is when it was last changed.</comment>
+  </data>
+  <data name="Sprocket.Library.InstallationsHeading" xml:space="preserve">
+    <value>Installations</value>
+    <comment>Heading in the library over the chosen blueprint's installations on the construct.</comment>
+  </data>
+  <data name="Sprocket.Library.Systems" xml:space="preserve">
+    <value>Logic systems</value>
+    <comment>Heading in the library over the logic systems a lost construct had.</comment>
+  </data>
+  <data name="Sprocket.Systems.RemoveFirst" xml:space="preserve">
+    <value>Remove its installations first, then take it off the construct.</value>
+    <comment>Note on the quiet minus of a blueprint on the home screen, while it has installations.</comment>
+  </data>
+  <data name="Sprocket.Library.Unreadable" xml:space="preserve">
+    <value>This copy will not read.</value>
+    <comment>In place of the status of a blueprint in the library whose text will not read; what is wrong is shown beside the list.</comment>
+  </data>
+  <data name="Sprocket.Library.Copy" xml:space="preserve">
+    <value>Make a copy</value>
+    <comment>Button in the library that puts a copy of the chosen blueprint on the construct, as a blueprint of its own.</comment>
+  </data>
+  <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
+    <value>Put a copy on this construct, as a blueprint of its own: changing the copy leaves this one as it is.</value>
+    <comment>Note on the button that makes a copy of a blueprint.</comment>
+  </data>
+  <data name="Sprocket.Library.CopyName" xml:space="preserve">
+    <value>{name} {number}</value>
+    <comment>What a copy of a blueprint is called. {name} is the blueprint copied, {number} the first number from 2 nothing is called yet.</comment>
+  </data>
+  <data name="Sprocket.Library.Deletes" xml:space="preserve">
+    <value>Delete this blueprint. It is not in storage, so this is its only copy.</value>
+    <comment>Note on the bin of a blueprint on the home screen, and on the switch in the library, where the blueprint has no installation and is not in storage.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOffQuestion" xml:space="preserve">
+    <value>Take this blueprint off this construct?</value>
+    <comment>Asked before taking a blueprint in storage off the construct; its name follows.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOffKept" xml:space="preserve">
+    <value>Its copy in storage is kept, brought up to date.</value>
+    <comment>Under the question about taking a blueprint off the construct.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOffKeep" xml:space="preserve">
+    <value>Keep it</value>
+    <comment>Answer to the question about taking a blueprint off the construct that leaves it on.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOffConfirm" xml:space="preserve">
+    <value>Take it off</value>
+    <comment>Answer to the question about taking a blueprint off the construct that takes it off.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NameTaken" xml:space="preserve">
+    <value>Another slot is already called {name}.</value>
+    <comment>Under a slot's name box while what is typed is another slot's name. {name} is the name typed.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NameEmpty" xml:space="preserve">
+    <value>A slot needs a name.</value>
+    <comment>Under a slot's name box while it is empty.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NameKeptTaken" xml:space="preserve">
+    <value>Not renamed: another slot is already called {name}.</value>
+    <comment>Under a slot's name box after a name another slot has was typed and the box left; the slot keeps its name. {name} is the name typed.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NameKeptEmpty" xml:space="preserve">
+    <value>Not renamed: a slot needs a name.</value>
+    <comment>Under a slot's name box after it was left empty; the slot keeps its name.</comment>
   </data>
 </root>

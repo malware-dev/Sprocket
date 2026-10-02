@@ -101,7 +101,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Åpne **{name}** for å velge blokkene det bruker.</value>
   </data>
   <data name="Sprocket.Systems.Load" xml:space="preserve">
-    <value>Plantegninger</value>
+    <value>Bibliotek</value>
   </data>
   <data name="Sprocket.Systems.PlainHeading" xml:space="preserve">
     <value>Logikksystemer</value>
@@ -110,7 +110,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Plantegninger</value>
   </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
-    <value>Biblioteket med **plantegninger**, der de importeres og eksporteres.</value>
+    <value>**Biblioteket**: plantegningene på denne konstruksjonen og i lageret, og automatiseringen til konstruksjoner som er tapt.</value>
   </data>
   <data name="Sprocket.Systems.Empty" xml:space="preserve">
     <value>Ingenting er automatisert her ennå.</value>
@@ -127,9 +127,6 @@ Denne blir dens første installasjon.</value>
   </data>
   <data name="Sprocket.Systems.LibraryUnbuilt" xml:space="preserve">
     <value>Ikke bygget ennå. Plantegninger skal importeres og eksporteres her.</value>
-  </data>
-  <data name="Sprocket.Systems.RemoveBlueprintLater" xml:space="preserve">
-    <value>Ikke bygget ennå. Dette skal ta plantegningen av konstruksjonen og beholde den i biblioteket.</value>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
     <value>installasjon</value>
@@ -1252,5 +1249,137 @@ Denne blir dens første installasjon.</value>
   </data>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>Automatiseringen i denne blokken kan ikke redigeres.</value>
+  </data>
+  <data name="Sprocket.Library.Saved" xml:space="preserve">
+    <value>Lagret {time}</value>
+  </data>
+  <data name="Sprocket.Library.NoneSaved" xml:space="preserve">
+    <value>Ingen ennå. En plantegning lagret her følger deg overalt.</value>
+  </data>
+  <data name="Sprocket.Library.OnConstructs" xml:space="preserve">
+    <value>På konstruksjonene dine</value>
+  </data>
+  <data name="Sprocket.Library.ThisConstruct" xml:space="preserve">
+    <value>{name} (denne konstruksjonen)</value>
+  </data>
+  <data name="Sprocket.Library.NoneHere" xml:space="preserve">
+    <value>Ingen plantegninger på denne konstruksjonen.</value>
+  </data>
+  <data name="Sprocket.Library.NoInstallations" xml:space="preserve">
+    <value>Ingen installasjoner</value>
+  </data>
+  <data name="Sprocket.Library.OneInstallation" xml:space="preserve">
+    <value>1 installasjon</value>
+  </data>
+  <data name="Sprocket.Library.Installations" xml:space="preserve">
+    <value>{count} installasjoner</value>
+  </data>
+  <data name="Sprocket.Library.Lost" xml:space="preserve">
+    <value>Tapt {time}. Automatiseringen er tatt vare på her.</value>
+  </data>
+  <data name="Sprocket.Library.ForgetLost" xml:space="preserve">
+    <value>Glem automatiseringen til denne konstruksjonen</value>
+  </data>
+  <data name="Sprocket.Library.ForgetLostQuestion" xml:space="preserve">
+    <value>Glemme automatiseringen til denne tapte konstruksjonen?</value>
+  </data>
+  <data name="Sprocket.Library.InStorage" xml:space="preserve">
+    <value>I lageret</value>
+  </data>
+  <data name="Sprocket.Library.SavedBy" xml:space="preserve">
+    <value>Av {name}, lagret {time}</value>
+  </data>
+  <data name="Sprocket.Library.Forget" xml:space="preserve">
+    <value>Slett den fra lageret</value>
+  </data>
+  <data name="Sprocket.Library.ForgetQuestion" xml:space="preserve">
+    <value>Slette denne plantegningen fra lageret?</value>
+  </data>
+  <data name="Sprocket.Library.Here" xml:space="preserve">
+    <value>På denne konstruksjonen</value>
+  </data>
+  <data name="Sprocket.Library.PutOn" xml:space="preserve">
+    <value>Legg denne plantegningen på denne konstruksjonen, klar for den første installasjonen.</value>
+  </data>
+  <data name="Sprocket.Library.TakeOff" xml:space="preserve">
+    <value>Ta denne plantegningen av denne konstruksjonen. Kopien i lageret beholdes, oppdatert.</value>
+  </data>
+  <data name="Sprocket.Library.HeldOne" xml:space="preserve">
+    <value>1 installasjon på denne konstruksjonen. Fjern den fra hjemskjermen først.</value>
+  </data>
+  <data name="Sprocket.Library.Held" xml:space="preserve">
+    <value>{count} installasjoner på denne konstruksjonen. Fjern dem fra hjemskjermen først.</value>
+  </data>
+  <data name="Sprocket.Library.Save" xml:space="preserve">
+    <value>Legg i lageret</value>
+  </data>
+  <data name="Sprocket.Library.SaveAbout" xml:space="preserve">
+    <value>Legg en kopi i lageret. Den følger deg overalt.</value>
+  </data>
+  <data name="Sprocket.Library.Update" xml:space="preserve">
+    <value>Oppdater den lagrede kopien</value>
+  </data>
+  <data name="Sprocket.Library.UpdateAbout" xml:space="preserve">
+    <value>Erstatt den lagrede kopien med denne plantegningen.</value>
+  </data>
+  <data name="Sprocket.Library.Same" xml:space="preserve">
+    <value>Den lagrede kopien er den samme som denne.</value>
+  </data>
+  <data name="Sprocket.Library.By" xml:space="preserve">
+    <value>Av {name}</value>
+  </data>
+  <data name="Sprocket.Library.ByChanged" xml:space="preserve">
+    <value>Av {name}, endret {time}</value>
+  </data>
+  <data name="Sprocket.Library.Changed" xml:space="preserve">
+    <value>Endret {time}</value>
+  </data>
+  <data name="Sprocket.Library.InstallationsHeading" xml:space="preserve">
+    <value>Installasjoner</value>
+  </data>
+  <data name="Sprocket.Library.Systems" xml:space="preserve">
+    <value>Logikksystemer</value>
+  </data>
+  <data name="Sprocket.Systems.RemoveFirst" xml:space="preserve">
+    <value>Fjern installasjonene først, og ta den så av konstruksjonen.</value>
+  </data>
+  <data name="Sprocket.Library.Unreadable" xml:space="preserve">
+    <value>Denne kopien kan ikke leses.</value>
+  </data>
+  <data name="Sprocket.Library.Copy" xml:space="preserve">
+    <value>Lag en kopi</value>
+  </data>
+  <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
+    <value>Legg en kopi på denne konstruksjonen, som en egen plantegning: å endre kopien lar denne være som den er.</value>
+  </data>
+  <data name="Sprocket.Library.CopyName" xml:space="preserve">
+    <value>{name} {number}</value>
+  </data>
+  <data name="Sprocket.Library.Deletes" xml:space="preserve">
+    <value>Slett denne plantegningen. Den er ikke i lageret, så dette er den eneste kopien.</value>
+  </data>
+  <data name="Sprocket.Library.TakeOffQuestion" xml:space="preserve">
+    <value>Ta denne plantegningen av denne konstruksjonen?</value>
+  </data>
+  <data name="Sprocket.Library.TakeOffKept" xml:space="preserve">
+    <value>Kopien i lageret beholdes, oppdatert.</value>
+  </data>
+  <data name="Sprocket.Library.TakeOffKeep" xml:space="preserve">
+    <value>Behold den</value>
+  </data>
+  <data name="Sprocket.Library.TakeOffConfirm" xml:space="preserve">
+    <value>Ta den av</value>
+  </data>
+  <data name="Sprocket.Blueprint.NameTaken" xml:space="preserve">
+    <value>En annen plass heter allerede {name}.</value>
+  </data>
+  <data name="Sprocket.Blueprint.NameEmpty" xml:space="preserve">
+    <value>En plass trenger et navn.</value>
+  </data>
+  <data name="Sprocket.Blueprint.NameKeptTaken" xml:space="preserve">
+    <value>Ikke omdøpt: en annen plass heter allerede {name}.</value>
+  </data>
+  <data name="Sprocket.Blueprint.NameKeptEmpty" xml:space="preserve">
+    <value>Ikke omdøpt: en plass trenger et navn.</value>
   </data>
 </root>

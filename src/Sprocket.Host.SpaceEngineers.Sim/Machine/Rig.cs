@@ -146,7 +146,7 @@ sealed class Rig
     {
         if (rotor.TopGrid == null)
         {
-            var head = new Grid(rotor.Name + " Head", _grid.Journal);
+            var head = new Grid(rotor.Name + " Head", _grid.Journal, 9000 + _grids.Count);
             head.Top((IMyMechanicalConnectionBlock)rotor.Block);
             rotor.TopGrid = head.Block;
             _grids.Add(head);
@@ -180,6 +180,18 @@ sealed class Rig
 
             return;
         }
+    }
+
+    /// <summary>Whether one of the rig's grids has the entity id <paramref name="entityId" />.</summary>
+    public bool HasGrid(long entityId)
+    {
+        for (var i = 0; i < _grids.Count; i++)
+        {
+            if (_grids[i].Block.EntityId == entityId)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>Grinds one off, which leaves whatever named it pointing at nothing.</summary>

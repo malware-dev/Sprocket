@@ -54,7 +54,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (_part == null)
             {
                 _part = system.PartFor(_name);
-                _part.Picked = true;
                 _part.IsTrigger = true;
                 if (_type.Length > 0)
                     _part.Expects.Add(_type);

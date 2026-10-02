@@ -203,7 +203,7 @@ sealed class RigSlots : ISlots
                 return true;
         }
 
-        return false;
+        return _rig.HasGrid(entityId);
     }
 
     public bool Clear(IMyToolbar toolbar, int slot)

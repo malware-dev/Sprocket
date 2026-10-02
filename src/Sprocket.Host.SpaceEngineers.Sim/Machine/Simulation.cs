@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -27,6 +29,10 @@ sealed class Simulation
     readonly SprocketUnit _unit;
 
     readonly Rota _rota = new Rota();
+
+    readonly Backups _backups = new Backups();
+
+    readonly Shelf _shelf = new Shelf();
 
     bool _rehoming;
 
@@ -96,10 +102,11 @@ sealed class Simulation
 
         // Said outright rather than read: the harness has no mod storage. A test that wants the
         // developer tools sets Editor.DeveloperMode on the way past.
-        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false), _rota, _texts);
+        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false), _rota, _texts, _backups);
 
         // The harness is always drawing the screen, which is what the unit ticks its editor for.
         _unit.Showing = true;
+        _unit.Shelf = _shelf;
 
         // Answered on the next tick, which is where the game's invoke on the game thread lands: after the grid that
         // removed the hero has finished changing.
@@ -119,6 +126,12 @@ sealed class Simulation
     /// <summary>The Sprocket the construct carries, as the machine keeping it holds it.</summary>
     public SprocketUnit Unit => _unit;
 
+    /// <summary>The world's backups, which the library lists.</summary>
+    public Backups Backups => _backups;
+
+    /// <summary>The player's library, kept in memory for as long as the harness runs.</summary>
+    public Shelf Shelf => _shelf;
+
     /// <summary>What the editor says; loading a language into its book says it in that language.</summary>
     public Texts Texts => _texts;
 
@@ -137,11 +150,22 @@ sealed class Simulation
     /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
     public string Where => _store.Where;
 
-    /// <summary>Writes the program and the wiring out now, whatever the clock says.</summary>
+    /// <summary>Takes the construct's backup, as the world saving does, saying it was taken at <paramref name="saved" />.</summary>
+    public void BackUp(DateTime saved)
+    {
+        _unit.Persist();
+        _unit.BackUp(_backups, saved, false);
+    }
+
+    /// <summary>Writes the program and the wiring out now, whatever the clock says, and takes the backup.</summary>
     public void Save()
     {
         _unit.Persist();
         _store.SetValue(Wiring.Key, Wiring.Save(_rig));
+
+        // And the backup, which the world saving takes too.
+        if (!_unit.Lost)
+            _unit.BackUp(_backups, DateTime.UtcNow, false);
     }
 
     /// <summary>
@@ -165,6 +189,10 @@ sealed class Simulation
         {
             _rehoming = false;
             _unit.Rehome();
+
+            // As the session does: nothing holds the automation after this, so its backup is taken from it now.
+            if (_unit.Lost)
+                _unit.BackUp(_backups, DateTime.UtcNow, true);
         }
 
         _rig.Tick();

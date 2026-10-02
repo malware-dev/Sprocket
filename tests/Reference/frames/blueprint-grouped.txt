@@ -8,17 +8,17 @@ on screen     Automation for Test Rig
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Sprite     Sprocket_Fill         {X:256 Y:57 W:32 H:32}  #3C4C52FF
 003  Text       at {X:262.1563 Y:59.01406} scale 0.401  #DCF5FDFF  "<"
-004  SetClip    {X:296 Y:53 W:1235 H:40}
+004  SetClip    {X:296 Y:53 W:1252 H:40}
 005  Text       at {X:296 Y:53.39666} scale 1.111  #A2C3CDFF  "Automation for"
 006  Text       at {X:470.6234 Y:53.39666} scale 1.111  #DCF5FDFF  "Test Rig"
 007  Text       at {X:566.9529 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 008  ClearClip  
-009  Sprite     Sprocket_Fill         {X:1539 Y:57 W:85 H:32}  #29363EFF
-010  Sprite     Sprocket_Fill         {X:1539 Y:57 W:85 H:1}  #3F474FFF
-011  Sprite     Sprocket_Fill         {X:1539 Y:88 W:85 H:1}  #3F474FFF
-012  Sprite     Sprocket_Fill         {X:1539 Y:57 W:1 H:32}  #3F474FFF
+009  Sprite     Sprocket_Fill         {X:1556 Y:57 W:68 H:32}  #29363EFF
+010  Sprite     Sprocket_Fill         {X:1556 Y:57 W:68 H:1}  #3F474FFF
+011  Sprite     Sprocket_Fill         {X:1556 Y:88 W:68 H:1}  #3F474FFF
+012  Sprite     Sprocket_Fill         {X:1556 Y:57 W:1 H:32}  #3F474FFF
 013  Sprite     Sprocket_Fill         {X:1623 Y:57 W:1 H:32}  #3F474FFF
-014  Text       at {X:1554.937 Y:63.05432} scale 0.556  #DCF5FDFF  "Blueprints"
+014  Text       at {X:1572.043 Y:63.05432} scale 0.556  #DCF5FDFF  "Library"
 015  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "s"
 016  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 017  SetClip    {X:256 Y:118 W:1408 H:902}

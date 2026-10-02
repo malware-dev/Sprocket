@@ -187,6 +187,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
+        /// <summary>A field holding what cannot be taken, marked as a heading's box is.</summary>
+        public static readonly TextBoxStyle FieldRefused = new TextBoxStyle(Field)
+        {
+            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
+        };
+
         /// <summary>A heading's name with its pencil, lit under the pointer where pressing it renames.</summary>
         public static readonly ElementStyle Plate = new ElementStyle
         {
@@ -354,6 +360,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly ElementStyle Broken = new ElementStyle(Row)
         {
             Base = { Background = Palette.ProblemWash }
+        };
+
+        /// <summary>The row chosen from a list, whose details stand beside it.</summary>
+        public static readonly ElementStyle Chosen = new ElementStyle(Row)
+        {
+            Base = { Background = Palette.PanelHot, Edge = Palette.Accent }
+        };
+
+        /// <summary>The chosen row, with something wrong in it.</summary>
+        public static readonly ElementStyle BrokenChosen = new ElementStyle(Broken)
+        {
+            Base = { Edge = Palette.Accent }
         };
 
         /// <summary>A row that has stopped where it is waiting to be let on.</summary>

@@ -28,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         readonly List<Part> _parts = new List<Part>();
         readonly List<string> _used = new List<string>();
         readonly List<Mention> _gone = new List<Mention>();
+        readonly Dictionary<Part, string> _refusals = new Dictionary<Part, string>();
         readonly bool _editing;
 
         SystemInstance _made;
@@ -376,11 +377,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 var row = _partRows[part];
                 if (box == row.NameBox)
                 {
-                    // Refused where another slot has the name, since the name is what tells the two apart.
+                    // A slot nothing uses is not saved, so its name is free, and it goes.
                     var name = Naming.Clean(row.NameBox.Text);
+                    var refused = Refused(part, name);
+                    if (refused != null)
+                    {
+                        _refusals[part] = name.Length == 0
+                            ? Editor.Texts.BlueprintNameKeptEmpty
+                            : Template.Fill(Editor.Texts.BlueprintNameKeptTaken, "name", name);
+                        row.NameBox.Text = part.Id;
+                        row.Refusal = _refusals[part];
+                        return;
+                    }
+
+                    _refusals.Remove(part);
                     var other = _system.FindPart(name);
-                    if (name.Length > 0 && (other == null || other == part))
-                        Editor.Do(_system, new RenamePart(part, name));
+                    if (other != null && other != part)
+                        _system.DropPart(other);
+
+                    Editor.Do(_system, new RenamePart(part, name));
                     return;
                 }
 
@@ -389,6 +404,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     Editor.Do(_system, new AnnotatePart(part, row.About.Text, Change.DescribeSlot));
                     return;
                 }
+            }
+        }
+
+        /// <summary>Why <paramref name="name" /> cannot be what <paramref name="part" /> is called, or null where it can.</summary>
+        /// <remarks>Slot names are unique, since the name is what tells two slots apart; one nothing uses does not count.</remarks>
+        string Refused(Part part, string name)
+        {
+            if (name.Length == 0)
+                return Editor.Texts.BlueprintNameEmpty;
+
+            var other = _system.FindPart(name);
+            if (other == null || other == part)
+                return null;
+
+            _system.Acted(_used);
+            return _used.Contains(other.Id) ? Template.Fill(Editor.Texts.BlueprintNameTaken, "name", name) : null;
+        }
+
+        /// <summary>Says on <paramref name="row" /> whether what is being typed as a slot's name can be taken.</summary>
+        void Typed(PartRow row)
+        {
+            for (var i = 0; i < _parts.Count; i++)
+            {
+                if (_partRows[_parts[i]] != row)
+                    continue;
+
+                _refusals.Remove(_parts[i]);
+                row.Refusal = Refused(_parts[i], Naming.Clean(row.NameBox.Text));
+                return;
             }
         }
 
@@ -404,7 +448,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         PartRow PartRow(Part part)
         {
-            return new PartRow(Windows);
+            var row = new PartRow(Windows);
+            row.NameBox.Edited += delegate { Typed(row); };
+            return row;
         }
 
         WindowLayer Windows()
@@ -458,7 +504,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             var texts = Editor.Texts;
             if (!row.NameBox.IsFocused)
+            {
                 row.NameBox.Text = part.Id;
+                string refused;
+                row.Refusal = _refusals.TryGetValue(part, out refused) ? refused : null;
+            }
 
             row.NameBox.Submit = new Relay(delegate { Editor.Input.Focus(null); });
             row.NameBox.Tip = Tip.For(row.NameBox.Tip, texts.BlueprintNameBoxAbout);

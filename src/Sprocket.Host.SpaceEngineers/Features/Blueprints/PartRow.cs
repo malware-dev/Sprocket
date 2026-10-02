@@ -6,6 +6,7 @@ using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Windows;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
@@ -79,7 +80,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 _blocks.IsVisible = !value;
                 _problem.IsVisible = !value && _problem.Text.Length != 0;
                 _nameBox.IsVisible = value;
+                _refusal.IsVisible = value && _refusal.Text.Length != 0;
                 _aboutComposer.IsVisible = value;
+            }
+        }
+
+        /// <summary>Why the name in the box is not the slot's, said under it and marked on it, or null where nothing is refused.</summary>
+        public string Refusal
+        {
+            get { return _refusal.Text.Length != 0 ? _refusal.Text : null; }
+            set
+            {
+                _refusal.Text = value ?? "";
+                _refusal.IsVisible = value != null;
+                _nameBox.Style = value == null ? Styles.Field : Styles.FieldRefused;
             }
         }
 

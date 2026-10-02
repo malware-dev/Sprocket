@@ -30,12 +30,12 @@ sealed class Grid
     Action<IMySlimBlock> _added;
     Action<IMySlimBlock> _removed;
 
-    public Grid(string name) : this(name, new List<string>())
+    public Grid(string name, long id = 9000) : this(name, new List<string>(), id)
     {
     }
 
-    /// <summary>A grid writing what is done to its blocks into <paramref name="journal" />, which several grids can share.</summary>
-    public Grid(string name, List<string> journal)
+    /// <summary>A grid, <paramref name="id" /> its entity id, writing what is done to its blocks into <paramref name="journal" />, which several grids can share.</summary>
+    public Grid(string name, List<string> journal, long id)
     {
         Journal = journal;
 
@@ -44,6 +44,7 @@ sealed class Grid
         var called = name;
 
         Block = Pretend.To<IMyCubeGrid>()
+            .Gives("EntityId", () => id)
             .Gives("CustomName", () => called)
             .Takes("CustomName", value => called = (string)value)
             .Gives("DisplayName", () => called)

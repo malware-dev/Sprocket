@@ -363,6 +363,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return at;
         }
 
+        /// <summary>Takes <paramref name="part" /> out of the system, and every instance's answer to it.</summary>
+        /// <remarks>For a part nothing uses, which would not be saved; there is no way back.</remarks>
+        public void DropPart(Part part)
+        {
+            ForgetPart(part);
+            for (var i = 0; i < _instances.Count; i++)
+                _instances[i].Clear(part.Id);
+        }
+
         /// <summary>Puts <paramref name="part" /> back at <paramref name="at" />, as it was before it was forgotten.</summary>
         public void PutPartBack(int at, Part part)
         {
@@ -404,7 +413,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             var name = Free(called);
             var part = PartFor(name);
-            part.Picked = true;
             if (type.Length > 0)
                 part.Expects.Add(type);
 
@@ -420,7 +428,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             var name = Free(called);
             var part = PartFor(name);
-            part.Picked = true;
             part.IsTrigger = true;
             if (type.Length > 0)
                 part.Expects.Add(type);

@@ -123,6 +123,15 @@ public class ScriptTests
         program.AddSequence(system).Steps.Add(close);
     }
 
+    /// <summary>Gives the first system of <paramref name="program" /> a step that closes <paramref name="slots" />, since a slot nothing uses is not written.</summary>
+    static void Closes(Automation program, params string[] slots)
+    {
+        var close = new Act("close");
+        foreach (var slot in slots)
+            close.Targets.Add(slot);
+        program.AddSequence(program.Systems[0]).Steps.Add(close);
+    }
+
     static Automation BlueprintCalled(string space, string name)
 
     {
@@ -307,6 +316,7 @@ public class ScriptTests
 
         system.PartFor("vent").Expects.Add("AirVent");
         system.PartFor("anything");
+        Closes(program, "inner", "vent", "anything");
 
         var text = Save(program);
         Assert.Contains("    # The inner door.\n    required slot inner expects [ Door, AirtightSlideDoor ]\n", text);
@@ -333,6 +343,7 @@ public class ScriptTests
         var lamp = system.PartFor("lamp");
         lamp.Expects.Add("InteriorLight");
         lamp.Optional = true;
+        Closes(program, "inner", "lamp");
 
         var text = Save(program);
         Assert.Contains("    required slot inner expects Door\n", text);
@@ -344,6 +355,26 @@ public class ScriptTests
         Assert.True(after.Systems[0].FindPart("lamp")!.Optional);
     }
 
+    /// <summary>A slot nothing uses is not written, and neither is an instance's answer to it.</summary>
+    [Fact]
+    public void ASlotNothingUsesIsNotWritten()
+    {
+        var program = BlueprintCalled("", "Airlock");
+        var system = program.Systems[0];
+        system.PartFor("inner");
+        var spare = system.PartFor("spare");
+        spare.Annotation = "Written about, and still unused.";
+        Closes(program, "inner");
+
+        var instance = system.AddInstance();
+        instance.Fill("inner", new[] { "door1" });
+        instance.Fill("spare", new[] { "door2" });
+
+        var text = Save(program);
+        Assert.Contains("required slot inner", text);
+        Assert.DoesNotContain("spare", text);
+    }
+
     /// <summary>
     /// A subtype is quoted, because a `/` is not a bare name.
     /// </summary>
@@ -352,6 +383,7 @@ public class ScriptTests
     {
         var program = BlueprintCalled("", "Hangar");
         program.Systems[0].PartFor("door").Expects.Add("AirtightHangarDoor/LargeBlockAirtightHangarDoor");
+        Closes(program, "door");
 
         var text = Save(program);
         Assert.Contains("required slot door expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'\n", text);

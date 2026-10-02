@@ -154,6 +154,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>How many things in it are worth a remark without being broken.</summary>
         public int Remarks { get; set; }
 
+        /// <summary>Whether it is the one chosen from its list, whose details stand beside the list.</summary>
+        public bool Chosen { get; set; }
+
         /// <summary>Whether it is running now.</summary>
         public bool Running { get; set; }
 
@@ -246,14 +249,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var wrong = Problems > 0;
 
             Style = wrong
-                ? Styles.Broken
-                : Running
-                    ? Styles.Running
-                    : Parked
-                        ? Styles.Parked
-                        : !pressable
-                            ? Styles.Still
-                            : Styles.Row;
+                ? Chosen ? Styles.BrokenChosen : Styles.Broken
+                : Chosen
+                    ? Styles.Chosen
+                    : Running
+                        ? Styles.Running
+                        : Parked
+                            ? Styles.Parked
+                            : !pressable
+                                ? Styles.Still
+                                : Styles.Row;
 
             if (!ReferenceEquals(_said, Summary))
             {

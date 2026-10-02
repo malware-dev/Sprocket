@@ -103,6 +103,54 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return pen.ToString();
         }
 
+        /// <summary>The blueprint <paramref name="system" /> written out alone, as a player's library keeps it.</summary>
+        /// <remarks>A blueprint names nothing outside itself, so the system is the whole of it; its instances are the construct's.</remarks>
+        public static string Blueprint(AutomationSystem system)
+        {
+            var pen = new Pen();
+            pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
+            pen.End();
+            WriteSystem(pen, system);
+            return pen.ToString();
+        }
+
+        /// <summary>
+        /// Reads the blueprint <paramref name="text" /> into <paramref name="program" />, beside what it holds, answering what was
+        /// wrong with it, or empty.
+        /// </summary>
+        /// <remarks>
+        /// Read into a program of its own first, because a text with an error in it is trusted in no part: where anything is
+        /// wrong, <paramref name="program" /> is left as it was. The text holds one system blueprint and nothing else, as
+        /// <see cref="Blueprint" /> writes it.
+        /// </remarks>
+        public static string AddBlueprint(string text, Automation program, Values values)
+        {
+            var trial = new Automation();
+            var trouble = Load(text, trial, values);
+            if (trouble.Length > 0)
+                return trouble;
+
+            if (trial.Systems.Count != 1 || !trial.Systems[0].IsBlueprint || trial.Refs.Count > 0 || trial.TriggerRefs.Count > 0
+                || trial.Systems[0].Instances.Count > 0)
+                return "expected one system blueprint and nothing else.";
+
+            var identity = trial.Systems[0].Identity;
+            if (program.FindSystem(identity) != null)
+                return "system " + identity.ToString("D") + " is already declared.";
+
+            var parser = new Parser(text);
+            var constructs = parser.Read();
+            var read = new Trouble(text, parser.Trouble);
+            for (var i = 0; i < constructs.Count; i++)
+            {
+                if (constructs[i].Key == Keyword.System)
+                    ReadSystem(constructs[i], program, read);
+            }
+
+            read.Settle();
+            return read.What;
+        }
+
         /// <summary>
         /// The variables something in <paramref name="program" /> names: in <paramref name="blocks" /> those holding a
         /// block, in <paramref name="triggers" /> those holding a trigger.
@@ -551,14 +599,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             pen.Body();
 
-            // The slots before what uses them, so a reader meets the vocabulary before the answers.
+            // The slots before what uses them, so a reader meets the vocabulary before the answers. A slot nothing uses is
+            // left out, and so are an instance's answers to it.
             var used = new List<string>();
             system.Acted(used);
 
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
             {
-                if (parts[i].IsTrigger || parts[i].Kept(used.Contains(parts[i].Id)))
+                if (used.Contains(parts[i].Id))
                     WriteSlot(pen, parts[i]);
             }
 
@@ -818,7 +867,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// Which parts this one fills, in a settled order, leaving out a part the system does not keep.
+        /// Which parts this one fills, in a settled order, leaving out a part nothing in the system uses.
         /// </summary>
         /// <remarks>
         /// Sorted, so a saved file does not churn between runs for no reason: a dictionary hands its
@@ -834,7 +883,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             foreach (var slot in instance.Filled)
             {
                 Part part = system.FindPart(slot);
-                if (part == null || part.Kept(used.Contains(slot)))
+                if (part == null || used.Contains(slot))
                     parts.Add(slot);
             }
 

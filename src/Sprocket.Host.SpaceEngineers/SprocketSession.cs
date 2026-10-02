@@ -34,6 +34,8 @@ namespace Sprocket.Host.SpaceEngineers
 
         const int Reclaiming = 300;
 
+        const string Library = "Library.sprocket";
+
         static SprocketSession _current;
 
         readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();
@@ -41,6 +43,16 @@ namespace Sprocket.Host.SpaceEngineers
         readonly Dictionary<long, long> _moved = new Dictionary<long, long>();
 
         readonly List<KeyValuePair<long, SprocketUnit>> _saving = new List<KeyValuePair<long, SprocketUnit>>();
+
+        readonly Backups _backups = new Backups();
+
+        Carrier _carrier;
+
+        bool _carries;
+
+        readonly Shelf _shelf = new Shelf();
+
+        bool _shelves;
 
         readonly Rota _rota = new Rota();
 
@@ -159,6 +171,87 @@ namespace Sprocket.Host.SpaceEngineers
         public override void BeforeStart()
         {
             MyAPIGateway.TerminalControls.CustomControlGetter += SprocketControls.Arrange;
+
+            if (IsServer)
+                FindBackups();
+
+            if (MyAPIGateway.Utilities != null && !MyAPIGateway.Utilities.IsDedicated)
+                FindShelf();
+        }
+
+        /// <summary>Reads the player's library out of the global store, once, as the world starts, and keeps it written as it changes.</summary>
+        /// <remarks>A library that will not read is logged and never written over: what is put in it this session is not kept.</remarks>
+        void FindShelf()
+        {
+            var files = MyAPIGateway.Utilities;
+            string trouble;
+            try
+            {
+                if (!files.FileExistsInGlobalStorage(Library))
+                {
+                    trouble = "";
+                }
+                else
+                {
+                    using (TextReader reader = files.ReadFileInGlobalStorage(Library))
+                        trouble = _shelf.Read(reader.ReadToEnd());
+                }
+            }
+            catch (Exception failed)
+            {
+                trouble = "the library will not open - " + failed.Message;
+            }
+
+            if (trouble.Length > 0)
+            {
+                Told.Say(trouble + "; the library is not kept this session");
+                return;
+            }
+
+            _shelves = true;
+            _shelf.Changed += Shelve;
+            Told.Say("read " + _shelf.All.Count + " blueprints from the library");
+        }
+
+        /// <summary>Writes the player's library into the global store, as it is now.</summary>
+        /// <remarks>Whenever a blueprint is put in or taken out, which a person does by hand.</remarks>
+        void Shelve()
+        {
+            if (!_shelves || !_shelf.Intact)
+                return;
+
+            try
+            {
+                using (TextWriter writer = MyAPIGateway.Utilities.WriteFileInGlobalStorage(Library))
+                    writer.Write(_shelf.Write());
+            }
+            catch (Exception failed)
+            {
+                Told.Say("the library will not write - " + failed.Message);
+            }
+        }
+
+        /// <summary>Reads the world's backups out of its carrier, once, as the world starts.</summary>
+        /// <remarks>
+        /// Backups that will not read, or a world with more than one carrier, are logged and never written over: the
+        /// backups go on being taken this session, and are not kept.
+        /// </remarks>
+        void FindBackups()
+        {
+            Carrier found;
+            var trouble = Carrier.Find(out found);
+            if (trouble.Length == 0 && found != null)
+                trouble = _backups.Read(found.Text);
+
+            if (trouble.Length > 0)
+            {
+                Told.Say(trouble + "; the backups are not kept this session");
+                return;
+            }
+
+            _carrier = found;
+            _carries = true;
+            Told.Say("read " + _backups.All.Count + " backups");
         }
 
         public override void LoadData()
@@ -490,7 +583,7 @@ namespace Sprocket.Host.SpaceEngineers
                 return unit;
             }
 
-            unit = new SprocketUnit(block, Asked, _rota, _texts);
+            unit = new SprocketUnit(block, Asked, _rota, _texts, _backups);
             unit.HeroRemoved += Removed;
             _units.Add(block.EntityId, unit);
             return unit;
@@ -528,6 +621,8 @@ namespace Sprocket.Host.SpaceEngineers
         {
             if (unit.Lost)
             {
+                // Taken now, from what it was running, because nothing holds the automation after this.
+                unit.BackUp(_backups, DateTime.UtcNow, true);
                 _units.Remove(was);
                 if (_shown == unit && _screen != null)
                     _screen.CloseNow();
@@ -616,6 +711,7 @@ namespace Sprocket.Host.SpaceEngineers
 
         void Show(IMyTerminalBlock block, SprocketUnit unit, Action closed)
         {
+            unit.Shelf = _shelf;
             if (_screen == null || _open != block.EntityId || _shown != unit)
             {
                 if (_screen != null)
@@ -707,12 +803,32 @@ namespace Sprocket.Host.SpaceEngineers
                 SprocketUnit unit = _saving[i].Value;
                 unit.Persist();
                 File(_saving[i].Key, unit);
-                if (!unit.Lost)
-                    Spread(unit);
+                if (unit.Lost)
+                    continue;
+
+                Spread(unit);
+                unit.BackUp(_backups, DateTime.UtcNow, false);
             }
 
             _saving.Clear();
+            Carry();
             return base.GetObjectBuilder();
+        }
+
+        /// <summary>Writes the backups into the world's carrier, making it where the world has none yet.</summary>
+        /// <remarks>
+        /// Once a save, from every backup, which costs what writing out the programs costs and nothing during play. A world
+        /// with no backups is given no carrier; one that has a carrier has it written, emptied where every backup was forgotten.
+        /// </remarks>
+        void Carry()
+        {
+            if (!_carries || !IsServer || (_carrier == null && _backups.All.Count == 0))
+                return;
+
+            if (_carrier == null)
+                _carrier = Carrier.Make();
+
+            _carrier.Write(_backups.Write());
         }
 
         protected override void UnloadData()

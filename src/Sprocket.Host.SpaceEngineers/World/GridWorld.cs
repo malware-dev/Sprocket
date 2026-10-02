@@ -548,6 +548,17 @@ namespace Sprocket.Host.SpaceEngineers.World
             return null;
         }
 
+        /// <summary>Puts the entity ids of the construct's grids into <paramref name="into" />, which a backup knows the construct again by.</summary>
+        public void GridIds(List<long> into)
+        {
+            into.Clear();
+            if (_stale)
+                Rebuild();
+
+            for (var i = 0; i < _grids.Count; i++)
+                into.Add(_grids[i].EntityId);
+        }
+
         /// <summary>Anchors the construct on <paramref name="anchor" />, the programmable block that holds the automation from here on.</summary>
         public void Anchor(IMyTerminalBlock anchor)
         {

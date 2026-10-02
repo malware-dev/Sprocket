@@ -47,6 +47,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         IMyTerminalBlock _block;
 
+        Backups _backups;
+
+        Shelf _shelf;
+
+        readonly List<long> _backedGrids = new List<long>();
+
         readonly bool _copy;
 
         readonly GridWorld _world;
@@ -81,9 +87,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <paramref name="rota" /> is the world's, shared by every Sprocket in it. See <see cref="Rota" />.
         /// <paramref name="texts" /> are what its editor says, in the player's language.
         /// </remarks>
-        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts)
+        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, Backups backups = null)
             : this(block, settings, rota, texts, false, Stored(block, ProgramKey), Stored(block, StateKey))
         {
+            _backups = backups;
         }
 
         /// <summary>
@@ -117,6 +124,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             var running = StateText.Running(_program, _runner);
             var rebuilt = new SprocketUnit(_block, settings, rota, _texts, false, program,
                 switches + "\n" + running);
+            rebuilt._backups = _backups;
+            rebuilt._shelf = _shelf;
             rebuilt.Showing = Showing;
             if (_editor != null)
                 rebuilt.Editor.Habits = _editor.Habits;
@@ -185,6 +194,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public event Action<SprocketUnit> HeroRemoved;
 
+        /// <summary>The player's library, which the editor is given; null on a machine that keeps none.</summary>
+        public Shelf Shelf
+        {
+            get { return _shelf; }
+            set
+            {
+                _shelf = value;
+                if (_editor != null)
+                    _editor.Shelf = value;
+            }
+        }
+
         /// <summary>The editor, made the first time it is asked for, building its first screen out of whatever the program says by then.</summary>
         public SprocketEditor Editor
         {
@@ -194,6 +215,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                     return _editor;
 
                 _editor = new SprocketEditor(_world, _program, _runner, _texts);
+                _editor.Backups = _backups;
+                _editor.Shelf = _shelf;
 
                 // A copy's buttons are written where the Sprocket is kept, which is asked by whoever lent it.
                 if (!_copy)
@@ -1380,6 +1403,34 @@ namespace Sprocket.Host.SpaceEngineers.World
             // What is switched off is kept under a key of its own, apart from the program somebody shares. The key
             // is claimed in EntityComponents.sbc, without which it would work all session and vanish on save.
             storage.SetValue(StateKey, state);
+
+            KeptProgram = program;
+            KeptState = state;
+        }
+
+        /// <summary>The program as <see cref="Persist" /> last wrote it, or null before it has; what a backup is taken from as the world saves.</summary>
+        public string KeptProgram { get; private set; }
+
+        /// <summary>What was switched off as <see cref="Persist" /> last wrote it, or null before it has.</summary>
+        public string KeptState { get; private set; }
+
+        /// <summary>
+        /// Takes the construct's backup into <paramref name="backups" />, from what <see cref="Persist" /> last wrote or, where
+        /// <paramref name="fresh" /> is set, from what this holds now.
+        /// </summary>
+        /// <remarks>A construct with no automation, or one whose program would not read, leaves its backup as it was.</remarks>
+        public void BackUp(Backups backups, DateTime saved, bool fresh)
+        {
+            if (!_program.Intact || _program.Systems.Count == 0)
+                return;
+
+            string program = KeptProgram;
+            string state = KeptState;
+            if (fresh || program == null)
+                Written(out program, out state);
+
+            _world.GridIds(_backedGrids);
+            backups.Take(_world.Name, saved, _backedGrids, program, state);
         }
 
         /// <summary>

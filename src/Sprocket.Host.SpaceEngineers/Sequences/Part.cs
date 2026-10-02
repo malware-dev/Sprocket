@@ -7,10 +7,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </summary>
     /// <remarks>
     /// The parts are the system's vocabulary: its sequences act on <c>inner</c>, and which block that
-    /// is on a given ship is one of that system's business. A part is kept whether or not anything
-    /// currently acts on it, because deleting the last step that mentioned a door must not quietly
-    /// discard what its author wrote about it. The exception is a part the editor took for a picked
-    /// block that nobody has written anything about: see <see cref="Kept" />.
+    /// is on a given ship is one of that system's business. A part nothing acts on is left out when the
+    /// program is written, and so is every instance's answer to it.
     /// </remarks>
     public sealed class Part
     {
@@ -24,9 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>The part's name, which is the slot's name wherever it is shown.</summary>
         public string Id { get; private set; }
-
-        /// <summary>Whether the editor took this part for a block that was picked, rather than it being declared.</summary>
-        public bool Picked { get; set; }
 
         /// <summary>Whether a construct may leave this part unfilled.</summary>
         public bool Optional { get; set; }
@@ -52,18 +47,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// which of their blocks to point at, so it is part of the model and round-trips like a name.
         /// </remarks>
         public string Annotation { get; set; }
-
-        /// <summary>
-        /// Whether this part is saved, given whether anything uses it.
-        /// </summary>
-        /// <remarks>
-        /// A part the editor took for a block, which nothing uses and nobody has written about, is what
-        /// a deleted step leaves behind, and nothing is lost by letting it go.
-        /// </remarks>
-        public bool Kept(bool used)
-        {
-            return used || !Picked || Annotation.Length > 0;
-        }
 
         /// <summary>Calls the part <paramref name="id" />, and nothing else: <see cref="AutomationSystem.RenamePart" /> renames what names it.</summary>
         public void Rename(string id)

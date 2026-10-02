@@ -80,6 +80,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         PageOn,
         PageBack,
 
+        // The library. Keeping a blueprint for every world and forgetting a lost construct change no program, so a copy
+        // lent to look at may do both.
+        Shelve,
+        Unshelve,
+        PutOn,
+        TakeOff,
+        ForgetBackup,
+
         // A list of answers.
         Choice,
         ChoiceTaken,

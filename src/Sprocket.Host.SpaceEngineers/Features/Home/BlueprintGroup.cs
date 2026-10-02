@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel;
 using Lumel.Controls;
+using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -24,6 +25,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         readonly Keyed<SystemInstance, StatusRow> _rows;
 
+        readonly ICommand _takesOff;
+
+        readonly ICommand _deletes;
+
         /// <summary>The group of <paramref name="system" /> on <paramref name="page" />, pressing through <paramref name="editor" />.</summary>
         public BlueprintGroup(SprocketEditor editor, HomePage page, AutomationSystem system)
         {
@@ -36,7 +41,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Flips = editor.Act(Cmd.EnableSystem, delegate { editor.SwitchSystem(system, !system.Enabled); });
             _heading.SwitchGovernsAll = true;
             _heading.Mark = Symbols.Blueprint;
-            _heading.BinMark = Symbols.Minus;
+            _takesOff = editor.Act(Cmd.TakeOff, delegate { editor.AskTakeOff(system); });
+            _deletes = editor.Act(Cmd.DeleteSystem, delegate { editor.DeleteSystem(system); });
             _heading.AboutArguments = _named;
             _another.Command = editor.Act(Cmd.AddInstance, delegate { page.Another(system); });
             _rows = new Keyed<SystemInstance, StatusRow>(_list.Children, Made);
@@ -55,9 +61,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Summary = _system.Name;
             _heading.About = texts.SystemsEditBlueprint;
 
-            // Taking a blueprint off the construct keeps it in the library, which does not exist yet; until it does, the
-            // minus stands where it will be, and says so.
-            _heading.Locked = texts.SystemsRemoveBlueprintLater;
+            // A blueprint in storage is taken off the construct, with a minus; one that is not is deleted, with a bin, since this
+            // is its only copy. Either only once nothing on the construct uses it.
+            var used = _system.Instances.Count > 0;
+            var stored = _editor.Stored(_system);
+            _heading.BinMark = stored ? Symbols.Minus : null;
+            _heading.Deletes = used ? null : stored ? _takesOff : _deletes;
+            _heading.DeleteText = stored ? texts.LibraryTakeOff : texts.LibraryDeletes;
+            _heading.Locked = used ? texts.SystemsRemoveFirst : "";
 
             _keys.Clear();
             var instances = _system.Instances;

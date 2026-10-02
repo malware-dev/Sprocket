@@ -1,0 +1,511 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using Lumel;
+using Lumel.Input;
+using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.World;
+
+namespace Sprocket.Host.SpaceEngineers.Features.Library
+{
+    /// <summary>The library: the blueprints on this construct, the constructs that are lost, and the blueprints the player keeps for every world.</summary>
+    /// <remarks>
+    /// A list beside the details of what is chosen from it. The list is made again whenever the screen is rebuilt, which
+    /// only something done on this page or a change to the program brings about. The elements it is drawn with are declared
+    /// in <c>LibraryPage.View.cs</c>.
+    /// </remarks>
+    sealed partial class LibraryPage : EditorPage
+    {
+        const int OnConstruct = 0;
+        const int Lost = 1;
+        const int Kept = 2;
+
+        readonly List<Entry> _entries = new List<Entry>();
+        readonly List<Volume> _volumes = new List<Volume>();
+        readonly List<string> _names = new List<string>();
+        readonly Relay _flips;
+        readonly Relay _keeps;
+        readonly Relay _copies;
+
+        Entry _chosen;
+        string _refused = "";
+
+        /// <summary>The library, in the editor <paramref name="editor" />.</summary>
+        public LibraryPage(SprocketEditor editor) : base(editor)
+        {
+            _flips = new Relay(Flip);
+            _keeps = new Relay(Keep);
+            _copies = new Relay(Copy);
+        }
+
+        /// <inheritdoc />
+        public override string Title => Editor.Texts.SystemsLoad;
+
+        /// <inheritdoc />
+        public override bool ScrollsItself => true;
+
+        /// <summary>The list, its headings and lines included, for whoever reads it back.</summary>
+        public Element.Collection Rows => _list.Children;
+
+        /// <summary>Makes the list again, once the view is made; until then <see cref="ViewCreated" /> does.</summary>
+        public override void Build()
+        {
+            if (_list != null)
+                List();
+        }
+
+        /// <summary>Gives the details their fixed words and makes the list for the first time.</summary>
+        protected override void ViewCreated()
+        {
+            var texts = Editor.Texts;
+            _search.Hint = texts.PickSearch;
+            _search.Edited += Narrow;
+            _hereLabel.Text = texts.LibraryHere;
+            _switch.Command = _flips;
+            _switch.Says(texts.SwitchOn, texts.SwitchOff);
+            _keep.Command = _keeps;
+            _copy.Command = _copies;
+            List();
+        }
+
+        /// <summary>Lists the blueprints on this construct, the constructs that are lost, and the blueprints in the library.</summary>
+        /// <remarks>What was chosen stays chosen where it is still listed; the first row is chosen where it is not.</remarks>
+        void List()
+        {
+            var texts = Editor.Texts;
+            var was = _chosen;
+            _chosen = null;
+            _entries.Clear();
+            _list.Children.Clear();
+
+            Heading(texts.LibraryOnConstructs, Styles.Heading);
+            _list.Children.Add(new Label
+            {
+                Style = Styles.InnerName,
+                Text = Template.Fill(texts.LibraryThisConstruct, "name", Editor.World.Name),
+                Padding = new Thickness(16f, 8f, 0f, 4f)
+            });
+
+            var here = 0;
+            var systems = Editor.Program.Systems;
+            for (var i = 0; i < systems.Count; i++)
+            {
+                if (!systems[i].IsBlueprint)
+                    continue;
+
+                here++;
+                var system = systems[i];
+                var row = new StatusRow { Mark = Symbols.Blueprint, Summary = system.Name, Depth = 1 };
+                row.Status = Installations(texts, system.Instances.Count);
+                Add(new Entry { Section = OnConstruct, Identity = system.Identity }, row);
+            }
+
+            if (here == 0)
+                Line(texts.LibraryNoneHere, Styles.Empty);
+
+            ListLost(texts);
+            ListKept(texts);
+
+            Entry again = null;
+            for (var i = 0; i < _entries.Count && again == null; i++)
+            {
+                if (_entries[i].Same(was))
+                    again = _entries[i];
+            }
+
+            Choose(again ?? (_entries.Count > 0 ? _entries[0] : null));
+            Narrow();
+        }
+
+        /// <summary>Lists the constructs whose every grid is gone from the world, where this machine keeps the backups.</summary>
+        void ListLost(Texts texts)
+        {
+            var backups = Editor.Backups;
+            if (backups == null)
+                return;
+
+            var all = backups.All;
+            for (var i = 0; i < all.Count; i++)
+            {
+                if (!Gone(all[i]))
+                    continue;
+
+                var backup = all[i];
+                var row = new StatusRow
+                {
+                    Summary = backup.Name,
+                    Problem = Template.Fill(texts.LibraryLost, "time", Time(backup.Saved)),
+                    Problems = 1,
+                    Deletes = Editor.Act(Cmd.ForgetBackup, delegate { Editor.ForgetBackup(backup); }),
+                    DeleteText = texts.LibraryForgetLost
+                };
+
+                Add(new Entry { Section = Lost, Backup = backup }, row);
+            }
+        }
+
+        /// <summary>Lists the blueprints in the library, by name, reading each to know it will read.</summary>
+        void ListKept(Texts texts)
+        {
+            var shelf = Editor.Shelf;
+            if (shelf == null)
+                return;
+
+            Heading(texts.LibraryInStorage, Styles.NextHeading);
+
+            _volumes.Clear();
+            _volumes.AddRange(shelf.All);
+            _volumes.Sort(delegate(Volume a, Volume b) { return string.Compare(a.Name, b.Name, StringComparison.CurrentCultureIgnoreCase); });
+
+            for (var i = 0; i < _volumes.Count; i++)
+            {
+                var volume = _volumes[i];
+                var entry = new Entry { Section = Kept, Identity = volume.Identity };
+                var trial = new Automation();
+                entry.Trouble = ProgramText.Load(volume.Text, trial, Editor.World.Values);
+                if (entry.Trouble.Length == 0)
+                    entry.Read = trial.FindSystem(volume.Identity);
+
+                var time = Time(volume.Saved);
+                var row = new StatusRow
+                {
+                    Mark = Symbols.Blueprint,
+                    Summary = volume.Name,
+                    Depth = 1,
+                    Status = volume.Namespace.Length == 0 || volume.Namespace == Editor.Author
+                        ? Template.Fill(texts.LibrarySaved, "time", time)
+                        : Template.Fill(Template.Fill(texts.LibrarySavedBy, "name", volume.Namespace), "time", time),
+                    Deletes = Editor.Act(Cmd.Unshelve, delegate { Editor.Unshelve(volume); }),
+                    DeleteText = texts.LibraryForget
+                };
+
+                if (entry.Read == null)
+                {
+                    row.Problem = texts.LibraryUnreadable;
+                    row.Problems = 1;
+                }
+
+                Add(entry, row);
+            }
+
+            if (_volumes.Count == 0)
+                Line(texts.LibraryNoneSaved, Styles.Empty);
+        }
+
+        /// <summary>Puts <paramref name="row" /> in the list for <paramref name="entry" />, pressed to choose it.</summary>
+        void Add(Entry entry, StatusRow row)
+        {
+            entry.Row = row;
+            row.Opens = Editor.Act(Cmd.Expand, delegate { Choose(entry); });
+            row.Show(Editor.Texts);
+            _entries.Add(entry);
+            _list.Children.Add(row);
+        }
+
+        void Heading(string text, TextStyle style)
+        {
+            _list.Children.Add(new Label { Style = style, Text = text.ToUpperInvariant() });
+        }
+
+        void Line(string text, TextStyle style)
+        {
+            _list.Children.Add(new Label { Style = style, Text = text, Wraps = true });
+        }
+
+        /// <summary>Shows only the rows whose name holds what is typed in the search box.</summary>
+        void Narrow()
+        {
+            var typed = _search.Text.Trim();
+            for (var i = 0; i < _entries.Count; i++)
+            {
+                var row = _entries[i].Row;
+                row.IsVisible = typed.Length == 0 || row.Summary.IndexOf(typed, StringComparison.CurrentCultureIgnoreCase) >= 0;
+            }
+        }
+
+        /// <summary>Marks <paramref name="entry" /> as chosen and shows its details.</summary>
+        void Choose(Entry entry)
+        {
+            var texts = Editor.Texts;
+            if (_chosen != null)
+            {
+                _chosen.Row.Chosen = false;
+                _chosen.Row.Show(texts);
+            }
+
+            if (!ReferenceEquals(_chosen, entry))
+                _refused = "";
+
+            _chosen = entry;
+            if (entry != null)
+            {
+                entry.Row.Chosen = true;
+                entry.Row.Show(texts);
+            }
+
+            Describe();
+        }
+
+        /// <summary>Shows the details of what is chosen: a blueprint, wherever it is listed, or a construct that is lost.</summary>
+        void Describe()
+        {
+            var entry = _chosen;
+            _name.IsVisible = entry != null;
+            _here.IsVisible = false;
+            _line.IsVisible = false;
+            _about.IsVisible = false;
+            _trouble.IsVisible = false;
+            Say(_firstHeading, _first, null, null);
+            Say(_secondHeading, _second, null, null);
+
+            if (entry == null)
+                return;
+
+            _name.Text = entry.Row.Summary;
+            if (entry.Backup != null)
+                DescribeLost(entry.Backup);
+            else
+                DescribeBlueprint(entry);
+        }
+
+        /// <summary>The details of a blueprint: whether it is on this construct, how it stands with the library, and what it holds.</summary>
+        /// <remarks>The copy on this construct where there is one, chosen from either list; the library's where there is not.</remarks>
+        void DescribeBlueprint(Entry entry)
+        {
+            var texts = Editor.Texts;
+            var shelf = Editor.Shelf;
+            var live = Live(entry.Identity);
+            var volume = shelf == null ? null : shelf.Find(entry.Identity);
+            var system = live ?? entry.Read;
+            var uses = live == null ? 0 : live.Instances.Count;
+            var free = Editor.Holder == null;
+
+            _here.IsVisible = true;
+            _switch.IsOn = live != null;
+            _flips.CanExecute = free && (live != null ? uses == 0 : system != null);
+            _switch.Tip = Tip.For(_switch.Tip, live == null
+                ? texts.LibraryPutOn
+                : uses == 0
+                    ? volume != null ? texts.LibraryTakeOff : texts.LibraryDeletes
+                    : uses == 1
+                        ? texts.LibraryHeldOne
+                        : Template.Fill(texts.LibraryHeld, "count", uses.ToString(CultureInfo.InvariantCulture)));
+
+            var same = live != null && volume != null && shelf.Holds(live);
+            _keep.IsVisible = live != null && shelf != null;
+            _keep.Text = volume == null ? texts.LibrarySave : texts.LibraryUpdate;
+            _keeps.CanExecute = !same;
+            _keep.Tip = Tip.For(_keep.Tip, same ? texts.LibrarySame : volume == null ? texts.LibrarySaveAbout : texts.LibraryUpdateAbout);
+
+            _copy.Text = texts.LibraryCopy;
+            _copies.CanExecute = free && system != null;
+            _copy.Tip = Tip.For(_copy.Tip, texts.LibraryCopyAbout);
+
+            var trouble = _refused.Length > 0 ? _refused : system == null ? entry.Trouble : "";
+            _trouble.Text = trouble;
+            _trouble.IsVisible = trouble.Length > 0;
+
+            if (system == null)
+                return;
+
+            _line.Text = Made(texts, system);
+            _line.IsVisible = _line.Text.Length > 0;
+            _about.Text = system.Annotation;
+            _about.IsVisible = system.Annotation.Length > 0;
+
+            _names.Clear();
+            var parts = system.Parts;
+            for (var i = 0; i < parts.Count; i++)
+            {
+                if (!parts[i].Optional)
+                    _names.Add(parts[i].Id);
+            }
+
+            Say(_firstHeading, _first, texts.BlueprintParts, _names);
+
+            _names.Clear();
+            for (var i = 0; live != null && i < uses; i++)
+                _names.Add(SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, live, live.Instances[i]));
+
+            Say(_secondHeading, _second, texts.LibraryInstallationsHeading, _names);
+        }
+
+        /// <summary>The details of a construct that is lost: when its automation was kept, and the logic systems it had.</summary>
+        void DescribeLost(Backup backup)
+        {
+            var texts = Editor.Texts;
+            _line.Text = Template.Fill(texts.LibraryLost, "time", Time(backup.Saved));
+            _line.IsVisible = true;
+
+            var trial = new Automation();
+            var trouble = ProgramText.Load(backup.Program, trial, Editor.World.Values);
+            _trouble.Text = trouble;
+            _trouble.IsVisible = trouble.Length > 0;
+
+            _names.Clear();
+            var systems = trial.Systems;
+            for (var i = 0; i < systems.Count; i++)
+                _names.Add(systems[i].Name);
+
+            Say(_firstHeading, _first, texts.LibrarySystems, _names);
+        }
+
+        /// <summary>Shows <paramref name="names" /> under <paramref name="title" />, or neither where there are none.</summary>
+        static void Say(Label heading, Label list, string title, List<string> names)
+        {
+            var shown = names != null && names.Count > 0;
+            heading.IsVisible = shown;
+            list.IsVisible = shown;
+            if (!shown)
+                return;
+
+            heading.Text = title.ToUpperInvariant();
+            var joined = new StringBuilder();
+            for (var i = 0; i < names.Count; i++)
+            {
+                if (i > 0)
+                    joined.Append(", ");
+
+                joined.Append(names[i]);
+            }
+
+            list.Text = joined.ToString();
+        }
+
+        /// <summary>Puts the chosen blueprint on the construct, or takes it off.</summary>
+        void Flip()
+        {
+            var entry = _chosen;
+            if (entry == null || entry.Backup != null)
+                return;
+
+            var live = Live(entry.Identity);
+            if (live != null && Editor.Stored(live))
+            {
+                Run(Cmd.TakeOff, delegate { Editor.AskTakeOff(live); });
+            }
+            else if (live != null)
+            {
+                Run(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(live); });
+            }
+            else
+            {
+                var volume = Editor.Shelf == null ? null : Editor.Shelf.Find(entry.Identity);
+                if (volume != null)
+                    Run(Cmd.PutOn, delegate { _refused = Editor.PutOn(volume); });
+            }
+
+            Describe();
+        }
+
+        /// <summary>Puts the chosen blueprint, as it is on this construct, in the library.</summary>
+        void Keep()
+        {
+            var live = _chosen == null ? null : Live(_chosen.Identity);
+            if (live != null)
+                Run(Cmd.Shelve, delegate { Editor.Shelve(live); });
+        }
+
+        /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>
+        /// <remarks>Copied as it is on this construct where it is here; as the library keeps it where it is not.</remarks>
+        void Copy()
+        {
+            var entry = _chosen;
+            if (entry == null || entry.Backup != null)
+                return;
+
+            var live = Live(entry.Identity);
+            var volume = Editor.Shelf == null ? null : Editor.Shelf.Find(entry.Identity);
+            var text = live != null ? ProgramText.Blueprint(live) : volume == null ? null : volume.Text;
+            if (text == null)
+                return;
+
+            Run(Cmd.PutOn, delegate
+            {
+                var made = Editor.Copy(text, out _refused);
+                if (made != null)
+                    Editor.Push(new LogicSystemPage(Editor, made));
+            });
+
+            Describe();
+        }
+
+        void Run(Cmd kind, Action action)
+        {
+            var command = Editor.Act(kind, action);
+            if (command != null)
+                command.Execute();
+        }
+
+        /// <summary>The blueprint <paramref name="identity" /> on this construct, or null.</summary>
+        AutomationSystem Live(Guid identity)
+        {
+            var system = Editor.Program.FindSystem(identity);
+            return system != null && system.IsBlueprint ? system : null;
+        }
+
+        /// <summary>Who made <paramref name="system" /> and when it last changed, as far as either is known.</summary>
+        static string Made(Texts texts, AutomationSystem system)
+        {
+            var by = system.Namespace;
+            if (!system.Changed.HasValue)
+                return by.Length == 0 ? "" : Template.Fill(texts.LibraryBy, "name", by);
+
+            var time = Time(system.Changed.Value);
+            return by.Length == 0
+                ? Template.Fill(texts.LibraryChanged, "time", time)
+                : Template.Fill(Template.Fill(texts.LibraryByChanged, "name", by), "time", time);
+        }
+
+        static string Installations(Texts texts, int count)
+        {
+            return count == 0
+                ? texts.LibraryNoInstallations
+                : count == 1
+                    ? texts.LibraryOneInstallation
+                    : Template.Fill(texts.LibraryInstallations, "count", count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>A time in UTC, said as the player's clock has it.</summary>
+        static string Time(DateTime utc)
+        {
+            return utc.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>Whether none of the grids <paramref name="backup" /> was taken of is still in the world.</summary>
+        static bool Gone(Backup backup)
+        {
+            for (var i = 0; i < backup.Grids.Count; i++)
+            {
+                if (Toolbars.Exists(backup.Grids[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>One row of the list, and what it stands for.</summary>
+        sealed class Entry
+        {
+            public int Section;
+            public Guid Identity;
+            public Backup Backup;
+            public AutomationSystem Read;
+            public string Trouble = "";
+            public StatusRow Row;
+
+            /// <summary>Whether <paramref name="other" /> stands for the same thing in the same list.</summary>
+            public bool Same(Entry other)
+            {
+                return other != null && other.Section == Section && other.Identity == Identity && other.Backup == Backup;
+            }
+        }
+    }
+}
