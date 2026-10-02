@@ -45,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly MyKeys[] _shortcuts = { MyKeys.A, MyKeys.C, MyKeys.X, MyKeys.V, MyKeys.Z, MyKeys.Y };
 
         readonly SprocketUnit _unit;
+        readonly IMyTerminalBlock _opened;
         readonly EditorView _view;
         readonly IScreenSpace _screen;
         readonly ScreenSpaceGraphics _graphics;
@@ -62,11 +63,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly Action _closed;
 
-        /// <summary>The editor on <paramref name="unit" />, telling <paramref name="closed" /> each time it closes.</summary>
-        public SprocketScreen(SprocketUnit unit, Action closed)
+        /// <summary>
+        /// The editor on <paramref name="unit" />, opened from <paramref name="opened" />, telling <paramref name="closed" /> each
+        /// time it closes.
+        /// </summary>
+        public SprocketScreen(SprocketUnit unit, IMyTerminalBlock opened, Action closed)
             : base("Sprocket", null, new Vector2(EditorView.ScreenWidth, EditorView.ScreenHeight))
         {
             _unit = unit;
+            _opened = opened;
             _closed = closed;
             _view = new EditorView(unit.Editor);
 
@@ -178,7 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Puts the status app on the Sprocket's own screen, where the screen is showing nothing.
+        /// Puts the status app on the screen of the programmable block the editor was opened from, where the screen is showing nothing.
         /// </summary>
         /// <remarks>
         /// Somebody who has just built their first rule has a block with automation in it and a blank
@@ -196,7 +201,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (_unit.Editor.Program.Systems.Count == 0)
                 return;
 
-            var provider = _unit.Block as IngameSurfaces;
+            var provider = _opened as IngameSurfaces;
             if (provider == null)
                 return;
 

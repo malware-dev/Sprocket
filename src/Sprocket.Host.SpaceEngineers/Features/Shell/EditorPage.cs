@@ -188,6 +188,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What pressing the switch would do, said as a note on it, or null for none.</summary>
         public virtual string SwitchAbout => null;
 
+        /// <summary>Whether the switch cannot be pressed now, which it shows dimmed with <see cref="SwitchAbout" /> saying why.</summary>
+        public virtual bool SwitchLocked => false;
+
         /// <summary>Whether the subject is running now, which turns the run mark into a stop.</summary>
         public virtual bool IsRunning => false;
 

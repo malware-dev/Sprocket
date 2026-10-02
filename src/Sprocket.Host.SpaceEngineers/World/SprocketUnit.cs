@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         static readonly Guid StateKey = new Guid("C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3");
 
 
-        readonly IMyTerminalBlock _block;
+        IMyTerminalBlock _block;
 
         readonly bool _copy;
 
@@ -154,6 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // let go of is a leak that holds the whole unit alive.
             _runner.Live = _block.IsWorking;
             _block.IsWorkingChanged += Working;
+            _world.AnchorRemoved += Removed;
         }
 
         /// <summary>
@@ -170,8 +171,19 @@ namespace Sprocket.Host.SpaceEngineers.World
             _runner.Live = _block.IsWorking;
         }
 
-        /// <summary>The block this belongs to, for anything asking which construct it is on.</summary>
-        internal IMyTerminalBlock Block => _block;
+        /// <summary>The programmable block the automation is kept in: the construct's hero.</summary>
+        /// <remarks>Another programmable block on the construct takes over when this one is gone - see <see cref="Seek" />.</remarks>
+        public IMyTerminalBlock Block => _block;
+
+        /// <summary>Whether the construct has no programmable block left to keep the automation in, which ends it.</summary>
+        public bool Lost { get; private set; }
+
+        /// <summary>Raised when the hero is removed from the construct, from the grid's own event; answered with <see cref="Rehome" />.</summary>
+        /// <remarks>
+        /// The grid is still changing when it is raised, so whatever answers it calls <see cref="Rehome" /> once the grid has
+        /// finished: the session through the game's own invoke on the game thread, the harness on its next tick.
+        /// </remarks>
+        public event Action<SprocketUnit> HeroRemoved;
 
         /// <summary>The editor, made the first time it is asked for, building its first screen out of whatever the program says by then.</summary>
         public SprocketEditor Editor
@@ -1334,18 +1346,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Writes the program into the block, so the world save carries it.
+        /// Writes the program into the hero, so the world save carries it.
         /// </summary>
         /// <remarks>
-        /// Written whenever the program might have changed rather than only when the world saves. Storage
-        /// is a dictionary the game serialises along with the block, so putting the text there early costs
-        /// a string and removes any question about whether a session component's save runs before or after
-        /// the entities are written out.
+        /// Written whenever the program might have changed, and as the world saves, from the session's object builder: the
+        /// game asks for that before it writes the entities, and runs a session component's own save after it has.
         /// </remarks>
         public void Persist()
         {
             // The machine that keeps the Sprocket writes it; a copy is only somebody's view of it.
             if (_copy)
+                return;
+
+            // Into the hero as the construct stands now, which may have changed since the last tick.
+            Seek();
+            if (Lost)
                 return;
 
             MyModStorageComponentBase storage = Attached(_block);
@@ -1456,9 +1471,83 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor.Invalidate();
         }
 
+        /// <summary>Keeps the automation in another programmable block on the construct, now that the hero is gone, answering whether it moved.</summary>
+        /// <remarks>
+        /// Where no programmable block is left the automation is <see cref="Lost" />, and whoever holds this lets it go.
+        /// </remarks>
+        public bool Rehome()
+        {
+            if (!Seek())
+                return false;
+
+            Persist();
+            return true;
+        }
+
+        void Removed()
+        {
+            if (HeroRemoved != null)
+                HeroRemoved(this);
+        }
+
+        /// <summary>
+        /// Moves into another programmable block on the construct where the hero has gone, answering whether it moved.
+        /// </summary>
+        /// <remarks>
+        /// Asked when the hero is removed and as the world saves, never on a tick. The hero found again under its own id is
+        /// the same block brought back as a new object, which a grid splitting does; it is taken as it is. Otherwise the first
+        /// programmable block found becomes the hero, and where there is none the automation is lost.
+        /// </remarks>
+        bool Seek()
+        {
+            if (Lost)
+                return false;
+
+            GridEntity found = _world.FindEntity(_block.EntityId);
+            if (found != null)
+            {
+                if (found.Block == _block)
+                    return false;
+
+                Move(found.Block);
+                return true;
+            }
+
+            IReadOnlyList<GridEntity> entities = _world.Entities;
+            for (var i = 0; i < entities.Count; i++)
+            {
+                if (!(entities[i].Block is IMyProgrammableBlock))
+                    continue;
+
+                Move(entities[i].Block);
+                return true;
+            }
+
+            Told.Say(_block.CustomName + " is gone, and its construct has no programmable block left to keep the automation");
+            Lost = true;
+            return false;
+        }
+
+        /// <summary>Makes <paramref name="block" /> the hero: the automation is kept in it from here on, and its buttons name it.</summary>
+        void Move(IMyTerminalBlock block)
+        {
+            Told.Say(_block.CustomName + " is gone; " + block.CustomName + " keeps the automation now");
+
+            _block.IsWorkingChanged -= Working;
+            _block = block;
+            _block.IsWorkingChanged += Working;
+            _runner.Live = _block.IsWorking;
+            _world.Anchor(block);
+
+            // The construct's buttons still name the block that is gone, so the next pass mends them as it does after a load.
+            _adopted = false;
+            _reconciled = int.MinValue;
+        }
+
         public void Dispose()
         {
             _block.IsWorkingChanged -= Working;
+            _world.AnchorRemoved -= Removed;
             _runner.Retire();
             _world.Dispose();
         }

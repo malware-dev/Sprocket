@@ -3,11 +3,12 @@ using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.Utils;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 {
     /// <summary>
-    /// The button on a programmable block that opens Sprocket, set apart by a separator on each side.
+    /// The button on a programmable block that opens Sprocket, set apart by a separator on each side, and in developer mode the label on the block keeping the automation.
     /// </summary>
     /// <remarks>
     /// Controls are global per block type rather than per block, so this runs exactly once per mod load,
@@ -26,10 +27,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 
         static IMyTerminalControlSeparator _above;
         static IMyTerminalControlButton _open;
+        static IMyTerminalControlLabel _hero;
         static IMyTerminalControlSeparator _below;
 
-        /// <summary>Makes the button once, in <paramref name="texts" />, which the game keeps for the session.</summary>
-        public static void DoOnce(Texts texts)
+        /// <summary>
+        /// Makes the button once, in <paramref name="texts" />, which the game keeps for the session; and where
+        /// <paramref name="developer" /> is set, the label that marks the block keeping the automation.
+        /// </summary>
+        public static void DoOnce(Texts texts, bool developer)
         {
             if (_done)
                 return;
@@ -56,6 +61,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 
             MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(_above);
             MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(_open);
+
+            // Shown on the block whose storage holds the program, which is the hero on the server and, from what the
+            // server tells them, on every client's copy of the construct.
+            if (developer)
+            {
+                _hero = MyAPIGateway.TerminalControls
+                    .CreateControl<IMyTerminalControlLabel, IMyProgrammableBlock>("Sprocket_Hero");
+
+                _hero.Label = MyStringId.GetOrCompute(texts.TerminalHero);
+                _hero.Visible = SprocketUnit.HasProgram;
+                MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(_hero);
+            }
+
             MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(_below);
         }
 
@@ -76,6 +94,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             controls.Remove(_above);
             controls.Remove(_open);
             controls.Remove(_below);
+            if (_hero != null)
+                controls.Remove(_hero);
 
             var at = -1;
             for (var i = 0; i < controls.Count; i++)
@@ -91,6 +111,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
                 at = controls.Count;
 
             controls.Insert(at, _below);
+            if (_hero != null)
+                controls.Insert(at, _hero);
+
             controls.Insert(at, _open);
             controls.Insert(at, _above);
         }

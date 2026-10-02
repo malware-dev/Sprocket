@@ -570,7 +570,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _hanging = screen.QuestionIsHere && _raisedBy != null;
             if (_hanging)
             {
-                _confirm.Ask(screen.Question, screen.Answers, screen.Default, _raisedBy, _windows);
+                _confirm.Ask(screen.Question, screen.QuestionArguments, screen.Answers, screen.Default, _raisedBy, _windows);
                 return;
             }
 
@@ -673,7 +673,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _switch.IsVisible = screen.HasSwitch;
             _switch.IsOn = screen.SwitchIsOn;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
-            _flips.CanExecute = screen.HasSwitch;
+            _flips.CanExecute = screen.HasSwitch && !screen.SwitchLocked;
             _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? screen.SwitchAbout : null);
 
             _done.IsVisible = screen.HasPrimary;

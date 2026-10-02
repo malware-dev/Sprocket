@@ -113,9 +113,9 @@ public class SystemSwitchTests
         Assert.DoesNotContain("Extra 3", question);
     }
 
-    /// <summary>With the blueprint off, its blocksets show off, and switching one on asks about the blueprint first.</summary>
+    /// <summary>With the blueprint off, a blockset's switch keeps showing its own setting and waits for the blueprint's.</summary>
     [Fact]
-    public void SwitchingOnABlocksetOfABlueprintSwitchedOffAsksAboutTheBlueprint()
+    public void ABlocksetsSwitchWaitsForTheBlueprint()
     {
         var sim = Blueprinted();
         var system = sim.Editor.Program.Systems.Single();
@@ -123,20 +123,17 @@ public class SystemSwitchTests
         sim.Editor.Tick(1000);
 
         var row = sim.Editor.RootRows()[0];
-        Assert.True(system.Instances[0].Enabled);
-        Assert.False(row.SwitchIsOn);
+        Assert.True(row.SwitchIsOn);
+        Assert.Equal("Switch the blueprint on first", row.SwitchLocked);
 
         row.Flips!.Execute();
         sim.Editor.Tick(1001);
-        Assert.Equal("Airlock is switched off. Switch it on?", sim.Editor.Question());
-        Assert.False(system.Enabled);
-
-        sim.Editor.PressAnswer("Switch it on");
-        sim.Editor.Tick(1002);
-
-        Assert.True(system.Enabled);
+        Assert.Equal("", sim.Editor.Question());
         Assert.True(system.Instances[0].Enabled);
-        Assert.True(sim.Editor.RootRows()[0].SwitchIsOn);
+
+        system.Enabled = true;
+        sim.Editor.Tick(1002);
+        Assert.Null(sim.Editor.RootRows()[0].SwitchLocked);
     }
 
     /// <summary>A logic system with a button, made a blueprint, with a second logic system made from it.</summary>

@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             // The button belongs to a terminal, and a dedicated server has none.
             if (!MyAPIGateway.Utilities.IsDedicated)
-                SprocketControls.DoOnce(texts);
+                SprocketControls.DoOnce(texts, SprocketSession.DeveloperMode);
 
             IMyTerminalBlock block = Entity as IMyTerminalBlock;
             if (block != null && SprocketUnit.HasProgram(block))

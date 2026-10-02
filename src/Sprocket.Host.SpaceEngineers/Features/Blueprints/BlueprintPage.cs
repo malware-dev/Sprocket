@@ -63,11 +63,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>The blockset has a switch, filling; the panel itself does not.</summary>
         public override bool CanSwitch => !_editing && Blockset != null;
 
-        /// <inheritdoc />
-        public override bool SwitchIsOn => Blockset != null && _system.Enabled && Blockset.Enabled;
+        /// <summary>The blockset's own setting, which it keeps while the blueprint is off.</summary>
+        public override bool SwitchIsOn => Blockset != null && Blockset.Enabled;
 
-        /// <summary>The blockset's switch stops that one and nothing else made from the blueprint.</summary>
-        public override string SwitchAbout => StatusRow.Switching(Editor.Texts, false, SwitchIsOn);
+        /// <summary>The blockset's switch stops that one and nothing else made from the blueprint; while the blueprint is off, it says to switch that on first.</summary>
+        public override string SwitchAbout => _system.Enabled ? StatusRow.Switching(Editor.Texts, false, SwitchIsOn) : Editor.Texts.RowSwitchBlueprintFirst;
+
+        /// <summary>The blockset's switch waits for the blueprint's while that is off.</summary>
+        public override bool SwitchLocked => !_system.Enabled;
 
         /// <summary>The blockset just made is as it was made: its name, its switch, and not one slot filled.</summary>
         public override bool Untouched
@@ -116,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return system == _system;
         }
 
-        /// <summary>Switches the blockset being filled on or off, and nothing else made from the blueprint; on while the blueprint is off, it asks about the blueprint.</summary>
+        /// <summary>Switches the blockset being filled on or off, and nothing else made from the blueprint.</summary>
         public override void Switch(bool on)
         {
             var chosen = Blockset;

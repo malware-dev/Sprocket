@@ -245,11 +245,14 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (!NetworkChannel.Network.IsServer)
                 return;
 
-            var grant = new Grant { Block = claim.Block, Holder = "", Program = "", State = "" };
-
+            // Lent by the block that keeps the automation, whichever programmable block on the construct was opened, so
+            // one construct has one lease, and the client works with that block from here on.
             SprocketUnit unit = _find(claim.Block);
+            long lent = unit == null ? claim.Block : unit.Block.EntityId;
+            var grant = new Grant { Block = lent, Holder = "", Program = "", State = "" };
+
             var holder = "";
-            if (unit != null && Lend(claim.Block, sender, claim.Name, out holder))
+            if (unit != null && Lend(lent, sender, claim.Name, out holder))
             {
                 grant.Given = true;
                 unit.Written(out grant.Program, out grant.State);

@@ -33,7 +33,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             CreateView();
             _heading.Opens = editor.Act(Cmd.OpenSystem, delegate { page.Open(system); });
+            _heading.Flips = editor.Act(Cmd.EnableSystem, delegate { editor.SwitchSystem(system, !system.Enabled); });
+            _heading.SwitchGovernsAll = true;
             _heading.Mark = Symbols.Blueprint;
+            _heading.BinMark = Symbols.Minus;
             _heading.AboutArguments = _named;
             _another.Command = editor.Act(Cmd.AddInstance, delegate { page.Another(system); });
             _rows = new Keyed<SystemInstance, StatusRow>(_list.Children, Made);
@@ -51,6 +54,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _named.Set("name", _system.Name);
             _heading.Summary = _system.Name;
             _heading.About = texts.SystemsEditBlueprint;
+
+            // Taking a blueprint off the construct keeps it in the library, which does not exist yet; until it does, the
+            // minus stands where it will be, and says so.
+            _heading.Locked = texts.SystemsRemoveBlueprintLater;
 
             _keys.Clear();
             var instances = _system.Instances;
@@ -82,7 +89,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             Loudest(shown, texts);
         }
 
-        /// <summary>Marks the heading as the installations of the blueprint are: broken where any is, warned where any is, running where any is.</summary>
+        /// <summary>
+        /// Marks the heading as the installations of the blueprint are: broken where any is, warned where any is, running where
+        /// any is; and its switch as the blueprint's.
+        /// </summary>
         /// <remarks>Read from the rows below, which have just been brought up to date, so nothing is asked of the runner twice.</remarks>
         void Loudest(bool shown, Texts texts)
         {
@@ -101,10 +111,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 running |= row.Running;
             }
 
+            var on = _system.Enabled;
             if (!shown && _heading.Problems == problems && _heading.Remarks == remarks && _heading.Parked == parked
-                && _heading.Running == running)
+                && _heading.Running == running && _heading.SwitchIsOn == on)
                 return;
 
+            _heading.SwitchIsOn = on;
+            _heading.SwitchAbout = _editor.SwitchAbout(_system);
             _heading.Problems = problems;
             _heading.Remarks = remarks;
             _heading.Parked = parked;

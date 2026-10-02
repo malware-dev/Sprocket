@@ -1044,6 +1044,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.Library = page.Library;
             _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
             _screen.SwitchAbout = page.SwitchAbout;
+
+            // Asked as the screen is built: what locks a switch is another page's switch, so it cannot change while this page shows.
+            _screen.SwitchLocked = page.SwitchLocked;
             _screen.Runs = page.Runs;
             _screen.Stops = page.Stops;
             _screen.Deletes = page.Deletes;
@@ -2334,26 +2337,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             });
         }
 
-        /// <summary>Switches <paramref name="instance" /> of <paramref name="system" /> on or off; on while the system is off, it asks to switch the system on as well.</summary>
-        /// <remarks>Leaving it off is the answer Enter takes, since the key pressed without reading must not start a machine.</remarks>
+        /// <summary>Switches <paramref name="instance" /> of <paramref name="system" /> on or off, while the system is on.</summary>
+        /// <remarks>
+        /// An installation keeps its own setting while its blueprint is off, so the blueprint switched back on starts exactly
+        /// the ones that were on; its switch cannot be pressed meanwhile.
+        /// </remarks>
         internal void SwitchInstance(AutomationSystem system, SystemInstance instance, bool on)
         {
-            if (!on || system.Enabled)
-            {
+            if (system.Enabled)
                 instance.Enabled = on;
-                return;
-            }
-
-            var arguments = new Arguments();
-            arguments.Set("name", system.Name);
-
-            AskHere(Texts.SystemOffQuestion, arguments);
-            Answer(Texts.SystemSwitchItOn, delegate
-            {
-                instance.Enabled = true;
-                SwitchSystem(system, true);
-            });
-            Answer(Texts.SystemLeaveItOff, delegate { }, true);
         }
 
         /// <summary>What pressing the switch of <paramref name="system" /> would do, said as a note on it.</summary>

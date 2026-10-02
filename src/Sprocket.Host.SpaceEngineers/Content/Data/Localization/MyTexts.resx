@@ -95,6 +95,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Switch on every installation of this blueprint</value>
     <comment>Note on a blueprint's switch when it is off. Each of them runs where its own switch is on.</comment>
   </data>
+  <data name="Sprocket.Row.SwitchBlueprintFirst" xml:space="preserve">
+    <value>Switch the blueprint on first</value>
+    <comment>Note on an installation's switch while its blueprint is switched off, when it cannot be pressed.</comment>
+  </data>
   <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
     <value>Switch off every installation of this blueprint</value>
     <comment>Note on a blueprint's switch when it is on.</comment>
@@ -161,6 +165,10 @@ This one becomes its first installation.</value>
   <data name="Sprocket.Systems.LibraryUnbuilt" xml:space="preserve">
     <value>Not built yet. Blueprints will be imported and exported here.</value>
     <comment>Said on the blueprint library while it is not built.</comment>
+  </data>
+  <data name="Sprocket.Systems.RemoveBlueprintLater" xml:space="preserve">
+    <value>Not built yet. This will take the blueprint off the construct and keep it in the library.</value>
+    <comment>Note on the minus beside a blueprint on the home screen, which cannot be pressed while the library is not built.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
     <value>installation</value>
@@ -829,10 +837,6 @@ This one becomes its first installation.</value>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} is on. Turn it off to edit.</value>
     <comment>Said in place of the buttons that change a logic system, or a sequence in it, while it is switched on. {name} is the logic system's name.</comment>
-  </data>
-  <data name="Sprocket.System.OffQuestion" xml:space="preserve">
-    <value>**{name}** is switched off. Switch it on?</value>
-    <comment>Asked on switching on one of a blueprint's logic systems while the blueprint is switched off. {name} is the blueprint's name.</comment>
   </data>
   <data name="Sprocket.System.SwitchOnQuestion" xml:space="preserve">
     <value>Switch **{name}** on?</value>
@@ -1629,6 +1633,10 @@ This one becomes its first installation.</value>
   <data name="Sprocket.Terminal.OpenAbout" xml:space="preserve">
     <value>Open the automation editor.</value>
     <comment>Note on that button.</comment>
+  </data>
+  <data name="Sprocket.Terminal.Hero" xml:space="preserve">
+    <value>Keeps the automation</value>
+    <comment>Label on the programmable block that keeps the automation, shown only in developer mode.</comment>
   </data>
   <data name="Sprocket.Terminal.Action" xml:space="preserve">
     <value>Automation: trigger</value>

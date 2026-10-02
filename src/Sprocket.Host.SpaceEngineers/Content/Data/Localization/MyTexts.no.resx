@@ -74,6 +74,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
     <value>Slå på hver installasjon av denne plantegningen</value>
   </data>
+  <data name="Sprocket.Row.SwitchBlueprintFirst" xml:space="preserve">
+    <value>Slå på plantegningen først</value>
+  </data>
   <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
     <value>Slå av hver installasjon av denne plantegningen</value>
   </data>
@@ -124,6 +127,9 @@ Denne blir dens første installasjon.</value>
   </data>
   <data name="Sprocket.Systems.LibraryUnbuilt" xml:space="preserve">
     <value>Ikke bygget ennå. Plantegninger skal importeres og eksporteres her.</value>
+  </data>
+  <data name="Sprocket.Systems.RemoveBlueprintLater" xml:space="preserve">
+    <value>Ikke bygget ennå. Dette skal ta plantegningen av konstruksjonen og beholde den i biblioteket.</value>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
     <value>installasjon</value>
@@ -636,9 +642,6 @@ Denne blir dens første installasjon.</value>
   </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} er på. Slå det av for å redigere.</value>
-  </data>
-  <data name="Sprocket.System.OffQuestion" xml:space="preserve">
-    <value>**{name}** er slått av. Slå det på?</value>
   </data>
   <data name="Sprocket.System.SwitchOnQuestion" xml:space="preserve">
     <value>Slå på **{name}**?</value>
@@ -1240,6 +1243,9 @@ Denne blir dens første installasjon.</value>
   </data>
   <data name="Sprocket.Terminal.OpenAbout" xml:space="preserve">
     <value>Åpne automatiseringsredigereren.</value>
+  </data>
+  <data name="Sprocket.Terminal.Hero" xml:space="preserve">
+    <value>Holder automatiseringen</value>
   </data>
   <data name="Sprocket.Terminal.Action" xml:space="preserve">
     <value>Automatisering: utløser</value>

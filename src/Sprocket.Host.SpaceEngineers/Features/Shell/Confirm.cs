@@ -27,11 +27,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// belongs to, offering <paramref name="answers" /> in order and marking <paramref name="taken" /> as the one Enter
         /// takes.
         /// </summary>
-        /// <remarks>The rows are made afresh for each question, which appears when somebody presses something and lives for one answer.</remarks>
-        public void Ask(string question, IList<ChoiceEntry> answers, ChoiceEntry taken, Element anchor, WindowLayer layer)
+        /// <remarks>
+        /// The question is markdown-lite, or where <paramref name="arguments" /> are given, a template whose named slots take
+        /// their words from them, as a question in the middle of the screen is. The rows are made afresh for each question,
+        /// which appears when somebody presses something and lives for one answer.
+        /// </remarks>
+        public void Ask(string question, Arguments arguments, IList<ChoiceEntry> answers, ChoiceEntry taken, Element anchor,
+            WindowLayer layer)
         {
-            _question.Text = question;
-            _question.IsVisible = !string.IsNullOrEmpty(question);
+            var asks = !string.IsNullOrEmpty(question);
+            _question.IsVisible = asks;
+            _question.Document = !asks ? null : arguments == null ? Markdown.Parse(question) : Template.Read(question);
+            _question.Arguments = arguments;
 
             _answers.Children.Clear();
             for (var i = 0; i < answers.Count; i++)

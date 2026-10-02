@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class GridWorld : IDisposable
     {
-        readonly IMyTerminalBlock _anchor;
+        IMyTerminalBlock _anchor;
         readonly Catalogue _catalogue = Catalogue();
 
         readonly BlockKinds _kinds;
@@ -56,6 +56,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             _anchor = anchor;
             _kinds = new BlockKinds(_catalogue, _extensions);
         }
+
+        /// <summary>Raised from the grid's own event when the anchor is removed from the construct, in the middle of the grid changing.</summary>
+        /// <remarks>Whatever answers it waits until the grid has finished, before it reads the construct again - see <see cref="SprocketUnit" />.</remarks>
+        public event Action AnchorRemoved;
 
         /// <summary>
         /// Makes and reads the values this construct deals in, and the lists behind the wide ones.
@@ -497,11 +501,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             _revision++;
             _entities.Clear();
             _byId.Clear();
-            if (_anchor == null || _anchor.CubeGrid == null || MyAPIGateway.GridGroups == null)
+            IMyCubeGrid home = Home();
+            if (home == null || MyAPIGateway.GridGroups == null)
                 return;
 
             _grids.Clear();
-            MyAPIGateway.GridGroups.GetGroup(_anchor.CubeGrid, GridLinkTypeEnum.Mechanical, _grids);
+            MyAPIGateway.GridGroups.GetGroup(home, GridLinkTypeEnum.Mechanical, _grids);
             Watch(_grids);
 
             for (int i = 0; i < _grids.Count; i++)
@@ -523,13 +528,40 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>The grid the construct is found from: the anchor's, or where the anchor is gone, one the construct had that is still there.</summary>
+        /// <remarks>
+        /// The anchor goes when the programmable block holding the automation is destroyed, and the construct is then found
+        /// again from what is left of it, so another programmable block can take the automation over. See
+        /// <see cref="SprocketUnit" />.
+        /// </remarks>
+        IMyCubeGrid Home()
+        {
+            if (_anchor != null && !_anchor.Closed && _anchor.CubeGrid != null && !_anchor.CubeGrid.Closed)
+                return _anchor.CubeGrid;
+
+            for (var i = 0; i < _watched.Count; i++)
+            {
+                if (!_watched[i].Closed)
+                    return _watched[i];
+            }
+
+            return null;
+        }
+
+        /// <summary>Anchors the construct on <paramref name="anchor" />, the programmable block that holds the automation from here on.</summary>
+        public void Anchor(IMyTerminalBlock anchor)
+        {
+            _anchor = anchor;
+            _stale = true;
+        }
+
         /// <summary>Listens to whatever grids are currently part of this construct, and nothing else.</summary>
         void Watch(List<IMyCubeGrid> grids)
         {
             for (int i = 0; i < _watched.Count; i++)
             {
                 _watched[i].OnBlockAdded -= OnBlocksChanged;
-                _watched[i].OnBlockRemoved -= OnBlocksChanged;
+                _watched[i].OnBlockRemoved -= OnBlockRemoved;
             }
 
             _watched.Clear();
@@ -537,7 +569,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (int i = 0; i < grids.Count; i++)
             {
                 grids[i].OnBlockAdded += OnBlocksChanged;
-                grids[i].OnBlockRemoved += OnBlocksChanged;
+                grids[i].OnBlockRemoved += OnBlockRemoved;
                 _watched.Add(grids[i]);
             }
         }
@@ -545,6 +577,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         void OnBlocksChanged(IMySlimBlock block)
         {
             _stale = true;
+        }
+
+        void OnBlockRemoved(IMySlimBlock block)
+        {
+            _stale = true;
+            if (block.FatBlock != null && block.FatBlock == _anchor && AnchorRemoved != null)
+                AnchorRemoved();
         }
 
         /// <summary>

@@ -99,6 +99,9 @@ abstract class Fitting
 
     public IMyCubeGrid Grid { get; set; }
 
+    /// <summary>Whether the block has been ground off, which closes it as the game closes a block it removes.</summary>
+    public bool Closed { get; set; }
+
     /// <summary>Where the block stands on its grid, which the grid gives it as it is welded where nothing set one.</summary>
     public Vector3I? Cell { get; set; }
 
@@ -144,6 +147,7 @@ abstract class Fitting
 
         return stand
             .Gives("EntityId", () => Id)
+            .Gives("Closed", () => Closed)
             .Gives("CustomName", () => Name)
             .Takes("CustomName", value => Name = (string)value)
             .Gives("DisplayNameText", () => Name)

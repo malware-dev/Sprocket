@@ -93,6 +93,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             }
         };
 
+        /// <summary>A question hanging under the control that raised it, small and quiet above its answers.</summary>
+        public static readonly RichTextStyle MenuQuestion = new RichTextStyle(SlotDescription);
+
         /// <summary>A formatting example as it reads, beside the marks that make it.</summary>
         public static readonly RichTextStyle Example = new RichTextStyle(Description)
         {
@@ -414,7 +417,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 WordPadding = new Thickness(8f, 4f),
                 Padding = new Thickness(4f)
             },
-            Hot = { Edge = Palette.ControlEdgeHot }
+            Hot = { Edge = Palette.ControlEdgeHot },
+            Disabled = { Color = Palette.Dim, Thumb = Palette.Dim, Background = Palette.Well, OffTrack = Palette.Well }
         };
 
         /// <summary>The game's button: a panel with a hairline round it, lifted under the pointer, lit while pressed, and its words dimmed while it cannot be used.</summary>

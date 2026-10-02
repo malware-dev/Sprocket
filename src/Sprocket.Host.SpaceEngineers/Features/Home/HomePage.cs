@@ -134,7 +134,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         }
 
         /// <summary>Gives a row the switch of one of the logic systems made from a blueprint, which stops that one and nothing else.</summary>
-        /// <remarks>Shown off while the blueprint is off, whatever its own switch holds, and switching it on then asks about the blueprint.</remarks>
+        /// <remarks>It shows its own setting, and cannot be pressed while the blueprint is off - see <see cref="Live(StatusRow, AutomationSystem, SystemInstance, bool, bool, Texts)" />.</remarks>
         public void Switched(StatusRow row, AutomationSystem system, SystemInstance instance)
         {
             if (instance == null)
@@ -142,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             row.Flips = Editor.Act(Cmd.EnableInstance, delegate
             {
-                Editor.SwitchInstance(system, instance, !(system.Enabled && instance.Enabled));
+                Editor.SwitchInstance(system, instance, !instance.Enabled);
             });
         }
 
@@ -161,7 +161,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 recount, shown, texts);
         }
 
-        /// <summary>Brings a row up to what its logic system is doing now, its switch showing <paramref name="on" /> and why Sprocket switched it off where it did.</summary>
+        /// <summary>Brings a row up to what its logic system is doing now, <paramref name="on" /> saying whether it may run, and why Sprocket switched it off where it did.</summary>
         void Live(StatusRow row, AutomationSystem system, SystemInstance instance, bool on, Halt halt, bool recount, bool shown,
             Texts texts)
         {
@@ -183,9 +183,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                     row.Parked = stopped.Length > 0;
                 }
 
+                // An installation's switch shows its own setting, and waits for the blueprint's while that is off, so
+                // switching the blueprint back on starts exactly the ones that were on. A plain system's is the system's.
+                var installed = system.IsBlueprint;
+                var own = installed ? instance.Enabled : on;
+                var held = installed && !system.Enabled ? texts.RowSwitchBlueprintFirst : null;
                 var going = SystemSummary.IsRunning(system, Editor.Runner, instance);
-                changed |= row.SwitchIsOn != on || row.Running != going;
-                row.SwitchIsOn = on;
+                changed |= row.SwitchIsOn != own || row.SwitchLocked != held || row.Running != going;
+                row.SwitchIsOn = own;
+                row.SwitchLocked = held;
                 row.Running = going;
                 row.Status = SystemSummary.RunningText(texts, going);
             }

@@ -47,6 +47,7 @@ sealed class Grid
             .Gives("CustomName", () => called)
             .Takes("CustomName", value => called = (string)value)
             .Gives("DisplayName", () => called)
+            .Gives("Closed", () => false)
             .Does("GetBlocks", Blocks)
             .Answers("GetCubeBlock", invocation => At((Vector3I)invocation.Arguments[0]))
             .Answers("add_OnBlockAdded", invocation => Listen(ref _added, invocation, true))
@@ -87,6 +88,8 @@ sealed class Grid
     {
         if (!_fitted.Remove(fitting))
             return;
+
+        fitting.Closed = true;
 
         IMySlimBlock slim = _slim[fitting];
         _slim.Remove(fitting);

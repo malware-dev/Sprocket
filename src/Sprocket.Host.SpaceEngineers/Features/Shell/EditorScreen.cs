@@ -29,6 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         ICommand _flip;
         bool _switchIsOn;
         string _switchAbout;
+        bool _switchLocked;
         bool _running;
         ICommand _runs;
         ICommand _stops;
@@ -134,6 +135,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _switchAbout; }
             set { Set(ref _switchAbout, value); }
+        }
+
+        /// <summary>Whether the switch cannot be pressed now, which it shows dimmed with <see cref="SwitchAbout" /> saying why.</summary>
+        public bool SwitchLocked
+        {
+            get { return _switchLocked; }
+            set { Set(ref _switchLocked, value); }
         }
 
         /// <summary>Whether the subject is running now, which turns the run mark into a stop.</summary>

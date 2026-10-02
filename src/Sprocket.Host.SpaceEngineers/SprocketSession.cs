@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Sandbox.ModAPI;
+using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Network;
@@ -37,6 +38,10 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();
 
+        readonly Dictionary<long, long> _moved = new Dictionary<long, long>();
+
+        readonly List<KeyValuePair<long, SprocketUnit>> _saving = new List<KeyValuePair<long, SprocketUnit>>();
+
         readonly Rota _rota = new Rota();
 
         SprocketScreen _screen;
@@ -51,6 +56,8 @@ namespace Sprocket.Host.SpaceEngineers
         SprocketUnit _copy;
 
         long _copyOf;
+
+        long _asked;
 
         readonly Dictionary<long, Habits> _habits = new Dictionary<long, Habits>();
 
@@ -84,6 +91,10 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>What the mod says, in the player's language, or null before the session has loaded.</summary>
         /// <remarks>Static for the reason <see cref="_current" /> is: a block's own component reaches the session only through statics, and it registers the terminal button and toolbar action in these words.</remarks>
         public static Texts Texts => _current == null ? null : _current._texts;
+
+        /// <summary>Whether the player asked for the developer tools, read once a world has loaded.</summary>
+        /// <remarks>Static for the reason <see cref="Texts" /> is: a block's own component reads it as it makes the terminal controls.</remarks>
+        public static bool DeveloperMode => _current != null && _current.Asked.DeveloperMode;
 
         /// <summary>
         /// The unit a block carries, or null. Never creates one.
@@ -206,15 +217,29 @@ namespace Sprocket.Host.SpaceEngineers
                 _copy.Reword();
         }
 
-        /// <summary>The Sprocket a programmable block carries, by entity id, made where it has none; or null.</summary>
-        /// <remarks>On the server, for a client's claim, so only a programmable block is ever taken on.</remarks>
+        /// <summary>The Sprocket of the construct a programmable block is on, by entity id, made where it has none; or null.</summary>
+        /// <remarks>
+        /// On the server, for a client's claim, so only a programmable block is ever taken on. An id the automation has
+        /// moved on from is followed to the block it moved to, so a client that was lent it goes on reaching it.
+        /// </remarks>
         SprocketUnit Found(long id)
         {
             var block = MyAPIGateway.Entities == null
                 ? null
-                : MyAPIGateway.Entities.GetEntityById(id) as IMyProgrammableBlock;
+                : MyAPIGateway.Entities.GetEntityById(Key(id)) as IMyProgrammableBlock;
 
             return block == null ? null : Adopt(block);
+        }
+
+        /// <summary>The id the automation once kept under <paramref name="id" /> is kept under now.</summary>
+        /// <remarks>Leases and a client's copy keep the id they were given, so what they send is followed through every move since.</remarks>
+        long Key(long id)
+        {
+            long next;
+            while (_moved.TryGetValue(id, out next))
+                id = next;
+
+            return id;
         }
 
         /// <summary>
@@ -261,7 +286,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _handover.Wire(id, panel);
             };
 
-            Show(block, copy, delegate
+            Show(Opened(block), copy, delegate
             {
                 // What changed since the last comparison goes before the Sprocket is handed back,
                 // because a change arriving from somebody who no longer holds it is not taken.
@@ -283,6 +308,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         void Changed(long id, string program, string switches)
         {
+            id = Key(id);
             SprocketUnit was;
             if (!_units.TryGetValue(id, out was))
             {
@@ -299,8 +325,10 @@ namespace Sprocket.Host.SpaceEngineers
             }
 
             _units[id] = rebuilt;
+            rebuilt.HeroRemoved += Removed;
             was.Dispose();
             rebuilt.Persist();
+            File(id, rebuilt);
             Spread(rebuilt);
             Told.Say(was.Block.CustomName + " was built again from the change, and saved");
         }
@@ -388,12 +416,19 @@ namespace Sprocket.Host.SpaceEngineers
             _copy = copy;
             _copyOf = id;
 
-            Show(block, copy, delegate
+            Show(Opened(block), copy, delegate
             {
                 copy.Dispose();
                 if (_copy == copy)
                     _copy = null;
             });
+        }
+
+        /// <summary>The programmable block this client asked to open, where it is still here; otherwise <paramref name="lent" />, the one the server lent.</summary>
+        IMyTerminalBlock Opened(IMyTerminalBlock lent)
+        {
+            var asked = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(_asked) as IMyTerminalBlock;
+            return asked ?? lent;
         }
 
         /// <summary>Says something to the player in a box over whatever screen is open.</summary>
@@ -436,15 +471,96 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         static bool IsServer => MyAPIGateway.Multiplayer == null || MyAPIGateway.Multiplayer.IsServer;
 
+        /// <summary>The Sprocket of the construct <paramref name="block" /> is on, made with it as the hero where the construct has none.</summary>
+        /// <remarks>
+        /// A construct has one Sprocket, so a programmable block holding a program of its own on a construct that already
+        /// has one is not taken on; it is logged, and its program is left where it is.
+        /// </remarks>
         SprocketUnit UnitFor(IMyTerminalBlock block)
+        {
+            SprocketUnit unit = UnitOn(block);
+            if (unit != null)
+            {
+                if (unit.Block != block && SprocketUnit.HasProgram(block))
+                {
+                    Told.Say(block.CustomName + " holds a program on a construct whose automation " + unit.Block.CustomName
+                        + " keeps; it was not taken on");
+                }
+
+                return unit;
+            }
+
+            unit = new SprocketUnit(block, Asked, _rota, _texts);
+            unit.HeroRemoved += Removed;
+            _units.Add(block.EntityId, unit);
+            return unit;
+        }
+
+        /// <summary>A Sprocket's hero removed from its construct, answered once the game is back on its own thread.</summary>
+        /// <remarks>
+        /// Raised inside the grid's own event, while the grid is still changing; the game's invoke on the game thread runs the
+        /// move after it has finished, so nothing of Sprocket's waits on a tick for it.
+        /// </remarks>
+        void Removed(SprocketUnit unit)
+        {
+            if (MyAPIGateway.Utilities != null)
+                MyAPIGateway.Utilities.InvokeOnGameThread(delegate { Rehome(unit); });
+        }
+
+        /// <summary>Moves a Sprocket into another programmable block on its construct, where it is still this session's.</summary>
+        void Rehome(SprocketUnit unit)
+        {
+            long was = unit.Block.EntityId;
+            SprocketUnit held;
+            if (!_units.TryGetValue(was, out held) || held != unit)
+                return;
+
+            unit.Rehome();
+            File(was, unit);
+        }
+
+        /// <summary>Files a Sprocket kept under <paramref name="was" /> under the block that holds it now, or lets it go where it is lost.</summary>
+        /// <remarks>
+        /// A moved Sprocket is told to every client, so their copies of the construct keep the program in the block that holds
+        /// it, and the id it moved from is remembered for the leases and copies still holding it.
+        /// </remarks>
+        void File(long was, SprocketUnit unit)
+        {
+            if (unit.Lost)
+            {
+                _units.Remove(was);
+                if (_shown == unit && _screen != null)
+                    _screen.CloseNow();
+
+                unit.Dispose();
+                return;
+            }
+
+            long now = unit.Block.EntityId;
+            if (now == was)
+                return;
+
+            _units.Remove(was);
+            _units[now] = unit;
+            _moved[was] = now;
+            Spread(unit);
+        }
+
+        /// <summary>The Sprocket of the construct <paramref name="block" /> is on, or null where it has none.</summary>
+        /// <remarks>One lookup per Sprocket in the world, asked when a block is opened or comes alive with a program, never on a tick.</remarks>
+        SprocketUnit UnitOn(IMyTerminalBlock block)
         {
             SprocketUnit unit;
             if (_units.TryGetValue(block.EntityId, out unit))
                 return unit;
 
-            unit = new SprocketUnit(block, Asked, _rota, _texts);
-            _units.Add(block.EntityId, unit);
-            return unit;
+            foreach (KeyValuePair<long, SprocketUnit> each in _units)
+            {
+                if (each.Value.World.FindEntity(block.EntityId) != null)
+                    return each.Value;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -467,6 +583,8 @@ namespace Sprocket.Host.SpaceEngineers
             var name = multiplayer == null ? "" : multiplayer.MyName;
             if (!IsServer)
             {
+                // The server answers with the block that keeps the automation; the editor is still opened from this one.
+                _current._asked = block.EntityId;
                 _current._handover.Ask(block.EntityId, name);
                 return;
             }
@@ -476,7 +594,7 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
 
             var id = multiplayer == null ? 0UL : multiplayer.MyId;
-            long lent = block.EntityId;
+            long lent = unit.Block.EntityId;
             Handover handover = _current._handover;
 
             string holder;
@@ -503,7 +621,7 @@ namespace Sprocket.Host.SpaceEngineers
                 if (_screen != null)
                     _screen.CloseNow();
 
-                _screen = new SprocketScreen(unit, closed);
+                _screen = new SprocketScreen(unit, block, closed);
                 _open = block.EntityId;
                 _shown = unit;
             }
@@ -569,20 +687,32 @@ namespace Sprocket.Host.SpaceEngineers
             return false;
         }
 
+
+
         /// <summary>
-        /// Writes every program back to its block before the world is written out.
+        /// Writes every program into its hero as the world saves, before the entities are written out.
         /// </summary>
         /// <remarks>
-        /// The screen already does this as it closes, which covers the ordinary way somebody finishes. This
-        /// covers saving with the editor still open, and costs a string per Sprocket.
+        /// The game asks for a session component's object builder before it writes the entities, and runs its
+        /// <c>SaveData</c> after, so this is the last moment a block's storage can still reach this save. The screen also
+        /// writes as it closes; this covers saving with the editor open, and costs a string per Sprocket.
         /// </remarks>
-        public override void SaveData()
+        public override MyObjectBuilder_SessionComponent GetObjectBuilder()
         {
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
+            // From a list of its own, because writing a Sprocket finds its hero first, and one that has moved is filed again.
+            _saving.Clear();
+            _saving.AddRange(_units);
+            for (var i = 0; i < _saving.Count; i++)
             {
-                unit.Value.Persist();
-                Spread(unit.Value);
+                SprocketUnit unit = _saving[i].Value;
+                unit.Persist();
+                File(_saving[i].Key, unit);
+                if (!unit.Lost)
+                    Spread(unit);
             }
+
+            _saving.Clear();
+            return base.GetObjectBuilder();
         }
 
         protected override void UnloadData()

@@ -136,6 +136,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>The symbol its light is drawn as, or null for the round light every row has.</summary>
         public string Mark { get; set; }
 
+        /// <summary>The symbol its bin is drawn as, or null for the bin: a minus where the row is taken off the list rather than destroyed.</summary>
+        public string BinMark { get; set; }
+
         /// <summary>What it is called.</summary>
         public string Summary { get; set; }
 
@@ -186,6 +189,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Why it cannot be deleted now, said on its quiet bin; empty where nothing stands in the way.</summary>
         public string Locked { get; set; }
+
+        /// <summary>Why its switch cannot be pressed now, said on the switch, which shows its state dimmed; empty where nothing stands in the way.</summary>
+        public string SwitchLocked { get; set; }
+
+        /// <summary>What pressing its switch does, said on it, where a row says more than switching itself; null for the plain words.</summary>
+        public string SwitchAbout { get; set; }
 
         /// <summary>What its button says.</summary>
         public string ButtonText { get; set; }
@@ -291,11 +300,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _below.Tint = quietly ? Palette.Notice : Palette.Problem;
 
             var switches = Flips != null;
+            var held = !string.IsNullOrEmpty(SwitchLocked);
             _switch.IsVisible = switches;
             _switch.IsOn = SwitchIsOn;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
-            _flips.CanExecute = switches;
-            _switch.Tip = Tip.For(_switch.Tip, switches ? Switching(texts, SwitchGovernsAll, SwitchIsOn) : null);
+            _flips.CanExecute = switches && !held;
+            _switch.Tip = Tip.For(_switch.Tip,
+                !switches ? null : held ? SwitchLocked : SwitchAbout ?? Switching(texts, SwitchGovernsAll, SwitchIsOn));
 
             var copies = Copies != null;
             _duplicate.IsVisible = copies;
@@ -314,6 +325,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var bins = Deletes != null;
             var locked = !string.IsNullOrEmpty(Locked);
             _delete.IsVisible = bins || locked;
+            _delete.Symbol = BinMark ?? Symbols.Delete;
             _bins.CanExecute = bins;
             _delete.Tip = Tip.For(_delete.Tip, bins ? DeleteText : locked ? Locked : null);
         }

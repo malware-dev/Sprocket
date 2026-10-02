@@ -28,6 +28,8 @@ sealed class Simulation
 
     readonly Rota _rota = new Rota();
 
+    bool _rehoming;
+
     readonly Texts _texts = new Texts();
 
     readonly int _saidBefore;
@@ -99,6 +101,10 @@ sealed class Simulation
         // The harness is always drawing the screen, which is what the unit ticks its editor for.
         _unit.Showing = true;
 
+        // Answered on the next tick, which is where the game's invoke on the game thread lands: after the grid that
+        // removed the hero has finished changing.
+        _unit.HeroRemoved += delegate { _rehoming = true; };
+
         // A slot used invokes what it holds, and what that means is the unit's to say - which is
         // the game's arrangement exactly: the slot carries a key and Sprocket resolves it.
         Connect();
@@ -155,8 +161,15 @@ sealed class Simulation
         // nobody hears, which looks exactly like Sprocket failing to claim the slot.
         Connect();
 
+        if (_rehoming)
+        {
+            _rehoming = false;
+            _unit.Rehome();
+        }
+
         _rig.Tick();
-        _unit.Tick(_frame);
+        if (!_unit.Lost)
+            _unit.Tick(_frame);
 
         // After the unit, as the session does it, so its bindings are current when its sequences run.
         _rota.Run(_frame);
@@ -175,7 +188,7 @@ sealed class Simulation
     /// </remarks>
     void Fire(long block, string key)
     {
-        if (block == _rig.Sprocket.Block.EntityId)
+        if (block == _unit.Block.EntityId)
             _unit.Fire(key);
     }
 

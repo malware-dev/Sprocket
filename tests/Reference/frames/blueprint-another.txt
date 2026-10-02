@@ -18,17 +18,16 @@ on screen     Airlock 2 made from Airlock
 011  Text       at {X:571.28 Y:53.39666} scale 1.111  #DCF5FDFF  "Airlock"
 012  Text       at {X:655.9867 Y:53.39666} scale 1.111  #A2C3CDFF  "blueprint"
 013  ClearClip  
-014  Sprite     Sprocket_Fill         {X:1527 Y:57 W:69 H:32}  #5B737BFF
-015  Sprite     Sprocket_Fill         {X:1531 Y:61 W:61 H:24}  #20272DFF
-016  Sprite     Sprocket_Fill         {X:1531 Y:61 W:24 H:24}  #DCF5FDFF
-017  Text       at {X:1562.603 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
-018  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
-019  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
-020  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-021  SetClip    {X:256 Y:118 W:1408 H:902}
-022  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "SLOTS"
-023  Text       at {X:276 Y:171.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
-024  Sprite     Sprocket_Fill         {X:409 Y:166 W:45 H:40}  #374851FF
-025  Sprite     Sprocket_Fill         {X:409 Y:204 W:45 H:2}  #8EBCCFFF
-026  Text       at {X:425.0367 Y:171.2255} scale 0.833  #DCF5FDFF  "…"
-027  ClearClip  
+014  Sprite     Sprocket_Fill         {X:1527 Y:57 W:69 H:32}  #20272DFF
+015  Sprite     Sprocket_Fill         {X:1567 Y:61 W:24 H:24}  #5F7278FF
+016  Text       at {X:1539.977 Y:63.05432} scale 0.556  #5F7278FF  "ON"
+017  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
+018  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
+019  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+020  SetClip    {X:256 Y:118 W:1408 H:902}
+021  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "SLOTS"
+022  Text       at {X:276 Y:171.2255} scale 0.833  #DCF5FDFF  "Airlock Button"
+023  Sprite     Sprocket_Fill         {X:409 Y:166 W:45 H:40}  #374851FF
+024  Sprite     Sprocket_Fill         {X:409 Y:204 W:45 H:2}  #8EBCCFFF
+025  Text       at {X:425.0367 Y:171.2255} scale 0.833  #DCF5FDFF  "…"
+026  ClearClip  
