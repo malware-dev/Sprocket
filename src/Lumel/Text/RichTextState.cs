@@ -37,6 +37,9 @@ namespace Lumel.Text
         /// <summary>How far a list item's words stand in from its mark, or null to leave it to the layers beneath.</summary>
         public float? Indent { get; set; }
 
+        /// <summary>Where the lines sit across the room, or null to leave it to the layers beneath.</summary>
+        public Alignment? Alignment { get; set; }
+
         /// <inheritdoc />
         public override void Neutral(Element element)
         {
@@ -75,6 +78,9 @@ namespace Lumel.Text
 
             if (Indent.HasValue)
                 text.Indent = NeutralFontSize;
+
+            if (Alignment.HasValue)
+                text.Alignment = Lumel.Text.Alignment.Left;
         }
 
         /// <inheritdoc />
@@ -115,6 +121,9 @@ namespace Lumel.Text
 
             if (Indent.HasValue)
                 text.Indent = Indent.Value;
+
+            if (Alignment.HasValue)
+                text.Alignment = Alignment.Value;
         }
 
         /// <inheritdoc />
@@ -131,6 +140,7 @@ namespace Lumel.Text
             Heading3Size = null;
             BlockSpacing = null;
             Indent = null;
+            Alignment = null;
         }
 
         /// <inheritdoc />
@@ -170,6 +180,9 @@ namespace Lumel.Text
 
             if (!Indent.HasValue)
                 Indent = other.Indent;
+
+            if (!Alignment.HasValue)
+                Alignment = other.Alignment;
         }
     }
 }

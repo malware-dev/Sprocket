@@ -38,9 +38,13 @@ namespace Lumel.Text
         float _heading3 = 24f;
         float _spacing;
         float _indent = 24f;
+        Alignment _alignment;
+        bool _fit;
 
         bool _stale = true;
         float _laidOutFor = -1f;
+        float _laidOutHigh = -1f;
+        float _scale = 1f;
         Vector2 _laidOut;
 
         float _pieceX;
@@ -177,6 +181,35 @@ namespace Lumel.Text
             set { Resize(ref _indent, value); }
         }
 
+        /// <summary>Where every line sits across the room, and a table narrower than the room with it; a table's cells sit as their columns say.</summary>
+        /// <remarks>Lines set anywhere but the left take the whole width they are given, so that they have room to be set in.</remarks>
+        public Alignment Alignment
+        {
+            get { return _alignment; }
+            set
+            {
+                if (_alignment == value)
+                    return;
+
+                _alignment = value;
+                Relayout();
+            }
+        }
+
+        /// <summary>Whether the document, where it would run past the height it is given, shrinks as a whole until it fits; it never grows past its own sizes.</summary>
+        public bool Fit
+        {
+            get { return _fit; }
+            set
+            {
+                if (_fit == value)
+                    return;
+
+                _fit = value;
+                Relayout();
+            }
+        }
+
         /// <summary>The color of ordinary words, and of a numbered item's number.</summary>
         public Color Color { get; set; }
 
@@ -212,8 +245,8 @@ namespace Lumel.Text
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
-            if (_stale || _laidOutFor != available.X)
-                Lay(g, available.X);
+            if (_stale || _laidOutFor != available.X || _fit && _laidOutHigh != available.Y)
+                Lay(g, available.X, available.Y);
 
             return _laidOut;
         }
@@ -278,11 +311,46 @@ namespace Lumel.Text
             InvalidateMeasure();
         }
 
-        /// <summary>Breaks the document into lines no wider than <paramref name="width" />, and the lines into pieces that each draw in one call.</summary>
-        void Lay(IGraphics g, float width)
+        /// <summary>Lays the document out <paramref name="width" /> wide, and where it shrinks to fit, small enough to be no taller than <paramref name="height" />.</summary>
+        /// <remarks>
+        ///     Smaller words only ever fit more of themselves on a line, so the document laid out at the scale
+        ///     that makes its first height fit is certain to fit; four halvings between that and full size then
+        ///     find the largest that does. Each is a whole layout, and none of them happens unless the
+        ///     document, its sizes or its room change.
+        /// </remarks>
+        void Lay(IGraphics g, float width, float height)
         {
             _stale = false;
             _laidOutFor = width;
+            _laidOutHigh = height;
+            _scale = 1f;
+            Pass(g, width);
+
+            if (!_fit || height >= Unbounded || _laidOut.Y <= height || _laidOut.Y <= 0f)
+                return;
+
+            var fits = height / _laidOut.Y;
+            var over = 1f;
+            for (var i = 0; i < 4; i++)
+            {
+                _scale = (fits + over) * 0.5f;
+                Pass(g, width);
+                if (_laidOut.Y <= height)
+                    fits = _scale;
+                else
+                    over = _scale;
+            }
+
+            if (_scale == fits)
+                return;
+
+            _scale = fits;
+            Pass(g, width);
+        }
+
+        /// <summary>Breaks the document into lines no wider than <paramref name="width" />, every size taken at the current scale, and the lines into pieces that each draw in one call.</summary>
+        void Pass(IGraphics g, float width)
+        {
             _pieces.Clear();
             _marks.Clear();
 
@@ -295,17 +363,20 @@ namespace Lumel.Text
                 return;
             }
 
+            var body = _fontSize * _scale;
+            var indent = _indent * _scale;
+
             for (var b = 0; b < _document.Blocks.Count; b++)
             {
                 var block = _document.Blocks[b];
 
                 if (b > 0)
-                    y += _spacing;
+                    y += _spacing * _scale;
 
                 if (block.Kind == BlockKind.Rule)
                 {
-                    _marks.Add(new Mark { Where = new RectangleF(0f, y + _fontSize * 0.5f, 0f, 1f), Across = true });
-                    y += _fontSize;
+                    _marks.Add(new Mark { Where = new RectangleF(0f, y + body * 0.5f, 0f, 1f), Across = true });
+                    y += body;
                     continue;
                 }
 
@@ -315,24 +386,27 @@ namespace Lumel.Text
                     continue;
                 }
 
-                var size = block.Kind == BlockKind.Heading ? HeadingSize(block.Level) : _fontSize;
+                var size = block.Kind == BlockKind.Heading ? HeadingSize(block.Level) : body;
                 var start = 0f;
 
                 if (block.Kind == BlockKind.Bullet || block.Kind == BlockKind.Numbered)
                 {
-                    start = _indent;
+                    start = indent;
 
                     if (block.Kind == BlockKind.Bullet)
                     {
                         var side = size / 5f;
-                        _marks.Add(new Mark { Where = new RectangleF((_indent - side) * 0.5f, y + (size - side) * 0.5f, side, side) });
+                        _marks.Add(new Mark { Where = new RectangleF((indent - side) * 0.5f, y + (size - side) * 0.5f, side, side) });
                     }
                     else
                         _pieces.Add(new Piece { Text = block.Level + ".", At = new Vector2(0f, y), Font = _font, Size = size, Tone = Tone.Plain });
                 }
 
-                Flow(g, block, start, size, width, Alignment.Left, ref y, ref widest);
+                Flow(g, block, start, size, width, _alignment, ref y, ref widest);
             }
+
+            if (_alignment != Alignment.Left && width < Unbounded && widest < width)
+                widest = width;
 
             _laidOut = new Vector2(widest, y);
         }
@@ -342,23 +416,28 @@ namespace Lumel.Text
         ///     Each column is as wide as its widest cell on one line, a gap of one indent apart. Spare width is
         ///     shared among the starred columns by their stars; with none starred the table is only as wide as it
         ///     needs. A table too wide for its room takes the width back from its widest columns, whose cells then
-        ///     wrap. A heading row is drawn in the heading color, with a rule under it.
+        ///     wrap. A heading row is drawn in the heading color, with a rule under it. A table narrower than its
+        ///     room stands where <see cref="Alignment" /> says.
         /// </remarks>
         void Table(IGraphics g, Block table, float width, ref float y, ref float widest)
         {
             var count = table.Columns.Count;
-            var gap = _indent;
+            var gap = _indent * _scale;
             Widths(g, table, width, gap);
 
             var across = gap * (count - 1);
             for (var c = 0; c < count; c++)
                 across += _wides[c];
 
+            var left = 0f;
+            if (_alignment != Alignment.Left && width < Unbounded && across < width)
+                left = _alignment == Alignment.Center ? (width - across) * 0.5f : width - across;
+
             for (var r = 0; r < table.Blocks.Count; r++)
             {
                 var row = table.Blocks[r];
-                var bottom = y + _fontSize;
-                var x = 0f;
+                var bottom = y + _fontSize * _scale;
+                var x = left;
 
                 for (var c = 0; c < count && c < row.Blocks.Count; c++)
                 {
@@ -366,7 +445,7 @@ namespace Lumel.Text
                     var right = x + _wides[c];
                     var ignored = 0f;
 
-                    Flow(g, row.Blocks[c], x, _fontSize, right, table.Columns[c].Align, ref line, ref ignored);
+                    Flow(g, row.Blocks[c], x, _fontSize * _scale, right, table.Columns[c].Align, ref line, ref ignored);
                     if (line > bottom)
                         bottom = line;
 
@@ -377,13 +456,13 @@ namespace Lumel.Text
 
                 if (row.Level == 1)
                 {
-                    _marks.Add(new Mark { Where = new RectangleF(0f, y + gap * 0.25f, across, 1f) });
+                    _marks.Add(new Mark { Where = new RectangleF(left, y + gap * 0.25f, across, 1f) });
                     y += gap * 0.5f;
                 }
             }
 
-            if (across > widest)
-                widest = across;
+            if (left + across > widest)
+                widest = left + across;
         }
 
         /// <summary>Fills <see cref="_wides" /> with how wide each of a table's columns is laid out within <paramref name="width" />, <paramref name="gap" /> apart.</summary>
@@ -403,7 +482,7 @@ namespace Lumel.Text
                     var line = 0f;
                     var natural = 0f;
 
-                    Flow(g, row.Blocks[c], 0f, _fontSize, Unbounded, Alignment.Left, ref line, ref natural);
+                    Flow(g, row.Blocks[c], 0f, _fontSize * _scale, Unbounded, Alignment.Left, ref line, ref natural);
                     _pieces.RemoveRange(pieces, _pieces.Count - pieces);
 
                     if (natural > _wides[c])
@@ -430,7 +509,7 @@ namespace Lumel.Text
             }
 
             var over = across - width;
-            var least = _fontSize * 3f;
+            var least = _fontSize * _scale * 3f;
             while (over > 0.5f)
             {
                 var broadest = 0;
@@ -482,7 +561,7 @@ namespace Lumel.Text
                 var image = shown != null && images != null ? images.Find(shown.Picture.Name) : null;
                 if (image != null)
                 {
-                    var box = SizeOf(shown.Picture, image, size);
+                    var box = SizeOf(shown.Picture, image, size, _scale);
                     End(g, y, false, ref x, ref widest);
 
                     if (!empty && width < Unbounded && x + box.X > width)
@@ -563,11 +642,11 @@ namespace Lumel.Text
             y += tall;
         }
 
-        /// <summary>How big an image of <paramref name="picture" /> is drawn: as written, a side not written taken from <paramref name="image" />'s shape, and as tall as a line of <paramref name="size" /> where neither is written.</summary>
-        static Vector2 SizeOf(Picture picture, IImageSource image, float size)
+        /// <summary>How big an image of <paramref name="picture" /> is drawn: as written, a side not written taken from <paramref name="image" />'s shape, and as tall as a line of <paramref name="size" /> where neither is written; what is written is taken at <paramref name="scale" />.</summary>
+        static Vector2 SizeOf(Picture picture, IImageSource image, float size, float scale)
         {
-            var width = picture.Width;
-            var height = picture.Height;
+            var width = picture.Width * scale;
+            var height = picture.Height * scale;
 
             if (float.IsNaN(width) && float.IsNaN(height))
                 height = size;
@@ -670,7 +749,7 @@ namespace Lumel.Text
 
         float HeadingSize(int level)
         {
-            return level <= 1 ? _heading1 : level == 2 ? _heading2 : _heading3;
+            return (level <= 1 ? _heading1 : level == 2 ? _heading2 : _heading3) * _scale;
         }
 
         enum Tone

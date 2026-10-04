@@ -67,13 +67,13 @@ namespace Sprocket.Sim
             }
 
             // A markdown file drawn by the rich text element, in the game's font, for looking at what it can do:
-            // --rich <file.md> <picture.png> <width> [tip] [strong=RRGGBB] [emphasis=RRGGBB]
+            // --rich <file.md> <picture.png> <width> [tip] [strong=RRGGBB] [emphasis=RRGGBB] [align=left|center|right] [fit=<height>]
             if (args.Length > 3 && args[0] == "--rich")
             {
                 var wide = float.Parse(args[3], CultureInfo.InvariantCulture);
                 var tip = Array.IndexOf(args, "tip") > 3;
                 var size = RichShot.Save(args[2], File.ReadAllText(args[1]), wide, tip, Hex(args, "strong="),
-                    Hex(args, "emphasis="));
+                    Hex(args, "emphasis="), Aligned(args), Number(args, "fit="));
                 Console.WriteLine("wrote " + args[2] + "   " + size.X.ToString(CultureInfo.InvariantCulture) + "x"
                                   + size.Y.ToString(CultureInfo.InvariantCulture));
                 return;
@@ -187,6 +187,22 @@ namespace Sprocket.Sim
 
             var rgb = int.Parse(given.Substring(name.Length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
             return new VRageMath.Color((rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255);
+        }
+
+        /// <summary>The number an argument starting <paramref name="name" /> gives, or zero where none does.</summary>
+        static float Number(string[] args, string name)
+        {
+            var given = Array.Find(args, a => a.StartsWith(name, StringComparison.Ordinal));
+            return given == null ? 0f : float.Parse(given.Substring(name.Length), CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>The alignment an <c>align=</c> argument names, or left where none does.</summary>
+        static Lumel.Text.Alignment Aligned(string[] args)
+        {
+            var given = Array.Find(args, a => a.StartsWith("align=", StringComparison.Ordinal));
+            return given == null
+                ? Lumel.Text.Alignment.Left
+                : (Lumel.Text.Alignment)Enum.Parse(typeof(Lumel.Text.Alignment), given.Substring(6), true);
         }
 
         /// <summary>Whether a word begins a script step rather than naming a file.</summary>

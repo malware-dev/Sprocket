@@ -38,13 +38,19 @@ public static class RichShot
     };
 
     /// <summary>Writes <paramref name="markdown" />, laid out <paramref name="wide" /> across, to <paramref name="path" />, and answers how big the picture is.</summary>
-    /// <remarks>A strong or emphasis color given here is tried in place of the style's, for comparing one against another.</remarks>
-    public static Vector2 Save(string path, string markdown, float wide, bool tip, Color? strong, Color? emphasis)
+    /// <remarks>A strong or emphasis color given here is tried in place of the style's, for comparing one against another; the page is laid out as <paramref name="align" /> says, and shrinks to fit a room <paramref name="fit" /> tall where that is above zero.</remarks>
+    public static Vector2 Save(string path, string markdown, float wide, bool tip, Color? strong, Color? emphasis, Alignment align, float fit)
     {
-        var text = new RichText { Style = tip ? Styles.Tip : Page, Document = Markdown.Parse(markdown) };
+        var text = new RichText { Style = tip ? Styles.Tip : Page, Document = Markdown.Parse(markdown), Alignment = align };
 
         if (strong.HasValue)
             text.StrongColor = strong.Value;
+
+        if (fit > 0f)
+        {
+            text.Fit = true;
+            text.Placement = Fixed.Size(wide, fit);
+        }
 
         if (emphasis.HasValue)
             text.EmphasisColor = emphasis.Value;
