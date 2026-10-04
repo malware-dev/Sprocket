@@ -55,6 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Glyph _redo;
         readonly Switch _switch;
         readonly Button _done;
+        readonly Glyph _close;
         readonly Button _library;
         readonly Glyph _run;
         readonly Glyph _delete;
@@ -135,15 +136,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 {
                                     new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
                                     _title,
-                                    // Quietest first and Done last: the row stands against the right edge, so a control's place
-                                    // depends only on what stands to its right, and the last cannot be moved by anything.
+                                    // Quietest first, and Done or the close cross last: the row stands against the right edge, so a
+                                    // control's place depends only on what stands to its right, and the last cannot be moved by anything.
                                     new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
                                     new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),
                                     new Button { Style = Styles.Button, Command = _libraries }.As(out _library),
                                     new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f), Command = _deletes }.As(out _delete),
                                     new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
-                                    new Button { Style = Styles.Primary, Command = _dones }.As(out _done)
+                                    new Button { Style = Styles.Primary, Command = _dones }.As(out _done),
+                                    new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = new Relay(Back) }.As(out _close)
                                 }
                             },
                             new Label { Style = Styles.Detail }.As(out _subtitle)
@@ -628,7 +630,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var texts = _editor.Texts;
 
-            _back.Tip = Tip.For(_back.Tip, screen.CanGoBack ? texts.ChromeBack : texts.ChromeClose);
+            // The first screen has nowhere to go back to, so it closes, with the cross at the far right where a close button stands.
+            _back.IsVisible = screen.CanGoBack;
+            _back.Tip = Tip.For(_back.Tip, screen.CanGoBack ? texts.ChromeBack : null);
+            _close.IsVisible = !screen.CanGoBack;
+            _close.Tip = Tip.For(_close.Tip, screen.CanGoBack ? null : texts.ChromeClose);
 
             _undone.Set("action", screen.UndoText);
             _redone.Set("action", screen.RedoText);
