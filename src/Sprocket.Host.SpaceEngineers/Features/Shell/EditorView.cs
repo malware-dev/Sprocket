@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// hangs directly beneath it so that everything above the press stays exactly where the eye left it.
     /// </para>
     /// </remarks>
-    public sealed class EditorView
+    public sealed partial class EditorView
     {
         /// <summary>How wide one of the game's own screens is, as a share of the safe area.</summary>
         /// <remarks>
@@ -86,7 +86,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         EditorPage _shownPage;
         int _seen = -1;
-        int _wires;
         int _asked;
         bool _hanging;
         bool _wantsClose;
@@ -215,9 +214,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>How many times the chrome has written what the screen says onto its controls, for a test to hold still.</summary>
-        public int Wires => _wires;
-
         /// <summary>Why the name in hand cannot be given as it stands, or empty when it can or none is.</summary>
         /// <remarks>
         /// About the <b>edit in hand</b> and not about the model: walking away from a box somebody is being told to fill in
@@ -271,7 +267,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
 
             _seen = screen.Revision;
-            _wires++;
+            Wrote();
             Dress(screen);
         }
 
@@ -853,5 +849,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             return text == null ? "" : text.ToUpperInvariant();
         }
+
+        /// <summary>The chrome has just written what the screen says onto its controls.</summary>
+        /// <remarks>
+        /// Without a body in anything packed for the game, where the call compiles to nothing. <c>EditorView.debug.cs</c>
+        /// counts the writes, so a test can hold an idle screen to none.
+        /// </remarks>
+        partial void Wrote();
     }
 }

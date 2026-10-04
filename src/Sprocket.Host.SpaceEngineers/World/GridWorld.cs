@@ -72,12 +72,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public Values Values { get; } = new Values();
 
-        /// <summary>What this world knows about kinds of block, for whatever holds a block and no entity.</summary>
-        public BlockExtensions Extensions
-        {
-            get { return _extensions; }
-        }
-
         /// <summary>
         /// Bumped by <see cref="Rebuild" />, which is the only place the set changes, and rebuilt first where the grid said it changed.
         /// </summary>

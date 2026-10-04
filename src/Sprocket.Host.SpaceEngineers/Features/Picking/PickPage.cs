@@ -250,7 +250,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public PickStrip Strip => _strip;
 
         /// <summary>Whether anything here differs from what was chosen when it opened: the blocks, what is done to them, any or all, or the values.</summary>
-        public bool Moved
+        bool Moved
         {
             get
             {

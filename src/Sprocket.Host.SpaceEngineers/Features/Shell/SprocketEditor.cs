@@ -297,7 +297,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>The same, <paramref name="question" /> a template whose named slots take their words from <paramref name="arguments" />.</summary>
-        public void AskHere(string question, Arguments arguments)
+        void AskHere(string question, Arguments arguments)
         {
             _screen.Ask(question, arguments, true);
         }
@@ -1122,7 +1122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _structureDirty = true;
         }
 
-        public void ForgetSequence(Sequence sequence)
+        void ForgetSequence(Sequence sequence)
         {
             _sequenceHistory.Forget(sequence);
 
@@ -1254,7 +1254,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// does not check either: the check belongs where the way in is put on a screen, so there is one place to
         /// read rather than two that can disagree.
         /// </remarks>
-        public void ShowScript()
+        void ShowScript()
         {
             // Also the way to a program's text that would not read, which is mended there whether or not developer mode is on.
             // Offered from every screen including this one, where it is already lit. Pressing it there
@@ -1371,7 +1371,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Opens <paramref name="page" /> on something just made and given a name of its own, with that name in hand to be given.</summary>
         /// <remarks>A made-up name, "Sequence 3", is one somebody means to replace, so the box is open for it before anything else is pressed.</remarks>
-        public void PushNamed(EditorPage page)
+        void PushNamed(EditorPage page)
         {
             page.NameOnArrival = true;
             Push(page);
