@@ -20,17 +20,21 @@
   <!--
       The copy the mod loads, apart from the build output: a language server holds whatever generator it
       loaded open, so it loads this one. The copy is replaced only where the generator's own sources or
-      this project differ from those it was built from, recorded beside it. The built assembly is no guide:
-      the SDK's compiler and the one JetBrains' inspection builds with make different bytes from the same
-      sources. An ordinary build leaves the copy alone; a change to the generator itself is the one time it
-      is written, and the language server has to let go of it for that.
+      this project differ from those it was built from, recorded beside it. The built assembly is no guide,
+      and neither is everything compiled into it: the SDK stamps the current commit into its informational
+      version, so every commit changes its bytes. An ordinary build leaves the copy alone; a change to the
+      generator itself is the one time it is written, and the language server has to let go of it for that.
   -->
   <Target Name="CopyForLoading" AfterTargets="Build">
     <PropertyGroup>
       <GeneratorCopy>$(MSBuildThisFileDirectory)bin\Loaded\$(TargetFileName)</GeneratorCopy>
       <GeneratorStamp>$(MSBuildThisFileDirectory)bin\Loaded\sources.hash</GeneratorStamp>
     </PropertyGroup>
-    <GetFileHash Files="@(Compile->'%(FullPath)');$(MSBuildProjectFullPath)">
+    <ItemGroup>
+      <GeneratorSourceFile Include="$(MSBuildProjectDirectory)\**\*.cs"
+                           Exclude="$(MSBuildProjectDirectory)\obj\**;$(MSBuildProjectDirectory)\bin\**" />
+    </ItemGroup>
+    <GetFileHash Files="@(GeneratorSourceFile->'%(FullPath)');$(MSBuildProjectFullPath)">
       <Output TaskParameter="Items" ItemName="GeneratorSource" />
     </GetFileHash>
     <PropertyGroup>

@@ -1289,6 +1289,26 @@ Denne blir dens første installasjon.</value>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>Automatiseringen i denne blokken kan ikke redigeres.</value>
   </data>
+  <data name="Sprocket.Terminal.FitExtents" xml:space="preserve">
+    <value>Tilpass etter utstrekning</value>
+  </data>
+  <data name="Sprocket.Terminal.FitExtentsAbout" xml:space="preserve">
+    <value>Gi feltet størrelsen som dekker hver blokk i dette gridet.</value>
+  </data>
+  <data name="Sprocket.Terminal.FitInterior" xml:space="preserve">
+    <value>Tilpass etter lufttrykk</value>
+  </data>
+  <data name="Sprocket.Terminal.FitInteriorAbout" xml:space="preserve">
+    <value>Gi feltet størrelsen som dekker hvert trykksatte rom i dette gridet. Krever at trykksetting er slått på i verdens innstillinger.</value>
+  </data>
+  <data name="Sprocket.Terminal.FitNoRooms" xml:space="preserve">
+    <value>Dette gridet har ingen trykksatte rom, så feltet er som det var.</value>
+  </data>
+  <data name="Sprocket.Terminal.FitShort" xml:space="preserve">
+    <value>Feltet er så stort som denne generatoren tillater, og dekker likevel ikke alt: det trenger {needed}, og når {reached}.
+
+I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor langt det når.</value>
+  </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
     <value>Endret {time}</value>
   </data>

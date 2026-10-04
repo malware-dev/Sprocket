@@ -13,6 +13,7 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
+using Sprocket.Host.SpaceEngineers.Features.Gravity;
 
 namespace Sprocket.Host.SpaceEngineers
 {
@@ -49,6 +50,8 @@ namespace Sprocket.Host.SpaceEngineers
         bool _carries;
 
         readonly Shelf _shelf = new Shelf(new GlobalFiles(), Told.Say);
+
+        readonly FieldMarks _marks = new FieldMarks();
 
         readonly Rota _rota = new Rota();
 
@@ -99,6 +102,10 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>What the mod says, in the player's language, or null before the session has loaded.</summary>
         /// <remarks>Static for the reason <see cref="_current" /> is: a block's own component reaches the session only through statics, and it registers the terminal button and toolbar action in these words.</remarks>
         public static Texts Texts => _current == null ? null : _current._texts;
+
+        /// <summary>The field boxes a gravity generator's fit is showing, or null outside a session.</summary>
+        /// <remarks>Static for the reason <see cref="Texts" /> is: the gravity generator's buttons reach the session only through statics.</remarks>
+        public static FieldMarks Marks => _current == null ? null : _current._marks;
 
         /// <summary>Whether the player asked for the developer tools, read once a world has loaded.</summary>
         /// <remarks>Static for the reason <see cref="Texts" /> is: a block's own component reads it as it makes the terminal controls.</remarks>
@@ -167,6 +174,7 @@ namespace Sprocket.Host.SpaceEngineers
         public override void BeforeStart()
         {
             MyAPIGateway.TerminalControls.CustomControlGetter += SprocketControls.Arrange;
+            MyAPIGateway.TerminalControls.CustomControlGetter += FieldControls.Arrange;
 
             if (IsServer)
                 FindBackups();
@@ -686,6 +694,13 @@ namespace Sprocket.Host.SpaceEngineers
             _screen.Open();
         }
 
+        /// <summary>Draws the boxes a gravity generator's fit is showing, while there are any.</summary>
+        public override void Draw()
+        {
+            if (MyAPIGateway.Session != null)
+                _marks.Draw(MyAPIGateway.Session.ElapsedPlayTime);
+        }
+
         public override void UpdateAfterSimulation()
         {
             if (MyAPIGateway.Session == null)
@@ -792,7 +807,10 @@ namespace Sprocket.Host.SpaceEngineers
         protected override void UnloadData()
         {
             if (MyAPIGateway.TerminalControls != null)
+            {
                 MyAPIGateway.TerminalControls.CustomControlGetter -= SprocketControls.Arrange;
+                MyAPIGateway.TerminalControls.CustomControlGetter -= FieldControls.Arrange;
+            }
 
             if (_gameTexts != null && MyAPIGateway.Gui != null)
                 MyAPIGateway.Gui.GuiControlRemoved -= Closed;

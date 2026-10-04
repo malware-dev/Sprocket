@@ -1694,6 +1694,32 @@ This one becomes its first installation.</value>
     <value>This block's automation cannot be edited.</value>
     <comment>The game's message when the editor cannot open.</comment>
   </data>
+  <data name="Sprocket.Terminal.FitExtents" xml:space="preserve">
+    <value>Autofit by extents</value>
+    <comment>Button in a gravity generator's terminal that sizes its field to cover every block of its grid, and the title of the game's message about it.</comment>
+  </data>
+  <data name="Sprocket.Terminal.FitExtentsAbout" xml:space="preserve">
+    <value>Size the field to cover every block of this grid.</value>
+    <comment>Note on that button.</comment>
+  </data>
+  <data name="Sprocket.Terminal.FitInterior" xml:space="preserve">
+    <value>Autofit by air pressure</value>
+    <comment>Button in a gravity generator's terminal that sizes its field to cover every pressurized room of its grid, and the title of the game's message about it.</comment>
+  </data>
+  <data name="Sprocket.Terminal.FitInteriorAbout" xml:space="preserve">
+    <value>Size the field to cover every pressurized room of this grid. Needs pressurization on in the world's settings.</value>
+    <comment>Note on that button, which is greyed out where the world has pressurization off.</comment>
+  </data>
+  <data name="Sprocket.Terminal.FitNoRooms" xml:space="preserve">
+    <value>This grid has no pressurized rooms, so the field is left as it was.</value>
+    <comment>The game's message when the interior button finds nothing to cover.</comment>
+  </data>
+  <data name="Sprocket.Terminal.FitShort" xml:space="preserve">
+    <value>The field is as large as this generator allows, and still does not cover all of it: it needs {needed}, and reaches {reached}.
+
+For half a minute, a red box shows what it has to cover, and a white box how far it reaches.</value>
+    <comment>The game's message when the fitted field would be larger than the generator can make it. {needed} and {reached} are sizes, width by height by depth in metres.</comment>
+  </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
     <value>Changed {time}</value>
     <comment>Under a blueprint in the library that the player made. {time} is when the blueprint last changed.</comment>
