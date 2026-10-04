@@ -39,6 +39,9 @@ on screen     Sequence 1
 032  Text       at {X:404.7033 Y:163.2255} scale 0.833  #DCF5FDFF  "300 ticks"
 033  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
 034  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-035  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task…"
-036  Text       at {X:374.43 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait…"
-037  ClearClip  
+035  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task"
+036  Text       at {X:361.2067 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait"
+037  Text       at {X:451.1967 Y:219.2255} scale 0.833  #A2C3CDFF  "+ run"
+038  Text       at {X:535.1766 Y:219.2255} scale 0.833  #A2C3CDFF  "+ stop"
+039  Text       at {X:627.4133 Y:219.2255} scale 0.833  #A2C3CDFF  "+ if"
+040  ClearClip  

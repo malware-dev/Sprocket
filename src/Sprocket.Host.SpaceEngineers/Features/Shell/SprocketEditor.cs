@@ -60,6 +60,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _runner = runner;
             Texts = texts;
             Ago = new Ago(texts);
+
+            // What each system says as the editor finds it, so only what changes from here on is dated.
+            var systems = _program.Systems;
+            for (var i = 0; i < systems.Count; i++)
+                _said[systems[i].Identity] = ProgramText.Said(systems[i]);
+
+            _saidEdits = _program.Edits;
+            _program.Reshaped += delegate { _reshaped = true; };
+
             _stack.Add(new HomePage(this));
             Rebuild();
         }
@@ -186,6 +195,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public void Tick(int tick)
         {
+            Stamp();
             if (_structureDirty)
             {
                 Rebuild();
@@ -198,6 +208,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _runner.Look();
 
             Current.Refresh();
+
+            // Again after the page, which writes a box the keyboard has just left into the program.
+            Stamp();
 
             // The heading's words are made of things that can change without anything saying so: the
             // grid's own name, and the name of a block inside a sentence. Nothing in the game's own
@@ -773,6 +786,60 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly History<Sequence> _sequenceHistory = new History<Sequence>();
 
+        readonly Dictionary<Guid, string> _said = new Dictionary<Guid, string>();
+
+        readonly List<Guid> _gone = new List<Guid>();
+
+        int _saidEdits;
+
+        bool _reshaped;
+
+        /// <summary>
+        /// Dates each system whose words have changed since they were last read with the time now; a few comparisons where
+        /// nothing has, unless <paramref name="surely" /> asks for every system to be read.
+        /// </summary>
+        /// <remarks>
+        /// Asked on every tick, where the program saying it was edited, reshaped or given another system is what makes it
+        /// read anything; and surely at the end of every command and before the program or a blueprint is written out, so a
+        /// change made by a way that says nothing is dated by then. A system's words are read without its date, so
+        /// switching it, which is not something it says, dates nothing. Known by identity, so a program read again over this
+        /// one is compared with what it was. A system met for the first time is dated only where it has no date: one just
+        /// made.
+        /// </remarks>
+        public void Stamp(bool surely = false)
+        {
+            if (!surely && !_reshaped && _program.Edits == _saidEdits && _program.Systems.Count == _said.Count)
+                return;
+
+            _reshaped = false;
+            _saidEdits = _program.Edits;
+
+            var now = DateTime.UtcNow;
+            var systems = _program.Systems;
+            for (var i = 0; i < systems.Count; i++)
+            {
+                var said = ProgramText.Said(systems[i]);
+                string was;
+                if (_said.TryGetValue(systems[i].Identity, out was) ? was != said : !systems[i].Changed.HasValue)
+                    systems[i].Changed = now;
+
+                _said[systems[i].Identity] = said;
+            }
+
+            if (_said.Count == systems.Count)
+                return;
+
+            _gone.Clear();
+            foreach (var identity in _said.Keys)
+            {
+                if (_program.FindSystem(identity) == null)
+                    _gone.Add(identity);
+            }
+
+            for (var i = 0; i < _gone.Count; i++)
+                _said.Remove(_gone[i]);
+        }
+
         readonly History<AutomationSystem> _systemHistory = new History<AutomationSystem>();
 
         /// <summary>Makes a change to a sequence and remembers how to take it back.</summary>
@@ -1014,6 +1081,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         void Settle()
         {
+            // Every system read, since a command is somebody's press and some of what they change, a name for one, says
+            // nothing to the counts the tick goes by.
+            Stamp(true);
             if (_structureDirty)
                 Rebuild();
 
@@ -1936,11 +2006,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 var steps = sequences[q].Steps;
                 for (var s = 0; s < steps.Count; s++)
-                {
-                    var act = steps[s] as Act;
-                    if (act != null)
-                        Slotted(act.Targets, slots);
-                }
+                    Slotted(steps[s].Targets, slots);
             }
 
             _program.Edited();
@@ -2300,6 +2366,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Puts the blueprint <paramref name="system" /> in the library as it is now.</summary>
         internal void Shelve(AutomationSystem system)
         {
+            Stamp(true);
             Shelf.Keep(system, DateTime.UtcNow);
             Invalidate();
         }
@@ -2363,6 +2430,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var copy = trial.Systems[0];
             copy.Identity = Guid.NewGuid();
+            copy.Changed = DateTime.UtcNow;
             copy.Name = Numbered(copy.Name);
             if (_author.Length > 0)
                 copy.Namespace = _author;
@@ -2426,6 +2494,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (system.Instances.Count > 0 || !Stored(system))
                 return;
 
+            Stamp(true);
             if (!Shelf.Holds(system))
                 Shelf.Keep(system, DateTime.UtcNow);
 
@@ -2522,9 +2591,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Another sequence saying what this one says, opened for whatever is to be different.
         /// </summary>
         /// <remarks>
-        /// Named like any other new sequence rather than after the one it came from: a name is what
-        /// makes a sequence callable, so a copied name would either collide or quietly take over what
-        /// called the original.
+        /// Named like any other new sequence rather than after the one it came from: a script may run a
+        /// sequence by its name, so a copied name would leave that name meaning two sequences.
         /// </remarks>
         internal void Duplicate(Sequence sequence)
         {

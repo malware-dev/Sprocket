@@ -50,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         int _all = -1;
         int _due = -1;
+        int _since = -1;
         int _tick;
         Bindings _bindings;
 
@@ -105,6 +106,34 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
+        /// <summary>What it read of each block at its last look, by the name the program gives the block; for a save.</summary>
+        public IEnumerable<KeyValuePair<string, bool>> Signals => _signals;
+
+        /// <summary>Whether every block was there at the last look of a <c>when all</c>: 1 or 0, or -1 before its first look.</summary>
+        public int All => _all;
+
+        /// <summary>Ticks since an <c>every</c> last fell due, or -1 before its first look.</summary>
+        public int Since => _due < 0 ? -1 : _owner.CurrentTick - _due;
+
+        /// <summary>Takes back what a save says it read of <paramref name="block" /> at its last look before the world was written.</summary>
+        public void Recall(string block, bool was)
+        {
+            _signals[block] = was;
+        }
+
+        /// <summary>Takes back whether every block was there at the last look before the world was written.</summary>
+        public void RecallAll(bool all)
+        {
+            _all = all ? 1 : 0;
+        }
+
+        /// <summary>Takes back how long it had been since an <c>every</c> last fell due when the world was written.</summary>
+        /// <remarks>Counted on from the first look, since the world's clock begins again at a load.</remarks>
+        public void RecallSince(int ticks)
+        {
+            _since = ticks;
+        }
+
         /// <summary>Takes it off the rota for good, when its trigger or its instance no longer exists.</summary>
         public void Retire()
         {
@@ -134,6 +163,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var cadence = _announced && Cadence < Backstop ? Backstop : Cadence;
             if (cadence == Rota.Each || cadence == Rota.Ten || cadence == Rota.Hundred)
                 _rota.Every(_shift, cadence);
+            else if (_trigger is EveryTrigger && _due >= 0)
+                // When it falls due rather than a whole cadence on, which is the same tick except after a load, where it
+                // takes up the beat it had.
+                _rota.At(_shift, Math.Max(_tick + 1, _due + cadence));
             else
                 _rota.At(_shift, _tick + cadence);
         }
@@ -244,7 +277,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (definition == null)
                     continue;
 
-                var now = Reads(world, entity, definition.PropertyId);
+                var now = entity.Flag(world.Values, definition.PropertyId);
                 if (now)
                     anyTrue = true;
 
@@ -317,7 +350,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
 
                 var wanted = definition.Edge == Edge.Rising;
-                if (Reads(world, entity, definition.PropertyId) != wanted)
+                if (entity.Flag(world.Values, definition.PropertyId) != wanted)
                     all = false;
             }
 
@@ -340,6 +373,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool SampleEvery(EveryTrigger every)
         {
             var interval = every.IntervalTicks < 1 ? 1 : every.IntervalTicks;
+            if (_due < 0 && _since >= 0)
+            {
+                _due = _tick - _since;
+                _since = -1;
+            }
+
             if (_due < 0 || _tick < _due)
             {
                 _due = _tick;
@@ -353,22 +392,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // for every period it missed.
             _due = _tick - _due < 2 * interval ? _due + interval : _tick;
             return true;
-        }
-
-        /// <summary>
-        /// Whether a signal reads as true right now.
-        /// </summary>
-        /// <remarks>
-        /// A value does not carry its own kind, so reading one needs the world that made it. An event is declared against
-        /// a property whose reading is a flag in every case that matters, and anything else answers the same question - is
-        /// there anything there.
-        /// </remarks>
-        static bool Reads(GridWorld world, GridEntity entity, string propertyId)
-        {
-            var property = entity.Kind.FindProperty(propertyId);
-            var kind = property == null ? ValueKind.Flag : property.Kind;
-
-            return world.Values.Flag(kind, entity.GetValue(propertyId));
         }
 
         /// <summary>Keeps whether a block it watches is gone, telling the runner where that changed.</summary>

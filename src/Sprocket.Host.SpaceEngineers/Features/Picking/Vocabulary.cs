@@ -218,6 +218,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// is not the selection talking, it is the question: there is nothing to ask
         /// about a block that nothing can happen to.
         /// </remarks>
+        /// <summary>The blocks a test can read anything of: a state, or one of their values.</summary>
+        public static List<GridEntity> Testable(GridWorld world)
+        {
+            var result = new List<GridEntity>();
+            var entities = world.Entities;
+            for (var i = 0; i < entities.Count; i++)
+            {
+                if (Tests(entities[i].Kind))
+                    result.Add(entities[i]);
+            }
+
+            return result;
+        }
+
+        static bool Tests(EntityKind kind)
+        {
+            for (var i = 0; i < kind.Events.Count; i++)
+            {
+                if (kind.Events[i].IsState)
+                    return true;
+            }
+
+            for (var i = 0; i < kind.Actions.Count; i++)
+            {
+                if (kind.Actions[i].Sets)
+                    return true;
+            }
+
+            return false;
+        }
+
         public static List<GridEntity> Capable(GridWorld world, bool forEvents)
         {
             var result = new List<GridEntity>();

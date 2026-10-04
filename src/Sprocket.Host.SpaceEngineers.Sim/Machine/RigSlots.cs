@@ -113,6 +113,17 @@ sealed class RigSlots : ISlots
         return false;
     }
 
+    public bool Holds(IMyTerminalBlock block, string propertyId, Literal value)
+    {
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block == block)
+                return fitting.Holds(propertyId, value);
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// A made-up block's action or value, made ready the way the game's are: each value built as the
     /// type it is taken as, which the fitting keeps for a test to look at when it is given.

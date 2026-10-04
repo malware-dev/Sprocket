@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -21,6 +22,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     public static class StateText
     {
+        /// <summary>What ends the line of a run started by hand, which may run where its sequence is switched off.</summary>
+        /// <remarks>Persisted, and a phrase rather than a keyword, so it reserves no word in a script.</remarks>
+        const string ByHand = "by hand";
+
         /// <summary>
         /// What is switched off and what is running, as a document.
         /// </summary>
@@ -56,7 +61,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
 
                 if (runner != null)
+                {
                     Runs(pen, runner, system, identity);
+                    Watches(pen, runner, system, identity);
+                }
             }
 
             return pen.ToString();
@@ -75,9 +83,176 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var systems = program.Systems;
 
             for (var i = 0; i < systems.Count; i++)
+            {
                 Runs(pen, runner, systems[i], systems[i].Identity.ToString("D"));
+                Watches(pen, runner, systems[i], systems[i].Identity.ToString("D"));
+            }
 
             return pen.ToString();
+        }
+
+        /// <summary>
+        /// What each <c>when</c> and <c>every</c> remembers, one line per trigger on each one of its system.
+        /// </summary>
+        /// <remarks>
+        /// A <c>when</c> fires on a change, which needs what it read at its last look; without it, a door that opened while
+        /// the world was being written would be read as open all along. Written as what each block read, by the name the
+        /// program gives it, or as whether all of them were there:
+        /// <code>
+        /// when "3f2a…" trigger 1 'Inner Door' on 'Outer Door' off
+        /// when "3f2a…" instance 2 trigger 3 all on
+        /// every "3f2a…" trigger 2 wait 120t
+        /// </code>
+        /// An <c>every</c> is written as how long since it last fell due, so it keeps its beat rather than starting a whole
+        /// interval again. A trigger is counted by its place in its system, which reading the program keeps.
+        /// </remarks>
+        static void Watches(Pen pen, AutomationRunner runner, AutomationSystem system, string identity)
+        {
+            var uses = system.Uses;
+            var triggers = system.Triggers;
+
+            for (var t = 0; t < triggers.Count; t++)
+            {
+                var when = triggers[t] as WhenTrigger;
+                var every = triggers[t] as EveryTrigger;
+                if (when == null && every == null)
+                    continue;
+
+                for (var n = 0; n < uses.Count; n++)
+                {
+                    var poller = runner.Poller(triggers[t], uses[n]);
+                    if (poller == null)
+                        continue;
+
+                    if (every != null && poller.Since < 0)
+                        continue;
+
+                    if (when != null && when.RequiresAll && poller.All < 0)
+                        continue;
+
+                    if (when != null && !when.RequiresAll && !Any(poller.Signals))
+                        continue;
+
+                    pen.Start(every != null ? Keyword.Every : Keyword.When).Text(identity);
+                    if (system.IsBlueprint)
+                        pen.Says(Keyword.Instance).Whole(uses[n].Number);
+
+                    pen.Says(Keyword.Trigger).Whole(t + 1);
+
+                    if (every != null)
+                    {
+                        pen.Says(Keyword.Wait).Ticks(poller.Since);
+                    }
+                    else if (when.RequiresAll)
+                    {
+                        pen.Says(Keyword.All).Says(poller.All == 1 ? Keyword.On : Keyword.Off);
+                    }
+                    else
+                    {
+                        foreach (var signal in poller.Signals)
+                            pen.Word(signal.Key).Says(signal.Value ? Keyword.On : Keyword.Off);
+                    }
+
+                    pen.End();
+                }
+            }
+        }
+
+        static bool Any(IEnumerable<KeyValuePair<string, bool>> signals)
+        {
+            using (var each = signals.GetEnumerator())
+                return each.MoveNext();
+        }
+
+        /// <summary>
+        /// Gives one <c>when</c> or <c>every</c> back what it remembered when the save caught it.
+        /// </summary>
+        /// <remarks>
+        /// Dropped rather than reported where what it names has gone, or is no longer that kind of trigger, the same as a run:
+        /// a program edited between saving and loading leaves those behind. A malformed line is reported.
+        /// </remarks>
+        static void Watch(Statement line, Automation program, AutomationRunner runner, Trouble trouble)
+        {
+            Guid identity;
+            if (!Guid.TryParseExact(line.Text(0), "D", out identity))
+            {
+                trouble.Say(line, "expected the system's identity.");
+                return;
+            }
+
+            var instanced = line.Says(1, Keyword.Instance);
+            var at = instanced ? 3 : 1;
+            var instance = instanced ? Counted(line, 2) : 0;
+            var number = line.Says(at, Keyword.Trigger) ? Counted(line, at + 1) : 0;
+            if ((instanced && instance < 1) || number < 1)
+            {
+                trouble.Say(line, "a trigger's memory is written as its system, then its instance where it has one, and trigger with a number counted from 1.");
+                return;
+            }
+
+            Action<Poller> recall;
+            var rest = at + 2;
+            if (line.Key == Keyword.Every)
+            {
+                var ticks = line.ValueAt(rest + 1);
+                if (!line.Says(rest, Keyword.Wait) || ticks.Form != ValueForm.Duration || ticks.Whole < 0 || ticks.Whole > int.MaxValue)
+                {
+                    trouble.Say(line, "expected wait and a duration, like wait 120t.");
+                    return;
+                }
+
+                var since = (int)ticks.Whole;
+                recall = delegate(Poller poller) { poller.RecallSince(since); };
+            }
+            else if (line.Says(rest, Keyword.All))
+            {
+                if (!line.Says(rest + 1, Keyword.On) && !line.Says(rest + 1, Keyword.Off))
+                {
+                    trouble.Say(line, "expected on or off after all.");
+                    return;
+                }
+
+                var all = line.Says(rest + 1, Keyword.On);
+                recall = delegate(Poller poller) { poller.RecallAll(all); };
+            }
+            else
+            {
+                var blocks = new List<string>();
+                var read = new List<bool>();
+                for (var i = rest; i < line.Count; i += 2)
+                {
+                    var block = line.ValueAt(i);
+                    if (block.Form != ValueForm.Identifier || block.Word.Length == 0 || (!line.Says(i + 1, Keyword.On) && !line.Says(i + 1, Keyword.Off)))
+                    {
+                        trouble.Say(line, "expected each block's name followed by on or off.");
+                        return;
+                    }
+
+                    blocks.Add(block.Word);
+                    read.Add(line.Says(i + 1, Keyword.On));
+                }
+
+                recall = delegate(Poller poller)
+                {
+                    for (var i = 0; i < blocks.Count; i++)
+                        poller.Recall(blocks[i], read[i]);
+                };
+            }
+
+            if (runner == null)
+                return;
+
+            var system = program.FindSystem(identity);
+            if (system == null || number > system.Triggers.Count)
+                return;
+
+            var trigger = system.Triggers[number - 1];
+            var kind = line.Key == Keyword.Every ? trigger is EveryTrigger : trigger is WhenTrigger;
+            var one = !instanced ? (system.IsBlueprint ? null : system.First) : system.FindInstance(instance);
+            if (!kind || one == null)
+                return;
+
+            runner.Recall(trigger, one, recall);
         }
 
         /// <summary>
@@ -117,6 +292,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                         pen.Says(Keyword.Wait).Ticks(state.WaitTicks);
                     else if (state.IsWaiting)
                         pen.Says(Keyword.Await);
+
+                    if (state.ByHand)
+                        pen.Text(ByHand);
 
                     pen.End();
                 }
@@ -166,7 +344,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
-                trouble.Say(line, "expected 'off' or 'running'.");
+                if (line.Key == Keyword.When || line.Key == Keyword.Every)
+                {
+                    Watch(line, program, runner, trouble);
+                    continue;
+                }
+
+                trouble.Say(line, "expected 'off', 'running', 'when' or 'every'.");
             }
 
             if (trouble.What.Length > 0)
@@ -220,6 +404,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var waiting = line.Says(at + 4, Keyword.Await);
             var held = 0;
+            var after = waiting ? at + 5 : at + 4;
 
             if (line.Says(at + 4, Keyword.Wait))
             {
@@ -232,7 +417,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 held = (int)ticks.Whole;
                 waiting = true;
+                after = at + 6;
             }
+
+            var byHand = after < line.Count && line.Text(after) == ByHand;
 
             if (runner == null)
                 return;
@@ -246,7 +434,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (one == null || which == null)
                 return;
 
-            runner.Resume(which, one, (int)step.Whole, waiting, held);
+            runner.Resume(which, one, (int)step.Whole, waiting, held, byHand);
         }
 
         /// <summary>A whole number in the line, or zero where it is not one.</summary>
@@ -263,14 +451,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static readonly string[] Reasons =
         {
             "unstartable", "source gone", "block gone", "gate gone", "unoffered", "unfilled", "mistyped", "unawaited", "adrift",
-            "slot empty"
+            "slot empty", "circular", "unable"
         };
 
         static readonly SequenceProblem[] Problems =
         {
             SequenceProblem.NeverTriggered, SequenceProblem.MissingSource, SequenceProblem.MissingTarget,
             SequenceProblem.MissingGate, SequenceProblem.Unoffered, SequenceProblem.Unfilled, SequenceProblem.Mistyped,
-            SequenceProblem.Unawaited, SequenceProblem.Adrift, SequenceProblem.EmptySlot
+            SequenceProblem.Unawaited, SequenceProblem.Adrift, SequenceProblem.EmptySlot, SequenceProblem.Circular,
+            SequenceProblem.Unable
         };
 
         /// <summary>What a block's trouble is written as, beside <see cref="Troubles" />.</summary>

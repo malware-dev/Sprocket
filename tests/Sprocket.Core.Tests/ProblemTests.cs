@@ -93,6 +93,32 @@ public class ProblemTests
         Assert.False(Fault(ship, warn).Exists);
     }
 
+    /// <summary>A step or a trigger that stops a sequence nothing starts leaves it warned about.</summary>
+    [Fact]
+    public void StoppingASequenceIsNotStartingIt()
+    {
+        var ship = Build();
+        var system = ship.Automation.Systems[0];
+
+        var warn = ship.Automation.AddSequence(system);
+        warn.Name = "Warn";
+        var shut = new Act("close");
+        shut.Targets.Add(ship.Automation.Declare(ship.World, ship.World.FindEntity(2)!).Name);
+        warn.Steps.Add(shut);
+        warn.Steps.Add(new Await());
+
+        ship.Sequence.Steps.Add(new Run(warn.Number, true));
+        Assert.Equal(SequenceProblem.NothingStarts, Fault(ship, warn).Problem);
+
+        system.AddTrigger(new EveryTrigger(600) { Does = new Run(warn.Number, true) });
+        Assert.Equal(SequenceProblem.NothingStarts, Fault(ship, warn).Problem);
+        Assert.Null(warn.Trigger);
+
+        system.AddTrigger(new EveryTrigger(600) { Does = new Run(warn.Number) });
+        Assert.False(Fault(ship, warn).Exists);
+        Assert.NotNull(warn.Trigger);
+    }
+
     /// <summary>
     /// A warning says its words and nothing else: no count, no mark, and it is not switched off.
     /// </summary>
@@ -433,7 +459,7 @@ public class ProblemTests
 
         ship.Editor.NewButtonSystem("Airlock");
 
-        ship.Editor.PressAdd("task…");
+        ship.Editor.PressAdd("task");
         ship.Editor.PressBlock("Inner Door");
         ship.Editor.PressChoice("Close");
         ship.Editor.PressPrimary();

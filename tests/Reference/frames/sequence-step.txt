@@ -43,12 +43,15 @@ on screen     Sequence 1
 036  Text       at {X:504.5142 Y:163.2255} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
 037  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
 038  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-039  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task…"
-040  Text       at {X:374.43 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait…"
-041  ClearClip  
-042  Sprite     Sprocket_Fill         {X:1404 Y:88 W:220 H:36}  #1B242AFF
-043  Sprite     Sprocket_Fill         {X:1404 Y:88 W:220 H:1}  #5B737BFF
-044  Sprite     Sprocket_Fill         {X:1404 Y:123 W:220 H:1}  #5B737BFF
-045  Sprite     Sprocket_Fill         {X:1404 Y:88 W:1 H:36}  #5B737BFF
-046  Sprite     Sprocket_Fill         {X:1623 Y:88 W:1 H:36}  #5B737BFF
-047  Text       at {X:1415.573 Y:93.92793} scale 0.694  #A2C3CDFF  "Keep any changes and return."
+039  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task"
+040  Text       at {X:361.2067 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait"
+041  Text       at {X:451.1967 Y:219.2255} scale 0.833  #A2C3CDFF  "+ run"
+042  Text       at {X:535.1766 Y:219.2255} scale 0.833  #A2C3CDFF  "+ stop"
+043  Text       at {X:627.4133 Y:219.2255} scale 0.833  #A2C3CDFF  "+ if"
+044  ClearClip  
+045  Sprite     Sprocket_Fill         {X:1404 Y:88 W:220 H:36}  #1B242AFF
+046  Sprite     Sprocket_Fill         {X:1404 Y:88 W:220 H:1}  #5B737BFF
+047  Sprite     Sprocket_Fill         {X:1404 Y:123 W:220 H:1}  #5B737BFF
+048  Sprite     Sprocket_Fill         {X:1404 Y:88 W:1 H:36}  #5B737BFF
+049  Sprite     Sprocket_Fill         {X:1623 Y:88 W:1 H:36}  #5B737BFF
+050  Text       at {X:1415.573 Y:93.92793} scale 0.694  #A2C3CDFF  "Keep any changes and return."

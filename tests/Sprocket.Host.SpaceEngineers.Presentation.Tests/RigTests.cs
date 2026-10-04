@@ -83,7 +83,7 @@ public class RigTests
 
         Airlock(rig.Editor);
 
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -122,12 +122,12 @@ public class RigTests
 
         Simulation sim = Simulation.On(rig);
         sim.Editor.NewSystem("Clock");
-        sim.Editor.PressStart("when…");
+        sim.Editor.PressStart("when");
         sim.Editor.PressBlock("Cycle Timer");
         sim.Editor.PressChoice("goes off");
         sim.Editor.PressPrimary();
 
-        sim.Editor.PressAdd("task…");
+        sim.Editor.PressAdd("task");
         sim.Editor.PressBlock("Inner Door");
         sim.Editor.PressChoice("Open");
         sim.Editor.PressPrimary();
@@ -161,11 +161,11 @@ public class RigTests
         sim.Editor.NewSystem("Clock");
         foreach (var door in new[] { "Inner Door", "Outer Door" })
         {
-            sim.Editor.PressStart("when…");
+            sim.Editor.PressStart("when");
             sim.Editor.PressBlock("Cycle Timer");
             sim.Editor.PressChoice("goes off");
             sim.Editor.PressPrimary();
-            sim.Editor.PressAdd("task…");
+            sim.Editor.PressAdd("task");
             sim.Editor.PressBlock(door);
             sim.Editor.PressChoice("Open");
             sim.Editor.PressPrimary();
@@ -200,7 +200,7 @@ public class RigTests
 
         Simulation sim = Simulation.On(rig);
         sim.Editor.NewSystem("Clock");
-        sim.Editor.PressStart("when…");
+        sim.Editor.PressStart("when");
         sim.Editor.PressBlock("Cycle Timer");
         Assert.True(sim.Editor.HasChoice("is switched on"), "the timer offers nothing but triggers, so this proves nothing");
         sim.Editor.PressChoice("goes off");
@@ -417,7 +417,7 @@ public class RigTests
 
         Airlock(rig.Editor);
 
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -465,7 +465,7 @@ public class RigTests
         Simulation rig = Simulation.On(Store.Nowhere());
         rig.Tick();
 
-        var program = "sprocket 1 alpha 9\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
+        var program = "sprocket 1 alpha 10\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
             + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
 
         Assert.Equal("", ProgramText.Load(program, rig.Editor.Program, rig.World.Values));
@@ -534,7 +534,7 @@ public class RigTests
         Assert.True(changes.Apply());
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -580,7 +580,7 @@ public class RigTests
         }
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -588,7 +588,7 @@ public class RigTests
 
         Sequence sequence = rig.Editor.Program.Sequences[0];
 
-        rig.Editor.PressStart("when…");
+        rig.Editor.PressStart("when");
         rig.Editor.PressBlock("Inside Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressChoice(sequence.Name);
@@ -615,16 +615,9 @@ public class RigTests
         throw new InvalidOperationException("no panel called " + name);
     }
 
-    /// <summary>
-    /// A trigger that does one plain thing is written as the game's own action.
-    /// </summary>
-    /// <remarks>
-    /// The slot holds the door's own action on the door rather than Sprocket's carrying a key, so the
-    /// button works with the mod removed. Sprocket is not part of the press at all - which is also
-    /// why the sequence must not be reported as one nothing starts: the slot answers for it.
-    /// </remarks>
+    /// <summary>A trigger that does one plain thing is Sprocket's own, and stops when its system is switched off.</summary>
     [Fact]
-    public void ATriggerThatDoesOneThingIsTheGamesOwnAction()
+    public void ATriggerThatDoesOneThingIsSprocketsOwn()
     {
         Simulation rig = Simulation.Fresh();
         rig.Tick();
@@ -634,27 +627,24 @@ public class RigTests
         for (var i = 0; i < 5; i++)
             rig.Tick();
 
-        Panel panel = Named(rig, "Airlock Button");
-        Assert.NotNull(panel);
-
         MyToolbarItemInfo held;
-        Assert.True(panel.Toolbar.TryGetItem(0, out held), "the button holds nothing");
-        Assert.Equal("Open_On", held.ActionId);
-        Assert.Equal(2L, held.BlockEntityId);
+        Assert.True(Named(rig, "Airlock Button").Toolbar.TryGetItem(0, out held), "the button holds nothing");
+        Assert.True(TriggerAction.IsOurs(held), "the button holds the game's own action");
 
         rig.Machine.Log.Clear();
         rig.Press("Airlock Button");
-        rig.Tick();
-
-        Assert.Contains("Airlock Inner Door:open", rig.Machine.Log);
-        Assert.False(Running(rig, sequence), "Sprocket ran a sequence the game was doing itself");
-
-        // Long enough for the pass that switches off what cannot work. A slot holding the game's action
-        // answers for the sequence, so nothing here is broken.
-        for (var i = 0; i < 70; i++)
+        for (var i = 0; i < 3; i++)
             rig.Tick();
 
-        Assert.True(sequence.System.Enabled, "the system was switched off although its button is wired");
+        Assert.Contains("Airlock Inner Door:open", rig.Machine.Log);
+
+        sequence.System.Enabled = false;
+        rig.Machine.Log.Clear();
+        rig.Press("Airlock Button");
+        for (var i = 0; i < 3; i++)
+            rig.Tick();
+
+        Assert.DoesNotContain("Airlock Inner Door:open", rig.Machine.Log);
     }
 
     /// <summary>
@@ -709,7 +699,7 @@ public class RigTests
 
         rig.Editor.NewButtonSystem("Airlock");
         // A wait, so the run lasts long enough to be stopped.
-        rig.Editor.PressAdd("wait…");
+        rig.Editor.PressAdd("wait");
         rig.Editor.PressChoice(TimeText.WaitChoice(new Texts(), 600));
         rig.Editor.SwitchOn();
 
@@ -752,7 +742,7 @@ public class RigTests
         rig.Tick();
 
         Airlock(rig.Editor);
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -792,7 +782,7 @@ public class RigTests
         Simulation rig = Simulation.Fresh();
 
         rig.Editor.NewButtonSystem("Airlock");
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();
@@ -846,7 +836,7 @@ public class RigTests
             rig.Tick();
 
         rig.Editor.Back();
-        rig.Editor.PressStart("when…");
+        rig.Editor.PressStart("when");
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("is pressed");
         rig.Editor.PressPrimary();
@@ -896,7 +886,7 @@ public class RigTests
         Simulation built = Simulation.On(store);
         Airlock(built.Editor);
 
-        built.Editor.PressAdd("task…");
+        built.Editor.PressAdd("task");
         built.Editor.PressBlock("Airlock Inner Door");
         built.Editor.PressChoice("Open");
         built.Editor.PressPrimary();
@@ -947,7 +937,7 @@ public class RigTests
         Simulation built = Simulation.On(store);
         Airlock(built.Editor);
 
-        built.Editor.PressAdd("task…");
+        built.Editor.PressAdd("task");
         built.Editor.PressBlock("Airlock Inner Door");
         built.Editor.PressChoice("Open");
         built.Editor.PressPrimary();

@@ -193,7 +193,7 @@ public class DragTests
 
     static void Step(SprocketEditor editor, string entity, string action)
     {
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         editor.PressBlock(entity);
         editor.PressChoice(action);
         editor.PressPrimary();

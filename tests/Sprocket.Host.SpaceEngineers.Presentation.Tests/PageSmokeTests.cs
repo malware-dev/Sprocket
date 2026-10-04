@@ -27,7 +27,7 @@ public class PageSmokeTests
         editor.NewSystem("Airlock");
         Record(seen, screen);
 
-        editor.PressStart("when…");
+        editor.PressStart("when");
         Record(seen, screen);
 
         editor.PressBlock("Approach Sensor");
@@ -37,7 +37,7 @@ public class PageSmokeTests
         editor.PressPrimary();
         Record(seen, screen);
 
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         editor.PressBlock("Landing Lights");
         editor.PressChoice("Switch on");
         editor.PressPrimary();

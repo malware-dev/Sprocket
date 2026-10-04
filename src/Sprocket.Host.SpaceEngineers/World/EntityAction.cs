@@ -143,16 +143,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The game's own name for this act, or null where the game has no single action for it.
         /// </summary>
         /// <remarks>
-        /// What lets a trigger that does one plain thing be written into a toolbar slot as the game's
-        /// action rather than as Sprocket's, so the button keeps working with the mod removed. The
-        /// game's convention is that an on/off switch called <c>X</c> offers <c>X_On</c> and
+        /// What lets a toolbar slot somebody wired to the game's own action be said in Sprocket's words.
+        /// The game's convention is that an on/off switch called <c>X</c> offers <c>X_On</c> and
         /// <c>X_Off</c>; a door's switch is <c>Open</c>, a vent's is <c>Depressurize</c>, and every
         /// functional block has <c>OnOff</c>.
         /// <para>
         /// Null for anything Sprocket performs out of several property writes, and for any block whose
-        /// own actions have not been mapped yet. A name is never trusted: the block is asked for it
-        /// before a slot is written, so a wrong or missing one costs a Sprocket trigger rather than a
-        /// dead button.
+        /// own actions have not been mapped yet.
         /// </para>
         /// </remarks>
         public string GameActionId { get; private set; }

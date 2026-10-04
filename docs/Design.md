@@ -392,13 +392,10 @@ Intervals come from the game's frame counter and are never counted by Sprocket. 
 Engineers offers update rates of 1, 10 and 100 only, and the slower two do not land on
 exact multiples, so anything self-counted drifts with server load.
 
-**A trigger that does one plain thing is written as the game's own action.** A block event
-whose target is a single action goes into the toolbar slot as that action, not as Sprocket's
-carrying a key, so it costs nothing at runtime and keeps working when the mod is removed.
-Only sequences stop. This is possible for the toolbar kinds and for actions the game has:
-Sprocket's own vocabulary is performed by setting properties, so each declared action needs
-the game's action name to place, and one an extension invents out of several writes has
-none. Where a block does not offer the name, the trigger runs through Sprocket instead.
+**A trigger is Sprocket's own, whatever it does.** Its toolbar slot holds Sprocket's action
+carrying a key, so switching its system off stops it, the same as a trigger that runs a
+sequence. A button somebody wires to a block's own action by hand stays the game's, outside
+Sprocket.
 
 ### Step
 

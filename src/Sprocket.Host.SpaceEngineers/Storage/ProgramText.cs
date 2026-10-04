@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         const int Version = 1;
 
-        const int Draft = 9;
+        const int Draft = 10;
 
         /// <summary>The host function this host answers a trigger with: a slot on a block's toolbar.</summary>
         /// <remarks>Persisted in every program with a trigger, and written by <see cref="Pen.Slot" />.</remarks>
@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var systems = program.Systems;
             for (var i = 0; i < systems.Count; i++)
-                WriteSystem(pen, systems[i]);
+                WriteSystem(pen, systems[i], true);
 
             // After every system, because an instance names the system it is one of and a reader
             // should have met it by then.
@@ -110,7 +110,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var pen = new Pen();
             pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
             pen.End();
-            WriteSystem(pen, system);
+            WriteSystem(pen, system, true);
+            return pen.ToString();
+        }
+
+        /// <summary>What <paramref name="system" /> says, written out alone without when it last changed: what tells whether it has.</summary>
+        public static string Said(AutomationSystem system)
+        {
+            var pen = new Pen();
+            WriteSystem(pen, system, false);
             return pen.ToString();
         }
 
@@ -578,7 +586,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             trouble.Say(statement, "unsupported key in the block's list.");
         }
 
-        static void WriteSystem(Pen pen, AutomationSystem system)
+        static void WriteSystem(Pen pen, AutomationSystem system, bool dated)
         {
             pen.Blank();
             pen.Note(system.Annotation);
@@ -588,7 +596,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             pen.Text(system.Identity.ToString("D")).Says(Keyword.As).Qualified(system.Namespace, system.Name);
 
-            if (system.Changed.HasValue)
+            if (dated && system.Changed.HasValue)
             {
                 pen.Says(Keyword.Changed)
                     .Text(system.Changed.Value.ToString(Times[0], CultureInfo.InvariantCulture));
@@ -1091,9 +1099,63 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var steps = sequence.Steps;
             for (var i = 0; i < steps.Count; i++)
-                WriteStep(pen, steps[i]);
+            {
+                var opens = steps[i] as If;
+                var branch = steps[i] as Else;
+                if (opens != null)
+                    WriteIf(pen, opens);
+                else if (branch != null)
+                    WriteElse(pen, branch);
+                else if (steps[i] is EndIf)
+                    pen.Shut();
+                else
+                    WriteStep(pen, steps[i]);
+            }
 
             pen.Shut();
+        }
+
+        /// <summary><c>if all ext.pressurized on [ vent ] == on then {</c>: the line an if starts, and its block opened.</summary>
+        static void WriteIf(Pen pen, If step)
+        {
+            if (step.Annotation.Length > 0)
+                pen.Blank();
+
+            pen.Note(step.Annotation);
+            pen.Start(Keyword.If, step.IsOff);
+            WriteTest(pen, step.Test);
+            pen.Body();
+        }
+
+        /// <summary><c>} else if … then {</c> or <c>} else {</c>: the branch before closed, and the next one opened.</summary>
+        static void WriteElse(Pen pen, Else step)
+        {
+            pen.Shut();
+            pen.Note(step.Annotation);
+            pen.Start(Keyword.Else);
+            if (step.Test != null)
+            {
+                pen.Says(Keyword.If);
+                WriteTest(pen, step.Test);
+            }
+
+            pen.Body();
+        }
+
+        /// <summary><c>all ext.pressurized on [ vent ] == on then</c>.</summary>
+        static void WriteTest(Pen pen, Comparison test)
+        {
+            pen.Says(test.RequiresAll ? Keyword.All : Keyword.Any);
+            if (test.Provider.Length == 0)
+                pen.Word(test.MemberId);
+            else
+                pen.Qualified(test.Provider, test.MemberId);
+
+            pen.Says(Keyword.On);
+            WriteNames(pen, test.Targets);
+            pen.Says(Keyword.EqualTo);
+            Written(pen, test.Value);
+            pen.Says(Keyword.Then);
         }
 
         /// <summary>
@@ -1132,18 +1194,169 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             Ends(statement, at, trouble);
+            ReadSteps(statement.Body, sequence.Steps, system, program, trouble);
+        }
 
-            var body = statement.Body;
+        /// <summary>The statements of a block, as steps added to <paramref name="into" />: an <c>if</c> as its line, its branches and its end.</summary>
+        static void ReadSteps(IList<Statement> body, IList<Step> into, AutomationSystem system, Automation program, Trouble trouble)
+        {
             for (var i = 0; i < body.Count; i++)
             {
-                var step = ReadStep(body[i], trouble);
+                var statement = body[i];
+                if (statement.Key == Keyword.If)
+                {
+                    i = ReadIf(body, i, into, system, program, trouble);
+                    continue;
+                }
+
+                if (statement.Key == Keyword.Else)
+                {
+                    trouble.Say(statement, "unexpected 'else'; an else is the statement after an if's closing brace.");
+                    continue;
+                }
+
+                var step = ReadStep(statement, trouble);
                 if (step == null)
                     continue;
 
-                step.IsOff = body[i].IsOff;
-                Uses(body[i], step as Act, system, program, trouble);
-                sequence.Steps.Add(step);
+                step.IsOff = statement.IsOff;
+                Uses(statement, step as Act, system, program, trouble);
+                into.Add(step);
             }
+        }
+
+        /// <summary>
+        /// <c>if … then { … }</c> and the <c>else if</c> and <c>else</c> after it, as the lines they are, answering where the
+        /// last statement of it stands in <paramref name="body" />.
+        /// </summary>
+        /// <remarks>
+        /// One line for the <c>if</c>, one for each <c>else</c>, the steps of every block between them, and an end, so the
+        /// sequence stays one list of lines and every branch ends somewhere.
+        /// </remarks>
+        static int ReadIf(IList<Statement> body, int at, IList<Step> into, AutomationSystem system, Automation program,
+            Trouble trouble)
+        {
+            var statement = body[at];
+            var opens = new If(Tested(statement, 0, system, program, trouble) ?? new Comparison());
+            opens.IsOff = statement.IsOff;
+            opens.Annotation = statement.Annotation;
+            into.Add(opens);
+            Blocked(statement, into, system, program, trouble);
+
+            var last = false;
+            while (at + 1 < body.Count && body[at + 1].Key == Keyword.Else)
+            {
+                var branch = body[++at];
+                if (branch.IsOff)
+                    trouble.Say(branch, "unexpected '//'; an else is switched off with its if.");
+                else if (last)
+                    trouble.Say(branch, "unexpected 'else'; an else comes last, and once.");
+
+                Comparison test = null;
+                if (branch.Says(0, Keyword.If))
+                    test = Tested(branch, 1, system, program, trouble) ?? new Comparison();
+                else
+                {
+                    Ends(branch, 0, trouble);
+                    last = true;
+                }
+
+                var other = new Else(test);
+                other.Annotation = branch.Annotation;
+                into.Add(other);
+                Blocked(branch, into, system, program, trouble);
+            }
+
+            into.Add(new EndIf());
+            return at;
+        }
+
+        /// <summary>The steps of the block of an <c>if</c> or an <c>else</c>, or trouble where it has none.</summary>
+        static void Blocked(Statement statement, IList<Step> into, AutomationSystem system, Automation program, Trouble trouble)
+        {
+            if (!statement.HasBlock)
+            {
+                trouble.Say(statement, "expected '{' to open the block.");
+                return;
+            }
+
+            ReadSteps(statement.Body, into, system, program, trouble);
+        }
+
+        /// <summary>
+        /// <c>all ext.pressurized on [ vent ] == on then</c>, from <paramref name="at" />: what an <c>if</c> or an <c>else if</c>
+        /// tests, or null and trouble where it is not that.
+        /// </summary>
+        static Comparison Tested(Statement statement, int at, AutomationSystem system, Automation program, Trouble trouble)
+        {
+            var all = statement.Says(at, Keyword.All);
+            if (!all && !statement.Says(at, Keyword.Any))
+            {
+                trouble.Say(statement, "expected any or all after 'if'.");
+                return null;
+            }
+
+            var member = statement.Parts(at + 1);
+            var bare = member.Count == 1 && member[0].Word.Length > 0;
+            var qualified = member.Count == 2 && member[0].Word.Length > 0 && member[1].Word.Length > 0;
+            if (!bare && !qualified)
+            {
+                trouble.Say(statement, "expected a value or a moment after '" + (all ? "all" : "any") + "'.");
+                return null;
+            }
+
+            if (qualified && member[0].Word != BlockKinds.Own)
+            {
+                trouble.Say(statement, "no namespace '" + member[0].Word + "'; expected a value or a moment, bare or qualified by ext.");
+                return null;
+            }
+
+            if (!statement.Says(at + 2, Keyword.On) || statement.ValueAt(at + 3).Form != ValueForm.List)
+            {
+                trouble.Say(statement, "expected 'on' and a list of names.");
+                return null;
+            }
+
+            var test = new Comparison();
+            test.RequiresAll = all;
+            test.MemberId = member[member.Count - 1].Word;
+            test.Provider = qualified ? member[0].Word : "";
+            if (!Names(statement, at + 3, test.Targets, trouble, "expected names in the list."))
+                return null;
+
+            if (!statement.Says(at + 4, Keyword.EqualTo) || statement.Count <= at + 5)
+            {
+                trouble.Say(statement, "expected '==' and a value after the names.");
+                return null;
+            }
+
+            var form = statement.ValueAt(at + 5).Form;
+            if (form == ValueForm.List || form == ValueForm.Vector || form == ValueForm.Function || form == ValueForm.Qualified)
+            {
+                trouble.Say(statement, "unexpected " + Spelled(statement, at + 5) + "; expected a value.");
+                return null;
+            }
+
+            test.Value = Given(statement.ValueAt(at + 5));
+            if (test.IsMoment && test.Value.Kind != ValueKind.Flag)
+            {
+                trouble.Say(statement, "expected on or off after '==' for a moment.");
+                return null;
+            }
+
+            if (!statement.Says(at + 6, Keyword.Then))
+            {
+                trouble.Say(statement, "expected 'then' after the value.");
+                return null;
+            }
+
+            if (!Ends(statement, at + 7, trouble))
+                return null;
+
+            for (var i = 0; i < test.Targets.Count; i++)
+                Uses(statement, test.Targets[i], system, program, false, trouble);
+
+            return test;
         }
 
         /// <summary>
@@ -1458,7 +1671,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                         pen.Says(Keyword.With);
 
                         for (var i = 0; i < act.Values.Count; i++)
+                        {
+                            if (i > 0)
+                                pen.Comma();
+
                             Written(pen, act.Values[i]);
+                        }
                     }
                 }
 

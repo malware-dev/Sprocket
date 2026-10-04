@@ -444,6 +444,35 @@ namespace Sprocket.Host.SpaceEngineers.World
             return true;
         }
 
+        /// <remarks>
+        /// Compared in the type the property holds, so a real written 0.1 matches the single the block keeps for it. A value of
+        /// another kind than the property's matches nothing.
+        /// </remarks>
+        public bool Holds(IMyTerminalBlock block, string propertyId, Literal value)
+        {
+            ITerminalProperty property = block == null ? null : block.GetProperty(propertyId);
+            if (property == null)
+                return false;
+
+            switch (property.TypeName)
+            {
+                case "Boolean":
+                    return value.Kind == ValueKind.Flag && property.AsBool().GetValue(block) == value.Flag;
+                case "Single":
+                    return value.Kind == ValueKind.Real && property.AsFloat().GetValue(block) == (float)value.Real;
+                case "Int64":
+                    return value.Kind == ValueKind.Integer && property.As<long>().GetValue(block) == value.Whole;
+                case "Color":
+                    return value.Kind == ValueKind.Color
+                        && property.AsColor().GetValue(block) == new Color(value.Red, value.Green, value.Blue, value.Alpha);
+                case "StringBuilder":
+                    return value.Kind == ValueKind.Text
+                        && property.As<StringBuilder>().GetValue(block).ToString() == value.Text;
+            }
+
+            return false;
+        }
+
         public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
             IList<Primitive> types)
         {

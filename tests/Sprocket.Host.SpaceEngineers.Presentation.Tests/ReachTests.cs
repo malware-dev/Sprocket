@@ -205,13 +205,13 @@ public class ReachTests
         AssertEverythingLights("the picker", screen =>
         {
             screen.Editor.NewSystem("Airlock");
-            screen.Editor.PressStart("when…");
+            screen.Editor.PressStart("when");
         });
 
         AssertEverythingLights("the picker with its kinds open", screen =>
         {
             screen.Editor.NewSystem("Airlock");
-            screen.Editor.PressStart("when…");
+            screen.Editor.PressStart("when");
             screen.Run(2);
 
             var line = screen.Text(Blocks(screen).Kinds()[0].Text);

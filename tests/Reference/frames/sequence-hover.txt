@@ -30,13 +30,9 @@ on screen     Sequence 1
 023  SetClip    {X:256 Y:118 W:1408 H:902}
 024  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
 025  Text       at {X:280 Y:115.6399} scale 0.694  #A2C3CDFF  "switched off"
-026  Sprite     Sprocket_Fill         {X:256 Y:162 W:94 H:32}  #29363EFF
-027  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ task…"
-028  Text       at {X:374.43 Y:163.2255} scale 0.833  #A2C3CDFF  "+ wait…"
-029  ClearClip  
-030  Sprite     Sprocket_Fill         {X:350 Y:191 W:431 H:36}  #1B242AFF
-031  Sprite     Sprocket_Fill         {X:350 Y:191 W:431 H:1}  #5B737BFF
-032  Sprite     Sprocket_Fill         {X:350 Y:226 W:431 H:1}  #5B737BFF
-033  Sprite     Sprocket_Fill         {X:350 Y:191 W:1 H:36}  #5B737BFF
-034  Sprite     Sprocket_Fill         {X:780 Y:191 W:1 H:36}  #5B737BFF
-035  Text       at {X:362 Y:196.9279} scale 0.694  #A2C3CDFF  "Add a task: run an action on blocks, or set one of their values."
+026  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ task"
+027  Text       at {X:361.2067 Y:163.2255} scale 0.833  #A2C3CDFF  "+ wait"
+028  Text       at {X:451.1967 Y:163.2255} scale 0.833  #A2C3CDFF  "+ run"
+029  Text       at {X:535.1766 Y:163.2255} scale 0.833  #A2C3CDFF  "+ stop"
+030  Text       at {X:627.4133 Y:163.2255} scale 0.833  #A2C3CDFF  "+ if"
+031  ClearClip  

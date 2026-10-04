@@ -470,16 +470,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             row.Described = part.Annotation;
             row.Optional = part.Optional ? Editor.Texts.BlueprintOptional : null;
             row.Blocks.Clear();
+            row.Triggers.Clear();
             _gone.Clear();
 
             var filled = chosen == null ? null : chosen.FilledWith(part.Id);
+            var at = chosen == null || !part.IsTrigger ? null : chosen.Positions(part.Id);
             if (filled != null)
             {
                 for (var i = 0; i < filled.Count; i++)
                 {
                     var block = Editor.Runner.Bindings.Entity(filled[i]);
                     if (block != null)
+                    {
                         row.Blocks.Add(block.Id);
+                        if (at != null)
+                        {
+                            var answers = i < at.Count ? block.Kind.Trigger(at[i]) : null;
+                            row.Triggers.Add(answers == null ? "" : answers.Text);
+                        }
+                    }
                     else if (_gone.Count == 0)
                         _gone.Add(new Mention(Template.Fill(Editor.Texts.BlueprintGone, "name", Called(filled[i])), null));
                 }

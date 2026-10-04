@@ -11,6 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         Grip _grip;
         Label _number;
         Flow _sentence;
+        Glyph _leadWaits;
         Label _lead;
         Glyph _pause;
         Glyph _delete;
@@ -36,7 +37,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Spacing = 8f,
                 LineSpacing = 8f,
                 Placement = Flex.Grow,
-                Children = { new Label { Style = Styles.Phrase }.As(out _lead) }
+                Children =
+                {
+                    // Before its word, as it stands before a member's name: running another sequence lasts until it finishes.
+                    new Glyph { Symbol = Symbols.Finish, Style = Styles.Waits, IsVisible = false }.As(out _leadWaits),
+                    new Label { Style = Styles.Phrase }.As(out _lead)
+                }
             }.As(out _sentence));
 
             Children.Add(new Glyph { Symbol = Symbols.Pause, Style = Styles.Holds, Placement = Fixed.Size(32f, 32f) }.As(out _pause));

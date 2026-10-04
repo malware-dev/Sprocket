@@ -23,6 +23,21 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         Run,
 
         /// <summary>Stops another sequence of the same system where it is running.</summary>
-        Stop
+        Stop,
+
+        /// <summary>Opens an if: runs the steps under it where its test holds.</summary>
+        If,
+
+        /// <summary>The next branch of an if, tested where nothing before it held.</summary>
+        OtherwiseIf,
+
+        /// <summary>The last branch of an if, run where nothing before it held.</summary>
+        Otherwise,
+
+        /// <summary>Closes an if; where its branches are added.</summary>
+        End,
+
+        /// <summary>The end of a branch of an if, where steps are added to it; no step of its own.</summary>
+        Adds
     }
 }

@@ -1,0 +1,38 @@
+namespace Sprocket.Host.SpaceEngineers.Sequences
+{
+    /// <summary>Which sequence a step runs or stops, changed.</summary>
+    sealed class SetRun : SequenceEdit
+    {
+        readonly int _index;
+        readonly int _was;
+        readonly int _now;
+
+        public SetRun(int index, int was, int now)
+        {
+            _index = index;
+            _was = was;
+            _now = now;
+        }
+
+        public override Change Change => Change.Step;
+
+        public override bool Changes => _was != _now;
+
+        public override void Apply(Sequence sequence)
+        {
+            Put(sequence, _now);
+        }
+
+        public override void Undo(Sequence sequence)
+        {
+            Put(sequence, _was);
+        }
+
+        void Put(Sequence sequence, int number)
+        {
+            var run = sequence.Steps[_index] as Run;
+            if (run != null)
+                run.Number = number;
+        }
+    }
+}

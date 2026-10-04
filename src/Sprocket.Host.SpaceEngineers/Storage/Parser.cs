@@ -201,12 +201,23 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var from = values.Count;
 
             Step();
+
+            // After 'with', the values are separated by commas, and a comma stands nowhere else in a statement.
+            var listing = false;
+            var separated = true;
             while (true)
             {
                 if (_token.Kind == TokenKind.Comma)
                 {
-                    Fail("unexpected ','.");
-                    break;
+                    if (!listing || separated)
+                    {
+                        Fail("unexpected ','.");
+                        break;
+                    }
+
+                    separated = true;
+                    Step();
+                    continue;
                 }
 
                 if (_token.Kind == TokenKind.Off)
@@ -218,8 +229,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (!Valuish())
                     break;
 
-                values.Add(Next());
+                if (listing && !separated)
+                {
+                    Fail("expected ',' between the values after 'with'.");
+                    break;
+                }
+
+                var value = Next();
+                values.Add(value);
+                if (value.Says(Keyword.With))
+                    listing = true;
+                else if (listing)
+                {
+                    separated = false;
+                }
             }
+
+            if (listing && separated && _failures == failures && values.Count - from > 0
+                && !values[values.Count - 1].Says(Keyword.With))
+                Fail("expected a value after ','.");
 
             // A line that went wrong is not made a statement at all, since the trouble already says what is wrong
             // with it and half a statement would only be judged again for what is missing.
@@ -241,8 +269,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return statement;
             }
 
-            // Only a system, a sequence and an instance hold statements. The body is still read, so the braces stay counted.
-            if (key != Keyword.System && key != Keyword.Sequence && key != Keyword.Instance)
+            // Only a system, a sequence, an instance, an if and an else hold statements. The body is still read, so the braces
+            // stay counted.
+            if (key != Keyword.System && key != Keyword.Sequence && key != Keyword.Instance && key != Keyword.If
+                && key != Keyword.Else)
                 Fail("unexpected '{'.");
 
             Step();
@@ -258,6 +288,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case TokenKind.Identifier:
                 case TokenKind.Keyword:
                 case TokenKind.Equals:
+                case TokenKind.EqualTo:
                 case TokenKind.Text:
                 case TokenKind.Integer:
                 case TokenKind.Real:
@@ -299,6 +330,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case TokenKind.Equals:
                     Step();
                     return new Value(ValueForm.Keyword, null, 0, 0, Keyword.Equals);
+
+                case TokenKind.EqualTo:
+                    Step();
+                    return new Value(ValueForm.Keyword, null, 0, 0, Keyword.EqualTo);
 
                 case TokenKind.Text:
                     Step();

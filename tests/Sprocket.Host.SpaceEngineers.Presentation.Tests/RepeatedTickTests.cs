@@ -20,7 +20,7 @@ public class RepeatedTickTests
         screen.Run(60);
 
         editor.NewSystem("Airlock");
-        editor.PressStart("when…");
+        editor.PressStart("when");
         screen.Run(60);
 
         editor.PressBlock("Airlock Button");
@@ -32,7 +32,7 @@ public class RepeatedTickTests
         editor.PressPrimary();
         screen.Run(60);
 
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         screen.Run(60);
 
         editor.Back();
@@ -64,7 +64,7 @@ public class RepeatedTickTests
         AssertStill(screen, "the sequence list");
 
         editor.NewSystem("Airlock");
-        editor.PressStart("when…");
+        editor.PressStart("when");
         AssertStill(screen, "picking what happens");
 
         editor.PressBlock("Airlock Button");
@@ -74,7 +74,7 @@ public class RepeatedTickTests
         editor.PressPrimary();
         AssertStill(screen, "the sequence");
 
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         AssertStill(screen, "picking what to do");
 
         editor.Back();
@@ -105,7 +105,7 @@ public class RepeatedTickTests
         editor.NewSystem("Airlock");
         AssertIdle(screen, "a system");
 
-        editor.PressStart("when…");
+        editor.PressStart("when");
         AssertIdle(screen, "the picker");
 
         editor.PressBlock("Airlock Button");
@@ -117,7 +117,7 @@ public class RepeatedTickTests
         editor.PressPrimary();
         AssertIdle(screen, "a sequence");
 
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         AssertIdle(screen, "picking what happens");
 
         editor.Back();
@@ -154,7 +154,7 @@ public class RepeatedTickTests
         editor.NewSystem("Airlock");
         AssertQuiet(screen, "a system");
 
-        editor.PressStart("when…");
+        editor.PressStart("when");
         AssertQuiet(screen, "the picker, showing what every block is doing");
 
         editor.PressBlock("Airlock Button");

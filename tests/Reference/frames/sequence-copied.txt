@@ -30,6 +30,9 @@ on screen     Sequence 2
 023  SetClip    {X:256 Y:118 W:1408 H:902}
 024  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
 025  Text       at {X:280 Y:115.6399} scale 0.694  #A2C3CDFF  "switched off"
-026  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ task…"
-027  Text       at {X:374.43 Y:163.2255} scale 0.833  #A2C3CDFF  "+ wait…"
-028  ClearClip  
+026  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ task"
+027  Text       at {X:361.2067 Y:163.2255} scale 0.833  #A2C3CDFF  "+ wait"
+028  Text       at {X:451.1967 Y:163.2255} scale 0.833  #A2C3CDFF  "+ run"
+029  Text       at {X:535.1766 Y:163.2255} scale 0.833  #A2C3CDFF  "+ stop"
+030  Text       at {X:627.4133 Y:163.2255} scale 0.833  #A2C3CDFF  "+ if"
+031  ClearClip  

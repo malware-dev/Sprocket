@@ -203,11 +203,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     AddNames(bindings, SystemInstance.Through(system.First, moment.Sources), result);
 
                 for (var s = 0; s < sequence.Steps.Count; s++)
-                {
-                    var act = sequence.Steps[s] as Act;
-                    if (act != null)
-                        AddNames(bindings, SystemInstance.Through(system.First, act.Targets), result);
-                }
+                    AddNames(bindings, SystemInstance.Through(system.First, sequence.Steps[s].Targets), result);
             }
         }
 

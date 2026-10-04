@@ -25,6 +25,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     sealed partial class PickPage : EditorPage
     {
+        /// <summary>What a test's choice starts with where it is for its blocks not being in the state it names.</summary>
+        public const string Not = "!";
+
         const bool AsksAll = false;
         const int Looked = 15;
         const int Actions = 0;
@@ -37,6 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly string _title;
         readonly List<long> _selection = new List<long>();
         readonly bool _forEvents;
+        readonly bool _forTests;
         readonly bool _asksAll;
         readonly Action<PickAnswer> _done;
         readonly List<GridEntity> _candidates = new List<GridEntity>();
@@ -116,16 +120,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <paramref name="after" /> is the strip of the pick this page goes on in, as its next page, or null for a pick of its
         /// own. <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
         /// them. <paramref name="triggersOnly" /> offers only what the construct does to start something, for a trigger slot.
-        /// Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind it does
+        /// <paramref name="forTests" /> offers what an if can test: the states its blocks can be in or not, each a choice of
+        /// its own marked with <see cref="Not" /> for not, and their values. Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind it does
         /// not have is dropped later, where it is.
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
             bool asksAll = false, bool all = false, IList<Literal> values = null,
             Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
-            bool triggersOnly = false)
+            bool triggersOnly = false, bool forTests = false)
             : base(editor)
         {
+            _forTests = forTests;
             _admits = admits;
             _triggersOnly = triggersOnly;
             _opens = opens;
@@ -511,6 +517,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _blocks.Title = Editor.Texts.PickBlocks;
             _blocks.EmptyText = _fits != null
                 ? Editor.Texts.BlueprintNoneFits
+                : _forTests ? Editor.Texts.PickNoBlocksChecked
                 : _forEvents ? Editor.Texts.PickNoBlocksHappen : Editor.Texts.PickNoBlocksDone;
 
             // For the whole life of the column, so the line does not come and go as the list of kinds is narrowed.
@@ -527,13 +534,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void MakeWhat()
         {
-            // Two ways of looking only at what somebody does to a block. What happens to one is Sprocket's own wording
-            // throughout, so there is no second way to look at it.
-            var views = _forEvents ? null : new[] { Editor.Texts.PickOrganized, Editor.Texts.PickTerminal };
+            // Two ways of looking only at what somebody does to a block. What happens to one, and what is checked of one, is
+            // Sprocket's own wording throughout, so there is no second way to look at it.
+            var views = _forEvents || _forTests ? null : new[] { Editor.Texts.PickOrganized, Editor.Texts.PickTerminal };
 
             _what = new StageColumn(_strip.Width, true, views, Editor.Texts, Windows);
-            _what.Title = _forEvents ? Editor.Texts.PickWhatHappens : Editor.Texts.PickWhatToDo;
-            _what.EmptyText = _forEvents ? Editor.Texts.PickNothingHappens : Editor.Texts.PickNothingDone;
+            _what.Title = _forTests ? Editor.Texts.PickWhatToCheck : _forEvents ? Editor.Texts.PickWhatHappens : Editor.Texts.PickWhatToDo;
+            _what.EmptyText = _forTests
+                ? Editor.Texts.PickNothingChecked
+                : _forEvents ? Editor.Texts.PickNothingHappens : Editor.Texts.PickNothingDone;
             _what.Narrowed += OnWhatSearch;
             _whatRows = new Keyed<string, PickRow>(_what.Rows, WhatRow);
 
@@ -667,7 +676,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </remarks>
         void FillGiven()
         {
-            if (_forEvents)
+            // A state is chosen whole, being in it or not, so only a value is given anything.
+            if (_forEvents || _forTests && _chosenForm != Form.Value)
             {
                 _strip.ShowsValues = false;
                 return;
@@ -873,7 +883,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 narrow.Execute();
         }
 
-        /// <summary>Offered wherever the distinction between any one block and all of them means anything, which is nowhere yet.</summary>
+        /// <summary>Offered wherever the distinction between any one block and all of them means anything: on a test.</summary>
         /// <remarks>
         /// A trigger that waits for all of its blocks is built and tested, but the choice would be offered on triggers it means
         /// nothing for, and nothing on the way in explains it. A trigger already saying "all of them" keeps saying it and
@@ -881,7 +891,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </remarks>
         void FillOptions()
         {
-            var asks = _asksAll && AsksAll;
+            var asks = _asksAll && (AsksAll || _forTests);
             if (!asks)
             {
                 _blocks.Options.Clear();
@@ -915,7 +925,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _ready.Clear();
             _why.Clear();
 
-            if (_forEvents)
+            if (_forTests)
+            {
+                Testable();
+            }
+            else if (_forEvents)
             {
                 var events = Vocabulary.EventsOf(Editor.World, _selection);
                 for (var i = 0; i < events.Count; i++)
@@ -936,7 +950,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var texts = Editor.Texts;
             var note = Checked(texts, Vocabulary.Least(Editor.World, _selection));
-            if (!_forEvents && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsTerminal))
+            if (!_forEvents && !_forTests && Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsTerminal))
                 note = note.Length == 0 ? texts.PickShared : Template.Fill(Template.Fill(texts.PickNoteAndShared, "shared", texts.PickShared), "note", note);
 
             // A choice the blocks can no longer honor is dropped rather than left showing, so Done never appears over a
@@ -969,7 +983,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < _matched.Count; i++)
             {
                 var at = _matched[i];
-                var mine = _forEvents ? group : _groups.Count > at ? _groups[at] : group;
+                var mine = _forEvents || _forTests ? group : _groups.Count > at ? _groups[at] : group;
                 if (mine != group)
                 {
                     group = mine;
@@ -1049,6 +1063,52 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 case Evaluation.Partial: return texts.PickPartial;
                 default: return "";
             }
+        }
+
+        /// <summary>What a test can read of the blocks: each state they can be in, and then not, and then each of their values.</summary>
+        /// <remarks>A state read the same as one already listed is left out: switched on and switched off are one state, read from either side.</remarks>
+        void Testable()
+        {
+            var events = Vocabulary.EventsOf(Editor.World, _selection);
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (!events[i].IsState || _names.Contains(events[i].State))
+                    continue;
+
+                Offer(events[i].State, events[i].Id);
+                Offer(events[i].Unstate, Not + events[i].Id);
+            }
+
+            var actions = Vocabulary.ActionsOf(Editor.World, _selection);
+            actions.Sort(BySaid);
+            for (var i = 0; i < actions.Count; i++)
+            {
+                var one = actions[i];
+                if (!one.Sets || !Lists(one))
+                    continue;
+
+                _names.Add(Said(one));
+                _ids.Add(one.Id);
+                _forms.Add(Form.Value);
+                _groups.Add(0);
+                _waits.Add(false);
+                _sets.Add(true);
+                _ready.Add(one.Readiness);
+                _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
+            }
+        }
+
+        /// <summary>Lists a state to be read, by the words it reads in and the choice it makes.</summary>
+        void Offer(string said, string id)
+        {
+            _names.Add(said);
+            _ids.Add(id);
+            _forms.Add(Form.Native);
+            _groups.Add(0);
+            _waits.Add(false);
+            _sets.Add(false);
+            _ready.Add(Readiness.Ready);
+            _why.Add(null);
         }
 
         /// <summary>Everything the blocks offer, values first and each group in its own order.</summary>
@@ -1152,11 +1212,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             // A step acts on every block it names, so its blocks are always joined with "and". Only what starts something can
             // be any one of them, and then only where it was asked.
-            var blocks = SentenceText.Entities(Editor.World, _selection, !_forEvents || _all);
+            var blocks = SentenceText.Entities(Editor.World, _selection, !_forEvents && !_forTests || _all);
 
             _said = _selection.Count == 0 && chosen.Length == 0
                 ? _title
-                : SentenceText.Picking(_forEvents, blocks, chosen, at >= 0 && _sets[at]);
+                : _forTests
+                    ? SentenceText.Testing(blocks, chosen, at >= 0 && _sets[at])
+                    : SentenceText.Picking(_forEvents, blocks, chosen, at >= 0 && _sets[at]);
 
             _retitled = true;
         }
@@ -1254,7 +1316,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
             else
             {
-                var capable = Vocabulary.Capable(Editor.World, _forEvents);
+                var capable = _forTests ? Vocabulary.Testable(Editor.World) : Vocabulary.Capable(Editor.World, _forEvents);
                 for (var i = 0; i < capable.Count; i++)
                 {
                     if (_admits == null || _admits(capable[i]))

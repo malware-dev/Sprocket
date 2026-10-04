@@ -51,8 +51,8 @@ on screen     Airlock
 044  Sprite     Sprocket_Fill         {X:509 Y:292 W:124 H:2}  #8EBCCFFF
 045  Text       at {X:524.7633 Y:259.2255} scale 0.833  #DCF5FDFF  "Sequence 1"
 046  Text       at {X:1610.156 Y:262.5141} scale 0.401  #A2C3CDFF  "d"
-047  Text       at {X:272 Y:311.2255} scale 0.833  #A2C3CDFF  "+ when…"
-048  Text       at {X:385.4067 Y:311.2255} scale 0.833  #A2C3CDFF  "+ every…"
+047  Text       at {X:272 Y:311.2255} scale 0.833  #A2C3CDFF  "+ when"
+048  Text       at {X:372.1833 Y:311.2255} scale 0.833  #A2C3CDFF  "+ every"
 049  Text       at {X:260 Y:387.6399} scale 0.694  #85A1A9FF  "SEQUENCES"
 050  Sprite     Sprocket_Fill         {X:256 Y:418 W:1396 H:68}  #29363EFF
 051  Text       at {X:276.0625 Y:447.2328} scale 0.161  #5F7278FF  "0"

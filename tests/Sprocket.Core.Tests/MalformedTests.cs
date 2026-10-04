@@ -13,7 +13,7 @@ namespace Sprocket.Tests;
 public class MalformedTests
 {
     /// <summary>A script that reads clean, using every statement the cases below break.</summary>
-    const string Good = "sprocket 1 alpha 9\n\n"
+    const string Good = "sprocket 1 alpha 10\n\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n"
         + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n"
         + "let halt = panel1:toolbar(1, 1, 2)\n"
@@ -97,7 +97,7 @@ public class MalformedTests
     [InlineData("instance 1 of MalTek.Airlock {\n", "instance 1 of MalTek.Airlock garbage {\n")]
     [InlineData("let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n", "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ] garbage\n")]
     [InlineData("let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n", "block door1 [ 7, \"Inner\" ]\n")]
-    [InlineData("sprocket 1 alpha 9\n", "sprocket 1 alpha 9 garbage\n")]
+    [InlineData("sprocket 1 alpha 10\n", "sprocket 1 alpha 10 garbage\n")]
     [InlineData("    required slot inner expects Door\n", "    // required slot inner expects Door\n")]
     [InlineData("    on button then run 1\n", "    // on button then run 1\n")]
     [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "// let halt = panel1:toolbar(1, 1, 2)\n")]
@@ -117,15 +117,15 @@ public class MalformedTests
     [InlineData("        set Radius on [ inner ] to 4\n", "        set Radius on [ inner ] to (1 2 3)\n")]
     [InlineData("        set Radius on [ inner ] to 4\n", "        set Radius on [ inner ] to MalTek.Four\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.close on [ inner ] with [ 1, 2 ]\n")]
-    [InlineData("sprocket 1 alpha 9\n", "sprocket 1.5 alpha 9\n")]
-    [InlineData("sprocket 1 alpha 9\n", "sprocket 1 alpha 9.9\n")]
+    [InlineData("sprocket 1 alpha 10\n", "sprocket 1.5 alpha 10\n")]
+    [InlineData("sprocket 1 alpha 10\n", "sprocket 1 alpha 10.9\n")]
     [InlineData("        run 1\n", "        Run 1\n")]
     [InlineData("        await\n", "        Await\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.close ON [ inner ]\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.close on [ Inner ]\n")]
     [InlineData("    inner = [ door1 ]\n", "    inner = [ Door1 ]\n")]
     [InlineData("instance 1 of MalTek.Airlock {\n", "instance 1 of maltek.airlock {\n")]
-    [InlineData("sprocket 1 alpha 9\n", "Sprocket 1 alpha 9\n")]
+    [InlineData("sprocket 1 alpha 10\n", "Sprocket 1 alpha 10\n")]
     [InlineData("        run 1\n", "        run all\n")]
     [InlineData("        run 1\n", "        stop every\n")]
     [InlineData("    required slot inner expects Door\n", "    required slot inner expects block\n")]
@@ -155,7 +155,7 @@ public class MalformedTests
     public void AHeaderThatWillNotParseIsDamage()
     {
         var after = new Automation();
-        var said = ProgramText.Load(Good.Replace("sprocket 1 alpha 9\n", "sprocket 1 alpha 9 ,\n"), after, new Values());
+        var said = ProgramText.Load(Good.Replace("sprocket 1 alpha 10\n", "sprocket 1 alpha 10 ,\n"), after, new Values());
 
         Assert.StartsWith("Line 1: ", said);
         Assert.False(after.Intact);
@@ -199,7 +199,7 @@ public class MalformedTests
     public void EveryAnnotationIsKept()
     {
         var script = Good
-            .Replace("sprocket 1 alpha 9\n", "# The ship's automation.\nsprocket 1 alpha 9\n")
+            .Replace("sprocket 1 alpha 10\n", "# The ship's automation.\nsprocket 1 alpha 10\n")
             .Replace("let door1 = ", "# The inner door.\nlet door1 = ")
             .Replace("let halt = ", "# The stop button.\nlet halt = ")
             .Replace("instance 1 of MalTek.Airlock {\n", "# The front airlock.\ninstance 1 of MalTek.Airlock {\n")
@@ -209,7 +209,7 @@ public class MalformedTests
         Assert.Equal("", ProgramText.Load(script, after, new Values()));
         var saved = ProgramText.Save(after, new Values());
 
-        Assert.Contains("# The ship's automation.\nsprocket 1 alpha 9", saved);
+        Assert.Contains("# The ship's automation.\nsprocket 1 alpha 10", saved);
         Assert.Contains("# The inner door.\nlet door1 = ", saved);
         Assert.Contains("# The stop button.\nlet halt = ", saved);
 

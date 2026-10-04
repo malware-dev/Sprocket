@@ -18,7 +18,7 @@ public class ScriptTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Version = "sprocket 1 alpha 9\n\n";
+    const string Version = "sprocket 1 alpha 10\n\n";
 
     const string Head = Version + "system \"" + Identity + "\" as ";
 
@@ -152,7 +152,7 @@ public class ScriptTests
     public void AProgramReadsAsAScript()
     {
         Assert.Equal(
-            "sprocket 1 alpha 9\n" +
+            "sprocket 1 alpha 10\n" +
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934, \"Airlock Inner Door\" ]\n" +
             "\n" +
@@ -213,7 +213,7 @@ public class ScriptTests
         system.AddTrigger(pressed);
 
         const string written =
-            "sprocket 1 alpha 9\n" +
+            "sprocket 1 alpha 10\n" +
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934 ]\n" +
             "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 74857693847562937 ]\n" +
@@ -254,9 +254,9 @@ public class ScriptTests
     /// A system with no identity, or one that is not a GUID, is trouble and is not read.
     /// </summary>
     [Theory]
-    [InlineData("sprocket 1 alpha 9\n\nsystem Airlock {\n}\n")]
-    [InlineData("sprocket 1 alpha 9\n\nsystem \"airlock\" as Airlock {\n}\n")]
-    [InlineData("sprocket 1 alpha 9\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 10\n\nsystem Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 10\n\nsystem \"airlock\" as Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 10\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock {\n}\n")]
     public void ASystemWithoutAnIdentityIsTrouble(string text)
     {
         var after = new Automation();
@@ -1212,7 +1212,7 @@ public class ScriptTests
     [Fact]
     public void APathAmongABlocksKeysComesBackAsWritten()
     {
-        const string written = "sprocket 1 alpha 9\n\nlet door1 = block 'Door/LargeBlockDoor' "
+        const string written = "sprocket 1 alpha 10\n\nlet door1 = block 'Door/LargeBlockDoor' "
             + "[ 74857693847562934, [ (0 2 -1), (3 0 0) ], \"Hangar Door\" ]\n\n"
             + Using;
 
@@ -1233,7 +1233,7 @@ public class ScriptTests
     public void AListThatIsNotCellsIsTrouble(string key)
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 1 alpha 9\n\nlet door1 = block 'Door/LargeBlockDoor' [ 7, " + key + " ]\n", after));
+        Assert.NotEqual("", Load("sprocket 1 alpha 10\n\nlet door1 = block 'Door/LargeBlockDoor' [ 7, " + key + " ]\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1242,7 +1242,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(
-            "sprocket 1 alpha 9\n\nlet door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, (3 0 -2) ]\n", after));
+            "sprocket 1 alpha 10\n\nlet door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, (3 0 -2) ]\n", after));
 
         Assert.False(after.Intact);
     }
@@ -1378,7 +1378,7 @@ public class ScriptTests
     public void AnAnnotationWithNothingUnderItIsTrouble()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 1 alpha 9\n\n# about nothing at all\n", after));
+        Assert.NotEqual("", Load("sprocket 1 alpha 10\n\n# about nothing at all\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1393,7 +1393,7 @@ public class ScriptTests
     public void ASaveFromAnotherVersionIsTurnedAwayAndNotWrittenBack()
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 9", "sprocket 2"), after);
+        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 10", "sprocket 2"), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);
@@ -1410,14 +1410,14 @@ public class ScriptTests
     /// say something, rather than deep in the file where it cannot.
     /// </remarks>
     [Theory]
-    [InlineData("sprocket 1 alpha 8")]
-    [InlineData("sprocket 1 alpha 10")]
+    [InlineData("sprocket 1 alpha 9")]
+    [InlineData("sprocket 1 alpha 11")]
     [InlineData("sprocket 1")]
 
     public void ASaveFromAnotherDraftOfTheFormatIsRefused(string head)
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 9", head), after);
+        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 10", head), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);

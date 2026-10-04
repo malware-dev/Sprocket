@@ -424,23 +424,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             /// <summary>Which sequence on which one of its system, so reachability is reported for each one.</summary>
             public long Start;
 
-            /// <summary>
-            /// The block whose own action goes in the slot, or zero where Sprocket's action does.
-            /// </summary>
-            /// <remarks>
-            /// A trigger that does one plain thing is written as the game's action on the block that
-            /// act names, so the button keeps working with the mod removed.
-            /// </remarks>
-            public long ActionBlockId;
-
-            /// <summary>The game's name for that action, or null where Sprocket's action goes in.</summary>
-            public string GameActionId;
-
             public bool Same(Want other)
             {
                 return PanelId == other.PanelId && Toolbar == other.Toolbar && Slot == other.Slot
-                    && ActionBlockId == other.ActionBlockId
-                    && string.Equals(GameActionId, other.GameActionId, StringComparison.Ordinal)
                     && string.Equals(Key, other.Key, StringComparison.Ordinal);
             }
         }
@@ -492,7 +478,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Reindex();
             Wanted(_wanting);
-            Written();
 
             // Nothing is written for a program that has just been loaded. Every button it asks for was
             // wired by the session that built it and the game has owned those slots ever since; a slot
@@ -590,90 +575,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 want.Key = needed.Acts != null ? KeyOf(system, instance, needed) : KeyOf(system, instance, sequence, needed.Stops);
                 want.Reference = blocks[i];
                 want.Start = GridWorld.Start(sequence.Id, instance);
-
-                long acts;
-                string named;
-                if (Plain(instance, sequence, out acts, out named))
-                {
-                    want.ActionBlockId = acts;
-                    want.GameActionId = named;
-                }
-
                 into.Add(want);
             }
         }
 
-        /// <summary>
-        /// The game's own action a trigger's own act amounts to, where it amounts to exactly one.
-        /// </summary>
-        /// <remarks>
-        /// The act of a trigger that acts itself, on one block, whose kind knows the game's name for
-        /// that act. Then the slot holds the game's action rather than Sprocket's, and the button works
-        /// with the mod removed - which is the point of it.
-        /// <para>
-        /// Only a trigger's own act. A sequence is a thing on screen with a switch of its own, and
-        /// switching it off has to stop its buttons, which the game's action in a slot would sail
-        /// straight past. Anything else - several blocks, or an action Sprocket performs out of
-        /// property writes - is Sprocket's to run.
-        /// </para>
-        /// <para>
-        /// Asked of the block as well as of the kind, because a name is data and the block is the
-        /// authority: a subtype that does not offer it costs a Sprocket trigger rather than a slot
-        /// that silently does nothing.
-        /// </para>
-        /// </remarks>
-        bool Plain(SystemInstance instance, Sequence sequence, out long blockId, out string actionId)
-        {
-            blockId = 0;
-            actionId = null;
-
-            if (!sequence.IsAlone || sequence.Steps.Count != 1)
-                return false;
-
-            var act = sequence.Steps[0] as Act;
-            if (act == null || !act.HasAction)
-                return false;
-
-            _acting.Clear();
-            if (instance == null)
-            {
-                for (var i = 0; i < act.Targets.Count; i++)
-                    _acting.Add(act.Targets[i]);
-            }
-            else
-            {
-                instance.Resolve(act.Targets, _acting);
-            }
-
-            _runner.Bindings.Distinct(_acting);
-            if (_acting.Count != 1)
-                return false;
-
-            GridEntity entity = _runner.Bindings.Entity(_acting[0]);
-            if (entity == null)
-                return false;
-
-            EntityAction action = act.Names(entity.Kind.Actions);
-            if (action == null || string.IsNullOrEmpty(action.GameActionId))
-                return false;
-
-            if (!Toolbars.Offers(entity.Block, action.GameActionId))
-                return false;
-
-            blockId = entity.Block.EntityId;
-            actionId = action.GameActionId;
-            return true;
-        }
-
-        readonly List<string> _acting = new List<string>();
         readonly List<string> _answering = new List<string>();
         readonly List<ToolbarSlot> _answeringAt = new List<ToolbarSlot>();
-
-        /// <summary>What a slot holding the game's own action is counted under.</summary>
-        static string PlainKey(long blockId, string actionId)
-        {
-            return "do/" + blockId + "/" + actionId;
-        }
 
         static bool Holds(List<Want> wants, Want one)
         {
@@ -689,7 +596,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether the block this want names is arranged to start exactly this.
         /// </summary>
-        /// <remarks>Read off the slot itself: Sprocket's action carrying this want's key, or the game's own action it asks for.</remarks>
+        /// <remarks>Read off the slot itself: Sprocket's action carrying this want's key.</remarks>
         bool Wired(Want want)
         {
             GridEntity grid = _runner.Bindings.Entity(want.Reference);
@@ -705,17 +612,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly Dictionary<string, int> _needed = new Dictionary<string, int>(StringComparer.Ordinal);
 
-        /// <summary>Which key a trigger's slot holds: Sprocket's, the stopping one, or the game's.</summary>
+        /// <summary>Which key a trigger's slot holds: the one that runs, or the stopping one.</summary>
         string Wanting(AutomationSystem system, SystemInstance instance, Sequence sequence,
             Trigger trigger)
         {
             if (trigger.Stops)
                 return KeyOf(system, instance, sequence, true);
-
-            long acts;
-            string named;
-            if (Plain(instance, sequence, out acts, out named))
-                return PlainKey(acts, named);
 
             var needed = trigger as RequiredTrigger;
             return needed != null && needed.Acts != null ? KeyOf(system, instance, needed) : KeyOf(system, instance, sequence);
@@ -744,24 +646,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!toolbar.TryGetItem(slot, out present))
                     continue;
 
-                // A slot holding the game's own action on a block is a claim as well. It is how
-                // a trigger that does one plain thing is wired, and without counting it such a
-                // trigger reads as a sequence nothing starts and is parked a second later.
-                //
-                // Sprocket's action counts only where it points here. One pointed at another
-                // Sprocket runs that one's program, and one pointed at a block that is gone runs
-                // nothing at all, so counting either would be this program reporting a button
-                // that answers somebody else - or nobody - as its own.
+                // Sprocket's action counts only where it points here. One pointed at another Sprocket runs that one's
+                // program, and one pointed at a block that is gone runs nothing at all, so counting either would be this
+                // program reporting a button that answers somebody else - or nobody - as its own.
                 if (!Mine(present))
-                {
-                    if (present.Kind == MyToolbarItemKind.BlockAction
-                        && !string.IsNullOrEmpty(present.ActionId))
-                    {
-                        Claimed(PlainKey(present.BlockEntityId, present.ActionId));
-                    }
-
                     continue;
-                }
 
                 _arguments.Clear();
                 Toolbars.Parameters(toolbar, slot, _arguments);
@@ -917,15 +806,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             return new Unanswered(block, KeyIn(toolbar, slot, present) == wanted ? Unwired.Unknown : Unwired.Taken);
         }
 
-        /// <summary>The key a slot holds, Sprocket's or the game's own action's, or null where it holds neither.</summary>
+        /// <summary>The key a slot holds where it holds this Sprocket's action, or null.</summary>
         string KeyIn(IMyToolbar toolbar, int slot, MyToolbarItemInfo present)
         {
             if (!Mine(present))
-            {
-                return present.Kind == MyToolbarItemKind.BlockAction && !string.IsNullOrEmpty(present.ActionId)
-                    ? PlainKey(present.BlockEntityId, present.ActionId)
-                    : null;
-            }
+                return null;
 
             _arguments.Clear();
             Toolbars.Parameters(toolbar, slot, _arguments);
@@ -1062,9 +947,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 MyToolbarItemInfo present;
                 var filled = toolbar.TryGetItem(want.Slot, out present);
 
-                // Already exactly this. The ordinary case for a trigger written as the game's own
-                // action, where what is in the slot is not Sprocket's - so the test below would read
-                // Sprocket's own writing as somebody else's work.
+                // Already exactly this.
                 if (filled && Asked(toolbar, present, want))
                     continue;
 
@@ -1077,37 +960,15 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                if (!Toolbars.Write(toolbar, want.Slot, Item(want), Arguments(want)))
+                if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId), TriggerAction.Argument(want.Key)))
                 {
                     Told.Say("the write was refused for slot " + want.Slot);
                     continue;
                 }
 
-                Told.Say("wired slot " + want.Slot + " to " + Said(want));
+                Told.Say("wired slot " + want.Slot + " to " + want.Key);
             }
         }
-
-        /// <summary>What goes in the slot: the game's own action, or Sprocket's carrying a key.</summary>
-        MyToolbarItemInfo Item(Want want)
-        {
-            return want.GameActionId == null
-                ? TriggerAction.Slot(_block.EntityId)
-                : MyToolbarItemInfo.BlockAction(want.ActionBlockId, want.GameActionId);
-        }
-
-        /// <summary>
-        /// What the item is given to run with: the key, or nothing.
-        /// </summary>
-        /// <remarks>
-        /// The game's own action takes no argument. Sprocket's takes the key saying which sequence of
-        /// which one of which system, because its action is the same action on every construct.
-        /// </remarks>
-        List<TerminalActionParameter> Arguments(Want want)
-        {
-            return want.GameActionId == null ? TriggerAction.Argument(want.Key) : _nothing;
-        }
-
-        readonly List<TerminalActionParameter> _nothing = new List<TerminalActionParameter>();
 
         /// <summary>Whether a slot already holds exactly what a want asks for.</summary>
         /// <remarks>
@@ -1117,12 +978,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         bool Asked(IMyToolbar toolbar, MyToolbarItemInfo present, Want want)
         {
-            if (want.GameActionId != null)
-            {
-                return present.BlockEntityId == want.ActionBlockId
-                    && string.Equals(present.ActionId, want.GameActionId, StringComparison.Ordinal);
-            }
-
             if (!Mine(present))
                 return false;
 
@@ -1143,7 +998,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// in each of them and reported every button as wired while none of them did anything.
         /// <para>
         /// The id it needs was in the slot the whole time, because Sprocket writes its own block into
-        /// the action it puts there - see <see cref="Item" />.
+        /// the action it puts there.
         /// </para>
         /// </remarks>
         bool Mine(MyToolbarItemInfo present)
@@ -1169,14 +1024,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return TriggerAction.IsOurs(present)
                 && present.BlockEntityId != _block.EntityId
                 && !Toolbars.Exists(present.BlockEntityId);
-        }
-
-        /// <summary>What a want reads as in the log.</summary>
-        static string Said(Want want)
-        {
-            return want.GameActionId == null
-                ? want.Key
-                : want.GameActionId + " on " + want.ActionBlockId;
         }
 
         long PanelId(string reference)
@@ -1281,13 +1128,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (toolbar.TryGetItem(want.Slot, out present) && Asked(toolbar, present, want))
                     continue;
 
-                if (!Toolbars.Write(toolbar, want.Slot, Item(want), Arguments(want)))
+                if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId), TriggerAction.Argument(want.Key)))
                 {
                     Told.Say("the write was refused for slot " + want.Slot);
                     continue;
                 }
 
-                Told.Say("wired slot " + want.Slot + " to " + Said(want) + ", as picked");
+                Told.Say("wired slot " + want.Slot + " to " + want.Key + ", as picked");
             }
 
             if (_answered.Count == 0)
@@ -1301,22 +1148,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<long> _asserted = new List<long>();
         readonly List<long> _answered = new List<long>();
-
-        /// <summary>Tells the world which buttons the program writes as the game's own action, so a slot holding one reads as the program's.</summary>
-        void Written()
-        {
-            _spelled.Clear();
-            for (var w = 0; w < _wanting.Count; w++)
-            {
-                Want want = _wanting[w];
-                if (want.GameActionId != null)
-                    _spelled.Add(GridWorld.Spelled(want.PanelId, want.Slot, want.ActionBlockId, want.GameActionId));
-            }
-
-            _world.Writes(_spelled);
-        }
-
-        readonly List<string> _spelled = new List<string>();
 
         /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
         /// <remarks>
@@ -1511,6 +1342,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         public void Written(out string program, out string state)
         {
+            // Whatever was changed a moment ago is dated before it is written.
+            if (_editor != null)
+                _editor.Stamp(true);
+
             program = ProgramText.Save(_program, _world.Values);
             state = StateText.Save(_program, _runner);
         }

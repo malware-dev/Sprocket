@@ -67,7 +67,7 @@ public class RenameTests
         var editor = screen.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("when…");
+        editor.PressStart("when");
         screen.Run(5);
 
         var tall = Header(screen);

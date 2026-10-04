@@ -102,6 +102,15 @@ sealed class Battery : Fitting
     }
 
     /// <inheritdoc />
+    public override bool Holds(string propertyId, Literal value)
+    {
+        if (propertyId != "ChargeMode")
+            return base.Holds(propertyId, value);
+
+        return value.Kind == ValueKind.Integer && value.Whole == (long)_mode;
+    }
+
+    /// <inheritdoc />
     public override void Perform(string actionId, IList<Literal> values)
     {
         if (actionId == "Recharge_On")

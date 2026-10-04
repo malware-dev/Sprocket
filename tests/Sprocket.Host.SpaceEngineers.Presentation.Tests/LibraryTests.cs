@@ -18,7 +18,7 @@ public class LibraryTests
     public void BackupsReadBackWhatTheyWrite()
     {
         var written = new Backups();
-        written.Take("Hangar\nAirlock", Saved, new long[] { 118, 119 }, "sprocket 1 alpha 9\n\nsystem ...\n", "");
+        written.Take("Hangar\nAirlock", Saved, new long[] { 118, 119 }, "sprocket 1 alpha 10\n\nsystem ...\n", "");
         written.Take("Lost Ship", Saved.AddHours(1), new long[] { 7 }, "p", "switched off\n");
 
         var read = new Backups();
@@ -29,7 +29,7 @@ public class LibraryTests
         Assert.Equal("Hangar\nAirlock", read.All[0].Name);
         Assert.Equal(Saved, read.All[0].Saved);
         Assert.Equal(new long[] { 118, 119 }, read.All[0].Grids);
-        Assert.Equal("sprocket 1 alpha 9\n\nsystem ...\n", read.All[0].Program);
+        Assert.Equal("sprocket 1 alpha 10\n\nsystem ...\n", read.All[0].Program);
         Assert.Equal("switched off\n", read.All[1].Switches);
     }
 

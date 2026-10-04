@@ -27,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         const string OnWord = "on";
         const string ToWord = "to";
+        const string IsWord = "is";
 
         /// <summary>How many blocks a sentence names before it counts the rest.</summary>
         const int Said = 2;
@@ -103,7 +104,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>
-        /// What comes before a step's slots: "wait", "run", "stop", "set", or nothing at all.
+        /// What comes before a step's slots: "wait", "run", "stop", "set", "if", "otherwise if", "otherwise", or nothing at all.
         /// </summary>
         /// <remarks>
         /// Ordinarily nothing. A step reads as "close the inner door" and the list being a list is
@@ -120,6 +121,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (kind == StepKind.Set)
                 return SetWord;
 
+            if (kind == StepKind.If)
+                return "if";
+
+            if (kind == StepKind.OtherwiseIf)
+                return "otherwise if";
+
+            if (kind == StepKind.Otherwise)
+                return "otherwise";
+
             return kind == StepKind.Wait ? "wait" : "";
         }
 
@@ -132,6 +142,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </remarks>
         public static string Joining(IList<SentenceSlot> slots, int slot)
         {
+            return Joining(slots, slot, false);
+        }
+
+        /// <summary>The same, for a test where <paramref name="tests" /> says so, which reads its value as the program does: a value on some blocks is something.</summary>
+        public static string Joining(IList<SentenceSlot> slots, int slot, bool tests)
+        {
             var first = slots.Count > 0 ? slots[0] as ActionSlot : null;
             if (first == null || first.Action == null || !first.Action.Sets)
                 return "";
@@ -139,7 +155,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (slot == 1)
                 return OnWord;
 
-            return slot == 2 ? ToWord : "";
+            if (slot != 2)
+                return "";
+
+            return tests ? IsWord : ToWord;
         }
 
 
@@ -152,6 +171,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return SetWord + " " + value + " " + OnWord + " " + blocks + " " + ToWord + " " + given;
         }
 
+
+        /// <summary>A test being picked, as far as it has got: "If Inner Door is closed", "If On/Off on Airlock Light is …".</summary>
+        /// <param name="blocks">The blocks as <see cref="Entities(GridWorld, IList{long}, bool)" /> says them.</param>
+        /// <param name="chosen">The state or the value chosen, in the words its list shows it in, or empty.</param>
+        /// <param name="value">Whether what is chosen is a value, which reads "the value on the blocks is".</param>
+        public static string Testing(string blocks, string chosen, bool value)
+        {
+            if (chosen.Length == 0)
+                chosen = Empty;
+
+            return value
+                ? "If " + chosen + " " + OnWord + " " + blocks + " " + IsWord + " " + Empty
+                : "If " + blocks + " " + chosen;
+        }
 
         /// <summary>
         /// A trigger or a step being picked, as far as it has got: "When Airlock Button …".
@@ -194,6 +227,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             if (!Blocks(world, slot, into) && !Member(slot, into))
                 into.Add(new Mention(InStep(world, slot), null));
+        }
+
+        /// <summary>
+        /// Each of the blocks <paramref name="entityIds" />, each followed by what it does that answers a trigger: "Airlock
+        /// Button button 2 is pressed".
+        /// </summary>
+        /// <remarks>The trigger's words as the trigger's row says them, so a slot and the trigger it answers read alike.</remarks>
+        public static void Triggers(GridWorld world, IList<long> entityIds, IList<string> triggers, List<Mention> into)
+        {
+            for (var i = 0; i < entityIds.Count; i++)
+            {
+                if (i > 0)
+                    into.Add(new Mention(", ", null));
+
+                var entity = world.FindEntity(entityIds[i]);
+                into.Add(entity == null ? new Mention(Missing, null) : new Mention(entity.Name, entity.Kind.Icon));
+                if (i < triggers.Count && !string.IsNullOrEmpty(triggers[i]))
+                    into.Add(new Mention(triggers[i], null));
+            }
         }
 
         /// <summary>
@@ -356,6 +408,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var happening = slot as EventSlot;
             if (happening != null)
                 return happening.Event == null ? Empty : happening.Event.Text;
+
+            var state = slot as StateSlot;
+            if (state != null)
+                return state.Moment == null ? Empty : state.Holds ? state.Moment.State : state.Moment.Unstate;
 
             // A value is said by its name alone in its slot, because "set" is said before the slot and
             // is not part of what pressing it changes.

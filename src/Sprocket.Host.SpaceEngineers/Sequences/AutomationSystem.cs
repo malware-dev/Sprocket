@@ -240,14 +240,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             for (var i = 0; i < _triggers.Count && number > 0; i++)
             {
-                if (_triggers[i].Runs == number)
+                if (_triggers[i].Runs == number && !_triggers[i].Stops)
                     return _triggers[i];
             }
 
             return null;
         }
 
-        /// <summary>Whether any sequence of this system has a step that runs that one.</summary>
+        /// <summary>Whether any sequence of this system has a step that runs that one; a step that stops it does not count.</summary>
         /// <remarks>
         /// Asked of the whole system rather than of one sequence, because what is wanted is whether
         /// anybody at all calls it: a sequence with no trigger and no caller is one nothing can ever
@@ -261,7 +261,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 for (var q = 0; q < steps.Count; q++)
                 {
                     var run = steps[q] as Run;
-                    if (run != null && !run.IsOff && run.Number == number)
+                    if (run != null && !run.IsOff && !run.Stops && run.Number == number)
                         return true;
                 }
             }
@@ -309,11 +309,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 var steps = _sequences[s].Steps;
                 for (var i = 0; i < steps.Count; i++)
-                {
-                    var act = steps[i] as Act;
-                    if (act != null)
-                        Rename(act.Targets, was, name);
-                }
+                    Rename(steps[i].Targets, was, name);
             }
 
             for (var i = 0; i < _instances.Count; i++)
@@ -466,11 +462,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 var sequence = _sequences[i];
 
                 for (var s = 0; s < sequence.Steps.Count; s++)
-                {
-                    var act = sequence.Steps[s] as Act;
-                    if (act != null)
-                        Gather(act.Targets, into);
-                }
+                    Gather(sequence.Steps[s].Targets, into);
             }
         }
 

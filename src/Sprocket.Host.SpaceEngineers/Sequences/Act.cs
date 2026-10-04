@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public bool Sets => Form == Form.Value;
 
         /// <summary>The parts affected. All of them, together, in this step.</summary>
-        public IList<string> Targets => _targets;
+        public override IList<string> Targets => _targets;
 
         /// <summary>
         /// The values the action has to be given, in the order it declares them.

@@ -588,12 +588,37 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             var run = step as Run;
             if (run != null)
-                return Annotated(new Run(run.Number), step);
+                return Annotated(new Run(run.Number, run.Stops), step);
 
             if (step is Await)
                 return Annotated(new Await(), step);
 
+            var opens = step as If;
+            if (opens != null)
+                return Annotated(new If(Copied(opens.Test)), step);
+
+            var branch = step as Else;
+            if (branch != null)
+                return Annotated(new Else(branch.Test == null ? null : Copied(branch.Test)), step);
+
+            if (step is EndIf)
+                return Annotated(new EndIf(), step);
+
             return null;
+        }
+
+        /// <summary>A test again, deep enough that editing the copy cannot reach the original.</summary>
+        static Comparison Copied(Comparison test)
+        {
+            var copy = new Comparison();
+            copy.MemberId = test.MemberId;
+            copy.Provider = test.Provider;
+            copy.RequiresAll = test.RequiresAll;
+            copy.Value = test.Value;
+            for (var i = 0; i < test.Targets.Count; i++)
+                copy.Targets.Add(test.Targets[i]);
+
+            return copy;
         }
 
         static Step Annotated(Step made, Step from)
@@ -684,8 +709,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
-                var act = sequence.Steps[i] as Act;
-                if (act != null && act.Targets.Contains(name))
+                if (sequence.Steps[i].Targets.Contains(name))
                     return true;
             }
             return false;

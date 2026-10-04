@@ -82,7 +82,7 @@ qualified, the namespace's name, a dot, and the id.
 call Reverse on [ arm ]
 set Radius on [ light ] to 4.5
 call Gearbox.close on [ inner ]
-call Gearbox.'rotate-to' on [ arm ] with 0 90 2
+call Gearbox.'rotate-to' on [ arm ] with 0, 90, 2
 when any Gearbox.closed [ inner ] then run 2
 ```
 
@@ -117,7 +117,7 @@ A function the host does not offer, or values it does not take, is an error.
 The first statement of every program, and the version of the language it is written in.
 
 ```
-sprocket 1 alpha 9
+sprocket 1 alpha 10
 ```
 
 `<format>` goes up only when a change would stop existing programs working.
@@ -130,7 +130,7 @@ format, which comes after all of its drafts, however many there were.
 ```
 # Oldest first
 sprocket 1 alpha 1
-sprocket 1 alpha 9
+sprocket 1 alpha 10
 sprocket 1
 sprocket 2 alpha 1
 sprocket 2
@@ -281,12 +281,15 @@ run <sequence>
 stop <sequence>
 await
 wait <duration>
+if <any|all> <member> on [ <names> ] == <value> then {
+    <steps>
+}
 ```
 
 A step starts something and the next statement follows immediately.
 
 An `on`, a `when` and an `every` each start one step: `run`, `stop`, `call` or `set`, written as it is
-here. `await` and `wait` belong to sequences alone.
+here. `await`, `wait` and `if` belong to sequences alone.
 
 The list in `call` and `set` is every name the step acts on: a system's variables, or a system
 blueprint's slots. The names stand for one set of blocks: every block any of them stands for, each
@@ -312,16 +315,16 @@ sequence 1 as Cycle {
 `call <member> on [ <names> ]` calls an action on the blocks. The member is the action's id, bare or
 qualified by its namespace, as [Namespaces](#namespaces) sets out.
 
-`with` carries the values an action takes. Every value is written as the kind it is, in order, and a
-value left out is the default the action declared. Where an action says what type a value has to be,
-a value of another kind, or a whole number too large for that type, is an error, and a whole number
-stands for a real.
+`with` carries the values an action takes, separated by commas. Every value is written as the kind it
+is, in order, and a value left out is the default the action declared. Where an action says what type a
+value has to be, a value of another kind, or a whole number too large for that type, is an error, and a
+whole number stands for a real.
 
 ```
 call Gearbox.close on [ inner ]
-call Gearbox.'rotate-to' on [ arm ] with 0 90 2
+call Gearbox.'rotate-to' on [ arm ] with 0, 90, 2
 call Reverse on [ arm ]
-call SetColor on [ light ] with 255 136 0
+call SetColor on [ light ] with 255, 136, 0
 call Run on [ pb ] with "doors open"
 ```
 
@@ -364,6 +367,47 @@ call Gearbox.open on [ outer ]
 wait 60t
 call Run on [ pb ] with "doors open"
 ```
+
+#### `if <any|all> <member> on [ <names> ] == <value> then`
+
+```
+sequence 1 as Cycle {
+    if all Gearbox.pressurized on [ vent ] == on then {
+        call Gearbox.close on [ inner ]
+        await
+        call Gearbox.depressurize on [ vent ]
+        await
+        call Gearbox.open on [ outer ]
+    }
+    else if all Gearbox.depressurized on [ vent ] == on then {
+        call Gearbox.close on [ outer ]
+        await
+        call Gearbox.pressurize on [ vent ]
+        await
+        call Gearbox.open on [ inner ]
+    }
+    else {
+        call Gearbox.close on [ inner, outer ]
+    }
+    await
+    call SetColor on [ light ] with 0, 255, 0
+}
+```
+
+`if <any|all> <member> on [ <names> ] == <value> then` tests the member on the blocks once, when the step is
+reached, and runs the statements in its block where the test holds. With `any`, one block's member equal to
+the value is enough; with `all`, every block's must be. The member is one `set` writes, and the value is
+written as `set` writes it, or a moment, named as `when` names it, with `on` or `off` as its value.
+
+The statement after an `if`'s closing brace may be an `else if`, tested in turn where nothing before it
+held, or an `else`, which runs where nothing held. An `else` comes last, and once. The sequence then carries
+on after the whole `if`.
+
+The statements in an `if`'s block are steps like any other, an `if` among them. An `await` among them waits
+for everything started above it in the sequence, inside the `if` or before it.
+
+A `//` before an `if` switches off the whole of it, its `else if` and `else` included. A step inside can be
+switched off on its own.
 
 ## A construct
 

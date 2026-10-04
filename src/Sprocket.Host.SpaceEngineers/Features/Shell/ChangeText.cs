@@ -32,6 +32,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Change.AddStep: return texts.ChangeAddStep;
                 case Change.AddWait: return texts.ChangeAddWait;
                 case Change.DescribeSlot: return texts.ChangeDescribeSlot;
+                case Change.AddIf: return texts.ChangeAddIf;
+                case Change.AddBranch: return texts.ChangeAddBranch;
+                case Change.RemoveIf: return texts.ChangeRemoveIf;
+                case Change.Unwrap: return texts.ChangeUnwrap;
+                case Change.RemoveBranch: return texts.ChangeRemoveBranch;
+                case Change.MoveBranch: return texts.ChangeMoveBranch;
                 default: return "";
             }
         }

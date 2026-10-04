@@ -76,6 +76,26 @@ public class StateTests
         Assert.Equal("Inner Door", system.Instances[1].Halt!.Block);
     }
 
+    /// <summary>Every problem that switches something off is written and read back as itself, never as one not known.</summary>
+    /// <remarks>Walks every problem there is, so one added later that switches things off and has no spelling fails here.</remarks>
+    [Fact]
+    public void EveryReasonForSwitchingOffSurvivesAReload()
+    {
+        foreach (SequenceProblem problem in Enum.GetValues(typeof(SequenceProblem)))
+        {
+            if (!new SequenceFault(problem, 0).Parks)
+                continue;
+
+            var before = Ship();
+            before.Systems[0].Enabled = false;
+            before.Systems[0].Halt = new Halt(problem, 2, 3, Host.SpaceEngineers.World.Trouble.None, "Airlock 1 Outer Door");
+
+            var after = Ship();
+            Assert.Equal("", StateText.Load(StateText.Save(before, null), after, null));
+            Assert.Equal(problem, after.Systems[0].Halt!.Problem);
+        }
+    }
+
     /// <summary>What a block said stopped it is kept as what it is, and worded only when it is read.</summary>
     [Fact]
     public void ABlocksTroubleIsWrittenAndReadBack()

@@ -22,7 +22,7 @@ public class ParkedTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();

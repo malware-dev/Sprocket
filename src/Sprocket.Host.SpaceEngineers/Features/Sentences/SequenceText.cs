@@ -388,13 +388,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        /// <summary>
-        /// One numbered line of the sequence.
-        /// </summary>
-        /// <remarks>
-        /// Three sorts of line, because a sequence has three: something done to some blocks, waiting
-        /// for what has been started, and spending time.
-        /// </remarks>
+        /// <summary>One numbered line of the sequence, in the words its row reads in; the line closing an if says nothing.</summary>
         public static string Step(Bindings bindings, Sequence sequence, Step step, SystemInstance through)
         {
             var wait = step as Wait;
@@ -411,8 +405,45 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     : called.Name);
             }
 
+            var opens = step as If;
+            if (opens != null)
+                return "if " + Tested(bindings, opens.Test, through);
+
+            var branch = step as Else;
+            if (branch != null)
+                return branch.Test == null ? "otherwise" : "otherwise if " + Tested(bindings, branch.Test, through);
+
+            if (step is EndIf)
+                return "";
+
             var act = step as Act;
             return act == null ? "wait for it to finish" : Action(bindings, act, through);
+        }
+
+        /// <summary>A test as its row reads: the blocks and the state they are read for, or the value on the blocks and what it is compared with.</summary>
+        static string Tested(Bindings bindings, Comparison test, SystemInstance through)
+        {
+            var targets = SystemInstance.Through(through, test.Targets);
+            var blocks = SentenceText.Named(bindings, targets, test.RequiresAll);
+            if (test.IsMoment)
+            {
+                var events = Vocabulary.EventsFor(bindings, targets);
+                for (var i = 0; i < events.Count; i++)
+                {
+                    if (events[i].Id == test.MemberId && events[i].IsState)
+                        return blocks + " " + (test.Value.Flag ? events[i].State : events[i].Unstate);
+                }
+
+                return blocks + " " + SentenceText.Empty;
+            }
+
+            EntityAction value = test.Names(Vocabulary.ActionsFor(bindings, targets));
+            if (value == null)
+                return SentenceText.Empty + " on " + blocks;
+
+            var fields = new List<Field>();
+            value.Fields(fields);
+            return value.Named + " on " + blocks + " is " + SentenceText.Given(new ValuesSlot(new[] { test.Value }, fields, null));
         }
 
 

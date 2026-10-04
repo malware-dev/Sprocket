@@ -92,7 +92,7 @@ public class HandoverTests : IDisposable
     void Repeating()
     {
         _sim.Editor.NewSystem("Airlock");
-        _sim.Editor.PressStart("every…");
+        _sim.Editor.PressStart("every");
         _sim.Editor.PressChoice("A task on blocks…");
         _sim.Editor.PressBlock("Airlock Outer Door");
         _sim.Editor.PressChoice("Close");
@@ -442,7 +442,7 @@ public class HandoverTests : IDisposable
 
         _wire.As(anna, () =>
         {
-            copy.Editor.PressStart("when…");
+            copy.Editor.PressStart("when");
             copy.Editor.PressBlock("Airlock Button");
             hers.Keep(_block, copy);
         });
@@ -579,7 +579,7 @@ public class HandoverTests : IDisposable
             copy.Editor.Tick(1);
             copy.Editor.RootRows()[0].Opens!.Execute();
             copy.Editor.Tick(1);
-            copy.Editor.PressStart("when…");
+            copy.Editor.PressStart("when");
             copy.Editor.PressBlock("Airlock Button");
             copy.Editor.PressChoice("is pressed");
             copy.Editor.PressPrimary();

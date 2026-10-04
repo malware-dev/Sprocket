@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// Something the machine does: a trigger and the ordered steps it runs.
+    /// Something the machine does: the ordered steps a trigger, or a step of another sequence, runs.
     /// </summary>
     /// <remarks>
     /// A sequence can be understood on its own, without reading any other sequence.
@@ -11,11 +11,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// the whole thing in their head, and it is the main thing separating this from a
     /// script.
     ///
-    /// The name is optional. An unnamed sequence reads as its own sentence, which is
-    /// enough for a reflex like "when the sensor trips, turn the lights on". A name
-    /// buys two things and is worth it for neither reason alone: it makes a list of
-    /// twenty sequences legible, and it lets more than one trigger start the same
-    /// one. Naming is never required to get anything done.
+    /// A sequence is run by its number, so the name is optional and decides nothing:
+    /// it makes a list of twenty sequences legible, and a script may use it in place
+    /// of the number. Naming is never required to get anything done.
     /// </remarks>
     public sealed class Sequence
     {
@@ -94,5 +92,62 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return (System == null || System.Enabled) && (instance == null || instance.Enabled);
         }
 
+        /// <summary>The line that ends the branch opened at <paramref name="at" />: the next <see cref="Else" /> of its <see cref="If" />, or its <see cref="EndIf" />.</summary>
+        /// <remarks>Walks the lines of the branch, so it is asked when a run reaches a branch rather than on every tick.</remarks>
+        public int BranchAfter(int at)
+        {
+            var depth = 0;
+            for (var i = at + 1; i < _steps.Count; i++)
+            {
+                if (_steps[i] is If)
+                {
+                    depth++;
+                }
+                else if (_steps[i] is EndIf)
+                {
+                    if (depth == 0)
+                        return i;
+
+                    depth--;
+                }
+                else if (_steps[i] is Else && depth == 0)
+                {
+                    return i;
+                }
+            }
+
+            return _steps.Count;
+        }
+
+        /// <summary>The <see cref="EndIf" /> of the <see cref="If" /> whose branch opens at <paramref name="at" />.</summary>
+        public int EndOf(int at)
+        {
+            while (at < _steps.Count && !(_steps[at] is EndIf))
+                at = BranchAfter(at);
+
+            return at;
+        }
+
+        /// <summary>The <see cref="If" /> that the <see cref="Else" /> or <see cref="EndIf" /> at <paramref name="at" /> belongs to, or -1.</summary>
+        public int OpenOf(int at)
+        {
+            var depth = 0;
+            for (var i = at - 1; i >= 0; i--)
+            {
+                if (_steps[i] is EndIf)
+                {
+                    depth++;
+                }
+                else if (_steps[i] is If)
+                {
+                    if (depth == 0)
+                        return i;
+
+                    depth--;
+                }
+            }
+
+            return -1;
+        }
     }
 }

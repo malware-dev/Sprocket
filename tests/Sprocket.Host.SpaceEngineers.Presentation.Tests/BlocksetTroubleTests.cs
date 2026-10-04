@@ -82,7 +82,7 @@ public class BlocksetTroubleTests
     {
         var sim = Simulation.Fresh();
         sim.Editor.NewButtonSystem("Airlock");
-        sim.Editor.PressAdd("task…");
+        sim.Editor.PressAdd("task");
         sim.Editor.PressBlock("Airlock Inner Door");
         sim.Editor.PressChoice("Open");
         sim.Editor.PressPrimary();

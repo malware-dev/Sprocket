@@ -12,6 +12,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         StepList _steps;
         Button _doSomething;
         Button _wait;
+        Button _run;
+        Button _stop;
+        Button _if;
         Label _locked;
 
         /// <inheritdoc />
@@ -35,6 +38,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         {
                             new Button { Style = Styles.Start }.As(out _doSomething),
                             new Button { Style = Styles.Start }.As(out _wait),
+                            new Button { Style = Styles.Start }.As(out _run),
+                            new Button { Style = Styles.Start }.As(out _stop),
+                            new Button { Style = Styles.Start }.As(out _if),
                             new Label { Style = Styles.Aside, Padding = new Thickness(16f, 4f), IsVisible = false }.As(out _locked)
                         }
                     }

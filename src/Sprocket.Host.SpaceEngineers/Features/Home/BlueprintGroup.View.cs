@@ -12,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         const float RailWidth = 2f;
 
         StatusRow _heading;
+        Rail _rail;
         Button _another;
         VStack _list;
 
@@ -28,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 Spacing = (Gutter - RailWidth) / 2f,
                 Children =
                 {
-                    new VStack { Background = Palette.Line, Placement = Fixed.Wide(RailWidth) },
+                    new Rail { Placement = Fixed.Wide(RailWidth) }.As(out _rail),
                     new VStack
                     {
                         Placement = Flex.Grow,
@@ -40,6 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                     }
                 }
             });
+
+            // Turned in at the way to add another, the last line the rail runs past.
+            _rail.Ends = _another;
         }
     }
 }

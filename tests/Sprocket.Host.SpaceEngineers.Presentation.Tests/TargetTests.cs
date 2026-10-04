@@ -25,7 +25,7 @@ public class TargetTests
     /// <summary>Starts a second trigger, up to choosing what it does.</summary>
     static void Another(Screen screen)
     {
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
     }
@@ -35,7 +35,7 @@ public class TargetTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Run(2);
@@ -84,7 +84,7 @@ public class TargetTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Airlock");
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
 
         Assert.Equal(2, screen.Editor.Pick().Stages.Count);

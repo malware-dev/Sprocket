@@ -22,7 +22,7 @@ public class StartingTests
         screen.Run(2);
 
         screen.Editor.PressStart("sequence");
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Close");
         screen.Editor.PressPrimary();
@@ -82,7 +82,7 @@ public class StartingTests
         // The row for it says the same thing, one screen out.
         Assert.Equal("Nothing starts this yet.", screen.Editor.Rows()[0].Problem);
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressChoice("Sequence 1");

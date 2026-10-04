@@ -78,7 +78,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!triggers[i].IsAbout(sequence))
                     continue;
 
-                starts++;
+                // A trigger that stops it is wired like one that starts it, so it is checked below all the same, and
+                // starts nothing.
+                if (!triggers[i].Stops)
+                    starts++;
 
                 // A trigger part left unanswered is said by Empty; whether the slots it is given answer is the
                 // construct's to say below. One that names no part yet is somebody still building it.
@@ -226,13 +229,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
-                var act = sequence.Steps[i] as Act;
-                if (act == null)
-                    continue;
-
-                for (var s = 0; s < act.Targets.Count; s++)
+                var step = sequence.Steps[i];
+                var lost = step is Act ? SequenceProblem.MissingTarget : SequenceProblem.MissingGate;
+                for (var s = 0; s < step.Targets.Count; s++)
                 {
-                    var slot = act.Targets[s];
+                    var slot = step.Targets[s];
                     var part = system == null ? null : system.FindPart(slot);
                     var filled = through == null ? null : through.FilledWith(slot);
                     if (part != null && through != null && (filled == null || filled.Count == 0))
@@ -244,7 +245,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         var name = filled == null ? slot : filled[n];
                         var points = bindings.State(name);
                         if (points == RefState.Lost && (part == null || !part.Optional))
-                            return new SequenceFault(SequenceProblem.MissingTarget, i, Trouble.None, name);
+                            return new SequenceFault(lost, i, Trouble.None, name);
                         if (points == RefState.Adrift && !adrift.Exists)
                             adrift = new SequenceFault(SequenceProblem.Adrift, i, Trouble.None, name);
                     }
@@ -276,11 +277,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
-                var act = sequence.Steps[i] as Act;
-                if (act == null)
-                    continue;
-
-                var slot = EmptyOf(system, through, act.Targets);
+                var slot = EmptyOf(system, through, sequence.Steps[i].Targets);
                 if (slot != null)
                     return new SequenceFault(SequenceProblem.EmptySlot, i, Trouble.None, slot);
             }
@@ -315,15 +312,42 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (act == null || act.IsOff || !Lasts(bindings, act, through))
                     continue;
 
-                var next = i + 1;
-                while (next < steps.Count && steps[next].IsOff)
-                    next++;
-
-                if (next == steps.Count || !(steps[next] is Await))
+                var next = After(sequence, i);
+                if (next >= steps.Count || !(steps[next] is Await))
                     return new SequenceFault(SequenceProblem.Unawaited, i);
             }
 
             return SequenceFault.None;
+        }
+
+        /// <summary>The step a run goes on to from the one at <paramref name="at" />: past what is switched off, and out of a branch past the end of its if.</summary>
+        static int After(Sequence sequence, int at)
+        {
+            var steps = sequence.Steps;
+            var next = at + 1;
+            while (next < steps.Count)
+            {
+                var step = steps[next];
+                if ((step.IsOff && step is If) || step is Else)
+                    next = sequence.EndOf(next) + 1;
+                else if (step.IsOff || step is EndIf)
+                    next++;
+                else
+                    break;
+            }
+
+            return next;
+        }
+
+        /// <summary>The test an <see cref="If" /> or <see cref="Else" /> makes, or null for every other step and a plain <c>else</c>.</summary>
+        static Comparison TestOf(Step step)
+        {
+            var opens = step as If;
+            if (opens != null)
+                return opens.Test;
+
+            var branch = step as Else;
+            return branch == null ? null : branch.Test;
         }
 
         /// <summary>The first step that runs a sequence which, directly or through the sequences it runs, starts this one again, or none.</summary>
@@ -424,8 +448,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         static SequenceFault Mistyped(Bindings bindings, Sequence sequence, SystemInstance through)
         {
+            var compared = new List<Literal>(1);
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
+                var test = TestOf(sequence.Steps[i]);
+                if (test != null)
+                {
+                    compared.Clear();
+                    compared.Add(test.Value);
+                    if (!TestTakes(bindings, test, through, compared))
+                        return new SequenceFault(SequenceProblem.Mistyped, i);
+
+                    continue;
+                }
+
                 var act = sequence.Steps[i] as Act;
                 if (act == null || !act.HasAction || act.Values.Count == 0)
                     continue;
@@ -446,6 +482,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return SequenceFault.None;
         }
 
+        /// <summary>Whether every block a test reads a value on takes what it is compared with as the kind the value is.</summary>
+        static bool TestTakes(Bindings bindings, Comparison test, SystemInstance through, IList<Literal> compared)
+        {
+            var targets = SystemInstance.Through(through, test.Targets);
+            for (var t = 0; t < targets.Count; t++)
+            {
+                GridEntity entity = bindings.Entity(targets[t]);
+                EntityAction value = entity == null ? null : test.Names(entity.Kind.Actions);
+                if (value != null && !value.Takes(compared))
+                    return false;
+            }
+
+            return true;
+        }
+
         /// <summary>The first step whose blocks do not offer what it does, or none.</summary>
         /// <remarks>
         /// Every block the step names has to offer it, because the step is one act done to all of
@@ -456,6 +507,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
+                var test = TestOf(sequence.Steps[i]);
+                if (test != null)
+                {
+                    var read = SystemInstance.Through(through, test.Targets);
+                    for (var t = 0; t < read.Count; t++)
+                    {
+                        GridEntity entity = bindings.Entity(read[t]);
+                        if (entity != null && test.Moment(entity.Kind) == null && test.Names(entity.Kind.Actions) == null)
+                            return new SequenceFault(SequenceProblem.Unoffered, i);
+                    }
+
+                    continue;
+                }
+
                 var act = sequence.Steps[i] as Act;
                 if (act == null || !act.HasAction)
                     continue;

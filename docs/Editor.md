@@ -113,8 +113,8 @@ at the same blocks and is its own from then on.
 It arrives with **no trigger** and **switched off**. A toolbar slot holds one claim on Sprocket's
 action, so a copy carrying the trigger it came from would be a second claim on a slot that is
 already taken - and what that costs is not an airlock cycling twice but an airlock that stops
-cycling at all, with nothing on screen saying why. See *Two triggers on one button*. It is named like any other new sequence, because a name is what makes one
-callable and a copied name would either collide or quietly take over what called the original.
+cycling at all, with nothing on screen saying why. See *Two triggers on one button*. It is named like any other new sequence, because a script may run a sequence
+by its name, and a copied name would leave that name meaning two sequences.
 Pressing it opens the copy, which is both what somebody wanted to change and the screen where it
 is told what starts it. It is offered whether or not the sequence is running, unlike
 every control on the sequence's own screen, because the copy cannot run and so cannot disturb
@@ -163,8 +163,8 @@ its own.
 
 **A trigger always does something.** There is no way to empty what it does, only to change it. The
 trigger itself is kept through any change to what it does, since the toolbar slot the construct
-holds names that trigger. Pointing away from a sequence nobody named takes that sequence with it:
-it existed only to be the one thing this trigger did.
+holds names that trigger. The sequence it pointed at before stays, as any sequence does until it is
+deleted.
 
 ### Two triggers on one button
 

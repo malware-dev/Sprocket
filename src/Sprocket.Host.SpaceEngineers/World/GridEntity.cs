@@ -115,6 +115,25 @@ namespace Sprocket.Host.SpaceEngineers.World
             return EntityValue.Of(false);
         }
 
+        /// <summary>Whether the block's own value that <paramref name="value" /> writes is <paramref name="literal" />.</summary>
+        public bool Holds(EntityAction value, Literal literal)
+        {
+            return Toolbars.Holds(_block, value.Id, literal);
+        }
+
+        /// <summary>Whether the block is in <paramref name="moment" />: the flag it reads is set where the moment rises, clear where it falls.</summary>
+        public bool In(Values values, EntityEvent moment)
+        {
+            return Flag(values, moment.PropertyId) == (moment.Edge == Edge.Rising);
+        }
+
+        /// <summary>Whether there is anything in <paramref name="propertyId" />, read as the kind the block declares it, or as a flag.</summary>
+        public bool Flag(Values values, string propertyId)
+        {
+            var property = Kind.FindProperty(propertyId);
+            return values.Flag(property == null ? ValueKind.Flag : property.Kind, GetValue(propertyId));
+        }
+
         public void Invoke(string actionId)
         {
             Invoke(actionId, null);

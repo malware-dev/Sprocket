@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>It acts on something that is no longer here.</summary>
         MissingTarget,
 
-        /// <summary>It waits on something that is no longer here.</summary>
+        /// <summary>It tests something that is no longer here.</summary>
         MissingGate,
 
         /// <summary>It asks its blocks for something they do not offer.</summary>

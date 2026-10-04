@@ -73,8 +73,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (block is IMyFunctionalBlock)
             {
                 kind.WithProperty(GridEntity.OnProperty, "switched on")
-                    .WithEvent("switched-on", GridEntity.OnProperty, Edge.Rising, "is switched on")
-                    .WithEvent("switched-off", GridEntity.OnProperty, Edge.Falling, "is switched off")
+                    .WithEvent("switched-on", GridEntity.OnProperty, Edge.Rising, "is switched on").Reading("is on", "is off")
+                    .WithEvent("switched-off", GridEntity.OnProperty, Edge.Falling, "is switched off").Reading("is off", "is on")
                     .WithState("is-on", GridEntity.OnProperty, true, "is on")
                     .WithState("is-off", GridEntity.OnProperty, false, "is off")
                     .WithAction(SwitchOn, "switch on", "is-on", "OnOff_On")

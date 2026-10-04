@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -130,6 +131,25 @@ public class BlueprintWritingTests
 
         Assert.Equal("Airlock Button", part.Id);
         Assert.Equal("Not renamed: a slot needs a name.", editor.Parts()[0].Refusal);
+    }
+
+    /// <summary>A trigger slot being filled in names the trigger on its block that answers it, not only the block.</summary>
+    [Fact]
+    public void ATriggerSlotNamesTheTriggerOnItsBlock()
+    {
+        var screen = Writing();
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+
+        editor.GoToRoot();
+        screen.Run(5);
+        editor.Choose(system, system.Instances[0]);
+        editor.Push(new BlueprintPage(editor, system, false));
+        screen.Run(5);
+
+        var row = Assert.Single(editor.Parts());
+        Assert.Single(row.Blocks);
+        Assert.EndsWith("is pressed", Assert.Single(row.Triggers));
     }
 
     /// <summary>A step back taken while a box holds the keyboard takes back what was typed in it, and nothing before it.</summary>

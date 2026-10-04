@@ -58,7 +58,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("stop");
@@ -84,7 +84,7 @@ public class ChangingTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Housekeeping");
-        screen.Editor.PressStart("every…");
+        screen.Editor.PressStart("every");
         screen.Editor.PressChoice("steady - every 100 ticks");
         screen.Editor.PressPrimary();
         screen.Editor.Back();
@@ -147,7 +147,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A task on blocks…");
@@ -266,7 +266,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A task on blocks…");
@@ -287,7 +287,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A task on blocks…");
@@ -322,7 +322,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         Assert.Null(screen.Editor.Pick().Onward);
@@ -350,7 +350,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A task on blocks…");
@@ -417,7 +417,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A task on blocks…");
@@ -497,7 +497,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A task on blocks…");
@@ -571,7 +571,7 @@ public class ChangingTests
         var screen = WithOne();
         var parts = System(screen).Parts.Count;
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
@@ -598,7 +598,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressPrimary();
@@ -622,7 +622,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
@@ -652,7 +652,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
@@ -692,7 +692,7 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();

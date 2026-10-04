@@ -257,11 +257,11 @@ This one becomes its first installation.</value>
     <comment>Heading over a logic system's triggers: what starts its sequences.</comment>
   </data>
   <data name="Sprocket.System.When" xml:space="preserve">
-    <value>when…</value>
+    <value>when</value>
     <comment>Button that adds a trigger started by something happening to a block.</comment>
   </data>
   <data name="Sprocket.System.Every" xml:space="preserve">
-    <value>every…</value>
+    <value>every</value>
     <comment>Button that adds a trigger started on a timer.</comment>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
@@ -334,11 +334,11 @@ This one becomes its first installation.</value>
     <comment>Note on a sequence's name, in the heading of its own screen.</comment>
   </data>
   <data name="Sprocket.Sequence.DoSomething" xml:space="preserve">
-    <value>task…</value>
+    <value>task</value>
     <comment>Button under a sequence's steps, after a plus that means add, that adds a step acting on blocks. The ellipsis says it asks which before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.Wait" xml:space="preserve">
-    <value>wait…</value>
+    <value>wait</value>
     <comment>Button under a sequence's steps, after a plus that means add, that adds a step waiting a length of time. The ellipsis says it asks how long before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
@@ -567,6 +567,18 @@ This one becomes its first installation.</value>
   <data name="Sprocket.Pick.NoBlocksHappen" xml:space="preserve">
     <value>Nothing here has anything that can happen to it.</value>
     <comment>Where the column of blocks is empty, picking what starts something.</comment>
+  </data>
+  <data name="Sprocket.Pick.WhatToCheck" xml:space="preserve">
+    <value>What to check</value>
+    <comment>Heading of the column listing what an if can check of the chosen blocks.</comment>
+  </data>
+  <data name="Sprocket.Pick.NothingChecked" xml:space="preserve">
+    <value>Those blocks have nothing in common that can be checked.</value>
+    <comment>Said in the column of what to check where the chosen blocks share nothing.</comment>
+  </data>
+  <data name="Sprocket.Pick.NoBlocksChecked" xml:space="preserve">
+    <value>Nothing here has anything that can be checked.</value>
+    <comment>Said in the column of blocks where nothing on the construct can be checked.</comment>
   </data>
   <data name="Sprocket.Pick.NoBlocksDone" xml:space="preserve">
     <value>Nothing here has anything that can be done to it.</value>
@@ -991,8 +1003,8 @@ This one becomes its first installation.</value>
     <comment>A sequence with no trigger.</comment>
   </data>
   <data name="Sprocket.Problem.MissingGate" xml:space="preserve">
-    <value>This waits on something that isn't here any more.</value>
-    <comment>A block this waits on is gone.</comment>
+    <value>This checks something that isn't here any more.</value>
+    <comment>A block this checks is gone.</comment>
   </data>
   <data name="Sprocket.Problem.Unoffered" xml:space="preserve">
     <value>This does something these blocks no longer offer. Replace this step.</value>
@@ -1079,8 +1091,8 @@ This one becomes its first installation.</value>
     <comment>Reason: a block it acts on was gone.</comment>
   </data>
   <data name="Sprocket.Stopped.MissingGate" xml:space="preserve">
-    <value>a block it waits on was gone.</value>
-    <comment>Reason: a block it waits on was gone.</comment>
+    <value>a block it checks was gone.</value>
+    <comment>Reason: a block it checks was gone.</comment>
   </data>
   <data name="Sprocket.Stopped.Unoffered" xml:space="preserve">
     <value>its blocks no longer offered the action.</value>
@@ -1618,6 +1630,30 @@ This one becomes its first installation.</value>
     <value>describing a slot</value>
     <comment>Follows Undo or Redo.</comment>
   </data>
+  <data name="Sprocket.Change.AddIf" xml:space="preserve">
+    <value>adding an if</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddBranch" xml:space="preserve">
+    <value>adding a branch</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveIf" xml:space="preserve">
+    <value>deleting an if</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Unwrap" xml:space="preserve">
+    <value>taking an if away</value>
+    <comment>Named after Undo and Redo: the if is gone and the steps in it are kept.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveBranch" xml:space="preserve">
+    <value>deleting a branch</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveBranch" xml:space="preserve">
+    <value>moving a branch</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
   <data name="Sprocket.Systems.Default" xml:space="preserve">
     <value>Logic system {number}</value>
     <comment>The name a new logic system is given; {number} is the first free one.</comment>
@@ -1817,5 +1853,85 @@ This one becomes its first installation.</value>
   <data name="Sprocket.Blueprint.NameKeptEmpty" xml:space="preserve">
     <value>Not renamed: a slot needs a name.</value>
     <comment>Under a slot's name box after it was left empty; the slot keeps its name.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Run" xml:space="preserve">
+    <value>run</value>
+    <comment>Button under a sequence's steps, after a plus that means add, that adds a step running another sequence. The ellipsis says it asks which before it adds.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
+    <value>Add a step that runs another sequence of this system.</value>
+    <comment>Note on the button that adds a step running another sequence.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
+    <value>Run which sequence?</value>
+    <comment>Title of the list of the system's other sequences, one of which a new step runs.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RunNone" xml:space="preserve">
+    <value>This system has no other sequence to run.</value>
+    <comment>Said in place of the list of sequences to run where the system has no other sequence.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Stop" xml:space="preserve">
+    <value>stop</value>
+    <comment>Button under a sequence's steps, after a plus that means add, that adds a step stopping another sequence. The ellipsis says it asks which before it adds.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StopAbout" xml:space="preserve">
+    <value>Add a step that stops another sequence of this system.</value>
+    <comment>Note on the button that adds a step stopping another sequence.</comment>
+  </data>
+  <data name="Sprocket.Sequence.If" xml:space="preserve">
+    <value>if</value>
+    <comment>The button that adds an if to the end of a sequence: the steps dragged into it run only where what it checks holds.</comment>
+  </data>
+  <data name="Sprocket.Sequence.IfAbout" xml:space="preserve">
+    <value>Add an if: steps dragged into it run only where what it checks holds.</value>
+    <comment>Tooltip for the button that adds an if.</comment>
+  </data>
+  <data name="Sprocket.Sequence.OtherwiseIf" xml:space="preserve">
+    <value>otherwise if</value>
+    <comment>The button under an if that adds a branch checking something else, tried where nothing before it held.</comment>
+  </data>
+  <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
+    <value>Add a branch that checks something else, where nothing above it held.</value>
+    <comment>Tooltip for the button that adds an otherwise if.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Otherwise" xml:space="preserve">
+    <value>otherwise</value>
+    <comment>The button under an if that adds its last branch, run where nothing above it held.</comment>
+  </data>
+  <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
+    <value>Add a last branch, which runs where nothing above it held.</value>
+    <comment>Tooltip for the button that adds an otherwise.</comment>
+  </data>
+  <data name="Sprocket.Sequence.OtherwiseTestAbout" xml:space="preserve">
+    <value>Make this an otherwise if, which checks something first.</value>
+    <comment>Tooltip for the button on an otherwise that gives it something to check, which makes it an otherwise if.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StateAbout" xml:space="preserve">
+    <value>Choose what this checks.</value>
+    <comment>Tooltip on the part of an if that says what it checks of its blocks, such as is closed.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RemoveIf" xml:space="preserve">
+    <value>Delete this if?</value>
+    <comment>Asked when the bin on an if is pressed.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RemoveBranch" xml:space="preserve">
+    <value>Delete this branch?</value>
+    <comment>Asked when the bin on an otherwise or otherwise if is pressed.</comment>
+  </data>
+  <data name="Sprocket.Sequence.KeepSteps" xml:space="preserve">
+    <value>Keep the steps in it</value>
+    <comment>The answer that removes only the if or branch line, leaving its steps where they are.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DeleteSteps" xml:space="preserve">
+    <value>Delete the steps in it too</value>
+    <comment>The answer that removes the if or branch with every step in it.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StopQuestion" xml:space="preserve">
+    <value>Stop which sequence?</value>
+    <comment>Title of the list of the system's other sequences, one of which a new step stops.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StopNone" xml:space="preserve">
+    <value>This system has no other sequence to stop.</value>
+    <comment>Said in place of the list of sequences to stop where the system has no other sequence.</comment>
   </data>
 </root>

@@ -32,15 +32,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         static readonly int[] WaitPresets = { 60, 120, 300, 600, 1800, 3600 };
 
         readonly Sequence _sequence;
-        readonly List<Step> _keys = new List<Step>();
+        readonly List<object> _keys = new List<object>();
         readonly List<int> _shown = new List<int>();
+        Dictionary<Step, object> _ends = new Dictionary<Step, object>();
 
         int _wiring = -1;
         int _busy;
         int _off;
         string _skips = "";
         string _madeName;
-        Keyed<Step, StepRow> _rows;
+        Keyed<object, StepRow> _rows;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
         public SequencePage(SprocketEditor editor, Sequence sequence) : base(editor)
@@ -240,7 +241,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Keeps the rows by step, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            _rows = new Keyed<Step, StepRow>(_steps.Children, delegate { return new StepRow(); });
+            _rows = new Keyed<object, StepRow>(_steps.Children, delegate { return new StepRow(); });
+            _steps.Landings = Landings;
             _steps.Moves = delegate(int from, int to)
             {
                 var move = Editor.Act(Cmd.MoveStep, delegate { Move(from, to); });
@@ -282,7 +284,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var row = _rows[_keys[i]];
                 var from = _shown[i];
                 var to = from + Spanned(from);
-                row.IsCurrent = state != null && state.IsRunning && state.CurrentStep >= from && state.CurrentStep < to;
+                row.IsCurrent = _keys[i] is Step && state != null && state.IsRunning && state.CurrentStep >= from
+                                && state.CurrentStep < to;
                 row.Show(Editor.World, texts);
             }
 
@@ -307,12 +310,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var editable = Editable;
             _doSomething.Text = StatusRow.Plus + texts.SequenceDoSomething;
             _doSomething.Tip = Tip.For(_doSomething.Tip, texts.SequenceDoSomethingAbout);
-            _doSomething.Command = Changes(Cmd.AddAction, AddAction);
+            _doSomething.Command = Changes(Cmd.AddAction, delegate { AddAction(_sequence.Steps.Count); });
             _doSomething.IsVisible = editable;
             _wait.Text = StatusRow.Plus + texts.SequenceWait;
             _wait.Tip = Tip.For(_wait.Tip, texts.SequenceWaitAbout);
-            _wait.Command = Changes(Cmd.AddWait, AddWait);
+            _wait.Command = Changes(Cmd.AddWait, delegate { AddWait(_sequence.Steps.Count); });
             _wait.IsVisible = editable;
+            _run.Text = StatusRow.Plus + texts.SequenceRun;
+            _run.Tip = Tip.For(_run.Tip, texts.SequenceRunAbout);
+            _run.Command = Changes(Cmd.AddRun, delegate { AddRun(false, _sequence.Steps.Count); });
+            _run.IsVisible = editable;
+            _stop.Text = StatusRow.Plus + texts.SequenceStop;
+            _stop.Tip = Tip.For(_stop.Tip, texts.SequenceStopAbout);
+            _stop.Command = Changes(Cmd.AddStop, delegate { AddRun(true, _sequence.Steps.Count); });
+            _stop.IsVisible = editable;
+            _if.Text = StatusRow.Plus + texts.SequenceIf;
+            _if.Tip = Tip.For(_if.Tip, texts.SequenceIfAbout);
+            _if.Command = Changes(Cmd.AddIf, delegate { AddIf(_sequence.Steps.Count); });
+            _if.IsVisible = editable;
             _locked.IsVisible = !editable;
             _locked.Text = LockedText;
 
@@ -322,34 +337,150 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     ? Template.Fill(texts.SequenceHeld, "holder", Editor.Holder)
                     : texts.SystemTurnOffToEdit;
 
+            // While it can be changed, every branch ends in a row of its own holding the ways to add to it, standing where the
+            // line after the branch does. Kept by that line, so the row is the same row from one change to the next.
+            var ends = new Dictionary<Step, object>();
             _keys.Clear();
             _shown.Clear();
             for (var i = 0; i < _sequence.Steps.Count; i++)
             {
-                if (_sequence.Steps[i] is Await)
+                var step = _sequence.Steps[i];
+                if (step is Await)
                     continue;
 
-                _keys.Add(_sequence.Steps[i]);
+                if (editable && (step is Else || step is EndIf))
+                {
+                    object end;
+                    if (!_ends.TryGetValue(step, out end))
+                        end = new object();
+
+                    ends[step] = end;
+                    _keys.Add(end);
+                    _shown.Add(i);
+                }
+
+                _keys.Add(step);
                 _shown.Add(i);
             }
 
+            _ends = ends;
             _rows.Show(_keys);
 
+            // Every line is counted but the ones that hold only ways to add: the end of a branch and the row closing an if. A
+            // branch's line stands where its if does, and the steps in it one further in.
+            var depth = 0;
+            var number = 0;
+            var offTo = -1;
             for (var i = 0; i < _keys.Count; i++)
             {
                 var row = _rows[_keys[i]];
                 var index = _shown[i];
+                var step = _keys[i] as Step;
+                if (step == null)
+                {
+                    BranchEnd(row, texts, index, depth, index <= offTo, locked);
+                    continue;
+                }
 
-                row.Number = i + 1;
-                row.Kind = Kind(_keys[i]);
+                var branch = step is Else;
+                var closes = step is EndIf;
+
+                if ((branch || closes) && depth > 0)
+                    depth--;
+
+                // Passed over whole while its if is switched off, so drawn as passed over, whatever each says.
+                if (step is If && step.IsOff && index > offTo)
+                    offTo = _sequence.EndOf(index);
+
+                row.Depth = depth;
+                row.Number = closes ? 0 : ++number;
+                row.Kind = Kind(step);
+                row.Carries = step is If ? Within(i) : Kind(step) == StepKind.OtherwiseIf ? Branch(i) : 0;
                 row.Slots.Clear();
-                Word(row, _keys[i]);
-                row.Deletes = Changes(Cmd.DeleteStep, delegate { RemoveStep(index); });
-                row.IsOff = _keys[i].IsOff;
-                row.Pauses = Changes(Cmd.SwitchStep, delegate { SwitchStep(index); });
-                row.Grip.CanCarry = editable;
+                Word(row, step);
+                row.Deletes = closes ? null : Changes(Cmd.DeleteStep, delegate { Remove(index); });
+                row.IsOff = step.IsOff || index <= offTo;
+                row.Pauses = branch || closes ? null : Changes(Cmd.SwitchStep, delegate { SwitchStep(index); });
+                row.Grip.CanCarry = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
+                Branches(row, texts, step, index);
                 row.Locked = locked;
+
+                if (step is If || branch)
+                    depth++;
             }
+
+            // A rail goes on to the next row where that row stands as far in, and ends here where it does not.
+            for (var i = 0; i < _keys.Count; i++)
+            {
+                var row = _rows[_keys[i]];
+                row.Through = i + 1 < _keys.Count ? Math.Min(row.Depth, _rows[_keys[i + 1]].Depth) : 0;
+            }
+        }
+
+        /// <summary>Makes <paramref name="row" /> the end of a branch: the ways to add a step to it, at the line <paramref name="at" /> the branch ends before.</summary>
+        void BranchEnd(StepRow row, Texts texts, int at, int depth, bool off, string locked)
+        {
+            row.Depth = depth;
+            row.Number = 0;
+            row.Kind = StepKind.Adds;
+            row.Carries = 0;
+            row.Slots.Clear();
+            row.Deletes = null;
+            row.IsOff = off;
+            row.Pauses = null;
+            row.Grip.CanCarry = false;
+            row.Locked = locked;
+            row.Adds.Clear();
+            row.Adds.Add(new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout,
+                Changes(Cmd.AddAction, delegate { AddAction(at); })));
+            row.Adds.Add(new Adder(texts.SequenceWait, texts.SequenceWaitAbout, Changes(Cmd.AddWait, delegate { AddWait(at); })));
+            row.Adds.Add(new Adder(texts.SequenceRun, texts.SequenceRunAbout, Changes(Cmd.AddRun, delegate { AddRun(false, at); })));
+            row.Adds.Add(new Adder(texts.SequenceStop, texts.SequenceStopAbout, Changes(Cmd.AddStop, delegate { AddRun(true, at); })));
+            row.Adds.Add(new Adder(texts.SequenceIf, texts.SequenceIfAbout, Changes(Cmd.AddIf, delegate { AddIf(at); })));
+        }
+
+        /// <summary>
+        /// Gives the row closing an if the ways to add a branch, an otherwise only while it has none, and an otherwise the way to
+        /// make it an otherwise if where it stands.
+        /// </summary>
+        void Branches(StepRow row, Texts texts, Step step, int index)
+        {
+            row.Adds.Clear();
+            if (step is EndIf)
+            {
+                row.Adds.Add(new Adder(texts.SequenceOtherwiseIf, texts.SequenceOtherwiseIfAbout,
+                    Changes(Cmd.AddBranch, delegate { AddBranch(index); })));
+                if (Last(index) < 0)
+                    row.Adds.Add(new Adder(texts.SequenceOtherwise, texts.SequenceOtherwiseAbout,
+                        Changes(Cmd.AddBranch, delegate { AddLast(index); })));
+            }
+            else if (Kind(step) == StepKind.Otherwise)
+            {
+                row.Adds.Add(new Adder(texts.SequenceIf, texts.SequenceOtherwiseTestAbout,
+                    Changes(Cmd.AddBranch, delegate { GiveTest(step); })));
+            }
+        }
+
+        /// <summary>How many rows after the one at <paramref name="row" />, which opens a branch, are the rest of the branch, its end among them.</summary>
+        int Branch(int row)
+        {
+            var next = _sequence.BranchAfter(_shown[row]);
+            var count = 0;
+            for (var i = row + 1; i < _shown.Count && (_shown[i] < next || !(_keys[i] is Step)); i++)
+                count++;
+
+            return count;
+        }
+
+        /// <summary>How many rows after the one at <paramref name="row" />, which opens an if, are the rest of that if.</summary>
+        int Within(int row)
+        {
+            var end = _sequence.EndOf(_shown[row]);
+            var count = 0;
+            for (var i = row + 1; i < _shown.Count && _shown[i] <= end; i++)
+                count++;
+
+            return count;
         }
 
         /// <summary>Says what is wrong once, on the bar, and marks the row it is wrong on.</summary>
@@ -366,7 +497,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _bar.ProblemIsWarning = fault.IsWarning;
 
             for (var i = 0; i < _keys.Count; i++)
-                _rows[_keys[i]].HasProblem = fault.Exists && fault.Step == _shown[i];
+                _rows[_keys[i]].HasProblem = fault.Exists && _keys[i] is Step && fault.Step == _shown[i];
         }
 
         /// <summary>What was asked for and did not happen, and why not, in one line when both happened.</summary>
@@ -401,6 +532,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Gives a step's row the parts of its sentence, each pressed to open the question it was answered with.</summary>
         void Word(StepRow row, Step step)
         {
+            var opens = step as If;
+            if (opens != null)
+            {
+                Tested(row, step, opens.Test);
+                return;
+            }
+
+            var branch = step as Else;
+            if (branch != null)
+            {
+                if (branch.Test != null)
+                    Tested(row, step, branch.Test);
+
+                return;
+            }
+
             var wait = step as Wait;
             if (wait != null)
             {
@@ -411,10 +558,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var run = step as Run;
             if (run != null)
             {
-                // Read only: nothing in the editor makes one of these yet, and a part that opens nothing must still show
-                // what the step does.
+                // Opened on the list that made it, to run or stop another.
                 var called = _sequence.System == null ? null : _sequence.System.FindSequence(run.Number);
-                row.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name, null));
+                row.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name,
+                    Changes(Cmd.StepSlot, delegate { ChangeRun(run); })));
                 return;
             }
 
@@ -440,10 +587,59 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Slots.Add(new ValuesSlot(act.Values, fields, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Values); })));
         }
 
+        /// <summary>
+        /// Gives the row of an if, or of a branch that tests, the parts of its test: the blocks and the state they are read for,
+        /// or the value, the blocks and what it is compared with, as a set says them.
+        /// </summary>
+        void Tested(StepRow row, Step step, Comparison test)
+        {
+            var blocks = Editor.Blocks(_sequence.System, test.Targets);
+            var seen = Editor.Seen(_sequence.System, test.Targets);
+            var bindings = Editor.Runner.Bindings;
+            if (test.IsMoment)
+            {
+                EntityEvent moment = null;
+                var events = Vocabulary.EventsFor(bindings, seen);
+                for (var i = 0; i < events.Count && moment == null; i++)
+                {
+                    if (events[i].Id == test.MemberId && events[i].IsState)
+                        moment = events[i];
+                }
+
+                row.Slots.Add(new EntitiesSlot(blocks, test.RequiresAll,
+                    Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
+                row.Slots.Add(new StateSlot(moment, test.Value.Flag,
+                    Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
+                return;
+            }
+
+            var value = test.Names(Vocabulary.ActionsFor(bindings, seen));
+            row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
+            row.Slots.Add(new EntitiesSlot(blocks, test.RequiresAll,
+                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
+            if (value == null)
+                return;
+
+            var fields = new List<Field>();
+            value.Fields(fields);
+            row.Slots.Add(new ValuesSlot(new[] { test.Value }, fields,
+                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Values); })));
+        }
+
         static StepKind Kind(Step step)
         {
             if (step is Wait)
                 return StepKind.Wait;
+
+            if (step is If)
+                return StepKind.If;
+
+            var branch = step as Else;
+            if (branch != null)
+                return branch.Test == null ? StepKind.Otherwise : StepKind.OtherwiseIf;
+
+            if (step is EndIf)
+                return StepKind.End;
 
             var act = step as Act;
             if (act != null && act.Sets)
@@ -486,7 +682,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// Blocks first, because somebody knows which block they mean but may not know what verbs exist: pointing at a
         /// door and being told what a door can do is discovery, and every verb on the ship in one list is a wall.
         /// </remarks>
-        void AddAction()
+        void AddAction(int at)
         {
             var origin = Editor.Depth;
 
@@ -506,21 +702,171 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     // With a wait for it after it where what it does takes time to finish, because a numbered list is
                     // read as one thing after another; one edit, so one press takes the pair back.
                     Editor.Do(_sequence, Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)
-                        ? new AddStep(Change.AddStep, _sequence.Steps.Count, step, new Await())
-                        : new AddStep(Change.AddStep, _sequence.Steps.Count, step));
+                        ? new AddStep(Change.AddStep, at, step, new Await())
+                        : new AddStep(Change.AddStep, at, step));
                     Editor.UnwindTo(origin);
                 }));
         }
 
+        /// <summary>Asks what to check, and adds an if that checks it, with nothing in it yet, at the line <paramref name="at" />.</summary>
+        void AddIf(int at)
+        {
+            var origin = Editor.Depth;
+            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
+            {
+                Editor.Do(_sequence, new AddStep(Change.AddIf, at, new If(test), new EndIf()));
+                Editor.UnwindTo(origin);
+            }));
+        }
+
+        /// <summary>Asks what to check, and adds an otherwise if checking it to the if closed at <paramref name="end" />: last, or above its otherwise, which comes last.</summary>
+        void AddBranch(int end)
+        {
+            var origin = Editor.Depth;
+            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
+            {
+                var last = Last(end);
+                Editor.Do(_sequence, new AddStep(Change.AddBranch, last < 0 ? end : last, new Else(test)));
+                Editor.UnwindTo(origin);
+            }));
+        }
+
+        /// <summary>Asks what to check, and makes the otherwise <paramref name="step" /> an otherwise if checking it, where it stands.</summary>
+        void GiveTest(Step step)
+        {
+            var origin = Editor.Depth;
+            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
+            {
+                Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), null, test));
+                Editor.UnwindTo(origin);
+            }));
+        }
+
+        /// <summary>Adds an otherwise to the if closed at <paramref name="end" />, as its last branch.</summary>
+        void AddLast(int end)
+        {
+            Editor.Do(_sequence, new AddStep(Change.AddBranch, end, new Else(null)));
+        }
+
+        /// <summary>The otherwise of the if closed at <paramref name="end" />, or -1 where it has none.</summary>
+        int Last(int end)
+        {
+            var at = _sequence.OpenOf(end);
+            while (at >= 0 && at < end)
+            {
+                at = _sequence.BranchAfter(at);
+                var branch = at < end ? _sequence.Steps[at] as Else : null;
+                if (branch != null && branch.Test == null)
+                    return at;
+            }
+
+            return -1;
+        }
+
+        /// <summary>Opens the test of <paramref name="step" /> on the column <paramref name="opens" /> says, to be changed.</summary>
+        void EditTest(Step step, Comparison test, Opening opens)
+        {
+            Editor.Push(TestPage(test, opens, delegate(Comparison now)
+            {
+                Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
+                Editor.Pop();
+            }));
+        }
+
+        /// <summary>The picker a test is made and changed with, opened on <paramref name="test" /> where there is one; <paramref name="chosen" /> is given the test made.</summary>
+        PickPage TestPage(Comparison test, Opening opens, Action<Comparison> chosen)
+        {
+            var moment = test == null || test.IsMoment;
+            var id = test == null ? "" : moment && !test.Value.Flag ? PickPage.Not + test.MemberId : test.MemberId;
+            return new PickPage(Editor, "Check something", false,
+                test == null ? new List<long>() : Editor.Blocks(_sequence.System, test.Targets), id,
+                moment ? Form.Native : Form.Value,
+                delegate(PickAnswer answer) { chosen(Test(answer)); },
+                true, test != null && test.RequiresAll, moment ? null : new[] { test.Value }, opens, forTests: true);
+        }
+
+        /// <summary>The test a pick for one comes to.</summary>
+        Comparison Test(PickAnswer answer)
+        {
+            var test = new Comparison();
+            test.RequiresAll = answer.All;
+            var named = Editor.Named(_sequence.System, answer.Targets);
+            for (var i = 0; i < named.Count; i++)
+                test.Targets.Add(named[i]);
+
+            if (answer.Form == Form.Value)
+            {
+                test.MemberId = answer.Chosen;
+                test.Value = answer.Values != null && answer.Values.Count > 0 ? answer.Values[0] : Literal.Of(true);
+                return test;
+            }
+
+            var not = answer.Chosen.StartsWith(PickPage.Not, StringComparison.Ordinal);
+            test.MemberId = not ? answer.Chosen.Substring(PickPage.Not.Length) : answer.Chosen;
+            test.Provider = BlockKinds.Own;
+            test.Value = Literal.Of(!not);
+            return test;
+        }
+
         /// <summary>Adds a timed wait, for the things that have no finishing to wait on.</summary>
-        void AddWait()
+        void AddWait(int at)
         {
             var origin = Editor.Depth;
             Editor.Push(WaitPage(delegate(int ticks)
             {
-                Editor.Do(_sequence, new AddStep(Change.AddWait, _sequence.Steps.Count, new Wait(ticks)));
+                Editor.Do(_sequence, new AddStep(Change.AddWait, at, new Wait(ticks)));
                 Editor.UnwindTo(origin);
             }));
+        }
+
+        /// <summary>Asks which other sequence of the system to run, or to stop where <paramref name="stops" /> says so, and adds the step that does.</summary>
+        /// <remarks>
+        /// Running one comes with a wait for it after it, one edit, because a numbered list is read as one thing after another;
+        /// stopping one is done at once.
+        /// </remarks>
+        void AddRun(bool stops, int at)
+        {
+            var origin = Editor.Depth;
+            Editor.Push(RunPage(stops, 0, delegate(int number)
+            {
+                Editor.Do(_sequence, stops
+                    ? new AddStep(Change.AddStep, at, new Run(number, true))
+                    : new AddStep(Change.AddStep, at, new Run(number), new Await()));
+                Editor.UnwindTo(origin);
+            }));
+        }
+
+        /// <summary>Asks again which sequence <paramref name="step" /> runs or stops, on the list that made it.</summary>
+        void ChangeRun(Run step)
+        {
+            var origin = Editor.Depth;
+            Editor.Push(RunPage(step.Stops, step.Number, delegate(int number)
+            {
+                Editor.Do(_sequence, new SetRun(_sequence.Steps.IndexOf(step), step.Number, number));
+                Editor.UnwindTo(origin);
+            }));
+        }
+
+        /// <summary>The system's other sequences, to run or to stop, with <paramref name="current" /> marked where it is one; <paramref name="chosen" /> is given the one chosen.</summary>
+        ChoicePage RunPage(bool stops, int current, Action<int> chosen)
+        {
+            var texts = Editor.Texts;
+            var page = new ChoicePage(Editor, stops ? texts.SequenceStopQuestion : texts.SequenceRunQuestion)
+            {
+                EmptyText = stops ? texts.SequenceStopNone : texts.SequenceRunNone
+            };
+
+            var sequences = _sequence.System.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                var other = sequences[i];
+                if (other == _sequence)
+                    continue;
+
+                page.Add(SequenceText.Called(texts, other), other.Number == current, delegate { chosen(other.Number); });
+            }
+
+            return page;
         }
 
         ChoicePage WaitPage(Action<int> chosen)
@@ -572,6 +918,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }));
         }
 
+        /// <summary>Deletes the row's step; an if, or a branch of one, asks first whether the steps in it go too.</summary>
+        void Remove(int index)
+        {
+            var step = _sequence.Steps[index];
+            if (!(step is If) && !(step is Else))
+            {
+                RemoveStep(index);
+                return;
+            }
+
+            var whole = step is If;
+            var texts = Editor.Texts;
+            Editor.AskHere(whole ? texts.SequenceRemoveIf : texts.SequenceRemoveBranch);
+            Editor.Answer(texts.SequenceKeepSteps, delegate { Unwrap(index, whole); });
+            Editor.Answer(texts.SequenceDeleteSteps, delegate { Cut(index, whole); });
+            Editor.Answer(texts.ButtonLeaveAlone, delegate { }, true);
+        }
+
         void RemoveStep(int index)
         {
             var going = new List<Step>();
@@ -581,25 +945,151 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Editor.Do(_sequence, new RemoveStep(index, going.ToArray()));
         }
 
+        /// <summary>
+        /// Takes out the if at <paramref name="index" /> where <paramref name="whole" /> says so, its own lines only, or the branch
+        /// line there, keeping every step that was in it where it stands.
+        /// </summary>
+        /// <remarks>A branch's steps join the branch before it.</remarks>
+        void Unwrap(int index, bool whole)
+        {
+            var lines = new List<int>();
+            var steps = new List<Step>();
+            lines.Add(index);
+            if (whole)
+            {
+                var at = index;
+                while (at < _sequence.Steps.Count && !(_sequence.Steps[at] is EndIf))
+                {
+                    at = _sequence.BranchAfter(at);
+                    lines.Add(at);
+                }
+            }
+
+            for (var i = 0; i < lines.Count; i++)
+                steps.Add(_sequence.Steps[lines[i]]);
+
+            Editor.Do(_sequence, new Unwrap(whole ? Change.Unwrap : Change.RemoveBranch, lines, steps));
+        }
+
+        /// <summary>Deletes the if at <paramref name="index" /> where <paramref name="whole" /> says so, or the branch there, with every step in it.</summary>
+        /// <remarks>A whole if takes the wait after it as well, which waited for what it started.</remarks>
+        void Cut(int index, bool whole)
+        {
+            var end = whole ? _sequence.EndOf(index) + 1 : _sequence.BranchAfter(index);
+            if (whole && end < _sequence.Steps.Count && _sequence.Steps[end] is Await)
+                end++;
+
+            var going = new List<Step>();
+            for (var i = index; i < end && i < _sequence.Steps.Count; i++)
+                going.Add(_sequence.Steps[i]);
+
+            Editor.Do(_sequence, new RemoveStep(whole ? Change.RemoveIf : Change.RemoveBranch, index, going.ToArray()));
+        }
+
         /// <summary>Pauses the row's step, or lets it go again, with the wait for it to finish, which is one row with it.</summary>
         void SwitchStep(int index)
         {
             Editor.Do(_sequence, new SwitchStep(index, Spanned(index), !_sequence.Steps[index].IsOff));
         }
 
-        /// <summary>Moves the row somebody dragged to where they dropped it; both ends are rows, since a row is what was taken hold of.</summary>
+        /// <summary>
+        /// Where the row at <paramref name="from" /> may land, counted among the rows it does not carry: for an otherwise if, right
+        /// above each line opening a branch of its if, the if's own included, up to the otherwise or the end; anywhere for the rest.
+        /// </summary>
+        IList<int> Landings(int from)
+        {
+            if (from < 0 || from >= _keys.Count || !(_keys[from] is Else))
+                return null;
+
+            var open = _sequence.OpenOf(_sequence.EndOf(_shown[from]));
+            var span = _rows[_keys[from]].Carries + 1;
+            var allowed = new List<int>();
+            for (var r = 0; r < _keys.Count; r++)
+            {
+                if (r >= from && r < from + span)
+                    continue;
+
+                // The line opening a branch, or the row closing the if where the last branch can be an otherwise if.
+                var step = _keys[r] as Step;
+                var line = _shown[r];
+                var opens = line == open || step is Else && _sequence.OpenOf(_sequence.EndOf(line)) == open;
+                var closes = step is EndIf && _sequence.OpenOf(line) == open && Last(line) < 0;
+                if (step == null || !opens && !closes)
+                    continue;
+
+                allowed.Add(r < from ? r : r - span);
+                if (step is Else && ((Else)step).Test == null)
+                    break;
+            }
+
+            return allowed;
+        }
+
+        /// <summary>
+        /// Moves the branch whose row somebody dragged to the place in its if they dropped it: above the if, it becomes the if,
+        /// and the if an otherwise if. Dropped anywhere else, or below the otherwise, it goes back where it was.
+        /// </summary>
+        void Reorder(int from, int to)
+        {
+            var line = _shown[from];
+            var open = _sequence.OpenOf(_sequence.EndOf(line));
+            var last = from + _rows[_keys[from]].Carries;
+            var others = _shown.Count - (last - from + 1);
+            if (open < 0 || to < 0 || to > others)
+                return;
+
+            // The line the branch would land in front of; the row it lands above may be the end of the branch before, which
+            // stands where the line opening the next one does.
+            var before = to == others ? _sequence.Steps.Count : _shown[to < from ? to : to + last - from + 1];
+
+            var branches = new List<int>();
+            for (var at = open; at < _sequence.Steps.Count && !(_sequence.Steps[at] is EndIf); at = _sequence.BranchAfter(at))
+                branches.Add(at);
+
+            var target = before == _sequence.EndOf(open) ? branches.Count : branches.IndexOf(before);
+            if (target < 0)
+                return;
+
+            // Counted with the branch itself taken out, and never past an otherwise, which comes last.
+            var source = branches.IndexOf(line);
+            if (target > source)
+                target--;
+
+            var plain = _sequence.Steps[branches[branches.Count - 1]] as Else;
+            var limit = plain != null && plain.Test == null ? branches.Count - 2 : branches.Count - 1;
+            if (target > limit || target == source)
+                return;
+
+            Editor.Do(_sequence, new MoveBranch(open, source, target));
+        }
+
+        /// <summary>
+        /// Moves the row somebody dragged, with the rows it carries, to where they dropped it: <paramref name="to" /> is how many of
+        /// the rows it did not carry are above it now.
+        /// </summary>
+        /// <remarks>Where it lands in the sequence says which branch of which if it is in, as it says which step it follows.</remarks>
         void Move(int from, int to)
         {
-            if (from < 0 || from >= _shown.Count || to < 0 || to >= _shown.Count || from == to)
+            if (from < 0 || from >= _shown.Count || to == from)
+                return;
+
+            if (_keys[from] is Else)
+            {
+                Reorder(from, to);
+                return;
+            }
+
+            var last = from + _rows[_keys[from]].Carries;
+            var others = _shown.Count - (last - from + 1);
+            if (last >= _shown.Count || to < 0 || to > others)
                 return;
 
             var start = _shown[from];
-            var count = Spanned(start);
+            var count = _shown[last] + Spanned(_shown[last]) - start;
 
-            // Where the run lands: the line the row it is going to starts on, less the run itself where it is moving down.
-            var landing = _shown[to];
-            if (to > from)
-                landing = landing + Spanned(landing) - count;
+            // In front of the line the row it lands above starts on, less the run itself where it is moving down.
+            var before = to == others ? _sequence.Steps.Count : _shown[to < from ? to : to + last - from + 1];
+            var landing = before > start ? before - count : before;
 
             Editor.Do(_sequence, new MoveStep(start, landing, count));
         }

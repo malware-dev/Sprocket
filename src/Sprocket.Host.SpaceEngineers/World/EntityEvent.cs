@@ -67,10 +67,26 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         public string Text { get; private set; }
 
+        /// <summary>How the block being in this moment reads, e.g. "is closed", to complete "if the hangar door ___"; empty where it is no state.</summary>
+        public string State { get; private set; } = "";
+
+        /// <summary>How the block not being in this moment reads, e.g. "is not closed".</summary>
+        public string Unstate { get; private set; } = "";
+
+        /// <summary>Whether this is a state a block is in or not, which a test can read.</summary>
+        public bool IsState => State.Length > 0;
+
         /// <summary>Says the block announces this.</summary>
         internal void Announce()
         {
             Announced = true;
+        }
+
+        /// <summary>Gives the moment the words a test reads it in, being in it and not.</summary>
+        internal void Read(string state, string unstate)
+        {
+            State = state;
+            Unstate = unstate;
         }
     }
 }

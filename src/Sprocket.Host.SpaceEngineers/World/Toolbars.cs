@@ -123,6 +123,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 && _slots.Set(block, propertyId, value);
         }
 
+        /// <summary>Whether one of a block's own values is <paramref name="value" />; false where it has none by that name.</summary>
+        public static bool Holds(IMyTerminalBlock block, string propertyId, Literal value)
+        {
+            return block != null && !string.IsNullOrEmpty(propertyId) && _slots.Holds(block, propertyId, value);
+        }
+
         /// <summary>One of a block's own actions or values made ready to be given, or null.</summary>
         public static Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
             IList<Primitive> types)

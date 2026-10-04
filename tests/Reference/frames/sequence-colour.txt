@@ -52,6 +52,9 @@ on screen     Sequence 1
 045  Sprite     Sprocket_Fill         {X:746 Y:166 W:1 H:24}  #5B737BFF
 046  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
 047  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-048  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task…"
-049  Text       at {X:374.43 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait…"
-050  ClearClip  
+048  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task"
+049  Text       at {X:361.2067 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait"
+050  Text       at {X:451.1967 Y:219.2255} scale 0.833  #A2C3CDFF  "+ run"
+051  Text       at {X:535.1766 Y:219.2255} scale 0.833  #A2C3CDFF  "+ stop"
+052  Text       at {X:627.4133 Y:219.2255} scale 0.833  #A2C3CDFF  "+ if"
+053  ClearClip  

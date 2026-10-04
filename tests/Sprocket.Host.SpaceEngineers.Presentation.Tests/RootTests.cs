@@ -158,7 +158,7 @@ public class RootTests
     static void Repeating(Simulation sim, string name)
     {
         sim.Editor.NewSystem(name);
-        sim.Editor.PressStart("every…");
+        sim.Editor.PressStart("every");
         sim.Editor.PressChoice("A task on blocks…");
         sim.Editor.PressBlock("Airlock Outer Door");
         sim.Editor.PressChoice("Close");

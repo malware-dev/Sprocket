@@ -97,6 +97,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Says how a test reads the moment added last: the block in it, and not.</summary>
+        public EntityKind Reading(string state, string unstate)
+        {
+            _events[_events.Count - 1].Read(state, unstate);
+            return this;
+        }
+
         /// <summary>Says that the block announces when the moment added last may have happened - see <see cref="IAnnounces" />.</summary>
         public EntityKind Announced()
         {

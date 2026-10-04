@@ -8,10 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// What a construct's own buttons do, which is nothing of Sprocket's.
     /// </summary>
     /// <remarks>
-    /// A trigger that does one plain thing is written into a toolbar slot as the game's own action,
-    /// and nothing of it is kept in the program: the slot is the record. So this is how such a
-    /// trigger is shown at all, and it is the same reading that shows the wiring somebody did by hand
-    /// before Sprocket was ever on the ship.
+    /// The wiring somebody did by hand, with the game's own actions in toolbar slots: nothing of it is
+    /// in the program, so the slot is the record, and this is how it is read.
     /// <para>
     /// <b>Read when somebody asks, never on a tick.</b> Reading a toolbar is the dearest thing Sprocket
     /// does, and what it is read for is a screen.

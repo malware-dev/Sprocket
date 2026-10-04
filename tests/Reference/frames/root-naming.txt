@@ -28,8 +28,8 @@ on screen     Logic system 1
 021  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 022  SetClip    {X:256 Y:118 W:1408 H:902}
 023  Text       at {X:260 Y:123.6399} scale 0.694  #85A1A9FF  "TRIGGERS"
-024  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ when…"
-025  Text       at {X:385.4067 Y:163.2255} scale 0.833  #A2C3CDFF  "+ every…"
+024  Text       at {X:272 Y:163.2255} scale 0.833  #A2C3CDFF  "+ when"
+025  Text       at {X:372.1833 Y:163.2255} scale 0.833  #A2C3CDFF  "+ every"
 026  Text       at {X:260 Y:239.6399} scale 0.694  #85A1A9FF  "SEQUENCES"
 027  Text       at {X:264 Y:275.2255} scale 0.833  #A2C3CDFF  "No sequences yet."
 028  Text       at {X:272 Y:311.2255} scale 0.833  #A2C3CDFF  "+ sequence"

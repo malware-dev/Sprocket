@@ -26,7 +26,7 @@ public class PaperTargetTests
         editor.NewSystem("Airlock");
         Note(seen, ship);
 
-        editor.PressStart("when…");
+        editor.PressStart("when");
         Note(seen, ship);
 
         editor.PressBlock("Airlock Button");
@@ -36,7 +36,7 @@ public class PaperTargetTests
         editor.PressPrimary();
         Note(seen, ship);
 
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -61,7 +61,7 @@ public class PaperTargetTests
 
         editor.NewButtonSystem("Airlock");
 
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         editor.PressBlock("Inner Door");
         editor.PressChoice("Close");
         editor.PressPrimary();
@@ -79,7 +79,7 @@ public class PaperTargetTests
         var editor = ship.Editor;
 
         editor.NewSystem("Airlock");
-        editor.PressStart("when…");
+        editor.PressStart("when");
 
         var paper = PaperTarget.Draw(ship.World, editor);
 

@@ -21,14 +21,14 @@ public class WatchingTests
         var editor = screen.Editor;
 
         Sequence(editor);
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
         screen.Run(5);
 
         var parked = Places(screen);
-        var adders = screen.TopOf(screen.Text("+ task…"));
+        var adders = screen.TopOf(screen.Text("+ task"));
 
         editor.SwitchOn();
         screen.Run(5);
@@ -36,14 +36,14 @@ public class WatchingTests
         Assert.Equal(parked, Places(screen));
 
         // The adders' line says why there are none, on the same line.
-        Assert.False(screen.Shows("+ task…"), "add button still offered while locked");
+        Assert.False(screen.Shows("+ task"), "add button still offered while locked");
         Assert.Equal(adders, screen.TopOf(screen.Text(editor.Sentence().LockedText)), 3);
 
         editor.SwitchSystem(false);
         screen.Run(5);
 
         Assert.Equal(parked, Places(screen));
-        Assert.True(screen.Shows("+ task…"), "add button did not come back");
+        Assert.True(screen.Shows("+ task"), "add button did not come back");
     }
 
     /// <summary>Where the step's words, its grips and every bin and arrow stand.</summary>
@@ -70,7 +70,7 @@ public class WatchingTests
         var editor = screen.Editor;
 
         Sequence(editor);
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();
@@ -112,7 +112,7 @@ public class WatchingTests
         // Freshly built: nothing to walk back either way, but both are there and quiet.
         Assert.Equal(quiet, redo.Ink);
 
-        editor.PressAdd("task…");
+        editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
         editor.PressChoice("Switch on");
         editor.PressPrimary();

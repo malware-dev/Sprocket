@@ -8,10 +8,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
     /// <summary>A sequence's steps, one row each, any of which can be carried by its grip to another place in the list.</summary>
     /// <remarks>
+    /// A row that opens an if carries the rows of the if with it, as one block.
+    /// <para>
     /// While a row is carried, the rows between where it came from and where it would land step aside by its height, so
     /// the place it would take is visibly empty rather than imagined from where the pointer is. They slide rather than
     /// jump, because a row appearing somewhere new reads as the list glitching rather than as the list answering. None
     /// of it moves the layout: carrying only moves how the rows are drawn.
+    /// </para>
     /// </remarks>
     public class StepList : VStack
     {
@@ -20,6 +23,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         readonly Dictionary<Element, float> _landed = new Dictionary<Element, float>();
 
         int _carrying = -1;
+        int _span;
+        IList<int> _allowed;
         float _grabbedAt;
         float _moved;
 
@@ -29,7 +34,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Spacing = 8f;
         }
 
-        /// <summary>Told, when a row is dropped somewhere new, where it came from and where it landed, both as rows.</summary>
+        /// <summary>
+        /// Asked when a row is taken: the places it may land, each as how many of the rows it is not carrying would be above
+        /// it, in order; null where it may land anywhere.
+        /// </summary>
+        /// <remarks>The list opens only at those places, the nearest to where the row is carried, and the first and last of them hold beyond either end.</remarks>
+        public Func<int, IList<int>> Landings { get; set; }
+
+        /// <summary>Told, when a row is dropped somewhere new, where it came from as a row, and how many of the rows it was not carrying are above it now.</summary>
         public Action<int, int> Moves { get; set; }
 
         /// <summary>Moves every row a little closer to where it should be drawn; the row being carried follows the pointer exactly.</summary>
@@ -43,9 +55,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             {
                 var row = (StepRow)Children[i];
                 var shift = row.RenderTransform.Translate.Y;
-                var target = i == _carrying ? _moved : _wanted[i];
+                var carried = Carried(i);
+                var target = carried ? _moved : _wanted[i];
 
-                if (i == _carrying)
+                if (carried)
                     shift = target;
                 else
                     shift += (target - shift) * 0.35f;
@@ -114,10 +127,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             _landed.Clear();
             _carrying = Children.IndexOf(row);
+            _span = Math.Max(0, Math.Min(row.Carries, Children.Count - 1 - _carrying));
+            var landings = Landings;
+            _allowed = landings == null ? null : landings(_carrying);
             _grabbedAt = point.Y;
             _moved = 0f;
             row.IsCarried = true;
-            _wanted[_carrying] = 0f;
+            for (var i = _carrying; i <= _carrying + _span; i++)
+                _wanted[i] = 0f;
+        }
+
+        /// <summary>Whether the row at <paramref name="index" /> is being carried: the one taken, or one it carries.</summary>
+        bool Carried(int index)
+        {
+            return _carrying >= 0 && index >= _carrying && index <= _carrying + _span;
         }
 
         void Carry(Vector2 point)
@@ -148,15 +171,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (to == from)
                 return;
 
-            // Everything stays where the drag put it and the carried row drops into the gap held for it, so the
+            // Everything stays where the drag put it and the carried rows drop into the gap held for them, so the
             // reorder that follows changes nothing anybody can see.
+            var landing = Landing(from, to);
             for (var i = 0; i < Children.Count; i++)
             {
                 var row = Children[i];
-                _landed[row] = i == from ? Landing(from, to) : row.Bounds.Y + row.RenderTransform.Translate.Y;
-            }
+                var inSpan = i >= from && i <= from + _span;
+                _landed[row] = inSpan
+                    ? landing + row.Bounds.Y - carried.Bounds.Y
+                    : row.Bounds.Y + row.RenderTransform.Translate.Y;
 
-            carried.RenderTransform = RenderTransform.Moved(new Vector2(0f, Landing(from, to) - carried.Bounds.Y));
+                if (inSpan)
+                    row.RenderTransform = RenderTransform.Moved(new Vector2(0f, _landed[row] - row.Bounds.Y));
+            }
 
             var moves = Moves;
             if (moves != null)
@@ -165,17 +193,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         void MakeRoom(int to)
         {
-            var height = Children[_carrying].DesiredSize.Y + Spacing;
+            var height = 0f;
+            for (var i = _carrying; i <= _carrying + _span; i++)
+                height += Children[i].DesiredSize.Y + Spacing;
 
             for (var i = 0; i < Children.Count; i++)
             {
-                if (i == _carrying)
+                if (Carried(i))
                     continue;
 
+                // Counted among the rows not being carried, which is what the place it lands is counted in.
+                var among = i < _carrying ? i : i - _span - 1;
                 var shift = 0f;
-                if (_carrying < to && i > _carrying && i <= to)
+                if (_carrying < to && among >= _carrying && among < to)
                     shift = -height;
-                else if (_carrying > to && i >= to && i < _carrying)
+                else if (_carrying > to && among >= to && among < _carrying)
                     shift = height;
 
                 _wanted[i] = shift;
@@ -194,7 +226,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var index = 0;
             for (var i = 0; i < Children.Count; i++)
             {
-                if (i == _carrying)
+                if (Carried(i))
                     continue;
 
                 var bounds = Children[i].Bounds;
@@ -202,7 +234,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     index++;
             }
 
-            return index;
+            return Allowed(index);
+        }
+
+        /// <summary>The place nearest <paramref name="index" /> the carried row may land, or <paramref name="index" /> where it may land anywhere.</summary>
+        int Allowed(int index)
+        {
+            if (_allowed == null || _allowed.Count == 0)
+                return index;
+
+            var best = _allowed[0];
+            for (var i = 1; i < _allowed.Count; i++)
+            {
+                if (Math.Abs(_allowed[i] - index) < Math.Abs(best - index))
+                    best = _allowed[i];
+            }
+
+            return best;
         }
 
         float Landing(int from, int to)
@@ -214,7 +262,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             for (var i = 0; i < Children.Count && placed < to; i++)
             {
-                if (i == from)
+                if (i >= from && i <= from + _span)
                     continue;
 
                 top += Children[i].DesiredSize.Y + Spacing;

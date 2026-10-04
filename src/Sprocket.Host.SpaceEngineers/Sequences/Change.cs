@@ -68,6 +68,24 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         AddWait,
 
         /// <summary>Describing a slot.</summary>
-        DescribeSlot
+        DescribeSlot,
+
+        /// <summary>Adding an if.</summary>
+        AddIf,
+
+        /// <summary>Adding a branch to an if.</summary>
+        AddBranch,
+
+        /// <summary>Deleting an if and the steps in it.</summary>
+        RemoveIf,
+
+        /// <summary>Taking an if away and keeping the steps in it.</summary>
+        Unwrap,
+
+        /// <summary>Deleting a branch of an if.</summary>
+        RemoveBranch,
+
+        /// <summary>Moving a branch of an if to another place in it.</summary>
+        MoveBranch
     }
 }

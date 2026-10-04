@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public PartRow(Func<WindowLayer> windows)
         {
             Blocks = new List<long>();
+            Triggers = new List<string>();
             CreateView(windows);
         }
 
@@ -134,6 +135,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>The blocks the chosen logic system fills the part with, by entity id; none where it is empty.</summary>
         public List<long> Blocks { get; }
 
+        /// <summary>For a trigger slot, what each of <see cref="Blocks" /> does that answers it, in the same order: "button 2 is pressed"; none for any other slot.</summary>
+        public List<string> Triggers { get; }
+
         /// <summary>What pressing the blocks does, which is choosing others, or null where they cannot be changed.</summary>
         public ICommand Fills
         {
@@ -162,7 +166,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public void Show(GridWorld world)
         {
             _pieces.Clear();
-            SentenceText.Entities(world, Blocks, true, _pieces);
+            if (Triggers.Count == Blocks.Count && Blocks.Count > 0)
+                SentenceText.Triggers(world, Blocks, Triggers, _pieces);
+            else
+                SentenceText.Entities(world, Blocks, true, _pieces);
+
             _blocks.Say(_pieces);
             _blocks.IsEmpty = Blocks.Count == 0;
         }

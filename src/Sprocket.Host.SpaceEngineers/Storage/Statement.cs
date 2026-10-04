@@ -68,6 +68,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>What is inside its braces, empty when it has none.</summary>
         public IList<Statement> Body => _body != null ? (IList<Statement>)_body : Nothing;
 
+        /// <summary>Whether it was written with a block, empty or not.</summary>
+        public bool HasBlock => _body != null;
+
         public Value ValueAt(int index)
         {
             return index >= 0 && index < Count ? _reading.Values[_from + index] : Value.None;

@@ -315,8 +315,23 @@ abstract class Fitting
         if (!Carries(propertyId))
             return false;
 
+        if (propertyId == "OnOff" && value.Kind == ValueKind.Flag)
+            Enabled = value.Flag;
+
+        _values[propertyId] = value;
         Told(propertyId + " " + value.Said);
         return true;
+    }
+
+    /// <summary>Whether one of its values is <paramref name="value" />: whether it is on, for OnOff, and the last it was told for the rest.</summary>
+    public virtual bool Holds(string propertyId, Literal value)
+    {
+        if (propertyId == "OnOff")
+            return value.Kind == ValueKind.Flag && value.Flag == Enabled;
+
+        Literal had;
+        return _values.TryGetValue(propertyId, out had) && had.Kind == value.Kind && had.Value.Bits == value.Value.Bits
+               && had.Text == value.Text;
     }
 
     bool Carries(string propertyId)
@@ -331,6 +346,8 @@ abstract class Fitting
     }
 
     readonly List<Offer> _carries = new List<Offer>();
+
+    readonly Dictionary<string, Literal> _values = new Dictionary<string, Literal>();
 
     bool Named(string actionId)
     {

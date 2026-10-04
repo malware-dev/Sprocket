@@ -169,6 +169,111 @@ public class ResumeTests
         Assert.False(a.State.IsRunning);
     }
 
+    /// <summary>A run started by hand on a system that is switched off carries on after a reload, as it was let run before.</summary>
+    [Fact]
+    public void ARunStartedByHandCarriesOnAfterAReload()
+    {
+        var a = Build();
+        a.Program.Systems[0].Enabled = false;
+        a.Tick(3);
+        a.Runner.Call(a.Program.Sequences[0], a.Program.Systems[0].Uses[0], true);
+        a.Tick(20);
+
+        Assert.True(a.State.IsRunning);
+        Assert.True(a.State.ByHand);
+
+        var state = StateText.Save(a.Program, a.Runner);
+        Assert.Contains("\"by hand\"", state);
+        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        a.Log.Clear();
+
+        a.Tick(300);
+
+        Assert.Contains("Outer Door:open", a.Log);
+    }
+
+    /// <summary>A run waiting for a sequence it started waits for it again after a reload, and goes on when it finishes.</summary>
+    [Fact]
+    public void ARunWaitingOnAnotherSequenceCarriesOnAfterAReload()
+    {
+        var a = Build();
+        var cycle = a.Program.Sequences[0];
+        var system = cycle.System;
+
+        // The cycle hands the emptying to a sequence of its own and waits for it before opening the outer door.
+        var empty = a.Program.AddSequence(system);
+        empty.Name = "Empty";
+        Then(empty, "depressurize", a.Name(a.Vent));
+        cycle.Steps.RemoveAt(3);
+        cycle.Steps.RemoveAt(2);
+        cycle.Steps.Insert(2, new Run(empty.Number));
+        cycle.Steps.Insert(3, new Await());
+        a.Program.Edited();
+
+        a.Tick(3);
+        a.Press();
+        a.Tick(20);
+
+        Assert.Contains("Airlock Vent:depressurize", a.Log);
+        Assert.DoesNotContain("Outer Door:open", a.Log);
+
+        var state = StateText.Save(a.Program, a.Runner);
+        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        a.Log.Clear();
+        a.Tick(600);
+
+        Assert.Contains("Outer Door:open", a.Log);
+    }
+
+    /// <summary>A door that opens while the world is being written still sets off its <c>when</c> once the world loads.</summary>
+    /// <remarks>Without what the trigger read before the save, the first look after loading would read the door as open all along.</remarks>
+    [Fact]
+    public void AWhenRemembersWhatItReadAcrossAReload()
+    {
+        var a = Build();
+        var opened = new WhenTrigger("opened");
+        opened.Sources.Add(a.Name(a.Outer));
+        var close = new Act("close");
+        close.Targets.Add(a.Name(a.Inner));
+        opened.Does = close;
+        a.Program.Systems[0].AddTrigger(opened);
+        a.Program.Edited();
+        a.Tick(30);
+
+        var state = StateText.Save(a.Program, a.Runner);
+        Assert.Contains("when", state);
+
+        a.Outer.ForceOpen();
+        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        a.Log.Clear();
+        a.Tick(30);
+
+        Assert.Contains("Inner Door:close", a.Log);
+    }
+
+    /// <summary>An <c>every</c> keeps its beat across a reload rather than waiting a whole interval again.</summary>
+    [Fact]
+    public void AnEveryKeepsItsBeatAcrossAReload()
+    {
+        var a = Build();
+        var every = new EveryTrigger(600);
+        var close = new Act("close");
+        close.Targets.Add(a.Name(a.Inner));
+        every.Does = close;
+        a.Program.Systems[0].AddTrigger(every);
+        a.Program.Edited();
+        a.Tick(400);
+
+        var state = StateText.Save(a.Program, a.Runner);
+        Assert.Contains("every", state);
+
+        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        a.Log.Clear();
+        a.Tick(300);
+
+        Assert.Contains("Inner Door:close", a.Log);
+    }
+
     /// <summary>
     /// A wait picks up where it left off rather than starting again.
     /// </summary>

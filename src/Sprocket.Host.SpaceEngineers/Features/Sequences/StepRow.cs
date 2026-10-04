@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel;
+using Lumel.Controls;
+using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -9,6 +11,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
@@ -20,10 +23,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     /// </remarks>
     public partial class StepRow : HStack
     {
+        const float Indent = 32f;
+        const float RailIn = 6f;
+        const float RailWidth = 2f;
+        const float Foot = 12f;
+
+        // Half the room the list leaves between its rows, so the rails of two rows meet in the middle of it.
+        const float Reach = 4f;
+
         readonly List<Label> _joins = new List<Label>();
         readonly List<Slot> _chips = new List<Slot>();
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
         readonly List<Mention> _pieces = new List<Mention>();
+        readonly List<Button> _adders = new List<Button>();
 
         int _numbered;
         StepKind _led = (StepKind)(-1);
@@ -32,11 +44,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public StepRow()
         {
             Slots = new List<SentenceSlot>();
+            Adds = new List<Adder>();
             CreateView();
         }
 
-        /// <summary>Where the step stands in the sequence, counted from one.</summary>
+        /// <summary>Where the step stands in the sequence, counted from one; nothing is shown for none.</summary>
         public int Number { get; set; }
+
+        /// <summary>How many ifs it stands inside, which is how far its sentence is indented.</summary>
+        public int Depth { get; set; }
+
+        /// <summary>How many of its rails go on to the row below it; the rest end at it, as the last step of their branch.</summary>
+        public int Through { get; set; }
+
+        /// <summary>How many rows after it are carried with it: the rest of the if, for the row that opens one.</summary>
+        public int Carries { get; set; }
+
+        /// <summary>The ways it offers to add to the sequence, after its sentence: the end of a branch, the row closing an if, an otherwise.</summary>
+        public List<Adder> Adds { get; }
 
         /// <summary>What sort of step it is, which is what its line opens with.</summary>
         public StepKind Kind { get; set; }
@@ -74,8 +99,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_numbered != Number)
             {
                 _numbered = Number;
-                _number.Text = Number.ToString(CultureInfo.InvariantCulture);
+                _number.Text = Number > 0 ? Number.ToString(CultureInfo.InvariantCulture) : "";
             }
+
+            _sentence.Padding = new Thickness(Depth * Indent, 0f, 0f, 0f);
 
             if (_led != Kind)
             {
@@ -83,10 +110,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var lead = SentenceText.Lead(Kind);
                 _lead.Text = lead;
                 _lead.IsVisible = lead.Length != 0;
+                _leadWaits.IsVisible = Kind == StepKind.Run;
             }
 
-            if (_chips.Count != Slots.Count)
+            _leadWaits.Tip = Tip.For(_leadWaits.Tip, texts.MemberWaits);
+
+            // The row closing an if and the end of a branch are where things are added, and are nothing that can be moved,
+            // paused or deleted; a branch's own line moves, pauses and switches with its if.
+            var adds = Kind == StepKind.End || Kind == StepKind.Adds;
+            var branch = adds || Kind == StepKind.OtherwiseIf || Kind == StepKind.Otherwise;
+            _pause.IsVisible = !branch;
+            _delete.IsVisible = !adds;
+
+            if (_chips.Count != Slots.Count || _adders.Count != Adds.Count)
                 Reshape();
+
+            for (var i = 0; i < Adds.Count; i++)
+            {
+                _adders[i].IsVisible = Adds[i].Adds != null;
+                _adders[i].Command = Adds[i].Adds;
+                _adders[i].Text = Adds[i].Shown;
+                _adders[i].Tip = Tip.For(_adders[i].Tip, Adds[i].About);
+            }
 
             for (var i = 0; i < Slots.Count; i++)
             {
@@ -105,8 +150,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _chips[i].Style = parts;
             }
 
-            // Quiet rather than gone, so a locked row is the same row with nothing on it to press.
-            _grip.Color = _grip.CanCarry ? Palette.Faint : Palette.Dim;
+            // Quiet rather than gone, so a locked row is the same row with nothing on it to press. An otherwise if is carried to
+            // another place in its if; the rest of an if's own lines stay with it, so they have no grip to show, and keep the room
+            // one takes so their words line up with the rest.
+            var fixedInPlace = branch && Kind != StepKind.OtherwiseIf;
+            _grip.Color = fixedInPlace ? Palette.None : _grip.CanCarry ? Palette.Faint : Palette.Dim;
             _grip.Tip = Tip.For(_grip.Tip, _grip.CanCarry ? texts.SequenceDragStep : Why());
             _delete.Command = Deletes;
             _delete.IsEnabled = Deletes != null;
@@ -129,6 +177,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         : Palette.None;
         }
 
+        /// <summary>Draws the row, then a rail down the indent for each if it stands in, which is what ties a branch's steps to the line opening it.</summary>
+        /// <remarks>Drawn through the room either side of the row, so the rails of the rows in one branch are one line; a rail that ends here turns in towards the step.</remarks>
+        protected override void DrawContent(IGraphics g)
+        {
+            base.DrawContent(g);
+
+            var top = Bounds.Y - Reach;
+            var middle = Bounds.Y + Bounds.Height * 0.5f;
+            var bottom = Bounds.Y + Bounds.Height + Reach;
+            for (var level = 0; level < Depth; level++)
+            {
+                var x = _sentence.Bounds.X + level * Indent + RailIn;
+                var ends = level >= Through;
+                g.Fill(new RectangleF(x, top, RailWidth, (ends ? middle + RailWidth : bottom) - top), Palette.Line);
+                if (ends)
+                    g.Fill(new RectangleF(x, middle, Foot, RailWidth), Palette.Line);
+            }
+        }
+
         /// <summary><see cref="Locked" />, or null where there is nothing to say.</summary>
         string Why()
         {
@@ -147,6 +214,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (part is ValuesSlot)
                 return texts.SequenceValuesAbout;
 
+            if (part is StateSlot)
+                return texts.SequenceStateAbout;
+
             return part is DurationSlot ? texts.SequenceLengthAbout : null;
         }
 
@@ -157,7 +227,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             _shown[at] = part;
 
-            var join = SentenceText.Joining(Slots, at);
+            var join = SentenceText.Joining(Slots, at, Kind == StepKind.If || Kind == StepKind.OtherwiseIf);
             _joins[at].Text = join;
             _joins[at].IsVisible = join.Length != 0;
 
@@ -166,7 +236,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _chips[at].Show(part, _pieces);
         }
 
-        /// <summary>Lays the sentence out again with a chip for every part it now has, keeping the chips it had.</summary>
+        /// <summary>Lays the sentence out again with a chip for every part it now has and a button for every adder, keeping the ones it had.</summary>
         void Reshape()
         {
             while (_chips.Count < Slots.Count)
@@ -175,8 +245,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _chips.Add(new Slot());
             }
 
+            while (_adders.Count < Adds.Count)
+                _adders.Add(new Button { Style = Styles.Start });
+
+            _adders.RemoveRange(Adds.Count, _adders.Count - Adds.Count);
+
             var sentence = _sentence.Children;
             sentence.Clear();
+            sentence.Add(_leadWaits);
             sentence.Add(_lead);
 
             for (var i = 0; i < Slots.Count; i++)
@@ -184,6 +260,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 sentence.Add(_joins[i]);
                 sentence.Add(_chips[i]);
             }
+
+            for (var i = 0; i < _adders.Count; i++)
+                sentence.Add(_adders[i]);
 
             _joins.RemoveRange(Slots.Count, _joins.Count - Slots.Count);
             _chips.RemoveRange(Slots.Count, _chips.Count - Slots.Count);

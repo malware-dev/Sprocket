@@ -39,7 +39,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -69,7 +69,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -89,7 +89,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -122,7 +122,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
@@ -146,7 +146,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
@@ -160,14 +160,14 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
         Terminal(screen).Command!.Execute();
         screen.Editor.Back();
         screen.Run(2);
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -180,7 +180,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.TickBlock("Airlock Inner Door");
         screen.Editor.TickBlock("Airlock Outer Door");
         screen.Run(2);
@@ -200,7 +200,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Run(2);
 
@@ -215,13 +215,13 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Open");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Switch on");
         screen.Editor.PressPrimary();
@@ -290,7 +290,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
@@ -311,7 +311,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
         ShowTerminal(screen.Editor);
         screen.Run(2);
@@ -355,7 +355,7 @@ public class ActionTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
         ShowTerminal(screen.Editor);
         screen.Editor.PressChoice("Set Color");
@@ -388,7 +388,7 @@ public class ActionTests
 
         rig.Editor.NewButtonSystem("Lights");
 
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Light");
         ShowTerminal(rig.Editor);
         rig.Editor.PressChoice("Set Color");
@@ -415,7 +415,7 @@ public class ActionTests
 
         rig.Editor.NewButtonSystem("Airlock");
 
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Hydrogen Tank");
         rig.Editor.PressChoice("Stockpile On");
         rig.Editor.PressPrimary();

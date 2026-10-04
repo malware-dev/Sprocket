@@ -32,27 +32,28 @@ on screen     Automation for Test Rig
 025  Sprite     Sprocket_Fill         {X:1531 Y:292 W:61 H:24}  #20272DFF
 026  Sprite     Sprocket_Fill         {X:1531 Y:292 W:24 H:24}  #DCF5FDFF
 027  Text       at {X:1563.183 Y:294.0543} scale 0.556  #DCF5FDFF  "OFF"
-028  Text       at {X:1610.156 Y:292.5141} scale 0.401  #5F7278FF  "-"
-029  Sprite     Sprocket_Fill         {X:271 Y:346 W:2 H:184}  #5B737BFF
-030  Sprite     Sprocket_Fill         {X:288 Y:346 W:1364 H:68}  #29363EFF
-031  Text       at {X:308.0625 Y:375.2328} scale 0.161  #5F7278FF  "0"
-032  Text       at {X:336 Y:367.6399} scale 0.694  #DCF5FDFF  "Airlock"
-033  Sprite     Sprocket_Fill         {X:1527 Y:364 W:69 H:32}  #20272DFF
-034  Sprite     Sprocket_Fill         {X:1568 Y:368 W:24 H:24}  #5F7278FF
-035  Text       at {X:1540.557 Y:370.0543} scale 0.556  #5F7278FF  "ON"
-036  Text       at {X:1610.156 Y:368.5141} scale 0.401  #A2C3CDFF  "d"
-037  Sprite     Sprocket_Fill         {X:288 Y:422 W:1364 H:68}  #29363EFF
-038  Text       at {X:308.0625 Y:451.2328} scale 0.161  #5F7278FF  "0"
-039  Text       at {X:336 Y:443.6399} scale 0.694  #DCF5FDFF  "Port"
-040  Sprite     Sprocket_Fill         {X:1527 Y:440 W:69 H:32}  #20272DFF
-041  Sprite     Sprocket_Fill         {X:1568 Y:444 W:24 H:24}  #5F7278FF
-042  Text       at {X:1540.557 Y:446.0543} scale 0.556  #5F7278FF  "ON"
-043  Text       at {X:1610.156 Y:444.5141} scale 0.401  #A2C3CDFF  "d"
-044  Text       at {X:304 Y:499.2255} scale 0.833  #A2C3CDFF  "+ installation"
-045  ClearClip  
-046  Sprite     Sprocket_Fill         {X:275 Y:78 W:129 H:36}  #1B242AFF
-047  Sprite     Sprocket_Fill         {X:275 Y:78 W:129 H:1}  #5B737BFF
-048  Sprite     Sprocket_Fill         {X:275 Y:113 W:129 H:1}  #5B737BFF
-049  Sprite     Sprocket_Fill         {X:275 Y:78 W:1 H:36}  #5B737BFF
-050  Sprite     Sprocket_Fill         {X:403 Y:78 W:1 H:36}  #5B737BFF
-051  Text       at {X:287 Y:83.92793} scale 0.694  #A2C3CDFF  "Close the editor"
+028  Text       at {X:1610.156 Y:292.5141} scale 0.401  #5F7278FF  "d"
+029  Sprite     Sprocket_Fill         {X:271 Y:346 W:2 H:170}  #5B737BFF
+030  Sprite     Sprocket_Fill         {X:271 Y:514 W:12 H:2}  #5B737BFF
+031  Sprite     Sprocket_Fill         {X:288 Y:346 W:1364 H:68}  #29363EFF
+032  Text       at {X:308.0625 Y:375.2328} scale 0.161  #5F7278FF  "0"
+033  Text       at {X:336 Y:367.6399} scale 0.694  #DCF5FDFF  "Airlock"
+034  Sprite     Sprocket_Fill         {X:1527 Y:364 W:69 H:32}  #20272DFF
+035  Sprite     Sprocket_Fill         {X:1568 Y:368 W:24 H:24}  #5F7278FF
+036  Text       at {X:1540.557 Y:370.0543} scale 0.556  #5F7278FF  "ON"
+037  Text       at {X:1610.156 Y:368.5141} scale 0.401  #A2C3CDFF  "d"
+038  Sprite     Sprocket_Fill         {X:288 Y:422 W:1364 H:68}  #29363EFF
+039  Text       at {X:308.0625 Y:451.2328} scale 0.161  #5F7278FF  "0"
+040  Text       at {X:336 Y:443.6399} scale 0.694  #DCF5FDFF  "Port"
+041  Sprite     Sprocket_Fill         {X:1527 Y:440 W:69 H:32}  #20272DFF
+042  Sprite     Sprocket_Fill         {X:1568 Y:444 W:24 H:24}  #5F7278FF
+043  Text       at {X:1540.557 Y:446.0543} scale 0.556  #5F7278FF  "ON"
+044  Text       at {X:1610.156 Y:444.5141} scale 0.401  #A2C3CDFF  "d"
+045  Text       at {X:304 Y:499.2255} scale 0.833  #A2C3CDFF  "+ installation"
+046  ClearClip  
+047  Sprite     Sprocket_Fill         {X:275 Y:78 W:129 H:36}  #1B242AFF
+048  Sprite     Sprocket_Fill         {X:275 Y:78 W:129 H:1}  #5B737BFF
+049  Sprite     Sprocket_Fill         {X:275 Y:113 W:129 H:1}  #5B737BFF
+050  Sprite     Sprocket_Fill         {X:275 Y:78 W:1 H:36}  #5B737BFF
+051  Sprite     Sprocket_Fill         {X:403 Y:78 W:1 H:36}  #5B737BFF
+052  Text       at {X:287 Y:83.92793} scale 0.694  #A2C3CDFF  "Close the editor"

@@ -450,6 +450,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         bool _byHand;
 
+        /// <summary>Whether the run under way was started by hand, which lets it run where its sequence is switched off.</summary>
+        public bool ByHand => _byHand;
+
         /// <summary>
         /// Starts the sequence because its trigger fired, where it may run and is not already running.
         /// </summary>
@@ -496,11 +499,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// sequence that has since changed is a machine doing something nobody asked for.
         /// </para>
         /// </remarks>
-        public void Resume(int step, bool waiting, int waitTicks)
+        public void Resume(int step, bool waiting, int waitTicks, bool byHand)
         {
-            if (!CanRun || step < 0 || step >= _sequence.Steps.Count)
+            if ((!CanRun && !byHand) || step < 0 || step >= _sequence.Steps.Count)
                 return;
 
+            _byHand = byHand;
             IsRunning = true;
             IsWaiting = waiting;
             _stepIndex = step;
@@ -516,9 +520,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // Backwards to the await before this step, because that is the span an await covers. An
             // act that has already arrived is no burden: Settled says so at once, and a sequence no
             // longer running is none either.
+            //
+            // Which branch of an if ran is not written down, so a whole if before this step is passed over, and from
+            // inside a branch the branches before it are: what they started is left to the blocks.
             for (var i = step - 1; i >= 0; i--)
             {
                 var earlier = _sequence.Steps[i];
+                if (earlier is EndIf || earlier is Else)
+                {
+                    i = _sequence.OpenOf(i);
+                    continue;
+                }
+
                 if (earlier.IsOff)
                     continue;
 
@@ -678,10 +691,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 var step = _sequence.Steps[_stepIndex];
 
-                // Switched off: kept, and never done.
+                // Switched off: kept, and never done, and an if switched off takes its branches with it.
                 if (step.IsOff)
                 {
-                    Step();
+                    if (step is If)
+                        Go(_sequence.EndOf(_stepIndex) + 1);
+                    else
+                        Step();
+
                     continue;
                 }
 
@@ -742,6 +759,30 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         return;
                     }
 
+                    Step();
+                    continue;
+                }
+
+                var opens = step as If;
+                if (opens != null)
+                {
+                    IsWaiting = false;
+                    if (!Branch(opens.Test))
+                        return;
+
+                    continue;
+                }
+
+                // Reached from the end of the branch before it, so that branch is done, and the run goes on after the
+                // whole if.
+                if (step is Else)
+                {
+                    Go(_sequence.EndOf(_stepIndex) + 1);
+                    continue;
+                }
+
+                if (step is EndIf)
+                {
                     Step();
                     continue;
                 }
@@ -821,8 +862,67 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         void Step()
         {
-            _stepIndex++;
+            Go(_stepIndex + 1);
+        }
+
+        void Go(int step)
+        {
+            _stepIndex = step;
             EnterStep();
+        }
+
+        /// <summary>
+        /// Goes into the first branch of the if at the current step whose test holds, or past the if where none does; false
+        /// where a test cannot be read and the run has ended there.
+        /// </summary>
+        bool Branch(Comparison test)
+        {
+            var at = _stepIndex;
+            while (true)
+            {
+                var tested = Test(test);
+                if (tested.Problem != SequenceProblem.None)
+                {
+                    Meet(new SequenceFault(tested.Problem, at, Trouble.None, tested.Which));
+                    return false;
+                }
+
+                if (Holds(tested, test))
+                {
+                    Go(at + 1);
+                    return true;
+                }
+
+                at = _sequence.BranchAfter(at);
+                var next = at < _sequence.Steps.Count ? _sequence.Steps[at] as Else : null;
+                if (next == null || next.Test == null)
+                {
+                    Go(at + 1);
+                    return true;
+                }
+
+                test = next.Test;
+            }
+        }
+
+        /// <summary>Whether <paramref name="test" /> holds on its blocks as they are now: on one of them, or on all.</summary>
+        /// <remarks>Read once, when the run reaches the test; with no block to read, <c>all</c> holds and <c>any</c> does not.</remarks>
+        bool Holds(Tested tested, Comparison test)
+        {
+            var values = _owner.World.Values;
+            for (var i = 0; i < tested.Entities.Count; i++)
+            {
+                var entity = tested.Entities[i];
+                var moment = tested.Moments[i];
+                var equal = moment != null
+                    ? entity.In(values, moment) == test.Value.Flag
+                    : entity.Holds(tested.Values[i], tested.Literals[i]);
+
+                if (equal != test.RequiresAll)
+                    return equal;
+            }
+
+            return test.RequiresAll;
         }
 
         /// <summary>The first block of an act that is switched off, and so cannot do what it is asked; none where all can.</summary>
@@ -970,7 +1070,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public string Which;
         }
 
+        /// <summary>
+        /// What one test comes to on this one's blocks: each block it reads, and on each the moment, or the value with what
+        /// it is compared with as the block holds it.
+        /// </summary>
+        sealed class Tested
+        {
+            public readonly List<GridEntity> Entities = new List<GridEntity>();
+            public readonly List<EntityEvent> Moments = new List<EntityEvent>();
+            public readonly List<EntityAction> Values = new List<EntityAction>();
+            public readonly List<Literal> Literals = new List<Literal>();
+
+            /// <summary>Why the test cannot be read, a slot empty or a block gone or possibly swapped, or none.</summary>
+            public SequenceProblem Problem;
+
+            /// <summary>The slot or block that is so, by its reference.</summary>
+            public string Which;
+        }
+
         readonly Dictionary<Act, Compiled> _compiled = new Dictionary<Act, Compiled>();
+
+        readonly Dictionary<Comparison, Tested> _tested = new Dictionary<Comparison, Tested>();
 
         int _boundAt = -1;
         int _editedAt = -1;
@@ -992,14 +1112,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         Compiled Compile(Act step)
         {
-            var bound = _bindings.Revision;
-            var edited = _owner.Program.Edits;
-            if (bound != _boundAt || edited != _editedAt)
-            {
-                _compiled.Clear();
-                _boundAt = bound;
-                _editedAt = edited;
-            }
+            Fresh();
 
             Compiled compiled;
             if (_compiled.TryGetValue(step, out compiled))
@@ -1007,7 +1120,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             Compilations++;
             compiled = new Compiled();
-            Needed(compiled, step);
+            compiled.Problem = Needed(step.Targets, SequenceProblem.MissingTarget, out compiled.Which);
             var acting = ActedOn(step.Targets);
             for (var i = 0; i < acting.Count; i++)
             {
@@ -1033,14 +1146,72 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return compiled;
         }
 
-        /// <summary>Finds the first block the act needs and cannot have: a slot left empty, a block gone, or one possibly swapped for another.</summary>
-        /// <remarks>A slot that may be left empty is skipped, and so is a block gone from one.</remarks>
-        void Needed(Compiled compiled, Act step)
+        /// <summary>What a test comes to, worked out the first time it is asked after anything it rests on has changed, as an act is.</summary>
+        /// <remarks>A block that has neither the moment nor the value, or holds the value as another kind, is left out: the step is at fault, and the fault says so.</remarks>
+        Tested Test(Comparison test)
         {
-            var system = _sequence.System;
-            for (var s = 0; s < step.Targets.Count; s++)
+            Fresh();
+
+            Tested tested;
+            if (_tested.TryGetValue(test, out tested))
+                return tested;
+
+            tested = new Tested();
+            tested.Problem = Needed(test.Targets, SequenceProblem.MissingGate, out tested.Which);
+
+            var given = new List<Literal>(1);
+            given.Add(test.Value);
+            var became = new List<Literal>(1);
+
+            var reading = ActedOn(test.Targets);
+            for (var i = 0; i < reading.Count; i++)
             {
-                var slot = step.Targets[s];
+                var entity = _bindings.Entity(reading[i]);
+                if (entity == null)
+                    continue;
+
+                var moment = test.Moment(entity.Kind);
+                var value = moment == null ? test.Names(entity.Kind.Actions) : null;
+                became.Clear();
+                if (moment == null && (value == null || !value.Converts(given, became)))
+                    continue;
+
+                tested.Entities.Add(entity);
+                tested.Moments.Add(moment);
+                tested.Values.Add(value);
+                tested.Literals.Add(moment == null ? became[0] : test.Value);
+            }
+
+            _tested[test] = tested;
+            return tested;
+        }
+
+        /// <summary>Forgets what every act and test came to, where the program or what its names point at has changed since.</summary>
+        void Fresh()
+        {
+            var bound = _bindings.Revision;
+            var edited = _owner.Program.Edits;
+            if (bound == _boundAt && edited == _editedAt)
+                return;
+
+            _compiled.Clear();
+            _tested.Clear();
+            _boundAt = bound;
+            _editedAt = edited;
+        }
+
+        /// <summary>
+        /// The first block a step needs and cannot have, by its reference: a slot left empty, a block gone, or one possibly
+        /// swapped for another; with why, where a block gone is <paramref name="lost" />.
+        /// </summary>
+        /// <remarks>A slot that may be left empty is skipped, and so is a block gone from one.</remarks>
+        SequenceProblem Needed(IList<string> targets, SequenceProblem lost, out string which)
+        {
+            which = null;
+            var system = _sequence.System;
+            for (var s = 0; s < targets.Count; s++)
+            {
+                var slot = targets[s];
                 var part = system == null ? null : system.FindPart(slot);
                 var filled = _instance == null ? null : _instance.FilledWith(slot);
                 if (part != null && _instance != null && (filled == null || filled.Count == 0))
@@ -1048,9 +1219,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (part.Optional)
                         continue;
 
-                    compiled.Problem = SequenceProblem.EmptySlot;
-                    compiled.Which = slot;
-                    return;
+                    which = slot;
+                    return SequenceProblem.EmptySlot;
                 }
 
                 var count = filled == null ? 1 : filled.Count;
@@ -1061,11 +1231,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (points == RefState.Bound || (points == RefState.Lost && part != null && part.Optional))
                         continue;
 
-                    compiled.Problem = points == RefState.Lost ? SequenceProblem.MissingTarget : SequenceProblem.Adrift;
-                    compiled.Which = name;
-                    return;
+                    which = name;
+                    return points == RefState.Lost ? lost : SequenceProblem.Adrift;
                 }
             }
+
+            return SequenceProblem.None;
         }
 
         /// <summary>

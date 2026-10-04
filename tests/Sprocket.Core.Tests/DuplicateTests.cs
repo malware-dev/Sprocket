@@ -199,7 +199,8 @@ public class DuplicateTests
                 continue;
             }
 
-            arguments.Add(wanted.ParameterType.IsValueType
+            // A value, or anything else that can be made with nothing, is made; the rest is null.
+            arguments.Add(wanted.ParameterType.IsValueType || wanted.ParameterType.GetConstructor(Type.EmptyTypes) != null
                 ? Activator.CreateInstance(wanted.ParameterType)!
                 : null!);
         }

@@ -64,7 +64,7 @@ public class HeroTests
     {
         Simulation rig = Simulation.Fresh();
         rig.Editor.NewButtonSystem("Airlock");
-        rig.Editor.PressAdd("task…");
+        rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("Open");
         rig.Editor.PressPrimary();

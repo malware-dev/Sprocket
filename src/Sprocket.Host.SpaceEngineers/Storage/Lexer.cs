@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case ',': return One(TokenKind.Comma);
                 case '.': return One(TokenKind.Dot);
                 case ':': return One(TokenKind.Colon);
-                case '=': return One(TokenKind.Equals);
+                case '=': return Equality();
                 case '#': return Hash();
                 case '/': return Slashes();
                 case '"': return Quoted('"', TokenKind.Text);
@@ -100,6 +100,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var at = _ptr.Index;
             _ptr++;
             return new Token(kind, at);
+        }
+
+        /// <summary><c>==</c>, or <c>=</c> where it stands alone.</summary>
+        Token Equality()
+        {
+            var start = _ptr;
+            _ptr++;
+            if (_ptr.IsOutOfBounds() || _ptr.Char != '=')
+                return new Token(TokenKind.Equals, start.Index);
+
+            _ptr++;
+            return new Token(TokenKind.EqualTo, start.Index);
         }
 
         /// <summary><c>//</c>, or trouble where a single slash stands alone.</summary>

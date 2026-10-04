@@ -25,7 +25,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
@@ -52,7 +52,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Run(2);
@@ -72,7 +72,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Editor.Typed("2");
@@ -181,7 +181,7 @@ public class SettingTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Power");
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("is pressed");
         screen.Editor.PressChoice("A task on blocks…");
@@ -203,7 +203,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
         screen.Editor.PressChoice("Set Falloff");
         screen.Editor.Typed("2");
@@ -245,7 +245,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Warning Beacon");
         screen.Run(2);
 
@@ -266,7 +266,7 @@ public class SettingTests
     {
         var screen = WithASequence();
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Approach Sensor");
         screen.Run(2);
 

@@ -48,6 +48,9 @@ on screen     Sequence 1
 041  Text       at {X:812.5333 Y:163.2255} scale 0.833  #DCF5FDFF  "Left"
 042  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
 043  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-044  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task…"
-045  Text       at {X:374.43 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait…"
-046  ClearClip  
+044  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ task"
+045  Text       at {X:361.2067 Y:219.2255} scale 0.833  #A2C3CDFF  "+ wait"
+046  Text       at {X:451.1967 Y:219.2255} scale 0.833  #A2C3CDFF  "+ run"
+047  Text       at {X:535.1766 Y:219.2255} scale 0.833  #A2C3CDFF  "+ stop"
+048  Text       at {X:627.4133 Y:219.2255} scale 0.833  #A2C3CDFF  "+ if"
+049  ClearClip  

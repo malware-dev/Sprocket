@@ -72,6 +72,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         Blueprint,
 
         /// <summary>Something a system blueprint needs a construct to provide.</summary>
-        Slot
+        Slot,
+
+        /// <summary>A step that runs its block only where a test holds.</summary>
+        If,
+
+        /// <summary>What follows an <c>if</c>: another test, or what runs where none held.</summary>
+        Else,
+
+        /// <summary>The test that a member equals a value.</summary>
+        EqualTo
     }
 }

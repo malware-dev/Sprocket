@@ -70,6 +70,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>The <c>=</c> of one of a system saying what one of its parts is.</summary>
         Equals,
 
+        /// <summary><c>==</c>, the test that two things are equal.</summary>
+        EqualTo,
+
         /// <summary>
         /// Text that is not a token at all, carrying what is wrong with it.
         /// </summary>

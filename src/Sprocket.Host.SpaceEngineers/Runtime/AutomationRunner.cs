@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -23,6 +24,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         int _missingStamp;
         readonly HashSet<Poller> _keptPollers = new HashSet<Poller>();
+
+        readonly List<Recalling> _recalling = new List<Recalling>();
         readonly HashSet<long> _keptActing = new HashSet<long>();
         readonly HashSet<Trigger> _keptTriggers = new HashSet<Trigger>();
         readonly List<Trigger> _goneTriggers = new List<Trigger>();
@@ -375,7 +378,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// state is read as a world loads, and the runners are made on the first tick after that. A
         /// run held for a sequence that never appears is simply never applied, and costs one entry.
         /// </remarks>
-        public void Resume(Sequence sequence, SystemInstance instance, int step, bool waiting, int waitTicks)
+        public void Resume(Sequence sequence, SystemInstance instance, int step, bool waiting, int waitTicks, bool byHand)
         {
             if (sequence == null)
                 return;
@@ -385,7 +388,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             SequenceRunner runner;
             if (_runners.TryGetValue(key, out runner))
             {
-                runner.Resume(step, waiting, waitTicks);
+                runner.Resume(step, waiting, waitTicks, byHand);
                 return;
             }
 
@@ -394,6 +397,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             held.Step = step;
             held.Waiting = waiting;
             held.WaitTicks = waitTicks;
+            held.ByHand = byHand;
             _resuming.Add(held);
         }
 
@@ -404,6 +408,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public int Step;
             public bool Waiting;
             public int WaitTicks;
+            public bool ByHand;
         }
 
         readonly List<Held> _resuming = new List<Held>();
@@ -418,7 +423,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 var held = _resuming[i];
                 _resuming.RemoveAt(i);
-                runner.Resume(held.Step, held.Waiting, held.WaitTicks);
+                runner.Resume(held.Step, held.Waiting, held.WaitTicks, held.ByHand);
                 return;
             }
         }
@@ -681,6 +686,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The poller for <paramref name="trigger" /> on <paramref name="instance" />, made where there is none.</summary>
+        /// <remarks>One just made is handed whatever a save remembered for it.</remarks>
         Poller Watching(AutomationSystem system, Trigger trigger, SystemInstance instance)
         {
             var poller = Poller(trigger, instance);
@@ -696,7 +702,45 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             poller = new Poller(system, trigger, instance, this);
             pollers.Add(poller);
+
+            for (var i = _recalling.Count - 1; i >= 0; i--)
+            {
+                if (_recalling[i].Trigger != trigger || _recalling[i].Instance != instance)
+                    continue;
+
+                _recalling[i].Recall(poller);
+                _recalling.RemoveAt(i);
+            }
+
             return poller;
+        }
+
+        /// <summary>
+        /// Gives the poller for <paramref name="trigger" /> on <paramref name="instance" /> what a save remembered of it, now or
+        /// as it is made.
+        /// </summary>
+        /// <remarks>
+        /// State is read as a world loads, and the pollers are made on the first check after that. One held for a trigger
+        /// that never comes is never applied, and costs one entry.
+        /// </remarks>
+        public void Recall(Trigger trigger, SystemInstance instance, Action<Poller> recall)
+        {
+            var poller = Poller(trigger, instance);
+            if (poller != null)
+            {
+                recall(poller);
+                return;
+            }
+
+            _recalling.Add(new Recalling { Trigger = trigger, Instance = instance, Recall = recall });
+        }
+
+        /// <summary>What a save remembered of a poller, waiting for it to be made.</summary>
+        struct Recalling
+        {
+            public Trigger Trigger;
+            public SystemInstance Instance;
+            public Action<Poller> Recall;
         }
 
         /// <summary>The key of the runner for a trigger's own act on <paramref name="instance" />, made where there is none.</summary>

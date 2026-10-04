@@ -4,6 +4,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     sealed class RemoveStep : SequenceEdit
     {
+        readonly Change _change;
         readonly int _index;
         readonly List<Step> _steps = new List<Step>();
 
@@ -14,14 +15,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// A step and the await after it go together, because they arrived together and an await left
         /// behind would wait for nothing.
         /// </remarks>
-        public RemoveStep(int index, params Step[] steps)
+        public RemoveStep(int index, params Step[] steps) : this(Change.RemoveStep, index, steps)
         {
+        }
+
+        /// <summary>The same, called what <paramref name="change" /> says: a whole if, or a branch of one.</summary>
+        public RemoveStep(Change change, int index, params Step[] steps)
+        {
+            _change = change;
             _index = index;
             for (var i = 0; i < steps.Length; i++)
                 _steps.Add(steps[i]);
         }
 
-        public override Change Change => Change.RemoveStep;
+        public override Change Change => _change;
 
         public override void Apply(Sequence sequence)
         {

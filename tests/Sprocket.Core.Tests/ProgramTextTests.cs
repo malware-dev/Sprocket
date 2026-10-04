@@ -299,7 +299,7 @@ public class ProgramTextTests
 
         var saved = Save(program);
         Assert.Contains("call Reverse on [ rotor ]", saved);
-        Assert.Contains("call ext.'rotate-to' on [ rotor ] with 90 2.5", saved);
+        Assert.Contains("call ext.'rotate-to' on [ rotor ] with 90, 2.5", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
 
         var after = new Automation();
@@ -351,7 +351,7 @@ public class ProgramTextTests
         sequence.Steps.Add(each);
 
         // The language's own words for it, rather than a spelling invented here.
-        Assert.Contains("call SetColor on [ light ] with 255 136 0", Save(program));
+        Assert.Contains("call SetColor on [ light ] with 255, 136, 0", Save(program));
 
         var after = new Automation();
         LoadAll(program, after);

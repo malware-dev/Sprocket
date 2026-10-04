@@ -93,7 +93,7 @@ public class OpeningTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A task on blocks…");
@@ -128,7 +128,7 @@ public class OpeningTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressChoice("A task on blocks…");
@@ -159,7 +159,7 @@ public class OpeningTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("every…");
+        screen.Editor.PressStart("every");
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
@@ -205,7 +205,7 @@ public class OpeningTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         Assert.Equal("When something happens", screen.Editor.Screen.Title());
 
         screen.Editor.PressBlock("Airlock Inner Door");
@@ -221,13 +221,13 @@ public class OpeningTests
     {
         var screen = WithOne();
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Run(2);
         Stage(screen, 0).Search("Air");
         screen.Editor.Back();
         screen.Run(2);
 
-        screen.Editor.PressStart("when…");
+        screen.Editor.PressStart("when");
         screen.Run(2);
 
         Assert.Equal("Air", Stage(screen, 0).NarrowText);
@@ -241,7 +241,7 @@ public class OpeningTests
         screen.Editor.Rows()[0].Opens!.Execute();
         screen.Run(2);
 
-        screen.Editor.PressAdd("task…");
+        screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.TickBlock("Airlock Outer Door");
 

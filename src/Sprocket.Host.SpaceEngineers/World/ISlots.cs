@@ -62,6 +62,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         bool Set(IMyTerminalBlock block, string propertyId, Literal value);
 
+        /// <summary>Whether one of the block's own values is <paramref name="value" />, compared as the type the block holds it as; false where it has no such value.</summary>
+        bool Holds(IMyTerminalBlock block, string propertyId, Literal value);
+
         /// <summary>
         /// One of the block's own actions or values made ready to be given, or null where it has no
         /// such thing or the value is not the kind it holds.

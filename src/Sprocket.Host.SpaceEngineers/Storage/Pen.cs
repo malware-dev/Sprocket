@@ -140,6 +140,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
+        /// <summary>A comma after the value just written, as between the values after <c>with</c>.</summary>
+        public Pen Comma()
+        {
+            _text.Append(',');
+            return this;
+        }
+
         /// <summary>Text, always quoted, because it is whatever somebody typed.</summary>
         public Pen Text(string value)
         {
