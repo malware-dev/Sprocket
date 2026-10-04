@@ -92,6 +92,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         public bool IsRunning { get; private set; }
 
+        /// <summary>What stopped the last run from outside before it finished, or none.</summary>
+        public Stopper StoppedBy { get; private set; }
+
+        /// <summary>The step the last run was at when something stopped it.</summary>
+        public int StoppedAt { get; private set; }
+
+        /// <summary>The number of the sequence that stopped the last run, where <see cref="StoppedBy" /> is a sequence.</summary>
+        public int StoppedFrom { get; private set; }
+
         /// <summary>Which step is executing or waiting, or -1 when idle.</summary>
         public int CurrentStep => _stepIndex;
 
@@ -145,7 +154,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     return _stuck;
                 if (Quit.Exists)
                     return new SequenceFault(SequenceProblem.Conflicted, SequenceFault.Trigger, Quit);
-
                 return Found;
             }
         }
@@ -567,6 +575,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Finish();
         }
 
+        /// <summary>
+        /// Ends the run from outside, as <see cref="Stop" /> does, and keeps what stopped it and at which step, where
+        /// <paramref name="sequence" /> is the number of the sequence that did, where one did.
+        /// </summary>
+        /// <remarks>
+        /// Information rather than anything wrong: somebody meant it, and the construct is wherever the run got to. Kept until
+        /// the sequence next runs, and only where it was running, since stopping a sequence at rest is nothing happening.
+        /// </remarks>
+        public void Interrupt(Stopper by, int sequence)
+        {
+            var running = IsRunning;
+            var at = _stepIndex;
+            Stop();
+            if (!running)
+                return;
+
+            StoppedBy = by;
+            StoppedAt = at;
+            StoppedFrom = sequence;
+        }
+
         /// <summary>Ends a run that has done its last step, leaving what it started to carry on.</summary>
         /// <remarks>A trigger's own act has no wait after it, so what it started is still in flight when the run ends.</remarks>
         void Finish()
@@ -658,6 +687,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Quit = Trouble.None;
             _met = SequenceFault.None;
             _stuck = SequenceFault.None;
+            StoppedBy = Stopper.None;
             _stepIndex = 0;
             EnterStep();
             Advance(world);

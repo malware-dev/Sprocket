@@ -695,6 +695,18 @@ Denne blir dens første installasjon.</value>
   <data name="Sprocket.Sequence.Ready" xml:space="preserve">
     <value>klar</value>
   </data>
+  <data name="Sprocket.Sequence.Stopped" xml:space="preserve">
+    <value>stoppet</value>
+  </data>
+  <data name="Sprocket.Sequence.StoppedBySequence" xml:space="preserve">
+    <value>stoppet ved steg {step} av {sequence}</value>
+  </data>
+  <data name="Sprocket.Sequence.StoppedByTrigger" xml:space="preserve">
+    <value>stoppet ved steg {step} av en utløser</value>
+  </data>
+  <data name="Sprocket.Sequence.StoppedByHand" xml:space="preserve">
+    <value>stoppet ved steg {step} for hånd</value>
+  </data>
   <data name="Sprocket.Sequence.RunNow" xml:space="preserve">
     <value>Kjør den nå, slik utløseren ville gjort</value>
   </data>

@@ -336,7 +336,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 + (target.Instance == null ? "" : " on " + target.Instance.Number));
 
             if (target.Stops)
-                _runner.Halt(target.Sequence, target.Instance);
+                _runner.Halt(target.Sequence, target.Instance, Stopper.Trigger, 0);
             else
                 _runner.Call(target.Sequence, target.Instance);
         }
@@ -1333,7 +1333,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             var state = _runner.Get(which, one);
             if (state != null)
-                state.Stop();
+                state.Interrupt(Stopper.Hand, 0);
         }
 
         /// <summary>

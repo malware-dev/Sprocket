@@ -166,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             if (status == SequenceStatus.Running || status == SequenceStatus.RunningWaiting)
                 return 4;
 
-            if (status == SequenceStatus.Waiting)
+            if (status == SequenceStatus.Waiting || status == SequenceStatus.Stopped)
                 return 3;
 
             return status == SequenceStatus.NeverRun ? 2 : 1;

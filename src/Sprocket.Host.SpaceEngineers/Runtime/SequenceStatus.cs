@@ -17,6 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Live, has run before, and is waiting for its trigger again.</summary>
         Waiting,
 
+        /// <summary>Live, and its last run was stopped from outside before it finished; see <see cref="SequenceRunner.StoppedBy" />.</summary>
+        Stopped,
+
         /// <summary>Part way through its steps.</summary>
         Running,
 

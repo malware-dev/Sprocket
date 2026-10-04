@@ -170,6 +170,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (state == null)
                 return SequenceStatus.NeverRun;
 
+            if (state.StoppedBy != Stopper.None)
+                return SequenceStatus.Stopped;
+
             return state.LastFiredTick < 0 ? SequenceStatus.NeverRun : SequenceStatus.Waiting;
         }
 

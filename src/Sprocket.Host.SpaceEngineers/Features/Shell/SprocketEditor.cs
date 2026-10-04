@@ -2296,7 +2296,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             SequenceRunner state = _runner.Get(sequence, StandIn(sequence.System));
             if (state != null)
-                state.Stop();
+                state.Interrupt(Stopper.Hand, 0);
         }
 
         internal void RunNow(Sequence sequence)

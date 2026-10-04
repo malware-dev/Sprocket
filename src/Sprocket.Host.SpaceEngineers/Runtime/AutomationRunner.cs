@@ -303,7 +303,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 if (run.Stops)
                 {
-                    Halt(sequence, instance);
+                    Halt(sequence, instance, Stopper.Trigger, 0);
                     return;
                 }
 
@@ -363,11 +363,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// a machine with no power is a machine whose sequences are held anyway.
         /// </para>
         /// </remarks>
-        public void Halt(Sequence sequence, SystemInstance instance)
+        public void Halt(Sequence sequence, SystemInstance instance, Stopper by, int from)
         {
             var runner = Get(sequence, instance);
             if (runner != null)
-                runner.Stop();
+                runner.Interrupt(by, from);
         }
 
         /// <summary>
@@ -462,6 +462,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         // What a run step reaches: the same system, the same one of it, by number.
                         var owner = system;
                         var one = instances[n];
+                        var caller = sequences[q].Number;
                         runner.Calls = delegate(int number, bool stops)
                         {
                             var called = owner.FindSequence(number);
@@ -469,7 +470,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                                 return;
 
                             if (stops)
-                                Halt(called, one);
+                                Halt(called, one, Stopper.Sequence, caller);
                             else
                                 Call(called, one);
                         };

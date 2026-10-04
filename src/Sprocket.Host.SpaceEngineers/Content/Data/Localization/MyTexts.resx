@@ -902,6 +902,22 @@ This one becomes its first installation.</value>
     <value>ready</value>
     <comment>A sequence's state: ready to be started.</comment>
   </data>
+  <data name="Sprocket.Sequence.Stopped" xml:space="preserve">
+    <value>stopped</value>
+    <comment>What a sequence is doing: its last run was stopped from outside before it finished. Said until it runs again.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StoppedBySequence" xml:space="preserve">
+    <value>stopped at step {step} by {sequence}</value>
+    <comment>The same in full, where another sequence stopped it: {step} is the step it was at, {sequence} the sequence.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StoppedByTrigger" xml:space="preserve">
+    <value>stopped at step {step} by a trigger</value>
+    <comment>The same in full, where a trigger stopped it.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StoppedByHand" xml:space="preserve">
+    <value>stopped at step {step} by hand</value>
+    <comment>The same in full, where somebody stopped it from the editor.</comment>
+  </data>
   <data name="Sprocket.Sequence.RunNow" xml:space="preserve">
     <value>Run it now, as its trigger would</value>
     <comment>Note on the button that runs a sequence by hand.</comment>

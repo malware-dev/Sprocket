@@ -125,6 +125,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return texts.SequenceRunning;
             if (status == SequenceStatus.RunningWaiting)
                 return texts.SequenceRunningWaiting;
+            if (status == SequenceStatus.Stopped)
+                return texts.SequenceStopped;
 
             // Not "waiting", which is what a sequence held mid-run says two lines above. The same
             // word for a sequence doing nothing and for one stopped part-way through is the one
@@ -210,6 +212,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return texts.NumberFour;
 
             return values.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>What stopped the last run of <paramref name="sequence" />, and at which step: "stopped at step 4 by Cycle Out".</summary>
+        public static string CalledOff(Texts texts, Sequence sequence, SequenceRunner state)
+        {
+            var step = Row(sequence, state.StoppedAt).ToString(CultureInfo.InvariantCulture);
+            if (state.StoppedBy == Stopper.Hand)
+                return Template.Fill(texts.SequenceStoppedByHand, "step", step);
+
+            if (state.StoppedBy == Stopper.Trigger)
+                return Template.Fill(texts.SequenceStoppedByTrigger, "step", step);
+
+            var system = sequence.System;
+            var from = system == null ? null : system.FindSequence(state.StoppedFrom);
+            return Fill(texts.SequenceStoppedBySequence, "step", step, "sequence",
+                from == null ? DefaultName(texts, state.StoppedFrom) : Called(texts, from));
         }
 
         /// <summary>What is wrong with <paramref name="sequence" />, letting whatever is at fault speak for itself where it can.</summary>
@@ -338,15 +356,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>The number a step's row shows, counting past the waits for what a step starts, or 0 where there is none.</summary>
+        /// <remarks>
+        /// Counted as the sequence's screen numbers its rows: a wait for a step is part of the step's row, and the line closing an
+        /// if has no number. Zero where the line has no row of its own to point at.
+        /// </remarks>
         static int Row(Sequence sequence, int step)
         {
-            if (sequence == null || step < 0 || step >= sequence.Steps.Count || sequence.Steps[step] is Await)
+            if (sequence == null || step < 0 || step >= sequence.Steps.Count)
+                return 0;
+
+            while (step >= 0 && sequence.Steps[step] is Await)
+                step--;
+
+            if (step < 0 || sequence.Steps[step] is EndIf)
                 return 0;
 
             var row = 0;
             for (var i = 0; i <= step; i++)
             {
-                if (!(sequence.Steps[i] is Await))
+                if (!(sequence.Steps[i] is Await) && !(sequence.Steps[i] is EndIf))
                     row++;
             }
 

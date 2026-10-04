@@ -40,6 +40,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         int _busy;
         int _off;
         string _skips = "";
+        string _calledOff;
+        Stopper _stoppedBy;
+        int _stoppedAt;
+        int _stoppedFrom;
         string _madeName;
         Keyed<object, StepRow> _rows;
 
@@ -269,7 +273,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var state = Editor.Runner.Get(_sequence);
             var tick = Editor.CurrentTick;
 
-            _bar.Status = SequenceText.Status(texts, SequenceSummary.Status(_sequence, state));
+            var status = SequenceSummary.Status(_sequence, state);
+            _bar.Status = status == SequenceStatus.Stopped ? CalledOff(texts, state) : SequenceText.Status(texts, status);
             _bar.JustRan = state != null && state.LastFiredTick >= 0 && tick - state.LastFiredTick < JustRanTicks;
             _bar.LastRun = Editor.Ago.Said(SequenceSummary.TicksSinceRun(state, tick));
             _bar.Skipped = Skips(texts, state == null ? 0 : state.SkippedCount, state == null ? 0 : state.RefusedCount);
@@ -498,6 +503,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             for (var i = 0; i < _keys.Count; i++)
                 _rows[_keys[i]].HasProblem = fault.Exists && _keys[i] is Step && fault.Step == _shown[i];
+        }
+
+        /// <summary>What stopped the last run and where, in one line.</summary>
+        /// <remarks>Asked every tick while it is the status, so the line is joined again only when the stop it says is another.</remarks>
+        string CalledOff(Texts texts, SequenceRunner state)
+        {
+            if (state.StoppedBy == _stoppedBy && state.StoppedAt == _stoppedAt && state.StoppedFrom == _stoppedFrom
+                && _calledOff != null)
+            {
+                return _calledOff;
+            }
+
+            _stoppedBy = state.StoppedBy;
+            _stoppedAt = state.StoppedAt;
+            _stoppedFrom = state.StoppedFrom;
+            _calledOff = SequenceText.CalledOff(texts, _sequence, state);
+            return _calledOff;
         }
 
         /// <summary>What was asked for and did not happen, and why not, in one line when both happened.</summary>
