@@ -89,4 +89,9 @@
     <ItemGroup>
         <ProjectReference Include="..\Sprocket.Host.SpaceEngineers\Sprocket.Host.SpaceEngineers.csproj" />
     </ItemGroup>
+    <!-- Held to the same standards as the mod; loaded from its copy, see Loaded.targets. -->
+    <ItemGroup>
+        <ProjectReference Include="..\Sprocket.Standards\Sprocket.Standards.csproj" ReferenceOutputAssembly="false" />
+        <Analyzer Include="..\Sprocket.Standards\bin\Loaded\Sprocket.Standards.dll" />
+    </ItemGroup>
 </Project>

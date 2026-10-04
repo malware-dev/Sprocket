@@ -1,0 +1,45 @@
+<Project>
+  <!--
+      The copy of a compiler component that the projects using it load, apart from its build output: a
+      language server holds whatever analyzer or generator it loaded open, so it loads this one, from
+      bin\Loaded beside the component's project. The copy is replaced only where the component's own
+      sources, its project or this file differ from those it was built from, recorded beside it. The built
+      assembly is no guide, and neither is everything compiled into it: the SDK stamps the current commit
+      into its informational version, so every commit changes its bytes. An ordinary build leaves the copy
+      alone.
+
+      A held copy cannot be written over, but Windows lets a loaded assembly be renamed, so the one being
+      replaced is moved aside into Stale first and the language server goes on using it from there. Stale
+      copies are deleted by a later build, each once nothing holds it any more.
+  -->
+  <Target Name="CopyForLoading" AfterTargets="Build">
+    <PropertyGroup>
+      <LoadedFolder>$(MSBuildProjectDirectory)\bin\Loaded</LoadedFolder>
+      <LoadedCopy>$(LoadedFolder)\$(TargetFileName)</LoadedCopy>
+      <LoadedStamp>$(LoadedFolder)\sources.hash</LoadedStamp>
+    </PropertyGroup>
+    <ItemGroup>
+      <LoadedSourceFile Include="$(MSBuildProjectDirectory)\**\*.cs"
+                        Exclude="$(MSBuildProjectDirectory)\obj\**;$(MSBuildProjectDirectory)\bin\**" />
+    </ItemGroup>
+    <GetFileHash Files="@(LoadedSourceFile->'%(FullPath)');$(MSBuildProjectFullPath);$(MSBuildThisFileFullPath)">
+      <Output TaskParameter="Items" ItemName="LoadedSource" />
+    </GetFileHash>
+    <PropertyGroup>
+      <SourcesHash>@(LoadedSource->'%(FileHash)', '')</SourcesHash>
+    </PropertyGroup>
+    <ReadLinesFromFile File="$(LoadedStamp)" Condition="Exists('$(LoadedStamp)')">
+      <Output TaskParameter="Lines" PropertyName="LoadedSourcesHash" />
+    </ReadLinesFromFile>
+    <!-- Quietly, because a copy still held is the ordinary case, and is tried again by the next build. -->
+    <Exec Command="del /q &quot;$(LoadedFolder)\Stale\*.dll&quot; 2&gt;nul &amp; exit 0"
+          Condition="Exists('$(LoadedFolder)\Stale')" StandardOutputImportance="low" />
+    <Move SourceFiles="$(LoadedCopy)"
+          DestinationFiles="$(LoadedFolder)\Stale\$([System.Guid]::NewGuid().ToString('N')).dll"
+          Condition="Exists('$(LoadedCopy)') And '$(SourcesHash)' != '$(LoadedSourcesHash)'" />
+    <Copy SourceFiles="@(IntermediateAssembly)" DestinationFiles="$(LoadedCopy)"
+          Condition="!Exists('$(LoadedCopy)') Or '$(SourcesHash)' != '$(LoadedSourcesHash)'" />
+    <WriteLinesToFile File="$(LoadedStamp)" Lines="$(SourcesHash)" Overwrite="true"
+                      Condition="'$(SourcesHash)' != '$(LoadedSourcesHash)'" />
+  </Target>
+</Project>
