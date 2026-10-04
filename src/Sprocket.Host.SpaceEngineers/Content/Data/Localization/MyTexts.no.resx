@@ -1290,7 +1290,7 @@ Denne blir dens første installasjon.</value>
     <value>Automatiseringen i denne blokken kan ikke redigeres.</value>
   </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
-    <value>Lagret {time}</value>
+    <value>Endret {time}</value>
   </data>
   <data name="Sprocket.Library.NoneSaved" xml:space="preserve">
     <value>Ingen ennå. En plantegning lagret her følger deg overalt.</value>
@@ -1326,7 +1326,7 @@ Denne blir dens første installasjon.</value>
     <value>I lageret</value>
   </data>
   <data name="Sprocket.Library.SavedBy" xml:space="preserve">
-    <value>Av {name}, lagret {time}</value>
+    <value>Av {name}, endret {time}</value>
   </data>
   <data name="Sprocket.Library.Forget" xml:space="preserve">
     <value>Slett den fra lageret</value>
@@ -1384,6 +1384,15 @@ Denne blir dens første installasjon.</value>
   </data>
   <data name="Sprocket.Library.Unreadable" xml:space="preserve">
     <value>Denne kopien kan ikke leses.</value>
+  </data>
+  <data name="Sprocket.Library.Missing" xml:space="preserve">
+    <value>Filen finnes ikke i lageret.</value>
+  </data>
+  <data name="Sprocket.Library.Folder" xml:space="preserve">
+    <value>Linjen i indeksen nevner en mappe. Bare et filnavn kan stå der.</value>
+  </data>
+  <data name="Sprocket.Library.Twice" xml:space="preserve">
+    <value>En annen fil i lageret har den samme plantegningen.</value>
   </data>
   <data name="Sprocket.Library.Copy" xml:space="preserve">
     <value>Lag en kopi</value>

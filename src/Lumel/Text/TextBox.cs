@@ -378,18 +378,18 @@ namespace Lumel.Text
                     return true;
                 case MyKeys.C:
                     if (HasSelection)
-                        input.Clipboard = SelectedText();
+                        input.Clipboard.Set(SelectedText());
                     return true;
                 case MyKeys.X:
                     if (HasSelection)
                     {
-                        input.Clipboard = SelectedText();
+                        input.Clipboard.Set(SelectedText());
                         Backspace();
                     }
 
                     return true;
                 case MyKeys.V:
-                    Insert(input.Clipboard);
+                    Insert(input.Clipboard.Get());
                     return true;
                 default:
                     return false;

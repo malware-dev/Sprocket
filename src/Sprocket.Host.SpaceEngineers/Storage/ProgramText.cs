@@ -133,16 +133,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         public static string AddBlueprint(string text, Automation program, Values values)
         {
-            var trial = new Automation();
-            var trouble = Load(text, trial, values);
+            AutomationSystem lone;
+            var trouble = Lone(text, values, out lone);
             if (trouble.Length > 0)
                 return trouble;
 
-            if (trial.Systems.Count != 1 || !trial.Systems[0].IsBlueprint || trial.Refs.Count > 0 || trial.TriggerRefs.Count > 0
-                || trial.Systems[0].Instances.Count > 0)
-                return "expected one system blueprint and nothing else.";
-
-            var identity = trial.Systems[0].Identity;
+            var identity = lone.Identity;
             if (program.FindSystem(identity) != null)
                 return "system " + identity.ToString("D") + " is already declared.";
 
@@ -157,6 +153,27 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             read.Settle();
             return read.What;
+        }
+
+        /// <summary>
+        /// Reads the blueprint <paramref name="text" /> on its own into <paramref name="read" />, answering what was wrong with it,
+        /// or empty.
+        /// </summary>
+        /// <remarks>The text holds one system blueprint and nothing else, as <see cref="Blueprint" /> writes it; where it does not, <paramref name="read" /> is null.</remarks>
+        public static string Lone(string text, Values values, out AutomationSystem read)
+        {
+            read = null;
+            var trial = new Automation();
+            var trouble = Load(text, trial, values);
+            if (trouble.Length > 0)
+                return trouble;
+
+            if (trial.Systems.Count != 1 || !trial.Systems[0].IsBlueprint || trial.Refs.Count > 0 || trial.TriggerRefs.Count > 0
+                || trial.Systems[0].Instances.Count > 0)
+                return "expected one system blueprint and nothing else.";
+
+            read = trial.Systems[0];
+            return "";
         }
 
         /// <summary>

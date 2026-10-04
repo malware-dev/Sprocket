@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class Settings
     {
-        const string File = "Sprocket.ini";
+        const string File = "sprocket.ini";
 
         const string Section = "Sprocket";
 

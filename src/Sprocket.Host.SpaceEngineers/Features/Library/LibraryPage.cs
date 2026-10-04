@@ -162,33 +162,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             _volumes.Clear();
             _volumes.AddRange(shelf.All);
-            _volumes.Sort(delegate(Volume a, Volume b) { return string.Compare(a.Name, b.Name, StringComparison.CurrentCultureIgnoreCase); });
+            _volumes.Sort(delegate(Volume a, Volume b) { return string.Compare(Called(a), Called(b), StringComparison.CurrentCultureIgnoreCase); });
 
             for (var i = 0; i < _volumes.Count; i++)
             {
                 var volume = _volumes[i];
                 var entry = new Entry { Section = Kept, Identity = volume.Identity };
-                var trial = new Automation();
-                entry.Trouble = ProgramText.Load(volume.Text, trial, Editor.World.Values);
-                if (entry.Trouble.Length == 0)
-                    entry.Read = trial.FindSystem(volume.Identity);
+                if (volume.State == VolumeState.Read)
+                {
+                    var trial = new Automation();
+                    entry.Trouble = ProgramText.Load(volume.Text, trial, Editor.World.Values);
+                    if (entry.Trouble.Length == 0)
+                        entry.Read = trial.FindSystem(volume.Identity);
+                }
+                else
+                {
+                    entry.Trouble = volume.Trouble;
+                }
 
-                var time = Time(volume.Saved);
                 var row = new StatusRow
                 {
                     Mark = Symbols.Blueprint,
-                    Summary = volume.Name,
+                    Summary = Called(volume),
                     Depth = 1,
-                    Status = volume.Namespace.Length == 0 || volume.Namespace == Editor.Author
-                        ? Template.Fill(texts.LibrarySaved, "time", time)
-                        : Template.Fill(Template.Fill(texts.LibrarySavedBy, "name", volume.Namespace), "time", time),
+                    Status = Made(volume, texts),
                     Deletes = Editor.Act(Cmd.Unshelve, delegate { Editor.Unshelve(volume); }),
                     DeleteText = texts.LibraryForget
                 };
 
                 if (entry.Read == null)
                 {
-                    row.Problem = texts.LibraryUnreadable;
+                    row.Problem = Unkept(volume, texts);
                     row.Problems = 1;
                 }
 
@@ -471,6 +475,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 : count == 1
                     ? texts.LibraryOneInstallation
                     : Template.Fill(texts.LibraryInstallations, "count", count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>What <paramref name="volume" /> is called on its row: the blueprint's name, or its file's where it did not read.</summary>
+        static string Called(Volume volume)
+        {
+            return volume.State == VolumeState.Read ? volume.Name : volume.File;
+        }
+
+        /// <summary>Who made the blueprint in <paramref name="volume" /> and when it last changed, as far as its text says.</summary>
+        string Made(Volume volume, Texts texts)
+        {
+            if (volume.State != VolumeState.Read)
+                return "";
+
+            var own = volume.Namespace.Length == 0 || volume.Namespace == Editor.Author;
+            if (!volume.Changed.HasValue)
+                return own ? "" : Template.Fill(texts.LibraryBy, "name", volume.Namespace);
+
+            var time = Time(volume.Changed.Value);
+            return own
+                ? Template.Fill(texts.LibrarySaved, "time", time)
+                : Template.Fill(Template.Fill(texts.LibrarySavedBy, "name", volume.Namespace), "time", time);
+        }
+
+        /// <summary>Why <paramref name="volume" /> gave no blueprint.</summary>
+        static string Unkept(Volume volume, Texts texts)
+        {
+            switch (volume.State)
+            {
+                case VolumeState.Missing:
+                    return texts.LibraryMissing;
+                case VolumeState.Path:
+                    return texts.LibraryFolder;
+                case VolumeState.Twice:
+                    return texts.LibraryTwice;
+                default:
+                    return texts.LibraryUnreadable;
+            }
         }
 
         /// <summary>A time in UTC, said as the player's clock has it.</summary>

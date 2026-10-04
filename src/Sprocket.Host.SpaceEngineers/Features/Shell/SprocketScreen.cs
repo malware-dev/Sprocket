@@ -7,6 +7,7 @@ using VRage.Input;
 using IMyInput = VRage.ModAPI.IMyInput;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using VRage.Game.GUI.TextPanel;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -74,6 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _opened = opened;
             _closed = closed;
             _view = new EditorView(unit.Editor);
+            unit.Editor.Input.Clipboard = new ClipboardFile(new GlobalFiles(), Told.Say);
 
             // BelowHud because that is where a mod screen's own content goes; the demo mod draws its screen
             // on the same layer. The scissor is pushed onto whatever layer this names, so the two must agree

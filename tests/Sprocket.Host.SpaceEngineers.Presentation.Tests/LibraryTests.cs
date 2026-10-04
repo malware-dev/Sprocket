@@ -71,7 +71,8 @@ public class LibraryTests
     public void TheLibraryListsThisConstructThenTheLostThenTheKept()
     {
         var rig = Blueprinted();
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0], Saved);
+        rig.Editor.Program.Systems[0].Changed = Saved;
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
         rig.Backups.Take("Lost Ship", Saved, new long[] { 424242 }, "p", "");
 
         rig.Editor.GoToRoot();
@@ -84,41 +85,140 @@ public class LibraryTests
         Assert.Equal(new[] { "Airlock", "Lost Ship", "Airlock" }, rows.Select(r => r.Summary));
         Assert.Equal("2 installations", rows[0].Status);
         Assert.StartsWith("Lost ", rows[1].Problem);
-        Assert.StartsWith("Saved ", rows[2].Status);
+        Assert.StartsWith("Changed ", rows[2].Status);
         Assert.True(rows[0].Chosen);
     }
 
-    /// <summary>A library written out reads back as it was.</summary>
+    /// <summary>A blueprint put in the library is a file of its own holding the blueprint as written, named in the index, and reads back.</summary>
     [Fact]
     public void TheLibraryReadsBackWhatItWrites()
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
-        rig.Shelf.Keep(blueprint, Saved);
+        blueprint.Changed = Saved;
+        rig.Shelf.Keep(blueprint);
 
-        var read = new Shelf();
-        Assert.Equal("", read.Read(rig.Shelf.Write()));
+        Assert.Equal("sprocket-bp-Airlock.cog\n", rig.Folder.Files["sprocket-bp.index"]);
+        Assert.Equal(ProgramText.Blueprint(blueprint), rig.Folder.Files["sprocket-bp-Airlock.cog"]);
+
+        var read = new Shelf(rig.Folder, delegate { });
+        Assert.Equal("", read.Read());
 
         var volume = Assert.Single(read.All);
+        Assert.Equal(VolumeState.Read, volume.State);
         Assert.Equal(blueprint.Identity, volume.Identity);
         Assert.Equal("Airlock", volume.Name);
-        Assert.Equal(Saved, volume.Saved);
-        Assert.Equal(rig.Shelf.All[0].Text, volume.Text);
+        Assert.Equal(Saved, volume.Changed);
         Assert.True(read.Holds(blueprint));
     }
 
-    /// <summary>A library that will not read is taken not at all, and says what was wrong.</summary>
+    /// <summary>A line of the index that gives no blueprint is listed with why, and the lines after it are read all the same.</summary>
     [Theory]
-    [InlineData("")]
-    [InlineData("library 2\n")]
-    [InlineData("library 1\nvolume not-a-guid 2026-10-02T14:30:00.0000000Z 0 1 1\nAb\n")]
-    [InlineData("library 1\nvolume 3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43 2026-10-02T14:30:00.0000000Z 0 1 5\nAb\n")]
-    public void ALibraryThatWillNotReadIsNotTaken(string text)
+    [InlineData("gone.cog", VolumeState.Missing)]
+    [InlineData("Blueprints/given.cog", VolumeState.Path)]
+    [InlineData("..\\given.cog", VolumeState.Path)]
+    [InlineData("C:given.cog", VolumeState.Path)]
+    [InlineData("junk.doot", VolumeState.Unreadable)]
+    [InlineData("sprocket-bp-Airlock.cog", VolumeState.Twice)]
+    public void ALineThatGivesNoBlueprintSaysWhy(string line, VolumeState state)
     {
-        var shelf = new Shelf();
-        Assert.NotEqual("", shelf.Read(text));
-        Assert.False(shelf.Intact);
-        Assert.Empty(shelf.All);
+        var rig = Blueprinted();
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Folder.Write("junk.doot", "not a blueprint");
+        rig.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n" + line + "\n");
+
+        var read = new Shelf(rig.Folder, delegate { });
+        Assert.NotEqual("", read.Read());
+
+        Assert.True(read.Intact);
+        Assert.Equal(new[] { VolumeState.Read, state }, read.All.Select(v => v.State));
+        Assert.Equal(line, read.All[1].File);
+    }
+
+    /// <summary>The library lists a line that gave no blueprint by its file's name, saying why.</summary>
+    [Fact]
+    public void TheLibraryListsALineThatGaveNoBlueprintByItsFile()
+    {
+        var rig = Blueprinted();
+        rig.Folder.Write("sprocket-bp.index", "gone.cog\n");
+        rig.Shelf.Read();
+
+        rig.Editor.GoToRoot();
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.NotNull(page.View);
+        var row = page.Rows.OfType<StatusRow>().Last();
+        Assert.Equal("gone.cog", row.Summary);
+        Assert.Equal(rig.Texts.LibraryMissing, row.Problem);
+    }
+
+    /// <summary>A file a player named and listed reads, keeps its name when updated, and leaves their comments where they were.</summary>
+    [Fact]
+    public void APlayersOwnFileKeepsItsNameAndTheirCommentsStay()
+    {
+        var rig = Blueprinted();
+        var blueprint = rig.Editor.Program.Systems[0];
+        rig.Folder.Write("stoopid.doot", ProgramText.Blueprint(blueprint));
+        rig.Folder.Write("sprocket-bp.index", "# from a friend\r\n\r\n  stoopid.doot  \r\n");
+        Assert.Equal("", rig.Shelf.Read());
+
+        blueprint.Name = "Airlock Mk II";
+        rig.Shelf.Keep(blueprint);
+
+        Assert.Equal("# from a friend\r\n\r\n  stoopid.doot  \r\n", rig.Folder.Files["sprocket-bp.index"]);
+        Assert.Contains("Airlock Mk II", rig.Folder.Files["stoopid.doot"]);
+        Assert.Equal("Airlock Mk II", Assert.Single(rig.Shelf.All).Name);
+    }
+
+    /// <summary>A file the library named after a blueprint is renamed with it.</summary>
+    [Fact]
+    public void ALibraryFileIsRenamedWithItsBlueprint()
+    {
+        var rig = Blueprinted();
+        var blueprint = rig.Editor.Program.Systems[0];
+        rig.Shelf.Keep(blueprint);
+
+        blueprint.Name = "Airlock Mk II";
+        rig.Shelf.Keep(blueprint);
+
+        Assert.False(rig.Folder.Has("sprocket-bp-Airlock.cog"));
+        Assert.True(rig.Folder.Has("sprocket-bp-Airlock Mk II.cog"));
+        Assert.Equal("sprocket-bp-Airlock Mk II.cog\n", rig.Folder.Files["sprocket-bp.index"]);
+    }
+
+    /// <summary>A new file's name holds nothing a file name cannot, and is numbered where the name is taken.</summary>
+    [Fact]
+    public void ANewFileNameIsCleanedAndNumbered()
+    {
+        var rig = Blueprinted();
+        var blueprint = rig.Editor.Program.Systems[0];
+        blueprint.Name = "Air: lock?";
+        rig.Folder.Write("sprocket-bp-Air_ lock_.cog", "somebody else's");
+
+        rig.Shelf.Keep(blueprint);
+
+        Assert.Equal("sprocket-bp-Air_ lock_ 2.cog", Assert.Single(rig.Shelf.All).File);
+        Assert.Equal("somebody else's", rig.Folder.Files["sprocket-bp-Air_ lock_.cog"]);
+    }
+
+    /// <summary>Forgetting a blueprint deletes its file and its line; forgetting a line that gave none leaves the file it names alone.</summary>
+    [Fact]
+    public void ForgettingDeletesTheFileOnlyWhereItHeldABlueprint()
+    {
+        var rig = Blueprinted();
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Folder.Write("DefenseShields.cfg", "[shields]");
+        rig.Folder.Write("sprocket-bp.index", "# mine\nsprocket-bp-Airlock.cog\nDefenseShields.cfg\n");
+        rig.Shelf.Read();
+
+        rig.Shelf.Forget(rig.Shelf.All[1]);
+        rig.Shelf.Forget(rig.Shelf.All[0]);
+
+        Assert.Equal("# mine\n", rig.Folder.Files["sprocket-bp.index"]);
+        Assert.False(rig.Folder.Has("sprocket-bp-Airlock.cog"));
+        Assert.Equal("[shields]", rig.Folder.Files["DefenseShields.cfg"]);
     }
 
     /// <summary>A blueprint put on a construct from the library arrives as it was kept, with no installation, and only once.</summary>
@@ -127,10 +227,13 @@ public class LibraryTests
     {
         var made = Blueprinted();
         var blueprint = made.Editor.Program.Systems[0];
-        made.Shelf.Keep(blueprint, Saved);
+        made.Shelf.Keep(blueprint);
 
         var rig = Simulation.Fresh();
-        rig.Shelf.Read(made.Shelf.Write());
+        foreach (var file in made.Folder.Files)
+            rig.Folder.Write(file.Key, file.Value);
+
+        rig.Shelf.Read();
         var volume = rig.Shelf.All[0];
 
         Assert.Equal("", rig.Editor.PutOn(volume));
@@ -161,7 +264,7 @@ public class LibraryTests
         Assert.Single(rig.Editor.Program.Systems);
         Assert.Empty(rig.Shelf.All);
 
-        rig.Shelf.Keep(blueprint, Saved);
+        rig.Shelf.Keep(blueprint);
         blueprint.Name = "Airlock Mk II";
         rig.Editor.TakeOff(blueprint);
 
@@ -187,7 +290,7 @@ public class LibraryTests
         Assert.NotNull(rig.Editor.Asking);
         rig.Editor.Unask();
 
-        rig.Shelf.Keep(blueprint, Saved);
+        rig.Shelf.Keep(blueprint);
         rig.Editor.Invalidate();
         rig.Tick();
 
@@ -214,7 +317,7 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
-        rig.Shelf.Keep(blueprint, Saved);
+        rig.Shelf.Keep(blueprint);
 
         var copy = rig.Editor.Copy(ProgramText.Blueprint(blueprint), out var trouble);
 

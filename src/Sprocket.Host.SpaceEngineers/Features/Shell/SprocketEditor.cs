@@ -2367,14 +2367,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         internal void Shelve(AutomationSystem system)
         {
             Stamp(true);
-            Shelf.Keep(system, DateTime.UtcNow);
+            Shelf.Keep(system);
             Invalidate();
         }
 
         /// <summary>Asks before deleting <paramref name="volume" /> from the library.</summary>
         internal void Unshelve(Volume volume)
         {
-            Deleting(Texts.LibraryForgetQuestion, volume.Name, Texts.DeleteFinal, null, delegate
+            Deleting(Texts.LibraryForgetQuestion, volume.State == VolumeState.Read ? volume.Name : volume.File, Texts.DeleteFinal, null, delegate
             {
                 Shelf.Forget(volume);
                 Invalidate();
@@ -2496,7 +2496,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             Stamp(true);
             if (!Shelf.Holds(system))
-                Shelf.Keep(system, DateTime.UtcNow);
+                Shelf.Keep(system);
 
             Drop(system);
             _program.Edited();

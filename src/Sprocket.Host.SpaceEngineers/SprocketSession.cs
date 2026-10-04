@@ -34,8 +34,6 @@ namespace Sprocket.Host.SpaceEngineers
 
         const int Reclaiming = 300;
 
-        const string Library = "Library.sprocket";
-
         static SprocketSession _current;
 
         readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();
@@ -50,9 +48,7 @@ namespace Sprocket.Host.SpaceEngineers
 
         bool _carries;
 
-        readonly Shelf _shelf = new Shelf();
-
-        bool _shelves;
+        readonly Shelf _shelf = new Shelf(new GlobalFiles(), Told.Say);
 
         readonly Rota _rota = new Rota();
 
@@ -179,56 +175,18 @@ namespace Sprocket.Host.SpaceEngineers
                 FindShelf();
         }
 
-        /// <summary>Reads the player's library out of the global store, once, as the world starts, and keeps it written as it changes.</summary>
-        /// <remarks>A library that will not read is logged and never written over: what is put in it this session is not kept.</remarks>
+        /// <summary>Reads the player's library out of the global store, once, as the world starts.</summary>
+        /// <remarks>A file that will not read is logged and listed as it is; an index that will not read is never written over.</remarks>
         void FindShelf()
         {
-            var files = MyAPIGateway.Utilities;
-            string trouble;
-            try
-            {
-                if (!files.FileExistsInGlobalStorage(Library))
-                {
-                    trouble = "";
-                }
-                else
-                {
-                    using (TextReader reader = files.ReadFileInGlobalStorage(Library))
-                        trouble = _shelf.Read(reader.ReadToEnd());
-                }
-            }
-            catch (Exception failed)
-            {
-                trouble = "the library will not open - " + failed.Message;
-            }
-
+            var trouble = _shelf.Read();
             if (trouble.Length > 0)
-            {
-                Told.Say(trouble + "; the library is not kept this session");
-                return;
-            }
+                Told.Say(trouble);
 
-            _shelves = true;
-            _shelf.Changed += Shelve;
-            Told.Say("read " + _shelf.All.Count + " blueprints from the library");
-        }
-
-        /// <summary>Writes the player's library into the global store, as it is now.</summary>
-        /// <remarks>Whenever a blueprint is put in or taken out, which a person does by hand.</remarks>
-        void Shelve()
-        {
-            if (!_shelves || !_shelf.Intact)
-                return;
-
-            try
-            {
-                using (TextWriter writer = MyAPIGateway.Utilities.WriteFileInGlobalStorage(Library))
-                    writer.Write(_shelf.Write());
-            }
-            catch (Exception failed)
-            {
-                Told.Say("the library will not write - " + failed.Message);
-            }
+            if (!_shelf.Intact)
+                Told.Say("the library is not kept this session");
+            else
+                Told.Say("read " + _shelf.All.Count + " blueprints from the library");
         }
 
         /// <summary>Reads the world's backups out of its carrier, once, as the world starts.</summary>

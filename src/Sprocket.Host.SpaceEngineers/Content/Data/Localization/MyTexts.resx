@@ -1695,8 +1695,8 @@ This one becomes its first installation.</value>
     <comment>The game's message when the editor cannot open.</comment>
   </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
-    <value>Saved {time}</value>
-    <comment>Under a backup in the library. {time} is the date and time it was taken.</comment>
+    <value>Changed {time}</value>
+    <comment>Under a blueprint in the library that the player made. {time} is when the blueprint last changed.</comment>
   </data>
   <data name="Sprocket.Library.NoneSaved" xml:space="preserve">
     <value>None yet. A blueprint saved here goes wherever you go.</value>
@@ -1743,8 +1743,8 @@ This one becomes its first installation.</value>
     <comment>Heading in the library over the blueprints the player keeps, which go wherever they go.</comment>
   </data>
   <data name="Sprocket.Library.SavedBy" xml:space="preserve">
-    <value>By {name}, saved {time}</value>
-    <comment>Under a blueprint in the library that somebody else made. {name} is who, {time} when it was put in the library.</comment>
+    <value>By {name}, changed {time}</value>
+    <comment>Under a blueprint in the library that somebody else made. {name} is who, {time} when the blueprint last changed.</comment>
   </data>
   <data name="Sprocket.Library.Forget" xml:space="preserve">
     <value>Delete it from storage</value>
@@ -1821,6 +1821,18 @@ This one becomes its first installation.</value>
   <data name="Sprocket.Library.Unreadable" xml:space="preserve">
     <value>This copy will not read.</value>
     <comment>In place of the status of a blueprint in the library whose text will not read; what is wrong is shown beside the list.</comment>
+  </data>
+  <data name="Sprocket.Library.Missing" xml:space="preserve">
+    <value>Its file is not in storage.</value>
+    <comment>In place of the status of a line of the library's index naming a file that is not there; the row shows the file's name.</comment>
+  </data>
+  <data name="Sprocket.Library.Folder" xml:space="preserve">
+    <value>Its line in the index names a folder. Only a file name can be listed.</value>
+    <comment>In place of the status of a line of the library's index that holds a slash or another part of a path.</comment>
+  </data>
+  <data name="Sprocket.Library.Twice" xml:space="preserve">
+    <value>Another file in storage holds the same blueprint.</value>
+    <comment>In place of the status of a file in the library holding a blueprint an earlier file already gave.</comment>
   </data>
   <data name="Sprocket.Library.Copy" xml:space="preserve">
     <value>Make a copy</value>

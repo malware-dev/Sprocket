@@ -32,7 +32,9 @@ sealed class Simulation
 
     readonly Backups _backups = new Backups();
 
-    readonly Shelf _shelf = new Shelf();
+    readonly Folder _folder = new Folder();
+
+    readonly Shelf _shelf;
 
     bool _rehoming;
 
@@ -87,6 +89,7 @@ sealed class Simulation
     {
         _store = store;
         _rig = rig;
+        _shelf = new Shelf(_folder, delegate { });
         _saidBefore = Told.Lines.Count;
 
         // Before the unit, which reads the program out of this the moment it is built.
@@ -131,6 +134,9 @@ sealed class Simulation
 
     /// <summary>The player's library, kept in memory for as long as the harness runs.</summary>
     public Shelf Shelf => _shelf;
+
+    /// <summary>The storage folder the library is kept in.</summary>
+    public Folder Folder => _folder;
 
     /// <summary>What the editor says; loading a language into its book says it in that language.</summary>
     public Texts Texts => _texts;

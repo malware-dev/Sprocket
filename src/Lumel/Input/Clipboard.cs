@@ -1,20 +1,18 @@
-
 namespace Lumel.Input
 {
-    /// <summary>Copied text, for as long as the game is running.</summary>
-    /// <remarks>Not the operating system's clipboard, which the mod API does not offer.</remarks>
-    public static class Clipboard
+    /// <summary>Copied text, kept in memory for as long as whatever holds it.</summary>
+    public class Clipboard : IClipboard
     {
-        static string _value = string.Empty;
+        string _value = string.Empty;
 
-        /// <summary>The copied text, or empty when nothing has been copied.</summary>
-        public static string Get()
+        /// <inheritdoc />
+        public string Get()
         {
             return _value;
         }
 
-        /// <summary>Replaces the copied text with <paramref name="text" />; null empties it.</summary>
-        public static void Set(string text)
+        /// <inheritdoc />
+        public void Set(string text)
         {
             _value = text ?? string.Empty;
         }

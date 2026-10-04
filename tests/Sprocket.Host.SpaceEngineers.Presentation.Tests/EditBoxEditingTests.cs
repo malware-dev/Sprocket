@@ -134,7 +134,7 @@ public class EditBoxEditingTests
     {
         var typist = new Typist("[]");
         typist.Box.MoveCaret(0, 1, false);
-        typist.Input.Clipboard = "a\r\nb\nc";
+        typist.Input.Clipboard.Set("a\r\nb\nc");
         typist.Press(MyKeys.V, ctrl: true);
 
         Assert.Equal("[a\nb\nc]", typist.Box.Text);

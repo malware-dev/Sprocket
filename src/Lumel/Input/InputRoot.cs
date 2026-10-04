@@ -22,14 +22,14 @@ namespace Lumel.Input
         public InputRoot(Element root)
         {
             _root = root;
-            Clipboard = string.Empty;
+            Clipboard = new Clipboard();
         }
 
         /// <summary>What holds the keyboard, or null for nothing.</summary>
         public Element Focused => _focused;
 
-        /// <summary>The text last copied or cut from anything under this root.</summary>
-        public string Clipboard { get; set; }
+        /// <summary>Where text copied or cut from anything under this root is kept, and pasted from; in memory unless the host says otherwise.</summary>
+        public IClipboard Clipboard { get; set; }
 
         /// <summary>Raised after the keyboard has moved to something else, or to nothing.</summary>
         public event Action FocusChanged;

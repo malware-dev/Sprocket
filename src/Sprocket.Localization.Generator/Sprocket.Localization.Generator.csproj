@@ -19,20 +19,29 @@
   </ItemGroup>
   <!--
       The copy the mod loads, apart from the build output: a language server holds whatever generator it
-      loaded open, so it loads this one, and the copy is replaced only where the generator built differs,
-      by content rather than by date. An ordinary build leaves it alone; a change to the generator itself
-      is the one time it is written, and the language server has to let go of it for that.
+      loaded open, so it loads this one. The copy is replaced only where the generator's own sources or
+      this project differ from those it was built from, recorded beside it. The built assembly is no guide:
+      the SDK's compiler and the one JetBrains' inspection builds with make different bytes from the same
+      sources. An ordinary build leaves the copy alone; a change to the generator itself is the one time it
+      is written, and the language server has to let go of it for that.
   -->
   <Target Name="CopyForLoading" AfterTargets="Build">
     <PropertyGroup>
       <GeneratorCopy>$(MSBuildThisFileDirectory)bin\Loaded\$(TargetFileName)</GeneratorCopy>
+      <GeneratorStamp>$(MSBuildThisFileDirectory)bin\Loaded\sources.hash</GeneratorStamp>
     </PropertyGroup>
-    <GetFileHash Files="@(IntermediateAssembly->'%(FullPath)')">
-      <Output TaskParameter="Hash" PropertyName="BuiltHash" />
+    <GetFileHash Files="@(Compile->'%(FullPath)');$(MSBuildProjectFullPath)">
+      <Output TaskParameter="Items" ItemName="GeneratorSource" />
     </GetFileHash>
-    <GetFileHash Files="$(GeneratorCopy)" Condition="Exists('$(GeneratorCopy)')">
-      <Output TaskParameter="Hash" PropertyName="LoadedHash" />
-    </GetFileHash>
-    <Copy SourceFiles="@(IntermediateAssembly)" DestinationFiles="$(GeneratorCopy)" Condition="'$(BuiltHash)' != '$(LoadedHash)'" />
+    <PropertyGroup>
+      <SourcesHash>@(GeneratorSource->'%(FileHash)', '')</SourcesHash>
+    </PropertyGroup>
+    <ReadLinesFromFile File="$(GeneratorStamp)" Condition="Exists('$(GeneratorStamp)')">
+      <Output TaskParameter="Lines" PropertyName="LoadedSourcesHash" />
+    </ReadLinesFromFile>
+    <Copy SourceFiles="@(IntermediateAssembly)" DestinationFiles="$(GeneratorCopy)"
+          Condition="!Exists('$(GeneratorCopy)') Or '$(SourcesHash)' != '$(LoadedSourcesHash)'" />
+    <WriteLinesToFile File="$(GeneratorStamp)" Lines="$(SourcesHash)" Overwrite="true"
+                      Condition="!Exists('$(GeneratorCopy)') Or '$(SourcesHash)' != '$(LoadedSourcesHash)'" />
   </Target>
 </Project>
